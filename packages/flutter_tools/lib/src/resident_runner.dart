@@ -8,7 +8,6 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import 'android/android_device.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
@@ -346,7 +345,8 @@ class FlutterDevice {
       globals.printTrace('Successfully connected to service protocol: $vmServiceUri');
 
       vmService = service;
-      (await device!.getLogReader(app: package)).connectedVMService = vmService;
+      await (await device!.getLogReader(app: package))
+          .provideVmService(vmService!);
       completer.complete();
       await subscription.cancel();
     }, onError: (dynamic error) {
@@ -415,24 +415,6 @@ class FlutterDevice {
     }
     await _loggingSubscription!.cancel();
     _loggingSubscription = null;
-  }
-
-  /// Attempts to set up reading logs from the Flutter app on the device.
-  ///
-  /// This can fail if the device if no longer connected.
-  Future<void> tryInitLogReader() async {
-    final vm_service.VM? vm = await vmService!.getVmGuarded();
-    final DeviceLogReader logReader = await device!.getLogReader(app: package);
-    if (vm == null && logReader is AdbLogReader) {
-      // TODO(andrewkolos): This is a temporary, hacky fix for
-      //  https://github.com/flutter/flutter/issues/155795 that emphasizes
-      //  simplicity for the sake of being suitable for cherry-picking.
-      globals.printError(
-        'Unable to initiate adb log filtering for device'
-        '${device?.name}. Logs from the device may be more verbose than usual.',
-      );
-    }
-    logReader.appPid = vm?.pid;
   }
 
   Future<int> runHot({
@@ -1053,7 +1035,6 @@ abstract class ResidentRunner extends ResidentHandlers {
     this.flutterDevices, {
     required this.target,
     required this.debuggingOptions,
-    required bool useImplicitPubspecResolution,
     String? projectRootPath,
     this.stayResident = true,
     this.hotMode = true,
@@ -1064,7 +1045,6 @@ abstract class ResidentRunner extends ResidentHandlers {
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
        _dillOutputPath = dillOutputPath,
-       _useImplicitPubspecResolution = useImplicitPubspecResolution,
        artifactDirectory = dillOutputPath == null
           ? globals.fs.systemTempDirectory.createTempSync('flutter_tool.')
           : globals.fs.file(dillOutputPath).parent,
@@ -1097,7 +1077,6 @@ abstract class ResidentRunner extends ResidentHandlers {
   @override
   final bool stayResident;
   final String? _dillOutputPath;
-  final bool _useImplicitPubspecResolution;
   /// The parent location of the incremental artifacts.
   final Directory artifactDirectory;
   final String packagesFilePath;
@@ -1138,6 +1117,16 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
     return 'main.dart${swap ? '.swap' : ''}.dill';
   }
+
+  /// Whether the app being instrumented by the runner should be stopped during
+  /// cleanup.
+  ///
+  /// A detached app can happen one of two ways:
+  /// - [run] is used, and then the created application is manually [detach]ed;
+  /// - [attach] is used to explicitly connect to an already running app.
+  @protected
+  @visibleForTesting
+  bool stopAppDuringCleanup = true;
 
   bool get debuggingEnabled => debuggingOptions.debuggingEnabled;
 
@@ -1224,7 +1213,6 @@ abstract class ResidentRunner extends ResidentHandlers {
         // Needed for Dart plugin registry generation.
         kTargetFile: mainPath,
       },
-      useImplicitPubspecResolution: _useImplicitPubspecResolution,
     );
 
     final CompositeTarget compositeTarget = CompositeTarget(<Target>[
@@ -1276,7 +1264,10 @@ abstract class ResidentRunner extends ResidentHandlers {
   }
 
   @override
+  @mustCallSuper
   Future<void> detach() async {
+    stopAppDuringCleanup = false;
+
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
     await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
@@ -1420,6 +1411,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
   }
 
+  @protected
   void appFinished() {
     if (_finished.isCompleted) {
       return;

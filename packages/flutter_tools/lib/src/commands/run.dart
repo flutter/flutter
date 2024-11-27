@@ -28,7 +28,6 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 import '../tracing.dart';
-import '../vmservice.dart';
 import '../web/compile.dart';
 import '../web/web_constants.dart';
 import '../web/web_runner.dart';
@@ -350,9 +349,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 class RunCommand extends RunCommandBase {
   RunCommand({
     bool verboseHelp = false,
-    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
-  }) : _nativeAssetsBuilder = nativeAssetsBuilder,
-       super(verboseHelp: verboseHelp) {
+  }) : super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
@@ -435,8 +432,6 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
       );
   }
-
-  final HotRunnerNativeAssetsBuilder? _nativeAssetsBuilder;
 
   @override
   final String name = 'run';
@@ -682,7 +677,6 @@ class RunCommand extends RunCommandBase {
     required String? applicationBinaryPath,
     required FlutterProject flutterProject,
   }) async {
-    final bool useImplicitPubspecResolution = globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution);
     if (hotMode && !webMode) {
       return HotRunner(
         flutterDevices,
@@ -697,8 +691,6 @@ class RunCommand extends RunCommandBase {
         stayResident: stayResident,
         analytics: globals.analytics,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
-        nativeAssetsBuilder: _nativeAssetsBuilder,
-        useImplicitPubspecResolution: useImplicitPubspecResolution,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -712,7 +704,6 @@ class RunCommand extends RunCommandBase {
         analytics: globals.analytics,
         logger: globals.logger,
         systemClock: globals.systemClock,
-        useImplicitPubspecResolution: useImplicitPubspecResolution,
       );
     }
     return ColdRunner(
@@ -725,13 +716,11 @@ class RunCommand extends RunCommandBase {
           ? null
           : globals.fs.file(applicationBinaryPath),
       stayResident: stayResident,
-      useImplicitPubspecResolution: useImplicitPubspecResolution,
     );
   }
 
   @visibleForTesting
   Daemon createMachineDaemon() {
-    final bool useImplicitPubspecResolution = globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution);
     final Daemon daemon = Daemon(
       DaemonConnection(
         daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
@@ -741,7 +730,6 @@ class RunCommand extends RunCommandBase {
         ? globals.logger as NotifyingLogger
         : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
       logToStdout: true,
-      useImplicitPubspecResolution: useImplicitPubspecResolution,
     );
     return daemon;
   }
@@ -772,13 +760,12 @@ class RunCommand extends RunCommandBase {
           packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
           dillOutputPath: stringArg('output-dill'),
           userIdentifier: userIdentifier,
-          nativeAssetsBuilder: _nativeAssetsBuilder,
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());
       }
       final DateTime appStartedTime = globals.systemClock.now();
-      final int result = await app.runner!.waitForAppToFinish();
+      final int result = await app.runner.waitForAppToFinish();
       if (result != 0) {
         throwToolExit(null, exitCode: result);
       }
@@ -866,7 +853,7 @@ class RunCommand extends RunCommandBase {
         throwToolExit(null, exitCode: result);
       }
     } on RPCError catch (error) {
-      if (error.code == RPCErrorCodes.kServiceDisappeared ||
+      if (error.code == RPCErrorKind.kServiceDisappeared.code ||
           error.message.contains('Service connection disposed')) {
         throwToolExit('Lost connection to device.');
       }

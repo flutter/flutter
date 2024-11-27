@@ -11,11 +11,10 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
-import 'test_utils.dart' show fileSystem;
+import 'test_utils.dart' show flutterBin;
 
 const ProcessManager processManager = LocalProcessManager();
 final String flutterRoot = getFlutterRoot();
-final String flutterBin = fileSystem.path.join(flutterRoot, 'bin', 'flutter');
 
 void debugPrint(String message) {
   // This is called to intentionally print debugging output when a test is

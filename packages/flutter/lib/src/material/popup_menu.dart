@@ -28,6 +28,7 @@ import 'material_state.dart';
 import 'popup_menu_theme.dart';
 import 'text_theme.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'tooltip.dart';
 
 // Examples can assume:
@@ -355,6 +356,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
     widget.onTap?.call();
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -1543,6 +1545,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     };
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
@@ -1554,7 +1557,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     assert(debugCheckHasMaterialLocalizations(context));
 
     if (widget.child != null) {
-      return Tooltip(
+      final Widget child = Tooltip(
         message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
         child: InkWell(
           borderRadius: widget.borderRadius,
@@ -1565,6 +1568,17 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
           child: widget.child,
         ),
       );
+      final MaterialTapTargetSize tapTargetSize = widget.style?.tapTargetSize ?? MaterialTapTargetSize.shrinkWrap;
+      if (tapTargetSize == MaterialTapTargetSize.padded) {
+        return ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: kMinInteractiveDimension,
+            minHeight: kMinInteractiveDimension,
+          ),
+          child: child,
+        );
+      }
+      return child;
     }
 
     return IconButton(

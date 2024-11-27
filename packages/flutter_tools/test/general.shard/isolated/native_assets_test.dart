@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
@@ -46,37 +47,15 @@ void main() {
     projectUri = environment.projectDir.uri;
   });
 
-  testUsingContext('dry run with no package config', overrides: <Type, Generator>{
-    ProcessManager: () => FakeProcessManager.empty(),
-  }, () async {
-    expect(
-      await runFlutterSpecificDartDryRunOnPlatforms(
-        projectUri: projectUri,
-        fileSystem: fileSystem,
-        targetPlatforms: <TargetPlatform>[TargetPlatform.windows_x64],
-        buildRunner: FakeFlutterNativeAssetsBuildRunner(
-          hasPackageConfigResult: false,
-        ),
-      ),
-      null,
-    );
-    expect(
-      (globals.logger as BufferLogger).traceText,
-      contains('No package config found. Skipping native assets compilation.'),
-    );
-  });
-
   testUsingContext('build with no package config', overrides: <Type, Generator>{
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
-    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
     await runFlutterSpecificDartBuild(
       environmentDefines: <String, String>{
         kBuildMode: BuildMode.debug.cliName,
       },
       targetPlatform: TargetPlatform.windows_x64,
       projectUri: projectUri,
-      nativeAssetsYamlUri: nonFlutterTesterAssetUri,
       fileSystem: fileSystem,
       buildRunner: FakeFlutterNativeAssetsBuildRunner(
         hasPackageConfigResult: false,
@@ -88,103 +67,66 @@ void main() {
     );
   });
 
-  testUsingContext('dry run for multiple OSes with no package config', overrides: <Type, Generator>{
-    ProcessManager: () => FakeProcessManager.empty(),
-  }, () async {
-    await runFlutterSpecificDartDryRunOnPlatforms(
-      projectUri: projectUri,
-      fileSystem: fileSystem,
-      targetPlatforms: <TargetPlatform>[
-        TargetPlatform.windows_x64,
-        TargetPlatform.darwin,
-        TargetPlatform.ios,
-      ],
-      buildRunner: FakeFlutterNativeAssetsBuildRunner(
-        hasPackageConfigResult: false,
-      ),
-    );
-    expect(
-      (globals.logger as BufferLogger).traceText,
-      contains('No package config found. Skipping native assets compilation.'),
-    );
-  });
 
-  testUsingContext('dry run with assets but not enabled', overrides: <Type, Generator>{
-    ProcessManager: () => FakeProcessManager.empty(),
-  }, () async {
-    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
-    await packageConfig.parent.create();
-    await packageConfig.create();
-    expect(
-      () => runFlutterSpecificDartDryRunOnPlatforms(
-        projectUri: projectUri,
-        fileSystem: fileSystem,
-        targetPlatforms: <TargetPlatform>[TargetPlatform.windows_x64],
-        buildRunner: FakeFlutterNativeAssetsBuildRunner(
-          packagesWithNativeAssetsResult: <Package>[
-            Package('bar', projectUri),
-          ],
-        ),
-      ),
-      throwsToolExit(
-        message: 'Package(s) bar require the native assets feature to be enabled. '
-            'Enable using `flutter config --enable-native-assets`.',
-      ),
-    );
-  });
-
-  testUsingContext('dry run with assets', overrides: <Type, Generator>{
+  testUsingContext('Native assets: non-bundled libraries require no copying', overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
-    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
+    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.json').uri;
     await packageConfig.parent.create();
     await packageConfig.create();
-    final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
-      packagesWithNativeAssetsResult: <Package>[
-        Package('bar', projectUri),
-      ],
-      buildDryRunResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
-        codeAssets: <CodeAsset>[
-          CodeAsset(
-            package: 'bar',
-            name: 'bar.dart',
-            linkMode: DynamicLoadingBundled(),
-            os: OS.windows,
-            file: Uri.file('bar.dll'),
-          ),
-        ],
-      ),
-    );
-    final Uri? nativeAssetsYaml = await runFlutterSpecificDartDryRunOnPlatforms(
+
+    final File directSoFile = environment.projectDir.childFile('direct.so');
+    directSoFile.writeAsBytesSync(<int>[]);
+
+    CodeAsset makeCodeAsset(String name, LinkMode linkMode, [Uri? file])
+        => CodeAsset(
+             package: 'bar',
+             name: name,
+             linkMode: linkMode,
+             os: OS.linux,
+             architecture: Architecture.x64,
+             file: file,
+           );
+
+    final Map<String, String> environmentDefines = <String, String>{
+      kBuildMode: BuildMode.release.cliName,
+    };
+    final List<CodeAsset> codeAssets = <CodeAsset>[
+      makeCodeAsset('malloc', LookupInProcess()),
+      makeCodeAsset('free', LookupInExecutable()),
+      makeCodeAsset('draw', DynamicLoadingSystem(Uri.file('/usr/lib/skia.so'))),
+    ];
+    final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+      environmentDefines: environmentDefines,
+      targetPlatform: TargetPlatform.linux_x64,
       projectUri: projectUri,
       fileSystem: fileSystem,
-      targetPlatforms: <TargetPlatform>[TargetPlatform.windows_x64],
-      buildRunner: buildRunner,
+      buildRunner: FakeFlutterNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[
+          Package('bar', projectUri),
+        ],
+        buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
+        linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
+      ),
     );
-    expect(
-      (globals.logger as BufferLogger).traceText,
-      stringContainsInOrder(<String>[
-        'Dry running native assets for windows.',
-        'Dry running native assets for windows done.',
-      ]),
+    await installCodeAssets(
+      dartBuildResult: dartBuildResult,
+      environmentDefines: environmentDefines,
+      targetPlatform: TargetPlatform.windows_x64,
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      nativeAssetsFileUri: nonFlutterTesterAssetUri,
     );
-    expect(
-      nativeAssetsYaml,
-      projectUri.resolve('build/native_assets/windows/native_assets.yaml'),
-    );
-    expect(
-      await fileSystem.file(nativeAssetsYaml).readAsString(),
-      contains('package:bar/bar.dart'),
-    );
-    expect(buildRunner.buildDryRunInvocations, 1);
+    expect(testLogger.traceText, isNot(contains('Copying native assets to')));
   });
 
   testUsingContext('build with assets but not enabled', overrides: <Type, Generator>{
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
     final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
-    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
     await packageConfig.parent.create();
     await packageConfig.create();
     expect(
@@ -194,7 +136,6 @@ void main() {
         },
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
-        nativeAssetsYamlUri: nonFlutterTesterAssetUri,
         fileSystem: fileSystem,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
@@ -214,16 +155,17 @@ void main() {
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
     final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
-    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
+    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
     await packageConfig.parent.create();
     await packageConfig.create();
-    final (_, Uri nativeAssetsYaml) = await runFlutterSpecificDartBuild(
-      environmentDefines: <String, String>{
-        kBuildMode: BuildMode.debug.cliName,
-      },
+
+    final Map<String, String> environmentDefines = <String, String>{
+      kBuildMode: BuildMode.debug.cliName,
+    };
+    final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+      environmentDefines: environmentDefines,
       targetPlatform: TargetPlatform.windows_x64,
       projectUri: projectUri,
-      nativeAssetsYamlUri: nonFlutterTesterAssetUri,
       fileSystem: fileSystem,
       buildRunner: FakeFlutterNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
@@ -231,41 +173,21 @@ void main() {
         ],
       ),
     );
-    expect(nativeAssetsYaml, nonFlutterTesterAssetUri);
+    await installCodeAssets(
+      dartBuildResult: dartBuildResult,
+      environmentDefines: environmentDefines,
+      targetPlatform: TargetPlatform.windows_x64,
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      nativeAssetsFileUri: nonFlutterTesterAssetUri,
+    );
     expect(
-      await fileSystem.file(nativeAssetsYaml).readAsString(),
+      await fileSystem.file(nonFlutterTesterAssetUri).readAsString(),
       isNot(contains('package:bar/bar.dart')),
     );
     expect(
       environment.projectDir.childDirectory('build').childDirectory('native_assets').childDirectory('windows'),
       exists,
-    );
-  });
-
-  testUsingContext('Native assets dry run error', overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-    ProcessManager: () => FakeProcessManager.empty(),
-  }, () async {
-    final File packageConfig =
-        environment.projectDir.childFile('.dart_tool/package_config.json');
-    await packageConfig.parent.create();
-    await packageConfig.create();
-    expect(
-      () => runFlutterSpecificDartDryRunOnPlatforms(
-        projectUri: projectUri,
-        fileSystem: fileSystem,
-        targetPlatforms: <TargetPlatform>[TargetPlatform.windows_x64],
-        buildRunner: FakeFlutterNativeAssetsBuildRunner(
-          packagesWithNativeAssetsResult: <Package>[
-            Package('bar', projectUri),
-          ],
-          buildDryRunResult: null,
-        ),
-      ),
-      throwsToolExit(
-        message:
-            'Building (dry run) native assets failed. See the logs for more details.',
-      ),
     );
   });
 
@@ -275,7 +197,6 @@ void main() {
   }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
-    final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
     await packageConfig.parent.create();
     await packageConfig.create();
     expect(
@@ -285,7 +206,6 @@ void main() {
         },
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
-        nativeAssetsYamlUri: nonFlutterTesterAssetUri,
         fileSystem: fileSystem,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
@@ -299,5 +219,66 @@ void main() {
             'Building native assets failed. See the logs for more details.',
       ),
     );
+  });
+
+  testUsingContext('Native assets: no duplicate assets with linking', overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    ProcessManager: () => FakeProcessManager.empty(),
+  }, () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.parent.create();
+    await packageConfig.create();
+
+    final File directSoFile = environment.projectDir.childFile('direct.so');
+    directSoFile.writeAsBytesSync(<int>[]);
+    final File linkableAFile = environment.projectDir.childFile('linkable.a');
+    linkableAFile.writeAsBytesSync(<int>[]);
+    final File linkedSoFile = environment.projectDir.childFile('linked.so');
+    linkedSoFile.writeAsBytesSync(<int>[]);
+
+    CodeAsset makeCodeAsset(String name, Uri file, LinkMode linkMode)
+        => CodeAsset(
+             package: 'bar',
+             name: name,
+             linkMode: linkMode,
+             os: OS.linux,
+             architecture: Architecture.x64,
+             file: file,
+           );
+
+    final DartBuildResult result = await runFlutterSpecificDartBuild(
+      environmentDefines: <String, String>{
+        // Release mode means the dart build has linking enabled.
+        kBuildMode: BuildMode.release.cliName,
+      },
+      targetPlatform: TargetPlatform.linux_x64,
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      buildRunner: FakeFlutterNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[
+          Package('bar', projectUri),
+        ],
+        buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+          codeAssets: <CodeAsset>[
+            makeCodeAsset('direct', directSoFile.uri, DynamicLoadingBundled()),
+          ],
+          codeAssetsForLinking: <String, List<CodeAsset>>{
+            'package:bar' : <CodeAsset>[
+              makeCodeAsset('linkable', linkableAFile.uri, StaticLinking()),
+            ],
+          },
+        ),
+        linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+          codeAssets: <CodeAsset>[
+            makeCodeAsset('direct', directSoFile.uri, DynamicLoadingBundled()),
+            makeCodeAsset('linked', linkedSoFile.uri, DynamicLoadingBundled()),
+          ],
+        ),
+      ),
+    );
+    expect(
+      result.codeAssets.map((CodeAsset c) => c.file!.toString()).toList()..sort(),
+      <String>[directSoFile.uri.toString(), linkedSoFile.uri.toString()]);
   });
 }

@@ -17,7 +17,6 @@ final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
 final String gradlewExecutable =
 Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 final String fileReadWriteMode = Platform.isWindows ? 'rw-rw-rw-' : 'rw-r--r--';
-final String platformLineSep = Platform.isWindows ? '\r\n' : '\n';
 
 /// Combines several TaskFunctions with trivial success value into one.
 TaskFunction combine(List<TaskFunction> tasks) {
@@ -79,8 +78,8 @@ class ModuleTest {
       final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
-        'dependencies:$platformLineSep',
-        'dependencies:$platformLineSep  $ffiPackageName:$platformLineSep    path: ..${Platform.pathSeparator}$ffiPackageName$platformLineSep',
+        'dependencies:${Platform.lineTerminator}',
+        'dependencies:${Platform.lineTerminator}  $ffiPackageName:${Platform.lineTerminator}    path: ..${Platform.pathSeparator}$ffiPackageName${Platform.lineTerminator}',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -111,16 +110,16 @@ class ModuleTest {
       }
 
       content = content.replaceFirst(
-        '$platformLineSep  # assets:$platformLineSep',
-        '$platformLineSep  assets:$platformLineSep    - assets/read-only.txt$platformLineSep',
+        '${Platform.lineTerminator}  # assets:${Platform.lineTerminator}',
+        '${Platform.lineTerminator}  assets:${Platform.lineTerminator}    - assets/read-only.txt${Platform.lineTerminator}',
       );
       await pubspec.writeAsString(content, flush: true);
 
       section('Add plugins');
 
       content = content.replaceFirst(
-        '${platformLineSep}dependencies:$platformLineSep',
-        '${platformLineSep}dependencies:$platformLineSep',
+        '${Platform.lineTerminator}dependencies:${Platform.lineTerminator}',
+        '${Platform.lineTerminator}dependencies:${Platform.lineTerminator}',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {

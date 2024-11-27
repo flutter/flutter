@@ -32,7 +32,6 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
 import '../vmservice.dart';
 import '../web/web_runner.dart';
 
@@ -67,7 +66,6 @@ class DaemonCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final bool useImplicitPubspecResolution = globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution);
     if (argResults!['listen-on-tcp-port'] != null) {
       int? port;
       try {
@@ -84,7 +82,6 @@ class DaemonCommand extends FlutterCommand {
           outputPreferences: globals.outputPreferences,
         ),
         notifyingLogger: asLogger<NotifyingLogger>(globals.logger),
-        useImplicitPubspecResolution: useImplicitPubspecResolution,
       ).run();
       return FlutterCommandResult.success();
     }
@@ -95,7 +92,6 @@ class DaemonCommand extends FlutterCommand {
         logger: globals.logger,
       ),
       notifyingLogger: asLogger<NotifyingLogger>(globals.logger),
-      useImplicitPubspecResolution: useImplicitPubspecResolution,
     );
     final int code = await daemon.onExit;
     if (code != 0) {
@@ -109,11 +105,10 @@ class DaemonCommand extends FlutterCommand {
 class DaemonServer {
   DaemonServer({
     this.port,
-    required bool useImplicitPubspecResolution,
     required this.logger,
     this.notifyingLogger,
     @visibleForTesting Future<ServerSocket> Function(InternetAddress address, int port) bind = ServerSocket.bind,
-  }) : _bind = bind, _useImplicitPubspecResolution = useImplicitPubspecResolution;
+  }) : _bind = bind;
 
   final int? port;
 
@@ -122,7 +117,6 @@ class DaemonServer {
 
   // Logger that sends the message to the other end of daemon connection.
   final NotifyingLogger? notifyingLogger;
-  final bool _useImplicitPubspecResolution;
 
   final Future<ServerSocket> Function(InternetAddress address, int port) _bind;
 
@@ -157,7 +151,6 @@ class DaemonServer {
             logger: logger,
           ),
           notifyingLogger: notifyingLogger,
-          useImplicitPubspecResolution: _useImplicitPubspecResolution,
         );
         await daemon.onExit;
         await socketDone;
@@ -176,14 +169,13 @@ typedef CommandHandlerWithBinary = Future<Object?> Function(Map<String, Object?>
 class Daemon {
   Daemon(
     this.connection, {
-    required bool useImplicitPubspecResolution,
     this.notifyingLogger,
     this.logToStdout = false,
     FileTransfer fileTransfer = const FileTransfer(),
   }) {
     // Set up domains.
     registerDomain(daemonDomain = DaemonDomain(this));
-    registerDomain(appDomain = AppDomain(this, useImplicitPubspecResolution: useImplicitPubspecResolution));
+    registerDomain(appDomain = AppDomain(this));
     registerDomain(deviceDomain = DeviceDomain(this));
     registerDomain(emulatorDomain = EmulatorDomain(this));
     registerDomain(devToolsDomain = DevToolsDomain(this));
@@ -645,10 +637,7 @@ typedef RunOrAttach = Future<void> Function({
 ///
 /// It fires events for application start, stop, and stdout and stderr.
 class AppDomain extends Domain {
-  AppDomain(Daemon daemon, {
-    required bool useImplicitPubspecResolution,
-  }) : _useImplicitPubspecResolution = useImplicitPubspecResolution,
-       super(daemon, 'app') {
+  AppDomain(Daemon daemon) : super(daemon, 'app') {
     registerHandler('restart', restart);
     registerHandler('callServiceExtension', callServiceExtension);
     registerHandler('stop', stop);
@@ -660,7 +649,6 @@ class AppDomain extends Domain {
   static String _getNewAppId() => _uuidGenerator.v4();
 
   final List<AppInstance> _apps = <AppInstance>[];
-  final bool _useImplicitPubspecResolution;
 
   final DebounceOperationQueue<OperationResult, OperationType> operationQueue = DebounceOperationQueue<OperationResult, OperationType>();
 
@@ -679,7 +667,6 @@ class AppDomain extends Domain {
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
-    required HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
@@ -717,7 +704,6 @@ class AppDomain extends Domain {
         systemClock: globals.systemClock,
         logger: globals.logger,
         fileSystem: globals.fs,
-        useImplicitPubspecResolution: _useImplicitPubspecResolution,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
@@ -730,8 +716,6 @@ class AppDomain extends Domain {
         hostIsIde: true,
         machine: machine,
         analytics: globals.analytics,
-        nativeAssetsBuilder: nativeAssetsBuilder,
-        useImplicitPubspecResolution: _useImplicitPubspecResolution,
       );
     } else {
       runner = ColdRunner(
@@ -740,7 +724,6 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         applicationBinary: applicationBinary,
         machine: machine,
-        useImplicitPubspecResolution: _useImplicitPubspecResolution,
       );
     }
 
@@ -917,7 +900,7 @@ class AppDomain extends Domain {
     if (app == null) {
       throw DaemonException("app '$appId' not found");
     }
-    final FlutterDevice device = app.runner!.flutterDevices.first;
+    final FlutterDevice device = app.runner.flutterDevices.first;
     final List<FlutterView> views = await device.vmService!.getFlutterViews();
     final Map<String, Object?>? result = await device
       .vmService!
@@ -1565,20 +1548,24 @@ class NotifyingLogger extends DelegatingLogger {
 
 /// A running application, started by this daemon.
 class AppInstance {
-  AppInstance(this.id, { this.runner, this.logToStdout = false, required AppRunLogger logger })
-    : _logger = logger;
+  AppInstance(
+    this.id, {
+    required this.runner,
+    this.logToStdout = false,
+    required AppRunLogger logger,
+  }) : _logger = logger;
 
   final String id;
-  final ResidentRunner? runner;
+  final ResidentRunner runner;
   final bool logToStdout;
   final AppRunLogger _logger;
 
   Future<OperationResult> restart({ bool fullRestart = false, bool pause = false, String? reason }) {
-    return runner!.restart(fullRestart: fullRestart, pause: pause, reason: reason);
+    return runner.restart(fullRestart: fullRestart, pause: pause, reason: reason);
   }
 
-  Future<void> stop() => runner!.exit();
-  Future<void> detach() => runner!.detach();
+  Future<void> stop() => runner.exit();
+  Future<void> detach() => runner.detach();
 
   void closeLogger() {
     _logger.close();

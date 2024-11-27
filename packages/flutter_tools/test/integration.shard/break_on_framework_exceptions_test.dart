@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['flutter-test-driver'])
+library;
+
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -30,23 +33,29 @@ void main() {
 
     final FlutterTestTestDriver flutter = FlutterTestTestDriver(tempDir);
 
-    await _timeoutAfter(
-      message: 'Timed out launching `flutter test`',
-      work: () => flutter.test(withDebugger: true, pauseOnExceptions: true),
-    );
+    try {
+      await _timeoutAfter(
+        message: 'Timed out launching `flutter test`',
+        work: () => flutter.test(withDebugger: true, pauseOnExceptions: true),
+      );
 
-    await _timeoutAfter(
-      message: 'Timed out waiting for VM service pause debug event',
-      work: flutter.waitForPause,
-    );
+      await _timeoutAfter(
+        message: 'Timed out waiting for VM service pause debug event',
+        work: flutter.waitForPause,
+      );
 
-    int? breakLine;
-    await _timeoutAfter(
-      message: 'Timed out getting source location of top stack frame',
-      work: () async => breakLine = (await flutter.getSourceLocation())?.line,
-    );
+      int? breakLine;
+      await _timeoutAfter(
+        message: 'Timed out getting source location of top stack frame',
+        work: () async => breakLine = (await flutter.getSourceLocation())?.line,
+      );
 
-    expect(breakLine, project.lineContaining(project.test, exceptionMessage));
+      expect(breakLine, project.lineContaining(project.test, exceptionMessage));
+    } finally {
+      // Some of the tests will quit naturally, and others won't.
+      // By this point we don't need the tool anymore, so just force quit.
+      await flutter.quit();
+    }
   }
 
   testWithoutContext('breaks when AnimationController listener throws', () async {

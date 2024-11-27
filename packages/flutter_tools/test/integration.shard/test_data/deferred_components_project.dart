@@ -11,60 +11,60 @@ class DeferredComponentsProject extends Project {
 
   @override
   final String pubspec = '''
-  name: test
-  environment:
-    sdk: '>=3.2.0-0 <4.0.0'
+name: test
+environment:
+  sdk: '>=3.2.0-0 <4.0.0'
 
-  dependencies:
-    flutter:
-      sdk: flutter
+dependencies:
   flutter:
-    assets:
-      - test_assets/asset1.txt
-    deferred-components:
-      - name: component1
-        libraries:
-          - package:test/deferred_library.dart
-        assets:
-          - test_assets/asset2.txt
-  ''';
+    sdk: flutter
+flutter:
+  assets:
+    - test_assets/asset1.txt
+  deferred-components:
+    - name: component1
+      libraries:
+        - package:test/deferred_library.dart
+      assets:
+        - test_assets/asset2.txt
+''';
 
   @override
   final String main = r'''
-  import 'dart:async';
+import 'dart:async';
 
-  import 'package:flutter/material.dart';
-  import 'deferred_library.dart' deferred as DeferredLibrary;
+import 'package:flutter/material.dart';
+import 'deferred_library.dart' deferred as DeferredLibrary;
 
-  Future<void>? libFuture;
-  String deferredText = 'incomplete';
+Future<void>? libFuture;
+String deferredText = 'incomplete';
 
-  Future<void> main() async {
-    while (true) {
-      if (libFuture == null) {
-        libFuture = DeferredLibrary.loadLibrary();
-        libFuture?.whenComplete(() => deferredText = 'complete ${DeferredLibrary.add(10, 42)}');
-      }
-      runApp(MyApp());
-      await Future.delayed(const Duration(milliseconds: 50));
+Future<void> main() async {
+  while (true) {
+    if (libFuture == null) {
+      libFuture = DeferredLibrary.loadLibrary();
+      libFuture?.whenComplete(() => deferredText = 'complete ${DeferredLibrary.add(10, 42)}');
     }
+    runApp(MyApp());
+    await Future.delayed(const Duration(milliseconds: 50));
   }
+}
 
-  class MyApp extends StatelessWidget {
-    @override
-    Widget build(BuildContext context) {
-      topLevelFunction();
-      return MaterialApp( // BUILD BREAKPOINT
-        title: 'Flutter Demo',
-        home: Container(),
-      );
-    }
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    topLevelFunction();
+    return MaterialApp( // BUILD BREAKPOINT
+      title: 'Flutter Demo',
+      home: Container(),
+    );
   }
+}
 
-  topLevelFunction() {
-    print(deferredText); // TOP LEVEL BREAKPOINT
-  }
-  ''';
+topLevelFunction() {
+  print(deferredText); // TOP LEVEL BREAKPOINT
+}
+''';
 
   @override
   final DeferredComponentsConfig deferredComponents;
@@ -74,188 +74,186 @@ class DeferredComponentsProject extends Project {
 class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
   @override
   String get deferredLibrary => r'''
-  library DeferredLibrary;
+library DeferredLibrary;
 
-  int add(int i, int j) {
-    return i + j;
-  }
-  ''';
+int add(int i, int j) {
+  return i + j;
+}
+''';
 
   @override
   String? get deferredComponentsGolden => r'''
-  loading-units:
-    - id: 2
-      libraries:
-        - package:test/deferred_library.dart
-  ''';
+loading-units:
+  - id: 2
+    libraries:
+      - package:test/deferred_library.dart
+''';
 
-  @override
-  String get androidSettings => r'''
-  include ':app', ':component1'
+@override
+String get androidSettings => r'''
+include ':app', ':component1'
 
-  def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
-  def properties = new Properties()
+def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
+def properties = new Properties()
 
-  assert localPropertiesFile.exists()
-  localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
+assert localPropertiesFile.exists()
+localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
 
-  def flutterSdkPath = properties.getProperty("flutter.sdk")
-  assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
-  apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"
-  ''';
+def flutterSdkPath = properties.getProperty("flutter.sdk")
+assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"
+''';
 
-  @override
-  String get androidBuild => r'''
-  buildscript {
-      ext.kotlin_version = '1.8.22'
-      repositories {
-          google()
-          mavenCentral()
-      }
+@override
+String get androidBuild => r'''
+buildscript {
+    ext.kotlin_version = '1.8.22'
+    repositories {
+        google()
+        mavenCentral()
+    }
 
-      dependencies {
-          classpath 'com.android.tools.build:gradle:8.1.0'
-          classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-      }
-  }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
 
-  allprojects {
-      repositories {
-          google()
-          mavenCentral()
-      }
-  }
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
 
-  rootProject.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir("../../build").get())
-  subprojects {
-      project.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir(project.name).get())
-  }
-  subprojects {
-      project.evaluationDependsOn(':app')
-  }
+rootProject.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir("../../build").get())
+subprojects {
+    project.layout.buildDirectory.value(rootProject.layout.buildDirectory.dir(project.name).get())
+}
+subprojects {
+    project.evaluationDependsOn(':app')
+}
 
-  tasks.register("clean", Delete) {
-      delete rootProject.layout.buildDirectory
-  }
-  ''';
+tasks.register("clean", Delete) {
+    delete rootProject.layout.buildDirectory
+}
+''';
 
   @override
   String get appBuild => r'''
-  def localProperties = new Properties()
-  def localPropertiesFile = rootProject.file('local.properties')
-  if (localPropertiesFile.exists()) {
-      localPropertiesFile.withReader('UTF-8') { reader ->
-          localProperties.load(reader)
-      }
-  }
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
 
-  def flutterRoot = localProperties.getProperty('flutter.sdk')
-  if (flutterRoot == null) {
-      throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
-  }
+def flutterRoot = localProperties.getProperty('flutter.sdk')
+if (flutterRoot == null) {
+    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
+}
 
-  def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
-  if (flutterVersionCode == null) {
-      flutterVersionCode = '1'
-  }
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
 
-  def flutterVersionName = localProperties.getProperty('flutter.versionName')
-  if (flutterVersionName == null) {
-      flutterVersionName = '1.0'
-  }
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
 
-  def keystoreProperties = new Properties()
-  def keystorePropertiesFile = rootProject.file('key.properties')
-  if (keystorePropertiesFile.exists()) {
-      keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-  }
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
 
-  apply plugin: 'com.android.application'
-  apply plugin: 'kotlin-android'
-  apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
-  android {
-      namespace = "com.example.splitaot"
-      compileSdk flutter.compileSdkVersion
-      ndkVersion flutter.ndkVersion
+android {
+    namespace = "com.example.splitaot"
+    compileSdk flutter.compileSdkVersion
+    ndkVersion flutter.ndkVersion
 
-      compileOptions {
-          sourceCompatibility = JavaVersion.VERSION_1_8
-          targetCompatibility = JavaVersion.VERSION_1_8
-      }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
 
-      kotlinOptions {
-          jvmTarget = JavaVersion.VERSION_1_8
-      }
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
 
-      sourceSets {
-          main.java.srcDirs += 'src/main/kotlin'
-      }
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
 
-      lintOptions {
-          disable 'InvalidPackage'
-      }
+    lintOptions {
+        disable 'InvalidPackage'
+    }
 
-      defaultConfig {
-          // Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-          applicationId "ninja.qian.splitaottest1"
-          minSdkVersion flutter.minSdkVersion
-          targetSdkVersion flutter.targetSdkVersion
-          versionCode flutterVersionCode.toInteger()
-          versionName flutterVersionName
-      }
-      signingConfigs {
-          release {
-              keyAlias keystoreProperties['keyAlias']
-              keyPassword keystoreProperties['keyPassword']
-              storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
-              storePassword keystoreProperties['storePassword']
-          }
-      }
-      buildTypes {
-          release {
-              // Add your own signing config for the release build.
-              // Signing with the debug keys for now, so `flutter run --release` works.
-              signingConfig signingConfigs.release
-          }
-      }
-  }
+    defaultConfig {
+        // Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId "ninja.qian.splitaottest1"
+        minSdkVersion flutter.minSdkVersion
+        targetSdkVersion flutter.targetSdkVersion
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+    }
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+    buildTypes {
+        release {
+            // Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig signingConfigs.release
+        }
+    }
+}
 
-  flutter {
-      source '../..'
-  }
+flutter {
+    source '../..'
+}
 
-  dependencies {
-      implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-      implementation "com.google.android.play:core:1.8.0"
-  }
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "com.google.android.play:core:1.8.0"
+}
 
-  ''';
+''';
 
   @override
   String get androidLocalProperties => '''
-  flutter.sdk=${getFlutterRoot()}
-  flutter.buildMode=release
-  flutter.versionName=1.0.0
-  flutter.versionCode=22
-  ''';
+flutter.sdk=${getFlutterRoot()}
+flutter.buildMode=release
+flutter.versionName=1.0.0
+flutter.versionCode=22
+''';
 
   @override
   String get androidGradleProperties => '''
-  org.gradle.jvmargs=-Xmx8G -XX:MaxMetaspaceSize=2G -XX:+HeapDumpOnOutOfMemoryError
-  android.useAndroidX=true
-  android.enableJetifier=true
-  android.enableR8=true
-  android.experimental.enableNewResourceShrinker=true
-  ''';
+org.gradle.jvmargs=-Xmx8G -XX:MaxMetaspaceSize=4G -XX:ReservedCodeCacheSize=512m -XX:+HeapDumpOnOutOfMemoryError
+android.useAndroidX=true
+android.enableJetifier=true
+''';
 
   @override
   String get androidKeyProperties => '''
-  storePassword=123456
-  keyPassword=123456
-  keyAlias=test_release_key
-  storeFile=key.jks
-  ''';
+storePassword=123456
+keyPassword=123456
+keyAlias=test_release_key
+storeFile=key.jks
+''';
 
   // This is a test jks keystore, generated for testing use only. Do not use this key in an actual
   // application.
@@ -611,9 +609,9 @@ class NoGoldenDeferredComponentsConfig extends BasicDeferredComponentsConfig {
 class MismatchedGoldenDeferredComponentsConfig extends BasicDeferredComponentsConfig {
   @override
   String get deferredComponentsGolden => r'''
-  loading-units:
-    - id: 2
-      libraries:
-        - package:test/invalid_lib_name.dart
-  ''';
+loading-units:
+  - id: 2
+    libraries:
+      - package:test/invalid_lib_name.dart
+''';
 }
