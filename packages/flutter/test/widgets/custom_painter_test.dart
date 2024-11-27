@@ -356,7 +356,7 @@ void _defineTests() {
     final Set<SemanticsAction> allActions = SemanticsAction.values.toSet()
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
       ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
-      // TODO(LongCatIsLooong): clean up after `SemanticsAction.scrollToOffset` is added to dart:ui.
+      // TODO(LongCatIsLooong): change to `SemanticsAction.scrollToOffset` when available.
       // https://github.com/flutter/flutter/issues/159515.
       ..removeWhere((SemanticsAction action) => action.index == 1 << 23);
 
@@ -381,7 +381,7 @@ void _defineTests() {
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     int expectedLength = 1;
     for (final SemanticsAction action in allActions) {
-      // TODO(LongCatIsLooong): clean up after `SemanticsAction.scrollToOffset` is added to dart:ui.
+      // TODO(LongCatIsLooong): remove after `SemanticsAction.scrollToOffset` is added to dart:ui.
       // https://github.com/flutter/flutter/issues/159515.
       // ignore: exhaustive_cases
       switch (action) {
