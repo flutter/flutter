@@ -191,10 +191,12 @@ enum WebRendererMode {
   /// Always use skwasm.
   skwasm;
 
-  factory WebRendererMode.fromDartDefines(List<String> defines, {
+  factory WebRendererMode.fromDartDefines(Iterable<String> defines, {
     required bool useWasm,
   }) {
-    if (defines.contains('FLUTTER_WEB_USE_SKIA=false')
+    if (defines.contains('FLUTTER_WEB_AUTO_DETECT=true')) {
+      return auto;
+    } else if (defines.contains('FLUTTER_WEB_USE_SKIA=false')
         && defines.contains('FLUTTER_WEB_USE_SKWASM=true')) {
       return skwasm;
     } else if (defines.contains('FLUTTER_WEB_USE_SKIA=true')
@@ -239,23 +241,31 @@ enum WebRendererMode {
         skwasm => 'Always use the experimental skwasm renderer.'
       };
 
+  /// Returns [dartDefines] in a way usable from the CLI.
+  ///
+  /// This is used to start integration tests.
+  Iterable<String> get toCliDartDefines => dartDefines.map(
+    (String define) => '--dart-define=$define');
+
   Iterable<String> get dartDefines => switch (this) {
-        auto => <String>[
+        auto => const <String>{
             'FLUTTER_WEB_AUTO_DETECT=true',
-          ],
-        canvaskit => <String>[
+        },
+        canvaskit => const <String>{
             'FLUTTER_WEB_AUTO_DETECT=false',
             'FLUTTER_WEB_USE_SKIA=true',
-          ],
-        html => <String>[
+            'FLUTTER_WEB_USE_SKWASM=false',
+        },
+        html => const <String>{
             'FLUTTER_WEB_AUTO_DETECT=false',
             'FLUTTER_WEB_USE_SKIA=false',
-          ],
-        skwasm => <String>[
+            'FLUTTER_WEB_USE_SKWASM=false',
+        },
+        skwasm => const <String>{
             'FLUTTER_WEB_AUTO_DETECT=false',
             'FLUTTER_WEB_USE_SKIA=false',
             'FLUTTER_WEB_USE_SKWASM=true',
-          ],
+        },
       };
 
   List<String> updateDartDefines(List<String> inputDefines) {
