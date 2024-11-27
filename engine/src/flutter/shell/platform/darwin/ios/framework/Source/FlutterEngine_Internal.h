@@ -46,7 +46,6 @@ NS_ASSUME_NONNULL_BEGIN
                                  base64Encode:(bool)base64Encode;
 
 - (FlutterPlatformPlugin*)platformPlugin;
-- (std::shared_ptr<flutter::PlatformViewsController>&)platformViewsController;
 - (FlutterTextInputPlugin*)textInputPlugin;
 - (FlutterRestorationPlugin*)restorationPlugin;
 - (void)launchEngine:(nullable NSString*)entrypoint
@@ -81,6 +80,7 @@ NS_ASSUME_NONNULL_BEGIN
             userData:(nullable void*)userData;
 
 @property(nonatomic, readonly) FlutterDartProject* project;
+
 @end
 
 NS_ASSUME_NONNULL_END
