@@ -525,7 +525,8 @@ void main() {
       ..remove(SemanticsAction.moveCursorBackwardByWord)
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
       ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
-      // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/159515.
+      // TODO(LongCatIsLooong): clean up after `SemanticsAction.scrollToOffset` is added to dart:ui.
+      // https://github.com/flutter/flutter/issues/159515.
       ..removeWhere((SemanticsAction action) => action.index == 1 << 23);
 
     const int expectedId = 1;
@@ -544,7 +545,8 @@ void main() {
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     int expectedLength = 1;
     for (final SemanticsAction action in allActions) {
-      // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/159515.
+      // TODO(LongCatIsLooong): clean up after `SemanticsAction.scrollToOffset` is added to dart:ui.
+      // https://github.com/flutter/flutter/issues/159515.
       // ignore: exhaustive_cases
       switch (action) {
         case SemanticsAction.moveCursorBackwardByCharacter:
