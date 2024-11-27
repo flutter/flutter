@@ -782,6 +782,7 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
     contents->SetEffectTransform(effect_transform);
     contents->SetTexture(texture);
     contents->SetTileMode(x_tile_mode, y_tile_mode);
+    contents->SetSamplerDescriptor(sampler_descriptor);
 
     entity.SetContents(paint.WithFilters(std::move(contents)));
     AddRenderEntityToCurrentPass(entity);
