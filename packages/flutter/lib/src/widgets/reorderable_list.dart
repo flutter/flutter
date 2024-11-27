@@ -306,6 +306,9 @@ class ReorderableList extends StatefulWidget {
 
   /// {@template flutter.widgets.reorderable_list.dragBoundaryProvider}
   /// A callback used to provide drag boundaries during drag-and-drop reordering.
+  ///
+  /// If null, the delegate returned by `DragBoundary.forRectMaybeOf` will be used.
+  /// Defaults to null.
   /// {@endtemplate}
   final ReorderDragBoundaryProvider? dragBoundaryProvider;
 
@@ -1389,7 +1392,11 @@ class _DragInfo extends Drag {
     dragOffset = itemRenderBox.globalToLocal(initialPosition);
     itemSize = item.context.size!;
     _rawDragPosition = initialPosition;
-    boundary = listState.widget.dragBoundaryProvider?.call(listState.context);
+    if (listState.widget.dragBoundaryProvider != null) {
+      boundary = listState.widget.dragBoundaryProvider!.call(listState.context);
+    } else {
+      boundary = DragBoundary.forRectMaybeOf(listState.context);
+    }
     dragPosition = _adjustedDragOffset(initialPosition);
     itemExtent = _sizeExtent(itemSize, scrollDirection);
     itemLayoutConstraints = itemRenderBox.constraints;

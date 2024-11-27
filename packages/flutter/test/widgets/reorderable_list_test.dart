@@ -1696,9 +1696,6 @@ void main() {
                         child: Text('$index'),
                       );
                     },
-                    dragBoundaryProvider: (BuildContext context) {
-                      return DragBoundary.forRectOf(context);
-                    },
                     itemCount: 5,
                     onReorder: (int fromIndex, int toIndex) {},
                   ),
