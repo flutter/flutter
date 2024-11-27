@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_GEOMETRY_PATH_H_
 
 #include <functional>
+#include <memory>
 #include <optional>
 #include <tuple>
 #include <vector>

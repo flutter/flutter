@@ -5,6 +5,7 @@
 #ifndef FILESYSTEM_FILE_H_
 #define FILESYSTEM_FILE_H_
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
