@@ -34,9 +34,11 @@ const std::unique_ptr<const Sampler>& SamplerLibraryMTL::GetSampler(
   if (@available(iOS 14.0, macos 10.12, *)) {
     desc.borderColor = MTLSamplerBorderColorTransparentBlack;
   }
+#ifdef IMPELLER_DEBUG
   if (!descriptor.label.empty()) {
-    desc.label = @(descriptor.label.c_str());
+    desc.label = @(descriptor.label.data());
   }
+#endif  // IMPELLER_DEBUG
 
   auto mtl_sampler = [device_ newSamplerStateWithDescriptor:desc];
   if (!mtl_sampler) {

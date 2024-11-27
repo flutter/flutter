@@ -21,11 +21,11 @@ struct SamplerDescriptor final : public Comparable<SamplerDescriptor> {
   SamplerAddressMode height_address_mode = SamplerAddressMode::kClampToEdge;
   SamplerAddressMode depth_address_mode = SamplerAddressMode::kClampToEdge;
 
-  std::string label = "NN Clamp Sampler";
+  std::string_view label = "NN Clamp Sampler";
 
   SamplerDescriptor();
 
-  SamplerDescriptor(std::string label,
+  SamplerDescriptor(std::string_view label,
                     MinMagFilter min_filter,
                     MinMagFilter mag_filter,
                     MipFilter mip_filter);
