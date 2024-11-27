@@ -391,6 +391,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
 
   - name: Linux packages_autoroller
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/159544
     presubmit: false
     recipe: pub_autoroller/pub_autoroller
     # This takes a while because we need to fetch network dependencies and run
