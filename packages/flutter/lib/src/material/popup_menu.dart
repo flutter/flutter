@@ -989,6 +989,8 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 }
 
 /// A builder that creates a [RelativeRect] to position a popup menu.
+/// Both [BuildContext] and [BoxConstraints] are from the [PopupRoute] that
+/// displays this menu.
 ///
 /// The returned [RelativeRect] determines the position of the popup menu relative
 /// to the bounds of the [Navigator]'s overlay. The menu dimensions are not yet
