@@ -50,7 +50,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
 
   AccessibilityBridge(FlutterViewController* view_controller,
                       PlatformViewIOS* platform_view,
-                      std::shared_ptr<PlatformViewsController> platform_views_controller,
+                      __weak FlutterPlatformViewsController* platform_views_controller,
                       std::unique_ptr<IosDelegate> ios_delegate = nullptr);
   ~AccessibilityBridge();
 
@@ -72,7 +72,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
 
   fml::WeakPtr<AccessibilityBridge> GetWeakPtr();
 
-  std::shared_ptr<PlatformViewsController> GetPlatformViewsController() const override {
+  FlutterPlatformViewsController* GetPlatformViewsController() const override {
     return platform_views_controller_;
   };
 
@@ -91,7 +91,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
 
   FlutterViewController* view_controller_;
   PlatformViewIOS* platform_view_;
-  const std::shared_ptr<PlatformViewsController> platform_views_controller_;
+  __weak FlutterPlatformViewsController* platform_views_controller_;
   // If the this id is kSemanticObjectIdInvalid, it means either nothing has
   // been focused or the focus is currently outside of the flutter application
   // (i.e. the status bar or keyboard)
