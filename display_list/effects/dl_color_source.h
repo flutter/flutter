@@ -15,7 +15,6 @@
 
 namespace flutter {
 
-class DlColorColorSource;
 class DlImageColorSource;
 class DlLinearGradientColorSource;
 class DlRadialGradientColorSource;
@@ -34,7 +33,6 @@ class DlRuntimeEffectColorSource;
 // attributes, and the final blend with the pixels in the destination.
 
 enum class DlColorSourceType {
-  kColor,
   kImage,
   kLinearGradient,
   kRadialGradient,
@@ -45,8 +43,6 @@ enum class DlColorSourceType {
 
 class DlColorSource : public DlAttribute<DlColorSource, DlColorSourceType> {
  public:
-  static std::shared_ptr<DlColorSource> MakeColor(DlColor color);
-
   static std::shared_ptr<DlColorSource> MakeImage(
       const sk_sp<const DlImage>& image,
       DlTileMode horizontal_tile_mode,
@@ -119,10 +115,6 @@ class DlColorSource : public DlAttribute<DlColorSource, DlColorSourceType> {
   /// @return     True if the class represents the output of a gradient.
   ///
   virtual bool isGradient() const { return false; }
-
-  // Return a DlColorColorSource pointer to this object iff it is an Color
-  // type of ColorSource, otherwise return nullptr.
-  virtual const DlColorColorSource* asColor() const { return nullptr; }
 
   // Return a DlImageColorSource pointer to this object iff it is an Image
   // type of ColorSource, otherwise return nullptr.

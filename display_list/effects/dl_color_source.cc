@@ -20,10 +20,6 @@ static void DlGradientDeleter(void* p) {
   ::operator delete(p);
 }
 
-std::shared_ptr<DlColorSource> DlColorSource::MakeColor(DlColor color) {
-  return std::make_shared<DlColorColorSource>(color);
-}
-
 std::shared_ptr<DlColorSource> DlColorSource::MakeImage(
     const sk_sp<const DlImage>& image,
     DlTileMode horizontal_tile_mode,

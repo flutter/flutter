@@ -239,11 +239,6 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents() const {
       contents->SetTextureInputs(std::move(texture_inputs));
       return contents;
     }
-    case flutter::DlColorSourceType::kColor: {
-      auto contents = std::make_shared<SolidColorContents>();
-      contents->SetColor(color);
-      return contents;
-    }
   }
   FML_UNREACHABLE();
 }
