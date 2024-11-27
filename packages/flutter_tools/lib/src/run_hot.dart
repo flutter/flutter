@@ -90,13 +90,11 @@ class HotRunner extends ResidentRunner {
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
     ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
     ReassembleHelper reassembleHelper = _defaultReassembleHelper,
-    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
     String? nativeAssetsYamlFile,
     required Analytics analytics,
   })  : _stopwatchFactory = stopwatchFactory,
         _reloadSourcesHelper = reloadSourcesHelper,
         _reassembleHelper = reassembleHelper,
-        _nativeAssetsBuilder = nativeAssetsBuilder,
         _nativeAssetsYamlFile = nativeAssetsYamlFile,
         _analytics = analytics,
         super(
@@ -131,7 +129,6 @@ class HotRunner extends ResidentRunner {
   String? _sdkName;
   bool? _emulator;
 
-  final HotRunnerNativeAssetsBuilder? _nativeAssetsBuilder;
   final String? _nativeAssetsYamlFile;
 
   String? flavor;
@@ -378,20 +375,9 @@ class HotRunner extends ResidentRunner {
   }) async {
     await _calculateTargetPlatform();
 
-    final Uri? nativeAssetsYaml;
-    if (_nativeAssetsYamlFile != null) {
-      nativeAssetsYaml = globals.fs.path.toUri(_nativeAssetsYamlFile);
-    } else {
-      final Uri projectUri = Uri.directory(projectRootPath);
-      nativeAssetsYaml = await _nativeAssetsBuilder?.dryRun(
-        projectUri: projectUri,
-        fileSystem: fileSystem,
-        flutterDevices: flutterDevices,
-        logger: logger,
-        packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
-        packageConfig: debuggingOptions.buildInfo.packageConfig,
-      );
-    }
+    final Uri? nativeAssetsYaml = _nativeAssetsYamlFile != null
+        ? globals.fs.path.toUri(_nativeAssetsYamlFile)
+        : null;
 
     final Stopwatch appStartedTimer = Stopwatch()..start();
     final File mainFile = globals.fs.file(mainPath);
@@ -1707,17 +1693,4 @@ class ReasonForCancelling {
   String toString() {
     return '$message.\nTry performing a hot restart instead.';
   }
-}
-
-/// An interface to enable overriding native assets build logic in other
-/// build systems.
-abstract class HotRunnerNativeAssetsBuilder {
-  Future<Uri?> dryRun({
-    required Uri projectUri,
-    required FileSystem fileSystem,
-    required List<FlutterDevice> flutterDevices,
-    required String packageConfigPath,
-    required PackageConfig packageConfig,
-    required Logger logger,
-  });
 }

@@ -419,7 +419,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       webUseWasm: useWasm,
     );
 
-    String? testAssetDirectory;
+    final Uri? nativeAssetsJson = await nativeAssetsBuilder?.build(buildInfo);
+    String? testAssetPath;
     if (buildTestAssets) {
       await _buildTestAsset(
         flavor: buildInfo.flavor,
@@ -427,8 +428,19 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         buildMode: debuggingOptions.buildInfo.mode,
         packageConfigPath: buildInfo.packageConfigPath,
       );
-      testAssetDirectory = globals.fs.path.
-        join(flutterProject.directory.path, 'build', 'unit_test_assets');
+    }
+    if (buildTestAssets || nativeAssetsJson != null) {
+      testAssetPath = globals.fs.path
+          .join(flutterProject.directory.path, 'build', 'unit_test_assets');
+    }
+    if (nativeAssetsJson != null) {
+      final Directory testAssetDirectory = globals.fs.directory(testAssetPath);
+      if (!testAssetDirectory.existsSync()) {
+        await testAssetDirectory.create(recursive: true);
+      }
+      final File nativeAssetsManifest =
+          testAssetDirectory.childFile('NativeAssetsManifest.json');
+      await globals.fs.file(nativeAssetsJson).copy(nativeAssetsManifest.path);
     }
 
     final String? concurrencyString = stringArg('concurrency');
@@ -585,7 +597,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         machine: machine,
         updateGoldens: boolArg('update-goldens'),
         concurrency: jobs,
-        testAssetDirectory: testAssetDirectory,
+        testAssetDirectory: testAssetPath,
         flutterProject: flutterProject,
         randomSeed: stringArg('test-randomize-ordering-seed'),
         reporter: stringArg('reporter'),
@@ -612,7 +624,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         machine: machine,
         updateGoldens: boolArg('update-goldens'),
         concurrency: jobs,
-        testAssetDirectory: testAssetDirectory,
+        testAssetDirectory: testAssetPath,
         flutterProject: flutterProject,
         web: isWeb,
         randomSeed: stringArg('test-randomize-ordering-seed'),

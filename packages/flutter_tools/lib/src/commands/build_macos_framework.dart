@@ -118,6 +118,8 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
           '- .DS_Store',
           '--filter',
           '- native_assets.yaml',
+          '--filter',
+          '- native_assets.json',
           nativeAssetsDirectory.path,
           modeDirectory.path,
         ]);
