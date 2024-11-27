@@ -177,28 +177,34 @@ bool RenderPass::Draw() {
   render_pass_->SetPipeline(GetOrCreatePipeline());
 
   for (const auto& [_, buffer] : vertex_uniform_bindings) {
-    render_pass_->BindResource(impeller::ShaderStage::kVertex,
-                               impeller::DescriptorType::kUniformBuffer,
-                               buffer.slot, *buffer.view.GetMetadata(),
-                               buffer.view.resource);
+    render_pass_->BindDynamicResource(
+        impeller::ShaderStage::kVertex,
+        impeller::DescriptorType::kUniformBuffer, buffer.slot,
+        std::make_unique<impeller::ShaderMetadata>(*buffer.view.GetMetadata()),
+        buffer.view.resource);
   }
   for (const auto& [_, texture] : vertex_texture_bindings) {
-    render_pass_->BindResource(impeller::ShaderStage::kVertex,
-                               impeller::DescriptorType::kSampledImage,
-                               texture.slot, *texture.texture.GetMetadata(),
-                               texture.texture.resource, *texture.sampler);
+    render_pass_->BindDynamicResource(
+        impeller::ShaderStage::kVertex, impeller::DescriptorType::kSampledImage,
+        texture.slot,
+        std::make_unique<impeller::ShaderMetadata>(
+            *texture.texture.GetMetadata()),
+        texture.texture.resource, *texture.sampler);
   }
   for (const auto& [_, buffer] : fragment_uniform_bindings) {
-    render_pass_->BindResource(impeller::ShaderStage::kFragment,
-                               impeller::DescriptorType::kUniformBuffer,
-                               buffer.slot, *buffer.view.GetMetadata(),
-                               buffer.view.resource);
+    render_pass_->BindDynamicResource(
+        impeller::ShaderStage::kFragment,
+        impeller::DescriptorType::kUniformBuffer, buffer.slot,
+        std::make_unique<impeller::ShaderMetadata>(*buffer.view.GetMetadata()),
+        buffer.view.resource);
   }
   for (const auto& [_, texture] : fragment_texture_bindings) {
-    render_pass_->BindResource(impeller::ShaderStage::kFragment,
-                               impeller::DescriptorType::kSampledImage,
-                               texture.slot, *texture.texture.GetMetadata(),
-                               texture.texture.resource, *texture.sampler);
+    render_pass_->BindDynamicResource(
+        impeller::ShaderStage::kFragment,
+        impeller::DescriptorType::kSampledImage, texture.slot,
+        std::make_unique<impeller::ShaderMetadata>(
+            *texture.texture.GetMetadata()),
+        texture.texture.resource, *texture.sampler);
   }
 
   render_pass_->SetVertexBuffer(vertex_buffer);
