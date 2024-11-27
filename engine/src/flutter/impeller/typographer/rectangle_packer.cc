@@ -5,6 +5,7 @@
 #include "impeller/typographer/rectangle_packer.h"
 
 #include <algorithm>
+#include <memory>
 #include <vector>
 
 #include "flutter/fml/logging.h"

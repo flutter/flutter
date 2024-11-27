@@ -6,6 +6,7 @@
 #define FLUTTER_RUNTIME_DART_SERVICE_ISOLATE_H_
 
 #include <functional>
+#include <memory>
 #include <mutex>
 #include <set>
 #include <string>

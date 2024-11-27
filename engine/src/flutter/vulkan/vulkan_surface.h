@@ -5,6 +5,8 @@
 #ifndef FLUTTER_VULKAN_VULKAN_SURFACE_H_
 #define FLUTTER_VULKAN_VULKAN_SURFACE_H_
 
+#include <memory>
+
 #include "flutter/fml/macros.h"
 #include "flutter/vulkan/procs/vulkan_handle.h"
 #include "third_party/skia/include/core/SkSize.h"

@@ -9,6 +9,7 @@
 #include "impeller/geometry/scalar.h"
 
 #include <cstdint>
+#include <memory>
 
 namespace impeller {
 
