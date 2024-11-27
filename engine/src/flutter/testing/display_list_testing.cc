@@ -444,12 +444,6 @@ void DisplayListStreamDispatcher::setColorSource(const DlColorSource* source) {
   }
   startl() << "setColorSource(";
   switch (source->type()) {
-    case DlColorSourceType::kColor: {
-      const DlColorColorSource* color_src = source->asColor();
-      FML_DCHECK(color_src);
-      os_ << "DlColorColorSource(" << color_src->color() << ")";
-      break;
-    }
     case DlColorSourceType::kImage: {
       const DlImageColorSource* image_src = source->asImage();
       FML_DCHECK(image_src);

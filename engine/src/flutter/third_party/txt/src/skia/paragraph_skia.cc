@@ -191,7 +191,7 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
     // rendering will be faster as it avoids software rasterization. A stroke
     // width of four was chosen by eyeballing the point at which the path
     // text looks good enough, with some room for error.
-    return (paint.getColorSource() && !paint.getColorSource()->asColor()) ||
+    return paint.getColorSource() ||
            (paint.getDrawStyle() == DlDrawStyle::kStroke &&
             paint.getStrokeWidth() > 4);
   }

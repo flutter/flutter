@@ -55,8 +55,6 @@ source_set("display_list") {
     "effects/color_filters/dl_matrix_color_filter.h",
     "effects/color_filters/dl_srgb_to_linear_gamma_color_filter.cc",
     "effects/color_filters/dl_srgb_to_linear_gamma_color_filter.h",
-    "effects/color_sources/dl_color_color_source.cc",
-    "effects/color_sources/dl_color_color_source.h",
     "effects/color_sources/dl_conical_gradient_color_source.cc",
     "effects/color_sources/dl_conical_gradient_color_source.h",
     "effects/color_sources/dl_image_color_source.cc",

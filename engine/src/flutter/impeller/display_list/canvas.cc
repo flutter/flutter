@@ -54,9 +54,7 @@ static bool UseColorSourceContents(
   if (vertices->HasVertexColors()) {
     return false;
   }
-  if (vertices->HasTextureCoordinates() &&
-      (!paint.color_source ||
-       paint.color_source->type() == flutter::DlColorSourceType::kColor)) {
+  if (vertices->HasTextureCoordinates() && !paint.color_source) {
     return true;
   }
   return !vertices->HasTextureCoordinates();
@@ -314,8 +312,7 @@ bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
     return false;
   }
 
-  if (paint.color_source &&
-      paint.color_source->type() != flutter::DlColorSourceType::kColor) {
+  if (paint.color_source) {
     return false;
   }
 
@@ -736,8 +733,7 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
   // Override the blend mode with kDestination in order to match the behavior
   // of Skia's SK_LEGACY_IGNORE_DRAW_VERTICES_BLEND_WITH_NO_SHADER flag, which
   // is enabled when the Flutter engine builds Skia.
-  if (!paint.color_source ||
-      paint.color_source->type() == flutter::DlColorSourceType::kColor) {
+  if (!paint.color_source) {
     blend_mode = BlendMode::kDestination;
   }
 

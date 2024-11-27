@@ -88,53 +88,6 @@ static constexpr DlPoint kTestPoints2[2] = {
     DlPoint(107, 118),
 };
 
-TEST(DisplayListColorSource, ColorConstructor) {
-  DlColorColorSource source(DlColor::kRed());
-}
-
-TEST(DisplayListColorSource, ColorShared) {
-  DlColorColorSource source(DlColor::kRed());
-  ASSERT_NE(source.shared().get(), &source);
-  ASSERT_EQ(*source.shared(), source);
-}
-
-TEST(DisplayListColorSource, ColorAsColor) {
-  DlColorColorSource source(DlColor::kRed());
-  ASSERT_NE(source.asColor(), nullptr);
-  ASSERT_EQ(source.asColor(), &source);
-
-  ASSERT_EQ(source.asImage(), nullptr);
-  ASSERT_EQ(source.asLinearGradient(), nullptr);
-  ASSERT_EQ(source.asRadialGradient(), nullptr);
-  ASSERT_EQ(source.asConicalGradient(), nullptr);
-  ASSERT_EQ(source.asSweepGradient(), nullptr);
-  ASSERT_EQ(source.asRuntimeEffect(), nullptr);
-}
-
-TEST(DisplayListColorSource, ColorContents) {
-  DlColorColorSource source(DlColor::kRed());
-  ASSERT_EQ(source.color(), DlColor::kRed());
-  ASSERT_EQ(source.is_opaque(), true);
-  for (int i = 0; i < 255; i++) {
-    SkColor alpha_color = SkColorSetA(SK_ColorRED, i);
-    auto const alpha_source = DlColorColorSource(DlColor(alpha_color));
-    ASSERT_EQ(alpha_source.color(), alpha_color);
-    ASSERT_EQ(alpha_source.is_opaque(), false);
-  }
-}
-
-TEST(DisplayListColorSource, ColorEquals) {
-  DlColorColorSource source1(DlColor::kRed());
-  DlColorColorSource source2(DlColor::kRed());
-  TestEquals(source1, source2);
-}
-
-TEST(DisplayListColorSource, ColorNotEquals) {
-  DlColorColorSource source1(DlColor::kRed());
-  DlColorColorSource source2(DlColor::kBlue());
-  TestNotEquals(source1, source2, "Color differs");
-}
-
 TEST(DisplayListColorSource, ImageConstructor) {
   DlImageColorSource source(kTestImage1, DlTileMode::kClamp, DlTileMode::kClamp,
                             DlImageSampling::kLinear, &kTestMatrix1);
@@ -153,11 +106,11 @@ TEST(DisplayListColorSource, ImageAsImage) {
   ASSERT_NE(source.asImage(), nullptr);
   ASSERT_EQ(source.asImage(), &source);
 
-  ASSERT_EQ(source.asColor(), nullptr);
   ASSERT_EQ(source.asLinearGradient(), nullptr);
   ASSERT_EQ(source.asRadialGradient(), nullptr);
   ASSERT_EQ(source.asConicalGradient(), nullptr);
   ASSERT_EQ(source.asSweepGradient(), nullptr);
+  ASSERT_EQ(source.asRuntimeEffect(), nullptr);
 }
 
 TEST(DisplayListColorSource, ImageContents) {
@@ -251,7 +204,6 @@ TEST(DisplayListColorSource, LinearGradientAsLinear) {
   ASSERT_NE(source->asLinearGradient(), nullptr);
   ASSERT_EQ(source->asLinearGradient(), source.get());
 
-  ASSERT_EQ(source->asColor(), nullptr);
   ASSERT_EQ(source->asImage(), nullptr);
   ASSERT_EQ(source->asRadialGradient(), nullptr);
   ASSERT_EQ(source->asConicalGradient(), nullptr);
@@ -370,7 +322,6 @@ TEST(DisplayListColorSource, RadialGradientAsRadial) {
   ASSERT_NE(source->asRadialGradient(), nullptr);
   ASSERT_EQ(source->asRadialGradient(), source.get());
 
-  ASSERT_EQ(source->asColor(), nullptr);
   ASSERT_EQ(source->asImage(), nullptr);
   ASSERT_EQ(source->asLinearGradient(), nullptr);
   ASSERT_EQ(source->asConicalGradient(), nullptr);
@@ -489,7 +440,6 @@ TEST(DisplayListColorSource, ConicalGradientAsConical) {
   ASSERT_NE(source->asConicalGradient(), nullptr);
   ASSERT_EQ(source->asConicalGradient(), source.get());
 
-  ASSERT_EQ(source->asColor(), nullptr);
   ASSERT_EQ(source->asImage(), nullptr);
   ASSERT_EQ(source->asLinearGradient(), nullptr);
   ASSERT_EQ(source->asRadialGradient(), nullptr);
@@ -624,7 +574,6 @@ TEST(DisplayListColorSource, SweepGradientAsSweep) {
   ASSERT_NE(source->asSweepGradient(), nullptr);
   ASSERT_EQ(source->asSweepGradient(), source.get());
 
-  ASSERT_EQ(source->asColor(), nullptr);
   ASSERT_EQ(source->asImage(), nullptr);
   ASSERT_EQ(source->asLinearGradient(), nullptr);
   ASSERT_EQ(source->asRadialGradient(), nullptr);
@@ -743,7 +692,6 @@ TEST(DisplayListColorSource, RuntimeEffect) {
   ASSERT_NE(source2->asRuntimeEffect(), source1.get());
 
   ASSERT_EQ(source1->asImage(), nullptr);
-  ASSERT_EQ(source1->asColor(), nullptr);
   ASSERT_EQ(source1->asLinearGradient(), nullptr);
   ASSERT_EQ(source1->asRadialGradient(), nullptr);
   ASSERT_EQ(source1->asConicalGradient(), nullptr);

@@ -83,11 +83,6 @@ sk_sp<SkShader> ToSk(const DlColorSource* source) {
     return sk_colors;
   };
   switch (source->type()) {
-    case DlColorSourceType::kColor: {
-      const DlColorColorSource* color_source = source->asColor();
-      FML_DCHECK(color_source != nullptr);
-      return SkShaders::Color(ToSk(color_source->color()));
-    }
     case DlColorSourceType::kImage: {
       const DlImageColorSource* image_source = source->asImage();
       FML_DCHECK(image_source != nullptr);

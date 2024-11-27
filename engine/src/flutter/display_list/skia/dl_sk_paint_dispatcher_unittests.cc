@@ -64,11 +64,6 @@ TEST(DisplayListUtils, SetColorSourceDoesNotDitherIfNotGradient) {
   EXPECT_FALSE(helper.paint(true).isDither());
   EXPECT_FALSE(helper.paint(false).isDither());
 
-  DlColorColorSource color_color_source(DlColor::kBlue());
-  helper.setColorSource(&color_color_source);
-  EXPECT_FALSE(helper.paint(true).isDither());
-  EXPECT_FALSE(helper.paint(false).isDither());
-
   helper.setColorSource(kTestSource1.get());
   EXPECT_FALSE(helper.paint(true).isDither());
   EXPECT_FALSE(helper.paint(false).isDither());
@@ -93,13 +88,6 @@ TEST(DisplayListUtils, SkDispatcherSetColorSourceDoesNotDitherIfNotGradient) {
 
   dispatcher.setColorSource(kTestLinearGradient.get());
   dispatcher.setColorSource(nullptr);
-  EXPECT_FALSE(dispatcher.paint(true).isDither());
-  EXPECT_FALSE(dispatcher.paint(false).isDither());
-  EXPECT_FALSE(dispatcher.safe_paint(true)->isDither());
-  // Calling safe_paint(false) returns a nullptr
-
-  DlColorColorSource color_color_source(DlColor::kBlue());
-  dispatcher.setColorSource(&color_color_source);
   EXPECT_FALSE(dispatcher.paint(true).isDither());
   EXPECT_FALSE(dispatcher.paint(false).isDither());
   EXPECT_FALSE(dispatcher.safe_paint(true)->isDither());

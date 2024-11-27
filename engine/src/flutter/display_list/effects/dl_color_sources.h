@@ -5,7 +5,6 @@
 #ifndef FLUTTER_DISPLAY_LIST_EFFECTS_DL_COLOR_SOURCES_H_
 #define FLUTTER_DISPLAY_LIST_EFFECTS_DL_COLOR_SOURCES_H_
 
-#include "flutter/display_list/effects/color_sources/dl_color_color_source.h"
 #include "flutter/display_list/effects/color_sources/dl_conical_gradient_color_source.h"
 #include "flutter/display_list/effects/color_sources/dl_image_color_source.h"
 #include "flutter/display_list/effects/color_sources/dl_linear_gradient_color_source.h"

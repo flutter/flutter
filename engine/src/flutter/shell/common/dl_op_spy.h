@@ -106,6 +106,9 @@ class DlOpSpy final : public virtual DlOpReceiver,
                   bool transparent_occluder,
                   DlScalar dpr) override;
 
+  // Most recently set color, used when color_source goes to null
+  DlColor color_;
+
   // Indicates if the attributes are set to values that will modify the
   // destination. For now, the test only checks if there is a non-transparent
   // color set.

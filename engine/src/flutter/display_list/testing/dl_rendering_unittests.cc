@@ -863,7 +863,7 @@ class TestParameters {
   bool impeller_compatible(const DlPaint& paint) const {
     if (is_draw_text_blob()) {
       // Non-color text is rendered as paths
-      if (paint.getColorSourcePtr() && !paint.getColorSourcePtr()->asColor()) {
+      if (paint.getColorSourcePtr()) {
         return false;
       }
       // Non-filled text (stroke or stroke and fill) is rendered as paths

@@ -56,7 +56,16 @@ TEST(DisplayListPaint, ConstructorDefaults) {
   EXPECT_NE(paint, DlPaint().setStrokeWidth(6));
   EXPECT_NE(paint, DlPaint().setStrokeMiter(7));
 
-  auto color_source = DlColorSource::MakeColor(DlColor::kMagenta());
+  DlColor colors[2] = {
+      DlColor::kGreen(),
+      DlColor::kBlue(),
+  };
+  float stops[2] = {
+      0.0f,
+      1.0f,
+  };
+  auto color_source = DlColorSource::MakeLinear({0, 0}, {10, 10}, 2, colors,
+                                                stops, DlTileMode::kClamp);
   EXPECT_NE(paint, DlPaint().setColorSource(color_source));
 
   auto color_filter =
@@ -95,19 +104,28 @@ TEST(DisplayListPaint, NullSharedPointerSetGet) {
 }
 
 TEST(DisplayListPaint, ChainingConstructor) {
+  DlColor colors[2] = {
+      DlColor::kGreen(),
+      DlColor::kBlue(),
+  };
+  float stops[2] = {
+      0.0f,
+      1.0f,
+  };
   DlPaint paint =
-      DlPaint()                                                           //
-          .setAntiAlias(true)                                             //
-          .setInvertColors(true)                                          //
-          .setColor(DlColor::kGreen())                                    //
-          .setAlpha(0x7F)                                                 //
-          .setBlendMode(DlBlendMode::kLuminosity)                         //
-          .setDrawStyle(DlDrawStyle::kStrokeAndFill)                      //
-          .setStrokeCap(DlStrokeCap::kSquare)                             //
-          .setStrokeJoin(DlStrokeJoin::kBevel)                            //
-          .setStrokeWidth(42)                                             //
-          .setStrokeMiter(1.5)                                            //
-          .setColorSource(DlColorSource::MakeColor(DlColor::kMagenta()))  //
+      DlPaint()                                                         //
+          .setAntiAlias(true)                                           //
+          .setInvertColors(true)                                        //
+          .setColor(DlColor::kGreen())                                  //
+          .setAlpha(0x7F)                                               //
+          .setBlendMode(DlBlendMode::kLuminosity)                       //
+          .setDrawStyle(DlDrawStyle::kStrokeAndFill)                    //
+          .setStrokeCap(DlStrokeCap::kSquare)                           //
+          .setStrokeJoin(DlStrokeJoin::kBevel)                          //
+          .setStrokeWidth(42)                                           //
+          .setStrokeMiter(1.5)                                          //
+          .setColorSource(DlColorSource::MakeLinear(                    //
+              {0, 0}, {10, 10}, 2, colors, stops, DlTileMode::kClamp))  //
           .setColorFilter(
               DlColorFilter::MakeBlend(DlColor::kYellow(), DlBlendMode::kDstIn))
           .setImageFilter(DlImageFilter::MakeBlur(1.3, 4.7, DlTileMode::kClamp))
@@ -123,7 +141,8 @@ TEST(DisplayListPaint, ChainingConstructor) {
   EXPECT_EQ(paint.getStrokeWidth(), 42);
   EXPECT_EQ(paint.getStrokeMiter(), 1.5);
   EXPECT_TRUE(Equals(paint.getColorSource(),
-                     DlColorSource::MakeColor(DlColor::kMagenta())));
+                     DlColorSource::MakeLinear({0, 0}, {10, 10}, 2, colors,
+                                               stops, DlTileMode::kClamp)));
   EXPECT_TRUE(Equals(
       paint.getColorFilter(),
       DlColorFilter::MakeBlend(DlColor::kYellow(), DlBlendMode::kDstIn)));

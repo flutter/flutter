@@ -263,7 +263,6 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
         case DlColorSourceType::kRuntimeEffect:
           RecordByType(DisplayListOpType::kSetRuntimeEffectColorSource);
           break;
-        case DlColorSourceType::kColor:
         case DlColorSourceType::kLinearGradient:
         case DlColorSourceType::kRadialGradient:
         case DlColorSourceType::kConicalGradient:
