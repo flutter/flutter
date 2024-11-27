@@ -8,6 +8,7 @@ library;
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/web/compile.dart';
 
 import '../integration.shard/test_data/hot_reload_project.dart';
 import '../integration.shard/test_driver.dart';
@@ -52,7 +53,7 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
     await flutter.hotRestart();
   });
 
-  testWithoutContext('$testName: newly added code executes during hot restart', () async {
+  testWithoutContext('$testName: newly added code executes during hot restart - html (legacy)', () async {
     final Completer<void> completer = Completer<void>();
     final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
       printOnFailure(line);
@@ -60,7 +61,10 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
         completer.complete();
       }
     });
-    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose']);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>[
+      '--verbose',
+      ...WebRendererMode.html.toCliDartDefines,
+    ]);
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();
