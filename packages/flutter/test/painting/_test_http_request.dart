@@ -83,3 +83,69 @@ class MockEvent {
   final String type;
   final web.Event event;
 }
+
+@JS()
+@staticInterop
+@anonymous
+class ImgElementMock {
+  external factory ImgElementMock({
+    JSFunction? decode,
+  });
+}
+
+class TestImgElement {
+  TestImgElement() {
+    _mock = ImgElementMock(decode: decode.toJS);
+    final JSAny mock = _mock as JSAny;
+    objectDefineProperty(mock, 'src',
+      <String, JSFunction>{
+        'get': (() => src).toJS,
+        'set': ((JSString newValue) {
+          src = newValue.toDart;
+        }).toJS,
+      }.jsify()!,
+    );
+    objectDefineProperty(mock, 'naturalWidth',
+      <String, JSFunction>{
+        'get': (() => naturalWidth).toJS,
+        'set': ((JSNumber newValue) {
+          naturalWidth = newValue.toDartInt;
+        }).toJS,
+      }.jsify()!,
+    );
+    objectDefineProperty(mock, 'naturalHeight',
+      <String, JSFunction>{
+        'get': (() => naturalHeight).toJS,
+        'set': ((JSNumber newValue) {
+          naturalHeight = newValue.toDartInt;
+        }).toJS,
+      }.jsify()!,
+    );
+  }
+
+  late ImgElementMock _mock;
+
+  String src = '';
+  int naturalWidth = -1;
+  int naturalHeight = -1;
+
+  late JSFunction _resolveFunc;
+  late JSFunction _rejectFunc;
+
+  JSPromise<JSAny?> decode() {
+    return JSPromise<JSAny?>((JSFunction resolveFunc, JSFunction rejectFunc) {
+      _resolveFunc = resolveFunc;
+      _rejectFunc = rejectFunc;
+    }.toJS);
+  }
+
+  void decodeSuccess() {
+    _resolveFunc.callAsFunction();
+  }
+
+  void decodeFailure() {
+    _rejectFunc.callAsFunction();
+  }
+
+  web.HTMLImageElement getMock() => _mock as web.HTMLImageElement;
+}
