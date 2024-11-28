@@ -2958,7 +2958,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     if (!isRepaintBoundary && _wasRepaintBoundary) {
       _needsPaint = false;
       _needsCompositedLayerUpdate = false;
-      owner?._nodesNeedingPaint.remove(this);
+      owner?._nodesNeedingPaint.removeWhere((RenderObject t) => t == this);
       _needsCompositingBitsUpdate = false;
       markNeedsPaint();
     } else if (oldNeedsCompositing != _needsCompositing) {
@@ -3041,10 +3041,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     // If this was not previously a repaint boundary it will not have
     // a layer we can paint from.
     if (isRepaintBoundary && _wasRepaintBoundary) {
-      if (_needsCompositedLayerUpdate) {
-        assert(owner == null || owner!._nodesNeedingPaint.contains(this));
-        return;
-      }
       assert(() {
         if (debugPrintMarkNeedsPaintStacks) {
           debugPrintStack(label: 'markNeedsPaint() called for $this');
