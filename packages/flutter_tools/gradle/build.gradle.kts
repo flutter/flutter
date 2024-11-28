@@ -4,7 +4,7 @@
 
 plugins {
     `java-gradle-plugin`
-    //groovy
+    groovy
     kotlin("jvm") version "1.9.0" 
 }
 
