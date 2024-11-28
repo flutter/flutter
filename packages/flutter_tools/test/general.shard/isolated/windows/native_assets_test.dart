@@ -127,13 +127,16 @@ void main() {
           nativeAssetsFileUri: nativeAssetsFileUri,
         );
         final String expectedOS = flutterTester
-            ? native_assets_cli.Target.current.toString()
-            : 'windows_x64';
+            ? OS.current.toString()
+            : 'windows';
+        final String expectedArch = flutterTester
+            ? Architecture.current.toString()
+            : 'x64';
         expect(
           (globals.logger as BufferLogger).traceText,
           stringContainsInOrder(<String>[
-            'Building native assets for $expectedOS $buildMode.',
-            'Building native assets for $expectedOS $buildMode done.',
+            'Building native assets for $expectedOS $expectedArch $buildMode.',
+            'Building native assets for $expectedOS $expectedArch $buildMode done.',
           ]),
         );
         expect(
@@ -142,7 +145,10 @@ void main() {
             'package:bar/bar.dart',
             if (flutterTester)
               // Tests run on host system, so the have the full path on the system.
-              projectUri.resolve('build/native_assets/$expectedDirectory/bar.dll').toFilePath()
+              projectUri
+                  .resolve('build/native_assets/$expectedDirectory/bar.dll')
+                  .toFilePath()
+                  .replaceAll(r'\', r'\\') // Undo JSON string escaping.
             else
               // Apps are a bundle with the dylibs on their dlopen path.
               'bar.dll',

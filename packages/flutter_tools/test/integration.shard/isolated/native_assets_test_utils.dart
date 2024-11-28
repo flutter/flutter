@@ -10,7 +10,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
-import '../test_utils.dart' show ProcessResultMatcher, fileSystem;
+import '../test_utils.dart' show ProcessResultMatcher, fileSystem, flutterBin;
 import '../transition_test_utils.dart';
 
 Future<Directory> createTestProject(String packageName, Directory tempDirectory) async {

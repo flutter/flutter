@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(matanlurey): Remove after debugging https://github.com/flutter/flutter/issues/159000.
-@Tags(<String>['flutter-build-apk'])
-library;
-
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
@@ -15,7 +11,6 @@ import 'test_utils.dart';
 void main() {
   late Directory tempDir;
   late Directory projectRoot;
-  late String flutterBin;
   final List<String> targetPlatforms = <String>[
     'apk',
     'web',
@@ -27,11 +22,6 @@ void main() {
 
   setUpAll(() {
     tempDir = createResolvedTempDirectorySync('build_compilation_error_test.');
-    flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
     processManager.runSync(<String>[flutterBin, 'config',
       '--enable-macos-desktop',
       '--enable-windows-desktop',
