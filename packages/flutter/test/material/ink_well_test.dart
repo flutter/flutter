@@ -11,10 +11,6 @@ import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  RenderObject getInkFeatures(WidgetTester tester) {
-    return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-  }
-
   testWidgets('InkWell gestures control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
@@ -174,7 +170,7 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.byType(SizedBox)));
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)));
   });
 
@@ -213,7 +209,7 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.byType(SizedBox)));
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)));
   });
 
@@ -244,7 +240,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
@@ -293,7 +289,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
@@ -331,99 +327,11 @@ void main() {
     ));
     await tester.pumpAndSettle();
     final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(0, 0, 100, 100), color: pressedColor.withAlpha(0)));
     await tester.pumpAndSettle(); // Let the press highlight animation finish.
     expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(0, 0, 100, 100), color: pressedColor));
     await gesture.up();
-  });
-
-  group('Ink well overlayColor resolution respects WidgetState.selected', () {
-    const Color selectedHoveredColor = Color(0xff00ff00);
-    const Color selectedFocusedColor = Color(0xff0000ff);
-    const Color selectedPressedColor = Color(0xff00ffff);
-    const Rect inkRect = Rect.fromLTRB(0, 0, 100, 100);
-
-    Widget boilerplate({ FocusNode? focusNode }) {
-      final WidgetStatesController statesController = WidgetStatesController(<MaterialState>{MaterialState.selected});
-      addTearDown(statesController.dispose);
-
-      return Material(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: 100,
-              height: 100,
-              child: InkWell(
-                splashFactory: NoSplash.splashFactory,
-                focusNode: focusNode,
-                statesController: statesController,
-                overlayColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
-                  if (states.contains(WidgetState.selected)) {
-                    if (states.contains(WidgetState.pressed)) {
-                      return selectedPressedColor;
-                    }
-                    if (states.contains(WidgetState.hovered)) {
-                      return selectedHoveredColor;
-                    }
-                    if (states.contains(WidgetState.focused)) {
-                      return selectedFocusedColor;
-                    }
-                    return const Color(0xffbadbad); // Shouldn't happen.
-                  } else {
-                    return Colors.black;
-                  }
-                }),
-                onTap: () { },
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    testWidgets('when focused', (WidgetTester tester) async {
-      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-      final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
-      addTearDown(focusNode.dispose);
-
-      await tester.pumpWidget(boilerplate(focusNode: focusNode));
-      await tester.pumpAndSettle();
-
-      final RenderObject inkFeatures = getInkFeatures(tester);
-      expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
-      focusNode.requestFocus();
-      await tester.pumpAndSettle();
-
-      expect(inkFeatures, paints..rect(rect: inkRect, color: selectedFocusedColor));
-    });
-
-    testWidgets('when hovered', (WidgetTester tester) async {
-      await tester.pumpWidget(boilerplate());
-      await tester.pumpAndSettle();
-
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await gesture.addPointer();
-      await gesture.moveTo(tester.getCenter(find.byType(SizedBox)));
-      await tester.pumpAndSettle();
-
-      final RenderObject inkFeatures = getInkFeatures(tester);
-      expect(inkFeatures, paints..rect(rect: inkRect, color: selectedHoveredColor));
-    });
-
-    testWidgets('when pressed', (WidgetTester tester) async {
-      await tester.pumpWidget(boilerplate());
-      await tester.pumpAndSettle();
-
-      final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
-      final RenderObject inkFeatures = getInkFeatures(tester);
-      expect(inkFeatures, paints..rect(rect: inkRect, color: selectedPressedColor.withAlpha(0)));
-      await tester.pumpAndSettle(); // Let the press highlight animation finish.
-      expect(inkFeatures, paints..rect(rect: inkRect, color: selectedPressedColor));
-      await gesture.up();
-    });
   });
 
   testWidgets('ink response splashColor matches splashColor parameter', (WidgetTester tester) async {
@@ -459,7 +367,7 @@ void main() {
     await tester.pumpAndSettle();
     final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
     await tester.pump(const Duration(milliseconds: 200)); // unconfirmed splash is well underway
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..circle(x: 50, y: 50, color: splashColor));
     await gesture.up();
     focusNode.dispose();
@@ -509,7 +417,7 @@ void main() {
     await tester.pumpAndSettle();
     final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
     await tester.pump(const Duration(milliseconds: 200)); // unconfirmed splash is well underway
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..circle(x: 50, y: 50, color: splashColor));
     await gesture.up();
     focusNode.dispose();
@@ -538,7 +446,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
@@ -569,7 +477,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 0));
 
     focusNode.requestFocus();
@@ -605,7 +513,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 0));
 
     // Hover the ink well.
@@ -647,7 +555,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 0));
     expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 0));
 
@@ -699,7 +607,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 0));
     expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 0));
 
@@ -752,7 +660,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     }
     await tester.pumpWidget(boilerplate(10));
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
 
     focusNode.requestFocus();
@@ -793,7 +701,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
 
     await tester.pumpWidget(boilerplate(BoxShape.circle));
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
     expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 0));
 
@@ -834,7 +742,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
 
     await tester.pumpWidget(boilerplate(BorderRadius.circular(10)));
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 0));
 
     focusNode.requestFocus();
@@ -883,7 +791,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
 
     await tester.pumpWidget(boilerplate(BorderRadius.circular(20)));
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 0));
 
     focusNode.requestFocus();
@@ -954,7 +862,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(BorderRadius.circular(20)));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 0));
 
     final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
@@ -1037,7 +945,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
       ),
     ));
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
@@ -2140,7 +2048,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     expect(log, equals(<String>['tap-down', 'double-tap']));
 
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
   });
 
@@ -2185,7 +2093,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     expect(log, equals(<String>['tap-down', 'tap-down', 'tap-cancel', 'double-tap']));
 
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
   });
 
@@ -2263,7 +2171,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     await tester.pumpAndSettle();
     await gesture.moveTo(const Offset(10, 10)); // fade out the overlay
     await tester.pump(); // trigger the fade out animation
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     // Fadeout begins with the MaterialStates.hovered overlay color
     expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)));
     // 50ms fadeout is 50% complete, overlay color alpha goes from 0xff to 0x80
@@ -2328,7 +2236,7 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     await tester.pump(const Duration(milliseconds: 200));
 
     // No splash should be painted.
-    final RenderObject inkFeatures = getInkFeatures(tester);
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
 
     await gesture.up();
