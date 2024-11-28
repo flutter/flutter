@@ -422,7 +422,7 @@ void main() {
       ),
     );
 
-    // Open the nested anchor
+    // Open the nested anchor.
     nestedController.open();
     await tester.pump();
 
@@ -431,7 +431,7 @@ void main() {
     expect(find.text(Tag.b.text), findsOneWidget);
     expect(find.text(Tag.b.a.text), findsOneWidget);
 
-    // Close the root menu panel
+    // Close the root menu panel.
     controller.close();
     await tester.pump();
 
@@ -463,7 +463,7 @@ void main() {
       ),
     );
 
-    // Open the nested anchor
+    // Open the nested anchor.
     controllerB.open();
     await tester.pump();
 
@@ -472,7 +472,7 @@ void main() {
     expect(find.text(Tag.b.text), findsOneWidget);
     expect(find.text(Tag.b.a.text), findsOneWidget);
 
-    // Close the root menu panel
+    // Close the root menu panel.
     controller.closeChildren();
     await tester.pump();
 
@@ -855,7 +855,7 @@ void main() {
     expect(FocusManager.instance.primaryFocus, aFocusNode);
     expect(find.text(Tag.b.a.text), findsOneWidget);
 
-    // Test panel child can close siblings with escape key
+    // Test panel child can close siblings with escape key.
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pump();
 
@@ -870,7 +870,7 @@ void main() {
 
     expect(FocusManager.instance.primaryFocus, baaFocusNode);
 
-    // Test ancestors menus are closed with escape key
+    // Test ancestors menus are closed with escape key.
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pump();
 
@@ -1676,7 +1676,7 @@ void main() {
 
     expect(focusedMenu, equals(Tag.anchor.focusNode));
 
-    // Test from adjacent menu item sibling
+    // Test from adjacent menu item sibling.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
 
@@ -1702,7 +1702,7 @@ void main() {
     expect(focusedMenu, equals(Tag.a.focusNode));
     expect(find.text(Tag.a.text).hitTestable(), findsOneWidget);
 
-    // Test from nested overlay
+    // Test from nested overlay.
     await tester.ensureVisible(find.text(Tag.d.text));
     await tester.tap(find.text(Tag.d.text));
     await tester.pump();
@@ -1779,7 +1779,7 @@ void main() {
     expect(focusedMenu, Tag.a.focusNode);
     expect(find.text(Tag.d.text).hitTestable(), findsNothing);
 
-    // Test from menu item sibling
+    // Test from menu item sibling.
     await tester.sendKeyEvent(LogicalKeyboardKey.end);
 
     expect(focusedMenu, equals(Tag.d.focusNode));
@@ -1810,7 +1810,7 @@ void main() {
     expect(find.text(Tag.b.a.text), findsOneWidget);
     expect(focusedMenu, equals(Tag.b.a.focusNode));
 
-    // Test from nested overlay
+    // Test from nested overlay.
     await tester.sendKeyEvent(LogicalKeyboardKey.end);
 
     expect(focusedMenu, equals(Tag.b.c.focusNode));
@@ -2048,7 +2048,7 @@ void main() {
 
     listenForFocusChanges();
 
-    // Move into submenu
+    // Move into submenu.
     focusNode.requestFocus();
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
@@ -2124,7 +2124,7 @@ void main() {
 
     listenForFocusChanges();
 
-    // Move into submenu
+    // Move into submenu.
     focusNode.requestFocus();
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
@@ -2228,7 +2228,7 @@ void main() {
     await tester.tap(find.text(Tag.anchor.text));
     await tester.pump();
 
-    // Arrow down moves to first item
+    // Arrow down moves to first item.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     expect(focusedMenu, equals(Tag.a.focusNode));
 
@@ -2245,17 +2245,17 @@ void main() {
     await tester.pump();
     expect(focusedMenu, equals(Tag.b.focusNode));
 
-    // Move to the first submenu
+    // Move to the first submenu.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     expect(focusedMenu, equals(Tag.c.focusNode));
 
-    // Arrow left should do nothing since no menu is open
+    // Arrow left should do nothing since no menu is open.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
 
     expect(focusedMenu, equals(Tag.c.focusNode));
 
-    // Arrow right should open the submenu and focus the first item
+    // Arrow right should open the submenu and focus the first item.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
 
@@ -2291,7 +2291,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     expect(focusedMenu, equals(Tag.b.focusNode));
 
-    // Cycle back up
+    // Cycle back up.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     expect(focusedMenu, equals(Tag.a.focusNode));
 
@@ -2388,7 +2388,7 @@ void main() {
     await tester.tap(find.text(Tag.anchor.text));
     await tester.pump();
 
-    // Arrow down moves to first item
+    // Arrow down moves to first item.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     expect(focusedMenu, equals(Tag.a.focusNode));
 
@@ -2408,13 +2408,13 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     expect(focusedMenu, equals(Tag.c.focusNode));
 
-    // Arrow right should do nothing since no menu is open
+    // Arrow right should do nothing since no menu is open.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
 
     expect(focusedMenu, equals(Tag.c.focusNode));
 
-    // Arrow left should open the submenu and focus the first item
+    // Arrow left should open the submenu and focus the first item.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
 
@@ -2521,16 +2521,16 @@ void main() {
     await tester.pump();
     expect(focusedMenu, equals(Tag.b.focusNode));
 
-    // Tab on an unopened anchor should move focus to next widget
+    // Tab on an unopened anchor should move focus to next widget.
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     expect(focusedMenu, equals(Tag.c.focusNode));
 
-    // Move focus back to the anchor
+    // Move focus back to the anchor.
     focusNode.requestFocus();
     await tester.pump();
     expect(focusedMenu, equals(Tag.b.focusNode));
 
-    // Shift+Tab on unopened anchor should move focus to previous widget
+    // Shift+Tab on unopened anchor should move focus to previous widget.
     await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
@@ -2593,7 +2593,7 @@ void main() {
 
     listenForFocusChanges();
 
-    // Open overlay and focus first menu item
+    // Open overlay and focus first menu item.
     focusNode.requestFocus();
     await tester.pump();
 
@@ -2611,7 +2611,7 @@ void main() {
 
     expect(focusedMenu, equals(Tag.b.focusNode));
 
-    // Open and move focus to nested menu
+    // Open and move focus to nested menu.
     await tester.tap(find.text(Tag.b.text));
     await tester.pump();
     focusNode.requestFocus();
@@ -2687,11 +2687,11 @@ void main() {
     expect(focusedMenu, equals(Tag.b.focusNode));
     expect(find.text(Tag.b.a.text), findsOneWidget);
 
-    // Tab moves focus to the next root anchor sibling
+    // Tab moves focus to the next root anchor sibling.
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
 
-    // Menu should be closed
+    // Menu should be closed.
     expect(focusedMenu, equals(Tag.c.focusNode));
     expect(find.text(Tag.b.a.text), findsNothing);
 
@@ -2702,21 +2702,21 @@ void main() {
     expect(focusedMenu, equals(Tag.b.focusNode));
     expect(find.text(Tag.b.a.text), findsOneWidget);
 
-    // Move focus to the previous root anchor sibling
+    // Move focus to the previous root anchor sibling.
     await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
     await tester.pump();
 
-    // Menu should be closed
+    // Menu should be closed.
     expect(focusedMenu, equals(Tag.a.focusNode));
     expect(find.text(Tag.b.a.text), findsNothing);
 
     // Next, test that a nested anchor is closed when tabbing away from it.
     // This test also checks that the presence of a focus node does not
-    // affect the menu
+    // affect the menu.
 
-    // Open nested menu and focus first anchor
+    // Open nested menu and focus first anchor.
     bFocusNode.requestFocus();
     await tester.tap(find.text(Tag.b.text));
     await tester.pump();
@@ -2728,7 +2728,7 @@ void main() {
     expect(focusedMenu, equals(Tag.b.b.focusNode));
     expect(find.text(Tag.b.b.a.text), findsOneWidget);
 
-    // Tab moves focus to the next anchor sibling
+    // Tab moves focus to the next anchor sibling.
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
 
@@ -2745,7 +2745,7 @@ void main() {
     expect(focusedMenu, equals(Tag.b.b.focusNode));
     expect(find.text(Tag.b.b.a.text), findsOneWidget);
 
-    // Shift+Tab moves focus to the previous root anchor sibling
+    // Shift+Tab moves focus to the previous root anchor sibling.
     await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
@@ -4253,14 +4253,14 @@ void main() {
 
       await tester.pumpWidget(
         App(
-          // Overlaps the bottom of the anchor by 4px
+          // Overlaps the bottom of the anchor by 4px.
           RawMenuAnchor(
             surfaceDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
             alignmentOffset: const Offset(0, -4),
             alignment: AlignmentDirectional.bottomEnd,
             menuAlignment: AlignmentDirectional.topStart,
             menuChildren: <Widget>[
-              // Overlaps the top of the anchor by 4px
+              // Overlaps the top of the anchor by 4px.
               RawMenuAnchor(
                 surfaceDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
                 alignmentOffset: const Offset(0, 4),
@@ -4490,7 +4490,7 @@ void main() {
 
       expect(collectOverlays().first, control.shift(const Offset(33, 45)));
 
-      // Should not be affected by text direction
+      // Should not be affected by text direction.
       await tester.pumpWidget(buildApp(TextDirection.rtl));
 
       expect(collectOverlays().first, control.shift(const Offset(33, 45)));
@@ -4529,7 +4529,7 @@ void main() {
       controller.open();
       await tester.pump();
 
-      // Get position with alignmentOffset
+      // Get position with alignmentOffset.
       final ui.Rect control = collectOverlays().first;
 
       controller.open(position: Offset.zero);
@@ -4567,7 +4567,7 @@ void main() {
       controller.open();
       await tester.pump();
 
-      // Get position with alignmentOffset
+      // Get position with alignmentOffset.
       final ui.Rect control = collectOverlays().first;
 
       controller.open(position: Offset.zero);
@@ -4607,7 +4607,7 @@ void main() {
       controller.open();
       await tester.pump();
 
-      // Get position with alignmentOffset
+      // Get position with alignmentOffset.
       final ui.Rect control = collectOverlays().first;
 
       controller.open(position: const Offset(100, 100));
@@ -4655,7 +4655,7 @@ void main() {
         equals(const Offset(700, 500) & const Size(100, 100)),
       );
 
-      // Overflow right and bottom by 50 pixels
+      // Overflow right and bottom by 50 pixels.
       controller.open(position: const Offset(750, 550));
       await tester.pump();
 
@@ -4979,7 +4979,7 @@ void main() {
         find.byKey(ValueKey<String>(Tag.a.text)),
       );
 
-      // Menu should not overflow the screen
+      // Menu should not overflow the screen.
       expect(menuTopLeft, equals(anchorTopRight));
 
       controller.close();
@@ -5019,7 +5019,7 @@ void main() {
       //    - anchor position affected
       //
       // Padding inside App DOES NOT affect the overlay position but
-      // DOES affect the anchor position
+      // DOES affect the anchor position.
       await changeSurfaceSize(tester, const Size(400, 400));
 
       Widget buildApp({
@@ -5083,10 +5083,10 @@ void main() {
 
       expect(paddedAnchor, equals(anchor.shift(const Offset(31 + 64, 7 + 50))));
 
-      // Hits padding on top/left
+      // Hits padding on top/left.
       expect(firstPadded, equals(first.shift(const Offset(31, 7))));
 
-      // Hits padding on top/right
+      // Hits padding on top/right.
       expect(secondPadded, equals(second.shift(const Offset(-43, 7))));
     });
 
@@ -5098,7 +5098,7 @@ void main() {
       //    - anchor position affected
       //
       // Padding inside App DOES NOT affect the overlay position but
-      // DOES affect the anchor position
+      // DOES affect the anchor position.
 
       // First, collect measurements without padding.
       Widget buildApp({
@@ -5317,7 +5317,7 @@ void main() {
               color: const Color(0xFF004CFF),
               child: Stack(
                 children: <Widget>[
-                  // Pink box for visualizing the display feature
+                  // Pink box for visualizing the display feature.
                   Positioned.fromRect(
                     rect: const Rect.fromLTRB(390, 0, 410, 600),
                     child: const ColoredBox(color: Color(0xF7FF2190)),
