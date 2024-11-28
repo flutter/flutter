@@ -1283,16 +1283,12 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     assert(widget.debugCheckContext(context));
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
-    final ThemeData theme = Theme.of(context);
-    const Set<MaterialState> highlightableStates = <MaterialState>{MaterialState.focused, MaterialState.hovered, MaterialState.pressed};
-    final Set<MaterialState> nonHighlightableStates = statesController.value.difference(highlightableStates);
-    // Each highlightable state will be resolved separately to get the corresponding color.
-    // For this resolution to be correct, the non-highlightable states should be preserved.
-    final Set<MaterialState> pressed = <MaterialState>{...nonHighlightableStates, MaterialState.pressed};
-    final Set<MaterialState> focused = <MaterialState>{...nonHighlightableStates, MaterialState.focused};
-    final Set<MaterialState> hovered = <MaterialState>{...nonHighlightableStates, MaterialState.hovered};
-
     Color getHighlightColorForType(_HighlightType type) {
+      const Set<MaterialState> pressed = <MaterialState>{MaterialState.pressed};
+      const Set<MaterialState> focused = <MaterialState>{MaterialState.focused};
+      const Set<MaterialState> hovered = <MaterialState>{MaterialState.hovered};
+
+      final ThemeData theme = Theme.of(context);
       return switch (type) {
         // The pressed state triggers a ripple (ink splash), per the current
         // Material Design spec. A separate highlight is no longer used.
