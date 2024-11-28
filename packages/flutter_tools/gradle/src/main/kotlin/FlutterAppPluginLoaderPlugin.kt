@@ -46,22 +46,24 @@ class FlutterAppPluginLoaderPlugin : Plugin<Settings> {
             it.from(nativePluginLoaderPath)
         }
 
-        val nativePluginLoader = settings.extensions.extraProperties["nativePluginLoader"]
-            ?: throw IllegalStateException("nativePluginLoader is not set. Ensure the native plugin loader is correctly applied.")
+        val nativePluginLoader = settings.extra["nativePluginLoader"]
+    ?: throw IllegalStateException("nativePluginLoader is not set. Ensure the native plugin loader is correctly applied.")
 
-        @Suppress("UNCHECKED_CAST")
-        val nativePlugins = nativePluginLoader.getPlugins(flutterProjectRoot) as? List<Map<String, Any>>
-            ?: throw IllegalStateException("Failed to load native plugins. Ensure the nativePluginLoader is configured correctly.")
+// Use reflection to call getPlugins
+val method = nativePluginLoader.javaClass.getMethod("getPlugins", File::class.java)
+val nativePlugins = method.invoke(nativePluginLoader, flutterProjectRoot) as? List<Map<String, Any>>
+    ?: throw IllegalStateException("Failed to load native plugins. Ensure the nativePluginLoader is configured correctly.")
 
-        nativePlugins.forEach { androidPlugin: Map<String, Any> ->
-            val pluginPath = androidPlugin["path"] as? String
-                ?: throw IllegalStateException("Plugin path is missing for a native plugin.")
-            val pluginDirectory = File(pluginPath, "android")
-            check(pluginDirectory.exists()) { "Plugin directory does not exist: $pluginDirectory" }
+nativePlugins.forEach { androidPlugin: Map<String, Any> ->
+    val pluginPath = androidPlugin["path"] as? String
+        ?: throw IllegalStateException("Plugin path is missing for a native plugin.")
+    val pluginDirectory = File(pluginPath, "android")
+    check(pluginDirectory.exists()) { "Plugin directory does not exist: $pluginDirectory" }
 
-            val projectName = ":${androidPlugin["name"]}"
-            settings.include(projectName)
-            settings.project(projectName).projectDir = pluginDirectory
-        }
+    val projectName = ":${androidPlugin["name"]}"
+    settings.include(projectName)
+    settings.project(projectName).projectDir = pluginDirectory
+}
+
     }
 }
