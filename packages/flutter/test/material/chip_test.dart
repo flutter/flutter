@@ -6112,6 +6112,31 @@ void main() {
       customCursor,
     );
   });
+
+  testWidgets('Mouse cursor resolves in disabled states', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Chip');
+    addTearDown(focusNode.dispose);
+
+    // Test unfocused case.
+    await tester.pumpWidget(
+      wrapForChip(
+        child: Center(
+          child: Chip(
+            mouseCursor: const _ChipMouseCursor(),
+            focusNode: focusNode,
+            label: const Text('Chip'),
+          ),
+        ),
+      ),
+    );
+    final TestGesture gesture1 = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    addTearDown(gesture1.removePointer);
+    await gesture1.addPointer(location: tester.getCenter(find.text('Chip')));
+    await tester.pump();
+    await gesture1.moveTo(tester.getCenter(find.text('Chip')));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+  });
 }
 
 class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {
@@ -6143,4 +6168,19 @@ class RenderLayoutCount extends RenderBox {
     layoutCount += 1;
     size = constraints.biggest;
   }
+}
+
+class _ChipMouseCursor extends WidgetStateMouseCursor {
+  const _ChipMouseCursor();
+
+  @override
+  MouseCursor resolve(Set<WidgetState> states) {
+    return const WidgetStateProperty<MouseCursor>.fromMap(
+      <WidgetStatesConstraint, MouseCursor>{
+        WidgetState.disabled: SystemMouseCursors.forbidden,
+      },
+    ).resolve(states);
+  }
+  @override
+  String get debugDescription => '_ChipMouseCursor()';
 }

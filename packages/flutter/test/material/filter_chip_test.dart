@@ -1356,4 +1356,60 @@ void main() {
       customCursor,
     );
   });
+
+  testWidgets('Mouse cursor resolves in focused/unfocused/disabled states', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Chip');
+    addTearDown(focusNode.dispose);
+
+    Widget buildChip({ required bool enabled }) {
+      return wrapForChip(
+        child: Center(
+          child: FilterChip(
+            mouseCursor: const _ChipMouseCursor(),
+            focusNode: focusNode,
+            label: const Text('Chip'),
+            onSelected: enabled ? (bool value) {} : null,
+          ),
+        ),
+      );
+    }
+
+    // Test unfocused case.
+    await tester.pumpWidget(buildChip(enabled: true));
+    final TestGesture gesture1 = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    addTearDown(gesture1.removePointer);
+    await gesture1.addPointer(location: tester.getCenter(find.text('Chip')));
+    await tester.pump();
+    await gesture1.moveTo(tester.getCenter(find.text('Chip')));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Test focused case.
+    focusNode.requestFocus();
+    await tester.pump();
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+
+    // Test disabled case.
+    await tester.pumpWidget(buildChip(enabled: false));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+  });
+}
+
+class _ChipMouseCursor extends WidgetStateMouseCursor {
+  const _ChipMouseCursor();
+
+  @override
+  MouseCursor resolve(Set<WidgetState> states) {
+    return const WidgetStateProperty<MouseCursor>.fromMap(
+      <WidgetStatesConstraint, MouseCursor>{
+        WidgetState.disabled: SystemMouseCursors.forbidden,
+        WidgetState.focused: SystemMouseCursors.grab,
+        WidgetState.selected: SystemMouseCursors.click,
+        WidgetState.any: SystemMouseCursors.basic,
+      },
+    ).resolve(states);
+  }
+  @override
+  String get debugDescription => '_ChipMouseCursor()';
 }
