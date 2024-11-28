@@ -705,6 +705,7 @@ static bool ClipRRectContainsPlatformViewBoundingRect(const SkRRect& clip_rrect,
 }
 
 - (flutter::DlCanvas*)compositeEmbeddedViewWithId:(int64_t)viewId {
+  FML_DCHECK(self.slices.find(viewId) != self.slices.end());
   return self.slices[viewId]->canvas();
 }
 

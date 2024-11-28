@@ -8,6 +8,8 @@
 #import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
 
+#include <memory>
+
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/thread.h"
@@ -17,6 +19,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTouchInterceptingView_Test.h"
+#include "flutter/shell/platform/darwin/ios/ios_context_noop.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
 FLUTTER_ASSERT_ARC
@@ -3103,9 +3106,10 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return false; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/SkISize::Make(800, 600));
-  XCTAssertFalse([flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                                              withIosContext:nil
-                                                   grContext:nil]);
+  XCTAssertFalse([flutterPlatformViewsController
+         submitFrame:std::move(mock_surface)
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()
+           grContext:nil]);
 
   auto embeddedViewParams_2 =
       std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
@@ -3120,9 +3124,10 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/SkISize::Make(800, 600));
-  XCTAssertTrue([flutterPlatformViewsController submitFrame:std::move(mock_surface_submit_true)
-                                             withIosContext:nil
-                                                  grContext:nil]);
+  XCTAssertTrue([flutterPlatformViewsController
+         submitFrame:std::move(mock_surface_submit_true)
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()
+           grContext:nil]);
 }
 
 - (void)
@@ -3328,10 +3333,10 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/SkISize::Make(800, 600));
-
-  XCTAssertTrue([flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                                             withIosContext:nil
-                                                  grContext:nil]);
+  XCTAssertTrue([flutterPlatformViewsController
+         submitFrame:std::move(mock_surface)
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()
+           grContext:nil]);
 
   // platform view is wrapped by touch interceptor, which itself is wrapped by clipping view.
   UIView* clippingView1 = view1.superview.superview;
@@ -3359,9 +3364,10 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/SkISize::Make(800, 600));
-  XCTAssertTrue([flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                                             withIosContext:nil
-                                                  grContext:nil]);
+  XCTAssertTrue([flutterPlatformViewsController
+         submitFrame:std::move(mock_surface)
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()
+           grContext:nil]);
 
   XCTAssertTrue([flutterView.subviews indexOfObject:clippingView1] >
                     [flutterView.subviews indexOfObject:clippingView2],
@@ -3442,10 +3448,10 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/SkISize::Make(800, 600));
-
-  XCTAssertTrue([flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                                             withIosContext:nil
-                                                  grContext:nil]);
+  XCTAssertTrue([flutterPlatformViewsController
+         submitFrame:std::move(mock_surface)
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()
+           grContext:nil]);
 
   // platform view is wrapped by touch interceptor, which itself is wrapped by clipping view.
   UIView* clippingView1 = view1.superview.superview;
@@ -3473,10 +3479,10 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/SkISize::Make(800, 600));
-
-  XCTAssertTrue([flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                                             withIosContext:nil
-                                                  grContext:nil]);
+  XCTAssertTrue([flutterPlatformViewsController
+         submitFrame:std::move(mock_surface)
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()
+           grContext:nil]);
 
   XCTAssertTrue([flutterView.subviews indexOfObject:clippingView1] <
                     [flutterView.subviews indexOfObject:clippingView2],
@@ -3945,10 +3951,10 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
         [](const flutter::SurfaceFrame& surface_frame) { return true; },
         /*frame_size=*/SkISize::Make(800, 600));
-
-    XCTAssertTrue([flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                                               withIosContext:nil
-                                                    grContext:nil]);
+    XCTAssertTrue([flutterPlatformViewsController
+           submitFrame:std::move(mock_surface)
+        withIosContext:std::make_shared<flutter::IOSContextNoop>()
+             grContext:nil]);
 
     // Disposing won't remove embedded views until the view is removed from the composition_order_
     XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 2UL);
@@ -3975,10 +3981,10 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
         [](const flutter::SurfaceFrame& surface_frame) { return true; },
         /*frame_size=*/SkISize::Make(800, 600));
-
-    XCTAssertTrue([flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                                               withIosContext:nil
-                                                    grContext:nil]);
+    XCTAssertTrue([flutterPlatformViewsController
+           submitFrame:std::move(mock_surface)
+        withIosContext:std::make_shared<flutter::IOSContextNoop>()
+             grContext:nil]);
 
     // Disposing won't remove embedded views until the view is removed from the composition_order_
     XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 1UL);
@@ -4051,9 +4057,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/SkISize::Make(800, 600));
-
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                               withIosContext:nil
+                               withIosContext:std::make_shared<flutter::IOSContextNoop>()
                                     grContext:nil];
 
   UIView* someView = [[UIView alloc] init];
@@ -4130,9 +4135,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/SkISize::Make(800, 600));
-
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                               withIosContext:nil
+                               withIosContext:std::make_shared<flutter::IOSContextNoop>()
                                     grContext:nil];
 
   XCTAssertEqual(flutterView.subviews.count, 1u);
@@ -4252,7 +4256,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   });
 
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                               withIosContext:nil
+                               withIosContext:std::make_shared<flutter::IOSContextNoop>()
                                     grContext:nil];
 
   XCTAssertTrue(submit_info.has_value());

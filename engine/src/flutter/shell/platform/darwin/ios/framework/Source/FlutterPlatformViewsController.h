@@ -23,24 +23,23 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class FlutterTouchInterceptingView;
 @class FlutterClippingMaskViewPool;
 
 @interface FlutterPlatformViewsController : NSObject
 
-- (id)init NS_DESIGNATED_INITIALIZER;
+- (instancetype)init NS_DESIGNATED_INITIALIZER;
 
 /// The task runner used to post rendering tasks to the platform thread.
 @property(nonatomic, assign) const fml::RefPtr<fml::TaskRunner>& taskRunner;
 
 /// The flutter view.
-@property(nonatomic, weak) UIView* flutterView;
+@property(nonatomic, weak) UIView* _Nullable flutterView;
 
 /// @brief The flutter view controller.
-@property(nonatomic, weak) UIViewController<FlutterViewResponder>* flutterViewController;
-
-/// @brief Retrieve the view controller.
-- (UIViewController<FlutterViewResponder>*)flutterViewController;
+@property(nonatomic, weak) UIViewController<FlutterViewResponder>* _Nullable flutterViewController;
 
 /// @brief set the factory used to construct embedded UI Views.
 - (void)registerViewFactory:(NSObject<FlutterPlatformViewFactory>*)factory
@@ -101,7 +100,7 @@
 /// Called from the raster thread.
 - (BOOL)submitFrame:(std::unique_ptr<flutter::SurfaceFrame>)frame
      withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
-          grContext:(GrDirectContext*)grContext;
+          grContext:(GrDirectContext* _Nullable)grContext;
 
 /// @brief Handler for platform view message channels.
 - (void)onMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
@@ -130,7 +129,7 @@
 // If the `PlatformViewsController` does not contain any `FlutterPlatformView` object or
 // a `FlutterPlatformView` object associated with the view_id cannot be found, the method
 // returns nil.
-- (UIView*)platformViewForId:(int64_t)viewId;
+- (UIView* _Nullable)platformViewForId:(int64_t)viewId;
 
 // Composite the PlatformView with `viewId`.
 //
@@ -145,5 +144,7 @@
 - (const flutter::EmbeddedViewParams&)compositionParamsForView:(int64_t)viewId;
 
 @end
+
+NS_ASSUME_NONNULL_END
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMVIEWSCONTROLLER_H_
