@@ -3298,6 +3298,7 @@
 ../../../fuchsia/sdk/linux/bind/fuchsia.gpio/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.i2c/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.khadas.platform/meta.json
+../../../fuchsia/sdk/linux/bind/fuchsia.mailbox/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.nxp.platform/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.pci/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.platform/meta.json
