@@ -418,6 +418,7 @@ void main() {
     fileSystem.file(inputKernel)
       ..createSync(recursive: true)
       ..writeAsStringSync('testing');
+    environment.buildDir.childFile('native_assets.json').createSync();
 
     await const DebugMacOSBundleFlutterAssets().build(environment);
 
@@ -454,6 +455,9 @@ void main() {
       .createSync(recursive: true);
     fileSystem.file('${environment.buildDir.path}/App.framework/App')
       .createSync(recursive: true);
+    fileSystem
+        .file('${environment.buildDir.path}/native_assets.json')
+        .createSync();
 
     await const ProfileMacOSBundleFlutterAssets().build(environment..defines[kBuildMode] = 'profile');
 
@@ -483,6 +487,9 @@ void main() {
       .createSync(recursive: true);
     fileSystem.file('${environment.buildDir.path}/App.framework.dSYM/Contents/Resources/DWARF/App')
       .createSync(recursive: true);
+    fileSystem
+        .file('${environment.buildDir.path}/native_assets.json')
+        .createSync();
 
     await const ReleaseMacOSBundleFlutterAssets()
       .build(environment..defines[kBuildMode] = 'release');
@@ -504,6 +511,9 @@ void main() {
     final File inputFramework = fileSystem.file(fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App'))
       ..createSync(recursive: true)
       ..writeAsStringSync('ABC');
+    fileSystem
+        .file(environment.buildDir.childFile('native_assets.json'))
+        .createSync();
 
     await const ProfileMacOSBundleFlutterAssets().build(environment..defines[kBuildMode] = 'profile');
     final File outputFramework = fileSystem.file(fileSystem.path.join(environment.outputDir.path, 'App.framework', 'App'));
@@ -529,6 +539,9 @@ void main() {
         .createSync(recursive: true);
     fileSystem.file(fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App'))
         .createSync(recursive: true);
+    fileSystem
+        .file(environment.buildDir.childFile('native_assets.json'))
+        .createSync();
 
     await const ReleaseMacOSBundleFlutterAssets().build(environment);
     expect(usage.events, contains(const TestUsageEvent('assemble', 'macos-archive', label: 'success')));
