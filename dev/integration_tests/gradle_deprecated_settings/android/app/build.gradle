@@ -16,7 +16,7 @@ if (flutterRoot == null) {
 }
 
 apply plugin: 'com.android.application'
-apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
+apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle.kts"
 
 android {
     namespace = "com.yourcompany.flavors"
