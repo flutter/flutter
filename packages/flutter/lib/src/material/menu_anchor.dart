@@ -157,6 +157,7 @@ class MenuAnchor extends StatefulWidget {
     this.crossAxisUnconstrained = true,
     required this.menuChildren,
     this.builder,
+    this.builderAlignment,
     this.child,
   });
 
@@ -274,6 +275,18 @@ class MenuAnchor extends StatefulWidget {
   ///
   /// {@macro flutter.material.MenuBar.shortcuts_note}
   final List<Widget> menuChildren;
+
+  /// The optional alignment for the widget that this [MenuAnchor] surrounds.
+  ///
+  /// If provided, [builder] is placed inside an [Align] using this alignment.
+  /// This can be used when the [MenuAnchor] parent sets tight constraints
+  /// which will result in the menu appearing below these tight constraints
+  /// instead of below the widget returned by the [builder].
+  ///
+  /// The recommanded value is [AlignmentDirectional.topStart].
+  ///
+  /// Defaults to null which means no [Align] is added by default.
+  final AlignmentGeometry? builderAlignment;
 
   /// The widget that this [MenuAnchor] surrounds.
   ///
@@ -453,17 +466,30 @@ class _MenuAnchorState extends State<MenuAnchor> {
   }
 
   Widget _buildContents(BuildContext context) {
+    Widget builder = Builder(
+      key: _anchorKey,
+      builder: (BuildContext context) {
+        return widget.builder?.call(context, _menuController, widget.child)
+            ?? widget.child ?? const SizedBox();
+      },
+    );
+
+    if (widget.builderAlignment != null) {
+      // Using this Align, the menu will appear attached to the widget
+      // returned by the builder.
+      builder = Align(
+        alignment: widget.builderAlignment!,
+        heightFactor: 1.0,
+        widthFactor: 1.0,
+        child: builder,
+      );
+    }
+
     return Actions(
       actions: <Type, Action<Intent>>{
         DismissIntent: DismissMenuAction(controller: _menuController),
       },
-      child: Builder(
-        key: _anchorKey,
-        builder: (BuildContext context) {
-          return widget.builder?.call(context, _menuController, widget.child)
-              ?? widget.child ?? const SizedBox();
-        },
-      ),
+      child: builder,
     );
   }
 
