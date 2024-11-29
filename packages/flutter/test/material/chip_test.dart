@@ -6123,7 +6123,11 @@ void main() {
       wrapForChip(
         child: Center(
           child: Chip(
-            mouseCursor: const _ChipMouseCursor(),
+            mouseCursor: const WidgetStateMouseCursor.fromMap(
+              <WidgetStatesConstraint, MouseCursor>{
+                WidgetState.disabled: SystemMouseCursors.forbidden,
+              },
+            ),
             focusNode: focusNode,
             label: const Text('Chip'),
           ),
@@ -6168,19 +6172,4 @@ class RenderLayoutCount extends RenderBox {
     layoutCount += 1;
     size = constraints.biggest;
   }
-}
-
-class _ChipMouseCursor extends WidgetStateMouseCursor {
-  const _ChipMouseCursor();
-
-  @override
-  MouseCursor resolve(Set<WidgetState> states) {
-    return const WidgetStateProperty<MouseCursor>.fromMap(
-      <WidgetStatesConstraint, MouseCursor>{
-        WidgetState.disabled: SystemMouseCursors.forbidden,
-      },
-    ).resolve(states);
-  }
-  @override
-  String get debugDescription => '_ChipMouseCursor()';
 }

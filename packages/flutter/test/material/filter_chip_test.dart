@@ -1366,7 +1366,14 @@ void main() {
       return wrapForChip(
         child: Center(
           child: FilterChip(
-            mouseCursor: const _ChipMouseCursor(),
+            mouseCursor: const WidgetStateMouseCursor.fromMap(
+              <WidgetStatesConstraint, MouseCursor>{
+                WidgetState.disabled: SystemMouseCursors.forbidden,
+                WidgetState.focused: SystemMouseCursors.grab,
+                WidgetState.selected: SystemMouseCursors.click,
+                WidgetState.any: SystemMouseCursors.basic,
+              },
+            ),
             focusNode: focusNode,
             label: const Text('Chip'),
             onSelected: enabled ? (bool value) {} : null,
@@ -1394,22 +1401,4 @@ void main() {
     await tester.pumpWidget(buildChip(enabled: false));
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
   });
-}
-
-class _ChipMouseCursor extends WidgetStateMouseCursor {
-  const _ChipMouseCursor();
-
-  @override
-  MouseCursor resolve(Set<WidgetState> states) {
-    return const WidgetStateProperty<MouseCursor>.fromMap(
-      <WidgetStatesConstraint, MouseCursor>{
-        WidgetState.disabled: SystemMouseCursors.forbidden,
-        WidgetState.focused: SystemMouseCursors.grab,
-        WidgetState.selected: SystemMouseCursors.click,
-        WidgetState.any: SystemMouseCursors.basic,
-      },
-    ).resolve(states);
-  }
-  @override
-  String get debugDescription => '_ChipMouseCursor()';
 }
