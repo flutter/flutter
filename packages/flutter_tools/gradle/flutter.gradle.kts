@@ -15,3 +15,16 @@ logger.error(
 
 val pathToThisDirectory = buildscript.sourceFile?.parentFile
 apply(from = "$pathToThisDirectory/src/main/groovy/flutter.groovy")
+
+tasks.matching { it.name == "preBuild" }.configureEach {
+    doFirst {
+        println(
+            """
+            WARNING: You are applying Flutter's app_plugin_loader Gradle plugin 
+            imperatively using the apply script method, which is deprecated and will be 
+            removed in a future release. Migrate to applying Gradle plugins with the 
+            declarative plugins block: https://flutter.dev/to/flutter-gradle-plugin-apply
+            """.trimIndent()
+        )
+    }
+}
