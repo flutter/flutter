@@ -5,7 +5,7 @@
 // This file exists solely for the compatibility with projects that have
 // not migrated to the declarative apply of the Flutter App Plugin Loader Gradle Plugin.
 
-logger.error("You are applying Flutter\'s app_plugin_loader Gradle plugin \
+project.logger.error("You are applying Flutter\'s app_plugin_loader Gradle plugin \
 imperatively using the apply script method, which is deprecated and will be \
 removed in a future release. Migrate to applying Gradle plugins with the \
 declarative plugins block: https://flutter.dev/to/flutter-gradle-plugin-apply\n\
