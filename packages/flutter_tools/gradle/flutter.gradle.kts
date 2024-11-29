@@ -5,14 +5,17 @@
 // This file exists solely for compatibility with projects that have
 // not migrated to the declarative apply of the Flutter Gradle Plugin.
 
-logger.error(
-    """
-    You are applying Flutter's main Gradle plugin imperatively using
+logger.error("You are applying Flutter's main Gradle plugin imperatively using
     the apply script method, which is deprecated and will be removed in a future
     release. Migrate to applying Gradle plugins with the declarative plugins
     block: https://flutter.dev/to/flutter-gradle-plugin-apply
-    """.trimIndent()
+    ".trimIndent()
 )
 
 val pathToThisDirectory = buildscript.sourceFile?.parentFile
+if (pathToThisDirectory != null) {
 apply(from = "$pathToThisDirectory/src/main/groovy/flutter.groovy")
+}
+ else {
+    throw IllegalStateException("Unable to determine the path to this directory.")
+}
