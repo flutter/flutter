@@ -17,7 +17,7 @@ tasks.register("showDeprecationWarning") {
     }
 }
 gradle.taskGraph.whenReady {
-    tasks.named("showDeprecationWarning").get().execute()
+    tasks.named("showDeprecationWarning").get()
 }
 
 val pathToThisDirectory = buildscript.sourceFile?.parentFile
