@@ -174,6 +174,8 @@ void main() {
           'VERBOSE_SCRIPT_LOGGING=YES'
         else
           '-quiet',
+        '-allowProvisioningUpdates',
+        '-allowProvisioningDeviceRegistration',
         '-workspace', 'Runner.xcworkspace',
         '-scheme', 'Runner',
         '-sdk', 'iphoneos',
