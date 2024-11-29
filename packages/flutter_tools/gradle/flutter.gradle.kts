@@ -4,13 +4,21 @@
 
 // This file exists solely for compatibility with projects that have
 // not migrated to the declarative apply of the Flutter Gradle Plugin.
-
-logger.error("You are applying Flutter's main Gradle plugin imperatively using
-    the apply script method, which is deprecated and will be removed in a future
-    release. Migrate to applying Gradle plugins with the declarative plugins
-    block: https://flutter.dev/to/flutter-gradle-plugin-apply
-    ".trimIndent()
-)
+tasks.register("showDeprecationWarning") {
+    doLast {
+        println(
+            """
+            You are applying Flutter's main Gradle plugin imperatively using
+            the apply script method, which is deprecated and will be removed in a future
+            release. Migrate to applying Gradle plugins with the declarative plugins
+            block: https://flutter.dev/to/flutter-gradle-plugin-apply
+            """.trimIndent()
+        )
+    }
+}
+gradle.taskGraph.whenReady {
+    tasks.named("showDeprecationWarning").get().execute()
+}
 
 val pathToThisDirectory = buildscript.sourceFile?.parentFile
 if (pathToThisDirectory != null) {
