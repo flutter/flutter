@@ -4,7 +4,8 @@
 
 // This file exists solely for compatibility with projects that have
 // not migrated to the declarative apply of the Flutter App Plugin Loader Gradle Plugin.
-
+import org.gradle.api.logging.Logging
+val logger = Logging.getLogger("app_plugin_loader")
 logger.error(
     """
     You are applying Flutter's app_plugin_loader Gradle plugin 
