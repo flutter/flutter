@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
+import 'package:yaml_edit/yaml_edit.dart';
 
 import '../src/convert.dart';
 import 'android/android_builder.dart';
@@ -94,7 +95,7 @@ class FlutterProjectFactory {
 /// cached.
 class FlutterProject {
   @visibleForTesting
-  FlutterProject(this.directory, this.manifest, this._exampleManifest);
+  FlutterProject(this.directory, this._manifest, this._exampleManifest);
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -131,7 +132,8 @@ class FlutterProject {
   Directory get buildDirectory => directory.childDirectory('build');
 
   /// The manifest of this project.
-  final FlutterManifest manifest;
+  FlutterManifest get manifest => _manifest;
+  late FlutterManifest _manifest;
 
   /// The manifest of the example sub-project of this project.
   final FlutterManifest _exampleManifest;
@@ -258,7 +260,7 @@ class FlutterProject {
 
   /// The generated scaffolding project for hosting widget previews from this
   /// project.
-  FlutterProject get widgetPreviewScaffoldProject => FlutterProject.fromDirectory(
+  late final FlutterProject widgetPreviewScaffoldProject = FlutterProject.fromDirectory(
     widgetPreviewScaffold,
   );
 
@@ -321,6 +323,16 @@ class FlutterProject {
       throwToolExit('Please correct the pubspec.yaml file at $path');
     }
     return manifest;
+  }
+
+  /// Replaces the content of [pubspecFile] with the contents of [updated] and
+  /// sets [manifest] to the [updated] manifest.
+  void replacePubspec(FlutterManifest updated) {
+    final YamlMap updatedPubspecContents = updated.toYaml();
+    final YamlEditor editor = YamlEditor('');
+    editor.update(const <String>[], updatedPubspecContents);
+    pubspecFile.writeAsStringSync(editor.toString());
+    _manifest = updated;
   }
 
   /// Reapplies template files and regenerates project files and plugin
