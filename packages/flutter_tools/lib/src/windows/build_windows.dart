@@ -86,10 +86,12 @@ Future<void> buildWindows(
     processManager: globals.processManager,
     osUtils: globals.os,
   );
-  final String? cmakePath = visualStudio.cmakePath;
-  final String? cmakeGenerator = visualStudio.cmakeGenerator;
+  String? cmakePath = visualStudio.cmakePath;
+  String? cmakeGenerator = visualStudio.cmakeGenerator;
+  cmakePath = "E:/msys64/ucrt64/bin/cmake.exe";
+  cmakeGenerator = "Ninja";
   if (cmakePath == null || cmakeGenerator == null) {
-    throwToolExit('Unable to find suitable Visual Studio toolchain. '
+    throwToolExit('Unable to find suitable Visual Studio AAA toolchain. '
         'Please run `flutter doctor` for more details.');
   }
 

@@ -17,6 +17,7 @@ REM To debug the tool, you can uncomment the following line to enable debug mode
 REM SET FLUTTER_TOOL_ARGS="--enable-asserts %FLUTTER_TOOL_ARGS%"
 
 FOR %%i IN ("%~dp0..") DO SET FLUTTER_ROOT=%%~fi
+echo %FLUTTER_ROOT%
 
 REM If available, add location of bundled mingit to PATH
 SET mingit_path=%FLUTTER_ROOT%\bin\mingit\cmd
