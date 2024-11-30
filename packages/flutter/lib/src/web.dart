@@ -67,6 +67,7 @@ extension type DOMTokenList._(JSObject _) implements JSObject {
 extension type Element._(JSObject _) implements Node, JSObject {
   external DOMTokenList get classList;
   external void append(JSAny nodes);
+  external void remove();
 }
 
 extension type Event._(JSObject _) implements JSObject {}
@@ -83,12 +84,29 @@ extension type HTMLElement._(JSObject _) implements Element, JSObject {
   external String get innerText;
   external set innerText(String value);
   external CSSStyleDeclaration get style;
+  external HTMLElement cloneNode(bool deep);
 }
 
 extension type HTMLHeadElement._(JSObject _) implements HTMLElement, JSObject {}
 
 extension type HTMLStyleElement._(JSObject _) implements HTMLElement, JSObject {
   external CSSStyleSheet? get sheet;
+}
+
+extension type HTMLImageElement._(JSObject _) implements HTMLElement, JSObject {
+  external String get src;
+  external set src(String value);
+  external num get naturalWidth;
+  external num get naturalHeight;
+  external JSPromise<JSAny?> decode();
+}
+
+extension type HTMLCanvasElement._(JSObject _) implements HTMLElement, JSObject {
+  external int get width;
+  external set width(int value);
+  external int get height;
+  external set height(int value);
+  external String toDataURL();
 }
 
 extension type MediaQueryList._(JSObject _) implements EventTarget, JSObject {
@@ -120,6 +138,7 @@ extension type Window._(JSObject _) implements EventTarget, JSObject {
   external Navigator get navigator;
   external MediaQueryList matchMedia(String query);
   external Selection? getSelection();
+  external String get origin;
 }
 
 extension type XMLHttpRequest._(JSObject _)
