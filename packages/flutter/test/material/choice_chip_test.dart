@@ -833,7 +833,7 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: const Offset(10, 10));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.basic,
@@ -841,7 +841,7 @@ void main() {
 
     final Offset chip = tester.getCenter(find.text('Chip'));
     await gesture.moveTo(chip);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       customCursor,
@@ -874,7 +874,7 @@ void main() {
       );
     }
 
-    // Test unfocused case.
+    // Unfocused case.
     await tester.pumpWidget(buildChip(enabled: true));
     final TestGesture gesture1 = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     addTearDown(gesture1.removePointer);
@@ -883,13 +883,12 @@ void main() {
     await gesture1.moveTo(tester.getCenter(find.text('Chip')));
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
-    // Test focused case.
+    // Focused case.
     focusNode.requestFocus();
-    await tester.pump();
     await tester.pump();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
 
-    // Test disabled case.
+    // Disabled case.
     await tester.pumpWidget(buildChip(enabled: false));
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
   });

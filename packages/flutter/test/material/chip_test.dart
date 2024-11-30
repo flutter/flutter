@@ -6098,7 +6098,7 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: const Offset(10, 10));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.basic,
@@ -6106,7 +6106,7 @@ void main() {
 
     final Offset chip = tester.getCenter(find.text('Chip'));
     await gesture.moveTo(chip);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       customCursor,
@@ -6115,25 +6115,22 @@ void main() {
 
   testWidgets('Mouse cursor resolves in disabled states', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final FocusNode focusNode = FocusNode(debugLabel: 'Chip');
-    addTearDown(focusNode.dispose);
 
-    // Test unfocused case.
     await tester.pumpWidget(
       wrapForChip(
-        child: Center(
+        child: const Center(
           child: Chip(
-            mouseCursor: const WidgetStateMouseCursor.fromMap(
+            mouseCursor: WidgetStateMouseCursor.fromMap(
               <WidgetStatesConstraint, MouseCursor>{
                 WidgetState.disabled: SystemMouseCursors.forbidden,
               },
             ),
-            focusNode: focusNode,
-            label: const Text('Chip'),
+            label: Text('Chip'),
           ),
         ),
       ),
     );
+    // Unfocused case.
     final TestGesture gesture1 = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     addTearDown(gesture1.removePointer);
     await gesture1.addPointer(location: tester.getCenter(find.text('Chip')));
