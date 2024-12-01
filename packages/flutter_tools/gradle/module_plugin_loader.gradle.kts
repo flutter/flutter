@@ -6,6 +6,7 @@
 // so it can be versioned with the Flutter SDK.
 
 import java.nio.file.Paths
+import groovy.json.JsonSlurper
 class NativePluginLoader {
 
     // This string must match _kFlutterPluginsHasNativeBuildKey defined in
