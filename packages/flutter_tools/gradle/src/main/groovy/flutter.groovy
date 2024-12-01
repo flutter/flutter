@@ -1433,8 +1433,9 @@ class FlutterPlugin implements Plugin<Project> {
         assert(appProject != null) : "Project :${hostAppProjectName} doesn't exist. To customize the host app project name, set `flutter.hostAppProjectName=<project-name>` in gradle.properties."
         // Wait for the host app project configuration.
         appProject.afterEvaluate {
-    // Ensure this block doesn't conflict with other evaluations
-    if (appProject.android != null) {
+    try {
+        assert(appProject.android != null)
+
         project.android.libraryVariants.all { libraryVariant ->
             appProject.android.applicationVariants.all { appProjectVariant ->
                 Task appAssembleTask = getAssembleTask(appProjectVariant)
@@ -1442,18 +1443,21 @@ class FlutterPlugin implements Plugin<Project> {
                     return
                 }
 
+                // Find a compatible application variant in the host app.
                 String variantBuildMode = buildModeFor(libraryVariant.buildType)
                 if (buildModeFor(appProjectVariant.buildType) != variantBuildMode) {
                     return
                 }
 
-                // Create the task and set up dependencies without re-evaluating
                 Task copyFlutterAssetsTask = copyFlutterAssetsTask ?: addFlutterDeps(libraryVariant)
                 Task mergeAssets = project.tasks.findByPath(":${hostAppProjectName}:merge${appProjectVariant.name.capitalize()}Assets")
                 assert(mergeAssets)
                 mergeAssets.dependsOn(copyFlutterAssetsTask)
             }
         }
+    } catch (Exception e) {
+        // Print the stack trace of the error
+        e.printStackTrace()
     }
 }
 
