@@ -7,9 +7,7 @@
 
 import java.nio.file.Paths
 import groovy.json.JsonSlurper
-import org.gradle.api.Action
 import org.gradle.api.Project
-import org.gradle.api.Gradle
 class NativePluginLoader {
 
     // This string must match _kFlutterPluginsHasNativeBuildKey defined in
@@ -101,32 +99,28 @@ nativePlugins.forEach { androidPlugin ->
 
 val flutterModulePath = project(":flutter").projectDir.parentFile!!.absolutePath
 
-gradle.projectsLoaded(Action<Gradle> { g ->
-    g.rootProject.beforeEvaluate(Action<Project> { p ->
-        p.subprojects(Action<Project> { subproject ->
-            if (nativePlugins.any { it["name"] == subproject.name }) {
-                val androidPluginBuildOutputDir = File(
-                    flutterModulePath + File.separator +
-                            "plugins_build_output" + File.separator + subproject.name
-                )
-                if (!androidPluginBuildOutputDir.exists()) {
-                    androidPluginBuildOutputDir.mkdirs()
-                }
-                subproject.layout.buildDirectory.fileValue(androidPluginBuildOutputDir)
+gradle.afterProjects {
+    rootProject.subprojects { subproject ->
+        if (nativePlugins.any { it["name"] == subproject.name }) {
+            val androidPluginBuildOutputDir = File(
+                flutterModulePath + File.separator +
+                        "plugins_build_output" + File.separator + subproject.name
+            )
+            if (!androidPluginBuildOutputDir.exists()) {
+                androidPluginBuildOutputDir.mkdirs()
             }
-        })
-        val mainModuleName = p.findProperty("mainModuleName") as String?
-        if (!mainModuleName.isNullOrEmpty()) {
-            p.extensions.extraProperties["mainModuleName"] = mainModuleName
+            subproject.buildDir = androidPluginBuildOutputDir  // Directly set buildDir
         }
-    })
-    g.rootProject.afterEvaluate(Action<Project> { p ->
-        p.subprojects(Action<Project> { sp ->
-            if (sp.name != "flutter") {
-                sp.evaluationDependsOn(":flutter")
-            }
-        })
-    })
-})
 
+         if (subproject.name != "flutter") {
+             subproject.evaluationDependsOn(":flutter")
+         }
+
+          //Set mainModuleName in ext for backward compatability
+          val mainModuleName = findProperty("mainModuleName") as String?
+        if (!mainModuleName.isNullOrEmpty()) {
+             extensions.extraProperties["mainModuleName"] = mainModuleName
+        }
+
+    }
 }
