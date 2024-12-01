@@ -68,7 +68,7 @@ configurations {
 }
 
 dependencies {
-   "flutterRelease"("io.flutter:flutter_embedding_release:1.0.0-$engineVersion")
+    "flutterRelease"("io.flutter:flutter_embedding_release:1.0.0-$engineVersion")
     "flutterRelease"("io.flutter:armeabi_v7a_release:1.0.0-$engineVersion")
     "flutterRelease"("io.flutter:arm64_v8a_release:1.0.0-$engineVersion")
 
