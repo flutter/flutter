@@ -85,7 +85,7 @@ class NativePluginLoader {
 // Usage example (similar to Groovy's `ext`):
 val nativePluginLoader = NativePluginLoader()
 val pathToThisDirectory = buildscript.sourceFile!!.parentFile
-apply(from = Paths.get(pathToThisDirectory.absolutePath, "src", "main", "kotlin", "NativePluginLoader.kt").toFile())
+//apply(from = Paths.get(pathToThisDirectory.absolutePath, "src", "main", "kotlin", "NativePluginLoader.kt").toFile())
 
 val moduleProjectRoot = project(":flutter").projectDir.parentFile!!.parentFile!!
 
