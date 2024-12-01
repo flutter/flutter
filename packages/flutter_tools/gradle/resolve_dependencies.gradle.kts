@@ -2,6 +2,17 @@ import java.nio.file.Paths
 
 // This script is used to warm the Gradle cache by downloading the Flutter dependencies
 // used during the build. This script is invoked when `flutter precache` is run.
+//
+// Command:
+//  gradle -b <flutter-sdk>packages/flutter_tools/gradle/resolve_dependencies.gradle
+//      resolveDependencies
+//
+// This way, Gradle can run with the `--offline` flag later on to eliminate any
+// network request during the build process.
+//
+// This includes:
+//   1. The embedding
+//   2. libflutter.so
 
 val storageUrl: String = System.getenv("FLUTTER_STORAGE_BASE_URL") ?: "https://storage.googleapis.com"
 
@@ -57,19 +68,19 @@ configurations {
 }
 
 dependencies {
-    add("flutterRelease", "io.flutter:flutter_embedding_release:1.0.0-$engineVersion")
-    add("flutterRelease", "io.flutter:armeabi_v7a_release:1.0.0-$engineVersion")
-    add("flutterRelease", "io.flutter:arm64_v8a_release:1.0.0-$engineVersion")
+    ("flutterRelease", "io.flutter:flutter_embedding_release:1.0.0-$engineVersion")
+    ("flutterRelease", "io.flutter:armeabi_v7a_release:1.0.0-$engineVersion")
+    ("flutterRelease", "io.flutter:arm64_v8a_release:1.0.0-$engineVersion")
 
-    add("flutterProfile", "io.flutter:flutter_embedding_profile:1.0.0-$engineVersion")
-    add("flutterProfile", "io.flutter:armeabi_v7a_profile:1.0.0-$engineVersion")
-    add("flutterProfile", "io.flutter:arm64_v8a_profile:1.0.0-$engineVersion")
+    ("flutterProfile", "io.flutter:flutter_embedding_profile:1.0.0-$engineVersion")
+    ("flutterProfile", "io.flutter:armeabi_v7a_profile:1.0.0-$engineVersion")
+    ("flutterProfile", "io.flutter:arm64_v8a_profile:1.0.0-$engineVersion")
 
-    add("flutterDebug", "io.flutter:flutter_embedding_debug:1.0.0-$engineVersion")
-    add("flutterDebug", "io.flutter:armeabi_v7a_debug:1.0.0-$engineVersion")
-    add("flutterDebug", "io.flutter:arm64_v8a_debug:1.0.0-$engineVersion")
-    add("flutterDebug", "io.flutter:x86_debug:1.0.0-$engineVersion")
-    add("flutterDebug", "io.flutter:x86_64_debug:1.0.0-$engineVersion")
+    ("flutterDebug", "io.flutter:flutter_embedding_debug:1.0.0-$engineVersion")
+    ("flutterDebug", "io.flutter:armeabi_v7a_debug:1.0.0-$engineVersion")
+    ("flutterDebug", "io.flutter:arm64_v8a_debug:1.0.0-$engineVersion")
+    ("flutterDebug", "io.flutter:x86_debug:1.0.0-$engineVersion")
+    ("flutterDebug", "io.flutter:x86_64_debug:1.0.0-$engineVersion")
 }
 
 tasks.register("resolveDependencies") {
