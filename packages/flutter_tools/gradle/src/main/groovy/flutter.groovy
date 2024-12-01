@@ -1433,46 +1433,30 @@ class FlutterPlugin implements Plugin<Project> {
         assert(appProject != null) : "Project :${hostAppProjectName} doesn't exist. To customize the host app project name, set `flutter.hostAppProjectName=<project-name>` in gradle.properties."
         // Wait for the host app project configuration.
         appProject.afterEvaluate {
-            assert(appProject.android != null)
-            project.android.libraryVariants.all { libraryVariant ->
-                Task copyFlutterAssetsTask
-                appProject.android.applicationVariants.all { appProjectVariant ->
-                    Task appAssembleTask = getAssembleTask(appProjectVariant)
-                    if (!shouldConfigureFlutterTask(appAssembleTask)) {
-                        return
-                    }
-                    // Find a compatible application variant in the host app.
-                    //
-                    // For example, consider a host app that defines the following variants:
-                    // | ----------------- | ----------------------------- |
-                    // |   Build Variant   |   Flutter Equivalent Variant  |
-                    // | ----------------- | ----------------------------- |
-                    // |   freeRelease     |   release                     |
-                    // |   freeDebug       |   debug                       |
-                    // |   freeDevelop     |   debug                       |
-                    // |   profile         |   profile                     |
-                    // | ----------------- | ----------------------------- |
-                    //
-                    // This mapping is based on the following rules:
-                    // 1. If the host app build variant name is `profile` then the equivalent
-                    //    Flutter variant is `profile`.
-                    // 2. If the host app build variant is debuggable
-                    //    (e.g. `buildType.debuggable = true`), then the equivalent Flutter
-                    //    variant is `debug`.
-                    // 3. Otherwise, the equivalent Flutter variant is `release`.
-                    String variantBuildMode = buildModeFor(libraryVariant.buildType)
-                    if (buildModeFor(appProjectVariant.buildType) != variantBuildMode) {
-                        return
-                    }
-                    copyFlutterAssetsTask = copyFlutterAssetsTask ?: addFlutterDeps(libraryVariant)
-                    Task mergeAssets = project
-                        .tasks
-                        .findByPath(":${hostAppProjectName}:merge${appProjectVariant.name.capitalize()}Assets")
-                    assert(mergeAssets)
-                    mergeAssets.dependsOn(copyFlutterAssetsTask)
+    // Ensure this block doesn't conflict with other evaluations
+    if (appProject.android != null) {
+        project.android.libraryVariants.all { libraryVariant ->
+            appProject.android.applicationVariants.all { appProjectVariant ->
+                Task appAssembleTask = getAssembleTask(appProjectVariant)
+                if (!shouldConfigureFlutterTask(appAssembleTask)) {
+                    return
                 }
+
+                String variantBuildMode = buildModeFor(libraryVariant.buildType)
+                if (buildModeFor(appProjectVariant.buildType) != variantBuildMode) {
+                    return
+                }
+
+                // Create the task and set up dependencies without re-evaluating
+                Task copyFlutterAssetsTask = copyFlutterAssetsTask ?: addFlutterDeps(libraryVariant)
+                Task mergeAssets = project.tasks.findByPath(":${hostAppProjectName}:merge${appProjectVariant.name.capitalize()}Assets")
+                assert(mergeAssets)
+                mergeAssets.dependsOn(copyFlutterAssetsTask)
             }
         }
+    }
+}
+
         configurePlugins(project)
         detectLowCompileSdkVersionOrNdkVersion()
     }
