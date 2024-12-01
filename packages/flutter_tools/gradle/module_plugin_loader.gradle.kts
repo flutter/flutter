@@ -7,6 +7,9 @@
 
 import java.nio.file.Paths
 import groovy.json.JsonSlurper
+import org.gradle.api.Action
+import org.gradle.api.Project
+import org.gradle.api.Gradle
 class NativePluginLoader {
 
     // This string must match _kFlutterPluginsHasNativeBuildKey defined in
@@ -97,9 +100,10 @@ nativePlugins.forEach { androidPlugin ->
 }
 
 val flutterModulePath = project(":flutter").projectDir.parentFile!!.absolutePath
-gradle.projectsLoaded { g: Gradle ->
-    g.rootProject.beforeEvaluate { p: Project ->
-        p.subprojects { subproject: Project ->
+
+gradle.projectsLoaded(Action<Gradle> { g ->
+    g.rootProject.beforeEvaluate(Action<Project> { p ->
+        p.subprojects(Action<Project> { subproject ->
             if (nativePlugins.any { it["name"] == subproject.name }) {
                 val androidPluginBuildOutputDir = File(
                     flutterModulePath + File.separator +
@@ -110,17 +114,19 @@ gradle.projectsLoaded { g: Gradle ->
                 }
                 subproject.layout.buildDirectory.fileValue(androidPluginBuildOutputDir)
             }
-        }
+        })
         val mainModuleName = p.findProperty("mainModuleName") as String?
         if (!mainModuleName.isNullOrEmpty()) {
             p.extensions.extraProperties["mainModuleName"] = mainModuleName
         }
-    }
-    g.rootProject.afterEvaluate { p: Project ->
-        p.subprojects { sp: Project ->
+    })
+    g.rootProject.afterEvaluate(Action<Project> { p ->
+        p.subprojects(Action<Project> { sp ->
             if (sp.name != "flutter") {
                 sp.evaluationDependsOn(":flutter")
             }
-        }
-    }
+        })
+    })
+})
+
 }
