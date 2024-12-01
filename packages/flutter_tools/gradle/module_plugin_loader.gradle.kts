@@ -100,7 +100,7 @@ nativePlugins.forEach { androidPlugin ->
 val flutterModulePath = project(":flutter").projectDir.parentFile!!.absolutePath
 
 gradle.projectsEvaluated {
-    rootProject.subprojects { subproject ->
+    rootProject.subprojects { subproject: Project ->
         if (nativePlugins.any { it["name"] == subproject.name }) {
             val androidPluginBuildOutputDir = File(
                 flutterModulePath + File.separator +
@@ -109,18 +109,18 @@ gradle.projectsEvaluated {
             if (!androidPluginBuildOutputDir.exists()) {
                 androidPluginBuildOutputDir.mkdirs()
             }
-            subproject.buildDir = androidPluginBuildOutputDir  // Directly set buildDir
+            subproject.setBuildDir(androidPluginBuildOutputDir)  // Corrected buildDir assignment
         }
 
-         if (subproject.name != "flutter") {
-             subproject.evaluationDependsOn(":flutter")
-         }
+        if (subproject.name != "flutter") {
+            subproject.evaluationDependsOn(":flutter")
+        }
 
-          //Set mainModuleName in ext for backward compatability
-          val mainModuleName = findProperty("mainModuleName") as String?
+        // Set mainModuleName in ext for backward compatibility
+        val mainModuleName = project.findProperty("mainModuleName") as String?
         if (!mainModuleName.isNullOrEmpty()) {
-             extensions.extraProperties["mainModuleName"] = mainModuleName
+            extensions.extraProperties["mainModuleName"] = mainModuleName
         }
-
     }
 }
+
