@@ -68,19 +68,19 @@ configurations {
 }
 
 dependencies {
-    ("flutterRelease", "io.flutter:flutter_embedding_release:1.0.0-$engineVersion")
-    ("flutterRelease", "io.flutter:armeabi_v7a_release:1.0.0-$engineVersion")
-    ("flutterRelease", "io.flutter:arm64_v8a_release:1.0.0-$engineVersion")
+   "flutterRelease"("io.flutter:flutter_embedding_release:1.0.0-$engineVersion")
+    "flutterRelease"("io.flutter:armeabi_v7a_release:1.0.0-$engineVersion")
+    "flutterRelease"("io.flutter:arm64_v8a_release:1.0.0-$engineVersion")
 
-    ("flutterProfile", "io.flutter:flutter_embedding_profile:1.0.0-$engineVersion")
-    ("flutterProfile", "io.flutter:armeabi_v7a_profile:1.0.0-$engineVersion")
-    ("flutterProfile", "io.flutter:arm64_v8a_profile:1.0.0-$engineVersion")
+    "flutterProfile"("io.flutter:flutter_embedding_profile:1.0.0-$engineVersion")
+    "flutterProfile"("io.flutter:armeabi_v7a_profile:1.0.0-$engineVersion")
+    "flutterProfile"("io.flutter:arm64_v8a_profile:1.0.0-$engineVersion")
 
-    ("flutterDebug", "io.flutter:flutter_embedding_debug:1.0.0-$engineVersion")
-    ("flutterDebug", "io.flutter:armeabi_v7a_debug:1.0.0-$engineVersion")
-    ("flutterDebug", "io.flutter:arm64_v8a_debug:1.0.0-$engineVersion")
-    ("flutterDebug", "io.flutter:x86_debug:1.0.0-$engineVersion")
-    ("flutterDebug", "io.flutter:x86_64_debug:1.0.0-$engineVersion")
+    "flutterDebug"("io.flutter:flutter_embedding_debug:1.0.0-$engineVersion")
+    "flutterDebug"("io.flutter:armeabi_v7a_debug:1.0.0-$engineVersion")
+    "flutterDebug"("io.flutter:arm64_v8a_debug:1.0.0-$engineVersion")
+    "flutterDebug"("io.flutter:x86_debug:1.0.0-$engineVersion")
+    "flutterDebug"("io.flutter:x86_64_debug:1.0.0-$engineVersion")
 }
 
 tasks.register("resolveDependencies") {
