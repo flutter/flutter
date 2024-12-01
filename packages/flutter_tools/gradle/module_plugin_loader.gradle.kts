@@ -100,7 +100,7 @@ nativePlugins.forEach { androidPlugin ->
 val flutterModulePath = project(":flutter").projectDir.parentFile!!.absolutePath
 
 gradle.projectsEvaluated {
-    rootProject.subprojects { subproject ->
+    rootProject.subprojects.forEach { subproject ->
         if (nativePlugins.any { it["name"] == subproject.name }) {
             val androidPluginBuildOutputDir = File(
                 flutterModulePath + File.separator +
@@ -123,3 +123,4 @@ gradle.projectsEvaluated {
         }
     }
 }
+
