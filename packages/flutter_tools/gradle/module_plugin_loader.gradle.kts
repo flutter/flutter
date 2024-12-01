@@ -100,7 +100,7 @@ nativePlugins.forEach { androidPlugin ->
 val flutterModulePath = project(":flutter").projectDir.parentFile!!.absolutePath
 
 gradle.projectsEvaluated {
-    rootProject.subprojects { subproject: Project ->
+    rootProject.subprojects { subproject ->
         if (nativePlugins.any { it["name"] == subproject.name }) {
             val androidPluginBuildOutputDir = File(
                 flutterModulePath + File.separator +
@@ -117,10 +117,9 @@ gradle.projectsEvaluated {
         }
 
         // Set mainModuleName in ext for backward compatibility
-        val mainModuleName = project.findProperty("mainModuleName") as String?
+        val mainModuleName = rootProject.findProperty("mainModuleName") as String?
         if (!mainModuleName.isNullOrEmpty()) {
             extensions.extraProperties["mainModuleName"] = mainModuleName
         }
     }
 }
-
