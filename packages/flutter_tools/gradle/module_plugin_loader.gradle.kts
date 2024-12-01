@@ -97,9 +97,9 @@ nativePlugins.forEach { androidPlugin ->
 }
 
 val flutterModulePath = project(":flutter").projectDir.parentFile!!.absolutePath
-gradle.projectsLoaded { g ->
-    g.rootProject.beforeEvaluate { p ->
-        p.subprojects { subproject ->
+gradle.projectsLoaded { g: Gradle ->
+    g.rootProject.beforeEvaluate { p: Project ->
+        p.subprojects { subproject: Project ->
             if (nativePlugins.any { it["name"] == subproject.name }) {
                 val androidPluginBuildOutputDir = File(
                     flutterModulePath + File.separator +
@@ -116,8 +116,8 @@ gradle.projectsLoaded { g ->
             p.extensions.extraProperties["mainModuleName"] = mainModuleName
         }
     }
-    g.rootProject.afterEvaluate { p ->
-        p.subprojects { sp ->
+    g.rootProject.afterEvaluate { p: Project ->
+        p.subprojects { sp: Project ->
             if (sp.name != "flutter") {
                 sp.evaluationDependsOn(":flutter")
             }
