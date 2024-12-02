@@ -822,7 +822,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     // only show the selection overlay when the drag has finished and the pointer
     // device kind is not precise, for example at the end of a double tap + drag
     // to select on native iOS.
-    final bool shouldShowSelectionOverlayOnMobile = !isPointerPrecise && _selectionStatusNotifier.value == SelectableRegionSelectionStatus.changing;
+    final bool shouldShowSelectionOverlayOnMobile = !isPointerPrecise;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
