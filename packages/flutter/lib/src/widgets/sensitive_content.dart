@@ -10,7 +10,7 @@ import 'framework.dart';
 class SensitiveContentSetting {
   SensitiveContentSetting._();
 
-  late ContentSensitivity _currentSensitivityLevel;
+  ContentSensitivity _currentSensitivityLevel = ContentSensitivity.autoSensitive;
 
   final Map<ContentSensitivity, int> _contentSensitivityCounts = <ContentSensitivity, int> {
     ContentSensitivity.sensitive: 0,
