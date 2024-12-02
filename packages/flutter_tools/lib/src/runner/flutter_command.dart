@@ -29,7 +29,6 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../preview_device.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../reporting/unified_analytics.dart';
 import 'flutter_command_runner.dart';
 import 'target_devices.dart';
@@ -1382,9 +1381,6 @@ abstract class FlutterCommand extends Command<void> {
     }
   }
 
-  /// Additional usage values to be sent with the usage ping.
-  Future<CustomDimensions> get usageValues async => const CustomDimensions();
-
   /// Additional usage values to be sent with the usage ping for
   /// package:unified_analytics.
   ///
@@ -1410,8 +1406,6 @@ abstract class FlutterCommand extends Command<void> {
         if (_usesFatalWarnings) {
           globals.logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
         }
-        // Prints the welcome message if needed.
-        globals.flutterUsage.printWelcome();
         _printDeprecationWarning();
         final String? commandPath = await usagePath;
         if (commandPath != null) {
@@ -1637,7 +1631,6 @@ abstract class FlutterCommand extends Command<void> {
   ) {
     // Send command result.
     final int? maxRss = getMaxRss(processInfo);
-    CommandResultEvent(commandPath, commandResult.toString(), maxRss).send();
     analytics.send(Event.flutterCommandResult(
       commandPath: commandPath,
       result: commandResult.toString(),
@@ -1659,14 +1652,6 @@ abstract class FlutterCommand extends Command<void> {
     // If the command provides its own end time, use it. Otherwise report
     // the duration of the entire execution.
     final Duration elapsedDuration = (commandResult.endTimeOverride ?? endTime).difference(startTime);
-    globals.flutterUsage.sendTiming(
-      'flutter',
-      name,
-      elapsedDuration,
-      // Report in the form of `success-[parameter1-parameter2]`, all of which
-      // can be null if the command doesn't provide a FlutterCommandResult.
-      label: label == '' ? null : label,
-    );
     analytics.send(Event.timing(
       workflow: 'flutter',
       variableName: name,
@@ -1772,30 +1757,23 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
     setupApplicationPackages();
 
     if (commandPath != null) {
-      // Until the GA4 migration is complete, we will continue to send to the GA3 instance
-      // as well as GA4. Once migration is complete, we will only make a call for GA4 values
-      final List<Object> pairOfUsageValues = await Future.wait<Object>(<Future<Object>>[
-        usageValues,
-        unifiedAnalyticsUsageValues(commandPath),
-      ]);
-
-      Usage.command(commandPath, parameters: CustomDimensions(
-        commandHasTerminal: hasTerminal,
-      ).merge(pairOfUsageValues[0] as CustomDimensions));
-      analytics.send(pairOfUsageValues[1] as Event);
+      analytics.send(await unifiedAnalyticsUsageValues(commandPath));
     }
 
     return runCommand();
   }
 
   Future<void> _sendNullSafetyAnalyticsEvents(FlutterProject project) async {
-    final BuildInfo buildInfo = await getBuildInfo();
-    NullSafetyAnalysisEvent(
-      buildInfo.packageConfig,
-      buildInfo.nullSafetyMode,
-      project.manifest.appName,
-      globals.flutterUsage,
-    ).send();
+    // TODO dontmerge-looks like we don't send a GA4 event for this.
+    //  Is this intentional?
+    //
+    // final BuildInfo buildInfo = await getBuildInfo();
+    // NullSafetyAnalysisEvent(
+    //   buildInfo.packageConfig,
+    //   buildInfo.nullSafetyMode,
+    //   project.manifest.appName,
+    //   globals.flutterUsage,
+    // ).send();
   }
 
   /// The set of development artifacts required for this command.

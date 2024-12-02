@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -1005,36 +1004,6 @@ exit code: 66
       "FakeCommand's env successfully matched",
     ]);
     expect(processManager, hasNoRemainingExpectations);
-  });
-
-  testWithoutContext('analytics sent on success', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final TestUsage usage = TestUsage();
-    final Pub pub = Pub.test(
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-      processManager: FakeProcessManager.any(),
-      botDetector: const FakeBotDetector(false),
-      stdio: FakeStdio(),
-      platform: FakePlatform(environment: const <String, String>{
-        'PUB_CACHE': 'custom/pub-cache/path',
-      }),
-    );
-    fileSystem.file('version').createSync();
-    fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.dart_tool/package_config.json')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('{"configVersion": 2,"packages": []}');
-
-    await pub.get(
-      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-      context: PubContext.flutterTests,
-    );
-    expect(
-        usage.events,
-        contains(
-          const TestUsageEvent('pub-result', 'flutter-tests', label: 'success'),
-        ));
   });
 
   testWithoutContext(
