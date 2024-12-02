@@ -23,7 +23,7 @@ Future<void> main() async {
         await flutterProject.addPlugin('dev_dependency_plugin', options: <String>['--path', '${tempDir.path}/dev_dependency_plugin']);
 
         final List<String> buildModesToTest = <String>['debug', 'profile', 'release'];
-        for (final String buildMode in buildModesToTest) { 
+        for (final String buildMode in buildModesToTest) {
           section('APK does contain methods from dev dependency in $buildMode mode');
 
           // Build APK in buildMode and check that devDependencyPlugin is included/excluded in the APK as expected.
@@ -34,15 +34,15 @@ Future<void> main() async {
               '--target-platform=android-arm',
             ]);
 
-            File apk = File('${flutterProject.rootPath}/build/app/outputs/flutter-apk/app-debug.apk');
+            final File apk = File('${flutterProject.rootPath}/build/app/outputs/flutter-apk/app-debug.apk');
             if (!apk.existsSync()) {
               throw TaskResult.failure("Expected ${apk.path} to exist, but it doesn't");
             }
 
             // Expect the APK to not include the devDependencyPlugin in release mode.
-            bool isTestingReleaseMode = buildMode == 'release';
-            bool apkIncludesDevDependency = await checkApkContainsMethodsFromLibrary(apk, devDependencyPluginOrg);
-            bool apkIncludesDevDependencyAsExpected = isTestingReleaseMode ? apkIncludesDevDependency == false : apkIncludesDevDependency;
+            final bool isTestingReleaseMode = buildMode == 'release';
+            final bool apkIncludesDevDependency = await checkApkContainsMethodsFromLibrary(apk, devDependencyPluginOrg);
+            final bool apkIncludesDevDependencyAsExpected = isTestingReleaseMode ? !apkIncludesDevDependency : apkIncludesDevDependency;
             if (!apkIncludesDevDependencyAsExpected) {
               return TaskResult.failure('Expected to${isTestingReleaseMode ? ' not' : ''} find dev_dependency_plugin in APK built with debug mode but did${isTestingReleaseMode ? '' : ' not'}.');
             }
