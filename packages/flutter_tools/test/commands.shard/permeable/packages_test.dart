@@ -643,7 +643,6 @@ workspace:
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
-        usage: globals.flutterUsage,
         botDetector: globals.botDetector,
         platform: globals.platform,
         stdio: mockStdio,
