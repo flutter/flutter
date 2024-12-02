@@ -415,7 +415,7 @@ TypographerContextSkia::CollectNewGlyphs(
   std::vector<Rect> glyph_sizes;
   size_t generation_id = atlas->GetAtlasGeneration();
   for (const auto& frame : text_frames) {
-    if (frame->IsFrameComplete() &&
+    if (atlas->IsValid() && frame->IsFrameComplete() &&
         frame->GetAtlasGeneration() == generation_id &&
         !frame->GetFrameBounds(0).is_placeholder) {
       continue;
