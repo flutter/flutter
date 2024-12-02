@@ -87,17 +87,20 @@ struct SubpixelGlyph {
   struct Equal {
     constexpr bool operator()(const impeller::SubpixelGlyph& lhs,
                               const impeller::SubpixelGlyph& rhs) const {
-      if (!lhs.properties.has_value() && !rhs.properties.has_value()) {
-        return lhs.glyph.index == rhs.glyph.index &&
-               lhs.glyph.type == rhs.glyph.type &&
-               lhs.subpixel_offset == rhs.subpixel_offset;
+      // Check simple non-optionals first.
+      if (lhs.glyph.index != rhs.glyph.index ||
+          lhs.glyph.type != rhs.glyph.type ||
+          lhs.subpixel_offset != rhs.subpixel_offset ||
+          // Mixmatch properties.
+          lhs.properties.has_value() != rhs.properties.has_value()) {
+        return false;
       }
-      return lhs.glyph.index == rhs.glyph.index &&
-             lhs.glyph.type == rhs.glyph.type &&
-             lhs.subpixel_offset == rhs.subpixel_offset &&
-             lhs.properties.has_value() && rhs.properties.has_value() &&
-             GlyphProperties::Equal{}(lhs.properties.value(),
-                                      rhs.properties.value());
+      if (lhs.properties.has_value()) {
+        // Both have properties.
+        return GlyphProperties::Equal{}(lhs.properties.value(),
+                                        rhs.properties.value());
+      }
+      return true;
     }
   };
 };
