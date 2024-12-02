@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' as io show Directory, IOOverrides;
+import 'dart:io' as io show IOOverrides;
 
 import 'package:args/command_runner.dart';
 import 'package:file_testing/file_testing.dart';
