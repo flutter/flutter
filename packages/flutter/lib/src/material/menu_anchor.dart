@@ -278,14 +278,14 @@ class MenuAnchor extends StatefulWidget {
 
   /// The optional alignment for the widget that this [MenuAnchor] surrounds.
   ///
-  /// If provided, [builder] is placed inside an [Align] using this alignment.
-  /// This can be used when the [MenuAnchor] parent sets tight constraints
-  /// which will result in the menu appearing below these tight constraints
-  /// instead of below the widget returned by the [builder].
+  /// If [builderAlignment] is provided, [builder] is placed inside an [Align]
+  /// using this alignment. This can be used when the [MenuAnchor] parent sets
+  /// tight constraints which will result in the menu appearing below these
+  /// constraints instead of below the widget returned by the [builder].
   ///
   /// The recommanded value is [AlignmentDirectional.topStart].
   ///
-  /// Defaults to null which means no [Align] is added by default.
+  /// Defaults to null, which means no [Align] is added by default.
   final AlignmentGeometry? builderAlignment;
 
   /// The widget that this [MenuAnchor] surrounds.

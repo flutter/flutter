@@ -3961,14 +3961,10 @@ void main() {
       );
     });
 
-    group('The menu is attached to the bottom of the MenuAnchor content', () {
+    group('The menu is attached to the MenuAnchor content', () {
       const double contentHeight = 100.0;
       final MenuController menuController = MenuController();
       final UniqueKey contentKey = UniqueKey();
-
-      Finder findMenuPanel() {
-        return find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MenuPanel');
-      }
 
       MenuAnchor buildMenuAnchor() {
         return MenuAnchor(
@@ -3983,39 +3979,42 @@ void main() {
           builder: (BuildContext context, MenuController controller, Widget? child) {
             return SizedBox(key: contentKey, width: 100.0, height: contentHeight);
           },
-          child: Container(width: 200, height: 60, color: Colors.purple),
         );
       }
 
-      testWidgets('when given loose constraints', (WidgetTester tester) async {
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: buildMenuAnchor(),
+      testWidgets('when given loose constraints and placed below', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: buildMenuAnchor(),
+            ),
           ),
-        ));
+        );
 
         menuController.open();
         await tester.pump();
 
-        final double menuTop = tester.getRect(findMenuPanel()).top;
+        final double menuTop = tester.getRect(findMenuPanels()).top;
         expect(menuTop, contentHeight);
       });
 
-      testWidgets('when given tight constraints', (WidgetTester tester) async {
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              width: 200,
-              height: 300,
-              child: buildMenuAnchor(),
+      testWidgets('when given tight constraints and placed below', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                width: 200,
+                height: 300,
+                child: buildMenuAnchor(),
+              ),
             ),
           ),
-        ));
+        );
 
         menuController.open();
         await tester.pump();
 
-        final double menuTop = tester.getRect(findMenuPanel()).top;
+        final double menuTop = tester.getRect(findMenuPanels()).top;
         expect(menuTop, contentHeight);
       });
     });
