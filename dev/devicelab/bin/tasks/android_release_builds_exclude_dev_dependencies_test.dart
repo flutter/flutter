@@ -39,7 +39,7 @@ Future<void> main() async {
               throw TaskResult.failure("Expected ${apk.path} to exist, but it doesn't");
             }
 
-            // Expect the APK to not include the devDependencyPlugin in release mode.
+            // We expect the APK to include the devDependencyPlugin except in release mode.
             final bool isTestingReleaseMode = buildMode == 'release';
             final bool apkIncludesDevDependency = await checkApkContainsMethodsFromLibrary(apk, devDependencyPluginOrg);
             final bool apkIncludesDevDependencyAsExpected = isTestingReleaseMode ? !apkIncludesDevDependency : apkIncludesDevDependency;
