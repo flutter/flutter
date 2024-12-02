@@ -70,7 +70,6 @@ void main() {
       flutterVersion: flutterVersion,
       fileSystem: fileSystem,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
     await webBuilder.buildWeb(
       flutterProject,
@@ -139,6 +138,8 @@ void main() {
       ),
       true,
     );
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('WebBuilder throws tool exit on failure', () async {
@@ -161,7 +162,6 @@ void main() {
       flutterVersion: flutterVersion,
       fileSystem: fileSystem,
       analytics: fakeAnalytics,
-      useImplicitPubspecResolution: true,
     );
     await expectLater(
         () async => webBuilder.buildWeb(
@@ -178,5 +178,35 @@ void main() {
     expect(logger.errorText, contains('Target hello failed: FormatException: illegal character in input string'));
     expect(testUsage.timings, isEmpty);
     expect(fakeAnalytics.sentEvents, isEmpty);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  Future<void> testRendererModeFromDartDefines(WebRendererMode webRenderer) async {
+    testUsingContext('WebRendererMode.${webRenderer.name} can be initialized from dart defines', () {
+      final WebRendererMode computed = WebRendererMode.fromDartDefines(
+        webRenderer.dartDefines,
+        useWasm: true,
+      );
+
+      expect(computed, webRenderer);
+
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+  }
+  WebRendererMode.values
+    .forEach(testRendererModeFromDartDefines);
+
+  testUsingContext('WebRendererMode.fromDartDefines sets a wasm-aware default for unknown dart defines.', () async {
+    WebRendererMode computed = WebRendererMode.fromDartDefines(
+      <String>{}, useWasm: false,
+    );
+    expect(computed, WebRendererMode.getDefault(useWasm: false));
+
+    computed = WebRendererMode.fromDartDefines(
+      <String>{}, useWasm: true,
+    );
+    expect(computed, WebRendererMode.getDefault(useWasm: true));
   });
 }

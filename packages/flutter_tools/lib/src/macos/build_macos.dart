@@ -13,7 +13,9 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
+import '../ios/migrations/metal_api_validation_migration.dart';
 import '../ios/xcode_build_settings.dart';
 import '../ios/xcodeproj.dart';
 import '../migrations/swift_package_manager_gitignore_migration.dart';
@@ -91,17 +93,18 @@ Future<void> buildMacOS({
     FlutterApplicationMigration(flutterProject.macos, globals.logger),
     NSApplicationMainDeprecationMigration(flutterProject.macos, globals.logger),
     SecureRestorableStateMigration(flutterProject.macos, globals.logger),
-    if (flutterProject.usesSwiftPackageManager && flutterProject.macos.flutterPluginSwiftPackageManifest.existsSync())
-      SwiftPackageManagerIntegrationMigration(
-        flutterProject.macos,
-        SupportedPlatform.macos,
-        buildInfo,
-        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
-        logger: globals.logger,
-        fileSystem: globals.fs,
-        plistParser: globals.plistParser,
-      ),
-      SwiftPackageManagerGitignoreMigration(flutterProject, globals.logger),
+    SwiftPackageManagerIntegrationMigration(
+      flutterProject.macos,
+      SupportedPlatform.macos,
+      buildInfo,
+      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+      logger: globals.logger,
+      fileSystem: globals.fs,
+      plistParser: globals.plistParser,
+      features: featureFlags,
+    ),
+    SwiftPackageManagerGitignoreMigration(flutterProject, globals.logger),
+    MetalAPIValidationMigrator.macos(flutterProject.macos, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -145,7 +148,7 @@ Future<void> buildMacOS({
     useMacOSConfig: true,
   );
 
-  if (flutterProject.usesSwiftPackageManager) {
+  if (flutterProject.macos.usesSwiftPackageManager) {
     final String? macOSDeploymentTarget = buildSettings['MACOSX_DEPLOYMENT_TARGET'];
     if (macOSDeploymentTarget != null) {
       SwiftPackageManager.updateMinimumDeployment(

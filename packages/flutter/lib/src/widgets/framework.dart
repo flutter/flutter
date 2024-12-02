@@ -1495,6 +1495,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
     properties.add(ObjectFlagProperty<T>('_widget', _widget, ifNull: 'no widget'));
     properties.add(ObjectFlagProperty<StatefulElement>('_element', _element, ifNull: 'not mounted'));
   }
+
+  // If @protected State methods are added or removed, the analysis rule should be
+  // updated accordingly (dev/bots/custom_rules/protect_public_state_subtypes.dart)
 }
 
 /// A widget that has a child widget provided to it, instead of building a new
@@ -5379,18 +5382,13 @@ class _ElementDiagnosticableTreeNode extends DiagnosticableTreeNode {
   final bool stateful;
 
   @override
-  Map<String, Object?> toJsonMap(
-    DiagnosticsSerializationDelegate delegate, {
-    bool fullDetails = true,
-  }) {
-    final Map<String, Object?> json = super.toJsonMap(delegate, fullDetails: fullDetails,);
+  Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object?> json = super.toJsonMap(delegate);
     final Element element = value as Element;
     if (!element.debugIsDefunct) {
       json['widgetRuntimeType'] = element.widget.runtimeType.toString();
     }
-    if (fullDetails) {
-      json['stateful'] = stateful;
-    }
+    json['stateful'] = stateful;
     return json;
   }
 }

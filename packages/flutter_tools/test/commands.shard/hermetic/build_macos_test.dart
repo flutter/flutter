@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_macos.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -25,6 +26,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -218,6 +220,7 @@ STDERR STUFF
     Platform: () => macosPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
+    Pub: FakePubWithPrimedDeps.new,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     Analytics: () => fakeAnalytics,
   });
@@ -302,6 +305,7 @@ STDERR STUFF
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler('Debug'),
     ]),
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
@@ -328,6 +332,7 @@ STDERR STUFF
       setUpFakeXcodeBuildHandler('Release'),
     ]),
     Platform: () => macosPlatform,
+    Pub: FakePubWithPrimedDeps.new,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
@@ -352,6 +357,7 @@ STDERR STUFF
       setUpFakeXcodeBuildHandler('Debug'),
     ]),
     Platform: () => macosPlatform,
+    Pub: FakePubWithPrimedDeps.new,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
@@ -376,6 +382,7 @@ STDERR STUFF
       setUpFakeXcodeBuildHandler('Debug', verbose: true),
     ]),
     Platform: () => macosPlatform,
+    Pub: FakePubWithPrimedDeps.new,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
@@ -401,6 +408,7 @@ STDERR STUFF
       setUpFakeXcodeBuildHandler('Profile'),
     ]),
     Platform: () => macosPlatform,
+    Pub: FakePubWithPrimedDeps.new,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithProfile(),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
@@ -426,6 +434,7 @@ STDERR STUFF
       setUpFakeXcodeBuildHandler('Release'),
     ]),
     Platform: () => macosPlatform,
+    Pub: FakePubWithPrimedDeps.new,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
@@ -489,6 +498,7 @@ STDERR STUFF
       setUpFakeXcodeBuildHandler('Release'),
     ]),
     Platform: () => macosPlatform,
+    Pub: FakePubWithPrimedDeps.new,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     Artifacts: () => Artifacts.test(),
   });
@@ -542,6 +552,7 @@ STDERR STUFF
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatformCustomEnv,
+    Pub: FakePubWithPrimedDeps.new,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     XcodeProjectInterpreter: () => xcodeProjectInterpreter,
   });
@@ -580,6 +591,7 @@ STDERR STUFF
       setUpFakeXcodeBuildHandler('Debug'),
     ]),
     Platform: () => macosPlatform,
+    Pub: FakePubWithPrimedDeps.new,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
@@ -652,6 +664,7 @@ STDERR STUFF
       setUpFakeXcodeBuildHandler('Release'),
     ]),
     Platform: () => macosPlatform,
+    Pub: FakePubWithPrimedDeps.new,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
     Analytics: () => fakeAnalytics,
@@ -702,6 +715,7 @@ STDERR STUFF
       }),
     ]),
     Platform: () => macosPlatform,
+    Pub: FakePubWithPrimedDeps.new,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
     Analytics: () => fakeAnalytics,
@@ -768,6 +782,7 @@ STDERR STUFF
         'LUCI_CI': 'True'
       }
     ),
+    Pub: FakePubWithPrimedDeps.new,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
@@ -836,6 +851,7 @@ STDERR STUFF
         'LUCI_CI': 'True'
       }
     ),
+    Pub: FakePubWithPrimedDeps.new,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 }

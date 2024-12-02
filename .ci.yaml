@@ -51,7 +51,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:35v1"},
           {"dependency": "android_virtual_device", "version": "android_35_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8735216702926189361"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8733065022087935185"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       os: Ubuntu
@@ -68,7 +68,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:35v1"},
           {"dependency": "android_virtual_device", "version": "android_34_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8735216702926189361"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8733065022087935185"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       os: Ubuntu
@@ -362,6 +362,7 @@ targets:
   # are intentionally running it in the devicelab to ensure that it does not
   # run on a VM in order to avoid noisy results from the benchmark.
   - name: Linux analyzer_benchmark
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/158243
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -411,7 +412,7 @@ targets:
 
   - name: Linux_android_emu android views
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/153445
+    bringup: true
     properties:
       tags: >
         ["framework","hostonly","linux"]
@@ -634,39 +635,6 @@ targets:
       - dev/**
       - bin/**
       - .ci.yaml
-
-  - name: Linux firebase_abstract_method_smoke_test
-    presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/147335
-    recipe: firebaselab/firebaselab
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:35v1"},
-          {"dependency": "open_jdk", "version": "version:17"}
-        ]
-      tags: >
-        ["firebaselab"]
-      task_name: abstract_method_smoke_test
-      physical_devices: >-
-        [
-          "--device", "model=shiba,version=34",
-          "--device", "model=panther,version=33",
-          "--device", "model=redfin,version=30"
-        ]
-      # TODO(flutter/flutter#123331): This device is flaking.
-      # "--device", "model=Nexus6P,version=25"
-      virtual_devices: >-
-        [
-          "--device", "model=Nexus5.gce_x86,version=21",
-          "--device", "model=Nexus5.gce_x86,version=22",
-          "--device", "model=Nexus5.gce_x86,version=23",
-          "--device", "model=Nexus6P,version=25",
-          "--device", "model=Nexus6P,version=26",
-          "--device", "model=Nexus6P,version=27",
-          "--device", "model=NexusLowRes,version=29"
-        ]
 
   - name: Linux firebase_release_smoke_test
     recipe: firebaselab/firebaselab
@@ -1039,6 +1007,10 @@ targets:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"}
         ]
+      # TODO(fujino): delete once propagation from
+      # https://github.com/flutter/flutter/issues/158521 completes.
+      drone_dimensions: >
+        ["os=Linux", "os=Ubuntu-20"]
       tags: >
         ["devicelab", "hostonly", "linux"]
       task_name: plugin_test
@@ -1170,7 +1142,6 @@ targets:
       - .ci.yaml
 
   - name: Linux tool_integration_tests_1_6
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1197,7 +1168,6 @@ targets:
       - .ci.yaml
 
   - name: Linux tool_integration_tests_2_6
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1224,7 +1194,6 @@ targets:
       - .ci.yaml
 
   - name: Linux tool_integration_tests_3_6
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1251,7 +1220,6 @@ targets:
       - .ci.yaml
 
   - name: Linux tool_integration_tests_4_6
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1278,7 +1246,6 @@ targets:
       - .ci.yaml
 
   - name: Linux tool_integration_tests_5_6
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1305,7 +1272,6 @@ targets:
       - .ci.yaml
 
   - name: Linux tool_integration_tests_6_6
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1467,7 +1433,7 @@ targets:
 
   - name: Linux_android_emu flutter_driver_android_test
     recipe: flutter/flutter_drone
-    bringup: true # https://github.com/flutter/flutter/issues/153445
+    bringup: true
     timeout: 60
     properties:
       shard: flutter_driver_android
@@ -1519,23 +1485,6 @@ targets:
         ["devicelab","hostonly", "linux"]
       task_name: web_benchmarks_canvaskit
 
-  - name: Linux web_benchmarks_html
-    recipe: devicelab/devicelab_drone
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:35v1"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
-        ]
-      tags: >
-        ["devicelab"]
-      task_name: web_benchmarks_html
-    runIf:
-      - dev/**
-      - bin/**
-      - .ci.yaml
-
   - name: Linux web_benchmarks_skwasm
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -1556,7 +1505,6 @@ targets:
 
   - name: Linux web_benchmarks_skwasm_st
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2236,7 +2184,7 @@ targets:
 
   - name: Linux_android_emu android_defines_test
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/153445
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2649,7 +2597,7 @@ targets:
 
   - name: Linux_android_emu external_textures_integration_test
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/153445
+    bringup: true
     timeout: 60
     # Functionally the same as "presubmit: false", except that we will run on
     # presubmit during engine rolls. This test is the *only* automated e2e
@@ -3828,6 +3776,7 @@ targets:
       task_name: complex_layout_macos__start_up
 
   - name: Mac_benchmark complex_layout_scroll_perf_macos__timeline_summary
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/158251
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -4079,6 +4028,7 @@ targets:
       - .ci.yaml
 
   - name: Mac_benchmark hello_world_macos__compile
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/159542
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -4873,6 +4823,7 @@ targets:
       task_name: hello_world_ios__compile
 
   - name: Mac_x64 hot_mode_dev_cycle_macos_target__benchmark
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/158568
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -5405,7 +5356,6 @@ targets:
   - name: Mac_arm64 mac_desktop_impeller
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5417,7 +5367,6 @@ targets:
       task_name: run_release_test_macos
 
   - name: Windows build_tests_1_9
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5436,7 +5385,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_2_9
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5455,7 +5403,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_3_9
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5474,7 +5421,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_4_9
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5493,7 +5439,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_5_9
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5512,7 +5457,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_6_9
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5531,7 +5475,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_7_9
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5550,7 +5493,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_8_9
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5569,7 +5511,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_9_9
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5625,10 +5566,8 @@ targets:
 
   - name: Windows framework_tests_libraries_leak_tracking
     recipe: flutter/flutter_drone
-    bringup: true # New target: https://github.com/flutter/flutter/issues/140414
     timeout: 120
     properties:
-      ignore_flakiness: "true"
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
@@ -5712,10 +5651,8 @@ targets:
 
   - name: Windows framework_tests_widgets_leak_tracking
     recipe: flutter/flutter_drone
-    bringup: true # New target: https://github.com/flutter/flutter/issues/140414
     timeout: 120
     properties:
-      ignore_flakiness: "true"
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
@@ -6377,7 +6314,6 @@ targets:
 
   - name: Windows windows_desktop_impeller
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:

@@ -5,7 +5,10 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/android/android_device.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -17,6 +20,24 @@ const String kLastLogcatTimestamp = '11-27 15:39:04.506';
 /// if the previous line was a match. Include an intentionally non-matching
 /// line as the first input to disable this behavior.
 const String kDummyLine = 'Contents are not important\n';
+
+class _FakeVm extends Fake implements VM {
+  _FakeVm(this._appPid);
+
+  final int _appPid;
+
+  @override
+  int? get pid => _appPid;
+}
+
+class _FakeFlutterVmService extends Fake implements FlutterVmService {
+  _FakeFlutterVmService(this._appPid);
+
+  final int _appPid;
+
+  @override
+  Future<VM?> getVmGuarded() async => _FakeVm(_appPid);
+}
 
 void main() {
   testWithoutContext('AdbLogReader ignores spam from SurfaceSyncer', () async {
@@ -44,7 +65,9 @@ void main() {
     final AdbLogReader logReader = await AdbLogReader.createLogReader(
       createFakeDevice(null),
       processManager,
-    )..appPid = appPid;
+      BufferLogger.test(),
+    );
+    await logReader.provideVmService(_FakeFlutterVmService(appPid));
     final Completer<void> onDone = Completer<void>.sync();
     final List<String> emittedLines = <String>[];
     logReader.logLines.listen((String line) {
@@ -76,6 +99,7 @@ void main() {
     await AdbLogReader.createLogReader(
       createFakeDevice(kLollipopVersionCode),
       processManager,
+      BufferLogger.test(),
     );
 
     expect(processManager, hasNoRemainingExpectations);
@@ -99,6 +123,7 @@ void main() {
     await AdbLogReader.createLogReader(
       createFakeDevice(kLollipopVersionCode - 1),
       processManager,
+      BufferLogger.test(),
     );
 
     expect(processManager, hasNoRemainingExpectations);
@@ -122,6 +147,7 @@ void main() {
     await AdbLogReader.createLogReader(
       createFakeDevice(null),
       processManager,
+      BufferLogger.test(),
     );
 
     expect(processManager, hasNoRemainingExpectations);
@@ -147,6 +173,7 @@ void main() {
     await AdbLogReader.createLogReader(
       createFakeDevice(null),
       processManager,
+      BufferLogger.test(),
       includePastLogs: true,
     );
 
@@ -173,6 +200,7 @@ void main() {
     final AdbLogReader logReader = await AdbLogReader.createLogReader(
       createFakeDevice(null),
       processManager,
+      BufferLogger.test(),
     );
     final Completer<void> onDone = Completer<void>.sync();
     logReader.logLines.listen((String _) { }, onDone: onDone.complete);
@@ -207,6 +235,7 @@ void main() {
     final AdbLogReader logReader = await AdbLogReader.createLogReader(
       createFakeDevice(null),
       processManager,
+      BufferLogger.test()
     );
     await expectLater(logReader.logLines, emitsInOrder(<String>[
       'E/AndroidRuntime(11787): FATAL EXCEPTION: main',
