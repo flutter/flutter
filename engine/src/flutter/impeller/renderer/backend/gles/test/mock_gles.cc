@@ -167,6 +167,13 @@ void mockDeleteTextures(GLsizei size, const GLuint* queries) {
 static_assert(CheckSameSignature<decltype(mockDeleteQueriesEXT),  //
                                  decltype(glDeleteQueriesEXT)>::value);
 
+void mockUniform1fv(GLint location, GLsizei count, const GLfloat* value) {
+  RecordGLCall("glUniform1fv");
+}
+
+static_assert(CheckSameSignature<decltype(mockUniform1fv),  //
+                                 decltype(glUniform1fv)>::value);
+
 std::shared_ptr<MockGLES> MockGLES::Init(
     const std::optional<std::vector<const unsigned char*>>& extensions,
     const char* version_string,
@@ -208,6 +215,8 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockGetQueryObjectui64vEXT);
   } else if (strcmp(name, "glGetQueryObjectuivEXT") == 0) {
     return reinterpret_cast<void*>(mockGetQueryObjectuivEXT);
+  } else if (strcmp(name, "glUniform1fv") == 0) {
+    return reinterpret_cast<void*>(mockUniform1fv);
   } else {
     return reinterpret_cast<void*>(&doNothing);
   }

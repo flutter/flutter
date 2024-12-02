@@ -8,12 +8,17 @@
 #include <unordered_map>
 #include <vector>
 
+#include "flutter/third_party/abseil-cpp/absl/container/flat_hash_map.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/backend/gles/gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 #include "impeller/renderer/command.h"
 
 namespace impeller {
+
+namespace testing {
+FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformData);
+}  // namespace testing
 
 //------------------------------------------------------------------------------
 /// @brief      Sets up stage bindings for single draw call in the OpenGLES
@@ -37,13 +42,13 @@ class BufferBindingsGLES {
                             size_t vertex_offset);
 
   bool BindUniformData(const ProcTableGLES& gl,
-                       Allocator& transients_allocator,
                        const Bindings& vertex_bindings,
                        const Bindings& fragment_bindings);
 
   bool UnbindVertexAttributes(const ProcTableGLES& gl);
 
  private:
+  FML_FRIEND_TEST(testing::BufferBindingsGLESTest, BindUniformData);
   //----------------------------------------------------------------------------
   /// @brief      The arguments to glVertexAttribPointer.
   ///
@@ -57,9 +62,9 @@ class BufferBindingsGLES {
   };
   std::vector<std::vector<VertexAttribPointer>> vertex_attrib_arrays_;
 
-  std::unordered_map<std::string, GLint> uniform_locations_;
+  absl::flat_hash_map<std::string, GLint> uniform_locations_;
 
-  using BindingMap = std::unordered_map<std::string, std::vector<GLint>>;
+  using BindingMap = absl::flat_hash_map<std::string, std::vector<GLint>>;
   BindingMap binding_map_ = {};
   GLuint vertex_array_object_ = 0;
 
@@ -68,9 +73,7 @@ class BufferBindingsGLES {
 
   GLint ComputeTextureLocation(const ShaderMetadata* metadata);
 
-  bool BindUniformBuffer(const ProcTableGLES& gl,
-                         Allocator& transients_allocator,
-                         const BufferResource& buffer);
+  bool BindUniformBuffer(const ProcTableGLES& gl, const BufferResource& buffer);
 
   std::optional<size_t> BindTextures(const ProcTableGLES& gl,
                                      const Bindings& bindings,
@@ -80,6 +83,12 @@ class BufferBindingsGLES {
   BufferBindingsGLES(const BufferBindingsGLES&) = delete;
 
   BufferBindingsGLES& operator=(const BufferBindingsGLES&) = delete;
+
+  // For testing.
+  void SetUniformBindings(
+      absl::flat_hash_map<std::string, GLint> uniform_locations) {
+    uniform_locations_ = std::move(uniform_locations);
+  }
 };
 
 }  // namespace impeller

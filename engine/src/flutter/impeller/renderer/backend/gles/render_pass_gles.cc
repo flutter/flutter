@@ -435,7 +435,6 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     /// Bind uniform data.
     ///
     if (!vertex_desc_gles->BindUniformData(gl,                        //
-                                           *transients_allocator,     //
                                            command.vertex_bindings,   //
                                            command.fragment_bindings  //
                                            )) {
