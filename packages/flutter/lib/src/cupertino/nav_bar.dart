@@ -1185,13 +1185,13 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       );
     }
 
-    else if (atTop) {
+    else if (widget.bottom is _NavigationBarSearchField && atTop) {
       effectiveBottom = Row(
         children: <Widget>[
-          const Expanded(
+          Expanded(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(8.0, 0.0, 0.0, 0.0),
-              child: CupertinoSearchTextField(),
+              padding: const EdgeInsets.fromLTRB(8.0, 0.0, 0.0, 0.0),
+              child: (widget.bottom! as _NavigationBarSearchField).searchField,
             ),
           ),
           Center(
@@ -3086,12 +3086,12 @@ class _NavigationBarSearchField extends StatelessWidget implements PreferredSize
 
   @override
   Widget build(BuildContext context) {
-    return const IgnorePointer(
+    return IgnorePointer(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: padding, vertical: padding),
+        padding: const EdgeInsets.symmetric(horizontal: padding, vertical: padding),
         child: SizedBox(
           height: searchFieldHeight,
-          child: CupertinoSearchTextField()
+          child: searchField,
         ),
       ),
     );
@@ -3099,4 +3099,6 @@ class _NavigationBarSearchField extends StatelessWidget implements PreferredSize
 
   @override
   Size get preferredSize => const Size.fromHeight(searchFieldHeight + padding * 2);
+
+  Widget get searchField => const CupertinoSearchTextField();
 }
