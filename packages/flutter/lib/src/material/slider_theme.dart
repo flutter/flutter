@@ -1550,6 +1550,10 @@ abstract class RangeSliderTrackShape {
     bool isDiscrete = false,
     required TextDirection textDirection,
   });
+
+  /// Whether the track shape is rounded. This is used to determine the correct
+  /// position of the thumbs in relation to the track. Defaults to false.
+  bool get isRounded => false;
 }
 
 /// Base track shape that provides an implementation of [getPreferredRect] for
@@ -2080,15 +2084,6 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape with BaseRa
       ),
       inactivePaint,
     );
-    context.canvas.drawRect(
-      Rect.fromLTRB(
-        leftThumbOffset.dx,
-        trackRect.top - (additionalActiveTrackHeight / 2),
-        rightThumbOffset.dx,
-        trackRect.bottom + (additionalActiveTrackHeight / 2),
-      ),
-      activePaint,
-    );
     context.canvas.drawRRect(
       RRect.fromLTRBAndCorners(
         rightThumbOffset.dx,
@@ -2100,7 +2095,20 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape with BaseRa
       ),
       inactivePaint,
     );
+    context.canvas.drawRRect(
+      RRect.fromLTRBR(
+        leftThumbOffset.dx - (sliderTheme.trackHeight! / 2),
+        trackRect.top - (additionalActiveTrackHeight / 2),
+        rightThumbOffset.dx + (sliderTheme.trackHeight! / 2),
+        trackRect.bottom + (additionalActiveTrackHeight / 2),
+        trackRadius,
+      ),
+      activePaint,
+    );
   }
+
+  @override
+  bool get isRounded => true;
 }
 
 /// The default shape of each [Slider] tick mark.

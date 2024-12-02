@@ -1525,8 +1525,6 @@ void main() {
           topLeft: const Radius.circular(2.0),
           bottomLeft: const Radius.circular(2.0),
         ))
-      // active track RRect Start 10 pixels from left screen.
-        ..rect(rect:const Rect.fromLTRB(10.0, 297.0, 790.0, 303.0),)
         // inactive track RRect. Ends 10 pixels from right of screen.
         ..rrect(rrect: RRect.fromLTRBAndCorners(
           790.0,
@@ -1536,6 +1534,11 @@ void main() {
           topRight: const Radius.circular(2.0),
           bottomRight: const Radius.circular(2.0),
         ))
+        // active track RRect Start 10 pixels from left screen.
+        ..rrect(rrect: RRect.fromLTRBR(
+          8.0, 297.0, 792.0, 303.0,
+          const Radius.circular(2.0))
+        )
         // The thumb Left.
         ..circle(x: 10.0, y: 300.0, radius: 10.0)
         // The thumb Right.
@@ -1798,12 +1801,15 @@ void main() {
             topLeft: const Radius.circular(2.0),
             bottomLeft: const Radius.circular(2.0),
           ))
-          ..rect(rect: const Rect.fromLTRB(24.0, 297.0, 24.0, 303.0))
           ..rrect(rrect: RRect.fromLTRBAndCorners(
             24.0, 298.0, 776.0, 302.0,
             topRight: const Radius.circular(2.0),
             bottomRight: const Radius.circular(2.0),
           ))
+          ..rrect(rrect: RRect.fromLTRBR(
+            22.0, 297.0, 26.0, 303.0,
+            const Radius.circular(2.0)),
+          )
           ..circle(x: 24.0, y: 300.0)
           ..shadow(elevation: 1.0)
           ..circle(x: 24.0, y: 300.0)
@@ -1847,12 +1853,15 @@ void main() {
           topLeft: const Radius.circular(2.0),
           bottomLeft: const Radius.circular(2.0),
         ))
-        ..rect(rect: const Rect.fromLTRB(24.0, 297.0, 24.0, 303.0))
         ..rrect(rrect: RRect.fromLTRBAndCorners(
           24.0, 298.0, 776.0, 302.0,
           topRight: const Radius.circular(2.0),
           bottomRight: const Radius.circular(2.0),
         ))
+        ..rrect(rrect: RRect.fromLTRBR(
+          22.0, 297.0, 26.0, 303.0,
+          const Radius.circular(2)),
+        )
         ..circle(x: 24.0, y: 300.0)
         ..path(strokeWidth: 1.0 * 2.0, color: Colors.black)
         ..circle(x: 24.0, y: 300.0)
@@ -2546,9 +2555,11 @@ void main() {
     });
   });
 
-  testWidgets('SliderTrackShape isRounded defaults', (WidgetTester tester) async {
+  testWidgets('Track shape isRounded defaults', (WidgetTester tester) async {
     expect(const RectangularSliderTrackShape().isRounded, isFalse);
     expect(const RoundedRectSliderTrackShape().isRounded, isTrue);
+    expect(const RectangularRangeSliderTrackShape().isRounded, isFalse);
+    expect(const RoundedRectRangeSliderTrackShape().isRounded, isTrue);
   });
 
   testWidgets('SliderThemeData.padding can override the default Slider padding', (WidgetTester tester) async {
