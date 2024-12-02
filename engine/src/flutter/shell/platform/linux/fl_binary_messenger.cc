@@ -291,7 +291,10 @@ static GBytes* send_on_channel_finish(FlBinaryMessenger* messenger,
   g_return_val_if_fail(g_task_is_valid(result, self), FALSE);
 
   g_autoptr(GTask) task = G_TASK(result);
-  GAsyncResult* r = G_ASYNC_RESULT(g_task_propagate_pointer(task, nullptr));
+  GAsyncResult* r = G_ASYNC_RESULT(g_task_propagate_pointer(task, error));
+  if (r == nullptr) {
+    return nullptr;
+  }
 
   g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
   if (engine == nullptr) {
