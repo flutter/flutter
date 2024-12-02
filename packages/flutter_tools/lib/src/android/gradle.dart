@@ -260,6 +260,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required FlutterProject project,
     required List<GradleHandledError> localGradleErrors,
     int retry = 0,
+    VoidCallback? preRunTask,
+    VoidCallback? postRunTask,
     int? maxRetries,
     _OutputParser? outputParser,
   }) async {
@@ -311,6 +313,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ...options, // suppresses gradle output.
       taskName,
     ];
+    preRunTask?.call();
 
     int exitCode = 1;
     try {
@@ -331,6 +334,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     } finally {
       status.stop();
     }
+    postRunTask?.call();
     if (exitCode != 0) {
       if (detectedGradleError == null) {
         _analytics.send(Event.flutterBuildInfo(label: 'gradle-unknown-failure', buildType: 'gradle'));
@@ -354,24 +358,28 @@ class AndroidGradleBuilder implements AndroidBuilder {
             exitCode = await _runGradleTask(
               taskName,
               options: options,
+              preRunTask: preRunTask,
+              postRunTask: postRunTask,
               localGradleErrors: localGradleErrors,
               retry: retry,
               project: project,
               maxRetries: maxRetries,
             );
             if (exitCode == 0) {
-              final String successEventLabel = 'gradle-${detectedGradleError!.eventLabel}-success';
-
-              _analytics.send(Event.flutterBuildInfo(label: successEventLabel, buildType: 'gradle'));
+              final String successEventLabel = 'gradle-${detectedGradleError!
+                  .eventLabel}-success';
+              _analytics.send(Event.flutterBuildInfo(
+                  label: successEventLabel, buildType: 'gradle'));
               return exitCode;
             }
           case GradleBuildStatus.exit:
           // Continue and throw tool exit.
         }
       }
-      final String usageLabel = 'gradle-${detectedGradleError?.eventLabel}-failure';
+      final String usageLabel = 'gradle-${detectedGradleError!.eventLabel}-failure';
       _analytics.send(Event.flutterBuildInfo(label: usageLabel, buildType: 'gradle'));
     }
+
     return exitCode;
   }
 
@@ -413,19 +421,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     final ProjectMigration migration = ProjectMigration(migrators);
     await migration.run();
 
-    final bool usesAndroidX = isAppUsingAndroidX(project.android.hostAppGradleRoot);
-    if (usesAndroidX) {
-      _analytics.send(Event.flutterBuildInfo(label: 'app-using-android-x', buildType: 'gradle'));
-    } else if (!usesAndroidX) {
-      _analytics.send(Event.flutterBuildInfo(label: 'app-not-using-android-x', buildType: 'gradle'));
-
-      _logger.printStatus("${_logger.terminal.warningMark} Your app isn't using AndroidX.", emphasis: true);
-      _logger.printStatus(
-        'To avoid potential build failures, you can quickly migrate your app '
-            'by following the steps on https://goo.gl/CP92wY .',
-        indent: 4,
-      );
-    }
     // The default Gradle script reads the version name and number
     // from the local.properties file.
     updateLocalProperties(
@@ -524,22 +519,25 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (androidBuildInfo.fastStart) {
       options.add('-Pfast-start=true');
     }
-
-    final Stopwatch sw = Stopwatch()
-      ..start();
+    late Stopwatch sw;
     final int exitCode = await _runGradleTask(
         assembleTask,
+        preRunTask: () {
+          sw = Stopwatch()..start();
+        },
+        postRunTask: () {
+          final Duration elapsedDuration = sw.elapsed;
+          _analytics.send(Event.timing(
+            workflow: 'build',
+            variableName: 'gradle',
+            elapsedMilliseconds: elapsedDuration.inMilliseconds,
+          ));
+        },
         options: options,
         project: project,
-        localGradleErrors: gradleErrors
+        maxRetries: maxRetries,
+        localGradleErrors: localGradleErrors
     );
-
-    final Duration elapsedDuration = sw.elapsed;
-    _analytics.send(Event.timing(
-      workflow: 'build',
-      variableName: 'gradle',
-      elapsedMilliseconds: elapsedDuration.inMilliseconds,
-    ));
 
     if (exitCode != 0) {
       throwToolExit(
@@ -790,14 +788,24 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
   @override
   Future<List<String>> getBuildVariants({required FlutterProject project}) async {
-    final Stopwatch sw = Stopwatch()
-      ..start();
+    late Stopwatch sw;
     int exitCode = 1;
     final List<String> results = <String>[];
 
     try {
       exitCode = await _runGradleTask(
           _kBuildVariantTaskName,
+          preRunTask: () {
+            sw = Stopwatch()..start();
+          },
+          postRunTask: () {
+            final Duration elapsedDuration = sw.elapsed;
+            _analytics.send(Event.timing(
+              workflow: 'print',
+              variableName: 'android build variants',
+              elapsedMilliseconds: elapsedDuration.inMilliseconds,
+            ));
+          },
           options: const <String>['-q'],
           project: project,
           localGradleErrors: gradleErrors,
@@ -810,13 +818,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     } on Error catch(error) {
       _logger.printError(error.toString());
     }
-
-    final Duration elapsedDuration = sw.elapsed;
-    _analytics.send(Event.timing(
-      workflow: 'print',
-      variableName: 'android build variants',
-      elapsedMilliseconds: elapsedDuration.inMilliseconds,
-    ));
 
     if (exitCode != 0) {
       return const <String>[];
@@ -837,12 +838,22 @@ class AndroidGradleBuilder implements AndroidBuilder {
       directory.absolute.path,
       'app-link-settings-$buildVariant.json',
     );
-    final Stopwatch sw = Stopwatch()
-      ..start();
+    late Stopwatch sw;
     int exitCode = 1;
     try {
       exitCode = await _runGradleTask(
         taskName,
+        preRunTask: () {
+          sw = Stopwatch()..start();
+        },
+        postRunTask: () {
+          final Duration elapsedDuration = sw.elapsed;
+          _analytics.send(Event.timing(
+            workflow: 'outputs',
+            variableName: 'app link settings',
+            elapsedMilliseconds: elapsedDuration.inMilliseconds,
+          ));
+        },
         options: <String>['-q', '-PoutputPath=$outputPath'],
         project: project,
         localGradleErrors: gradleErrors,
@@ -850,12 +861,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     } on Error catch(error) {
       _logger.printError(error.toString());
     }
-    final Duration elapsedDuration = sw.elapsed;
-    _analytics.send(Event.timing(
-      workflow: 'outputs',
-      variableName: 'app link settings',
-      elapsedMilliseconds: elapsedDuration.inMilliseconds,
-    ));
 
     if (exitCode != 0) {
       throwToolExit('Gradle task $taskName failed with exit code $exitCode');
