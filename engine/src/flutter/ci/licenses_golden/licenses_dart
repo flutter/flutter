@@ -1,4 +1,4 @@
-Signature: c58e3e5f651099ae3efe6b395c6de0cf
+Signature: 533cea24d9f1d3bb787e0b491df12855
 
 ====================================================================================================
 LIBRARY: dart
@@ -4103,6 +4103,7 @@ ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/synce
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/invocation_mirror_constants.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_shared/lib/date_time_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_shared/lib/synced/async_status_codes.dart + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/vm/bin/resident_compiler_utils.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/vm/lib/concurrent_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/compact_hash.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/ffi_patch.dart + ../../../flutter/third_party/dart/LICENSE
@@ -4157,6 +4158,7 @@ FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/invocation_mirror_constants.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_shared/lib/date_time_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_shared/lib/synced/async_status_codes.dart
+FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/vm/bin/resident_compiler_utils.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/vm/lib/concurrent_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/compact_hash.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/ffi_patch.dart
@@ -4805,7 +4807,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/5785058c9bb126dd243c1dda3c8c29f677d83f02
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/46630dbefbbd7a9d844f3bf654df82af6e8828c6
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
