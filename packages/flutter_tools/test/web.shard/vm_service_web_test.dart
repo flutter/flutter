@@ -38,7 +38,7 @@ void main() {
     testWithoutContext('can validate flutter version', () async {
       await flutter.run(
         withDebugger: true, chrome: true,
-        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+        additionalCommandArgs: <String>['--verbose']);
 
       expect(flutter.vmServiceWsUri, isNotNull);
 
@@ -50,7 +50,7 @@ void main() {
     testWithoutContext('can validate flutter version in parallel', () async {
       await flutter.run(
         withDebugger: true, chrome: true,
-        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+        additionalCommandArgs: <String>['--verbose']);
 
       expect(flutter.vmServiceWsUri, isNotNull);
 
@@ -82,7 +82,7 @@ void main() {
     testWithoutContext('can validate flutter version', () async {
       await flutter.run(
         withDebugger: true, chrome: true,
-        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+        additionalCommandArgs: <String>['--verbose']);
 
       expect(flutter.vmServiceWsUri, isNotNull);
 

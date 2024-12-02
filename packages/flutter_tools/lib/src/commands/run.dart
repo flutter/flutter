@@ -39,7 +39,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
     usesDartDefineOption();
     usesFlavorOption();
-    usesWebRendererOption();
     usesWebResourcesCdnFlag();
     addNativeNullAssertions(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
@@ -234,10 +233,13 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   bool get useWasm => boolArg(FlutterOptions.kWebWasmFlag);
 
-  WebRendererMode get webRenderer => WebRendererMode.fromCliOption(
-    stringArg(FlutterOptions.kWebRendererFlag),
-    useWasm: useWasm
-  );
+  // Keep in sync with the [TestCommand.webRenderer] getter.
+  WebRendererMode get webRenderer {
+    final List<String> dartDefines = extractDartDefines(
+      defineConfigJsonMap: extractDartDefineConfigJsonMap()
+    );
+    return WebRendererMode.fromDartDefines(dartDefines, useWasm: useWasm);
+  }
 
   /// Create a debugging options instance for the current `run` or `drive` invocation.
   @visibleForTesting

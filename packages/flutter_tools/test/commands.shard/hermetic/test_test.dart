@@ -1395,11 +1395,11 @@ dev_dependencies:
       final TestCommand testCommand = TestCommand(testRunner: testRunner);
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
-      await commandRunner.run(const <String>[
+      await commandRunner.run(<String>[
         'test',
         '--no-pub',
         '--platform=chrome',
-        '--web-renderer=canvaskit',
+        ...WebRendererMode.canvaskit.toCliDartDefines,
       ]);
       expect(testRunner.lastDebuggingOptionsValue.webRenderer, WebRendererMode.canvaskit);
     }, overrides: <Type, Generator>{
@@ -1440,7 +1440,7 @@ dev_dependencies:
           'web',
           '--no-pub',
           '--platform=chrome',
-          '--web-renderer=${webRenderer.name}',
+          ...webRenderer.toCliDartDefines,
         ]);
       } on ToolExit catch (error) {
         expect(error, isA<ToolExit>());
@@ -1458,7 +1458,6 @@ dev_dependencies:
   WebRendererMode.values
     .where((WebRendererMode mode) => mode.isDeprecated)
     .forEach(testWebRendererDeprecationMessage);
-
 
   testUsingContext('Can test in a pub workspace',
       () async {

@@ -11,7 +11,6 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../cache.dart';
@@ -179,7 +178,7 @@ class WebBuilder {
 }
 
 /// Web rendering backend mode.
-enum WebRendererMode implements CliEnum {
+enum WebRendererMode {
   /// Auto detects which rendering backend to use.
   auto,
 
@@ -192,12 +191,22 @@ enum WebRendererMode implements CliEnum {
   /// Always use skwasm.
   skwasm;
 
-  factory WebRendererMode.fromCliOption(String? webRendererString,
-      {required bool useWasm}) {
-    if (webRendererString == null) {
-      return getDefault(useWasm: useWasm);
+  factory WebRendererMode.fromDartDefines(Iterable<String> defines, {
+    required bool useWasm,
+  }) {
+    if (defines.contains('FLUTTER_WEB_AUTO_DETECT=true')) {
+      return auto;
+    } else if (defines.contains('FLUTTER_WEB_USE_SKIA=false')
+        && defines.contains('FLUTTER_WEB_USE_SKWASM=true')) {
+      return skwasm;
+    } else if (defines.contains('FLUTTER_WEB_USE_SKIA=true')
+        && defines.contains('FLUTTER_WEB_USE_SKWASM=false')) {
+      return canvaskit;
+    } else if (defines.contains('FLUTTER_WEB_USE_SKIA=false')
+        && defines.contains('FLUTTER_WEB_USE_SKWASM=false')) {
+      return html; // The horror!
     }
-    return WebRendererMode.values.byName(webRendererString);
+    return getDefault(useWasm: useWasm);
   }
 
   static WebRendererMode getDefault({required bool useWasm}) {
@@ -219,13 +228,9 @@ enum WebRendererMode implements CliEnum {
 
   /// Returns a consistent deprecation warning for the WebRendererMode.
   String get deprecationWarning =>
-      'The HTML Renderer is deprecated. Do not use "--web-renderer=$name".'
+      'The HTML Renderer is deprecated and will be removed. Please, stop using it.'
       '\nSee: https://docs.flutter.dev/to/web-html-renderer-deprecation';
 
-  @override
-  String get cliName => kebabCase(name);
-
-  @override
   String get helpText => switch (this) {
         auto =>
           'Use the HTML renderer on mobile devices, and CanvasKit on desktop devices.',
@@ -236,34 +241,45 @@ enum WebRendererMode implements CliEnum {
         skwasm => 'Always use the experimental skwasm renderer.'
       };
 
+  /// Returns [dartDefines] in a way usable from the CLI.
+  ///
+  /// This is used to start integration tests.
+  Iterable<String> get toCliDartDefines => dartDefines.map(
+    (String define) => '--dart-define=$define');
+
   Iterable<String> get dartDefines => switch (this) {
-        auto => <String>[
+        auto => const <String>{
             'FLUTTER_WEB_AUTO_DETECT=true',
-          ],
-        canvaskit => <String>[
+        },
+        canvaskit => const <String>{
             'FLUTTER_WEB_AUTO_DETECT=false',
             'FLUTTER_WEB_USE_SKIA=true',
-          ],
-        html => <String>[
+            'FLUTTER_WEB_USE_SKWASM=false',
+        },
+        html => const <String>{
             'FLUTTER_WEB_AUTO_DETECT=false',
             'FLUTTER_WEB_USE_SKIA=false',
-          ],
-        skwasm => <String>[
+            'FLUTTER_WEB_USE_SKWASM=false',
+        },
+        skwasm => const <String>{
             'FLUTTER_WEB_AUTO_DETECT=false',
             'FLUTTER_WEB_USE_SKIA=false',
             'FLUTTER_WEB_USE_SKWASM=true',
-          ],
+        },
       };
 
+  /// Sets the dart defines for the currently selected WebRendererMode
   List<String> updateDartDefines(List<String> inputDefines) {
     final Set<String> dartDefinesSet = inputDefines.toSet();
-    if (!inputDefines
-            .any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT=')) &&
-        inputDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
-      dartDefinesSet
-          .removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
-    }
-    dartDefinesSet.addAll(dartDefines);
+
+    dartDefinesSet
+      ..removeWhere((String d) {
+        return d.startsWith('FLUTTER_WEB_AUTO_DETECT=') ||
+            d.startsWith('FLUTTER_WEB_USE_SKIA=') ||
+            d.startsWith('FLUTTER_WEB_USE_SKWASM=');
+      })
+      ..addAll(dartDefines);
+
     return dartDefinesSet.toList();
   }
 }
