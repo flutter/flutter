@@ -454,7 +454,7 @@ end
             'archive',
           ],
           environment: <String, String>{
-            'FLUTTER_SUPPRESS_ANALYTICS': '1',
+            'FLUTTER_SUPPRESS_ANALYTICS': 'true',
           }
         );
 
@@ -551,7 +551,7 @@ end
             'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
           environment: <String, String>{
-            'FLUTTER_SUPPRESS_ANALYTICS': '1',
+            'FLUTTER_SUPPRESS_ANALYTICS': 'true',
           },
           workingDirectory: objectiveCHostApp.path,
           canFail: true,
@@ -602,7 +602,7 @@ end
             'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
           environment: <String, String>{
-            'FLUTTER_SUPPRESS_ANALYTICS': '1',
+            'FLUTTER_SUPPRESS_ANALYTICS': 'true',
           },
           canFail: true,
         )

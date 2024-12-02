@@ -100,7 +100,7 @@ void main() {
       expect(fakeAnalytics.sentEvents, contains(Event.exception(exception: '_Exception')));
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(environment: <String, String>{
-        'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+        'FLUTTER_SUPPRESS_ANALYTICS': 'true',
         'FLUTTER_ROOT': '/',
       }),
       FileSystem: () => fileSystem,
@@ -144,7 +144,7 @@ void main() {
       await completer.future;
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(environment: <String, String>{
-        'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+        'FLUTTER_SUPPRESS_ANALYTICS': 'true',
         'FLUTTER_ROOT': '/',
       }),
       FileSystem: () => fileSystem,
@@ -213,7 +213,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(
         environment: <String, String>{
-          'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+          'FLUTTER_SUPPRESS_ANALYTICS': 'true',
           'FLUTTER_ROOT': '/',
         }
       ),
@@ -308,7 +308,7 @@ void main() {
       }, overrides: <Type, Generator>{
         Platform: () => FakePlatform(
           environment: <String, String>{
-            'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+            'FLUTTER_SUPPRESS_ANALYTICS': 'true',
             'FLUTTER_ROOT': '/',
           }
         ),
