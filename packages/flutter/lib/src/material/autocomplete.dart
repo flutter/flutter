@@ -227,7 +227,6 @@ class _AutocompleteOptionsListState<T extends Object> extends State<_Autocomplet
 
   @override
   void didUpdateWidget(_AutocompleteOptionsList<T> oldWidget) {
-    // Call super first.
     super.didUpdateWidget(oldWidget);
 
     if (widget.highlightedIndex != oldWidget.highlightedIndex) {
