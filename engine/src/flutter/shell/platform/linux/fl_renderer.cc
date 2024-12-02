@@ -89,6 +89,12 @@ static gboolean is_nvidia() {
   return strstr(vendor, "NVIDIA") != nullptr;
 }
 
+// Check if running on an Vivante Corporation driver.
+static gboolean is_vivante() {
+  const gchar* vendor = reinterpret_cast<const gchar*>(glGetString(GL_VENDOR));
+  return strstr(vendor, "Vivante Corporation") != nullptr;
+}
+
 // Returns the log for the given OpenGL shader. Must be freed by the caller.
 static gchar* get_shader_log(GLuint shader) {
   GLint log_length;
@@ -568,11 +574,12 @@ void fl_renderer_setup(FlRenderer* self) {
 
   g_return_if_fail(FL_IS_RENDERER(self));
 
-  // Note: NVIDIA is temporarily disabled due to
+  // Note: NVIDIA and Vivante are temporarily disabled due to
   // https://github.com/flutter/flutter/issues/152099
   priv->has_gl_framebuffer_blit =
-      !is_nvidia() && (epoxy_gl_version() >= 30 ||
-                       epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
+      !is_nvidia() && !is_vivante() &&
+      (epoxy_gl_version() >= 30 ||
+       epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
 
   if (!priv->has_gl_framebuffer_blit) {
     setup_shader(self);
