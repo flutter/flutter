@@ -396,6 +396,25 @@ void main() {
     TestRenderingFlutterBinding.instance.pumpCompleteFrame();
     expect(caughtErrors, isNull);
   });
+
+  test('ContainerParentDataMixin asserts parentData type', () {
+    final TestRenderObject renderObject = TestRenderObjectWithoutSetupParentData();
+    final TestRenderObject child = TestRenderObject();
+    expect(
+      () => renderObject.add(child),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError error) => error.toString(),
+          'description',
+          contains(
+            'A child of TestRenderObjectWithoutSetupParentData has parentData of type ParentData, '
+            'which does not conform to TestRenderObjectParentData. Class using ContainerRenderObjectMixin '
+            'should override setupParentData() to set parentData to type TestRenderObjectParentData.'
+          ),
+        ),
+      ),
+    );
+  });
 }
 
 
@@ -501,6 +520,16 @@ class TestRenderObject extends RenderObject with ContainerRenderObjectMixin<Test
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
     describeSemanticsConfigurationCallCount++;
+  }
+}
+
+class TestRenderObjectWithoutSetupParentData extends TestRenderObject {
+  @override
+  void setupParentData(RenderObject child) {
+    // Use a mismatched parent data type.
+    if (child.parentData is! ParentData) {
+      child.parentData = ParentData();
+    }
   }
 }
 
