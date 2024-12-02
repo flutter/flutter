@@ -19,11 +19,9 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/run.dart';
-import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/pre_run_validator.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/testing.dart';
@@ -1217,32 +1215,6 @@ class FakeTargetCommand extends FlutterCommand {
   String get name => 'test';
 }
 
-class FakeReportingNullSafetyCommand extends FlutterCommand {
-  FakeReportingNullSafetyCommand() {
-    argParser.addFlag('debug');
-    argParser.addFlag('release');
-    argParser.addFlag('jit-release');
-    argParser.addFlag('profile');
-  }
-
-  @override
-  String get description => 'test';
-
-  @override
-  String get name => 'test';
-
-  @override
-  bool get shouldRunPub => true;
-
-  @override
-  bool get reportNullSafety => true;
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
-    return FlutterCommandResult.success();
-  }
-}
-
 class FakeDdsCommand extends FlutterCommand {
   FakeDdsCommand() {
     addDdsOptions(verboseHelp: false);
@@ -1316,20 +1288,6 @@ class FakeClock extends Fake implements SystemClock {
   DateTime now() {
     return DateTime.fromMillisecondsSinceEpoch(times.removeAt(0));
   }
-}
-
-class FakePub extends Fake implements Pub {
-  @override
-  Future<void> get({
-    required PubContext context,
-    required FlutterProject project,
-    bool upgrade = false,
-    bool offline = false,
-    String? flutterRootOverride,
-    bool checkUpToDate = false,
-    bool shouldSkipThirdPartyGenerator = true,
-    PubOutputMode outputMode = PubOutputMode.all,
-  }) async { }
 }
 
 class _TestDeviceManager extends DeviceManager {
