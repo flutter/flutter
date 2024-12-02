@@ -6,6 +6,7 @@
 //
 // Run with --help for usage.
 
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:args/args.dart';
@@ -312,17 +313,15 @@ class ClangFormatChecker extends FormatChecker {
     super.allFiles,
     super.messageCallback,
   }) {
-    /*late*/ String clangOs;
-    if (Platform.isLinux) {
-      clangOs = 'linux-x64';
-    } else if (Platform.isMacOS) {
-      clangOs = 'mac-x64';
-    } else if (Platform.isWindows) {
-      clangOs = 'windows-x64';
-    } else {
-      throw FormattingException(
-          "Unknown operating system: don't know how to run clang-format here.");
-    }
+    final clangOs = switch (Abi.current()) {
+      Abi.linuxArm64 => 'linux-arm64',
+      Abi.linuxX64 => 'linux-x64',
+      Abi.macosArm64 => 'mac-arm64',
+      Abi.macosX64 => 'mac-x64',
+      Abi.windowsX64 => 'windows-x64',
+      (_) => throw FormattingException(
+          "Unknown operating system: don't know how to run clang-format here.")
+    };
     clangFormat = File(
       path.join(
         srcDir.absolute.path,
