@@ -4683,6 +4683,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_selectionOverlay == null) {
       return false;
     }
+    if (_selectionOverlay!.toolbarIsVisible) {
+      return false;
+    }
     _liveTextInputStatus?.update();
     clipboardStatus.update();
     _selectionOverlay!.showToolbar();

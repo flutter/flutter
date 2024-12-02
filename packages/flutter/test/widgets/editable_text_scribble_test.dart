@@ -683,4 +683,61 @@ void main() {
 
     // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
+
+  // Regression test for https://github.com/flutter/flutter/issues/159259.
+  testWidgets('showToolbar does nothing and returns false when already shown during Scribble selection', (WidgetTester tester) async {
+    controller.text = 'Lorem ipsum dolor sit amet';
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          key: editableTextKey,
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionHandleControls,
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+
+    await tester.showKeyboard(find.byType(EditableText));
+
+    await tester.testTextInput.startScribbleInteraction();
+    tester.testTextInput.updateEditingValue(TextEditingValue(
+      text: controller.text,
+      selection: const TextSelection(baseOffset: 3, extentOffset: 4),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+
+    expect(editableTextKey.currentState!.showToolbar(), isTrue);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+
+    expect(editableTextKey.currentState!.showToolbar(), isFalse);
+    await tester.pump();
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+
+    await tester.testTextInput.finishScribbleInteraction();
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+    skip: kIsWeb, // [intended]
+  );
 }

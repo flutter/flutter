@@ -17212,6 +17212,51 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/159259.
+  testWidgets('showToolbar does nothing and returns false when already shown', (WidgetTester tester) async {
+    controller.text = 'Lorem ipsum dolor sit amet';
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          key: editableTextKey,
+          autofocus: true,
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionHandleControls,
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+
+    expect(editableTextKey.currentState!.showToolbar(), isTrue);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+
+    expect(editableTextKey.currentState!.showToolbar(), isFalse);
+    await tester.pump();
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+    skip: kIsWeb, // [intended]
+  );
 }
 
 class UnsettableController extends TextEditingController {
