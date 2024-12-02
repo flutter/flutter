@@ -2600,22 +2600,10 @@ class SystemContextMenuController with SystemContextMenuClient {
   }
 }
 
-// TODO(justinmc): Is this still useful without toJson?
 /// Represents a single menu item in a system context menu.
-///
-/// Can be sent to the engine to be displayed in a system context menu via the
-/// `ContextMenu.showSystemContextMenu` [MethodChannel] method with [toJson].
-sealed class SystemContextMenuItem {
-  const SystemContextMenuItem();
-}
-
-/// Represents a single menu item in a system context menu on iOS or macOS.
-///
-/// Can be sent to the engine to be displayed in a system context menu via the
-/// `ContextMenu.showSystemContextMenu` [MethodChannel] method.
-class AppleSystemContextMenuItem extends SystemContextMenuItem {
-  /// Creates an instance of [AppleSystemContextMenuItem].
-  const AppleSystemContextMenuItem({
+class SystemContextMenuItem {
+  /// Creates an instance of [SystemContextMenuItem].
+  const SystemContextMenuItem({
     required this.action,
     required this.type,
     this.title,
@@ -2628,7 +2616,7 @@ class AppleSystemContextMenuItem extends SystemContextMenuItem {
   final String? title;
 
   /// The type of this menu item.
-  final SystemContextMenuType type;
+  final SystemContextMenuItemType type;
 }
 
 /// The type of a [SystemContextMenuItem].
@@ -2637,15 +2625,20 @@ class AppleSystemContextMenuItem extends SystemContextMenuItem {
 ///
 ///  * [SystemContextMenuAction], which specifies the action to take when a menu
 ///    item is invoked.
-enum SystemContextMenuType {
+enum SystemContextMenuItemType {
+  /// Indicates an item that is built-in to the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [SystemContextMenuAction], which contains all of the supported built-in
+  ///    items.
   builtIn,
 
   // TODO(justinmc): Support the "custom" type.
   // https://github.com/flutter/flutter/issues/103163
 }
 
-// TODO(justinmc): Revisit docs now that name doesn't include Apple.
-/// The built-in supported actions of iOS's system context menu items.
+/// The supported actions that are built-in to the platform.
 ///
 /// See also:
 ///
