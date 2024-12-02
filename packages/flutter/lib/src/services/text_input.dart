@@ -2619,6 +2619,24 @@ class SystemContextMenuItem {
   final SystemContextMenuItemType type;
 }
 
+/*
+// TODO(justinmc): Rename to be iOS-specific?
+enum SystemContextMenuAction {
+  cut._(ContextMenuButtonType.cut),
+  copy._(ContextMenuButtonType.copy),
+  paste._(ContextMenuButtonType.paste),
+  selectAll._(ContextMenuButtonType.selectAll),
+  lookUp._(ContextMenuButtonType.lookUp),
+  searchWeb._(ContextMenuButtonType.searchWeb),
+  share._(ContextMenuButtonType.share);
+
+  const SystemContextMenuAction._(this._contextMenuButtonType);
+
+  final ContextMenuButtonType _contextMenuButtonType;
+}
+*/
+
+// TODO(justinmc): Name conflicts with ContextMenuButtonItemType.
 /// The type of a [SystemContextMenuItem].
 ///
 /// See also:
@@ -2638,6 +2656,7 @@ enum SystemContextMenuItemType {
   // https://github.com/flutter/flutter/issues/103163
 }
 
+// TODO(justinmc): Reconcile with ContextMenuButtonType.
 /// The supported actions that are built-in to the platform.
 ///
 /// See also:
