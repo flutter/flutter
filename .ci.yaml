@@ -1080,6 +1080,7 @@ targets:
   - name: Linux android_release_builds_exclude_dev_dependencies_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    presubmit: true # TESTING ONLY; REMOVE BEFORE LANDING.
     bringup: true
     properties:
       dependencies: >-
