@@ -45,6 +45,7 @@ class SensitiveContentSetting {
       // set the desired level.
       // TODO(camsim99): Make this compatible with multi-window.
       _sensitiveContentService.setContentSensitivity(/*default Flutter view ID */ 0, desiredSensitivityLevel);
+      _currentSensitivityLevel = desiredSensitivityLevel;
       return;
     }
     if (!shouldSetContentSensitivity(desiredSensitivityLevel)) {
