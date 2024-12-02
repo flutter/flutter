@@ -297,7 +297,7 @@ android {
   /// `google_maps_flutter:^2.2.1`.
   ///
   /// Include all other desired options for running `flutter pub add` to
-  /// [options], e.g. ` <String>['--path', 'path/to/plugin']`.
+  /// [options], e.g. `<String>['--path', 'path/to/plugin']`.
   Future<void> addPlugin(String plugin, {List<String> options = const <String>[]}) async {
     await inDirectory(Directory(rootPath), () async {
       await flutter('pub', options: <String>['add', plugin, ...options]);

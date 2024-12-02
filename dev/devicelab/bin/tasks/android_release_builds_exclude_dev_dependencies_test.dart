@@ -14,8 +14,6 @@ Future<void> main() async {
   await task(() async {
     try {
       await runProjectTest((FlutterProject flutterProject) async {
-        section('APK does contain methods from dev dependency in debug mode');
-
         // Create dev_dependency plugin to use for test.
         final Directory tempDir = Directory.systemTemp.createTempSync('android_release_builds_exclude_dev_dependencies_test.');
         const String devDependencyPluginOrg = 'com.example.dev_dependency_plugin';
@@ -24,39 +22,32 @@ Future<void> main() async {
         // Add devDependencyPlugin as dependency of flutterProject.
         await flutterProject.addPlugin('dev_dependency_plugin', options: <String>['--path', '${tempDir.path}/dev_dependency_plugin']);
 
-        // Build APK in debug mode and check that devDependencyPlugin is represented in the APK.
-        await inDirectory(flutterProject.rootPath, () async {
-          await flutter('build', options: <String>[
-            'apk',
-            '--debug',
-            '--target-platform=android-arm',
-          ]);
-          File apk = File('${flutterProject.rootPath}/build/app/outputs/flutter-apk/app-debug.apk');
-          if (!apk.existsSync()) {
-            throw TaskResult.failure("Expected ${apk.path} to exist, but it doesn't");
-          }
-          bool apkIncludesDevDependency = await checkApkContainsMethodsFromLibrary(apk, devDependencyPluginOrg);
-          if (!apkIncludesDevDependency) {
-            return TaskResult.failure('Expected to find dev_dependency_plugin in APK built with debug mode but did not.');
-          }
+        final List<String> buildModesToTest = <String>['debug', 'profile', 'release'];
+        for (final String buildMode in buildModesToTest) { 
+          section('APK does contain methods from dev dependency in $buildMode mode');
 
-          section('APK does contain methods from dev dependency in release mode');
+          // Build APK in buildMode and check that devDependencyPlugin is included/excluded in the APK as expected.
+          await inDirectory(flutterProject.rootPath, () async {
+            await flutter('build', options: <String>[
+              'apk',
+              '--$buildMode',
+              '--target-platform=android-arm',
+            ]);
 
-          // Build APK in release mode and check that devDependencyPlugin is not represented in the APK.
-          await flutter('build', options: <String>[
-            'apk',
-            '--release',
-            '--target-platform=android-arm',
-          ]);
-          apk = File('${flutterProject.rootPath}/build/app/outputs/flutter-apk/app-release.apk');
-          if (!apk.existsSync()) {
-            throw TaskResult.failure("Expected ${apk.path} to exist, but it doesn't");
-          }
-          apkIncludesDevDependency = await checkApkContainsMethodsFromLibrary(apk, devDependencyPluginOrg);
-          if (apkIncludesDevDependency) {
-            return TaskResult.failure('Expected to not find dev_dependency_plugin in APK built with release mode but did.');
-          }
-        });
+            File apk = File('${flutterProject.rootPath}/build/app/outputs/flutter-apk/app-debug.apk');
+            if (!apk.existsSync()) {
+              throw TaskResult.failure("Expected ${apk.path} to exist, but it doesn't");
+            }
+
+            // Expect the APK to not include the devDependencyPlugin in release mode.
+            bool isTestingReleaseMode = buildMode == 'release';
+            bool apkIncludesDevDependency = await checkApkContainsMethodsFromLibrary(apk, devDependencyPluginOrg);
+            bool apkIncludesDevDependencyAsExpected = isTestingReleaseMode ? apkIncludesDevDependency == false : apkIncludesDevDependency;
+            if (!apkIncludesDevDependencyAsExpected) {
+              return TaskResult.failure('Expected to${isTestingReleaseMode ? ' not' : ''} find dev_dependency_plugin in APK built with debug mode but did${isTestingReleaseMode ? '' : ' not'}.');
+            }
+          });
+        }
       });
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
