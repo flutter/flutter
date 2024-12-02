@@ -59,10 +59,11 @@ GOTO :after_subroutine
     ECHO Error: Unable to find git in your PATH. && EXIT 1
   )
   2>NUL (
-    REM 'FOR /f' spawns a new terminal instance to run the command, so we need
-    REM to 'PUSHD %FLUTTER_ROOT%' before getting the git revision. If an
-    REM 'AutoRun' command is defined in the user's registry, we might not be in
-    REM the directory we expect to be in.
+    REM 'FOR /f' spawns a new terminal instance to run the command. If an
+    REM 'AutoRun' command is defined in the user's registry, that command could
+    REM change the working directory, and then we wouldn't be in the directory
+    REM we expect to be in. To prevent this, we need to 'PUSHD %FLUTTER_ROOT%'
+    REM before getting the git revision.
     REM
     REM See https://github.com/flutter/flutter/issues/159018
     FOR /f %%r IN ('PUSHD %FLUTTER_ROOT% ^& $git rev-parse HEAD') DO (
