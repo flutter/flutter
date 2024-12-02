@@ -384,7 +384,7 @@ class SemanticsController {
     bool checkForAction = true,
   }) {
     final SemanticsNode node = finder.evaluate().single;
-    if (checkForAction && !node.getSemanticsData().hasAction(action)){
+    if (checkForAction && !node.getSemanticsData().hasAction(action)) {
       throw StateError(
         'The given node does not support $action. If the action is implicitly '
         'supported or an unsupported action is being tested for this node, '
@@ -520,7 +520,7 @@ class SemanticsController {
     performAction(
       finder,
       SemanticsAction.moveCursorForwardByCharacter,
-      args: shouldModifySelection
+      args: shouldModifySelection,
     );
   }
 
@@ -538,7 +538,7 @@ class SemanticsController {
     performAction(
       finder,
       SemanticsAction.moveCursorForwardByWord,
-      args: shouldModifySelection
+      args: shouldModifySelection,
     );
   }
 
@@ -559,7 +559,7 @@ class SemanticsController {
     performAction(
       finder,
       SemanticsAction.moveCursorBackwardByCharacter,
-      args: shouldModifySelection
+      args: shouldModifySelection,
     );
   }
 
@@ -577,7 +577,7 @@ class SemanticsController {
     performAction(
       finder,
       SemanticsAction.moveCursorBackwardByWord,
-      args: shouldModifySelection
+      args: shouldModifySelection,
     );
   }
 
@@ -681,7 +681,7 @@ class SemanticsController {
     performAction(
       finder,
       SemanticsAction.customAction,
-      args: CustomSemanticsAction.getIdentifier(action)
+      args: CustomSemanticsAction.getIdentifier(action),
     );
   }
 
