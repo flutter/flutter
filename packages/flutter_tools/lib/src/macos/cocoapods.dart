@@ -74,7 +74,7 @@ enum CocoaPodsStatus {
 }
 
 const Version cocoaPodsMinimumVersion = Version.withText(1, 10, 0, '1.10.0');
-const Version cocoaPodsRecommendedVersion = Version.withText(1, 13, 0, '1.13.0');
+const Version cocoaPodsRecommendedVersion = Version.withText(1, 16, 2, '1.16.2');
 
 /// Cocoapods is a dependency management solution for iOS and macOS applications.
 ///
@@ -163,7 +163,7 @@ class CocoaPods {
   }) async {
     if (!xcodeProject.podfile.existsSync()) {
       // Swift Package Manager doesn't need Podfile, so don't error.
-      if (xcodeProject.parent.usesSwiftPackageManager) {
+      if (xcodeProject.usesSwiftPackageManager) {
         return false;
       }
       throwToolExit('Podfile missing');
@@ -493,6 +493,14 @@ class CocoaPods {
           );
         }
       }
+    } else if (stdout.contains('unknown ISA `PBXFileSystemSynchronizedRootGroup`')) {
+      // CocoaPods must be at least verison 1.16.2 to handle synchronized
+      // groups/folders https://github.com/CocoaPods/CocoaPods/issues/12456
+      _logger.printError(
+        'Error: Your Cocoapods might be out-of-date and unable to support synchronized groups/folders. '
+        'Please update to a minimum version of 1.16.2 and try again.',
+        emphasis: true,
+      );
     }
   }
 

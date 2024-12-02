@@ -187,7 +187,6 @@ void main() {
         FakeCommand(
           command: const <String>[
             'Artifact.engineDartSdkPath/bin/dart',
-            '--disable-dart-dev',
             'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
@@ -225,7 +224,6 @@ void main() {
         FakeCommand(
           command: const <String>[
             'Artifact.engineDartSdkPath/bin/dart',
-            '--disable-dart-dev',
             'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
@@ -270,7 +268,6 @@ void main() {
         FakeCommand(
           command: const <String>[
             'Artifact.engineDartSdkPath/bin/dart',
-            '--disable-dart-dev',
             'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
@@ -325,7 +322,6 @@ void main() {
           FakeCommand(
               command: const <String>[
                 'Artifact.engineDartSdkPath/bin/dart',
-                '--disable-dart-dev',
                 'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
                 '--disable-server-feature-completion',
                 '--disable-server-feature-search',

@@ -410,7 +410,7 @@ class ListTile extends StatelessWidget {
     this.minLeadingWidth,
     this.minTileHeight,
     this.titleAlignment,
-    this.internalAddSemanticForOnTap = false,
+    this.internalAddSemanticForOnTap = true,
   }) : assert(!isThreeLine || subtitle != null);
 
   /// A widget to display before the title.
@@ -621,7 +621,7 @@ class ListTile extends StatelessWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.selected].
@@ -630,11 +630,6 @@ class ListTile extends StatelessWidget {
   ///
   /// If null, then the value of [ListTileThemeData.mouseCursor] is used. If
   /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
-  ///
-  /// See also:
-  ///
-  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor]
-  ///    that is also a [WidgetStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// If this tile is also [enabled] then icons and text are rendered with the same color.
@@ -1546,12 +1541,10 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
   Color? get tileColor =>  Colors.transparent;
 
   @override
-  TextStyle? get titleTextStyle {
-    return switch (style!) {
-      ListTileStyle.drawer => _textTheme.bodyLarge,
-      ListTileStyle.list   => _textTheme.titleMedium,
-    };
-  }
+  TextStyle? get titleTextStyle => switch (style!) {
+    ListTileStyle.drawer => _textTheme.bodyLarge,
+    ListTileStyle.list   => _textTheme.titleMedium,
+  };
 
   @override
   TextStyle? get subtitleTextStyle => _textTheme.bodyMedium!
@@ -1564,15 +1557,13 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
   Color? get selectedColor => _theme.colorScheme.primary;
 
   @override
-  Color? get iconColor {
-    return switch (_theme.brightness) {
-      // For the sake of backwards compatibility, the default for unselected
-      // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
-      Brightness.light => Colors.black45,
-      // null -> use current icon theme color
-      Brightness.dark => null,
-    };
-  }
+  Color? get iconColor => switch (_theme.brightness) {
+    // For the sake of backwards compatibility, the default for unselected
+    // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
+    Brightness.light => Colors.black45,
+    // null -> use current icon theme color
+    Brightness.dark => null,
+  };
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - LisTile

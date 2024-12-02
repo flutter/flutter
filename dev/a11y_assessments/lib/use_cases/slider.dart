@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class SliderUseCase extends UseCase {
@@ -28,12 +28,14 @@ class MainWidgetState extends State<MainWidget> {
   double currentSliderValue = 20;
   static const String accessibilityLabel = 'Accessibility Test Slider';
 
+  String pageTitle = getUseCaseName(SliderUseCase());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: const Text('Slider demo')),
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle demo')),
       ),
       body: Center(
         child: Semantics(

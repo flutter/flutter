@@ -78,6 +78,7 @@ class WebDriverService extends DriverService {
           hostname: debuggingOptions.hostname,
           webRenderer: debuggingOptions.webRenderer,
           webUseWasm: debuggingOptions.webUseWasm,
+          webHeaders: debuggingOptions.webHeaders,
         )
         : DebuggingOptions.enabled(
           buildInfo,
@@ -86,6 +87,7 @@ class WebDriverService extends DriverService {
           disablePortPublication: debuggingOptions.disablePortPublication,
           webRenderer: debuggingOptions.webRenderer,
           webUseWasm: debuggingOptions.webUseWasm,
+          webHeaders: debuggingOptions.webHeaders,
         ),
       stayResident: true,
       flutterProject: FlutterProject.current(),
@@ -113,18 +115,18 @@ class WebDriverService extends DriverService {
     ]);
 
     if (_runResult != null) {
-      throw ToolExit(
+      throwToolExit(
         'Application exited before the test started. Check web driver logs '
         'for possible application-side errors.'
       );
     }
 
     if (!isAppStarted) {
-      throw ToolExit('Failed to start application');
+      throwToolExit('Failed to start application');
     }
 
     if (_residentRunner.uri == null) {
-      throw ToolExit('Unable to connect to the app. URL not available.');
+      throwToolExit('Unable to connect to the app. URL not available.');
     }
 
     if (debuggingOptions.webLaunchUrl != null) {
@@ -208,7 +210,7 @@ class WebDriverService extends DriverService {
     await _residentRunner.cleanupAtFinish();
 
     if (appDidFinishPrematurely) {
-      throw ToolExit(
+      throwToolExit(
         'Application exited before the test finished. Check web driver logs '
         'for possible application-side errors.'
       );

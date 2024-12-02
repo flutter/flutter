@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_ios.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
@@ -28,6 +29,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../general.shard/ios/xcresult_test_data.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -98,7 +100,7 @@ void main() {
   // Sets up the minimal mock project files necessary to look like a Flutter project.
   void createCoreMockProjectFiles() {
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
@@ -264,7 +266,7 @@ void main() {
       osUtils: FakeOperatingSystemUtils(),
     );
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
 
@@ -298,6 +300,7 @@ void main() {
     expect(testLogger.statusText, contains(RegExp(r'✓ Built build/ios/iphoneos/Runner\.app \(\d+\.\d+MB\)')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    Pub: FakePubWithPrimedDeps.new,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(onRun: (_) {
@@ -336,6 +339,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -368,6 +372,7 @@ void main() {
       ),
       setUpRsyncCommand(),
     ]),
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -399,6 +404,7 @@ void main() {
       ),
       setUpRsyncCommand(),
     ]),
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -434,6 +440,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -464,6 +471,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -493,6 +501,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -522,6 +531,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    Pub: FakePubWithPrimedDeps.new,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -575,6 +585,7 @@ void main() {
     Logger: () => logger,
     ProcessManager: () => processManager,
     Platform: () => macosPlatform,
+    Pub: FakePubWithPrimedDeps.new,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
     Analytics: () => fakeAnalytics,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -639,6 +650,7 @@ void main() {
         platform: macosPlatform,
       ),
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Pub: FakePubWithPrimedDeps.new,
       Analytics: () => fakeAnalytics,
     });
 
@@ -704,6 +716,7 @@ void main() {
           plutilCommand, plutilCommand, plutilCommand,
         ]),
       ),
+      Pub: FakePubWithPrimedDeps.new,
       Analytics: () => fakeAnalytics,
     });
   });
@@ -740,6 +753,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
+      Pub: FakePubWithPrimedDeps.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });
@@ -779,6 +793,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
+      Pub: FakePubWithPrimedDeps.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });
@@ -817,6 +832,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
+      Pub: FakePubWithPrimedDeps.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });
@@ -849,6 +865,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
+      Pub: FakePubWithPrimedDeps.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });
@@ -888,6 +905,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
+      Pub: FakePubWithPrimedDeps.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });
@@ -927,6 +945,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
+      Pub: FakePubWithPrimedDeps.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });
@@ -962,6 +981,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
+      Pub: FakePubWithPrimedDeps.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });
@@ -1009,6 +1029,7 @@ void main() {
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
+      Pub: FakePubWithPrimedDeps.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });
@@ -1050,6 +1071,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
+      Pub: FakePubWithPrimedDeps.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });
@@ -1088,6 +1110,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
+      Pub: FakePubWithPrimedDeps.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
     });
@@ -1127,6 +1150,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
         setUpRsyncCommand(),
       ]),
+      Pub: FakePubWithPrimedDeps.new,
       EnvironmentType: () => EnvironmentType.physical,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
@@ -1165,6 +1189,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
+      Pub: FakePubWithPrimedDeps.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
     });
@@ -1204,6 +1229,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
+      Pub: FakePubWithPrimedDeps.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
     });
@@ -1243,6 +1269,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
+      Pub: FakePubWithPrimedDeps.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
     });
@@ -1284,6 +1311,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
+      Pub: FakePubWithPrimedDeps.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });
@@ -1324,6 +1352,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
+      Pub: FakePubWithPrimedDeps.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });
@@ -1367,6 +1396,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
+      Pub: FakePubWithPrimedDeps.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });
@@ -1403,6 +1433,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       FileSystem: () => fileSystem,
       Logger: () => logger,
       ProcessManager: () => processManager,
+      Pub: FakePubWithPrimedDeps.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });

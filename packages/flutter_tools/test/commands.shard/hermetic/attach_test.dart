@@ -29,7 +29,6 @@ import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
-import 'package:flutter_tools/src/vmservice.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -1091,7 +1090,7 @@ void main() {
         bool enableDevTools,
       ) async {
         await null;
-        throw vm_service.RPCError('flutter._listViews', RPCErrorCodes.kServiceDisappeared, '');
+        throw vm_service.RPCError('flutter._listViews', vm_service.RPCErrorKind.kServiceDisappeared.code, '');
       };
 
       testDeviceManager.devices = <Device>[device];
@@ -1130,7 +1129,7 @@ void main() {
         bool enableDevTools,
       ) async {
         await null;
-        throw vm_service.RPCError('flutter._listViews', RPCErrorCodes.kServerError, 'Service connection disposed');
+        throw vm_service.RPCError('flutter._listViews', vm_service.RPCErrorKind.kServerError.code, 'Service connection disposed');
       };
 
       testDeviceManager.devices = <Device>[device];
@@ -1170,7 +1169,7 @@ void main() {
         bool enableDevTools,
       ) async {
         await null;
-        throw vm_service.RPCError('flutter._listViews', RPCErrorCodes.kInvalidParams, '');
+        throw vm_service.RPCError('flutter._listViews', vm_service.RPCErrorKind.kInvalidParams.code, '');
       };
 
       testDeviceManager.devices = <Device>[device];
@@ -1250,7 +1249,6 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
     FlutterProject? flutterProject,
     Analytics? analytics,
     String? nativeAssetsYamlFile,
-    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) {
     if (_artifactTester != null) {
       for (final FlutterDevice device in devices) {

@@ -163,9 +163,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Future<int> runCold({ColdRunner? coldRunner, String? route}) async {
     return runColdCode;
   }
-
-  @override
-  Future<void> initLogReader() async { }
 }
 
 class FakeDevice extends Fake implements Device {

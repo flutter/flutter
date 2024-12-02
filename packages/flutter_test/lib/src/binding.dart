@@ -849,20 +849,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   Future<void> _handleAnnouncementMessage(Object? mockMessage) async {
-    final Map<Object?, Object?> message = mockMessage! as Map<Object?, Object?>;
-    if (message['type'] == 'announce') {
-      final Map<Object?, Object?> data =
-          message['data']! as Map<Object?, Object?>;
-      final String dataMessage = data['message'].toString();
-      final TextDirection textDirection =
-          TextDirection.values[data['textDirection']! as int];
-      final int assertivenessLevel = (data['assertiveness'] as int?) ?? 0;
-      final Assertiveness assertiveness =
-          Assertiveness.values[assertivenessLevel];
-      final CapturedAccessibilityAnnouncement announcement =
-          CapturedAccessibilityAnnouncement._(
-              dataMessage, textDirection, assertiveness);
-      _announcements.add(announcement);
+    if (mockMessage! case {
+      'type': 'announce',
+      'data': final Map<Object?, Object?> data as Map<Object?, Object?>,
+    }) {
+      _announcements.add(CapturedAccessibilityAnnouncement._(
+        data['message'].toString(),
+        TextDirection.values[data['textDirection']! as int],
+        Assertiveness.values[(data['assertiveness'] ?? 0) as int],
+      ));
     }
   }
 
@@ -1649,6 +1644,12 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   benchmarkLive,
 }
 
+enum _HandleDrawFrame {
+  reset,
+  drawFrame,
+  skipFrame,
+}
+
 /// A variant of [TestWidgetsFlutterBinding] for executing tests
 /// on a device, typically via `flutter run`, or via integration tests.
 /// This is intended to allow interactive test development.
@@ -1779,31 +1780,35 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     return super.reassembleApplication();
   }
 
-  bool? _doDrawThisFrame;
+  _HandleDrawFrame _drawFrame = _HandleDrawFrame.reset;
 
   @override
   void handleBeginFrame(Duration? rawTimeStamp) {
-    assert(_doDrawThisFrame == null);
+    if (_drawFrame != _HandleDrawFrame.reset) {
+      throw StateError('handleBeginFrame() called before previous handleDrawFrame()');
+    }
     if (_expectingFrame ||
         _expectingFrameToReassemble ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fadePointers && _viewNeedsPaint)) {
-      _doDrawThisFrame = true;
+      _drawFrame = _HandleDrawFrame.drawFrame;
       super.handleBeginFrame(rawTimeStamp);
     } else {
-      _doDrawThisFrame = false;
+      _drawFrame = _HandleDrawFrame.skipFrame;
     }
   }
 
   @override
   void handleDrawFrame() {
-    assert(_doDrawThisFrame != null);
-    if (_doDrawThisFrame!) {
+    if (_drawFrame == _HandleDrawFrame.reset) {
+      throw StateError('handleDrawFrame() called without paired handleBeginFrame()');
+    }
+    if (_drawFrame == _HandleDrawFrame.drawFrame) {
       super.handleDrawFrame();
     }
-    _doDrawThisFrame = null;
+    _drawFrame = _HandleDrawFrame.reset;
     _viewNeedsPaint = false;
     _expectingFrameToReassemble = false;
     if (_expectingFrame) { // set during pump
@@ -1832,7 +1837,13 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     fontSize: 10.0,
   );
 
-  void _setDescription(String value) {
+  /// Label describing the test.
+  @visibleForTesting
+  TextPainter? get label => _label;
+
+  /// Set a description label that is drawn into the test output.
+  @protected
+  void setLabel(String value) {
     if (value.isEmpty) {
       _label = null;
       return;
@@ -2033,7 +2044,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }) {
     assert(!inTest);
     _inTest = true;
-    _setDescription(description);
+    setLabel(description);
     return _runTest(testBody, invariantTester, description);
   }
 
@@ -2170,7 +2181,11 @@ class TestViewConfiguration implements ViewConfiguration {
     final double desiredWidth = size.width;
     final double desiredHeight = size.height;
     double scale, shiftX, shiftY;
-    if ((actualWidth / actualHeight) > (desiredWidth / desiredHeight)) {
+    if (desiredWidth == 0.0 || desiredHeight == 0.0) {
+      scale = 1.0;
+      shiftX = 0.0;
+      shiftY = 0.0;
+    } else if ((actualWidth / actualHeight) > (desiredWidth / desiredHeight)) {
       scale = actualHeight / desiredHeight;
       shiftX = (actualWidth - desiredWidth * scale) / 2.0;
       shiftY = 0.0;

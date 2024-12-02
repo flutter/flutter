@@ -147,7 +147,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         ...framework.parent
             .listSync()
             .where((FileSystemEntity entity) =>
-        entity.basename.endsWith('dSYM'))
+        entity.basename.endsWith('dSYM') && !entity.basename.startsWith('Flutter'))
             .map((FileSystemEntity entity) => <String>['-debug-symbols', entity.path])
             .expand<String>((List<String> parameter) => parameter),
       ],
@@ -283,6 +283,8 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
           '- .DS_Store',
           '--filter',
           '- native_assets.yaml',
+          '--filter',
+          '- native_assets.json',
           nativeAssetsDirectory.path,
           modeDirectory.path,
         ]);
@@ -452,7 +454,7 @@ end
           processManager: globals.processManager,
           platform: globals.platform,
           analytics: globals.analytics,
-          engineVersion: globals.artifacts!.isLocalEngine
+          engineVersion: globals.artifacts!.usesLocalArtifacts
               ? null
               : globals.flutterVersion.engineRevision,
           generateDartPluginRegistry: true,

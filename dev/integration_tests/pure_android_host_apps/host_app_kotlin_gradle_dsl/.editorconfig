@@ -1,0 +1,2 @@
+[*.{kt,kts}]
+ktlint = disabled

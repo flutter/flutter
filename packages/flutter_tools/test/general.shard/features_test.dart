@@ -407,9 +407,9 @@ void main() {
       expect(swiftPackageManager.master.enabledByDefault, false);
       expect(swiftPackageManager.master.available, true);
       expect(swiftPackageManager.beta.enabledByDefault, false);
-      expect(swiftPackageManager.beta.available, false);
+      expect(swiftPackageManager.beta.available, true);
       expect(swiftPackageManager.stable.enabledByDefault, false);
-      expect(swiftPackageManager.stable.available, false);
+      expect(swiftPackageManager.stable.available, true);
     });
   });
 }

@@ -39,6 +39,15 @@ class ProgressIndicatorThemeData with Diagnosticable {
     this.linearMinHeight,
     this.circularTrackColor,
     this.refreshBackgroundColor,
+    this.borderRadius,
+    this.stopIndicatorColor,
+    this.stopIndicatorRadius,
+    this.strokeWidth,
+    this.strokeAlign,
+    this.strokeCap,
+    this.constraints,
+    this.trackGap,
+    this.circularTrackPadding,
   });
 
   /// The color of the [ProgressIndicator]'s indicator.
@@ -66,6 +75,45 @@ class ProgressIndicatorThemeData with Diagnosticable {
   /// {@macro flutter.material.RefreshProgressIndicator.backgroundColor}
   final Color? refreshBackgroundColor;
 
+  /// Overrides the border radius of the [ProgressIndicator].
+  final BorderRadiusGeometry? borderRadius;
+
+  /// Overrides the stop indicator color of the [LinearProgressIndicator].
+  ///
+  /// If [LinearProgressIndicator.year2023] is false or [ThemeData.useMaterial3]
+  /// is false, then no stop indicator will be drawn.
+  final Color? stopIndicatorColor;
+
+  /// Overrides the stop indicator radius of the [LinearProgressIndicator].
+  ///
+  /// If [LinearProgressIndicator.year2023] is false or [ThemeData.useMaterial3]
+  /// is false, then no stop indicator will be drawn.
+  final double? stopIndicatorRadius;
+
+  /// Overrides the stroke width of the [CircularProgressIndicator].
+  final double? strokeWidth;
+
+  /// Overrides the stroke align of the [CircularProgressIndicator].
+  final double? strokeAlign;
+
+  /// Overrides the stroke cap of the [CircularProgressIndicator].
+  final StrokeCap? strokeCap;
+
+  /// Overrides the constraints of the [CircularProgressIndicator].
+  final BoxConstraints? constraints;
+
+  /// Overrides the active indicator and the background track.
+  ///
+  /// If [CircularProgressIndicator.year2023] is false or [ThemeData.useMaterial3]
+  /// is false, then no track gap will be drawn.
+  ///
+  /// If [LinearProgressIndicator.year2023] is false or [ThemeData.useMaterial3]
+  /// is false, then no track gap will be drawn.
+  final double? trackGap;
+
+  /// Overrides the padding of the [CircularProgressIndicator].
+  final EdgeInsetsGeometry? circularTrackPadding;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ProgressIndicatorThemeData copyWith({
@@ -74,6 +122,15 @@ class ProgressIndicatorThemeData with Diagnosticable {
     double? linearMinHeight,
     Color? circularTrackColor,
     Color? refreshBackgroundColor,
+    BorderRadiusGeometry? borderRadius,
+    Color? stopIndicatorColor,
+    double? stopIndicatorRadius,
+    double? strokeWidth,
+    double? strokeAlign,
+    StrokeCap? strokeCap,
+    BoxConstraints? constraints,
+    double? trackGap,
+    EdgeInsetsGeometry? circularTrackPadding,
   }) {
     return ProgressIndicatorThemeData(
       color: color ?? this.color,
@@ -81,6 +138,15 @@ class ProgressIndicatorThemeData with Diagnosticable {
       linearMinHeight : linearMinHeight ?? this.linearMinHeight,
       circularTrackColor : circularTrackColor ?? this.circularTrackColor,
       refreshBackgroundColor : refreshBackgroundColor ?? this.refreshBackgroundColor,
+      borderRadius : borderRadius ?? this.borderRadius,
+      stopIndicatorColor : stopIndicatorColor ?? this.stopIndicatorColor,
+      stopIndicatorRadius : stopIndicatorRadius ?? this.stopIndicatorRadius,
+      strokeWidth : strokeWidth ?? this.strokeWidth,
+      strokeAlign : strokeAlign ?? this.strokeAlign,
+      strokeCap : strokeCap ?? this.strokeCap,
+      constraints: constraints ?? this.constraints,
+      trackGap : trackGap ?? this.trackGap,
+      circularTrackPadding: circularTrackPadding ?? this.circularTrackPadding,
     );
   }
 
@@ -97,6 +163,15 @@ class ProgressIndicatorThemeData with Diagnosticable {
       linearMinHeight : lerpDouble(a?.linearMinHeight, b?.linearMinHeight, t),
       circularTrackColor : Color.lerp(a?.circularTrackColor, b?.circularTrackColor, t),
       refreshBackgroundColor : Color.lerp(a?.refreshBackgroundColor, b?.refreshBackgroundColor, t),
+      borderRadius : BorderRadiusGeometry.lerp(a?.borderRadius, b?.borderRadius, t),
+      stopIndicatorColor : Color.lerp(a?.stopIndicatorColor, b?.stopIndicatorColor, t),
+      stopIndicatorRadius : lerpDouble(a?.stopIndicatorRadius, b?.stopIndicatorRadius, t),
+      strokeWidth : lerpDouble(a?.strokeWidth, b?.strokeWidth, t),
+      strokeAlign : lerpDouble(a?.strokeAlign, b?.strokeAlign, t),
+      strokeCap : t < 0.5 ? a?.strokeCap : b?.strokeCap,
+      constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
+      trackGap : lerpDouble(a?.trackGap, b?.trackGap, t),
+      circularTrackPadding: EdgeInsetsGeometry.lerp(a?.circularTrackPadding, b?.circularTrackPadding, t),
     );
   }
 
@@ -107,6 +182,15 @@ class ProgressIndicatorThemeData with Diagnosticable {
     linearMinHeight,
     circularTrackColor,
     refreshBackgroundColor,
+    borderRadius,
+    stopIndicatorColor,
+    stopIndicatorRadius,
+    strokeAlign,
+    strokeWidth,
+    strokeCap,
+    constraints,
+    trackGap,
+    circularTrackPadding,
   );
 
   @override
@@ -122,7 +206,16 @@ class ProgressIndicatorThemeData with Diagnosticable {
       && other.linearTrackColor == linearTrackColor
       && other.linearMinHeight == linearMinHeight
       && other.circularTrackColor == circularTrackColor
-      && other.refreshBackgroundColor == refreshBackgroundColor;
+      && other.refreshBackgroundColor == refreshBackgroundColor
+      && other.borderRadius == borderRadius
+      && other.stopIndicatorColor == stopIndicatorColor
+      && other.stopIndicatorRadius == stopIndicatorRadius
+      && other.strokeAlign == strokeAlign
+      && other.strokeWidth == strokeWidth
+      && other.strokeCap == strokeCap
+      && other.constraints == constraints
+      && other.trackGap == trackGap
+      && other.circularTrackPadding == circularTrackPadding;
   }
 
   @override
@@ -133,6 +226,15 @@ class ProgressIndicatorThemeData with Diagnosticable {
     properties.add(DoubleProperty('linearMinHeight', linearMinHeight, defaultValue: null));
     properties.add(ColorProperty('circularTrackColor', circularTrackColor, defaultValue: null));
     properties.add(ColorProperty('refreshBackgroundColor', refreshBackgroundColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius, defaultValue: null));
+    properties.add(ColorProperty('stopIndicatorColor', stopIndicatorColor, defaultValue: null));
+    properties.add(DoubleProperty('stopIndicatorRadius', stopIndicatorRadius, defaultValue: null));
+    properties.add(DoubleProperty('strokeWidth', strokeWidth, defaultValue: null));
+    properties.add(DoubleProperty('strokeAlign', strokeAlign, defaultValue: null));
+    properties.add(DiagnosticsProperty<StrokeCap>('strokeCap', strokeCap, defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
+    properties.add(DoubleProperty('trackGap', trackGap, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('circularTrackPadding', circularTrackPadding, defaultValue: null));
   }
 }
 

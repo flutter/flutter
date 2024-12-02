@@ -26,6 +26,7 @@ import 'material_state.dart';
 import 'outlined_button.dart';
 import 'text_button.dart';
 import 'theme_data.dart';
+import 'tooltip.dart';
 
 /// {@template flutter.material.ButtonStyleButton.iconAlignment}
 /// Determines the alignment of the icon within the widgets such as:
@@ -85,8 +86,9 @@ abstract class ButtonStyleButton extends StatefulWidget {
     required this.clipBehavior,
     this.statesController,
     this.isSemanticButton = true,
-    required this.child,
     this.iconAlignment = IconAlignment.start,
+    this.tooltip,
+    required this.child,
   });
 
   /// Called when the button is tapped or otherwise activated.
@@ -155,13 +157,22 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// Defaults to true.
   final bool? isSemanticButton;
 
+  /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
+  final IconAlignment iconAlignment;
+
+  /// Text that describes the action that will occur when the button is pressed or
+  /// hovered over.
+  ///
+  /// This text is displayed when the user long-presses or hovers over the button
+  /// in a tooltip. This string is also used for accessibility.
+  ///
+  /// If null, the button will not display a tooltip.
+  final String? tooltip;
+
   /// Typically the button's label.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
-
-  /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
-  final IconAlignment iconAlignment;
 
   /// Returns a [ButtonStyle] that's based primarily on the [Theme]'s
   /// [ThemeData.textTheme] and [ThemeData.colorScheme], but has most values
@@ -234,6 +245,23 @@ abstract class ButtonStyleButton extends StatefulWidget {
   ///
   /// A convenience method for subclasses.
   static MaterialStateProperty<T>? allOrNull<T>(T? value) => value == null ? null : MaterialStatePropertyAll<T>(value);
+
+  /// Returns null if [enabled] and [disabled] are null.
+  /// Otherwise, returns a [WidgetStateProperty] that resolves to [disabled]
+  /// when [WidgetState.disabled] is active, and [enabled] otherwise.
+  ///
+  /// A convenience method for subclasses.
+  static WidgetStateProperty<Color?>? defaultColor(Color? enabled, Color? disabled) {
+    if ((enabled ?? disabled) == null) {
+      return null;
+    }
+    return WidgetStateProperty<Color?>.fromMap(
+      <WidgetStatesConstraint, Color?>{
+        WidgetState.disabled: disabled,
+        WidgetState.any: enabled,
+      },
+    );
+  }
 
   /// A convenience method used by subclasses in the framework, that returns an
   /// interpolated value based on the [fontSizeMultiplier] parameter:
@@ -379,7 +407,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final VisualDensity? resolvedVisualDensity = effectiveValue((ButtonStyle? style) => style?.visualDensity);
     final MaterialTapTargetSize? resolvedTapTargetSize = effectiveValue((ButtonStyle? style) => style?.tapTargetSize);
     final Duration? resolvedAnimationDuration = effectiveValue((ButtonStyle? style) => style?.animationDuration);
-    final bool? resolvedEnableFeedback = effectiveValue((ButtonStyle? style) => style?.enableFeedback);
+    final bool resolvedEnableFeedback = effectiveValue((ButtonStyle? style) => style?.enableFeedback) ?? true;
     final AlignmentGeometry? resolvedAlignment = effectiveValue((ButtonStyle? style) => style?.alignment);
     final Offset densityAdjustment = resolvedVisualDensity!.baseSizeAdjustment;
     final InteractiveInkFeatureFactory? resolvedSplashFactory = effectiveValue((ButtonStyle? style) => style?.splashFactory);
@@ -454,7 +482,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     elevation = resolvedElevation;
     backgroundColor = resolvedBackgroundColor;
 
-    Widget effectiveChild = Padding(
+    Widget result = Padding(
       padding: padding,
       child: Align(
         alignment: resolvedAlignment!,
@@ -466,46 +494,39 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       ),
     );
     if (resolvedBackgroundBuilder != null) {
-      effectiveChild = resolvedBackgroundBuilder(context, statesController.value, effectiveChild);
+      result = resolvedBackgroundBuilder(context, statesController.value, result);
     }
 
-    final Widget result = ConstrainedBox(
-      constraints: effectiveConstraints,
-      child: Material(
-        elevation: resolvedElevation!,
-        textStyle: resolvedTextStyle?.copyWith(color: resolvedForegroundColor),
-        shape: resolvedShape!.copyWith(side: resolvedSide),
-        color: resolvedBackgroundColor,
-        shadowColor: resolvedShadowColor,
-        surfaceTintColor: resolvedSurfaceTintColor,
-        type: resolvedBackgroundColor == null ? MaterialType.transparency : MaterialType.button,
-        animationDuration: resolvedAnimationDuration,
-        clipBehavior: effectiveClipBehavior,
-        child: InkWell(
-          onTap: widget.onPressed,
-          onLongPress: widget.onLongPress,
-          onHover: widget.onHover,
-          mouseCursor: mouseCursor,
-          enableFeedback: resolvedEnableFeedback,
-          focusNode: widget.focusNode,
-          canRequestFocus: widget.enabled,
-          onFocusChange: widget.onFocusChange,
-          autofocus: widget.autofocus,
-          splashFactory: resolvedSplashFactory,
-          overlayColor: overlayColor,
-          highlightColor: Colors.transparent,
-          customBorder: resolvedShape.copyWith(side: resolvedSide),
-          statesController: statesController,
-          child: IconTheme.merge(
-            data: IconThemeData(
-              color: resolvedIconColor ?? resolvedForegroundColor,
-              size: resolvedIconSize,
-            ),
-            child: effectiveChild,
-          ),
+    result = InkWell(
+      onTap: widget.onPressed,
+      onLongPress: widget.onLongPress,
+      onHover: widget.onHover,
+      mouseCursor: mouseCursor,
+      enableFeedback: resolvedEnableFeedback,
+      focusNode: widget.focusNode,
+      canRequestFocus: widget.enabled,
+      onFocusChange: widget.onFocusChange,
+      autofocus: widget.autofocus,
+      splashFactory: resolvedSplashFactory,
+      overlayColor: overlayColor,
+      highlightColor: Colors.transparent,
+      customBorder: resolvedShape!.copyWith(side: resolvedSide),
+      statesController: statesController,
+      child: IconTheme.merge(
+        data: IconThemeData(
+          color: resolvedIconColor ?? resolvedForegroundColor,
+          size: resolvedIconSize,
         ),
+        child: result,
       ),
     );
+
+    if (widget.tooltip != null) {
+      result = Tooltip(
+        message: widget.tooltip,
+        child: result,
+      );
+    }
 
     final Size minSize;
     switch (resolvedTapTargetSize!) {
@@ -526,7 +547,21 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       enabled: widget.enabled,
       child: _InputPadding(
         minSize: minSize,
-        child: result,
+        child: ConstrainedBox(
+          constraints: effectiveConstraints,
+          child: Material(
+            elevation: resolvedElevation!,
+            textStyle: resolvedTextStyle?.copyWith(color: resolvedForegroundColor),
+            shape: resolvedShape.copyWith(side: resolvedSide),
+            color: resolvedBackgroundColor,
+            shadowColor: resolvedShadowColor,
+            surfaceTintColor: resolvedSurfaceTintColor,
+            type: resolvedBackgroundColor == null ? MaterialType.transparency : MaterialType.button,
+            animationDuration: resolvedAnimationDuration,
+            clipBehavior: effectiveClipBehavior,
+            child: result,
+          ),
+        ),
       ),
     );
   }

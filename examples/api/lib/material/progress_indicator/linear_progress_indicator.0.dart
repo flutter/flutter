@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [LinearProgressIndicator].
 
-void main() => runApp(const ProgressIndicatorApp());
+void main() => runApp(const ProgressIndicatorExampleApp());
 
-class ProgressIndicatorApp extends StatelessWidget {
-  const ProgressIndicatorApp({super.key});
+class ProgressIndicatorExampleApp extends StatelessWidget {
+  const ProgressIndicatorExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,24 +23,26 @@ class ProgressIndicatorExample extends StatefulWidget {
   const ProgressIndicatorExample({super.key});
 
   @override
-  State<ProgressIndicatorExample> createState() => _ProgressIndicatorExampleState();
+  State<ProgressIndicatorExample> createState() =>
+      _ProgressIndicatorExampleState();
 }
 
-class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> with TickerProviderStateMixin {
+class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
+    with TickerProviderStateMixin {
   late AnimationController controller;
 
   @override
   void initState() {
+    super.initState();
     controller = AnimationController(
       /// [AnimationController]s can be created with `vsync: this` because of
       /// [TickerProviderStateMixin].
       vsync: this,
       duration: const Duration(seconds: 5),
     )..addListener(() {
-        setState(() {});
-      });
-    controller.repeat(reverse: true);
-    super.initState();
+      setState(() {});
+    })
+    ..repeat(reverse: true);
   }
 
   @override
@@ -55,16 +57,13 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> wit
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          spacing: 16.0,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'Linear progress indicator with a fixed color',
-              style: TextStyle(fontSize: 20),
-            ),
-            LinearProgressIndicator(
-              value: controller.value,
-              semanticsLabel: 'Linear progress indicator',
-            ),
+            const Text('Determinate LinearProgressIndicator'),
+            LinearProgressIndicator(value: controller.value),
+            const Text('Indeterminate LinearProgressIndicator'),
+            const LinearProgressIndicator(),
           ],
         ),
       ),

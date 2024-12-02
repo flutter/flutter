@@ -29,8 +29,8 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../preview_device.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 import '../reporting/unified_analytics.dart';
-import '../web/compile.dart';
 import 'flutter_command_runner.dart';
 import 'target_devices.dart';
 
@@ -153,7 +153,6 @@ abstract final class FlutterOptions {
   static const String kFatalWarnings = 'fatal-warnings';
   static const String kUseApplicationBinary = 'use-application-binary';
   static const String kWebBrowserFlag = 'web-browser-flag';
-  static const String kWebRendererFlag = 'web-renderer';
   static const String kWebResourcesCdnFlag = 'web-resources-cdn';
   static const String kWebWasmFlag = 'wasm';
 }
@@ -706,32 +705,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  // This option is deprecated and is no longer publicly supported, and
-  // therefore is hidden.
-  //
-  // The option still exists for internal testing, and to give existing users
-  // time to migrate off the HTML renderer, but it is no longer advertised as a
-  // supported mode.
-  //
-  // See also:
-  //   * https://github.com/flutter/flutter/issues/151786
-  //   * https://github.com/flutter/flutter/issues/145954
-  void usesWebRendererOption() {
-    argParser.addOption(
-      hide: true,
-      FlutterOptions.kWebRendererFlag,
-      allowed: WebRendererMode.values.map((WebRendererMode e) => e.name),
-      help: 'This option is deprecated and will be removed in a future Flutter '
-            'release.\n'
-            'Selects the renderer implementation to use when building for the '
-            'web. The supported renderers are "canvaskit" when compiling to '
-            'JavaScript, and "skwasm" when compiling to WebAssembly. Other '
-            'renderer and compiler combinations are no longer supported. '
-            'Consider migrating your app to a supported renderer.',
-      allowedHelp: CliEnum.allowedHelp(WebRendererMode.values)
-    );
-  }
-
   void usesWebResourcesCdnFlag() {
     argParser.addFlag(
       FlutterOptions.kWebResourcesCdnFlag,
@@ -779,6 +752,9 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Whether it is safe for this command to use a cached pub invocation.
   bool get cachePubGet => true;
+
+  /// Whether this command should report null safety analytics.
+  bool get reportNullSafety => false;
 
   late final Duration? deviceDiscoveryTimeout = () {
     if ((argResults?.options.contains(FlutterOptions.kDeviceTimeout) ?? false)
@@ -1406,6 +1382,9 @@ abstract class FlutterCommand extends Command<void> {
     }
   }
 
+  /// Additional usage values to be sent with the usage ping.
+  Future<CustomDimensions> get usageValues async => const CustomDimensions();
+
   /// Additional usage values to be sent with the usage ping for
   /// package:unified_analytics.
   ///
@@ -1431,6 +1410,8 @@ abstract class FlutterCommand extends Command<void> {
         if (_usesFatalWarnings) {
           globals.logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
         }
+        // Prints the welcome message if needed.
+        globals.flutterUsage.printWelcome();
         _printDeprecationWarning();
         final String? commandPath = await usagePath;
         if (commandPath != null) {
@@ -1656,6 +1637,7 @@ abstract class FlutterCommand extends Command<void> {
   ) {
     // Send command result.
     final int? maxRss = getMaxRss(processInfo);
+    CommandResultEvent(commandPath, commandResult.toString(), maxRss).send();
     analytics.send(Event.flutterCommandResult(
       commandPath: commandPath,
       result: commandResult.toString(),
@@ -1677,6 +1659,14 @@ abstract class FlutterCommand extends Command<void> {
     // If the command provides its own end time, use it. Otherwise report
     // the duration of the entire execution.
     final Duration elapsedDuration = (commandResult.endTimeOverride ?? endTime).difference(startTime);
+    globals.flutterUsage.sendTiming(
+      'flutter',
+      name,
+      elapsedDuration,
+      // Report in the form of `success-[parameter1-parameter2]`, all of which
+      // can be null if the command doesn't provide a FlutterCommandResult.
+      label: label == '' ? null : label,
+    );
     analytics.send(Event.timing(
       workflow: 'flutter',
       variableName: name,
@@ -1747,6 +1737,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
         platform: globals.platform,
+        usage: globals.flutterUsage,
         analytics: analytics,
         projectDir: project.directory,
         packageConfigPath: packageConfigPath(),
@@ -1771,18 +1762,42 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         // The preview device does not currently support any plugins.
         allowedPlugins = PreviewDevice.supportedPubPlugins;
       }
-      await project.regeneratePlatformSpecificTooling(allowedPlugins: allowedPlugins);
+      await project.regeneratePlatformSpecificTooling(
+        allowedPlugins: allowedPlugins,
+      );
+      if (reportNullSafety) {
+        await _sendNullSafetyAnalyticsEvents(project);
+      }
     }
 
     setupApplicationPackages();
 
     if (commandPath != null) {
-      analytics.send(await unifiedAnalyticsUsageValues(commandPath));
+      // Until the GA4 migration is complete, we will continue to send to the GA3 instance
+      // as well as GA4. Once migration is complete, we will only make a call for GA4 values
+      final List<Object> pairOfUsageValues = await Future.wait<Object>(<Future<Object>>[
+        usageValues,
+        unifiedAnalyticsUsageValues(commandPath),
+      ]);
+
+      Usage.command(commandPath, parameters: CustomDimensions(
+        commandHasTerminal: hasTerminal,
+      ).merge(pairOfUsageValues[0] as CustomDimensions));
+      analytics.send(pairOfUsageValues[1] as Event);
     }
 
     return runCommand();
   }
 
+  Future<void> _sendNullSafetyAnalyticsEvents(FlutterProject project) async {
+    final BuildInfo buildInfo = await getBuildInfo();
+    NullSafetyAnalysisEvent(
+      buildInfo.packageConfig,
+      buildInfo.nullSafetyMode,
+      project.manifest.appName,
+      globals.flutterUsage,
+    ).send();
+  }
 
   /// The set of development artifacts required for this command.
   ///
@@ -1855,7 +1870,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
     if (_usesTargetOption) {
       final String targetPath = targetFile;
       if (!globals.fs.isFileSync(targetPath)) {
-        throw ToolExit(globals.userMessages.flutterTargetFileMissing(targetPath));
+        throwToolExit(globals.userMessages.flutterTargetFileMissing(targetPath));
       }
     }
   }

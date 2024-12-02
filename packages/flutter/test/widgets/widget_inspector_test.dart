@@ -285,9 +285,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
   static void runTests() {
     final TestWidgetInspectorService service = TestWidgetInspectorService();
     WidgetInspectorService.instance = service;
-    setUp(() {
-      WidgetInspectorService.instance.isSelectMode.value = true;
-    });
     tearDown(() async {
       service.resetAllState();
 
@@ -357,7 +354,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         const Directionality(
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
-            selectButtonBuilder: null,
+            exitWidgetSelectionButtonBuilder: null,
+            moveExitWidgetSelectionButtonBuilder: null,
             child: Stack(
               children: <Widget>[
                 Text('a', textDirection: TextDirection.ltr),
@@ -373,13 +371,23 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets('WidgetInspector interaction test', (WidgetTester tester) async {
+      // Enable widget selection mode.
+      WidgetInspectorService.instance.isSelectMode = true;
+
       final List<String> log = <String>[];
-      final GlobalKey selectButtonKey = GlobalKey();
+      late GlobalKey exitWidgetSelectionButtonKey;
       final GlobalKey inspectorKey = GlobalKey();
       final GlobalKey topButtonKey = GlobalKey();
+      final GlobalKey bottomButtonKey = GlobalKey();
 
-      Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
-        return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: null));
+      Widget exitWidgetSelectionButtonBuilder(
+        BuildContext context, {
+        required VoidCallback onPressed,
+        required GlobalKey key,
+      }) {
+        exitWidgetSelectionButtonKey = key;
+        return Material(
+            child: ElevatedButton(onPressed: onPressed, key: key, child: null));
       }
 
       String paragraphText(RenderParagraph paragraph) {
@@ -387,12 +395,56 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         return textSpan.text!;
       }
 
+
+      Future<void> tapAndVerifyWidgetSelection(
+        Finder widgetFinder, {
+        required bool isSelected,
+        required GlobalKey widgetKey,
+      }) async {
+        // Tap on the widget.
+        await tester.tap(widgetFinder, warnIfMissed: false);
+        await tester.pump();
+
+        // Verify the tap was intercepted by the Widget Inspector.
+        final RenderObject renderObject =
+            find.byKey(widgetKey).evaluate().first.renderObject!;
+        expect(
+          WidgetInspectorService.instance.selection.candidates,
+          contains(renderObject),
+        );
+      }
+
+      Future<void> panAndVerifyWidgetSelection({
+        required Finder startAt,
+        required Finder endAt,
+        required bool isSelected,
+        required GlobalKey widgetKey,
+      }) async {
+        // Pan to the widget.
+        final ui.Offset start = tester.getCenter(startAt);
+        final ui.Offset end = tester.getCenter(endAt);
+        await tester.dragFrom(
+          tester.getCenter(startAt),
+          Offset(end.dx - start.dx, end.dy - start.dy),
+        );
+        await tester.pump();
+
+        // Verify the pan end was intercepted by the Widget Inspector.
+        final RenderObject renderObject =
+            find.byKey(widgetKey).evaluate().first.renderObject!;
+        expect(
+          WidgetInspectorService.instance.selection.candidates,
+          contains(renderObject),
+        );
+      }
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
             key: inspectorKey,
-            selectButtonBuilder: selectButtonBuilder,
+            exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+            moveExitWidgetSelectionButtonBuilder: null,
             child: Material(
               child: ListView(
                 children: <Widget>[
@@ -404,6 +456,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                     child: const Text('TOP'),
                   ),
                   ElevatedButton(
+                    key: bottomButtonKey,
                     onPressed: () {
                       log.add('bottom');
                     },
@@ -417,9 +470,13 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
 
       expect(WidgetInspectorService.instance.selection.current, isNull);
-      await tester.tap(find.text('TOP'), warnIfMissed: false);
-      await tester.pump();
-      // Tap intercepted by the inspector
+
+      // Tap on the top button and verify it's selected in the Inspector.
+      await tapAndVerifyWidgetSelection(
+        find.text('TOP'),
+        isSelected: true,
+        widgetKey: topButtonKey,
+      );
       expect(log, equals(<String>[]));
       expect(
         paragraphText(
@@ -427,35 +484,61 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
         equals('TOP'),
       );
-      final RenderObject topButton = find.byKey(topButtonKey).evaluate().first.renderObject!;
-      expect(
-        WidgetInspectorService.instance.selection.candidates,
-        contains(topButton),
-      );
 
+      // Tap on the bottom button and verify it's selected in the Inspector.
+      await tapAndVerifyWidgetSelection(
+        find.text('BOTTOM'),
+        isSelected: true,
+        widgetKey: bottomButtonKey,
+      );
+      expect(
+        paragraphText(
+          WidgetInspectorService.instance.selection.current! as RenderParagraph,
+        ),
+        equals('BOTTOM'),
+      );
+      expect(log, equals(<String>[]));
+
+
+      // Now pan to the top button and verify it's selected in the Inspector.
+      await panAndVerifyWidgetSelection(
+        startAt: find.text('BOTTOM'),
+        endAt: find.text('TOP'),
+        isSelected: true,
+        widgetKey: topButtonKey,
+      );
+      expect(
+        paragraphText(
+          WidgetInspectorService.instance.selection.current! as RenderParagraph,
+        ),
+        equals('TOP'),
+      );
+      expect(log, equals(<String>[]));
+
+      // Now pan to the bottom button and verify it's selected in the Inspector.
+      await panAndVerifyWidgetSelection(
+        startAt: find.text('TOP'),
+        endAt: find.text('BOTTOM'),
+        isSelected: true,
+        widgetKey: bottomButtonKey,
+      );
+      expect(
+        paragraphText(
+          WidgetInspectorService.instance.selection.current! as RenderParagraph,
+        ),
+        equals('BOTTOM'),
+      );
+      expect(log, equals(<String>[]));
+
+      // Now exit selection mode by tapping the Exit Selection Mode button.
+      await tester.tap(find.byKey(exitWidgetSelectionButtonKey));
+      await tester.pump();
+
+      // Tap on the top button and verify it is not selected in the Inspector.
       await tester.tap(find.text('TOP'));
       expect(log, equals(<String>['top']));
-      log.clear();
 
-      await tester.tap(find.text('BOTTOM'));
-      expect(log, equals(<String>['bottom']));
-      log.clear();
-      // Ensure the inspector selection has not changed to bottom.
-      expect(
-        paragraphText(
-          WidgetInspectorService.instance.selection.current! as RenderParagraph,
-        ),
-        equals('TOP'),
-      );
-
-      await tester.tap(find.byKey(selectButtonKey));
-      await tester.pump();
-
-      // We are now back in select mode so tapping the bottom button will have
-      // not trigger a click but will cause it to be selected.
-      await tester.tap(find.text('BOTTOM'), warnIfMissed: false);
-      expect(log, equals(<String>[]));
-      log.clear();
+      // Ensure the inspector selection is still BOTTOM (not TOP).
       expect(
         paragraphText(
           WidgetInspectorService.instance.selection.current! as RenderParagraph,
@@ -469,7 +552,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         Directionality(
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
-            selectButtonBuilder: null,
+            exitWidgetSelectionButtonBuilder: null,
+            moveExitWidgetSelectionButtonBuilder: null,
             child: Transform(
               transform: Matrix4.identity()..scale(0.0),
               child: const Stack(
@@ -490,12 +574,21 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets('WidgetInspector scroll test', (WidgetTester tester) async {
-      final Key childKey = UniqueKey();
-      final GlobalKey selectButtonKey = GlobalKey();
-      final GlobalKey inspectorKey = GlobalKey();
+      // Enable widget selection mode.
+      WidgetInspectorService.instance.isSelectMode = true;
 
-      Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
-        return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: null));
+      final Key childKey = UniqueKey();
+      final GlobalKey inspectorKey = GlobalKey();
+      late GlobalKey exitWidgetSelectionButtonKey;
+
+      Widget exitWidgetSelectionButtonBuilder(
+        BuildContext context, {
+        required VoidCallback onPressed,
+        required GlobalKey key,
+      }) {
+        exitWidgetSelectionButtonKey = key;
+        return Material(
+            child: ElevatedButton(onPressed: onPressed, key: key, child: null));
       }
 
       await tester.pumpWidget(
@@ -503,7 +596,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
             key: inspectorKey,
-            selectButtonBuilder: selectButtonBuilder,
+            exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+            moveExitWidgetSelectionButtonBuilder: null,
             child: ListView(
               dragStartBehavior: DragStartBehavior.down,
               children: <Widget>[
@@ -534,7 +628,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pump();
       expect(WidgetInspectorService.instance.selection.current, isNotNull);
 
-      // Now out of inspect mode due to the click.
+      // Now exit selection mode by tapping the Exit Selection Mode button.
+      await tester.tap(find.byKey(exitWidgetSelectionButtonKey));
+      await tester.pump();
+
+      // Now out of inspect mode due to clicking the Exit Selection Mode button.
       await tester.fling(find.byType(ListView), const Offset(0.0, -200.0), 200.0);
       await tester.pump();
 
@@ -547,13 +645,17 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets('WidgetInspector long press', (WidgetTester tester) async {
+      // Enable widget selection mode.
+      WidgetInspectorService.instance.isSelectMode = true;
+
       bool didLongPress = false;
 
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
-            selectButtonBuilder: null,
+            exitWidgetSelectionButtonBuilder: null,
+            moveExitWidgetSelectionButtonBuilder: null,
             child: GestureDetector(
               onLongPress: () {
                 expect(didLongPress, isFalse);
@@ -571,6 +673,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets('WidgetInspector offstage', (WidgetTester tester) async {
+      // Enable widget selection mode.
+      WidgetInspectorService.instance.isSelectMode = true;
+
       final GlobalKey inspectorKey = GlobalKey();
       final GlobalKey clickTarget = GlobalKey();
 
@@ -601,7 +706,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
             key: inspectorKey,
-            selectButtonBuilder: null,
+            exitWidgetSelectionButtonBuilder: null,
+            moveExitWidgetSelectionButtonBuilder: null,
             child: Overlay(
               initialEntries: <OverlayEntry>[
                 entry1 = OverlayEntry(
@@ -642,6 +748,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets('WidgetInspector with Transform above', (WidgetTester tester) async {
+      // Enable widget selection mode.
+      WidgetInspectorService.instance.isSelectMode = true;
+
       final GlobalKey childKey = GlobalKey();
       final GlobalKey repaintBoundaryKey = GlobalKey();
 
@@ -660,7 +769,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               child: Directionality(
                 textDirection: TextDirection.ltr,
                 child: WidgetInspector(
-                  selectButtonBuilder: null,
+                  exitWidgetSelectionButtonBuilder: null,
+                  moveExitWidgetSelectionButtonBuilder: null,
                   child: ColoredBox(
                     color: Colors.white,
                     child: Center(
@@ -689,6 +799,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets('Multiple widget inspectors', (WidgetTester tester) async {
+      // Enable widget selection mode.
+      WidgetInspectorService.instance.isSelectMode = true;
+
       // This test verifies that interacting with different inspectors
       // works correctly. This use case may be an app that displays multiple
       // apps inside (i.e. a storyboard).
@@ -701,8 +814,13 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final GlobalKey child1Key = GlobalKey();
       final GlobalKey child2Key = GlobalKey();
 
-      InspectorSelectButtonBuilder selectButtonBuilder(Key key) {
-        return (BuildContext context, VoidCallback onPressed) {
+      ExitWidgetSelectionButtonBuilder exitWidgetSelectionButtonBuilder(
+          Key key) {
+        return (
+          BuildContext context, {
+          required VoidCallback onPressed,
+          required GlobalKey key,
+        }) {
           return Material(child: ElevatedButton(onPressed: onPressed, key: key, child: null));
         };
       }
@@ -720,7 +838,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               Flexible(
                 child: WidgetInspector(
                   key: inspector1Key,
-                  selectButtonBuilder: selectButtonBuilder(selectButton1Key),
+                  exitWidgetSelectionButtonBuilder:
+                      exitWidgetSelectionButtonBuilder(selectButton1Key),
+                  moveExitWidgetSelectionButtonBuilder: null,
                   child: Container(
                     key: child1Key,
                     child: const Text('Child 1'),
@@ -730,7 +850,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               Flexible(
                 child: WidgetInspector(
                   key: inspector2Key,
-                  selectButtonBuilder: selectButtonBuilder(selectButton2Key),
+                  exitWidgetSelectionButtonBuilder:
+                      exitWidgetSelectionButtonBuilder(selectButton2Key),
+                  moveExitWidgetSelectionButtonBuilder: null,
                   child: Container(
                     key: child2Key,
                     child: const Text('Child 2'),
@@ -751,10 +873,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         equals('Child 1'),
       );
 
-      // Re-enable select mode since it's state is shared between the
-      // WidgetInspectors
-      WidgetInspectorService.instance.isSelectMode.value = true;
-
       await tester.tap(find.text('Child 2'), warnIfMissed: false);
       await tester.pump();
       expect(
@@ -766,14 +884,20 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets(
-      'WidgetInspector selectButton inspection for tap',
+      'WidgetInspector Exit Selection Mode button',
       (WidgetTester tester) async {
-        final GlobalKey selectButtonKey = GlobalKey();
+      // Enable widget selection mode.
+      WidgetInspectorService.instance.isSelectMode = true;
+
         final GlobalKey inspectorKey = GlobalKey();
         setupDefaultPubRootDirectory(service);
 
-        Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
-          return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: null));
+      Widget exitWidgetSelectionButtonBuilder(
+        BuildContext context, {
+        required VoidCallback onPressed,
+        required GlobalKey key,
+      }) {
+          return Material(child: ElevatedButton(onPressed: onPressed, key: key, child: null));
         }
 
         await tester.pumpWidget(
@@ -781,7 +905,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             textDirection: TextDirection.ltr,
             child: WidgetInspector(
               key: inspectorKey,
-              selectButtonBuilder: selectButtonBuilder,
+              exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+              moveExitWidgetSelectionButtonBuilder: null,
               child: const Text('Child 1'),
             ),
           ),
@@ -811,6 +936,94 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(line, isNotNull);
         // Column numbers are more stable than line numbers.
         expect(column, equals(28));
+      },
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked() // [intended] Test requires --track-widget-creation flag.
+    );
+
+    testWidgets(
+        'WidgetInspector Move Exit Selection Mode button to the right / left',
+        (WidgetTester tester) async {
+        // Enable widget selection mode.
+        WidgetInspectorService.instance.isSelectMode = true;
+
+        final GlobalKey inspectorKey = GlobalKey();
+        setupDefaultPubRootDirectory(service);
+
+        Widget exitWidgetSelectionButtonBuilder(
+          BuildContext context, {
+          required VoidCallback onPressed,
+          required GlobalKey key,
+        }) {
+          return Material(
+            child: ElevatedButton(
+              onPressed: onPressed,
+              key: key,
+              child: const Text('EXIT SELECT MODE'),
+            ),
+          );
+        }
+
+        Widget moveWidgetSelectionButtonBuilder(
+          BuildContext context, {
+          required VoidCallback onPressed,
+          bool isLeftAligned = true,
+        }) {
+          return Material(
+            child: ElevatedButton(
+              onPressed: onPressed,
+              child: Text(isLeftAligned ? 'MOVE RIGHT' : 'MOVE LEFT'),
+            ),
+          );
+        }
+
+        Finder buttonFinder(String buttonText) {
+          return find.ancestor(
+            of: find.text(buttonText),
+            matching: find.byType(ElevatedButton),
+          );
+        }
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: WidgetInspector(
+              key: inspectorKey,
+              exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+              moveExitWidgetSelectionButtonBuilder:
+                  moveWidgetSelectionButtonBuilder,
+              child: const Text('APP'),
+            ),
+          ),
+        );
+
+        // Intitially the exit select button is on the left.
+        final Finder exitButton = buttonFinder('EXIT SELECT MODE');
+        expect(exitButton, findsOneWidget);
+        final Finder moveRightButton = buttonFinder('MOVE RIGHT');
+        expect(moveRightButton, findsOneWidget);
+        final double initialExitButtonX = tester.getCenter(exitButton).dx;
+
+        // Move the button to the right.
+        await tester.tap(moveRightButton);
+        await tester.pump();
+
+        // Verify the button is now on the right.
+        expect(moveRightButton, findsNothing);
+        final Finder moveLeftButton = buttonFinder('MOVE LEFT');
+        expect(moveLeftButton, findsOneWidget);
+        final double exitButtonXAfterMovingRight =
+            tester.getCenter(exitButton).dx;
+        expect(initialExitButtonX, lessThan(exitButtonXAfterMovingRight));
+
+        // Move the button to the left again.
+        await tester.tap(moveLeftButton);
+        await tester.pump();
+
+        // Verify the button is in its original position.
+        expect(moveLeftButton, findsNothing);
+        expect(moveRightButton, findsOneWidget);
+        final double exitButtonXAfterMovingLeft = tester.getCenter(exitButton).dx;
+        expect(exitButtonXAfterMovingLeft, equals(initialExitButtonX));
       },
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked() // [intended] Test requires --track-widget-creation flag.
     );
@@ -1964,7 +2177,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
           /// Gets the children nodes from the JSON response.
           List<Object?> childrenFromJsonResponse(Map<String, Object?> json) {
-            return json['children']! as List<Object?>;
+            return (json['children'] as List<Object?>?) ?? <Object?>[];
           }
 
           /// Gets the children nodes using a call to
@@ -1980,6 +2193,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           /// Returns whether the child was created by the local project.
           bool wasCreatedByLocalProject(Map<String, Object?> childJson) {
             return childJson['createdByLocalProject'] == true;
+          }
+
+          /// Returns whether the child is missing the "type" field.
+          ///
+          /// This should always be true for nodes in the widget tree without
+          /// full details.
+          bool isMissingType(Map<String, Object?> childJson) {
+            return childJson['type'] == null;
           }
 
           /// Returns whether the child has a description matching [description].
@@ -2280,6 +2501,78 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
             expect(
               allChildrenSatisfyCondition(rootJson,
+                condition: isMissingType,
+              ),
+              isFalse,
+            );
+            expect(
+              allChildrenSatisfyCondition(rootJson,
+                condition: wasCreatedByLocalProject,
+              ),
+              isFalse,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    !hasTextPreview(child, preview: 'a');
+                },
+              ),
+              isTrue,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    !hasTextPreview(child, preview: 'b');
+                },
+              ),
+              isTrue,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    !hasTextPreview(child, preview: 'c');
+                },
+              ),
+              isTrue,
+            );
+          });
+
+          testWidgets(
+              'tree without full details using ext.flutter.inspector.getRootWidgetTree',
+              (WidgetTester tester) async {
+            const String group = 'test-group';
+
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
+            final Map<String, dynamic> jsonA =
+                await selectedWidgetResponseForElement(elementA);
+
+            final Map<String, Object?> creationLocation =
+                verifyAndReturnCreationLocation(jsonA);
+            final String testFile = verifyAndReturnTestFile(creationLocation);
+            addPubRootDirectoryFor(testFile);
+
+            final Map<String, Object?> rootJson = (await service.testExtension(
+              WidgetInspectorServiceExtensions.getRootWidgetTree.name,
+              <String, String>{
+                'groupName': group,
+                'isSummaryTree': 'false',
+                'withPreviews': 'false',
+                'fullDetails': 'false',
+              },
+            ))! as Map<String, Object?>;
+
+            expect(
+              allChildrenSatisfyCondition(rootJson,
+                condition: isMissingType,
+              ),
+              isTrue,
+            );
+            expect(
+              allChildrenSatisfyCondition(rootJson,
                 condition: wasCreatedByLocalProject,
               ),
               isFalse,
@@ -2337,6 +2630,79 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               },
             ))! as Map<String, Object?>;
 
+            expect(
+              allChildrenSatisfyCondition(rootJson,
+                condition: isMissingType,
+              ),
+              isFalse,
+            );
+            expect(
+              allChildrenSatisfyCondition(rootJson,
+                condition: wasCreatedByLocalProject,
+              ),
+              isFalse,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    hasTextPreview(child, preview: 'a');
+                },
+              ),
+              isTrue,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    hasTextPreview(child, preview: 'b');
+                },
+              ),
+              isTrue,
+            );
+            expect(
+              oneChildSatisfiesCondition(rootJson, condition: (Map<String, Object?> child) {
+                return hasDescription(child, description: 'Text') &&
+                    wasCreatedByLocalProject(child) &&
+                    hasTextPreview(child, preview: 'c');
+                },
+              ),
+              isTrue,
+            );
+          });
+
+          testWidgets(
+              'tree without full details and with previews using ext.flutter.inspector.getRootWidgetTree',
+              (WidgetTester tester) async {
+            const String group = 'test-group';
+
+            await pumpWidgetTreeWithABC(tester);
+            final Element elementA = findElementABC('a');
+            final Map<String, dynamic> jsonA =
+                await selectedWidgetResponseForElement(elementA);
+
+            final Map<String, Object?> creationLocation =
+                verifyAndReturnCreationLocation(jsonA);
+            final String testFile = verifyAndReturnTestFile(creationLocation);
+            addPubRootDirectoryFor(testFile);
+
+            final Map<String, Object?> rootJson = (await service.testExtension(
+              WidgetInspectorServiceExtensions.getRootWidgetTree.name,
+              <String, String>{
+                'groupName': group,
+                'isSummaryTree': 'false',
+                'withPreviews': 'true',
+                'fullDetails': 'false',
+              },
+            ))! as Map<String, Object?>;
+
+
+            expect(
+              allChildrenSatisfyCondition(rootJson,
+                condition: isMissingType,
+              ),
+              isTrue,
+            );
             expect(
               allChildrenSatisfyCondition(rootJson,
                 condition: wasCreatedByLocalProject,
@@ -3573,7 +3939,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final Widget widget = Directionality(
         textDirection: TextDirection.ltr,
         child: WidgetInspector(
-          selectButtonBuilder: null,
+          exitWidgetSelectionButtonBuilder: null,
+          moveExitWidgetSelectionButtonBuilder: null,
           child: _applyConstructor(_TrivialWidget.new),
         ),
       );
@@ -5258,33 +5625,23 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ),
         ),
       );
-      final Finder columnWidgetFinder = find.byType(Column);
-      expect(columnWidgetFinder, findsOneWidget);
-      final Element columnWidgetElement = columnWidgetFinder
-        .evaluate()
-        .first;
-      final DiagnosticsNode node = columnWidgetElement.toDiagnosticsNode();
-      final InspectorSerializationDelegate delegate =
-        InspectorSerializationDelegate(
-          service: service,
-          includeProperties: true,
-          addAdditionalPropertiesCallback:
-            (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
-              final Map<String, Object> additionalJson = <String, Object>{};
-              final Object? value = node.value;
-              if (value is Element) {
-                final RenderObject? renderObject = value.renderObject;
-                if (renderObject != null) {
-                  additionalJson['renderObject'] =
-                      renderObject.toDiagnosticsNode().toJsonMap(
-                        delegate.copyWith(subtreeDepth: 0),
-                      );
-                }
-              }
-              additionalJson['callbackExecuted'] = true;
-              return additionalJson;
-            },
-        );
+
+      final Finder columnFinder = find.byType(Column);
+      expect(columnFinder, findsOneWidget);
+
+      final DiagnosticsNode node = columnFinder.evaluate().first.toDiagnosticsNode();
+      final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(
+        service: service,
+        includeProperties: true,
+        addAdditionalPropertiesCallback:
+          (DiagnosticsNode node, InspectorSerializationDelegate delegate) => <String, Object>{
+            if (node.value case Element(:final RenderObject renderObject))
+              'renderObject': renderObject.toDiagnosticsNode().toJsonMap(
+                  delegate.copyWith(subtreeDepth: 0),
+                ),
+            'callbackExecuted': true,
+          },
+      );
       final Map<String, Object?> json = node.toJsonMap(delegate);
       expect(json['callbackExecuted'], true);
       expect(json.containsKey('renderObject'), true);

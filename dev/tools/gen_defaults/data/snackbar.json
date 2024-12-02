@@ -1,5 +1,5 @@
 {
-  "version": "5_0_0",
+  "version": "6_1_0",
 
   "md.comp.snackbar.action.focus.label-text.color": "inversePrimary",
   "md.comp.snackbar.action.focus.state-layer.color": "inversePrimary",

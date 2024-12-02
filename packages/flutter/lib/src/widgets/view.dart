@@ -597,7 +597,7 @@ class _RawViewElement extends RenderTreeRootElement {
 class _ViewScope extends InheritedWidget {
   const _ViewScope({required this.view, required super.child});
 
-  final FlutterView? view;
+  final FlutterView view;
 
   @override
   bool updateShouldNotify(_ViewScope oldWidget) => view != oldWidget.view;
@@ -713,8 +713,7 @@ class ViewAnchor extends StatelessWidget {
     return _MultiChildComponentWidget(
       views: <Widget>[
         if (view != null)
-          _ViewScope(
-            view: null,
+          LookupBoundary(
             child: view!,
           ),
       ],

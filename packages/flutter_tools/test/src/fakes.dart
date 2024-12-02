@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
+import 'package:dds/dds_launcher.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/java.dart';
@@ -481,6 +482,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isNativeAssetsEnabled = false,
     this.isPreviewDeviceEnabled = false,
     this.isSwiftPackageManagerEnabled = false,
+    this.isExplicitPackageDependenciesEnabled = false,
   });
 
   @override
@@ -520,6 +522,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isSwiftPackageManagerEnabled;
 
   @override
+  final bool isExplicitPackageDependenciesEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     return switch (feature) {
       flutterWebFeature => isWebEnabled,
@@ -532,6 +537,7 @@ class TestFeatureFlags implements FeatureFlags {
       flutterCustomDevicesFeature => areCustomDevicesEnabled,
       cliAnimation => isCliAnimationEnabled,
       nativeAssets => isNativeAssetsEnabled,
+      explicitPackageDependencies => isExplicitPackageDependenciesEnabled,
       _ => false,
     };
   }
@@ -664,6 +670,7 @@ class FakeAndroidStudio extends Fake implements AndroidStudio {
 class FakeJava extends Fake implements Java {
   FakeJava({
     this.javaHome = '/android-studio/jbr',
+    this.javaSource = JavaSource.androidStudio,
     String binary = '/android-studio/jbr/bin/java',
     Version? version,
     bool canRun = true,
@@ -681,6 +688,9 @@ class FakeJava extends Fake implements Java {
   @override
   String binaryPath;
 
+  @override
+  JavaSource javaSource;
+
   final Map<String, String> _environment;
   final bool _canRun;
 
@@ -694,6 +704,32 @@ class FakeJava extends Fake implements Java {
   bool canRun() {
     return _canRun;
   }
+}
+
+class FakeDartDevelopmentServiceLauncher extends Fake
+    implements DartDevelopmentServiceLauncher {
+  FakeDartDevelopmentServiceLauncher({
+    required this.uri,
+    this.devToolsUri,
+    this.dtdUri,
+  });
+
+  @override
+  final Uri uri;
+
+  @override
+  final Uri? devToolsUri;
+
+  @override
+  final Uri? dtdUri;
+
+  @override
+  Future<void> get done => _completer.future;
+
+  @override
+  Future<void> shutdown() async => _completer.complete();
+
+  final Completer<void> _completer = Completer<void>();
 }
 
 class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {

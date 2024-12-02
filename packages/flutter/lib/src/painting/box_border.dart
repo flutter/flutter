@@ -463,9 +463,6 @@ class Border extends BoxBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    if (_widthIsUniform) {
-      return EdgeInsets.all(top.strokeInset);
-    }
     return EdgeInsets.fromLTRB(left.strokeInset, top.strokeInset, right.strokeInset, bottom.strokeInset);
   }
 
@@ -803,9 +800,6 @@ class BorderDirectional extends BoxBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    if (isUniform) {
-      return EdgeInsetsDirectional.all(top.strokeInset);
-    }
     return EdgeInsetsDirectional.fromSTEB(start.strokeInset, top.strokeInset, end.strokeInset, bottom.strokeInset);
   }
 

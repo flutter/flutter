@@ -411,13 +411,6 @@ TaskFunction createColorFilterWithUnstableChildPerfE2ETest() {
   ).run;
 }
 
-TaskFunction createRasterCacheUseMemoryPerfE2ETest() {
-  return PerfTest.e2e(
-    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test/raster_cache_use_memory_perf_e2e.dart',
-  ).run;
-}
-
 TaskFunction createShaderMaskCachePerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -1311,6 +1304,8 @@ class PerfTest {
       late Device selectedDevice;
       selectedDevice = device ?? await devices.workingDevice;
       await selectedDevice.unlock();
+      await selectedDevice.toggleFixedPerformanceMode(true);
+
       final String deviceId = selectedDevice.deviceId;
       final String? localEngine = localEngineFromEnv;
       final String? localEngineHost = localEngineHostFromEnv;
@@ -1415,6 +1410,7 @@ class PerfTest {
       } finally {
         await resetManifest();
         await resetPlist();
+        await selectedDevice.toggleFixedPerformanceMode(false);
       }
 
       final Map<String, dynamic> data = json.decode(

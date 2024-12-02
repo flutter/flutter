@@ -351,10 +351,10 @@ void main() {
       const Offset(400, 0),
     );
     // Let the dismissing snapping animation go 60%.
-    await tester.pump(const Duration(milliseconds: 240));
+    await tester.pump(const Duration(milliseconds: 210));
     expect(
       tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(CupertinoPageScaffold))).dx,
-      moreOrLessEquals(798, epsilon: 1),
+      moreOrLessEquals(789, epsilon: 1),
     );
 
     // Use the navigator to push a route instead of tapping the 'push' button.
@@ -1252,13 +1252,13 @@ void main() {
     );
 
     await tester.pump(const Duration(milliseconds: 50));
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-19, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(744, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-61, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(614, epsilon: 1));
 
     await tester.pump(const Duration(milliseconds: 50));
     // Rate of change is slowing down.
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-4, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(787, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-26, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(721, epsilon: 1));
 
     await tester.pumpAndSettle();
     expect(
@@ -1297,7 +1297,7 @@ void main() {
 
     // Didn't drag far enough to snap into dismissing this route.
     // Each 100px distance takes 100ms to snap back.
-    await tester.pump(const Duration(milliseconds: 101));
+    await tester.pump(const Duration(milliseconds: 351));
     // Back to the page covering the whole screen.
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(0));
     expect(navigatorKey.currentState!.userGestureInProgress, false);
@@ -1312,7 +1312,7 @@ void main() {
     expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didPop);
 
     // Did go far enough to snap out of this route.
-    await tester.pump(const Duration(milliseconds: 301));
+    await tester.pump(const Duration(milliseconds: 351));
     // Back to the page covering the whole screen.
     expect(find.text('2'), findsNothing);
     // First route covers the whole screen.
@@ -2689,6 +2689,250 @@ void main() {
     // Open the dialog.
     await tester.tap(find.text('tap'));
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('fullscreen routes do not transition previous route', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        initialRoute: '/',
+        onGenerateRoute: (RouteSettings settings) {
+          if (settings.name == '/') {
+            return PageRouteBuilder<void>(
+              pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+                return CupertinoPageScaffold(
+                  navigationBar: const CupertinoNavigationBar(
+                    middle: Text('Page 1'),
+                  ),
+                  child: Container()
+                );
+              },
+            );
+          }
+          return CupertinoPageRoute<void>(
+            builder: (BuildContext context) {
+              return CupertinoPageScaffold(
+                navigationBar: const CupertinoNavigationBar(
+                  middle: Text('Page 2'),
+                ),
+                child: Container(),
+              );
+            },
+            fullscreenDialog: true,
+          );
+        },
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    final double pageTitleDX = tester.getTopLeft(find.text('Page 1')).dx;
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Second page transition has started.
+    expect(find.text('Page 2'), findsOneWidget);
+
+    // First page has not moved.
+    expect(tester.getTopLeft(find.text('Page 1')).dx, equals(pageTitleDX));
+  });
+
+  testWidgets('Setting CupertinoDialogRoute.requestFocus to false does not request focus on the dialog', (WidgetTester tester) async {
+    late BuildContext savedContext;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    const String dialogText = 'Dialog Text';
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return CupertinoTextField(focusNode: focusNode);
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    FocusNode? getCupertinoTextFieldFocusNode() {
+      return tester.widget<Focus>(find.descendant(
+        of: find.byType(CupertinoTextField),
+        matching: find.byType(Focus),
+      )).focusNode;
+    }
+
+    // Initially, there is no dialog and the text field has no focus.
+    expect(find.text(dialogText), findsNothing);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, false);
+
+    // Request focus on the text field.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up dialog.
+    final NavigatorState navigator = Navigator.of(savedContext);
+    navigator.push(
+      CupertinoDialogRoute<void>(
+        context: savedContext,
+        builder: (BuildContext context) => const Text(dialogText),
+      ),
+    );
+    await tester.pump();
+
+    // The dialog is showing and the text field has lost focus.
+    expect(find.text(dialogText), findsOneWidget);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, false);
+
+    // Dismiss the dialog.
+    navigator.pop();
+    await tester.pump();
+
+    // The dialog is dismissed and the focus is shifted back to the text field.
+    expect(find.text(dialogText), findsNothing);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up dialog again with requestFocus to false.
+    navigator.push(
+      CupertinoDialogRoute<void>(
+        context: savedContext,
+        requestFocus: false,
+        builder: (BuildContext context) => const Text(dialogText),
+      ),
+    );
+    await tester.pump();
+
+    // The dialog is showing and the text field still has focus.
+    expect(find.text(dialogText), findsOneWidget);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, true);
+  });
+
+  testWidgets('Setting CupertinoModalPopupRoute.requestFocus to false does not request focus on the popup', (WidgetTester tester) async {
+    late BuildContext savedContext;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    const String dialogText = 'Popup Text';
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return CupertinoTextField(focusNode: focusNode);
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    FocusNode? getCupertinoTextFieldFocusNode() {
+      return tester.widget<Focus>(find.descendant(
+        of: find.byType(CupertinoTextField),
+        matching: find.byType(Focus),
+      )).focusNode;
+    }
+
+    // Initially, there is no popup and the text field has no focus.
+    expect(find.text(dialogText), findsNothing);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, false);
+
+    // Request focus on the text field.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up popup.
+    final NavigatorState navigator = Navigator.of(savedContext);
+    navigator.push(
+      CupertinoModalPopupRoute<void>(
+        builder: (BuildContext context) => const Text(dialogText),
+      ),
+    );
+    await tester.pump();
+
+    // The popup is showing and the text field has lost focus.
+    expect(find.text(dialogText), findsOneWidget);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, false);
+
+    // Dismiss the popup.
+    navigator.pop();
+    await tester.pump();
+
+    // The popup is dismissed and the focus is shifted back to the text field.
+    expect(find.text(dialogText), findsNothing);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up popup again with requestFocus to false.
+    navigator.push(
+      CupertinoModalPopupRoute<void>(
+        requestFocus: false,
+        builder: (BuildContext context) => const Text(dialogText),
+      ),
+    );
+    await tester.pump();
+
+    // The popup is showing and the text field still has focus.
+    expect(find.text(dialogText), findsOneWidget);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, true);
+  });
+
+  testWidgets('Setting CupertinoPageRoute.requestFocus to false does not request focus on the page', (WidgetTester tester) async {
+    late BuildContext savedContext;
+    const String pageTwoText = 'Page Two';
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return Container();
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // Check page two is not on the screen.
+    expect(find.text(pageTwoText), findsNothing);
+
+    // Navigate to page two with text.
+    final NavigatorState navigator = Navigator.of(savedContext);
+    navigator.push(
+      CupertinoPageRoute<void>(
+        builder: (BuildContext context) {
+          return const Text(pageTwoText);
+        }
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100)); // Advance route transition animation.
+
+    // The page two is showing and the text widget has focus.
+    Element textOnPageTwo = tester.element(find.text(pageTwoText));
+    FocusScopeNode focusScopeNode = FocusScope.of(textOnPageTwo);
+    expect(focusScopeNode.hasFocus, isTrue);
+
+    // Navigate back to page one.
+    navigator.pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100)); // Advance route transition animation.
+
+    // Navigate to page two again with requestFocus set to false.
+    navigator.push(
+      CupertinoPageRoute<void>(
+        requestFocus: false,
+        builder: (BuildContext context) {
+          return const Text(pageTwoText);
+        }
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100)); // Advance route transition animation.
+
+    // The page two is showing and the text widget is not focused.
+    textOnPageTwo = tester.element(find.text(pageTwoText));
+    focusScopeNode = FocusScope.of(textOnPageTwo);
+    expect(focusScopeNode.hasFocus, isFalse);
   });
 }
 

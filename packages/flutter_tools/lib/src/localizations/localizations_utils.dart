@@ -9,6 +9,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart';
 import 'gen_l10n_types.dart';
 import 'language_subtag_registry.dart';
 
@@ -471,6 +472,7 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
   required File file,
   required Logger logger,
   required String defaultArbDir,
+  required bool defaultSyntheticPackage,
 }) {
   final String contents = file.readAsStringSync();
   if (contents.trim().isEmpty) {
@@ -497,7 +499,7 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
     headerFile: _tryReadUri(yamlNode, 'header-file', logger)?.path,
     useDeferredLoading: _tryReadBool(yamlNode, 'use-deferred-loading', logger),
     preferredSupportedLocales: _tryReadStringList(yamlNode, 'preferred-supported-locales', logger),
-    syntheticPackage: _tryReadBool(yamlNode, 'synthetic-package', logger),
+    syntheticPackage: _tryReadBool(yamlNode, 'synthetic-package', logger) ?? defaultSyntheticPackage,
     requiredResourceAttributes: _tryReadBool(yamlNode, 'required-resource-attributes', logger),
     nullableGetter: _tryReadBool(yamlNode, 'nullable-getter', logger),
     format: _tryReadBool(yamlNode, 'format', logger),
@@ -513,6 +515,15 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
   required FlutterCommand command,
   required String defaultArbDir,
 }) {
+  // TODO(matanlurey): Remove as part of https://github.com/flutter/flutter/issues/102983.
+  final bool syntheticPackage;
+  if (command.argResults!.wasParsed('synthetic-package')) {
+    // If provided explicitly, use the explicit value.
+    syntheticPackage = command.boolArg('synthetic-package');
+  } else {
+    // Otherwise, inherit from whatever the default of --implicit-pubspec-resolution is.
+    syntheticPackage = command.globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution);
+  }
   return LocalizationOptions(
     arbDir: command.stringArg('arb-dir') ?? defaultArbDir,
     outputDir: command.stringArg('output-dir'),
@@ -524,7 +535,7 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
     headerFile: command.stringArg('header-file'),
     useDeferredLoading: command.boolArg('use-deferred-loading'),
     genInputsAndOutputsList: command.stringArg('gen-inputs-and-outputs-list'),
-    syntheticPackage: command.boolArg('synthetic-package'),
+    syntheticPackage: syntheticPackage,
     projectDir: command.stringArg('project-dir'),
     requiredResourceAttributes: command.boolArg('required-resource-attributes'),
     nullableGetter: command.boolArg('nullable-getter'),

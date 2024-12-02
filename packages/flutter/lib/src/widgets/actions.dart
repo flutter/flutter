@@ -246,13 +246,10 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// [ContextAction] instead of [Action].
   bool isEnabled(T intent) => isActionEnabled;
 
-  bool _isEnabled(T intent, BuildContext? context) {
-    final Action<T> self = this;
-    if (self is ContextAction<T>) {
-      return self.isEnabled(intent, context);
-    }
-    return self.isEnabled(intent);
-  }
+  bool _isEnabled(T intent, BuildContext? context) => switch (this) {
+    final ContextAction<T> action => action.isEnabled(intent, context),
+    _ => isEnabled(intent),
+  };
 
   /// Whether this [Action] is inherently enabled.
   ///
@@ -338,13 +335,10 @@ abstract class Action<T extends Intent> with Diagnosticable {
   @protected
   Object? invoke(T intent);
 
-  Object? _invoke(T intent, BuildContext? context) {
-    final Action<T> self = this;
-    if (self is ContextAction<T>) {
-      return self.invoke(intent, context);
-    }
-    return self.invoke(intent);
-  }
+  Object? _invoke(T intent, BuildContext? context) => switch (this) {
+    final ContextAction<T> action => action.invoke(intent, context),
+    _ => invoke(intent),
+  };
 
   /// Register a callback to listen for changes to the state of this action.
   ///
@@ -1344,12 +1338,10 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     }
   }
 
-  bool get _canRequestFocus {
-    return switch (MediaQuery.maybeNavigationModeOf(context)) {
-      NavigationMode.traditional || null => widget.enabled,
-      NavigationMode.directional => true,
-    };
-  }
+  bool get _canRequestFocus => switch (MediaQuery.maybeNavigationModeOf(context)) {
+    NavigationMode.traditional || null => widget.enabled,
+    NavigationMode.directional => true,
+  };
 
   // This global key is needed to keep only the necessary widgets in the tree
   // while maintaining the subtree's state.

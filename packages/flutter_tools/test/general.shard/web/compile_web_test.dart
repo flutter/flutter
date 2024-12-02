@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -19,6 +20,7 @@ import '../../src/test_build_system.dart';
 
 void main() {
   late MemoryFileSystem fileSystem;
+  late TestUsage testUsage;
   late FakeAnalytics fakeAnalytics;
   late BufferLogger logger;
   late FakeFlutterVersion flutterVersion;
@@ -26,6 +28,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+    testUsage = TestUsage();
     logger = BufferLogger.test();
     flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0', engineRevision: '9.8.7');
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -34,7 +37,11 @@ void main() {
     );
 
     flutterProject = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-    fileSystem.file('.packages').createSync();
+
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
   });
 
   testUsingContext('WebBuilder sets environment on success', () async {
@@ -59,6 +66,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.any(),
       buildSystem: buildSystem,
+      usage: testUsage,
       flutterVersion: flutterVersion,
       fileSystem: fileSystem,
       analytics: fakeAnalytics,
@@ -88,17 +96,40 @@ void main() {
       contains('generated_plugin_registrant.dart not found. Skipping.'),
     );
 
+    // Sends build config event
+    expect(
+      testUsage.events,
+      unorderedEquals(
+        <TestUsageEvent>[
+      const TestUsageEvent(
+        'build',
+        'web',
+        label: 'web-compile',
+            parameters: CustomDimensions(
+              buildEventSettings:
+                  'optimizationLevel: 0; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+
+      ),
+          ),
+        ],
+      ),
+    );
+
     expect(
       fakeAnalytics.sentEvents,
       containsAll(<Event>[
         Event.flutterBuildInfo(
           label: 'web-compile',
           buildType: 'web',
-          settings: 'optimizationLevel: 4; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+          settings: 'optimizationLevel: 0; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
         ),
       ]),
     );
 
+    // Sends timing event.
+    final TestTimingEvent timingEvent = testUsage.timings.single;
+    expect(timingEvent.category, 'build');
+    expect(timingEvent.variableName, 'dual-compile');
     expect(
       analyticsTimingEventExists(
         sentEvents: fakeAnalytics.sentEvents,
@@ -107,6 +138,8 @@ void main() {
       ),
       true,
     );
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('WebBuilder throws tool exit on failure', () async {
@@ -125,6 +158,7 @@ void main() {
       logger: logger,
       processManager: FakeProcessManager.any(),
       buildSystem: buildSystem,
+      usage: testUsage,
       flutterVersion: flutterVersion,
       fileSystem: fileSystem,
       analytics: fakeAnalytics,
@@ -142,6 +176,37 @@ void main() {
         throwsToolExit(message: 'Failed to compile application for the Web.'));
 
     expect(logger.errorText, contains('Target hello failed: FormatException: illegal character in input string'));
+    expect(testUsage.timings, isEmpty);
     expect(fakeAnalytics.sentEvents, isEmpty);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  Future<void> testRendererModeFromDartDefines(WebRendererMode webRenderer) async {
+    testUsingContext('WebRendererMode.${webRenderer.name} can be initialized from dart defines', () {
+      final WebRendererMode computed = WebRendererMode.fromDartDefines(
+        webRenderer.dartDefines,
+        useWasm: true,
+      );
+
+      expect(computed, webRenderer);
+
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+  }
+  WebRendererMode.values
+    .forEach(testRendererModeFromDartDefines);
+
+  testUsingContext('WebRendererMode.fromDartDefines sets a wasm-aware default for unknown dart defines.', () async {
+    WebRendererMode computed = WebRendererMode.fromDartDefines(
+      <String>{}, useWasm: false,
+    );
+    expect(computed, WebRendererMode.getDefault(useWasm: false));
+
+    computed = WebRendererMode.fromDartDefines(
+      <String>{}, useWasm: true,
+    );
+    expect(computed, WebRendererMode.getDefault(useWasm: true));
   });
 }

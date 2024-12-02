@@ -105,7 +105,7 @@ class WebTestsSuite {
           testAppDirectory: path.join('packages', 'integration_test', 'example'),
           target: path.join('test_driver', 'failure.dart'),
           buildMode: buildMode,
-          renderer: 'canvaskit',
+          webRenderer: 'canvaskit',
           // This test intentionally fails and prints stack traces in the browser
           // logs. To avoid confusion, silence browser output.
           silenceBrowserOutput: true,
@@ -115,7 +115,7 @@ class WebTestsSuite {
           target: path.join('integration_test', 'example_test.dart'),
           driver: path.join('test_driver', 'integration_test.dart'),
           buildMode: buildMode,
-          renderer: 'canvaskit',
+          webRenderer: 'canvaskit',
           expectWriteResponseFile: true,
           expectResponseFileContent: 'null',
         ),
@@ -124,7 +124,7 @@ class WebTestsSuite {
           target: path.join('integration_test', 'extended_test.dart'),
           driver: path.join('test_driver', 'extended_integration_test.dart'),
           buildMode: buildMode,
-          renderer: 'canvaskit',
+          webRenderer: 'canvaskit',
           expectWriteResponseFile: true,
           expectResponseFileContent: '''
 {
@@ -177,7 +177,7 @@ class WebTestsSuite {
         testAppDirectory: path.join(flutterRoot, 'examples', 'hello_world'),
         target: 'test_driver/smoke_web_engine.dart',
         buildMode: 'profile',
-        renderer: 'auto',
+        webRenderer: 'auto',
       ),
       () => _runGalleryE2eWebTest('debug'),
       () => _runGalleryE2eWebTest('debug', canvasKit: true),
@@ -278,7 +278,7 @@ class WebTestsSuite {
     await _runFlutterDriverWebTest(
       target: path.join('test_driver', '$name.dart'),
       buildMode: buildMode,
-      renderer: renderer,
+      webRenderer: renderer,
       testAppDirectory: path.join(flutterRoot, 'dev', 'integration_tests', 'web_e2e_tests'),
     );
   }
@@ -286,7 +286,7 @@ class WebTestsSuite {
   Future<void> _runFlutterDriverWebTest({
     required String target,
     required String buildMode,
-    required String renderer,
+    required String webRenderer,
     required String testAppDirectory,
     String? driver,
     bool expectFailure = false,
@@ -300,8 +300,10 @@ class WebTestsSuite {
       <String>[ 'clean' ],
       workingDirectory: testAppDirectory,
     );
+    // This must match the testOutputsDirectory defined in flutter_driver's driver/common.dart.
+    final String driverOutputPath = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? path.join(testAppDirectory, 'build');
     final String responseFile =
-        path.join(testAppDirectory, 'build', 'integration_response_data.json');
+        path.join(driverOutputPath, 'integration_response_data.json');
     if (File(responseFile).existsSync()) {
       File(responseFile).deleteSync();
     }
@@ -316,7 +318,24 @@ class WebTestsSuite {
         '-d',
         'web-server',
         '--$buildMode',
-        '--web-renderer=$renderer',
+        // '--web-renderer=$webRenderer',
+        '--dart-define=FLUTTER_WEB_AUTO_DETECT=false',
+        if (webRenderer == 'skwasm') ...<String>[
+          // See: WebRendererMode.dartDefines[skwasm]
+          '--dart-define=FLUTTER_WEB_USE_SKIA=false',
+          '--dart-define=FLUTTER_WEB_USE_SKWASM=true',
+        ],
+        if (webRenderer == 'canvaskit') ...<String>[
+          // See: WebRendererMode.dartDefines[canvaskit]
+          '--dart-define=FLUTTER_WEB_USE_SKIA=true',
+          '--dart-define=FLUTTER_WEB_USE_SKWASM=false',
+        ],
+        if (webRenderer == 'html') ...<String>[
+          // See: WebRendererMode.dartDefines[html]
+          '--dart-define=FLUTTER_WEB_USE_SKIA=false',
+          '--dart-define=FLUTTER_WEB_USE_SKWASM=false',
+        ],
+
       ],
       expectNonZeroExit: expectFailure,
       workingDirectory: testAppDirectory,
@@ -693,7 +712,23 @@ class WebTestsSuite {
         '-v',
         '--platform=chrome',
         if (useWasm) '--wasm',
-        '--web-renderer=$webRenderer',
+        '--dart-define=FLUTTER_WEB_AUTO_DETECT=false',
+        // '--web-renderer=$webRenderer',
+        if (webRenderer == 'skwasm') ...<String>[
+          // See: WebRendererMode.dartDefines[skwasm]
+          '--dart-define=FLUTTER_WEB_USE_SKIA=false',
+          '--dart-define=FLUTTER_WEB_USE_SKWASM=true',
+        ],
+        if (webRenderer == 'canvaskit') ...<String>[
+          // See: WebRendererMode.dartDefines[canvaskit]
+          '--dart-define=FLUTTER_WEB_USE_SKIA=true',
+          '--dart-define=FLUTTER_WEB_USE_SKWASM=false',
+        ],
+        if (webRenderer == 'html') ...<String>[
+          // See: WebRendererMode.dartDefines[html]
+          '--dart-define=FLUTTER_WEB_USE_SKIA=false',
+          '--dart-define=FLUTTER_WEB_USE_SKWASM=false',
+        ],
         '--dart-define=DART_HHH_BOT=$runningInDartHHHBot',
         ...flutterTestArgs,
         ...tests,
@@ -706,7 +741,9 @@ class WebTestsSuite {
     // metriciFile is a transitional file that needs to be deleted once it is parsed.
     // TODO(godofredoc): Ensure metricFile is parsed and aggregated before deleting.
     // https://github.com/flutter/flutter/issues/146003
-    metricFile.deleteSync();
+    if (!dryRun) {
+      metricFile.deleteSync();
+    }
   }
 
   // The `chromedriver` process created by this test.

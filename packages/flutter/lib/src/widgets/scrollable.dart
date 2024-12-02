@@ -304,12 +304,17 @@ class Scrollable extends StatefulWidget {
   /// {@endtemplate}
   final String? restorationId;
 
-  /// {@macro flutter.widgets.shadow.scrollBehavior}
+  /// {@template flutter.widgets.scrollable.scrollBehavior}
+  /// A [ScrollBehavior] that will be applied to this widget individually.
+  ///
+  /// Defaults to null, wherein the inherited [ScrollBehavior] is copied and
+  /// modified to alter the viewport decoration, like [Scrollbar]s.
   ///
   /// [ScrollBehavior]s also provide [ScrollPhysics]. If an explicit
   /// [ScrollPhysics] is provided in [physics], it will take precedence,
   /// followed by [scrollBehavior], and then the inherited ancestor
   /// [ScrollBehavior].
+  /// {@endtemplate}
   final ScrollBehavior? scrollBehavior;
 
   /// {@macro flutter.material.Material.clipBehavior}
@@ -469,10 +474,10 @@ class Scrollable extends StatefulWidget {
     return false;
   }
 
-  /// Scrolls the scrollables that enclose the given context so as to make the
+  /// Scrolls all scrollables that enclose the given context so as to make the
   /// given context visible.
   ///
-  /// If the [Scrollable] of the provided [BuildContext] is a
+  /// If a [Scrollable] enclosing the provided [BuildContext] is a
   /// [TwoDimensionalScrollable], both vertical and horizontal axes will ensure
   /// the target is made visible.
   static Future<void> ensureVisible(
@@ -570,14 +575,12 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   ///
   /// Used by [EdgeDraggingAutoScroller] to progress the position forward when a
   /// drag gesture reaches the edge of the [Viewport].
-  Offset get deltaToScrollOrigin {
-    return switch (axisDirection) {
-      AxisDirection.up    => Offset(0, -position.pixels),
-      AxisDirection.down  => Offset(0, position.pixels),
-      AxisDirection.left  => Offset(-position.pixels, 0),
-      AxisDirection.right => Offset(position.pixels, 0),
-    };
-  }
+  Offset get deltaToScrollOrigin => switch (axisDirection) {
+    AxisDirection.up    => Offset(0, -position.pixels),
+    AxisDirection.down  => Offset(0, position.pixels),
+    AxisDirection.left  => Offset(-position.pixels, 0),
+    AxisDirection.right => Offset(position.pixels, 0),
+  };
 
   ScrollController get _effectiveScrollController => widget.controller ?? _fallbackScrollController!;
 
@@ -628,6 +631,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     _effectiveScrollController.attach(position);
   }
 
+  @protected
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_persistedScrollOffset, 'offset');
@@ -637,6 +641,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     }
   }
 
+  @protected
   @override
   void saveOffset(double offset) {
     assert(debugIsSerializableForRestoration(offset));
@@ -646,6 +651,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     ServicesBinding.instance.restorationManager.flushData();
   }
 
+  @protected
   @override
   void initState() {
     if (widget.controller == null) {
@@ -654,6 +660,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     super.initState();
   }
 
+  @protected
   @override
   void didChangeDependencies() {
     _mediaQueryGestureSettings = MediaQuery.maybeGestureSettingsOf(context);
@@ -682,6 +689,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     return widget.controller?.runtimeType != oldWidget.controller?.runtimeType;
   }
 
+  @protected
   @override
   void didUpdateWidget(Scrollable oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -713,6 +721,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     }
   }
 
+  @protected
   @override
   void dispose() {
     if (widget.controller != null) {
@@ -982,6 +991,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   // DESCRIPTION
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(_position != null);
@@ -1066,6 +1076,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     return (<Future<void>>[ ensureVisibleFuture ], this);
   }
 
+  @protected
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -1936,6 +1947,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
     return _horizontalInnerScrollableKey.currentState!;
   }
 
+  @protected
   @override
   void initState() {
     if (widget.verticalDetails.controller == null) {
@@ -1947,6 +1959,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
     super.initState();
   }
 
+  @protected
   @override
   void didUpdateWidget(TwoDimensionalScrollable oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -1987,6 +2000,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
     }
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(
@@ -2051,6 +2065,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
     );
   }
 
+  @protected
   @override
   void dispose() {
     _verticalFallbackController?.dispose();

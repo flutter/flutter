@@ -26,11 +26,17 @@ $ dart bin/flutter_tools.dart
 ```
 followed by command-line arguments, as usual.
 
-As a convenience, you can also use the `bin/flutter-dev` script:
+As a convenience for folks developing the `flutter` tool itself,
+you can also use the `bin/flutter-dev` script:
 ```shell
 # Assuming flutter/bin is on your PATH
 $ flutter-dev
 ```
+
+Note: `flutter-dev` is identical to `flutter`, except it does not
+use a cached on-disk snapshot. In other words, it will be significantly
+slower but you will not need to forget (remember?) to delete the cached
+snapshot.
 
 ### Running the analyzer
 
@@ -73,7 +79,7 @@ Please avoid setting any other timeouts.
 
 The integration tests can be configured to use a specific local engine
 variant by setting the `FLUTTER_LOCAL_ENGINE` and `FLUTTER_LOCAL_ENGINE_HOST`
-environment svariable to the name of the local engines (e.g. `android_debug_unopt`
+environment variables to the name of the local engines (e.g. `android_debug_unopt`
 and `host_debug_unopt`). If the local engine build requires a source path, this
 can be provided by setting the `FLUTTER_LOCAL_ENGINE_SRC_PATH` environment
 variable. This second variable is not necessary if the `flutter` and `engine`

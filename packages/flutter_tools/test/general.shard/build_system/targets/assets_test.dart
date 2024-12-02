@@ -43,14 +43,17 @@ void main() {
       },
     );
     fileSystem.file(environment.buildDir.childFile('app.dill')).createSync(recursive: true);
+    fileSystem.file(environment.buildDir.childFile('native_assets.json')).createSync(recursive: true);
     fileSystem.file('packages/flutter_tools/lib/src/build_system/targets/assets.dart')
       .createSync(recursive: true);
     fileSystem.file('assets/foo/bar.png')
       .createSync(recursive: true);
     fileSystem.file('assets/wildcard/#bar.png')
       .createSync(recursive: true);
-    fileSystem.file('.packages')
-      .createSync();
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('''
@@ -65,8 +68,22 @@ flutter:
   });
 
   testUsingContext('includes LICENSE file inputs in dependencies', () async {
-    fileSystem.file('.packages')
-      .writeAsStringSync('foo:file:///bar/lib');
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "foo",
+      "rootUri": "file:///bar",
+      "packageUri": "lib/"
+    }
+  ]
+}
+''');
     fileSystem.file('bar/LICENSE')
       ..createSync(recursive: true)
       ..writeAsStringSync('THIS IS A LICENSE');
@@ -185,7 +202,10 @@ flutter:
       },
     );
 
-    await fileSystem.file('.packages').create();
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
 
     fileSystem.file('pubspec.yaml')
       ..createSync()
@@ -272,7 +292,10 @@ flutter:
       },
     );
 
-    await fileSystem.file('.packages').create();
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
 
     fileSystem.file('pubspec.yaml')
       ..createSync()
@@ -370,7 +393,10 @@ flutter:
       },
     );
 
-    await fileSystem.file('.packages').create();
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
 
     fileSystem.file('pubspec.yaml')
       ..createSync()

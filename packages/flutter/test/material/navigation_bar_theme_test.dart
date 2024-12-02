@@ -38,18 +38,21 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('Custom debugFillProperties', (WidgetTester tester) async {
+  testWidgets('NavigationBarThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationBarThemeData(
       height: 200.0,
       backgroundColor: Color(0x00000099),
       elevation: 20.0,
-      indicatorColor: Color(0x00000098),
+      shadowColor: Color(0x00000098),
+      surfaceTintColor: Color(0x00000097),
+      indicatorColor: Color(0x00000096),
       indicatorShape: CircleBorder(),
       labelTextStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
       iconTheme: MaterialStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000097))),
       labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
-      overlayColor: MaterialStatePropertyAll<Color>(Color(0x00000096)),
+      overlayColor: MaterialStatePropertyAll<Color>(Color(0x00000095)),
+      labelPadding: EdgeInsets.all(8),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -57,17 +60,20 @@ void main() {
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
-    expect(description[0], 'height: 200.0');
-    expect(description[1], 'backgroundColor: Color(0x00000099)');
-    expect(description[2], 'elevation: 20.0');
-    expect(description[3], 'indicatorColor: Color(0x00000098)');
-    expect(description[4], 'indicatorShape: CircleBorder(BorderSide(width: 0.0, style: none))');
-    expect(description[5], 'labelTextStyle: WidgetStatePropertyAll(TextStyle(inherit: true, size: 7.0))');
-    // Ignore instance address for IconThemeData.
-    expect(description[6].contains('iconTheme: WidgetStatePropertyAll(IconThemeData'), isTrue);
-    expect(description[6].contains('(color: Color(0x00000097))'), isTrue);
-    expect(description[7], 'labelBehavior: NavigationDestinationLabelBehavior.alwaysHide');
-    expect(description[8], 'overlayColor: WidgetStatePropertyAll(Color(0x00000096))');
+    expect(description, equalsIgnoringHashCodes(<String>[
+      'height: 200.0',
+      'backgroundColor: Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.6000, colorSpace: ColorSpace.sRGB)',
+      'elevation: 20.0',
+      'shadowColor: Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.5961, colorSpace: ColorSpace.sRGB)',
+      'surfaceTintColor: Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.5922, colorSpace: ColorSpace.sRGB)',
+      'indicatorColor: Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.5882, colorSpace: ColorSpace.sRGB)',
+      'indicatorShape: CircleBorder(BorderSide(width: 0.0, style: none))',
+      'labelTextStyle: WidgetStatePropertyAll(TextStyle(inherit: true, size: 7.0))',
+      'iconTheme: WidgetStatePropertyAll(IconThemeData#fd5c3(color: Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.5922, colorSpace: ColorSpace.sRGB)))',
+      'labelBehavior: NavigationDestinationLabelBehavior.alwaysHide',
+      'overlayColor: WidgetStatePropertyAll(Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.5843, colorSpace: ColorSpace.sRGB))',
+      'labelPadding: EdgeInsets.all(8.0)'
+    ]));
   });
 
   testWidgets('NavigationBarThemeData values are used when no NavigationBar properties are specified', (WidgetTester tester) async {
@@ -85,6 +91,7 @@ void main() {
     const double selectedLabelFontSize = 13.0;
     const double unselectedLabelFontSize = 11.0;
     const NavigationDestinationLabelBehavior labelBehavior = NavigationDestinationLabelBehavior.alwaysShow;
+    const EdgeInsetsGeometry labelPadding = EdgeInsets.all(8);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -117,6 +124,7 @@ void main() {
                 return const TextStyle(fontSize: unselectedLabelFontSize);
               }),
               labelBehavior: labelBehavior,
+              labelPadding: labelPadding,
             ),
             child: NavigationBar(
               destinations: _destinations(),
@@ -140,6 +148,8 @@ void main() {
     expect(_selectedLabelStyle(tester).fontSize, selectedLabelFontSize);
     expect(_unselectedLabelStyle(tester).fontSize, unselectedLabelFontSize);
     expect(_labelBehavior(tester), labelBehavior);
+    expect(_getLabelPadding(tester, 'Abc'), labelPadding);
+    expect(_getLabelPadding(tester, 'Def'),labelPadding);
   });
 
   testWidgets('NavigationBar values take priority over NavigationBarThemeData values when both properties are specified', (WidgetTester tester) async {
@@ -147,6 +157,7 @@ void main() {
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 42.0;
     const NavigationDestinationLabelBehavior labelBehavior = NavigationDestinationLabelBehavior.alwaysShow;
+    const EdgeInsetsGeometry labelPadding = EdgeInsets.symmetric(horizontal: 16.0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -157,12 +168,14 @@ void main() {
               elevation: 18.0,
               backgroundColor: Color(0x00000099),
               labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+              labelPadding: EdgeInsets.all(8),
             ),
             child: NavigationBar(
               height: height,
               elevation: elevation,
               backgroundColor: backgroundColor,
               labelBehavior: labelBehavior,
+              labelPadding: labelPadding,
               destinations: _destinations(),
             ),
           ),
@@ -174,6 +187,8 @@ void main() {
     expect(_barMaterial(tester).color, backgroundColor);
     expect(_barMaterial(tester).elevation, elevation);
     expect(_labelBehavior(tester), labelBehavior);
+    expect(_getLabelPadding(tester, 'Abc'), labelPadding);
+    expect(_getLabelPadding(tester, 'Def'), labelPadding);
   });
 
   testWidgets('Custom label style renders ink ripple properly', (WidgetTester tester) async {
@@ -399,4 +414,13 @@ double _labelOpacity(WidgetTester tester, String text) {
     ),
   );
   return opacityWidget.opacity;
+}
+
+EdgeInsetsGeometry _getLabelPadding(WidgetTester tester, String text) {
+  return tester.widget<Padding>(
+    find.ancestor(
+      of: find.text(text),
+      matching: find.byType(Padding),
+    ).first,
+  ).padding;
 }

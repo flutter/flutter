@@ -166,11 +166,10 @@ class FlutterManifest {
   ///     - assets/foo_license.txt
   /// ```
   List<String> get additionalLicenses {
-    final Object? licenses = _flutterDescriptor['licenses'];
-    if (licenses is YamlList) {
-      return licenses.map((Object? element) => element.toString()).toList();
-    }
-    return <String>[];
+    return <String>[
+      if (_flutterDescriptor case {'licenses': final YamlList list})
+        for (final Object? item in list) '$item',
+    ];
   }
 
   /// True if this manifest declares a Flutter module project.
@@ -197,27 +196,19 @@ class FlutterManifest {
   /// such declaration.
   String? get androidPackage {
     if (isModule) {
-      final Object? module = _flutterDescriptor['module'];
-      if (module is YamlMap) {
-        return module['androidPackage'] as String?;
+      if (_flutterDescriptor case {'module': final YamlMap map}) {
+        return map['androidPackage'] as String?;
       }
     }
-    final Map<String, Object?>? platforms = supportedPlatforms;
-    if (platforms == null) {
+
+    late final YamlMap? plugin = _flutterDescriptor['plugin'] as YamlMap?;
+
+    return switch (supportedPlatforms) {
+      {'android': final YamlMap map} => map['package'] as String?,
       // Pre-multi-platform plugin format
-      if (isPlugin) {
-        final YamlMap? plugin = _flutterDescriptor['plugin'] as YamlMap?;
-        return plugin?['androidPackage'] as String?;
-      }
-      return null;
-    }
-    if (platforms.containsKey('android')) {
-      final Object? android = platforms['android'];
-      if (android is YamlMap) {
-        return android['package'] as String?;
-      }
-    }
-    return null;
+      null when isPlugin => plugin?['androidPackage'] as String?,
+      _ => null,
+    };
   }
 
   /// Returns the deferred components configuration if declared. Returns
@@ -253,9 +244,8 @@ class FlutterManifest {
   /// module descriptor. Returns null if there is no such declaration.
   String? get iosBundleIdentifier {
     if (isModule) {
-      final Object? module = _flutterDescriptor['module'];
-      if (module is YamlMap) {
-        return module['iosBundleIdentifier'] as String?;
+      if (_flutterDescriptor case {'module': final YamlMap map}) {
+        return map['iosBundleIdentifier'] as String?;
       }
     }
     return null;

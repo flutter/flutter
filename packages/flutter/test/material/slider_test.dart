@@ -3136,9 +3136,9 @@ void main() {
       'max: 100.0',
       'divisions: 10',
       'label: "Set a value"',
-      'activeColor: MaterialColor(primary value: Color(0xff2196f3))',
-      'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
-      'secondaryActiveColor: MaterialColor(primary value: Color(0xff607d8b))',
+      'activeColor: MaterialColor(primary value: ${const Color(0xff2196f3)})',
+      'inactiveColor: MaterialColor(primary value: ${const Color(0xff9e9e9e)})',
+      'secondaryActiveColor: MaterialColor(primary value: ${const Color(0xff607d8b)})',
     ]);
   });
 
@@ -4598,4 +4598,299 @@ void main() {
       paints..path(color: const Color(0xff000000))..paragraph(),
     );
   }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('Slider.padding can override the default Slider padding', (WidgetTester tester) async {
+    Widget buildSlider({ EdgeInsetsGeometry? padding }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: IntrinsicHeight(
+              child: Slider(
+                padding: padding,
+                value: 0.5,
+                onChanged: (double value) {},
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    RenderBox sliderRenderBox() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderSlider') as RenderBox;
+    }
+
+    // Test Slider height and tracks spacing with zero padding.
+    await tester.pumpWidget(buildSlider(padding: EdgeInsets.zero));
+    await tester.pumpAndSettle();
+
+    // The height equals to the default thumb height.
+    expect(sliderRenderBox().size, const Size(800, 20));
+    expect(
+      find.byType(Slider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(398.0, 8.0, 800.0, 12.0,  const Radius.circular(2.0)),
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 7.0, 402.0, 13.0,  const Radius.circular(3.0)),
+        ),
+    );
+
+    // Test Slider height and tracks spacing with directional padding.
+    const double startPadding = 100;
+    const double endPadding = 20;
+    await tester.pumpWidget(buildSlider(
+      padding: const EdgeInsetsDirectional.only(
+        start: startPadding,
+        end: endPadding,
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(sliderRenderBox().size, const Size(800 - startPadding - endPadding, 20));
+    expect(
+      find.byType(Slider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(338.0, 8.0, 680.0, 12.0,  const Radius.circular(2.0)),
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 7.0, 342.0, 13.0,  const Radius.circular(3.0)),
+        ),
+    );
+
+
+    // Test Slider height and tracks spacing with top and bottom padding.
+    const double topPadding = 100;
+    const double bottomPadding = 20;
+    const double trackHeight = 20;
+    await tester.pumpWidget(buildSlider(padding: const EdgeInsetsDirectional.only(top: topPadding, bottom: bottomPadding)));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(Slider)), const Size(800, topPadding + trackHeight + bottomPadding));
+    expect(sliderRenderBox().size, const Size(800, 20));
+    expect(
+      find.byType(Slider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(398.0, 8.0, 800.0, 12.0,  const Radius.circular(2.0)),
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 7.0, 402.0, 13.0,  const Radius.circular(3.0)),
+        ),
+    );
+  });
+
+  testWidgets('Default Slider when year2023 is false', (WidgetTester tester) async {
+    debugDisableShadows = false;
+    try {
+      final ThemeData theme = ThemeData();
+      final ColorScheme colorScheme = theme.colorScheme;
+      final Color activeTrackColor = colorScheme.primary;
+      final Color inactiveTrackColor = colorScheme.secondaryContainer;
+      final Color secondaryActiveTrackColor = colorScheme.primary.withOpacity(0.54);
+      final Color disabledActiveTrackColor = colorScheme.onSurface.withOpacity(0.38);
+      final Color disabledInactiveTrackColor = colorScheme.onSurface.withOpacity(0.12);
+      final Color disabledSecondaryActiveTrackColor = colorScheme.onSurface.withOpacity(0.38);
+      final Color activeTickMarkColor = colorScheme.onPrimary;
+      final Color inactiveTickMarkColor = colorScheme.onSecondaryContainer;
+      final Color disabledActiveTickMarkColor = colorScheme.onInverseSurface;
+      final Color disabledInactiveTickMarkColor = colorScheme.onSurface;
+      final Color thumbColor = colorScheme.primary;
+      final Color disabledThumbColor = colorScheme.onSurface.withOpacity(0.38);
+      final Color valueIndicatorColor = colorScheme.inverseSurface;
+      double value = 0.45;
+      Widget buildApp({
+        int? divisions,
+        bool enabled = true,
+      }) {
+        final ValueChanged<double>? onChanged = !enabled
+          ? null
+          : (double d) {
+              value = d;
+            };
+        return MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(
+              child: Center(
+                child: Theme(
+                  data: theme,
+                  child: Slider(
+                    year2023: false,
+                    value: value,
+                    secondaryTrackValue: 0.75,
+                    label: '$value',
+                    divisions: divisions,
+                    onChanged: onChanged,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp());
+
+      final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
+
+      // Test default track shape.
+      const Radius trackOuterCornerRadius = Radius.circular(8.0);
+      const Radius trackInnerCornderRadius = Radius.circular(2.0);
+      expect(
+        material,
+        paints
+          // Active track.
+          ..rrect(
+            rrect: RRect.fromLTRBAndCorners(
+              24.0, 292.0, 356.4, 308.0,
+              topLeft: trackOuterCornerRadius,
+              topRight: trackInnerCornderRadius,
+              bottomRight: trackInnerCornderRadius,
+              bottomLeft: trackOuterCornerRadius,
+            ),
+            color: activeTrackColor,
+          )
+          // Inctive track.
+          ..rrect(
+            rrect: RRect.fromLTRBAndCorners(
+              368.4, 292.0, 776.0, 308.0,
+              topLeft: trackInnerCornderRadius,
+              topRight: trackOuterCornerRadius,
+              bottomRight: trackOuterCornerRadius,
+              bottomLeft: trackInnerCornderRadius,
+            ),
+            color: inactiveTrackColor,
+          )
+      );
+
+      // Test default colors for enabled slider.
+      expect(material, paints..circle()..rrect(color: thumbColor));
+      expect(material, isNot(paints..circle()..circle(color: disabledThumbColor)));
+      expect(material, isNot(paints..rrect(color: disabledActiveTrackColor)));
+      expect(material, isNot(paints..rrect(color: disabledInactiveTrackColor)));
+      expect(material, isNot(paints..rrect(color: disabledSecondaryActiveTrackColor)));
+
+      // Test defaults colors for discrete slider.
+      await tester.pumpWidget(buildApp(divisions: 3));
+      expect(
+        material,
+        paints
+          ..rrect(color: activeTrackColor)
+          ..rrect(color: inactiveTrackColor)
+          ..rrect(color: secondaryActiveTrackColor)
+          ..circle(color: activeTickMarkColor)
+          ..circle(color: activeTickMarkColor)
+          ..circle(color: inactiveTickMarkColor)
+          ..circle(color: inactiveTickMarkColor)
+      );
+      expect(material, isNot(paints..circle(color: disabledThumbColor)));
+      expect(material, isNot(paints..rrect(color: disabledActiveTrackColor)));
+      expect(material, isNot(paints..rrect(color: disabledInactiveTrackColor)));
+      expect(material, isNot(paints..rrect(color: disabledSecondaryActiveTrackColor)));
+
+      // Test defaults colors for disabled slider.
+      await tester.pumpWidget(buildApp(enabled: false));
+      await tester.pumpAndSettle();
+      expect(
+        material,
+        paints
+          ..rrect(color: disabledActiveTrackColor)
+          ..rrect(color: disabledInactiveTrackColor)
+          ..rrect(color: disabledSecondaryActiveTrackColor),
+      );
+      expect(material, paints..circle()..rrect(color: disabledThumbColor));
+      expect(material, isNot(paints..circle()..rrect(color: thumbColor)));
+      expect(material, isNot(paints..rrect(color: activeTrackColor)));
+      expect(material, isNot(paints..rrect(color: inactiveTrackColor)));
+      expect(material, isNot(paints..rrect(color: secondaryActiveTrackColor)));
+
+      // Test defaults colors for disabled discrete slider.
+      await tester.pumpWidget(buildApp(divisions: 3, enabled: false));
+      expect(
+        material,
+        paints
+          ..rrect(color: disabledActiveTrackColor)
+          ..rrect(color: disabledInactiveTrackColor)
+          ..rrect(color: disabledSecondaryActiveTrackColor)
+          ..circle(color: disabledActiveTickMarkColor)
+          ..circle(color: disabledActiveTickMarkColor)
+          ..circle(color: disabledInactiveTickMarkColor)
+          ..circle(color: disabledInactiveTickMarkColor)
+          ..rrect(color: disabledThumbColor),
+      );
+      expect(material, isNot(paints..circle()..rrect(color: thumbColor)));
+      expect(material, isNot(paints..rrect(color: activeTrackColor)));
+      expect(material, isNot(paints..rrect(color: inactiveTrackColor)));
+      expect(material, isNot(paints..rrect(color: secondaryActiveTrackColor)));
+
+      await tester.pumpWidget(buildApp(divisions: 3));
+      await tester.pumpAndSettle();
+
+      final Offset center = tester.getCenter(find.byType(Slider));
+      final TestGesture gesture = await tester.startGesture(center);
+      // Wait for value indicator animation to finish.
+      await tester.pumpAndSettle();
+
+      final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+      expect(
+        valueIndicatorBox,
+        paints
+          ..scale()
+          ..rrect(color: valueIndicatorColor)
+      );
+      await gesture.up();
+    } finally {
+      debugDisableShadows = true;
+    }
+  });
+
+  testWidgets('Slider value indicator text when year2023 is false', (WidgetTester tester) async {
+      const double value = 50;
+      final List<InlineSpan> log = <InlineSpan>[];
+      final LoggingValueIndicatorShape loggingValueIndicatorShape = LoggingValueIndicatorShape(log);
+      final ThemeData theme = ThemeData(
+        sliderTheme: SliderThemeData(
+          valueIndicatorShape: loggingValueIndicatorShape,
+        ),
+      );
+
+      Widget buildSlider() {
+        return MaterialApp(
+          theme: theme,
+          home: Material(
+            child: Center(
+              child: Slider(
+                year2023: false,
+                max: 100.0,
+                divisions: 4,
+                label: '${value.round()}',
+                value: value,
+                onChanged: (double newValue) { },
+              ),
+            ),
+          ),
+        );
+      }
+      // Normal text
+      await tester.pumpWidget(buildSlider());
+      final Offset center = tester.getCenter(find.byType(Slider));
+      final TestGesture gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      expect(log.last.toPlainText(), '50');
+      expect(log.last.style!.fontSize, 14.0);
+      expect(log.last.style!.color, theme.colorScheme.onInverseSurface);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+  });
 }

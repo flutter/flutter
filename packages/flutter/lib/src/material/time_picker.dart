@@ -2047,7 +2047,14 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
     final bool alwaysUse24HourFormat = MediaQuery.alwaysUse24HourFormatOf(context);
 
     final InputDecorationTheme inputDecorationTheme = timePickerTheme.inputDecorationTheme ?? defaultTheme.inputDecorationTheme;
-    InputDecoration inputDecoration = const InputDecoration().applyDefaults(inputDecorationTheme);
+    InputDecoration inputDecoration = InputDecoration(
+      // Prevent the error text from appearing when
+      // timePickerTheme.inputDecorationTheme is used.
+      // TODO(tahatesser): Remove this workaround once
+      // https://github.com/flutter/flutter/issues/54104
+      // is fixed.
+      errorStyle: defaultTheme.inputDecorationTheme.errorStyle,
+    ).applyDefaults(inputDecorationTheme);
     // Remove the hint text when focused because the centered cursor
     // appears odd above the hint text.
     final String? hintText = focusNode.hasFocus ? null : _formattedValue;
@@ -2152,6 +2159,8 @@ class TimePickerDialog extends StatefulWidget {
     this.initialEntryMode = TimePickerEntryMode.dial,
     this.orientation,
     this.onEntryModeChanged,
+    this.switchToInputEntryModeIcon,
+    this.switchToTimerEntryModeIcon,
   });
 
   /// The time initially selected when the dialog is shown.
@@ -2211,6 +2220,12 @@ class TimePickerDialog extends StatefulWidget {
 
   /// Callback called when the selected entry mode is changed.
   final EntryModeChangeCallback? onEntryModeChanged;
+
+  /// {@macro flutter.material.time_picker.switchToInputEntryModeIcon}
+  final Icon? switchToInputEntryModeIcon;
+
+  /// {@macro flutter.material.time_picker.switchToTimerEntryModeIcon}
+  final Icon? switchToTimerEntryModeIcon;
 
   @override
   State<TimePickerDialog> createState() => _TimePickerDialogState();
@@ -2409,33 +2424,37 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
               color: theme.useMaterial3 ? null : entryModeIconColor,
               style: theme.useMaterial3 ? IconButton.styleFrom(foregroundColor: entryModeIconColor) : null,
               onPressed: _toggleEntryMode,
-              icon: Icon(_entryMode.value == TimePickerEntryMode.dial ? Icons.keyboard_outlined : Icons.access_time),
+              icon: _entryMode.value == TimePickerEntryMode.dial
+                  ? widget.switchToInputEntryModeIcon ?? const Icon(Icons.keyboard_outlined)
+                  : widget.switchToTimerEntryModeIcon ?? const Icon(Icons.access_time),
               tooltip: _entryMode.value == TimePickerEntryMode.dial
                   ? MaterialLocalizations.of(context).inputTimeModeButtonLabel
                   : MaterialLocalizations.of(context).dialModeButtonLabel,
             ),
           Expanded(
-            child: Container(
-              alignment: AlignmentDirectional.centerEnd,
+            child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 36),
-              child: OverflowBar(
-                spacing: 8,
-                overflowAlignment: OverflowBarAlignment.end,
-                children: <Widget>[
-                  TextButton(
-                    style: pickerTheme.cancelButtonStyle ?? defaultTheme.cancelButtonStyle,
-                    onPressed: _handleCancel,
-                    child: Text(widget.cancelText ??
-                        (theme.useMaterial3
-                            ? localizations.cancelButtonLabel
-                            : localizations.cancelButtonLabel.toUpperCase())),
-                  ),
-                  TextButton(
-                    style: pickerTheme.confirmButtonStyle ?? defaultTheme.confirmButtonStyle,
-                    onPressed: _handleOk,
-                    child: Text(widget.confirmText ?? localizations.okButtonLabel),
-                  ),
-                ],
+              child: Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: OverflowBar(
+                  spacing: 8,
+                  overflowAlignment: OverflowBarAlignment.end,
+                  children: <Widget>[
+                    TextButton(
+                      style: pickerTheme.cancelButtonStyle ?? defaultTheme.cancelButtonStyle,
+                      onPressed: _handleCancel,
+                      child: Text(widget.cancelText ??
+                          (theme.useMaterial3
+                              ? localizations.cancelButtonLabel
+                              : localizations.cancelButtonLabel.toUpperCase())),
+                    ),
+                    TextButton(
+                      style: pickerTheme.confirmButtonStyle ?? defaultTheme.confirmButtonStyle,
+                      onPressed: _handleOk,
+                      child: Text(widget.confirmText ?? localizations.okButtonLabel),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -2496,6 +2515,8 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
                           entryMode: _entryMode.value,
                           orientation: widget.orientation,
                           onEntryModeChanged: _handleEntryModeChanged,
+                          switchToInputEntryModeIcon: widget.switchToInputEntryModeIcon,
+                          switchToTimerEntryModeIcon: widget.switchToTimerEntryModeIcon,
                         ),
                       ),
                     ),
@@ -2531,6 +2552,8 @@ class _TimePicker extends StatefulWidget {
     this.entryMode = TimePickerEntryMode.dial,
     this.orientation,
     this.onEntryModeChanged,
+    this.switchToInputEntryModeIcon,
+    this.switchToTimerEntryModeIcon,
   });
 
   /// Optionally provide your own text for the help text at the top of the
@@ -2598,6 +2621,12 @@ class _TimePicker extends StatefulWidget {
 
   /// Callback called when the selected entry mode is changed.
   final EntryModeChangeCallback? onEntryModeChanged;
+
+  /// {@macro flutter.material.time_picker.switchToInputEntryModeIcon}
+  final Icon? switchToInputEntryModeIcon;
+
+  /// {@macro flutter.material.time_picker.switchToTimerEntryModeIcon}
+  final Icon? switchToTimerEntryModeIcon;
 
   @override
   State<_TimePicker> createState() => _TimePickerState();
@@ -2932,6 +2961,22 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
 /// parameter to override the default and force the dialog to appear in either
 /// portrait or landscape mode.
 ///
+/// {@template flutter.material.time_picker.switchToInputEntryModeIcon}
+/// The optional [switchToInputEntryModeIcon] argument can be used to customize
+/// the input method icon that is shown when the [TimePickerEntryMode]
+/// is [TimePickerEntryMode.dial].
+///
+/// Defaults to an [Icon] widget with [Icons.keyboard_outlined] as icon.
+/// {@endtemplate}
+///
+/// {@template flutter.material.time_picker.switchToTimerEntryModeIcon}
+/// The optional [switchToTimerEntryModeIcon] argument can be used to customize
+/// the input method icon that is shown when the [TimePickerEntryMode]
+/// is [TimePickerEntryMode.input].
+///
+/// Defaults to an [Icon] widget with [Icons.access_time] as icon.
+/// {@endtemplate}
+///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// By default, the time picker gets its colors from the overall theme's
@@ -3006,6 +3051,8 @@ Future<TimeOfDay?> showTimePicker({
   EntryModeChangeCallback? onEntryModeChanged,
   Offset? anchorPoint,
   Orientation? orientation,
+  Icon? switchToInputEntryModeIcon,
+  Icon? switchToTimerEntryModeIcon,
 }) async {
   assert(debugCheckHasMaterialLocalizations(context));
 
@@ -3020,6 +3067,8 @@ Future<TimeOfDay?> showTimePicker({
     minuteLabelText: minuteLabelText,
     orientation: orientation,
     onEntryModeChanged: onEntryModeChanged,
+    switchToInputEntryModeIcon: switchToInputEntryModeIcon,
+    switchToTimerEntryModeIcon: switchToTimerEntryModeIcon,
   );
   return showDialog<TimeOfDay>(
     context: context,
@@ -3341,7 +3390,7 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
       // TODO(rami-a): Remove this workaround once
       // https://github.com/flutter/flutter/issues/54104
       // is fixed.
-      errorStyle: const TextStyle(fontSize: 0, height: 0),
+      errorStyle: const TextStyle(fontSize: 0, height: 1),
     );
   }
 
@@ -3676,7 +3725,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
       // TODO(rami-a): Remove this workaround once
       // https://github.com/flutter/flutter/issues/54104
       // is fixed.
-      errorStyle: const TextStyle(fontSize: 0, height: 0),
+      errorStyle: const TextStyle(fontSize: 0),
     );
   }
 

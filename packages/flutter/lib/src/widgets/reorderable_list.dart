@@ -14,7 +14,6 @@ import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
-import 'layout_builder.dart';
 import 'localizations.dart';
 import 'media_query.dart';
 import 'overlay.dart';
@@ -389,6 +388,7 @@ class ReorderableListState extends State<ReorderableList> {
     _sliverReorderableListKey.currentState!.cancelReorder();
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
@@ -412,6 +412,7 @@ class ReorderableListState extends State<ReorderableList> {
             itemExtent: widget.itemExtent,
             prototypeItem: widget.prototypeItem,
             itemBuilder: widget.itemBuilder,
+            itemExtentBuilder: widget.itemExtentBuilder,
             itemCount: widget.itemCount,
             onReorder: widget.onReorder,
             onReorderStart: widget.onReorderStart,
@@ -630,6 +631,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   Axis get _scrollDirection => axisDirectionToAxis(_scrollable.axisDirection);
   bool get _reverse => axisDirectionIsReversed(_scrollable.axisDirection);
 
+  @protected
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -644,6 +646,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     }
   }
 
+  @protected
   @override
   void didUpdateWidget(covariant SliverReorderableList oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -661,6 +664,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     }
   }
 
+  @protected
   @override
   void dispose() {
     _dragReset();
@@ -872,7 +876,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     // Find the new index for inserting the item being dragged.
     int newIndex = _insertIndex!;
     for (final _ReorderableItemState item in _items.values) {
-      if (item.index == _dragIndex! || !item.mounted) {
+      if ((_reverse && item.index == _dragIndex!) || !item.mounted) {
         continue;
       }
 
@@ -903,7 +907,13 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
           newIndex = item.index;
         }
       } else {
-        if (itemStart <= proxyItemStart && proxyItemStart <= itemMiddle) {
+        if (item.index == _dragIndex!) {
+          // If end of the proxy is not in ending half of item,
+          // we don't process, because it's original dragged item.
+          if (itemMiddle <= proxyItemEnd && proxyItemEnd <= itemEnd) {
+            newIndex = _dragIndex!;
+          }
+        } else if (itemStart <= proxyItemStart && proxyItemStart <= itemMiddle) {
           // The start of the proxy is in the beginning half of the item, so
           // we should swap the item with the gap and we are done looking for
           // the new index.
@@ -1024,6 +1034,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     );
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
@@ -1087,8 +1098,6 @@ class _ReorderableItemState extends State<_ReorderableItem> {
     }
   }
   bool _dragging = false;
-  BoxConstraints? get childLayoutConstraints => _childLayoutConstraints;
-  BoxConstraints? _childLayoutConstraints;
 
   @override
   void initState() {
@@ -1120,13 +1129,10 @@ class _ReorderableItemState extends State<_ReorderableItem> {
       return SizedBox.fromSize(size: size);
     }
     _listState._registerItem(this);
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-      _childLayoutConstraints = constraints;
-      return Transform(
-        transform: Matrix4.translationValues(offset.dx, offset.dy, 0.0),
-        child: widget.child,
-      );
-    });
+    return Transform.translate(
+      offset: offset,
+      child: widget.child,
+    );
   }
 
   @override
@@ -1346,7 +1352,7 @@ class _DragInfo extends Drag {
     dragOffset = itemRenderBox.globalToLocal(initialPosition);
     itemSize = item.context.size!;
     itemExtent = _sizeExtent(itemSize, scrollDirection);
-    itemLayoutConstraints = item.childLayoutConstraints!;
+    itemLayoutConstraints = itemRenderBox.constraints;
     scrollable = Scrollable.of(item.context);
   }
 

@@ -386,16 +386,19 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     }
   }
 
-  WebCompilerConfig get _compilerConfig => (debuggingOptions.webUseWasm)
-    ? WasmCompilerConfig(
+  WebCompilerConfig get _compilerConfig {
+    if (debuggingOptions.webUseWasm) {
+      return WasmCompilerConfig(
         optimizationLevel: 0,
         stripWasm: false,
         renderer: debuggingOptions.webRenderer
-      )
-    : JsCompilerConfig.run(
-        nativeNullAssertions: debuggingOptions.nativeNullAssertions,
-        renderer: debuggingOptions.webRenderer,
       );
+    }
+    return JsCompilerConfig.run(
+      nativeNullAssertions: debuggingOptions.nativeNullAssertions,
+      renderer: debuggingOptions.webRenderer,
+    );
+  }
 
   @override
   Future<OperationResult> restart({
@@ -503,7 +506,10 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       result = _generatedEntrypointDirectory!.childFile('web_entrypoint.dart');
 
       // Generates the generated_plugin_registrar
-      await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: _generatedEntrypointDirectory!);
+      await injectBuildTimePluginFilesForWebPlatform(
+        flutterProject,
+        destination: _generatedEntrypointDirectory!,
+      );
       // The below works because `injectBuildTimePluginFiles` is configured to write
       // the web_plugin_registrant.dart file alongside the generated main.dart
       const String generatedImport = 'web_plugin_registrant.dart';
@@ -590,10 +596,19 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
   }) async {
     if (_chromiumLauncher != null) {
       final Chromium chrome = await _chromiumLauncher!.connectedInstance;
-      final ChromeTab? chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
-        return !chromeTab.url.startsWith('chrome-extension');
-      }, retryFor: const Duration(seconds: 5));
+      final ChromeTab? chromeTab = await getChromeTabGuarded(
+        chrome.chromeConnection,
+        (ChromeTab chromeTab) {
+          return !chromeTab.url.startsWith('chrome-extension');
+        },
+        retryFor: const Duration(seconds: 5),
+        onIoError: (Object error, StackTrace stackTrace) {
+          // We were unable to unable to communicate with Chrome.
+          _logger.printError(error.toString(), stackTrace: stackTrace);
+        }
+      );
       if (chromeTab == null) {
+        appFailedToStart();
         throwToolExit('Failed to connect to Chrome instance.');
       }
       _wipConnection = await chromeTab.connect();

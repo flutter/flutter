@@ -341,7 +341,8 @@ class WidgetsApp extends StatefulWidget {
     this.showSemanticsDebugger = false,
     this.debugShowWidgetInspector = false,
     this.debugShowCheckedModeBanner = true,
-    this.inspectorSelectButtonBuilder,
+    this.exitWidgetSelectionButtonBuilder,
+    this.moveExitWidgetSelectionButtonBuilder,
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
@@ -439,7 +440,8 @@ class WidgetsApp extends StatefulWidget {
     this.showSemanticsDebugger = false,
     this.debugShowWidgetInspector = false,
     this.debugShowCheckedModeBanner = true,
-    this.inspectorSelectButtonBuilder,
+    this.exitWidgetSelectionButtonBuilder,
+    this.moveExitWidgetSelectionButtonBuilder,
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
@@ -1026,13 +1028,20 @@ class WidgetsApp extends StatefulWidget {
   /// debug mode.
   final bool debugShowWidgetInspector;
 
-  /// Builds the widget the [WidgetInspector] uses to switch between view and
-  /// inspect modes.
+  /// Builds the widget the [WidgetInspector] uses to exit selection mode.
   ///
-  /// This lets [MaterialApp] to use a Material Design button to toggle the
+  /// This lets [MaterialApp] to use a Material Design button to exit the
   /// inspector select mode without requiring [WidgetInspector] to depend on the
-  /// material package.
-  final InspectorSelectButtonBuilder? inspectorSelectButtonBuilder;
+  /// Material package.
+  final ExitWidgetSelectionButtonBuilder? exitWidgetSelectionButtonBuilder;
+
+  /// Builds the widget the [WidgetInspector] uses to move the exit selection
+  /// mode button.
+  ///
+  /// This lets [MaterialApp] to use a Material Design button to change the
+  /// alignment without requiring [WidgetInspector] to depend on the Material
+  /// package.
+  final MoveExitWidgetSelectionButtonBuilder? moveExitWidgetSelectionButtonBuilder;
 
   /// {@template flutter.widgets.widgetsApp.debugShowCheckedModeBanner}
   /// Turns on a little "DEBUG" banner in debug mode to indicate
@@ -1368,9 +1377,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     switch (_appLifecycleState) {
       case null:
       case AppLifecycleState.detached:
-      case AppLifecycleState.inactive:
         // Avoid updating the engine when the app isn't ready.
         return true;
+      case AppLifecycleState.inactive:
       case AppLifecycleState.resumed:
       case AppLifecycleState.hidden:
       case AppLifecycleState.paused:
@@ -1755,7 +1764,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         builder: (BuildContext context, bool debugShowWidgetInspectorOverride, Widget? child) {
           if (widget.debugShowWidgetInspector || debugShowWidgetInspectorOverride) {
             return WidgetInspector(
-              selectButtonBuilder: widget.inspectorSelectButtonBuilder,
+              exitWidgetSelectionButtonBuilder: widget.exitWidgetSelectionButtonBuilder,
+              moveExitWidgetSelectionButtonBuilder: widget.moveExitWidgetSelectionButtonBuilder,
               child: child!,
             );
           }

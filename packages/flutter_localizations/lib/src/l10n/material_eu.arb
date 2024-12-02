@@ -144,7 +144,7 @@
   "menuDismissLabel": "Baztertu menua",
   "lookUpButtonLabel": "Bilatu",
   "searchWebButtonLabel": "Bilatu sarean",
-  "shareButtonLabel": "Partekatu...",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "Partekatu",
+  "clearButtonTooltip": "Garbitu testua",
+  "selectedDateLabel": "Hautatuta"
 }

@@ -118,6 +118,8 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
           '- .DS_Store',
           '--filter',
           '- native_assets.yaml',
+          '--filter',
+          '- native_assets.json',
           nativeAssetsDirectory.path,
           modeDirectory.path,
         ]);
@@ -236,7 +238,7 @@ end
         processManager: globals.processManager,
         platform: globals.platform,
         analytics: globals.analytics,
-        engineVersion: globals.artifacts!.isLocalEngine ? null : globals.flutterVersion.engineRevision,
+        engineVersion: globals.artifacts!.usesLocalArtifacts ? null : globals.flutterVersion.engineRevision,
         generateDartPluginRegistry: true,
       );
       Target target;

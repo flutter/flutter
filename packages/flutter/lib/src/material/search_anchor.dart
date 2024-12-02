@@ -6,8 +6,10 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'adaptive_text_selection_toolbar.dart';
 import 'back_button.dart';
 import 'button_style.dart';
 import 'color_scheme.dart';
@@ -125,11 +127,14 @@ class SearchAnchor extends StatefulWidget {
     this.viewSurfaceTintColor,
     this.viewSide,
     this.viewShape,
+    this.viewBarPadding,
     this.headerHeight,
     this.headerTextStyle,
     this.headerHintStyle,
     this.dividerColor,
     this.viewConstraints,
+    this.viewPadding,
+    this.shrinkWrap,
     this.textCapitalization,
     this.viewOnChanged,
     this.viewOnSubmitted,
@@ -137,6 +142,7 @@ class SearchAnchor extends StatefulWidget {
     required this.suggestionsBuilder,
     this.textInputAction,
     this.keyboardType,
+    this.enabled = true,
   });
 
   /// Create a [SearchAnchor] that has a [SearchBar] which opens a search view.
@@ -163,8 +169,10 @@ class SearchAnchor extends StatefulWidget {
     MaterialStateProperty<BorderSide?>? barSide,
     MaterialStateProperty<OutlinedBorder?>? barShape,
     MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
+    EdgeInsetsGeometry? viewBarPadding,
     MaterialStateProperty<TextStyle?>? barTextStyle,
     MaterialStateProperty<TextStyle?>? barHintStyle,
+    ViewBuilder? viewBuilder,
     Widget? viewLeading,
     Iterable<Widget>? viewTrailing,
     String? viewHintText,
@@ -178,6 +186,8 @@ class SearchAnchor extends StatefulWidget {
     Color? dividerColor,
     BoxConstraints? constraints,
     BoxConstraints? viewConstraints,
+    EdgeInsetsGeometry? viewPadding,
+    bool? shrinkWrap,
     bool? isFullScreen,
     SearchController searchController,
     TextCapitalization textCapitalization,
@@ -185,6 +195,7 @@ class SearchAnchor extends StatefulWidget {
     TextInputAction? textInputAction,
     TextInputType? keyboardType,
     EdgeInsets scrollPadding,
+    EditableTextContextMenuBuilder contextMenuBuilder,
   }) = _SearchAnchorWithSearchBar;
 
   /// Whether the search view grows to fill the entire screen when the
@@ -269,6 +280,11 @@ class SearchAnchor extends StatefulWidget {
   /// mode and a [RoundedRectangleBorder] shape with a 28.0 radius otherwise.
   final OutlinedBorder? viewShape;
 
+  /// The padding to use for the search view's search bar.
+  ///
+  /// If null, then the default value is 8.0 horizontally.
+  final EdgeInsetsGeometry? viewBarPadding;
+
   /// The height of the search field on the search view.
   ///
   /// If null, the value of [SearchViewThemeData.headerHeight] will be used. If
@@ -308,6 +324,21 @@ class SearchAnchor extends StatefulWidget {
   /// const BoxConstraints(minWidth: 360.0, minHeight: 240.0)
   /// ```
   final BoxConstraints? viewConstraints;
+
+  /// The padding to use for the search view.
+  ///
+  /// Has no effect if the search view is full-screen.
+  ///
+  /// If null, the value of [SearchViewThemeData.padding] will be used.
+  final EdgeInsetsGeometry? viewPadding;
+
+  /// Whether the search view should shrink-wrap its contents.
+  ///
+  /// Has no effect if the search view is full-screen.
+  ///
+  /// If null, the value of [SearchViewThemeData.shrinkWrap] will be used. If
+  /// this is also null, then the default value is `false`.
+  final bool? shrinkWrap;
 
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
@@ -350,6 +381,13 @@ class SearchAnchor extends StatefulWidget {
   /// Defaults to the default value specified in [TextField].
   final TextInputType? keyboardType;
 
+  /// Whether or not this widget is currently interactive.
+  ///
+  /// When false, the widget will ignore taps and appear dimmed.
+  ///
+  /// Defaults to true.
+  final bool enabled;
+
   @override
   State<SearchAnchor> createState() => _SearchAnchorState();
 }
@@ -361,6 +399,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
   bool get _viewIsOpen => !_anchorIsVisible;
   SearchController? _internalSearchController;
   SearchController get _searchController => widget.searchController ?? (_internalSearchController ??= SearchController());
+  _SearchViewRoute? _route;
 
   @override
   void initState() {
@@ -391,15 +430,25 @@ class _SearchAnchorState extends State<SearchAnchor> {
 
   @override
   void dispose() {
-    super.dispose();
     widget.searchController?._detach(this);
     _internalSearchController?._detach(this);
-    _internalSearchController?.dispose();
+    final bool usingExternalController = widget.searchController != null;
+    if (_route?.navigator != null) {
+      _route?._dismiss(
+        disposeController: !usingExternalController,
+      );
+      if (usingExternalController) {
+        _internalSearchController?.dispose();
+      }
+    } else {
+      _internalSearchController?.dispose();
+    }
+    super.dispose();
   }
 
   void _openView() {
     final NavigatorState navigator = Navigator.of(context);
-    navigator.push(_SearchViewRoute(
+    _route = _SearchViewRoute(
       viewOnChanged: widget.viewOnChanged,
       viewOnSubmitted: widget.viewOnSubmitted,
       viewLeading: widget.viewLeading,
@@ -410,11 +459,14 @@ class _SearchAnchorState extends State<SearchAnchor> {
       viewSurfaceTintColor: widget.viewSurfaceTintColor,
       viewSide: widget.viewSide,
       viewShape: widget.viewShape,
+      viewBarPadding: widget.viewBarPadding,
       viewHeaderHeight: widget.headerHeight,
       viewHeaderTextStyle: widget.headerTextStyle,
       viewHeaderHintStyle: widget.headerHintStyle,
       dividerColor: widget.dividerColor,
       viewConstraints: widget.viewConstraints,
+      viewPadding: widget.viewPadding,
+      shrinkWrap: widget.shrinkWrap,
       showFullScreenView: getShowFullScreenView(),
       toggleVisibility: toggleVisibility,
       textDirection: Directionality.of(context),
@@ -426,7 +478,8 @@ class _SearchAnchorState extends State<SearchAnchor> {
       capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
       textInputAction: widget.textInputAction,
       keyboardType: widget.keyboardType,
-    ));
+    );
+    navigator.push(_route!);
   }
 
   void _closeView(String? selectedText) {
@@ -450,15 +503,25 @@ class _SearchAnchorState extends State<SearchAnchor> {
     };
   }
 
+  double _getOpacity() {
+    if (widget.enabled) {
+      return _anchorIsVisible ? 1.0 : 0.0;
+    }
+    return _kDisableSearchBarOpacity;
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedOpacity(
       key: _anchorKey,
-      opacity: _anchorIsVisible ? 1.0 : 0.0,
+      opacity: _getOpacity(),
       duration: _kAnchorFadeDuration,
-      child: GestureDetector(
-        onTap: _openView,
-        child: widget.builder(context, _searchController),
+      child: IgnorePointer(
+        ignoring: !widget.enabled,
+        child: GestureDetector(
+          onTap: _openView,
+          child: widget.builder(context, _searchController),
+        ),
       ),
     );
   }
@@ -479,11 +542,14 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     this.viewSurfaceTintColor,
     this.viewSide,
     this.viewShape,
+    this.viewBarPadding,
     this.viewHeaderHeight,
     this.viewHeaderTextStyle,
     this.viewHeaderHintStyle,
     this.dividerColor,
     this.viewConstraints,
+    this.viewPadding,
+    this.shrinkWrap,
     this.textCapitalization,
     required this.showFullScreenView,
     required this.anchorKey,
@@ -507,11 +573,14 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final Color? viewSurfaceTintColor;
   final BorderSide? viewSide;
   final OutlinedBorder? viewShape;
+  final EdgeInsetsGeometry? viewBarPadding;
   final double? viewHeaderHeight;
   final TextStyle? viewHeaderTextStyle;
   final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
   final BoxConstraints? viewConstraints;
+  final EdgeInsetsGeometry? viewPadding;
+  final bool? shrinkWrap;
   final TextCapitalization? textCapitalization;
   final bool showFullScreenView;
   final GlobalKey anchorKey;
@@ -522,6 +591,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final TextInputType? keyboardType;
   CurvedAnimation? curvedAnimation;
   CurvedAnimation? viewFadeOnIntervalCurve;
+  bool willDisposeSearchController = false;
 
   @override
   Color? get barrierColor => Colors.transparent;
@@ -565,10 +635,20 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     return super.didPop(result);
   }
 
+  void _dismiss({required bool disposeController}) {
+    willDisposeSearchController = disposeController;
+    if (isActive) {
+      navigator?.removeRoute(this);
+    }
+  }
+
   @override
   void dispose() {
     curvedAnimation?.dispose();
     viewFadeOnIntervalCurve?.dispose();
+    if (willDisposeSearchController) {
+      searchController.dispose();
+    }
     super.dispose();
   }
 
@@ -625,7 +705,6 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-
     return Directionality(
       textDirection: textDirection ?? TextDirection.ltr,
       child: AnimatedBuilder(
@@ -662,10 +741,14 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
                 viewSurfaceTintColor: viewSurfaceTintColor,
                 viewSide: viewSide,
                 viewShape: viewShape,
+                viewBarPadding: viewBarPadding,
                 viewHeaderHeight: viewHeaderHeight,
                 viewHeaderTextStyle: viewHeaderTextStyle,
                 viewHeaderHintStyle: viewHeaderHintStyle,
                 dividerColor: dividerColor,
+                viewConstraints: viewConstraints,
+                viewPadding: viewPadding,
+                shrinkWrap: shrinkWrap,
                 showFullScreenView: showFullScreenView,
                 animation: curvedAnimation!,
                 topPadding: topPadding,
@@ -702,10 +785,14 @@ class _ViewContent extends StatefulWidget {
     this.viewSurfaceTintColor,
     this.viewSide,
     this.viewShape,
+    this.viewBarPadding,
     this.viewHeaderHeight,
     this.viewHeaderTextStyle,
     this.viewHeaderHintStyle,
     this.dividerColor,
+    this.viewConstraints,
+    this.viewPadding,
+    this.shrinkWrap,
     this.textCapitalization,
     required this.showFullScreenView,
     required this.topPadding,
@@ -729,10 +816,14 @@ class _ViewContent extends StatefulWidget {
   final Color? viewSurfaceTintColor;
   final BorderSide? viewSide;
   final OutlinedBorder? viewShape;
+  final EdgeInsetsGeometry? viewBarPadding;
   final double? viewHeaderHeight;
   final TextStyle? viewHeaderTextStyle;
   final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
+  final BoxConstraints? viewConstraints;
+  final EdgeInsetsGeometry? viewPadding;
+  final bool? shrinkWrap;
   final TextCapitalization? textCapitalization;
   final bool showFullScreenView;
   final double topPadding;
@@ -840,19 +931,6 @@ class _ViewContentState extends State<_ViewContent> {
     viewListFadeOnIntervalCurve.dispose();
   }
 
-  Widget viewBuilder(Iterable<Widget> suggestions) {
-    if (widget.viewBuilder == null) {
-      return MediaQuery.removePadding(
-        context: context,
-        removeTop: true,
-        child: ListView(
-          children: suggestions.toList()
-        ),
-      );
-    }
-    return widget.viewBuilder!(suggestions);
-  }
-
   Future<void> updateSuggestions() async {
     if (searchValue != _controller.text) {
       searchValue = _controller.text;
@@ -920,6 +998,22 @@ class _ViewContentState extends State<_ViewContent> {
       ?? widget.viewHeaderTextStyle
       ?? viewTheme.headerTextStyle
       ?? viewDefaults.headerHintStyle;
+    final EdgeInsetsGeometry? effectivePadding = widget.viewPadding
+      ?? viewTheme.padding
+      ?? viewDefaults.padding;
+    final EdgeInsetsGeometry? effectiveBarPadding = widget.viewBarPadding
+      ?? viewTheme.barPadding
+      ?? viewDefaults.barPadding;
+
+    final BoxConstraints effectiveConstraints = widget.viewConstraints
+      ?? viewTheme.constraints
+      ?? viewDefaults.constraints!;
+    final double minWidth = math.min(effectiveConstraints.minWidth, _viewRect.width);
+    final double minHeight = math.min(effectiveConstraints.minHeight, _viewRect.height);
+
+    final bool effectiveShrinkWrap = widget.shrinkWrap
+      ?? viewTheme.shrinkWrap
+      ?? viewDefaults.shrinkWrap!;
 
     final Widget viewDivider = DividerTheme(
       data: dividerTheme.copyWith(color: effectiveDividerColor),
@@ -930,24 +1024,30 @@ class _ViewContentState extends State<_ViewContent> {
       alignment: Alignment.topLeft,
       child: Transform.translate(
         offset: _viewRect.topLeft,
-        child: SizedBox(
-          width: _viewRect.width,
-          height: _viewRect.height,
-          child: Material(
-            clipBehavior: Clip.antiAlias,
-            shape: effectiveShape,
-            color: effectiveBackgroundColor,
-            surfaceTintColor: effectiveSurfaceTint,
-            elevation: effectiveElevation,
-            child: ClipRect(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: minWidth,
+            maxWidth: _viewRect.width,
+            minHeight: minHeight,
+            maxHeight: _viewRect.height,
+          ),
+          child: Padding(
+            padding: widget.showFullScreenView ? EdgeInsets.zero : (effectivePadding ?? EdgeInsets.zero),
+            child: Material(
               clipBehavior: Clip.antiAlias,
+              shape: effectiveShape,
+              color: effectiveBackgroundColor,
+              surfaceTintColor: effectiveSurfaceTint,
+              elevation: effectiveElevation,
               child: OverflowBox(
                 alignment: Alignment.topLeft,
                 maxWidth: math.min(widget.viewMaxWidth, _screenSize!.width),
                 minWidth: 0,
+                fit: OverflowBoxFit.deferToChild,
                 child: FadeTransition(
                   opacity: viewIconsFadeCurve,
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
                       Padding(
@@ -958,6 +1058,7 @@ class _ViewContentState extends State<_ViewContent> {
                           child: SearchBar(
                             autoFocus: true,
                             constraints: headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null),
+                            padding: WidgetStatePropertyAll<EdgeInsetsGeometry?>(effectiveBarPadding),
                             leading: widget.viewLeading ?? defaultLeading,
                             trailing: widget.viewTrailing ?? defaultTrailing,
                             hintText: widget.viewHintText,
@@ -978,15 +1079,28 @@ class _ViewContentState extends State<_ViewContent> {
                           ),
                         ),
                       ),
-                      FadeTransition(
-                        opacity: viewDividerFadeCurve,
-                        child: viewDivider),
-                      Expanded(
-                        child: FadeTransition(
-                          opacity: viewListFadeOnIntervalCurve,
-                          child: viewBuilder(result),
+                      if (!effectiveShrinkWrap || minHeight > 0 || widget.showFullScreenView || result.isNotEmpty) ...<Widget>[
+                        FadeTransition(
+                          opacity: viewDividerFadeCurve,
+                          child: viewDivider,
                         ),
-                      ),
+                        Flexible(
+                          fit: (effectiveShrinkWrap && !widget.showFullScreenView) ? FlexFit.loose : FlexFit.tight,
+                          child: FadeTransition(
+                            opacity: viewListFadeOnIntervalCurve,
+                            child: widget.viewBuilder == null
+                                ? MediaQuery.removePadding(
+                                    context: context,
+                                    removeTop: true,
+                                    child: ListView(
+                                      shrinkWrap: effectiveShrinkWrap,
+                                      children: result.toList(),
+                                    ),
+                                  )
+                                : widget.viewBuilder!(result),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -1011,8 +1125,10 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     MaterialStateProperty<BorderSide?>? barSide,
     MaterialStateProperty<OutlinedBorder?>? barShape,
     MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
+    super.viewBarPadding,
     MaterialStateProperty<TextStyle?>? barTextStyle,
     MaterialStateProperty<TextStyle?>? barHintStyle,
+    super.viewBuilder,
     super.viewLeading,
     super.viewTrailing,
     String? viewHintText,
@@ -1026,6 +1142,8 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.dividerColor,
     BoxConstraints? constraints,
     super.viewConstraints,
+    super.viewPadding,
+    super.shrinkWrap,
     super.isFullScreen,
     super.searchController,
     super.textCapitalization,
@@ -1035,6 +1153,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.textInputAction,
     super.keyboardType,
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
+    EditableTextContextMenuBuilder contextMenuBuilder = SearchBar._defaultContextMenuBuilder,
   }) : super(
     viewHintText: viewHintText ?? barHintText,
     headerHeight: viewHeaderHeight,
@@ -1069,6 +1188,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
         textInputAction: textInputAction,
         keyboardType: keyboardType,
         scrollPadding: scrollPadding,
+        contextMenuBuilder: contextMenuBuilder,
       );
     }
   );
@@ -1190,6 +1310,7 @@ class SearchBar extends StatefulWidget {
     this.textInputAction,
     this.keyboardType,
     this.scrollPadding = const EdgeInsets.all(20.0),
+    this.contextMenuBuilder = _defaultContextMenuBuilder,
   });
 
   /// Controls the text being edited in the search bar's text field.
@@ -1317,7 +1438,11 @@ class SearchBar extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
 
-  /// If false the text field is "disabled" so the SearchBar will ignore taps.
+  /// Whether or not this widget is currently interactive.
+  ///
+  /// When false, the widget will ignore taps and appear dimmed.
+  ///
+  /// Defaults to true.
   final bool enabled;
 
   /// {@macro flutter.widgets.editableText.autofocus}
@@ -1333,6 +1458,23 @@ class SearchBar extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.scrollPadding}
   final EdgeInsets scrollPadding;
+
+  /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
+  ///
+  /// If not provided, will build a default menu based on the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [AdaptiveTextSelectionToolbar], which is built by default.
+  ///  * [BrowserContextMenu], which allows the browser's context menu on web to
+  ///    be disabled and Flutter-rendered context menus to appear.
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+
+  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+    return AdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
+    );
+  }
 
   @override
   State<SearchBar> createState() => _SearchBarState();
@@ -1475,6 +1617,7 @@ class _SearchBarState extends State<SearchBar> {
                           textInputAction: widget.textInputAction,
                           keyboardType: widget.keyboardType,
                           scrollPadding: widget.scrollPadding,
+                          contextMenuBuilder: widget.contextMenuBuilder,
                         ),
                       ),
                     ),
@@ -1604,6 +1747,12 @@ class _SearchViewDefaultsM3 extends SearchViewThemeData {
 
   @override
   BoxConstraints get constraints => const BoxConstraints(minWidth: 360.0, minHeight: 240.0);
+
+  @override
+  EdgeInsetsGeometry? get barPadding => const EdgeInsets.symmetric(horizontal: 8.0);
+
+  @override
+  bool get shrinkWrap => false;
 
   @override
   Color? get dividerColor => _colors.outline;

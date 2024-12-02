@@ -2894,6 +2894,85 @@ void main() {
     const SimpleDialog simpleDialog = SimpleDialog();
     expect(simpleDialog.insetPadding, isNull);
   });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/153983.
+  testWidgets('Can pass a null value to AlertDialog.adaptive clip behavior', (WidgetTester tester) async {
+    for (final Clip? clipBehavior in <Clip?>[null, ...Clip.values]) {
+      AlertDialog.adaptive(clipBehavior: clipBehavior);
+    }
+  });
+
+  testWidgets('Setting DialogRoute.requestFocus to false does not request focus on the dialog', (WidgetTester tester) async {
+    late BuildContext savedContext;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    const String dialogText = 'Dialog Text';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              savedContext = context;
+              return TextField(focusNode: focusNode);
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    FocusNode? getTextFieldFocusNode() {
+      return tester.widget<Focus>(find.descendant(
+        of: find.byType(TextField),
+        matching: find.byType(Focus),
+      )).focusNode;
+    }
+
+    // Initially, there is no dialog and the text field has no focus.
+    expect(find.text(dialogText), findsNothing);
+    expect(getTextFieldFocusNode()?.hasFocus, false);
+
+    // Request focus on the text field.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(getTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up dialog.
+    final NavigatorState navigator = Navigator.of(savedContext);
+    navigator.push(
+      DialogRoute<void>(
+        context: savedContext,
+        builder: (BuildContext context) => const Text(dialogText),
+      ),
+    );
+    await tester.pump();
+
+    // The dialog is showing and the text field has lost focus.
+    expect(find.text(dialogText), findsOneWidget);
+    expect(getTextFieldFocusNode()?.hasFocus, false);
+
+    // Dismiss the dialog.
+    navigator.pop();
+    await tester.pump();
+
+    // The dialog is dismissed and the focus is shifted back to the text field.
+    expect(find.text(dialogText), findsNothing);
+    expect(getTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up dialog again with requestFocus to false.
+    navigator.push(
+      ModalBottomSheetRoute<void>(
+        requestFocus: false,
+        isScrollControlled: false,
+        builder: (BuildContext context) => const Text(dialogText),
+      ),
+    );
+    await tester.pump();
+
+    // The dialog is showing and the text field still has focus.
+    expect(find.text(dialogText), findsOneWidget);
+    expect(getTextFieldFocusNode()?.hasFocus, true);
+  });
 }
 
 class _RestorableDialogTestWidget extends StatelessWidget {

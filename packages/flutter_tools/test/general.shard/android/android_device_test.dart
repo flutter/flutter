@@ -16,10 +16,14 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {
@@ -189,7 +193,6 @@ name: example
 flutter:
   module: {}
 ''');
-    fileSystem.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProjectFactory(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -202,7 +205,6 @@ flutter:
   testWithoutContext('isSupportedForProject is true with editable host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
     fileSystem.directory('android').createSync();
     final FlutterProject flutterProject = FlutterProjectFactory(
       fileSystem: fileSystem,
@@ -217,7 +219,6 @@ flutter:
   testWithoutContext('isSupportedForProject is false with no host app and no module', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProjectFactory(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -473,6 +474,34 @@ Uptime: 441088659 Realtime: 521464097
     expect(await device.stopApp(null), isFalse);
   });
 
+  testUsingContext('AdbLogReader.provideVmService catches any RPCError due to VM service disconnection', () async {
+    final BufferLogger logger = globals.logger as BufferLogger;
+    final FlutterVmService vmService = FlutterVmService(_MyFakeVmService());
+    final AdbLogReader logReader = AdbLogReader.test(
+      FakeProcess(),
+      'foo',
+      logger,
+    );
+    await logReader.provideVmService(vmService);
+    expect(
+      logger.traceText,
+      'VmService.getVm call failed: null: (-32000) '
+      'Service connection disposed\n',
+    );
+    expect(
+      logger.errorText,
+      'An error occurred when setting up filtering for adb logs. '
+      'Unable to communicate with the VM service.\n',
+    );
+  }, overrides: <Type, Generator>{
+    Logger: () => BufferLogger.test(),
+  });
+}
+
+class _MyFakeVmService extends Fake implements VmService {
+  @override Future<VM> getVM() async {
+    throw RPCError(null, RPCErrorKind.kServerError.code, 'Service connection disposed');
+  }
 }
 
 AndroidDevice setUpAndroidDevice({

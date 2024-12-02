@@ -28,7 +28,6 @@ import 'custom_devices/custom_device_workflow.dart';
 import 'device.dart';
 import 'doctor_validator.dart';
 import 'features.dart';
-import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart' as globals;
 import 'http_host_validator.dart';
 import 'intellij/intellij_validator.dart';
@@ -142,6 +141,10 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         WindowsVersionValidator(
           operatingSystemUtils: globals.os,
           processLister: ProcessLister(globals.processManager),
+          versionExtractor: WindowsVersionExtractor(
+            processManager: globals.processManager,
+            logger: globals.logger,
+          ),
         ),
       if (androidWorkflow!.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
@@ -198,7 +201,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     return _workflows ??= <Workflow>[
       if (globals.iosWorkflow!.appliesToHostPlatform)      globals.iosWorkflow!,
       if (androidWorkflow?.appliesToHostPlatform ?? false) androidWorkflow!,
-      if (fuchsiaWorkflow?.appliesToHostPlatform ?? false) fuchsiaWorkflow!,
       if (linuxWorkflow.appliesToHostPlatform)             linuxWorkflow,
       if (macOSWorkflow.appliesToHostPlatform)             macOSWorkflow,
       if (windowsWorkflow?.appliesToHostPlatform ?? false) windowsWorkflow!,

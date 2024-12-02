@@ -150,6 +150,7 @@ void main() {
           SemanticsFlag.isEnabled,
           SemanticsFlag.isFocusable,
           SemanticsFlag.isChecked,
+          if (isApple) SemanticsFlag.hasSelectedState,
           if (isApple) SemanticsFlag.isSelected,
         ],
         actions: <SemanticsAction>[
@@ -823,7 +824,7 @@ void main() {
           value: 1,
           groupValue: 1,
           onChanged: (int? i) { },
-          mouseCursor: const RadioMouseCursor(),
+          mouseCursor: const _RadioMouseCursor(),
           focusNode: focusNode
         ),
       ),
@@ -858,7 +859,7 @@ void main() {
           value: 1,
           groupValue: 1,
           onChanged: null,
-          mouseCursor: RadioMouseCursor(),
+          mouseCursor: _RadioMouseCursor(),
         ),
       ),
     ));
@@ -896,8 +897,8 @@ void main() {
   });
 }
 
-class RadioMouseCursor extends WidgetStateMouseCursor {
-  const RadioMouseCursor();
+class _RadioMouseCursor extends WidgetStateMouseCursor {
+  const _RadioMouseCursor();
 
   @override
   MouseCursor resolve(Set<WidgetState> states) {
@@ -911,5 +912,5 @@ class RadioMouseCursor extends WidgetStateMouseCursor {
   }
 
   @override
-  String get debugDescription => 'RadioMouseCursor()';
+  String get debugDescription => '_RadioMouseCursor()';
 }

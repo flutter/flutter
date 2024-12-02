@@ -38,7 +38,6 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <Pattern>[
         'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
-        '--disable-dart-dev',
         'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
         '--sdk-root',
         'HostArtifact.flutterWebSdk/',
@@ -47,6 +46,7 @@ void main() {
         '--experimental-emit-debug-metadata',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '--output-dill',
         'build/out',
         '--packages',

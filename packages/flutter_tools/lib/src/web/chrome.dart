@@ -6,8 +6,10 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
+    hide StackTrace;
 
+import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -214,6 +216,12 @@ class ChromiumLauncher {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
+
+      // Remove the search engine choice screen. It's irrelevant for app
+      // debugging purposes.
+      // See: https://github.com/flutter/flutter/issues/153928
+      '--disable-search-engine-choice-screen',
+
       if (headless)
         ...<String>[
           '--headless',
@@ -305,7 +313,7 @@ class ChromiumLauncher {
           if (retry >= kMaxRetries) {
             errors.forEach(_logger.printError);
             _logger.printError('Failed to launch browser after $kMaxRetries tries. Command used to launch it: ${args.join(' ')}');
-            throw ToolExit(
+            throwToolExit(
               'Failed to launch browser. Make sure you are using an up-to-date '
               'Chrome or Edge. Otherwise, consider using -d web-server instead '
               'and filing an issue at https://github.com/flutter/flutter/issues.',
@@ -490,6 +498,10 @@ class Chromium {
         if (i == attempts) {
           rethrow;
         }
+      } on IOException {
+        if (i == attempts) {
+          rethrow;
+        }
       }
       await Future<void>.delayed(const Duration(milliseconds: 25));
     }
@@ -508,7 +520,7 @@ class Chromium {
     Duration sigtermDelay = Duration.zero;
     if (_hasValidChromeConnection) {
       try {
-        final ChromeTab? tab = await chromeConnection.getTab(
+        final ChromeTab? tab = await getChromeTabGuarded(chromeConnection,
             (_) => true, retryFor: const Duration(seconds: 1));
         if (tab != null) {
           final WipConnection wipConnection = await tab.connect();
@@ -549,5 +561,40 @@ class Chromium {
         return 0;
       });
     });
+  }
+}
+
+
+/// Wrapper for [ChromeConnection.getTab] that will catch any [IOException] or
+/// [StateError], delegate it to the [onIoError] callback, and return null.
+///
+/// This is useful for callers who are want to retrieve a [ChromeTab], but
+/// are okay with the operation failing (e.g. due to an network IO issue or
+/// the Chrome process no longer existing).
+Future<ChromeTab?> getChromeTabGuarded(
+  ChromeConnection chromeConnection,
+  bool Function(ChromeTab tab) accept, {
+  Duration? retryFor,
+  void Function(Object error, StackTrace stackTrace)? onIoError,
+}) async {
+  try {
+    return await asyncGuard(
+      () => chromeConnection.getTab(
+        accept,
+        retryFor: retryFor,
+      ),
+    );
+  } on IOException catch (error, stackTrace) {
+    if (onIoError != null) {
+      onIoError(error, stackTrace);
+    }
+    return null;
+    // The underlying HttpClient will throw a StateError when it tries to
+    // perform a request despite the connection already being closed.
+  } on StateError catch (error, stackTrace) {
+    if (onIoError != null) {
+      onIoError(error, stackTrace);
+    }
+    return null;
   }
 }

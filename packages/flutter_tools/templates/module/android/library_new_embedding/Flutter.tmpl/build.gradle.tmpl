@@ -47,21 +47,6 @@ android {
     }
 }
 
-android.buildTypes.all {buildType ->
-    if (!android.productFlavors.isEmpty()) {
-        android.productFlavors.all{productFlavor ->
-            android.publishing.singleVariant(productFlavor.name + buildType.name.capitalize()) {
-                withSourcesJar()
-                withJavadocJar()
-            }
-        }
-    } else {
-        android.publishing.singleVariant(buildType.name) {
-            withSourcesJar()
-            withJavadocJar()
-        }
-    }
-}
 
 flutter {
     source = "../.."

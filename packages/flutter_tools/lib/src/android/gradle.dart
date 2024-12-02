@@ -35,6 +35,7 @@ import 'gradle_errors.dart';
 import 'gradle_utils.dart';
 import 'java.dart';
 import 'migrations/android_studio_java_gradle_conflict_migration.dart';
+import 'migrations/cmake_android_16k_pages_migration.dart';
 import 'migrations/min_sdk_version_migration.dart';
 import 'migrations/multidex_removal_migration.dart';
 import 'migrations/top_level_gradle_build_file_migration.dart';
@@ -311,6 +312,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
           java: globals.java),
       MinSdkVersionMigration(project.android, _logger),
       MultidexRemovalMigration(project.android, _logger),
+      CmakeAndroid16kPagesMigration(project.android, _logger),
     ];
 
     final ProjectMigration migration = ProjectMigration(migrators);
@@ -440,7 +442,12 @@ class AndroidGradleBuilder implements AndroidBuilder {
     GradleHandledError? detectedGradleError;
     String? detectedGradleErrorLine;
     String? consumeLog(String line) {
-      if (detectedGradleError != null) {
+      // The log lines that trigger incompatibleKotlinVersionHandler don't
+      // always indicate an error, and there are times that that handler
+      // covers up a more important error handler. Uniquely set it to be
+      // the lowest priority handler by allowing it to be overridden.
+      if (detectedGradleError != null
+          && detectedGradleError != incompatibleKotlinVersionHandler) {
         // Pipe stdout/stderr from Gradle.
         return line;
       }
@@ -622,14 +629,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
       'A summary of your ${kind.toUpperCase()} analysis can be found at: ${outputFile.path}',
     );
 
-    // DevTools expects a file path relative to the .flutter-devtools/ dir.
-    final String relativeAppSizePath = outputFile.path
-        .split('.flutter-devtools/')
-        .last
-        .trim();
     _logger.printStatus(
         '\nTo analyze your app size in Dart DevTools, run the following command:\n'
-            'dart devtools --appSizeBase=$relativeAppSizePath'
+        'dart devtools --appSizeBase=${outputFile.path}'
     );
   }
 

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 /// Flutter code sample for [CupertinoContextMenu].
 

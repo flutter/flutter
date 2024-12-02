@@ -96,10 +96,38 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   String? get barrierLabel => null;
 
   @override
+  DelegatedTransitionBuilder? get delegatedTransition => _delegatedTransition;
+
+  static Widget? _delegatedTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child) {
+    final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
+    final TargetPlatform platform = Theme.of(context).platform;
+    final DelegatedTransitionBuilder? themeDelegatedTransition = theme.delegatedTransition(platform);
+    return themeDelegatedTransition != null ? themeDelegatedTransition(context, animation, secondaryAnimation, allowSnapshotting, child) : null;
+  }
+
+  @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
+    // Don't perform outgoing animation if the next route is a fullscreen dialog,
+    // or there is no matching transition to use.
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
-    return (nextRoute is MaterialRouteTransitionMixin && !nextRoute.fullscreenDialog)
-      || (nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog);
+    final bool nextRouteIsNotFullscreen = (nextRoute is! PageRoute<T>) || !nextRoute.fullscreenDialog;
+
+    // If the next route has a delegated transition, then this route is able to
+    // use that delegated transition to smoothly sync with the next route's
+    // transition.
+    final bool nextRouteHasDelegatedTransition = nextRoute is ModalRoute<T>
+      && nextRoute.delegatedTransition != null;
+
+    // Otherwise if the next route has the same route transition mixin as this
+    // one, then this route will already be synced with its transition.
+    return nextRouteIsNotFullscreen &&
+      ((nextRoute is MaterialRouteTransitionMixin) || nextRouteHasDelegatedTransition);
+  }
+
+  @override
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
+    // Supress previous route from transitioning if this is a fullscreenDialog route.
+    return previousRoute is PageRoute && !fullscreenDialog;
   }
 
   @override

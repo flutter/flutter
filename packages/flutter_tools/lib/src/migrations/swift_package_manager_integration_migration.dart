@@ -11,6 +11,7 @@ import '../base/logger.dart';
 import '../base/project_migrator.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../features.dart';
 import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
 import '../project.dart';
@@ -26,6 +27,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     required Logger logger,
     required FileSystem fileSystem,
     required PlistParser plistParser,
+    required FeatureFlags features,
   })  : _xcodeProject = project,
         _platform = platform,
         _buildInfo = buildInfo,
@@ -33,6 +35,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
         _xcodeProjectInterpreter = xcodeProjectInterpreter,
         _fileSystem = fileSystem,
         _plistParser = plistParser,
+        _features = features,
         super(logger);
 
   final XcodeBasedProject _xcodeProject;
@@ -42,6 +45,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   final FileSystem _fileSystem;
   final File _xcodeProjectInfoFile;
   final PlistParser _plistParser;
+  final FeatureFlags _features;
 
   /// New identifier for FlutterGeneratedPluginSwiftPackage PBXBuildFile.
   static const String _flutterPluginsSwiftPackageBuildFileIdentifier = '78A318202AECB46A00862997';
@@ -107,6 +111,23 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   /// will revert any changes made and throw an error.
   @override
   Future<void> migrate() async {
+    if (!_features.isSwiftPackageManagerEnabled) {
+      logger.printTrace(
+        'The Swift Package Manager feature is off. '
+        'Skipping the migration that adds Swift Package Manager integration...',
+      );
+      return;
+    }
+
+    if (!_xcodeProject.flutterPluginSwiftPackageManifest.existsSync()) {
+      logger.printTrace(
+        'The tool did not generate a Swift package. '
+        "This can happen if the project doesn't have any plugins. "
+        'Skipping the migration that adds Swift Package Manager integration...',
+      );
+      return;
+    }
+
     Status? migrationStatus;
     SchemeInfo? schemeInfo;
     try {
@@ -862,33 +883,26 @@ class ParsedProjectInfo {
     final List<String> parsedSwiftPackageProductDependencies = <String>[];
     final List<String> parsedLocalSwiftPackageProductDependencies = <String>[];
 
-    if (data['objects'] is Map<String, Object?>) {
-      final Map<String, Object?> values =
-          data['objects']! as Map<String, Object?>;
+    if (data case {'objects': final Map<String, Object?> values}) {
       for (final String key in values.keys) {
-        if (values[key] is Map<String, Object?>) {
-          final Map<String, Object?> details =
-              values[key]! as Map<String, Object?>;
-          if (details['isa'] is String) {
-            final String objectType = details['isa']! as String;
-            if (objectType == 'PBXBuildFile') {
+        if (values[key] case final Map<String, Object?> details) {
+          switch (details['isa']) {
+            case 'PBXBuildFile':
               buildFiles.add(key);
-            } else if (objectType == 'PBXFileReference') {
+            case 'PBXFileReference':
               references.add(key);
-            } else if (objectType == 'PBXGroup') {
+            case 'PBXGroup':
               groups.add(ParsedProjectGroup.fromJson(key, details));
-            } else if (objectType == 'PBXFrameworksBuildPhase') {
-              buildPhases.add(
-                  ParsedProjectFrameworksBuildPhase.fromJson(key, details));
-            } else if (objectType == 'PBXNativeTarget') {
+            case 'PBXFrameworksBuildPhase':
+              buildPhases.add(ParsedProjectFrameworksBuildPhase.fromJson(key, details));
+            case 'PBXNativeTarget':
               native.add(ParsedNativeTarget.fromJson(key, details));
-            } else if (objectType == 'PBXProject') {
+            case 'PBXProject':
               project.add(ParsedProject.fromJson(key, details));
-            } else if (objectType == 'XCSwiftPackageProductDependency') {
+            case 'XCSwiftPackageProductDependency':
               parsedSwiftPackageProductDependencies.add(key);
-            } else if (objectType == 'XCLocalSwiftPackageReference') {
+            case 'XCLocalSwiftPackageReference':
               parsedLocalSwiftPackageProductDependencies.add(key);
-            }
           }
         }
       }
@@ -935,27 +949,16 @@ class ParsedProjectInfo {
 
 /// Representation of data parsed from PBXGroup section in Xcode project's project.pbxproj.
 class ParsedProjectGroup {
-  ParsedProjectGroup._(this.identifier, this.children, this.name);
-
-  factory ParsedProjectGroup.fromJson(String key, Map<String, Object?> data) {
-    String? name;
-    if (data['name'] is String) {
-      name = data['name']! as String;
-    } else if (data['path'] is String) {
-      name = data['path']! as String;
-    }
-
-    final List<String> parsedChildren = <String>[];
-    if (data['children'] is List<Object?>) {
-      for (final Object? item in data['children']! as List<Object?>) {
-        if (item is String) {
-          parsedChildren.add(item);
-        }
-      }
-      return ParsedProjectGroup._(key, parsedChildren, name);
-    }
-    return ParsedProjectGroup._(key, null, name);
-  }
+  ParsedProjectGroup.fromJson(this.identifier, Map<String, Object?> data)
+      : children = switch (data['children']) {
+          final List<Object?> children => children.whereType<String>().toList(),
+          _ => null,
+        },
+        name = switch (data) {
+          {'name': final String name} => name,
+          {'path': final String path} => path,
+          _ => null,
+        };
 
   final String identifier;
   final List<String>? children;
@@ -965,21 +968,13 @@ class ParsedProjectGroup {
 /// Representation of data parsed from PBXFrameworksBuildPhase section in Xcode
 /// project's project.pbxproj.
 class ParsedProjectFrameworksBuildPhase {
-  ParsedProjectFrameworksBuildPhase._(this.identifier, this.files);
-
-  factory ParsedProjectFrameworksBuildPhase.fromJson(
-      String key, Map<String, Object?> data) {
-    final List<String> parsedFiles = <String>[];
-    if (data['files'] is List<Object?>) {
-      for (final Object? item in data['files']! as List<Object?>) {
-        if (item is String) {
-          parsedFiles.add(item);
-        }
-      }
-      return ParsedProjectFrameworksBuildPhase._(key, parsedFiles);
-    }
-    return ParsedProjectFrameworksBuildPhase._(key, null);
-  }
+  ParsedProjectFrameworksBuildPhase.fromJson(
+    this.identifier,
+    Map<String, Object?> data,
+  ) : files = switch (data['files']) {
+        final List<Object?> files => files.whereType<String>().toList(),
+        _ => null,
+      };
 
   final String identifier;
   final List<String>? files;
@@ -988,31 +983,15 @@ class ParsedProjectFrameworksBuildPhase {
 /// Representation of data parsed from PBXNativeTarget section in Xcode project's
 /// project.pbxproj.
 class ParsedNativeTarget {
-  ParsedNativeTarget._(
-    this.data,
-    this.identifier,
-    this.name,
-    this.packageProductDependencies,
-  );
-
-  factory ParsedNativeTarget.fromJson(String key, Map<String, Object?> data) {
-    String? name;
-    if (data['name'] is String) {
-      name = data['name']! as String;
-    }
-
-    final List<String> parsedChildren = <String>[];
-    if (data['packageProductDependencies'] is List<Object?>) {
-      for (final Object? item
-          in data['packageProductDependencies']! as List<Object?>) {
-        if (item is String) {
-          parsedChildren.add(item);
-        }
-      }
-      return ParsedNativeTarget._(data, key, name, parsedChildren);
-    }
-    return ParsedNativeTarget._(data, key, name, null);
-  }
+  ParsedNativeTarget.fromJson(this.identifier, this.data)
+      : name = switch (data) {
+          {'name': final String name} => name,
+          _ => null,
+        },
+        packageProductDependencies = switch (data['packageProductDependencies']) {
+          final List<Object?> dependencies => dependencies.whereType<String>().toList(),
+          _ => null,
+        };
 
   final Map<String, Object?> data;
   final String identifier;
@@ -1023,24 +1002,11 @@ class ParsedNativeTarget {
 /// Representation of data parsed from PBXProject section in Xcode project's
 /// project.pbxproj.
 class ParsedProject {
-  ParsedProject._(
-    this.data,
-    this.identifier,
-    this.packageReferences,
-  );
-
-  factory ParsedProject.fromJson(String key, Map<String, Object?> data) {
-    final List<String> parsedChildren = <String>[];
-    if (data['packageReferences'] is List<Object?>) {
-      for (final Object? item in data['packageReferences']! as List<Object?>) {
-        if (item is String) {
-          parsedChildren.add(item);
-        }
-      }
-      return ParsedProject._(data, key, parsedChildren);
-    }
-    return ParsedProject._(data, key, null);
-  }
+  ParsedProject.fromJson(this.identifier, this.data)
+      : packageReferences = switch (data['packageReferences']) {
+          final List<Object?> references => references.whereType<String>().toList(),
+          _ => null,
+        };
 
   final Map<String, Object?> data;
   final String identifier;

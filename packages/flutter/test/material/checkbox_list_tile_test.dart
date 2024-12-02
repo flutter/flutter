@@ -1266,6 +1266,47 @@ void main() {
     final Offset offsetPlatform = tester.getTopLeft(platform);
     expect(offsetPlatform, const Offset(736.0, 8.0));
   });
+
+  testWidgets('CheckboxListTile renders with default scale', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: CheckboxListTile(
+          value: false,
+          onChanged: null,
+        ),
+      ),
+    ));
+
+    final Finder transformFinder = find.ancestor(
+        of: find.byType(Checkbox),
+        matching: find.byType(Transform),
+    );
+
+    expect(transformFinder, findsNothing);
+  });
+
+  testWidgets('CheckboxListTile respects checkboxScaleFactor', (WidgetTester tester) async {
+    const double scale = 1.5;
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: CheckboxListTile(
+          value: false,
+          onChanged: null,
+          checkboxScaleFactor: scale,
+        ),
+      ),
+    ));
+
+    final Transform widget = tester.widget(
+      find.ancestor(
+        of: find.byType(Checkbox),
+        matching: find.byType(Transform),
+      ),
+    );
+
+    expect(widget.transform.getMaxScaleOnAxis(), scale);
+  });
 }
 
 class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {

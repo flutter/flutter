@@ -260,7 +260,7 @@ void main() {
     expect(getMaterial(tester).color, null);
     expect(getMaterial(tester).elevation, 0);
     expect(getMaterial(tester).shape, RoundedRectangleBorder(
-      side: BorderSide(color: lightTheme.colorScheme.outline),
+      side: BorderSide(color: lightTheme.colorScheme.outlineVariant),
       borderRadius: BorderRadius.circular(8.0),
     ));
     expect(getIconData(tester).color, lightTheme.colorScheme.primary);
@@ -288,7 +288,7 @@ void main() {
     expect(getMaterial(tester).color, null);
     expect(getMaterial(tester).elevation, 0);
     expect(getMaterial(tester).shape, RoundedRectangleBorder(
-      side: BorderSide(color: darkTheme.colorScheme.outline),
+      side: BorderSide(color: darkTheme.colorScheme.outlineVariant),
       borderRadius: BorderRadius.circular(8.0),
     ));
     expect(getIconData(tester).color, darkTheme.colorScheme.primary);
@@ -2839,6 +2839,7 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
+                              SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                             ],
@@ -2888,6 +2889,7 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
+                              SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                             ],
@@ -2948,6 +2950,7 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
+                              SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                               SemanticsFlag.isEnabled,
@@ -3006,6 +3009,7 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
+                              SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                               SemanticsFlag.isEnabled,
@@ -3062,6 +3066,7 @@ void main() {
                               SemanticsFlag.isButton,
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
+                              SemanticsFlag.hasSelectedState,
                               SemanticsFlag.isSelected,
                             ],
                             actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
@@ -3113,6 +3118,7 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
+                              SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                             ],
@@ -3163,7 +3169,10 @@ void main() {
                           TestSemantics(
                             label: 'test',
                             textDirection: TextDirection.ltr,
-                            flags: <SemanticsFlag>[], // Must not be a button when tapping is disabled.
+                            // Must not be a button when tapping is disabled.
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.hasSelectedState
+                            ],
                             actions: <SemanticsAction>[],
                           ),
                         ],
@@ -3213,6 +3222,7 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
+                              SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                               SemanticsFlag.isEnabled,
@@ -3265,6 +3275,7 @@ void main() {
                             label: 'test',
                             textDirection: TextDirection.ltr,
                             flags: <SemanticsFlag>[
+                              SemanticsFlag.hasSelectedState,
                               SemanticsFlag.hasEnabledState,
                               SemanticsFlag.isButton,
                             ],
@@ -4722,7 +4733,7 @@ void main() {
     ));
     final ShapeDecoration decoration = ink.decoration! as ShapeDecoration;
     expect(decoration.color, backgroundColor);
-    expect(decoration.shape, shape.copyWith(side: BorderSide(color: theme.colorScheme.outline)));
+    expect(decoration.shape, shape.copyWith(side: BorderSide(color: theme.colorScheme.outlineVariant)));
   });
 
   testWidgets('Chip highlight color is drawn on top of the backgroundColor', (WidgetTester tester) async {
@@ -4910,7 +4921,7 @@ void main() {
     // Chip should have the default side.
     expect(
       getMaterial(tester).shape,
-      StadiumBorder(side: BorderSide(color: theme.colorScheme.outline)),
+      StadiumBorder(side: BorderSide(color: theme.colorScheme.outlineVariant)),
     );
   });
 
@@ -5913,7 +5924,7 @@ void main() {
       ),
     );
 
-    // Test the chechmark is not visible yet.
+    // Test the checkmark is not visible yet.
     expect(materialBox, isNot(paints..path(color:checkmarkColor)));
     expect(tester.getSize(find.byType(RawChip)).width, closeTo(132.6, 0.1));
 
@@ -6027,6 +6038,49 @@ void main() {
     ));
 
     expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/157622.
+  testWidgets('Chip does not glitch on hover when providing ThemeData.hoverColor', (WidgetTester tester) async {
+    const Color themeDataHoverColor = Color(0xffff0000);
+    const Color hoverColor = Color(0xff00ff00);
+    const Color backgroundColor = Color(0xff0000ff);
+    await tester.pumpWidget(wrapForChip(
+      theme: ThemeData(hoverColor: themeDataHoverColor),
+      child: Center(
+        child: RawChip(
+          color: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+            if (states.contains(WidgetState.hovered)) {
+              return hoverColor;
+            }
+            return backgroundColor;
+          }),
+          label: const Text('Chip'),
+          onPressed: () {},
+        ),
+      ),
+    ));
+
+    expect(getMaterialBox(tester), paints..rrect(color: backgroundColor));
+
+    // Hover over the chip.
+    final Offset center = tester.getCenter(find.byType(RawChip));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    addTearDown(gesture.removePointer);
+    await tester.pumpAndSettle();
+
+    expect(
+      getMaterialBox(tester),
+      paints..rrect(color: hoverColor)..rect(color: Colors.transparent),
+    );
+    expect(
+      getMaterialBox(tester),
+      isNot(paints..rrect(color: hoverColor)..rect(color: themeDataHoverColor)),
+    );
   });
 }
 

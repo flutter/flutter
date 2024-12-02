@@ -4,16 +4,14 @@
 // The local repository will contain the AAR and POM files.
 
 import java.nio.file.Paths
-import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.publish.maven.MavenPublication
+
 
 void configureProject(Project project, String outputDir) {
     if (!project.hasProperty("android")) {
         throw new GradleException("Android property not found.")
     }
     if (!project.android.hasProperty("libraryVariants")) {
-        throw new GradleException("Can't generate AAR on a non Android library project.");
+        throw new GradleException("Can't generate AAR on a non Android library project.")
     }
 
     // Snapshot versions include the timestamp in the artifact name.
@@ -79,7 +77,7 @@ void configurePlugin(Project project, String outputDir) {
     configureProject(project, outputDir)
 }
 
-String getFlutterRoot(Project project) {
+static String getFlutterRoot(Project project) {
     if (!project.hasProperty("flutter-root")) {
         throw new GradleException("The `-Pflutter-root` flag must be specified.")
     }
@@ -114,6 +112,39 @@ void addAarTask(Project project, component) {
 
 allprojects {
    apply plugin: "maven-publish"
+}
+
+afterProject { project ->
+    // Exit early if either:
+    // 1. The project doesn't have the Android Gradle plugin applied.
+    // 2. The project has already defined which variants to publish (trying to re-define which
+    //    variants to publish will result in an error).
+    if (!project.hasProperty("android")) {
+        return
+    }
+    if (project.android.publishing.singleVariants.size() != 0) {
+        return
+    }
+
+    Closure addSingleVariants = {buildType ->
+        if (!project.android.productFlavors.isEmpty()) {
+            project.android.productFlavors.all{productFlavor ->
+                project.android.publishing.singleVariant(
+                        productFlavor.name + buildType.name.capitalize()
+                ) {
+                    withSourcesJar()
+                    withJavadocJar()
+                }
+            }
+        } else {
+            project.android.publishing.singleVariant(buildType.name) {
+                withSourcesJar()
+                withJavadocJar()
+            }
+        }
+    }
+
+    project.android.buildTypes.all(addSingleVariants)
 }
 
 projectsEvaluated {

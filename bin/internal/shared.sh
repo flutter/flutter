@@ -168,7 +168,7 @@ function upgrade_flutter () (
     fi
 
     # Compile...
-    "$DART" --verbosity=error --disable-dart-dev $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --snapshot-kind="app-jit" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" --no-enable-mirrors "$SCRIPT_PATH" > /dev/null
+    "$DART" --verbosity=error $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --snapshot-kind="app-jit" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" --no-enable-mirrors "$SCRIPT_PATH" > /dev/null
     echo "$compilekey" > "$STAMP_PATH"
 
     # Delete any temporary snapshot path.
@@ -262,7 +262,7 @@ function shared::execute() {
     flutter*)
       # FLUTTER_TOOL_ARGS aren't quoted below, because it is meant to be
       # considered as separate space-separated args.
-      exec "$DART" --disable-dart-dev --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
+      exec "$DART" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
       ;;
     dart*)
       exec "$DART" "$@"

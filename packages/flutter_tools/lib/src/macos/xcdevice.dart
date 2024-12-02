@@ -70,6 +70,7 @@ class XCDevice {
     required IProxy iproxy,
     required FileSystem fileSystem,
     required Analytics analytics,
+    required ShutdownHooks shutdownHooks,
     @visibleForTesting
     IOSCoreDeviceControl? coreDeviceControl,
     XcodeDebug? xcodeDebug,
@@ -104,12 +105,13 @@ class XCDevice {
       _xcode = xcode,
       _analytics = analytics {
 
+    shutdownHooks.addShutdownHook(dispose);
+
     _setupDeviceIdentifierByEventStream();
   }
 
   void dispose() {
-    _usbDeviceObserveProcess?.kill();
-    _wifiDeviceObserveProcess?.kill();
+    _stopObservingTetheredIOSDevices();
     _usbDeviceWaitProcess?.kill();
     _wifiDeviceWaitProcess?.kill();
   }
@@ -226,13 +228,13 @@ class XCDevice {
       final Future<void> usbProcessExited = _usbDeviceObserveProcess!.exitCode.then((int status) {
         _logger.printTrace('xcdevice observe --usb exited with code $exitCode');
         // Kill other process in case only one was killed.
-        _wifiDeviceObserveProcess?.kill();
+        _stopObservingTetheredIOSDevices();
       });
 
       final Future<void> wifiProcessExited = _wifiDeviceObserveProcess!.exitCode.then((int status) {
         _logger.printTrace('xcdevice observe --wifi exited with code $exitCode');
         // Kill other process in case only one was killed.
-        _usbDeviceObserveProcess?.kill();
+        _stopObservingTetheredIOSDevices();
       });
 
       unawaited(Future.wait(<Future<void>>[
@@ -331,8 +333,15 @@ class XCDevice {
   }
 
   void _stopObservingTetheredIOSDevices() {
-    _usbDeviceObserveProcess?.kill();
-    _wifiDeviceObserveProcess?.kill();
+    // xcdevice observe is running in an interactive shell.
+    // Signal script child jobs to exit and exit the shell.
+    // See https://linux.die.net/Bash-Beginners-Guide/sect_12_01.html#sect_12_01_01_02.
+    if (_usbDeviceObserveProcess != null) {
+      ProcessSignal.sighup.kill(_usbDeviceObserveProcess!);
+    }
+    if (_wifiDeviceObserveProcess != null) {
+      ProcessSignal.sighup.kill(_wifiDeviceObserveProcess!);
+    }
   }
 
   XCDeviceEventNotification? _processXCDeviceStdOut(

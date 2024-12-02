@@ -1292,7 +1292,6 @@ name: example
 flutter:
   module: {}
 ''');
-      globals.fs.file('.packages').createSync();
       final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
 
       final IOSSimulator simulator = IOSSimulator(
@@ -1312,7 +1311,6 @@ flutter:
 
     testUsingContext('is true with editable host app', () async {
       globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('.packages').createSync();
       globals.fs.directory('ios').createSync();
       final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
 
@@ -1332,7 +1330,6 @@ flutter:
 
     testUsingContext('is false with no host app and no module', () async {
       globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('.packages').createSync();
       final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);
 
       final IOSSimulator simulator = IOSSimulator(

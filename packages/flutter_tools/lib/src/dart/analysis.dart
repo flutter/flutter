@@ -62,7 +62,6 @@ class AnalysisServer {
     );
     final List<String> command = <String>[
       _fileSystem.path.join(sdkPath, 'bin', 'dart'),
-      '--disable-dart-dev',
       snapshot,
       '--disable-server-feature-completion',
       '--disable-server-feature-search',
@@ -241,13 +240,11 @@ class AnalysisError implements Comparable<AnalysisError> {
 
   String get _separator => _platform.isWindows ? '-' : '•';
 
-  String get colorSeverity {
-    return switch (writtenError.severityLevel) {
-      AnalysisSeverity.error   => _terminal.color(writtenError.severity, TerminalColor.red),
-      AnalysisSeverity.warning => _terminal.color(writtenError.severity, TerminalColor.yellow),
-      AnalysisSeverity.info || AnalysisSeverity.none => writtenError.severity,
-    };
-  }
+  String get colorSeverity => switch (writtenError.severityLevel) {
+    AnalysisSeverity.error   => _terminal.color(writtenError.severity, TerminalColor.red),
+    AnalysisSeverity.warning => _terminal.color(writtenError.severity, TerminalColor.yellow),
+    AnalysisSeverity.info || AnalysisSeverity.none => writtenError.severity,
+  };
 
   String get type => writtenError.type;
   String get code => writtenError.code;

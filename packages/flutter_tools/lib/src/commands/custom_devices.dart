@@ -377,7 +377,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     final CustomDevice device = CustomDevice(
       config: config,
       logger: logger,
-      processManager: _processManager
+      processManager: _processManager,
     );
 
     bool result = true;

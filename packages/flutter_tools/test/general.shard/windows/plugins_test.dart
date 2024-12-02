@@ -28,7 +28,7 @@ void main() {
         name: 'test',
         path: 'foo',
         defaultPackagePlatforms: const <String, String>{},
-        pluginDartClassPlatforms: const <String, String>{},
+        pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
         platforms: const <String, PluginPlatform>{
           WindowsPlugin.kConfigKey: WindowsPlugin(
             name: 'test',
@@ -38,6 +38,7 @@ void main() {
         },
         dependencies: <String>[],
         isDirectDependency: true,
+        isDevDependency: false,
       ),
     ], renderer);
 

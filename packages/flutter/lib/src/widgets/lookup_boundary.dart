@@ -47,14 +47,15 @@ import 'framework.dart';
 /// tree, which is rather uncommon. Such anomalies are created by
 /// [RenderObjectElement]s that don't attach their [RenderObject] to the closest
 /// ancestor [RenderObjectElement], e.g. because they bootstrap a separate
-/// stand-alone render tree.
-// TODO(goderbauer): Reference the View widget here once available.
-/// This behavior breaks the assumption some widgets have about the structure of
-/// the render tree: These widgets may try to reach out to an ancestor widget,
-/// assuming that their associated [RenderObject]s are also ancestors, which due
-/// to the anomaly may not be the case. At the point where the divergence in the
-/// two trees is introduced, a [LookupBoundary] can be used to hide that ancestor
-/// from the querying widget.
+/// stand-alone render tree. This behavior breaks the assumption some widgets
+/// have about the structure of the render tree: These widgets may try to reach
+/// out to an ancestor widget, assuming that their associated [RenderObject]s
+/// are also ancestors, which due to the anomaly may not be the case. At the
+/// point where the divergence in the two trees is introduced, a
+/// [LookupBoundary] can be used to hide that ancestor from the querying widget.
+/// The [ViewAnchor], for example, wraps its [ViewAnchor.view] child in a
+/// [LookupBoundary] because the [RenderObject] produced by that widget subtree
+/// is not attached to the render tree that the [ViewAnchor] itself belongs to.
 ///
 /// As an example, [Material.of] relies on lookup boundaries to hide the
 /// [Material] widget from certain descendant button widget. Buttons reach out

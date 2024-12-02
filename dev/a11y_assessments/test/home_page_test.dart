@@ -2,10 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_dynamic_calls
+
 import 'package:a11y_assessments/main.dart';
+import 'package:a11y_assessments/use_cases/action_chip.dart';
+import 'package:a11y_assessments/use_cases/auto_complete.dart';
+import 'package:a11y_assessments/use_cases/badge.dart';
+import 'package:a11y_assessments/use_cases/card.dart';
+import 'package:a11y_assessments/use_cases/check_box_list_tile.dart';
+import 'package:a11y_assessments/use_cases/date_picker.dart';
+import 'package:a11y_assessments/use_cases/dialog.dart';
+import 'package:a11y_assessments/use_cases/drawer.dart';
+import 'package:a11y_assessments/use_cases/expansion_tile.dart';
+import 'package:a11y_assessments/use_cases/material_banner.dart';
+import 'package:a11y_assessments/use_cases/navigation_bar.dart';
+import 'package:a11y_assessments/use_cases/navigation_drawer.dart';
+import 'package:a11y_assessments/use_cases/navigation_rail.dart';
+import 'package:a11y_assessments/use_cases/radio_list_tile.dart';
+import 'package:a11y_assessments/use_cases/slider.dart';
+import 'package:a11y_assessments/use_cases/snack_bar.dart';
+import 'package:a11y_assessments/use_cases/switch_list_tile.dart';
+import 'package:a11y_assessments/use_cases/text_button.dart';
+import 'package:a11y_assessments/use_cases/text_field.dart';
+import 'package:a11y_assessments/use_cases/text_field_password.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
+
+import 'test_utils.dart';
 
 void main() {
   testWidgets('Has light and dark theme', (WidgetTester tester) async {
@@ -139,6 +164,149 @@ void main() {
         MaterialDynamicColors.inverseOnSurface.getArgb(highContrastScheme));
     expect(appScheme.inversePrimary.value,
         MaterialDynamicColors.inversePrimary.getArgb(highContrastScheme));
+  });
+
+  testWidgets('Each A11y Assessments page has a unique page title.', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+      if (methodCall.method == 'SystemChrome.setApplicationSwitcherDescription') {
+        log.add(methodCall);
+      }
+      return null;
+    });
+
+    await tester.pumpWidget(Title(
+      color: const Color(0xFF00FF00),
+      title: 'Accessibility Assessments',
+      child: Container(),
+    ));
+    expect(log[0], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'Accessibility Assessments', 'primaryColor': 4278255360},
+    ));
+
+    await pumpsUseCase(tester, AutoCompleteUseCase());
+    expect(log[2], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'AutoComplete', 'primaryColor': 4284960932},
+    ));
+
+    await pumpsUseCase(tester, ActionChipUseCase());
+    expect(log[4], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'ActionChip', 'primaryColor': 4284960932},
+    ));
+
+    await pumpsUseCase(tester, BadgeUseCase());
+    expect(log[6], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'Badge', 'primaryColor': 4284960932},
+    ));
+
+    await pumpsUseCase(tester, CardUseCase());
+    expect(log[8], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'Card', 'primaryColor': 4284960932},
+    ));
+
+    await pumpsUseCase(tester, CheckBoxListTile());
+    expect(log[10], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'CheckBoxListTile', 'primaryColor': 4284960932},
+    ));
+
+    await pumpsUseCase(tester, DatePickerUseCase());
+    expect(log[12], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'DatePicker', 'primaryColor': 4284960932},
+    ));
+
+    await pumpsUseCase(tester, DialogUseCase());
+    expect(log[14], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'Dialog', 'primaryColor': 4284960932},
+    ));
+
+    await pumpsUseCase(tester, ExpansionTileUseCase());
+    expect(log[16], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'ExpansionTile', 'primaryColor': 4284960932},
+    ));
+
+    await pumpsUseCase(tester, MaterialBannerUseCase());
+    expect(log[18], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'MaterialBanner', 'primaryColor': 4284960932},
+    ));
+
+    await pumpsUseCase(tester, NavigationBarUseCase());
+    expect(log[20], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'NavigationBar', 'primaryColor': 4284960932},
+    ));
+
+    await pumpsUseCase(tester, RadioListTileUseCase());
+    expect(log[22], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'RadioListTile', 'primaryColor': 4284960932},
+    ));
+
+    await pumpsUseCase(tester, SliderUseCase());
+    expect(log[24], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'Slider', 'primaryColor': 4284960932},
+    ));
+
+    await pumpsUseCase(tester, SnackBarUseCase());
+    expect(log[26], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'SnackBar', 'primaryColor': 4284960932},
+    ));
+
+    await pumpsUseCase(tester, SwitchListTileUseCase());
+    expect(log[28], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'SwitchListTile', 'primaryColor': 4284960932},
+    ));
+
+    await pumpsUseCase(tester, TextButtonUseCase());
+    expect(log[30], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'TextButton', 'primaryColor': 4284960932},
+    ));
+
+    await pumpsUseCase(tester, TextFieldUseCase());
+    expect(log[32], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'TextField', 'primaryColor': 4284960932},
+    ));
+
+    await pumpsUseCase(tester, TextFieldPasswordUseCase());
+    expect(log[34], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'TextField password', 'primaryColor': 4284960932},
+    ));
+
+    await pumpsUseCase(tester, NavigationDrawerUseCase());
+    expect(log[36], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'NavigationDrawer', 'primaryColor': 4284960932},
+    ));
+
+    await pumpsUseCase(tester, NavigationRailUseCase());
+    expect(log[38], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'NavigationRail', 'primaryColor': 4284960932},
+    ));
+
+    await pumpsUseCase(tester, DrawerUseCase());
+    expect(log[40], isMethodCall(
+      'SystemChrome.setApplicationSwitcherDescription',
+      arguments: <String, dynamic>{'label': 'drawer', 'primaryColor': 4284960932},
+    ));
+
+
   });
 
   testWidgets('a11y assessments home page has one h1 tag', (WidgetTester tester) async {

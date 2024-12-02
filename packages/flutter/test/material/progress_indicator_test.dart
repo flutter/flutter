@@ -1217,11 +1217,10 @@ void main() {
     expect((wrappedTheme as ProgressIndicatorTheme).data, themeData);
   });
 
-  testWidgets('default size of CircularProgressIndicator is 36x36 - M3', (WidgetTester tester) async {
+  testWidgets('Material3 - Default size of CircularProgressIndicator', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: theme.copyWith(useMaterial3: true),
-        home: const Scaffold(
+      const MaterialApp(
+        home: Scaffold(
           body: Material(
             child: CircularProgressIndicator(),
           ),
@@ -1230,6 +1229,20 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(CircularProgressIndicator)), const Size(36, 36));
+  });
+
+  testWidgets('Material3 - Default size of CircularProgressIndicator when year2023 is false', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: CircularProgressIndicator(year2023: false),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(CircularProgressIndicator)), const Size(48, 48));
   });
 
   testWidgets('RefreshProgressIndicator using fields correctly', (WidgetTester tester) async {
@@ -1245,24 +1258,24 @@ void main() {
         matching: find.byType(Material),
       ),
     );
-    Container container = tester.widget(
+    Padding padding = tester.widget(
       find.descendant(
         of: find.byType(RefreshProgressIndicator),
-        matching: find.byType(Container),
-      ),
+        matching: find.byType(Padding),
+      ).first,
     );
-    Padding padding = tester.widget(
+    Padding innerPadding = tester.widget(
       find.descendant(
         of: find.descendant(
           of: find.byType(RefreshProgressIndicator),
           matching: find.byType(Material),
         ),
         matching: find.byType(Padding),
-      ),
+      ).last,
     );
     expect(material.elevation, 2.0);
-    expect(container.margin, const EdgeInsets.all(4.0));
-    expect(padding.padding, const EdgeInsets.all(12.0));
+    expect(padding.padding, const EdgeInsets.all(4.0));
+    expect(innerPadding.padding, const EdgeInsets.all(12.0));
 
     // With values provided.
     const double testElevation = 1.0;
@@ -1281,24 +1294,469 @@ void main() {
         matching: find.byType(Material),
       ),
     );
-    container = tester.widget(
+    padding = tester.widget(
       find.descendant(
         of: find.byType(RefreshProgressIndicator),
-        matching: find.byType(Container),
-      ),
+        matching: find.byType(Padding),
+      ).first,
     );
-    padding = tester.widget(
+    innerPadding = tester.widget(
       find.descendant(
         of: find.descendant(
           of: find.byType(RefreshProgressIndicator),
           matching: find.byType(Material),
         ),
         matching: find.byType(Padding),
-      ),
+      ).last,
     );
     expect(material.elevation, testElevation);
-    expect(container.margin, testIndicatorMargin);
-    expect(padding.padding, testIndicatorPadding);
+    expect(padding.padding, testIndicatorMargin);
+    expect(innerPadding.padding, testIndicatorPadding);
+  });
+
+  testWidgets('LinearProgressIndicator default stop indicator when year2023 is false', (WidgetTester tester) async {
+    Widget buildIndicator({ required TextDirection textDirection }) {
+      return Directionality(
+        textDirection: textDirection,
+        child: const Center(
+          child: SizedBox(
+            width: 200.0,
+            child: LinearProgressIndicator(
+              year2023: false,
+              value: 0.5,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildIndicator(textDirection: TextDirection.ltr));
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints..circle(x: 198.0, y: 2.0, radius: 2.0, color: theme.colorScheme.primary),
+    );
+
+    await tester.pumpWidget(buildIndicator(textDirection: TextDirection.rtl));
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints..circle(x: 2.0, y: 2.0, radius: 2.0, color: theme.colorScheme.primary)
+    );
+  });
+
+  testWidgets('Indeterminate LinearProgressIndicator does not paint stop indicator', (WidgetTester tester) async {
+    Widget buildIndicator({ double? value }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 200.0,
+            child: LinearProgressIndicator(
+              year2023: false,
+              value: value,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Determinate LinearProgressIndicator paints stop indicator.
+    await tester.pumpWidget(buildIndicator(value: 0.5));
+    expect(
+      find.byType(LinearProgressIndicator),
+      // Stop indicator.
+      paints..circle(x: 198.0, y: 2.0, radius: 2.0, color: theme.colorScheme.primary),
+    );
+
+    // Indeterminate LinearProgressIndicator does not paint stop indicator.
+    await tester.pumpWidget(buildIndicator());
+    expect(
+      find.byType(LinearProgressIndicator),
+      // Stop indicator.
+      isNot(paints..circle(x: 198.0, y: 2.0, radius: 2.0, color: theme.colorScheme.primary)),
+    );
+  });
+
+  testWidgets('Can customise LinearProgressIndicator stop indicator when year2023 is false', (WidgetTester tester) async {
+    const Color stopIndicatorColor = Color(0XFF00FF00);
+    const double stopIndicatorRadius = 5.0;
+    Widget buildIndicator({ Color? stopIndicatorColor, double? stopIndicatorRadius }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 200.0,
+            child: LinearProgressIndicator(
+              year2023: false,
+              stopIndicatorColor: stopIndicatorColor,
+              stopIndicatorRadius: stopIndicatorRadius,
+              minHeight: 20.0,
+              value: 0.5,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test customized stop indicator.
+    await tester.pumpWidget(buildIndicator(
+      stopIndicatorColor: stopIndicatorColor,
+      stopIndicatorRadius: stopIndicatorRadius,
+    ));
+    expect(
+      find.byType(LinearProgressIndicator),
+      // Stop indicator.
+      paints..circle(x: 190.0, y: 10.0, radius: stopIndicatorRadius, color: stopIndicatorColor),
+    );
+
+    // Remove stop indicator.
+    await tester.pumpWidget(buildIndicator(stopIndicatorRadius: 0));
+    expect(
+      find.byType(LinearProgressIndicator),
+      // Stop indicator.
+      isNot(paints..circle(color: stopIndicatorColor)),
+    );
+
+    // Test stop indicator with transparent color.
+    await tester.pumpWidget(buildIndicator(stopIndicatorColor: const Color(0x00000000)));
+    expect(
+      find.byType(LinearProgressIndicator),
+      // Stop indicator.
+      paints..circle(color: const Color(0x00000000)),
+    );
+  });
+
+  testWidgets('Stop indicator size cannot be larger than the progress indicator', (WidgetTester tester) async {
+    Widget buildIndicator({ double? stopIndicatorRadius, double? minHeight }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 200.0,
+            child: LinearProgressIndicator(
+              year2023: false,
+              stopIndicatorRadius: stopIndicatorRadius,
+              minHeight: minHeight,
+              value: 0.5,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test stop indicator radius equals to minHeight.
+    await tester.pumpWidget(buildIndicator(stopIndicatorRadius: 10.0, minHeight: 20.0));
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints..circle(x: 190.0, y: 10.0, radius: 10.0, color: theme.colorScheme.primary),
+    );
+
+    // Test stop indicator radius larger than minHeight.
+    await tester.pumpWidget(buildIndicator(stopIndicatorRadius: 30.0, minHeight: 20.0));
+    expect(
+      find.byType(LinearProgressIndicator),
+      // Stop indicator radius is clamped to minHeight.
+      paints..circle(x: 190.0, y: 10.0, radius: 10.0, color: theme.colorScheme.primary),
+    );
+  });
+
+  testWidgets('LinearProgressIndicator default track gap when year2023 is false', (WidgetTester tester) async {
+    const double defaultTrackGap = 4.0;
+    Widget buildIndicator({ required TextDirection textDirection }) {
+      return Directionality(
+        textDirection: textDirection,
+        child: const Center(
+          child: SizedBox(
+            width: 200.0,
+            child: LinearProgressIndicator(
+              year2023: false,
+              value: 0.5,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default track gap in LTR.
+    await tester.pumpWidget(buildIndicator(textDirection: TextDirection.ltr));
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        // Track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(100.0 + defaultTrackGap, 0.0, 200.0, 4.0, const Radius.circular(2.0)),
+          color: theme.colorScheme.secondaryContainer,
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 0.0, 100.0, 4.0, const Radius.circular(2.0)),
+          color: theme.colorScheme.primary,
+        ),
+    );
+
+    // Test default track gap in RTL.
+    await tester.pumpWidget(buildIndicator(textDirection: TextDirection.rtl));
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        // Track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 0.0, 100.0 - defaultTrackGap, 4.0, const Radius.circular(2.0)),
+          color: theme.colorScheme.secondaryContainer,
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(100.0, 0.0, 200.0, 4.0, const Radius.circular(2.0)),
+          color: theme.colorScheme.primary,
+        ),
+    );
+  });
+
+  testWidgets('Can customise LinearProgressIndicator track gap when year2023 is false', (WidgetTester tester) async {
+    const double customTrackGap = 12.0;
+    const double noTrackGap = 0.0;
+    Widget buildIndicator({ double? trackGap }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 200.0,
+            child: LinearProgressIndicator(
+              year2023: false,
+              trackGap: trackGap,
+              value: 0.5,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test customized track gap.
+    await tester.pumpWidget(buildIndicator(trackGap: customTrackGap));
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        // Track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(100.0 + customTrackGap, 0.0, 200.0, 4.0, const Radius.circular(2.0)),
+          color: theme.colorScheme.secondaryContainer,
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 0.0, 100.0, 4.0, const Radius.circular(2.0)),
+          color: theme.colorScheme.primary,
+        ),
+    );
+
+    // Remove track gap.
+    await tester.pumpWidget(buildIndicator(trackGap: noTrackGap));
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        // Track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 0.0, 200.0, 4.0, const Radius.circular(2.0)),
+          color: theme.colorScheme.secondaryContainer,
+        )
+        // Active indicator.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 0.0, 100.0, 4.0, const Radius.circular(2.0)),
+          color: theme.colorScheme.primary,
+        ),
+    );
+  });
+
+  testWidgets('Default determinate CircularProgressIndicator when year2023 is false', (WidgetTester tester) async {
+    const EdgeInsetsGeometry padding = EdgeInsets.all(4.0);
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: const Center(
+        child: CircularProgressIndicator(
+          year2023: false,
+          value: 0.5,
+        ),
+      ),
+    ));
+
+    final Size indicatorBoxSize = tester.getSize(find.descendant(
+      of: find.byType(CircularProgressIndicator),
+      matching: find.byType(ConstrainedBox),
+    ));
+    expect(
+      tester.getSize(find.byType(CircularProgressIndicator)),
+      equals(Size(
+        indicatorBoxSize.width + padding.horizontal,
+        indicatorBoxSize.height + padding.vertical,
+      )),
+    );
+    expect(
+      find.byType(CircularProgressIndicator),
+      paints
+        // Track.
+        ..arc(
+          rect: const Rect.fromLTRB(2.0, 2.0, 38.0, 38.0),
+          color: theme.colorScheme.secondaryContainer,
+          strokeWidth: 4.0,
+          strokeCap: StrokeCap.round,
+          style: PaintingStyle.stroke,
+        )
+        // Active indicator.
+        ..arc(
+          rect: const Rect.fromLTRB(2.0, 2.0, 38.0, 38.0),
+          color: theme.colorScheme.primary,
+          strokeWidth: 4.0,
+          strokeCap: StrokeCap.round,
+          style: PaintingStyle.stroke,
+        ),
+    );
+    await expectLater(
+      find.byType(CircularProgressIndicator),
+      matchesGoldenFile('circular_progress_indicator_determinate_year2023_false.png'),
+    );
+  });
+
+  testWidgets('Default indeterminate CircularProgressIndicator when year2023 is false', (WidgetTester tester) async {
+    const EdgeInsetsGeometry padding = EdgeInsets.all(4.0);
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: const Center(child: CircularProgressIndicator(year2023: false)),
+    ));
+
+    // Advance the animation.
+    await tester.pump(const Duration(milliseconds: 200));
+
+    final Size indicatorBoxSize = tester.getSize(find.descendant(
+      of: find.byType(CircularProgressIndicator),
+      matching: find.byType(ConstrainedBox),
+    ));
+    expect(
+      tester.getSize(find.byType(CircularProgressIndicator)),
+      equals(Size(
+        indicatorBoxSize.width + padding.horizontal,
+        indicatorBoxSize.height + padding.vertical,
+      )),
+    );
+    expect(
+      find.byType(CircularProgressIndicator),
+      paints
+        // Active indicator.
+        ..arc(
+          rect: const Rect.fromLTRB(2.0, 2.0, 38.0, 38.0),
+          color: theme.colorScheme.primary,
+          strokeWidth: 4.0,
+          strokeCap: StrokeCap.round,
+          style: PaintingStyle.stroke,
+        ),
+    );
+    await expectLater(
+      find.byType(CircularProgressIndicator),
+      matchesGoldenFile('circular_progress_indicator_indeterminate_year2023_false.png'),
+    );
+  });
+
+  testWidgets('CircularProgressIndicator track gap can be adjusted when year2023 is false', (WidgetTester tester) async {
+    Widget buildIndicator({ double? trackGap }) {
+      return MaterialApp(
+        home: Center(
+          child: CircularProgressIndicator(
+            year2023: false,
+            trackGap: trackGap,
+            value: 0.5,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildIndicator());
+    await expectLater(
+      find.byType(CircularProgressIndicator),
+      matchesGoldenFile('circular_progress_indicator_default_track_gap_year2023_false.png'),
+    );
+
+    await tester.pumpWidget(buildIndicator(trackGap: 12.0));
+    await expectLater(
+      find.byType(CircularProgressIndicator),
+      matchesGoldenFile('circular_progress_indicator_custom_track_gap_year2023_false.png'),
+    );
+
+    await tester.pumpWidget(buildIndicator(trackGap: 0.0));
+    await expectLater(
+      find.byType(CircularProgressIndicator),
+      matchesGoldenFile('circular_progress_indicator_no_track_gap_year2023_false.png'),
+    );
+  });
+
+  testWidgets('Can override CircularProgressIndicator stroke cap when year2023 is false', (WidgetTester tester) async {
+    const StrokeCap strokeCap = StrokeCap.square;
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: CircularProgressIndicator(
+            year2023: false,
+            strokeCap: strokeCap,
+            value: 0.5,
+          ),
+        ),
+      )
+    );
+
+    expect(
+      find.byType(CircularProgressIndicator),
+      paints
+        // Track.
+        ..arc(strokeCap: strokeCap)
+        // Active indicator.
+        ..arc(strokeCap: strokeCap)
+    );
+    await expectLater(
+      find.byType(CircularProgressIndicator),
+      matchesGoldenFile('circular_progress_indicator_custom_stroke_cap_year2023_false.png'),
+    );
+  });
+
+  testWidgets('CircularProgressIndicator.constraints can override default size', (WidgetTester tester) async {
+    const Size size = Size(64, 64);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: CircularProgressIndicator(
+            constraints: BoxConstraints(
+              minWidth: size.width,
+              minHeight: size.height
+            ),
+            value: 0.5,
+          ),
+        ),
+      )
+    );
+
+    expect(tester.getSize(find.byType(CircularProgressIndicator)), equals(size));
+  });
+
+  testWidgets('CircularProgressIndicator padding can be customized', (WidgetTester tester) async {
+    const EdgeInsetsGeometry padding = EdgeInsets.all(12.0);
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: CircularProgressIndicator(
+            padding: padding,
+            year2023: false,
+            value: 0.5,
+          ),
+        ),
+      )
+    );
+
+    final Size indicatorBoxSize = tester.getSize(find.descendant(
+      of: find.byType(CircularProgressIndicator),
+      matching: find.byType(ConstrainedBox),
+    ));
+    expect(
+      tester.getSize(find.byType(CircularProgressIndicator)),
+      equals(Size(
+        indicatorBoxSize.width + padding.horizontal,
+        indicatorBoxSize.height + padding.vertical,
+      )),
+    );
   });
 }
 

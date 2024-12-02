@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class SwitchListTileUseCase extends UseCase {
@@ -27,12 +27,15 @@ class SwitchListTileExample extends StatefulWidget {
 class _SwitchListTileExampleState extends State<SwitchListTileExample> {
   bool _lights1 = false;
   bool _lights2 = false;
+
+  String pageTitle = getUseCaseName(SwitchListTileUseCase());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: const Text('SwitchListTile')),
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
       ),
       body: Center(
         child: Column(

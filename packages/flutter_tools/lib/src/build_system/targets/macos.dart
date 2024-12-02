@@ -10,6 +10,7 @@ import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
+import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
 import '../build_system.dart';
 import '../depfile.dart';
@@ -17,6 +18,7 @@ import '../exceptions.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
+import 'native_assets.dart';
 
 /// Copy the macOS framework to the correct copy dir by invoking 'rsync'.
 ///
@@ -50,9 +52,10 @@ abstract class UnpackMacOS extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'unpack_macos');
     }
+
+    // Copy Flutter framework.
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String basePath = environment.artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
-
     final ProcessResult result = environment.processManager.runSync(<String>[
       'rsync',
       '-av',
@@ -81,10 +84,16 @@ abstract class UnpackMacOS extends Target {
     if (!frameworkBinary.existsSync()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
+
     await _thinFramework(environment, frameworkBinaryPath);
   }
 
-  static const List<String> _copyDenylist = <String>['entitlements.txt', 'without_entitlements.txt'];
+  /// Files that should not be copied to build output directory if found during framework copy step.
+  static const List<String> _copyDenylist = <String>[
+    'entitlements.txt',
+    'without_entitlements.txt',
+    'unsigned_binaries.txt',
+  ];
 
   void _removeDenylistedFiles(Directory directory) {
     for (final FileSystemEntity entity in directory.listSync(recursive: true)) {
@@ -155,10 +164,51 @@ class ReleaseUnpackMacOS extends UnpackMacOS {
   String get name => 'release_unpack_macos';
 
   @override
-  List<Source> get inputs => <Source>[
-    ...super.inputs,
-    const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.release),
+  List<Source> get outputs => super.outputs + const <Source>[
+    Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework.dSYM/Contents/Resources/DWARF/FlutterMacOS'),
   ];
+
+  @override
+  List<Source> get inputs => super.inputs + const <Source>[
+    Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.release),
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    await super.build(environment);
+
+    // Copy Flutter framework dSYM (debug symbol) bundle, if present.
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
+      throw MissingDefineException(kBuildMode, 'unpack_macos');
+    }
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final Directory frameworkDsym = environment.fileSystem.directory(
+      environment.artifacts.getArtifactPath(
+        Artifact.flutterMacOSFrameworkDsym,
+        platform: TargetPlatform.darwin,
+        mode: buildMode,
+      )
+    );
+    if (frameworkDsym.existsSync()) {
+      final ProcessResult result = await environment.processManager.run(<String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+        frameworkDsym.path,
+        environment.outputDir.path,
+      ]);
+      if (result.exitCode != 0) {
+        throw Exception(
+          'Failed to copy framework dSYM (exit ${result.exitCode}:\n'
+          '${result.stdout}\n---\n${result.stderr}',
+        );
+      }
+    }
+  }
 }
 
 /// Unpack the profile prebuilt engine framework.
@@ -440,6 +490,10 @@ abstract class MacOSBundleFlutterAssets extends Target {
       targetPlatform: TargetPlatform.darwin,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],
+      additionalContent: <String, DevFSContent>{
+        'NativeAssetsManifest.json':
+            DevFSFileContent(environment.buildDir.childFile('native_assets.json')),
+      },
     );
     environment.depFileService.writeToFile(
       assetDepfile,
@@ -542,6 +596,7 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
     KernelSnapshot(),
     DebugMacOSFramework(),
     DebugUnpackMacOS(),
+    InstallCodeAssets(),
   ];
 
   @override
@@ -571,6 +626,7 @@ class ProfileMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   @override
   List<Target> get dependencies => const <Target>[
     CompileMacOSFramework(),
+    InstallCodeAssets(),
     ProfileUnpackMacOS(),
   ];
 
@@ -598,6 +654,7 @@ class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   @override
   List<Target> get dependencies => const <Target>[
     CompileMacOSFramework(),
+    InstallCodeAssets(),
     ReleaseUnpackMacOS(),
   ];
 

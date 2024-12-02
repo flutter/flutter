@@ -244,6 +244,11 @@ https://docs.flutter.dev/testing/integration-tests
     results[description] ??= _success;
   }
 
+  // Do not paint a description label because it could show up in screenshots
+  // of the integration test.
+  @override
+  void setLabel(String value) {}
+
   vm.VmService? _vmService;
 
   /// Initialize the [vm.VmService] settings for the timeline.
@@ -440,14 +445,6 @@ https://docs.flutter.dev/testing/integration-tests
 
   @override
   Timeout defaultTestTimeout = Timeout.none;
-
-  @override
-  Widget wrapWithDefaultView(Widget rootWidget) {
-    // This is a workaround where screenshots of root widgets have incorrect
-    // bounds.
-    // TODO(jiahaog): Remove when https://github.com/flutter/flutter/issues/66006 is fixed.
-    return super.wrapWithDefaultView(RepaintBoundary(child: rootWidget));
-  }
 
   @override
   void reportExceptionNoticed(FlutterErrorDetails exception) {

@@ -44,7 +44,7 @@ void main() {
   test(
     'build succeeds targeting string compileSdkVersion',
     () async {
-      final File buildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
+      final File buildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle.kts');
       // write a build.gradle with compileSdkVersion as `android-UpsideDownCake` which is a string preview version
       buildGradleFile.writeAsStringSync(
         buildGradleFile.readAsStringSync().replaceFirst(compileSdkVersionMatch, 'compileSdkVersion = "android-UpsideDownCake"'),
@@ -72,7 +72,7 @@ void main() {
   test(
     'build succeeds targeting string compileSdkPreview',
     () async {
-      final File buildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
+      final File buildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle.kts');
       // write a build.gradle with compileSdkPreview as `UpsideDownCake` which is a string preview version
       buildGradleFile.writeAsStringSync(
         buildGradleFile.readAsStringSync().replaceFirst(compileSdkVersionMatch, 'compileSdkPreview = "UpsideDownCake"'),
@@ -100,7 +100,7 @@ void main() {
   test(
     'build succeeds when both example app and plugin target compileSdkPreview',
         () async {
-      final File appBuildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
+      final File appBuildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle.kts');
       // write a build.gradle with compileSdkPreview as `UpsideDownCake` which is a string preview version
       appBuildGradleFile.writeAsStringSync(
           appBuildGradleFile.readAsStringSync().replaceFirst(compileSdkVersionMatch, 'compileSdkPreview = "UpsideDownCake"'),

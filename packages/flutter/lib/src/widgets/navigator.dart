@@ -225,7 +225,9 @@ abstract class Route<T> extends _RoutePlaceholder {
   void _updateSettings(RouteSettings newSettings) {
     if (_settings != newSettings) {
       _settings = newSettings;
-      changedInternalState();
+      if (_navigator != null) {
+        changedInternalState();
+      }
     }
   }
 
@@ -792,6 +794,17 @@ class NavigatorObserver {
 
   /// The [Navigator] replaced `oldRoute` with `newRoute`.
   void didReplace({ Route<dynamic>? newRoute, Route<dynamic>? oldRoute }) { }
+
+  /// The top most route has changed.
+  ///
+  /// The `topRoute` is the new top most route. This can be a new route pushed
+  /// on top of the screen, or an existing route that becomes the new top-most
+  /// route because the previous top-most route has been popped.
+  ///
+  /// The `previousTopRoute` was the top most route before the change. This can
+  /// be a route that was popped off the screen, or a route that will be covered
+  /// by the `topRoute`. This can also be null if this is the first build.
+  void didChangeTop(Route<dynamic> topRoute, Route<dynamic>? previousTopRoute) { }
 
   /// The [Navigator]'s routes are being moved by a user gesture.
   ///
@@ -2797,16 +2810,14 @@ class Navigator extends StatefulWidget {
     BuildContext context, {
     bool rootNavigator = false,
   }) {
-    // Handles the case where the input context is a navigator element.
     NavigatorState? navigator;
-    if (context is StatefulElement && context.state is NavigatorState) {
-      navigator = context.state as NavigatorState;
+    if (context case StatefulElement(:final NavigatorState state)) {
+      navigator = state;
     }
-    if (rootNavigator) {
-      navigator = context.findRootAncestorStateOfType<NavigatorState>() ?? navigator;
-    } else {
-      navigator = navigator ?? context.findAncestorStateOfType<NavigatorState>();
-    }
+
+    navigator = rootNavigator
+        ? context.findRootAncestorStateOfType<NavigatorState>() ?? navigator
+        : navigator ?? context.findAncestorStateOfType<NavigatorState>();
 
     assert(() {
       if (navigator == null) {
@@ -2847,17 +2858,14 @@ class Navigator extends StatefulWidget {
     BuildContext context, {
     bool rootNavigator = false,
   }) {
-    // Handles the case where the input context is a navigator element.
     NavigatorState? navigator;
-    if (context is StatefulElement && context.state is NavigatorState) {
-      navigator = context.state as NavigatorState;
+    if (context case StatefulElement(:final NavigatorState state)) {
+      navigator = state;
     }
-    if (rootNavigator) {
-      navigator = context.findRootAncestorStateOfType<NavigatorState>() ?? navigator;
-    } else {
-      navigator = navigator ?? context.findAncestorStateOfType<NavigatorState>();
-    }
-    return navigator;
+
+    return rootNavigator
+        ? context.findRootAncestorStateOfType<NavigatorState>() ?? navigator
+        : navigator ?? context.findAncestorStateOfType<NavigatorState>();
   }
 
   /// Turn a route name into a set of [Route] objects.
@@ -3095,10 +3103,6 @@ class _RouteEntry extends RouteTransitionRecord {
   void handleAdd({ required NavigatorState navigator, required Route<dynamic>? previousPresent }) {
     assert(currentState == _RouteLifecycle.add);
     assert(navigator._debugLocked);
-    assert(route._navigator == null);
-    route._navigator = navigator;
-    route.install();
-    assert(route.overlayEntries.isNotEmpty);
     currentState = _RouteLifecycle.adding;
     navigator._observedRouteAdditions.add(
       _NavigatorPushObservation(route, previousPresent),
@@ -3223,6 +3227,10 @@ class _RouteEntry extends RouteTransitionRecord {
   }
 
   void didAdd({ required NavigatorState navigator, required bool isNewFirst}) {
+    assert(route._navigator == null);
+    route._navigator = navigator;
+    route.install();
+    assert(route.overlayEntries.isNotEmpty);
     route.didAdd();
     currentState = _RouteLifecycle.idle;
     if (isNewFirst) {
@@ -3698,6 +3706,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return true;
   }
 
+  @protected
   @override
   void initState() {
     super.initState();
@@ -3734,6 +3743,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   int get _nextPagelessRestorationScopeId => _rawNextPagelessRestorationScopeId.value++;
 
+  @protected
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_rawNextPagelessRestorationScopeId, 'id');
@@ -3802,6 +3812,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(() { _debugLocked = false; return true; }());
   }
 
+  @protected
   @override
   void didToggleBucket(RestorationBucket? oldBucket) {
     super.didToggleBucket(oldBucket);
@@ -3814,12 +3825,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   String? get restorationId => widget.restorationScopeId;
 
+  @protected
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _updateHeroController(HeroControllerScope.maybeOf(context));
     for (final _RouteEntry entry in _history) {
-      entry.route.changedExternalState();
+      if (entry.route.navigator == this) {
+        entry.route.changedExternalState();
+      }
     }
   }
 
@@ -3905,6 +3919,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
   }
 
+  @protected
   @override
   void didUpdateWidget(Navigator oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -3939,7 +3954,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
 
     for (final _RouteEntry entry in _history) {
-      entry.route.changedExternalState();
+      if (entry.route.navigator == this) {
+        entry.route.changedExternalState();
+      }
     }
   }
 
@@ -3957,23 +3974,28 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
   }
 
+  @protected
   @override
   void deactivate() {
     for (final NavigatorObserver observer in _effectiveObservers) {
       NavigatorObserver._navigators[observer] = null;
     }
+    _effectiveObservers = <NavigatorObserver>[];
     super.deactivate();
   }
 
+  @protected
   @override
   void activate() {
     super.activate();
+    _updateEffectiveObservers();
     for (final NavigatorObserver observer in _effectiveObservers) {
       assert(observer.navigator == null);
       NavigatorObserver._navigators[observer] = this;
     }
   }
 
+  @protected
   @override
   void dispose() {
     assert(!_debugLocked);
@@ -3981,12 +4003,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       _debugLocked = true;
       return true;
     }());
-    assert(() {
-      for (final NavigatorObserver observer in _effectiveObservers) {
-        assert(observer.navigator != this);
-      }
-      return true;
-    }());
+    assert(_effectiveObservers.isEmpty);
     _updateHeroController(null);
     focusNode.dispose();
     _forcedDisposeAllRouteEntries();
@@ -4011,6 +4028,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     ];
   }
 
+  _RouteEntry? _lastTopmostRoute;
   String? _lastAnnouncedRouteName;
 
   bool _debugUpdatingPage = false;
@@ -4437,9 +4455,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     // notifications.
     _flushRouteAnnouncement();
 
+    final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+    if (lastEntry != null && _lastTopmostRoute != lastEntry) {
+      for (final NavigatorObserver observer in _effectiveObservers) {
+        observer.didChangeTop(lastEntry.route, _lastTopmostRoute?.route);
+      }
+    }
+    _lastTopmostRoute = lastEntry;
     // Announce route name changes.
     if (widget.reportsRouteUpdateToEngine) {
-      final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
       final String? routeName = lastEntry?.route.settings.name;
       if (routeName != null && routeName != _lastAnnouncedRouteName) {
         SystemNavigator.routeInformationUpdated(uri: Uri.parse(routeName));
@@ -5630,6 +5654,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return result;
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(!_debugLocked);

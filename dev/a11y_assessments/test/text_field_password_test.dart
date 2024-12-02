@@ -53,7 +53,7 @@ void main() {
 
   testWidgets('text field password demo page has one h1 tag', (WidgetTester tester) async {
     await pumpsUseCase(tester, TextFieldPasswordUseCase());
-    final Finder findHeadingLevelOnes = find.bySemanticsLabel('TextField password demo');
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel('TextField password Demo');
     await tester.pumpAndSettle();
     expect(findHeadingLevelOnes, findsOne);
   });

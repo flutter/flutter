@@ -10,8 +10,6 @@ import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
-final String platformLineSep = Platform.isWindows ? '\r\n': '\n';
-
 /// Tests that AARs can be built on module projects.
 Future<void> main() async {
   await task(() async {
@@ -59,13 +57,12 @@ Future<void> main() async {
       final File modulePubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
       String content = modulePubspec.readAsStringSync();
       content = content.replaceFirst(
-        '${platformLineSep}dependencies:$platformLineSep',
-        '${platformLineSep}dependencies:$platformLineSep'
-          '  plugin_with_android:$platformLineSep'
-          '    path: ../plugin_with_android$platformLineSep'
-          '  plugin_without_android:$platformLineSep'
-          '    path: ../plugin_without_android$platformLineSep'
-          '  webcrypto: 0.5.2$platformLineSep', // Plugin that uses NDK.
+        '${Platform.lineTerminator}dependencies:${Platform.lineTerminator}',
+        '${Platform.lineTerminator}dependencies:${Platform.lineTerminator}'
+          '  plugin_with_android:${Platform.lineTerminator}'
+          '    path: ../plugin_with_android${Platform.lineTerminator}'
+          '  plugin_without_android:${Platform.lineTerminator}'
+          '    path: ../plugin_without_android${Platform.lineTerminator}'
       );
       modulePubspec.writeAsStringSync(content, flush: true);
 
@@ -229,7 +226,6 @@ Future<void> main() async {
 
       checkFileContains(<String>[
         'flutter_embedding_debug',
-        'x86_debug',
         'x86_64_debug',
         'armeabi_v7a_debug',
         'arm64_v8a_debug',

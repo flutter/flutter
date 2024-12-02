@@ -16,9 +16,6 @@ import 'custom_devices/custom_device.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
 import 'features.dart';
-import 'fuchsia/fuchsia_device.dart';
-import 'fuchsia/fuchsia_sdk.dart';
-import 'fuchsia/fuchsia_workflow.dart';
 import 'ios/devices.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/simulators.dart';
@@ -27,11 +24,11 @@ import 'macos/macos_device.dart';
 import 'macos/macos_ipad_device.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcdevice.dart';
+import 'native_assets.dart';
 import 'preview_device.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'web/web_device.dart';
-
 import 'windows/windows_device.dart';
 import 'windows/windows_workflow.dart';
 
@@ -48,15 +45,14 @@ class FlutterDeviceManager extends DeviceManager {
     required XCDevice xcDevice,
     required AndroidWorkflow androidWorkflow,
     required IOSWorkflow iosWorkflow,
-    required FuchsiaWorkflow fuchsiaWorkflow,
     required FlutterVersion flutterVersion,
     required Artifacts artifacts,
     required MacOSWorkflow macOSWorkflow,
-    required FuchsiaSdk fuchsiaSdk,
     required UserMessages userMessages,
     required OperatingSystemUtils operatingSystemUtils,
     required WindowsWorkflow windowsWorkflow,
     required CustomDevicesConfig customDevicesConfig,
+    required TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) : deviceDiscoverers =  <DeviceDiscovery>[
     AndroidDevices(
       logger: logger,
@@ -76,18 +72,13 @@ class FlutterDeviceManager extends DeviceManager {
     IOSSimulators(
       iosSimulatorUtils: iosSimulatorUtils,
     ),
-    FuchsiaDevices(
-      fuchsiaSdk: fuchsiaSdk,
-      logger: logger,
-      fuchsiaWorkflow: fuchsiaWorkflow,
-      platform: platform,
-    ),
     FlutterTesterDevices(
       fileSystem: fileSystem,
       flutterVersion: flutterVersion,
       processManager: processManager,
       logger: logger,
       artifacts: artifacts,
+      nativeAssetsBuilder: nativeAssetsBuilder,
     ),
     MacOSDevices(
       processManager: processManager,
@@ -139,7 +130,7 @@ class FlutterDeviceManager extends DeviceManager {
       featureFlags: featureFlags,
       processManager: processManager,
       logger: logger,
-      config: customDevicesConfig
+      config: customDevicesConfig,
     ),
   ];
 

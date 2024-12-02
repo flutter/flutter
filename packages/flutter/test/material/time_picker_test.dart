@@ -19,8 +19,16 @@ void main() {
   const String okString = 'OK';
   const String amString = 'AM';
   const String pmString = 'PM';
+
   Material getMaterialFromDialog(WidgetTester tester) {
     return tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first);
+  }
+
+  Finder findBorderPainter() {
+    return find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_BorderContainer'),
+      matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
+    );
   }
 
   testWidgets('Material2 - Dialog size - dial mode', (WidgetTester tester) async {
@@ -1638,6 +1646,45 @@ void main() {
         expect(find.text(errorInvalidText), findsOneWidget);
       });
 
+      testWidgets('TimePicker default entry icons', (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: TimePickerDialog(initialTime: TimeOfDay.now()),
+        ));
+
+        // Check that the default icon for the dial mode is displayed.
+        expect(find.byIcon(Icons.keyboard_outlined), findsOneWidget);
+        expect(find.byIcon(Icons.access_time), findsNothing);
+        // Tap the icon to switch to input mode.
+        await tester.tap(find.byIcon(Icons.keyboard_outlined));
+        await tester.pumpAndSettle();
+        // Check that the icon for the input mode is displayed.
+        expect(find.byIcon(Icons.access_time), findsOneWidget);
+        expect(find.byIcon(Icons.keyboard_outlined), findsNothing);
+      });
+
+      testWidgets('Can override TimePicker entry icons', (WidgetTester tester) async {
+        const Icon customInputIcon = Icon(Icons.text_fields);
+        const Icon customTimerIcon = Icon(Icons.watch);
+
+        await tester.pumpWidget(MaterialApp(
+          home: TimePickerDialog(
+            initialTime: TimeOfDay.now(),
+            switchToInputEntryModeIcon: customInputIcon,
+            switchToTimerEntryModeIcon: customTimerIcon,
+          ),
+        ));
+
+        // Check that the custom icons are displayed.
+        expect(find.byIcon(Icons.text_fields), findsOneWidget);
+        expect(find.byIcon(Icons.watch), findsNothing);
+        // Tap the custom icon to switch to input mode.
+        await tester.tap(find.byIcon(Icons.text_fields));
+        await tester.pumpAndSettle();
+        // Check that the custom icon for the input mode is displayed.
+        expect(find.byIcon(Icons.text_fields), findsNothing);
+        expect(find.byIcon(Icons.watch), findsOneWidget);
+      });
+
       testWidgets('Can switch from input to dial entry mode', (WidgetTester tester) async {
         await mediaQueryBoilerplate(
           tester,
@@ -2012,6 +2059,41 @@ void main() {
     final RenderParagraph paragraph = tester.renderObject(find.text(':'));
     expect(paragraph.text.style!.color, theme.colorScheme.onSurface);
     expect(paragraph.text.style!.fontSize, 56.0);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/153549.
+  testWidgets('Time picker hour minute does not resize on error', (WidgetTester tester) async {
+    await startPicker(
+      entryMode: TimePickerEntryMode.input,
+      tester,
+      (TimeOfDay? value) { },
+    );
+
+    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
+
+    // Enter invalid hour.
+    await tester.enterText(find.byType(TextField).first, 'AB');
+    await tester.tap(find.text(okString));
+
+    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/153549.
+  testWidgets('Material2 - Time picker hour minute does not resize on error', (WidgetTester tester) async {
+    await startPicker(
+      entryMode: TimePickerEntryMode.input,
+      tester,
+      (TimeOfDay? value) { },
+      materialType: MaterialType.material2,
+    );
+
+    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
+
+    // Enter invalid hour.
+    await tester.enterText(find.byType(TextField).first, 'AB');
+    await tester.tap(find.text(okString));
+
+    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
   });
 }
 

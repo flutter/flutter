@@ -15,6 +15,8 @@ import 'base/logger.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'device.dart';
+import 'globals.dart' as globals;
+import 'reporting/reporting.dart';
 
 /// A wrapper around [MDnsClient] to find a Dart VM Service instance.
 class MDnsVmServiceDiscovery {
@@ -25,10 +27,12 @@ class MDnsVmServiceDiscovery {
     MDnsClient? mdnsClient,
     MDnsClient? preliminaryMDnsClient,
     required Logger logger,
+    required Usage flutterUsage,
     required Analytics analytics,
   })  : _client = mdnsClient ?? MDnsClient(),
         _preliminaryClient = preliminaryMDnsClient,
         _logger = logger,
+        _flutterUsage = flutterUsage,
         _analytics = analytics;
 
   final MDnsClient _client;
@@ -38,6 +42,7 @@ class MDnsVmServiceDiscovery {
   final MDnsClient? _preliminaryClient;
 
   final Logger _logger;
+  final Usage _flutterUsage;
   final Analytics _analytics;
 
   @visibleForTesting
@@ -225,10 +230,28 @@ class MDnsVmServiceDiscovery {
       final Set<String> uniqueDomainNamesInResults = <String>{};
 
       // Listen for mDNS connections until timeout.
-      final Stream<PtrResourceRecord> ptrResourceStream = client.lookup<PtrResourceRecord>(
-        ResourceRecordQuery.serverPointer(dartVmServiceName),
-        timeout: timeout
-      );
+      final Stream<PtrResourceRecord> ptrResourceStream;
+
+      try {
+        ptrResourceStream = client.lookup<PtrResourceRecord>(
+          ResourceRecordQuery.serverPointer(dartVmServiceName),
+          timeout: timeout,
+        );
+      } on SocketException catch (e, stacktrace) {
+        _logger.printError(e.message);
+        _logger.printTrace(stacktrace.toString());
+        if (globals.platform.isMacOS) {
+          throwToolExit(
+            'You might be having a permissions issue with your IDE. '
+            'Please try going to '
+            'System Settings -> Privacy & Security -> Local Network -> '
+            '[Find your IDE] -> Toggle ON, then restart your phone.'
+          );
+        } else {
+          rethrow;
+        }
+      }
+
       await for (final PtrResourceRecord ptr in ptrResourceStream) {
         uniqueDomainNames.add(ptr.domainName);
 
@@ -503,6 +526,7 @@ class MDnsVmServiceDiscovery {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     switch (targetPlatform) {
       case TargetPlatform.ios:
+        UsageEvent('ios-mdns', 'no-ipv4-link-local', flutterUsage: _flutterUsage).send();
         _analytics.send(Event.appleUsageEvent(workflow: 'ios-mdns', parameter: 'no-ipv4-link-local'));
         _logger.printError(
           'The mDNS query for an attached iOS device failed. It may '

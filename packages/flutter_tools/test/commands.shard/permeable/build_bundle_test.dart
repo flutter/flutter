@@ -123,7 +123,6 @@ void main() {
   testUsingContext('bundle fails to build for Windows if feature is disabled', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync(recursive: true);
-    globals.fs.file('.packages').createSync(recursive: true);
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
       logger: BufferLogger.test(),
     ));
@@ -143,7 +142,6 @@ void main() {
   testUsingContext('bundle fails to build for Linux if feature is disabled', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
       logger: BufferLogger.test(),
     ));
@@ -163,7 +161,6 @@ void main() {
   testUsingContext('bundle fails to build for macOS if feature is disabled', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
       logger: BufferLogger.test(),
     ));
@@ -183,7 +180,6 @@ void main() {
   testUsingContext('bundle --tree-shake-icons fails', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
       logger: BufferLogger.test(),
     ));
@@ -202,7 +198,6 @@ void main() {
   testUsingContext('bundle can build for Windows if feature is enabled', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
       logger: BufferLogger.test(),
     ));
@@ -222,7 +217,6 @@ void main() {
   testUsingContext('bundle can build for Linux if feature is enabled', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
       logger: BufferLogger.test(),
     ));
@@ -242,7 +236,6 @@ void main() {
   testUsingContext('bundle can build for macOS if feature is enabled', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
       logger: BufferLogger.test(),
     ));
@@ -262,7 +255,7 @@ void main() {
   testUsingContext('passes track widget creation through', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
+
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
       logger: BufferLogger.test(),
     ));
@@ -295,7 +288,6 @@ void main() {
   testUsingContext('passes dart-define through', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
       logger: BufferLogger.test(),
     ));
@@ -329,7 +321,6 @@ void main() {
   testUsingContext('passes filesystem-scheme through', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
       logger: BufferLogger.test(),
     ));
@@ -362,7 +353,6 @@ void main() {
   testUsingContext('passes filesystem-roots through', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
       logger: BufferLogger.test(),
     ));
@@ -396,7 +386,6 @@ void main() {
   testUsingContext('passes extra frontend-options through', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
       logger: BufferLogger.test(),
     ));
@@ -430,7 +419,6 @@ void main() {
   testUsingContext('passes extra gen_snapshot-options through', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
       logger: BufferLogger.test(),
     ));
@@ -464,7 +452,6 @@ void main() {
   testUsingContext('passes profile options through', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
       logger: BufferLogger.test(),
     ));
@@ -506,7 +493,6 @@ void main() {
   testUsingContext('passes release options through', () async {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand(
       logger: BufferLogger.test(),
     ));

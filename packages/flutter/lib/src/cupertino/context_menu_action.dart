@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'colors.dart';
+import 'context_menu.dart';
 
 /// A button in a _ContextMenuSheet.
 ///
@@ -47,10 +48,6 @@ class CupertinoContextMenuAction extends StatefulWidget {
 }
 
 class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction> {
-  static const Color _kBackgroundColor = CupertinoDynamicColor.withBrightness(
-    color: Color(0xFFF1F1F1),
-    darkColor: Color(0xFF212122),
-  );
   static const Color _kBackgroundColorPressed = CupertinoDynamicColor.withBrightness(
     color: Color(0xFFDDDDDD),
     darkColor: Color(0xFF3F3F40),
@@ -123,7 +120,7 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
             child: ColoredBox(
               color: _isPressed
                   ? CupertinoDynamicColor.resolve(_kBackgroundColorPressed, context)
-                  : CupertinoDynamicColor.resolve(_kBackgroundColor, context),
+                  : CupertinoDynamicColor.resolve(CupertinoContextMenu.kBackgroundColor, context),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(15.5, 8.0, 17.5, 8.0),
                 child: DefaultTextStyle(

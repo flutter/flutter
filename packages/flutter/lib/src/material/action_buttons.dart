@@ -21,41 +21,16 @@ import 'material_localizations.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
-abstract class _ActionButton extends StatelessWidget {
+abstract class _ActionButton extends IconButton {
   /// Creates a Material Design icon button.
   const _ActionButton({
     super.key,
-    this.color,
-    required this.icon,
-    required this.onPressed,
+    super.color,
+    super.style,
+    super.onPressed,
+    required super.icon,
     this.standardComponent,
-    this.style,
   });
-
-  /// The icon to display inside the button.
-  final Widget icon;
-
-  /// The callback that is called when the button is tapped
-  /// or otherwise activated.
-  ///
-  /// If this is set to null, the button will do a default action
-  /// when it is tapped or activated.
-  final VoidCallback? onPressed;
-
-  /// The color to use for the icon.
-  ///
-  /// Defaults to the [IconThemeData.color] specified in the ambient [IconTheme],
-  /// which usually matches the ambient [Theme]'s [ThemeData.iconTheme].
-  final Color? color;
-
-  /// Customizes this icon button's appearance.
-  ///
-  /// The [style] is only used for Material 3 [IconButton]s. If [ThemeData.useMaterial3]
-  /// is set to true, [style] is preferred for icon button customization, and any
-  /// parameters defined in [style] will override the same parameters in [IconButton].
-  ///
-  /// Null by default.
-  final ButtonStyle? style;
 
   /// An enum value to use to identify this button as a type of
   /// [StandardComponentType].

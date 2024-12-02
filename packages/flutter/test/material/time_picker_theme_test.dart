@@ -101,30 +101,30 @@ void main() {
         .toList();
 
     expect(description, equalsIgnoringHashCodes(<String>[
-      'backgroundColor: Color(0xfffffff0)',
-      'cancelButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(Color(0xfffffff1)))',
-      'confirmButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(Color(0xfffffff2)))',
-      'dayPeriodBorderSide: BorderSide(color: Color(0xfffffff3))',
-      'dayPeriodColor: Color(0x00000000)',
-      'dayPeriodShape: RoundedRectangleBorder(BorderSide(color: Color(0xfffffff5)), BorderRadius.zero)',
-      'dayPeriodTextColor: Color(0xfffffff6)',
-      'dayPeriodTextStyle: TextStyle(inherit: true, color: Color(0xfffffff7))',
-      'dialBackgroundColor: Color(0xfffffff8)',
-      'dialHandColor: Color(0xfffffff9)',
-      'dialTextColor: Color(0xfffffffa)',
-      'dialTextStyle: TextStyle(inherit: true, color: Color(0xfffffffb))',
+      'backgroundColor: ${const Color(0xfffffff0)}',
+      'cancelButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(${const Color(0xfffffff1)}))',
+      'confirmButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(${const Color(0xfffffff2)}))',
+      'dayPeriodBorderSide: BorderSide(color: ${const Color(0xfffffff3)})',
+      'dayPeriodColor: ${const Color(0x00000000)}',
+      'dayPeriodShape: RoundedRectangleBorder(BorderSide(color: ${const Color(0xfffffff5)}), BorderRadius.zero)',
+      'dayPeriodTextColor: ${const Color(0xfffffff6)}',
+      'dayPeriodTextStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff7)})',
+      'dialBackgroundColor: ${const Color(0xfffffff8)}',
+      'dialHandColor: ${const Color(0xfffffff9)}',
+      'dialTextColor: ${const Color(0xfffffffa)}',
+      'dialTextStyle: TextStyle(inherit: true, color: ${const Color(0xfffffffb)})',
       'elevation: 1.0',
-      'entryModeIconColor: Color(0xfffffffc)',
-      'helpTextStyle: TextStyle(inherit: true, color: Color(0xfffffffd))',
-      'hourMinuteColor: Color(0xfffffffe)',
-      'hourMinuteShape: RoundedRectangleBorder(BorderSide(color: Color(0xffffffff)), BorderRadius.zero)',
-      'hourMinuteTextColor: Color(0xfffffff0)',
-      'hourMinuteTextStyle: TextStyle(inherit: true, color: Color(0xfffffff1))',
-      'inputDecorationTheme: InputDecorationTheme#ff861(labelStyle: TextStyle(inherit: true, color: Color(0xfffffff2)))',
+      'entryModeIconColor: ${const Color(0xfffffffc)}',
+      'helpTextStyle: TextStyle(inherit: true, color: ${const Color(0xfffffffd)})',
+      'hourMinuteColor: ${const Color(0xfffffffe)}',
+      'hourMinuteShape: RoundedRectangleBorder(BorderSide(color: ${const Color(0xffffffff)}), BorderRadius.zero)',
+      'hourMinuteTextColor: ${const Color(0xfffffff0)}',
+      'hourMinuteTextStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff1)})',
+      'inputDecorationTheme: InputDecorationTheme#ff861(labelStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff2)}))',
       'padding: EdgeInsets.all(1.0)',
-      'shape: RoundedRectangleBorder(BorderSide(color: Color(0xfffffff3)), BorderRadius.zero)',
-      'timeSelectorSeparatorColor: WidgetStatePropertyAll(Color(0xfffffff4))',
-      'timeSelectorSeparatorTextStyle: WidgetStatePropertyAll(TextStyle(inherit: true, color: Color(0xfffffff5)))'
+      'shape: RoundedRectangleBorder(BorderSide(color: ${const Color(0xfffffff3)}), BorderRadius.zero)',
+      'timeSelectorSeparatorColor: WidgetStatePropertyAll(${const Color(0xfffffff4)})',
+      'timeSelectorSeparatorTextStyle: WidgetStatePropertyAll(TextStyle(inherit: true, color: ${const Color(0xfffffff5)}))'
     ]));
   });
 
@@ -858,6 +858,40 @@ void main() {
     expect(paragraph.text.style!.fontSize, 35.0);
     expect(paragraph.text.style!.fontStyle, FontStyle.italic);
   });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/153549.
+  testWidgets('Time picker hour minute does not resize on error', (WidgetTester tester) async {
+    final TimePickerThemeData timePickerTheme = _timePickerTheme(includeInputDecoration: true);
+    final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
+    await tester.pumpWidget(_TimePickerLauncher(themeData: theme, entryMode: TimePickerEntryMode.input));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 72.0));
+
+    // Enter invalid hour.
+    await tester.enterText(find.byType(TextField).first, 'AB');
+    await tester.tap(find.text('OK'));
+
+    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 72.0));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/153549.
+  testWidgets('Material2 - Time picker hour minute does not resize on error', (WidgetTester tester) async {
+    final TimePickerThemeData timePickerTheme = _timePickerTheme(includeInputDecoration: true);
+    final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme, useMaterial3: false);
+    await tester.pumpWidget(_TimePickerLauncher(themeData: theme, entryMode: TimePickerEntryMode.input));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
+
+    // Enter invalid hour.
+    await tester.enterText(find.byType(TextField).first, 'AB');
+    await tester.tap(find.text('OK'));
+
+    expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
+  });
 }
 
 final Color _selectedColor = Colors.green[100]!;
@@ -969,4 +1003,11 @@ final Finder findDialPaint = find.descendant(
 
 ButtonStyle _actionButtonStyle(WidgetTester tester, String text) {
   return tester.widget<TextButton>(find.widgetWithText(TextButton, text)).style!;
+}
+
+Finder findBorderPainter() {
+  return find.descendant(
+    of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_BorderContainer'),
+    matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
+  );
 }
