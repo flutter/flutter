@@ -284,6 +284,11 @@ TaskFunction createHelloWorldCompileTest() {
   return CompileTest('${flutterDirectory.path}/examples/hello_world', reportPackageContentSizes: true).run;
 }
 
+TaskFunction createSwiftUICompileTest() {
+  return CompileSwiftUITest('${flutterDirectory.path}/examples/SwiftUIBenchmark', reportPackageContentSizes: true).run;
+}
+
+
 TaskFunction createWebCompileTest() {
   return const WebCompileTest().run;
 }
@@ -1637,6 +1642,307 @@ class WebCompileTest {
 
 /// Measures how long it takes to compile a Flutter app and how big the compiled
 /// code is.
+class CompileSwiftUITest {
+  const CompileSwiftUITest(this.testDirectory, { this.reportPackageContentSizes = false });
+
+  final String testDirectory;
+  final bool reportPackageContentSizes;
+
+  Future<TaskResult> run() async {
+    await Process.run('xcodebuild', <String>[
+      'clean'
+    ]);
+
+    final Stopwatch watch = Stopwatch();
+    int releaseSizeInBytes;
+    watch.start();
+    await Process.run(workingDirectory: '/Users/louisehsu/Development/flutter/examples/SwiftUIBenchmark' ,'xcodebuild', <String>[
+      '-destination',
+      'platform=iOS Simulator,name=iPhone 14 Pro Max,OS=16.4' // Replace with your desired simulator
+    ]).then((ProcessResult results) {
+      print(results.stdout); // Print the output from xcodebuild
+      if (results.exitCode != 0) {
+        print(results.stderr); // Print errors if any
+      }
+    });
+    watch.stop();
+
+    final Directory appBundle =  dir('/Users/louisehsu/Development/flutter/examples/SwiftUIBenchmark/build/Release-iphoneos/SwiftUIBenchmark.app');
+
+    int totalSize = 0;
+    try {
+      for (final FileSystemEntity entity in appBundle.listSync(recursive: true)) {
+        if (entity is File) {
+          totalSize += entity.lengthSync();
+        }
+      }
+    } catch (e) {
+      print('Error calculating size: $e');
+    }
+
+    releaseSizeInBytes = totalSize;
+
+    final Map<String, dynamic> metrics = <String, dynamic>{};
+    metrics.addAll(<String, dynamic>{
+      'release_compile_millis': watch.elapsedMilliseconds,
+      'release_size_bytes': releaseSizeInBytes,
+    });
+    return TaskResult.success(metrics);
+  }
+
+  Future<Map<String, dynamic>> _compileApp({required bool deleteGradleCache}) async {
+    await flutter('clean');
+    if (deleteGradleCache) {
+      final Directory gradleCacheDir = Directory('$testDirectory/android/.gradle');
+      rmTree(gradleCacheDir);
+    }
+    final Stopwatch watch = Stopwatch();
+    int releaseSizeInBytes;
+    final List<String> options = <String>['--release'];
+    final Map<String, dynamic> metrics = <String, dynamic>{};
+
+    switch (deviceOperatingSystem) {
+      case DeviceOperatingSystem.ios:
+      case DeviceOperatingSystem.macos:
+        unawaited(stderr.flush());
+        late final String deviceId;
+        if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+          deviceId = 'ios';
+        } else if (deviceOperatingSystem == DeviceOperatingSystem.macos) {
+          deviceId = 'macos';
+          print("HEWWWOOWOWOOWOWOOWOWOOWOWO");
+        } else {
+          throw Exception('Attempted to run darwin compile workflow with $deviceOperatingSystem');
+        }
+
+        options.insert(0, deviceId);
+        options.add('--tree-shake-icons');
+        options.add('--split-debug-info=infos/');
+        watch.start();
+        await flutter(
+          'build',
+          options: options,
+          environment: <String, String> {
+            // iOS 12.1 and lower did not have Swift ABI compatibility so Swift apps embedded the Swift runtime.
+            // https://developer.apple.com/documentation/xcode-release-notes/swift-5-release-notes-for-xcode-10_2#App-Thinning
+            // The gallery pulls in Swift plugins. Set lowest version to 12.2 to avoid benchmark noise.
+            // This should be removed when when Flutter's minimum supported version is >12.2.
+            'FLUTTER_XCODE_IPHONEOS_DEPLOYMENT_TARGET': '12.2',
+          },
+        );
+        watch.stop();
+        final Directory buildDirectory = dir(path.join(
+          cwd,
+          'build',
+        ));
+        final String? appPath =
+        _findDarwinAppInBuildDirectory(buildDirectory.path);
+        if (appPath == null) {
+          throw 'Failed to find app bundle in ${buildDirectory.path}';
+        }
+        // Validate changes in Dart snapshot format and data layout do not
+        // change compression size. This also simulates the size of an IPA on iOS.
+        await exec('tar', <String>['-zcf', 'build/app.tar.gz', appPath]);
+        releaseSizeInBytes = await file('$cwd/build/app.tar.gz').length();
+        if (reportPackageContentSizes) {
+          final Map<String, Object> sizeMetrics = await getSizesFromDarwinApp(
+            appPath: appPath,
+            operatingSystem: deviceOperatingSystem,
+          );
+          metrics.addAll(sizeMetrics);
+        }
+      case DeviceOperatingSystem.android:
+      case DeviceOperatingSystem.androidArm:
+        options.insert(0, 'apk');
+        options.add('--target-platform=android-arm');
+        options.add('--tree-shake-icons');
+        options.add('--split-debug-info=infos/');
+        watch.start();
+        await flutter('build', options: options);
+        watch.stop();
+        final String apkPath = '$cwd/build/app/outputs/flutter-apk/app-release.apk';
+        final File apk = file(apkPath);
+        releaseSizeInBytes = apk.lengthSync();
+        if (reportPackageContentSizes) {
+          metrics.addAll(await getSizesFromApk(apkPath));
+        }
+      case DeviceOperatingSystem.androidArm64:
+        options.insert(0, 'apk');
+        options.add('--target-platform=android-arm64');
+        options.add('--tree-shake-icons');
+        options.add('--split-debug-info=infos/');
+        watch.start();
+        await flutter('build', options: options);
+        watch.stop();
+        final String apkPath = '$cwd/build/app/outputs/flutter-apk/app-release.apk';
+        final File apk = file(apkPath);
+        releaseSizeInBytes = apk.lengthSync();
+        if (reportPackageContentSizes) {
+          metrics.addAll(await getSizesFromApk(apkPath));
+        }
+      case DeviceOperatingSystem.fake:
+        throw Exception('Unsupported option for fake devices');
+      case DeviceOperatingSystem.fuchsia:
+        throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.linux:
+        throw Exception('Unsupported option for Linux devices');
+      case DeviceOperatingSystem.windows:
+        unawaited(stderr.flush());
+        options.insert(0, 'windows');
+        options.add('--tree-shake-icons');
+        options.add('--split-debug-info=infos/');
+        watch.start();
+        await flutter('build', options: options);
+        watch.stop();
+        final String basename = path.basename(cwd);
+        final String arch = Abi.current() == Abi.windowsX64 ? 'x64': 'arm64';
+        final String exePath = path.join(
+            cwd,
+            'build',
+            'windows',
+            arch,
+            'runner',
+            'release',
+            '$basename.exe');
+        final File exe = file(exePath);
+        // On Windows, we do not produce a single installation package file,
+        // rather a directory containing an .exe and .dll files.
+        // The release size is set to the size of the produced .exe file
+        releaseSizeInBytes = exe.lengthSync();
+    }
+
+    metrics.addAll(<String, dynamic>{
+      'release_${deleteGradleCache ? 'initial' : 'full'}_compile_millis': watch.elapsedMilliseconds,
+      'release_size_bytes': releaseSizeInBytes,
+    });
+
+    return metrics;
+  }
+
+  Future<Map<String, dynamic>> _compileDebug({
+    required bool deleteGradleCache,
+    required bool clean,
+    required String metricKey,
+  }) async {
+    if (clean) {
+      await flutter('clean');
+    }
+    if (deleteGradleCache) {
+      final Directory gradleCacheDir = Directory('$testDirectory/android/.gradle');
+      rmTree(gradleCacheDir);
+    }
+    final Stopwatch watch = Stopwatch();
+    final List<String> options = <String>['--debug'];
+    switch (deviceOperatingSystem) {
+      case DeviceOperatingSystem.ios:
+        options.insert(0, 'ios');
+      case DeviceOperatingSystem.android:
+      case DeviceOperatingSystem.androidArm:
+        options.insert(0, 'apk');
+        options.add('--target-platform=android-arm');
+      case DeviceOperatingSystem.androidArm64:
+        options.insert(0, 'apk');
+        options.add('--target-platform=android-arm64');
+      case DeviceOperatingSystem.fake:
+        throw Exception('Unsupported option for fake devices');
+      case DeviceOperatingSystem.fuchsia:
+        throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.linux:
+        throw Exception('Unsupported option for Linux devices');
+      case DeviceOperatingSystem.macos:
+        unawaited(stderr.flush());
+        options.insert(0, 'macos');
+      case DeviceOperatingSystem.windows:
+        unawaited(stderr.flush());
+        options.insert(0, 'windows');
+    }
+    watch.start();
+    await flutter('build', options: options);
+    watch.stop();
+
+    return <String, dynamic>{
+      metricKey: watch.elapsedMilliseconds,
+    };
+  }
+
+  static Future<Map<String, Object>> getSizesFromDarwinApp({
+    required String appPath,
+    required DeviceOperatingSystem operatingSystem,
+  }) async {
+    late final File flutterFramework;
+    late final String frameworkDirectory;
+    switch (deviceOperatingSystem) {
+      case DeviceOperatingSystem.ios:
+        frameworkDirectory = path.join(
+          appPath,
+          'Frameworks',
+        );
+        flutterFramework = File(path.join(
+          frameworkDirectory,
+          'Flutter.framework',
+          'Flutter',
+        ));
+      case DeviceOperatingSystem.macos:
+        frameworkDirectory = path.join(
+          appPath,
+          'Contents',
+          'Frameworks',
+        );
+        flutterFramework = File(path.join(
+          frameworkDirectory,
+          'FlutterMacOS.framework',
+          'FlutterMacOS',
+        )); // https://github.com/flutter/flutter/issues/70413
+      case DeviceOperatingSystem.android:
+      case DeviceOperatingSystem.androidArm:
+      case DeviceOperatingSystem.androidArm64:
+      case DeviceOperatingSystem.fake:
+      case DeviceOperatingSystem.fuchsia:
+      case DeviceOperatingSystem.linux:
+      case DeviceOperatingSystem.windows:
+        throw Exception('Called ${CompileTest.getSizesFromDarwinApp} with $operatingSystem.');
+    }
+
+    final File appFramework = File(path.join(
+      frameworkDirectory,
+      'App.framework',
+      'App',
+    ));
+
+    return <String, Object>{
+      'app_framework_uncompressed_bytes': await appFramework.length(),
+      'flutter_framework_uncompressed_bytes': await flutterFramework.length(),
+    };
+  }
+
+  static Future<Map<String, dynamic>> getSizesFromApk(String apkPath) async {
+    final  String output = await eval('unzip', <String>['-v', apkPath]);
+    final List<String> lines = output.split('\n');
+    final Map<String, _UnzipListEntry> fileToMetadata = <String, _UnzipListEntry>{};
+
+    // First three lines are header, last two lines are footer.
+    for (int i = 3; i < lines.length - 2; i++) {
+      final _UnzipListEntry entry = _UnzipListEntry.fromLine(lines[i]);
+      fileToMetadata[entry.path] = entry;
+    }
+
+    final _UnzipListEntry libflutter = fileToMetadata['lib/armeabi-v7a/libflutter.so']!;
+    final _UnzipListEntry libapp = fileToMetadata['lib/armeabi-v7a/libapp.so']!;
+    final _UnzipListEntry license = fileToMetadata['assets/flutter_assets/NOTICES.Z']!;
+
+    return <String, dynamic>{
+      'libflutter_uncompressed_bytes': libflutter.uncompressedSize,
+      'libflutter_compressed_bytes': libflutter.compressedSize,
+      'libapp_uncompressed_bytes': libapp.uncompressedSize,
+      'libapp_compressed_bytes': libapp.compressedSize,
+      'license_uncompressed_bytes': license.uncompressedSize,
+      'license_compressed_bytes': license.compressedSize,
+    };
+  }
+}
+
+/// Measures how long it takes to compile a Flutter app and how big the compiled
+/// code is.
 class CompileTest {
   const CompileTest(this.testDirectory, { this.reportPackageContentSizes = false });
 
@@ -1645,7 +1951,7 @@ class CompileTest {
 
   Future<TaskResult> run() async {
     return inDirectory<TaskResult>(testDirectory, () async {
-      await flutter('packages', options: <String>['get']);
+      // await flutter('packages', options: <String>['get']);
 
       // "initial" compile required downloading and creating the `android/.gradle` directory while "full"
       // compiles only run `flutter clean` between runs.
@@ -1716,6 +2022,7 @@ class CompileTest {
           deviceId = 'ios';
         } else if (deviceOperatingSystem == DeviceOperatingSystem.macos) {
           deviceId = 'macos';
+          print("HEWWWOOWOWOOWOWOOWOWOOWOWO");
         } else {
           throw Exception('Attempted to run darwin compile workflow with $deviceOperatingSystem');
         }
