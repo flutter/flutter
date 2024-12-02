@@ -1081,7 +1081,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     presubmit: true # TESTING ONLY; REMOVE BEFORE LANDING.
-    bringup: true
+    # bringup: true # TESTING ONLY; ADD BACK BEFORE LANDING.
     properties:
       dependencies: >-
         [
