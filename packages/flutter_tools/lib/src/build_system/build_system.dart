@@ -334,7 +334,7 @@ class Environment {
   /// [engineVersion] should be set to null for local engine builds.
   factory Environment({
     required Directory projectDir,
-    required String? packageConfigPath,
+    required String packageConfigPath,
     required Directory outputDir,
     required Directory cacheDir,
     required Directory flutterRootDir,
@@ -375,7 +375,7 @@ class Environment {
     return Environment._(
       outputDir: outputDir,
       projectDir: projectDir,
-      packageConfigPath: packageConfigPath ?? '.dart_tool/package_config.json',
+      packageConfigPath: packageConfigPath,
       buildDir: buildDirectory,
       rootBuildDir: rootBuildDir,
       cacheDir: cacheDir,
@@ -488,7 +488,7 @@ class Environment {
   /// The path to the package configuration file to use for compilation.
   ///
   /// This is used by package:package_config to locate the actual package_config.json
-  /// file. If not provided, defaults to `.dart_tool/package_config.json`.
+  /// file. If not provided in tests, defaults to `.dart_tool/package_config.json`.
   final String packageConfigPath;
 
   /// The `BUILD_DIR` environment variable.
