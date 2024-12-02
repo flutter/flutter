@@ -94,7 +94,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   final ValueNotifier<SelectionGeometry> _geometry;
 
   Color get selectionColor => _selectionColor;
-  late Color _selectionColor;
+  Color _selectionColor;
   set selectionColor(Color value) {
     if (_selectionColor == value) {
       return;
@@ -271,6 +271,20 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   SelectedContent? getSelectedContent() {
     return value.hasSelection ? const SelectedContent(plainText: 'Custom Text') : null;
   }
+
+  @override
+  SelectedContentRange? getSelection() {
+    if (!value.hasSelection) {
+      return null;
+    }
+    return const SelectedContentRange(
+      startOffset: 0,
+      endOffset: 1,
+    );
+  }
+
+  @override
+  int get contentLength => 1;
 
   LayerLink? _startHandle;
   LayerLink? _endHandle;
