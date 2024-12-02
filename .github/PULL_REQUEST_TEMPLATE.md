@@ -18,13 +18,13 @@
 If you need help, consider asking for advice on the #hackers-new channel on [Discord].
 
 <!-- Links -->
-[Contributor Guide]: https://github.com/flutter/flutter/wiki/Tree-hygiene#overview
-[Tree Hygiene]: https://github.com/flutter/flutter/wiki/Tree-hygiene
-[test-exempt]: https://github.com/flutter/flutter/wiki/Tree-hygiene#tests
-[Flutter Style Guide]: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo
+[Contributor Guide]: https://github.com/flutter/flutter/blob/master/docs/contributing/Tree-hygiene.md#overview
+[Tree Hygiene]: https://github.com/flutter/flutter/blob/master/docs/contributing/Tree-hygiene.md
+[test-exempt]: https://github.com/flutter/flutter/blob/master/docs/contributing/Tree-hygiene.md#tests
+[Flutter Style Guide]: https://github.com/flutter/flutter/blob/master/docs/contributing/Style-guide-for-Flutter-repo.md
 [C++, Objective-C, Java style guides]: https://github.com/flutter/engine/blob/main/CONTRIBUTING.md#style
-[testing the engine]: https://github.com/flutter/flutter/wiki/Testing-the-engine
+[testing the engine]: https://github.com/flutter/engine/blob/main/docs/testing/Testing-the-engine.md
 [CLA]: https://cla.developers.google.com/
 [flutter/tests]: https://github.com/flutter/tests
-[breaking change policy]: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes
-[Discord]: https://github.com/flutter/flutter/wiki/Chat
+[breaking change policy]: https://github.com/flutter/flutter/blob/master/docs/contributing/Tree-hygiene.md#handling-breaking-changes
+[Discord]: https://github.com/flutter/flutter/blob/master/docs/contributing/Chat.md
