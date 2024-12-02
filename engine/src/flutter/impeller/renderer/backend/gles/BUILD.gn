@@ -14,6 +14,7 @@ config("gles_config") {
 impeller_component("gles_unittests") {
   testonly = true
   sources = [
+    "buffer_bindings_gles_unittests.cc",
     "test/capabilities_unittests.cc",
     "test/formats_gles_unittests.cc",
     "test/gpu_tracer_gles_unittests.cc",

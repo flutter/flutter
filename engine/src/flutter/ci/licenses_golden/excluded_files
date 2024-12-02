@@ -182,6 +182,7 @@
 ../../../flutter/impeller/geometry/trig_unittests.cc
 ../../../flutter/impeller/golden_tests/README.md
 ../../../flutter/impeller/playground
+../../../flutter/impeller/renderer/backend/gles/buffer_bindings_gles_unittests.cc
 ../../../flutter/impeller/renderer/backend/gles/test
 ../../../flutter/impeller/renderer/backend/metal/allocator_mtl_unittests.mm
 ../../../flutter/impeller/renderer/backend/metal/texture_mtl_unittests.mm
