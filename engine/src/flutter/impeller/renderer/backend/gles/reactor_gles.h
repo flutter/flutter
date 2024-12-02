@@ -9,6 +9,7 @@
 #include <memory>
 #include <vector>
 
+#include "flutter/third_party/abseil-cpp/absl/container/flat_hash_map.h"
 #include "fml/closure.h"
 #include "impeller/base/thread.h"
 #include "impeller/renderer/backend/gles/handle_gles.h"
@@ -276,12 +277,10 @@ class ReactorGLES {
   std::map<std::thread::id, std::vector<Operation>> ops_ IPLR_GUARDED_BY(
       ops_mutex_);
 
-  // Make sure the container is one where erasing items during iteration doesn't
-  // invalidate other iterators.
-  using LiveHandles = std::unordered_map<const HandleGLES,
-                                         LiveHandle,
-                                         HandleGLES::Hash,
-                                         HandleGLES::Equal>;
+  using LiveHandles = absl::flat_hash_map<const HandleGLES,
+                                          LiveHandle,
+                                          HandleGLES::Hash,
+                                          HandleGLES::Equal>;
   mutable RWMutex handles_mutex_;
   LiveHandles handles_ IPLR_GUARDED_BY(handles_mutex_);
   int32_t handles_to_collect_count_ IPLR_GUARDED_BY(handles_mutex_) = 0;
