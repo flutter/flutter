@@ -51,7 +51,7 @@ class SensitiveContentService {
       sensitiveContentChannel.invokeMethod(
         'SensitiveContent.setContentSensitivity',
         <int>[flutterViewId, contentSensitivity.index],
-      ) as List<dynamic>;
+      );
     } catch (e) {
       // Content sensitivity failed to be set.
       throw FlutterError(
