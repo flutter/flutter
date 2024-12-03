@@ -130,6 +130,12 @@ void main() {
           reason: '$keyName is  not included.',
         );
       }
+
+      // The truncated value should not be included if it is false.
+      expect(
+        result['truncated'] == null || result['truncated'] == true,
+        isTrue,
+      );
     });
 
     test('subtreeDepth 1', () {

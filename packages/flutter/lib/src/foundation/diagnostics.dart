@@ -1892,7 +1892,8 @@ abstract class DiagnosticsNode {
       // description instead, see:
       // https://github.com/flutter/devtools/issues/8556
       'widgetRuntimeType': widgetRuntimeType,
-      'truncated': truncated,
+      if (truncated)
+        'truncated': truncated,
       ...delegate.additionalNodeProperties(this, fullDetails: false),
       if (includeChildren) 'children': childrenJsonList,
     };
