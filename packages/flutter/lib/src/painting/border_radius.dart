@@ -114,6 +114,9 @@ abstract class BorderRadiusGeometry {
     return BorderRadius.vertical(top: top, bottom: bottom);
   }
 
+  /// A [BorderRadius] with all zero radii.
+  static const BorderRadiusGeometry zero = BorderRadius.zero;
+
   Radius get _topLeft;
   Radius get _topRight;
   Radius get _bottomLeft;

@@ -121,6 +121,9 @@ abstract class EdgeInsetsGeometry {
     return EdgeInsetsDirectional.fromSTEB(start, top, end, bottom);
   }
 
+  /// An [EdgeInsets] with zero offsets in each direction.
+  static const EdgeInsetsGeometry zero = EdgeInsets.zero;
+
   double get _bottom;
   double get _end;
   double get _left;
