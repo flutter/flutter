@@ -236,9 +236,17 @@ class CupertinoSheetTransition extends StatefulWidget {
 
 class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
 
-  // When this page is coming in to cover another page.
+  // When this page is coming in to cover a non-sheet page.
+  late Animation<Offset> _primaryPositionAnimation;
+  // When this page is coming in to cover another sheet.
+  late Animation<Offset> _primarySheetPositionAnimation;
+  // The offset animation when this page is becoming covered by another sheet.
+  late Animation<Offset> _secondaryPositionAnimation;
+  // The scale animation when this page is becoming covered by another sheet.
+  late Animation<double> _secondaryScaleAnimation;
+  // Curve of primary page which is coming in to cover another route.
   CurvedAnimation? _primaryPositionCurve;
-  // When this page is becoming covered by another page.
+  // Curve of secondary page which is becoming covered by another sheet.
   CurvedAnimation? _secondaryPositionCurve;
 
   @override
@@ -274,6 +282,14 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
       reverseCurve: Curves.easeInToLinear,
       parent: widget.secondaryRouteAnimation
     );
+     _primaryPositionAnimation = (_primaryPositionCurve ?? widget.primaryRouteAnimation)
+      .drive(_kBottomUpTween);
+    _primarySheetPositionAnimation = (_primaryPositionCurve ?? widget.primaryRouteAnimation)
+      .drive(_kFullBottomUpTween);
+    _secondaryPositionAnimation = (_secondaryPositionCurve ?? widget.secondaryRouteAnimation)
+      .drive(_kMidUpTween);
+    _secondaryScaleAnimation = (_secondaryPositionCurve ?? widget.secondaryRouteAnimation)
+      .drive(_kScaleTween);
   }
 
   void _disposeCurve() {
@@ -284,23 +300,23 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
   }
 
   Widget _coverSheetPrimaryTransition(BuildContext context, Animation<double> animation, Widget? child) {
-    final Animatable<Offset> offsetTween =
+    final Animation<Offset> offsetAnimation =
       CupertinoSheetRoute.hasParentSheet(context) ?
-      _kFullBottomUpTween :
-      _kBottomUpTween;
+      _primarySheetPositionAnimation :
+      _primaryPositionAnimation;
 
     return SlideTransition(
-      position: (_primaryPositionCurve ?? animation).drive(offsetTween),
+      position: offsetAnimation,
       child: child,
     );
   }
 
   Widget _coverSheetSecondaryTransition(Animation<double> secondaryAnimation, Widget? child) {
     return SlideTransition(
-      position: (_secondaryPositionCurve ?? secondaryAnimation).drive(_kMidUpTween),
+      position: _secondaryPositionAnimation,
       transformHitTests: false,
       child: ScaleTransition(
-        scale: (_secondaryPositionCurve ?? secondaryAnimation).drive(_kScaleTween),
+        scale: _secondaryScaleAnimation,
         filterQuality: FilterQuality.medium,
         alignment: Alignment.topCenter,
         child: ClipRRect(
