@@ -185,7 +185,7 @@ const Feature previewDevice = Feature(
 const Feature swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
   configSetting: 'enable-swift-package-manager',
-  environmentOverride: 'SWIFT_PACKAGE_MANAGER',
+  environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER',
   master: FeatureChannelSetting(
     available: true,
   ),
