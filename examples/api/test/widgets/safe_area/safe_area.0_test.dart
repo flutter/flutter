@@ -100,13 +100,9 @@ void main() {
     expect(appScreenHeight(), 480);
     expect(insetsState.insets, const EdgeInsets.fromLTRB(8.0, 25.0, 8.0, 12.0));
 
-    const List<Key> keys = <Key>[
-      ValueKey<example.Inset>(example.Inset.top),
-      ValueKey<example.Inset>(example.Inset.sides),
-      ValueKey<example.Inset>(example.Inset.bottom),
-    ];
-    for (final Key key in keys) {
-      await tester.drag(find.byKey(key), const Offset(500.0, 0.0));
+    // Drag each slider to its maximum value.
+    for (int index = 0; index < 3; index++) {
+      await tester.drag(find.byType(Slider).at(index), const Offset(500.0, 0.0));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     }

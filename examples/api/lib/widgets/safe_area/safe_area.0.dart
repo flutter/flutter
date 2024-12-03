@@ -122,7 +122,6 @@ enum Inset implements Value {
     Text(label),
     Builder(
       builder: (BuildContext context) => Slider(
-        key: ValueKey<Inset>(this),
         max: 50,
         value: of(context),
         onChanged: (double newValue) {
