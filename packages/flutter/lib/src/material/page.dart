@@ -101,6 +101,18 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   @override
+  TickerFuture didPush() {
+    controller?.duration = transitionDuration;
+    return super.didPush();
+  }
+
+  @override
+  bool didPop(T? result) {
+    controller?.reverseDuration = reverseTransitionDuration;
+    return super.didPop(result);
+  }
+
+  @override
   Color? get barrierColor => null;
 
   @override
