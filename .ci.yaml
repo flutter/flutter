@@ -566,6 +566,7 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
 
   - name: Linux docs_publish
     recipe: flutter/docs
