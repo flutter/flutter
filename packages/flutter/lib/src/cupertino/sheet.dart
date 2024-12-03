@@ -170,7 +170,7 @@ class CupertinoSheetTransition extends StatefulWidget {
 
     const Curve curve = Curves.linearToEaseOut;
     const Curve reverseCurve = Curves.easeInToLinear;
-    final Animation<double> curvedAnimation = CurvedAnimation(
+    final CurvedAnimation curvedAnimation = CurvedAnimation(
       curve: curve,
       reverseCurve: reverseCurve,
       parent: secondaryAnimation
@@ -183,13 +183,16 @@ class CupertinoSheetTransition extends StatefulWidget {
     );
 
     final Animation<BorderRadiusGeometry> radiusAnimation = curvedAnimation.drive(decorationTween);
+    final Animation<Offset> slideAnimation = curvedAnimation.drive(_kTopDownTween);
+    final Animation<double> scaleAnimation = curvedAnimation.drive(_kScaleTween);
+    curvedAnimation.dispose();
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
 
     return SlideTransition(
-      position: curvedAnimation.drive(_kTopDownTween),
+      position: slideAnimation,
       child: ScaleTransition(
-        scale: curvedAnimation.drive(_kScaleTween),
+        scale: scaleAnimation,
         filterQuality: FilterQuality.medium,
         alignment: Alignment.topCenter,
         child: AnimatedBuilder(
@@ -209,17 +212,22 @@ class CupertinoSheetTransition extends StatefulWidget {
   static Widget _delegatedCoverSheetSecondaryTransition(Animation<double> secondaryAnimation, Widget? child) {
     const Curve curve = Curves.linearToEaseOut;
     const Curve reverseCurve = Curves.easeInToLinear;
-    final Animation<double> curvedAnimation = CurvedAnimation(
+    final CurvedAnimation curvedAnimation = CurvedAnimation(
       curve: curve,
       reverseCurve: reverseCurve,
       parent: secondaryAnimation
     );
 
+    final Animation<Offset> slideAnimation = curvedAnimation.drive(_kMidUpTween);
+    final Animation<double> scaleAnimation = curvedAnimation.drive(_kScaleTween);
+    curvedAnimation.dispose();
+
+
     return SlideTransition(
-      position: curvedAnimation.drive(_kMidUpTween),
+      position: slideAnimation,
       transformHitTests: false,
       child: ScaleTransition(
-        scale: curvedAnimation.drive(_kScaleTween),
+        scale: scaleAnimation,
         filterQuality: FilterQuality.medium,
         alignment: Alignment.topCenter,
         child: ClipRRect(
