@@ -1273,6 +1273,46 @@ void main() {
     expect(contentRect, anchorCorner & const Size(200, 200));
   });
 
+  testWidgets('[OverlayBuilder] RawMenuAnchorOverlayPosition.anchorRect respects ancestor transformations', (WidgetTester tester) async {
+    RawMenuAnchorOverlayPosition? builderPosition;
+    final GlobalKey anchorKey = GlobalKey();
+    await tester.pumpWidget(
+      App(
+        Transform(
+          transform: Matrix4.translationValues(-50, 50, 0)..scale(1.2),
+          child: RawMenuAnchor.overlayBuilder(
+            controller: controller,
+            overlayBuilder: (
+              BuildContext context,
+              List<Widget> menuChildren,
+              RawMenuAnchorOverlayPosition position,
+            ) {
+              builderPosition = position;
+              return Positioned.fromRect(
+                rect: position.anchorRect,
+                child: Container(
+                  color: const Color(0xFF0000FF),
+                ),
+              );
+            },
+            menuChildren: <Widget>[
+              Text(Tag.b.a.text),
+            ],
+            child: AnchorButton(Tag.b, key: anchorKey),
+          ),
+        ),
+      ),
+    );
+
+    controller.open();
+    await tester.pump();
+
+    expect(
+      tester.getRect(find.byType(AnchorButton)),
+      equals(builderPosition?.anchorRect)
+    );
+  });
+
   testWidgets('[OverlayBuilder] TapRegion group ID is passed to overlay', (WidgetTester tester) async {
     bool? insideTap;
 

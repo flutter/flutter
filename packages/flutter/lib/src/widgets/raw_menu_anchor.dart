@@ -1023,18 +1023,25 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
     );
   }
 
-  Widget _buildOverlay(BuildContext context) {
+    Widget _buildOverlay(BuildContext context) {
     final BuildContext anchorContext = _anchorKey.currentContext!;
     final RenderBox overlay = Overlay.of(anchorContext, rootOverlay: true)
                               .context
                               .findRenderObject()! as RenderBox;
-    final RenderBox anchor = anchorContext.findRenderObject()! as RenderBox;
-    final Rect anchorRect = anchor.localToGlobal(Offset.zero, ancestor: overlay) & anchor.size;
+    final RenderBox anchorBox = anchorContext.findRenderObject()! as RenderBox;
+    final ui.Offset upperLeft = anchorBox.localToGlobal(
+      Offset.zero,
+      ancestor: overlay,
+    );
+    final ui.Offset bottomRight = anchorBox.localToGlobal(
+      anchorBox.size.bottomRight(Offset.zero),
+      ancestor: overlay,
+    );
     return widget.overlayBuilder(
       context,
       widget.menuChildren,
       RawMenuAnchorOverlayPosition(
-        anchorRect: anchorRect,
+        anchorRect: Rect.fromPoints(upperLeft, bottomRight),
         overlaySize: overlay.size,
         position: _menuPosition,
         tapRegionGroupId: _root._menuController,
