@@ -63,15 +63,6 @@ bool RenderPass::AddCommand(Command&& command) {
     return false;
   }
 
-  if (command.scissor.has_value()) {
-    auto target_rect = IRect::MakeSize(render_target_.GetRenderTargetSize());
-    if (!target_rect.Contains(command.scissor.value())) {
-      VALIDATION_LOG << "Cannot apply a scissor that lies outside the bounds "
-                        "of the render target.";
-      return false;
-    }
-  }
-
   if (command.element_count == 0u || command.instance_count == 0u) {
     // Essentially a no-op. Don't record the command but this is not necessary
     // an error either.

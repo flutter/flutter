@@ -196,7 +196,6 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   const auto& gl = reactor.GetProcTable();
 #ifdef IMPELLER_DEBUG
   tracer->MarkFrameStart(gl);
-#endif  // IMPELLER_DEBUG
 
   fml::ScopedCleanupClosure pop_pass_debug_marker(
       [&gl]() { gl.PopDebugGroup(); });
@@ -205,6 +204,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   } else {
     pop_pass_debug_marker.Release();
   }
+#endif  // IMPELLER_DEBUG
 
   GLuint fbo = GL_NONE;
   TextureGLES& color_gles = TextureGLES::Cast(*pass_data.color_attachment);
@@ -285,6 +285,29 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
 
   gl.Clear(clear_bits);
 
+  // Both the viewport and scissor are specified in framebuffer coordinates.
+  // Impeller's framebuffer coordinate system is top left origin, but OpenGL's
+  // is bottom left origin, so we convert the coordinates here.
+  auto target_size = pass_data.color_attachment->GetSize();
+
+  //--------------------------------------------------------------------------
+  /// Setup the viewport.
+  ///
+  const auto& viewport = pass_data.viewport;
+  gl.Viewport(viewport.rect.GetX(),  // x
+              target_size.height - viewport.rect.GetY() -
+                  viewport.rect.GetHeight(),  // y
+              viewport.rect.GetWidth(),       // width
+              viewport.rect.GetHeight()       // height
+  );
+  if (pass_data.depth_attachment) {
+    if (gl.DepthRangef.IsAvailable()) {
+      gl.DepthRangef(viewport.depth_range.z_near, viewport.depth_range.z_far);
+    } else {
+      gl.DepthRange(viewport.depth_range.z_near, viewport.depth_range.z_far);
+    }
+  }
+
   for (const auto& command : commands) {
     if (command.instance_count != 1u) {
       VALIDATION_LOG << "GLES backend does not support instanced rendering.";
@@ -339,26 +362,24 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
       gl.Disable(GL_DEPTH_TEST);
     }
 
-    // Both the viewport and scissor are specified in framebuffer coordinates.
-    // Impeller's framebuffer coordinate system is top left origin, but OpenGL's
-    // is bottom left origin, so we convert the coordinates here.
-    auto target_size = pass_data.color_attachment->GetSize();
-
     //--------------------------------------------------------------------------
     /// Setup the viewport.
     ///
-    const auto& viewport = command.viewport.value_or(pass_data.viewport);
-    gl.Viewport(viewport.rect.GetX(),  // x
-                target_size.height - viewport.rect.GetY() -
-                    viewport.rect.GetHeight(),  // y
-                viewport.rect.GetWidth(),       // width
-                viewport.rect.GetHeight()       // height
-    );
-    if (pass_data.depth_attachment) {
-      if (gl.DepthRangef.IsAvailable()) {
-        gl.DepthRangef(viewport.depth_range.z_near, viewport.depth_range.z_far);
-      } else {
-        gl.DepthRange(viewport.depth_range.z_near, viewport.depth_range.z_far);
+    if (command.viewport.has_value()) {
+      gl.Viewport(viewport.rect.GetX(),  // x
+                  target_size.height - viewport.rect.GetY() -
+                      viewport.rect.GetHeight(),  // y
+                  viewport.rect.GetWidth(),       // width
+                  viewport.rect.GetHeight()       // height
+      );
+      if (pass_data.depth_attachment) {
+        if (gl.DepthRangef.IsAvailable()) {
+          gl.DepthRangef(viewport.depth_range.z_near,
+                         viewport.depth_range.z_far);
+        } else {
+          gl.DepthRange(viewport.depth_range.z_near,
+                        viewport.depth_range.z_far);
+        }
       }
     }
 
@@ -479,13 +500,6 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     /// Unbind vertex attribs.
     ///
     if (!vertex_desc_gles->UnbindVertexAttributes(gl)) {
-      return false;
-    }
-
-    //--------------------------------------------------------------------------
-    /// Unbind the program pipeline.
-    ///
-    if (!pipeline.UnbindProgram()) {
       return false;
     }
   }
