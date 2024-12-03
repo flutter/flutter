@@ -3,6 +3,7 @@
 // The local repository will contain the AAR and POM files.
 
 import java.nio.file.Paths
+import com.android.build.gradle.BaseExtension
 
 fun configureProject(project: Project, outputDir: String) {
     if (project.findProperty("android") == null) {
