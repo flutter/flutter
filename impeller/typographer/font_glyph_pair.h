@@ -41,11 +41,10 @@ struct ScaledFont {
   Font font;
   Scalar scale;
 
-  struct Hash {
-    constexpr std::size_t operator()(const impeller::ScaledFont& sf) const {
-      return fml::HashCombine(sf.font.GetHash(), sf.scale);
-    }
-  };
+  template <typename H>
+  friend H AbslHashValue(H h, const ScaledFont& sf) {
+    return H::combine(std::move(h), sf.font.GetHash(), sf.scale);
+  }
 
   struct Equal {
     constexpr bool operator()(const impeller::ScaledFont& lhs,
@@ -70,19 +69,18 @@ struct SubpixelGlyph {
         subpixel_offset(p_subpixel_offset),
         properties(p_properties) {}
 
-  struct Hash {
-    constexpr std::size_t operator()(const impeller::SubpixelGlyph& sg) const {
-      if (!sg.properties.has_value()) {
-        return fml::HashCombine(sg.glyph.index, sg.subpixel_offset.x,
-                                sg.subpixel_offset.y);
-      }
-      return fml::HashCombine(
-          sg.glyph.index, sg.subpixel_offset.x, sg.subpixel_offset.y,
-          sg.properties->color.ToARGB(), sg.properties->stroke,
-          sg.properties->stroke_cap, sg.properties->stroke_join,
-          sg.properties->stroke_miter, sg.properties->stroke_width);
+  template <typename H>
+  friend H AbslHashValue(H h, const SubpixelGlyph& sg) {
+    if (!sg.properties.has_value()) {
+      return H::combine(std::move(h), sg.glyph.index, sg.subpixel_offset.x,
+                        sg.subpixel_offset.y);
     }
-  };
+    return H::combine(std::move(h), sg.glyph.index, sg.subpixel_offset.x,
+                      sg.subpixel_offset.y, sg.properties->color.ToARGB(),
+                      sg.properties->stroke, sg.properties->stroke_cap,
+                      sg.properties->stroke_join, sg.properties->stroke_miter,
+                      sg.properties->stroke_width);
+  }
 
   struct Equal {
     constexpr bool operator()(const impeller::SubpixelGlyph& lhs,
