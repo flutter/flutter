@@ -221,6 +221,7 @@ optional("fontmgr_android") {
 
   deps = [
     ":typeface_freetype",
+    ":typeface_proxy",
     "//flutter/third_party/expat",
   ]
   public = skia_ports_fontmgr_android_public
