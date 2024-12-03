@@ -585,9 +585,9 @@ TEST_P(TypographerTest, TextFrameAtlasGenerationTracksState) {
   EXPECT_TRUE(frame->GetFrameBounds(0).is_placeholder);
   if (GetBackend() == PlaygroundBackend::kOpenGLES) {
     // OpenGLES must always increase the atlas backend if the texture grows.
-    EXPECT_EQ(frame->GetAtlasGeneration(), 1u);
+    EXPECT_EQ(frame->GetAtlasGenerationAndID().first, 1u);
   } else {
-    EXPECT_EQ(frame->GetAtlasGeneration(), 0u);
+    EXPECT_EQ(frame->GetAtlasGenerationAndID().first, 0u);
   }
 
   atlas = CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
@@ -598,9 +598,9 @@ TEST_P(TypographerTest, TextFrameAtlasGenerationTracksState) {
   EXPECT_TRUE(frame->IsFrameComplete());
   EXPECT_FALSE(frame->GetFrameBounds(0).is_placeholder);
   if (GetBackend() == PlaygroundBackend::kOpenGLES) {
-    EXPECT_EQ(frame->GetAtlasGeneration(), 1u);
+    EXPECT_EQ(frame->GetAtlasGenerationAndID().first, 1u);
   } else {
-    EXPECT_EQ(frame->GetAtlasGeneration(), 0u);
+    EXPECT_EQ(frame->GetAtlasGenerationAndID().first, 0u);
   }
 
   // Force increase the generation.
@@ -609,7 +609,7 @@ TEST_P(TypographerTest, TextFrameAtlasGenerationTracksState) {
                            GlyphAtlas::Type::kAlphaBitmap, /*scale=*/1.0f,
                            atlas_context, frame);
 
-  EXPECT_EQ(frame->GetAtlasGeneration(), 2u);
+  EXPECT_EQ(frame->GetAtlasGenerationAndID().first, 2u);
 }
 
 TEST_P(TypographerTest, InvalidAtlasForcesRepopulation) {
@@ -637,9 +637,9 @@ TEST_P(TypographerTest, InvalidAtlasForcesRepopulation) {
   EXPECT_TRUE(frame->GetFrameBounds(0).is_placeholder);
   if (GetBackend() == PlaygroundBackend::kOpenGLES) {
     // OpenGLES must always increase the atlas backend if the texture grows.
-    EXPECT_EQ(frame->GetAtlasGeneration(), 1u);
+    EXPECT_EQ(frame->GetAtlasGenerationAndID().first, 1u);
   } else {
-    EXPECT_EQ(frame->GetAtlasGeneration(), 0u);
+    EXPECT_EQ(frame->GetAtlasGenerationAndID().first, 0u);
   }
 
   auto second_context = TypographerContextSkia::Make();
