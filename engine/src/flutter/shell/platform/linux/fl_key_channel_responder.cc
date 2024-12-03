@@ -7,23 +7,7 @@
 #include <gtk/gtk.h>
 #include <cinttypes>
 
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_basic_message_channel.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
-
-static constexpr char kChannelName[] = "flutter/keyevent";
-static constexpr char kTypeKey[] = "type";
-static constexpr char kTypeValueUp[] = "keyup";
-static constexpr char kTypeValueDown[] = "keydown";
-static constexpr char kKeymapKey[] = "keymap";
-static constexpr char kKeyCodeKey[] = "keyCode";
-static constexpr char kScanCodeKey[] = "scanCode";
-static constexpr char kModifiersKey[] = "modifiers";
-static constexpr char kToolkitKey[] = "toolkit";
-static constexpr char kSpecifiedLogicalKey[] = "specifiedLogicalKey";
-static constexpr char kUnicodeScalarValuesKey[] = "unicodeScalarValues";
-
-static constexpr char kGtkToolkit[] = "gtk";
-static constexpr char kLinuxKeymap[] = "linux";
+#include "flutter/shell/platform/linux/fl_key_event_channel.h"
 
 /* Declare and define FlKeyChannelUserData */
 
@@ -93,7 +77,7 @@ static FlKeyChannelUserData* fl_key_channel_user_data_new(
 struct _FlKeyChannelResponder {
   GObject parent_instance;
 
-  FlBasicMessageChannel* channel;
+  FlKeyEventChannel* channel;
 };
 
 G_DEFINE_TYPE(FlKeyChannelResponder, fl_key_channel_responder, G_TYPE_OBJECT)
@@ -111,19 +95,11 @@ static void handle_response(GObject* object,
     return;
   }
 
+  gboolean handled = FALSE;
   g_autoptr(GError) error = nullptr;
-  FlBasicMessageChannel* messageChannel = FL_BASIC_MESSAGE_CHANNEL(object);
-  FlValue* message =
-      fl_basic_message_channel_send_finish(messageChannel, result, &error);
-  bool handled = false;
-  if (error != nullptr) {
+  if (!fl_key_event_channel_send_finish(object, result, &handled, &error)) {
     g_warning("Unable to retrieve framework response: %s", error->message);
-  } else {
-    g_autoptr(FlValue) handled_value =
-        fl_value_lookup_string(message, "handled");
-    handled = fl_value_get_bool(handled_value);
   }
-
   data->callback(handled, data->user_data);
 }
 
@@ -155,9 +131,7 @@ FlKeyChannelResponder* fl_key_channel_responder_new(
   FlKeyChannelResponder* self = FL_KEY_CHANNEL_RESPONDER(
       g_object_new(fl_key_channel_responder_get_type(), nullptr));
 
-  g_autoptr(FlJsonMessageCodec) codec = fl_json_message_codec_new();
-  self->channel = fl_basic_message_channel_new(messenger, kChannelName,
-                                               FL_MESSAGE_CODEC(codec));
+  self->channel = fl_key_event_channel_new(messenger);
 
   return self;
 }
@@ -171,10 +145,11 @@ void fl_key_channel_responder_handle_event(
   g_return_if_fail(event != nullptr);
   g_return_if_fail(callback != nullptr);
 
-  const gchar* type =
-      fl_key_event_get_is_press(event) ? kTypeValueDown : kTypeValueUp;
+  FlKeyEventType type = fl_key_event_get_is_press(event)
+                            ? FL_KEY_EVENT_TYPE_KEYDOWN
+                            : FL_KEY_EVENT_TYPE_KEYUP;
   int64_t scan_code = fl_key_event_get_keycode(event);
-  int64_t unicode_scarlar_values =
+  int64_t unicode_scalar_values =
       gdk_keyval_to_unicode(fl_key_event_get_keyval(event));
 
   // For most modifier keys, GTK keeps track of the "pressed" state of the
@@ -223,29 +198,10 @@ void fl_key_channel_responder_handle_event(
   state |= (shift_lock_pressed || caps_lock_pressed) ? GDK_LOCK_MASK : 0x0;
   state |= num_lock_pressed ? GDK_MOD2_MASK : 0x0;
 
-  g_autoptr(FlValue) message = fl_value_new_map();
-  fl_value_set_string_take(message, kTypeKey, fl_value_new_string(type));
-  fl_value_set_string_take(message, kKeymapKey,
-                           fl_value_new_string(kLinuxKeymap));
-  fl_value_set_string_take(message, kScanCodeKey, fl_value_new_int(scan_code));
-  fl_value_set_string_take(message, kToolkitKey,
-                           fl_value_new_string(kGtkToolkit));
-  fl_value_set_string_take(message, kKeyCodeKey,
-                           fl_value_new_int(fl_key_event_get_keyval(event)));
-  fl_value_set_string_take(message, kModifiersKey, fl_value_new_int(state));
-  if (unicode_scarlar_values != 0) {
-    fl_value_set_string_take(message, kUnicodeScalarValuesKey,
-                             fl_value_new_int(unicode_scarlar_values));
-  }
-
-  if (specified_logical_key != 0) {
-    fl_value_set_string_take(message, kSpecifiedLogicalKey,
-                             fl_value_new_int(specified_logical_key));
-  }
-
   FlKeyChannelUserData* data =
       fl_key_channel_user_data_new(self, callback, user_data);
-  // Send the message off to the framework for handling (or not).
-  fl_basic_message_channel_send(self->channel, message, nullptr,
-                                handle_response, data);
+  fl_key_event_channel_send(self->channel, type, scan_code,
+                            fl_key_event_get_keyval(event), state,
+                            unicode_scalar_values, specified_logical_key,
+                            nullptr, handle_response, data);
 }
