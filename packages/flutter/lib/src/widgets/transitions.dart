@@ -963,8 +963,7 @@ class AlignTransition extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderPositionedBox renderObject) {
-    (renderObject as _RenderAnimatedAlign)
-      ..listenable = alignment
+    renderObject
       ..widthFactor = widthFactor
       ..heightFactor = heightFactor
       ..textDirection = Directionality.maybeOf(context);
@@ -973,32 +972,23 @@ class AlignTransition extends SingleChildRenderObjectWidget {
 
 class _RenderAnimatedAlign extends RenderPositionedBox {
   _RenderAnimatedAlign({
-    required ValueListenable<AlignmentGeometry> listenable,
+    required this.listenable,
     super.widthFactor,
     super.heightFactor,
     super.textDirection,
-  }) : _listenable = listenable,
-       super(alignment: listenable.value) {
-    _listenable.addListener(_listener);
+  }) : super(alignment: listenable.value) {
+    listenable.addListener(_listener);
   }
 
-  ValueListenable<AlignmentGeometry> get listenable => _listenable;
-  ValueListenable<AlignmentGeometry> _listenable;
-  set listenable(ValueListenable<AlignmentGeometry> newValue) {
-    if (newValue == _listenable) {
-      return;
-    }
-    _listenable.removeListener(_listener);
-    _listenable = newValue..addListener(_listener);
-  }
+  final ValueListenable<AlignmentGeometry> listenable;
 
   void _listener() {
-    alignment = _listenable.value;
+    alignment = listenable.value;
   }
 
   @override
   void dispose() {
-    _listenable.removeListener(_listener);
+    listenable.removeListener(_listener);
     super.dispose();
   }
 }
