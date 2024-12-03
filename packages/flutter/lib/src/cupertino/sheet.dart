@@ -137,7 +137,7 @@ Future<T?> showCupertinoSheet<T>({
 /// The page slides up and stops below the top of the screen. When covered by
 /// another sheet view, it will slide slightly up and scale down to appear
 /// stacked behind the new sheet.
-class CupertinoSheetTransition extends StatelessWidget {
+class CupertinoSheetTransition extends StatefulWidget {
   /// Creates an iOS style sheet transition.
   const CupertinoSheetTransition({
     super.key,
@@ -165,7 +165,7 @@ class CupertinoSheetTransition extends StatelessWidget {
   /// slide the previous sheet upwards instead.
   static Widget delegateTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child) {
     if (CupertinoSheetRoute.hasParentSheet(context)) {
-      return _coverSheetSecondaryTransition(secondaryAnimation, child);
+      return _delegatedCoverSheetSecondaryTransition(secondaryAnimation, child);
     }
 
     const Curve curve = Curves.linearToEaseOut;
@@ -206,26 +206,7 @@ class CupertinoSheetTransition extends StatelessWidget {
     );
   }
 
-  static Widget _coverSheetPrimaryTransition(BuildContext context, Animation<double> animation, Widget? child) {
-    final Animatable<Offset> offsetTween =
-      CupertinoSheetRoute.hasParentSheet(context) ?
-      _kFullBottomUpTween :
-      _kBottomUpTween;
-
-    final Animation<Offset> positionAnimation =
-      CurvedAnimation(
-            parent: animation,
-            curve: Curves.fastEaseInToSlowEaseOut,
-            reverseCurve: Curves.fastEaseInToSlowEaseOut.flipped,
-          ).drive(offsetTween);
-
-    return SlideTransition(
-      position: positionAnimation,
-      child: child,
-    );
-  }
-
-  static Widget _coverSheetSecondaryTransition(Animation<double> secondaryAnimation, Widget? child) {
+  static Widget _delegatedCoverSheetSecondaryTransition(Animation<double> secondaryAnimation, Widget? child) {
     const Curve curve = Curves.linearToEaseOut;
     const Curve reverseCurve = Curves.easeInToLinear;
     final Animation<double> curvedAnimation = CurvedAnimation(
@@ -250,17 +231,98 @@ class CupertinoSheetTransition extends StatelessWidget {
   }
 
   @override
+  State<CupertinoSheetTransition> createState() => _CupertinoSheetTransitionState();
+}
+
+class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
+
+  // When this page is coming in to cover another page.
+  CurvedAnimation? _primaryPositionCurve;
+  // When this page is becoming covered by another page.
+  CurvedAnimation? _secondaryPositionCurve;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupAnimation();
+  }
+
+  @override
+  void didUpdateWidget(covariant CupertinoSheetTransition oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.primaryRouteAnimation != widget.primaryRouteAnimation
+    || oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation) {
+      _disposeCurve();
+      _setupAnimation();
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposeCurve();
+    super.dispose();
+  }
+
+  void _setupAnimation() {
+    _primaryPositionCurve = CurvedAnimation(
+      curve: Curves.fastEaseInToSlowEaseOut,
+      reverseCurve: Curves.fastEaseInToSlowEaseOut.flipped,
+      parent: widget.primaryRouteAnimation,
+    );
+    _secondaryPositionCurve = CurvedAnimation(
+      curve: Curves.linearToEaseOut,
+      reverseCurve: Curves.easeInToLinear,
+      parent: widget.secondaryRouteAnimation
+    );
+  }
+
+  void _disposeCurve() {
+    _primaryPositionCurve?.dispose();
+    _secondaryPositionCurve?.dispose();
+    _primaryPositionCurve = null;
+    _secondaryPositionCurve = null;
+  }
+
+  Widget _coverSheetPrimaryTransition(BuildContext context, Animation<double> animation, Widget? child) {
+    final Animatable<Offset> offsetTween =
+      CupertinoSheetRoute.hasParentSheet(context) ?
+      _kFullBottomUpTween :
+      _kBottomUpTween;
+
+    return SlideTransition(
+      position: (_primaryPositionCurve ?? animation).drive(offsetTween),
+      child: child,
+    );
+  }
+
+  Widget _coverSheetSecondaryTransition(Animation<double> secondaryAnimation, Widget? child) {
+    return SlideTransition(
+      position: (_secondaryPositionCurve ?? secondaryAnimation).drive(_kMidUpTween),
+      transformHitTests: false,
+      child: ScaleTransition(
+        scale: (_secondaryPositionCurve ?? secondaryAnimation).drive(_kScaleTween),
+        filterQuality: FilterQuality.medium,
+        alignment: Alignment.topCenter,
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ColoredBox(
       color: CupertinoColors.transparent,
       child: _coverSheetSecondaryTransition(
-        secondaryRouteAnimation,
+        widget.secondaryRouteAnimation,
         _coverSheetPrimaryTransition(
           context,
-          primaryRouteAnimation,
+          widget.primaryRouteAnimation,
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: child,
+            child: widget.child,
           ),
         ),
       ),
