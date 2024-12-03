@@ -2471,7 +2471,7 @@ void main() {
     expect(material.color, backgroundColor);
   });
 
-  testWidgets('Default iconAlignment', (WidgetTester tester) async {
+  testWidgets('Default OutlinedButton icon alignment', (WidgetTester tester) async {
     Widget buildWidget({ required TextDirection textDirection }) {
       return MaterialApp(
         home: Directionality(
@@ -2506,7 +2506,7 @@ void main() {
     expect(buttonTopRight.dx, iconTopRight.dx + 16.0); // 16.0 - padding between icon and button edge.
   });
 
-  testWidgets('iconAlignment can be customized', (WidgetTester tester) async {
+  testWidgets('OutlinedButton icon alignment can be customized', (WidgetTester tester) async {
     Widget buildWidget({
       required TextDirection textDirection,
       required IconAlignment iconAlignment,
@@ -2581,6 +2581,35 @@ void main() {
 
     // The icon is aligned to the left of the button.
     expect(buttonTopLeft.dx, iconTopLeft.dx - 24.0); // 24.0 - padding between icon and button edge.
+  });
+
+  testWidgets('OutlinedButton icon alignment respects ButtonStyle.iconAlignment', (WidgetTester tester) async {
+    Widget buildButton({ IconAlignment? iconAlignment }) {
+      return MaterialApp(
+        home: Center(
+          child: OutlinedButton.icon(
+            style: ButtonStyle(iconAlignment: iconAlignment),
+            onPressed: () {},
+            icon: const Icon(Icons.add),
+            label: const Text('button'),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildButton());
+
+    final Offset buttonTopLeft = tester.getTopLeft(find.byType(Material).last);
+    final Offset iconTopLeft = tester.getTopLeft(find.byIcon(Icons.add));
+
+    expect(buttonTopLeft.dx, iconTopLeft.dx - 16.0);
+
+    await tester.pumpWidget(buildButton(iconAlignment: IconAlignment.end));
+
+    final Offset buttonTopRight = tester.getTopRight(find.byType(Material).last);
+    final Offset iconTopRight = tester.getTopRight(find.byIcon(Icons.add));
+
+    expect(buttonTopRight.dx, iconTopRight.dx + 24.0);
   });
 
   testWidgets("OutlinedButton.icon response doesn't hover when disabled", (WidgetTester tester) async {
@@ -2763,6 +2792,7 @@ void main() {
               style: OutlinedButton.styleFrom(
                 iconColor: iconColor,
                 iconSize: iconSize,
+                iconAlignment: IconAlignment.end,
                 disabledIconColor: disabledIconColor,
               ),
               onPressed: enabled ? () {} : null,
@@ -2782,5 +2812,9 @@ void main() {
     // Test disabled button.
     await tester.pumpWidget(buildButton(enabled: false));
     expect(iconStyle(tester, Icons.add).color, disabledIconColor);
+
+    final Offset buttonTopRight = tester.getTopRight(find.byType(Material).last);
+    final Offset iconTopRight = tester.getTopRight(find.byIcon(Icons.add));
+    expect(buttonTopRight.dx, iconTopRight.dx + 24.0);
   });
 }

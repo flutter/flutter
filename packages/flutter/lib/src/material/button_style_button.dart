@@ -86,7 +86,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
     required this.clipBehavior,
     this.statesController,
     this.isSemanticButton = true,
-    this.iconAlignment = IconAlignment.start,
+    this.iconAlignment,
     this.tooltip,
     required this.child,
   });
@@ -158,7 +158,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   final bool? isSemanticButton;
 
   /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
-  final IconAlignment iconAlignment;
+  final IconAlignment? iconAlignment;
 
   /// Text that describes the action that will occur when the button is pressed or
   /// hovered over.
