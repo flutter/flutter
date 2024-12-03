@@ -105,7 +105,7 @@ flutter:
       ...<String>['Debug', 'Profile', 'Release'].map((String buildMode) => FakeCommand(
         command: <Pattern>[
           '/.android/gradlew',
-          '-I=/flutter/packages/flutter_tools/gradle/aar_init_script.gradle',
+          '-I=/flutter/packages/flutter_tools/gradle/aar_init_script.gradle.kts',
           ...List<RegExp>.filled(4, RegExp(r'-P[a-zA-Z-]+=.*')),
           '-q',
           ...List<RegExp>.filled(5, RegExp(r'-P[a-zA-Z-]+=.*')),
