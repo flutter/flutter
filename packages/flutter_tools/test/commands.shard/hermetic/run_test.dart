@@ -27,7 +27,6 @@ import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
-import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:test/fake.dart';
@@ -1013,7 +1012,7 @@ void main() {
           () => createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
-            '--web-renderer=skwasm',
+            ...WebRendererMode.skwasm.toCliDartDefines,
           ]), throwsToolExit(message: 'Skwasm renderer requires --wasm'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -1031,7 +1030,7 @@ void main() {
             await createTestCommandRunner(RunCommand()).run(<String>[
               'run',
               '--no-pub',
-              '--web-renderer=${webRenderer.name}',
+              ...webRenderer.toCliDartDefines,
             ]);
           } on ToolExit catch (error) {
             expect(error, isA<ToolExit>());
@@ -1611,7 +1610,6 @@ class CapturingAppDomain extends AppDomain {
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
-    required HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     this.userIdentifier = userIdentifier;
     enableDevTools = options.enableDevTools;
