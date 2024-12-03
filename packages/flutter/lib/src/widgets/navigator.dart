@@ -3706,6 +3706,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return true;
   }
 
+  @protected
   @override
   void initState() {
     super.initState();
@@ -3742,6 +3743,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   int get _nextPagelessRestorationScopeId => _rawNextPagelessRestorationScopeId.value++;
 
+  @protected
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_rawNextPagelessRestorationScopeId, 'id');
@@ -3810,6 +3812,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(() { _debugLocked = false; return true; }());
   }
 
+  @protected
   @override
   void didToggleBucket(RestorationBucket? oldBucket) {
     super.didToggleBucket(oldBucket);
@@ -3822,6 +3825,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   String? get restorationId => widget.restorationScopeId;
 
+  @protected
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -3915,6 +3919,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
   }
 
+  @protected
   @override
   void didUpdateWidget(Navigator oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -3969,6 +3974,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
   }
 
+  @protected
   @override
   void deactivate() {
     for (final NavigatorObserver observer in _effectiveObservers) {
@@ -3978,6 +3984,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     super.deactivate();
   }
 
+  @protected
   @override
   void activate() {
     super.activate();
@@ -3988,6 +3995,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
   }
 
+  @protected
   @override
   void dispose() {
     assert(!_debugLocked);
@@ -5646,6 +5654,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return result;
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(!_debugLocked);

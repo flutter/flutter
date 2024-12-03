@@ -4,7 +4,6 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException;
@@ -39,7 +38,7 @@ void main() {
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(),
-      botDetector: const BotDetectorAlwaysNo(),
+      botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
     );
 
@@ -94,7 +93,7 @@ void main() {
         processManager: processManager,
         usage: TestUsage(),
         platform: FakePlatform(),
-        botDetector: const BotDetectorAlwaysNo(),
+        botDetector: const FakeBotDetector(false),
         stdio: FakeStdio(),
       );
 
@@ -149,7 +148,7 @@ void main() {
         processManager: processManager,
         usage: TestUsage(),
         platform: FakePlatform(),
-        botDetector: const BotDetectorAlwaysNo(),
+        botDetector: const FakeBotDetector(false),
         stdio: FakeStdio(),
       );
 
@@ -203,7 +202,7 @@ void main() {
         processManager: processManager,
         usage: TestUsage(),
         platform: FakePlatform(),
-        botDetector: const BotDetectorAlwaysNo(),
+        botDetector: const FakeBotDetector(false),
         stdio: FakeStdio(),
       );
 
@@ -236,7 +235,7 @@ void main() {
         processManager: processManager,
         usage: TestUsage(),
         platform: FakePlatform(),
-        botDetector: const BotDetectorAlwaysNo(),
+        botDetector: const FakeBotDetector(false),
         stdio: FakeStdio(),
       );
 
@@ -275,7 +274,7 @@ void main() {
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(),
-      botDetector: const BotDetectorAlwaysNo(),
+      botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
     );
 
@@ -321,7 +320,7 @@ void main() {
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(),
-      botDetector: const BotDetectorAlwaysNo(),
+      botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
     );
 
@@ -366,7 +365,7 @@ void main() {
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(),
-      botDetector: const BotDetectorAlwaysNo(),
+      botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
     );
 
@@ -414,7 +413,7 @@ void main() {
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(),
-      botDetector: const BotDetectorAlwaysNo(),
+      botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
     );
 
@@ -459,7 +458,7 @@ void main() {
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(),
-      botDetector: const BotDetectorAlwaysNo(),
+      botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
     );
 
@@ -504,7 +503,7 @@ void main() {
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(),
-      botDetector: const BotDetectorAlwaysNo(),
+      botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
     );
 
@@ -552,7 +551,7 @@ void main() {
       processManager: processManager,
       usage: TestUsage(),
       platform: FakePlatform(),
-      botDetector: const BotDetectorAlwaysNo(),
+      botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
     );
 
@@ -597,7 +596,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: TestUsage(),
-      botDetector: const BotDetectorAlwaysNo(),
+      botDetector: const FakeBotDetector(false),
       stdio: mockStdio,
       processManager: processManager,
     );
@@ -615,8 +614,8 @@ exit code: 66
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         context: PubContext.flutterTests,
       ),
-      throwsA(isA<ToolExit>()
-          .having((ToolExit error) => error.message, 'message', contains('Failed to update packages'))),
+      throwsA(isA<ToolExit>().having((ToolExit error) => error.message,
+          'message', contains('Failed to update packages'))),
     );
     expect(logger.statusText, isEmpty);
     expect(logger.traceText, contains(toolExitMessage));
@@ -629,11 +628,14 @@ exit code: 66
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('pub get with failing exit code even with OutputMode == failuresOnly', () async {
+  testWithoutContext(
+      'pub get with failing exit code even with OutputMode == failuresOnly',
+      () async {
     final BufferLogger logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
 
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final FakeProcessManager processManager =
+        FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
           'bin/cache/dart-sdk/bin/dart',
@@ -661,7 +663,7 @@ exit code: 66
       fileSystem: fileSystem,
       logger: logger,
       usage: TestUsage(),
-      botDetector: const BotDetectorAlwaysNo(),
+      botDetector: const FakeBotDetector(false),
       processManager: processManager,
     );
 
@@ -680,7 +682,8 @@ exit code: 66
     expect(
       logger.warningText,
       contains('git remote set-url upstream'),
-      reason: 'When update-packages fails, it is often because of missing an upsteam remote.',
+      reason:
+          'When update-packages fails, it is often because of missing an upsteam remote.',
     );
     expect(processManager, hasNoRemainingExpectations);
   });
@@ -732,7 +735,7 @@ exit code: 66
       fileSystem: fileSystem,
       logger: logger,
       usage: TestUsage(),
-      botDetector: const BotDetectorAlwaysNo(),
+      botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
       processManager: processManager,
     );
@@ -758,6 +761,49 @@ exit code: 66
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
     expect(processManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('pub get does not inherit logger.verbose', () async {
+    final BufferLogger logger = BufferLogger.test(verbose: true);
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem.currentDirectory.childFile('version').createSync();
+
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(command: const <String>[
+        'bin/cache/dart-sdk/bin/dart',
+        // Note: Omitted --verbose.
+        'pub',
+        '--suppress-analytics',
+        '--directory',
+        '.',
+        'get',
+        '--example',
+      ], onRun: (_) {
+        fileSystem.currentDirectory
+          .childDirectory('.dart_tool')
+          .childFile('package_config.json')
+          .createSync(recursive: true);
+      }),
+    ]);
+
+    final Pub pub = Pub.test(
+      platform: FakePlatform(),
+      fileSystem: fileSystem,
+      logger: logger,
+      usage: TestUsage(),
+      botDetector: const FakeBotDetector(false),
+      stdio: FakeStdio(),
+      processManager: processManager,
+    );
+
+    await expectLater(
+      pub.get(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        context: PubContext.flutterTests,
+        outputMode: PubOutputMode.failuresOnly,
+      ),
+      completes,
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/116627
@@ -793,7 +839,7 @@ exit code: 66
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      botDetector: const BotDetectorAlwaysNo(),
+      botDetector: const FakeBotDetector(false),
       stdio: mockStdio,
     );
 
@@ -844,7 +890,7 @@ exit code: 66
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: processManager,
-      botDetector: const BotDetectorAlwaysNo(),
+      botDetector: const FakeBotDetector(false),
       stdio: mockStdio,
     );
 
@@ -915,7 +961,7 @@ exit code: 66
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      botDetector: const BotDetectorAlwaysNo(),
+      botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
     );
 
@@ -957,7 +1003,7 @@ exit code: 66
       logger: BufferLogger.test(),
       processManager: processManager,
       usage: TestUsage(),
-      botDetector: const BotDetectorAlwaysNo(),
+      botDetector: const FakeBotDetector(false),
       stdio: mockStdio,
       platform: FakePlatform(
         environment: const <String, String>{
@@ -988,7 +1034,7 @@ exit code: 66
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
-      botDetector: const BotDetectorAlwaysNo(),
+      botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
       usage: usage,
       platform: FakePlatform(environment: const <String, String>{
@@ -1021,7 +1067,7 @@ exit code: 66
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
-      botDetector: const BotDetectorAlwaysNo(),
+      botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
       usage: usage,
       platform: FakePlatform(environment: const <String, String>{
@@ -1084,7 +1130,7 @@ exit code: 66
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: processManager,
-      botDetector: const BotDetectorAlwaysNo(),
+      botDetector: const FakeBotDetector(false),
       stdio: FakeStdio(),
       platform: FakePlatform(
         environment: const <String, String>{
@@ -1173,7 +1219,7 @@ exit code: 66
         platform: FakePlatform(
           environment: <String, String>{},
         ),
-        botDetector: const BotDetectorAlwaysNo(),
+        botDetector: const FakeBotDetector(false),
         stdio: FakeStdio());
 
     fileSystem.file('version').createSync();
@@ -1210,11 +1256,4 @@ exit code: 66
         DateTime(2001)); // because nothing should touch it
     logger.clear();
   });
-}
-
-class BotDetectorAlwaysNo implements BotDetector {
-  const BotDetectorAlwaysNo();
-
-  @override
-  Future<bool> get isRunningOnBot async => false;
 }

@@ -26,6 +26,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
 
@@ -677,7 +678,12 @@ class FlutterPlugin implements Plugin<Project> {
      */
     private void configureLegacyPluginEachProjects(Project project) {
         try {
-            if (!settingsGradleFile(project).text.contains("'.flutter-plugins'")) {
+            // Read the contents of the settings.gradle file.
+            // Remove block/line comments
+            String settingsText = settingsGradleFile(project).text
+            settingsText = settingsText.replaceAll(/(?s)\/\*.*?\*\//, '').replaceAll(/(?m)\/\/.*$/, '')
+
+            if (!settingsText.contains("'.flutter-plugins'")) {
                 return
             }
         } catch (FileNotFoundException ignored) {
@@ -1243,7 +1249,7 @@ class FlutterPlugin implements Plugin<Project> {
             // original value. You either need to hoist the value
             // into a separate variable `verbose verboseValue` or prefix with
             // `this` (`verbose this.isVerbose()`).
-            FlutterTask compileTask = project.tasks.create(name: taskName, type: FlutterTask) {
+            TaskProvider<FlutterTask> compileTaskProvider = project.tasks.register(taskName , FlutterTask) {
                 flutterRoot(this.flutterRoot)
                 flutterExecutable(this.flutterExecutable)
                 buildMode(variantBuildMode)
@@ -1274,8 +1280,9 @@ class FlutterPlugin implements Plugin<Project> {
                 validateDeferredComponents(validateDeferredComponentsValue)
                 flavor(flavorValue)
             }
+            Task compileTask = compileTaskProvider.get();
             File libJar = project.file(project.layout.buildDirectory.dir("$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar"))
-            Task packJniLibsTask = project.tasks.create(name: "packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
+            TaskProvider<Jar> packJniLibsTaskProvider = project.tasks.register("packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", Jar) {
                 destinationDirectory = libJar.parentFile
                 archiveFileName = libJar.name
                 dependsOn compileTask
@@ -1300,12 +1307,12 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
+            Task packJniLibsTask = packJniLibsTaskProvider.get();
             addApiDependencies(project, variant.name, project.files {
                 packJniLibsTask
             })
-            Task copyFlutterAssetsTask = project.tasks.create(
-                name: "copyFlutterAssets${variant.name.capitalize()}",
-                type: Copy,
+            TaskProvider<Copy> copyFlutterAssetsTaskProvider = project.tasks.register(
+            "copyFlutterAssets${variant.name.capitalize()}" , Copy
             ) {
                 dependsOn(compileTask)
                 with(compileTask.assets)
@@ -1339,6 +1346,7 @@ class FlutterPlugin implements Plugin<Project> {
                 mergeAssets.mustRunAfter("clean${mergeAssets.name.capitalize()}")
                 into(mergeAssets.outputDir)
             }
+            Task copyFlutterAssetsTask = copyFlutterAssetsTaskProvider.get();
             if (!isUsedAsSubproject) {
                 def variantOutput = variant.outputs.first()
                 def processResources = variantOutput.hasProperty(propProcessResourcesProvider) ?

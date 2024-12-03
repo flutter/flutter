@@ -290,7 +290,6 @@
 /dev/devicelab/bin/tasks/run_release_test_windows.dart @loic-sharma @flutter/tool
 /dev/devicelab/bin/tasks/technical_debt__cost.dart @Piinks @flutter/framework
 /dev/devicelab/bin/tasks/web_benchmarks_canvaskit.dart @yjbanov @flutter/web
-/dev/devicelab/bin/tasks/web_benchmarks_html.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/web_benchmarks_skwasm.dart @eyebrowsoffire @flutter/web
 /dev/devicelab/bin/tasks/web_benchmarks_skwasm_st.dart @eyebrowsoffire @flutter/web
 /dev/devicelab/bin/tasks/windows_home_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
@@ -316,7 +315,6 @@
 /dev/integration_tests/deferred_components_test @gmackall @flutter/android
 
 ## Firebase tests
-/dev/integration_tests/abstract_method_smoke_test @reidbaker @flutter/android
 /dev/integration_tests/release_smoke_test @reidbaker @flutter/android
 
 ## Shards tests

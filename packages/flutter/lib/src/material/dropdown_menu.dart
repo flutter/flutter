@@ -902,7 +902,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       controller: _controller,
       menuChildren: menu,
       crossAxisUnconstrained: false,
-      layerLink: LayerLink(),
       builder: (BuildContext context, MenuController controller, Widget? child) {
         assert(_initialMenu != null);
         final Widget trailingButton = Padding(
@@ -1022,6 +1021,17 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         child: menuAnchor,
       );
     }
+
+    // Wrap the menu anchor with an Align to narrow down the constraints.
+    // Without this Align, when tight constraints are applied to DropdownMenu,
+    // the menu will appear below these constraints instead of below the
+    // text field.
+    menuAnchor = Align(
+      alignment: AlignmentDirectional.topStart,
+      widthFactor: 1.0,
+      heightFactor: 1.0,
+      child: menuAnchor,
+    );
 
     return Actions(
       actions: <Type, Action<Intent>>{

@@ -31,7 +31,6 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
-import '../vmservice.dart';
 
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
@@ -69,7 +68,6 @@ class AttachCommand extends FlutterCommand {
     required Platform platform,
     required ProcessInfo processInfo,
     required FileSystem fileSystem,
-    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
        _stdio = stdio,
        _logger = logger,
@@ -77,8 +75,7 @@ class AttachCommand extends FlutterCommand {
        _signals = signals,
        _platform = platform,
        _processInfo = processInfo,
-       _fileSystem = fileSystem,
-       _nativeAssetsBuilder = nativeAssetsBuilder {
+       _fileSystem = fileSystem {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -150,7 +147,6 @@ class AttachCommand extends FlutterCommand {
   final Platform _platform;
   final ProcessInfo _processInfo;
   final FileSystem _fileSystem;
-  final HotRunnerNativeAssetsBuilder? _nativeAssetsBuilder;
 
   @override
   final String name = 'attach';
@@ -280,7 +276,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             ? _logger
             : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
           logToStdout: true,
-          useImplicitPubspecResolution: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
         )
       : null;
 
@@ -350,7 +345,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           device: device,
           flutterProject: flutterProject,
           usesIpv6: usesIpv6,
-          nativeAssetsBuilder: _nativeAssetsBuilder,
         );
         late AppInstance app;
         try {
@@ -374,7 +368,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         } on Exception catch (error) {
           throwToolExit(error.toString());
         }
-        result = await app.runner!.waitForAppToFinish();
+        result = await app.runner.waitForAppToFinish();
         return;
       }
       while (true) {
@@ -383,7 +377,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           device: device,
           flutterProject: flutterProject,
           usesIpv6: usesIpv6,
-          nativeAssetsBuilder: _nativeAssetsBuilder,
         );
         final Completer<void> onAppStart = Completer<void>.sync();
         TerminalHandler? terminalHandler;
@@ -415,7 +408,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         _logger.printStatus('Waiting for a new connection from Flutter on ${device.name}...');
       }
     } on RPCError catch (err) {
-      if (err.code == RPCErrorCodes.kServiceDisappeared ||
+      if (err.code == RPCErrorKind.kServiceDisappeared.code ||
           err.message.contains('Service connection disposed')) {
         throwToolExit('Lost connection to device.');
       }
@@ -440,7 +433,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     required Device device,
     required FlutterProject flutterProject,
     required bool usesIpv6,
-    required HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     final BuildInfo buildInfo = await getBuildInfo();
 
@@ -467,7 +459,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
     );
 
-    final bool useImplicitPubspecResolution = globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution);
     return buildInfo.isDebug
       ? _hotRunnerFactory.build(
           flutterDevices,
@@ -478,15 +469,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           dillOutputPath: stringArg('output-dill'),
           flutterProject: flutterProject,
           nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
-          nativeAssetsBuilder: _nativeAssetsBuilder,
           analytics: analytics,
-          useImplicitPubspecResolution: useImplicitPubspecResolution,
         )
       : ColdRunner(
           flutterDevices,
           target: targetFile,
           debuggingOptions: debuggingOptions,
-          useImplicitPubspecResolution: useImplicitPubspecResolution,
         );
   }
 
@@ -512,8 +500,6 @@ class HotRunnerFactory {
     bool stayResident = true,
     FlutterProject? flutterProject,
     String? nativeAssetsYamlFile,
-    required HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
-    required bool useImplicitPubspecResolution,
     required Analytics analytics,
   }) => HotRunner(
     devices,
@@ -526,8 +512,6 @@ class HotRunnerFactory {
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
     nativeAssetsYamlFile: nativeAssetsYamlFile,
-    nativeAssetsBuilder: nativeAssetsBuilder,
     analytics: analytics,
-    useImplicitPubspecResolution: useImplicitPubspecResolution,
   );
 }

@@ -19,7 +19,6 @@ import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
-import '../runner/flutter_command_runner.dart';
 import '../version.dart';
 import 'build_ios_framework.dart';
 
@@ -119,6 +118,8 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
           '- .DS_Store',
           '--filter',
           '- native_assets.yaml',
+          '--filter',
+          '- native_assets.json',
           nativeAssetsDirectory.path,
           modeDirectory.path,
         ]);
@@ -240,7 +241,6 @@ end
         analytics: globals.analytics,
         engineVersion: globals.artifacts!.usesLocalArtifacts ? null : globals.flutterVersion.engineRevision,
         generateDartPluginRegistry: true,
-        useImplicitPubspecResolution: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
       );
       Target target;
       // Always build debug for simulator.

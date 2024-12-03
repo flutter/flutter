@@ -26,7 +26,6 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
 
 /// All currently implemented targets.
 List<Target> _kDefaultTargets = <Target>[
@@ -253,7 +252,6 @@ class AssembleCommand extends FlutterCommand {
         ? null
         : globals.flutterVersion.engineRevision,
       generateDartPluginRegistry: true,
-      useImplicitPubspecResolution: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
     );
     return result;
   }
@@ -311,6 +309,14 @@ class AssembleCommand extends FlutterCommand {
         'Error parsing assemble command: your generated configuration may be out of date. '
         "Try re-running 'flutter build ios' or the appropriate build command."
       );
+    }
+    if (deferredTargets.isNotEmpty) {
+      // Record to analytics that DeferredComponents is being used.
+      globals.analytics.send(Event.flutterBuildInfo(
+        label: 'assemble-deferred-components',
+        buildType: 'android',
+        settings: deferredTargets.map((Target t) => t.name).join(','),
+      ));
     }
     if (_flutterProject.manifest.deferredComponents != null
         && decodedDefines.contains('validate-deferred-components=true')
