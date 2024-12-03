@@ -1411,7 +1411,6 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
       ?? chipDefaults.labelPadding
       ?? defaultLabelPadding;
 
-
     Widget result = Material(
       elevation: isTapping ? pressElevation : elevation,
       shadowColor: widget.selected ? selectedShadowColor : shadowColor,
