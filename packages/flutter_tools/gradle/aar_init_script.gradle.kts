@@ -5,11 +5,11 @@
 import java.nio.file.Paths
 
 fun configureProject(project: Project, outputDir: String) {
-    if (!project.hasProperty("android")) {
+    if (project.findProperty("android") == null) {
         throw GradleException("Android property not found.")
     }
     val android = project.extensions.getByName("android")
-    if (!android.hasProperty("libraryVariants")) {
+    if (project.findProperty("libraryVariants") == null) {
         throw GradleException("Can't generate AAR on a non Android library project.")
     }
 
