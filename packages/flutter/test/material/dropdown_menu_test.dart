@@ -3488,6 +3488,94 @@ void main() {
     // None of the menus should be closed.
     expect(dropdownMenuAnchor.controller!.isOpen, true);
   });
+
+  group('The menu is attached at the bottom of the TextField', () {
+    // Define the expected text field bottom instead of querying it using
+    // tester.getRect because when tight constraints are applied to the
+    // Dropdown the TextField bounds are expanded while the visible size
+    // remains 56 pixels.
+    const double textFieldBottom = 56.0;
+
+    testWidgets('when given loose constraints and expandedInsets is set', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            expandedInsets: EdgeInsets.zero,
+            initialSelection: TestMenu.mainMenu3,
+            dropdownMenuEntries: menuChildrenWithIcons,
+          ),
+        ),
+      ));
+
+      // Open the menu.
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      expect(tester.getRect(findMenuMaterial()).top, textFieldBottom);
+    });
+
+    testWidgets('when given tight constraints and expandedInsets is set', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 200,
+            height: 300,
+            child: DropdownMenu<TestMenu>(
+              expandedInsets: EdgeInsets.zero,
+              initialSelection: TestMenu.mainMenu3,
+              dropdownMenuEntries: menuChildrenWithIcons,
+            ),
+          ),
+        ),
+      ));
+
+      // Open the menu.
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      expect(tester.getRect(findMenuMaterial()).top, textFieldBottom);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/147076.
+    testWidgets('when given loose constraints and expandedInsets is not set', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            initialSelection: TestMenu.mainMenu3,
+            dropdownMenuEntries: menuChildrenWithIcons,
+          ),
+        ),
+      ));
+
+      // Open the menu.
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      expect(tester.getRect(findMenuMaterial()).top, textFieldBottom);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/147076.
+    testWidgets('when given tight constraints and expandedInsets is not set', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 200,
+            height: 300,
+            child: DropdownMenu<TestMenu>(
+              initialSelection: TestMenu.mainMenu3,
+              dropdownMenuEntries: menuChildrenWithIcons,
+            ),
+          ),
+        ),
+      ));
+
+      // Open the menu.
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      expect(tester.getRect(findMenuMaterial()).top, textFieldBottom);
+    });
+  });
 }
 
 enum TestMenu {
