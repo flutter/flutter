@@ -116,6 +116,7 @@ source_set("flutter_linux_sources") {
     "fl_key_channel_responder.cc",
     "fl_key_embedder_responder.cc",
     "fl_key_event.cc",
+    "fl_key_event_channel.cc",
     "fl_keyboard_channel.cc",
     "fl_keyboard_handler.cc",
     "fl_keyboard_layout.cc",
