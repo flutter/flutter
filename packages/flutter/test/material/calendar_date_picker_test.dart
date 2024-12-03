@@ -1196,7 +1196,7 @@ void main() {
       await gesture.moveTo(tester.getCenter(find.text('25')));
       await tester.pumpAndSettle();
       inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-      expect(inkFeatures, paints..circle()..circle(radius: 35.0, color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08)));
+      expect(inkFeatures, paints..circle(radius: 35.0, color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08)));
       expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 1));
 
       final Rect expectedClipRect = Rect.fromCircle(center: const Offset(400.0, 241.0), radius: 35.0);
