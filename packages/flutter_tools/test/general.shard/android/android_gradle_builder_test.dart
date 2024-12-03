@@ -1006,7 +1006,7 @@ Gradle Crashed
       processManager.addCommand(const FakeCommand(
         command: <String>[
            'gradlew',
-          '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
+          '-I=/packages/flutter_tools/gradle/aar_init_script.gradle.kts',
           '-Pflutter-root=/',
           '-Poutput-dir=build/',
           '-Pis-plugin=false',
@@ -1089,7 +1089,7 @@ Gradle Crashed
       processManager.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
-          '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
+          '-I=/packages/flutter_tools/gradle/aar_init_script.gradle.kts',
           '-Pflutter-root=/',
           '-Poutput-dir=build/',
           '-Pis-plugin=false',
@@ -1155,7 +1155,7 @@ Gradle Crashed
       processManager.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
-          '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
+          '-I=/packages/flutter_tools/gradle/aar_init_script.gradle.kts',
           '-Pflutter-root=/',
           '-Poutput-dir=build/',
           '-Pis-plugin=false',
@@ -1629,7 +1629,7 @@ Gradle Crashed
       processManager.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
-          '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
+          '-I=/packages/flutter_tools/gradle/aar_init_script.gradle.kts',
           '-Pflutter-root=/',
           '-Poutput-dir=build/',
           '-Pis-plugin=false',
@@ -1725,7 +1725,7 @@ Gradle Crashed
       processManager.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
-          '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
+          '-I=/packages/flutter_tools/gradle/aar_init_script.gradle.kts',
           '-Pflutter-root=/',
           '-Poutput-dir=build/',
           '-Pis-plugin=false',
@@ -1820,7 +1820,7 @@ Gradle Crashed
       processManager.addCommand(const FakeCommand(
         command: <String>[
           'gradlew',
-          '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
+          '-I=/packages/flutter_tools/gradle/aar_init_script.gradle.kts',
           '-Pflutter-root=/',
           '-Poutput-dir=build/',
           '-Pis-plugin=false',
@@ -1915,7 +1915,7 @@ Gradle Crashed
       processManager.addCommand(const FakeCommand(
         command: <String>[
          'gradlew',
-          '-I=/packages/flutter_tools/gradle/aar_init_script.gradle',
+          '-I=/packages/flutter_tools/gradle/aar_init_script.gradle.kts',
           '-Pflutter-root=/',
           '-Poutput-dir=build/',
           '-Pis-plugin=false',
