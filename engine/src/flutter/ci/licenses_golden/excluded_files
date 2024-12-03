@@ -3411,6 +3411,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.radar/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.registers/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.rtc/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.sdhci/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.sdio/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.sdmmc/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.serial/meta.json

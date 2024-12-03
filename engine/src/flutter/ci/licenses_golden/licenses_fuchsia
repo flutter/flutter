@@ -1,4 +1,4 @@
-Signature: 240abbdd3b863a5c4422fa3d3ab342e0
+Signature: 15f560d5caf064d40213ca6a0c1da622
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -14692,6 +14692,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.pinimpl/pin-impl.fidl +
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.platform.device/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/metadata.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.sdhci/sdhci.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.spmi/metadata.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.spmi/spmi.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.images2/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -14792,6 +14793,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.pinimpl/pin-impl.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.platform.device/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/metadata.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/overview.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.sdhci/sdhci.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.spmi/metadata.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.spmi/spmi.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images2/overview.fidl
