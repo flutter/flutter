@@ -11,27 +11,6 @@
 
 typedef FlValue* (*FlValueConverter)(FlValue*);
 
-/**
- * FlKeyChannelResponderMock:
- *
- * Allows mocking of FlKeyChannelResponder methods and values. Only used in
- * unittests.
- */
-typedef struct _FlKeyChannelResponderMock {
-  /**
-   * FlKeyChannelResponderMock::value_converter:
-   * If #value_converter is not nullptr, then this function is applied to the
-   * reply of the message, whose return value is taken as the message reply.
-   */
-  FlValueConverter value_converter;
-
-  /**
-   * FlKeyChannelResponderMock::channel_name:
-   * Mocks the channel name to send the message.
-   */
-  const char* channel_name;
-} FlKeyChannelResponderMock;
-
 G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE(FlKeyChannelResponder,
@@ -64,15 +43,13 @@ typedef void (*FlKeyChannelResponderAsyncCallback)(bool handled,
 /**
  * fl_key_channel_responder_new:
  * @messenger: the messenger that the message channel should be built on.
- * @mock: options to mock several functionalities. Only used in unittests.
  *
  * Creates a new #FlKeyChannelResponder.
  *
  * Returns: a new #FlKeyChannelResponder.
  */
 FlKeyChannelResponder* fl_key_channel_responder_new(
-    FlBinaryMessenger* messenger,
-    FlKeyChannelResponderMock* mock = nullptr);
+    FlBinaryMessenger* messenger);
 
 /**
  * fl_key_channel_responder_handle_event:
