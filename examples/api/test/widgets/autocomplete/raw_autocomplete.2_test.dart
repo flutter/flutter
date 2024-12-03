@@ -10,8 +10,10 @@ void main() {
   testWidgets('Form is entirely visible and rejects invalid responses', (WidgetTester tester) async {
     await tester.pumpWidget(const example.AutocompleteExampleApp());
     expect(find.text('RawAutocomplete Form'), findsOneWidget);
+    // One of the icon is hidden for an input decoration height workaround
+    // See https://github.com/flutter/flutter/issues/159431.
+    expect(find.byIcon(Icons.arrow_downward), findsNWidgets(2));
     expect(find.byType(TextFormField), findsNWidgets(2));
-    expect(find.byIcon(Icons.arrow_downward), findsOneWidget);
     expect(find.text('This is a regular DropdownButtonFormField'), findsOneWidget);
     expect(find.text('This is a regular TextFormField'), findsOneWidget);
     expect(find.text('This is a RawAutocomplete!'), findsOneWidget);
@@ -37,7 +39,7 @@ void main() {
 
   testWidgets('Form accepts valid inputs', (WidgetTester tester) async {
     await tester.pumpWidget(const example.AutocompleteExampleApp());
-    await tester.tap(find.byIcon(Icons.arrow_downward));
+    await tester.tap(find.byIcon(Icons.arrow_downward).last);
     await tester.pump();
 
     expect(find.text('One'), findsOneWidget);

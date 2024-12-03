@@ -1549,14 +1549,14 @@ void main() {
     // The selected value should be displayed when the button is enabled.
     await tester.pumpWidget(build(onChanged: onChanged, value: 'two'));
     // The dropdown icon and the selected menu item are vertically aligned.
-    expect(tester.getCenter(find.text('two')).dy, tester.getCenter(find.byType(Icon)).dy);
+    expect(tester.getCenter(find.text('two')).dy, tester.getCenter(find.byType(Icon).last).dy);
     // Selected item has a normal color from [DropdownButtonFormField.style]
     // when the button is enabled.
     expect(textColor('two'), Colors.yellow);
 
     // The selected value should be displayed when the button is disabled.
     await tester.pumpWidget(build(value: 'two'));
-    expect(tester.getCenter(find.text('two')).dy, tester.getCenter(find.byType(Icon)).dy);
+    expect(tester.getCenter(find.text('two')).dy, tester.getCenter(find.byType(Icon).last).dy);
     // Selected item has a disabled color from [theme.disabledColor]
     // when the button is disable.
     expect(textColor('two'), Colors.pink);

@@ -1526,6 +1526,15 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     }
 
     const Icon defaultIcon = Icon(Icons.arrow_drop_down);
+    final Widget effectiveSuffixIcon = IconTheme(
+      data: IconThemeData(
+        color: _iconColor,
+        size: widget.iconSize,
+      ),
+      child: widget.icon
+        ?? widget._inputDecoration?.suffixIcon
+        ?? defaultIcon,
+    );
 
     Widget result = DefaultTextStyle(
       style: _enabled ? _textStyle! : _textStyle!.copyWith(color: Theme.of(context).disabledColor),
@@ -1541,12 +1550,15 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
                 Expanded(child: innerItemsWidget)
               else
                 innerItemsWidget,
-              IconTheme(
-                data: IconThemeData(
-                  color: _iconColor,
-                  size: widget.iconSize,
-                ),
-                child: widget.icon ?? defaultIcon,
+              // TODO(TahaTessser): Remove InputDecorator height workaround.
+              // Wrapped the suffix icon with Visibility widget as a workaround
+              // for https://github.com/flutter/flutter/issues/159431.
+              Visibility(
+                visible: widget._inputDecoration == null,
+                maintainSize: true,
+                maintainState: true,
+                maintainAnimation: true,
+                child: effectiveSuffixIcon,
               ),
             ],
           ),
@@ -1588,7 +1600,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     if (widget._inputDecoration != null) {
       result = InputDecorator(
-        decoration: widget._inputDecoration!,
+        decoration: widget._inputDecoration!.copyWith(
+          // Override the suffix ucins constraints to allow the
+          // icons alignment to match the regular dropdown button.
+          suffixIconConstraints: const BoxConstraints(minWidth: 40.0),
+          suffixIcon: effectiveSuffixIcon,
+        ),
         isEmpty: widget._isEmpty,
         isFocused: widget._isFocused,
         child: result,

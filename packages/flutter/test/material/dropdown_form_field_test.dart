@@ -510,7 +510,7 @@ void main() {
     expect(buttonBox.attached, isTrue);
 
     final RenderBox arrowIcon = tester.renderObject<RenderBox>(
-      find.byIcon(Icons.arrow_drop_down),
+      find.byIcon(Icons.arrow_drop_down).last,
     );
     expect(arrowIcon.attached, isTrue);
 
@@ -813,11 +813,11 @@ void main() {
     ));
 
     // test for size
-    final RenderBox icon = tester.renderObject(find.byKey(iconKey));
-    expect(icon.size, const Size(30.0, 30.0));
+    final RenderBox icon = tester.renderObject(find.byKey(iconKey).last);
+    expect(icon.size, const Size(40.0, 30.0));
 
     // test for enabled color
-    final RichText enabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
+    final RichText enabledRichText = tester.widget<RichText>(_iconRichText(iconKey).last);
     expect(enabledRichText.text.style!.color, Colors.pink);
 
     // test for disabled color
@@ -829,7 +829,7 @@ void main() {
       items: null,
     ));
 
-    final RichText disabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
+    final RichText disabledRichText = tester.widget<RichText>(_iconRichText(iconKey).last);
     expect(disabledRichText.text.style!.color, Colors.orange);
   });
 
@@ -1306,5 +1306,65 @@ void main() {
     formKey.currentState!.reset();
 
     expect(tester.takeException(), isNull);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/157074.
+  testWidgets('DropdownButtonFormField icon is aligned with label text', (WidgetTester tester) async {
+    const String labelText = 'Label Text';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: labelText,
+              ),
+              items: <String>['One', 'Two']
+                .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+              }).toList(),
+              onChanged: (_) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getCenter(find.text(labelText)).dy, tester.getCenter(find.byType(Icon).last).dy);
+  });
+
+  // TODO(TahaTessser): Remove this test when the workround is removed.
+  // See https://github.com/flutter/flutter/issues/159431.
+  testWidgets('DropdownButtonFormField workaround hides the suffix icon in the child Row', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DropdownButtonFormField<String>(
+              items: <String>['One', 'Two']
+                .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+              }).toList(),
+              onChanged: (_) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Icon), findsNWidgets(2));
+
+    // Test the suffix icon workaround hides the icon.
+    final Visibility visibility = tester.widget<Visibility>(find.ancestor(
+      of: find.byType(Icon).first,
+      matching: find.byType(Visibility),
+    ));
+    expect(visibility.visible, equals(false));
   });
 }
