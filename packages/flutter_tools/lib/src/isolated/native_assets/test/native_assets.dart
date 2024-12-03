@@ -13,22 +13,20 @@ import '../../../native_assets.dart';
 import '../../../project.dart';
 import '../native_assets.dart';
 
-const bool _isWeb = false;
-
 class TestCompilerNativeAssetsBuilderImpl
     implements TestCompilerNativeAssetsBuilder {
   const TestCompilerNativeAssetsBuilderImpl();
 
   @override
-  Future<Uri?> build(BuildInfo buildInfo) =>
-      testCompilerBuildNativeAssets(buildInfo);
+  Future<Uri?> build(BuildInfo buildInfo, bool isWeb) =>
+      testCompilerBuildNativeAssets(buildInfo, isWeb);
 
   @override
   String windowsBuildDirectory(FlutterProject project) =>
-      nativeAssetsBuildUri(project.directory.uri, _isWeb, OS.windows).toFilePath();
+      nativeAssetsBuildUri(project.directory.uri, false, OS.windows).toFilePath();
 }
 
-Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
+Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo, bool isWeb) async {
   if (!buildInfo.buildNativeAssets) {
     return null;
   }
@@ -56,9 +54,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   // Only `flutter test` uses the
   // `build/native_assets/<os>/native_assets.json` file which uses absolute
   // paths to the shared libraries.
-  final OS targetOS = getNativeOSFromTargetPlatfrorm(TargetPlatform.tester);
-  final Uri buildUri = nativeAssetsBuildUri(projectUri, _isWeb, targetOS);
-  final Uri nativeAssetsFileUri = buildUri.resolve('native_assets.json');
+  final Uri buildUri = nativeAssetsBuildUri(projectUri, isWeb, isWeb ? null : getNativeOSFromTargetPlatfrorm(TargetPlatform.tester));
 
   final Map<String, String> environmentDefines = <String, String>{
     kBuildMode: buildInfo.mode.cliName,
@@ -68,15 +64,18 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
       environmentDefines: environmentDefines,
       buildRunner: buildRunner,
-      targetPlatform: TargetPlatform.tester,
+      targetPlatform: isWeb ? TargetPlatform.web_javascript : TargetPlatform.tester,
       projectUri: projectUri,
       fileSystem: globals.fs);
 
+  if (isWeb) {
+    return null;
+  }
   // Then "install" the code assets so they can be used at runtime.
+  final Uri nativeAssetsFileUri = buildUri.resolve('native_assets.json');
   await installCodeAssets(dartBuildResult: dartBuildResult, environmentDefines: environmentDefines,
     targetPlatform: TargetPlatform.tester, projectUri: projectUri, fileSystem: globals.fs,
     nativeAssetsFileUri: nativeAssetsFileUri);
   assert(await globals.fs.file(nativeAssetsFileUri).exists());
-
   return nativeAssetsFileUri;
 }

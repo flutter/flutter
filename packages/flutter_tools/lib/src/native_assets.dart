@@ -8,7 +8,7 @@ import 'project.dart';
 /// An interface to enable overriding native assets build logic in other
 /// build systems.
 abstract class TestCompilerNativeAssetsBuilder {
-  Future<Uri?> build(BuildInfo buildInfo);
+  Future<Uri?> build(BuildInfo buildInfo, bool isWeb);
 
   /// Returns the Windows native assets build directory.
   ///
