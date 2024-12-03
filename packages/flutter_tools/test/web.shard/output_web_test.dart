@@ -38,7 +38,6 @@ void main() {
         chrome: true,
         additionalCommandArgs: <String>[
           if (verbose) '--verbose',
-          '--web-renderer=html',
         ]);
   }
 

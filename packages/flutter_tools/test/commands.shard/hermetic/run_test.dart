@@ -1012,7 +1012,7 @@ void main() {
           () => createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
-            '--web-renderer=skwasm',
+            ...WebRendererMode.skwasm.toCliDartDefines,
           ]), throwsToolExit(message: 'Skwasm renderer requires --wasm'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -1030,7 +1030,7 @@ void main() {
             await createTestCommandRunner(RunCommand()).run(<String>[
               'run',
               '--no-pub',
-              '--web-renderer=${webRenderer.name}',
+              ...webRenderer.toCliDartDefines,
             ]);
           } on ToolExit catch (error) {
             expect(error, isA<ToolExit>());
