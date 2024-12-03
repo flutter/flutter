@@ -1,30 +1,40 @@
-// This script initializes the build in a module or plugin project using Kotlin DSL.
-// It applies the Maven plugin and configures the destination of the local repository.
-// The local repository will contain the AAR and POM files.
-
 import java.nio.file.Paths
+import org.gradle.api.Project
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.plugins.ExtensionContainer
+import org.gradle.api.component.SoftwareComponent
+import org.gradle.api.tasks.TaskProvider
 
 fun configureProject(project: Project, outputDir: String) {
+    // Ensure Android extension is present
     if (project.findProperty("android") == null) {
         throw GradleException("Android property not found.")
     }
-    val android = project.extensions.getByName("android")
+
+    // Validate if the project is an Android library
     if (project.findProperty("libraryVariants") == null) {
-        throw GradleException("Can't generate AAR on a non Android library project.")
+        throw GradleException("Can't generate AAR on a non-Android library project.")
     }
 
+    // Update version by removing SNAPSHOT if present
     project.version = project.version.toString().replace("-SNAPSHOT", "")
 
+    // Check for buildNumber and update version if available
     if (project.hasProperty("buildNumber")) {
         project.version = project.property("buildNumber").toString()
     }
 
+    // Register AAR task for each component
     project.components.forEach { component ->
         if (component.name != "all") {
             addAarTask(project, component)
         }
     }
 
+    // Configure Maven publishing repository
     project.extensions.configure<PublishingExtension> {
         repositories {
             maven {
@@ -33,30 +43,30 @@ fun configureProject(project: Project, outputDir: String) {
         }
     }
 
-    if (!project.property("is-plugin").toString().toBoolean()) {
-        return
+    // Handle Flutter plugin-specific logic
+    if (project.property("is-plugin").toString().toBoolean()) {
+        configureFlutterPlugin(project)
     }
+}
 
+fun configureFlutterPlugin(project: Project) {
     val storageUrl = System.getenv("FLUTTER_STORAGE_BASE_URL") ?: "https://storage.googleapis.com"
-
-    val engineRealm = Paths.get(getFlutterRoot(project), "bin", "internal", "engine.realm")
+    val flutterRoot = getFlutterRoot(project)
+    val engineRealm = Paths.get(flutterRoot, "bin", "internal", "engine.realm")
         .toFile().readText().trim()
     val engineRealmPath = if (engineRealm.isNotEmpty()) "$engineRealm/" else ""
 
+    // Set repository for Flutter engine dependencies
     project.repositories.maven {
         url = uri("$storageUrl/${engineRealmPath}download.flutter.io")
     }
 
-    val engineVersion = Paths.get(getFlutterRoot(project), "bin", "internal", "engine.version")
+    // Get Flutter engine version and add as compileOnly dependency
+    val engineVersion = Paths.get(flutterRoot, "bin", "internal", "engine.version")
         .toFile().readText().trim()
     project.dependencies.add("compileOnly", "io.flutter:flutter_embedding_release:1.0.0-$engineVersion") {
         isTransitive = false
     }
-}
-
-fun configurePlugin(project: Project, outputDir: String) {
-    if (!project.hasProperty("android")) return
-    configureProject(project, outputDir)
 }
 
 fun getFlutterRoot(project: Project): String {
@@ -69,17 +79,20 @@ fun getFlutterRoot(project: Project): String {
 fun addAarTask(project: Project, component: SoftwareComponent) {
     val variantName = component.name.capitalize()
     val taskName = "assembleAar$variantName"
+
     project.tasks.register(taskName) {
         if (!project.gradle.startParameter.taskNames.contains(taskName)) return@register
 
+        // Configure Maven publication for the component
         project.extensions.configure<PublishingExtension> {
             publications.create<MavenPublication>(component.name) {
-                groupId = this.groupId
-                artifactId = "${this.artifactId}_${this.name}"
-                version = this.version
+                groupId = project.group.toString()
+                artifactId = "${project.name}_${component.name}"
+                version = project.version.toString()
                 from(component)
             }
         }
+
         finalizedBy("publish")
     }
 }
@@ -95,7 +108,7 @@ projectsEvaluated {
         configureProject(rootProject, rootProject.property("output-dir").toString())
     } else {
         val moduleProject = rootProject.subprojects.find { it.name == "flutter" }
-            ?: throw GradleException("Module project not found")
+            ?: throw GradleException("Module project 'flutter' not found")
         configureProject(moduleProject, moduleProject.property("output-dir").toString())
 
         val modulePlugins = rootProject.subprojects.filter { it.name != "flutter" && it.name != "app" }
@@ -110,3 +123,9 @@ projectsEvaluated {
         }
     }
 }
+
+fun configurePlugin(project: Project, outputDir: String) {
+    if (!project.hasProperty("android")) return
+    configureProject(project, outputDir)
+}
+
