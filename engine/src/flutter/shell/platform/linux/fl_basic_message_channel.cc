@@ -239,7 +239,7 @@ G_MODULE_EXPORT void fl_basic_message_channel_send(FlBasicMessageChannel* self,
       fl_message_codec_encode_message(self->codec, message, &error);
   if (data == nullptr) {
     if (task != nullptr) {
-      g_task_return_error(task, error);
+      g_task_return_error(task, g_error_copy(error));
     }
     return;
   }

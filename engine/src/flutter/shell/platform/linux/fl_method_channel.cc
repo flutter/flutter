@@ -178,7 +178,7 @@ G_MODULE_EXPORT void fl_method_channel_invoke_method(
       fl_method_codec_encode_method_call(self->codec, method, args, &error);
   if (message == nullptr) {
     if (task != nullptr) {
-      g_task_return_error(task, error);
+      g_task_return_error(task, g_error_copy(error));
     }
     return;
   }
