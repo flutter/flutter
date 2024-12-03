@@ -1550,9 +1550,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
                 Expanded(child: innerItemsWidget)
               else
                 innerItemsWidget,
-              // TODO(TahaTessser): Remove InputDecorator height workaround.
-              // Wrapped the suffix icon with Visibility widget as a workaround
+              // TODO(TahaTessser): Remove InputDecorator height workaround
               // for https://github.com/flutter/flutter/issues/159431.
+              // Hiding the icon with maintainSize does not effect the baseline.
               Visibility(
                 visible: widget._inputDecoration == null,
                 maintainSize: true,
