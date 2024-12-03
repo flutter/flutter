@@ -4,9 +4,10 @@
 
 #include "flutter/shell/platform/linux/fl_keyboard_handler.h"
 
+#include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
 #include "flutter/shell/platform/linux/fl_method_codec_private.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
-#include "flutter/shell/platform/linux/testing/mock_binary_messenger.h"
+#include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -25,19 +26,6 @@ G_DECLARE_FINAL_TYPE(FlMockKeyboardHandlerDelegate,
                      GObject);
 
 G_END_DECLS
-
-MATCHER_P(MethodSuccessResponse, result, "") {
-  g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
-  g_autoptr(FlMethodResponse) response =
-      fl_method_codec_decode_response(FL_METHOD_CODEC(codec), arg, nullptr);
-  fl_method_response_get_result(response, nullptr);
-  if (fl_value_equal(fl_method_response_get_result(response, nullptr),
-                     result)) {
-    return true;
-  }
-  *result_listener << ::testing::PrintToString(response);
-  return false;
-}
 
 struct _FlMockKeyboardHandlerDelegate {
   GObject parent_instance;
@@ -74,8 +62,7 @@ static FlMockKeyboardHandlerDelegate* fl_mock_keyboard_handler_delegate_new() {
 }
 
 TEST(FlKeyboardHandlerTest, KeyboardChannelGetPressedState) {
-  ::testing::NiceMock<flutter::testing::MockBinaryMessenger> messenger;
-
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
                              FL_BINARY_MESSENGER(messenger), nullptr));
@@ -95,21 +82,28 @@ TEST(FlKeyboardHandlerTest, KeyboardChannelGetPressedState) {
       },
       nullptr);
   g_autoptr(FlKeyboardHandler) handler =
-      fl_keyboard_handler_new(messenger, manager);
+      fl_keyboard_handler_new(FL_BINARY_MESSENGER(messenger), manager);
   EXPECT_NE(handler, nullptr);
 
-  g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
-  g_autoptr(GBytes) message = fl_method_codec_encode_method_call(
-      FL_METHOD_CODEC(codec), kGetKeyboardStateMethod, nullptr, nullptr);
+  gboolean called = FALSE;
+  fl_mock_binary_messenger_invoke_standard_method(
+      messenger, kKeyboardChannelName, kGetKeyboardStateMethod, nullptr,
+      [](FlMockBinaryMessenger* messenger, FlMethodResponse* response,
+         gpointer user_data) {
+        gboolean* called = static_cast<gboolean*>(user_data);
+        *called = TRUE;
 
-  g_autoptr(FlValue) response = fl_value_new_map();
-  fl_value_set_take(response, fl_value_new_int(kMockPhysicalKey),
-                    fl_value_new_int(kMockLogicalKey));
-  EXPECT_CALL(messenger,
-              fl_binary_messenger_send_response(
-                  ::testing::Eq<FlBinaryMessenger*>(messenger), ::testing::_,
-                  MethodSuccessResponse(response), ::testing::_))
-      .WillOnce(::testing::Return(true));
+        EXPECT_TRUE(FL_IS_METHOD_SUCCESS_RESPONSE(response));
 
-  messenger.ReceiveMessage(kKeyboardChannelName, message);
+        g_autoptr(FlValue) expected_result = fl_value_new_map();
+        fl_value_set_take(expected_result, fl_value_new_int(kMockPhysicalKey),
+                          fl_value_new_int(kMockLogicalKey));
+        EXPECT_TRUE(fl_value_equal(fl_method_success_response_get_result(
+                                       FL_METHOD_SUCCESS_RESPONSE(response)),
+                                   expected_result));
+      },
+      &called);
+  EXPECT_TRUE(called);
+
+  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }

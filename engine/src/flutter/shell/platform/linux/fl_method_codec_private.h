@@ -86,14 +86,28 @@ GBytes* fl_method_codec_encode_error_envelope(FlMethodCodec* codec,
                                               GError** error);
 
 /**
+ * fl_method_codec_encode_response:
+ * @codec: an #FlMethodCodec.
+ * @response: response to encode.
+ * @error: (allow-none): #GError location to store the error occurring, or
+ * %NULL.
+ *
+ * Encodes a response to a method call.
+ *
+ * Returns: a new #FlMethodResponse or %NULL on error.
+ */
+GBytes* fl_method_codec_encode_response(FlMethodCodec* codec,
+                                        FlMethodResponse* response,
+                                        GError** error);
+
+/**
  * fl_method_codec_decode_response:
  * @codec: an #FlMethodCodec.
  * @message: message to decode.
  * @error: (allow-none): #GError location to store the error occurring, or
  * %NULL.
  *
- * Decodes a response to a method call. If the call resulted in an error then
- * @error_code is set, otherwise it is %NULL.
+ * Decodes a response to a method call.
  *
  * Returns: a new #FlMethodResponse or %NULL on error.
  */

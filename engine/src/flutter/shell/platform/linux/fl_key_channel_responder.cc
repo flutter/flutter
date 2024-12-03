@@ -94,8 +94,6 @@ struct _FlKeyChannelResponder {
   GObject parent_instance;
 
   FlBasicMessageChannel* channel;
-
-  FlKeyChannelResponderMock* mock;
 };
 
 G_DEFINE_TYPE(FlKeyChannelResponder, fl_key_channel_responder, G_TYPE_OBJECT)
@@ -117,9 +115,6 @@ static void handle_response(GObject* object,
   FlBasicMessageChannel* messageChannel = FL_BASIC_MESSAGE_CHANNEL(object);
   FlValue* message =
       fl_basic_message_channel_send_finish(messageChannel, result, &error);
-  if (self->mock != nullptr && self->mock->value_converter != nullptr) {
-    message = self->mock->value_converter(message);
-  }
   bool handled = false;
   if (error != nullptr) {
     g_warning("Unable to retrieve framework response: %s", error->message);
@@ -152,22 +147,16 @@ static void fl_key_channel_responder_init(FlKeyChannelResponder* self) {}
 
 // Creates a new FlKeyChannelResponder instance, with a messenger used to send
 // messages to the framework, and an FlTextInputHandler that is used to handle
-// key events that the framework doesn't handle. Mainly for testing purposes, it
-// also takes an optional callback to call when a response is received, and an
-// optional channel name to use when sending messages.
+// key events that the framework doesn't handle.
 FlKeyChannelResponder* fl_key_channel_responder_new(
-    FlBinaryMessenger* messenger,
-    FlKeyChannelResponderMock* mock) {
+    FlBinaryMessenger* messenger) {
   g_return_val_if_fail(FL_IS_BINARY_MESSENGER(messenger), nullptr);
 
   FlKeyChannelResponder* self = FL_KEY_CHANNEL_RESPONDER(
       g_object_new(fl_key_channel_responder_get_type(), nullptr));
-  self->mock = mock;
 
   g_autoptr(FlJsonMessageCodec) codec = fl_json_message_codec_new();
-  const char* channel_name =
-      mock == nullptr ? kChannelName : mock->channel_name;
-  self->channel = fl_basic_message_channel_new(messenger, channel_name,
+  self->channel = fl_basic_message_channel_new(messenger, kChannelName,
                                                FL_MESSAGE_CODEC(codec));
 
   return self;

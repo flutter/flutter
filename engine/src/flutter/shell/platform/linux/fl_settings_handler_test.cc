@@ -5,114 +5,187 @@
 #include "flutter/shell/platform/linux/fl_settings_handler.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
+#include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_value.h"
+#include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
-#include "flutter/shell/platform/linux/testing/mock_binary_messenger.h"
 #include "flutter/shell/platform/linux/testing/mock_settings.h"
 #include "flutter/testing/testing.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-MATCHER_P2(HasSetting, key, value, "") {
-  g_autoptr(FlJsonMessageCodec) codec = fl_json_message_codec_new();
-  g_autoptr(FlValue) message =
-      fl_message_codec_decode_message(FL_MESSAGE_CODEC(codec), arg, nullptr);
-  if (fl_value_equal(fl_value_lookup_string(message, key), value)) {
-    return true;
-  }
-  *result_listener << ::testing::PrintToString(message);
-  return false;
-}
-
-#define EXPECT_SETTING(messenger, key, value)                                 \
-  EXPECT_CALL(                                                                \
-      messenger,                                                              \
-      fl_binary_messenger_send_on_channel(                                    \
-          ::testing::Eq<FlBinaryMessenger*>(messenger),                       \
-          ::testing::StrEq("flutter/settings"), HasSetting(key, value),       \
-          ::testing::A<GCancellable*>(), ::testing::A<GAsyncReadyCallback>(), \
-          ::testing::A<gpointer>()))
-
 TEST(FlSettingsHandlerTest, AlwaysUse24HourFormat) {
   ::testing::NiceMock<flutter::testing::MockSettings> settings;
-  ::testing::NiceMock<flutter::testing::MockBinaryMessenger> messenger;
 
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
                              FL_BINARY_MESSENGER(messenger), nullptr));
   g_autoptr(FlSettingsHandler) handler = fl_settings_handler_new(engine);
-
-  g_autoptr(FlValue) use_12h = fl_value_new_bool(false);
-  g_autoptr(FlValue) use_24h = fl_value_new_bool(true);
 
   EXPECT_CALL(settings, fl_settings_get_clock_format(
                             ::testing::Eq<FlSettings*>(settings)))
       .WillOnce(::testing::Return(FL_CLOCK_FORMAT_12H))
       .WillOnce(::testing::Return(FL_CLOCK_FORMAT_24H));
 
-  EXPECT_SETTING(messenger, "alwaysUse24HourFormat", use_12h);
+  gboolean called = FALSE;
+  fl_mock_binary_messenger_set_json_message_channel(
+      messenger, "flutter/settings",
+      [](FlMockBinaryMessenger* messenger, FlValue* message,
+         gpointer user_data) {
+        gboolean* called = static_cast<gboolean*>(user_data);
+        *called = TRUE;
 
+        EXPECT_EQ(fl_value_get_type(message), FL_VALUE_TYPE_MAP);
+        FlValue* value =
+            fl_value_lookup_string(message, "alwaysUse24HourFormat");
+        EXPECT_NE(value, nullptr);
+        EXPECT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_BOOL);
+        EXPECT_FALSE(fl_value_get_bool(value));
+
+        return fl_value_new_null();
+      },
+      &called);
   fl_settings_handler_start(handler, settings);
+  EXPECT_TRUE(called);
 
-  EXPECT_SETTING(messenger, "alwaysUse24HourFormat", use_24h);
+  called = FALSE;
+  fl_mock_binary_messenger_set_json_message_channel(
+      messenger, "flutter/settings",
+      [](FlMockBinaryMessenger* messenger, FlValue* message,
+         gpointer user_data) {
+        gboolean* called = static_cast<gboolean*>(user_data);
+        *called = TRUE;
 
+        EXPECT_EQ(fl_value_get_type(message), FL_VALUE_TYPE_MAP);
+        FlValue* value =
+            fl_value_lookup_string(message, "alwaysUse24HourFormat");
+        EXPECT_NE(value, nullptr);
+        EXPECT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_BOOL);
+        EXPECT_TRUE(fl_value_get_bool(value));
+
+        return fl_value_new_null();
+      },
+      &called);
   fl_settings_emit_changed(settings);
+  EXPECT_TRUE(called);
+
+  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
 TEST(FlSettingsHandlerTest, PlatformBrightness) {
   ::testing::NiceMock<flutter::testing::MockSettings> settings;
-  ::testing::NiceMock<flutter::testing::MockBinaryMessenger> messenger;
 
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
                              FL_BINARY_MESSENGER(messenger), nullptr));
   g_autoptr(FlSettingsHandler) handler = fl_settings_handler_new(engine);
-
-  g_autoptr(FlValue) light = fl_value_new_string("light");
-  g_autoptr(FlValue) dark = fl_value_new_string("dark");
 
   EXPECT_CALL(settings, fl_settings_get_color_scheme(
                             ::testing::Eq<FlSettings*>(settings)))
       .WillOnce(::testing::Return(FL_COLOR_SCHEME_LIGHT))
       .WillOnce(::testing::Return(FL_COLOR_SCHEME_DARK));
 
-  EXPECT_SETTING(messenger, "platformBrightness", light);
+  gboolean called = FALSE;
+  fl_mock_binary_messenger_set_json_message_channel(
+      messenger, "flutter/settings",
+      [](FlMockBinaryMessenger* messenger, FlValue* message,
+         gpointer user_data) {
+        gboolean* called = static_cast<gboolean*>(user_data);
+        *called = TRUE;
 
+        EXPECT_EQ(fl_value_get_type(message), FL_VALUE_TYPE_MAP);
+        FlValue* value = fl_value_lookup_string(message, "platformBrightness");
+        EXPECT_NE(value, nullptr);
+        EXPECT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_STRING);
+        EXPECT_STREQ(fl_value_get_string(value), "light");
+
+        return fl_value_new_null();
+      },
+      &called);
   fl_settings_handler_start(handler, settings);
+  EXPECT_TRUE(called);
 
-  EXPECT_SETTING(messenger, "platformBrightness", dark);
+  called = FALSE;
+  fl_mock_binary_messenger_set_json_message_channel(
+      messenger, "flutter/settings",
+      [](FlMockBinaryMessenger* messenger, FlValue* message,
+         gpointer user_data) {
+        gboolean* called = static_cast<gboolean*>(user_data);
+        *called = TRUE;
 
+        EXPECT_EQ(fl_value_get_type(message), FL_VALUE_TYPE_MAP);
+        FlValue* value = fl_value_lookup_string(message, "platformBrightness");
+        EXPECT_NE(value, nullptr);
+        EXPECT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_STRING);
+        EXPECT_STREQ(fl_value_get_string(value), "dark");
+
+        return fl_value_new_null();
+      },
+      &called);
   fl_settings_emit_changed(settings);
+  EXPECT_TRUE(called);
+
+  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
 TEST(FlSettingsHandlerTest, TextScaleFactor) {
   ::testing::NiceMock<flutter::testing::MockSettings> settings;
-  ::testing::NiceMock<flutter::testing::MockBinaryMessenger> messenger;
 
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
                              FL_BINARY_MESSENGER(messenger), nullptr));
   g_autoptr(FlSettingsHandler) handler = fl_settings_handler_new(engine);
-
-  g_autoptr(FlValue) one = fl_value_new_float(1.0);
-  g_autoptr(FlValue) two = fl_value_new_float(2.0);
 
   EXPECT_CALL(settings, fl_settings_get_text_scaling_factor(
                             ::testing::Eq<FlSettings*>(settings)))
       .WillOnce(::testing::Return(1.0))
       .WillOnce(::testing::Return(2.0));
 
-  EXPECT_SETTING(messenger, "textScaleFactor", one);
+  gboolean called = FALSE;
+  fl_mock_binary_messenger_set_json_message_channel(
+      messenger, "flutter/settings",
+      [](FlMockBinaryMessenger* messenger, FlValue* message,
+         gpointer user_data) {
+        gboolean* called = static_cast<gboolean*>(user_data);
+        *called = TRUE;
 
+        EXPECT_EQ(fl_value_get_type(message), FL_VALUE_TYPE_MAP);
+        FlValue* value = fl_value_lookup_string(message, "textScaleFactor");
+        EXPECT_NE(value, nullptr);
+        EXPECT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_FLOAT);
+        EXPECT_EQ(fl_value_get_float(value), 1.0);
+
+        return fl_value_new_null();
+      },
+      &called);
   fl_settings_handler_start(handler, settings);
+  EXPECT_TRUE(called);
 
-  EXPECT_SETTING(messenger, "textScaleFactor", two);
+  called = FALSE;
+  fl_mock_binary_messenger_set_json_message_channel(
+      messenger, "flutter/settings",
+      [](FlMockBinaryMessenger* messenger, FlValue* message,
+         gpointer user_data) {
+        gboolean* called = static_cast<gboolean*>(user_data);
+        *called = TRUE;
 
+        EXPECT_EQ(fl_value_get_type(message), FL_VALUE_TYPE_MAP);
+        FlValue* value = fl_value_lookup_string(message, "textScaleFactor");
+        EXPECT_NE(value, nullptr);
+        EXPECT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_FLOAT);
+        EXPECT_EQ(fl_value_get_float(value), 2.0);
+
+        return fl_value_new_null();
+      },
+      &called);
   fl_settings_emit_changed(settings);
+  EXPECT_TRUE(called);
+
+  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
 // MOCK_ENGINE_PROC is leaky by design
