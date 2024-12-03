@@ -78,7 +78,9 @@ void GlyphAtlas::SetAtlasGeneration(size_t generation) {
 void GlyphAtlas::AddTypefaceGlyphPositionAndBounds(const FontGlyphPair& pair,
                                                    Rect position,
                                                    Rect bounds) {
-  font_atlas_map_[pair.scaled_font].positions_[pair.glyph] =
+  FontAtlasMap::iterator it = font_atlas_map_.find(pair.scaled_font);
+  FML_DCHECK(it != font_atlas_map_.end());
+  it->second.positions_[pair.glyph] =
       FrameBounds{position, bounds, /*is_placeholder=*/false};
 }
 
@@ -93,12 +95,9 @@ std::optional<FrameBounds> GlyphAtlas::FindFontGlyphBounds(
 
 FontGlyphAtlas* GlyphAtlas::GetOrCreateFontGlyphAtlas(
     const ScaledFont& scaled_font) {
-  const auto& found = font_atlas_map_.find(scaled_font);
-  if (found != font_atlas_map_.end()) {
-    return &found->second;
-  }
-  font_atlas_map_[scaled_font] = FontGlyphAtlas();
-  return &font_atlas_map_[scaled_font];
+  auto [iter, inserted] =
+      font_atlas_map_.try_emplace(scaled_font, FontGlyphAtlas());
+  return &iter->second;
 }
 
 size_t GlyphAtlas::GetGlyphCount() const {
