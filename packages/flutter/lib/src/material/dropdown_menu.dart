@@ -1022,6 +1022,17 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       );
     }
 
+    // Wrap the menu anchor with an Align to narrow down the constraints.
+    // Without this Align, when tight constraints are applied to DropdownMenu,
+    // the menu will appear below these constraints instead of below the
+    // text field.
+    menuAnchor = Align(
+      alignment: AlignmentDirectional.topStart,
+      widthFactor: 1.0,
+      heightFactor: 1.0,
+      child: menuAnchor,
+    );
+
     return Actions(
       actions: <Type, Action<Intent>>{
         _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(

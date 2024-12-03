@@ -43,6 +43,7 @@ void main() {
       },
     );
     fileSystem.file(environment.buildDir.childFile('app.dill')).createSync(recursive: true);
+    fileSystem.file(environment.buildDir.childFile('native_assets.json')).createSync(recursive: true);
     fileSystem.file('packages/flutter_tools/lib/src/build_system/targets/assets.dart')
       .createSync(recursive: true);
     fileSystem.file('assets/foo/bar.png')
