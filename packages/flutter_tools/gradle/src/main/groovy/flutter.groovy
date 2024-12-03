@@ -278,6 +278,7 @@ class FlutterPlugin implements Plugin<Project> {
         extension.flutterVersionName = flutterVersionName ?: "1.0"
 
         this.addFlutterTasks(project)
+        forceNdkDownload(project, flutterRootPath)
 
         // By default, assembling APKs generates fat APKs if multiple platforms are passed.
         // Configuring split per ABI allows to generate separate APKs for each abi.
@@ -842,6 +843,16 @@ class FlutterPlugin implements Plugin<Project> {
             return version1
         }
         return version2
+    }
+
+    private void forceNdkDownload(Project gradleProject, String flutterSdkRootPath) {
+        gradleProject.android {
+            externalNativeBuild {
+                cmake {
+                    path = flutterSdkRootPath + "/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+                }
+            }
+        }
     }
 
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
