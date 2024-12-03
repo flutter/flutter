@@ -260,8 +260,8 @@ static gboolean send_response(FlBinaryMessenger* messenger,
 static void platform_message_ready_cb(GObject* object,
                                       GAsyncResult* result,
                                       gpointer user_data) {
-  GTask* task = G_TASK(user_data);
-  g_task_return_pointer(task, result, g_object_unref);
+  g_autoptr(GTask) task = G_TASK(user_data);
+  g_task_return_pointer(task, g_object_ref(result), g_object_unref);
 }
 
 static void send_on_channel(FlBinaryMessenger* messenger,
@@ -290,8 +290,9 @@ static GBytes* send_on_channel_finish(FlBinaryMessenger* messenger,
   FlBinaryMessengerImpl* self = FL_BINARY_MESSENGER_IMPL(messenger);
   g_return_val_if_fail(g_task_is_valid(result, self), FALSE);
 
-  g_autoptr(GTask) task = G_TASK(result);
-  GAsyncResult* r = G_ASYNC_RESULT(g_task_propagate_pointer(task, error));
+  GTask* task = G_TASK(result);
+  g_autoptr(GAsyncResult) r =
+      G_ASYNC_RESULT(g_task_propagate_pointer(task, error));
   if (r == nullptr) {
     return nullptr;
   }
