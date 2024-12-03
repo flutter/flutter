@@ -529,7 +529,6 @@ class FlutterPlatform extends PlatformPlugin {
             flutterProject,
             precompiledDillPath: precompiledDillPath,
             testTimeRecorder: testTimeRecorder,
-            nativeAssetsBuilder: nativeAssetsBuilder,
           );
           final Uri uri = globals.fs.file(path).uri;
           // Trigger a compilation to initialize the resident compiler.
@@ -556,7 +555,6 @@ class FlutterPlatform extends PlatformPlugin {
             debuggingOptions.buildInfo,
             flutterProject,
             testTimeRecorder: testTimeRecorder,
-            nativeAssetsBuilder: nativeAssetsBuilder,
           );
           mainDart = await compiler!.compile(globals.fs.file(mainDart).uri);
 

@@ -629,14 +629,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
       'A summary of your ${kind.toUpperCase()} analysis can be found at: ${outputFile.path}',
     );
 
-    // DevTools expects a file path relative to the .flutter-devtools/ dir.
-    final String relativeAppSizePath = outputFile.path
-        .split('.flutter-devtools/')
-        .last
-        .trim();
     _logger.printStatus(
         '\nTo analyze your app size in Dart DevTools, run the following command:\n'
-            'dart devtools --appSizeBase=$relativeAppSizePath'
+        'dart devtools --appSizeBase=${outputFile.path}'
     );
   }
 
