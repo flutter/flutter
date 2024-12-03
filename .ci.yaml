@@ -566,6 +566,7 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
 
   - name: Linux docs_publish
     recipe: flutter/docs
@@ -3796,6 +3797,7 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
 
   - name: Mac dart_plugin_registry_test
     recipe: devicelab/devicelab_drone
@@ -5538,6 +5540,7 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
 
   - name: Windows framework_tests_libraries
     recipe: flutter/flutter_drone
