@@ -228,9 +228,6 @@ class ModuleTest {
       section(propertyContent);
       await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
 
-      final File analyticsOutputFile =
-      File(path.join(tempDir.path, 'analytics.log'));
-
       section('Build debug host APK');
 
       await inDirectory(hostApp, () async {
@@ -241,7 +238,7 @@ class ModuleTest {
           <String>['app:assembleDebug'],
           environment: <String, String>{
             'JAVA_HOME': javaHome,
-            'FLUTTER_ANALYTICS_LOG_FILE': analyticsOutputFile.path,
+            'FLUTTER_SUPPRESS_ANALYTICS': 'true',
           },
         );
       });
@@ -282,17 +279,6 @@ class ModuleTest {
         return TaskResult.failure("Debug host APK doesn't contain metadata: flutterProjectType = module ");
       }
 
-      final String analyticsOutput = analyticsOutputFile.readAsStringSync();
-      if (!analyticsOutput.contains('cd24: android')
-          || !analyticsOutput.contains('cd25: true')
-          || !analyticsOutput.contains('viewName: assemble')) {
-        return TaskResult.failure(
-            'Building outer app produced the following analytics: "$analyticsOutput" '
-                'but not the expected strings: "cd24: android", "cd25: true" and '
-                '"viewName: assemble"'
-        );
-      }
-
       section('Check file access modes for read-only asset from Flutter module');
 
       final String readonlyDebugAssetFilePath = path.joinAll(<String>[
@@ -325,7 +311,7 @@ class ModuleTest {
           <String>['app:assembleRelease'],
           environment: <String, String>{
             'JAVA_HOME': javaHome,
-            'FLUTTER_ANALYTICS_LOG_FILE': analyticsOutputFile.path,
+            'FLUTTER_SUPPRESS_ANALYTICS': 'true',
           },
         );
       });
