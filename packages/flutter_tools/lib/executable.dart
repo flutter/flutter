@@ -50,7 +50,6 @@ import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
 import 'src/isolated/build_targets.dart';
 import 'src/isolated/mustache_template.dart';
-import 'src/isolated/native_assets/native_assets.dart';
 import 'src/isolated/native_assets/test/native_assets.dart';
 import 'src/isolated/resident_web_runner.dart';
 import 'src/native_assets.dart';
@@ -182,7 +181,6 @@ List<FlutterCommand> generateCommands({
     platform: globals.platform,
     processInfo: globals.processInfo,
     fileSystem: globals.fs,
-    nativeAssetsBuilder: const HotRunnerNativeAssetsBuilderImpl(),
   ),
   BuildCommand(
     artifacts: globals.artifacts!,
@@ -245,7 +243,6 @@ List<FlutterCommand> generateCommands({
   ),
   RunCommand(
     verboseHelp: verboseHelp,
-    nativeAssetsBuilder: const HotRunnerNativeAssetsBuilderImpl(),
   ),
   ScreenshotCommand(fs: globals.fs),
   ShellCompletionCommand(),
