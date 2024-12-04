@@ -107,7 +107,7 @@ void main() {
     );
   });
 
-  testWidgets('If a sheet covers another sheet, than the previous sheet moves slightly upwards', (WidgetTester tester) async {
+  testWidgets('If a sheet covers another sheet, then the previous sheet moves slightly upwards', (WidgetTester tester) async {
     final GlobalKey scaffoldKey = GlobalKey();
 
     await tester.pumpWidget(
