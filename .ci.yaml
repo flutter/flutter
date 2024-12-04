@@ -1077,6 +1077,25 @@ targets:
         ["devicelab", "hostonly", "linux"]
       task_name: linux_desktop_impeller
 
+  - name: Linux android_release_builds_exclude_dev_dependencies_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    bringup: true
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:35v1"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: android_release_builds_exclude_dev_dependencies_test
+    runIf:
+      - dev/**
+      - bin/**
+      - .ci.yaml
+
   - name: Linux run_release_test_linux
     recipe: devicelab/devicelab_drone
     timeout: 60
