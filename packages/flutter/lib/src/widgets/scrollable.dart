@@ -1654,7 +1654,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
           ..scrollExtentMax = _position.maxScrollExtent
           ..scrollExtentMin = _position.minScrollExtent
           ..scrollChildCount = semanticChildCount;
-      if (position.maxScrollExtent > position.minScrollExtent && allowImplicitScrolling) { 
+      if (position.maxScrollExtent > position.minScrollExtent && allowImplicitScrolling) {
           config.onScrollToOffset = _onScrollToOffset;
       }
     }

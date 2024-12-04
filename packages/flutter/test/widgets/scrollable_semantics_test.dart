@@ -42,7 +42,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Vertical scrollable responds to scrollToOffset', (WidgetTester tester) async { 
+  testWidgets('Vertical scrollable responds to scrollToOffset', (WidgetTester tester) async {
     semantics = SemanticsTester(tester);
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
@@ -64,7 +64,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Horizontal scrollable responds to scrollToOffset', (WidgetTester tester) async { 
+  testWidgets('Horizontal scrollable responds to scrollToOffset', (WidgetTester tester) async {
     semantics = SemanticsTester(tester);
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
@@ -87,7 +87,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Unscrollable scrollable does not respond to scrollToOffset', (WidgetTester tester) async { 
+  testWidgets('Unscrollable scrollable does not respond to scrollToOffset', (WidgetTester tester) async {
     semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
@@ -101,7 +101,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('scrollToOffset respects implicit scrolling configuration', (WidgetTester tester) async { 
+  testWidgets('scrollToOffset respects implicit scrolling configuration', (WidgetTester tester) async {
     semantics = SemanticsTester(tester);
     final ScrollPhysics physics = _NoImplicitScrollingScrollPhysics();
     await tester.pumpWidget(

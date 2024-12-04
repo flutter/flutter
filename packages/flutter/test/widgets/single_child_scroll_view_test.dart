@@ -353,7 +353,7 @@ void main() {
               SemanticsFlag.hasImplicitScrolling,
             ],
             actions: <SemanticsAction>[
-              SemanticsAction.scrollUp, 
+              SemanticsAction.scrollUp,
               SemanticsAction.scrollToOffset,
             ],
             children: generateSemanticsChildren(endHidden: 3),
