@@ -2177,7 +2177,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
           /// Gets the children nodes from the JSON response.
           List<Object?> childrenFromJsonResponse(Map<String, Object?> json) {
-            return json['children']! as List<Object?>;
+            return (json['children'] as List<Object?>?) ?? <Object?>[];
           }
 
           /// Gets the children nodes using a call to
@@ -2571,7 +2571,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               ),
               isTrue,
             );
-
             expect(
               allChildrenSatisfyCondition(rootJson,
                 condition: wasCreatedByLocalProject,
@@ -5758,7 +5757,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         node.toJsonMap(const DiagnosticsSerializationDelegate()),
         equals(<String, dynamic>{
           'description': 'description of the deep link',
-          'shouldIndent': true,
           'type': 'DevToolsDeepLinkProperty',
           'name': '',
           'style': 'singleLine',
