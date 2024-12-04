@@ -1009,7 +1009,8 @@ public class FlutterFragment extends Fragment
     return new FlutterActivityAndFragmentDelegate(host);
   }
 
-  private final OnBackPressedCallback onBackPressedCallback =
+  @VisibleForTesting
+  final OnBackPressedCallback onBackPressedCallback =
       new OnBackPressedCallback(true) {
         @Override
         public void handleOnBackPressed() {
@@ -1071,6 +1072,12 @@ public class FlutterFragment extends Fragment
   @Override
   public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    if (savedInstanceState != null) {
+      boolean frameworkHandlesBack =
+          savedInstanceState.getBoolean(
+              FlutterActivityAndFragmentDelegate.ON_BACK_CALLBACK_ENABLED_KEY);
+      onBackPressedCallback.setEnabled(frameworkHandlesBack);
+    }
     delegate.onRestoreInstanceState(savedInstanceState);
   }
 
@@ -1653,6 +1660,11 @@ public class FlutterFragment extends Fragment
   @Override
   public boolean attachToEngineAutomatically() {
     return true;
+  }
+
+  @Override
+  public boolean getBackCallbackState() {
+    return onBackPressedCallback.isEnabled();
   }
 
   /**

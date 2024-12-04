@@ -5,6 +5,8 @@
 package io.flutter.embedding.android;
 
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY;
+import static io.flutter.embedding.android.FlutterFragment.ARG_CACHED_ENGINE_ID;
+import static io.flutter.embedding.android.FlutterFragment.ARG_DESTROY_ENGINE_WITH_FRAGMENT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -13,6 +15,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -25,9 +28,11 @@ import androidx.annotation.Nullable;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import io.flutter.Build;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.plugins.GeneratedPluginRegistrant;
@@ -252,6 +257,63 @@ public class FlutterFragmentActivityTest {
     // The framework would have recreated a new fragment but the fragment activity wouldn't have
     // created a new one again.
     assertEquals(0, activity.numberOfEnginesCreated);
+  }
+
+  @Test
+  @Config(minSdk = Build.API_LEVELS.API_34)
+  @TargetApi(Build.API_LEVELS.API_34)
+  public void whenUsingCachedEngine_predictiveBackStateIsSaved() {
+    FlutterLoader mockFlutterLoader = mock(FlutterLoader.class);
+    FlutterJNI mockFlutterJni = mock(FlutterJNI.class);
+    when(mockFlutterJni.isAttached()).thenReturn(true);
+    FlutterEngine cachedEngine = new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni);
+    FlutterEngineCache.getInstance().put("my_cached_engine", cachedEngine);
+
+    ActivityScenario<FlutterFragmentActivity> flutterFragmentActivityActivityScenario =
+        ActivityScenario.launch(FlutterFragmentActivity.class);
+
+    // Set to framework handling and then recreate the activity and check the state is preserved.
+    flutterFragmentActivityActivityScenario.onActivity(
+        activity -> {
+          FlutterFragment flutterFragment = activity.retrieveExistingFlutterFragmentIfPossible();
+          flutterFragment.setFrameworkHandlesBack(true);
+          Bundle bundle = flutterFragment.getArguments();
+          bundle.putString(ARG_CACHED_ENGINE_ID, "my_cached_engine");
+          bundle.putBoolean(ARG_DESTROY_ENGINE_WITH_FRAGMENT, false);
+          FlutterEngineCache.getInstance().put("my_cached_engine", cachedEngine);
+          flutterFragment.setArguments(bundle);
+        });
+
+    flutterFragmentActivityActivityScenario.recreate();
+
+    flutterFragmentActivityActivityScenario.onActivity(
+        activity -> {
+          assertTrue(
+              activity
+                  .retrieveExistingFlutterFragmentIfPossible()
+                  .onBackPressedCallback
+                  .isEnabled());
+        });
+
+    // Clean up.
+    flutterFragmentActivityActivityScenario.close();
+  }
+
+  @Test
+  @Config(minSdk = Build.API_LEVELS.API_34)
+  @TargetApi(Build.API_LEVELS.API_34)
+  public void whenNotUsingCachedEngine_predictiveBackStateIsNotSaved() {
+    ActivityScenario<FlutterActivity> flutterActivityScenario =
+        ActivityScenario.launch(FlutterActivity.class);
+
+    // Set to framework handling and then recreate the activity and check the state is preserved.
+    flutterActivityScenario.onActivity(activity -> activity.setFrameworkHandlesBack(true));
+
+    flutterActivityScenario.recreate();
+    flutterActivityScenario.onActivity(activity -> assertFalse(activity.hasRegisteredBackCallback));
+
+    // Clean up.
+    flutterActivityScenario.close();
   }
 
   static class FlutterFragmentActivityWithProvidedEngine extends FlutterFragmentActivity {

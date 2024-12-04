@@ -76,6 +76,7 @@ import java.util.List;
   private static final String TAG = "FlutterActivityAndFragmentDelegate";
   private static final String FRAMEWORK_RESTORATION_BUNDLE_KEY = "framework";
   private static final String PLUGINS_RESTORATION_BUNDLE_KEY = "plugins";
+  static final String ON_BACK_CALLBACK_ENABLED_KEY = "enableOnBackInvokedCallbackState";
   private static final int FLUTTER_SPLASH_VIEW_FALLBACK_ID = 486947586;
 
   /** Factory to obtain a FlutterActivityAndFragmentDelegate instance. */
@@ -691,6 +692,12 @@ import java.util.List;
       flutterEngine.getActivityControlSurface().onSaveInstanceState(plugins);
       bundle.putBundle(PLUGINS_RESTORATION_BUNDLE_KEY, plugins);
     }
+
+    // If using a cached engine, we need to save whether the framework or the system should handle
+    // backs.
+    if (host.getCachedEngineId() != null && !host.shouldDestroyEngineWithHost()) {
+      bundle.putBoolean(ON_BACK_CALLBACK_ENABLED_KEY, host.getBackCallbackState());
+    }
   }
 
   @Override
@@ -1297,5 +1304,7 @@ import java.util.List;
      * <p>Defaults to {@code true}.
      */
     boolean attachToEngineAutomatically();
+
+    boolean getBackCallbackState();
   }
 }
