@@ -2504,10 +2504,13 @@ class SystemContextMenuController with SystemContextMenuClient {
   }
 
   @override
-  void handleTapCustomActionItem() {
+  void handleTapCustomActionItem(int callbackId) {
     if (!_isVisible) {
       return;
     }
+    final VoidCallback? callback = _buttonCallbacks[callbackId];
+    assert(callback != null, 'Tap received for non-existent callbackId $callbackId.');
+    _buttonCallbacks[callbackId]!();
   }
 
   // End SystemContextMenuClient.
@@ -2546,12 +2549,22 @@ class SystemContextMenuController with SystemContextMenuClient {
       return Future<void>.value();
     }
 
-    // TODO(justinmc): The itemsJson is an implementation detail. This class is public. You should hide it in here. That means you need to pass the localizations right?
+    // TODO(justinmc): The itemsJson is an implementation detail. This class is public. You should hide it in here.
 
     assert(
       _lastShown == null || _lastShown == this || !_lastShown!._isVisible,
       'Attempted to show while another instance was still visible.',
     );
+
+    _buttonCallbacks.clear();
+    if (items != null) {
+      for (final SystemContextMenuItemData item in items) {
+        if (item.action == SystemContextMenuAction.custom) {
+          assert(item.onPressed != null, 'Custom SystemContextMenuItemDatas must define an onPressed callback.');
+          _buttonCallbacks[item.hashCode] = item.onPressed!;
+        }
+      }
+    }
 
     _lastTargetRect = targetRect;
     _lastShown = this;
@@ -2566,6 +2579,7 @@ class SystemContextMenuController with SystemContextMenuClient {
           'height': targetRect.height,
         },
         if (items != null)
+          // TODO(justinmc): Yeah it seems like the json stuff should be here, right? Or maybe SystemContextMenuItemData will be moved here.
           'items': SystemContextMenuItemData.itemsToJson(items),
       },
     );
@@ -2591,6 +2605,7 @@ class SystemContextMenuController with SystemContextMenuClient {
       return;
     }
     _lastShown = null;
+    _buttonCallbacks.clear();
     // This may be called unnecessarily in the case where the user has already
     // hidden the menu (for example by tapping the screen).
     return _channel.invokeMethod<void>(
@@ -2612,6 +2627,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   }
 }
 
+/*
 /// Represents a single menu item in a system context menu.
 class SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItem].
@@ -2664,73 +2680,72 @@ class SystemContextMenuItemWithTitle {
 
   final VoidCallback? onPressed;
 }
+*/
 
-class SystemContextMenuItemWithConstructors {
-  /// Creates an instance of [SystemContextMenuItemWithConstructors] for the
+class SystemContextMenuItem {
+  /// Creates an instance of [SystemContextMenuItem] for the
   /// system's built-in cut button.
-  SystemContextMenuItemWithConstructors.cut(
+  SystemContextMenuItem.cut(
   ) : action = SystemContextMenuAction.cut,
       type = SystemContextMenuItemType.builtIn,
       onPressed = null,
       title = null;
 
-  /// Creates an instance of [SystemContextMenuItemWithConstructors] for the
+  /// Creates an instance of [SystemContextMenuItem] for the
   /// system's built-in copy button.
-  SystemContextMenuItemWithConstructors.copy(
+  SystemContextMenuItem.copy(
   ) : action = SystemContextMenuAction.copy,
       type = SystemContextMenuItemType.builtIn,
       onPressed = null,
       title = null;
 
-  /// Creates an instance of [SystemContextMenuItemWithConstructors] for the
+  /// Creates an instance of [SystemContextMenuItem] for the
   /// system's built-in paste button.
-  SystemContextMenuItemWithConstructors.paste(
+  SystemContextMenuItem.paste(
   ) : action = SystemContextMenuAction.paste,
       type = SystemContextMenuItemType.builtIn,
       onPressed = null,
       title = null;
 
-  /// Creates an instance of [SystemContextMenuItemWithConstructors] for the
+  /// Creates an instance of [SystemContextMenuItem] for the
   /// system's built-in select all button.
-  SystemContextMenuItemWithConstructors.selectAll(
+  SystemContextMenuItem.selectAll(
   ) : action = SystemContextMenuAction.selectAll,
       type = SystemContextMenuItemType.builtIn,
       onPressed = null,
       title = null;
 
-  /// Creates an instance of [SystemContextMenuItemWithConstructors] for the
+  /// Creates an instance of [SystemContextMenuItem] for the
   /// system's built-in search web button.
-  SystemContextMenuItemWithConstructors.searchWeb({
+  SystemContextMenuItem.searchWeb({
     this.title,
   }) : action = SystemContextMenuAction.searchWeb,
        type = SystemContextMenuItemType.builtIn,
        onPressed = null;
 
-  /// Creates an instance of [SystemContextMenuItemWithConstructors] for the
+  /// Creates an instance of [SystemContextMenuItem] for the
   /// system's built-in look up button.
   ///
   /// Looks up the current selection in a dictionary.
-  SystemContextMenuItemWithConstructors.lookUp({
+  SystemContextMenuItem.lookUp({
     this.title,
   }) : action = SystemContextMenuAction.lookUp,
        onPressed = null,
        type = SystemContextMenuItemType.builtIn;
 
-  SystemContextMenuItemWithConstructors.share({
+  SystemContextMenuItem.share({
     this.title,
   }) : action = SystemContextMenuAction.share,
        onPressed = null,
        type = SystemContextMenuItemType.builtIn;
 
-/*
-  SystemContextMenuItemWithConstructors.custom({
+  SystemContextMenuItem.custom({
     required this.onPressed,
     required this.title,
   }) : action = SystemContextMenuAction.custom,
        type = SystemContextMenuItemType.custom,
        assert(onPressed != null),
        assert(title != null);
-       */
 
   // TODO(justinmc): Make private.
   /// The action to take when this menu item is invoked.
@@ -2739,7 +2754,7 @@ class SystemContextMenuItemWithConstructors {
   /// The text to display to the user.
   final String? title;
 
-  // TODO(justinmc): This should be inferred?
+  // TODO(justinmc): This should be inferred.
   /// The type of this menu item.
   final SystemContextMenuItemType type;
 
@@ -2749,7 +2764,7 @@ class SystemContextMenuItemWithConstructors {
 // TODO(justinmc): Move to text_input.dart.
 // TODO(justinmc): Check how the hashCode thing for callback works with this.
 class SystemContextMenuItemData {
-  /// Creates an instance of [SystemContextMenuItemWithConstructors] for the
+  /// Creates an instance of [SystemContextMenuItem] for the
   /// system's built-in cut button.
   const SystemContextMenuItemData.cut(
   ) : action = SystemContextMenuAction.cut,
@@ -2815,7 +2830,7 @@ class SystemContextMenuItemData {
   const SystemContextMenuItemData.custom({
     required VoidCallback onPressed,
     required String title,
-  }) : action = SystemContextMenuAction.share,
+  }) : action = SystemContextMenuAction.custom,
        onPressed = onPressed,
        type = SystemContextMenuItemType.builtIn,
        title = title;

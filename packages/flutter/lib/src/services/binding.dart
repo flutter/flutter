@@ -393,7 +393,9 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       case 'ContextMenu.onTapCustomActionItem':
         for (final SystemContextMenuClient client in _systemContextMenuClients) {
           // TODO(justinmc): You could do the thing where you quit after one returns true. Only one client should be able to handle this.
-          client.handleTapCustomActionItem();
+          final List<dynamic> args = methodCall.arguments as List<dynamic>;
+          final int callbackId = args.first as int;
+          client.handleTapCustomActionItem(callbackId);
         }
       case 'SystemChrome.systemUIChange':
         final List<dynamic> args = methodCall.arguments as List<dynamic>;
@@ -659,5 +661,6 @@ mixin SystemContextMenuClient {
   /// not guaranteed that this instance was the one that was hidden.
   void handleSystemHide();
 
-  void handleTapCustomActionItem();
+  /// Called when a custom system context menu button receives a tap.
+  void handleTapCustomActionItem(int callbackId);
 }

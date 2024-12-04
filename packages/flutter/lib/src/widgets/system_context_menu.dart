@@ -155,16 +155,16 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
       SystemContextMenuAction.paste => const SystemContextMenuItemData.paste(),
       SystemContextMenuAction.selectAll => const SystemContextMenuItemData.selectAll(),
       SystemContextMenuAction.lookUp => SystemContextMenuItemData.lookUp(
-        title: _getTitleForAction(item.action, localizations),
+        title: item.title ?? _getTitleForAction(item.action, localizations),
       ),
       SystemContextMenuAction.share => SystemContextMenuItemData.share(
-        title: _getTitleForAction(item.action, localizations),
+        title: item.title ?? _getTitleForAction(item.action, localizations),
       ),
       SystemContextMenuAction.searchWeb => SystemContextMenuItemData.searchWeb(
-        title: _getTitleForAction(item.action, localizations),
+        title: item.title ?? _getTitleForAction(item.action, localizations),
       ),
       SystemContextMenuAction.custom => SystemContextMenuItemData.custom(
-        title: _getTitleForAction(item.action, localizations),
+        title: item.title!,
         onPressed: item.onPressed!,
       ),
     };
@@ -183,11 +183,13 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
     super.didUpdateWidget(oldWidget);
     // TODO(justinmc): Or if items changed.
     if (widget.anchor != oldWidget.anchor) {
+      // TODO(justinmc): Deduplicate with the `show` call in the first build below.
       final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-      final Iterable<SystemContextMenuItemData> datas = items.map((SystemContextMenuButtonItem item) => _itemToData(item));
+      final Iterable<SystemContextMenuItemData>? datas =
+        widget.items?.map((SystemContextMenuItem item) => _itemToData(item, localizations));
       _systemContextMenuController.show(
         widget.anchor,
-        widget.items == null ? null : _itemsToJson(widget.items!, localizations),
+        datas?.toList(),
       );
     }
   }
@@ -204,9 +206,11 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
     if (isFirstBuild) {
       isFirstBuild = false;
       final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+      final Iterable<SystemContextMenuItemData>? datas =
+        widget.items?.map((SystemContextMenuItem item) => _itemToData(item, localizations));
       _systemContextMenuController.show(
         widget.anchor,
-        widget.items == null ? null : _itemsToJson(widget.items!, localizations),
+        datas?.toList(),
       );
     }
 
