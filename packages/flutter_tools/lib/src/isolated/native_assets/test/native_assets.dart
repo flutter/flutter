@@ -27,9 +27,6 @@ class TestCompilerNativeAssetsBuilderImpl
 }
 
 Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
-  if (!buildInfo.buildNativeAssets) {
-    return null;
-  }
   final Uri projectUri = FlutterProject.current().directory.uri;
   final FlutterNativeAssetsBuildRunner buildRunner = FlutterNativeAssetsBuildRunnerImpl(
     projectUri,

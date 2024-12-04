@@ -4,6 +4,8 @@
 
 // Logic for native assets shared between all host OSes.
 
+import 'dart:io' as io; // flutter_ignore: dart_io_import
+
 import 'package:logging/logging.dart' as logging;
 import 'package:native_assets_builder/native_assets_builder.dart';
 import 'package:native_assets_cli/code_assets_builder.dart';
@@ -27,6 +29,8 @@ import 'linux/native_assets.dart';
 import 'macos/native_assets.dart';
 import 'macos/native_assets_host.dart';
 import 'windows/native_assets.dart';
+
+export 'package:native_assets_cli/code_assets_builder.dart' show OS;
 
 /// The assets produced by a Dart build and the dependencies of those assets.
 ///
@@ -219,8 +223,13 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   );
 
   @override
-  Future<bool> hasPackageConfig() {
-    return fileSystem.file(packageConfigPath).exists();
+  Future<bool> hasPackageConfig() async {
+    // WARNING: We do not use [fileSystem] here because the code in
+    // [packagesWithNativeAssets] below uses `PackageLayout.fromPackageConfig`
+    // (from package:native_assets_builder`) which asserts that the file
+    // actually exists on disc using `dart:io` (instead of using a file system
+    // mock).
+    return io.File.fromUri(Uri.file(packageConfigPath)).existsSync();
   }
 
   @override
