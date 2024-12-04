@@ -48,14 +48,27 @@ RenderPassBuilderVK& RenderPassBuilderVK::SetColorAttachment(
     desc.initialLayout = vk::ImageLayout::eUndefined;
   }
   desc.finalLayout = vk::ImageLayout::eGeneral;
-  colors_[index] = desc;
 
-  if (StoreActionPerformsResolve(store_action)) {
-    desc.storeOp = ToVKAttachmentStoreOp(store_action, true);
-    desc.samples = vk::SampleCountFlagBits::e1;
-    resolves_[index] = desc;
+  const bool performs_resolves = StoreActionPerformsResolve(store_action);
+  if (index == 0u) {
+    color0_ = desc;
+
+    if (performs_resolves) {
+      desc.storeOp = ToVKAttachmentStoreOp(store_action, true);
+      desc.samples = vk::SampleCountFlagBits::e1;
+      color0_resolve_ = desc;
+    } else {
+      color0_resolve_ = std::nullopt;
+    }
   } else {
-    resolves_.erase(index);
+    colors_[index] = desc;
+    if (performs_resolves) {
+      desc.storeOp = ToVKAttachmentStoreOp(store_action, true);
+      desc.samples = vk::SampleCountFlagBits::e1;
+      resolves_[index] = desc;
+    } else {
+      resolves_.erase(index);
+    }
   }
   return *this;
 }
@@ -100,8 +113,11 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
     const vk::Device& device) const {
   // This must be less than `VkPhysicalDeviceLimits::maxColorAttachments` but we
   // are not checking.
-  const auto color_attachments_count =
+  auto color_attachments_count =
       colors_.empty() ? 0u : colors_.rbegin()->first + 1u;
+  if (color0_.has_value()) {
+    color_attachments_count++;
+  }
 
   std::vector<vk::AttachmentDescription> attachments;
 
@@ -110,6 +126,22 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
   std::vector<vk::AttachmentReference> resolve_refs(color_attachments_count,
                                                     kUnusedAttachmentReference);
   vk::AttachmentReference depth_stencil_ref = kUnusedAttachmentReference;
+
+  if (color0_.has_value()) {
+    vk::AttachmentReference color_ref;
+    color_ref.attachment = attachments.size();
+    color_ref.layout = vk::ImageLayout::eGeneral;
+    color_refs[0] = color_ref;
+    attachments.push_back(color0_.value());
+
+    if (color0_resolve_.has_value()) {
+      vk::AttachmentReference resolve_ref;
+      resolve_ref.attachment = attachments.size();
+      resolve_ref.layout = vk::ImageLayout::eGeneral;
+      resolve_refs[0] = resolve_ref;
+      attachments.push_back(color0_resolve_.value());
+    }
+  }
 
   for (const auto& color : colors_) {
     vk::AttachmentReference color_ref;
@@ -205,6 +237,18 @@ RenderPassBuilderVK::GetResolves() const {
 const std::optional<vk::AttachmentDescription>&
 RenderPassBuilderVK::GetDepthStencil() const {
   return depth_stencil_;
+}
+
+// Visible for testing.
+std::optional<vk::AttachmentDescription> RenderPassBuilderVK::GetColor0()
+    const {
+  return color0_;
+}
+
+// Visible for testing.
+std::optional<vk::AttachmentDescription> RenderPassBuilderVK::GetColor0Resolve()
+    const {
+  return color0_resolve_;
 }
 
 }  // namespace impeller
