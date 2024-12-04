@@ -2166,9 +2166,9 @@ class Navigator extends StatefulWidget {
   /// and [Route.didChangeNext]). If the [Navigator] has any
   /// [Navigator.observers], they will be notified as well (see
   /// [NavigatorObserver.didPush] and [NavigatorObserver.didRemove]). The
-  /// removed routes are disposed, without being notified, once the new route
-  /// has finished animating. The futures that had been returned from pushing
-  /// those routes will not complete.
+  /// removed routes are disposed, once the new route has finished animating,
+  /// and the futures that had been returned from pushing those routes
+  /// will complete.
   ///
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
@@ -2423,7 +2423,7 @@ class Navigator extends StatefulWidget {
   /// they will be notified as well (see [NavigatorObserver.didPush] and
   /// [NavigatorObserver.didRemove]). The removed routes are disposed of and
   /// notified, once the new route has finished animating. The futures that had
-  /// been returned from pushing those routes will not complete.
+  /// been returned from pushing those routes will complete.
   ///
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
@@ -2493,16 +2493,15 @@ class Navigator extends StatefulWidget {
   /// _does_ animate the new route, and delays removing the old route until the
   /// new route has finished animating.
   ///
-  /// The removed route is removed without being completed, so this method does
+  /// The removed route is removed and completed with null, so this method does
   /// not take a return value argument.
   ///
   /// The new route, the route below the new route (if any), and the route above
   /// the new route, are all notified (see [Route.didReplace],
   /// [Route.didChangeNext], and [Route.didChangePrevious]). If the [Navigator]
   /// has any [Navigator.observers], they will be notified as well (see
-  /// [NavigatorObserver.didReplace]). The removed route is disposed without
-  /// being notified. The future that had been returned from pushing that routes
-  /// will not complete.
+  /// [NavigatorObserver.didReplace]). The removed route is disposed, and the
+  /// future that had been returned from pushing that routes will complete.
   ///
   /// This can be useful in combination with [removeRouteBelow] when building a
   /// non-linear user experience.
@@ -2551,16 +2550,15 @@ class Navigator extends StatefulWidget {
   /// _does_ animate the new route, and delays removing the old route until the
   /// new route has finished animating.
   ///
-  /// The removed route is removed without being completed, so this method does
+  /// The removed route is removed and completed with null, so this method does
   /// not take a return value argument.
   ///
   /// The new route, the route below the new route (if any), and the route above
   /// the new route, are all notified (see [Route.didReplace],
   /// [Route.didChangeNext], and [Route.didChangePrevious]). If the [Navigator]
   /// has any [Navigator.observers], they will be notified as well (see
-  /// [NavigatorObserver.didReplace]). The removed route is disposed without
-  /// being notified. The future that had been returned from pushing that routes
-  /// will not complete.
+  /// [NavigatorObserver.didReplace]). The removed route is disposed, and the
+  /// future that had been returned from pushing that route will complete.
   ///
   /// The `T` type argument is the type of the return value of the new route.
   /// {@endtemplate}
@@ -5174,6 +5172,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     while (index >= 0 && !predicate(_history[index].route)) {
       if (_history[index].isPresent) {
         _history[index].remove();
+        _history[index].route.didComplete(null);
       }
       index -= 1;
     }
@@ -5243,6 +5242,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     final bool wasCurrent = oldRoute.isCurrent;
     _history.insert(index + 1, entry);
     _history[index].remove(isReplaced: true);
+    _history[index].route.didComplete(null);
     _flushHistoryUpdates();
     assert(() {
       _debugLocked = false;
@@ -5311,6 +5311,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(index >= 0, 'There are no routes below the specified anchorRoute.');
     _history.insert(index + 1, entry);
     _history[index].remove(isReplaced: true);
+    _history[index].route.didComplete(null);
     _flushHistoryUpdates();
     assert(() { _debugLocked = false; return true; }());
   }
