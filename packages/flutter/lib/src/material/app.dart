@@ -72,8 +72,6 @@ enum ThemeMode {
   dark;
 
   /// Checks if the themeMode is [ThemeMode.system].
-  ///
-  /// {@macro flutter.material.ThemeMode.themeMode.system}
   bool get isSystem => this == ThemeMode.system;
 
   /// Checks if the themeMode is [ThemeMode.light].
