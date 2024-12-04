@@ -82,7 +82,6 @@ class FilledButton extends ButtonStyleButton {
     super.clipBehavior = Clip.none,
     super.statesController,
     required super.child,
-    super.iconAlignment,
   }) : _variant = _FilledButtonVariant.filled;
 
   /// Create a filled button from [icon] and [label].
@@ -107,7 +106,7 @@ class FilledButton extends ButtonStyleButton {
     MaterialStatesController? statesController,
     Widget? icon,
     required Widget label,
-    IconAlignment iconAlignment = IconAlignment.start,
+    IconAlignment? iconAlignment,
   }) {
      if (icon == null) {
       return FilledButton(
@@ -180,7 +179,7 @@ class FilledButton extends ButtonStyleButton {
     MaterialStatesController? statesController,
     Widget? icon,
     required Widget label,
-    IconAlignment iconAlignment = IconAlignment.start,
+    IconAlignment? iconAlignment,
   }) {
     if (icon == null) {
       return FilledButton.tonal(
@@ -275,6 +274,7 @@ class FilledButton extends ButtonStyleButton {
     Color? surfaceTintColor,
     Color? iconColor,
     double? iconSize,
+    IconAlignment? iconAlignment,
     Color? disabledIconColor,
     Color? overlayColor,
     double? elevation,
@@ -317,6 +317,7 @@ class FilledButton extends ButtonStyleButton {
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
       iconColor: ButtonStyleButton.defaultColor(iconColor, disabledIconColor),
       iconSize: ButtonStyleButton.allOrNull<double>(iconSize),
+      iconAlignment: iconAlignment,
       elevation: ButtonStyleButton.allOrNull(elevation),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
@@ -501,7 +502,7 @@ class _FilledButtonWithIcon extends FilledButton {
     super.statesController,
     required Widget icon,
     required Widget label,
-    super.iconAlignment,
+    IconAlignment? iconAlignment,
   }) : super(
          autofocus: autofocus ?? false,
          child: _FilledButtonWithIconChild(
@@ -525,7 +526,7 @@ class _FilledButtonWithIcon extends FilledButton {
     super.statesController,
     required Widget icon,
     required Widget label,
-    required IconAlignment iconAlignment,
+    IconAlignment? iconAlignment,
   }) : super.tonal(
          autofocus: autofocus ?? false,
          child: _FilledButtonWithIconChild(
@@ -572,7 +573,7 @@ class _FilledButtonWithIconChild extends StatelessWidget {
   final Widget label;
   final Widget icon;
   final ButtonStyle? buttonStyle;
-  final IconAlignment iconAlignment;
+  final IconAlignment? iconAlignment;
 
   @override
   Widget build(BuildContext context) {
@@ -581,9 +582,14 @@ class _FilledButtonWithIconChild extends StatelessWidget {
     // Adjust the gap based on the text scale factor. Start at 8, and lerp
     // to 4 based on how large the text is.
     final double gap = lerpDouble(8, 4, scale)!;
+    final FilledButtonThemeData filledButtonTheme = FilledButtonTheme.of(context);
+    final IconAlignment effectiveIconAlignment = iconAlignment
+      ?? filledButtonTheme.style?.iconAlignment
+      ?? buttonStyle?.iconAlignment
+      ?? IconAlignment.start;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: iconAlignment == IconAlignment.start
+      children: effectiveIconAlignment == IconAlignment.start
         ? <Widget>[icon, SizedBox(width: gap), Flexible(child: label)]
         : <Widget>[Flexible(child: label), SizedBox(width: gap), icon],
     );
