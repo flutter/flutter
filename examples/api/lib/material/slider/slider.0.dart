@@ -5,11 +5,12 @@
 import 'package:flutter/material.dart';
 
 /// Flutter code sample for [Slider].
+/// set to false.
 
-void main() => runApp(const SliderApp());
+void main() => runApp(const SliderExampleApp());
 
-class SliderApp extends StatelessWidget {
-  const SliderApp({super.key});
+class SliderExampleApp extends StatelessWidget {
+  const SliderExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,21 +29,51 @@ class SliderExample extends StatefulWidget {
 
 class _SliderExampleState extends State<SliderExample> {
   double _currentSliderValue = 20;
+  double _currentDiscreteSliderValue = 60;
+  bool year2023 = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Slider')),
-      body: Slider(
-        value: _currentSliderValue,
-        max: 100,
-        divisions: 5,
-        label: _currentSliderValue.round().toString(),
-        onChanged: (double value) {
-          setState(() {
-            _currentSliderValue = value;
-          });
-        },
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 16,
+          children: <Widget>[
+            Slider(
+              year2023: year2023,
+              value: _currentSliderValue,
+              max: 100,
+              onChanged: (double value) {
+                setState(() {
+                  _currentSliderValue = value;
+                });
+              },
+            ),
+            Slider(
+              year2023: year2023,
+              value: _currentDiscreteSliderValue,
+              max: 100,
+              divisions: 5,
+              label: _currentDiscreteSliderValue.round().toString(),
+              onChanged: (double value) {
+                setState(() {
+                  _currentDiscreteSliderValue = value;
+                });
+              },
+            ),
+            SwitchListTile(
+              value: year2023,
+              title: const Text('Toggle year2023 flag'),
+              onChanged: (bool value) {
+                setState(() {
+                  year2023 = !year2023;
+                });
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
