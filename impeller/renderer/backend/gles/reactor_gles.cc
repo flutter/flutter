@@ -126,6 +126,10 @@ const ProcTableGLES& ReactorGLES::GetProcTable() const {
 
 std::optional<ReactorGLES::GLStorage> ReactorGLES::GetHandle(
     const HandleGLES& handle) const {
+  if (handle.untracked_id_.has_value()) {
+    return ReactorGLES::GLStorage{.integer = handle.untracked_id_.value()};
+  }
+
   ReaderLock handles_lock(handles_mutex_);
   if (auto found = handles_.find(handle); found != handles_.end()) {
     if (found->second.pending_collection) {
@@ -187,12 +191,24 @@ bool ReactorGLES::RegisterCleanupCallback(const HandleGLES& handle,
   if (handle.IsDead()) {
     return false;
   }
+  FML_DCHECK(!handle.untracked_id_.has_value());
   WriterLock handles_lock(handles_mutex_);
   if (auto found = handles_.find(handle); found != handles_.end()) {
     found->second.callback = fml::ScopedCleanupClosure(callback);
     return true;
   }
   return false;
+}
+
+HandleGLES ReactorGLES::CreateUntrackedHandle(HandleType type) {
+  FML_DCHECK(CanReactOnCurrentThread());
+  auto new_handle = HandleGLES::Create(type);
+  std::optional<ReactorGLES::GLStorage> gl_handle =
+      CreateGLHandle(GetProcTable(), type);
+  if (gl_handle.has_value()) {
+    new_handle.untracked_id_ = gl_handle.value().integer;
+  }
+  return new_handle;
 }
 
 HandleGLES ReactorGLES::CreateHandle(HandleType type, GLuint external_handle) {
@@ -217,12 +233,19 @@ HandleGLES ReactorGLES::CreateHandle(HandleType type, GLuint external_handle) {
 }
 
 void ReactorGLES::CollectHandle(HandleGLES handle) {
-  WriterLock handles_lock(handles_mutex_);
-  if (auto found = handles_.find(handle); found != handles_.end()) {
-    if (!found->second.pending_collection) {
-      handles_to_collect_count_ += 1;
+  if (handle.untracked_id_.has_value()) {
+    LiveHandle live_handle(GLStorage{.integer = handle.untracked_id_.value()});
+    live_handle.pending_collection = true;
+    WriterLock handles_lock(handles_mutex_);
+    handles_[handle] = std::move(live_handle);
+  } else {
+    WriterLock handles_lock(handles_mutex_);
+    if (auto found = handles_.find(handle); found != handles_.end()) {
+      if (!found->second.pending_collection) {
+        handles_to_collect_count_ += 1;
+      }
+      found->second.pending_collection = true;
     }
-    found->second.pending_collection = true;
   }
 }
 

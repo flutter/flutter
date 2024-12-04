@@ -50,8 +50,11 @@ class MockGLES final {
 
   ~MockGLES();
 
+  void SetNextTexture(uint64_t next_texture) { next_texture_ = next_texture; }
+
  private:
   friend void RecordGLCall(const char* name);
+  friend void mockGenTextures(GLsizei n, GLuint* textures);
 
   explicit MockGLES(ProcTableGLES::Resolver resolver = kMockResolverGLES);
 
@@ -59,6 +62,7 @@ class MockGLES final {
 
   ProcTableGLES proc_table_;
   std::vector<std::string> captured_calls_;
+  std::optional<uint64_t> next_texture_;
 
   MockGLES(const MockGLES&) = delete;
 

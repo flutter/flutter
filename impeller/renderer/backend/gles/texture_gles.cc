@@ -193,7 +193,7 @@ TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
       type_(GetTextureTypeFromDescriptor(GetTextureDescriptor())),
       handle_(external_handle.has_value()
                   ? external_handle.value()
-                  : reactor_->CreateHandle(ToHandleType(type_))),
+                  : reactor_->CreateUntrackedHandle(ToHandleType(type_))),
       is_wrapped_(fbo.has_value() || external_handle.has_value()),
       wrapped_fbo_(fbo) {
   // Ensure the texture descriptor itself is valid.
@@ -407,7 +407,7 @@ void TextureGLES::InitializeContentsIfNecessary() const {
   }
 
   const auto& gl = reactor_->GetProcTable();
-  auto handle = reactor_->GetGLHandle(handle_);
+  std::optional<GLuint> handle = reactor_->GetGLHandle(handle_);
   if (!handle.has_value()) {
     VALIDATION_LOG << "Could not initialize the contents of texture.";
     return;

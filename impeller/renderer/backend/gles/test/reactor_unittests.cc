@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
 #include <memory>
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
@@ -59,6 +60,35 @@ TEST(ReactorGLES, DeletesHandlesDuringShutdown) {
   auto calls = mock_gles->GetCapturedCalls();
   EXPECT_TRUE(std::find(calls.begin(), calls.end(), "glDeleteTextures") !=
               calls.end());
+}
+
+TEST(ReactorGLES, UntrackedHandle) {
+  std::shared_ptr<MockGLES> mock_gles = MockGLES::Init();
+  ProcTableGLES::Resolver resolver = kMockResolverGLES;
+  auto proc_table = std::make_unique<ProcTableGLES>(resolver);
+  auto worker = std::make_shared<TestWorker>();
+  auto reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
+  reactor->AddWorker(worker);
+
+  mock_gles->SetNextTexture(1234u);
+  HandleGLES handle = reactor->CreateUntrackedHandle(HandleType::kTexture);
+  EXPECT_FALSE(handle.IsDead());
+  std::optional<GLuint> glint = reactor->GetGLHandle(handle);
+  EXPECT_TRUE(glint.has_value());
+  if (glint.has_value()) {
+    EXPECT_EQ(1234u, *glint);
+  }
+  mock_gles->GetCapturedCalls();
+  reactor->CollectHandle(handle);
+  std::vector<std::string> calls = mock_gles->GetCapturedCalls();
+  EXPECT_TRUE(std::find(calls.begin(), calls.end(), "glDeleteTextures") ==
+              calls.end());
+  // Without an operation nothing is cleaned up.
+  EXPECT_TRUE(reactor->AddOperation([&](const ReactorGLES&) {}));
+  EXPECT_TRUE(reactor->React());
+  calls = mock_gles->GetCapturedCalls();
+  EXPECT_FALSE(std::find(calls.begin(), calls.end(), "glDeleteTextures") ==
+               calls.end());
 }
 
 TEST(ReactorGLES, PerThreadOperationQueues) {
