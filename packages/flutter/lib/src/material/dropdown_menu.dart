@@ -850,7 +850,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         widget.onSelected?.call(entry.value);
       }
     } else {
-      widget.onSelected?.call(null);
+      if (_controller.isOpen) {
+        widget.onSelected?.call(null);
+      }
     }
     if (!widget.enableSearch) {
       currentHighlight = null;
