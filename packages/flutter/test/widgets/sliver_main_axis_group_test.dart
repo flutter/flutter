@@ -896,6 +896,7 @@ void main() {
 
   testWidgets('SliverMainAxisGroup precision error', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
