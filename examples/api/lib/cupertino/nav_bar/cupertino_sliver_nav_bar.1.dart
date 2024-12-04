@@ -108,7 +108,7 @@ class _NextPageState extends State<NextPage> {
             middle: const Text('Contacts Group'),
             largeTitle: const Text('Family'),
             bottomMode: widget.bottomMode,
-            onSearchFocused: (bool value) {
+            onSearchActiveChanged: (bool value) {
               setState(() {
                 isFocused = value;
               });
