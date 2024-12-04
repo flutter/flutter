@@ -1,35 +1,40 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:multi_window_ref_app/app/window_controller_render.dart';
 
 import 'window_settings.dart';
 import 'window_settings_dialog.dart';
 
+class _KeyedWindowController {
+  _KeyedWindowController({required this.controller});
+
+  final WindowController controller;
+  final UniqueKey key = UniqueKey();
+}
+
 class _WindowManagerModel extends ChangeNotifier {
-  final List<WindowController> _windows = <WindowController>[];
-  List<WindowController> get windows => _windows;
+  final List<_KeyedWindowController> _windows = <_KeyedWindowController>[];
+  List<_KeyedWindowController> get windows => _windows;
   int? _selectedViewId;
   WindowController? get selected {
     if (_selectedViewId == null) {
       return null;
     }
 
-    for (final WindowController window in _windows) {
-      if (window.view?.viewId == _selectedViewId) {
-        return window;
+    for (final _KeyedWindowController controller in _windows) {
+      if (controller.controller.view?.viewId == _selectedViewId) {
+        return controller.controller;
       }
     }
 
     return null;
   }
 
-  void add(WindowController window) {
+  void add(_KeyedWindowController window) {
     _windows.add(window);
     notifyListeners();
   }
 
-  void remove(WindowController window) {
+  void remove(_KeyedWindowController window) {
     _windows.remove(window);
     notifyListeners();
   }
@@ -92,34 +97,19 @@ class _MainWindowState extends State<MainWindow> {
         view: ListenableBuilder(
             listenable: _windowManagerModel,
             builder: (BuildContext context, Widget? widget) {
-              return _ViewCollection(
-                  windowManagerModel: _windowManagerModel,
-                  windowSettings: _settings);
+              return ViewCollection(
+                  views: _windowManagerModel.windows
+                      .map((_KeyedWindowController controller) {
+                return WindowControllerRender(
+                    key: controller.key,
+                    controller: controller.controller,
+                    onDestroyed: () {
+                      _windowManagerModel.remove(controller);
+                    },
+                    windowSettings: _settings);
+              }).toList());
             }),
         child: widget);
-  }
-}
-
-class _ViewCollection extends StatelessWidget {
-  _ViewCollection(
-      {required this.windowManagerModel, required this.windowSettings});
-
-  final _WindowManagerModel windowManagerModel;
-  final WindowSettings windowSettings;
-
-  @override
-  Widget build(BuildContext context) {
-    final List<Widget> childViews = <Widget>[];
-    for (final WindowController controller in windowManagerModel.windows) {
-      childViews.add(WindowControllerRender(
-          controller: controller,
-          onDestroyed: () {
-            windowManagerModel.remove(controller);
-          },
-          windowSettings: windowSettings));
-    }
-
-    return ViewCollection(views: childViews);
   }
 }
 
@@ -169,8 +159,9 @@ class _ActiveWindowsTable extends StatelessWidget {
                   numeric: true),
             ],
             rows: windowManagerModel.windows
-                .map<DataRow>((WindowController controller) {
+                .map<DataRow>((_KeyedWindowController controller) {
               return DataRow(
+                key: controller.key,
                 color: WidgetStateColor.resolveWith((states) {
                   if (states.contains(WidgetState.selected)) {
                     return Theme.of(context)
@@ -180,39 +171,39 @@ class _ActiveWindowsTable extends StatelessWidget {
                   }
                   return Colors.transparent;
                 }),
-                selected: controller.view?.viewId ==
+                selected: controller.controller.view?.viewId ==
                     windowManagerModel._selectedViewId,
                 onSelectChanged: (selected) {
                   if (selected != null) {
-                    windowManagerModel
-                        .select(selected ? controller.view?.viewId : null);
+                    windowManagerModel.select(
+                        selected ? controller.controller.view?.viewId : null);
                   }
                 },
                 cells: [
                   DataCell(
                     ListenableBuilder(
-                        listenable: controller,
+                        listenable: controller.controller,
                         builder: (BuildContext context, Widget? _) => Text(
-                            controller.view != null
-                                ? '${controller.view?.viewId}'
+                            controller.controller.view != null
+                                ? '${controller.controller.view?.viewId}'
                                 : 'Loading...')),
                   ),
                   DataCell(
                     ListenableBuilder(
-                        listenable: controller,
+                        listenable: controller.controller,
                         builder: (BuildContext context, Widget? _) => Text(
-                            controller.type
+                            controller.controller.type
                                 .toString()
                                 .replaceFirst('WindowArchetype.', ''))),
                   ),
                   DataCell(
                     ListenableBuilder(
-                        listenable: controller,
+                        listenable: controller.controller,
                         builder: (BuildContext context, Widget? _) =>
                             IconButton(
                               icon: const Icon(Icons.delete_outlined),
                               onPressed: () async {
-                                await controller.destroy();
+                                await controller.controller.destroy();
                               },
                             )),
                   ),
@@ -258,7 +249,8 @@ class _WindowCreatorCard extends StatelessWidget {
               children: [
                 OutlinedButton(
                   onPressed: () async {
-                    windowManagerModel.add(RegularWindowController());
+                    windowManagerModel.add(_KeyedWindowController(
+                        controller: RegularWindowController()));
                   },
                   child: const Text('Regular'),
                 ),

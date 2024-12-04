@@ -91,11 +91,13 @@ class RegularWindow extends StatefulWidget {
       {required Size preferredSize,
       this.onDestroyed,
       this.controller,
+      this.key,
       required this.child})
       : _preferredSize = preferredSize;
 
   final RegularWindowController? controller;
   void Function()? onDestroyed;
+  final Key? key;
   final Widget child;
   final Size _preferredSize;
 
@@ -157,6 +159,7 @@ class _RegularWindowState extends State<RegularWindow> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
+        key: widget.key,
         future: _future,
         builder: (BuildContext context,
             AsyncSnapshot<RegularWindowMetadata> metadata) {
