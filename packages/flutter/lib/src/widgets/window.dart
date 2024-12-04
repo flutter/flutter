@@ -106,6 +106,7 @@ class RegularWindow extends StatefulWidget {
 class _RegularWindowState extends State<RegularWindow> {
   _WindowListener? _listener;
   Future<RegularWindowMetadata>? _future;
+  WindowingApp? _app;
 
   @override
   void initState() {
@@ -138,7 +139,8 @@ class _RegularWindowState extends State<RegularWindow> {
               }
             },
             onDestroyed: widget.onDestroyed);
-        windowingAppContext!.windowingApp._registerListener(_listener!);
+        _app = windowingAppContext!.windowingApp;
+        _app!._registerListener(_listener!);
       });
     });
   }
@@ -146,11 +148,9 @@ class _RegularWindowState extends State<RegularWindow> {
   @override
   void dispose() {
     super.dispose();
-    final _WindowingAppContext? windowingAppContext =
-        _WindowingAppContext.of(context);
     if (_listener != null) {
-      assert(windowingAppContext != null);
-      windowingAppContext!.windowingApp._unregisterListener(_listener!);
+      assert(_app != null);
+      _app!._unregisterListener(_listener!);
     }
   }
 

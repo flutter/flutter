@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:multi_window_ref_app/app/window_metadata_content.dart';
+import 'package:multi_window_ref_app/app/window_controller_render.dart';
+import 'package:multi_window_ref_app/app/window_settings.dart';
 
 class RegularWindowContent extends StatefulWidget {
-  const RegularWindowContent({super.key, required this.window});
+  const RegularWindowContent({super.key, required this.window, required this.windowSettings});
 
   final RegularWindowController window;
+  final WindowSettings windowSettings;
 
   @override
   State<RegularWindowContent> createState() => _RegularWindowContentState();
 }
 
 class _RegularWindowContentState extends State<RegularWindowContent> {
-  List<WindowController> children = <WindowController>[];
+  List<WindowController> childControllers = <WindowController>[];
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,10 @@ class _RegularWindowContentState extends State<RegularWindowContent> {
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  children = [...children, RegularWindowController()];
+                  childControllers = [
+                    ...childControllers,
+                    RegularWindowController()
+                  ];
                 });
               },
               child: const Text('Create Regular Window'),
@@ -48,8 +53,13 @@ class _RegularWindowContentState extends State<RegularWindowContent> {
     );
 
     final List<Widget> childViews =
-        children.map((WindowController childWindow) {
-      return WindowMetadataContent(controller: childWindow);
+        childControllers.map((WindowController controller) {
+      return WindowControllerRender(
+          controller: controller,
+          windowSettings: widget.windowSettings,
+          onDestroyed: () {
+            childControllers.remove(controller);
+          });
     }).toList();
 
     return ViewAnchor(view: ViewCollection(views: childViews), child: child);
