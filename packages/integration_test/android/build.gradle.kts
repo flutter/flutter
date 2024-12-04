@@ -52,9 +52,11 @@ android {
         testImplementation("junit:junit:4.13.2")
         testImplementation("org.mockito:mockito-inline:5.1.0")
 
-        api("androidx.test:runner:1.2+")
+        api("androidx.test:runner:1.5+")
         api("androidx.test:rules:1.2+")
         api("androidx.test.espresso:espresso-core:3.2+")
+        api("androidx.test.uiautomator:uiautomator:2.2+")
+        api("androidx.test:monitor:1.7+")
 
         implementation("com.google.guava:guava:28.1-android")
     }
