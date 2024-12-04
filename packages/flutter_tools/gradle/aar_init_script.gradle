@@ -155,11 +155,12 @@ projectsEvaluated {
         configureProject(rootProject, rootProject.property("output-dir"))
         return
     }
-    // The module project is the `:flutter` subproject.
-    Project moduleProject = rootProject.subprojects.find { it.name == "flutter" }
     if (rootProject.name == "gradle") {
+        // Skip the "gradle" project, we are looking only for the "android_generated" project.
         return
     }
+    // The module project is the `:flutter` subproject.
+    Project moduleProject = rootProject.subprojects.find { it.name == "flutter" }
     assert moduleProject != null
     assert moduleProject.hasProperty("output-dir")
     configureProject(moduleProject, moduleProject.property("output-dir"))
