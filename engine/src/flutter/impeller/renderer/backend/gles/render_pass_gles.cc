@@ -6,12 +6,12 @@
 
 #include <cstdint>
 
-#include "GLES3/gl3.h"
 #include "flutter/fml/trace_event.h"
 #include "fml/closure.h"
 #include "fml/logging.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
+#include "impeller/renderer/backend/gles/buffer_bindings_gles.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/backend/gles/device_buffer_gles.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
@@ -218,7 +218,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     }
   } else {
     // Create and bind an offscreen FBO.
-    auto cached_fbo = color_gles.GetCachedFBO();
+    GLuint cached_fbo = color_gles.GetCachedFBO();
     if (cached_fbo != GL_NONE) {
       fbo = cached_fbo;
       gl.BindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -289,7 +289,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   // Both the viewport and scissor are specified in framebuffer coordinates.
   // Impeller's framebuffer coordinate system is top left origin, but OpenGL's
   // is bottom left origin, so we convert the coordinates here.
-  auto target_size = pass_data.color_attachment->GetSize();
+  ISize target_size = pass_data.color_attachment->GetSize();
 
   //--------------------------------------------------------------------------
   /// Setup the viewport.
@@ -310,16 +310,6 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   }
 
   for (const auto& command : commands) {
-    if (command.instance_count != 1u) {
-      VALIDATION_LOG << "GLES backend does not support instanced rendering.";
-      return false;
-    }
-
-    if (!command.pipeline) {
-      VALIDATION_LOG << "Command has no pipeline specified.";
-      return false;
-    }
-
 #ifdef IMPELLER_DEBUG
     fml::ScopedCleanupClosure pop_cmd_debug_marker(
         [&gl]() { gl.PopDebugGroup(); });
@@ -426,11 +416,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
         break;
     }
 
-    auto vertex_desc_gles = pipeline.GetBufferBindings();
-
-    if (command.index_type == IndexType::kUnknown) {
-      return false;
-    }
+    BufferBindingsGLES* vertex_desc_gles = pipeline.GetBufferBindings();
 
     //--------------------------------------------------------------------------
     /// Bind vertex buffers.
@@ -471,9 +457,10 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     // correct; full triangle outlines won't be drawn and disconnected
     // geometry may appear connected. However this can still be useful for
     // wireframe debug views.
-    auto mode = pipeline.GetDescriptor().GetPolygonMode() == PolygonMode::kLine
-                    ? GL_LINE_STRIP
-                    : ToMode(pipeline.GetDescriptor().GetPrimitiveType());
+    GLenum mode =
+        pipeline.GetDescriptor().GetPolygonMode() == PolygonMode::kLine
+            ? GL_LINE_STRIP
+            : ToMode(pipeline.GetDescriptor().GetPrimitiveType());
 
     //--------------------------------------------------------------------------
     /// Finally! Invoke the draw call.
