@@ -8,7 +8,6 @@ import 'package:args/command_runner.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -24,11 +23,6 @@ void main() {
   late LoggingProcessManager loggingProcessManager;
   late FakeStdio mockStdio;
 
-  setUpAll(() async {
-    Cache.disableLocking();
-    await ensureFlutterToolsSnapshot();
-  });
-
   setUp(() {
     loggingProcessManager = LoggingProcessManager();
     tempDir = globals.fs.systemTempDirectory
@@ -38,10 +32,6 @@ void main() {
 
   tearDown(() {
     tryToDelete(tempDir);
-  });
-
-  tearDownAll(() async {
-    await restoreFlutterToolsSnapshot();
   });
 
   Future<String> createRootProject() async {
