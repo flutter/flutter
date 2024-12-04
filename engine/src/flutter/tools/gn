@@ -569,10 +569,6 @@ def to_gn_args(args):
   else:
     gn_args['enable_backtrace'] = False
 
-  # Overrides whether Boring SSL is compiled with system as. Only meaningful
-  # on Android.
-  gn_args['bssl_use_clang_integrated_as'] = True
-
   if args.allow_deprecated_api_calls:
     gn_args['allow_deprecated_api_calls'] = args.allow_deprecated_api_calls
 
