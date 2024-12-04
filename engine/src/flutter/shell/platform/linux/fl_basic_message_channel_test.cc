@@ -43,7 +43,7 @@ TEST(FlBasicMessageChannelTest, SendMessageWithoutResponse) {
             g_bytes_new(message->message, message->message_size);
         g_autoptr(FlStandardMessageCodec) codec =
             fl_standard_message_codec_new();
-        FlValue* message_value = fl_message_codec_decode_message(
+        g_autoptr(FlValue) message_value = fl_message_codec_decode_message(
             FL_MESSAGE_CODEC(codec), message_bytes, nullptr);
         EXPECT_EQ(fl_value_get_type(message_value), FL_VALUE_TYPE_STRING);
         EXPECT_STREQ(fl_value_get_string(message_value), "Hello World!");

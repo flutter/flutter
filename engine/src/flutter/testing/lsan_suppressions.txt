@@ -50,12 +50,6 @@ leak:RefCountedTest_DebugChecks_Test::TestBody
 # and allow some tests to inspect contents.
 leak:*flutter/shell/platform/linux/testing/mock_engine.cc
 
-# TODO(bdero): Fix FL leaks: https://github.com/flutter/flutter/issues/90155
-leak:*flutter/shell/platform/linux/fl_keyboard_handler_test.cc*
-leak:*flutter/shell/platform/linux/fl_key_channel_responder_test.cc*
-leak:*flutter/shell/platform/linux/fl_basic_message_channel_test.cc*
-leak:fl_message_codec_decode_message
-
 # TODO(bdero): https://github.com/flutter/flutter/issues/90156
 # Unfortunately, realloc calls originating from g_realloc effectively obscure
 # the trace of the original allocation. Deeper investigation is required to
