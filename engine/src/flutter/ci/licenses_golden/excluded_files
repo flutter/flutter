@@ -946,11 +946,6 @@
 ../../../flutter/third_party/angle/tools
 ../../../flutter/third_party/angle/util
 ../../../flutter/third_party/benchmark
-../../../flutter/third_party/boringssl/.git
-../../../flutter/third_party/boringssl/.gitignore
-../../../flutter/third_party/boringssl/OWNERS
-../../../flutter/third_party/boringssl/README
-../../../flutter/third_party/boringssl/codereview.settings
 ../../../flutter/third_party/boringssl/src/.bazelrc
 ../../../flutter/third_party/boringssl/src/.bcr/README.md
 ../../../flutter/third_party/boringssl/src/.clang-format
@@ -1666,6 +1661,7 @@
 ../../../flutter/third_party/dart/third_party/OWNERS
 ../../../flutter/third_party/dart/third_party/binary_size
 ../../../flutter/third_party/dart/third_party/binaryen
+../../../flutter/third_party/dart/third_party/boringssl/OWNERS
 ../../../flutter/third_party/dart/third_party/clang.tar.gz.sha1
 ../../../flutter/third_party/dart/third_party/cpu_features/OWNERS
 ../../../flutter/third_party/dart/third_party/cpu_features/README.chromium
