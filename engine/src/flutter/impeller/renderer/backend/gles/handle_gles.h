@@ -79,6 +79,7 @@ class HandleGLES {
   HandleType type_ = HandleType::kUnknown;
   std::optional<UniqueID> name_;
   std::size_t hash_;
+  std::optional<uint64_t> untracked_id_;
 
   friend class ReactorGLES;
 

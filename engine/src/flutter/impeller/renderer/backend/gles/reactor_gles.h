@@ -174,6 +174,16 @@ class ReactorGLES {
   ///
   HandleGLES CreateHandle(HandleType type, GLuint external_handle = GL_NONE);
 
+  /// @brief Create a handle that is not managed by `ReactorGLES`.
+  /// @details This behaves just like `CreateHandle` but it doesn't add the
+  /// handle to ReactorGLES::handles_ and the creation is executed
+  /// synchronously, so it must be called from a proper thread. The benefit of
+  /// this is that it avoid synchronization and hash table lookups when
+  /// creating/accessing the handle.
+  /// @param type The type of handle to create.
+  /// @return The reactor handle.
+  HandleGLES CreateUntrackedHandle(HandleType type);
+
   //----------------------------------------------------------------------------
   /// @brief      Collect a reactor handle.
   ///
@@ -255,8 +265,10 @@ class ReactorGLES {
     union {
       GLuint handle;
       GLsync sync;
+      uint64_t integer;
     };
   };
+  static_assert(sizeof(GLStorage) == sizeof(uint64_t));
 
   struct LiveHandle {
     std::optional<GLStorage> name;
