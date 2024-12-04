@@ -170,7 +170,10 @@ canvaskit_wasm_lib("canvaskit") {
     "-sFILESYSTEM=0",
     "-sMODULARIZE",
     "-sNO_EXIT_RUNTIME=1",
-    "-sINITIAL_MEMORY=128MB",
+    "-sINITIAL_MEMORY=32MB",
+
+    # Grow memory by +100% i.e. double the size each time we run out of memory.
+    "-sMEMORY_GROWTH_GEOMETRIC_STEP=1.0",
     "-sWASM",
     "-sSTRICT=1",
   ]
