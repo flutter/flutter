@@ -4843,14 +4843,14 @@ targets:
         ["devicelab", "ios", "mac", "arm64"]
       task_name: hello_world_swiftui__compile
 
-  - name: Mac_arm64_ios hello_world_swiftui__compile
-    recipe: devicelab/devicelab_drone
-#    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac", "arm64""]
-      task_name: hello_world_swiftui__compile
+#  - name: Mac_arm64_ios hello_world_swiftui__compile
+#    recipe: devicelab/devicelab_drone
+##    presubmit: false
+#    timeout: 60
+#    properties:
+#      tags: >
+#        ["devicelab", "ios", "mac", "arm64""]
+#      task_name: hello_world_swiftui__compile
 
   - name: Mac_x64 hot_mode_dev_cycle_macos_target__benchmark
     bringup: true # Flaky https://github.com/flutter/flutter/issues/158568
