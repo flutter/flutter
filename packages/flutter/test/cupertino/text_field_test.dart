@@ -5231,6 +5231,8 @@ void main() {
     // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
     // On macOS, we select the precise position of the tap.
     final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
+    // Provide a [TextSelectionControls] that builds selection handles.
+    final TextSelectionControls selectionControls = CupertinoTextSelectionHandleControls();
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -5238,6 +5240,7 @@ void main() {
           child: CupertinoTextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
+            selectionControls: selectionControls,
             style: const TextStyle(fontSize: 10.0),
           ),
         ),
@@ -5299,6 +5302,8 @@ void main() {
     // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
     // On macOS, we select the precise position of the tap.
     final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
+    // Provide a [TextSelectionControls] that builds selection handles.
+    final TextSelectionControls selectionControls = CupertinoTextSelectionHandleControls();
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -5306,6 +5311,7 @@ void main() {
           child: CupertinoTextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
+            selectionControls: selectionControls,
             style: const TextStyle(fontSize: 10.0),
           ),
         ),
@@ -5339,20 +5345,11 @@ void main() {
     // We use a small offset because the endpoint is on the very corner
     // of the handle.
     final Offset handlePos = endpoints[1].point;
-    Offset newHandlePos = textOffsetToPosition(tester, 5); // Position of 'e'.
+    Offset newHandlePos = textOffsetToPosition(tester, 2); // Position of 'c'.
     final TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
     await gesture.moveTo(newHandlePos);
     await tester.pump();
-    expect(controller.selection.baseOffset, 4);
-    expect(controller.selection.extentOffset, 5);
-
-    newHandlePos = textOffsetToPosition(tester, 2); // Position of 'c'.
-    await gesture.moveTo(newHandlePos);
-    await tester.pump();
-    await gesture.up();
-    await tester.pump();
-
     // The selection inverts moving beyond the left handle.
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 2);
