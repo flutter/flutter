@@ -17,7 +17,6 @@ import 'base/utils.dart';
 import 'base/version.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
-import 'dart/package_map.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
