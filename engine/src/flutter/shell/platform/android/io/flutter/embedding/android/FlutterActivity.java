@@ -212,7 +212,7 @@ public class FlutterActivity extends Activity
     implements FlutterActivityAndFragmentDelegate.Host, LifecycleOwner {
   private static final String TAG = "FlutterActivity";
 
-  private boolean hasRegisteredBackCallback = false;
+  @VisibleForTesting boolean hasRegisteredBackCallback = false;
 
   /**
    * The ID of the {@code FlutterView} created by this activity.
@@ -633,6 +633,13 @@ public class FlutterActivity extends Activity
     switchLaunchThemeForNormalTheme();
 
     super.onCreate(savedInstanceState);
+
+    if (savedInstanceState != null) {
+      boolean frameworkHandlesBack =
+          savedInstanceState.getBoolean(
+              FlutterActivityAndFragmentDelegate.ON_BACK_CALLBACK_ENABLED_KEY);
+      setFrameworkHandlesBack(frameworkHandlesBack);
+    }
 
     delegate = new FlutterActivityAndFragmentDelegate(this);
     delegate.onAttach(this);
@@ -1475,6 +1482,11 @@ public class FlutterActivity extends Activity
   @Override
   public boolean attachToEngineAutomatically() {
     return true;
+  }
+
+  @Override
+  public boolean getBackCallbackState() {
+    return hasRegisteredBackCallback;
   }
 
   @Override

@@ -5,6 +5,7 @@
 package io.flutter.embedding.android;
 
 import static io.flutter.Build.API_LEVELS;
+import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_ID;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -34,6 +35,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.FlutterInjector;
@@ -92,6 +94,48 @@ public class FlutterActivityTest {
     activity.onCreate(null);
     assertNotNull(activity.findViewById(FlutterActivity.FLUTTER_VIEW_ID));
     assertTrue(activity.findViewById(FlutterActivity.FLUTTER_VIEW_ID) instanceof FlutterView);
+  }
+
+  @Test
+  @Config(minSdk = API_LEVELS.API_34)
+  @TargetApi(API_LEVELS.API_34)
+  public void whenUsingCachedEngine_predictiveBackStateIsSaved() {
+    FlutterLoader mockFlutterLoader = mock(FlutterLoader.class);
+    FlutterJNI mockFlutterJni = mock(FlutterJNI.class);
+    when(mockFlutterJni.isAttached()).thenReturn(true);
+    FlutterEngine cachedEngine = new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni);
+    FlutterEngineCache.getInstance().put("my_cached_engine", cachedEngine);
+
+    ActivityScenario<FlutterActivity> flutterActivityScenario =
+        ActivityScenario.launch(FlutterActivity.class);
+
+    // Set to framework handling and then recreate the activity and check the state is preserved.
+    flutterActivityScenario.onActivity(activity -> activity.setFrameworkHandlesBack(true));
+    flutterActivityScenario.onActivity(
+        activity -> activity.getIntent().putExtra(EXTRA_CACHED_ENGINE_ID, "my_cached_engine"));
+
+    flutterActivityScenario.recreate();
+    flutterActivityScenario.onActivity(activity -> assertTrue(activity.hasRegisteredBackCallback));
+
+    // Clean up.
+    flutterActivityScenario.close();
+  }
+
+  @Test
+  @Config(minSdk = API_LEVELS.API_34)
+  @TargetApi(API_LEVELS.API_34)
+  public void whenNotUsingCachedEngine_predictiveBackStateIsNotSaved() {
+    ActivityScenario<FlutterActivity> flutterActivityScenario =
+        ActivityScenario.launch(FlutterActivity.class);
+
+    // Set to framework handling and then recreate the activity and check the state is preserved.
+    flutterActivityScenario.onActivity(activity -> activity.setFrameworkHandlesBack(true));
+
+    flutterActivityScenario.recreate();
+    flutterActivityScenario.onActivity(activity -> assertFalse(activity.hasRegisteredBackCallback));
+
+    // Clean up.
+    flutterActivityScenario.close();
   }
 
   // TODO(garyq): Robolectric does not yet support android api 33 yet. Switch to a robolectric
