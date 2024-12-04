@@ -30,8 +30,6 @@ import 'macos/native_assets.dart';
 import 'macos/native_assets_host.dart';
 import 'windows/native_assets.dart';
 
-export 'package:native_assets_cli/code_assets_builder.dart' show OS;
-
 /// The assets produced by a Dart build and the dependencies of those assets.
 ///
 /// If any of the dependencies change, then the Dart build should be performed
