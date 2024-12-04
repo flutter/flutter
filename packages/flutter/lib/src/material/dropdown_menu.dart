@@ -1054,7 +1054,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       },
       child: Stack(
         children: <Widget>[
-          // Handling keyboard navigation when the Textfield has no focus
+          // Handling keyboard navigation when the Textfield has no focus.
           Shortcuts(
             shortcuts: const <ShortcutActivator, Intent>{
               SingleActivator(LogicalKeyboardKey.arrowUp): _ArrowUpIntent(),
