@@ -3868,6 +3868,7 @@ targets:
       - dev/bots/**
 
   - name: Mac_benchmark flutter_view_macos__start_up
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/159540
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
