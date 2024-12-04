@@ -904,7 +904,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
          bottomMode == null || bottom != null,
          'A bottomMode was provided without a corresponding bottom.',
        ),
-       onSearchFocused = null;
+       onSearchActiveChanged = null;
 
   /// Create a navigation bar for scrolling lists with [bottom] set to a
   /// [CupertinoSearchTextField] with padding.
@@ -931,7 +931,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.heroTag = _defaultHeroTag,
     this.stretch = false,
     this.bottomMode = NavigationBarBottomMode.automatic,
-    this.onSearchFocused,
+    this.onSearchActiveChanged,
   }) : assert(
          automaticallyImplyTitle || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
@@ -1047,8 +1047,8 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   final NavigationBarBottomMode? bottomMode;
 
   /// Callback called when the search field in [CupertinoSliverNavigationBar.search]
-  /// is focused or unfocused.
-  final ValueChanged<bool>? onSearchFocused;
+  /// is active or inactive by being focused or unfocused respectively.
+  final ValueChanged<bool>? onSearchActiveChanged;
 
   /// True if the navigation bar's background color has no transparency.
   bool get opaque => backgroundColor?.alpha == 0xFF;
@@ -1175,8 +1175,8 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
             effectiveTrailing = const SizedBox.shrink();
             effectiveBottomMode = NavigationBarBottomMode.always;
             effectiveStretch = false;
-            if (widget.onSearchFocused != null) {
-              widget.onSearchFocused!(atTop);
+            if (widget.onSearchActiveChanged != null) {
+              widget.onSearchActiveChanged!(atTop);
             }
             _animationController.forward();
             _fadeController.forward();
@@ -1204,8 +1204,8 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                   effectiveTrailing = widget.trailing;
                   effectiveBottomMode = widget.bottomMode;
                   effectiveStretch = widget.stretch;
-                  if (widget.onSearchFocused != null) {
-                    widget.onSearchFocused!(atTop);
+                  if (widget.onSearchActiveChanged != null) {
+                    widget.onSearchActiveChanged!(atTop);
                   }
                   _animationController.reverse();
                   _fadeController.reverse();
