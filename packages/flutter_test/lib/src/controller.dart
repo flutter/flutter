@@ -71,7 +71,8 @@ class SemanticsController {
     SemanticsAction.scrollUp.index |
     SemanticsAction.scrollDown.index |
     SemanticsAction.scrollLeft.index |
-    SemanticsAction.scrollRight.index;
+    SemanticsAction.scrollRight.index |
+    SemanticsAction.scrollToOffset.index;
 
   /// Based on Android's FOCUSABLE_FLAGS. See [flutter/engine/AccessibilityBridge.java](https://github.com/flutter/engine/blob/main/shell/platform/android/io/flutter/view/AccessibilityBridge.java).
   static final int _importantFlagsForAccessibility =
