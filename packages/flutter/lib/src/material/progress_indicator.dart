@@ -312,6 +312,9 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 ///
 /// {@tool dartpad}
 /// This example showcases determinate and indeterminate [LinearProgressIndicator]s.
+/// The [LinearProgressIndicator]s will use the updated Material 3 Design appearance
+/// as described in: https://m3.material.io/components/progress-indicators/overview,
+/// when setting the [LinearProgressIndicator.year2023] flag to false.
 ///
 /// ** See code in examples/api/lib/material/progress_indicator/linear_progress_indicator.0.dart **
 /// {@end-tool}
@@ -704,7 +707,10 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// specify a constant color use: `AlwaysStoppedAnimation<Color>(color)`.
 ///
 /// {@tool dartpad}
-/// This example shows a [CircularProgressIndicator] with a changing value.
+/// This example showcases determinate and indeterminate [CircularProgressIndicator]s.
+/// The [CircularProgressIndicator]s will use the updated Material 3 Design appearance
+/// as described in: https://m3.material.io/components/progress-indicators/overview,
+/// when setting the [CircularProgressIndicator.year2023] flag to false.
 ///
 /// ** See code in examples/api/lib/material/progress_indicator/circular_progress_indicator.0.dart **
 /// {@end-tool}
