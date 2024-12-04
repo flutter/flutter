@@ -1,5 +1,7 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
-import 'package:multi_window_ref_app/app/window_metadata_content.dart';
+import 'package:multi_window_ref_app/app/window_controller_render.dart';
 
 import 'window_settings.dart';
 import 'window_settings_dialog.dart';
@@ -47,6 +49,7 @@ class MainWindow extends StatefulWidget {
 
 class _MainWindowState extends State<MainWindow> {
   final _WindowManagerModel _windowManagerModel = _WindowManagerModel();
+  final WindowSettings _settings = WindowSettings();
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +78,8 @@ class _MainWindowState extends State<MainWindow> {
                     builder: (BuildContext context, Widget? child) {
                       return _WindowCreatorCard(
                           selectedWindow: _windowManagerModel.selected,
-                          windowManagerModel: _windowManagerModel);
+                          windowManagerModel: _windowManagerModel,
+                          windowSettings: _settings);
                     })
               ],
             ),
@@ -88,22 +92,31 @@ class _MainWindowState extends State<MainWindow> {
         view: ListenableBuilder(
             listenable: _windowManagerModel,
             builder: (BuildContext context, Widget? widget) {
-              return _ViewCollection(windowManagerModel: _windowManagerModel);
+              return _ViewCollection(
+                  windowManagerModel: _windowManagerModel,
+                  windowSettings: _settings);
             }),
         child: widget);
   }
 }
 
 class _ViewCollection extends StatelessWidget {
-  _ViewCollection({required this.windowManagerModel});
+  _ViewCollection(
+      {required this.windowManagerModel, required this.windowSettings});
 
-  _WindowManagerModel windowManagerModel;
+  final _WindowManagerModel windowManagerModel;
+  final WindowSettings windowSettings;
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> childViews = <Widget>[];
-    for (final WindowController childWindow in windowManagerModel.windows) {
-      childViews.add(WindowMetadataContent(controller: childWindow));
+    for (final WindowController controller in windowManagerModel.windows) {
+      childViews.add(WindowControllerRender(
+          controller: controller,
+          onDestroyed: () {
+            windowManagerModel.remove(controller);
+          },
+          windowSettings: windowSettings));
     }
 
     return ViewCollection(views: childViews);
@@ -211,19 +224,15 @@ class _ActiveWindowsTable extends StatelessWidget {
   }
 }
 
-class _WindowCreatorCard extends StatefulWidget {
-  const _WindowCreatorCard(
-      {required this.selectedWindow, required this.windowManagerModel});
+class _WindowCreatorCard extends StatelessWidget {
+  _WindowCreatorCard(
+      {required this.selectedWindow,
+      required this.windowManagerModel,
+      required this.windowSettings});
 
   final WindowController? selectedWindow;
   final _WindowManagerModel windowManagerModel;
-
-  @override
-  State<StatefulWidget> createState() => _WindowCreatorCardState();
-}
-
-class _WindowCreatorCardState extends State<_WindowCreatorCard> {
-  WindowSettings _settings = WindowSettings();
+  final WindowSettings windowSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -249,7 +258,7 @@ class _WindowCreatorCardState extends State<_WindowCreatorCard> {
               children: [
                 OutlinedButton(
                   onPressed: () async {
-                    widget.windowManagerModel.add(RegularWindowController());
+                    windowManagerModel.add(RegularWindowController());
                   },
                   child: const Text('Regular'),
                 ),
@@ -259,13 +268,7 @@ class _WindowCreatorCardState extends State<_WindowCreatorCard> {
                   child: TextButton(
                     child: const Text('SETTINGS'),
                     onPressed: () {
-                      windowSettingsDialog(context, _settings).then(
-                        (WindowSettings? settings) {
-                          if (settings != null) {
-                            _settings = settings;
-                          }
-                        },
-                      );
+                      windowSettingsDialog(context, windowSettings);
                     },
                   ),
                 ),
