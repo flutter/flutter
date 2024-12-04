@@ -130,6 +130,7 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
       // TODO(justinmc): But the engine ignores the title for cut/copy/paste/selectall. See:
       // https://github.com/flutter/engine/pull/56362#issuecomment-2512589800
       'title': item.title ?? _getTitleForAction(item.action, localizations),
+      'callbackId': item.hashCode, // TODO(justinmc): Effective?
     };
   }
 
@@ -143,6 +144,29 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
       SystemContextMenuAction.searchWeb => localizations.searchWebButtonLabel,
       SystemContextMenuAction.selectAll => localizations.selectAllButtonLabel,
       SystemContextMenuAction.share => localizations.shareButtonLabel,
+      SystemContextMenuAction.custom => throw AssertionError('Custom type has no title.'),
+    };
+  }
+
+  SystemContextMenuItemData _itemToData(SystemContextMenuItem item, WidgetsLocalizations localizations) {
+    return switch (item.action) {
+      SystemContextMenuAction.cut => const SystemContextMenuItemData.cut(),
+      SystemContextMenuAction.copy => const SystemContextMenuItemData.copy(),
+      SystemContextMenuAction.paste => const SystemContextMenuItemData.paste(),
+      SystemContextMenuAction.selectAll => const SystemContextMenuItemData.selectAll(),
+      SystemContextMenuAction.lookUp => SystemContextMenuItemData.lookUp(
+        title: _getTitleForAction(item.action, localizations),
+      ),
+      SystemContextMenuAction.share => SystemContextMenuItemData.share(
+        title: _getTitleForAction(item.action, localizations),
+      ),
+      SystemContextMenuAction.searchWeb => SystemContextMenuItemData.searchWeb(
+        title: _getTitleForAction(item.action, localizations),
+      ),
+      SystemContextMenuAction.custom => SystemContextMenuItemData.custom(
+        title: _getTitleForAction(item.action, localizations),
+        onPressed: item.onPressed!,
+      ),
     };
   }
 
@@ -157,8 +181,10 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
   @override
   void didUpdateWidget(SystemContextMenu oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // TODO(justinmc): Or if items changed.
     if (widget.anchor != oldWidget.anchor) {
       final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+      final Iterable<SystemContextMenuItemData> datas = items.map((SystemContextMenuButtonItem item) => _itemToData(item));
       _systemContextMenuController.show(
         widget.anchor,
         widget.items == null ? null : _itemsToJson(widget.items!, localizations),

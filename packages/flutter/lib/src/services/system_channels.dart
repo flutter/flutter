@@ -561,4 +561,9 @@ abstract final class SystemChannels {
   static const MethodChannel keyboard = OptionalMethodChannel(
     'flutter/keyboard',
   );
+
+  static const MethodChannel systemContextMenu = OptionalMethodChannel(
+      'flutter/systemcontextmenu',
+      JSONMethodCodec(),
+  );
 }
