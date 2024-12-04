@@ -4387,6 +4387,54 @@ void main() {
     await tester.pump();
     expect(fieldFocusNode.hasFocus, isTrue);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/152475
+  testWidgets('PopupMenuButton updates position on orientation change', (WidgetTester tester) async {
+    const Size initialSize = Size(400, 800);
+    const Size newSize = Size(1024, 768);
+
+    await tester.binding.setSurfaceSize(initialSize);
+
+    final GlobalKey buttonKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<int>(
+              key: buttonKey,
+              itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[
+                const PopupMenuItem<int>(
+                  value: 1,
+                  child: Text('Option 1'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(PopupMenuButton<int>));
+    await tester.pumpAndSettle();
+
+    final Rect initialButtonRect = tester.getRect(find.byKey(buttonKey));
+    final Rect initialMenuRect = tester.getRect(find.text('Option 1'));
+
+    await tester.binding.setSurfaceSize(newSize);
+    await tester.pumpAndSettle();
+
+    final Rect newButtonRect = tester.getRect(find.byKey(buttonKey));
+    final Rect newMenuRect = tester.getRect(find.text('Option 1'));
+
+    expect(newButtonRect, isNot(equals(initialButtonRect)));
+
+    expect(newMenuRect, isNot(equals(initialMenuRect)));
+
+    expect(newMenuRect.topLeft - newButtonRect.topLeft, initialMenuRect.topLeft - initialButtonRect.topLeft);
+
+    await tester.binding.setSurfaceSize(null);
+  });
 }
 
 Matcher overlaps(Rect other) => OverlapsMatcher(other);
