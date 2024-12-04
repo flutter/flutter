@@ -5,7 +5,6 @@
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/foundation/serialization.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
