@@ -299,6 +299,8 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
     }
 
     final double remainingExtent = math.max(0, scrollOffset - constraints.scrollOffset);
+    // If the children's paint extent exceeds the remaining scroll extent of the `RenderSliverMainAxisGroup`,
+    // they need to be corrected.
     if (paintOffset > remainingExtent) {
       final double paintCorrection = paintOffset - remainingExtent;
       paintOffset = remainingExtent;
