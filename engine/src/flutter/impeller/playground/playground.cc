@@ -284,12 +284,7 @@ bool Playground::OpenPlaygroundHere(
       }
       buffer->SetLabel("ImGui Command Buffer");
 
-      if (render_target.GetColorAttachments().empty()) {
-        VALIDATION_LOG << "render target attachments are empty.";
-        return false;
-      }
-
-      auto color0 = render_target.GetColorAttachments().find(0)->second;
+      auto color0 = render_target.GetColorAttachment(0);
       color0.load_action = LoadAction::kLoad;
       if (color0.resolve_texture) {
         color0.texture = color0.resolve_texture;
@@ -297,7 +292,6 @@ bool Playground::OpenPlaygroundHere(
         color0.store_action = StoreAction::kStore;
       }
       render_target.SetColorAttachment(color0, 0);
-
       render_target.SetStencilAttachment(std::nullopt);
       render_target.SetDepthAttachment(std::nullopt);
 

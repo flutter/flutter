@@ -40,9 +40,12 @@ TEST(RenderPassBuilder, RenderPassWithLoadOpUsesCurrentLayout) {
 
   EXPECT_TRUE(!!render_pass);
 
-  auto maybe_color = builder.GetColorAttachments().find(0u);
-  ASSERT_NE(maybe_color, builder.GetColorAttachments().end());
-  auto color = maybe_color->second;
+  std::optional<vk::AttachmentDescription> maybe_color = builder.GetColor0();
+  ASSERT_TRUE(maybe_color.has_value());
+  if (!maybe_color.has_value()) {
+    return;
+  }
+  vk::AttachmentDescription color = maybe_color.value();
 
   EXPECT_EQ(color.initialLayout, vk::ImageLayout::eColorAttachmentOptimal);
   EXPECT_EQ(color.finalLayout, vk::ImageLayout::eGeneral);
@@ -66,21 +69,25 @@ TEST(RenderPassBuilder, CreatesRenderPassWithCombinedDepthStencil) {
 
   EXPECT_TRUE(!!render_pass);
 
-  auto maybe_color = builder.GetColorAttachments().find(0u);
-  ASSERT_NE(maybe_color, builder.GetColorAttachments().end());
-  auto color = maybe_color->second;
+  std::optional<vk::AttachmentDescription> maybe_color = builder.GetColor0();
+  ASSERT_TRUE(maybe_color.has_value());
+  if (!maybe_color.has_value()) {
+    return;
+  }
+  vk::AttachmentDescription color = maybe_color.value();
 
   EXPECT_EQ(color.initialLayout, vk::ImageLayout::eUndefined);
   EXPECT_EQ(color.finalLayout, vk::ImageLayout::eGeneral);
   EXPECT_EQ(color.loadOp, vk::AttachmentLoadOp::eClear);
   EXPECT_EQ(color.storeOp, vk::AttachmentStoreOp::eStore);
 
-  auto maybe_depth_stencil = builder.GetDepthStencil();
+  std::optional<vk::AttachmentDescription> maybe_depth_stencil =
+      builder.GetDepthStencil();
   ASSERT_TRUE(maybe_depth_stencil.has_value());
   if (!maybe_depth_stencil.has_value()) {
     return;
   }
-  auto depth_stencil = maybe_depth_stencil.value();
+  vk::AttachmentDescription depth_stencil = maybe_depth_stencil.value();
 
   EXPECT_EQ(depth_stencil.initialLayout, vk::ImageLayout::eUndefined);
   EXPECT_EQ(depth_stencil.finalLayout,
@@ -106,12 +113,13 @@ TEST(RenderPassBuilder, CreatesRenderPassWithOnlyStencil) {
 
   EXPECT_TRUE(!!render_pass);
 
-  auto maybe_depth_stencil = builder.GetDepthStencil();
+  std::optional<vk::AttachmentDescription> maybe_depth_stencil =
+      builder.GetDepthStencil();
   ASSERT_TRUE(maybe_depth_stencil.has_value());
   if (!maybe_depth_stencil.has_value()) {
     return;
   }
-  auto depth_stencil = maybe_depth_stencil.value();
+  vk::AttachmentDescription depth_stencil = maybe_depth_stencil.value();
 
   EXPECT_EQ(depth_stencil.initialLayout, vk::ImageLayout::eUndefined);
   EXPECT_EQ(depth_stencil.finalLayout,
@@ -135,9 +143,12 @@ TEST(RenderPassBuilder, CreatesMSAAResolveWithCorrectStore) {
 
   EXPECT_TRUE(!!render_pass);
 
-  auto maybe_color = builder.GetColorAttachments().find(0u);
-  ASSERT_NE(maybe_color, builder.GetColorAttachments().end());
-  auto color = maybe_color->second;
+  auto maybe_color = builder.GetColor0();
+  ASSERT_TRUE(maybe_color.has_value());
+  if (!maybe_color.has_value()) {
+    return;
+  }
+  vk::AttachmentDescription color = maybe_color.value();
 
   // MSAA Texture.
   EXPECT_EQ(color.initialLayout, vk::ImageLayout::eUndefined);
@@ -145,9 +156,12 @@ TEST(RenderPassBuilder, CreatesMSAAResolveWithCorrectStore) {
   EXPECT_EQ(color.loadOp, vk::AttachmentLoadOp::eClear);
   EXPECT_EQ(color.storeOp, vk::AttachmentStoreOp::eDontCare);
 
-  auto maybe_resolve = builder.GetResolves().find(0u);
-  ASSERT_NE(maybe_resolve, builder.GetResolves().end());
-  auto resolve = maybe_resolve->second;
+  auto maybe_resolve = builder.GetColor0Resolve();
+  ASSERT_TRUE(maybe_resolve.has_value());
+  if (!maybe_resolve.has_value()) {
+    return;
+  }
+  vk::AttachmentDescription resolve = maybe_resolve.value();
 
   // MSAA Resolve Texture.
   EXPECT_EQ(resolve.initialLayout, vk::ImageLayout::eUndefined);

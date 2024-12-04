@@ -589,10 +589,6 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
       }
       pass->SetLabel("Playground Blit Pass");
 
-      if (render_target.GetColorAttachments().empty()) {
-        return false;
-      }
-
       // Blit `bridge` to the top left corner of the texture.
       pass->AddCopy(bridge, texture);
 
@@ -708,10 +704,6 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
         return false;
       }
       pass->SetLabel("Playground Blit Pass");
-
-      if (render_target.GetColorAttachments().empty()) {
-        return false;
-      }
 
       // Blit `bridge` to the top left corner of the texture.
       pass->AddCopy(bridge, device_buffer);

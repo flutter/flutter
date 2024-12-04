@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 #include "fml/concurrent_message_loop.h"
+#include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/command_queue_vk.h"
 #include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/render_pass_builder_vk.h"
@@ -666,15 +667,18 @@ void ContextVK::InitializeCommonlyUsedShadersIfNeeded() const {
       rt_allocator.CreateOffscreenMSAA(*this, {1, 1}, 1);
 
   RenderPassBuilderVK builder;
-  for (const auto& [bind_point, color] : render_target.GetColorAttachments()) {
-    builder.SetColorAttachment(
-        bind_point,                                          //
-        color.texture->GetTextureDescriptor().format,        //
-        color.texture->GetTextureDescriptor().sample_count,  //
-        color.load_action,                                   //
-        color.store_action                                   //
-    );
-  }
+
+  render_target.IterateAllColorAttachments(
+      [&builder](size_t index, const ColorAttachment& attachment) -> bool {
+        builder.SetColorAttachment(
+            index,                                                    //
+            attachment.texture->GetTextureDescriptor().format,        //
+            attachment.texture->GetTextureDescriptor().sample_count,  //
+            attachment.load_action,                                   //
+            attachment.store_action                                   //
+        );
+        return true;
+      });
 
   if (auto depth = render_target.GetDepthAttachment(); depth.has_value()) {
     builder.SetDepthStencilAttachment(

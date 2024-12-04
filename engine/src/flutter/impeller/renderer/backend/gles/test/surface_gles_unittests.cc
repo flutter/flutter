@@ -22,7 +22,7 @@ TEST_P(SurfaceGLESTest, CanWrapNonZeroFBO) {
   ASSERT_TRUE(surface->IsValid());
   ASSERT_TRUE(surface->GetRenderTarget().HasColorAttachment(0));
   const auto& texture = TextureGLES::Cast(
-      *(surface->GetRenderTarget().GetColorAttachments().at(0).texture));
+      *(surface->GetRenderTarget().GetColorAttachment(0).texture));
   auto wrapped = texture.GetFBO();
   ASSERT_TRUE(wrapped.has_value());
   // NOLINTNEXTLINE(bugprone-unchecked-optional-access)

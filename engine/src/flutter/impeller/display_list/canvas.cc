@@ -14,6 +14,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/formats.h"
 #include "impeller/display_list/color_filter.h"
 #include "impeller/display_list/image_filter.h"
 #include "impeller/display_list/skia_conversions.h"
@@ -853,7 +854,7 @@ void Canvas::DrawAtlas(const std::shared_ptr<AtlasContents>& atlas_contents,
 
 void Canvas::SetupRenderPass() {
   renderer_.GetRenderTargetCache()->Start();
-  auto color0 = render_target_.GetColorAttachments().find(0u)->second;
+  ColorAttachment color0 = render_target_.GetColorAttachment(0);
 
   auto& stencil_attachment = render_target_.GetStencilAttachment();
   auto& depth_attachment = render_target_.GetDepthAttachment();
@@ -1460,8 +1461,7 @@ void Canvas::AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth) {
       RenderTarget& render_target = render_passes_.back()
                                         .inline_pass_context->GetPassTarget()
                                         .GetRenderTarget();
-      ColorAttachment attachment =
-          render_target.GetColorAttachments().find(0u)->second;
+      ColorAttachment attachment = render_target.GetColorAttachment(0);
       // Attachment.clear color needs to be premultiplied at all times, but the
       // Color::Blend function requires unpremultiplied colors.
       attachment.clear_color = attachment.clear_color.Unpremultiply()
@@ -1588,8 +1588,7 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
   }
 
   if (should_use_onscreen) {
-    ColorAttachment color0 =
-        render_target_.GetColorAttachments().find(0u)->second;
+    ColorAttachment color0 = render_target_.GetColorAttachment(0);
     // When MSAA is being used, we end up overriding the entire backdrop by
     // drawing the previous pass texture, and so we don't have to clear it and
     // can use kDontCare.

@@ -86,20 +86,13 @@ const std::shared_ptr<RenderPass>& InlinePassContext::GetRenderPass() {
     return pass_;
   }
 
-  if (pass_target_.GetRenderTarget().GetColorAttachments().empty()) {
-    VALIDATION_LOG << "Color attachment unexpectedly missing from the "
-                      "EntityPass render target.";
-    return pass_;
-  }
-
   command_buffer_->SetLabel("EntityPass Command Buffer");
 
   {
     // If the pass target has a resolve texture, then we're using MSAA.
-    bool is_msaa = pass_target_.GetRenderTarget()
-                       .GetColorAttachments()
-                       .find(0)
-                       ->second.resolve_texture != nullptr;
+    bool is_msaa =
+        pass_target_.GetRenderTarget().GetColorAttachment(0).resolve_texture !=
+        nullptr;
     if (pass_count_ > 0 && is_msaa) {
       pass_target_.Flip(renderer_);
     }
@@ -107,8 +100,7 @@ const std::shared_ptr<RenderPass>& InlinePassContext::GetRenderPass() {
 
   // Find the color attachment a second time, since the target may have just
   // flipped.
-  auto color0 =
-      pass_target_.GetRenderTarget().GetColorAttachments().find(0)->second;
+  ColorAttachment color0 = pass_target_.GetRenderTarget().GetColorAttachment(0);
   bool is_msaa = color0.resolve_texture != nullptr;
 
   if (pass_count_ > 0) {

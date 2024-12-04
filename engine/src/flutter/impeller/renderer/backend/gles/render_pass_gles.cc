@@ -11,6 +11,7 @@
 #include "fml/closure.h"
 #include "fml/logging.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/backend/gles/device_buffer_gles.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
@@ -550,9 +551,11 @@ bool RenderPassGLES::OnEncodeCommands(const Context& context) const {
   if (!render_target.HasColorAttachment(0u)) {
     return false;
   }
-  const auto& color0 = render_target.GetColorAttachments().at(0u);
-  const auto& depth0 = render_target.GetDepthAttachment();
-  const auto& stencil0 = render_target.GetStencilAttachment();
+  const ColorAttachment& color0 = render_target.GetColorAttachment(0);
+  const std::optional<DepthAttachment>& depth0 =
+      render_target.GetDepthAttachment();
+  const std::optional<StencilAttachment>& stencil0 =
+      render_target.GetStencilAttachment();
 
   auto pass_data = std::make_shared<RenderPassData>();
   pass_data->label = label_;

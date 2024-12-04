@@ -104,15 +104,15 @@ static MTLRenderPassDescriptor* ToMTLRenderPassDescriptor(
     const RenderTarget& desc) {
   auto result = [MTLRenderPassDescriptor renderPassDescriptor];
 
-  const auto& colors = desc.GetColorAttachments();
+  bool configured_attachment = desc.IterateAllColorAttachments(
+      [&result](size_t index, const ColorAttachment& attachment) -> bool {
+        return ConfigureColorAttachment(attachment,
+                                        result.colorAttachments[index]);
+      });
 
-  for (const auto& color : colors) {
-    if (!ConfigureColorAttachment(color.second,
-                                  result.colorAttachments[color.first])) {
-      VALIDATION_LOG << "Could not configure color attachment at index "
-                     << color.first;
-      return nil;
-    }
+  if (!configured_attachment) {
+    VALIDATION_LOG << "Could not configure color attachments";
+    return nil;
   }
 
   const auto& depth = desc.GetDepthAttachment();
