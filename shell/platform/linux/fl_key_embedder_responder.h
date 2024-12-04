@@ -8,8 +8,6 @@
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_key_event.h"
 
-constexpr int kMaxConvertedKeyData = 3;
-
 // The signature of a function that FlKeyEmbedderResponder calls on every key
 // event.
 //
