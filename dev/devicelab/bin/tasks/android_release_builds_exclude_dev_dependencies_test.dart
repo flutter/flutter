@@ -37,7 +37,7 @@ Future<void> main() async {
 
             final File apk = File(path.join(flutterProject.rootPath, 'build', 'app', 'outputs', 'flutter-apk', 'app-debug.apk'));
             if (!apk.existsSync()) {
-              throw TaskResult.failure("Expected ${apk.path} to exist, but it doesn't");
+              throw TaskResult.failure("Expected ${apk.path} to exist, but it doesn't.");
             }
 
             // We expect the APK to include the devDependencyPlugin except in release mode.
