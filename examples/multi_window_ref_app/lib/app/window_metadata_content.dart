@@ -2,29 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:multi_window_ref_app/app/regular_window_content.dart';
 
 class WindowMetadataContent extends StatelessWidget {
-  WindowMetadataContent({required this.childWindow});
+  WindowMetadataContent({required this.controller});
 
-  WindowMetadata childWindow;
+  WindowController controller;
 
   @override
   Widget build(BuildContext context) {
-    Widget child;
-    switch (childWindow.type) {
+    switch (controller.type) {
       case WindowArchetype.regular:
-        child =
-            RegularWindowContent(window: childWindow as RegularWindowMetadata);
-        break;
+        return RegularWindow(
+            preferredSize: Size(400, 400),
+            controller: controller as RegularWindowController,
+            child: RegularWindowContent(
+                window: controller as RegularWindowController));
       default:
         throw UnimplementedError(
             "The provided window type does not have an implementation");
     }
-
-    return View(
-      view: childWindow.view,
-      child: WindowContext(
-        viewId: childWindow.view.viewId,
-        child: child,
-      ),
-    );
   }
 }

@@ -32,30 +32,57 @@ enum WindowArchetype {
 /// Controller used with the [RegularWindow] widget. This controller
 /// provides access to modify and destroy the window, in addition to
 /// listening to changes on the window.
-class RegularWindowController with ChangeNotifier {
-  late int _viewId;
+abstract class WindowController with ChangeNotifier {
+  FlutterView? _view;
 
   /// The ID of the view used for this window, which is unique to each window.
-  int get viewId => _viewId;
+  FlutterView? get view => _view;
+  set view(FlutterView? value) {
+    _view = value;
+    notifyListeners();
+  }
 
-  late Size _size;
+  Size? _size;
 
   /// The current size of the window. This may differ from the requested size.
-  Size get size => _size;
+  Size? get size => _size;
+  set size(Size? value) {
+    _size = value;
+    notifyListeners();
+  }
 
-  late int? _parentViewId;
+  int? _parentViewId;
 
   /// The ID of the parent in which this rendered, if any.
   int? get parentViewId => _parentViewId;
-
-  /// Modifies this window with the provided properties.
-  Future<void> modify({Size? size}) {
-    throw UnimplementedError();
+  set parentViewId(int? value) {
+    _parentViewId = value;
+    notifyListeners();
   }
 
+  /// The archetype of the window.
+  WindowArchetype get type;
+
+  /// Modifies this window with the provided properties.
+  Future<void> modify({Size? size});
+
   /// Destroys this window.
-  Future<void> destroy() {
-    return destroyWindow(viewId);
+  Future<void> destroy() async {
+    if (view == null) {
+      return;
+    }
+
+    return destroyWindow(view!.viewId);
+  }
+}
+
+class RegularWindowController extends WindowController {
+  @override
+  WindowArchetype get type => WindowArchetype.regular;
+
+  @override
+  Future<void> modify({Size? size}) {
+    throw UnimplementedError();
   }
 }
 
@@ -65,12 +92,12 @@ class RegularWindow extends StatefulWidget {
       this.onDestroyed,
       this.controller,
       required this.child})
-      : _future = createRegular(size: preferredSize);
+      : _preferredSize = preferredSize;
 
   final RegularWindowController? controller;
   void Function()? onDestroyed;
-  final Future<RegularWindowMetadata> _future;
   final Widget child;
+  final Size _preferredSize;
 
   @override
   State<RegularWindow> createState() => _RegularWindowState();
@@ -78,14 +105,17 @@ class RegularWindow extends StatefulWidget {
 
 class _RegularWindowState extends State<RegularWindow> {
   _WindowListener? _listener;
+  Future<RegularWindowMetadata>? _future;
 
   @override
   void initState() {
     super.initState();
-    widget._future.then((RegularWindowMetadata metadata) async {
+    _future = createRegular(size: widget._preferredSize);
+    _future!.then((RegularWindowMetadata metadata) async {
       if (widget.controller != null) {
-        widget.controller!._parentViewId = metadata.parentViewId;
-        widget.controller!._size = metadata.size;
+        widget.controller!.view = metadata.view;
+        widget.controller!.parentViewId = metadata.parentViewId;
+        widget.controller!.size = metadata.size;
       }
 
       SchedulerBinding.instance.addPostFrameCallback((_) async {
@@ -100,11 +130,11 @@ class _RegularWindowState extends State<RegularWindow> {
               }
 
               if (properties.size != null) {
-                widget.controller!._size = properties.size!;
+                widget.controller!.size = properties.size;
               }
 
               if (properties.parentViewId != null) {
-                widget.controller!._parentViewId = properties.parentViewId;
+                widget.controller!.parentViewId = properties.parentViewId;
               }
             },
             onDestroyed: widget.onDestroyed);
@@ -127,12 +157,11 @@ class _RegularWindowState extends State<RegularWindow> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: widget._future,
+        future: _future,
         builder: (BuildContext context,
             AsyncSnapshot<RegularWindowMetadata> metadata) {
           if (!metadata.hasData) {
-            final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
-            return binding.wrapWithDefaultView(Container());
+            return const ViewCollection(views: <Widget>[]);
           }
 
           return View(
@@ -162,22 +191,17 @@ class WindowContext extends InheritedWidget {
   }
 }
 
-abstract class WindowMetadata {
+class WindowMetadata {
   WindowMetadata({required this.view, required this.size, this.parentViewId});
 
   final FlutterView view;
   final Size size;
   final int? parentViewId;
-
-  WindowArchetype get type;
 }
 
 class RegularWindowMetadata extends WindowMetadata {
   RegularWindowMetadata(
       {required super.view, required super.size, super.parentViewId});
-
-  @override
-  WindowArchetype get type => WindowArchetype.regular;
 }
 
 class _WindowMetadata {

@@ -5,16 +5,16 @@ import 'window_settings.dart';
 import 'window_settings_dialog.dart';
 
 class _WindowManagerModel extends ChangeNotifier {
-  final List<WindowMetadata> _windows = <WindowMetadata>[];
-  List<WindowMetadata> get windows => _windows;
+  final List<WindowController> _windows = <WindowController>[];
+  List<WindowController> get windows => _windows;
   int? _selectedViewId;
-  WindowMetadata? get selected {
+  WindowController? get selected {
     if (_selectedViewId == null) {
       return null;
     }
 
-    for (final WindowMetadata window in _windows) {
-      if (window.view.viewId == _selectedViewId) {
+    for (final WindowController window in _windows) {
+      if (window.view?.viewId == _selectedViewId) {
         return window;
       }
     }
@@ -22,18 +22,19 @@ class _WindowManagerModel extends ChangeNotifier {
     return null;
   }
 
-  void add(WindowMetadata window) {
+  void add(WindowController window) {
     _windows.add(window);
     notifyListeners();
   }
 
-  void remove(WindowMetadata window) {
+  void remove(WindowController window) {
     _windows.remove(window);
     notifyListeners();
   }
 
   void select(int? viewId) {
     _selectedViewId = viewId;
+    notifyListeners();
   }
 }
 
@@ -101,8 +102,8 @@ class _ViewCollection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> childViews = <Widget>[];
-    for (final WindowMetadata childWindow in windowManagerModel.windows) {
-      childViews.add(WindowMetadataContent(childWindow: childWindow));
+    for (final WindowController childWindow in windowManagerModel.windows) {
+      childViews.add(WindowMetadataContent(controller: childWindow));
     }
 
     return ViewCollection(views: childViews);
@@ -116,84 +117,97 @@ class _ActiveWindowsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DataTable(
-      showBottomBorder: true,
-      onSelectAll: (selected) {
-        windowManagerModel.select(null);
-      },
-      columns: const [
-        DataColumn(
-          label: SizedBox(
-            width: 20,
-            child: Text(
-              'ID',
-              style: TextStyle(
-                fontSize: 16,
+    return ListenableBuilder(
+        listenable: windowManagerModel,
+        builder: (BuildContext context, Widget? widget) {
+          return DataTable(
+            showBottomBorder: true,
+            onSelectAll: (selected) {
+              windowManagerModel.select(null);
+            },
+            columns: const [
+              DataColumn(
+                label: SizedBox(
+                  width: 20,
+                  child: Text(
+                    'ID',
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
-        ),
-        DataColumn(
-          label: SizedBox(
-            width: 120,
-            child: Text(
-              'Type',
-              style: TextStyle(
-                fontSize: 16,
+              DataColumn(
+                label: SizedBox(
+                  width: 120,
+                  child: Text(
+                    'Type',
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
-        ),
-        DataColumn(
-            label: SizedBox(
-              width: 20,
-              child: Text(''),
-            ),
-            numeric: true),
-      ],
-      rows: windowManagerModel.windows
-          .asMap()
-          .entries
-          .map<DataRow>((indexedEntry) {
-        final index = indexedEntry.key;
-        final WindowMetadata entry = indexedEntry.value;
-        final window = entry;
-        final viewId = window.view.viewId;
-        final archetype = window.type;
-        final isSelected = viewId == windowManagerModel._selectedViewId;
-
-        return DataRow(
-          color: WidgetStateColor.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) {
-              return Theme.of(context).colorScheme.primary.withOpacity(0.08);
-            }
-            return Colors.transparent;
-          }),
-          selected: isSelected,
-          onSelectChanged: (selected) {
-            if (selected != null) {
-              windowManagerModel.select(selected ? viewId : null);
-            }
-          },
-          cells: [
-            DataCell(
-              Text('$viewId'),
-            ),
-            DataCell(
-              Text(archetype.toString().replaceFirst('WindowArchetype.', '')),
-            ),
-            DataCell(
-              IconButton(
-                icon: const Icon(Icons.delete_outlined),
-                onPressed: () {
-                  destroyWindow(viewId);
+              DataColumn(
+                  label: SizedBox(
+                    width: 20,
+                    child: Text(''),
+                  ),
+                  numeric: true),
+            ],
+            rows: windowManagerModel.windows
+                .map<DataRow>((WindowController controller) {
+              return DataRow(
+                color: WidgetStateColor.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withOpacity(0.08);
+                  }
+                  return Colors.transparent;
+                }),
+                selected: controller.view?.viewId ==
+                    windowManagerModel._selectedViewId,
+                onSelectChanged: (selected) {
+                  if (selected != null) {
+                    windowManagerModel
+                        .select(selected ? controller.view?.viewId : null);
+                  }
                 },
-              ),
-            ),
-          ],
-        );
-      }).toList(),
-    );
+                cells: [
+                  DataCell(
+                    ListenableBuilder(
+                        listenable: controller,
+                        builder: (BuildContext context, Widget? _) => Text(
+                            controller.view != null
+                                ? '${controller.view?.viewId}'
+                                : 'Loading...')),
+                  ),
+                  DataCell(
+                    ListenableBuilder(
+                        listenable: controller,
+                        builder: (BuildContext context, Widget? _) => Text(
+                            controller.type
+                                .toString()
+                                .replaceFirst('WindowArchetype.', ''))),
+                  ),
+                  DataCell(
+                    ListenableBuilder(
+                        listenable: controller,
+                        builder: (BuildContext context, Widget? _) =>
+                            IconButton(
+                              icon: const Icon(Icons.delete_outlined),
+                              onPressed: () async {
+                                await controller.destroy();
+                              },
+                            )),
+                  ),
+                ],
+              );
+            }).toList(),
+          );
+        });
   }
 }
 
@@ -201,7 +215,7 @@ class _WindowCreatorCard extends StatefulWidget {
   const _WindowCreatorCard(
       {required this.selectedWindow, required this.windowManagerModel});
 
-  final WindowMetadata? selectedWindow;
+  final WindowController? selectedWindow;
   final _WindowManagerModel windowManagerModel;
 
   @override
@@ -235,9 +249,7 @@ class _WindowCreatorCardState extends State<_WindowCreatorCard> {
               children: [
                 OutlinedButton(
                   onPressed: () async {
-                    final WindowMetadata metadata =
-                        await createRegular(size: _settings.regularSize);
-                    widget.windowManagerModel.add(metadata);
+                    widget.windowManagerModel.add(RegularWindowController());
                   },
                   child: const Text('Regular'),
                 ),
