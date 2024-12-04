@@ -86,8 +86,7 @@ TEST(SwapchainTest, CachesRenderPassOnSwapchainImage) {
     auto& depth = render_target.GetDepthAttachment();
     depth_stencil_textures.push_back(depth.has_value() ? depth->texture
                                                        : nullptr);
-    msaa_textures.push_back(
-        render_target.GetColorAttachments().find(0u)->second.texture);
+    msaa_textures.push_back(render_target.GetColorAttachment(0).texture);
   }
 
   for (auto i = 1; i < 3; i++) {

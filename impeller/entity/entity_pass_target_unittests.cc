@@ -31,20 +31,14 @@ TEST_P(EntityPassTargetTest, SwapWithMSAATexture) {
 
   auto entity_pass_target = EntityPassTarget(render_target, false, false);
 
-  auto color0 = entity_pass_target.GetRenderTarget()
-                    .GetColorAttachments()
-                    .find(0u)
-                    ->second;
+  auto color0 = entity_pass_target.GetRenderTarget().GetColorAttachment(0);
   auto msaa_tex = color0.texture;
   auto resolve_tex = color0.resolve_texture;
 
   FML_DCHECK(content_context);
   entity_pass_target.Flip(*content_context);
 
-  color0 = entity_pass_target.GetRenderTarget()
-               .GetColorAttachments()
-               .find(0u)
-               ->second;
+  color0 = entity_pass_target.GetRenderTarget().GetColorAttachment(0);
 
   ASSERT_EQ(msaa_tex, color0.texture);
   ASSERT_NE(resolve_tex, color0.resolve_texture);
@@ -89,10 +83,7 @@ TEST_P(EntityPassTargetTest, SwapWithMSAAImplicitResolve) {
 
   auto entity_pass_target = EntityPassTarget(render_target, false, true);
 
-  auto color0 = entity_pass_target.GetRenderTarget()
-                    .GetColorAttachments()
-                    .find(0u)
-                    ->second;
+  auto color0 = entity_pass_target.GetRenderTarget().GetColorAttachment(0);
   auto msaa_tex = color0.texture;
   auto resolve_tex = color0.resolve_texture;
 
@@ -101,10 +92,7 @@ TEST_P(EntityPassTargetTest, SwapWithMSAAImplicitResolve) {
   FML_DCHECK(content_context);
   entity_pass_target.Flip(*content_context);
 
-  color0 = entity_pass_target.GetRenderTarget()
-               .GetColorAttachments()
-               .find(0u)
-               ->second;
+  color0 = entity_pass_target.GetRenderTarget().GetColorAttachment(0);
 
   ASSERT_NE(msaa_tex, color0.texture);
   ASSERT_NE(resolve_tex, color0.resolve_texture);

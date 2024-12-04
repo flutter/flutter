@@ -7,6 +7,7 @@
 #include "flutter/testing/testing.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/allocator.h"
+#include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/entity/entity_playground.h"
 #include "impeller/entity/render_target_cache.h"
@@ -104,8 +105,8 @@ TEST_P(RenderTargetCacheTest, CachedTextureGetsNewAttachmentConfig) {
       *GetContext(), {100, 100}, 1, "Offscreen2", color_attachment_config);
   render_target_cache.End();
 
-  auto color1 = target1.GetColorAttachments().find(0)->second;
-  auto color2 = target2.GetColorAttachments().find(0)->second;
+  ColorAttachment color1 = target1.GetColorAttachment(0);
+  ColorAttachment color2 = target2.GetColorAttachment(0);
   // The second color attachment should reuse the first attachment's texture
   // but with attributes from the second AttachmentConfig.
   EXPECT_EQ(color2.texture, color1.texture);
