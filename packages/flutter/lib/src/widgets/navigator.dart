@@ -2493,8 +2493,7 @@ class Navigator extends StatefulWidget {
   /// _does_ animate the new route, and delays removing the old route until the
   /// new route has finished animating.
   ///
-  /// The removed route is removed and completed with null, so this method does
-  /// not take a return value argument.
+  /// The removed route is removed and completed with a `null` value.
   ///
   /// The new route, the route below the new route (if any), and the route above
   /// the new route, are all notified (see [Route.didReplace],
@@ -2550,8 +2549,7 @@ class Navigator extends StatefulWidget {
   /// _does_ animate the new route, and delays removing the old route until the
   /// new route has finished animating.
   ///
-  /// The removed route is removed and completed with null, so this method does
-  /// not take a return value argument.
+  /// The removed route is removed and completed with a `null` value.
   ///
   /// The new route, the route below the new route (if any), and the route above
   /// the new route, are all notified (see [Route.didReplace],
@@ -5171,8 +5169,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     _history.add(entry);
     while (index >= 0 && !predicate(_history[index].route)) {
       if (_history[index].isPresent) {
-        _history[index].remove();
-        _history[index].route.didComplete(null);
+        _history[index].complete(null);
       }
       index -= 1;
     }
@@ -5241,8 +5238,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(_history[index].isPresent, 'The specified oldRoute has already been removed from the Navigator.');
     final bool wasCurrent = oldRoute.isCurrent;
     _history.insert(index + 1, entry);
-    _history[index].remove(isReplaced: true);
-    _history[index].route.didComplete(null);
+    _history[index].complete(null, isReplaced: true);
     _flushHistoryUpdates();
     assert(() {
       _debugLocked = false;
@@ -5310,8 +5306,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
     assert(index >= 0, 'There are no routes below the specified anchorRoute.');
     _history.insert(index + 1, entry);
-    _history[index].remove(isReplaced: true);
-    _history[index].route.didComplete(null);
+    _history[index].complete(null, isReplaced: true);
     _flushHistoryUpdates();
     assert(() { _debugLocked = false; return true; }());
   }
@@ -5481,8 +5476,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(route._navigator == this);
     final bool wasCurrent = route.isCurrent;
     final _RouteEntry entry = _history.firstWhere(_RouteEntry.isRoutePredicate(route));
-    entry.remove();
-    entry.route.didComplete(result);
+    entry.complete(result);
     _flushHistoryUpdates(rearrangeOverlay: false);
     assert(() {
       _debugLocked = false;
@@ -5518,8 +5512,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       index -= 1;
     }
     assert(index >= 0, 'There are no routes below the specified anchorRoute.');
-    _history[index].remove();
-    _history[index].route.didComplete(result);
+    _history[index].complete(result);
     _flushHistoryUpdates(rearrangeOverlay: false);
     assert(() {
       _debugLocked = false;
