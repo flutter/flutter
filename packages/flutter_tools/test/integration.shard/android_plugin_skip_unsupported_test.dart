@@ -194,7 +194,7 @@ void main() {
 const String pubspecWithPluginPath = r'''
 name: test
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.7.0-0
 dependencies:
   flutter:
     sdk: flutter
