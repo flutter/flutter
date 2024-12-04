@@ -1,6 +1,7 @@
 # Ignore everything by default, as these come from gclient/DEPS.
 # We'll explicitly include the folders we want to track.
 /*
+/boringssl/src
 
 # Include the .gitignore file itself and .clang-tidy.
 !.gitignore
@@ -12,6 +13,7 @@
 
 # Include folders that have hand-written code (not DEPS).
 !accessibility/
+!boringssl/
 !canvaskit/
 !spring_animation/
 !test_shaders/
