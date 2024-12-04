@@ -797,7 +797,7 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
     end: 1.0,
   ).chain(CurveTween(curve: const Interval(0.0, 0.75)));
 
-  // The fade out trnasition of the old page when the new page appears.
+  // The fade out transition of the old page when the new page appears.
   static final Animatable<double> _fadeOutTransition = Tween<double>(
     begin: 1.0,
     end: 0.0,
