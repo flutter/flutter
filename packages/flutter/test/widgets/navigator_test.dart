@@ -1364,6 +1364,36 @@ void main() {
     expect(await pageValue, 'B');
   });
 
+  testWidgets('remove route below an other one whose value is awaited', (WidgetTester tester) async {
+    late Future<String?> pageValue;
+    final Map<String, WidgetBuilder> pageBuilders = <String, WidgetBuilder>{
+      '/':  (BuildContext context) => OnTapPage(id: '/', onTap: () { pageValue = Navigator.pushNamed(context, '/A'); }),
+      '/A':  (BuildContext context) => OnTapPage(id: '/A', onTap: () { Navigator.pushNamed(context, '/B'); }),
+      '/B': (BuildContext context) => OnTapPage(id: 'B', onTap: () { Navigator.pop(context, 'B'); }),
+    };
+    final Map<String, Route<String>> routes = <String, Route<String>>{};
+
+    await tester.pumpWidget(MaterialApp(
+      onGenerateRoute: (RouteSettings settings) {
+        routes[settings.name!] = PageRouteBuilder<String>(
+          settings: settings,
+          pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+            return pageBuilders[settings.name!]!(context);
+          },
+        );
+        return routes[settings.name];
+      },
+    ));
+
+    await tester.tap(find.text('/')); // pushNamed('/A'), stack becomes /, /A
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('/A')); // pushNamed('/B'), stack becomes /, /A /B
+
+    final NavigatorState navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.removeRouteBelow(routes['/B']!, 'A'); // stack becomes / /B, pageValue will complete and return 'A'
+    expect(await pageValue, 'A');
+  });
+
   testWidgets('replacing route can be observed', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
     final List<String> log = <String>[];
