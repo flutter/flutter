@@ -4,7 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 
-/// Flutter code sample for [CupertinoSheetRoute], with nested navigation.
+/// Flutter code sample for [showCupertinoSheet].
 
 void main() {
   runApp(const CupertinoSheetApp());
@@ -38,9 +38,11 @@ class HomePage extends StatelessWidget {
           children: <Widget>[
             CupertinoButton.filled(
               onPressed: () {
-                Navigator.of(context).push(CupertinoSheetRoute<void>(
-                  builder: (BuildContext context) => const SheetContentWithNavigator()
-                ));
+                showCupertinoSheet<void>(
+                  context: context,
+                  useNestedNavigation: true,
+                  pageBuilder: (BuildContext context) => const SheetScaffold(),
+                );
               },
               child: const Text('Open Bottom Sheet'),
             ),
@@ -51,40 +53,8 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class SheetContentWithNavigator extends StatelessWidget {
-  const SheetContentWithNavigator({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return NavigatorPopHandler(
-      onPopWithResult: (dynamic result) {
-        Navigator.of(context, rootNavigator: true).maybePop();
-      },
-      child: Navigator(
-        initialRoute: '/',
-        onGenerateRoute: (RouteSettings settings) {
-          return CupertinoPageRoute<void>(
-            builder: (BuildContext context) {
-              return PopScope(
-                canPop: settings.name != '/',
-                onPopInvokedWithResult: (bool didPop, Object? result) {
-                  if (didPop) {
-                    return;
-                  }
-                  Navigator.of(context).pop();
-                },
-                child: const SheetFirstPage(),
-              );
-            }
-          );
-        },
-      )
-    );
-  }
-}
-
-class SheetFirstPage extends StatelessWidget {
-  const SheetFirstPage({super.key});
+class SheetScaffold extends StatelessWidget {
+  const SheetScaffold({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -131,9 +101,11 @@ class SheetBody extends StatelessWidget {
           ),
           CupertinoButton.filled(
             onPressed: () {
-              Navigator.of(context, rootNavigator: true).push(CupertinoSheetRoute<void>(
-                builder: (BuildContext context) => const SheetContentWithNavigator()
-              ));
+              showCupertinoSheet<void>(
+                context: context,
+                useNestedNavigation: true,
+                pageBuilder: (BuildContext context) => const SheetScaffold(),
+              );
             },
             child: const Text('Push Another Sheet'),
           ),
@@ -142,7 +114,6 @@ class SheetBody extends StatelessWidget {
     );
   }
 }
-
 
 class SheetNextPage extends StatelessWidget {
   const SheetNextPage({super.key});

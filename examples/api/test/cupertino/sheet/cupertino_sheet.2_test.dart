@@ -9,17 +9,17 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Tap on button displays cupertino sheet', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.CupertinoSheetApp(),
+      const example.RestorableSheetExampleApp(),
     );
 
-    final Finder dialogTitle = find.text('CupertinoSheetRoute');
+    final Finder dialogTitle = find.text('Current Count');
     expect(dialogTitle, findsNothing);
 
     await tester.tap(find.byType(CupertinoButton));
     await tester.pumpAndSettle();
     expect(dialogTitle, findsOneWidget);
 
-    await tester.tap(find.text('Go Back'));
+    await tester.tap(find.text('Pop Sheet'));
     await tester.pumpAndSettle();
     expect(dialogTitle, findsNothing);
   });

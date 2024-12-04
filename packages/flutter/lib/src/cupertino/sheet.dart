@@ -5,7 +5,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'route.dart';
 
 // Tween for animating a Cupertino sheet onto the screen.
@@ -61,8 +60,8 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 /// sheet will also be intercepted to pop the whole [CupertinoSheetRoute]. If
 /// a custom [Navigator] setup is needed, like for example to enable named routes
 /// or the pages API, then it is recommended to directly push a [CupertinoSheetRoute]
-/// to the stack with whatever configuration needed. See the implementation below
-/// for the boilerplate provided by `showCupertinoSheet` to get started.
+/// to the stack with whatever configuration needed. See [CupertinoSheetRoute] for
+/// an example that manually sets up nested navigation.
 ///
 /// The whole sheet can be popped at once by either dragging down on the sheet,
 /// or calling [CupertinoSheetRoute.popSheet].
@@ -76,8 +75,8 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 /// will be shown with no [Navigator] widget. Multiple calls to `showCupertinoSheet`
 /// can still be made to show multiple stacked sheets, if desired.
 ///
-/// In both cases, new [CupertinoSheetRoute]s will be pushed to the root
-/// [Navigator]. This is to ensure the previous routes animate correctly.
+/// `showCupertinoSheet` always pushes the [CupertinoSheetRoute] to the root
+/// [Navigator]. This is to ensure the previous route animates correctly.
 ///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the sheet was closed.
@@ -86,7 +85,7 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 /// This example shows how to navigate to use [showCupertinoSheet] to display a
 /// Cupertino sheet widget with nested navigation.
 ///
-/// ** See code in examples/api/lib/cupertino/sheet/cupertino_sheet.2.dart **
+/// ** See code in examples/api/lib/cupertino/sheet/cupertino_sheet.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -374,15 +373,15 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example shows how to setup a [CupertinoSheetRoute] with nested navigation.
-/// This allows for pushing to new routes that transition from within the sheet
-/// view.
+/// This example shows how to show a Cupertino Sheet with nested navigation manually
+/// set up in order to enable restorable state.
 ///
-/// This example can be acieved by calling [showCupertinoSheet], which sets up
-/// much of the same boilderplate by default.
-///
-/// ** See code in examples/api/lib/cupertino/sheet/cupertino_sheet.1.dart **
+/// ** See code in examples/api/lib/cupertino/sheet/cupertino_sheet.2.dart **
 /// {@end-tool}
+///
+/// See also:
+///   * [showCupertinoSheet], which is a convenience method for pushing a
+///     `CupertinoSheetRoute`, with optional nested navigation built in.
 class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTransitionMixin<T> {
   /// Creates a page route that displays an iOS styled sheet.
   CupertinoSheetRoute({
