@@ -3574,6 +3574,7 @@ void main() {
       expect(tester.getRect(findMenuMaterial()).top, textFieldBottom);
     });
   });
+  
   // Regression test for https://github.com/flutter/flutter/issues/143505.
   testWidgets('Using keyboard navigation to select', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
