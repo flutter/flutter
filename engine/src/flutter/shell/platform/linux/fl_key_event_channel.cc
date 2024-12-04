@@ -109,13 +109,13 @@ gboolean fl_key_event_channel_send_finish(GObject* object,
                                           GAsyncResult* result,
                                           gboolean* handled,
                                           GError** error) {
-  FlValue* message = fl_basic_message_channel_send_finish(
+  g_autoptr(FlValue) message = fl_basic_message_channel_send_finish(
       FL_BASIC_MESSAGE_CHANNEL(object), result, error);
   if (message == nullptr) {
     return FALSE;
   }
 
-  g_autoptr(FlValue) handled_value = fl_value_lookup_string(message, "handled");
+  FlValue* handled_value = fl_value_lookup_string(message, "handled");
   *handled = fl_value_get_bool(handled_value);
 
   return TRUE;
