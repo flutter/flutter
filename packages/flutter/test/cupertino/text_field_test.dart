@@ -5294,7 +5294,7 @@ void main() {
     expect(controller.selection.extentOffset, 5);
   }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgets('Can drag one handle past the other on Apple platforms', (WidgetTester tester) async {
+  testWidgets('Can drag one handle past the other on iOS', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'abc def ghi',
     );
@@ -5345,15 +5345,24 @@ void main() {
     // We use a small offset because the endpoint is on the very corner
     // of the handle.
     final Offset handlePos = endpoints[1].point;
-    Offset newHandlePos = textOffsetToPosition(tester, 2); // Position of 'c'.
+    Offset newHandlePos = textOffsetToPosition(tester, 5); // Position of 'e'.
     final TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
     await gesture.moveTo(newHandlePos);
     await tester.pump();
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 5);
+
+    newHandlePos = textOffsetToPosition(tester, 2); // Position of 'c'.
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
     // The selection inverts moving beyond the left handle.
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 2);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('Dragging between multiple lines keeps the contact point at the same place on the handle on Android', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
