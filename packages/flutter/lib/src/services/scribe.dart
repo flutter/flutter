@@ -11,6 +11,8 @@ import 'system_channels.dart';
 
 /// An interface into Android's stylus handwriting text input.
 ///
+/// Allows handwriting directly on top of a text input using a stylus.
+///
 /// This is typically used by implemeting the methods in [ScribeClient] in a
 /// class, usually a [State], and setting an instance of it to [client]. The
 /// relevant methods on [ScribeClient] will be called in response to method
@@ -19,72 +21,136 @@ import 'system_channels.dart';
 /// See also:
 ///
 ///  * [EditableText.stylusHandwritingEnabled], which controls whether Flutter's
-///    built-in text fields support handwriting input. On Android it uses this
-///    class via [ScribeClient].
+///    built-in text fields support handwriting input.
 ///  * [SystemChannels.scribe], which is the [MethodChannel] used by this
 ///    class, and which has a list of the methods that this class handles.
-class Scribe {
+///  * <https://developer.android.com/develop/ui/views/touch-and-input/stylus-input/stylus-input-in-text-fields>,
+///    which is the Android documentation explaining the Scribe feature.
+final class Scribe {
   Scribe._() {
     _channel.setMethodCallHandler(_loudlyHandleScribeInputInvocation);
   }
 
-  /// Ensure that a [Scribe] instance has been set up so that the platform
-  /// can handle messages on the scribe method channel.
-  static void ensureInitialized() {
-    _instance; // ignore: unnecessary_statements
-  }
-
+  static const MethodChannel _channel = SystemChannels.scribe;
   static final Scribe _instance = Scribe._();
-
-  /// Set the given [ScribeClient] as the single active client.
-  ///
-  /// This is usually based on the [ScribeClient] receiving focus.
-  static set client(ScribeClient? client) {
-    _instance._client = client;
-  }
-
-  /// Return the current active [ScribeClient], or null if none.
-  static ScribeClient? get client => _instance._client;
-
-  ScribeClient? _client;
-
-  final MethodChannel _channel = SystemChannels.scribe;
 
   final Set<ScribeClient> _scribeClients = <ScribeClient>{};
 
-  /// Returns true if the InputMethodManager supports Scribe stylus handwriting
-  /// input.
+  /// A convenience method to check if the device currently supports Scribe
+  /// stylus handwriting input.
   ///
-  /// Call this before calling [startStylusHandwriting] to make sure it's
-  /// available.
+  /// Call this each time before calling [startStylusHandwriting] to make sure
+  /// it's available.
   ///
-  /// Supported on Android API 34 and above. If this method is called on a lower
-  /// API version, the Future will resolve with an error. If it's possible that
-  /// this method will be called on a device other than Android API 34+,
-  /// consider wrapping the call in a try/catch block.
+  /// {@tool snippet}
+  /// This example shows using [isFeatureAvailable] to confirm that
+  /// [startStylusHandwriting] can be called.
+  ///
+  /// ```dart
+  /// if (!await Scribe.isFeatureAvailable()) {
+  ///   // The device doesn't support stylus input right now, or maybe at all.
+  ///   return;
+  /// }
+  ///
+  /// // Scribe is supported, so start it.
+  /// Scribe.startStylusHandwriting();
+  /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
-  /// * [https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#isStylusHandwritingAvailable()],
-  ///   which is the corresponding API on Android.
-  static Future<bool?> isStylusHandwritingAvailable() {
-    return _instance._channel.invokeMethod<bool?>(
+  /// * [isStylusHandwritingAvailable], which is similar, but throws an error
+  ///   when called by an unsupported API level. It directly corresponds to the
+  ///   underlying Android API
+  ///   <https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#isStylusHandwritingAvailable()>.
+  ///  * [EditableText.stylusHandwritingEnabled], which controls whether
+  ///    Flutter's built-in text fields support handwriting input.
+  static Future<bool> isFeatureAvailable() async {
+    final bool? result = await _channel.invokeMethod<bool?>(
+      'Scribe.isFeatureAvailable',
+    );
+
+    if (result == null) {
+      throw FlutterError('MethodChannel.invokeMethod unexpectedly returned null.');
+    }
+
+    return result;
+  }
+
+  /// Returns true if the InputMethodManager supports Scribe stylus handwriting
+  /// input, false otherwise.
+  ///
+  /// Call this each time before calling [startStylusHandwriting] to make sure
+  /// it's available.
+  ///
+  /// Supported on Android API 34 and above. If called by an unsupported API
+  /// level, a [PlatformException] will be thrown. To avoid error handling, use
+  /// the convenience method [isFeatureAvailable] instead.
+  ///
+  /// {@tool snippet}
+  /// This example shows using [isStylusHandwritingAvailable] to confirm that
+  /// [startStylusHandwriting] can be called.
+  ///
+  /// ```dart
+  /// try {
+  ///   if (!await Scribe.isStylusHandwritingAvailable()) {
+  ///     // If isStylusHandwritingAvailable returns false then the device's API level
+  ///     // supports Scribe, but for some other reason it's not able to accept stylus
+  ///     // input right now.
+  ///     return;
+  ///   }
+  /// } on PlatformException catch (exception) {
+  ///   if (exception.message == 'Requires API level 34 or higher.') {
+  ///     // The device's API level is too low to support Scribe.
+  ///     return;
+  ///   }
+  ///   // Any other exception is unexpected and should not be caught here.
+  ///   rethrow;
+  /// }
+  ///
+  /// // Scribe is supported, so start it.
+  /// Scribe.startStylusHandwriting();
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  /// * <https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#isStylusHandwritingAvailable()>,
+  ///   which is the corresponding API on Android that this method attempts to
+  ///   mirror.
+  static Future<bool> isStylusHandwritingAvailable() async {
+    final bool? result = await _channel.invokeMethod<bool?>(
       'Scribe.isStylusHandwritingAvailable',
     );
+
+    if (result == null) {
+      throw FlutterError('MethodChannel.invokeMethod unexpectedly returned null.');
+    }
+
+    return result;
   }
 
   /// Tell Android to begin receiving stylus handwriting input.
   ///
-  /// This is typically called after detecting the start of stylus input.
+  /// This is typically called after detecting a [PointerDownEvent] from a
+  /// [PointerDeviceKind.stylus] on an active text field, indicating the start
+  /// of stylus handwriting input. If there is no active [TextInputConnection],
+  /// the call will be ignored.
+  ///
+  /// Call [isFeatureAvailable] each time before calling this to make sure that
+  /// stylus handwriting input is supported and available.
   ///
   /// Supported on Android API 33 and above.
   ///
   /// See also:
   ///
-  /// * [https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#startStylusHandwriting(android.view.View)],
-  ///   which is the corresponding API on Android.
+  /// * <https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#startStylusHandwriting(android.view.View)>,
+  ///   which is the corresponding API on Android that this method attempts to
+  ///   mirror.
+  ///  * [EditableText.stylusHandwritingEnabled], which controls whether
+  ///    Flutter's built-in text fields support handwriting input.
   static Future<void> startStylusHandwriting() {
-    return _instance._channel.invokeMethod<void>(
+    return _channel.invokeMethod<void>(
       'Scribe.startStylusHandwriting',
     );
   }

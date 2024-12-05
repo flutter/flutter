@@ -12,6 +12,7 @@
 /// @docImport 'list_tile.dart';
 /// @docImport 'outlined_button.dart';
 /// @docImport 'text_button.dart';
+/// @docImport 'text_field.dart';
 /// @docImport 'time_picker_theme.dart';
 library;
 
@@ -301,9 +302,19 @@ typedef MaterialStateTextStyle = WidgetStateTextStyle;
 /// [MaterialStateOutlineInputBorder] and override its [resolve] method. You'll also need
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
+@Deprecated(
+  'Use WidgetStateInputBorder instead. '
+  'Renamed to match other WidgetStateProperty objects. '
+  'This feature was deprecated after v3.26.0-0.1.pre.'
+)
 abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder implements MaterialStateProperty<InputBorder> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
+  @Deprecated(
+    'Use WidgetStateInputBorder instead. '
+    'Renamed to match other WidgetStateProperty objects. '
+    'This feature was deprecated after v3.26.0-0.1.pre.'
+  )
   const MaterialStateOutlineInputBorder();
 
   /// Creates a [MaterialStateOutlineInputBorder] from a [MaterialPropertyResolver<InputBorder>]
@@ -314,6 +325,11 @@ abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder implem
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
+  @Deprecated(
+    'Use WidgetStateInputBorder.resolveWith() instead. '
+    'Renamed to match other WidgetStateProperty objects. '
+    'This feature was deprecated after v3.26.0-0.1.pre.'
+  )
   const factory MaterialStateOutlineInputBorder.resolveWith(MaterialPropertyResolver<InputBorder> callback) = _MaterialStateOutlineInputBorder;
 
   /// Returns a [InputBorder] that's to be used when a Material component is in the
@@ -363,9 +379,19 @@ class _MaterialStateOutlineInputBorder extends MaterialStateOutlineInputBorder {
 /// [MaterialStateUnderlineInputBorder] and override its [resolve] method. You'll also need
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
+@Deprecated(
+  'Use WidgetStateInputBorder instead. '
+  'Renamed to match other WidgetStateProperty objects. '
+  'This feature was deprecated after v3.26.0-0.1.pre.'
+)
 abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder implements MaterialStateProperty<InputBorder> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
+  @Deprecated(
+    'Use WidgetStateInputBorder instead. '
+    'Renamed to match other WidgetStateProperty objects. '
+    'This feature was deprecated after v3.26.0-0.1.pre.'
+  )
   const MaterialStateUnderlineInputBorder();
 
   /// Creates a [MaterialStateUnderlineInputBorder] from a [MaterialPropertyResolver<InputBorder>]
@@ -376,6 +402,11 @@ abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder im
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
+  @Deprecated(
+    'Use WidgetStateInputBorder.resolveWith() instead. '
+    'Renamed to match other WidgetStateProperty objects. '
+    'This feature was deprecated after v3.26.0-0.1.pre.'
+  )
   const factory MaterialStateUnderlineInputBorder.resolveWith(MaterialPropertyResolver<InputBorder> callback) = _MaterialStateUnderlineInputBorder;
 
   /// Returns a [InputBorder] that's to be used when a Material component is in the
@@ -398,6 +429,66 @@ class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBord
 
   @override
   InputBorder resolve(Set<MaterialState> states) => _resolve(states);
+}
+
+/// Defines an [InputBorder] that is also a [WidgetStateProperty].
+///
+/// This class exists to enable widgets with [InputBorder] valued properties
+/// to also accept [WidgetStateProperty] objects.
+///
+/// [WidgetStateInputBorder] should only be used with widgets that document
+/// their support, like [InputDecoration.border].
+///
+/// A [WidgetStateInputBorder] can be created by:
+///  1. Creating a class that extends [OutlineInputBorder] or [UnderlineInputBorder]
+///     and implements [WidgetStateInputBorder]. The class would also need to
+///     override the [resolve] method.
+///  2. Using [WidgetStateInputBorder.resolveWith] with a callback that
+///     resolves the input border in the given states.
+///  3. Using [WidgetStateInputBorder.fromMap] to assign a border with a [WidgetStateMap].
+///
+/// {@tool dartpad}
+/// This example shows how to use [WidgetStateInputBorder] to create
+/// a [TextField] with an appearance that responds to user interaction.
+///
+/// ** See code in examples/api/lib/material/widget_state_input_border/widget_state_input_border.0.dart **
+/// {@end-tool}
+abstract interface class WidgetStateInputBorder implements InputBorder, WidgetStateProperty<InputBorder> {
+  /// Creates a [WidgetStateInputBorder] using a [WidgetPropertyResolver]
+  /// callback.
+  ///
+  /// This constructor should only be used for fields that support
+  /// [WidgetStateInputBorder], such as [InputDecoration.border]
+  /// (if used as a regular [InputBorder], it acts the same as
+  /// an empty `OutlineInputBorder()` constructor).
+  const factory WidgetStateInputBorder.resolveWith(
+    WidgetPropertyResolver<InputBorder> callback,
+  ) = _WidgetStateInputBorder;
+
+  /// Creates a [WidgetStateOutlinedBorder] from a [WidgetStateMap].
+  ///
+  /// {@macro flutter.widgets.WidgetStateProperty.fromMap}
+  /// It should only be used for fields that support [WidgetStateOutlinedBorder]
+  /// objects, such as [InputDecoration.border]
+  /// (throws an error if used as a regular [OutlinedBorder]).
+  ///
+  /// {@macro flutter.widgets.WidgetState.any}
+  const factory WidgetStateInputBorder.fromMap(
+    WidgetStateMap<InputBorder> map,
+  ) = _WidgetInputBorderMapper;
+}
+
+class _WidgetStateInputBorder extends OutlineInputBorder implements WidgetStateInputBorder {
+  const _WidgetStateInputBorder(this._resolve);
+
+  final WidgetPropertyResolver<InputBorder> _resolve;
+
+  @override
+  InputBorder resolve(Set<WidgetState> states) => _resolve(states);
+}
+
+class _WidgetInputBorderMapper extends WidgetStateMapper<InputBorder> implements WidgetStateInputBorder {
+  const _WidgetInputBorderMapper(super.map);
 }
 
 /// Interface for classes that [resolve] to a value of type `T` based

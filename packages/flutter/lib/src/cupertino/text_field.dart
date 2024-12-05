@@ -239,6 +239,7 @@ class CupertinoTextField extends StatefulWidget {
     this.prefixMode = OverlayVisibilityMode.always,
     this.suffix,
     this.suffixMode = OverlayVisibilityMode.always,
+    this.crossAxisAlignment = CrossAxisAlignment.center,
     this.clearButtonMode = OverlayVisibilityMode.never,
     this.clearButtonSemanticLabel,
     TextInputType? keyboardType,
@@ -272,6 +273,7 @@ class CupertinoTextField extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onTapOutside,
+    this.onTapUpOutside,
     this.inputFormatters,
     this.enabled = true,
     this.cursorWidth = 2.0,
@@ -295,10 +297,10 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     @Deprecated(
       'Use `stylusHandwritingEnabled` instead. '
-      'This feature was deprecated after v3.22.0-0.3.pre.',
+      'This feature was deprecated after v3.27.0-0.2.pre.',
     )
     this.scribbleEnabled = true,
-    this.stylusHandwritingEnabled = true,
+    this.stylusHandwritingEnabled = EditableText.defaultStylusHandwritingEnabled,
     this.enableIMEPersonalizedLearning = true,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.spellCheckConfiguration,
@@ -372,6 +374,7 @@ class CupertinoTextField extends StatefulWidget {
     this.prefixMode = OverlayVisibilityMode.always,
     this.suffix,
     this.suffixMode = OverlayVisibilityMode.always,
+    this.crossAxisAlignment = CrossAxisAlignment.center,
     this.clearButtonMode = OverlayVisibilityMode.never,
     this.clearButtonSemanticLabel,
     TextInputType? keyboardType,
@@ -405,6 +408,7 @@ class CupertinoTextField extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onTapOutside,
+    this.onTapUpOutside,
     this.inputFormatters,
     this.enabled = true,
     this.cursorWidth = 2.0,
@@ -428,7 +432,7 @@ class CupertinoTextField extends StatefulWidget {
     this.restorationId,
     @Deprecated(
       'Use `stylusHandwritingEnabled` instead. '
-      'This feature was deprecated after v3.22.0-0.3.pre.',
+      'This feature was deprecated after v3.27.0-0.2.pre.',
     )
     this.scribbleEnabled = true,
     this.stylusHandwritingEnabled = true,
@@ -525,6 +529,13 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// Has no effect when [suffix] is null.
   final OverlayVisibilityMode suffixMode;
+
+  /// Controls the vertical alignment of the [prefix] and the [suffix] widget in relation to content.
+  ///
+  /// Defaults to [CrossAxisAlignment.center].
+  ///
+  /// Has no effect when both the [prefix] and [suffix] are null.
+  final CrossAxisAlignment crossAxisAlignment;
 
   /// Show an iOS-style clear button to clear the current text entry.
   ///
@@ -672,6 +683,9 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.onTapOutside}
   final TapRegionCallback? onTapOutside;
 
+  /// {@macro flutter.widgets.editableText.onTapUpOutside}
+  final TapRegionCallback? onTapUpOutside;
+
   /// {@macro flutter.widgets.editableText.inputFormatters}
   final List<TextInputFormatter>? inputFormatters;
 
@@ -760,7 +774,7 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.scribbleEnabled}
   @Deprecated(
     'Use `stylusHandwritingEnabled` instead. '
-    'This feature was deprecated after v3.22.0-0.3.pre.',
+    'This feature was deprecated after v3.27.0-0.2.pre.',
   )
   final bool scribbleEnabled;
 
@@ -898,7 +912,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
-    properties.add(DiagnosticsProperty<bool>('stylusHandwritingEnabled', stylusHandwritingEnabled, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('stylusHandwritingEnabled', stylusHandwritingEnabled, defaultValue: EditableText.defaultStylusHandwritingEnabled));
     properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
     properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
     properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentInsertionConfiguration?.allowedMimeTypes ?? const <String>[], defaultValue: contentInsertionConfiguration == null ? const <String>[] : kDefaultContentInsertionMimeTypes));
@@ -1231,28 +1245,31 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
           (true, true) => widget.suffix ?? _buildClearButton(),
           (false, true) => _buildClearButton(),
         };
-        return Row(children: <Widget>[
-          // Insert a prefix at the front if the prefix visibility mode matches
-          // the current text state.
-          if (prefixWidget != null) prefixWidget,
-          // In the middle part, stack the placeholder on top of the main EditableText
-          // if needed.
-          Expanded(
-            child: Stack(
-              // Ideally this should be baseline aligned. However that comes at
-              // the cost of the ability to compute the intrinsic dimensions of
-              // this widget.
-              // See also https://github.com/flutter/flutter/issues/13715.
-              alignment: AlignmentDirectional.center,
-              textDirection: widget.textDirection,
-              children: <Widget>[
-                if (placeholder != null) placeholder,
-                editableText,
-              ],
+        return Row(
+          crossAxisAlignment: widget.crossAxisAlignment,
+          children: <Widget>[
+            // Insert a prefix at the front if the prefix visibility mode matches
+            // the current text state.
+            if (prefixWidget != null) prefixWidget,
+            // In the middle part, stack the placeholder on top of the main EditableText
+            // if needed.
+            Expanded(
+              child: Stack(
+                // Ideally this should be baseline aligned. However that comes at
+                // the cost of the ability to compute the intrinsic dimensions of
+                // this widget.
+                // See also https://github.com/flutter/flutter/issues/13715.
+                alignment: AlignmentDirectional.center,
+                textDirection: widget.textDirection,
+                children: <Widget>[
+                  if (placeholder != null) placeholder,
+                  editableText,
+                ],
+              ),
             ),
-          ),
-          if (suffixWidget != null) suffixWidget
-        ]);
+            if (suffixWidget != null) suffixWidget,
+          ],
+        );
       },
     );
   }

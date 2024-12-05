@@ -21,7 +21,6 @@ import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
-import 'macos/xcode.dart';
 import 'platform_plugins.dart';
 import 'project_validator_result.dart';
 import 'template.dart';
@@ -230,6 +229,10 @@ class FlutterProject {
   /// The `.dart-tool` directory of this project.
   Directory get dartTool => directory.childDirectory('.dart_tool');
 
+  /// The location of the generated scaffolding project for hosting widget
+  /// previews from this project.
+  Directory get widgetPreviewScaffold => dartTool.childDirectory('widget_preview_scaffold');
+
   /// The directory containing the generated code for this project.
   Directory get generated => directory
     .absolute
@@ -250,6 +253,12 @@ class FlutterProject {
     FlutterManifest.empty(logger: globals.logger),
   );
 
+  /// The generated scaffolding project for hosting widget previews from this
+  /// project.
+  FlutterProject get widgetPreviewScaffoldProject => FlutterProject.fromDirectory(
+    widgetPreviewScaffold,
+  );
+
   /// True if this project is a Flutter module project.
   bool get isModule => manifest.isModule;
 
@@ -261,24 +270,6 @@ class FlutterProject {
 
   /// True if this project has an example application.
   bool get hasExampleApp => _exampleDirectory(directory).existsSync();
-
-  /// True if this project doesn't have Swift Package Manager disabled in the
-  /// pubspec, has either an iOS or macOS platform implementation, is not a
-  /// module project, Xcode is 15 or greater, and the Swift Package Manager
-  /// feature is enabled.
-  bool get usesSwiftPackageManager {
-    if (!manifest.disabledSwiftPackageManager &&
-        (ios.existsSync() || macos.existsSync()) &&
-        !isModule) {
-      final Xcode? xcode = globals.xcode;
-      final Version? xcodeVersion = xcode?.currentVersion;
-      if (xcodeVersion == null || xcodeVersion.major < 15) {
-        return false;
-      }
-      return featureFlags.isSwiftPackageManagerEnabled;
-    }
-    return false;
-  }
 
   /// Returns a list of platform names that are supported by the project.
   List<SupportedPlatform> getSupportedPlatforms({bool includeRoot = false}) {
@@ -370,7 +361,11 @@ class FlutterProject {
     if (!directory.existsSync() || isPlugin) {
       return;
     }
-    await refreshPluginsList(this, iosPlatform: iosPlatform, macOSPlatform: macOSPlatform);
+    await refreshPluginsList(
+      this,
+      iosPlatform: iosPlatform,
+      macOSPlatform: macOSPlatform,
+    );
     if (androidPlatform) {
       await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
     }
@@ -467,7 +462,19 @@ class AndroidProject extends FlutterProjectPlatform {
   static final RegExp _androidNamespacePattern = RegExp('android {[\\S\\s]+namespace\\s*=?\\s*[\'"](.+)[\'"]');
   static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
   static final RegExp _imperativeKotlinPluginPattern = RegExp('^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$');
-  static final RegExp _declarativeKotlinPluginPattern = RegExp('^\\s*id\\s+[\'"]kotlin-android[\'"]\\s*\$');
+
+  /// Examples of strings that this regex matches:
+  /// - `id "kotlin-android"`
+  /// - `id("kotlin-android")`
+  /// - `id ( "kotlin-android" ) `
+  /// - `id "org.jetbrains.kotlin.android"`
+  /// - `id("org.jetbrains.kotlin.android")`
+  /// - `id ( "org.jetbrains.kotlin.android" )`
+  static final List<RegExp> _declarativeKotlinPluginPatterns = <RegExp>[
+      RegExp('^\\s*id\\s*\\(?\\s*[\'"]kotlin-android[\'"]\\s*\\)?\\s*\$'),
+      RegExp('^\\s*id\\s*\\(?\\s*[\'"]org.jetbrains.kotlin.android[\'"]\\s*\\)?\\s*\$'),
+  ];
+
 
   /// Pattern used to find the assignment of the "group" property in Gradle.
   /// Expected example: `group "dev.flutter.plugin"`
@@ -563,7 +570,9 @@ class AndroidProject extends FlutterProjectPlatform {
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
     final bool imperativeMatch = firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null;
-    final bool declarativeMatch = firstMatchInFile(appGradleFile, _declarativeKotlinPluginPattern) != null;
+    final bool declarativeMatch = _declarativeKotlinPluginPatterns.any((RegExp pattern) {
+      return (firstMatchInFile(appGradleFile, pattern) != null);
+    });
     return imperativeMatch || declarativeMatch;
   }
 
@@ -866,7 +875,7 @@ $javaGradleCompatUrl
     }
     for (final XmlElement metaData in document.findAllElements('meta-data')) {
       final String? name = metaData.getAttribute('android:name');
-      // External code checks for this string to indentify flutter android apps.
+      // External code checks for this string to identify flutter android apps.
       // See cl/667760684 as an example.
       if (name == 'flutterEmbedding') {
         final String? embeddingVersionString = metaData.getAttribute('android:value');
@@ -881,8 +890,7 @@ $javaGradleCompatUrl
     return AndroidEmbeddingVersionResult(AndroidEmbeddingVersion.v1, 'No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in ${appManifestFile.absolute.path}');
   }
 
-  // TODO(matanlurey): Flip to true when on by default, https://github.com/flutter/flutter/issues/132712.
-  static const bool _impellerEnabledByDefault = false;
+  static const bool _impellerEnabledByDefault = true;
 
   /// Returns the `io.flutter.embedding.android.EnableImpeller` manifest value.
   ///
@@ -983,10 +991,9 @@ class WebProject extends FlutterProjectPlatform {
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     /// Create .dart_tool/dartpad/web_plugin_registrant.dart.
     /// See: https://github.com/dart-lang/dart-services/pull/874
-    await injectBuildTimePluginFiles(
+    await injectBuildTimePluginFilesForWebPlatform(
       parent,
       destination: dartpadToolDirectory,
-      webPlatform: true,
     );
   }
 }

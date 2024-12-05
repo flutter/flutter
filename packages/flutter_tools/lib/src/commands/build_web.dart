@@ -28,7 +28,7 @@ class BuildWebCommand extends BuildSubCommand {
     usesPubOption();
     usesBuildNumberOption();
     usesBuildNameOption();
-    addBuildModeFlags(verboseHelp: verboseHelp, excludeDebug: true);
+    addBuildModeFlags(verboseHelp: verboseHelp);
     usesDartDefineOption();
     addEnableExperimentation(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
@@ -51,7 +51,6 @@ class BuildWebCommand extends BuildSubCommand {
       allowed: ServiceWorkerStrategy.values.map((ServiceWorkerStrategy e) => e.cliName),
       allowedHelp: CliEnum.allowedHelp(ServiceWorkerStrategy.values),
     );
-    usesWebRendererOption();
     usesWebResourcesCdnFlag();
 
     //
@@ -62,7 +61,6 @@ class BuildWebCommand extends BuildSubCommand {
       abbr: 'O',
       help:
           'Sets the optimization level used for Dart compilation to JavaScript/Wasm.',
-      defaultsTo: '${WebCompilerConfig.kDefaultOptimizationLevel}',
       allowed: const <String>['0', '1', '2', '3', '4'],
     );
     argParser.addFlag(
@@ -134,24 +132,31 @@ class BuildWebCommand extends BuildSubCommand {
       throwToolExit('"build web" is not currently supported. To enable, run "flutter config --enable-web".');
     }
 
-    final int optimizationLevel = int.parse(stringArg('optimization-level')!);
+    final String? optimizationLevelArg = stringArg('optimization-level');
+    final int? optimizationLevel = optimizationLevelArg != null ? int.parse(optimizationLevelArg) : null;
 
     final String? dart2jsOptimizationLevelValue = stringArg('dart2js-optimization');
-    final int jsOptimizationLevel =  dart2jsOptimizationLevelValue != null
+    final int? jsOptimizationLevel =  dart2jsOptimizationLevelValue != null
         ? int.parse(dart2jsOptimizationLevelValue.substring(1))
         : optimizationLevel;
 
-    final String? webRendererString = stringArg(FlutterOptions.kWebRendererFlag);
-    final WebRendererMode? webRenderer = webRendererString == null
-        ? null
-        : WebRendererMode.values.byName(webRendererString);
+    final List<String> dartDefines = extractDartDefines(
+      defineConfigJsonMap: extractDartDefineConfigJsonMap()
+    );
+    final bool useWasm = boolArg(FlutterOptions.kWebWasmFlag);
+    // See also: RunCommandBase.webRenderer and TestCommand.webRenderer.
+    final WebRendererMode webRenderer = WebRendererMode.fromDartDefines(dartDefines, useWasm: useWasm);
 
     final bool sourceMaps = boolArg('source-maps');
 
     final List<WebCompilerConfig> compilerConfigs;
-    if (boolArg(FlutterOptions.kWebWasmFlag)) {
-      if (webRenderer != null) {
-        throwToolExit('"--${FlutterOptions.kWebRendererFlag}" cannot be combined with "--${FlutterOptions.kWebWasmFlag}"');
+    if (webRenderer.isDeprecated) {
+      globals.logger.printWarning(webRenderer.deprecationWarning);
+    }
+
+    if (useWasm) {
+      if (webRenderer != WebRendererMode.getDefault(useWasm: true)) {
+        throwToolExit('Do not attempt to set a web renderer when using "--${FlutterOptions.kWebWasmFlag}"');
       }
       globals.logger.printBox(
         title: 'New feature',
@@ -182,15 +187,12 @@ class BuildWebCommand extends BuildSubCommand {
         nativeNullAssertions: boolArg('native-null-assertions'),
         noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
         sourceMaps: sourceMaps,
-        renderer: webRenderer ?? WebRendererMode.defaultForJs,
+        renderer: webRenderer,
       )];
     }
 
     final String target = stringArg('target')!;
     final BuildInfo buildInfo = await getBuildInfo();
-    if (buildInfo.isDebug) {
-      throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
-    }
     final String? baseHref = stringArg('base-href');
     if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
       throwToolExit(

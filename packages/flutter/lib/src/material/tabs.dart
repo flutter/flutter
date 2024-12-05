@@ -92,7 +92,7 @@ enum TabAlignment {
 ///
 /// See also:
 ///  * [TabBar], which displays a row of tabs.
-///  * [TabBarTheme], which can be used to configure the appearance of the tab
+///  * [TabBarThemeData], which can be used to configure the appearance of the tab
 ///    indicator.
 enum TabIndicatorAnimation {
   /// The tab indicator animates linearly.
@@ -159,6 +159,31 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
   /// If null, the height will be calculated based on the content of the [Tab]. When `icon` is not
   /// null along with `child` or `text`, the default height is 72.0 pixels. Without an `icon`, the
   /// height is 46.0 pixels.
+  ///
+  /// {@tool snippet}
+  ///
+  /// The provided tab height cannot be lower than the default height. Use
+  /// [PreferredSize] widget to adjust the overall [TabBar] height and match
+  /// the provided tab [height]:
+  ///
+  /// ```dart
+  /// bottom: const PreferredSize(
+  ///   preferredSize: Size.fromHeight(20.0),
+  ///   child: TabBar(
+  ///     tabs: <Widget>[
+  ///       Tab(
+  ///         text: 'Tab 1',
+  ///         height: 20.0,
+  ///       ),
+  ///       Tab(
+  ///         text: 'Tab 2',
+  ///         height: 20.0,
+  ///       ),
+  ///     ],
+  ///   ),
+  /// ),
+  /// ```
+  /// {@end-tool}
   final double? height;
 
   Widget _buildLabelText() {
@@ -241,12 +266,15 @@ class _TabStyle extends AnimatedWidget {
   final bool isPrimary;
   final Color? labelColor;
   final Color? unselectedLabelColor;
-  final TabBarTheme defaults;
+  final TabBarThemeData defaults;
   final Widget child;
 
-  MaterialStateColor _resolveWithLabelColor(BuildContext context) {
+  MaterialStateColor _resolveWithLabelColor(
+    BuildContext context, {
+    IconThemeData? iconTheme,
+  }) {
     final ThemeData themeData = Theme.of(context);
-    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
     final Animation<double> animation = listenable as Animation<double>;
 
     // labelStyle.color (and tabBarTheme.labelStyle.color) is not considered
@@ -270,6 +298,7 @@ class _TabStyle extends AnimatedWidget {
           ?? tabBarTheme.unselectedLabelColor
           ?? unselectedLabelStyle?.color
           ?? tabBarTheme.unselectedLabelStyle?.color
+          ?? iconTheme?.color
           ?? (themeData.useMaterial3
                ? defaults.unselectedLabelColor!
                : selectedColor.withAlpha(0xB2)); // 70% alpha
@@ -285,7 +314,8 @@ class _TabStyle extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    final ThemeData theme = Theme.of(context);
+    final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
     final Animation<double> animation = listenable as Animation<double>;
 
     final Set<MaterialState> states = isSelected
@@ -306,14 +336,23 @@ class _TabStyle extends AnimatedWidget {
     final TextStyle textStyle = isSelected
       ? TextStyle.lerp(selectedStyle, unselectedStyle, animation.value)!
       : TextStyle.lerp(unselectedStyle, selectedStyle, animation.value)!;
-    final Color color = _resolveWithLabelColor(context).resolve(states);
+    final Color defaultIconColor = switch (theme.colorScheme.brightness) {
+      Brightness.light => kDefaultIconDarkColor,
+      Brightness.dark  => kDefaultIconLightColor,
+    };
+    final IconThemeData? customIconTheme = switch (IconTheme.of(context)) {
+      final IconThemeData iconTheme when iconTheme.color != defaultIconColor => iconTheme,
+      _ => null,
+    };
+    final Color iconColor = _resolveWithLabelColor(context, iconTheme: customIconTheme).resolve(states);
+    final Color labelColor = _resolveWithLabelColor(context).resolve(states);
 
     return DefaultTextStyle(
-      style: textStyle.copyWith(color: color),
+      style: textStyle.copyWith(color: labelColor),
       child: IconTheme.merge(
         data: IconThemeData(
-          size: 24.0,
-          color: color,
+          size: customIconTheme?.size ?? 24.0,
+          color: iconColor,
         ),
         child: child,
       ),
@@ -790,7 +829,7 @@ class _TabBarScrollController extends ScrollController {
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// Uses values from [TabBarTheme] if it is set in the current context.
+/// Uses values from [TabBarThemeData] if it is set in the current context.
 ///
 /// {@tool dartpad}
 /// This sample shows the implementation of [TabBar] and [TabBarView] using a [DefaultTabController].
@@ -954,7 +993,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If this parameter is null, then the value of the Theme's indicatorColor
   /// property is used.
   ///
-  /// If [indicator] is specified or provided from [TabBarTheme],
+  /// If [indicator] is specified or provided from [TabBarThemeData],
   /// this property is ignored.
   final Color? indicatorColor;
 
@@ -971,7 +1010,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If [ThemeData.useMaterial3] is false, the default value is 2.0.
   ///
-  /// If [indicator] is specified or provided from [TabBarTheme],
+  /// If [indicator] is specified or provided from [TabBarThemeData],
   /// this property is ignored.
   final double indicatorWeight;
 
@@ -986,7 +1025,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// Defines the appearance of the selected tab indicator.
   ///
-  /// If [indicator] is specified or provided from [TabBarTheme],
+  /// If [indicator] is specified or provided from [TabBarThemeData],
   /// the [indicatorColor] and [indicatorWeight] properties are ignored.
   ///
   /// The default, underline-style, selected tab indicator can be defined with
@@ -1030,7 +1069,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If the [dividerColor] is [Colors.transparent], then the divider will not be drawn.
   ///
-  /// If null and [ThemeData.useMaterial3] is false, [TabBarTheme.dividerColor]
+  /// If null and [ThemeData.useMaterial3] is false, [TabBarThemeData.dividerColor]
   /// color is used. If that is null and [ThemeData.useMaterial3] is true,
   /// [ColorScheme.outlineVariant] will be used, otherwise divider will not be drawn.
   final Color? dividerColor;
@@ -1039,26 +1078,26 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If the [dividerHeight] is zero or negative, then the divider will not be drawn.
   ///
-  /// If null and [ThemeData.useMaterial3] is true, [TabBarTheme.dividerHeight] is used.
+  /// If null and [ThemeData.useMaterial3] is true, [TabBarThemeData.dividerHeight] is used.
   /// If that is also null and [ThemeData.useMaterial3] is true, 1.0 will be used.
   /// Otherwise divider will not be drawn.
   final double? dividerHeight;
 
   /// The color of selected tab labels.
   ///
-  /// If null, then [TabBarTheme.labelColor] is used. If that is also null and
+  /// If null, then [TabBarThemeData.labelColor] is used. If that is also null and
   /// [ThemeData.useMaterial3] is true, [ColorScheme.primary] will be used,
   /// otherwise the color of the [ThemeData.primaryTextTheme]'s
   /// [TextTheme.bodyLarge] text color is used.
   ///
-  /// If [labelColor] (or, if null, [TabBarTheme.labelColor]) is a
+  /// If [labelColor] (or, if null, [TabBarThemeData.labelColor]) is a
   /// [WidgetStateColor], then the effective tab color will depend on the
   /// [WidgetState.selected] state, i.e. if the [Tab] is selected or not,
   /// ignoring [unselectedLabelColor] even if it's non-null.
   ///
-  /// When this color or the [TabBarTheme.labelColor] is specified, it overrides
+  /// When this color or the [TabBarThemeData.labelColor] is specified, it overrides
   /// the [TextStyle.color] specified for the [labelStyle] or the
-  /// [TabBarTheme.labelStyle].
+  /// [TabBarThemeData.labelStyle].
   ///
   /// See also:
   ///
@@ -1067,19 +1106,19 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The color of unselected tab labels.
   ///
-  /// If [labelColor] (or, if null, [TabBarTheme.labelColor]) is a
+  /// If [labelColor] (or, if null, [TabBarThemeData.labelColor]) is a
   /// [WidgetStateColor], then the unselected tabs are rendered with
   /// that [WidgetStateColor]'s resolved color for unselected state, even if
   /// [unselectedLabelColor] is non-null.
   ///
-  /// If null, then [TabBarTheme.unselectedLabelColor] is used. If that is also
+  /// If null, then [TabBarThemeData.unselectedLabelColor] is used. If that is also
   /// null and [ThemeData.useMaterial3] is true, [ColorScheme.onSurfaceVariant]
   /// will be used, otherwise unselected tab labels are rendered with
   /// [labelColor] at 70% opacity.
   ///
-  /// When this color or the [TabBarTheme.unselectedLabelColor] is specified, it
+  /// When this color or the [TabBarThemeData.unselectedLabelColor] is specified, it
   /// overrides the [TextStyle.color] specified for the [unselectedLabelStyle]
-  /// or the [TabBarTheme.unselectedLabelStyle].
+  /// or the [TabBarThemeData.unselectedLabelStyle].
   ///
   /// See also:
   ///
@@ -1088,14 +1127,14 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The text style of the selected tab labels.
   ///
-  /// The color specified in [labelStyle] and [TabBarTheme.labelStyle] is used
-  /// to style the label when [labelColor] or [TabBarTheme.labelColor] are not
+  /// The color specified in [labelStyle] and [TabBarThemeData.labelStyle] is used
+  /// to style the label when [labelColor] or [TabBarThemeData.labelColor] are not
   /// specified.
   ///
   /// If [unselectedLabelStyle] is null, then this text style will be used for
   /// both selected and unselected label styles.
   ///
-  /// If this property is null, then [TabBarTheme.labelStyle] will be used.
+  /// If this property is null, then [TabBarThemeData.labelStyle] will be used.
   ///
   /// If that is also null and [ThemeData.useMaterial3] is true, [TextTheme.titleSmall]
   /// will be used, otherwise the text style of the [ThemeData.primaryTextTheme]'s
@@ -1104,11 +1143,11 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The text style of the unselected tab labels.
   ///
-  /// The color specified in [unselectedLabelStyle] and [TabBarTheme.unselectedLabelStyle]
-  /// is used to style the label when [unselectedLabelColor] or [TabBarTheme.unselectedLabelColor]
+  /// The color specified in [unselectedLabelStyle] and [TabBarThemeData.unselectedLabelStyle]
+  /// is used to style the label when [unselectedLabelColor] or [TabBarThemeData.unselectedLabelColor]
   /// are not specified.
   ///
-  /// If this property is null, then [TabBarTheme.unselectedLabelStyle] will be used.
+  /// If this property is null, then [TabBarThemeData.unselectedLabelStyle] will be used.
   ///
   /// If that is also null and [ThemeData.useMaterial3] is true, [TextTheme.titleSmall]
   /// will be used, otherwise then the [labelStyle] value is used. If [labelStyle] is null,
@@ -1153,19 +1192,14 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// individual tab widgets.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.selected].
   /// {@endtemplate}
   ///
-  /// If null, then the value of [TabBarTheme.mouseCursor] is used. If
+  /// If null, then the value of [TabBarThemeData.mouseCursor] is used. If
   /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
-  ///
-  /// See also:
-  ///
-  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor]
-  ///    that is also a [WidgetStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
@@ -1244,20 +1278,20 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If [TabBar.isScrollable] is true, only [TabAlignment.start], [TabAlignment.startOffset],
   /// and [TabAlignment.center] are supported. Otherwise an exception is thrown.
   ///
-  /// If this is null, then the value of [TabBarTheme.tabAlignment] is used.
+  /// If this is null, then the value of [TabBarThemeData.tabAlignment] is used.
   ///
-  /// If [TabBarTheme.tabAlignment] is null and [ThemeData.useMaterial3] is true,
+  /// If [TabBarThemeData.tabAlignment] is null and [ThemeData.useMaterial3] is true,
   /// then [TabAlignment.startOffset] is used if [isScrollable] is true,
   /// otherwise [TabAlignment.fill] is used.
   ///
-  /// If [TabBarTheme.tabAlignment] is null and [ThemeData.useMaterial3] is false,
+  /// If [TabBarThemeData.tabAlignment] is null and [ThemeData.useMaterial3] is false,
   /// then [TabAlignment.center] is used if [isScrollable] is true,
   /// otherwise [TabAlignment.fill] is used.
   final TabAlignment? tabAlignment;
 
   /// Specifies the text scaling behavior for the [Tab] label.
   ///
-  /// If this is null, then the value of [TabBarTheme.textScaler] is used. If that is
+  /// If this is null, then the value of [TabBarThemeData.textScaler] is used. If that is
   /// also null, then the text scaling behavior is determined by the [MediaQueryData.textScaler]
   /// from the ambient [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
   ///
@@ -1267,7 +1301,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// Specifies the animation behavior of the tab indicator.
   ///
-  /// If this is null, then the value of [TabBarTheme.indicatorAnimation] is used.
+  /// If this is null, then the value of [TabBarThemeData.indicatorAnimation] is used.
   /// If that is also null, then the tab indicator will animate linearly if the
   /// [indicatorSize] is [TabBarIndicatorSize.tab], otherwise it will animate
   /// with an elastic effect if the [indicatorSize] is [TabBarIndicatorSize.label].
@@ -1343,7 +1377,7 @@ class _TabBarState extends State<TabBar> {
     _labelPaddings = List<EdgeInsetsGeometry>.filled(widget.tabs.length, EdgeInsets.zero, growable: true);
   }
 
-  TabBarTheme get _defaults {
+  TabBarThemeData get _defaults {
     if (Theme.of(context).useMaterial3) {
       return widget._isPrimary
         ? _TabsPrimaryDefaultsM3(context, widget.isScrollable)
@@ -1355,7 +1389,7 @@ class _TabBarState extends State<TabBar> {
 
   Decoration _getIndicator(TabBarIndicatorSize indicatorSize) {
     final ThemeData theme = Theme.of(context);
-    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
 
     if (widget.indicator != null) {
       return widget.indicator!;
@@ -1455,7 +1489,7 @@ class _TabBarState extends State<TabBar> {
 
   void _initIndicatorPainter() {
     final ThemeData theme = Theme.of(context);
-    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
     final TabBarIndicatorSize indicatorSize = widget.indicatorSize
       ?? tabBarTheme.indicatorSize
       ?? _defaults.indicatorSize!;
@@ -1626,7 +1660,7 @@ class _TabBarState extends State<TabBar> {
     widget.onTap?.call(index);
   }
 
-  Widget _buildStyledTab(Widget child, bool isSelected, Animation<double> animation, TabBarTheme defaults) {
+  Widget _buildStyledTab(Widget child, bool isSelected, Animation<double> animation, TabBarThemeData defaults) {
     return _TabStyle(
       animation: animation,
       isSelected: isSelected,
@@ -1687,7 +1721,7 @@ class _TabBarState extends State<TabBar> {
     assert(debugCheckHasMaterialLocalizations(context));
     assert(_debugScheduleCheckHasValidTabsCount());
     final ThemeData theme = Theme.of(context);
-    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
     final TabAlignment effectiveTabAlignment = widget.tabAlignment ?? tabBarTheme.tabAlignment ?? _defaults.tabAlignment!;
     assert(_debugTabAlignmentIsValid(effectiveTabAlignment));
 
@@ -1700,22 +1734,17 @@ class _TabBarState extends State<TabBar> {
     }
 
     final List<Widget> wrappedTabs = List<Widget>.generate(widget.tabs.length, (int index) {
-      const double verticalAdjustment = (_kTextAndIconTabHeight - _kTabHeight)/2.0;
-      EdgeInsetsGeometry? adjustedPadding;
+      EdgeInsetsGeometry padding = widget.labelPadding ?? tabBarTheme.labelPadding ?? kTabLabelPadding;
+      const double verticalAdjustment = (_kTextAndIconTabHeight - _kTabHeight) / 2.0;
 
-      if (widget.tabs[index] is PreferredSizeWidget) {
-        final PreferredSizeWidget tab = widget.tabs[index] as PreferredSizeWidget;
-        if (widget.tabHasTextAndIcon && tab.preferredSize.height == _kTabHeight) {
-          if (widget.labelPadding != null || tabBarTheme.labelPadding != null) {
-            adjustedPadding = (widget.labelPadding ?? tabBarTheme.labelPadding!).add(const EdgeInsets.symmetric(vertical: verticalAdjustment));
-          }
-          else {
-            adjustedPadding = const EdgeInsets.symmetric(vertical: verticalAdjustment, horizontal: 16.0);
-          }
-        }
+      final Widget tab = widget.tabs[index];
+      if (
+        tab is PreferredSizeWidget && tab.preferredSize.height == _kTabHeight
+        && widget.tabHasTextAndIcon
+      ) {
+        padding = padding.add(const EdgeInsets.symmetric(vertical: verticalAdjustment));
       }
-
-      _labelPaddings[index] = adjustedPadding ?? widget.labelPadding ?? tabBarTheme.labelPadding ?? kTabLabelPadding;
+      _labelPaddings[index] = padding;
 
       return Center(
         heightFactor: 1.0,
@@ -1743,11 +1772,9 @@ class _TabBarState extends State<TabBar> {
         wrappedTabs[previousIndex] = _buildStyledTab(wrappedTabs[previousIndex], false, animation, _defaults);
       } else {
         // The user is dragging the TabBarView's PageView left or right.
-        if (_currentIndex! < widget.tabs.length) {
-          final int tabIndex = _currentIndex!;
-          final Animation<double> centerAnimation = _DragAnimation(_controller!, tabIndex);
-          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation, _defaults);
-        }
+        final int tabIndex = _currentIndex!;
+        final Animation<double> centerAnimation = _DragAnimation(_controller!, tabIndex);
+        wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation, _defaults);
         if (_currentIndex! > 0) {
           final int tabIndex = _currentIndex! - 1;
           final Animation<double> previousAnimation = ReverseAnimation(_DragAnimation(_controller!, tabIndex));
@@ -1861,7 +1888,7 @@ class _TabBarState extends State<TabBar> {
           tabBar = CustomPaint(
             painter: _DividerPainter(
               dividerColor: dividerColor,
-              dividerHeight: widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight!,
+              dividerHeight: dividerHeight,
             ),
             child: tabBar,
           );
@@ -2430,7 +2457,7 @@ class _TabPageSelectorState extends State<TabPageSelector> {
 }
 
 // Hand coded defaults based on Material Design 2.
-class _TabsDefaultsM2 extends TabBarTheme {
+class _TabsDefaultsM2 extends TabBarThemeData {
   const _TabsDefaultsM2(this.context, this.isScrollable)
     : super(indicatorSize: TabBarIndicatorSize.tab);
 
@@ -2465,7 +2492,7 @@ class _TabsDefaultsM2 extends TabBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-class _TabsPrimaryDefaultsM3 extends TabBarTheme {
+class _TabsPrimaryDefaultsM3 extends TabBarThemeData {
   _TabsPrimaryDefaultsM3(this.context, this.isScrollable)
     : super(indicatorSize: TabBarIndicatorSize.label);
 
@@ -2544,7 +2571,7 @@ class _TabsPrimaryDefaultsM3 extends TabBarTheme {
   static const EdgeInsetsGeometry iconMargin = EdgeInsets.only(bottom: 2);
 }
 
-class _TabsSecondaryDefaultsM3 extends TabBarTheme {
+class _TabsSecondaryDefaultsM3 extends TabBarThemeData {
   _TabsSecondaryDefaultsM3(this.context, this.isScrollable)
     : super(indicatorSize: TabBarIndicatorSize.tab);
 

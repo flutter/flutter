@@ -468,10 +468,8 @@ class XcodeAutomationScriptResponse {
 
   factory XcodeAutomationScriptResponse.fromJson(Map<String, Object?> data) {
     XcodeAutomationScriptDebugResult? debugResult;
-    if (data['debugResult'] != null && data['debugResult'] is Map<String, Object?>) {
-      debugResult = XcodeAutomationScriptDebugResult.fromJson(
-        data['debugResult']! as Map<String, Object?>,
-      );
+    if (data case {'debugResult': final Map<String, Object?> resultData}) {
+      debugResult = XcodeAutomationScriptDebugResult.fromJson(resultData);
     }
     return XcodeAutomationScriptResponse._(
       status: data['status'] is bool? ? data['status'] as bool? : null,

@@ -463,6 +463,9 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
   /// Determines whether the given [Selectable] was created by this
   /// [RenderParagraph].
+  ///
+  /// The [RenderParagraph] splits its text into multiple [Selectable]s,
+  /// delimited by [PlaceholderSpan]s or [WidgetSpan]s.
   bool selectableBelongsToParagraph(Selectable selectable) {
     if (_lastSelectableFragments == null) {
       return false;
@@ -701,6 +704,12 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       .maxIntrinsicWidth;
   }
 
+  /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].
+  ///
+  /// This does not require the layout to be updated.
+  @visibleForTesting
+  double get preferredLineHeight => _textPainter.preferredLineHeight;
+
   double _computeIntrinsicHeight(double width) {
     return (_textIntrinsics
       ..setPlaceholderDimensions(layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild, ChildLayoutHelper.getDryBaseline))
@@ -809,6 +818,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
   @override
   void performLayout() {
+    _lastSelectableFragments?.forEach((_SelectableFragment element) => element.didChangeParagraphLayout());
     final BoxConstraints constraints = this.constraints;
     _placeholderDimensions = layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.layoutChild, ChildLayoutHelper.getBaseline);
     _layoutTextWithConstraints(constraints);
@@ -1220,10 +1230,10 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
           ..textDirection = initialDirection
           ..attributedLabel = AttributedString(info.semanticsLabel ?? info.text, attributes: info.stringAttributes);
         switch (info.recognizer) {
-          case TapGestureRecognizer(onTap: final VoidCallback? onTap):
-          case DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? onTap):
-            if (onTap != null) {
-              configuration.onTap = onTap;
+          case TapGestureRecognizer(onTap: final VoidCallback? handler):
+          case DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? handler):
+            if (handler != null) {
+              configuration.onTap = handler;
               configuration.isLink = true;
             }
           case LongPressGestureRecognizer(onLongPress: final GestureLongPressCallback? onLongPress):
@@ -1473,6 +1483,17 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     final int end = math.max(_textSelectionStart!.offset, _textSelectionEnd!.offset);
     return SelectedContent(
       plainText: fullText.substring(start, end),
+    );
+  }
+
+  @override
+  SelectedContentRange? getSelection() {
+    if (_textSelectionStart == null || _textSelectionEnd == null) {
+      return null;
+    }
+    return SelectedContentRange(
+      startOffset: _textSelectionStart!.offset,
+      endOffset: _textSelectionEnd!.offset,
     );
   }
 
@@ -2996,6 +3017,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     if (_cachedBoundingBoxes == null) {
       final List<TextBox> boxes = paragraph.getBoxesForSelection(
         TextSelection(baseOffset: range.start, extentOffset: range.end),
+        boxHeightStyle: ui.BoxHeightStyle.max,
       );
       if (boxes.isNotEmpty) {
         _cachedBoundingBoxes = <Rect>[];
@@ -3033,7 +3055,11 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
 
   void didChangeParagraphLayout() {
     _cachedRect = null;
+    _cachedBoundingBoxes = null;
   }
+
+  @override
+  int get contentLength => range.end - range.start;
 
   @override
   Size get size {

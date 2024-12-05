@@ -200,7 +200,7 @@ void _defineTests() {
               TestSemantics(
                 rect: const Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
                 id: 2,
-                flags: 1,
+                flags: <SemanticsFlag>[SemanticsFlag.hasCheckedState, SemanticsFlag.hasSelectedState],
                 label: 'label-before',
                 value: 'value-before',
                 increasedValue: 'increase-before',
@@ -253,7 +253,13 @@ void _defineTests() {
                 rect: const Rect.fromLTRB(5.0, 6.0, 7.0, 8.0),
                 actions: 255,
                 id: 2,
-                flags: 15,
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.hasCheckedState,
+                  SemanticsFlag.isChecked,
+                  SemanticsFlag.hasSelectedState,
+                  SemanticsFlag.isSelected,
+                  SemanticsFlag.isButton,
+                ],
                 label: 'label-after',
                 value: 'value-after',
                 increasedValue: 'increase-after',
@@ -349,7 +355,10 @@ void _defineTests() {
     ));
     final Set<SemanticsAction> allActions = SemanticsAction.values.toSet()
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
-      ..remove(SemanticsAction.showOnScreen); // showOnScreen is not user-exposed
+      ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
+      // TODO(LongCatIsLooong): change to `SemanticsAction.scrollToOffset` when available.
+      // https://github.com/flutter/flutter/issues/159515.
+      ..removeWhere((SemanticsAction action) => action.index == 1 << 23);
 
     const int expectedId = 2;
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -372,6 +381,9 @@ void _defineTests() {
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     int expectedLength = 1;
     for (final SemanticsAction action in allActions) {
+      // TODO(LongCatIsLooong): remove after `SemanticsAction.scrollToOffset` is added to dart:ui.
+      // https://github.com/flutter/flutter/issues/159515.
+      // ignore: exhaustive_cases
       switch (action) {
         case SemanticsAction.moveCursorBackwardByCharacter:
         case SemanticsAction.moveCursorForwardByCharacter:

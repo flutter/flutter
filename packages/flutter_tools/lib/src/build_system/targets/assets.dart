@@ -22,6 +22,7 @@ import '../tools/scene_importer.dart';
 import '../tools/shader_compiler.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
+import 'native_assets.dart';
 
 /// A helper function to copy an asset bundle into an [environment]'s output
 /// directory.
@@ -302,14 +303,14 @@ DevFSContent? processSkSLBundle(String? bundlePath, {
     throw Exception('SkSL bundle was invalid');
   }
 
-  final String? parsedPlatform = bundle['platform'] as String?;
-  TargetPlatform? bundleTargetPlatform;
-  if (parsedPlatform != null) {
-    bundleTargetPlatform = getTargetPlatformForName(parsedPlatform);
-  }
-  if (bundleTargetPlatform == null || bundleTargetPlatform != targetPlatform) {
+  final TargetPlatform? bundlePlatform = switch (bundle['platform'] as String?) {
+    final String platform => getTargetPlatformForName(platform),
+    null => null,
+  };
+
+  if (bundlePlatform != targetPlatform) {
     logger.printError(
-      'The SkSL bundle was created for $bundleTargetPlatform, but the current '
+      'The SkSL bundle was created for $bundlePlatform, but the current '
       'platform is $targetPlatform. This may lead to less efficient shader '
       'caching.'
     );
@@ -329,6 +330,7 @@ class CopyAssets extends Target {
   @override
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
+    InstallCodeAssets(),
   ];
 
   @override
@@ -363,6 +365,10 @@ class CopyAssets extends Target {
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],
+      additionalContent: <String, DevFSContent>{
+        'NativeAssetsManifest.json':
+            DevFSFileContent(environment.buildDir.childFile('native_assets.json')),
+      },
     );
     environment.depFileService.writeToFile(
       depfile,

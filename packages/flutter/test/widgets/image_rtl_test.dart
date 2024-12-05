@@ -7,38 +7,32 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-class TestImageProvider extends ImageProvider<TestImageProvider> {
-  const TestImageProvider(this.image);
+class _TestImageProvider extends ImageProvider<_TestImageProvider> {
+  _TestImageProvider(ui.Image image) {
+    _completer = OneFrameImageStreamCompleter(
+      SynchronousFuture<ImageInfo>(ImageInfo(image: image)),
+    );
+  }
 
-  final ui.Image image;
+  late final OneFrameImageStreamCompleter _completer;
 
   @override
-  Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
-    return SynchronousFuture<TestImageProvider>(this);
+  Future<_TestImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<_TestImageProvider>(this);
   }
 
   @override
-  ImageStreamCompleter loadImage(TestImageProvider key, ImageDecoderCallback decode) {
-    return OneFrameImageStreamCompleter(
-      SynchronousFuture<ImageInfo>(ImageInfo(image: image)),
-    );
+  ImageStreamCompleter loadImage(_TestImageProvider key, ImageDecoderCallback decode) {
+    return _completer;
   }
 }
 
 void main() {
-  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
-  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
-
   late ui.Image testImage;
 
-  setUpAll(() async {
+  setUp(() async {
     testImage = await createTestImage(width: 16, height: 9);
-  });
-
-  tearDownAll(() {
-    testImage.dispose();
   });
 
   testWidgets('DecorationImage RTL with alignment topEnd and match', (WidgetTester tester) async {
@@ -51,7 +45,7 @@ void main() {
             height: 50.0,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: TestImageProvider(testImage),
+                image: _TestImageProvider(testImage),
                 alignment: AlignmentDirectional.topEnd,
                 repeat: ImageRepeat.repeatX,
                 matchTextDirection: true,
@@ -90,7 +84,7 @@ void main() {
             height: 50.0,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: TestImageProvider(testImage),
+                image: _TestImageProvider(testImage),
                 alignment: AlignmentDirectional.topEnd,
                 repeat: ImageRepeat.repeatX,
                 matchTextDirection: true,
@@ -126,7 +120,7 @@ void main() {
             height: 50.0,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: TestImageProvider(testImage),
+                image: _TestImageProvider(testImage),
                 alignment: AlignmentDirectional.topEnd,
                 repeat: ImageRepeat.repeatX,
               ),
@@ -161,7 +155,7 @@ void main() {
             height: 50.0,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: TestImageProvider(testImage),
+                image: _TestImageProvider(testImage),
                 alignment: AlignmentDirectional.topEnd,
                 repeat: ImageRepeat.repeatX,
               ),
@@ -196,7 +190,7 @@ void main() {
             height: 50.0,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: TestImageProvider(testImage),
+                image: _TestImageProvider(testImage),
                 alignment: Alignment.centerRight,
                 matchTextDirection: true,
               ),
@@ -228,7 +222,7 @@ void main() {
             height: 50.0,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: TestImageProvider(testImage),
+                image: _TestImageProvider(testImage),
                 alignment: Alignment.centerRight,
               ),
             ),
@@ -255,7 +249,7 @@ void main() {
             height: 50.0,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: TestImageProvider(testImage),
+                image: _TestImageProvider(testImage),
                 alignment: Alignment.centerRight,
                 matchTextDirection: true,
               ),
@@ -283,7 +277,7 @@ void main() {
             height: 50.0,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: TestImageProvider(testImage),
+                image: _TestImageProvider(testImage),
                 alignment: Alignment.centerRight,
                 matchTextDirection: true,
               ),
@@ -310,7 +304,7 @@ void main() {
             width: 100.0,
             height: 50.0,
             child: Image(
-              image: TestImageProvider(testImage),
+              image: _TestImageProvider(testImage),
               alignment: AlignmentDirectional.topEnd,
               repeat: ImageRepeat.repeatX,
               matchTextDirection: true,
@@ -336,6 +330,8 @@ void main() {
       ..restore(),
     );
     expect(find.byType(SizedBox), isNot(paints..scale()..scale()));
+
+    imageCache.clear();
   });
 
   testWidgets('Image LTR with alignment topEnd (and pointless match)', (WidgetTester tester) async {
@@ -347,7 +343,7 @@ void main() {
             width: 100.0,
             height: 50.0,
             child: Image(
-              image: TestImageProvider(testImage),
+              image: _TestImageProvider(testImage),
               alignment: AlignmentDirectional.topEnd,
               repeat: ImageRepeat.repeatX,
               matchTextDirection: true,
@@ -381,7 +377,7 @@ void main() {
             width: 100.0,
             height: 50.0,
             child: Image(
-              image: TestImageProvider(testImage),
+              image: _TestImageProvider(testImage),
               alignment: AlignmentDirectional.topEnd,
               repeat: ImageRepeat.repeatX,
             ),
@@ -414,7 +410,7 @@ void main() {
             width: 100.0,
             height: 50.0,
             child: Image(
-              image: TestImageProvider(testImage),
+              image: _TestImageProvider(testImage),
               alignment: AlignmentDirectional.topEnd,
               repeat: ImageRepeat.repeatX,
             ),
@@ -447,7 +443,7 @@ void main() {
             width: 100.0,
             height: 50.0,
             child: Image(
-              image: TestImageProvider(testImage),
+              image: _TestImageProvider(testImage),
               alignment: Alignment.centerRight,
               matchTextDirection: true,
             ),
@@ -475,7 +471,7 @@ void main() {
             width: 100.0,
             height: 50.0,
             child: Image(
-              image: TestImageProvider(testImage),
+              image: _TestImageProvider(testImage),
               alignment: Alignment.centerRight,
             ),
           ),
@@ -500,7 +496,7 @@ void main() {
             width: 100.0,
             height: 50.0,
             child: Image(
-              image: TestImageProvider(testImage),
+              image: _TestImageProvider(testImage),
               alignment: Alignment.centerRight,
               matchTextDirection: true,
             ),
@@ -526,7 +522,7 @@ void main() {
             width: 100.0,
             height: 50.0,
             child: Image(
-              image: TestImageProvider(testImage),
+              image: _TestImageProvider(testImage),
               alignment: Alignment.centerRight,
               matchTextDirection: true,
             ),
@@ -544,22 +540,25 @@ void main() {
   });
 
   testWidgets('Image - Switch needing direction', (WidgetTester tester) async {
+    final _TestImageProvider provider = _TestImageProvider(testImage);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Image(
-          image: TestImageProvider(testImage),
+          image: provider,
           alignment: Alignment.centerRight,
         ),
       ),
       duration: Duration.zero,
       phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Image(
-          image: TestImageProvider(testImage),
+          image: provider,
           alignment: AlignmentDirectional.centerEnd,
           matchTextDirection: true,
         ),
@@ -567,16 +566,19 @@ void main() {
       duration: Duration.zero,
       phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Image(
-          image: TestImageProvider(testImage),
+          image: provider,
           alignment: Alignment.centerRight,
         ),
       ),
       duration: Duration.zero,
       phase: EnginePhase.layout, // so that we don't try to paint the fake images
     );
+
+    imageCache.clear();
   });
 }

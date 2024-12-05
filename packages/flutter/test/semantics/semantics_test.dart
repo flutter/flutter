@@ -730,7 +730,7 @@ void main() {
         '   merge boundary ⛔️\n'
         '   Rect.fromLTRB(60.0, 20.0, 80.0, 50.0)\n'
         '   actions: longPress, scrollUp, showOnScreen\n'
-        '   flags: hasCheckedState, isSelected, isButton\n'
+        '   flags: hasCheckedState, hasSelectedState, isSelected, isButton\n'
         '   label: "Use all the properties"\n'
         '   textDirection: rtl\n'
         '   sortKey: OrdinalSortKey#19df5(order: 1.0)\n',
@@ -738,7 +738,12 @@ void main() {
     );
     expect(
       allProperties.getSemanticsData().toString(),
-      'SemanticsData(Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), [1.0,0.0,0.0,10.0; 0.0,1.0,0.0,10.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0], actions: [longPress, scrollUp, showOnScreen], flags: [hasCheckedState, isSelected, isButton], label: "Use all the properties", textDirection: rtl)',
+      'SemanticsData('
+      'Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), '
+      '[1.0,0.0,0.0,10.0; 0.0,1.0,0.0,10.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0], '
+      'actions: [longPress, scrollUp, showOnScreen], '
+      'flags: [hasCheckedState, hasSelectedState, isSelected, isButton], '
+      'label: "Use all the properties", textDirection: rtl)',
     );
 
     final SemanticsNode scaled = SemanticsNode()

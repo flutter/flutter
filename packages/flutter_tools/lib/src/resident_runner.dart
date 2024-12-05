@@ -345,7 +345,8 @@ class FlutterDevice {
       globals.printTrace('Successfully connected to service protocol: $vmServiceUri');
 
       vmService = service;
-      (await device!.getLogReader(app: package)).connectedVMService = vmService;
+      await (await device!.getLogReader(app: package))
+          .provideVmService(vmService!);
       completer.complete();
       await subscription.cancel();
     }, onError: (dynamic error) {
@@ -414,23 +415,6 @@ class FlutterDevice {
     }
     await _loggingSubscription!.cancel();
     _loggingSubscription = null;
-  }
-
-  /// Attempts to set up reading logs from the Flutter app on the device.
-  ///
-  /// This can fail if the device if no longer connected.
-  Future<void> tryInitLogReader() async {
-    final vm_service.VM? vm = await vmService!.getVmGuarded();
-    if (vm == null) {
-      globals.printError(
-        'Unable to initiate log reader for device'
-        '${device?.name}, because the Flutter VM service connection '
-        'is closed.',
-      );
-      return;
-    }
-    final DeviceLogReader logReader = await device!.getLogReader(app: package);
-    logReader.appPid = vm.pid;
   }
 
   Future<int> runHot({
@@ -1134,6 +1118,16 @@ abstract class ResidentRunner extends ResidentHandlers {
     return 'main.dart${swap ? '.swap' : ''}.dill';
   }
 
+  /// Whether the app being instrumented by the runner should be stopped during
+  /// cleanup.
+  ///
+  /// A detached app can happen one of two ways:
+  /// - [run] is used, and then the created application is manually [detach]ed;
+  /// - [attach] is used to explicitly connect to an already running app.
+  @protected
+  @visibleForTesting
+  bool stopAppDuringCleanup = true;
+
   bool get debuggingEnabled => debuggingOptions.debuggingEnabled;
 
   @override
@@ -1270,7 +1264,10 @@ abstract class ResidentRunner extends ResidentHandlers {
   }
 
   @override
+  @mustCallSuper
   Future<void> detach() async {
+    stopAppDuringCleanup = false;
+
     // TODO(bkonyi): remove when ready to serve DevTools from DDS.
     await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
@@ -1414,6 +1411,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
   }
 
+  @protected
   void appFinished() {
     if (_finished.isCompleted) {
       return;

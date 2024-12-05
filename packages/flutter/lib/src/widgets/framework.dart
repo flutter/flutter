@@ -187,17 +187,10 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// The current state is null if (1) there is no widget in the tree that
   /// matches this global key, (2) that widget is not a [StatefulWidget], or the
   /// associated [State] object is not a subtype of `T`.
-  T? get currentState {
-    final Element? element = _currentElement;
-    if (element is StatefulElement) {
-      final StatefulElement statefulElement = element;
-      final State state = statefulElement.state;
-      if (state is T) {
-        return state;
-      }
-    }
-    return null;
-  }
+  T? get currentState => switch (_currentElement) {
+    StatefulElement(:final T state) => state,
+    _ => null,
+  };
 }
 
 /// A global key with a debugging label.
@@ -1502,6 +1495,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
     properties.add(ObjectFlagProperty<T>('_widget', _widget, ifNull: 'no widget'));
     properties.add(ObjectFlagProperty<StatefulElement>('_element', _element, ifNull: 'not mounted'));
   }
+
+  // If @protected State methods are added or removed, the analysis rule should be
+  // updated accordingly (dev/bots/custom_rules/protect_public_state_subtypes.dart)
 }
 
 /// A widget that has a child widget provided to it, instead of building a new
@@ -2717,7 +2713,7 @@ final class BuildScope {
   }
 
   bool _debugAssertElementInScope(Element element, Element debugBuildRoot) {
-    final bool isInScope = element._debugIsDescsendantOf(debugBuildRoot)
+    final bool isInScope = element._debugIsDescendantOf(debugBuildRoot)
                         || !element.debugIsActive;
     if (isInScope) {
       return true;
@@ -3678,7 +3674,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     });
   }
 
-  bool _debugIsDescsendantOf(Element target) {
+  bool _debugIsDescendantOf(Element target) {
     Element? element = this;
     while (element != null && element.depth > target.depth) {
       element = element._parent;
@@ -5176,7 +5172,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       if (owner!._debugBuilding) {
         assert(owner!._debugCurrentBuildTarget != null);
         assert(owner!._debugStateLocked);
-        if (_debugIsDescsendantOf(owner!._debugCurrentBuildTarget!)) {
+        if (_debugIsDescendantOf(owner!._debugCurrentBuildTarget!)) {
           return true;
         }
         final List<DiagnosticsNode> information = <DiagnosticsNode>[

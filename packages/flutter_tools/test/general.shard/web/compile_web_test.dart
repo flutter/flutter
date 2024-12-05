@@ -107,7 +107,7 @@ void main() {
         label: 'web-compile',
             parameters: CustomDimensions(
               buildEventSettings:
-                  'optimizationLevel: 4; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+                  'optimizationLevel: 0; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
 
       ),
           ),
@@ -121,7 +121,7 @@ void main() {
         Event.flutterBuildInfo(
           label: 'web-compile',
           buildType: 'web',
-          settings: 'optimizationLevel: 4; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+          settings: 'optimizationLevel: 0; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
         ),
       ]),
     );
@@ -138,6 +138,8 @@ void main() {
       ),
       true,
     );
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('WebBuilder throws tool exit on failure', () async {
@@ -176,5 +178,35 @@ void main() {
     expect(logger.errorText, contains('Target hello failed: FormatException: illegal character in input string'));
     expect(testUsage.timings, isEmpty);
     expect(fakeAnalytics.sentEvents, isEmpty);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  Future<void> testRendererModeFromDartDefines(WebRendererMode webRenderer) async {
+    testUsingContext('WebRendererMode.${webRenderer.name} can be initialized from dart defines', () {
+      final WebRendererMode computed = WebRendererMode.fromDartDefines(
+        webRenderer.dartDefines,
+        useWasm: true,
+      );
+
+      expect(computed, webRenderer);
+
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+  }
+  WebRendererMode.values
+    .forEach(testRendererModeFromDartDefines);
+
+  testUsingContext('WebRendererMode.fromDartDefines sets a wasm-aware default for unknown dart defines.', () async {
+    WebRendererMode computed = WebRendererMode.fromDartDefines(
+      <String>{}, useWasm: false,
+    );
+    expect(computed, WebRendererMode.getDefault(useWasm: false));
+
+    computed = WebRendererMode.fromDartDefines(
+      <String>{}, useWasm: true,
+    );
+    expect(computed, WebRendererMode.getDefault(useWasm: true));
   });
 }

@@ -200,6 +200,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
+    this.radioScaleFactor = 1.0,
     this.internalAddSemanticForOnTap = false,
   }) : _radioType = _RadioType.material,
        useCupertinoCheckmarkStyle = false,
@@ -240,6 +241,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
+    this.radioScaleFactor = 1.0,
     this.useCupertinoCheckmarkStyle = false,
     this.internalAddSemanticForOnTap = false,
   }) : _radioType = _RadioType.adaptive,
@@ -286,7 +288,7 @@ class RadioListTile<T> extends StatelessWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
   ///  * [WidgetState.selected].
@@ -468,9 +470,14 @@ class RadioListTile<T> extends StatelessWidget {
   /// Defaults to false.
   final bool useCupertinoCheckmarkStyle;
 
+  /// Controls the scaling factor applied to the [Radio] within the [RadioListTile].
+  ///
+  /// Defaults to 1.0.
+  final double radioScaleFactor;
+
   @override
   Widget build(BuildContext context) {
-    final Widget control;
+    Widget control;
     switch (_radioType) {
       case _RadioType.material:
         control = ExcludeFocus(
@@ -507,6 +514,13 @@ class RadioListTile<T> extends StatelessWidget {
             useCupertinoCheckmarkStyle: useCupertinoCheckmarkStyle,
           ),
         );
+    }
+
+    if (radioScaleFactor != 1.0) {
+      control = Transform.scale(
+        scale: radioScaleFactor,
+        child: control,
+      );
     }
 
     final ListTileThemeData listTileTheme = ListTileTheme.of(context);

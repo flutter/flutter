@@ -623,8 +623,8 @@ class _DraggableSheetExtent {
     required bool snap,
     required List<double> snapSizes,
     required double initialSize,
-    Duration? snapAnimationDuration,
-    bool shouldCloseOnMinExtent = true,
+    required Duration? snapAnimationDuration,
+    required bool shouldCloseOnMinExtent,
   }) {
     return _DraggableSheetExtent(
       minSize: minSize,
@@ -744,6 +744,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       snapSizes: _impliedSnapSizes(),
       snapAnimationDuration: widget.snapAnimationDuration,
       initialSize: widget.initialChildSize,
+      shouldCloseOnMinExtent: widget.shouldCloseOnMinExtent,
     );
     // Modify the existing scroll controller instead of replacing it so that
     // developers listening to the controller do not have to rebuild their listeners.

@@ -215,7 +215,7 @@ class Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CardTheme cardTheme = CardTheme.of(context);
+    final CardThemeData cardTheme = CardTheme.of(context);
     final CardThemeData defaults;
     if (Theme.of(context).useMaterial3) {
       defaults = switch (_variant) {

@@ -1395,11 +1395,11 @@ dev_dependencies:
       final TestCommand testCommand = TestCommand(testRunner: testRunner);
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
-      await commandRunner.run(const <String>[
+      await commandRunner.run(<String>[
         'test',
         '--no-pub',
         '--platform=chrome',
-        '--web-renderer=canvaskit',
+        ...WebRendererMode.canvaskit.toCliDartDefines,
       ]);
       expect(testRunner.lastDebuggingOptionsValue.webRenderer, WebRendererMode.canvaskit);
     }, overrides: <Type, Generator>{
@@ -1425,6 +1425,39 @@ dev_dependencies:
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
+
+  // Tests whether using a deprecated webRenderer toggles a warningText.
+  Future<void> testWebRendererDeprecationMessage(WebRendererMode webRenderer) async {
+    testUsingContext('Using --web-renderer=${webRenderer.name} triggers a warningText.', () async {
+      // Run the command so it parses --web-renderer, but ignore all errors.
+      // We only care about the logger.
+      try {
+        final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+        final TestCommand testCommand = TestCommand(testRunner: testRunner);
+        await createTestCommandRunner(testCommand).run(<String>[
+          'test',
+          'web',
+          '--no-pub',
+          '--platform=chrome',
+          ...webRenderer.toCliDartDefines,
+        ]);
+      } on ToolExit catch (error) {
+        expect(error, isA<ToolExit>());
+      }
+      expect(logger.warningText, contains(
+        'See: https://docs.flutter.dev/to/web-html-renderer-deprecation'
+      ));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      Logger: () => logger,
+    });
+  }
+  /// Do test all the deprecated WebRendererModes
+  WebRendererMode.values
+    .where((WebRendererMode mode) => mode.isDeprecated)
+    .forEach(testWebRendererDeprecationMessage);
 
   testUsingContext('Can test in a pub workspace',
       () async {

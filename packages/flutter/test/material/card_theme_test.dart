@@ -106,7 +106,7 @@ void main() {
   });
 
   testWidgets('Card uses values from CardTheme', (WidgetTester tester) async {
-    final CardTheme cardTheme = _cardTheme();
+    final CardThemeData cardTheme = _cardTheme();
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(cardTheme: cardTheme),
@@ -163,7 +163,7 @@ void main() {
   });
 
   testWidgets('CardTheme properties take priority over ThemeData properties', (WidgetTester tester) async {
-    final CardTheme cardTheme = _cardTheme();
+    final CardThemeData cardTheme = _cardTheme();
     final ThemeData themeData = _themeData().copyWith(cardTheme: cardTheme);
 
     await tester.pumpWidget(MaterialApp(
@@ -192,7 +192,7 @@ void main() {
   });
 
   testWidgets('Material3 - CardTheme customizes shape', (WidgetTester tester) async {
-    const CardTheme cardTheme = CardTheme(
+    const CardThemeData cardTheme = CardThemeData(
       color: Colors.white,
       shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(7))),
       elevation: 1.0,
@@ -218,6 +218,120 @@ void main() {
       find.byKey(painterKey),
       matchesGoldenFile('card_theme.custom_shape.png'),
     );
+  });
+
+  testWidgets('Card properties are taken over the theme values', (WidgetTester tester) async {
+    const Clip themeClipBehavior = Clip.antiAlias;
+    const Color themeColor = Colors.red;
+    const Color themeShadowColor = Colors.orange;
+    const double themeElevation = 10.0;
+    const EdgeInsets themeMargin = EdgeInsets.all(12.0);
+    const ShapeBorder themeShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0)));
+
+    const Clip clipBehavior = Clip.hardEdge;
+    const Color color = Colors.yellow;
+    const Color shadowColor = Colors.green;
+    const double elevation = 20.0;
+    const EdgeInsets margin = EdgeInsets.all(18.0);
+    const ShapeBorder shape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(25.0)));
+
+    final ThemeData themeData = ThemeData(
+      cardTheme: const CardThemeData(
+        clipBehavior: themeClipBehavior,
+        color: themeColor,
+        shadowColor: themeShadowColor,
+        elevation: themeElevation,
+        margin: themeMargin,
+        shape: themeShape,
+      ),
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: const Scaffold(
+        body: Card(
+          clipBehavior: clipBehavior,
+          color: color,
+          shadowColor: shadowColor,
+          elevation: elevation,
+          margin: margin,
+          shape: shape,
+          child: SizedBox(
+            width: 200,
+            height: 200,
+          ),
+        ),
+      ),
+    )
+    );
+
+    final Padding cardMargin = _getCardPadding(tester);
+    final Material material = _getCardMaterial(tester);
+
+    expect(material.clipBehavior, clipBehavior);
+    expect(material.color, color);
+    expect(material.shadowColor, shadowColor);
+    expect(material.elevation, elevation);
+    expect(material.shape, shape);
+    expect(cardMargin.padding, margin);
+  });
+
+  testWidgets('Local CardTheme can override global CardTheme', (WidgetTester tester) async {
+    const Clip globalClipBehavior = Clip.antiAlias;
+    const Color globalColor = Colors.red;
+    const Color globalShadowColor = Colors.orange;
+    const double globalElevation = 10.0;
+    const EdgeInsets globalMargin = EdgeInsets.all(12.0);
+    const ShapeBorder globalShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0)));
+
+    const Clip localClipBehavior = Clip.hardEdge;
+    const Color localColor = Colors.yellow;
+    const Color localShadowColor = Colors.green;
+    const double localElevation = 20.0;
+    const EdgeInsets localMargin = EdgeInsets.all(18.0);
+    const ShapeBorder localShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(25.0)));
+
+    final ThemeData themeData = ThemeData(
+      cardTheme: const CardThemeData(
+        clipBehavior: globalClipBehavior,
+        color: globalColor,
+        shadowColor: globalShadowColor,
+        elevation: globalElevation,
+        margin: globalMargin,
+        shape: globalShape,
+      ),
+    );
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: const Scaffold(
+        body: CardTheme(
+          data: CardThemeData(
+            clipBehavior: localClipBehavior,
+            color: localColor,
+            shadowColor: localShadowColor,
+            elevation: localElevation,
+            margin: localMargin,
+            shape: localShape,
+          ),
+          child: Card(
+            child: SizedBox(
+              width: 200,
+              height: 200,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final Padding cardMargin = _getCardPadding(tester);
+    final Material material = _getCardMaterial(tester);
+
+    expect(material.clipBehavior, localClipBehavior);
+    expect(material.color, localColor);
+    expect(material.shadowColor, localShadowColor);
+    expect(material.elevation, localElevation);
+    expect(material.shape, localShape);
+    expect(cardMargin.padding, localMargin);
   });
 
   group('Material 2', () {
@@ -262,7 +376,7 @@ void main() {
     });
 
     testWidgets('Material2 - CardTheme customizes shape', (WidgetTester tester) async {
-      const CardTheme cardTheme = CardTheme(
+      const CardThemeData cardTheme = CardThemeData(
         color: Colors.white,
         shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(7))),
         elevation: 1.0,
@@ -292,8 +406,8 @@ void main() {
   });
 }
 
-CardTheme _cardTheme() {
-  return const CardTheme(
+CardThemeData _cardTheme() {
+  return const CardThemeData(
     clipBehavior: Clip.antiAlias,
     color: Colors.green,
     shadowColor: Colors.red,

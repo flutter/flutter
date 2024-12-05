@@ -93,8 +93,10 @@ class Dialog extends StatelessWidget {
   ///
   /// This sets the [Material.color] on this [Dialog]'s [Material].
   ///
-  /// If `null`, [ColorScheme.surfaceContainerHigh] is used in Material 3.
-  /// Otherwise, defaults to [ThemeData.dialogBackgroundColor].
+  /// If null, then the [DialogThemeData.backgroundColor] is used. If that is
+  /// also null, defaults to [ColorScheme.surfaceContainerHigh]. If
+  /// [ThemeData.useMaterial3] is false, defaults to [Colors.grey] with a shade
+  ///  of 800 in dark theme and [Colors.white] in light theme.
   ///
   /// If [Dialog.fullscreen] is used, defaults to [ColorScheme.surface].
   /// {@endtemplate}
@@ -230,7 +232,7 @@ class Dialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final DialogThemeData dialogTheme = DialogTheme.of(context).data;
+    final DialogThemeData dialogTheme = DialogTheme.of(context);
     final EdgeInsets effectivePadding = MediaQuery.viewInsetsOf(context)
       + (insetPadding ?? dialogTheme.insetPadding ?? _defaultInsetPadding);
     final DialogThemeData defaults = theme.useMaterial3
@@ -720,7 +722,7 @@ class AlertDialog extends StatelessWidget {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
 
-    final DialogThemeData dialogTheme = DialogTheme.of(context).data;
+    final DialogThemeData dialogTheme = DialogTheme.of(context);
     final DialogThemeData defaults = theme.useMaterial3 ? _DialogDefaultsM3(context) : _DialogDefaultsM2(context);
 
     String? label = semanticLabel;
@@ -1235,7 +1237,7 @@ class SimpleDialog extends StatelessWidget {
 
     // The paddingScaleFactor is used to adjust the padding of Dialog
     // children.
-    final TextStyle defaultTextStyle = titleTextStyle ?? DialogTheme.of(context).data.titleTextStyle ?? theme.textTheme.titleLarge!;
+    final TextStyle defaultTextStyle = titleTextStyle ?? DialogTheme.of(context).titleTextStyle ?? theme.textTheme.titleLarge!;
     final double fontSize = defaultTextStyle.fontSize ?? kDefaultFontSize;
     final double fontSizeToScale = fontSize == 0.0 ? kDefaultFontSize : fontSize;
     final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
@@ -1445,7 +1447,7 @@ Future<T?> showDialog<T>({
     builder: builder,
     barrierColor: barrierColor
       ?? DialogTheme.of(context).barrierColor
-      ?? Theme.of(context).dialogTheme.data.barrierColor
+      ?? Theme.of(context).dialogTheme.barrierColor
       ?? Colors.black54,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,
@@ -1638,9 +1640,7 @@ double _scalePadding(double textScaleFactor) {
 // Hand coded defaults based on Material Design 2.
 class _DialogDefaultsM2 extends DialogThemeData {
   _DialogDefaultsM2(this.context)
-    : _textTheme = Theme.of(context).textTheme,
-      _iconTheme = Theme.of(context).iconTheme,
-      super(
+    : super(
         alignment: Alignment.center,
         elevation: 24.0,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
@@ -1648,23 +1648,26 @@ class _DialogDefaultsM2 extends DialogThemeData {
       );
 
   final BuildContext context;
-  final TextTheme _textTheme;
-  final IconThemeData _iconTheme;
+  late final ThemeData theme = Theme.of(context);
+  late final TextTheme textTheme = theme.textTheme;
+  late final IconThemeData iconTheme = theme.iconTheme;
 
   @override
-  Color? get iconColor => _iconTheme.color;
+  Color? get iconColor => iconTheme.color;
 
   @override
-  Color? get backgroundColor => Theme.of(context).dialogBackgroundColor;
+  Color? get backgroundColor => theme.brightness == Brightness.dark
+    ? Colors.grey[800]!
+    : Colors.white;
 
   @override
-  Color? get shadowColor => Theme.of(context).shadowColor;
+  Color? get shadowColor => theme.shadowColor;
 
   @override
-  TextStyle? get titleTextStyle => _textTheme.titleLarge;
+  TextStyle? get titleTextStyle => textTheme.titleLarge;
 
   @override
-  TextStyle? get contentTextStyle => _textTheme.titleMedium;
+  TextStyle? get contentTextStyle => textTheme.titleMedium;
 
   @override
   EdgeInsetsGeometry? get actionsPadding => EdgeInsets.zero;

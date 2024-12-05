@@ -51,8 +51,8 @@ void main() {
     const double extraValueToHaveRoundingIssues = 1e-11;
 
     test('should be 0 when item extent is 0', () {
-      const double offsetValueWhichDoesntCare = 1234;
-      final int actual = testGetMaxChildIndexForScrollOffset(offsetValueWhichDoesntCare, 0);
+      const double offsetValueWhichDoesNotCare = 1234;
+      final int actual = testGetMaxChildIndexForScrollOffset(offsetValueWhichDoesNotCare, 0);
       expect(actual, 0);
     });
 

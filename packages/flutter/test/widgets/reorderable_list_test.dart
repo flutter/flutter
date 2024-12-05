@@ -923,6 +923,51 @@ void main() {
     ), throwsAssertionError);
   });
 
+  testWidgets('ReorderableList passes itemExtentBuilder to SliverReorderableList', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/155936
+    const int itemCount = 5;
+    const List<double> items = <double>[10.0, 20.0, 30.0, 40.0, 50.0];
+
+    void handleReorder(int fromIndex, int toIndex) {
+      if (toIndex > fromIndex) {
+        toIndex -= 1;
+      }
+      items.insert(toIndex, items.removeAt(fromIndex));
+    }
+
+    // The list has five elements, that indicate the extent for the item at the given index.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ReorderableList(
+          itemBuilder: (BuildContext context, int index) => SizedBox(
+            key: ValueKey<double>(items[index]),
+            child: Text('Item $index'),
+          ),
+          itemCount: itemCount,
+          onReorder: handleReorder,
+          itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
+            return items[index];
+          },
+        ),
+      ),
+    );
+
+    const Map<int, double> expectedExtents = <int, double>{
+      0: 10.0,
+      1: 20.0,
+      2: 30.0,
+      3: 40.0,
+      4: 50.0,
+    };
+
+    final Map<int, double> itemExtents = <int, double>{
+      for (int i = 0; i < itemCount; i++)
+        i: tester.getSize(find.text('Item $i')).height,
+    };
+
+    expect(const MapEquality<int, double>().equals(itemExtents, expectedExtents), isTrue);
+  });
+
   testWidgets('SliverReorderableList asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
     final List<int> numbers = <int>[0,1,2];
     expect(() => SliverReorderableList(

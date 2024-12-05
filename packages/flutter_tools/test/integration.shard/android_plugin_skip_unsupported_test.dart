@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 
 import '../src/common.dart';
+import 'test_data/deferred_components_config.dart';
 import 'test_data/plugin_each_settings_gradle_project.dart';
 import 'test_data/plugin_project.dart';
 import 'test_data/project.dart';
@@ -36,12 +37,6 @@ void main() {
     required Project project,
     required bool createAndroidPluginFolder,
   }) async {
-    final String flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
-
     // Create dummy plugin that supports iOS and optionally Android.
     processManager.runSync(<String>[
       flutterBin,
@@ -97,6 +92,8 @@ void main() {
       'build',
       'apk',
       '--debug',
+      // TODO(bkonyi): remove once https://github.com/flutter/flutter/pull/158933 is resolved
+      '--verbose',
     ], workingDirectory: pluginExampleAppDir.path);
   }
 
@@ -112,12 +109,34 @@ void main() {
   test(
       'skip plugin with android folder if it does not support the Android platform',
       () async {
-    final Project project = PluginWithPathAndroidProject();
+    final Project project = PluginWithPathAndroidProjectWithoutDeferred();
     final ProcessResult buildApkResult = await testUnsupportedPlugin(
         project: project, createAndroidPluginFolder: true);
     expect(buildApkResult.stderr.toString(),
         isNot(contains('Please fix your settings.gradle')));
     expect(buildApkResult, const ProcessResultMatcher());
+
+    // Regression check for https://github.com/flutter/flutter/issues/158962.
+    {
+      final Directory androidDir = project.dir.childDirectory('android');
+      expect(
+        androidDir.childFile('settings.gradle.kts'),
+        exists,
+        reason:
+            'Modern flutter create --platforms android template creates this',
+      );
+      expect(
+        androidDir.childFile('settings.gradle'),
+        isNot(exists),
+        reason: ''
+            'flutter create should have created a settings.gradle.kts file '
+            'but not a settings.gradle file. Prior to the change in the PR '
+            'addressing https://github.com/flutter/flutter/issues/158962 '
+            'both files were created, which means that tooling picked one '
+            'and not the other, which causes ambiguity for debugging test '
+            'flakes.',
+      );
+    }
   });
 
   // TODO(54566): Remove test when issue is resolved.
@@ -185,12 +204,30 @@ dependencies:
 ''';
 
 /// Project that load's a plugin from the specified path.
+class PluginWithPathAndroidProjectWithoutDeferred extends PluginProject {
+  // Intentionally omit; this test case has nothing to do with deferred
+  // components and a DeferredComponentsConfig will cause duplicates of files
+  // such as build.gradle{.kts}, settings.gradle{kts} and related to be
+  // generated, which in turn adds ambiguity to how the tests are built and
+  // executed.
+  //
+  // See https://github.com/flutter/flutter/issues/158962.
+  @override
+  DeferredComponentsConfig? get deferredComponents => null;
+
+  @override
+  String get pubspec => pubspecWithPluginPath;
+}
+
+/// Project that load's a plugin from the specified path.
 class PluginWithPathAndroidProject extends PluginProject {
   @override
   String get pubspec => pubspecWithPluginPath;
 }
 
-// TODO(54566): Remove class when issue is resolved.
+// TODO(matanlurey): Remove class when `.flutter-plugins` is no longer emitted.
+// See https://github.com/flutter/flutter/issues/48918.
+
 /// [PluginEachSettingsGradleProject] that load's a plugin from the specified
 /// path.
 class PluginEachWithPathAndroidProject extends PluginEachSettingsGradleProject {
@@ -198,7 +235,9 @@ class PluginEachWithPathAndroidProject extends PluginEachSettingsGradleProject {
   String get pubspec => pubspecWithPluginPath;
 }
 
-// TODO(54566): Remove class when issue is resolved.
+// TODO(matanlurey): Remove class when `.flutter-plugins` is no longer emitted.
+// See https://github.com/flutter/flutter/issues/48918.
+
 /// [PluginCompromisedEachSettingsGradleProject] that load's a plugin from the
 /// specified path.
 class PluginCompromisedEachWithPathAndroidProject

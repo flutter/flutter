@@ -1213,7 +1213,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// This value is not exposed to the users of the app.
   ///
   /// It's usually used for UI testing with tools that work by querying the
-  /// native accessibility, like UIAutomator, XCUITest, or Appium.
+  /// native accessibility, like UIAutomator, XCUITest, or Appium. It can be
+  /// matched with [CommonFinders.bySemanticsIdentifier].
   ///
   /// On Android, this is used for `AccessibilityNodeInfo.setViewIdResourceName`.
   /// It'll be appear in accessibility hierarchy as `resource-id`.
@@ -1697,7 +1698,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// * Buttons must respond to tap/click events produced via keyboard shortcuts.
   /// * Text fields must become focused and editable, showing an on-screen
   ///   keyboard, if necessary.
-  /// * Checkboxes, switches, and radio buttons must become togglable using
+  /// * Checkboxes, switches, and radio buttons must become toggleable using
   ///   keyboard shortcuts.
   ///
   /// Focus behavior is specific to the platform and to the assistive technology
@@ -2091,8 +2092,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// Visits the immediate children of this node.
   ///
   /// This function calls visitor for each immediate child until visitor returns
-  /// false. Returns true if all the visitor calls returned true, otherwise
-  /// returns false.
+  /// false.
   void visitChildren(SemanticsNodeVisitor visitor) {
     if (_children != null) {
       for (final SemanticsNode child in _children!) {
@@ -4671,6 +4671,7 @@ class SemanticsConfiguration {
   /// in which case it will not be flagged as selected.
   bool get isSelected => _hasFlag(SemanticsFlag.isSelected);
   set isSelected(bool value) {
+    _setFlag(SemanticsFlag.hasSelectedState, true);
     _setFlag(SemanticsFlag.isSelected, value);
   }
 

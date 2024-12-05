@@ -396,6 +396,8 @@ class AndroidBuildInfo {
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
 
+  bool get containsX86Target => targetArchs.contains(AndroidArch.x86);
+
   /// Whether to bootstrap an empty application.
   final bool fastStart;
 }
@@ -649,23 +651,19 @@ enum AndroidArch {
   x86,
   x86_64;
 
-  String get archName {
-    return switch (this) {
-      AndroidArch.armeabi_v7a => 'armeabi-v7a',
-      AndroidArch.arm64_v8a => 'arm64-v8a',
-      AndroidArch.x86_64 => 'x86_64',
-      AndroidArch.x86 => 'x86'
-    };
-  }
+  String get archName => switch (this) {
+    AndroidArch.armeabi_v7a => 'armeabi-v7a',
+    AndroidArch.arm64_v8a   => 'arm64-v8a',
+    AndroidArch.x86_64      => 'x86_64',
+    AndroidArch.x86         => 'x86',
+  };
 
-  String get platformName {
-    return switch (this) {
-      AndroidArch.armeabi_v7a => 'android-arm',
-      AndroidArch.arm64_v8a => 'android-arm64',
-      AndroidArch.x86_64 => 'android-x64',
-      AndroidArch.x86 => 'android-x86'
-    };
-  }
+  String get platformName => switch (this) {
+    AndroidArch.armeabi_v7a => 'android-arm',
+    AndroidArch.arm64_v8a   => 'android-arm64',
+    AndroidArch.x86_64      => 'android-x64',
+    AndroidArch.x86         => 'android-x86',
+  };
 }
 
 /// The default set of iOS device architectures to build for.

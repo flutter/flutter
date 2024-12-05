@@ -1700,7 +1700,6 @@ class DropdownButtonFormField<T> extends FormField<T> {
               ? effectiveHint != null
               : effectiveHint != null || effectiveDisabledHint != null;
             final bool isEmpty = !showSelectedItem && !isHintOrDisabledHintAvailable;
-            final bool hasError = effectiveDecoration.errorText != null;
 
             // An unfocusable Focus widget so that this widget can detect if its
             // descendants have focus or not.
@@ -1709,31 +1708,17 @@ class DropdownButtonFormField<T> extends FormField<T> {
               skipTraversal: true,
               child: Builder(builder: (BuildContext context) {
                 final bool isFocused = Focus.of(context).hasFocus;
-                InputBorder? resolveInputBorder() {
-                  if (hasError) {
-                    if (isFocused) {
-                      return effectiveDecoration.focusedErrorBorder;
-                    }
-                    return effectiveDecoration.errorBorder;
-                  }
-                  if (isFocused) {
-                    return effectiveDecoration.focusedBorder;
-                  }
-                  if (effectiveDecoration.enabled) {
-                    return effectiveDecoration.enabledBorder;
-                  }
-                  return effectiveDecoration.border;
-                }
-                BorderRadius? effectiveBorderRadius() {
-                  final InputBorder? inputBorder = resolveInputBorder();
-                  if (inputBorder is OutlineInputBorder) {
-                    return inputBorder.borderRadius;
-                  }
-                  if (inputBorder is UnderlineInputBorder) {
-                    return inputBorder.borderRadius;
-                  }
-                  return null;
-                }
+                late final InputBorder? resolvedBorder = switch ((
+                  enabled: effectiveDecoration.enabled,
+                  focused: isFocused,
+                  error: effectiveDecoration.errorText != null,
+                )) {
+                  (enabled: _, focused: true, error: true) => effectiveDecoration.focusedErrorBorder,
+                  (enabled: _, focused: _,    error: true) => effectiveDecoration.errorBorder,
+                  (enabled: _, focused: true,  error: _)   => effectiveDecoration.focusedBorder,
+                  (enabled: true,  focused: _, error: _)   => effectiveDecoration.enabledBorder,
+                  (enabled: false, focused: _, error: _)   => effectiveDecoration.border,
+                };
 
                 return DropdownButtonHideUnderline(
                   child: DropdownButton<T>._formField(
@@ -1760,7 +1745,11 @@ class DropdownButtonFormField<T> extends FormField<T> {
                     menuMaxHeight: menuMaxHeight,
                     enableFeedback: enableFeedback,
                     alignment: alignment,
-                    borderRadius: borderRadius ?? effectiveBorderRadius(),
+                    borderRadius: borderRadius ?? switch (resolvedBorder) {
+                      final OutlineInputBorder border   => border.borderRadius,
+                      final UnderlineInputBorder border => border.borderRadius,
+                      _ => null,
+                    },
                     // Clear the decoration hintText because DropdownButton has its own hint logic.
                     inputDecoration: effectiveDecoration.copyWith(
                       errorText: field.errorText,

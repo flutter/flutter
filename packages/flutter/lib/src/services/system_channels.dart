@@ -277,24 +277,33 @@ abstract final class SystemChannels {
     JSONMethodCodec(),
   );
 
-  /// A [MethodChannel] for handling handwriting input.
+  /// A [MethodChannel] for handling Android Scribe stylus handwriting input.
   ///
-  /// This method channel is used by Android API 33's Scribe feature where writing
-  /// with a stylus on top of a text field inserts text into the field.
+  /// Android's Scribe feature allows writing directly on top of a text input
+  /// using a stylus.
   ///
   /// The following methods are defined for this channel:
   ///
   ///  * `Scribe.startStylusHandwriting`: Indicates that stylus input has been
   ///  detected and Android should start handwriting input.
-  ///    [Offset].
+  ///  * `Scribe.isStylusHandwritingAvailable`: Returns a boolean representing
+  ///  whether or not the device currently supports accepting stylus handwriting
+  ///  input. Throws if the device's API level is not sufficient.
+  ///  * `Scribe.isFeatureAvailable`: Returns a boolean representing whether or
+  ///  not the device currently supports accepting stylus handwriting input.
+  ///  Returns false and does not throw if the device's API level is not
+  ///  sufficient.
   ///
   /// See also:
   ///
+  ///  * [Scribe], which uese this channel.
   ///  * [ScribbleClient], which implements the iOS version of this feature,
-  ///  [Scribble](https://support.apple.com/guide/ipad/enter-text-with-scribble-ipad355ab2a7/ipados).
+  ///    [Scribble](https://support.apple.com/guide/ipad/enter-text-with-scribble-ipad355ab2a7/ipados).
+  ///  * <https://developer.android.com/develop/ui/views/touch-and-input/stylus-input/stylus-input-in-text-fields>,
+  ///    which is the Android documentation explaining the Scribe feature.
   static const MethodChannel scribe = OptionalMethodChannel(
-    'flutter/scribe',
-    JSONMethodCodec(),
+      'flutter/scribe',
+      JSONMethodCodec(),
   );
 
   /// A [MethodChannel] for handling spell check for text input.
