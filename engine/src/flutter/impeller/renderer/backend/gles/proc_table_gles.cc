@@ -360,7 +360,7 @@ static bool ResourceIsLive(const ProcTableGLES& gl,
 
 bool ProcTableGLES::SetDebugLabel(DebugResourceType type,
                                   GLint name,
-                                  const std::string& label) const {
+                                  std::string_view label) const {
   if (debug_label_max_length_ <= 0) {
     return true;
   }
