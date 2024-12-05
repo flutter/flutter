@@ -24,10 +24,15 @@ void main() {
   });
 
   group('Serialization', () {
-    const List<String> essentialDiagnosticKeys = <String>[
+    // These are always included.
+    const List<String> defaultDiagnosticKeys = <String>[
       'description',
+    ];
+    // These are only included when fullDetails = false.
+    const List<String> essentialDiagnosticKeys = <String>[
       'shouldIndent',
     ];
+    // These are only included with fullDetails = true.
     const List<String> detailedDiagnosticKeys = <String>[
       'type',
       'hasChildren',
@@ -81,7 +86,7 @@ void main() {
       expect(result.containsKey('properties'), isFalse);
       expect(result.containsKey('children'), isFalse);
 
-      for (final String keyName in essentialDiagnosticKeys) {
+      for (final String keyName in defaultDiagnosticKeys) {
         expect(
           result.containsKey(keyName),
           isTrue,
@@ -97,15 +102,20 @@ void main() {
       }
     });
 
-    test('without full details', () {
+    test('iterative implementation (without full details)', () {
       final Map<String, Object?> result = testTree
         .toDiagnosticsNode()
-        .toJsonMap(
-          const DiagnosticsSerializationDelegate(), fullDetails: false
+          .toJsonMapIterative(const DiagnosticsSerializationDelegate()
         );
       expect(result.containsKey('properties'), isFalse);
       expect(result.containsKey('children'), isFalse);
-
+      for (final String keyName in defaultDiagnosticKeys) {
+        expect(
+          result.containsKey(keyName),
+          isTrue,
+          reason: '$keyName is included.',
+        );
+      }
       for (final String keyName in essentialDiagnosticKeys) {
         expect(
           result.containsKey(keyName),
@@ -120,6 +130,12 @@ void main() {
           reason: '$keyName is  not included.',
         );
       }
+
+      // The truncated value should not be included if it is false.
+      expect(
+        result['truncated'] == null || result['truncated'] == true,
+        isTrue,
+      );
     });
 
     test('subtreeDepth 1', () {

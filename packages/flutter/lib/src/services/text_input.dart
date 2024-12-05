@@ -1267,11 +1267,11 @@ mixin TextInputClient {
   void performSelector(String selectorName) {}
 }
 
-/// An interface into iOS's stylus hadnwriting text input.
+/// An interface into iOS's stylus handwriting text input.
 ///
 /// See also:
 ///
-///  * [Scribe], which provides similar functionality for Anroid.
+///  * [Scribe], which provides similar functionality for Android.
 ///  * [UIIndirectScribbleInteraction](https://developer.apple.com/documentation/uikit/uiindirectscribbleinteraction),
 ///    which is iOS's API for Scribble.
 abstract class ScribbleClient {

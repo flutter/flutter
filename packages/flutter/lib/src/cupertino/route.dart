@@ -176,6 +176,12 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   @override
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
+    // Supress previous route from transitioning if this is a fullscreenDialog route.
+    return previousRoute is PageRoute && !fullscreenDialog;
+  }
+
+  @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     final Widget child = buildContent(context);
     return Semantics(

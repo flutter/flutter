@@ -29,7 +29,7 @@ import 'media_query.dart';
 /// {@tool snippet}
 ///
 /// This example creates a blue box containing text that is sufficiently padded
-/// to avoid instrusions by the operating system.
+/// to avoid intrusions by the operating system.
 ///
 /// ```dart
 /// SafeArea(
