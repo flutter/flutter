@@ -11,22 +11,7 @@ import 'package:flutter/services.dart';
 /// Defines the type of the Window
 enum WindowArchetype {
   /// Defines a traditional window
-  regular,
-
-  /// Defines a window that is on a layer above [regular] windows and is not dockable
-  floatingRegular,
-
-  /// Defines a dialog window
-  dialog,
-
-  /// Defines a satellite window
-  satellite,
-
-  /// Defines a popup window
-  popup,
-
-  /// Defines a tooltip window
-  tip,
+  regular
 }
 
 /// Controller used with the [RegularWindow] widget. This controller
@@ -88,23 +73,33 @@ class RegularWindowController extends WindowController {
   }
 }
 
-/// A regular window.
+/// A widget that creates a regular window. This content of this window is
+/// rendered into a [View], meaning that this widget must be rendered into
+/// either a [ViewAnchor] or a [ViewCollection].
 class RegularWindow extends StatefulWidget {
-  RegularWindow(
-      {required Size preferredSize,
+  /// Creates a regular window widget
+  const RegularWindow(
+      {this.controller,
       this.onDestroyed,
       this.onError,
-      this.controller,
-      this.key,
+      super.key,
+      required Size preferredSize,
       required this.child})
       : _preferredSize = preferredSize;
 
+  /// Controller for this widget.
   final RegularWindowController? controller;
-  void Function()? onDestroyed;
-  void Function(String?)? onError;
-  final Key? key;
-  final Widget child;
+
+  /// Called when the window backing this widget is destroyed.
+  final void Function()? onDestroyed;
+
+  /// Called when an error is encountered during the creation of this widget.
+  final void Function(String?)? onError;
+
   final Size _preferredSize;
+
+  /// The content rendered into this window.
+  final Widget child;
 
   @override
   State<RegularWindow> createState() => _RegularWindowState();
@@ -113,7 +108,7 @@ class RegularWindow extends StatefulWidget {
 class _RegularWindowState extends State<RegularWindow> {
   _WindowListener? _listener;
   Future<_RegularWindowMetadata>? _future;
-  WindowingApp? _app;
+  _WindowingAppState? _app;
 
   @override
   void initState() {
@@ -300,16 +295,29 @@ class _WindowListener {
   void Function()? onDestroyed;
 }
 
-/// Declares that an application will create multiple [Window]s.
-/// The current [Window] can be looked up with [WindowContext.of].
-class WindowingApp extends StatelessWidget {
-  WindowingApp({super.key, required this.children}) {
+/// Declares that an application will create multiple windows.
+class WindowingApp extends StatefulWidget {
+  /// Creates a new windowing app with the provided child windows.
+  const WindowingApp({super.key, required this.children});
+
+  /// A list of initial windows to render. These windows will be placed inside
+  /// of a [ViewCollection].
+  final List<Widget> children;
+
+  @override
+  State<WindowingApp> createState() => _WindowingAppState();
+}
+
+class _WindowingAppState extends State<WindowingApp>
+{
+  final List<_WindowListener> _listeners = <_WindowListener>[];
+
+  @override
+  void initState() {
+    super.initState();
     WidgetsFlutterBinding.ensureInitialized();
     SystemChannels.windowing.setMethodCallHandler(_methodCallHandler);
   }
-
-  final List<Widget> children;
-  final List<_WindowListener> _listeners = [];
 
   Future<void> _methodCallHandler(MethodCall call) async {
     final Map<Object?, Object?> arguments =
@@ -367,7 +375,7 @@ class WindowingApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _WindowingAppContext(
-        windowingApp: this, child: ViewCollection(views: children));
+        windowingApp: this, child: ViewCollection(views: widget.children));
   }
 }
 
@@ -375,7 +383,7 @@ class _WindowingAppContext extends InheritedWidget {
   const _WindowingAppContext(
       {super.key, required super.child, required this.windowingApp});
 
-  final WindowingApp windowingApp;
+  final _WindowingAppState windowingApp;
 
   /// Returns the [MultiWindowAppContext] if any
   static _WindowingAppContext? of(BuildContext context) {
