@@ -75,6 +75,8 @@ RuntimeStage::Map RuntimeStage::DecodeRuntimeStages(
        RuntimeStageIfPresent(raw_stages->metal(), payload)},
       {RuntimeStageBackend::kOpenGLES,
        RuntimeStageIfPresent(raw_stages->opengles(), payload)},
+      {RuntimeStageBackend::kOpenGLES3,
+       RuntimeStageIfPresent(raw_stages->opengles3(), payload)},
       {RuntimeStageBackend::kVulkan,
        RuntimeStageIfPresent(raw_stages->vulkan(), payload)},
   };

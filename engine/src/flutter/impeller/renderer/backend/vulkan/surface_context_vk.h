@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "impeller/base/backend_cast.h"
+#include "impeller/core/runtime_types.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/command_queue.h"
 #include "impeller/renderer/context.h"
@@ -66,7 +67,11 @@ class SurfaceContextVK : public Context,
   // |Context|
   std::shared_ptr<CommandQueue> GetCommandQueue() const override;
 
+  // |Context|
   std::shared_ptr<const IdleWaiter> GetIdleWaiter() const override;
+
+  // |Context|
+  RuntimeStageBackend GetRuntimeStageBackend() const override;
 
   // |Context|
   void Shutdown() override;

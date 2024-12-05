@@ -17,6 +17,7 @@ enum class RuntimeStageBackend {
   kSkSL,
   kMetal,
   kOpenGLES,
+  kOpenGLES3,
   kVulkan,
 };
 

@@ -207,6 +207,7 @@ static bool OutputDepfile(const Compiler& compiler, const Switches& switches) {
       case TargetPlatform::kOpenGLDesktop:
       case TargetPlatform::kRuntimeStageMetal:
       case TargetPlatform::kRuntimeStageGLES:
+      case TargetPlatform::kRuntimeStageGLES3:
       case TargetPlatform::kRuntimeStageVulkan:
       case TargetPlatform::kSkSL:
       case TargetPlatform::kVulkan:

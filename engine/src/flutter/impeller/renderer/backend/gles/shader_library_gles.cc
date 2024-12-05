@@ -57,7 +57,6 @@ ShaderLibraryGLES::ShaderLibraryGLES(
                                                          ) -> bool {
     const auto stage = ToShaderStage(type);
     const auto key_name = GLESShaderNameToShaderKeyName(name, stage);
-
     functions[ShaderKey{key_name, stage}] = std::shared_ptr<ShaderFunctionGLES>(
         new ShaderFunctionGLES(library_id,  //
                                stage,       //

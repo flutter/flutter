@@ -4876,7 +4876,7 @@ TEST_F(ShellTest, RuntimeStageBackendWithImpeller) {
             EXPECT_EQ(backend, impeller::RuntimeStageBackend::kMetal);
             break;
           case impeller::Context::BackendType::kOpenGLES:
-            EXPECT_EQ(backend, impeller::RuntimeStageBackend::kOpenGLES);
+            EXPECT_EQ(backend, impeller::RuntimeStageBackend::kOpenGLES3);
             break;
           case impeller::Context::BackendType::kVulkan:
             EXPECT_EQ(backend, impeller::RuntimeStageBackend::kVulkan);

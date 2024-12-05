@@ -5,6 +5,7 @@
 #include "impeller/renderer/backend/vulkan/surface_context_vk.h"
 
 #include "flutter/fml/trace_event.h"
+#include "impeller/core/runtime_types.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/khr/khr_swapchain_vk.h"
@@ -126,6 +127,10 @@ bool SurfaceContextVK::EnqueueCommandBuffer(
 
 bool SurfaceContextVK::FlushCommandBuffers() {
   return parent_->FlushCommandBuffers();
+}
+
+RuntimeStageBackend SurfaceContextVK::GetRuntimeStageBackend() const {
+  return parent_->GetRuntimeStageBackend();
 }
 
 }  // namespace impeller

@@ -33,6 +33,8 @@ static std::string RuntimeStageBackendToString(
       return "OpenGLES";
     case impeller::RuntimeStageBackend::kVulkan:
       return "Vulkan";
+    case impeller::RuntimeStageBackend::kOpenGLES3:
+      return "OpenGLES3";
   }
 }
 

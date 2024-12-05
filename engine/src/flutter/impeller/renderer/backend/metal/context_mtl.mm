@@ -13,6 +13,7 @@
 #include "flutter/fml/paths.h"
 #include "flutter/fml/synchronization/sync_switch.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/runtime_types.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/renderer/backend/metal/gpu_tracer_mtl.h"
 #include "impeller/renderer/backend/metal/sampler_library_mtl.h"
@@ -428,6 +429,11 @@ void ContextMTL::SyncSwitchObserver::OnSyncSwitchUpdate(bool new_is_disabled) {
 // |Context|
 std::shared_ptr<CommandQueue> ContextMTL::GetCommandQueue() const {
   return command_queue_ip_;
+}
+
+// |Context|
+RuntimeStageBackend ContextMTL::GetRuntimeStageBackend() const {
+  return RuntimeStageBackend::kMetal;
 }
 
 #ifdef IMPELLER_DEBUG

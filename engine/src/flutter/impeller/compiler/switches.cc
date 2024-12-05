@@ -29,6 +29,7 @@ static const std::map<std::string, TargetPlatform> kKnownRuntimeStages = {
     {"sksl", TargetPlatform::kSkSL},
     {"runtime-stage-metal", TargetPlatform::kRuntimeStageMetal},
     {"runtime-stage-gles", TargetPlatform::kRuntimeStageGLES},
+    {"runtime-stage-gles3", TargetPlatform::kRuntimeStageGLES3},
     {"runtime-stage-vulkan", TargetPlatform::kRuntimeStageVulkan},
 };
 

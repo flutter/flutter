@@ -204,6 +204,8 @@ static std::string RuntimeStageBackendToString(RuntimeStageBackend backend) {
       return "opengles";
     case RuntimeStageBackend::kVulkan:
       return "vulkan";
+    case RuntimeStageBackend::kOpenGLES3:
+      return "opengles3";
   }
 }
 
@@ -383,6 +385,9 @@ RuntimeStageData::CreateMultiStageFlatbuffer() const {
         break;
       case RuntimeStageBackend::kVulkan:
         runtime_stages->vulkan = std::move(runtime_stage);
+        break;
+      case RuntimeStageBackend::kOpenGLES3:
+        runtime_stages->opengles3 = std::move(runtime_stage);
         break;
     }
   }

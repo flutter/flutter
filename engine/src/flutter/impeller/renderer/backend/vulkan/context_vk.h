@@ -13,6 +13,7 @@
 #include "impeller/base/backend_cast.h"
 #include "impeller/base/strings.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/runtime_types.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "impeller/renderer/backend/vulkan/driver_info_vk.h"
@@ -228,6 +229,8 @@ class ContextVK final : public Context,
 
   // | Context |
   bool FlushCommandBuffers() override;
+
+  RuntimeStageBackend GetRuntimeStageBackend() const override;
 
   std::shared_ptr<const IdleWaiter> GetIdleWaiter() const override {
     return idle_waiter_vk_;

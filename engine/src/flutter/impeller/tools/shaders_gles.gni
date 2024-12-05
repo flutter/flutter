@@ -19,6 +19,8 @@ template("impeller_shaders_gles") {
     require_framebuffer_fetch = invoker.require_framebuffer_fetch
   }
 
+  is_300 = defined(invoker.is_300) && invoker.is_300
+
   shaders_base_name = string_join("",
                                   [
                                     invoker.name,
@@ -35,11 +37,18 @@ template("impeller_shaders_gles") {
 
     # Metal reflectors generate a superset of information.
     if (impeller_enable_metal || impeller_enable_vulkan) {
-      intermediates_subdir = "gles"
+      if (is_300) {
+        intermediates_subdir = "gles3"
+      } else {
+        intermediates_subdir = "gles"
+      }
     }
     shader_target_flags = [ "--opengl-es" ]
 
     defines = [ "IMPELLER_TARGET_OPENGLES" ]
+    if (is_300) {
+      defines += [ "IMPELLER_TARGET_OPENGLES3" ]
+    }
   }
 
   gles_shaders =
@@ -68,13 +77,24 @@ template("impeller_shaders_gles") {
   }
 
   embed_gles_lib = "embed_$target_name"
-  embed_blob(embed_gles_lib) {
-    gles_library_files = get_target_outputs(":$gles_lib")
-    symbol_name = shaders_base_name
-    blob = gles_library_files[0]
-    hdr = "$target_gen_dir/gles/$shaders_base_name.h"
-    cc = "$target_gen_dir/gles/$shaders_base_name.cc"
-    deps = [ ":$gles_lib" ]
+  if (is_300) {
+    embed_blob(embed_gles_lib) {
+      gles_library_files = get_target_outputs(":$gles_lib")
+      symbol_name = shaders_base_name + "3"
+      blob = gles_library_files[0]
+      hdr = "$target_gen_dir/gles3/$shaders_base_name.h"
+      cc = "$target_gen_dir/gles3/$shaders_base_name.cc"
+      deps = [ ":$gles_lib" ]
+    }
+  } else {
+    embed_blob(embed_gles_lib) {
+      gles_library_files = get_target_outputs(":$gles_lib")
+      symbol_name = shaders_base_name
+      blob = gles_library_files[0]
+      hdr = "$target_gen_dir/gles/$shaders_base_name.h"
+      cc = "$target_gen_dir/gles/$shaders_base_name.cc"
+      deps = [ ":$gles_lib" ]
+    }
   }
 
   group(target_name) {

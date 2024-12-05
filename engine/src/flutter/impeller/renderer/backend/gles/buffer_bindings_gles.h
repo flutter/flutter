@@ -10,6 +10,7 @@
 
 #include "flutter/third_party/abseil-cpp/absl/container/flat_hash_map.h"
 #include "impeller/core/shader_types.h"
+#include "impeller/renderer/backend/gles/device_buffer_gles.h"
 #include "impeller/renderer/backend/gles/gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 #include "impeller/renderer/command.h"
@@ -65,17 +66,34 @@ class BufferBindingsGLES {
   std::vector<std::vector<VertexAttribPointer>> vertex_attrib_arrays_;
 
   absl::flat_hash_map<std::string, GLint> uniform_locations_;
+  absl::flat_hash_map<std::string, std::pair<GLint, GLuint>> ubo_locations_;
 
   using BindingMap = absl::flat_hash_map<std::string, std::vector<GLint>>;
   BindingMap binding_map_ = {};
   GLuint vertex_array_object_ = 0;
+  GLuint program_handle_ = GL_NONE;
+  bool use_ubo_ = false;
 
   const std::vector<GLint>& ComputeUniformLocations(
       const ShaderMetadata* metadata);
 
+  bool ReadUniformsBindingsV2(const ProcTableGLES& gl, GLuint program);
+
+  bool ReadUniformsBindingsV3(const ProcTableGLES& gl, GLuint program);
+
   GLint ComputeTextureLocation(const ShaderMetadata* metadata);
 
   bool BindUniformBuffer(const ProcTableGLES& gl, const BufferResource& buffer);
+
+  bool BindUniformBufferV2(const ProcTableGLES& gl,
+                           const BufferView& buffer,
+                           const ShaderMetadata* metadata,
+                           const DeviceBufferGLES& device_buffer_gles);
+
+  bool BindUniformBufferV3(const ProcTableGLES& gl,
+                           const BufferView& buffer,
+                           const ShaderMetadata* metadata,
+                           const DeviceBufferGLES& device_buffer_gles);
 
   std::optional<size_t> BindTextures(
       const ProcTableGLES& gl,

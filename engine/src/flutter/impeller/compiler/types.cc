@@ -89,6 +89,8 @@ std::string TargetPlatformToString(TargetPlatform platform) {
       return "RuntimeStageMetal";
     case TargetPlatform::kRuntimeStageGLES:
       return "RuntimeStageGLES";
+    case TargetPlatform::kRuntimeStageGLES3:
+      return "RuntimeStageGLES3";
     case TargetPlatform::kRuntimeStageVulkan:
       return "RuntimeStageVulkan";
     case TargetPlatform::kSkSL:
@@ -146,6 +148,7 @@ bool TargetPlatformNeedsReflection(TargetPlatform platform) {
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageMetal:
     case TargetPlatform::kRuntimeStageGLES:
+    case TargetPlatform::kRuntimeStageGLES3:
     case TargetPlatform::kRuntimeStageVulkan:
     case TargetPlatform::kVulkan:
       return true;
@@ -221,6 +224,7 @@ spirv_cross::CompilerMSL::Options::Platform TargetPlatformToMSLPlatform(
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageGLES:
+    case TargetPlatform::kRuntimeStageGLES3:
     case TargetPlatform::kRuntimeStageVulkan:
     case TargetPlatform::kVulkan:
     case TargetPlatform::kUnknown:
@@ -255,6 +259,7 @@ std::string TargetPlatformSLExtension(TargetPlatform platform) {
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageGLES:
+    case TargetPlatform::kRuntimeStageGLES3:
       return "glsl";
     case TargetPlatform::kVulkan:
     case TargetPlatform::kRuntimeStageVulkan:
@@ -268,6 +273,7 @@ bool TargetPlatformIsOpenGL(TargetPlatform platform) {
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageGLES:
+    case TargetPlatform::kRuntimeStageGLES3:
       return true;
     case TargetPlatform::kMetalDesktop:
     case TargetPlatform::kRuntimeStageMetal:
@@ -292,6 +298,7 @@ bool TargetPlatformIsMetal(TargetPlatform platform) {
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageGLES:
+    case TargetPlatform::kRuntimeStageGLES3:
     case TargetPlatform::kRuntimeStageVulkan:
     case TargetPlatform::kVulkan:
       return false;
@@ -312,6 +319,7 @@ bool TargetPlatformIsVulkan(TargetPlatform platform) {
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageGLES:
+    case TargetPlatform::kRuntimeStageGLES3:
       return false;
   }
   FML_UNREACHABLE();
@@ -322,6 +330,7 @@ bool TargetPlatformBundlesSkSL(TargetPlatform platform) {
     case TargetPlatform::kSkSL:
     case TargetPlatform::kRuntimeStageMetal:
     case TargetPlatform::kRuntimeStageGLES:
+    case TargetPlatform::kRuntimeStageGLES3:
     case TargetPlatform::kRuntimeStageVulkan:
       return true;
     case TargetPlatform::kMetalDesktop:

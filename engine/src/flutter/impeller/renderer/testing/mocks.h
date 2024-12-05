@@ -7,6 +7,7 @@
 
 #include "gmock/gmock.h"
 #include "impeller/core/allocator.h"
+#include "impeller/core/runtime_types.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/core/texture.h"
 #include "impeller/renderer/command_buffer.h"
@@ -182,6 +183,11 @@ class MockImpellerContext : public Context {
 
   MOCK_METHOD(std::shared_ptr<CommandQueue>,
               GetCommandQueue,
+              (),
+              (const, override));
+
+  MOCK_METHOD(RuntimeStageBackend,
+              GetRuntimeStageBackend,
               (),
               (const, override));
 };
