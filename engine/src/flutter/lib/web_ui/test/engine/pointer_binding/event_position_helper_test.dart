@@ -32,6 +32,7 @@ void doTests() {
   group('computeEventOffsetToTarget', () {
     setUp(() {
       view = EngineFlutterView(EnginePlatformDispatcher.instance, domDocument.body!);
+      EnginePlatformDispatcher.instance.viewManager.registerView(view);
       rootElement = view.dom.rootElement;
       eventSource = createDomElement('div-event-source');
       rootElement.append(eventSource);
@@ -58,6 +59,7 @@ void doTests() {
     });
 
     tearDown(() {
+      EnginePlatformDispatcher.instance.viewManager.unregisterView(view.viewId);
       view.dispose();
     });
 
@@ -99,6 +101,36 @@ void doTests() {
 
       expect(offset.dx, 140);
       expect(offset.dy, 110);
+    });
+
+    test('eventTarget takes precedence', () async {
+      final input = view.dom.textEditingHost.appendChild(createDomElement('input'));
+
+      textEditing.strategy.enable(
+        InputConfiguration(viewId: view.viewId),
+        onChange: (_, __) {},
+        onAction: (_) {},
+      );
+
+      addTearDown(() {
+        textEditing.strategy.disable();
+      });
+
+      final moveEvent = createDomPointerEvent('pointermove', <String, Object>{
+        'bubbles': true,
+        'clientX': 10,
+        'clientY': 20,
+      });
+
+      expect(
+        () => computeEventOffsetToTarget(moveEvent, view),
+        throwsA(anything),
+      );
+
+      expect(
+        () => computeEventOffsetToTarget(moveEvent, view, eventTarget: input),
+        returnsNormally,
+      );
     });
 
     test('Event dispatched by TalkBack gets a computed offset', () async {

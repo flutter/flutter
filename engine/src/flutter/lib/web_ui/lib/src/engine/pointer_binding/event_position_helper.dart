@@ -18,9 +18,12 @@ import '../window.dart';
 /// The offset is *not* multiplied by DPR or anything else, it's the closest
 /// to what the DOM would return if we had currentTarget readily available.
 ///
-/// This needs an `eventTarget`, because the `event.target` (which is what
-/// this would really need to use) gets lost when the `event` comes from a
-/// "coalesced" event (see https://github.com/flutter/flutter/issues/155987).
+/// This takes an optional `eventTarget`, because the `event.target` may have
+/// the wrong value for "coalesced" events. See:
+///
+/// - https://github.com/flutter/flutter/issues/155987
+/// - https://github.com/flutter/flutter/issues/159804
+/// - https://g-issues.chromium.org/issues/382473107
 ///
 /// It also takes into account semantics being enabled to fix the case where
 /// offsetX, offsetY == 0 (TalkBack events).
@@ -41,12 +44,12 @@ ui.Offset computeEventOffsetToTarget(
   if (isInput) {
     final EditableTextGeometry? inputGeometry = textEditing.strategy.geometry;
     if (inputGeometry != null) {
-      return _computeOffsetForInputs(event, inputGeometry);
+      return _computeOffsetForInputs(event, eventTarget, inputGeometry);
     }
   }
 
   // On another DOM Element (normally a platform view)
-  final bool isTargetOutsideOfShadowDOM = event.target != actualTarget;
+  final bool isTargetOutsideOfShadowDOM = eventTarget != actualTarget;
   if (isTargetOutsideOfShadowDOM) {
     final DomRect origin = actualTarget.getBoundingClientRect();
     // event.clientX/Y and origin.x/y are relative **to the viewport**.
@@ -70,8 +73,14 @@ ui.Offset computeEventOffsetToTarget(
 /// sent from the framework, which includes information on how to transform the
 /// underlying input element. We transform the `event.offset` points we receive
 /// using the values from the input's transform matrix.
-ui.Offset _computeOffsetForInputs(DomMouseEvent event, EditableTextGeometry inputGeometry) {
-  final DomElement targetElement = event.target! as DomHTMLElement;
+///
+/// See [computeEventOffsetToTarget] for more information about `eventTarget`.
+ui.Offset _computeOffsetForInputs(
+  DomMouseEvent event,
+  DomEventTarget eventTarget,
+  EditableTextGeometry inputGeometry,
+) {
+  final DomElement targetElement = eventTarget as DomElement;
   final DomHTMLElement domElement = textEditing.strategy.activeDomElement;
   assert(targetElement == domElement, 'The targeted input element must be the active input element');
   final Float32List transformValues = inputGeometry.globalTransform;
