@@ -543,6 +543,7 @@ void main() {
         'HostArtifact.impellerc',
         '--sksl',
         '--runtime-stage-gles',
+        '--runtime-stage-gles3',
         '--runtime-stage-vulkan',
         '--iplr',
         '--sl=out/flutter_assets/shader.glsl',
