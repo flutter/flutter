@@ -107,14 +107,14 @@ class RegularWindow extends StatefulWidget {
 
 class _RegularWindowState extends State<RegularWindow> {
   _WindowListener? _listener;
-  Future<_RegularWindowMetadata>? _future;
+  Future<RegularWindowMetadata>? _future;
   _WindowingAppState? _app;
 
   @override
   void initState() {
     super.initState();
     _future = createRegular(size: widget._preferredSize);
-    _future!.then((_RegularWindowMetadata metadata) async {
+    _future!.then((RegularWindowMetadata metadata) async {
       if (widget.controller != null) {
         widget.controller!.view = metadata.view;
         widget.controller!.parentViewId = metadata.parentViewId;
@@ -160,11 +160,11 @@ class _RegularWindowState extends State<RegularWindow> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<_RegularWindowMetadata>(
+    return FutureBuilder<RegularWindowMetadata>(
         key: widget.key,
         future: _future,
         builder: (BuildContext context,
-            AsyncSnapshot<_RegularWindowMetadata> metadata) {
+            AsyncSnapshot<RegularWindowMetadata> metadata) {
           if (!metadata.hasData) {
             return const ViewCollection(views: <Widget>[]);
           }
@@ -196,17 +196,27 @@ class WindowContext extends InheritedWidget {
   }
 }
 
-class _WindowMetadata {
-  _WindowMetadata({required this.view, required this.size, this.parentViewId});
+/// Base class for window creation metadata.
+abstract class WindowMetadata {
+  /// Creates generic window metadata.
+  WindowMetadata({required this.view, required this.size, this.parentViewId});
 
+  /// The view associated with the window.
   final FlutterView view;
+
+  /// The size of the created window.
   final Size size;
+
+  /// The parent view of the window, if any.
   final int? parentViewId;
 }
 
-class _RegularWindowMetadata extends _WindowMetadata {
-  _RegularWindowMetadata(
-      {required super.view, required super.size, super.parentViewId});
+/// Data object returned by [createRegular].
+class RegularWindowMetadata extends WindowMetadata {
+  /// Creates metadata for a regular window. This should only be initialized
+  /// by [createRegular].
+  RegularWindowMetadata(
+      {required super.view, required super.size});
 }
 
 class _WindowCreationResult {
@@ -227,14 +237,14 @@ class _WindowCreationResult {
 /// widget instead of this method.
 ///
 /// [size] the size of the new [Window] in pixels
-Future<_RegularWindowMetadata> createRegular({required Size size}) async {
+Future<RegularWindowMetadata> createRegular({required Size size}) async {
   final _WindowCreationResult metadata =
       await _createWindow(viewBuilder: (MethodChannel channel) async {
     return await channel.invokeMethod('createWindow', <String, dynamic>{
       'size': <int>[size.width.toInt(), size.height.toInt()],
     }) as Map<Object?, Object?>;
   });
-  return _RegularWindowMetadata(view: metadata.flView, size: metadata.size);
+  return RegularWindowMetadata(view: metadata.flView, size: metadata.size);
 }
 
 Future<_WindowCreationResult> _createWindow(
