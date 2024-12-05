@@ -1,24 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:multi_window_ref_app/app/window_controller_render.dart';
+import 'package:multi_window_ref_app/app/window_manager_model.dart';
 import 'package:multi_window_ref_app/app/window_settings.dart';
 
-class RegularWindowContent extends StatefulWidget {
-  const RegularWindowContent({super.key, required this.window, required this.windowSettings});
+class RegularWindowContent extends StatelessWidget {
+  const RegularWindowContent(
+      {super.key,
+      required this.window,
+      required this.windowSettings,
+      required this.windowManagerModel});
 
   final RegularWindowController window;
   final WindowSettings windowSettings;
-
-  @override
-  State<RegularWindowContent> createState() => _RegularWindowContentState();
-}
-
-class _RegularWindowContentState extends State<RegularWindowContent> {
-  List<WindowController> childControllers = <WindowController>[];
+  final WindowManagerModel windowManagerModel;
 
   @override
   Widget build(BuildContext context) {
     final child = Scaffold(
-      appBar: AppBar(title: Text('${widget.window.type}')),
+      appBar: AppBar(title: Text('${window.type}')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -26,23 +25,19 @@ class _RegularWindowContentState extends State<RegularWindowContent> {
           children: [
             ElevatedButton(
               onPressed: () {
-                setState(() {
-                  childControllers = [
-                    ...childControllers,
-                    RegularWindowController()
-                  ];
-                });
+                windowManagerModel.add(KeyedWindowController(
+                    controller: RegularWindowController()));
               },
               child: const Text('Create Regular Window'),
             ),
             const SizedBox(height: 20),
             ListenableBuilder(
-                listenable: widget.window,
+                listenable: window,
                 builder: (BuildContext context, Widget? _) {
                   return Text(
-                    'View #${widget.window.view?.viewId ?? "Unknown"}\n'
-                    'Parent View: ${widget.window.parentViewId}\n'
-                    'Logical Size: ${widget.window.size?.width ?? "?"}\u00D7${widget.window.size?.height ?? "?"}\n'
+                    'View #${window.view?.viewId ?? "Unknown"}\n'
+                    'Parent View: ${window.parentViewId}\n'
+                    'Logical Size: ${window.size?.width ?? "?"}\u00D7${window.size?.height ?? "?"}\n'
                     'DPR: ${MediaQuery.of(context).devicePixelRatio}',
                     textAlign: TextAlign.center,
                   );
@@ -52,16 +47,27 @@ class _RegularWindowContentState extends State<RegularWindowContent> {
       ),
     );
 
-    final List<Widget> childViews =
-        childControllers.map((WindowController controller) {
-      return WindowControllerRender(
-          controller: controller,
-          windowSettings: widget.windowSettings,
-          onDestroyed: () {
-            childControllers.remove(controller);
-          });
-    }).toList();
+    return ViewAnchor(
+        view: ListenableBuilder(
+            listenable: windowManagerModel,
+            builder: (BuildContext context, Widget? _) {
+              final List<Widget> childViews = <Widget>[];
+              for (final KeyedWindowController controller
+                  in windowManagerModel.windows) {
+                if (controller.parent == window) {
+                  childViews.add(WindowControllerRender(
+                      controller: controller.controller,
+                      key: controller.key,
+                      windowSettings: windowSettings,
+                      windowManagerModel: windowManagerModel,
+                      onDestroyed: () {
+                        windowManagerModel.remove(controller);
+                      }));
+                }
+              }
 
-    return ViewAnchor(view: ViewCollection(views: childViews), child: child);
+              return ViewCollection(views: childViews);
+            }),
+        child: child);
   }
 }
