@@ -56,13 +56,13 @@ class RegularWindowContent extends StatelessWidget {
                   in windowManagerModel.windows) {
                 if (controller.parent == window) {
                   childViews.add(WindowControllerRender(
-                      controller: controller.controller,
-                      key: controller.key,
-                      windowSettings: windowSettings,
-                      windowManagerModel: windowManagerModel,
-                      onDestroyed: () {
-                        windowManagerModel.remove(controller);
-                      }));
+                    controller: controller.controller,
+                    key: controller.key,
+                    windowSettings: windowSettings,
+                    windowManagerModel: windowManagerModel,
+                    onDestroyed: () => windowManagerModel.remove(controller),
+                    onError: () => windowManagerModel.remove(controller),
+                  ));
                 }
               }
 
