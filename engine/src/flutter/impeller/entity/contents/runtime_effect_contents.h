@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 
+#include "impeller/core/host_buffer.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/runtime_stage/runtime_stage.h"
@@ -34,6 +35,12 @@ class RuntimeEffectContents final : public ColorSourceContents {
 
   /// Load the runtime effect and ensure a default PSO is initialized.
   bool BootstrapShader(const ContentContext& renderer) const;
+
+  // Visible for testing
+  static BufferView EmplaceVulkanUniform(
+      const std::shared_ptr<const std::vector<uint8_t>>& input_data,
+      HostBuffer& host_buffer,
+      const RuntimeUniformDescription& uniform);
 
  private:
   bool RegisterShader(const ContentContext& renderer) const;

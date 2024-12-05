@@ -1843,27 +1843,16 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
   auto uniform_data = std::make_shared<std::vector<uint8_t>>();
   uniform_data->resize(sizeof(FragUniforms));
   memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
-  contents->SetUniformData(uniform_data);
 
-  Entity entity;
-  entity.SetContents(contents);
+  auto buffer_view = RuntimeEffectContents::EmplaceVulkanUniform(
+      uniform_data, GetContentContext()->GetTransientsBuffer(),
+      runtime_stage->GetUniforms()[0]);
 
-  auto context = GetContentContext();
-  RenderTarget target = context->GetRenderTargetCache()->CreateOffscreen(
-      *context->GetContext(), {1, 1}, 1u);
-
-  testing::MockRenderPass pass(GetContext(), target);
-  ASSERT_TRUE(contents->Render(*context, entity, pass));
-  ASSERT_EQ(pass.GetCommands().size(), 1u);
-  const auto& command = pass.GetCommands()[0];
-  ASSERT_EQ(command.fragment_bindings.buffers.size(), 1u);
   // 16 bytes:
   //   8 bytes for iResolution
   //   4 bytes for iTime
   //   4 bytes padding
-  EXPECT_EQ(
-      command.fragment_bindings.buffers[0].view.resource.GetRange().length,
-      16u);
+  EXPECT_EQ(buffer_view.GetRange().length, 16u);
 }
 
 TEST_P(EntityTest, ColorFilterWithForegroundColorAdvancedBlend) {

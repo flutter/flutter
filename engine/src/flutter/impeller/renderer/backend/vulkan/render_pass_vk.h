@@ -92,9 +92,6 @@ class RenderPassVK final : public RenderPass {
   // |RenderPass|
   fml::Status Draw() override;
 
-  // |RenderPass|
-  void ReserveCommands(size_t command_count) override {}
-
   // |ResourceBinder|
   bool BindResource(ShaderStage stage,
                     DescriptorType type,

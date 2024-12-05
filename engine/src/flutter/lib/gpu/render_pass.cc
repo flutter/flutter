@@ -417,7 +417,7 @@ static bool BindUniform(
 
   uniform_map->insert_or_assign(
       uniform_struct,
-      impeller::BufferAndUniformSlot{
+      flutter::gpu::RenderPass::BufferAndUniformSlot{
           .slot = uniform_struct->slot,
           .view = impeller::BufferResource{
               &uniform_struct->metadata,
