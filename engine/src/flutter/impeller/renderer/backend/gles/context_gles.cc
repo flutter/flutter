@@ -83,7 +83,7 @@ Context::BackendType ContextGLES::GetBackendType() const {
   return Context::BackendType::kOpenGLES;
 }
 
-const ReactorGLES::Ref& ContextGLES::GetReactor() const {
+const std::shared_ptr<ReactorGLES>& ContextGLES::GetReactor() const {
   return reactor_;
 }
 

@@ -24,7 +24,7 @@ namespace impeller {
 
 RenderPassGLES::RenderPassGLES(std::shared_ptr<const Context> context,
                                const RenderTarget& target,
-                               ReactorGLES::Ref reactor)
+                               std::shared_ptr<ReactorGLES> reactor)
     : RenderPass(std::move(context), target),
       reactor_(std::move(reactor)),
       is_valid_(reactor_ && reactor_->IsValid()) {}

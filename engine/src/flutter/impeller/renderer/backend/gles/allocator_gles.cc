@@ -13,7 +13,7 @@
 
 namespace impeller {
 
-AllocatorGLES::AllocatorGLES(ReactorGLES::Ref reactor)
+AllocatorGLES::AllocatorGLES(std::shared_ptr<ReactorGLES> reactor)
     : reactor_(std::move(reactor)), is_valid_(true) {}
 
 // |Allocator|

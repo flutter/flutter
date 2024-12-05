@@ -140,9 +140,10 @@ HandleType ToHandleType(TextureGLES::Type type) {
   FML_UNREACHABLE();
 }
 
-std::shared_ptr<TextureGLES> TextureGLES::WrapFBO(ReactorGLES::Ref reactor,
-                                                  TextureDescriptor desc,
-                                                  GLuint fbo) {
+std::shared_ptr<TextureGLES> TextureGLES::WrapFBO(
+    std::shared_ptr<ReactorGLES> reactor,
+    TextureDescriptor desc,
+    GLuint fbo) {
   auto texture = std::shared_ptr<TextureGLES>(
       new TextureGLES(std::move(reactor), desc, fbo, std::nullopt));
   if (!texture->IsValid()) {
@@ -152,7 +153,7 @@ std::shared_ptr<TextureGLES> TextureGLES::WrapFBO(ReactorGLES::Ref reactor,
 }
 
 std::shared_ptr<TextureGLES> TextureGLES::WrapTexture(
-    ReactorGLES::Ref reactor,
+    std::shared_ptr<ReactorGLES> reactor,
     TextureDescriptor desc,
     HandleGLES external_handle) {
   if (external_handle.IsDead()) {
@@ -172,12 +173,13 @@ std::shared_ptr<TextureGLES> TextureGLES::WrapTexture(
 }
 
 std::shared_ptr<TextureGLES> TextureGLES::CreatePlaceholder(
-    ReactorGLES::Ref reactor,
+    std::shared_ptr<ReactorGLES> reactor,
     TextureDescriptor desc) {
   return TextureGLES::WrapFBO(std::move(reactor), desc, 0u);
 }
 
-TextureGLES::TextureGLES(ReactorGLES::Ref reactor, TextureDescriptor desc)
+TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
+                         TextureDescriptor desc)
     : TextureGLES(std::move(reactor),  //
                   desc,                //
                   std::nullopt,        //
