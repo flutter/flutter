@@ -3,62 +3,25 @@ import 'package:multi_window_ref_app/app/window_controller_render.dart';
 
 import 'window_settings.dart';
 import 'window_settings_dialog.dart';
-
-class _KeyedWindowController {
-  _KeyedWindowController({required this.controller});
-
-  final WindowController controller;
-  final UniqueKey key = UniqueKey();
-}
-
-class _WindowManagerModel extends ChangeNotifier {
-  final List<_KeyedWindowController> _windows = <_KeyedWindowController>[];
-  List<_KeyedWindowController> get windows => _windows;
-  int? _selectedViewId;
-  WindowController? get selected {
-    if (_selectedViewId == null) {
-      return null;
-    }
-
-    for (final _KeyedWindowController controller in _windows) {
-      if (controller.controller.view?.viewId == _selectedViewId) {
-        return controller.controller;
-      }
-    }
-
-    return null;
-  }
-
-  void add(_KeyedWindowController window) {
-    _windows.add(window);
-    notifyListeners();
-  }
-
-  void remove(_KeyedWindowController window) {
-    _windows.remove(window);
-    notifyListeners();
-  }
-
-  void select(int? viewId) {
-    _selectedViewId = viewId;
-    notifyListeners();
-  }
-}
+import 'window_manager_model.dart';
 
 class MainWindow extends StatefulWidget {
-  const MainWindow({super.key});
+  MainWindow({super.key, required WindowController mainController})
+    : _mainKeyedController = KeyedWindowController(controller: mainController);
+
+  final KeyedWindowController _mainKeyedController;
 
   @override
   State<MainWindow> createState() => _MainWindowState();
 }
 
 class _MainWindowState extends State<MainWindow> {
-  final _WindowManagerModel _windowManagerModel = _WindowManagerModel();
+  final WindowManagerModel _windowManagerModel = WindowManagerModel();
   final WindowSettings _settings = WindowSettings();
 
   @override
   Widget build(BuildContext context) {
-    final widget = Scaffold(
+    final child = Scaffold(
       appBar: AppBar(
         title: const Text('Multi Window Reference App'),
       ),
@@ -70,7 +33,9 @@ class _MainWindowState extends State<MainWindow> {
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child:
-                  _ActiveWindowsTable(windowManagerModel: _windowManagerModel),
+                  _ActiveWindowsTable(
+                    mainController: widget._mainKeyedController,
+                    windowManagerModel: _windowManagerModel),
             ),
           ),
           Expanded(
@@ -97,26 +62,32 @@ class _MainWindowState extends State<MainWindow> {
         view: ListenableBuilder(
             listenable: _windowManagerModel,
             builder: (BuildContext context, Widget? widget) {
-              return ViewCollection(
-                  views: _windowManagerModel.windows
-                      .map((_KeyedWindowController controller) {
-                return WindowControllerRender(
-                    key: controller.key,
-                    controller: controller.controller,
-                    onDestroyed: () {
-                      _windowManagerModel.remove(controller);
-                    },
-                    windowSettings: _settings);
-              }).toList());
+              final List<Widget> childViews = <Widget>[];
+              for (final KeyedWindowController controller
+                  in _windowManagerModel.windows) {
+                if (controller.parent == null) {
+                  childViews.add(WindowControllerRender(
+                      controller: controller.controller,
+                      key: controller.key,
+                      windowSettings: _settings,
+                      windowManagerModel: _windowManagerModel,
+                      onDestroyed: () {
+                        _windowManagerModel.remove(controller);
+                      }));
+                }
+              }
+
+              return ViewCollection(views: childViews);
             }),
-        child: widget);
+        child: child);
   }
 }
 
 class _ActiveWindowsTable extends StatelessWidget {
-  const _ActiveWindowsTable({required this.windowManagerModel});
+  const _ActiveWindowsTable({required this.mainController, required this.windowManagerModel});
 
-  final _WindowManagerModel windowManagerModel;
+  final KeyedWindowController mainController;
+  final WindowManagerModel windowManagerModel;
 
   @override
   Widget build(BuildContext context) {
@@ -158,8 +129,8 @@ class _ActiveWindowsTable extends StatelessWidget {
                   ),
                   numeric: true),
             ],
-            rows: windowManagerModel.windows
-                .map<DataRow>((_KeyedWindowController controller) {
+            rows: ([mainController] + windowManagerModel.windows)
+                .map<DataRow>((KeyedWindowController controller) {
               return DataRow(
                 key: controller.key,
                 color: WidgetStateColor.resolveWith((states) {
@@ -171,8 +142,7 @@ class _ActiveWindowsTable extends StatelessWidget {
                   }
                   return Colors.transparent;
                 }),
-                selected: controller.controller.view?.viewId ==
-                    windowManagerModel._selectedViewId,
+                selected: controller.controller == windowManagerModel.selected,
                 onSelectChanged: (selected) {
                   if (selected != null) {
                     windowManagerModel.select(
@@ -222,7 +192,7 @@ class _WindowCreatorCard extends StatelessWidget {
       required this.windowSettings});
 
   final WindowController? selectedWindow;
-  final _WindowManagerModel windowManagerModel;
+  final WindowManagerModel windowManagerModel;
   final WindowSettings windowSettings;
 
   @override
@@ -249,7 +219,7 @@ class _WindowCreatorCard extends StatelessWidget {
               children: [
                 OutlinedButton(
                   onPressed: () async {
-                    windowManagerModel.add(_KeyedWindowController(
+                    windowManagerModel.add(KeyedWindowController(
                         controller: RegularWindowController()));
                   },
                   child: const Text('Regular'),
