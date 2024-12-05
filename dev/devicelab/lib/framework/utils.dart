@@ -514,12 +514,21 @@ Future<int> flutter(String command, {
                               // DevToolsMemoryTest in perf_tests.dart.
   Map<String, String>? environment,
   String? workingDirectory,
+  StringBuffer? output, // if not null, the stdout will be written here
+  StringBuffer? stderr, // if not null, the stderr will be written here
 }) async {
   final List<String> args = _flutterCommandArgs(
     command, options, driveWithDds: driveWithDds,
   );
-  final int exitCode = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-    canFail: canFail, environment: environment, workingDirectory: workingDirectory);
+  final int exitCode = await exec(
+      path.join(flutterDirectory.path, 'bin', 'flutter'),
+      args,
+      canFail: canFail,
+      environment: environment,
+      workingDirectory: workingDirectory,
+      output: output,
+      stderr: stderr,
+  );
 
   if (exitCode != 0 && !canFail) {
     await _flutterScreenshot(workingDirectory: workingDirectory);
