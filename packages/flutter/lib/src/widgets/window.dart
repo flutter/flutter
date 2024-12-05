@@ -115,11 +115,13 @@ class _RegularWindowState extends State<RegularWindow> {
   @override
   void initState() {
     super.initState();
+    final Future<WindowCreationResult> createRegularFuture =
+        createRegular(size: widget._preferredSize);
     setState(() {
-      _future = createRegular(size: widget._preferredSize);
+      _future = createRegularFuture;
     });
 
-    _future!.then((WindowCreationResult metadata) async {
+    createRegularFuture.then((WindowCreationResult metadata) async {
       _viewId = metadata.flView.viewId;
       if (widget.controller != null) {
         widget.controller!.view = metadata.flView;
@@ -159,8 +161,7 @@ class _RegularWindowState extends State<RegularWindow> {
   }
 
   @override
-  void dispose() {
-    super.dispose();
+  Future<void> dispose() async {
     if (_listener != null) {
       assert(_app != null);
       _app!._unregisterListener(_listener!);
@@ -169,8 +170,14 @@ class _RegularWindowState extends State<RegularWindow> {
     // In the event that we're being disposed before we've been destroyed
     // we need to destroy ther window on our way out.
     if (!_hasBeenDestroyed && _viewId != null) {
-      destroyWindow(_viewId!);
+      // In the event of an argument error, we do nothing. We assume that
+      // the window has been successfully destroyed somehow else. 
+      try {
+        await destroyWindow(_viewId!);
+      } on ArgumentError {}
     }
+
+    super.dispose();
   }
 
   @override
