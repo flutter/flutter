@@ -49,9 +49,6 @@ class RenderPassMTL final : public RenderPass {
                 id<MTLCommandBuffer> buffer);
 
   // |RenderPass|
-  void ReserveCommands(size_t command_count) override {}
-
-  // |RenderPass|
   bool IsValid() const override;
 
   // |RenderPass|

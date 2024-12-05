@@ -18,9 +18,6 @@
 
 namespace impeller {
 
-class HostBuffer;
-class Allocator;
-
 //------------------------------------------------------------------------------
 /// @brief      Render passes encode render commands directed as one specific
 ///             render target into an underlying command buffer.
@@ -45,13 +42,6 @@ class RenderPass : public ResourceBinder {
   virtual bool IsValid() const = 0;
 
   void SetLabel(std::string_view label);
-
-  /// @brief Reserve [command_count] commands in the HAL command buffer.
-  ///
-  /// Note: this is not the native command buffer.
-  virtual void ReserveCommands(size_t command_count) {
-    commands_.reserve(command_count);
-  }
 
   //----------------------------------------------------------------------------
   /// The pipeline to use for this command.
@@ -202,6 +192,7 @@ class RenderPass : public ResourceBinder {
       std::shared_ptr<const Texture> texture,
       const std::unique_ptr<const Sampler>& sampler);
 
+  /// @brief Bind with dynamically generated shader metadata.
   virtual bool BindDynamicResource(ShaderStage stage,
                                    DescriptorType type,
                                    const ShaderUniformSlot& slot,
@@ -253,6 +244,8 @@ class RenderPass : public ResourceBinder {
   const ISize render_target_size_;
   const RenderTarget render_target_;
   std::vector<Command> commands_;
+  std::vector<BufferResource> bound_buffers_;
+  std::vector<TextureAndSampler> bound_textures_;
   const Matrix orthographic_;
 
   //----------------------------------------------------------------------------
@@ -284,7 +277,18 @@ class RenderPass : public ResourceBinder {
 
   RenderPass& operator=(const RenderPass&) = delete;
 
+  bool BindBuffer(ShaderStage stage,
+                  const ShaderUniformSlot& slot,
+                  BufferResource resource);
+
+  bool BindTexture(ShaderStage stage,
+                   const SampledImageSlot& slot,
+                   TextureResource resource,
+                   const std::unique_ptr<const Sampler>& sampler);
+
   Command pending_;
+  std::optional<size_t> bound_buffers_start_ = std::nullopt;
+  std::optional<size_t> bound_textures_start_ = std::nullopt;
 };
 
 }  // namespace impeller

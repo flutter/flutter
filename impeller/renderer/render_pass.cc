@@ -194,8 +194,12 @@ bool RenderPass::ValidateIndexBuffer(const BufferView& index_buffer,
 }
 
 fml::Status RenderPass::Draw() {
+  pending_.bound_buffers.offset = bound_buffers_start_.value_or(0u);
+  pending_.bound_textures.offset = bound_textures_start_.value_or(0u);
   auto result = AddCommand(std::move(pending_));
   pending_ = Command{};
+  bound_textures_start_ = std::nullopt;
+  bound_buffers_start_ = std::nullopt;
   if (result) {
     return fml::Status();
   }
@@ -209,7 +213,12 @@ bool RenderPass::BindResource(ShaderStage stage,
                               const ShaderUniformSlot& slot,
                               const ShaderMetadata* metadata,
                               BufferView view) {
-  return pending_.BindResource(stage, type, slot, metadata, view);
+  FML_DCHECK(slot.ext_res_0 != VertexDescriptor::kReservedVertexBufferIndex);
+  if (!view) {
+    return false;
+  }
+  BufferResource resouce = BufferResource(metadata, std::move(view));
+  return BindBuffer(stage, slot, std::move(resouce));
 }
 
 // |ResourceBinder|
@@ -219,8 +228,14 @@ bool RenderPass::BindResource(ShaderStage stage,
                               const ShaderMetadata* metadata,
                               std::shared_ptr<const Texture> texture,
                               const std::unique_ptr<const Sampler>& sampler) {
-  return pending_.BindResource(stage, type, slot, metadata, std::move(texture),
-                               sampler);
+  if (!sampler) {
+    return false;
+  }
+  if (!texture || !texture->IsValid()) {
+    return false;
+  }
+  TextureResource resource = TextureResource(metadata, std::move(texture));
+  return BindTexture(stage, slot, std::move(resource), sampler);
 }
 
 bool RenderPass::BindDynamicResource(ShaderStage stage,
@@ -228,8 +243,14 @@ bool RenderPass::BindDynamicResource(ShaderStage stage,
                                      const ShaderUniformSlot& slot,
                                      std::unique_ptr<ShaderMetadata> metadata,
                                      BufferView view) {
-  return pending_.BindDynamicResource(stage, type, slot, std::move(metadata),
-                                      std::move(view));
+  FML_DCHECK(slot.ext_res_0 != VertexDescriptor::kReservedVertexBufferIndex);
+  if (!view) {
+    return false;
+  }
+  BufferResource resouce =
+      BufferResource::MakeDynamic(std::move(metadata), std::move(view));
+
+  return BindBuffer(stage, slot, std::move(resouce));
 }
 
 bool RenderPass::BindDynamicResource(
@@ -239,8 +260,46 @@ bool RenderPass::BindDynamicResource(
     std::unique_ptr<ShaderMetadata> metadata,
     std::shared_ptr<const Texture> texture,
     const std::unique_ptr<const Sampler>& sampler) {
-  return pending_.BindDynamicResource(stage, type, slot, std::move(metadata),
-                                      std::move(texture), sampler);
+  if (!sampler) {
+    return false;
+  }
+  if (!texture || !texture->IsValid()) {
+    return false;
+  }
+  TextureResource resource =
+      TextureResource::MakeDynamic(std::move(metadata), std::move(texture));
+  return BindTexture(stage, slot, std::move(resource), sampler);
+}
+
+bool RenderPass::BindBuffer(ShaderStage stage,
+                            const ShaderUniformSlot& slot,
+                            BufferResource resource) {
+  if (!bound_buffers_start_.has_value()) {
+    bound_buffers_start_ = bound_buffers_.size();
+  }
+
+  pending_.bound_buffers.length++;
+  bound_buffers_.push_back(std::move(resource));
+  return true;
+}
+
+bool RenderPass::BindTexture(ShaderStage stage,
+                             const SampledImageSlot& slot,
+                             TextureResource resource,
+                             const std::unique_ptr<const Sampler>& sampler) {
+  TextureAndSampler data = TextureAndSampler{
+      .stage = stage,
+      .texture = std::move(resource),
+      .sampler = &sampler,
+  };
+
+  if (!bound_textures_start_.has_value()) {
+    bound_textures_start_ = bound_textures_.size();
+  }
+
+  pending_.bound_textures.length++;
+  bound_textures_.push_back(std::move(data));
+  return true;
 }
 
 }  // namespace impeller
