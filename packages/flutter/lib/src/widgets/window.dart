@@ -109,6 +109,8 @@ class _RegularWindowState extends State<RegularWindow> {
   _WindowListener? _listener;
   Future<WindowCreationResult>? _future;
   _WindowingAppState? _app;
+  int? _viewId;
+  bool _hasBeenDestroyed = false;
 
   @override
   void initState() {
@@ -118,6 +120,7 @@ class _RegularWindowState extends State<RegularWindow> {
     setState(() => _future = createRegularFuture);
 
     createRegularFuture.then((WindowCreationResult metadata) async {
+      _viewId = metadata.flView.viewId;
       if (widget.controller != null) {
         widget.controller!.view = metadata.flView;
         widget.controller!.parentViewId = metadata.parent;
@@ -143,7 +146,10 @@ class _RegularWindowState extends State<RegularWindow> {
                 widget.controller!.parentViewId = properties.parentViewId;
               }
             },
-            onDestroyed: widget.onDestroyed);
+            onDestroyed: () {
+              widget.onDestroyed?.call();
+              _hasBeenDestroyed = true;
+            });
         _app = windowingAppContext!.windowingApp;
         _app!._registerListener(_listener!);
       });
@@ -158,6 +164,12 @@ class _RegularWindowState extends State<RegularWindow> {
     if (_listener != null) {
       assert(_app != null);
       _app!._unregisterListener(_listener!);
+    }
+
+    // In the event that we're being disposed before we've been destroyed
+    // we need to destroy ther window on our way out.
+    if (!_hasBeenDestroyed && _viewId != null) {
+      destroyWindow(_viewId!);
     }
   }
 
