@@ -15,6 +15,14 @@ UniqueHandleGLES::UniqueHandleGLES(ReactorGLES::Ref reactor, HandleType type)
   }
 }
 
+// static
+UniqueHandleGLES UniqueHandleGLES::MakeUntracked(ReactorGLES::Ref reactor,
+                                                 HandleType type) {
+  FML_DCHECK(reactor);
+  HandleGLES handle = reactor->CreateUntrackedHandle(type);
+  return UniqueHandleGLES(std::move(reactor), handle);
+}
+
 UniqueHandleGLES::UniqueHandleGLES(ReactorGLES::Ref reactor, HandleGLES handle)
     : reactor_(std::move(reactor)), handle_(handle) {}
 
