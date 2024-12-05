@@ -26,6 +26,9 @@ import '../widgets/text_selection_toolbar_utils.dart';
 
 class MockTextSelectionControls extends TextSelectionControls {
   @override
+  bool get canSwap => false;
+
+  @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
     throw UnimplementedError();
   }
@@ -5223,16 +5226,11 @@ void main() {
     expect(find.byType(CupertinoButton), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Cannot drag one handle past the other on non-Apple platform', (WidgetTester tester) async {
+  testWidgets('Cannot drag one handle past the other on desktop platforms', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'abc def ghi',
     );
     addTearDown(controller.dispose);
-    // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
-    // On macOS, we select the precise position of the tap.
-    final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
-    // Provide a [TextSelectionControls] that builds selection handles.
-    final TextSelectionControls selectionControls = CupertinoTextSelectionHandleControls();
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -5240,7 +5238,6 @@ void main() {
           child: CupertinoTextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
-            selectionControls: selectionControls,
             style: const TextStyle(fontSize: 10.0),
           ),
         ),
@@ -5252,49 +5249,21 @@ void main() {
     await tester.tapAt(ePos, pointer: 7);
     await tester.pump(const Duration(milliseconds: 50));
     expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, isTargetPlatformIOS ? 7 : 5);
+    expect(controller.selection.baseOffset, 5);
     await tester.tapAt(ePos, pointer: 7);
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 7);
-
-    final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = globalize(
-      renderEditable.getEndpointsForSelection(controller.selection),
-      renderEditable,
+    final Iterable<RenderBox> boxes = tester.renderObjectList<RenderBox>(
+      find.descendant(
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
+        matching: find.byType(CustomPaint),
+      ),
     );
-    expect(endpoints.length, 2);
+    expect(boxes.length, 0);
+  }, variant: TargetPlatformVariant.desktop());
 
-    // On Mac, the toolbar blocks the drag on the right handle, so hide it.
-    final EditableTextState editableTextState = tester.state(find.byType(EditableText));
-    editableTextState.hideToolbar(false);
-    await tester.pumpAndSettle();
-
-    // Drag the right handle until there's only 1 char selected.
-    // We use a small offset because the endpoint is on the very corner
-    // of the handle.
-    final Offset handlePos = endpoints[1].point;
-    Offset newHandlePos = textOffsetToPosition(tester, 5); // Position of 'e'.
-    final TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
-    await tester.pump();
-    await gesture.moveTo(newHandlePos);
-    await tester.pump();
-    expect(controller.selection.baseOffset, 4);
-    expect(controller.selection.extentOffset, 5);
-
-    newHandlePos = textOffsetToPosition(tester, 2); // Position of 'c'.
-    await gesture.moveTo(newHandlePos);
-    await tester.pump();
-    await gesture.up();
-    await tester.pump();
-
-    expect(controller.selection.baseOffset, 4);
-    // The selection doesn't move beyond the left handle. There's always at
-    // least 1 char selected.
-    expect(controller.selection.extentOffset, 5);
-  }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
-
-  testWidgets('Can drag one handle past the other on iOS', (WidgetTester tester) async {
+  testWidgets('Can drag one handle past the other on mobile platforms', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'abc def ghi',
     );
@@ -5362,7 +5331,7 @@ void main() {
     // The selection inverts moving beyond the left handle.
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 2);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+  }, variant: TargetPlatformVariant.mobile());
 
   testWidgets('Dragging between multiple lines keeps the contact point at the same place on the handle on Android', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
