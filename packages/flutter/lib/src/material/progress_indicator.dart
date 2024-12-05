@@ -414,14 +414,14 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// If that is null, then defaults to 4.
   final double? trackGap;
 
-  /// When true, the [LinearProgressIndicator] will use the 2023 Material 3
-  /// Design appearance.
+  /// When true, the [LinearProgressIndicator] will use the 2023 Material Design
+  /// 3 appearance.
   ///
   /// If null, then the [ProgressIndicatorThemeData.year2023] will be used.
   /// If that is null, then defaults to true.
   ///
   /// If this is set to false, the [LinearProgressIndicator] will use the
-  /// latest Material 3 Design appearance, which was introduced in December 2023.
+  /// latest Material Design 3 appearance, which was introduced in December 2023.
   ///
   /// If [ThemeData.useMaterial3] is false, then this property is ignored.
   @Deprecated(
@@ -846,14 +846,14 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// If that is null, then defaults to 4.
   final double? trackGap;
 
-  /// When true, the [CircularProgressIndicator] will use the 2023 Material 3
-  /// Design appearance.
+  /// When true, the [CircularProgressIndicator] will use the 2023 Material Design
+  /// 3 appearance.
   ///
   /// If null, then the [ProgressIndicatorThemeData.year2023] will be used.
   /// If that is null, then defaults to true.
   ///
   /// If this is set to false, the [CircularProgressIndicator] will use the
-  /// latest Material 3 Design appearance, which was introduced in December 2023.
+  /// latest Material Design 3 appearance, which was introduced in December 2023.
   ///
   /// If [ThemeData.useMaterial3] is false, then this property is ignored.
   @Deprecated(

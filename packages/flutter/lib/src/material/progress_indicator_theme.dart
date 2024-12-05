@@ -123,10 +123,10 @@ class ProgressIndicatorThemeData with Diagnosticable {
   /// [LinearProgressIndicator.year2023] properties.
   ///
   /// When true, the [CircularProgressIndicator] and [LinearProgressIndicator]
-  /// will use the 2023 Material 3 Design appearance. Defaults to true.
+  /// will use the 2023 Material Design 3 appearance. Defaults to true.
   ///
   /// If this is set to false, the [CircularProgressIndicator] and
-  /// [LinearProgressIndicator] will use the latest Material 3 Design appearance,
+  /// [LinearProgressIndicator] will use the latest Material Design 3 appearance,
   /// which was introduced in December 2023.
   ///
   /// If [ThemeData.useMaterial3] is false, then this property is ignored.
