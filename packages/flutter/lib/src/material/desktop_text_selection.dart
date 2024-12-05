@@ -24,6 +24,9 @@ class _DesktopTextSelectionHandleControls extends DesktopTextSelectionControls w
 class DesktopTextSelectionControls extends TextSelectionControls {
   /// Desktop has no text selection handles.
   @override
+  bool get canSwap => false;
+  /// Desktop has no text selection handles.
+  @override
   Size getHandleSize(double textLineHeight) {
     return Size.zero;
   }
