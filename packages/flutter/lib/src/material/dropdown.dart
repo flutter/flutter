@@ -1603,17 +1603,18 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     if (widget._inputDecoration != null) {
       InputDecoration effectiveDecoration = widget._inputDecoration!;
       if (_hasPrimaryFocus) {
-        final Color effectiveFocusColor = widget.focusColor
-          ?? effectiveDecoration.focusColor
-          ?? Theme.of(context).focusColor;
-        effectiveDecoration = effectiveDecoration.copyWith(fillColor: effectiveFocusColor);
+        final Color? focusColor = widget.focusColor ?? effectiveDecoration.focusColor;
+        // For compatibility, override the fill color when focusColor is set.
+        if (focusColor != null) {
+          effectiveDecoration = effectiveDecoration.copyWith(fillColor: focusColor);
+        }
       }
       result = Focus(
         canRequestFocus: _enabled,
         focusNode: focusNode,
         autofocus: widget.autofocus,
         child: MouseRegion(
-          onHover: (PointerHoverEvent event) {
+          onEnter: (PointerEnterEvent event) {
             if (!_isHovering) {
               setState(() {
                 _isHovering = true;

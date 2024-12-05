@@ -2470,11 +2470,12 @@ void main() {
     await tester.pump(); // Pump a frame for autofocus to take effect.
     expect(focusNode.hasPrimaryFocus, isTrue);
 
-    // Default focus Color from ThemeData.focusColor.
+    // Default focus Color from InputDecorator defaults.
+    final ThemeData theme = Theme.of(tester.element(find.byType(InputDecorator)));
     expect(findInputDecoratorBorderPainter(), paints
       ..path(
         style: PaintingStyle.fill,
-        color: const Color(0x1f000000),
+        color: theme.colorScheme.surfaceContainerHighest,
       ),
     );
 
