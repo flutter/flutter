@@ -4836,7 +4836,7 @@ targets:
 
   - name: Mac_arm64_ios hello_world_ios__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
+#    presubmit: false
     timeout: 60
     properties:
       tags: >

@@ -1649,8 +1649,6 @@ class CompileSwiftUITest {
   final bool reportPackageContentSizes;
 
   Future<TaskResult> run() async {
-    print("hewwo");
-    print(testDirectory);
     await Process.run('xcodebuild', <String>[
       'clean',
       '-allTargets'
