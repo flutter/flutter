@@ -115,13 +115,11 @@ class _RegularWindowState extends State<RegularWindow> {
   @override
   void initState() {
     super.initState();
-    final Future<WindowCreationResult> createRegularFuture =
-        createRegular(size: widget._preferredSize);
     setState(() {
-      _future = createRegularFuture;
-  });
+      _future = createRegular(size: widget._preferredSize);
+    });
 
-    createRegularFuture.then((WindowCreationResult metadata) async {
+    _future!.then((WindowCreationResult metadata) async {
       _viewId = metadata.flView.viewId;
       if (widget.controller != null) {
         widget.controller!.view = metadata.flView;
