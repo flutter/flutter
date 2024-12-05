@@ -7,27 +7,27 @@ Future<void> windowSettingsDialog(
       barrierDismissible: true,
       context: context,
       builder: (BuildContext ctx) {
-        return ListenableBuilder(
-            listenable: settings,
-            builder: (BuildContext ctx, Widget? _) {
-              return SimpleDialog(
-                contentPadding: const EdgeInsets.all(4),
-                titlePadding: const EdgeInsets.fromLTRB(24, 10, 24, 0),
-                title: const Center(
-                  child: Text('Window Settings'),
-                ),
+        return SimpleDialog(
+          contentPadding: const EdgeInsets.all(4),
+          titlePadding: const EdgeInsets.fromLTRB(24, 10, 24, 0),
+          title: const Center(
+            child: Text('Window Settings'),
+          ),
+          children: [
+            SizedBox(
+              width: 600,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(
-                    width: 600,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ListTile(
-                                title: const Text('Regular'),
-                                subtitle: Row(
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ListTile(
+                          title: const Text('Regular'),
+                          subtitle: ListenableBuilder(
+                              listenable: settings,
+                              builder: (BuildContext ctx, Widget? _) {
+                                return Row(
                                   children: [
                                     Expanded(
                                       child: TextFormField(
@@ -60,31 +60,31 @@ Future<void> windowSettingsDialog(
                                       ),
                                     ),
                                   ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                          ],
+                                );
+                              }),
                         ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.of(context, rootNavigator: true).pop();
-                      },
-                      child: const Text('Apply'),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 2,
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                    ],
                   ),
                 ],
-              );
-            });
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                },
+                child: const Text('Apply'),
+              ),
+            ),
+            const SizedBox(
+              height: 2,
+            ),
+          ],
+        );
       });
 }
