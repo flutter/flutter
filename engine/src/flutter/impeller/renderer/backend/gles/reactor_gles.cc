@@ -386,15 +386,23 @@ void ReactorGLES::SetupDebugGroups() {
 
 void ReactorGLES::SetDebugLabel(const HandleGLES& handle,
                                 std::string_view label) {
+  FML_DCHECK(handle.GetType() != HandleType::kFence);
   if (!can_set_debug_labels_) {
     return;
   }
   if (handle.IsDead()) {
     return;
   }
-  WriterLock handles_lock(handles_mutex_);
-  if (auto found = handles_.find(handle); found != handles_.end()) {
-    found->second.pending_debug_label = label;
+  if (handle.untracked_id_.has_value()) {
+    FML_DCHECK(CanReactOnCurrentThread());
+    const auto& gl = GetProcTable();
+    gl.SetDebugLabel(ToDebugResourceType(handle.GetType()),
+                     handle.untracked_id_.value(), label);
+  } else {
+    WriterLock handles_lock(handles_mutex_);
+    if (auto found = handles_.find(handle); found != handles_.end()) {
+      found->second.pending_debug_label = label;
+    }
   }
 }
 
