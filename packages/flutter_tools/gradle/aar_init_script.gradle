@@ -179,7 +179,7 @@ projectsEvaluated {
                 Task mpt = moduleProject.tasks.named("assembleAar$variantName").get()
                 Task ppt = pluginProject.tasks.named("assembleAar$variantName").get()
                 mpt.dependsOn(ppt)
-            }catch (UnknownTaskException ignored) {
+            } catch (UnknownTaskException ignored) {
 
             }
         }
