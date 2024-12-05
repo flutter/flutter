@@ -19,6 +19,9 @@ class UniqueHandleGLES {
  public:
   UniqueHandleGLES(ReactorGLES::Ref reactor, HandleType type);
 
+  static UniqueHandleGLES MakeUntracked(ReactorGLES::Ref reactor,
+                                        HandleType type);
+
   UniqueHandleGLES(ReactorGLES::Ref reactor, HandleGLES handle);
 
   ~UniqueHandleGLES();

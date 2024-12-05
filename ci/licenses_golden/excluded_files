@@ -184,6 +184,7 @@
 ../../../flutter/impeller/playground
 ../../../flutter/impeller/renderer/backend/gles/buffer_bindings_gles_unittests.cc
 ../../../flutter/impeller/renderer/backend/gles/test
+../../../flutter/impeller/renderer/backend/gles/unique_handle_gles_unittests.cc
 ../../../flutter/impeller/renderer/backend/metal/allocator_mtl_unittests.mm
 ../../../flutter/impeller/renderer/backend/metal/texture_mtl_unittests.mm
 ../../../flutter/impeller/renderer/backend/vulkan/allocator_vk_unittests.cc
