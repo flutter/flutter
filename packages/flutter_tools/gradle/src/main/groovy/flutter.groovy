@@ -244,11 +244,11 @@ class FlutterPlugin implements Plugin<Project> {
 
         engineRealm = Paths.get(flutterRoot.absolutePath, "bin", "internal", "engine.realm").toFile().text.trim()
         if (engineRealm) {
-            engineRealm = engineRealm + "/"
+            engineRealm = "/"
         }
 
         // Configure the Maven repository.
-        String hostedRepository = System.env.FLUTTER_STORAGE_BASE_URL ?: DEFAULT_MAVEN_HOST
+        String hostedRepository = System.getenv("FLUTTER_STORAGE_BASE_URL") ?: DEFAULT_MAVEN_HOST
         String repository = useLocalEngine()
             ? project.property(propLocalEngineRepo)
             : "$hostedRepository/${engineRealm}download.flutter.io"
