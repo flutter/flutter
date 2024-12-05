@@ -110,6 +110,20 @@ bool APNGImageGenerator::GetPixels(const SkImageInfo& info,
                     << ") of APNG due to the frame missing data (frame_info).";
     return false;
   }
+  if (frame.x_offset + frame_info.width() >
+          static_cast<unsigned int>(info.width()) ||
+      frame.y_offset + frame_info.height() >
+          static_cast<unsigned int>(info.height())) {
+    FML_DLOG(ERROR)
+        << "Decoded image at index " << image_index
+        << " (frame index: " << frame_index
+        << ") rejected because the destination region (x: " << frame.x_offset
+        << ", y: " << frame.y_offset << ", width: " << frame_info.width()
+        << ", height: " << frame_info.height()
+        << ") is not entirely within the destination surface (width: "
+        << info.width() << ", height: " << info.height() << ").";
+    return false;
+  }
 
   //----------------------------------------------------------------------------
   /// 3. Composite the frame onto the canvas.
@@ -630,7 +644,19 @@ uint32_t APNGImageGenerator::ChunkHeader::ComputeChunkCrc32() {
 bool APNGImageGenerator::RenderDefaultImage(const SkImageInfo& info,
                                             void* pixels,
                                             size_t row_bytes) {
-  SkCodec::Result result = images_[0].codec->getPixels(info, pixels, row_bytes);
+  APNGImage& frame = images_[0];
+  SkImageInfo frame_info = frame.codec->getInfo();
+  if (frame_info.width() > info.width() ||
+      frame_info.height() > info.height()) {
+    FML_DLOG(ERROR)
+        << "Default image rejected because the destination region (width: "
+        << frame_info.width() << ", height: " << frame_info.height()
+        << ") is not entirely within the destination surface (width: "
+        << info.width() << ", height: " << info.height() << ").";
+    return false;
+  }
+
+  SkCodec::Result result = frame.codec->getPixels(info, pixels, row_bytes);
   if (result != SkCodec::kSuccess) {
     FML_DLOG(ERROR) << "Failed to decode the APNG's default/fallback image. "
                        "SkCodec::Result: "
