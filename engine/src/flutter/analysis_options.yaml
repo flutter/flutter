@@ -23,6 +23,9 @@ analyzer:
     - third_party
     - shell/platform/fuchsia
 
+formatter:
+  page_width: 100
+
 linter:
   rules:
     # This list is derived from the list of all available lints located at
