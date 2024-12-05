@@ -35,7 +35,7 @@ gradle.projectsLoaded { final Gradle gradleInstance ->
         }
         final def mainModuleName = binding.variables['mainModuleName']
         if (mainModuleName != null && !mainModuleName.empty) {
-            project.ext.mainModuleName = _mainModuleName
+            project.ext.mainModuleName = mainModuleName
         }
     }
     gradleInstance.rootProject.afterEvaluate { final Project project ->
