@@ -27,6 +27,7 @@ impeller_component("gles_unittests") {
     "test/specialization_constants_unittests.cc",
     "test/surface_gles_unittests.cc",
     "test/texture_gles_unittests.cc",
+    "unique_handle_gles_unittests.cc",
   ]
   deps = [
     ":gles",
