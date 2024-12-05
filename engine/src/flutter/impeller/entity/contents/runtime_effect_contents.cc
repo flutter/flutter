@@ -24,6 +24,38 @@
 
 namespace impeller {
 
+namespace {
+constexpr char kPaddingType = 0;
+constexpr char kFloatType = 1;
+}  // namespace
+
+// static
+BufferView RuntimeEffectContents::EmplaceVulkanUniform(
+    const std::shared_ptr<const std::vector<uint8_t>>& input_data,
+    HostBuffer& host_buffer,
+    const RuntimeUniformDescription& uniform) {
+  // TODO(jonahwilliams): rewrite this to emplace directly into
+  // HostBuffer.
+  std::vector<float> uniform_buffer;
+  uniform_buffer.reserve(uniform.struct_layout.size());
+  size_t uniform_byte_index = 0u;
+  for (char byte_type : uniform.struct_layout) {
+    if (byte_type == kPaddingType) {
+      uniform_buffer.push_back(0.f);
+    } else {
+      FML_DCHECK(byte_type == kFloatType);
+      uniform_buffer.push_back(reinterpret_cast<const float*>(
+          input_data->data())[uniform_byte_index++]);
+    }
+  }
+  size_t alignment = std::max(sizeof(float) * uniform_buffer.size(),
+                              DefaultUniformAlignment());
+
+  return host_buffer.Emplace(
+      reinterpret_cast<const void*>(uniform_buffer.data()),
+      sizeof(float) * uniform_buffer.size(), alignment);
+}
+
 void RuntimeEffectContents::SetRuntimeStage(
     std::shared_ptr<RuntimeStage> runtime_stage) {
   runtime_stage_ = std::move(runtime_stage);
@@ -251,30 +283,11 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
           uniform_slot.binding = uniform.location;
           uniform_slot.name = uniform.name.c_str();
 
-          // TODO(jonahwilliams): rewrite this to emplace directly into
-          // HostBuffer.
-          std::vector<float> uniform_buffer;
-          uniform_buffer.reserve(uniform.struct_layout.size());
-          size_t uniform_byte_index = 0u;
-          for (const auto& byte_type : uniform.struct_layout) {
-            if (byte_type == 0) {
-              uniform_buffer.push_back(0.f);
-            } else if (byte_type == 1) {
-              uniform_buffer.push_back(reinterpret_cast<float*>(
-                  uniform_data_->data())[uniform_byte_index++]);
-            } else {
-              FML_UNREACHABLE();
-            }
-          }
-          size_t alignment = std::max(sizeof(float) * uniform_buffer.size(),
-                                      DefaultUniformAlignment());
-
-          BufferView buffer_view = renderer.GetTransientsBuffer().Emplace(
-              reinterpret_cast<const void*>(uniform_buffer.data()),
-              sizeof(float) * uniform_buffer.size(), alignment);
-          pass.BindResource(ShaderStage::kFragment,
-                            DescriptorType::kUniformBuffer, uniform_slot,
-                            nullptr, std::move(buffer_view));
+          pass.BindResource(
+              ShaderStage::kFragment, DescriptorType::kUniformBuffer,
+              uniform_slot, nullptr,
+              EmplaceVulkanUniform(uniform_data_,
+                                   renderer.GetTransientsBuffer(), uniform));
         }
       }
     }

@@ -13,6 +13,7 @@
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "fml/memory/ref_ptr.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/shader_types.h"
 #include "impeller/renderer/command.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
@@ -56,9 +57,14 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   bool Draw();
 
+  struct BufferAndUniformSlot {
+    impeller::ShaderUniformSlot slot;
+    impeller::BufferResource view;
+  };
+
   using BufferUniformMap =
       std::unordered_map<const flutter::gpu::Shader::UniformBinding*,
-                         impeller::BufferAndUniformSlot>;
+                         BufferAndUniformSlot>;
   using TextureUniformMap =
       std::unordered_map<const flutter::gpu::Shader::TextureBinding*,
                          impeller::TextureAndSampler>;
