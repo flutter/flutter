@@ -1367,7 +1367,7 @@ TEST_F(DisplayListTest, SaveLayerFalseWithSrcBlendSupportsGroupOpacity) {
   DisplayListBuilder builder;
   // This empty draw rect will not actually be inserted into the stream,
   // but the Src blend mode will be synchronized as an attribute. The
-  // saveLayer following it should not use that attribute to base its
+  // SaveLayer following it should not use that attribute to base its
   // decisions about group opacity and the draw rect after that comes
   // with its own compatible blend mode.
   builder.DrawRect(SkRect{0, 0, 0, 0},
@@ -1416,7 +1416,7 @@ TEST_F(DisplayListTest, SaveLayerBoundsSnapshotsImageFilter) {
   DlPaint save_paint;
   builder.SaveLayer(nullptr, &save_paint);
   builder.DrawRect(SkRect{50, 50, 100, 100}, DlPaint());
-  // This image filter should be ignored since it was not set before saveLayer
+  // This image filter should be ignored since it was not set before SaveLayer
   // And the rect drawn with it will not contribute any more area to the bounds
   DlPaint draw_paint;
   draw_paint.setImageFilter(&kTestBlurImageFilter1);
@@ -2510,7 +2510,7 @@ TEST_F(DisplayListTest, RTreeOfSaveLayerFilterScene) {
   builder.DrawRect(SkRect{10, 10, 20, 20}, default_paint);
   builder.SaveLayer(nullptr, &filter_paint);
   // the following rectangle will be expanded to 50,50,60,60
-  // by the saveLayer filter during the restore operation
+  // by the SaveLayer filter during the restore operation
   builder.DrawRect(SkRect{53, 53, 57, 57}, default_paint);
   builder.Restore();
   auto display_list = builder.Build();
@@ -3272,7 +3272,7 @@ TEST_F(DisplayListTest, RTreeOfClippedSaveLayerFilterScene) {
   builder.ClipRect(SkRect{50, 50, 60, 60}, ClipOp::kIntersect, false);
   builder.SaveLayer(nullptr, &filter_paint);
   // the following rectangle will be expanded to 23,23,87,87
-  // by the saveLayer filter during the restore operation
+  // by the SaveLayer filter during the restore operation
   // but it will then be clipped to 50,50,60,60
   builder.DrawRect(SkRect{53, 53, 57, 57}, default_paint);
   builder.Restore();
@@ -3862,7 +3862,7 @@ TEST_F(DisplayListTest, TransformResetSaveLayerBoundsComputationOfSimpleRect) {
   builder.SaveLayer(nullptr, nullptr);
   builder.TransformReset();
   builder.Scale(20.0f, 20.0f);
-  // Net local transform for saveLayer is Scale(2, 2)
+  // Net local transform for SaveLayer is Scale(2, 2)
   {  //
     builder.DrawRect(rect, DlPaint());
   }
@@ -4451,7 +4451,7 @@ TEST_F(DisplayListTest, MaxBlendModeInsideComplexSaveLayers) {
   builder.Restore();
 
   // Double check that kModulate is the max blend mode for the first
-  // saveLayer operations
+  // SaveLayer operations
   auto expect = std::max(DlBlendMode::kModulate, DlBlendMode::kSrc);
   ASSERT_EQ(expect, DlBlendMode::kModulate);
 
@@ -4487,8 +4487,8 @@ TEST_F(DisplayListTest, BackdropDetectionSimpleSaveLayer) {
   auto dl = builder.Build();
 
   EXPECT_TRUE(dl->root_has_backdrop_filter());
-  // The saveLayer itself, though, does not have the contains backdrop
-  // flag set because its content does not contain a saveLayer with backdrop
+  // The SaveLayer itself, though, does not have the contains backdrop
+  // flag set because its content does not contain a SaveLayer with backdrop
   SAVE_LAYER_EXPECTOR(expector);
   expector.addExpectation(
       SaveLayerOptions::kNoAttributes.with_can_distribute_opacity());
@@ -5946,6 +5946,133 @@ TEST_F(DisplayListTest, RecordSingleLargeDisplayListOperation) {
                      DlPaint{});
 
   EXPECT_TRUE(!!builder.Build());
+}
+
+TEST_F(DisplayListTest, DisplayListDetectsRuntimeEffect) {
+  const auto runtime_effect = DlRuntimeEffect::MakeSkia(
+      SkRuntimeEffect::MakeForShader(
+          SkString("vec4 main(vec2 p) { return vec4(0); }"))
+          .effect);
+  auto color_source = DlColorSource::MakeRuntimeEffect(
+      runtime_effect, {}, std::make_shared<std::vector<uint8_t>>());
+  auto image_filter = DlImageFilter::MakeRuntimeEffect(
+      runtime_effect, {}, std::make_shared<std::vector<uint8_t>>());
+
+  {
+    // Default - no runtime effects, supports group opacity
+    DisplayListBuilder builder;
+    DlPaint paint;
+
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), paint);
+    EXPECT_TRUE(builder.Build()->can_apply_group_opacity());
+  }
+
+  {
+    // Draw with RTE color source does not support group opacity
+    DisplayListBuilder builder;
+    DlPaint paint;
+
+    paint.setColorSource(color_source);
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), paint);
+
+    EXPECT_FALSE(builder.Build()->can_apply_group_opacity());
+  }
+
+  {
+    // Draw with RTE image filter does not support group opacity
+    DisplayListBuilder builder;
+    DlPaint paint;
+
+    paint.setImageFilter(image_filter);
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), paint);
+
+    EXPECT_FALSE(builder.Build()->can_apply_group_opacity());
+  }
+
+  {
+    // Draw with RTE color source inside SaveLayer does not support group
+    // opacity on the SaveLayer, but does support it on the DisplayList
+    DisplayListBuilder builder;
+    DlPaint paint;
+
+    builder.SaveLayer(nullptr, nullptr);
+    paint.setColorSource(color_source);
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), paint);
+    builder.Restore();
+
+    auto display_list = builder.Build();
+    EXPECT_TRUE(display_list->can_apply_group_opacity());
+
+    SAVE_LAYER_EXPECTOR(expector);
+    expector.addExpectation([](const SaveLayerOptions& options) {
+      return !options.can_distribute_opacity();
+    });
+    display_list->Dispatch(expector);
+  }
+
+  {
+    // Draw with RTE image filter inside SaveLayer does not support group
+    // opacity on the SaveLayer, but does support it on the DisplayList
+    DisplayListBuilder builder;
+    DlPaint paint;
+
+    builder.SaveLayer(nullptr, nullptr);
+    paint.setImageFilter(image_filter);
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), paint);
+    builder.Restore();
+
+    auto display_list = builder.Build();
+    EXPECT_TRUE(display_list->can_apply_group_opacity());
+
+    SAVE_LAYER_EXPECTOR(expector);
+    expector.addExpectation([](const SaveLayerOptions& options) {
+      return !options.can_distribute_opacity();
+    });
+    display_list->Dispatch(expector);
+  }
+
+  {
+    // Draw with RTE color source inside nested saveLayers does not support
+    // group opacity on the inner SaveLayer, but does support it on the
+    // outer SaveLayer and the DisplayList
+    DisplayListBuilder builder;
+    DlPaint paint;
+
+    builder.SaveLayer(nullptr, nullptr);
+
+    builder.SaveLayer(nullptr, nullptr);
+    paint.setColorSource(color_source);
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), paint);
+    paint.setColorSource(nullptr);
+    builder.Restore();
+
+    builder.SaveLayer(nullptr, nullptr);
+    paint.setImageFilter(image_filter);
+    // Make sure these DrawRects are non-overlapping otherwise the outer
+    // SaveLayer and DisplayList will be incompatible due to overlaps
+    builder.DrawRect(DlRect::MakeLTRB(60, 60, 100, 100), paint);
+    paint.setImageFilter(nullptr);
+    builder.Restore();
+
+    builder.Restore();
+    auto display_list = builder.Build();
+    EXPECT_TRUE(display_list->can_apply_group_opacity());
+
+    SAVE_LAYER_EXPECTOR(expector);
+    expector.addExpectation([](const SaveLayerOptions& options) {
+      // outer SaveLayer supports group opacity
+      return options.can_distribute_opacity();
+    });
+    expector.addExpectation([](const SaveLayerOptions& options) {
+      // first inner SaveLayer does not support group opacity
+      return !options.can_distribute_opacity();
+    });
+    expector.addExpectation([](const SaveLayerOptions& options) {
+      // second inner SaveLayer does not support group opacity
+      return !options.can_distribute_opacity();
+    });
+    display_list->Dispatch(expector);
+  }
 }
 
 }  // namespace testing
