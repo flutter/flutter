@@ -3398,6 +3398,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2c/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.i2cimpl/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.light/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.mailbox/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network.driver/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.pci/meta.json
