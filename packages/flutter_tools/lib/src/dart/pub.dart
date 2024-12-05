@@ -159,7 +159,7 @@ abstract class Pub {
 
   /// Runs, parses, and returns `pub deps --json` for [project].
   ///
-  /// While it is guaranteed that, if succcessful, that the result are a valid
+  /// While it is guaranteed that, if successful, that the result are a valid
   /// JSON object, the exact contents returned are _not_ validated, and are left
   /// as a responsibility of the caller.
   Future<Map<String, Object?>> deps(FlutterProject project);

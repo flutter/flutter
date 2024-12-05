@@ -244,7 +244,7 @@ void main() {
         loggingProcessManager.clear();
         await startWidgetPreview(
           rootProjectPath: rootProjectPath,
-          arguments: <String>['--offline'],
+          arguments: <String>['--pub', '--offline'],
         );
 
         expect(
