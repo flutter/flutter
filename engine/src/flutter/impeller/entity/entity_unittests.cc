@@ -37,6 +37,7 @@
 #include "impeller/entity/entity_playground.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/entity/geometry/point_field_geometry.h"
+#include "impeller/entity/geometry/round_superellipse_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/entity/geometry/superellipse_geometry.h"
 #include "impeller/geometry/color.h"
@@ -2309,6 +2310,41 @@ TEST_P(EntityTest, DrawSuperEllipse) {
     std::unique_ptr<SuperellipseGeometry> geom =
         std::make_unique<SuperellipseGeometry>(Point{400, 400}, radius, degree,
                                                alpha, beta);
+    contents->SetColor(color);
+    contents->SetGeometry(geom.get());
+
+    Entity entity;
+    entity.SetContents(contents);
+
+    return entity.Render(context, pass);
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(EntityTest, DrawRoundSuperEllipse) {
+  auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
+    // UI state.
+    static float center_x = 100;
+    static float center_y = 100;
+    static float width = 900;
+    static float height = 900;
+    static float corner_radius = 300;
+    static Color color = Color::Red();
+
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SliderFloat("Center X", &center_x, 0, 1000);
+    ImGui::SliderFloat("Center Y", &center_y, 0, 1000);
+    ImGui::SliderFloat("Width", &width, 0, 1000);
+    ImGui::SliderFloat("Height", &height, 0, 1000);
+    ImGui::SliderFloat("Corner radius", &corner_radius, 0, 500);
+    ImGui::End();
+
+    auto contents = std::make_shared<SolidColorContents>();
+    std::unique_ptr<RoundSuperellipseGeometry> geom =
+        std::make_unique<RoundSuperellipseGeometry>(
+            Rect::MakeOriginSize({center_x, center_y}, {width, height}),
+            corner_radius);
     contents->SetColor(color);
     contents->SetGeometry(geom.get());
 
