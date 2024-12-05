@@ -18,10 +18,10 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/test/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/test/runner.dart';
 import 'package:flutter_tools/src/test/test_wrapper.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 const String _kOptionPackages = 'packages';
 const String _kOptionShell = 'shell';
@@ -42,7 +42,7 @@ const String _kOptionCoveragePath = 'coverage-path';
 
 void main(List<String> args) {
   runInContext<void>(() => run(args), overrides: <Type, Generator>{
-    Usage: () => DisabledUsage(),
+    Analytics: () => const NoOpAnalytics(),
   });
 }
 
