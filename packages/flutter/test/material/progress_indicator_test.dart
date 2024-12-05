@@ -1540,6 +1540,8 @@ void main() {
           rrect: RRect.fromLTRBR(100.0 + customTrackGap, 0.0, 200.0, 4.0, const Radius.circular(2.0)),
           color: theme.colorScheme.secondaryContainer,
         )
+        // Stop indicator.
+        ..circle()
         // Active track.
         ..rrect(
           rrect: RRect.fromLTRBR(0.0, 0.0, 100.0, 4.0, const Radius.circular(2.0)),
@@ -1557,6 +1559,8 @@ void main() {
           rrect: RRect.fromLTRBR(0.0, 0.0, 200.0, 4.0, const Radius.circular(2.0)),
           color: theme.colorScheme.secondaryContainer,
         )
+        // Stop indicator.
+        ..circle()
         // Active indicator.
         ..rrect(
           rrect: RRect.fromLTRBR(0.0, 0.0, 100.0, 4.0, const Radius.circular(2.0)),
