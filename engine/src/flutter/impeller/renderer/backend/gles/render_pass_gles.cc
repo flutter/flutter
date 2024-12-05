@@ -309,6 +309,10 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     }
   }
 
+  CullMode current_cull_mode = CullMode::kNone;
+  WindingOrder current_winding_order = WindingOrder::kClockwise;
+  gl.FrontFace(GL_CW);
+
   for (const auto& command : commands) {
 #ifdef IMPELLER_DEBUG
     fml::ScopedCleanupClosure pop_cmd_debug_marker(
@@ -391,29 +395,39 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     //--------------------------------------------------------------------------
     /// Setup culling.
     ///
-    switch (pipeline.GetDescriptor().GetCullMode()) {
-      case CullMode::kNone:
-        gl.Disable(GL_CULL_FACE);
-        break;
-      case CullMode::kFrontFace:
-        gl.Enable(GL_CULL_FACE);
-        gl.CullFace(GL_FRONT);
-        break;
-      case CullMode::kBackFace:
-        gl.Enable(GL_CULL_FACE);
-        gl.CullFace(GL_BACK);
-        break;
+    CullMode pipeline_cull_mode = pipeline.GetDescriptor().GetCullMode();
+    if (current_cull_mode != pipeline_cull_mode) {
+      switch (pipeline_cull_mode) {
+        case CullMode::kNone:
+          gl.Disable(GL_CULL_FACE);
+          break;
+        case CullMode::kFrontFace:
+          gl.Enable(GL_CULL_FACE);
+          gl.CullFace(GL_FRONT);
+          break;
+        case CullMode::kBackFace:
+          gl.Enable(GL_CULL_FACE);
+          gl.CullFace(GL_BACK);
+          break;
+      }
+      current_cull_mode = pipeline_cull_mode;
     }
+
     //--------------------------------------------------------------------------
     /// Setup winding order.
     ///
-    switch (pipeline.GetDescriptor().GetWindingOrder()) {
-      case WindingOrder::kClockwise:
-        gl.FrontFace(GL_CW);
-        break;
-      case WindingOrder::kCounterClockwise:
-        gl.FrontFace(GL_CCW);
-        break;
+    WindingOrder pipeline_winding_order =
+        pipeline.GetDescriptor().GetWindingOrder();
+    if (current_winding_order != pipeline_winding_order) {
+      switch (pipeline.GetDescriptor().GetWindingOrder()) {
+        case WindingOrder::kClockwise:
+          gl.FrontFace(GL_CW);
+          break;
+        case WindingOrder::kCounterClockwise:
+          gl.FrontFace(GL_CCW);
+          break;
+      }
+      current_winding_order = pipeline_winding_order;
     }
 
     BufferBindingsGLES* vertex_desc_gles = pipeline.GetBufferBindings();
