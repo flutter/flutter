@@ -511,7 +511,7 @@ final RegExp _agpJavaError = RegExp(r'Android Gradle plugin requires Java (\d+\.
 // Android Gradle Plugin handles the error here: http://shortn/_SgUWyRdywL.
 
 // If we ever need to reference or check the thrown requirements,
-// we can find the Java and Android Gradle Plugin compatability here:
+// we can find the Java and Android Gradle Plugin compatibility here:
 // 'https://developer.android.com/build/releases/past-releases'
 @visibleForTesting
 final GradleHandledError incompatibleJavaAndAgpVersionsHandler= GradleHandledError(

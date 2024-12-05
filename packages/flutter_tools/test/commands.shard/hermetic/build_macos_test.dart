@@ -113,7 +113,7 @@ void main() {
     String configuration, {
     bool verbose = false,
     void Function(List<String> command)? onRun,
-    List<String>? additionalCommandArguements,
+    List<String>? additionalCommandArguments,
   }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
@@ -134,8 +134,8 @@ void main() {
         else
           '-quiet',
         'COMPILER_INDEX_STORE_ENABLE=NO',
-        if (additionalCommandArguements != null)
-          ...additionalCommandArguements,
+        if (additionalCommandArguments != null)
+          ...additionalCommandArguments,
       ],
       stdout: '''
 STDOUT STUFF
@@ -769,7 +769,7 @@ STDERR STUFF
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler(
         'Debug',
-        additionalCommandArguements: <String>[
+        additionalCommandArguments: <String>[
           'CODE_SIGN_ENTITLEMENTS=/.tmp_rand0/flutter_disable_sandbox_entitlement.rand0/DebugProfileWithDisabledSandboxing.entitlements',
         ],
       ),
@@ -838,7 +838,7 @@ STDERR STUFF
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpFakeXcodeBuildHandler(
         'Release',
-        additionalCommandArguements: <String>[
+        additionalCommandArguments: <String>[
           'CODE_SIGN_ENTITLEMENTS=/.tmp_rand0/flutter_disable_sandbox_entitlement.rand0/ReleaseWithDisabledSandboxing.entitlements',
         ],
       ),

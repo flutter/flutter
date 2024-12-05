@@ -127,8 +127,8 @@ Future<void> main() async {
   final ArgResults results = parser.parse(mainArgs);
   final List<String> selectedTests = results.multiOption('tests');
 
-  // Shuffle the tests becauase we don't want order dependent tests.
-  // It is the responsibily of the infra to tell us what the seed value is,
+  // Shuffle the tests because we don't want order dependent tests.
+  // It is the responsibility of the infra to tell us what the seed value is,
   // in case we want to have the seed stable for some time period.
   final List<Benchmark> tests = benchmarks.where((Benchmark e) => selectedTests.contains(e.$1)).toList();
   tests.shuffle(Random(int.parse(results.option('seed')!)));

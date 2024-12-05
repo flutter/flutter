@@ -157,7 +157,7 @@ void main() {
               '@rpath/libfoo.dylib',
             ].join('\n'),
           ),
-          // Change the instal name of the binary itself and of its dependencies.
+          // Change the install name of the binary itself and of its dependencies.
           // We pass the old to new install name mappings of all native assets dylibs,
           // even for the dylib that is being updated, since the `-change` option
           // is ignored if the dylib does not depend on the target dylib.

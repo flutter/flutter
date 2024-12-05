@@ -12844,7 +12844,7 @@ void main() {
       selection: TextSelection.collapsed(offset: textAC.length),
     );
 
-    bool isDeskop() {
+    bool isDesktop() {
       return debugDefaultTargetPlatformOverride == TargetPlatform.macOS
           || debugDefaultTargetPlatformOverride == TargetPlatform.windows
           || debugDefaultTargetPlatformOverride == TargetPlatform.linux;
@@ -13032,7 +13032,7 @@ void main() {
       focusNode.requestFocus();
       await tester.pump();
       await waitForThrottling(tester);
-      expect(controller.value, isDeskop() ? textASelected : textACollapsedAtEnd);
+      expect(controller.value, isDesktop() ? textASelected : textACollapsedAtEnd);
 
       // Insert some text.
       await tester.enterText(find.byType(EditableText), textAB);
@@ -13041,7 +13041,7 @@ void main() {
       // Undo the insertion without waiting for the throttling delay.
       await sendUndo(tester);
       expect(controller.value.selection.isValid, true);
-      expect(controller.value, isDeskop() ? textASelected : textACollapsedAtEnd);
+      expect(controller.value, isDesktop() ? textASelected : textACollapsedAtEnd);
 
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
@@ -13056,7 +13056,7 @@ void main() {
       await tester.pump();
       await sendUndo(tester);
       await waitForThrottling(tester);
-      expect(controller.value, isDeskop() ? textASelected : textACollapsedAtEnd);
+      expect(controller.value, isDesktop() ? textASelected : textACollapsedAtEnd);
 
       // Insert some text.
       await tester.enterText(find.byType(EditableText), textAB);
@@ -13066,7 +13066,7 @@ void main() {
       await sendUndo(tester);
 
       // Initial text should have been recorded and restored.
-      expect(controller.value, isDeskop() ? textASelected : textACollapsedAtEnd);
+      expect(controller.value, isDesktop() ? textASelected : textACollapsedAtEnd);
 
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]

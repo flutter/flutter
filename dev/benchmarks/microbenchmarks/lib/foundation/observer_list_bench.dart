@@ -25,7 +25,7 @@ Future<void> execute() async {
 
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
 
-  void runNotifiyListenersLoopWithObserverList(
+  void runNotifyListenersLoopWithObserverList(
     int totalIterations, {
     bool failRemoval = false,
     bool addResult = true,
@@ -79,7 +79,7 @@ Future<void> execute() async {
     }
   }
 
-  void runNotifiyListenersLoopWithHashedObserverList(
+  void runNotifyListenersLoopWithHashedObserverList(
     int totalIterations, {
     bool addResult = true,
   }) {
@@ -124,7 +124,7 @@ Future<void> execute() async {
     }
   }
 
-  void runNotifiyListenersLoopWithAnimationController(
+  void runNotifyListenersLoopWithAnimationController(
     int totalIterations, {
     bool addResult = true,
   }) {
@@ -162,11 +162,11 @@ Future<void> execute() async {
     }
   }
 
-  runNotifiyListenersLoopWithObserverList(_kNumIterationsList);
-  runNotifiyListenersLoopWithObserverList(_kNumIterationsList,
+  runNotifyListenersLoopWithObserverList(_kNumIterationsList);
+  runNotifyListenersLoopWithObserverList(_kNumIterationsList,
       failRemoval: true);
-  runNotifiyListenersLoopWithHashedObserverList(_kNumIterationsHashed);
-  runNotifiyListenersLoopWithAnimationController(_kNumIterationsHashed);
+  runNotifyListenersLoopWithHashedObserverList(_kNumIterationsHashed);
+  runNotifyListenersLoopWithAnimationController(_kNumIterationsHashed);
 
   printer.printToStdout();
 }

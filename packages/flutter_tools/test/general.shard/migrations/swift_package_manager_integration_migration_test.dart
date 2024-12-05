@@ -353,7 +353,7 @@ void main() {
             project.xcodeProjectSchemeFile().writeAsStringSync('''
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "${_runnerNativeTargetIdentifer(platform)}"
+            BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
             BlueprintName = "Runner"
             ReferencedContainer = "container:Runner.xcodeproj">
          </BuildableReference>
@@ -389,7 +389,7 @@ void main() {
             project.xcodeProjectSchemeFile().writeAsStringSync('''
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "${_runnerNativeTargetIdentifer(platform)}"
+            BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
             BuildableName = "Runner.app"
             ReferencedContainer = "container:Runner.xcodeproj">
          </BuildableReference>
@@ -425,7 +425,7 @@ void main() {
             project.xcodeProjectSchemeFile().writeAsStringSync('''
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "${_runnerNativeTargetIdentifer(platform)}"
+            BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
             BuildableName = "Runner.app"
             BlueprintName = "Runner">
          </BuildableReference>
@@ -1051,7 +1051,7 @@ void main() {
 /* Begin PBXFrameworksBuildPhase section */
 /* End PBXFrameworksBuildPhase section */
 /* Begin NonExistant section */
-    ${_runnerFrameworksBuildPhaseIdentifer(platform)} /* Frameworks */ = {
+    ${_runnerFrameworksBuildPhaseIdentifier(platform)} /* Frameworks */ = {
     };
 /* End NonExistant section */
 ''';
@@ -1436,7 +1436,7 @@ void main() {
 /* Begin PBXNativeTarget section */
 /* End PBXNativeTarget section */
 /* Begin NonExistant section */
-    ${_runnerNativeTargetIdentifer(platform)} /* Runner */ = {
+    ${_runnerNativeTargetIdentifier(platform)} /* Runner */ = {
     };
 /* End NonExistant section */
 ''';
@@ -2565,7 +2565,7 @@ String _validBuildActions(
                <EnvironmentBuildable>
                   <BuildableReference
                      BuildableIdentifier = "primary"
-                     BlueprintIdentifier = "${_runnerNativeTargetIdentifer(platform)}"
+                     BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
                      BuildableName = "Runner.app"
                      BlueprintName = "Runner"
                      ReferencedContainer = "container:Runner.xcodeproj">
@@ -2601,7 +2601,7 @@ String _validBuildableReference(SupportedPlatform platform) {
   return '''
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "${_runnerNativeTargetIdentifer(platform)}"
+               BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
                BuildableName = "Runner.app"
                BlueprintName = "Runner"
                ReferencedContainer = "container:Runner.xcodeproj">
@@ -2677,13 +2677,13 @@ ${objects.join('\n')}
 ''';
 }
 
-String _runnerFrameworksBuildPhaseIdentifer(SupportedPlatform platform) {
+String _runnerFrameworksBuildPhaseIdentifier(SupportedPlatform platform) {
   return platform == SupportedPlatform.ios
       ? '97C146EB1CF9000F007C117D'
       : '33CC10EA2044A3C60003C045';
 }
 
-String _runnerNativeTargetIdentifer(SupportedPlatform platform) {
+String _runnerNativeTargetIdentifier(SupportedPlatform platform) {
   return platform == SupportedPlatform.ios
       ? '97C146ED1CF9000F007C117D'
       : '33CC10EC2044A3C60003C045';
@@ -2740,7 +2740,7 @@ String unmigratedFrameworksBuildPhaseSection(
 }) {
   return <String>[
     '/* Begin PBXFrameworksBuildPhase section */',
-    '		${_runnerFrameworksBuildPhaseIdentifer(platform)} /* Frameworks */ = {',
+    '		${_runnerFrameworksBuildPhaseIdentifier(platform)} /* Frameworks */ = {',
     '			isa = PBXFrameworksBuildPhase;',
     '			buildActionMask = 2147483647;',
     if (!missingFiles) ...<String>[
@@ -2769,7 +2769,7 @@ String migratedFrameworksBuildPhaseSection(
   ];
   return <String>[
     '/* Begin PBXFrameworksBuildPhase section */',
-    '		${_runnerFrameworksBuildPhaseIdentifer(platform)} /* Frameworks */ = {',
+    '		${_runnerFrameworksBuildPhaseIdentifier(platform)} /* Frameworks */ = {',
     if (missingFiles) ...filesField,
     '			isa = PBXFrameworksBuildPhase;',
     '			buildActionMask = 2147483647;',
@@ -2786,7 +2786,7 @@ String unmigratedFrameworksBuildPhaseSectionAsJson(
   bool missingFiles = false,
 }) {
   return <String>[
-    '    "${_runnerFrameworksBuildPhaseIdentifer(platform)}" : {',
+    '    "${_runnerFrameworksBuildPhaseIdentifier(platform)}" : {',
     '      "buildActionMask" : "2147483647",',
     if (!missingFiles) ...<String>[
       '      "files" : [',
@@ -2801,7 +2801,7 @@ String unmigratedFrameworksBuildPhaseSectionAsJson(
 
 String migratedFrameworksBuildPhaseSectionAsJson(SupportedPlatform platform) {
   return '''
-    "${_runnerFrameworksBuildPhaseIdentifer(platform)}" : {
+    "${_runnerFrameworksBuildPhaseIdentifier(platform)}" : {
       "buildActionMask" : "2147483647",
       "files" : [
         "78A318202AECB46A00862997"
@@ -2819,13 +2819,13 @@ String unmigratedNativeTargetSection(
 }) {
   return <String>[
     '/* Begin PBXNativeTarget section */',
-    '		${_runnerNativeTargetIdentifer(platform)} /* Runner */ = {',
+    '		${_runnerNativeTargetIdentifier(platform)} /* Runner */ = {',
     '			isa = PBXNativeTarget;',
     '			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;',
     '			buildPhases = (',
     '				9740EEB61CF901F6004384FC /* Run Script */,',
     '				97C146EA1CF9000F007C117D /* Sources */,',
-    '				${_runnerFrameworksBuildPhaseIdentifer(platform)} /* Frameworks */,',
+    '				${_runnerFrameworksBuildPhaseIdentifier(platform)} /* Frameworks */,',
     '				97C146EC1CF9000F007C117D /* Resources */,',
     '				9705A1C41CF9048500538489 /* Embed Frameworks */,',
     '				3B06AD1E1E4923F5004D2608 /* Thin Binary */,',
@@ -2863,14 +2863,14 @@ String migratedNativeTargetSection(
   ];
   return <String>[
     '/* Begin PBXNativeTarget section */',
-    '		${_runnerNativeTargetIdentifer(platform)} /* Runner */ = {',
+    '		${_runnerNativeTargetIdentifier(platform)} /* Runner */ = {',
     if (missingPackageProductDependencies) ...packageDependencies,
     '			isa = PBXNativeTarget;',
     '			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;',
     '			buildPhases = (',
     '				9740EEB61CF901F6004384FC /* Run Script */,',
     '				97C146EA1CF9000F007C117D /* Sources */,',
-    '				${_runnerFrameworksBuildPhaseIdentifer(platform)} /* Frameworks */,',
+    '				${_runnerFrameworksBuildPhaseIdentifier(platform)} /* Frameworks */,',
     '				97C146EC1CF9000F007C117D /* Resources */,',
     '				9705A1C41CF9048500538489 /* Embed Frameworks */,',
     '				3B06AD1E1E4923F5004D2608 /* Thin Binary */,',
@@ -2894,12 +2894,12 @@ String unmigratedNativeTargetSectionAsJson(
   bool missingPackageProductDependencies = false,
 }) {
   return <String>[
-    '    "${_runnerNativeTargetIdentifer(platform)}" : {',
+    '    "${_runnerNativeTargetIdentifier(platform)}" : {',
     '      "buildConfigurationList" : "97C147051CF9000F007C117D",',
     '      "buildPhases" : [',
     '        "9740EEB61CF901F6004384FC",',
     '        "97C146EA1CF9000F007C117D",',
-    '        "${_runnerFrameworksBuildPhaseIdentifer(platform)}",',
+    '        "${_runnerFrameworksBuildPhaseIdentifier(platform)}",',
     '        "97C146EC1CF9000F007C117D",',
     '        "9705A1C41CF9048500538489",',
     '        "3B06AD1E1E4923F5004D2608"',
@@ -2923,12 +2923,12 @@ String unmigratedNativeTargetSectionAsJson(
 
 String migratedNativeTargetSectionAsJson(SupportedPlatform platform) {
   return '''
-    "${_runnerNativeTargetIdentifer(platform)}" : {
+    "${_runnerNativeTargetIdentifier(platform)}" : {
       "buildConfigurationList" : "97C147051CF9000F007C117D",
       "buildPhases" : [
         "9740EEB61CF901F6004384FC",
         "97C146EA1CF9000F007C117D",
-        "${_runnerFrameworksBuildPhaseIdentifer(platform)}",
+        "${_runnerFrameworksBuildPhaseIdentifier(platform)}",
         "97C146EC1CF9000F007C117D",
         "9705A1C41CF9048500538489",
         "3B06AD1E1E4923F5004D2608"
@@ -2967,9 +2967,9 @@ String unmigratedProjectSection(
     '				TargetAttributes = {',
     '					331C8080294A63A400263BE5 = {',
     '						CreatedOnToolsVersion = 14.0;',
-    '						TestTargetID = ${_runnerNativeTargetIdentifer(platform)};',
+    '						TestTargetID = ${_runnerNativeTargetIdentifier(platform)};',
     '					};',
-    '					${_runnerNativeTargetIdentifer(platform)} = {',
+    '					${_runnerNativeTargetIdentifier(platform)} = {',
     '						CreatedOnToolsVersion = 7.3.1;',
     '						LastSwiftMigration = 1100;',
     '					};',
@@ -2994,7 +2994,7 @@ String unmigratedProjectSection(
     '			projectDirPath = "";',
     '			projectRoot = "";',
     '			targets = (',
-    '				${_runnerNativeTargetIdentifer(platform)} /* Runner */,',
+    '				${_runnerNativeTargetIdentifier(platform)} /* Runner */,',
     '				331C8080294A63A400263BE5 /* RunnerTests */,',
     '			);',
     '		};',
@@ -3026,9 +3026,9 @@ String migratedProjectSection(
     '				TargetAttributes = {',
     '					331C8080294A63A400263BE5 = {',
     '						CreatedOnToolsVersion = 14.0;',
-    '						TestTargetID = ${_runnerNativeTargetIdentifer(platform)};',
+    '						TestTargetID = ${_runnerNativeTargetIdentifier(platform)};',
     '					};',
-    '					${_runnerNativeTargetIdentifer(platform)} = {',
+    '					${_runnerNativeTargetIdentifier(platform)} = {',
     '						CreatedOnToolsVersion = 7.3.1;',
     '						LastSwiftMigration = 1100;',
     '					};',
@@ -3048,7 +3048,7 @@ String migratedProjectSection(
     '			projectDirPath = "";',
     '			projectRoot = "";',
     '			targets = (',
-    '				${_runnerNativeTargetIdentifer(platform)} /* Runner */,',
+    '				${_runnerNativeTargetIdentifier(platform)} /* Runner */,',
     '				331C8080294A63A400263BE5 /* RunnerTests */,',
     '			);',
     '		};',
@@ -3067,13 +3067,13 @@ String unmigratedProjectSectionAsJson(
     '        "LastUpgradeCheck" : "1510",',
     '        "ORGANIZATIONNAME" : "",',
     '        "TargetAttributes" : {',
-    '          "${_runnerNativeTargetIdentifer(platform)}" : {',
+    '          "${_runnerNativeTargetIdentifier(platform)}" : {',
     '            "CreatedOnToolsVersion" : "7.3.1",',
     '            "LastSwiftMigration" : "1100"',
     '          },',
     '          "331C8080294A63A400263BE5" : {',
     '            "CreatedOnToolsVersion" : "14.0",',
-    '            "TestTargetID" : "${_runnerNativeTargetIdentifer(platform)}"',
+    '            "TestTargetID" : "${_runnerNativeTargetIdentifier(platform)}"',
     '          }',
     '        }',
     '      },',
@@ -3095,7 +3095,7 @@ String unmigratedProjectSectionAsJson(
     '      "projectDirPath" : "",',
     '      "projectRoot" : "",',
     '      "targets" : [',
-    '        "${_runnerNativeTargetIdentifer(platform)}",',
+    '        "${_runnerNativeTargetIdentifier(platform)}",',
     '        "331C8080294A63A400263BE5"',
     '      ]',
     '    }',
@@ -3110,13 +3110,13 @@ String migratedProjectSectionAsJson(SupportedPlatform platform) {
         "LastUpgradeCheck" : "1510",
         "ORGANIZATIONNAME" : "",
         "TargetAttributes" : {
-          "${_runnerNativeTargetIdentifer(platform)}" : {
+          "${_runnerNativeTargetIdentifier(platform)}" : {
             "CreatedOnToolsVersion" : "7.3.1",
             "LastSwiftMigration" : "1100"
           },
           "331C8080294A63A400263BE5" : {
             "CreatedOnToolsVersion" : "14.0",
-            "TestTargetID" : "${_runnerNativeTargetIdentifer(platform)}"
+            "TestTargetID" : "${_runnerNativeTargetIdentifier(platform)}"
           }
         }
       },
@@ -3137,7 +3137,7 @@ String migratedProjectSectionAsJson(SupportedPlatform platform) {
       "projectDirPath" : "",
       "projectRoot" : "",
       "targets" : [
-        "${_runnerNativeTargetIdentifer(platform)}",
+        "${_runnerNativeTargetIdentifier(platform)}",
         "331C8080294A63A400263BE5"
       ]
     }''';

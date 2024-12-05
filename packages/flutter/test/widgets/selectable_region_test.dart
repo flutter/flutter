@@ -320,7 +320,7 @@ void main() {
       final Offset gPos = textOffsetToPosition(paragraph, testValue.indexOf('g'));
       final Offset pPos = textOffsetToPosition(paragraph, testValue.indexOf('p'));
 
-      // A double tap + drag should take precendence over parent drags.
+      // A double tap + drag should take precedence over parent drags.
       final TestGesture gesture = await tester.startGesture(gPos);
       addTearDown(gesture.removePointer);
       await tester.pump();
@@ -382,7 +382,7 @@ void main() {
       final Offset gPos = textOffsetToPosition(paragraph, testValue.indexOf('g'));
       final Offset pPos = textOffsetToPosition(paragraph, testValue.indexOf('p'));
 
-      // A double tap + drag should take precendence over parent drags.
+      // A double tap + drag should take precedence over parent drags.
       final TestGesture gesture = await tester.startGesture(gPos);
       addTearDown(gesture.removePointer);
       await tester.pump();
@@ -4634,7 +4634,7 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    // Clear selection programatically.
+    // Clear selection programmatically.
     state.clearSelection();
     expect(paragraph1.selections, isEmpty);
     expect(paragraph2.selections, isEmpty);

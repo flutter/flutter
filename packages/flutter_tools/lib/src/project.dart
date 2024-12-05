@@ -875,7 +875,7 @@ $javaGradleCompatUrl
     }
     for (final XmlElement metaData in document.findAllElements('meta-data')) {
       final String? name = metaData.getAttribute('android:name');
-      // External code checks for this string to indentify flutter android apps.
+      // External code checks for this string to identify flutter android apps.
       // See cl/667760684 as an example.
       if (name == 'flutterEmbedding') {
         final String? embeddingVersionString = metaData.getAttribute('android:value');

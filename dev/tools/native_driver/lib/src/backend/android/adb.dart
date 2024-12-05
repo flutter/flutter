@@ -11,7 +11,7 @@ import 'package:process/process.dart';
 /// A minimal wrapper around the `adb` command-line tool.
 @internal
 class Adb {
-  const Adb._(this._prefixArgs, this._proccess);
+  const Adb._(this._prefixArgs, this._process);
 
   /// Creates a new `adb` command runner that uses the `adb` command-line tool.
   ///
@@ -41,7 +41,7 @@ class Adb {
   }
 
   Future<AdbStringResult> _runString(List<String> args) async {
-    final io.ProcessResult result = await _proccess.run(
+    final io.ProcessResult result = await _process.run(
       <String>[
         ..._prefixArgs,
         ...args,
@@ -55,7 +55,7 @@ class Adb {
   }
 
   Future<AdbBinaryResult> _runBinary(List<String> args) async {
-    final io.ProcessResult result = await _proccess.run(
+    final io.ProcessResult result = await _process.run(
       <String>[
         ..._prefixArgs,
         ...args,
@@ -70,7 +70,7 @@ class Adb {
   }
 
   final List<String> _prefixArgs;
-  final ProcessManager _proccess;
+  final ProcessManager _process;
 
   /// Returns whether the device is currently connected.
   ///
@@ -161,7 +161,7 @@ class Adb {
     }
   }
 
-  /// Disable confirnations for immersive mode.
+  /// Disable confirmations for immersive mode.
   Future<void> disableImmersiveModeConfirmations() async {
     final AdbStringResult result = await _runString(<String>[
       'shell',

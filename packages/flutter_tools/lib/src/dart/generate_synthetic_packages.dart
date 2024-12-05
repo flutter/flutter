@@ -53,7 +53,7 @@ Future<void> generateLocalizationsSyntheticPackage({
       return;
     }
   } else if (featureFlags.isExplicitPackageDependenciesEnabled) {
-    // synthetic-packages: true was not set and it is no longer the defualt.
+    // synthetic-packages: true was not set and it is no longer the default.
     return;
   }
 

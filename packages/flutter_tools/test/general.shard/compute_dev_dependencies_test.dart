@@ -25,7 +25,7 @@ const String _dartBin = 'bin/cache/dart-sdk/bin/dart';
 //     pubspec.yaml
 //   /package_a
 //     pubspec.yaml
-//   /pacakge_b
+//   /package_b
 //     pubspec.yaml
 //   /package_c
 //     pubspec.yaml

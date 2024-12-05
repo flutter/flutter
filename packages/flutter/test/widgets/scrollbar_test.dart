@@ -3267,7 +3267,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     // that begin in the center of the scrollable are handled by the
     // scrollable, not the scrollbar. However: the scrollbar widget does
     // contain the scrollable and this test verifies that it doesn't
-    // inadvertantly handle thumb down/start/update/end gestures due
+    // inadvertently handle thumb down/start/update/end gestures due
     // to trackpad pan/zoom events. Those callbacks are prevented by
     // the overrides of isPointerPanZoomAllowed in the scrollbar
     // gesture recognizers.

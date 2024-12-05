@@ -1079,7 +1079,7 @@ However, where possible avoid global constants. Rather than `kDefaultButtonColor
 
 ### Avoid abbreviations
 
-Unless the abbreviation is more recognizable than the expansion (e.g. XML, HTTP, JSON), expand abbrevations
+Unless the abbreviation is more recognizable than the expansion (e.g. XML, HTTP, JSON), expand abbreviations
 when selecting a name for an identifier. In general, avoid one-character names unless one character is idiomatic
 (for example, prefer `index` over `i`, but prefer `x` over `horizontalPosition`).
 

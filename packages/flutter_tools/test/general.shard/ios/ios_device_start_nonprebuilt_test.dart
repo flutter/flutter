@@ -403,7 +403,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       })));
 
-      // Wait until all asyncronous time has been elapsed.
+      // Wait until all asynchronous time has been elapsed.
       do {
         fakeAsync.elapse(const Duration(seconds: 2));
       } while (fakeAsync.pendingTimers.isNotEmpty);

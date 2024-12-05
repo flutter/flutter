@@ -2488,7 +2488,7 @@ void main() {
     expect(tabBarBox.size.height, 48.0);
 
     // Ease in sine (accelerating).
-    double accelerateIntepolation(double fraction) {
+    double accelerateInterpolation(double fraction) {
       return 1.0 - math.cos((fraction * math.pi) / 2.0);
     }
 
@@ -2499,8 +2499,8 @@ void main() {
     }) {
       const double indicatorWeight = 3.0;
       final double tabChangeProgress =  (controller.index - controller.animation!.value).abs();
-      final double leftFraction = accelerateIntepolation(tabChangeProgress);
-      final double rightFraction = accelerateIntepolation(tabChangeProgress);
+      final double leftFraction = accelerateInterpolation(tabChangeProgress);
+      final double rightFraction = accelerateInterpolation(tabChangeProgress);
 
       final RRect rrect = RRect.fromLTRBAndCorners(
         lerpDouble(rect.left, targetRect.left, leftFraction)!,
@@ -7313,7 +7313,7 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/150316.
-  testWidgets('Scrollable TabBar wuth transparent divider expands to full width', (WidgetTester tester) async {
+  testWidgets('Scrollable TabBar with transparent divider expands to full width', (WidgetTester tester) async {
     Widget buildTabBar({ Color? dividerColor, TabAlignment? tabAlignment }) {
       return boilerplate(
         child: Center(
@@ -7424,7 +7424,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Ease in sine (accelerating).
-    double accelerateIntepolation(double fraction) {
+    double accelerateInterpolation(double fraction) {
       return 1.0 - math.cos((fraction * math.pi) / 2.0);
     }
 
@@ -7435,8 +7435,8 @@ void main() {
     }) {
       const double indicatorWeight = 3.0;
       final double tabChangeProgress =  (controller.index - controller.animation!.value).abs();
-      final double leftFraction = accelerateIntepolation(tabChangeProgress);
-      final double rightFraction = accelerateIntepolation(tabChangeProgress);
+      final double leftFraction = accelerateInterpolation(tabChangeProgress);
+      final double rightFraction = accelerateInterpolation(tabChangeProgress);
 
       final RRect rrect = RRect.fromLTRBAndCorners(
         lerpDouble(rect.left, targetRect.left, leftFraction)!,

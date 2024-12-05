@@ -300,7 +300,7 @@ void main() {
 
     group('Impeller AndroidManifest.xml setting', () {
       // Adds a key-value `<meta-data>` pair to the `<application>` tag in the
-      // cooresponding `AndroidManifest.xml` file, right before the closing
+      // corresponding `AndroidManifest.xml` file, right before the closing
       // `</application>` tag.
       void writeManifestMetadata({
         required String projectPath,

@@ -45,7 +45,7 @@ class _SettingsAppBarExampleState extends State<SettingsAppBarExample> {
 
   // The key must be for a widget _below_ a RenderSliver so that
   // findAncestorRenderObjectOfType can find the RenderSliver when it searches
-  // the key widget's renderer ancesotrs.
+  // the key widget's renderer ancestors.
   RenderSliver? keyToSliver(GlobalKey key) => key.currentContext?.findAncestorRenderObjectOfType<RenderSliver>();
 
   // Each time the app's list scrolls: if the Title sliver has scrolled completely behind

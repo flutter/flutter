@@ -117,7 +117,7 @@ Future<Set<String>> computeExclusiveDevDependencies(
 
     // Remove any listed dependency from dev dependencies; it might have been
     // a dev dependency for the app (root) package, but it is being used as a
-    // real dependency for a dependend on package, so we would not want to send
+    // real dependency for a dependent on package, so we would not want to send
     // a signal that the package can be ignored/removed.
     devDependencies.removeAll(directDependencies);
 

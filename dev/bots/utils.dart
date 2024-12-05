@@ -74,7 +74,7 @@ final List<String> flutterTestArgs = <String>[];
 /// Whether execution should be simulated for debugging purposes.
 ///
 /// When `true`, calls to [runCommand] print to [io.stdout] instead of running
-/// the process. This is useful for determing what an invocation of `test.dart`
+/// the process. This is useful for determining what an invocation of `test.dart`
 /// _might_ due if not invoked with `--dry-run`, or otherwise determine what the
 /// different test shards and sub-shards are configured as.
 bool get dryRun => _dryRun ?? false;
@@ -621,7 +621,7 @@ List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubs
   required int subShardCount,
 }) {
   // While there exists a closed formula figuring out the range of tests the
-  // subshard is resposible for, modeling this as a simulation of distributing
+  // subshard is responsible for, modeling this as a simulation of distributing
   // items equally into buckets is more intuitive.
   //
   // A bucket represents how many tests a subshard should be allocated.

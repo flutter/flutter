@@ -1372,7 +1372,7 @@ String? _validatePlugin(Plugin plugin, String platformKey, {
     if (_hasPluginInlineImpl(plugin, platformKey, pluginResolutionType: pluginResolutionType)) {
       return 'Plugin ${plugin.name}:$platformKey which provides an inline implementation '
           'cannot also reference a default implementation for $defaultImplPluginName. '
-          'Ask the maintainers of ${plugin.name} to either remove the implementation via `platforms: $platformKey:${pluginResolutionType == _PluginResolutionType.dart ? ' dartPluginClass' : '` `pluginClass` or `dartPLuginClass'}` '
+          'Ask the maintainers of ${plugin.name} to either remove the implementation via `platforms: $platformKey:${pluginResolutionType == _PluginResolutionType.dart ? ' dartPluginClass' : '` `pluginClass` or `dartPluginClass'}` '
           'or avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName`.\n';
     }
   }

@@ -683,7 +683,7 @@ exit code: 66
       logger.warningText,
       contains('git remote set-url upstream'),
       reason:
-          'When update-packages fails, it is often because of missing an upsteam remote.',
+          'When update-packages fails, it is often because of missing an upstream remote.',
     );
     expect(processManager, hasNoRemainingExpectations);
   });
