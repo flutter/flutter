@@ -154,5 +154,49 @@ TEST(DisplayListPaint, ChainingConstructor) {
   EXPECT_NE(paint, DlPaint());
 }
 
+TEST(DisplayListPaint, PaintDetectsRuntimeEffects) {
+  const auto runtime_effect = DlRuntimeEffect::MakeSkia(
+      SkRuntimeEffect::MakeForShader(
+          SkString("vec4 main(vec2 p) { return vec4(0); }"))
+          .effect);
+  auto color_source = DlColorSource::MakeRuntimeEffect(
+      runtime_effect, {}, std::make_shared<std::vector<uint8_t>>());
+  auto image_filter = DlImageFilter::MakeRuntimeEffect(
+      runtime_effect, {}, std::make_shared<std::vector<uint8_t>>());
+  DlPaint paint;
+
+  EXPECT_FALSE(paint.usesRuntimeEffect());
+  paint.setColorSource(color_source);
+  EXPECT_TRUE(paint.usesRuntimeEffect());
+  paint.setColorSource(nullptr);
+  EXPECT_FALSE(paint.usesRuntimeEffect());
+
+  EXPECT_FALSE(paint.usesRuntimeEffect());
+  paint.setImageFilter(image_filter);
+  EXPECT_TRUE(paint.usesRuntimeEffect());
+  paint.setImageFilter(nullptr);
+  EXPECT_FALSE(paint.usesRuntimeEffect());
+
+  EXPECT_FALSE(paint.usesRuntimeEffect());
+  paint.setColorSource(color_source);
+  EXPECT_TRUE(paint.usesRuntimeEffect());
+  paint.setImageFilter(image_filter);
+  EXPECT_TRUE(paint.usesRuntimeEffect());
+  paint.setImageFilter(nullptr);
+  EXPECT_TRUE(paint.usesRuntimeEffect());
+  paint.setColorSource(nullptr);
+  EXPECT_FALSE(paint.usesRuntimeEffect());
+
+  EXPECT_FALSE(paint.usesRuntimeEffect());
+  paint.setColorSource(color_source);
+  EXPECT_TRUE(paint.usesRuntimeEffect());
+  paint.setImageFilter(image_filter);
+  EXPECT_TRUE(paint.usesRuntimeEffect());
+  paint.setColorSource(nullptr);
+  EXPECT_TRUE(paint.usesRuntimeEffect());
+  paint.setImageFilter(nullptr);
+  EXPECT_FALSE(paint.usesRuntimeEffect());
+}
+
 }  // namespace testing
 }  // namespace flutter

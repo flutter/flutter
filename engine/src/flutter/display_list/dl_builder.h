@@ -723,6 +723,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
     current_opacity_compatibility_ =             //
         current_.getColorFilter() == nullptr &&  //
         !current_.isInvertColors() &&            //
+        !current_.usesRuntimeEffect() &&         //
         IsOpacityCompatible(current_.getBlendMode());
   }
 

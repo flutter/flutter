@@ -244,6 +244,7 @@ void DisplayListBuilder::onSetColorSource(const DlColorSource* source) {
       }
     }
   }
+  UpdateCurrentOpacityCompatibility();
 }
 void DisplayListBuilder::onSetImageFilter(const DlImageFilter* filter) {
   if (filter == nullptr) {
@@ -289,6 +290,7 @@ void DisplayListBuilder::onSetImageFilter(const DlImageFilter* filter) {
       }
     }
   }
+  UpdateCurrentOpacityCompatibility();
 }
 void DisplayListBuilder::onSetColorFilter(const DlColorFilter* filter) {
   if (filter == nullptr) {

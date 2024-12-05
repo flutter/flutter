@@ -178,6 +178,11 @@ class DlPaint {
 
   bool isDefault() const { return *this == kDefault; }
 
+  bool usesRuntimeEffect() const {
+    return ((color_source_ && color_source_->asRuntimeEffect()) ||
+            (image_filter_ && image_filter_->asRuntimeEffectFilter()));
+  }
+
   bool operator==(DlPaint const& other) const;
   bool operator!=(DlPaint const& other) const { return !(*this == other); }
 
