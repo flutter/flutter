@@ -67,8 +67,9 @@ void main() {
             final FontAsset rootFontAsset = rootFont.fontAssets[j];
             final FontAsset updatedFontAsset = updatedFont.fontAssets[j];
             expect(
-              updatedFontAsset,
-              WidgetPreviewStartCommand.transformFontAsset(rootFontAsset),
+              updatedFontAsset.descriptor,
+              WidgetPreviewStartCommand.transformFontAsset(rootFontAsset)
+                  .descriptor,
             );
           }
         }
