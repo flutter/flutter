@@ -8,33 +8,52 @@ import 'package:flutter_api_samples/material/progress_indicator/linear_progress_
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Determinate and Indeterminate LinearProgressIndicators',
-      (WidgetTester tester) async {
+  testWidgets('Determinate LinearProgressIndicator uses the provided value', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.ProgressIndicatorExampleApp(),
+    );
+    await tester.pump(const Duration(milliseconds: 2500));
+
+    final Finder indicatorFinder = find.byType(LinearProgressIndicator).first;
+    final LinearProgressIndicator progressIndicator = tester.widget(indicatorFinder);
+    expect(progressIndicator.value, equals(0.5));
+  });
+
+  testWidgets('Indeterminate LinearProgressIndicator does not have a value', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.ProgressIndicatorExampleApp(),
+    );
+    await tester.pump(const Duration(milliseconds: 2500));
+
+    final Finder indicatorFinder = find.byType(LinearProgressIndicator).last;
+    final LinearProgressIndicator progressIndicator = tester.widget(indicatorFinder);
+    expect(progressIndicator.value, null);
+  });
+
+  testWidgets('Progress indicators year2023 flag can be toggled', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ProgressIndicatorExampleApp(),
     );
 
-    expect(find.text('Determinate LinearProgressIndicator'), findsOneWidget);
-    expect(find.text('Indeterminate LinearProgressIndicator'), findsOneWidget);
-    expect(find.byType(LinearProgressIndicator), findsNWidgets(2));
-
-    // Test determinate LinearProgressIndicator.
-    LinearProgressIndicator determinateIndicator = tester.firstWidget(
+    LinearProgressIndicator determinateIndicator = tester.widget<LinearProgressIndicator>(
       find.byType(LinearProgressIndicator).first,
     );
-    expect(determinateIndicator.value, equals(0.0));
-
-    // Advance the animation by 2 seconds.
-    await tester.pump(const Duration(seconds: 2));
-    determinateIndicator = tester.firstWidget(
-      find.byType(LinearProgressIndicator).first,
-    );
-    expect(determinateIndicator.value, equals(0.4));
-
-    // Test indeterminate LinearProgressIndicator.
-    final LinearProgressIndicator indeterminateIndicator = tester.firstWidget(
+    expect(determinateIndicator.year2023, true);
+    LinearProgressIndicator indeterminateIndicator = tester.widget<LinearProgressIndicator>(
       find.byType(LinearProgressIndicator).last,
     );
-    expect(indeterminateIndicator.value, null);
+    expect(indeterminateIndicator.year2023, true);
+
+    await tester.tap(find.byType(SwitchListTile));
+    await tester.pump();
+
+    determinateIndicator = tester.widget<LinearProgressIndicator>(
+      find.byType(LinearProgressIndicator).first,
+    );
+    expect(determinateIndicator.year2023, false);
+    indeterminateIndicator = tester.widget<LinearProgressIndicator>(
+      find.byType(LinearProgressIndicator).last,
+    );
+    expect(indeterminateIndicator.year2023, false);
   });
 }

@@ -58,18 +58,17 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
+          spacing: 16.0,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
               'Linear progress indicator',
               style: TextStyle(fontSize: 20),
             ),
-            const SizedBox(height: 30),
             LinearProgressIndicator(
               value: determinate ? controller.value : null,
               semanticsLabel: 'Linear progress indicator',
             ),
-            const SizedBox(height: 10),
             Row(
               children: <Widget>[
                 Expanded(

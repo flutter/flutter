@@ -27,9 +27,9 @@ class ProgressIndicatorExample extends StatefulWidget {
       _ProgressIndicatorExampleState();
 }
 
-class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
-    with TickerProviderStateMixin {
+class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> with TickerProviderStateMixin {
   late AnimationController controller;
+  bool year2023 = true;
 
   @override
   void initState() {
@@ -54,18 +54,33 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          spacing: 16.0,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('Determinate LinearProgressIndicator'),
-            LinearProgressIndicator(value: controller.value),
-            const Text('Indeterminate LinearProgressIndicator'),
-            const LinearProgressIndicator(),
-          ],
-        ),
+      body: Column(
+        spacing: 16.0,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const Text('Determinate LinearProgressIndicator'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: LinearProgressIndicator(
+              year2023: year2023,
+              value: controller.value,
+            ),
+          ),
+          const Text('Indeterminate LinearProgressIndicator'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: LinearProgressIndicator(year2023: year2023),
+          ),
+          SwitchListTile(
+            value: year2023,
+            title: year2023 ? const Text('Switch to latest M3 style') : const Text('Switch to year2023 M3 style'),
+            onChanged: (bool value) {
+              setState(() {
+                year2023 = !year2023;
+              });
+            },
+          ),
+        ],
       ),
     );
   }
