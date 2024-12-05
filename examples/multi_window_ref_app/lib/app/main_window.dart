@@ -7,7 +7,8 @@ import 'window_manager_model.dart';
 
 class MainWindow extends StatefulWidget {
   MainWindow({super.key, required WindowController mainController})
-    : _mainKeyedController = KeyedWindowController(controller: mainController);
+      : _mainKeyedController =
+            KeyedWindowController(controller: mainController);
 
   final KeyedWindowController _mainKeyedController;
 
@@ -32,10 +33,9 @@ class _MainWindowState extends State<MainWindow> {
             flex: 60,
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
-              child:
-                  _ActiveWindowsTable(
-                    mainController: widget._mainKeyedController,
-                    windowManagerModel: _windowManagerModel),
+              child: _ActiveWindowsTable(
+                  mainController: widget._mainKeyedController,
+                  windowManagerModel: _windowManagerModel),
             ),
           ),
           Expanded(
@@ -67,13 +67,13 @@ class _MainWindowState extends State<MainWindow> {
                   in _windowManagerModel.windows) {
                 if (controller.parent == null) {
                   childViews.add(WindowControllerRender(
-                      controller: controller.controller,
-                      key: controller.key,
-                      windowSettings: _settings,
-                      windowManagerModel: _windowManagerModel,
-                      onDestroyed: () {
-                        _windowManagerModel.remove(controller);
-                      }));
+                    controller: controller.controller,
+                    key: controller.key,
+                    windowSettings: _settings,
+                    windowManagerModel: _windowManagerModel,
+                    onDestroyed: () => _windowManagerModel.remove(controller),
+                    onError: () => _windowManagerModel.remove(controller),
+                  ));
                 }
               }
 
@@ -84,7 +84,8 @@ class _MainWindowState extends State<MainWindow> {
 }
 
 class _ActiveWindowsTable extends StatelessWidget {
-  const _ActiveWindowsTable({required this.mainController, required this.windowManagerModel});
+  const _ActiveWindowsTable(
+      {required this.mainController, required this.windowManagerModel});
 
   final KeyedWindowController mainController;
   final WindowManagerModel windowManagerModel;

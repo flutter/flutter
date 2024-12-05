@@ -8,24 +8,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-/// Defines the type of a [Window]
+/// Defines the type of the Window
 enum WindowArchetype {
-  /// Defines a standard [Window]
+  /// Defines a traditional window
   regular,
 
-  /// Defines a [Window] that is on a layer above [regular] [Window]s and is not dockable
+  /// Defines a window that is on a layer above [regular] windows and is not dockable
   floatingRegular,
 
-  /// Defines a dialog [Window]
+  /// Defines a dialog window
   dialog,
 
-  /// Defines a satellite [Window]
+  /// Defines a satellite window
   satellite,
 
-  /// Defines a popup [Window]
+  /// Defines a popup window
   popup,
 
-  /// Defines a tooltip
+  /// Defines a tooltip window
   tip,
 }
 
@@ -76,6 +76,8 @@ abstract class WindowController with ChangeNotifier {
   }
 }
 
+/// Provided to [RegularWindow]. Allows the user to listen on changes
+/// to a regular window and modify the window.
 class RegularWindowController extends WindowController {
   @override
   WindowArchetype get type => WindowArchetype.regular;
@@ -86,10 +88,12 @@ class RegularWindowController extends WindowController {
   }
 }
 
+/// A regular window.
 class RegularWindow extends StatefulWidget {
   RegularWindow(
       {required Size preferredSize,
       this.onDestroyed,
+      this.onError,
       this.controller,
       this.key,
       required this.child})
@@ -97,6 +101,7 @@ class RegularWindow extends StatefulWidget {
 
   final RegularWindowController? controller;
   void Function()? onDestroyed;
+  void Function(String?)? onError;
   final Key? key;
   final Widget child;
   final Size _preferredSize;
@@ -107,14 +112,14 @@ class RegularWindow extends StatefulWidget {
 
 class _RegularWindowState extends State<RegularWindow> {
   _WindowListener? _listener;
-  Future<RegularWindowMetadata>? _future;
+  Future<_RegularWindowMetadata>? _future;
   WindowingApp? _app;
 
   @override
   void initState() {
     super.initState();
     _future = createRegular(size: widget._preferredSize);
-    _future!.then((RegularWindowMetadata metadata) async {
+    _future!.then((_RegularWindowMetadata metadata) async {
       if (widget.controller != null) {
         widget.controller!.view = metadata.view;
         widget.controller!.parentViewId = metadata.parentViewId;
@@ -144,6 +149,8 @@ class _RegularWindowState extends State<RegularWindow> {
         _app = windowingAppContext!.windowingApp;
         _app!._registerListener(_listener!);
       });
+    }).catchError((Object? error) {
+      widget.onError?.call(error.toString());
     });
   }
 
@@ -158,11 +165,11 @@ class _RegularWindowState extends State<RegularWindow> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return FutureBuilder<_RegularWindowMetadata>(
         key: widget.key,
         future: _future,
         builder: (BuildContext context,
-            AsyncSnapshot<RegularWindowMetadata> metadata) {
+            AsyncSnapshot<_RegularWindowMetadata> metadata) {
           if (!metadata.hasData) {
             return const ViewCollection(views: <Widget>[]);
           }
@@ -194,21 +201,21 @@ class WindowContext extends InheritedWidget {
   }
 }
 
-class WindowMetadata {
-  WindowMetadata({required this.view, required this.size, this.parentViewId});
+class _WindowMetadata {
+  _WindowMetadata({required this.view, required this.size, this.parentViewId});
 
   final FlutterView view;
   final Size size;
   final int? parentViewId;
 }
 
-class RegularWindowMetadata extends WindowMetadata {
-  RegularWindowMetadata(
+class _RegularWindowMetadata extends _WindowMetadata {
+  _RegularWindowMetadata(
       {required super.view, required super.size, super.parentViewId});
 }
 
-class _WindowMetadata {
-  _WindowMetadata(
+class _WindowCreationResult {
+  _WindowCreationResult(
       {required this.flView,
       required this.archetype,
       required this.size,
@@ -225,17 +232,17 @@ class _WindowMetadata {
 /// widget instead of this method.
 ///
 /// [size] the size of the new [Window] in pixels
-Future<RegularWindowMetadata> createRegular({required Size size}) async {
-  final _WindowMetadata metadata =
+Future<_RegularWindowMetadata> createRegular({required Size size}) async {
+  final _WindowCreationResult metadata =
       await _createWindow(viewBuilder: (MethodChannel channel) async {
     return await channel.invokeMethod('createWindow', <String, dynamic>{
       'size': <int>[size.width.toInt(), size.height.toInt()],
     }) as Map<Object?, Object?>;
   });
-  return RegularWindowMetadata(view: metadata.flView, size: metadata.size);
+  return _RegularWindowMetadata(view: metadata.flView, size: metadata.size);
 }
 
-Future<_WindowMetadata> _createWindow(
+Future<_WindowCreationResult> _createWindow(
     {required Future<Map<Object?, Object?>> Function(MethodChannel channel)
         viewBuilder}) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -255,7 +262,7 @@ Future<_WindowMetadata> _createWindow(
     },
   );
 
-  return _WindowMetadata(
+  return _WindowCreationResult(
       flView: flView,
       archetype: archetype,
       size: Size((size[0]! as int).toDouble(), (size[1]! as int).toDouble()),
