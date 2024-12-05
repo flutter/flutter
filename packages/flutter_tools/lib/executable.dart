@@ -43,13 +43,13 @@ import 'src/commands/symbolize.dart';
 import 'src/commands/test.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
+import 'src/commands/widget_preview.dart';
 import 'src/devtools_launcher.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
 import 'src/isolated/build_targets.dart';
 import 'src/isolated/mustache_template.dart';
-import 'src/isolated/native_assets/native_assets.dart';
 import 'src/isolated/native_assets/test/native_assets.dart';
 import 'src/isolated/resident_web_runner.dart';
 import 'src/native_assets.dart';
@@ -181,7 +181,6 @@ List<FlutterCommand> generateCommands({
     platform: globals.platform,
     processInfo: globals.processInfo,
     fileSystem: globals.fs,
-    nativeAssetsBuilder: const HotRunnerNativeAssetsBuilderImpl(),
   ),
   BuildCommand(
     artifacts: globals.artifacts!,
@@ -244,7 +243,6 @@ List<FlutterCommand> generateCommands({
   ),
   RunCommand(
     verboseHelp: verboseHelp,
-    nativeAssetsBuilder: const HotRunnerNativeAssetsBuilderImpl(),
   ),
   ScreenshotCommand(fs: globals.fs),
   ShellCompletionCommand(),
@@ -253,6 +251,7 @@ List<FlutterCommand> generateCommands({
     verbose: verbose,
     nativeAssetsBuilder: globals.nativeAssetsBuilder,
   ),
+  WidgetPreviewCommand(),
   UpgradeCommand(verboseHelp: verboseHelp),
   SymbolizeCommand(
     stdio: globals.stdio,

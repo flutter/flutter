@@ -2,12 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/build_info.dart' hide BuildMode;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:flutter_tools/src/resident_runner.dart';
-import 'package:flutter_tools/src/run_hot.dart';
 import 'package:native_assets_builder/native_assets_builder.dart';
 import 'package:native_assets_cli/code_assets_builder.dart';
 import 'package:package_config/package_config_types.dart';
@@ -23,7 +18,6 @@ class FakeFlutterNativeAssetsBuildRunner
     this.packagesWithNativeAssetsResult = const <Package>[],
     this.onBuild,
     this.onLink,
-    this.buildDryRunResult = const FakeFlutterNativeAssetsBuilderResult(),
     this.buildResult = const FakeFlutterNativeAssetsBuilderResult(),
     this.linkResult = const FakeFlutterNativeAssetsBuilderResult(),
     CCompilerConfig? cCompilerConfigResult,
@@ -36,14 +30,12 @@ class FakeFlutterNativeAssetsBuildRunner
   final LinkResult? Function(LinkConfig)? onLink;
   final BuildResult? buildResult;
   final LinkResult? linkResult;
-  final BuildDryRunResult? buildDryRunResult;
   final bool hasPackageConfigResult;
   final List<Package> packagesWithNativeAssetsResult;
   final CCompilerConfig cCompilerConfigResult;
   final CCompilerConfig ndkCCompilerConfigResult;
 
   int buildInvocations = 0;
-  int buildDryRunInvocations = 0;
   int linkInvocations = 0;
   int hasPackageConfigInvocations = 0;
   int packagesWithNativeAssetsInvocations = 0;
@@ -129,19 +121,6 @@ class FakeFlutterNativeAssetsBuildRunner
   }
 
   @override
-  Future<BuildDryRunResult?> buildDryRun({
-    required List<String> supportedAssetTypes,
-    required ConfigCreator configCreator,
-    required BuildValidator buildValidator,
-    required bool includeParentEnvironment,
-    required OS targetOS,
-    required Uri workingDirectory,
-  }) async {
-    buildDryRunInvocations++;
-    return buildDryRunResult;
-  }
-
-  @override
   Future<bool> hasPackageConfig() async {
     hasPackageConfigInvocations++;
     return hasPackageConfigResult;
@@ -161,7 +140,7 @@ class FakeFlutterNativeAssetsBuildRunner
 }
 
 final class FakeFlutterNativeAssetsBuilderResult
-    implements BuildResult, BuildDryRunResult, LinkResult {
+    implements BuildResult, LinkResult {
   const FakeFlutterNativeAssetsBuilderResult({
     this.encodedAssets = const <EncodedAsset>[],
     this.encodedAssetsForLinking = const <String, List<EncodedAsset>>{},
@@ -196,31 +175,4 @@ final class FakeFlutterNativeAssetsBuilderResult
 
   @override
   final List<Uri> dependencies;
-}
-
-class FakeHotRunnerNativeAssetsBuilder implements HotRunnerNativeAssetsBuilder {
-  FakeHotRunnerNativeAssetsBuilder(this.buildRunner);
-
-  final FlutterNativeAssetsBuildRunner buildRunner;
-
-  @override
-  Future<Uri?> dryRun({
-    required Uri projectUri,
-    required FileSystem fileSystem,
-    required List<FlutterDevice> flutterDevices,
-    required String packageConfigPath,
-    required PackageConfig packageConfig,
-    required Logger logger,
-  }) {
-    final List<TargetPlatform> targetPlatforms = flutterDevices
-        .map((FlutterDevice d) => d.targetPlatform)
-        .nonNulls
-        .toList();
-    return runFlutterSpecificDartDryRunOnPlatforms(
-      projectUri: projectUri,
-      fileSystem: fileSystem,
-      buildRunner: buildRunner,
-      targetPlatforms: targetPlatforms,
-    );
-  }
 }

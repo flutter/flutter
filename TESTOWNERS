@@ -230,6 +230,7 @@
 
 ## Host only DeviceLab tests
 /dev/devicelab/bin/tasks/animated_complex_opacity_perf_macos__e2e_summary.dart @cbracken @flutter/desktop
+/dev/devicelab/bin/tasks/android_release_builds_exclude_dev_dependencies_test.dart @camsim99 @flutter/android
 /dev/devicelab/bin/tasks/basic_material_app_macos__compile.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/build_aar_module_test.dart @andrewkolos @flutter/tool
 /dev/devicelab/bin/tasks/build_ios_framework_module_test.dart @jmagman @flutter/tool
@@ -327,7 +328,6 @@
 # coverage @goderbauer @flutter/infra
 # customer_testing @Piinks @flutter/framework
 # docs @Piinks @flutter/framework
-# flutter_build_apk_health_tests @matanlurey @gmackall
 # flutter_driver_android_test @matanlurey @johnmccutchan
 # flutter_packaging @christopherfujino @flutter/infra
 # flutter_plugins @stuartmorgan @flutter/plugin
