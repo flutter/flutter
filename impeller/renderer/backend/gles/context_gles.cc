@@ -7,6 +7,8 @@
 
 #include "impeller/base/config.h"
 #include "impeller/base/validation.h"
+#include "impeller/base/version.h"
+#include "impeller/core/runtime_types.h"
 #include "impeller/renderer/backend/gles/command_buffer_gles.h"
 #include "impeller/renderer/backend/gles/gpu_tracer_gles.h"
 #include "impeller/renderer/backend/gles/handle_gles.h"
@@ -178,6 +180,15 @@ bool ContextGLES::AddTrackingFence(
   HandleGLES fence = reactor_->CreateHandle(HandleType::kFence);
   TextureGLES::Cast(*texture).SetFence(fence);
   return true;
+}
+
+// |Context|
+RuntimeStageBackend ContextGLES::GetRuntimeStageBackend() const {
+  if (GetReactor()->GetProcTable().GetDescription()->GetGlVersion().IsAtLeast(
+          Version{3, 0, 0})) {
+    return RuntimeStageBackend::kOpenGLES3;
+  }
+  return RuntimeStageBackend::kOpenGLES;
 }
 
 }  // namespace impeller

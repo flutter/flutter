@@ -118,6 +118,9 @@ class ContextMTL final : public Context,
   // |Context|
   const std::shared_ptr<const Capabilities>& GetCapabilities() const override;
 
+  // |Context|
+  RuntimeStageBackend GetRuntimeStageBackend() const override;
+
   void SetCapabilities(const std::shared_ptr<const Capabilities>& capabilities);
 
   // |Context|

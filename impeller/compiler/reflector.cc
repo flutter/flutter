@@ -312,6 +312,8 @@ static std::optional<RuntimeStageBackend> GetRuntimeStageBackend(
       return RuntimeStageBackend::kMetal;
     case TargetPlatform::kRuntimeStageGLES:
       return RuntimeStageBackend::kOpenGLES;
+    case TargetPlatform::kRuntimeStageGLES3:
+      return RuntimeStageBackend::kOpenGLES3;
     case TargetPlatform::kRuntimeStageVulkan:
       return RuntimeStageBackend::kVulkan;
     case TargetPlatform::kSkSL:

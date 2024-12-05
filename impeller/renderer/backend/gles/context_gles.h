@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_CONTEXT_GLES_H_
 
 #include "impeller/base/backend_cast.h"
+#include "impeller/core/runtime_types.h"
 #include "impeller/renderer/backend/gles/allocator_gles.h"
 #include "impeller/renderer/backend/gles/capabilities_gles.h"
 #include "impeller/renderer/backend/gles/gpu_tracer_gles.h"
@@ -105,6 +106,9 @@ class ContextGLES final : public Context,
 
   // |Context|
   [[nodiscard]] bool FlushCommandBuffers() override;
+
+  // |Context|
+  RuntimeStageBackend GetRuntimeStageBackend() const override;
 
   ContextGLES(const ContextGLES&) = delete;
 

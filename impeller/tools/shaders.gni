@@ -97,12 +97,29 @@ template("impeller_shaders") {
       analyze = false
     }
     gles_shaders = "gles_$target_name"
+
     impeller_shaders_gles(gles_shaders) {
       name = invoker.name
       require_framebuffer_fetch = require_framebuffer_fetch
       if (defined(invoker.gles_language_version)) {
         gles_language_version = invoker.gles_language_version
       }
+      if (defined(invoker.gles_exclusions)) {
+        shaders = invoker.shaders - invoker.gles_exclusions
+      } else {
+        shaders = invoker.shaders
+      }
+      analyze = analyze
+    }
+
+    gles3_shaders = "gles3_$target_name"
+
+    impeller_shaders_gles(gles3_shaders) {
+      name = invoker.name
+      require_framebuffer_fetch = require_framebuffer_fetch
+      gles_language_version = 300
+      is_300 = true
+      analyze = false
       if (defined(invoker.gles_exclusions)) {
         shaders = invoker.shaders - invoker.gles_exclusions
       } else {
@@ -139,7 +156,10 @@ template("impeller_shaders") {
     }
 
     if (enable_opengles) {
-      public_deps += [ ":$gles_shaders" ]
+      public_deps += [
+        ":$gles3_shaders",
+        ":$gles_shaders",
+      ]
     }
 
     if (impeller_enable_vulkan) {

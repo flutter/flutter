@@ -156,11 +156,15 @@ static CompilerBackend CreateGLSLCompiler(const spirv_cross::ParsedIR& ir,
   sl_options.force_zero_initialized_variables = true;
   sl_options.vertex.fixup_clipspace = true;
   if (source_options.target_platform == TargetPlatform::kOpenGLES ||
-      source_options.target_platform == TargetPlatform::kRuntimeStageGLES) {
+      source_options.target_platform == TargetPlatform::kRuntimeStageGLES ||
+      source_options.target_platform == TargetPlatform::kRuntimeStageGLES3) {
     sl_options.version = source_options.gles_language_version > 0
                              ? source_options.gles_language_version
                              : 100;
     sl_options.es = true;
+    if (source_options.target_platform == TargetPlatform::kRuntimeStageGLES3) {
+      sl_options.version = 300;
+    }
     if (source_options.require_framebuffer_fetch &&
         source_options.type == SourceType::kFragmentShader) {
       gl_compiler->remap_ext_framebuffer_fetch(0, 0, true);
@@ -202,6 +206,7 @@ static bool EntryPointMustBeNamedMain(TargetPlatform platform) {
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageGLES:
+    case TargetPlatform::kRuntimeStageGLES3:
       return true;
   }
   FML_UNREACHABLE();
@@ -224,6 +229,7 @@ static CompilerBackend CreateCompiler(const spirv_cross::ParsedIR& ir,
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageGLES:
+    case TargetPlatform::kRuntimeStageGLES3:
       compiler = CreateGLSLCompiler(ir, source_options);
       break;
     case TargetPlatform::kSkSL:
@@ -317,7 +323,8 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
       spirv_options.target = target;
     } break;
     case TargetPlatform::kRuntimeStageMetal:
-    case TargetPlatform::kRuntimeStageGLES: {
+    case TargetPlatform::kRuntimeStageGLES:
+    case TargetPlatform::kRuntimeStageGLES3: {
       SPIRVCompilerTargetEnv target;
 
       target.env = shaderc_target_env::shaderc_target_env_opengl;

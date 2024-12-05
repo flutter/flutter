@@ -6,7 +6,6 @@
 
 #include <sstream>
 
-#include "fml/closure.h"
 #include "impeller/base/allocation.h"
 #include "impeller/base/comparable.h"
 #include "impeller/base/strings.h"
@@ -180,12 +179,12 @@ void ProcTableGLES::ShaderSourceMapping(
 std::optional<std::string> ProcTableGLES::ComputeShaderWithDefines(
     const fml::Mapping& mapping,
     const std::vector<Scalar>& defines) const {
-  auto shader_source = std::string{
+  std::string shader_source = std::string{
       reinterpret_cast<const char*>(mapping.GetMapping()), mapping.GetSize()};
 
   // Look for the first newline after the '#version' header, which impellerc
   // will always emit as the first line of a compiled shader.
-  auto index = shader_source.find('\n');
+  size_t index = shader_source.find('\n');
   if (index == std::string::npos) {
     VALIDATION_LOG << "Failed to append constant data to shader";
     return std::nullopt;
