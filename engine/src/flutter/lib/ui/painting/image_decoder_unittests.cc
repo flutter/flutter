@@ -24,6 +24,7 @@
 #include "flutter/testing/test_gl_surface.h"
 #include "flutter/testing/testing.h"
 #include "fml/logging.h"
+#include "impeller/core/runtime_types.h"
 #include "impeller/renderer/command_queue.h"
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
 #include "third_party/skia/include/core/SkData.h"
@@ -95,6 +96,10 @@ class TestImpellerContext : public impeller::Context {
   void DisposeThreadLocalCachedResources() override { did_dispose_ = true; }
 
   void Shutdown() override {}
+
+  RuntimeStageBackend GetRuntimeStageBackend() const override {
+    return RuntimeStageBackend::kVulkan;
+  }
 
   bool DidDisposeResources() const { return did_dispose_; }
 

@@ -13,6 +13,7 @@
 #include "fml/logging.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "impeller/core/runtime_types.h"
 #include "shell/platform/android/context/android_context.h"
 
 namespace flutter {
@@ -83,6 +84,10 @@ class TestImpellerContext : public impeller::Context {
   }
 
   void Shutdown() override { did_shutdown = true; }
+
+  impeller::RuntimeStageBackend GetRuntimeStageBackend() const override {
+    return impeller::RuntimeStageBackend::kVulkan;
+  }
 
   bool did_shutdown = false;
 };

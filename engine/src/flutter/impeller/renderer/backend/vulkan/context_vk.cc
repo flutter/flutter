@@ -8,6 +8,7 @@
 
 #include "fml/concurrent_message_loop.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/runtime_types.h"
 #include "impeller/renderer/backend/vulkan/command_queue_vk.h"
 #include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/render_pass_builder_vk.h"
@@ -719,6 +720,10 @@ const std::unique_ptr<DriverInfoVK>& ContextVK::GetDriverInfo() const {
 
 bool ContextVK::GetShouldDisableSurfaceControlSwapchain() const {
   return should_disable_surface_control_;
+}
+
+RuntimeStageBackend ContextVK::GetRuntimeStageBackend() const {
+  return RuntimeStageBackend::kVulkan;
 }
 
 }  // namespace impeller

@@ -11,6 +11,8 @@
 #include "flutter/impeller/toolkit/egl/surface.h"
 #include "impeller/entity/gles/entity_shaders_gles.h"
 #include "impeller/entity/gles/framebuffer_blend_shaders_gles.h"
+#include "impeller/entity/gles3/entity_shaders_gles.h"
+#include "impeller/entity/gles3/framebuffer_blend_shaders_gles.h"
 
 namespace flutter {
 
@@ -55,8 +57,10 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
     FML_LOG(ERROR) << "Could not create OpenGL proc table.";
     return nullptr;
   }
+  bool is_gles3 = proc_table->GetDescription()->GetGlVersion().IsAtLeast(
+      impeller::Version{3, 0, 0});
 
-  std::vector<std::shared_ptr<fml::Mapping>> shader_mappings = {
+  std::vector<std::shared_ptr<fml::Mapping>> gles2_shader_mappings = {
       std::make_shared<fml::NonOwnedMapping>(
           impeller_entity_shaders_gles_data,
           impeller_entity_shaders_gles_length),
@@ -65,8 +69,19 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
           impeller_framebuffer_blend_shaders_gles_length),
   };
 
+  std::vector<std::shared_ptr<fml::Mapping>> gles3_shader_mappings = {
+      std::make_shared<fml::NonOwnedMapping>(
+          impeller_entity_shaders_gles3_data,
+          impeller_entity_shaders_gles3_length),
+      std::make_shared<fml::NonOwnedMapping>(
+          impeller_framebuffer_blend_shaders_gles3_data,
+          impeller_framebuffer_blend_shaders_gles3_length),
+  };
+
   auto context = impeller::ContextGLES::Create(
-      std::move(proc_table), shader_mappings, enable_gpu_tracing);
+      std::move(proc_table),
+      is_gles3 ? gles3_shader_mappings : gles2_shader_mappings,
+      enable_gpu_tracing);
   if (!context) {
     FML_LOG(ERROR) << "Could not create OpenGLES Impeller Context.";
     return nullptr;

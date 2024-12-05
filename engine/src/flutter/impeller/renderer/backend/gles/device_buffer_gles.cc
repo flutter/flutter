@@ -56,6 +56,10 @@ bool DeviceBufferGLES::OnCopyHostBuffer(const uint8_t* source,
   return true;
 }
 
+std::optional<GLuint> DeviceBufferGLES::GetHandle() const {
+  return reactor_->GetGLHandle(handle_);
+}
+
 void DeviceBufferGLES::Flush(std::optional<Range> range) const {
   if (!range.has_value()) {
     dirty_range_ = Range{
@@ -75,6 +79,8 @@ static GLenum ToTarget(DeviceBufferGLES::BindingType type) {
       return GL_ARRAY_BUFFER;
     case DeviceBufferGLES::BindingType::kElementArrayBuffer:
       return GL_ELEMENT_ARRAY_BUFFER;
+    case DeviceBufferGLES::BindingType::kUniformBuffer:
+      return GL_UNIFORM_BUFFER;
   }
   FML_UNREACHABLE();
 }

@@ -34,6 +34,7 @@ enum class TargetPlatform {
   kVulkan,
   kRuntimeStageMetal,
   kRuntimeStageGLES,
+  kRuntimeStageGLES3,
   kRuntimeStageVulkan,
   kSkSL,
 };

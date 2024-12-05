@@ -36,6 +36,7 @@ template("_impellerc") {
 #                                       --vulkan
 #                                       --runtime-stage-metal
 #                                       --runtime-stage-gles
+#                                       --runtime-stage-gles3
 #                                       --runtime-stage-vulkan
 #                                   Not required for --shader_bundle mode.
 # Required: sl_file_extension       The file extension to use for output files.

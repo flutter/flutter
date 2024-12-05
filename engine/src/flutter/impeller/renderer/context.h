@@ -236,6 +236,12 @@ class Context {
   ///
   virtual void ResetThreadLocalState() const;
 
+  /// @brief Retrieve the runtime stage for this context type.
+  ///
+  /// This is used by the engine shell and other subsystems for loading the
+  /// correct shader types.
+  virtual RuntimeStageBackend GetRuntimeStageBackend() const = 0;
+
  protected:
   Context();
 

@@ -83,5 +83,6 @@ table RuntimeStages {
   sksl: RuntimeStage;
   metal: RuntimeStage;
   opengles: RuntimeStage;
+  opengles3: RuntimeStage;
   vulkan: RuntimeStage;
 }
