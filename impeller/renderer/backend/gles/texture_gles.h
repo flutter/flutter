@@ -39,9 +39,10 @@ class TextureGLES final : public Texture,
   /// @return     If a texture representation of the framebuffer could be
   ///             created.
   ///
-  static std::shared_ptr<TextureGLES> WrapFBO(ReactorGLES::Ref reactor,
-                                              TextureDescriptor desc,
-                                              GLuint fbo);
+  static std::shared_ptr<TextureGLES> WrapFBO(
+      std::shared_ptr<ReactorGLES> reactor,
+      TextureDescriptor desc,
+      GLuint fbo);
 
   //----------------------------------------------------------------------------
   /// @brief      Create a texture by wrapping an external OpenGL texture
@@ -55,9 +56,10 @@ class TextureGLES final : public Texture,
   /// @return     If a texture representation of the framebuffer could be
   ///             created.
   ///
-  static std::shared_ptr<TextureGLES> WrapTexture(ReactorGLES::Ref reactor,
-                                                  TextureDescriptor desc,
-                                                  HandleGLES external_handle);
+  static std::shared_ptr<TextureGLES> WrapTexture(
+      std::shared_ptr<ReactorGLES> reactor,
+      TextureDescriptor desc,
+      HandleGLES external_handle);
 
   //----------------------------------------------------------------------------
   /// @brief      Create a "texture" that is never expected to be bound/unbound
@@ -70,10 +72,10 @@ class TextureGLES final : public Texture,
   /// @return     If a texture placeholder could be created.
   ///
   static std::shared_ptr<TextureGLES> CreatePlaceholder(
-      ReactorGLES::Ref reactor,
+      std::shared_ptr<ReactorGLES> reactor,
       TextureDescriptor desc);
 
-  TextureGLES(ReactorGLES::Ref reactor, TextureDescriptor desc);
+  TextureGLES(std::shared_ptr<ReactorGLES> reactor, TextureDescriptor desc);
 
   // |Texture|
   ~TextureGLES() override;
@@ -143,7 +145,7 @@ class TextureGLES final : public Texture,
   std::optional<HandleGLES> GetSyncFence() const;
 
  private:
-  ReactorGLES::Ref reactor_;
+  std::shared_ptr<ReactorGLES> reactor_;
   const Type type_;
   HandleGLES handle_;
   mutable std::optional<HandleGLES> fence_ = std::nullopt;

@@ -18,10 +18,10 @@ class AllocatorGLES final : public Allocator {
  private:
   friend class ContextGLES;
 
-  ReactorGLES::Ref reactor_;
+  std::shared_ptr<ReactorGLES> reactor_;
   bool is_valid_ = false;
 
-  explicit AllocatorGLES(ReactorGLES::Ref reactor);
+  explicit AllocatorGLES(std::shared_ptr<ReactorGLES> reactor);
 
   // |Allocator|
   bool IsValid() const;

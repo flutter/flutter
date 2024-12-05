@@ -25,11 +25,11 @@ class BlitPassGLES final : public BlitPass,
   friend class CommandBufferGLES;
 
   std::vector<std::unique_ptr<BlitEncodeGLES>> commands_;
-  ReactorGLES::Ref reactor_;
+  std::shared_ptr<ReactorGLES> reactor_;
   std::string label_;
   bool is_valid_ = false;
 
-  explicit BlitPassGLES(ReactorGLES::Ref reactor);
+  explicit BlitPassGLES(std::shared_ptr<ReactorGLES> reactor);
 
   // |BlitPass|
   bool IsValid() const override;

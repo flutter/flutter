@@ -35,7 +35,7 @@ class ContextGLES final : public Context,
   // |Context|
   BackendType GetBackendType() const override;
 
-  const ReactorGLES::Ref& GetReactor() const;
+  const std::shared_ptr<ReactorGLES>& GetReactor() const;
 
   std::optional<ReactorGLES::WorkerID> AddReactorWorker(
       const std::shared_ptr<ReactorGLES::Worker>& worker);
@@ -45,7 +45,7 @@ class ContextGLES final : public Context,
   std::shared_ptr<GPUTracerGLES> GetGPUTracer() const { return gpu_tracer_; }
 
  private:
-  ReactorGLES::Ref reactor_;
+  std::shared_ptr<ReactorGLES> reactor_;
   std::shared_ptr<ShaderLibraryGLES> shader_library_;
   std::shared_ptr<PipelineLibraryGLES> pipeline_library_;
   std::shared_ptr<SamplerLibraryGLES> sampler_library_;

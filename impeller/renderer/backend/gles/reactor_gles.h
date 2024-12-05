@@ -85,8 +85,6 @@ class ReactorGLES {
         const ReactorGLES& reactor) const = 0;
   };
 
-  using Ref = std::shared_ptr<ReactorGLES>;
-
   //----------------------------------------------------------------------------
   /// @brief      Create a new reactor. There are expensive and only one per
   ///             application instance is necessary.
