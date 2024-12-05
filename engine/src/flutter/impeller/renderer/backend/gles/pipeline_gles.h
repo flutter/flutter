@@ -38,7 +38,7 @@ class PipelineGLES final
  private:
   friend PipelineLibraryGLES;
 
-  ReactorGLES::Ref reactor_;
+  std::shared_ptr<ReactorGLES> reactor_;
   std::shared_ptr<UniqueHandleGLES> handle_;
   std::unique_ptr<BufferBindingsGLES> buffer_bindings_;
   bool is_valid_ = false;
@@ -46,7 +46,7 @@ class PipelineGLES final
   // |Pipeline|
   bool IsValid() const override;
 
-  PipelineGLES(ReactorGLES::Ref reactor,
+  PipelineGLES(std::shared_ptr<ReactorGLES> reactor,
                std::weak_ptr<PipelineLibrary> library,
                const PipelineDescriptor& desc,
                std::shared_ptr<UniqueHandleGLES> handle);

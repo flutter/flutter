@@ -11,7 +11,7 @@
 namespace impeller {
 
 CommandBufferGLES::CommandBufferGLES(std::weak_ptr<const Context> context,
-                                     ReactorGLES::Ref reactor)
+                                     std::shared_ptr<ReactorGLES> reactor)
     : CommandBuffer(std::move(context)),
       reactor_(std::move(reactor)),
       is_valid_(reactor_ && reactor_->IsValid()) {}

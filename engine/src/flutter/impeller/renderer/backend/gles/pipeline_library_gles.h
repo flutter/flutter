@@ -87,12 +87,12 @@ class PipelineLibraryGLES final
                                         ProgramKey::Hash,
                                         ProgramKey::Equal>;
 
-  ReactorGLES::Ref reactor_;
+  std::shared_ptr<ReactorGLES> reactor_;
   PipelineMap pipelines_;
   Mutex programs_mutex_;
   ProgramMap programs_ IPLR_GUARDED_BY(programs_mutex_);
 
-  explicit PipelineLibraryGLES(ReactorGLES::Ref reactor);
+  explicit PipelineLibraryGLES(std::shared_ptr<ReactorGLES> reactor);
 
   // |PipelineLibrary|
   bool IsValid() const override;
@@ -113,7 +113,7 @@ class PipelineLibraryGLES final
   void RemovePipelinesWithEntryPoint(
       std::shared_ptr<const ShaderFunction> function) override;
 
-  const ReactorGLES::Ref& GetReactor() const;
+  const std::shared_ptr<ReactorGLES>& GetReactor() const;
 
   static std::shared_ptr<PipelineGLES> CreatePipeline(
       const std::weak_ptr<PipelineLibrary>& weak_library,

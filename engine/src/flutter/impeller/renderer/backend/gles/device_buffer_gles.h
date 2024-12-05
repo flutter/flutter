@@ -20,7 +20,7 @@ class DeviceBufferGLES final
       public BackendCast<DeviceBufferGLES, DeviceBuffer> {
  public:
   DeviceBufferGLES(DeviceBufferDescriptor desc,
-                   ReactorGLES::Ref reactor,
+                   std::shared_ptr<ReactorGLES> reactor,
                    std::shared_ptr<Allocation> backing_store);
 
   // |DeviceBuffer|
@@ -44,7 +44,7 @@ class DeviceBufferGLES final
   std::optional<GLuint> GetHandle() const;
 
  private:
-  ReactorGLES::Ref reactor_;
+  std::shared_ptr<ReactorGLES> reactor_;
   HandleGLES handle_;
   mutable std::shared_ptr<Allocation> backing_store_;
   mutable std::optional<Range> dirty_range_ = std::nullopt;

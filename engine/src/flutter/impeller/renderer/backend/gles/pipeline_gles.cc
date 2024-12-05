@@ -6,7 +6,7 @@
 
 namespace impeller {
 
-PipelineGLES::PipelineGLES(ReactorGLES::Ref reactor,
+PipelineGLES::PipelineGLES(std::shared_ptr<ReactorGLES> reactor,
                            std::weak_ptr<PipelineLibrary> library,
                            const PipelineDescriptor& desc,
                            std::shared_ptr<UniqueHandleGLES> handle)

@@ -14,7 +14,7 @@
 
 namespace impeller {
 
-BlitPassGLES::BlitPassGLES(ReactorGLES::Ref reactor)
+BlitPassGLES::BlitPassGLES(std::shared_ptr<ReactorGLES> reactor)
     : reactor_(std::move(reactor)),
       is_valid_(reactor_ && reactor_->IsValid()) {}
 

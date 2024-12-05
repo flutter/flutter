@@ -16,7 +16,7 @@
 
 namespace impeller {
 
-PipelineLibraryGLES::PipelineLibraryGLES(ReactorGLES::Ref reactor)
+PipelineLibraryGLES::PipelineLibraryGLES(std::shared_ptr<ReactorGLES> reactor)
     : reactor_(std::move(reactor)) {}
 
 static std::string GetShaderInfoLog(const ProcTableGLES& gl, GLuint shader) {
@@ -324,7 +324,7 @@ void PipelineLibraryGLES::RemovePipelinesWithEntryPoint(
 // |PipelineLibrary|
 PipelineLibraryGLES::~PipelineLibraryGLES() = default;
 
-const ReactorGLES::Ref& PipelineLibraryGLES::GetReactor() const {
+const std::shared_ptr<ReactorGLES>& PipelineLibraryGLES::GetReactor() const {
   return reactor_;
 }
 
