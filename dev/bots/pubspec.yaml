@@ -2,7 +2,7 @@ name: tests_on_bots
 description: Scripts which run on bots.
 
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.7.0-0
 
 dependencies:
   analyzer: 6.11.0

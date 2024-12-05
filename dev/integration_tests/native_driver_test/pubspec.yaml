@@ -2,7 +2,7 @@ name: native_driver_test
 publish_to: none
 
 environment:
-  sdk: ^3.6.0-216.0.dev
+  sdk: ^3.7.0-0
 
 dependencies:
   native_driver:

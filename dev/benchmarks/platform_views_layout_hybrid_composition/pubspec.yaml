@@ -2,7 +2,7 @@ name: platform_views_layout_hybrid_composition
 description: A benchmark for platform views, using hybrid composition on android.
 
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.7.0-0
 
 dependencies:
   flutter:

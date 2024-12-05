@@ -1,7 +1,7 @@
 name: native_driver
 
 environment:
-  sdk: ^3.5.0
+  sdk: ^3.7.0-0
 
 dependencies:
   flutter:

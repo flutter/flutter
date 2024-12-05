@@ -3,7 +3,7 @@ description: Flutter continuous integration performance and correctness tests.
 homepage: https://github.com/flutter/flutter
 
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.7.0-0
 
 dependencies:
   archive: 3.6.1

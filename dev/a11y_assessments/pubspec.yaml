@@ -3,7 +3,7 @@ description: A new Flutter project
 version: 5.0.0+5
 
 environment:
-  sdk: '>=3.2.0-22.0.dev <4.0.0'
+  sdk: ^3.7.0-0
 
 dependencies:
   flutter:
