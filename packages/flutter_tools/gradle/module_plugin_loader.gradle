@@ -33,9 +33,9 @@ gradle.projectsLoaded { final Gradle gradleInstance ->
                 subproject.layout.buildDirectory.fileValue(androidPluginBuildOutputDir)
             }
         }
-        final def mainModuleName = binding.variables['mainModuleName']
-        if (mainModuleName != null && !mainModuleName.empty) {
-            project.ext.mainModuleName = mainModuleName
+        final def _mainModuleName = binding.variables['mainModuleName']
+        if (_mainModuleName != null && !_mainModuleName.empty) {
+            project.ext.mainModuleName = _mainModuleName
         }
     }
     gradleInstance.rootProject.afterEvaluate { final Project project ->
