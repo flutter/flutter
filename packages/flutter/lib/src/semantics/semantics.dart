@@ -2092,8 +2092,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// Visits the immediate children of this node.
   ///
   /// This function calls visitor for each immediate child until visitor returns
-  /// false. Returns true if all the visitor calls returned true, otherwise
-  /// returns false.
+  /// false.
   void visitChildren(SemanticsNodeVisitor visitor) {
     if (_children != null) {
       for (final SemanticsNode child in _children!) {

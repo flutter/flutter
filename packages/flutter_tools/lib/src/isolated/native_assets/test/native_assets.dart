@@ -52,11 +52,11 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   }
 
   // Only `flutter test` uses the
-  // `build/native_assets/<os>/native_assets.yaml` file which uses absolute
+  // `build/native_assets/<os>/native_assets.json` file which uses absolute
   // paths to the shared libraries.
   final OS targetOS = getNativeOSFromTargetPlatform(TargetPlatform.tester);
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
-  final Uri nativeAssetsFileUri = buildUri.resolve('native_assets.yaml');
+  final Uri nativeAssetsFileUri = buildUri.resolve('native_assets.json');
 
   final Map<String, String> environmentDefines = <String, String>{
     kBuildMode: buildInfo.mode.cliName,

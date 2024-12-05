@@ -27,6 +27,7 @@ import '../native_assets.dart';
 import '../project.dart';
 import '../test/test_wrapper.dart';
 
+import '../vmservice.dart';
 import 'flutter_tester_device.dart';
 import 'font_config_manager.dart';
 import 'integration_test_device.dart';
@@ -425,8 +426,12 @@ class FlutterPlatform extends PlatformPlugin {
       await compiler!.compiler!.compileExpression(expression, definitions,
         definitionTypes, typeDefinitions, typeBounds, typeDefaults, libraryUri,
         klass, method, isStatic);
-    if (compilerOutput != null && compilerOutput.expressionData != null) {
-      return base64.encode(compilerOutput.expressionData!);
+    if (compilerOutput != null) {
+      if (compilerOutput.errorCount == 0 && compilerOutput.expressionData != null) {
+        return base64.encode(compilerOutput.expressionData!);
+      } else if (compilerOutput.errorCount > 0 && compilerOutput.errorMessage != null) {
+        throw VmServiceExpressionCompilationException(compilerOutput.errorMessage!);
+      }
     }
     throw Exception('Failed to compile $expression');
   }
@@ -524,7 +529,6 @@ class FlutterPlatform extends PlatformPlugin {
             flutterProject,
             precompiledDillPath: precompiledDillPath,
             testTimeRecorder: testTimeRecorder,
-            nativeAssetsBuilder: nativeAssetsBuilder,
           );
           final Uri uri = globals.fs.file(path).uri;
           // Trigger a compilation to initialize the resident compiler.
@@ -551,7 +555,6 @@ class FlutterPlatform extends PlatformPlugin {
             debuggingOptions.buildInfo,
             flutterProject,
             testTimeRecorder: testTimeRecorder,
-            nativeAssetsBuilder: nativeAssetsBuilder,
           );
           mainDart = await compiler!.compile(globals.fs.file(mainDart).uri);
 
