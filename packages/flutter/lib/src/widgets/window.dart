@@ -107,17 +107,17 @@ class RegularWindow extends StatefulWidget {
 
 class _RegularWindowState extends State<RegularWindow> {
   _WindowListener? _listener;
-  Future<RegularWindowMetadata>? _future;
+  Future<WindowCreationResult>? _future;
   _WindowingAppState? _app;
 
   @override
   void initState() {
     super.initState();
     _future = createRegular(size: widget._preferredSize);
-    _future!.then((RegularWindowMetadata metadata) async {
+    _future!.then((WindowCreationResult metadata) async {
       if (widget.controller != null) {
-        widget.controller!.view = metadata.view;
-        widget.controller!.parentViewId = metadata.parentViewId;
+        widget.controller!.view = metadata.flView;
+        widget.controller!.parentViewId = metadata.parent;
         widget.controller!.size = metadata.size;
       }
 
@@ -126,7 +126,7 @@ class _RegularWindowState extends State<RegularWindow> {
             _WindowingAppContext.of(context);
         assert(windowingAppContext != null);
         _listener = _WindowListener(
-            viewId: metadata.view.viewId,
+            viewId: metadata.flView.viewId,
             onChanged: (_WindowChangeProperties properties) {
               if (widget.controller == null) {
                 return;
@@ -160,19 +160,19 @@ class _RegularWindowState extends State<RegularWindow> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<RegularWindowMetadata>(
+    return FutureBuilder<WindowCreationResult>(
         key: widget.key,
         future: _future,
         builder: (BuildContext context,
-            AsyncSnapshot<RegularWindowMetadata> metadata) {
+            AsyncSnapshot<WindowCreationResult> metadata) {
           if (!metadata.hasData) {
             return const ViewCollection(views: <Widget>[]);
           }
 
           return View(
-              view: metadata.data!.view,
+              view: metadata.data!.flView,
               child: WindowContext(
-                  viewId: metadata.data!.view.viewId, child: widget.child));
+                  viewId: metadata.data!.flView.viewId, child: widget.child));
         });
   }
 }
@@ -196,39 +196,25 @@ class WindowContext extends InheritedWidget {
   }
 }
 
-/// Base class for window creation metadata.
-abstract class WindowMetadata {
-  /// Creates generic window metadata.
-  WindowMetadata({required this.view, required this.size, this.parentViewId});
-
-  /// The view associated with the window.
-  final FlutterView view;
-
-  /// The size of the created window.
-  final Size size;
-
-  /// The parent view of the window, if any.
-  final int? parentViewId;
-}
-
-/// Data object returned by [createRegular].
-class RegularWindowMetadata extends WindowMetadata {
-  /// Creates metadata for a regular window. This should only be initialized
-  /// by [createRegular].
-  RegularWindowMetadata(
-      {required super.view, required super.size});
-}
-
-class _WindowCreationResult {
-  _WindowCreationResult(
+/// The raw data returned as a result of creating a window.
+class WindowCreationResult {
+  /// Creates a new window.
+  WindowCreationResult(
       {required this.flView,
       required this.archetype,
       required this.size,
       this.parent});
 
+  /// The view associated with the window.
   final FlutterView flView;
+
+  /// The archetype of the window.
   final WindowArchetype archetype;
+
+  /// The initial size of the window.
   final Size size;
+
+  /// The id of the window's parent, if any.
   final int? parent;
 }
 
@@ -237,17 +223,15 @@ class _WindowCreationResult {
 /// widget instead of this method.
 ///
 /// [size] the size of the new [Window] in pixels
-Future<RegularWindowMetadata> createRegular({required Size size}) async {
-  final _WindowCreationResult metadata =
-      await _createWindow(viewBuilder: (MethodChannel channel) async {
+Future<WindowCreationResult> createRegular({required Size size}) {
+  return _createWindow(viewBuilder: (MethodChannel channel) async {
     return await channel.invokeMethod('createWindow', <String, dynamic>{
       'size': <int>[size.width.toInt(), size.height.toInt()],
     }) as Map<Object?, Object?>;
   });
-  return RegularWindowMetadata(view: metadata.flView, size: metadata.size);
 }
 
-Future<_WindowCreationResult> _createWindow(
+Future<WindowCreationResult> _createWindow(
     {required Future<Map<Object?, Object?>> Function(MethodChannel channel)
         viewBuilder}) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -267,7 +251,7 @@ Future<_WindowCreationResult> _createWindow(
     },
   );
 
-  return _WindowCreationResult(
+  return WindowCreationResult(
       flView: flView,
       archetype: archetype,
       size: Size((size[0]! as int).toDouble(), (size[1]! as int).toDouble()),
@@ -318,8 +302,7 @@ class WindowingApp extends StatefulWidget {
   State<WindowingApp> createState() => _WindowingAppState();
 }
 
-class _WindowingAppState extends State<WindowingApp>
-{
+class _WindowingAppState extends State<WindowingApp> {
   final List<_WindowListener> _listeners = <_WindowListener>[];
 
   @override
