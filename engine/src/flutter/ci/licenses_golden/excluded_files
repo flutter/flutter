@@ -947,6 +947,7 @@
 ../../../flutter/third_party/angle/util
 ../../../flutter/third_party/benchmark
 ../../../flutter/third_party/boringssl/src/.bazelrc
+../../../flutter/third_party/boringssl/src/.bazelversion
 ../../../flutter/third_party/boringssl/src/.bcr/README.md
 ../../../flutter/third_party/boringssl/src/.clang-format
 ../../../flutter/third_party/boringssl/src/.git
@@ -1068,6 +1069,7 @@
 ../../../flutter/third_party/boringssl/src/gen/sources.bzl
 ../../../flutter/third_party/boringssl/src/gen/sources.cmake
 ../../../flutter/third_party/boringssl/src/gen/test_support
+../../../flutter/third_party/boringssl/src/infra/config/README.md
 ../../../flutter/third_party/boringssl/src/pki/README.md
 ../../../flutter/third_party/boringssl/src/pki/cert_issuer_source_static_unittest.cc
 ../../../flutter/third_party/boringssl/src/pki/cert_issuer_source_sync_unittest.h
@@ -1107,6 +1109,7 @@
 ../../../flutter/third_party/boringssl/src/rust
 ../../../flutter/third_party/boringssl/src/ssl/span_test.cc
 ../../../flutter/third_party/boringssl/src/ssl/ssl_c_test.c
+../../../flutter/third_party/boringssl/src/ssl/ssl_internal_test.cc
 ../../../flutter/third_party/boringssl/src/ssl/ssl_test.cc
 ../../../flutter/third_party/boringssl/src/ssl/test
 ../../../flutter/third_party/boringssl/src/third_party/fiat/METADATA
