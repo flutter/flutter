@@ -65,7 +65,7 @@ class _SliderExampleState extends State<SliderExample> {
             ),
             SwitchListTile(
               value: year2023,
-              title: const Text('Toggle year2023 flag'),
+              title: year2023 ? const Text('Switch to latest M3 style') : const Text('Switch to year2023 M3 style'),
               onChanged: (bool value) {
                 setState(() {
                   year2023 = !year2023;

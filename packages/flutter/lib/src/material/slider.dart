@@ -79,8 +79,7 @@ enum SliderInteraction {
 ///
 /// {@tool dartpad}
 /// This example showcases non-discrete and discrete [Slider]s.
-/// The [Slider]s will use the updated Material 3 Design appearance
-/// as described in: https://m3.material.io/components/sliders/overview,
+/// The [Slider]s will show the updated ![Material 3 Design appearance](https://m3.material.io/components/sliders/overview)
 /// when setting the [Slider.year2023] flag to false.
 ///
 /// ** See code in examples/api/lib/material/slider/slider.0.dart **
