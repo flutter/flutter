@@ -566,7 +566,7 @@ class Slider extends StatefulWidget {
   /// overlay shape, whichever is larger.
   final EdgeInsetsGeometry? padding;
 
-  /// When true, the [Slider] will use the 2023 Material 3 esign appearance.
+  /// When true, the [Slider] will use the 2023 Material 3 design appearance.
   ///
   /// Defaults to true. If false, the [Slider] will use the latest Material 3
   /// Design appearance, which was introduced in December 2023.

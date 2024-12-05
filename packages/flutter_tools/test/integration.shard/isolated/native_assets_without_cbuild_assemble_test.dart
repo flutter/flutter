@@ -25,7 +25,7 @@ import 'native_assets_test_utils.dart';
 /// combinations that could trigger this error.
 ///
 /// The version of `native_assets_cli` is derived from the template used by
-/// `flutter create --type=pacakges_ffi`. See
+/// `flutter create --type=packages_ffi`. See
 /// [_getPackageFfiTemplatePubspecVersion].
 void main() {
   if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {

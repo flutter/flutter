@@ -1860,7 +1860,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
   /// Returns the bounding [Rect] of the text selection handle in local
   /// coordinates.
   ///
-  /// When interacting with a text seletion handle through a touch event, the
+  /// When interacting with a text selection handle through a touch event, the
   /// interactive area should be at least [kMinInteractiveDimension] square,
   /// which this method does not consider.
   Rect _getHandleRect(TextSelectionHandleType type, double preferredLineHeight) {
