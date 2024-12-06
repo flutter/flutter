@@ -143,6 +143,7 @@ const String _kFlutterPluginsPathKey = 'path';
 const String _kFlutterPluginsDependenciesKey = 'dependencies';
 const String _kFlutterPluginsHasNativeBuildKey = 'native_build';
 const String _kFlutterPluginsSharedDarwinSource = 'shared_darwin_source';
+const String _kFlutterPluginsDevDependencyKey = 'dev_dependency';
 
 /// Writes the .flutter-plugins-dependencies file based on the list of plugins.
 /// If there aren't any plugins, then the files aren't written to disk. The resulting
@@ -270,6 +271,7 @@ List<Map<String, Object>> _createPluginMapOfPlatform(
       if (platformPlugin is NativeOrDartPlugin)
         _kFlutterPluginsHasNativeBuildKey: (platformPlugin as NativeOrDartPlugin).hasMethodChannel() || (platformPlugin as NativeOrDartPlugin).hasFfi(),
       _kFlutterPluginsDependenciesKey: <String>[...plugin.dependencies.where(pluginNames.contains)],
+      _kFlutterPluginsDevDependencyKey: plugin.isDevDependency,
     });
   }
   return pluginInfo;
@@ -1370,7 +1372,7 @@ String? _validatePlugin(Plugin plugin, String platformKey, {
     if (_hasPluginInlineImpl(plugin, platformKey, pluginResolutionType: pluginResolutionType)) {
       return 'Plugin ${plugin.name}:$platformKey which provides an inline implementation '
           'cannot also reference a default implementation for $defaultImplPluginName. '
-          'Ask the maintainers of ${plugin.name} to either remove the implementation via `platforms: $platformKey:${pluginResolutionType == _PluginResolutionType.dart ? ' dartPluginClass' : '` `pluginClass` or `dartPLuginClass'}` '
+          'Ask the maintainers of ${plugin.name} to either remove the implementation via `platforms: $platformKey:${pluginResolutionType == _PluginResolutionType.dart ? ' dartPluginClass' : '` `pluginClass` or `dartPluginClass'}` '
           'or avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName`.\n';
     }
   }

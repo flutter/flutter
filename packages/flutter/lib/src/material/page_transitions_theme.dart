@@ -556,7 +556,7 @@ abstract class PageTransitionsBuilder {
   /// const constructors so that they can be used in const expressions.
   const PageTransitionsBuilder();
 
-  /// Provideds a secondary transition to the previous route.
+  /// Provides a secondary transition to the previous route.
   ///
   /// {@macro flutter.widgets.delegatedTransition}
   DelegatedTransitionBuilder? get delegatedTransition => null;

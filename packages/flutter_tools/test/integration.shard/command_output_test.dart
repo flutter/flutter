@@ -16,7 +16,6 @@ import 'test_utils.dart';
 
 void main() {
   testWithoutContext('All development tools and deprecated commands are hidden and help text is not verbose', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       '-h',
@@ -34,7 +33,6 @@ void main() {
   });
 
   testWithoutContext('Flutter help is shown with -? command line argument', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       '-?',
@@ -48,7 +46,6 @@ void main() {
   });
 
   testWithoutContext('flutter doctor is not verbose', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'doctor',
@@ -60,7 +57,6 @@ void main() {
   });
 
   testWithoutContext('flutter doctor -vv super verbose', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'doctor',
@@ -72,7 +68,6 @@ void main() {
   });
 
   testWithoutContext('flutter config --list contains all features', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'config',
@@ -99,7 +94,6 @@ void main() {
         .childDirectory('lib')
         .childFile('main.dart')
         .createSync(recursive: true);
-      final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
       final ProcessResult result = await processManager.run(<String>[
         flutterBin,
         'run',
@@ -115,7 +109,6 @@ void main() {
   });
 
   testWithoutContext('flutter attach --machine uses AppRunLogger', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'attach',
@@ -127,7 +120,6 @@ void main() {
   });
 
   testWithoutContext('flutter --version --machine outputs JSON with flutterRoot', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       '--version',
@@ -145,7 +137,6 @@ void main() {
 
   testWithoutContext('A tool exit is thrown for an invalid debug-url in flutter attach', () async {
     // This test is almost exactly like the next one; update them together please.
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
@@ -164,7 +155,6 @@ void main() {
 
   testWithoutContext('--debug-uri is an alias for --debug-url', () async {
     // This text is exactly the same as the previous one but with a "l" turned to an "i".
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
@@ -186,8 +176,6 @@ void main() {
   });
 
   testWithoutContext('will load bootstrap script before starting', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-
     final File bootstrap = fileSystem.file(fileSystem.path.join(
       getFlutterRoot(),
       'bin',
@@ -208,7 +196,6 @@ void main() {
   });
 
   testWithoutContext('Providing sksl bundle with missing file with tool exit', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
@@ -224,7 +211,6 @@ void main() {
   });
 
   testWithoutContext('flutter attach does not support --release', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
@@ -238,7 +224,6 @@ void main() {
   });
 
   testWithoutContext('flutter can report crashes', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'update-packages',
@@ -255,7 +240,6 @@ void main() {
   });
 
   testWithoutContext('flutter supports trailing args', () async {
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final String helloWorld = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,

@@ -518,6 +518,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   double? leadingPadding;
   bool _menuHasEnabledItem = false;
   TextEditingController? _localTextEditingController;
+  final FocusNode _internalFocudeNode = FocusNode();
 
   TextEditingValue get _initialTextEditingValue {
     for (final DropdownMenuEntry<T> entry in filteredEntries) {
@@ -554,6 +555,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       _localTextEditingController?.dispose();
       _localTextEditingController = null;
     }
+    _internalFocudeNode.dispose();
     super.dispose();
   }
 
@@ -832,8 +834,30 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         _enableFilter = false;
       }
       controller.open();
+      _internalFocudeNode.requestFocus();
     }
     setState(() {});
+  }
+
+  void _handleEditingComplete() {
+    if (currentHighlight != null) {
+      final DropdownMenuEntry<T> entry = filteredEntries[currentHighlight!];
+      if (entry.enabled) {
+        _localTextEditingController?.value = TextEditingValue(
+          text: entry.label,
+          selection: TextSelection.collapsed(offset: entry.label.length),
+        );
+        widget.onSelected?.call(entry.value);
+      }
+    } else {
+      if (_controller.isOpen) {
+        widget.onSelected?.call(null);
+      }
+    }
+    if (!widget.enableSearch) {
+      currentHighlight = null;
+    }
+    _controller.close();
   }
 
   @override
@@ -902,7 +926,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       controller: _controller,
       menuChildren: menu,
       crossAxisUnconstrained: false,
-      layerLink: LayerLink(),
       builder: (BuildContext context, MenuController controller, Widget? child) {
         assert(_initialMenu != null);
         final Widget trailingButton = Padding(
@@ -935,24 +958,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           textAlignVertical: TextAlignVertical.center,
           style: effectiveTextStyle,
           controller: _localTextEditingController,
-          onEditingComplete: () {
-            if (currentHighlight != null) {
-              final DropdownMenuEntry<T> entry = filteredEntries[currentHighlight!];
-              if (entry.enabled) {
-                _localTextEditingController?.value = TextEditingValue(
-                  text: entry.label,
-                  selection: TextSelection.collapsed(offset: entry.label.length),
-                );
-                widget.onSelected?.call(entry.value);
-              }
-            } else {
-              widget.onSelected?.call(null);
-            }
-            if (!widget.enableSearch) {
-              currentHighlight = null;
-            }
-            controller.close();
-          },
+          onEditingComplete: _handleEditingComplete,
           onTap: !widget.enabled ? null : () {
             handlePressed(controller);
           },
@@ -1023,6 +1029,17 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       );
     }
 
+    // Wrap the menu anchor with an Align to narrow down the constraints.
+    // Without this Align, when tight constraints are applied to DropdownMenu,
+    // the menu will appear below these constraints instead of below the
+    // text field.
+    menuAnchor = Align(
+      alignment: AlignmentDirectional.topStart,
+      widthFactor: 1.0,
+      heightFactor: 1.0,
+      child: menuAnchor,
+    );
+
     return Actions(
       actions: <Type, Action<Intent>>{
         _ArrowUpIntent: CallbackAction<_ArrowUpIntent>(
@@ -1031,8 +1048,28 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         _ArrowDownIntent: CallbackAction<_ArrowDownIntent>(
           onInvoke: handleDownKeyInvoke,
         ),
+        _EnterIntent: CallbackAction<_EnterIntent>(
+          onInvoke: (_) => _handleEditingComplete(),
+        ),
       },
-      child: menuAnchor,
+      child: Stack(
+        children: <Widget>[
+          // Handling keyboard navigation when the Textfield has no focus.
+          Shortcuts(
+            shortcuts: const <ShortcutActivator, Intent>{
+              SingleActivator(LogicalKeyboardKey.arrowUp): _ArrowUpIntent(),
+              SingleActivator(LogicalKeyboardKey.arrowDown): _ArrowDownIntent(),
+              SingleActivator(LogicalKeyboardKey.enter): _EnterIntent(),
+            },
+            child: Focus(
+              focusNode: _internalFocudeNode,
+              skipTraversal: true,
+              child: const SizedBox.shrink(),
+            ),
+          ),
+          menuAnchor,
+        ],
+      ),
     );
   }
 }
@@ -1050,6 +1087,10 @@ class _ArrowUpIntent extends Intent {
 
 class _ArrowDownIntent extends Intent {
   const _ArrowDownIntent();
+}
+
+class _EnterIntent extends Intent {
+  const _EnterIntent();
 }
 
 class _DropdownMenuBody extends MultiChildRenderObjectWidget {

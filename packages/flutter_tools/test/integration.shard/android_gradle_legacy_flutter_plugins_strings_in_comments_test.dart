@@ -24,12 +24,6 @@ void main() {
   });
 
   test('should build Android app with commented-out ".flutter-plugins" in settings.gradle', () async {
-    final String flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
-
     // Create Android app project instead of plugin
     processManager.runSync(<String>[
       flutterBin,

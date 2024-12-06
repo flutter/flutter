@@ -42,7 +42,17 @@ class ProgressIndicatorThemeData with Diagnosticable {
     this.borderRadius,
     this.stopIndicatorColor,
     this.stopIndicatorRadius,
+    this.strokeWidth,
+    this.strokeAlign,
+    this.strokeCap,
+    this.constraints,
     this.trackGap,
+    this.circularTrackPadding,
+    @Deprecated(
+      'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
+      'This feature was deprecated after v3.27.0-0.2.pre.'
+    )
+    this.year2023,
   });
 
   /// The color of the [ProgressIndicator]'s indicator.
@@ -85,11 +95,46 @@ class ProgressIndicatorThemeData with Diagnosticable {
   /// is false, then no stop indicator will be drawn.
   final double? stopIndicatorRadius;
 
-  /// Overrides the gap between the [LinearProgressIndicator].
+  /// Overrides the stroke width of the [CircularProgressIndicator].
+  final double? strokeWidth;
+
+  /// Overrides the stroke align of the [CircularProgressIndicator].
+  final double? strokeAlign;
+
+  /// Overrides the stroke cap of the [CircularProgressIndicator].
+  final StrokeCap? strokeCap;
+
+  /// Overrides the constraints of the [CircularProgressIndicator].
+  final BoxConstraints? constraints;
+
+  /// Overrides the active indicator and the background track.
+  ///
+  /// If [CircularProgressIndicator.year2023] is false or [ThemeData.useMaterial3]
+  /// is false, then no track gap will be drawn.
   ///
   /// If [LinearProgressIndicator.year2023] is false or [ThemeData.useMaterial3]
   /// is false, then no track gap will be drawn.
   final double? trackGap;
+
+  /// Overrides the padding of the [CircularProgressIndicator].
+  final EdgeInsetsGeometry? circularTrackPadding;
+
+  /// Overrides the [CircularProgressIndicator.year2023] and
+  /// [LinearProgressIndicator.year2023] properties.
+  ///
+  /// When true, the [CircularProgressIndicator] and [LinearProgressIndicator]
+  /// will use the 2023 Material Design 3 appearance. Defaults to true.
+  ///
+  /// If this is set to false, the [CircularProgressIndicator] and
+  /// [LinearProgressIndicator] will use the latest Material Design 3 appearance,
+  /// which was introduced in December 2023.
+  ///
+  /// If [ThemeData.useMaterial3] is false, then this property is ignored.
+  @Deprecated(
+    'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
+    'This feature was deprecated after v3.27.0-0.2.pre.'
+  )
+  final bool? year2023;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -102,7 +147,13 @@ class ProgressIndicatorThemeData with Diagnosticable {
     BorderRadiusGeometry? borderRadius,
     Color? stopIndicatorColor,
     double? stopIndicatorRadius,
+    double? strokeWidth,
+    double? strokeAlign,
+    StrokeCap? strokeCap,
+    BoxConstraints? constraints,
     double? trackGap,
+    EdgeInsetsGeometry? circularTrackPadding,
+    bool? year2023,
   }) {
     return ProgressIndicatorThemeData(
       color: color ?? this.color,
@@ -113,7 +164,13 @@ class ProgressIndicatorThemeData with Diagnosticable {
       borderRadius : borderRadius ?? this.borderRadius,
       stopIndicatorColor : stopIndicatorColor ?? this.stopIndicatorColor,
       stopIndicatorRadius : stopIndicatorRadius ?? this.stopIndicatorRadius,
+      strokeWidth : strokeWidth ?? this.strokeWidth,
+      strokeAlign : strokeAlign ?? this.strokeAlign,
+      strokeCap : strokeCap ?? this.strokeCap,
+      constraints: constraints ?? this.constraints,
       trackGap : trackGap ?? this.trackGap,
+      circularTrackPadding: circularTrackPadding ?? this.circularTrackPadding,
+      year2023: year2023 ?? this.year2023,
     );
   }
 
@@ -133,7 +190,13 @@ class ProgressIndicatorThemeData with Diagnosticable {
       borderRadius : BorderRadiusGeometry.lerp(a?.borderRadius, b?.borderRadius, t),
       stopIndicatorColor : Color.lerp(a?.stopIndicatorColor, b?.stopIndicatorColor, t),
       stopIndicatorRadius : lerpDouble(a?.stopIndicatorRadius, b?.stopIndicatorRadius, t),
+      strokeWidth : lerpDouble(a?.strokeWidth, b?.strokeWidth, t),
+      strokeAlign : lerpDouble(a?.strokeAlign, b?.strokeAlign, t),
+      strokeCap : t < 0.5 ? a?.strokeCap : b?.strokeCap,
+      constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
       trackGap : lerpDouble(a?.trackGap, b?.trackGap, t),
+      circularTrackPadding: EdgeInsetsGeometry.lerp(a?.circularTrackPadding, b?.circularTrackPadding, t),
+      year2023: t < 0.5 ? a?.year2023 : b?.year2023,
     );
   }
 
@@ -147,7 +210,13 @@ class ProgressIndicatorThemeData with Diagnosticable {
     borderRadius,
     stopIndicatorColor,
     stopIndicatorRadius,
+    strokeAlign,
+    strokeWidth,
+    strokeCap,
+    constraints,
     trackGap,
+    circularTrackPadding,
+    year2023,
   );
 
   @override
@@ -167,7 +236,13 @@ class ProgressIndicatorThemeData with Diagnosticable {
       && other.borderRadius == borderRadius
       && other.stopIndicatorColor == stopIndicatorColor
       && other.stopIndicatorRadius == stopIndicatorRadius
-      && other.trackGap == trackGap;
+      && other.strokeAlign == strokeAlign
+      && other.strokeWidth == strokeWidth
+      && other.strokeCap == strokeCap
+      && other.constraints == constraints
+      && other.trackGap == trackGap
+      && other.circularTrackPadding == circularTrackPadding
+      && other.year2023 == year2023;
   }
 
   @override
@@ -181,7 +256,13 @@ class ProgressIndicatorThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius, defaultValue: null));
     properties.add(ColorProperty('stopIndicatorColor', stopIndicatorColor, defaultValue: null));
     properties.add(DoubleProperty('stopIndicatorRadius', stopIndicatorRadius, defaultValue: null));
+    properties.add(DoubleProperty('strokeWidth', strokeWidth, defaultValue: null));
+    properties.add(DoubleProperty('strokeAlign', strokeAlign, defaultValue: null));
+    properties.add(DiagnosticsProperty<StrokeCap>('strokeCap', strokeCap, defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
     properties.add(DoubleProperty('trackGap', trackGap, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('circularTrackPadding', circularTrackPadding, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('year2023', year2023, defaultValue: null));
   }
 }
 

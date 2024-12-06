@@ -26,6 +26,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
 
@@ -768,10 +769,18 @@ class FlutterPlugin implements Plugin<Project> {
         // Apply the "flutter" Gradle extension to plugins so that they can use it's vended
         // compile/target/min sdk values.
         pluginProject.extensions.create("flutter", FlutterExtension)
+
         // Add plugin dependency to the app project.
-        project.dependencies {
-            api(pluginProject)
+        project.android.buildTypes.each { buildType ->
+            String flutterBuildMode = buildModeFor(buildType)
+            if (flutterBuildMode != "release" || !pluginObject.dev_dependency) {
+                // Only add dependency on dev dependencies in non-release builds.
+                project.dependencies {
+                    api(pluginProject)
+                }
+            }
         }
+
         Closure addEmbeddingDependencyToPlugin = { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
             // In AGP 3.5, the embedding must be added as an API implementation,
@@ -781,6 +790,12 @@ class FlutterPlugin implements Plugin<Project> {
                 return
             }
             if (!pluginProject.hasProperty("android")) {
+                return
+            }
+            if (flutterBuildMode == "release" && pluginObject.dev_dependency) {
+                // This plugin is a dev dependency and will not be included in
+                // the release build,  so no need to add the embedding
+                // dependency to it.
                 return
             }
             // Copy build types from the app to the plugin.
@@ -943,20 +958,29 @@ class FlutterPlugin implements Plugin<Project> {
         if (pluginProject == null) {
             return
         }
-        def dependencies = pluginObject.dependencies
-        assert(dependencies instanceof List<String>)
-        dependencies.each { pluginDependencyName ->
-            if (pluginDependencyName.empty) {
+
+        project.android.buildTypes.each { buildType ->
+            String flutterBuildMode = buildModeFor(buildType)
+            if (flutterBuildMode == "release" && pluginObject.dev_dependency) {
+                // This plugin is a dev dependency will not be included in the
+                // release build, so no need to add its dependencies.
                 return
             }
-            Project dependencyProject = project.rootProject.findProject(":$pluginDependencyName")
-            if (dependencyProject == null) {
-                return
-            }
-            // Wait for the Android plugin to load and add the dependency to the plugin project.
-            pluginProject.afterEvaluate {
-                pluginProject.dependencies {
-                    implementation(dependencyProject)
+            def dependencies = pluginObject.dependencies
+            assert(dependencies instanceof List<String>)
+            dependencies.each { pluginDependencyName ->
+                if (pluginDependencyName.empty) {
+                    return
+                }
+                Project dependencyProject = project.rootProject.findProject(":$pluginDependencyName")
+                if (dependencyProject == null) {
+                    return
+                }
+                // Wait for the Android plugin to load and add the dependency to the plugin project.
+                pluginProject.afterEvaluate {
+                    pluginProject.dependencies {
+                        implementation(dependencyProject)
+                    }
                 }
             }
         }
@@ -1248,7 +1272,7 @@ class FlutterPlugin implements Plugin<Project> {
             // original value. You either need to hoist the value
             // into a separate variable `verbose verboseValue` or prefix with
             // `this` (`verbose this.isVerbose()`).
-            FlutterTask compileTask = project.tasks.create(name: taskName, type: FlutterTask) {
+            TaskProvider<FlutterTask> compileTaskProvider = project.tasks.register(taskName , FlutterTask) {
                 flutterRoot(this.flutterRoot)
                 flutterExecutable(this.flutterExecutable)
                 buildMode(variantBuildMode)
@@ -1279,8 +1303,9 @@ class FlutterPlugin implements Plugin<Project> {
                 validateDeferredComponents(validateDeferredComponentsValue)
                 flavor(flavorValue)
             }
+            Task compileTask = compileTaskProvider.get();
             File libJar = project.file(project.layout.buildDirectory.dir("$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar"))
-            Task packJniLibsTask = project.tasks.create(name: "packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
+            TaskProvider<Jar> packJniLibsTaskProvider = project.tasks.register("packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", Jar) {
                 destinationDirectory = libJar.parentFile
                 archiveFileName = libJar.name
                 dependsOn compileTask
@@ -1305,12 +1330,12 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
+            Task packJniLibsTask = packJniLibsTaskProvider.get();
             addApiDependencies(project, variant.name, project.files {
                 packJniLibsTask
             })
-            Task copyFlutterAssetsTask = project.tasks.create(
-                name: "copyFlutterAssets${variant.name.capitalize()}",
-                type: Copy,
+            TaskProvider<Copy> copyFlutterAssetsTaskProvider = project.tasks.register(
+            "copyFlutterAssets${variant.name.capitalize()}" , Copy
             ) {
                 dependsOn(compileTask)
                 with(compileTask.assets)
@@ -1344,6 +1369,7 @@ class FlutterPlugin implements Plugin<Project> {
                 mergeAssets.mustRunAfter("clean${mergeAssets.name.capitalize()}")
                 into(mergeAssets.outputDir)
             }
+            Task copyFlutterAssetsTask = copyFlutterAssetsTaskProvider.get();
             if (!isUsedAsSubproject) {
                 def variantOutput = variant.outputs.first()
                 def processResources = variantOutput.hasProperty(propProcessResourcesProvider) ?

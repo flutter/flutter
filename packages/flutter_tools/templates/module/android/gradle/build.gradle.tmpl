@@ -1,18 +1,5 @@
 // Generated file. Do not edit.
 
-buildscript {
-    ext.kotlin_version = "{{kotlinVersion}}"
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath("com.android.tools.build:gradle:{{agpVersionForModule}}")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
-    }
-}
-
 allprojects {
     repositories {
         google()
@@ -30,8 +17,4 @@ android {
         minSdk = {{minSdkVersion}}
         targetSdk = {{targetSdkVersion}}
     }
-}
-
-dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version")
 }

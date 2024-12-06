@@ -1066,7 +1066,12 @@ enum SelectionChangedCause {
   /// of text.
   drag,
 
-  /// The user used iPadOS 14+ Scribble to change the selection.
+  // TODO(justinmc): Rename this to stylusHandwriting.
+  // https://github.com/flutter/flutter/issues/159223
+  /// The user used stylus handwriting to change the selection.
+  ///
+  /// Currently, this is only supported on iPadOS 14+ via the Scribble feature,
+  /// or on Android API 34+ via the Scribe feature.
   scribble,
 }
 
@@ -1262,9 +1267,13 @@ mixin TextInputClient {
   void performSelector(String selectorName) {}
 }
 
-/// An interface to receive focus from the engine.
+/// An interface into iOS's stylus handwriting text input.
 ///
-/// This is currently only used to handle UIIndirectScribbleInteraction.
+/// See also:
+///
+///  * [Scribe], which provides similar functionality for Android.
+///  * [UIIndirectScribbleInteraction](https://developer.apple.com/documentation/uikit/uiindirectscribbleinteraction),
+///    which is iOS's API for Scribble.
 abstract class ScribbleClient {
   /// A unique identifier for this element.
   String get elementIdentifier;
