@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 import 'package:test_api/fake.dart';
 
@@ -207,7 +206,7 @@ flutter:
 
   @override
   late FlutterProject widgetPreviewScaffoldProject = FakeFlutterProject(
-    projectRoot: path.join(
+    projectRoot: fileSystem.path.join(
       projectRoot,
       '.dart_tool',
       'widget_preview_scaffold',
@@ -229,7 +228,7 @@ flutter:
   @override
   late final File packageConfig = () {
     final File file = fileSystem
-        .directory(path.join(projectRoot, '.dart_tool'))
+        .directory(fileSystem.path.join(projectRoot, '.dart_tool'))
         .childFile('package_config.json')
       ..createSync(recursive: true);
     file.writeAsStringSync(basicPackageConfig);
