@@ -21,6 +21,19 @@ TEST(MockGLES, CanInitialize) {
   EXPECT_EQ(vendor, "MockGLES");
 }
 
+// Tests we can call two functions and capture the calls.
+TEST(MockGLES, CapturesPushAndPopDebugGroup) {
+  auto mock_gles = MockGLES::Init();
+
+  auto& gl = mock_gles->GetProcTable();
+  gl.PushDebugGroupKHR(GL_DEBUG_SOURCE_APPLICATION_KHR, 0, -1, "test");
+  gl.PopDebugGroupKHR();
+
+  auto calls = mock_gles->GetCapturedCalls();
+  EXPECT_EQ(calls, std::vector<std::string>(
+                       {"PushDebugGroupKHR", "PopDebugGroupKHR"}));
+}
+
 // Tests that if we call a function we have not mocked, it's OK.
 TEST(MockGLES, CanCallUnmockedFunction) {
   auto mock_gles = MockGLES::Init();
