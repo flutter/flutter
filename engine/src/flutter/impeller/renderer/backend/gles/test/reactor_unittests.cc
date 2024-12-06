@@ -6,7 +6,6 @@
 #include <memory>
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
-#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "impeller/renderer/backend/gles/handle_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
@@ -15,8 +14,6 @@
 
 namespace impeller {
 namespace testing {
-
-using ::testing::_;
 
 class TestWorker : public ReactorGLES::Worker {
  public:
@@ -49,40 +46,31 @@ TEST(ReactorGLES, CanAttachCleanupCallbacksToHandles) {
 }
 
 TEST(ReactorGLES, DeletesHandlesDuringShutdown) {
-  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
-
-  EXPECT_CALL(*mock_gles_impl, GenTextures(1, _))
-      .WillOnce([](GLsizei size, GLuint* queries) { queries[0] = 1234; });
-  EXPECT_CALL(*mock_gles_impl, DeleteTextures(1, ::testing::Pointee(1234)))
-      .Times(1);
-
-  std::shared_ptr<MockGLES> mock_gles =
-      MockGLES::Init(std::move(mock_gles_impl));
+  auto mock_gles = MockGLES::Init();
   ProcTableGLES::Resolver resolver = kMockResolverGLES;
   auto proc_table = std::make_unique<ProcTableGLES>(resolver);
   auto worker = std::make_shared<TestWorker>();
   auto reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
   reactor->AddWorker(worker);
-  reactor->CreateHandle(HandleType::kTexture);
+
+  reactor->CreateHandle(HandleType::kTexture, 123);
+
   reactor.reset();
+
+  auto calls = mock_gles->GetCapturedCalls();
+  EXPECT_TRUE(std::find(calls.begin(), calls.end(), "glDeleteTextures") !=
+              calls.end());
 }
 
 TEST(ReactorGLES, UntrackedHandle) {
-  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
-
-  EXPECT_CALL(*mock_gles_impl, GenTextures(1, _))
-      .WillOnce([](GLsizei size, GLuint* queries) { queries[0] = 1234; });
-  EXPECT_CALL(*mock_gles_impl, DeleteTextures(1, ::testing::Pointee(1234)))
-      .Times(1);
-
-  std::shared_ptr<MockGLES> mock_gles =
-      MockGLES::Init(std::move(mock_gles_impl));
+  std::shared_ptr<MockGLES> mock_gles = MockGLES::Init();
   ProcTableGLES::Resolver resolver = kMockResolverGLES;
   auto proc_table = std::make_unique<ProcTableGLES>(resolver);
   auto worker = std::make_shared<TestWorker>();
   auto reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
   reactor->AddWorker(worker);
 
+  mock_gles->SetNextTexture(1234u);
   HandleGLES handle = reactor->CreateUntrackedHandle(HandleType::kTexture);
   EXPECT_FALSE(handle.IsDead());
   std::optional<GLuint> glint = reactor->GetGLHandle(handle);
@@ -90,30 +78,34 @@ TEST(ReactorGLES, UntrackedHandle) {
   if (glint.has_value()) {
     EXPECT_EQ(1234u, *glint);
   }
+  mock_gles->GetCapturedCalls();
   reactor->CollectHandle(handle);
+  std::vector<std::string> calls = mock_gles->GetCapturedCalls();
+  EXPECT_TRUE(std::find(calls.begin(), calls.end(), "glDeleteTextures") ==
+              calls.end());
+  // Without an operation nothing is cleaned up.
   EXPECT_TRUE(reactor->AddOperation([&](const ReactorGLES&) {}));
   EXPECT_TRUE(reactor->React());
+  calls = mock_gles->GetCapturedCalls();
+  EXPECT_FALSE(std::find(calls.begin(), calls.end(), "glDeleteTextures") ==
+               calls.end());
 }
 
 TEST(ReactorGLES, NameUntrackedHandle) {
-  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
-
-  EXPECT_CALL(*mock_gles_impl, GenTextures(1, _))
-      .WillOnce([](GLsizei size, GLuint* queries) { queries[0] = 1234; });
-  EXPECT_CALL(*mock_gles_impl,
-              ObjectLabelKHR(_, 1234, _, ::testing::StrEq("hello, joe!")))
-      .Times(1);
-
-  std::shared_ptr<MockGLES> mock_gles =
-      MockGLES::Init(std::move(mock_gles_impl));
+  std::shared_ptr<MockGLES> mock_gles = MockGLES::Init();
   ProcTableGLES::Resolver resolver = kMockResolverGLES;
   auto proc_table = std::make_unique<ProcTableGLES>(resolver);
   auto worker = std::make_shared<TestWorker>();
   auto reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
   reactor->AddWorker(worker);
 
+  mock_gles->SetNextTexture(1234u);
   HandleGLES handle = reactor->CreateUntrackedHandle(HandleType::kTexture);
+  mock_gles->GetCapturedCalls();
   reactor->SetDebugLabel(handle, "hello, joe!");
+  std::vector<std::string> calls = mock_gles->GetCapturedCalls();
+  EXPECT_TRUE(std::find(calls.begin(), calls.end(), "glObjectLabelKHR") !=
+              calls.end());
 }
 
 TEST(ReactorGLES, PerThreadOperationQueues) {

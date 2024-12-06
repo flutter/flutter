@@ -12,18 +12,12 @@
 namespace impeller {
 namespace testing {
 
-using ::testing::_;
-
 TEST(BufferBindingsGLESTest, BindUniformData) {
   BufferBindingsGLES bindings;
   absl::flat_hash_map<std::string, GLint> uniform_bindings;
   uniform_bindings["SHADERMETADATA.FOOBAR"] = 1;
   bindings.SetUniformBindings(std::move(uniform_bindings));
-  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
-
-  EXPECT_CALL(*mock_gles_impl, Uniform1fv(_, _, _)).Times(1);
-
-  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init();
   std::vector<BufferResource> bound_buffers;
   std::vector<TextureAndSampler> bound_textures;
 
@@ -45,6 +39,9 @@ TEST(BufferBindingsGLESTest, BindUniformData) {
   EXPECT_TRUE(bindings.BindUniformData(mock_gl->GetProcTable(), bound_textures,
                                        bound_buffers, Range{0, 0},
                                        Range{0, 1}));
+  std::vector<std::string> captured_calls = mock_gl->GetCapturedCalls();
+  EXPECT_TRUE(std::find(captured_calls.begin(), captured_calls.end(),
+                        "glUniform1fv") != captured_calls.end());
 }
 
 }  // namespace testing
