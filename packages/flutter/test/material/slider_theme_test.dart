@@ -63,6 +63,10 @@ void main() {
       valueIndicatorTextStyle: TextStyle(color: Colors.black),
       mouseCursor: MaterialStateMouseCursor.clickable,
       allowedInteraction: SliderInteraction.tapOnly,
+      padding: EdgeInsets.all(1.0),
+      thumbSize: WidgetStatePropertyAll<Size>(Size(20, 20)),
+      trackGap: 10.0,
+      year2023: false,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -100,7 +104,11 @@ void main() {
       'showValueIndicator: always',
       'valueIndicatorTextStyle: TextStyle(inherit: true, color: ${const Color(0xff000000)})',
       'mouseCursor: WidgetStateMouseCursor(clickable)',
-      'allowedInteraction: tapOnly'
+      'allowedInteraction: tapOnly',
+      'padding: EdgeInsets.all(1.0)',
+      'thumbSize: WidgetStatePropertyAll(Size(20.0, 20.0))',
+      'trackGap: 10.0',
+      'year2023: false',
     ]);
   });
 
@@ -2641,172 +2649,263 @@ void main() {
   });
 
   testWidgets('Can customize track gap when year2023 is false', (WidgetTester tester) async {
-    debugDisableShadows = false;
-    try {
-      Widget buildSlider({ double? trackGap }) {
-        return MaterialApp(
-          theme: ThemeData(
-            sliderTheme: SliderThemeData(
-              trackGap: trackGap,
+    Widget buildSlider({ double? trackGap }) {
+      return MaterialApp(
+        theme: ThemeData(
+          sliderTheme: SliderThemeData(
+            trackGap: trackGap,
+          ),
+        ),
+        home: Material(
+          child: Center(
+            child: Slider(
+              year2023: false,
+              value: 0.5,
+              onChanged: (double value) { },
             ),
           ),
-          home: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Material(
-              child: Center(
-                child: Slider(
-                  year2023: false,
-                  value: 0.5,
-                  onChanged: (double value) { },
-                ),
-              ),
-            ),
-          ),
-        );
-      }
-
-      await tester.pumpWidget(buildSlider(trackGap: 0));
-
-      final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
-
-      // Test default track shape.
-      const Radius trackOuterCornerRadius = Radius.circular(8.0);
-      const Radius trackInnerCornerRadius = Radius.circular(2.0);
-      expect(
-        material,
-        paints
-          // Active track.
-          ..rrect(
-            rrect: RRect.fromLTRBAndCorners(
-              24.0, 292.0, 400.0, 308.0,
-              topLeft: trackOuterCornerRadius,
-              topRight: trackInnerCornerRadius,
-              bottomRight: trackInnerCornerRadius,
-              bottomLeft: trackOuterCornerRadius,
-            ),
-          )
-          // Inactive track.
-          ..rrect(
-            rrect: RRect.fromLTRBAndCorners(
-              400.0, 292.0, 776.0, 308.0,
-              topLeft: trackInnerCornerRadius,
-              topRight: trackOuterCornerRadius,
-              bottomRight: trackOuterCornerRadius,
-              bottomLeft: trackInnerCornerRadius,
-            ),
-          )
+        ),
       );
-
-      await tester.pumpWidget(buildSlider(trackGap: 10));
-      await tester.pumpAndSettle();
-      expect(
-        material,
-        paints
-          // Active track.
-          ..rrect(
-            rrect: RRect.fromLTRBAndCorners(
-              24.0, 292.0, 390.0, 308.0,
-              topLeft: trackOuterCornerRadius,
-              topRight: trackInnerCornerRadius,
-              bottomRight: trackInnerCornerRadius,
-              bottomLeft: trackOuterCornerRadius,
-            ),
-          )
-          // Inactive track.
-          ..rrect(
-            rrect: RRect.fromLTRBAndCorners(
-              410.0, 292.0, 776.0, 308.0,
-              topLeft: trackInnerCornerRadius,
-              topRight: trackOuterCornerRadius,
-              bottomRight: trackOuterCornerRadius,
-              bottomLeft: trackInnerCornerRadius,
-            ),
-          )
-      );
-    } finally {
-      debugDisableShadows = true;
     }
+
+    await tester.pumpWidget(buildSlider(trackGap: 0));
+
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
+
+    // Test default track shape.
+    const Radius trackOuterCornerRadius = Radius.circular(8.0);
+    const Radius trackInnerCornerRadius = Radius.circular(2.0);
+    expect(
+      material,
+      paints
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            24.0, 292.0, 400.0, 308.0,
+            topLeft: trackOuterCornerRadius,
+            topRight: trackInnerCornerRadius,
+            bottomRight: trackInnerCornerRadius,
+            bottomLeft: trackOuterCornerRadius,
+          ),
+        )
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            400.0, 292.0, 776.0, 308.0,
+            topLeft: trackInnerCornerRadius,
+            topRight: trackOuterCornerRadius,
+            bottomRight: trackOuterCornerRadius,
+            bottomLeft: trackInnerCornerRadius,
+          ),
+        )
+    );
+
+    await tester.pumpWidget(buildSlider(trackGap: 10));
+    await tester.pumpAndSettle();
+    expect(
+      material,
+      paints
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            24.0, 292.0, 390.0, 308.0,
+            topLeft: trackOuterCornerRadius,
+            topRight: trackInnerCornerRadius,
+            bottomRight: trackInnerCornerRadius,
+            bottomLeft: trackOuterCornerRadius,
+          ),
+        )
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            410.0, 292.0, 776.0, 308.0,
+            topLeft: trackInnerCornerRadius,
+            topRight: trackOuterCornerRadius,
+            bottomRight: trackOuterCornerRadius,
+            bottomLeft: trackInnerCornerRadius,
+          ),
+        )
+    );
   });
 
   testWidgets('Can customize thumb size when year2023 is false', (WidgetTester tester) async {
-    debugDisableShadows = false;
-    try {
-      Widget buildSlider({ WidgetStateProperty<Size?>? thumbSize }) {
-        return MaterialApp(
-          theme: ThemeData(
-            sliderTheme: SliderThemeData(
-              thumbSize: thumbSize,
+    Widget buildSlider({ WidgetStateProperty<Size?>? thumbSize }) {
+      return MaterialApp(
+        theme: ThemeData(
+          sliderTheme: SliderThemeData(
+            thumbSize: thumbSize,
+          ),
+        ),
+        home: Material(
+          child: Center(
+            child: Slider(
+              year2023: false,
+              value: 0.5,
+              onChanged: (double value) { },
             ),
           ),
-          home: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Material(
-              child: Center(
-                child: Slider(
-                  year2023: false,
-                  value: 0.5,
-                  onChanged: (double value) { },
-                ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSlider(thumbSize: const WidgetStatePropertyAll<Size>(Size(20, 20))));
+
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
+    expect(
+      material,
+      paints
+        ..circle()
+        ..rrect(
+          rrect: RRect.fromLTRBR(
+          390.0, 290.0, 410.0, 310.0,
+          const Radius.circular(10.0),
+        ),
+    ));
+
+    await tester.pumpWidget(buildSlider(thumbSize: const WidgetStateProperty<Size?>.fromMap(
+      <WidgetStatesConstraint, Size>{
+        WidgetState.pressed: Size(20, 20),
+        WidgetState.any:  Size(10, 10),
+      },
+    )));
+    await tester.pumpAndSettle();
+
+    expect(
+      material,
+      paints
+        ..circle()
+        ..rrect(
+          rrect: RRect.fromLTRBR(
+          395.0, 295.0, 405.0, 305.0,
+          const Radius.circular(5.0),
+        ),
+    ));
+
+
+    final Offset center = tester.getCenter(find.byType(Slider));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pumpAndSettle();
+
+    expect(
+      material,
+      paints
+        ..circle()
+        ..rrect(
+          rrect: RRect.fromLTRBR(
+          390.0, 295.0, 410.0, 305.0,
+          const Radius.circular(5.0),
+        ),
+    ));
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('Opt into 2024 Slider appearance with SliderThemeData.year2023', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(year2023: false),
+    );
+    final ColorScheme colorScheme = theme.colorScheme;
+    final Color activeTrackColor = colorScheme.primary;
+    final Color inactiveTrackColor = colorScheme.secondaryContainer;
+    const double value = 0.45;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: value,
+              onChanged: (double value) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
+
+    // Test default track shape.
+    const Radius trackOuterCornerRadius = Radius.circular(8.0);
+    const Radius trackInnerCornderRadius = Radius.circular(2.0);
+    expect(
+      material,
+      paints
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            24.0, 292.0, 356.4, 308.0,
+            topLeft: trackOuterCornerRadius,
+            topRight: trackInnerCornderRadius,
+            bottomRight: trackInnerCornderRadius,
+            bottomLeft: trackOuterCornerRadius,
+          ),
+          color: activeTrackColor,
+        )
+        // Inctive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            368.4, 292.0, 776.0, 308.0,
+            topLeft: trackInnerCornderRadius,
+            topRight: trackOuterCornerRadius,
+            bottomRight: trackOuterCornerRadius,
+            bottomLeft: trackInnerCornderRadius,
+          ),
+          color: inactiveTrackColor,
+        ),
+    );
+  });
+
+  testWidgets('Slider.year2023 overrides SliderThemeData.year2023', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(year2023: false),
+    );
+    final ColorScheme colorScheme = theme.colorScheme;
+    final Color activeTrackColor = colorScheme.primary;
+    final Color inactiveTrackColor = colorScheme.surfaceContainerHighest;
+    const double value = 0.45;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Theme(
+              data: theme,
+              child: Slider(
+                year2023: true,
+                value: value,
+                onChanged: (double value) { },
               ),
             ),
           ),
-        );
-      }
+        ),
+      ),
+    );
 
-      await tester.pumpWidget(buildSlider(thumbSize: const WidgetStatePropertyAll<Size>(Size(20, 20))));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
-      final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
-      expect(
-        material,
-        paints
-          ..circle()
-          ..rrect(
-            rrect: RRect.fromLTRBR(
-            390.0, 290.0, 410.0, 310.0,
-            const Radius.circular(10.0),
+    // Test default track shape.
+    const Radius activeTrackCornerRadius = Radius.circular(3.0);
+    const Radius inactiveTrackCornerRadius = Radius.circular(2.0);
+    expect(
+      material,
+      paints
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(
+            360.4, 298.0, 776.0, 302.0,
+            inactiveTrackCornerRadius,
           ),
-      ));
-
-      await tester.pumpWidget(buildSlider(thumbSize: const WidgetStateProperty<Size?>.fromMap(
-        <WidgetStatesConstraint, Size>{
-          WidgetState.pressed: Size(20, 20),
-          WidgetState.any:  Size(10, 10),
-        },
-      )));
-      await tester.pumpAndSettle();
-
-      expect(
-        material,
-        paints
-          ..circle()
-          ..rrect(
-            rrect: RRect.fromLTRBR(
-            395.0, 295.0, 405.0, 305.0,
-            const Radius.circular(5.0),
+          color: inactiveTrackColor,
+        )
+        // Inctive track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(
+            24.0, 297.0, 364.4, 303.0,
+            activeTrackCornerRadius,
           ),
-      ));
-
-
-      final Offset center = tester.getCenter(find.byType(Slider));
-      final TestGesture gesture = await tester.startGesture(center);
-      await tester.pumpAndSettle();
-
-      expect(
-        material,
-        paints
-          ..circle()
-          ..rrect(
-            rrect: RRect.fromLTRBR(
-            390.0, 295.0, 410.0, 305.0,
-            const Radius.circular(5.0),
-          ),
-      ));
-
-      await gesture.up();
-      await tester.pumpAndSettle();
-    } finally {
-      debugDisableShadows = true;
-    }
+          color: activeTrackColor,
+        ),
+    );
   });
 
   group('Material 2', () {
@@ -2847,17 +2946,14 @@ void main() {
               };
           return MaterialApp(
             theme: theme,
-            home: Directionality(
-              textDirection: TextDirection.ltr,
-              child: Material(
-                child: Center(
-                  child: Slider(
-                    value: value,
-                    secondaryTrackValue: 0.75,
-                    label: '$value',
-                    divisions: divisions,
-                    onChanged: onChanged,
-                  ),
+            home: Material(
+              child: Center(
+                child: Slider(
+                  value: value,
+                  secondaryTrackValue: 0.75,
+                  label: '$value',
+                  divisions: divisions,
+                  onChanged: onChanged,
                 ),
               ),
             ),
@@ -2979,23 +3075,20 @@ void main() {
         Widget buildApp(String value, { double sliderValue = 0.5, TextScaler textScaler = TextScaler.noScaling }) {
           return MaterialApp(
             theme: theme,
-            home: Directionality(
-              textDirection: TextDirection.ltr,
-              child: MediaQuery(
-                data: MediaQueryData(textScaler: textScaler),
-                child: Material(
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Slider(
-                          value: sliderValue,
-                          label: value,
-                          divisions: 3,
-                          onChanged: (double d) { },
-                        ),
+            home: MediaQuery(
+              data: MediaQueryData(textScaler: textScaler),
+              child: Material(
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Slider(
+                        value: sliderValue,
+                        label: value,
+                        divisions: 3,
+                        onChanged: (double d) { },
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
