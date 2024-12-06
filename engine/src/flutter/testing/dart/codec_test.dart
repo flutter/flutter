@@ -272,6 +272,26 @@ void main() {
       }
     }
   });
+
+  test(
+      'Animated apng frame decode does not crash with invalid destination region and bounds wrapping',
+      () async {
+    final Uint8List data = File(
+      path.join('flutter', 'lib', 'ui', 'fixtures', 'out_of_bounds_wrapping.apng'),
+    ).readAsBytesSync();
+
+    final ui.Codec codec = await ui.instantiateImageCodec(data);
+    try {
+      await codec.getNextFrame();
+      fail('exception not thrown');
+    } on Exception catch (e) {
+      if (impellerEnabled) {
+        expect(e.toString(), contains('Could not decompress image.'));
+      } else {
+        expect(e.toString(), contains('Codec failed'));
+      }
+    }
+  });
 }
 
 /// Returns a File handle to a file in the skia/resources directory.
