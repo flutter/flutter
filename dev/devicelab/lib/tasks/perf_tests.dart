@@ -1649,11 +1649,12 @@ class CompileSwiftUITest {
   final bool reportPackageContentSizes;
 
   Future<TaskResult> run() async {
+    print(testDirectory);
     await Process.run('xcodebuild', <String>[
       'clean',
       '-allTargets'
     ]);
-
+    print('cleaned');
     final Stopwatch watch = Stopwatch();
     int releaseSizeInBytes = 0;
     watch.start();
@@ -1666,10 +1667,12 @@ class CompileSwiftUITest {
         print(results.stderr);
       }
     });
+    print('ran build');
     watch.stop();
 
     final Directory appBundle =  dir('$testDirectory/build/Release-iphoneos/hello_world_swiftui.app');
 
+    print('grabbed app bundle');
     try {
       for (final FileSystemEntity entity in appBundle.listSync(recursive: true)) {
         if (entity is File) {
