@@ -3,7 +3,7 @@ description: "A new Dart FFI package project."
 version: 0.0.1
 
 environment:
-  sdk: '>=3.5.0-154.0.dev <4.0.0'
+  sdk: ^3.7.0-0
 
 dependencies:
   logging: 1.3.0

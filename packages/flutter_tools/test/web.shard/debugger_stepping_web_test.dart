@@ -28,7 +28,7 @@ void main() {
 
     await flutter.run(
       withDebugger: true, startPaused: true, chrome: true,
-      additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+      additionalCommandArgs: <String>['--verbose']);
     await flutter.addBreakpoint(project.breakpointUri, project.breakpointLine);
     await flutter.resume(waitForNextPause: true); // Now we should be on the breakpoint.
     expect((await flutter.getSourceLocation())!.line, equals(project.breakpointLine));

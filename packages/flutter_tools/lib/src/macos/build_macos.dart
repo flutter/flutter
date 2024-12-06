@@ -15,6 +15,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
+import '../ios/migrations/metal_api_validation_migration.dart';
 import '../ios/xcode_build_settings.dart';
 import '../ios/xcodeproj.dart';
 import '../migrations/swift_package_manager_gitignore_migration.dart';
@@ -103,6 +104,7 @@ Future<void> buildMacOS({
       features: featureFlags,
     ),
     SwiftPackageManagerGitignoreMigration(flutterProject, globals.logger),
+    MetalAPIValidationMigrator.macos(flutterProject.macos, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -301,11 +303,9 @@ Future<void> _writeCodeSizeAnalysis(BuildInfo buildInfo, SizeAnalyzer? sizeAnaly
     'A summary of your macOS bundle analysis can be found at: ${outputFile.path}',
   );
 
-  // DevTools expects a file path relative to the .flutter-devtools/ dir.
-  final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
   globals.printStatus(
     '\nTo analyze your app size in Dart DevTools, run the following command:\n'
-    'dart devtools --appSizeBase=$relativeAppSizePath'
+    'dart devtools --appSizeBase=${outputFile.path}'
   );
 }
 

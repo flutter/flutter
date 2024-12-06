@@ -10,8 +10,6 @@
 // contain the native assets mapping.
 // When doing a hot reload, this mapping must stay in place.
 
-// TODO(matanlurey): Remove after debugging https://github.com/flutter/flutter/issues/159000.
-@Tags(<String>['flutter-build-apk'])
 @Timeout(Duration(minutes: 10))
 library;
 
@@ -223,9 +221,6 @@ void main() {
           expectCCompilerIsConfigured(exampleDirectory);
         });
       },
-      // TODO(matanlurey): Debug why flutter build apk often timesout.
-      // See https://github.com/flutter/flutter/issues/158560 for details.
-      skip: buildSubcommand == 'apk' ? 'flutter build apk times out' : false, // Temporary workaround for https://github.com/flutter/flutter/issues/158560.
       tags: <String>['flutter-build-apk'],
       );
     }
@@ -472,7 +467,7 @@ void expectCCompilerIsConfigured(Directory appDirectory) {
   for (final Directory subDir in nativeAssetsBuilderDir.listSync().whereType<Directory>()) {
     // We only want to look at build/link hook invocation directories. The
     // `/shared/*` directory allows the individual hooks to store data that is
-    // reusable across different build/link confiurations.
+    // reusable across different build/link configurations.
     if (subDir.path.endsWith('shared')) {
       continue;
     }

@@ -16,6 +16,7 @@ import 'foundation/change_notifier_bench.dart' as change_notifier_bench;
 import 'foundation/clamp.dart' as clamp;
 import 'foundation/decode_and_parse_asset_manifest.dart'
     as decode_and_parse_asset_manifest;
+import 'foundation/observer_list_bench.dart' as observer_list_bench;
 import 'foundation/platform_asset_bundle.dart' as platform_asset_bundle;
 import 'foundation/standard_message_codec_bench.dart'
     as standard_message_codec_bench;
@@ -64,6 +65,7 @@ Future<void> main() async {
       'foundation/decode_and_parse_asset_manifest.dart',
       decode_and_parse_asset_manifest.execute
     ),
+    ('foundation/observer_list_bench.dart', observer_list_bench.execute),
     (
       'geometry/matrix_utils_transform_bench.dart',
       matrix_utils_transform_bench.execute
@@ -125,8 +127,8 @@ Future<void> main() async {
   final ArgResults results = parser.parse(mainArgs);
   final List<String> selectedTests = results.multiOption('tests');
 
-  // Shuffle the tests becauase we don't want order dependent tests.
-  // It is the responsibily of the infra to tell us what the seed value is,
+  // Shuffle the tests because we don't want order dependent tests.
+  // It is the responsibility of the infra to tell us what the seed value is,
   // in case we want to have the seed stable for some time period.
   final List<Benchmark> tests = benchmarks.where((Benchmark e) => selectedTests.contains(e.$1)).toList();
   tests.shuffle(Random(int.parse(results.option('seed')!)));

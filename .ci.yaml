@@ -506,7 +506,6 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
 
   - name: Linux build_tests_4_5
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -567,6 +566,7 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
 
   - name: Linux docs_publish
     recipe: flutter/docs
@@ -635,39 +635,6 @@ targets:
       - dev/**
       - bin/**
       - .ci.yaml
-
-  - name: Linux firebase_abstract_method_smoke_test
-    presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/147335
-    recipe: firebaselab/firebaselab
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:35v1"},
-          {"dependency": "open_jdk", "version": "version:17"}
-        ]
-      tags: >
-        ["firebaselab"]
-      task_name: abstract_method_smoke_test
-      physical_devices: >-
-        [
-          "--device", "model=shiba,version=34",
-          "--device", "model=panther,version=33",
-          "--device", "model=redfin,version=30"
-        ]
-      # TODO(flutter/flutter#123331): This device is flaking.
-      # "--device", "model=Nexus6P,version=25"
-      virtual_devices: >-
-        [
-          "--device", "model=Nexus5.gce_x86,version=21",
-          "--device", "model=Nexus5.gce_x86,version=22",
-          "--device", "model=Nexus5.gce_x86,version=23",
-          "--device", "model=Nexus6P,version=25",
-          "--device", "model=Nexus6P,version=26",
-          "--device", "model=Nexus6P,version=27",
-          "--device", "model=NexusLowRes,version=29"
-        ]
 
   - name: Linux firebase_release_smoke_test
     recipe: firebaselab/firebaselab
@@ -1110,6 +1077,25 @@ targets:
         ["devicelab", "hostonly", "linux"]
       task_name: linux_desktop_impeller
 
+  - name: Linux android_release_builds_exclude_dev_dependencies_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    bringup: true
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:35v1"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: android_release_builds_exclude_dev_dependencies_test
+    runIf:
+      - dev/**
+      - bin/**
+      - .ci.yaml
+
   - name: Linux run_release_test_linux
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -1329,29 +1315,6 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-
-  - name: Linux flutter_build_apk_health_tests
-    recipe: flutter/flutter_drone
-    # WARNING: Do *NOT* enable. This intended for testing on CI only.
-    # Ask matanlurey@ or @gmackall if you have any questions.
-    bringup: true
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:35v1"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
-          {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:17"}
-        ]
-      shard: flutter_build_apk_health_tests
-      tags: >
-        ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
 
   - name: Linux android_preview_tool_integration_tests
     recipe: flutter/flutter_drone
@@ -3853,6 +3816,7 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
 
   - name: Mac dart_plugin_registry_test
     recipe: devicelab/devicelab_drone
@@ -3923,6 +3887,7 @@ targets:
       - dev/bots/**
 
   - name: Mac_benchmark flutter_view_macos__start_up
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/159540
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -4084,6 +4049,7 @@ targets:
       - .ci.yaml
 
   - name: Mac_benchmark hello_world_macos__compile
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/159542
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -5043,6 +5009,7 @@ targets:
       task_name: macos_chrome_dev_mode
 
   - name: Mac_ios microbenchmarks_ios
+    bringup: true # Flakey https://github.com/flutter/flutter/issues/156457
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -5593,6 +5560,7 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
 
   - name: Windows framework_tests_libraries
     recipe: flutter/flutter_drone

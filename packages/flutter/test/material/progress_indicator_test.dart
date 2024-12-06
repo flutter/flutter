@@ -1217,11 +1217,10 @@ void main() {
     expect((wrappedTheme as ProgressIndicatorTheme).data, themeData);
   });
 
-  testWidgets('default size of CircularProgressIndicator is 36x36 - M3', (WidgetTester tester) async {
+  testWidgets('Material3 - Default size of CircularProgressIndicator', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: theme.copyWith(useMaterial3: true),
-        home: const Scaffold(
+      const MaterialApp(
+        home: Scaffold(
           body: Material(
             child: CircularProgressIndicator(),
           ),
@@ -1230,6 +1229,20 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(CircularProgressIndicator)), const Size(36, 36));
+  });
+
+  testWidgets('Material3 - Default size of CircularProgressIndicator when year2023 is false', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Material(
+            child: CircularProgressIndicator(year2023: false),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(CircularProgressIndicator)), const Size(48, 48));
   });
 
   testWidgets('RefreshProgressIndicator using fields correctly', (WidgetTester tester) async {
@@ -1527,6 +1540,8 @@ void main() {
           rrect: RRect.fromLTRBR(100.0 + customTrackGap, 0.0, 200.0, 4.0, const Radius.circular(2.0)),
           color: theme.colorScheme.secondaryContainer,
         )
+        // Stop indicator.
+        ..circle()
         // Active track.
         ..rrect(
           rrect: RRect.fromLTRBR(0.0, 0.0, 100.0, 4.0, const Radius.circular(2.0)),
@@ -1544,11 +1559,207 @@ void main() {
           rrect: RRect.fromLTRBR(0.0, 0.0, 200.0, 4.0, const Radius.circular(2.0)),
           color: theme.colorScheme.secondaryContainer,
         )
+        // Stop indicator.
+        ..circle()
         // Active indicator.
         ..rrect(
           rrect: RRect.fromLTRBR(0.0, 0.0, 100.0, 4.0, const Radius.circular(2.0)),
           color: theme.colorScheme.primary,
         ),
+    );
+  });
+
+  testWidgets('Default determinate CircularProgressIndicator when year2023 is false', (WidgetTester tester) async {
+    const EdgeInsetsGeometry padding = EdgeInsets.all(4.0);
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: const Center(
+        child: CircularProgressIndicator(
+          year2023: false,
+          value: 0.5,
+        ),
+      ),
+    ));
+
+    final Size indicatorBoxSize = tester.getSize(find.descendant(
+      of: find.byType(CircularProgressIndicator),
+      matching: find.byType(ConstrainedBox),
+    ));
+    expect(
+      tester.getSize(find.byType(CircularProgressIndicator)),
+      equals(Size(
+        indicatorBoxSize.width + padding.horizontal,
+        indicatorBoxSize.height + padding.vertical,
+      )),
+    );
+    expect(
+      find.byType(CircularProgressIndicator),
+      paints
+        // Track.
+        ..arc(
+          rect: const Rect.fromLTRB(2.0, 2.0, 38.0, 38.0),
+          color: theme.colorScheme.secondaryContainer,
+          strokeWidth: 4.0,
+          strokeCap: StrokeCap.round,
+          style: PaintingStyle.stroke,
+        )
+        // Active indicator.
+        ..arc(
+          rect: const Rect.fromLTRB(2.0, 2.0, 38.0, 38.0),
+          color: theme.colorScheme.primary,
+          strokeWidth: 4.0,
+          strokeCap: StrokeCap.round,
+          style: PaintingStyle.stroke,
+        ),
+    );
+    await expectLater(
+      find.byType(CircularProgressIndicator),
+      matchesGoldenFile('circular_progress_indicator_determinate_year2023_false.png'),
+    );
+  });
+
+  testWidgets('Default indeterminate CircularProgressIndicator when year2023 is false', (WidgetTester tester) async {
+    const EdgeInsetsGeometry padding = EdgeInsets.all(4.0);
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: const Center(child: CircularProgressIndicator(year2023: false)),
+    ));
+
+    // Advance the animation.
+    await tester.pump(const Duration(milliseconds: 200));
+
+    final Size indicatorBoxSize = tester.getSize(find.descendant(
+      of: find.byType(CircularProgressIndicator),
+      matching: find.byType(ConstrainedBox),
+    ));
+    expect(
+      tester.getSize(find.byType(CircularProgressIndicator)),
+      equals(Size(
+        indicatorBoxSize.width + padding.horizontal,
+        indicatorBoxSize.height + padding.vertical,
+      )),
+    );
+    expect(
+      find.byType(CircularProgressIndicator),
+      paints
+        // Active indicator.
+        ..arc(
+          rect: const Rect.fromLTRB(2.0, 2.0, 38.0, 38.0),
+          color: theme.colorScheme.primary,
+          strokeWidth: 4.0,
+          strokeCap: StrokeCap.round,
+          style: PaintingStyle.stroke,
+        ),
+    );
+    await expectLater(
+      find.byType(CircularProgressIndicator),
+      matchesGoldenFile('circular_progress_indicator_indeterminate_year2023_false.png'),
+    );
+  });
+
+  testWidgets('CircularProgressIndicator track gap can be adjusted when year2023 is false', (WidgetTester tester) async {
+    Widget buildIndicator({ double? trackGap }) {
+      return MaterialApp(
+        home: Center(
+          child: CircularProgressIndicator(
+            year2023: false,
+            trackGap: trackGap,
+            value: 0.5,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildIndicator());
+    await expectLater(
+      find.byType(CircularProgressIndicator),
+      matchesGoldenFile('circular_progress_indicator_default_track_gap_year2023_false.png'),
+    );
+
+    await tester.pumpWidget(buildIndicator(trackGap: 12.0));
+    await expectLater(
+      find.byType(CircularProgressIndicator),
+      matchesGoldenFile('circular_progress_indicator_custom_track_gap_year2023_false.png'),
+    );
+
+    await tester.pumpWidget(buildIndicator(trackGap: 0.0));
+    await expectLater(
+      find.byType(CircularProgressIndicator),
+      matchesGoldenFile('circular_progress_indicator_no_track_gap_year2023_false.png'),
+    );
+  });
+
+  testWidgets('Can override CircularProgressIndicator stroke cap when year2023 is false', (WidgetTester tester) async {
+    const StrokeCap strokeCap = StrokeCap.square;
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: CircularProgressIndicator(
+            year2023: false,
+            strokeCap: strokeCap,
+            value: 0.5,
+          ),
+        ),
+      )
+    );
+
+    expect(
+      find.byType(CircularProgressIndicator),
+      paints
+        // Track.
+        ..arc(strokeCap: strokeCap)
+        // Active indicator.
+        ..arc(strokeCap: strokeCap)
+    );
+    await expectLater(
+      find.byType(CircularProgressIndicator),
+      matchesGoldenFile('circular_progress_indicator_custom_stroke_cap_year2023_false.png'),
+    );
+  });
+
+  testWidgets('CircularProgressIndicator.constraints can override default size', (WidgetTester tester) async {
+    const Size size = Size(64, 64);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: CircularProgressIndicator(
+            constraints: BoxConstraints(
+              minWidth: size.width,
+              minHeight: size.height
+            ),
+            value: 0.5,
+          ),
+        ),
+      )
+    );
+
+    expect(tester.getSize(find.byType(CircularProgressIndicator)), equals(size));
+  });
+
+  testWidgets('CircularProgressIndicator padding can be customized', (WidgetTester tester) async {
+    const EdgeInsetsGeometry padding = EdgeInsets.all(12.0);
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: CircularProgressIndicator(
+            padding: padding,
+            year2023: false,
+            value: 0.5,
+          ),
+        ),
+      )
+    );
+
+    final Size indicatorBoxSize = tester.getSize(find.descendant(
+      of: find.byType(CircularProgressIndicator),
+      matching: find.byType(ConstrainedBox),
+    ));
+    expect(
+      tester.getSize(find.byType(CircularProgressIndicator)),
+      equals(Size(
+        indicatorBoxSize.width + padding.horizontal,
+        indicatorBoxSize.height + padding.vertical,
+      )),
     );
   });
 }
