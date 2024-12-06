@@ -33,9 +33,9 @@ TEST(CapabilitiesGLES, CanInitializeWithDefaults) {
 }
 
 TEST(CapabilitiesGLES, SupportsDecalSamplerAddressMode) {
-  auto const extensions = std::vector<const char*>{
-      "GL_KHR_debug",                 //
-      "GL_EXT_texture_border_clamp",  //
+  auto const extensions = std::vector<const unsigned char*>{
+      reinterpret_cast<const unsigned char*>("GL_KHR_debug"),                 //
+      reinterpret_cast<const unsigned char*>("GL_EXT_texture_border_clamp"),  //
   };
   auto mock_gles = MockGLES::Init(extensions);
   auto capabilities = mock_gles->GetProcTable().GetCapabilities();
@@ -43,9 +43,9 @@ TEST(CapabilitiesGLES, SupportsDecalSamplerAddressMode) {
 }
 
 TEST(CapabilitiesGLES, SupportsDecalSamplerAddressModeNotOES) {
-  auto const extensions = std::vector<const char*>{
-      "GL_KHR_debug",                 //
-      "GL_OES_texture_border_clamp",  //
+  auto const extensions = std::vector<const unsigned char*>{
+      reinterpret_cast<const unsigned char*>("GL_KHR_debug"),                 //
+      reinterpret_cast<const unsigned char*>("GL_OES_texture_border_clamp"),  //
   };
   auto mock_gles = MockGLES::Init(extensions);
   auto capabilities = mock_gles->GetProcTable().GetCapabilities();
@@ -53,9 +53,10 @@ TEST(CapabilitiesGLES, SupportsDecalSamplerAddressModeNotOES) {
 }
 
 TEST(CapabilitiesGLES, SupportsFramebufferFetch) {
-  auto const extensions = std::vector<const char*>{
-      "GL_KHR_debug",                     //
-      "GL_EXT_shader_framebuffer_fetch",  //
+  auto const extensions = std::vector<const unsigned char*>{
+      reinterpret_cast<const unsigned char*>("GL_KHR_debug"),  //
+      reinterpret_cast<const unsigned char*>(
+          "GL_EXT_shader_framebuffer_fetch"),  //
   };
   auto mock_gles = MockGLES::Init(extensions);
   auto capabilities = mock_gles->GetProcTable().GetCapabilities();
