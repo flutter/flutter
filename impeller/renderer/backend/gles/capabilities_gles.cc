@@ -22,6 +22,10 @@ static const constexpr char* kNvidiaTextureBorderClampExt =
 static const constexpr char* kMultisampledRenderToTextureExt =
     "GL_EXT_multisampled_render_to_texture";
 
+// https://registry.khronos.org/OpenGL/extensions/EXT/EXT_multisampled_render_to_texture2.txt
+static const constexpr char* kMultisampledRenderToTexture2Ext =
+    "GL_EXT_multisampled_render_to_texture2";
+
 CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   {
     GLint value = 0;
@@ -123,10 +127,12 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   if (desc->HasExtension(kMultisampledRenderToTextureExt)) {
     supports_implicit_msaa_ = true;
 
-    // We hard-code 4x MSAA, so let's make sure it's supported.
-    GLint value = 0;
-    gl.GetIntegerv(GL_MAX_SAMPLES_EXT, &value);
-    supports_offscreen_msaa_ = value >= 4;
+    if (desc->HasExtension(kMultisampledRenderToTexture2Ext)) {
+      // We hard-code 4x MSAA, so let's make sure it's supported.
+      GLint value = 0;
+      gl.GetIntegerv(GL_MAX_SAMPLES_EXT, &value);
+      supports_offscreen_msaa_ = value >= 4;
+    }
   }
   is_es_ = desc->IsES();
   is_angle_ = desc->IsANGLE();

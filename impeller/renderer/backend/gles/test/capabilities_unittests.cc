@@ -63,5 +63,16 @@ TEST(CapabilitiesGLES, SupportsFramebufferFetch) {
   EXPECT_TRUE(capabilities->SupportsFramebufferFetch());
 }
 
+TEST(CapabilitiesGLES, SupportsMSAA) {
+  auto const extensions = std::vector<const unsigned char*>{
+      reinterpret_cast<const unsigned char*>(
+          "GL_EXT_multisampled_render_to_texture"),
+  };
+  auto mock_gles = MockGLES::Init(extensions);
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_TRUE(capabilities->SupportsImplicitResolvingMSAA());
+  EXPECT_FALSE(capabilities->SupportsOffscreenMSAA());
+}
+
 }  // namespace testing
 }  // namespace impeller
