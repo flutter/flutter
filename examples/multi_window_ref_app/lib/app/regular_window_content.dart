@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:multi_window_ref_app/app/window_controller_render.dart';
-import 'package:multi_window_ref_app/app/window_manager_model.dart';
-import 'package:multi_window_ref_app/app/window_settings.dart';
+import 'child_window_renderer.dart';
+import 'window_controller_text.dart';
+import 'window_manager_model.dart';
+import 'window_settings.dart';
 
 class RegularWindowContent extends StatelessWidget {
   const RegularWindowContent(
       {super.key,
-      required this.window,
+      required this.controller,
       required this.windowSettings,
       required this.windowManagerModel});
 
-  final RegularWindowController window;
+  final RegularWindowController controller;
   final WindowSettings windowSettings;
   final WindowManagerModel windowManagerModel;
 
   @override
   Widget build(BuildContext context) {
     final child = Scaffold(
-      appBar: AppBar(title: Text('${window.type}')),
+      appBar: AppBar(title: Text('${controller.type}')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -31,43 +32,17 @@ class RegularWindowContent extends StatelessWidget {
               child: const Text('Create Regular Window'),
             ),
             const SizedBox(height: 20),
-            ListenableBuilder(
-                listenable: window,
-                builder: (BuildContext context, Widget? _) {
-                  return Text(
-                    'View #${window.view?.viewId ?? "Unknown"}\n'
-                    'Parent View: ${window.parentViewId}\n'
-                    'Logical Size: ${window.size?.width ?? "?"}\u00D7${window.size?.height ?? "?"}\n'
-                    'DPR: ${MediaQuery.of(context).devicePixelRatio}',
-                    textAlign: TextAlign.center,
-                  );
-                })
+            WindowControllerText(controller: controller)
           ],
         ),
       ),
     );
 
     return ViewAnchor(
-        view: ListenableBuilder(
-            listenable: windowManagerModel,
-            builder: (BuildContext context, Widget? _) {
-              final List<Widget> childViews = <Widget>[];
-              for (final KeyedWindowController controller
-                  in windowManagerModel.windows) {
-                if (controller.parent == window) {
-                  childViews.add(WindowControllerRender(
-                    controller: controller.controller,
-                    key: controller.key,
-                    windowSettings: windowSettings,
-                    windowManagerModel: windowManagerModel,
-                    onDestroyed: () => windowManagerModel.remove(controller),
-                    onError: () => windowManagerModel.remove(controller),
-                  ));
-                }
-              }
-
-              return ViewCollection(views: childViews);
-            }),
+        view: ChildWindowRenderer(
+            windowManagerModel: windowManagerModel,
+            windowSettings: windowSettings,
+            controller: controller),
         child: child);
   }
 }

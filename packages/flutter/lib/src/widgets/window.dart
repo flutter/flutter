@@ -285,6 +285,11 @@ class RegularWindowController extends WindowController {
   }
 }
 
+class PopupWindowController extends WindowController {
+  @override
+  WindowArchetype get type => WindowArchetype.popup;
+}
+
 class _GenericWindow extends StatefulWidget {
   _GenericWindow(
       {this.onDestroyed,
@@ -452,7 +457,7 @@ class PopupWindow extends StatelessWidget {
         _positioner = positioner;
 
   /// Controller for this widget.
-  final RegularWindowController? controller;
+  final PopupWindowController? controller;
 
   /// Called when the window backing this widget is destroyed.
   final void Function()? onDestroyed;
