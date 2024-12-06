@@ -16,7 +16,8 @@ namespace impeller {
 ///        Any textures unused after a frame are immediately discarded.
 class RenderTargetCache : public RenderTargetAllocator {
  public:
-  explicit RenderTargetCache(std::shared_ptr<Allocator> allocator);
+  explicit RenderTargetCache(std::shared_ptr<Allocator> allocator,
+                             uint32_t keep_alive_frame_count = 4);
 
   ~RenderTargetCache() = default;
 
@@ -59,11 +60,13 @@ class RenderTargetCache : public RenderTargetAllocator {
  private:
   struct RenderTargetData {
     bool used_this_frame;
+    uint32_t keep_alive_frame_count;
     RenderTargetConfig config;
     RenderTarget render_target;
   };
 
   std::vector<RenderTargetData> render_target_data_;
+  uint32_t keep_alive_frame_count_;
 
   RenderTargetCache(const RenderTargetCache&) = delete;
 

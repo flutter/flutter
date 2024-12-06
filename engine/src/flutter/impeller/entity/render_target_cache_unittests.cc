@@ -50,8 +50,8 @@ class TestAllocator : public Allocator {
 };
 
 TEST_P(RenderTargetCacheTest, CachesUsedTexturesAcrossFrames) {
-  auto render_target_cache =
-      RenderTargetCache(GetContext()->GetResourceAllocator());
+  auto render_target_cache = RenderTargetCache(
+      GetContext()->GetResourceAllocator(), /*keep_alive_frame_count=*/0);
 
   render_target_cache.Start();
   // Create two render targets of the same exact size/shape. Both should be
@@ -73,10 +73,41 @@ TEST_P(RenderTargetCacheTest, CachesUsedTexturesAcrossFrames) {
   EXPECT_EQ(render_target_cache.CachedTextureCount(), 1u);
 }
 
+TEST_P(RenderTargetCacheTest, CachesUsedTexturesAcrossFramesWithKeepAlive) {
+  auto render_target_cache = RenderTargetCache(
+      GetContext()->GetResourceAllocator(), /*keep_alive_frame_count=*/3);
+
+  render_target_cache.Start();
+  // Create two render targets of the same exact size/shape. Both should be
+  // marked as used this frame, so the cached data set will contain two.
+  render_target_cache.CreateOffscreen(*GetContext(), {100, 100}, 1);
+  render_target_cache.CreateOffscreen(*GetContext(), {100, 100}, 1);
+
+  EXPECT_EQ(render_target_cache.CachedTextureCount(), 2u);
+
+  render_target_cache.End();
+  render_target_cache.Start();
+
+  // The unused texture is kept alive until the keep alive countdown
+  // reaches 0.
+  EXPECT_EQ(render_target_cache.CachedTextureCount(), 2u);
+
+  for (auto i = 0; i < 3; i++) {
+    render_target_cache.Start();
+    render_target_cache.End();
+    EXPECT_EQ(render_target_cache.CachedTextureCount(), 2u);
+  }
+  // After the countdown has elapsed the texture is removed.
+  render_target_cache.Start();
+  render_target_cache.End();
+  EXPECT_EQ(render_target_cache.CachedTextureCount(), 0u);
+}
+
 TEST_P(RenderTargetCacheTest, DoesNotPersistFailedAllocations) {
   ScopedValidationDisable disable;
   auto allocator = std::make_shared<TestAllocator>();
-  auto render_target_cache = RenderTargetCache(allocator);
+  auto render_target_cache =
+      RenderTargetCache(allocator, /*keep_alive_frame_count=*/0);
 
   render_target_cache.Start();
   allocator->should_fail = true;
@@ -89,8 +120,8 @@ TEST_P(RenderTargetCacheTest, DoesNotPersistFailedAllocations) {
 }
 
 TEST_P(RenderTargetCacheTest, CachedTextureGetsNewAttachmentConfig) {
-  auto render_target_cache =
-      RenderTargetCache(GetContext()->GetResourceAllocator());
+  auto render_target_cache = RenderTargetCache(
+      GetContext()->GetResourceAllocator(), /*keep_alive_frame_count=*/0);
 
   render_target_cache.Start();
   RenderTarget::AttachmentConfig color_attachment_config =
@@ -114,8 +145,8 @@ TEST_P(RenderTargetCacheTest, CachedTextureGetsNewAttachmentConfig) {
 }
 
 TEST_P(RenderTargetCacheTest, CreateWithEmptySize) {
-  auto render_target_cache =
-      RenderTargetCache(GetContext()->GetResourceAllocator());
+  auto render_target_cache = RenderTargetCache(
+      GetContext()->GetResourceAllocator(), /*keep_alive_frame_count=*/0);
 
   render_target_cache.Start();
   RenderTarget empty_target =
