@@ -14,7 +14,7 @@ Eligibility:
 3. The target branch is either [beta](https://github.com/flutter/flutter/blob/beta/bin/internal/release-candidate-branch.version) or [stable](https://github.com/flutter/flutter/blob/stable/bin/internal/release-candidate-branch.version). (not a new beta branch that isn't yet created)
 
 For automatic cherry pick:
-1. Add the `cp: beta` or `cp: stable` label to the pull request on flutter/flutter master. (you can find [beta](https://github.com/flutter/flutter/blob/beta/bin/internal/release-candidate-branch.version) and [stable](https://github.com/flutter/flutter/blob/stable/bin/internal/release-candidate-branch.version) candidate branch info by following the respective links)
+1. Add the `cp: beta` or `cp: stable` label to the pull request on flutter/flutter or flutter/engine main. (you can find [beta](https://github.com/flutter/flutter/blob/beta/bin/internal/release-candidate-branch.version) and [stable](https://github.com/flutter/flutter/blob/stable/bin/internal/release-candidate-branch.version) candidate branch info by following the respective links)
 2. Wait about 30 seconds.
 3. If automatic cherry pick succeeds (no merge conflict), a new pull requested will be created and you will receive an email. Edit the cherry-pick details in the PR description of the generated pull request, and a release engineer will follow up on the request.
 4. If automatic cherry pick fails, a comment will be left on the original PR. In this case you will need to follow instructions in the FAQ section below to manually create a cherry pick PR.
