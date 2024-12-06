@@ -864,7 +864,9 @@ class FlutterPlugin implements Plugin<Project> {
         gradleProject.android {
             externalNativeBuild {
                 cmake {
-                    path = flutterSdkRootPath + "/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+                    // Respect the existing configuration if it exists - the NDK will already be
+                    // downloaded in this case.
+                    path = path ?: flutterSdkRootPath + "/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
                 }
             }
         }
