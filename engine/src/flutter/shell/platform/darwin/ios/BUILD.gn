@@ -165,6 +165,7 @@ source_set("flutter_framework_source") {
     "CoreVideo.framework",
     "IOSurface.framework",
     "QuartzCore.framework",
+    "WebKit.framework",
     "UIKit.framework",
   ]
   if (flutter_runtime_mode == "profile" || flutter_runtime_mode == "debug") {
