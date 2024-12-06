@@ -35,7 +35,7 @@
 #
 # # Required for workspace support.
 # environment:
-#   sdk: ^3.5.0-294.0.dev
+#   sdk: ^3.7.0-0
 #
 # # This package is managed as part of the engine workspace.
 # resolution: workspace
@@ -76,7 +76,7 @@ name: _engine_workspace
 
 # Required for workspace support.
 environment:
-  sdk: ^3.5.0-294.0.dev
+  sdk: ^3.7.0-0
 
 # Declare all packages that are part of the workspace.
 workspace:
