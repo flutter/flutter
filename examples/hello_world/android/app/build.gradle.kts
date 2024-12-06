@@ -18,12 +18,6 @@ android {
         ndkPath = systemNdkPath
     }
 
-    val systemNdkPath: String? = System.getenv("ANDROID_NDK_PATH")
-    if (systemNdkPath != null) {
-        ndkVersion = flutter.ndkVersion
-        ndkPath = systemNdkPath
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
