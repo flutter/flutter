@@ -8,12 +8,67 @@
 #include <memory>
 #include <optional>
 
+#include "gmock/gmock.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 
 namespace impeller {
 namespace testing {
 
 extern const ProcTableGLES::Resolver kMockResolverGLES;
+
+class IMockGLESImpl {
+ public:
+  virtual ~IMockGLESImpl() = default;
+  virtual void DeleteTextures(GLsizei size, const GLuint* queries) {}
+  virtual void GenTextures(GLsizei n, GLuint* textures) {}
+  virtual void ObjectLabelKHR(GLenum identifier,
+                              GLuint name,
+                              GLsizei length,
+                              const GLchar* label) {}
+  virtual void Uniform1fv(GLint location, GLsizei count, const GLfloat* value) {
+  }
+  virtual void GenQueriesEXT(GLsizei n, GLuint* ids) {}
+  virtual void BeginQueryEXT(GLenum target, GLuint id) {}
+  virtual void EndQueryEXT(GLuint id) {}
+  virtual void GetQueryObjectuivEXT(GLuint id, GLenum target, GLuint* result) {}
+  virtual void GetQueryObjectui64vEXT(GLuint id,
+                                      GLenum target,
+                                      GLuint64* result) {}
+  virtual void DeleteQueriesEXT(GLsizei size, const GLuint* queries) {}
+};
+
+class MockGLESImpl : public IMockGLESImpl {
+ public:
+  MOCK_METHOD(void,
+              DeleteTextures,
+              (GLsizei size, const GLuint* queries),
+              (override));
+  MOCK_METHOD(void, GenTextures, (GLsizei n, GLuint* textures), (override));
+  MOCK_METHOD(
+      void,
+      ObjectLabelKHR,
+      (GLenum identifier, GLuint name, GLsizei length, const GLchar* label),
+      (override));
+  MOCK_METHOD(void,
+              Uniform1fv,
+              (GLint location, GLsizei count, const GLfloat* value),
+              (override));
+  MOCK_METHOD(void, GenQueriesEXT, (GLsizei n, GLuint* ids), (override));
+  MOCK_METHOD(void, BeginQueryEXT, (GLenum target, GLuint id), (override));
+  MOCK_METHOD(void, EndQueryEXT, (GLuint id), (override));
+  MOCK_METHOD(void,
+              GetQueryObjectuivEXT,
+              (GLuint id, GLenum target, GLuint* result),
+              (override));
+  MOCK_METHOD(void,
+              GetQueryObjectui64vEXT,
+              (GLuint id, GLenum target, GLuint64* result),
+              (override));
+  MOCK_METHOD(void,
+              DeleteQueriesEXT,
+              (GLsizei size, const GLuint* queries),
+              (override));
+};
 
 /// @brief      Provides a mocked version of the |ProcTableGLES| class.
 ///
@@ -25,32 +80,26 @@ extern const ProcTableGLES::Resolver kMockResolverGLES;
 /// See `README.md` for more information.
 class MockGLES final {
  public:
+  static std::shared_ptr<MockGLES> Init(
+      std::unique_ptr<MockGLESImpl> impl,
+      const std::optional<std::vector<const char*>>& extensions = std::nullopt);
+
   /// @brief      Returns an initialized |MockGLES| instance.
   ///
   /// This method overwrites mocked global GLES function pointers to record
   /// invocations on this instance of |MockGLES|. As such, it should only be
   /// called once per test.
   static std::shared_ptr<MockGLES> Init(
-      const std::optional<std::vector<const unsigned char*>>& extensions =
-          std::nullopt,
+      const std::optional<std::vector<const char*>>& extensions = std::nullopt,
       const char* version_string = "OpenGL ES 3.0",
       ProcTableGLES::Resolver resolver = kMockResolverGLES);
 
   /// @brief      Returns a configured |ProcTableGLES| instance.
   const ProcTableGLES& GetProcTable() const { return proc_table_; }
 
-  /// @brief      Returns a vector of the names of all recorded calls.
-  ///
-  /// Calls are cleared after this method is called.
-  std::vector<std::string> GetCapturedCalls() {
-    std::vector<std::string> calls = captured_calls_;
-    captured_calls_.clear();
-    return calls;
-  }
-
   ~MockGLES();
 
-  void SetNextTexture(uint64_t next_texture) { next_texture_ = next_texture; }
+  IMockGLESImpl* GetImpl() { return impl_.get(); }
 
  private:
   friend void RecordGLCall(const char* name);
@@ -58,11 +107,8 @@ class MockGLES final {
 
   explicit MockGLES(ProcTableGLES::Resolver resolver = kMockResolverGLES);
 
-  void RecordCall(const char* name) { captured_calls_.emplace_back(name); }
-
   ProcTableGLES proc_table_;
-  std::vector<std::string> captured_calls_;
-  std::optional<uint64_t> next_texture_;
+  std::unique_ptr<IMockGLESImpl> impl_;
 
   MockGLES(const MockGLES&) = delete;
 
