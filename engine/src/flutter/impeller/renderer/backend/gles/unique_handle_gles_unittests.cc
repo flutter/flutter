@@ -11,6 +11,8 @@
 namespace impeller {
 namespace testing {
 
+using ::testing::_;
+
 namespace {
 class TestWorker : public ReactorGLES::Worker {
  public:
@@ -22,20 +24,21 @@ class TestWorker : public ReactorGLES::Worker {
 }  // namespace
 
 TEST(UniqueHandleGLES, MakeUntracked) {
-  auto mock_gles = MockGLES::Init();
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+
+  EXPECT_CALL(*mock_gles_impl, GenTextures(1, _)).Times(1);
+
+  std::shared_ptr<MockGLES> mock_gled =
+      MockGLES::Init(std::move(mock_gles_impl));
   ProcTableGLES::Resolver resolver = kMockResolverGLES;
   auto proc_table = std::make_unique<ProcTableGLES>(resolver);
   auto worker = std::make_shared<TestWorker>();
   auto reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
   reactor->AddWorker(worker);
 
-  mock_gles->GetCapturedCalls();
   UniqueHandleGLES handle =
       UniqueHandleGLES::MakeUntracked(reactor, HandleType::kTexture);
   EXPECT_FALSE(handle.Get().IsDead());
-  std::vector<std::string> calls = mock_gles->GetCapturedCalls();
-  EXPECT_TRUE(std::find(calls.begin(), calls.end(), "glGenTextures") !=
-              calls.end());
 }
 
 }  // namespace testing
