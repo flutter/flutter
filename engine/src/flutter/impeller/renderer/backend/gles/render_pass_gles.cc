@@ -10,6 +10,7 @@
 #include "fml/closure.h"
 #include "fml/logging.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/buffer_view.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/buffer_bindings_gles.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
@@ -191,6 +192,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     const RenderPassData& pass_data,
     const ReactorGLES& reactor,
     const std::vector<Command>& commands,
+    const std::vector<BufferView>& vertex_buffers,
     const std::vector<TextureAndSampler>& bound_textures,
     const std::vector<BufferResource>& bound_buffers,
     const std::shared_ptr<GPUTracerGLES>& tracer) {
@@ -441,8 +443,9 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     ///       `RenderPass::ValidateIndexBuffer` here, as validation already runs
     ///       when the vertex/index buffers are set on the command.
     ///
-    for (size_t i = 0; i < command.vertex_buffer_count; i++) {
-      if (!BindVertexBuffer(gl, vertex_desc_gles, command.vertex_buffers[i],
+    for (size_t i = 0; i < command.vertex_buffers.length; i++) {
+      if (!BindVertexBuffer(gl, vertex_desc_gles,
+                            vertex_buffers[i + command.vertex_buffers.offset],
                             i)) {
         return false;
       }
@@ -615,6 +618,7 @@ bool RenderPassGLES::OnEncodeCommands(const Context& context) const {
             /*pass_data=*/*pass_data,                         //
             /*reactor=*/reactor,                              //
             /*commands=*/render_pass->commands_,              //
+            /*vertex_buffers=*/render_pass->vertex_buffers_,  //
             /*bound_textures=*/render_pass->bound_textures_,  //
             /*bound_buffers=*/render_pass->bound_buffers_,    //
             /*tracer=*/tracer                                 //

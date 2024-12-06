@@ -142,9 +142,13 @@ bool RenderPass::SetVertexBuffer(BufferView vertex_buffers[],
     return false;
   }
 
-  pending_.vertex_buffer_count = vertex_buffer_count;
+  if (!vertex_buffers_start_.has_value()) {
+    vertex_buffers_start_ = vertex_buffers_.size();
+  }
+
+  pending_.vertex_buffers.length += vertex_buffer_count;
   for (size_t i = 0; i < vertex_buffer_count; i++) {
-    pending_.vertex_buffers[i] = std::move(vertex_buffers[i]);
+    vertex_buffers_.push_back(vertex_buffers[i]);
   }
   return true;
 }
@@ -196,10 +200,12 @@ bool RenderPass::ValidateIndexBuffer(const BufferView& index_buffer,
 fml::Status RenderPass::Draw() {
   pending_.bound_buffers.offset = bound_buffers_start_.value_or(0u);
   pending_.bound_textures.offset = bound_textures_start_.value_or(0u);
+  pending_.vertex_buffers.offset = vertex_buffers_start_.value_or(0u);
   auto result = AddCommand(std::move(pending_));
   pending_ = Command{};
   bound_textures_start_ = std::nullopt;
   bound_buffers_start_ = std::nullopt;
+  vertex_buffers_start_ = std::nullopt;
   if (result) {
     return fml::Status();
   }
