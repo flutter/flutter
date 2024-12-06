@@ -29,7 +29,13 @@ if (flutterVersionName == null) {
 android {
     namespace "com.example.spell_check"
     compileSdk flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
+
+    // Flutter's CI installs the NDK at a non-standard path.
+    String systemNdkPath = System.getenv("ANDROID_NDK_PATH")
+    if (systemNdkPath != null) {
+        ndkVersion = flutter.ndkVersion
+        ndkPath = systemNdkPath
+    }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

@@ -11,6 +11,13 @@ android {
     namespace = "io.flutter.examples.hello_world"
     compileSdk = flutter.compileSdkVersion
 
+    // Flutter's CI installs the NDK at a non-standard path.
+    val systemNdkPath: String? = System.getenv("ANDROID_NDK_PATH")
+    if (systemNdkPath != null) {
+        ndkVersion = flutter.ndkVersion
+        ndkPath = systemNdkPath
+    }
+
     val systemNdkPath: String? = System.getenv("ANDROID_NDK_PATH")
     if (systemNdkPath != null) {
         ndkVersion = flutter.ndkVersion

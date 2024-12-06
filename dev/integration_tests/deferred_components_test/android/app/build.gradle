@@ -36,6 +36,13 @@ android {
     namespace "io.flutter.integration.deferred_components_test"
     compileSdk flutter.compileSdkVersion
 
+    // Flutter's CI installs the NDK at a non-standard path.
+    String systemNdkPath = System.getenv("ANDROID_NDK_PATH")
+    if (systemNdkPath != null) {
+        ndkVersion = flutter.ndkVersion
+        ndkPath = systemNdkPath
+    }
+
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
