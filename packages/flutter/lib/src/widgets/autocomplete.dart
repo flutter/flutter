@@ -6,7 +6,9 @@
 library;
 
 import 'dart:async';
+import 'dart:math';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
@@ -301,10 +303,11 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   State<RawAutocomplete<T>> createState() => _RawAutocompleteState<T>();
 }
 
-class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> {
+class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> with WidgetsBindingObserver {
   final GlobalKey _fieldKey = GlobalKey();
   final LayerLink _optionsLayerLink = LayerLink();
   final OverlayPortalController _optionsViewController = OverlayPortalController(debugLabel: '_RawAutocompleteState');
+  EdgeInsets? insets;
 
   TextEditingController? _internalTextEditingController;
   TextEditingController get _textEditingController {
@@ -433,7 +436,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     }
   }
 
-  Widget _buildOptionsView(BuildContext context) {
+  Widget _buildOptionsView(BuildContext context, BoxConstraints constraints) {
     final TextDirection textDirection = Directionality.of(context);
     final Alignment followerAlignment = switch (widget.optionsViewOpenDirection) {
       OptionsViewOpenDirection.up => AlignmentDirectional.bottomStart,
@@ -453,7 +456,18 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
         child: AutocompleteHighlightedOption(
           highlightIndexNotifier: _highlightedOptionIndex,
           child: Builder(
-            builder: (BuildContext context) => widget.optionsViewBuilder(context, _select, _options),
+            builder: (BuildContext context) {
+              return Align(
+                alignment: switch (widget.optionsViewOpenDirection) {
+                  OptionsViewOpenDirection.up => Alignment.bottomLeft,
+                  OptionsViewOpenDirection.down => Alignment.topLeft,
+                },
+                child: ConstrainedBox(
+                  constraints: constraints,
+                  child:widget.optionsViewBuilder(context, _select, _options),
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -467,6 +481,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
                                                  ?? (_internalTextEditingController = TextEditingController.fromValue(widget.initialValue));
     initialController.addListener(_onChangedField);
     widget.focusNode?.addListener(_updateOptionsViewVisibility);
+    WidgetsBinding.instance.addObserver(this);
+    updateOverlay();
   }
 
   @override
@@ -497,8 +513,36 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     widget.focusNode?.removeListener(_updateOptionsViewVisibility);
     _internalFocusNode?.dispose();
     _highlightedOptionIndex.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
+
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    updateOverlay();
+  }
+
+  @override
+  void didChangeMetrics() {
+    final OverlayState overlay = Overlay.of(context);
+    final MediaQueryData mediaQuery = MediaQuery.of(overlay.context);
+    if (insets != mediaQuery.viewInsets) {
+      insets = mediaQuery.viewInsets;
+      updateOverlay();
+    }
+  }
+
+  void updateOverlay() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {});
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -506,7 +550,34 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
                           ?? const SizedBox.shrink();
     return OverlayPortal.targetsRootOverlay(
       controller: _optionsViewController,
-      overlayChildBuilder: _buildOptionsView,
+      overlayChildBuilder: (BuildContext context) {
+        final RenderBox targetRenderBox =
+            _fieldKey.currentContext!.findRenderObject()! as RenderBox;
+        final Size targetSize = targetRenderBox.size;
+        final Offset targetOffset = targetRenderBox.localToGlobal(Offset.zero);
+
+        final OverlayState overlay = Overlay.of(context);
+        final RenderBox overlayBox = overlay.context.findRenderObject()! as RenderBox;
+        final Offset overlayOffset = overlayBox.localToGlobal(Offset.zero);
+        final Size overlaySize = overlayBox.size;
+
+        final MediaQueryData mediaQuery = MediaQuery.of(overlay.context);
+        final EdgeInsets viewPadding = mediaQuery.padding + mediaQuery.viewInsets;
+
+        final Size available = switch (widget.optionsViewOpenDirection) {
+          OptionsViewOpenDirection.down => Size(
+              targetSize.width,
+              overlaySize.height -
+                  targetOffset.dy +
+                  overlayOffset.dy -
+                  targetSize.height -
+                  viewPadding.vertical),
+          OptionsViewOpenDirection.up =>
+            Size(targetSize.width, targetOffset.dy - overlayOffset.dy),
+        };
+
+        return _buildOptionsView(context, BoxConstraints.loose(available));
+      },
       child: TextFieldTapRegion(
         child: SizedBox(
           key: _fieldKey,
