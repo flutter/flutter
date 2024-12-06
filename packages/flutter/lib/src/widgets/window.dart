@@ -48,9 +48,6 @@ abstract class WindowController with ChangeNotifier {
   /// The archetype of the window.
   WindowArchetype get type;
 
-  /// Modifies this window with the provided properties.
-  Future<void> modify({Size? size});
-
   /// Destroys this window.
   Future<void> destroy() async {
     if (view == null) {
@@ -67,7 +64,7 @@ class RegularWindowController extends WindowController {
   @override
   WindowArchetype get type => WindowArchetype.regular;
 
-  @override
+  /// Modify the properties of the window.
   Future<void> modify({Size? size}) {
     throw UnimplementedError();
   }
