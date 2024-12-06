@@ -110,7 +110,15 @@ bool APNGImageGenerator::GetPixels(const SkImageInfo& info,
                     << ") of APNG due to the frame missing data (frame_info).";
     return false;
   }
-  if (frame.x_offset + frame_info.width() >
+  if (
+      // Check for unsigned integer wrapping for
+      // frame.{x|y}_offset + frame_info.{width|height}().
+      frame.x_offset >
+          std::numeric_limits<uint32_t>::max() - frame_info.width() ||
+      frame.y_offset >
+          std::numeric_limits<uint32_t>::max() - frame_info.height() ||
+
+      frame.x_offset + frame_info.width() >
           static_cast<unsigned int>(info.width()) ||
       frame.y_offset + frame_info.height() >
           static_cast<unsigned int>(info.height())) {
