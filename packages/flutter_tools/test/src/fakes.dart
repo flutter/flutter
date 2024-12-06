@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:test/fake.dart';
 
 /// Environment with DYLD_LIBRARY_PATH=/path/to/libraries
@@ -790,5 +791,19 @@ class ClosedStdinController extends Fake implements StreamSink<List<int>> {
   @override
   Future<Object?> close() async {
     return null;
+  }
+}
+
+class FakeChromiumLauncher extends Fake implements ChromiumLauncher {
+  @override
+  Future<Chromium> launch(
+    String url, {
+    bool headless = false,
+    int? debugPort,
+    bool skipCheck = false,
+    Directory? cacheDir,
+    List<String> webBrowserFlags = const <String>[],
+  }) async {
+    throw ProcessException('ChromiumLauncher', <String>[url]);
   }
 }
