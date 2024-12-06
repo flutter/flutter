@@ -15,7 +15,6 @@
 #include "impeller/core/sampler.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/core/texture.h"
-#include "impeller/core/vertex_buffer.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/renderer/pipeline.h"
 
@@ -130,13 +129,10 @@ struct Command {
   size_t instance_count = 1u;
 
   //----------------------------------------------------------------------------
-  /// The vertex buffers used by the vertex shader stage.
-  std::array<BufferView, kMaxVertexBuffers> vertex_buffers;
-
-  //----------------------------------------------------------------------------
-  /// The number of vertex buffers in the vertex_buffers array. Must not exceed
-  /// kMaxVertexBuffers.
-  size_t vertex_buffer_count = 0u;
+  /// An offset and range of vertex buffers bound for this draw call.
+  ///
+  /// The vertex buffers are stored on the render pass object.
+  Range vertex_buffers;
 
   //----------------------------------------------------------------------------
   /// The index buffer binding used by the vertex shader stage.
@@ -151,16 +147,6 @@ struct Command {
   /// The type of indices in the index buffer. The indices must be tightly
   /// packed in the index buffer.
   IndexType index_type = IndexType::kUnknown;
-
-  //----------------------------------------------------------------------------
-  /// @brief      Specify the vertex and index buffer to use for this command.
-  ///
-  /// @param[in]  buffer  The vertex and index buffer definition. If possible,
-  ///             this value should be moved and not copied.
-  ///
-  /// @return     returns if the binding was updated.
-  ///
-  bool BindVertices(const VertexBuffer& buffer);
 
   bool IsValid() const { return pipeline && pipeline->IsValid(); }
 };
