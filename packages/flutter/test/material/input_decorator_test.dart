@@ -1634,8 +1634,9 @@ void main() {
       );
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/82321.
+    // Regression test for https://github.com/flutter/flutter/issues/150109.
     testWidgets('OutlineBorder starts at the right position when border radius is taller than horizontal content padding', (WidgetTester tester) async {
-      // This is a regression test for https://github.com/flutter/flutter/issues/82321.
       Widget buildFrame(TextDirection textDirection) {
         return MaterialApp(
           home: Scaffold(
@@ -1677,8 +1678,8 @@ void main() {
           ],
           // The points just before the label bottom left corner should be part of the border.
           includes: <Offset>[
-            labelBottomLeftLocalToBorder - const Offset(1, 0),
-            labelBottomLeftLocalToBorder - const Offset(1, 1),
+            labelBottomLeftLocalToBorder + const Offset(-1, 0),
+            labelBottomLeftLocalToBorder + const Offset(-1, -1),
           ],
         )
         ..restore(),
@@ -1687,10 +1688,7 @@ void main() {
       await tester.pumpWidget(buildFrame(TextDirection.rtl));
       borderBox = InputDecorator.containerOf(tester.element(findBorderPainter()))!;
       // Convert label bottom right offset to border path coordinate system.
-      Offset labelBottomRightLocalToBorder = borderBox.globalToLocal(getLabelRect(tester).bottomRight);
-      // TODO(bleroux): determine why the position has to be moved by 2 pixels to the right.
-      // See https://github.com/flutter/flutter/issues/150109.
-      labelBottomRightLocalToBorder += const Offset(2, 0);
+      final Offset labelBottomRightLocalToBorder = borderBox.globalToLocal(getLabelRect(tester).bottomRight);
 
       expect(findBorderPainter(), paints
         ..save()
@@ -1702,7 +1700,7 @@ void main() {
           // The points just after the label bottom right corner should be part of the border.
           includes: <Offset>[
             labelBottomRightLocalToBorder + const Offset(1, 0),
-            labelBottomRightLocalToBorder + const Offset(1, 1),
+            labelBottomRightLocalToBorder + const Offset(1, -1),
           ],
         )
         ..restore(),
