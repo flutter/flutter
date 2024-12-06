@@ -696,11 +696,8 @@ class TextSelectionOverlay {
   // corresponds to, in global coordinates.
   late double _endHandleDragTarget;
 
-  // The edge to hold in place when the selection is inverted.
-  int? _oppositeEdge;
-
-  // Whether the selection was collapsed when the handle drag began.
-  bool? _dragStartSelectionCollapsed;
+  // The initial selection when a selection handle drag has started.
+  TextSelection? _dragStartSelection;
 
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
     if (!renderObject.attached) {
@@ -727,8 +724,7 @@ class TextSelectionOverlay {
         centerOfLineGlobal,
       ),
     );
-    _oppositeEdge = _selection.start;
-    _dragStartSelectionCollapsed ??= _selection.isCollapsed;
+    _dragStartSelection ??= _selection;
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -768,6 +764,7 @@ class TextSelectionOverlay {
     if (!renderObject.attached) {
       return;
     }
+    assert(_dragStartSelection != null);
 
     // This is NOT the same as details.localPosition. That is relative to the
     // selection handle, whereas this is relative to the RenderEditable.
@@ -788,7 +785,7 @@ class TextSelectionOverlay {
 
     final TextPosition position = renderObject.getPositionForPoint(handleTargetGlobal);
 
-    if (_dragStartSelectionCollapsed!) {
+    if (_dragStartSelection!.isCollapsed) {
       _selectionOverlay.updateMagnifier(_buildMagnifier(
         currentTextPosition: position,
         globalGesturePosition: details.globalPosition,
@@ -801,14 +798,22 @@ class TextSelectionOverlay {
     }
 
     final TextSelection newSelection;
+    final bool dragStartSelectionNormalized = _dragStartSelection!.extentOffset >= _dragStartSelection!.baseOffset;
     switch (defaultTargetPlatform) {
       // On Apple platforms, dragging the base handle makes it the extent.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        newSelection = TextSelection(
-          baseOffset: _oppositeEdge!,
-          extentOffset: position.offset,
-        );
+        if (dragStartSelectionNormalized) {
+          newSelection = TextSelection(
+            baseOffset: _dragStartSelection!.baseOffset,
+            extentOffset: position.offset,
+          );
+        } else {
+          newSelection = TextSelection(
+            baseOffset: _dragStartSelection!.extentOffset,
+            extentOffset: position.offset,
+          );
+        }
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -864,8 +869,7 @@ class TextSelectionOverlay {
         centerOfLineGlobal,
       ),
     );
-    _oppositeEdge = _selection.end;
-    _dragStartSelectionCollapsed ??= _selection.isCollapsed;
+    _dragStartSelection ??= _selection;
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -880,6 +884,7 @@ class TextSelectionOverlay {
     if (!renderObject.attached) {
       return;
     }
+    assert(_dragStartSelection != null);
 
     // This is NOT the same as details.localPosition. That is relative to the
     // selection handle, whereas this is relative to the RenderEditable.
@@ -897,7 +902,7 @@ class TextSelectionOverlay {
     );
     final TextPosition position = renderObject.getPositionForPoint(handleTargetGlobal);
 
-    if (_dragStartSelectionCollapsed!) {
+    if (_dragStartSelection!.isCollapsed) {
       _selectionOverlay.updateMagnifier(_buildMagnifier(
         currentTextPosition: position,
         globalGesturePosition: details.globalPosition,
@@ -910,14 +915,22 @@ class TextSelectionOverlay {
     }
 
     final TextSelection newSelection;
+    final bool dragStartSelectionNormalized = _dragStartSelection!.extentOffset >= _dragStartSelection!.baseOffset;
     switch (defaultTargetPlatform) {
       // On Apple platforms, dragging the base handle makes it the extent.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        newSelection = TextSelection(
-          baseOffset: _oppositeEdge!,
-          extentOffset: position.offset,
-        );
+        if (dragStartSelectionNormalized) {
+          newSelection = TextSelection(
+            baseOffset: _dragStartSelection!.extentOffset,
+            extentOffset: position.offset,
+          );
+        } else {
+          newSelection = TextSelection(
+            baseOffset: _dragStartSelection!.baseOffset,
+            extentOffset: position.offset,
+          );
+        }
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -944,8 +957,7 @@ class TextSelectionOverlay {
     if (!context.mounted) {
       return;
     }
-    _dragStartSelectionCollapsed = null;
-    _oppositeEdge = null;
+    _dragStartSelection = null;
     if (selectionControls is! TextSelectionHandleControls) {
       _selectionOverlay.hideMagnifier();
       if (!_selection.isCollapsed) {
