@@ -53,6 +53,7 @@ class PopupWindowContent extends StatelessWidget {
                   ElevatedButton(
                       onPressed: () {
                         windowManagerModel.add(KeyedWindowController(
+                            parent: controller,
                             controller: PopupWindowController()));
                       },
                       child: const Text('Another popup')),

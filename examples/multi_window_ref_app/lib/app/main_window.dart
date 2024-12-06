@@ -226,6 +226,17 @@ class _WindowCreatorCard extends StatelessWidget {
                   child: const Text('Regular'),
                 ),
                 const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed: () {
+                    windowManagerModel.add(KeyedWindowController(
+                        parent: windowManagerModel.selected,
+                        controller: PopupWindowController()));
+                  },
+                  child: Text(windowManagerModel.selected?.view?.viewId != null
+                      ? 'Popup of ID ${windowManagerModel.selected!.view?.viewId}'
+                      : 'Popup'),
+                ),
+                const SizedBox(height: 8),
                 Container(
                   alignment: Alignment.bottomRight,
                   child: TextButton(
