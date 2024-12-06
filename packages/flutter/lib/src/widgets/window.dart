@@ -436,6 +436,58 @@ class RegularWindow extends StatelessWidget {
   }
 }
 
+class PopupWindow extends StatelessWidget {
+  /// Creates a regular window widget
+  const PopupWindow(
+      {this.controller,
+      this.onDestroyed,
+      this.onError,
+      super.key,
+      required Size preferredSize,
+      Rect? anchorRect,
+      WindowPositioner positioner = const WindowPositioner(),
+      required this.child})
+      : _preferredSize = preferredSize,
+        _anchorRect = anchorRect,
+        _positioner = positioner;
+
+  /// Controller for this widget.
+  final RegularWindowController? controller;
+
+  /// Called when the window backing this widget is destroyed.
+  final void Function()? onDestroyed;
+
+  /// Called when an error is encountered during the creation of this widget.
+  final void Function(String?)? onError;
+
+  final Size _preferredSize;
+
+  final Rect? _anchorRect;
+
+  final WindowPositioner _positioner;
+
+  /// The content rendered into this window.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final WindowContext? windowContext = WindowContext.of(context);
+    assert(windowContext != null, 'A PopupWindow must have a parent');
+
+    return _GenericWindow(
+        onDestroyed: onDestroyed,
+        onError: onError,
+        key: key,
+        createFuture: () => createPopup(
+            parentViewId: windowContext!.viewId,
+            size: _preferredSize,
+            anchorRect: _anchorRect,
+            positioner: _positioner),
+        controller: controller,
+        child: child);
+  }
+}
+
 /// Provides descendents with access to the [Window] in which they are rendered
 class WindowContext extends InheritedWidget {
   /// [window] the [Window]
