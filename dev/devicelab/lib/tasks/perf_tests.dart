@@ -1659,8 +1659,8 @@ class CompileSwiftUITest {
     int releaseSizeInBytes = 0;
     watch.start();
     await Process.run(workingDirectory: testDirectory ,'xcodebuild', <String>[
-      '-destination',
-      'platform=iOS Simulator,name=iPhone 14 Pro Max,OS=16.4'
+      // '-destination',
+      // 'platform=iOS Simulator,name=iPhone 14 Pro Max,OS=16.4'
     ]).then((ProcessResult results) {
       print(results.stdout);
       if (results.exitCode != 0) {
