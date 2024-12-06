@@ -36,10 +36,6 @@ class MaterialTextSelectionHandleControls extends MaterialTextSelectionControls 
 /// The [materialTextSelectionControls] global variable has a
 /// suitable instance of this class.
 class MaterialTextSelectionControls extends TextSelectionControls {
-  /// Whether Material selection handles can swap.
-  @override
-  bool get canSwap => false;
-
   /// Returns the size of the Material handle.
   @override
   Size getHandleSize(double textLineHeight) => const Size(_kHandleSize, _kHandleSize);

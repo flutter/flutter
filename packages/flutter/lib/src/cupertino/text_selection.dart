@@ -70,10 +70,6 @@ class CupertinoTextSelectionHandleControls extends CupertinoTextSelectionControl
 /// The [cupertinoTextSelectionControls] global variable has a
 /// suitable instance of this class.
 class CupertinoTextSelectionControls extends TextSelectionControls {
-  /// Whether Cupertino selection handles can swap.
-  @override
-  bool get canSwap => true;
-
   /// Returns the size of the Cupertino handle.
   @override
   Size getHandleSize(double textLineHeight) {

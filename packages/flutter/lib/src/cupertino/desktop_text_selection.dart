@@ -23,9 +23,6 @@ class _CupertinoDesktopTextSelectionHandleControls extends CupertinoDesktopTextS
 class CupertinoDesktopTextSelectionControls extends TextSelectionControls {
   /// Desktop has no text selection handles.
   @override
-  bool get canSwap => false;
-  /// Desktop has no text selection handles.
-  @override
   Size getHandleSize(double textLineHeight) {
     return Size.zero;
   }
