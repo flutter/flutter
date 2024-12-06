@@ -74,7 +74,6 @@ void RecordingRenderPass::SetInstanceCount(size_t count) {
 
 // |RenderPass|
 bool RecordingRenderPass::SetVertexBuffer(VertexBuffer buffer) {
-  pending_.BindVertices(buffer);
   if (delegate_) {
     return delegate_->SetVertexBuffer(buffer);
   }
