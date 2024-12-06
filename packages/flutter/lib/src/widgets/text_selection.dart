@@ -138,9 +138,6 @@ abstract class TextSelectionControls {
     Offset? lastSecondaryTapDownPosition,
   );
 
-  /// Whether the selection handles allow for swapping.
-  bool get canSwap;
-
   /// Returns the size of the selection handle.
   Size getHandleSize(double textLineHeight);
 
@@ -275,9 +272,6 @@ abstract class TextSelectionControls {
 /// The [emptyTextSelectionControls] global variable has a
 /// suitable instance of this class.
 class EmptyTextSelectionControls extends TextSelectionControls {
-  @override
-  bool get canSwap => false;
-
   @override
   Size getHandleSize(double textLineHeight) => Size.zero;
 
@@ -815,11 +809,6 @@ class TextSelectionOverlay {
           baseOffset: _oppositeEdge!,
           extentOffset: position.offset,
         );
-        if (selectionControls != null
-            && !selectionControls!.canSwap
-            && position.offset <= _selection.start) {
-          return; // Don't allow order swapping.
-        }
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -828,9 +817,7 @@ class TextSelectionOverlay {
           baseOffset: _selection.baseOffset,
           extentOffset: position.offset,
         );
-        if (selectionControls != null
-            && !selectionControls!.canSwap
-            && newSelection.baseOffset >= newSelection.extentOffset) {
+        if (newSelection.baseOffset >= newSelection.extentOffset) {
           return; // Don't allow order swapping.
         }
     }
@@ -931,11 +918,6 @@ class TextSelectionOverlay {
           baseOffset: _oppositeEdge!,
           extentOffset: position.offset,
         );
-        if (selectionControls != null
-            && !selectionControls!.canSwap
-            && newSelection.extentOffset >= _selection.end) {
-          return; // Don't allow order swapping.
-        }
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -944,9 +926,7 @@ class TextSelectionOverlay {
           baseOffset: position.offset,
           extentOffset: _selection.extentOffset,
         );
-        if (selectionControls != null
-            && !selectionControls!.canSwap
-            && newSelection.baseOffset >= newSelection.extentOffset) {
+        if (newSelection.baseOffset >= newSelection.extentOffset) {
           return; // Don't allow order swapping.
         }
     }
