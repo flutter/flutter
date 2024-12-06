@@ -229,6 +229,10 @@ class FlutterProject {
   /// The `.dart-tool` directory of this project.
   Directory get dartTool => directory.childDirectory('.dart_tool');
 
+  /// The location of the generated scaffolding project for hosting widget
+  /// previews from this project.
+  Directory get widgetPreviewScaffold => dartTool.childDirectory('widget_preview_scaffold');
+
   /// The directory containing the generated code for this project.
   Directory get generated => directory
     .absolute
@@ -247,6 +251,12 @@ class FlutterProject {
     _exampleDirectory(directory),
     _exampleManifest,
     FlutterManifest.empty(logger: globals.logger),
+  );
+
+  /// The generated scaffolding project for hosting widget previews from this
+  /// project.
+  FlutterProject get widgetPreviewScaffoldProject => FlutterProject.fromDirectory(
+    widgetPreviewScaffold,
   );
 
   /// True if this project is a Flutter module project.
@@ -865,7 +875,7 @@ $javaGradleCompatUrl
     }
     for (final XmlElement metaData in document.findAllElements('meta-data')) {
       final String? name = metaData.getAttribute('android:name');
-      // External code checks for this string to indentify flutter android apps.
+      // External code checks for this string to identify flutter android apps.
       // See cl/667760684 as an example.
       if (name == 'flutterEmbedding') {
         final String? embeddingVersionString = metaData.getAttribute('android:value');

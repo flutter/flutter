@@ -322,7 +322,7 @@ class SemanticsController {
 
   /// Recursive depth first traversal of the specified `node`, adding nodes
   /// that are important for semantics to the `traversal` list.
-  void _accessibilityTraversal(SemanticsNode node, List<SemanticsNode> traversal){
+  void _accessibilityTraversal(SemanticsNode node, List<SemanticsNode> traversal) {
     if (_isImportantForAccessibility(node)) {
       traversal.add(node);
     }
@@ -381,10 +381,10 @@ class SemanticsController {
     finders.FinderBase<SemanticsNode> finder,
     SemanticsAction action, {
     Object? args,
-    bool checkForAction = true
+    bool checkForAction = true,
   }) {
     final SemanticsNode node = finder.evaluate().single;
-    if (checkForAction && !node.getSemanticsData().hasAction(action)){
+    if (checkForAction && !node.getSemanticsData().hasAction(action)) {
       throw StateError(
         'The given node does not support $action. If the action is implicitly '
         'supported or an unsupported action is being tested for this node, '
@@ -515,12 +515,12 @@ class SemanticsController {
   ///   [SemanticsAction.moveCursorForwardByCharacter].
   void moveCursorForwardByCharacter(
     finders.FinderBase<SemanticsNode> finder, {
-    bool shouldModifySelection = false
+    bool shouldModifySelection = false,
   }) {
     performAction(
       finder,
       SemanticsAction.moveCursorForwardByCharacter,
-      args: shouldModifySelection
+      args: shouldModifySelection,
     );
   }
 
@@ -533,12 +533,12 @@ class SemanticsController {
   ///   [SemanticsAction.moveCursorForwardByWord].
   void moveCursorForwardByWord(
     finders.FinderBase<SemanticsNode> finder, {
-    bool shouldModifySelection = false
+    bool shouldModifySelection = false,
   }) {
     performAction(
       finder,
       SemanticsAction.moveCursorForwardByWord,
-      args: shouldModifySelection
+      args: shouldModifySelection,
     );
   }
 
@@ -554,12 +554,12 @@ class SemanticsController {
   ///   [SemanticsAction.moveCursorBackwardByCharacter].
   void moveCursorBackwardByCharacter(
     finders.FinderBase<SemanticsNode> finder, {
-    bool shouldModifySelection = false
+    bool shouldModifySelection = false,
   }) {
     performAction(
       finder,
       SemanticsAction.moveCursorBackwardByCharacter,
-      args: shouldModifySelection
+      args: shouldModifySelection,
     );
   }
 
@@ -572,12 +572,12 @@ class SemanticsController {
   ///   [SemanticsAction.moveCursorBackwardByWord].
   void moveCursorBackwardByWord(
     finders.FinderBase<SemanticsNode> finder, {
-    bool shouldModifySelection = false
+    bool shouldModifySelection = false,
   }) {
     performAction(
       finder,
       SemanticsAction.moveCursorBackwardByWord,
-      args: shouldModifySelection
+      args: shouldModifySelection,
     );
   }
 
@@ -606,7 +606,7 @@ class SemanticsController {
   void setSelection(
     finders.FinderBase<SemanticsNode> finder, {
     required int base,
-    required int extent
+    required int extent,
   }) {
     performAction(
       finder,
@@ -681,7 +681,7 @@ class SemanticsController {
     performAction(
       finder,
       SemanticsAction.customAction,
-      args: CustomSemanticsAction.getIdentifier(action)
+      args: CustomSemanticsAction.getIdentifier(action),
     );
   }
 
@@ -1000,6 +1000,7 @@ abstract class WidgetController {
         ..._walkLayers(renderView.debugLayer!)
     ];
   }
+
   Iterable<Layer> _walkLayers(Layer layer) sync* {
     TestAsyncUtils.guardSync();
     yield layer;
@@ -1059,7 +1060,7 @@ abstract class WidgetController {
   ///
   /// The `pointer` and `button` arguments specify [PointerEvent.pointer] and
   /// [PointerEvent.buttons] of the tap event.
-  Future<void> tapOnText(finders.FinderBase<finders.TextRangeContext> textRangeFinder, {int? pointer, int buttons = kPrimaryButton }) {
+  Future<void> tapOnText(finders.FinderBase<finders.TextRangeContext> textRangeFinder, { int? pointer, int buttons = kPrimaryButton }) {
     final Iterable<finders.TextRangeContext> ranges = textRangeFinder.evaluate();
     if (ranges.isEmpty) {
       throw FlutterError(textRangeFinder.toString());
@@ -1073,13 +1074,12 @@ abstract class WidgetController {
     if (tapLocation == null) {
       final finders.TextRangeContext found = textRangeFinder.evaluate().single;
       throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Finder specifies a TextRange that can not receive pointer events.'),
-          ErrorDescription('The finder used was: ${textRangeFinder.toString(describeSelf: true)}'),
-          ErrorDescription('Found a matching substring in a static text widget, within ${found.textRange}.'),
-          ErrorDescription('But the "tapOnText" method could not find a hit-testable Offset with in that text range.'),
-          found.renderObject.toDiagnosticsNode(name: 'The RenderBox of that static text widget was', style: DiagnosticsTreeStyle.shallow),
-        ]
-      );
+        ErrorSummary('Finder specifies a TextRange that can not receive pointer events.'),
+        ErrorDescription('The finder used was: ${textRangeFinder.toString(describeSelf: true)}'),
+        ErrorDescription('Found a matching substring in a static text widget, within ${found.textRange}.'),
+        ErrorDescription('But the "tapOnText" method could not find a hit-testable Offset with in that text range.'),
+        found.renderObject.toDiagnosticsNode(name: 'The RenderBox of that static text widget was', style: DiagnosticsTreeStyle.shallow),
+      ]);
     }
     return tapAt(tapLocation, pointer: pointer, buttons: buttons);
   }
@@ -1643,22 +1643,22 @@ abstract class WidgetController {
     ];
     final List<PointerEventRecord> records = <PointerEventRecord>[
       PointerEventRecord(Duration.zero, <PointerEvent>[
-          PointerAddedEvent(
-            position: startLocation,
-          ),
-          PointerDownEvent(
-            position: startLocation,
-            pointer: pointer,
-            buttons: buttons,
-          ),
-        ]),
+        PointerAddedEvent(
+          position: startLocation,
+        ),
+        PointerDownEvent(
+          position: startLocation,
+          pointer: pointer,
+          buttons: buttons,
+        ),
+      ]),
       ...<PointerEventRecord>[
         for (int t = 0; t <= intervals; t += 1)
           PointerEventRecord(timeStamps[t], <PointerEvent>[
             PointerMoveEvent(
               timeStamp: timeStamps[t],
-              position: offsets[t+1],
-              delta: offsets[t+1] - offsets[t],
+              position: offsets[t + 1],
+              delta: offsets[t + 1] - offsets[t],
               pointer: pointer,
               buttons: buttons,
             ),
@@ -1993,7 +1993,7 @@ abstract class WidgetController {
     LogicalKeyboardKey key, {
     String? platform,
     String? character,
-    PhysicalKeyboardKey? physicalKey
+    PhysicalKeyboardKey? physicalKey,
   }) async {
     final bool handled = await simulateKeyDownEvent(key, platform: platform, character: character, physicalKey: physicalKey);
     // Internally wrapped in async guard.
@@ -2032,7 +2032,7 @@ abstract class WidgetController {
     LogicalKeyboardKey key, {
     String? platform,
     String? character,
-    PhysicalKeyboardKey? physicalKey
+    PhysicalKeyboardKey? physicalKey,
   }) async {
     // Internally wrapped in async guard.
     return simulateKeyDownEvent(key, platform: platform, character: character, physicalKey: physicalKey);
@@ -2060,10 +2060,10 @@ abstract class WidgetController {
   ///    corresponding key down and repeat event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
   Future<bool> sendKeyUpEvent(
-      LogicalKeyboardKey key, {
-        String? platform,
-        PhysicalKeyboardKey? physicalKey
-      }) async {
+    LogicalKeyboardKey key, {
+    String? platform,
+    PhysicalKeyboardKey? physicalKey,
+  }) async {
     // Internally wrapped in async guard.
     return simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
   }
@@ -2096,11 +2096,11 @@ abstract class WidgetController {
   ///    key down and up event.
   ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
   Future<bool> sendKeyRepeatEvent(
-      LogicalKeyboardKey key, {
-        String? platform,
-        String? character,
-        PhysicalKeyboardKey? physicalKey
-      }) async {
+    LogicalKeyboardKey key, {
+    String? platform,
+    String? character,
+    PhysicalKeyboardKey? physicalKey,
+  }) async {
     // Internally wrapped in async guard.
     return simulateKeyRepeatEvent(key, platform: platform, character: character, physicalKey: physicalKey);
   }
@@ -2175,11 +2175,10 @@ abstract class WidgetController {
   Future<void> scrollUntilVisible(
     finders.FinderBase<Element> finder,
     double delta, {
-      finders.FinderBase<Element>? scrollable,
-      int maxScrolls = 50,
-      Duration duration = const Duration(milliseconds: 50),
-    }
-  ) {
+    finders.FinderBase<Element>? scrollable,
+    int maxScrolls = 50,
+    Duration duration = const Duration(milliseconds: 50),
+  }) {
     assert(maxScrolls > 0);
     scrollable ??= finders.find.byType(Scrollable);
     return TestAsyncUtils.guard<void>(() async {
@@ -2219,8 +2218,8 @@ abstract class WidgetController {
     finders.FinderBase<Element> finder,
     finders.FinderBase<Element> view,
     Offset moveStep, {
-      int maxIteration = 50,
-      Duration duration = const Duration(milliseconds: 50),
+    int maxIteration = 50,
+    Duration duration = const Duration(milliseconds: 50),
   }) {
     return TestAsyncUtils.guard<void>(() async {
       while (maxIteration > 0 && finder.evaluate().isEmpty) {
