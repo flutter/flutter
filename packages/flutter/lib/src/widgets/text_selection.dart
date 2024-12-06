@@ -803,17 +803,12 @@ class TextSelectionOverlay {
       // On Apple platforms, dragging the base handle makes it the extent.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        if (dragStartSelectionNormalized) {
-          newSelection = TextSelection(
-            baseOffset: _dragStartSelection!.baseOffset,
-            extentOffset: position.offset,
-          );
-        } else {
-          newSelection = TextSelection(
-            baseOffset: _dragStartSelection!.extentOffset,
-            extentOffset: position.offset,
-          );
-        }
+        newSelection = TextSelection(
+          baseOffset: dragStartSelectionNormalized
+                      ? _dragStartSelection!.baseOffset
+                      : _dragStartSelection!.extentOffset,
+          extentOffset: position.offset,
+        );
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -920,17 +915,12 @@ class TextSelectionOverlay {
       // On Apple platforms, dragging the base handle makes it the extent.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        if (dragStartSelectionNormalized) {
-          newSelection = TextSelection(
-            baseOffset: _dragStartSelection!.extentOffset,
-            extentOffset: position.offset,
-          );
-        } else {
-          newSelection = TextSelection(
-            baseOffset: _dragStartSelection!.baseOffset,
-            extentOffset: position.offset,
-          );
-        }
+        newSelection = TextSelection(
+          baseOffset: dragStartSelectionNormalized
+                      ? _dragStartSelection!.extentOffset
+                      : _dragStartSelection!.baseOffset,
+          extentOffset: position.offset,
+        );
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
