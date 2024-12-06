@@ -14,7 +14,6 @@ import 'package:test_api/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import 'devices_test.dart';
 
 void main() {
   group('WidgetPreviewStartCommand', () {
@@ -30,7 +29,7 @@ void main() {
       rootProject = FakeFlutterProject(
         projectRoot: 'some_project',
         fileSystem: fileSystem,
-        logger: FakeBufferLogger(),
+        logger: BufferLogger.test(),
       );
     });
 
