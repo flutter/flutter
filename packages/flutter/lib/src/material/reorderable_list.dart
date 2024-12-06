@@ -102,6 +102,7 @@ class ReorderableListView extends StatefulWidget {
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.autoScrollerVelocityScalar,
+    this.dragBoundaryProvider,
   }) : assert(
         (itemExtent == null && prototypeItem == null) ||
         (itemExtent == null && itemExtentBuilder == null) ||
@@ -171,6 +172,7 @@ class ReorderableListView extends StatefulWidget {
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.autoScrollerVelocityScalar,
+    this.dragBoundaryProvider,
   }) : assert(itemCount >= 0),
        assert(
          (itemExtent == null && prototypeItem == null) ||
@@ -291,6 +293,9 @@ class ReorderableListView extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.SliverReorderableList.autoScrollerVelocityScalar.default}
   final double? autoScrollerVelocityScalar;
+
+  /// {@macro flutter.widgets.reorderable_list.dragBoundaryProvider}
+  final ReorderDragBoundaryProvider? dragBoundaryProvider;
 
   @override
   State<ReorderableListView> createState() => _ReorderableListViewState();
@@ -446,6 +451,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             onReorderEnd: widget.onReorderEnd,
             proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
             autoScrollerVelocityScalar: widget.autoScrollerVelocityScalar,
+            dragBoundaryProvider: widget.dragBoundaryProvider,
           ),
         ),
         if (widget.footer != null)

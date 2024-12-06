@@ -1925,6 +1925,46 @@ void main() {
     expect(offsetForFastScroller / offsetForSlowScroller, fastVelocityScalar / slowVelocityScalar);
   });
 
+  testWidgets('DragBoundary defines the boundary for ReorderableListView.', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Container(
+            margin: const EdgeInsets.only(top: 100),
+            height: 300,
+            child: DragBoundary(
+              child: ReorderableListView.builder(
+                itemBuilder: (BuildContext context, int index) {
+                  return ReorderableDragStartListener(
+                    key: ValueKey<int>(index),
+                    index: index,
+                    child: Text('$index'),
+                  );
+                },
+                itemCount: 5,
+                onReorder: (int fromIndex, int toIndex) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    TestGesture drag = await tester.startGesture(tester.getCenter(find.text('0')));
+    await tester.pump(kLongPressTimeout);
+    await drag.moveBy(const Offset(0, -400));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('0')), const Offset(0, 100));
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    drag = await tester.startGesture(tester.getCenter(find.text('0')));
+    await tester.pump(kLongPressTimeout);
+    await drag.moveBy(const Offset(0, 800));
+    await tester.pumpAndSettle();
+    expect(tester.getBottomLeft(find.text('0')), const Offset(0, 400));
+    await drag.up();
+    await tester.pumpAndSettle();
+  });
 }
 
 Future<void> longPressDrag(WidgetTester tester, Offset start, Offset end) async {
