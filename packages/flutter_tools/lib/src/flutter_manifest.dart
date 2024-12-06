@@ -122,7 +122,7 @@ class FlutterManifest {
 
     copy._descriptor['flutter'] = YamlMap.wrap(copy._flutterDescriptor);
 
-    if(!_validate(YamlMap.wrap(copy._descriptor), logger)) {
+    if (!_validate(YamlMap.wrap(copy._descriptor), logger)) {
       throw StateError('Generated invalid pubspec.yaml.');
     }
 
