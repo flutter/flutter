@@ -154,8 +154,11 @@ class HashedObserverList<T> extends Iterable<T> {
   /// allocations.
   @override
   List<T> toList({bool growable = true}) {
-    final Iterator<T> iter = _map.keys.iterator;
-    return List<T>.generate(_map.length, (_) => (iter..moveNext()).current,
-        growable: growable);
+    final Iterator<T> iterator = _map.keys.iterator;
+    return List<T>.generate(
+      _map.length,
+      (_) => (iterator..moveNext()).current,
+      growable: growable,
+    );
   }
 }

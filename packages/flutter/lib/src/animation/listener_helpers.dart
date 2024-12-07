@@ -91,8 +91,7 @@ mixin AnimationEagerListenerMixin {
 /// and [didUnregisterListener]. Implementations of these methods can be obtained
 /// by mixing in another mixin from this library, such as [AnimationLazyListenerMixin].
 mixin AnimationLocalListenersMixin {
-  final HashedObserverList<VoidCallback> _listeners =
-      HashedObserverList<VoidCallback>();
+  final HashedObserverList<VoidCallback> _listeners = HashedObserverList<VoidCallback>();
 
   /// Called immediately before a listener is added via [addListener].
   ///
