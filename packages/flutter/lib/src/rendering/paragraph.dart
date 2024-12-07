@@ -1394,27 +1394,29 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
       selectionRects.add(textBox.toRect());
     }
+    final bool selectionCollapsed = selectionStart == selectionEnd;
+    final (
+      TextSelectionHandleType startSelectionHandleType,
+      TextSelectionHandleType endSelectionHandleType,
+    ) = switch ((selectionCollapsed, flipHandles)) {
+      // Always prefer collapsed handle when selection is collapsed.
+      (true, _) => (TextSelectionHandleType.collapsed, TextSelectionHandleType.collapsed),
+      (false, true) => (TextSelectionHandleType.right, TextSelectionHandleType.left),
+      (false, false) => (TextSelectionHandleType.left, TextSelectionHandleType.right),
+    };
     return SelectionGeometry(
       startSelectionPoint: SelectionPoint(
         localPosition: startOffsetInParagraphCoordinates,
         lineHeight: paragraph._textPainter.preferredLineHeight,
-        handleType: selectionStart == selectionEnd
-                    ? TextSelectionHandleType.collapsed
-                    : flipHandles
-                    ? TextSelectionHandleType.right
-                    : TextSelectionHandleType.left,
+        handleType: startSelectionHandleType,
       ),
       endSelectionPoint: SelectionPoint(
         localPosition: endOffsetInParagraphCoordinates,
         lineHeight: paragraph._textPainter.preferredLineHeight,
-        handleType: selectionStart == selectionEnd
-                    ? TextSelectionHandleType.collapsed
-                    : flipHandles
-                    ? TextSelectionHandleType.left
-                    : TextSelectionHandleType.right,
+        handleType: endSelectionHandleType,
       ),
       selectionRects: selectionRects,
-      status: _textSelectionStart!.offset == _textSelectionEnd!.offset
+      status: selectionCollapsed
         ? SelectionStatus.collapsed
         : SelectionStatus.uncollapsed,
       hasContent: true,
