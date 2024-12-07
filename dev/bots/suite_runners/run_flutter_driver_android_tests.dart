@@ -81,4 +81,49 @@ Future<void> runFlutterDriverAndroidTests() async {
       'native_driver_test',
     ),
   );
+
+  // A simulated cutout overlay is necessary to test display_cutout_rotation.
+  // Using adb to enable a cutout overlay once the test app is running breaks
+  // the connection with FlutterDriver; therefore, this setting must be set
+  // before `flutter drive` is executed.
+  await runCommand(
+    'adb',
+    <String>[
+      'shell',
+      'settings',
+      'put',
+      'global',
+      'development_settings_enabled',
+      '1',
+    ],
+  );
+  await runCommand(
+    'adb',
+    <String>[
+      'shell',
+      'cmd',
+      'overlay',
+      'enable',
+      'com.android.internal.display.cutout.emulation.tall',
+    ],
+  );
+  await runCommand(
+    'flutter',
+    <String>[
+      'drive',
+      'lib/display_cutout_rotation_main.dart',
+      // There are no reason to enable development flags for this test.
+      // Disable them to work around flakiness issues, and in general just
+      // make less things start up unnecessarily.
+      '--no-dds',
+      '--no-enable-dart-profiling',
+      '--test-arguments=test',
+      '--test-arguments=--reporter=expanded',
+    ],
+    workingDirectory: path.join(
+      'dev',
+      'integration_tests',
+      'native_driver_test',
+    ),
+  );
 }
