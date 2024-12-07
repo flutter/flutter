@@ -10,7 +10,7 @@ android {
     // Flutter's CI installs the NDK at a non-standard path.
     val systemNdkPath: String? = System.getenv("ANDROID_NDK_PATH")
     if (systemNdkPath != null) {
-        ndkVersion = flutter.ndkVersion
+        ndkVersion = "26.3.11579264"
         ndkPath = systemNdkPath
     }
 
