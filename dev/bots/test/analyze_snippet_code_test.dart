@@ -19,7 +19,6 @@ const List<String> expectedMainErrors = <String>[
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:112:21: (top-level declaration) (invalid_assignment)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:134:14: (top-level declaration) (undefined_identifier)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:136:21: (top-level declaration) (read_potentially_unassigned_final)',
-  'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:147:12: (self-contained program) (unused_import)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:148:11: (self-contained program) (undefined_class)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:148:22: (self-contained program) (undefined_function)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:153:10: (stateful widget) (annotate_overrides)',
@@ -38,8 +37,7 @@ const List<String> expectedUiErrors = <String>[
   'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:16:20: (top-level declaration) (unused_field)',
 ];
 
-final RegExp errorPrefixRE =
-    RegExp(r'^([-a-z0-9/_.:]+): .*(\([-a-z_ ]+\) \([-a-z_ ]+\))$');
+final RegExp errorPrefixRE = RegExp(r'^([-a-z0-9/_.:]+): .*(\([-a-z_ ]+\) \([-a-z_ ]+\))$');
 String removeLintDescriptions(String error) {
   final RegExpMatch? match = errorPrefixRE.firstMatch(error);
   if (match != null) {
@@ -68,10 +66,8 @@ void main() {
     );
     expect(process.stdout, isEmpty);
     final List<String> stderrLines = process.stderr.toString().split('\n');
-    expect(stderrLines.length, stderrLines.toSet().length,
-        reason: 'found duplicates in $stderrLines');
-    final List<String> stderrNoDescriptions =
-        stderrLines.map(removeLintDescriptions).toList();
+    expect(stderrLines.length, stderrLines.toSet().length, reason: 'found duplicates in $stderrLines');
+    final List<String> stderrNoDescriptions = stderrLines.map(removeLintDescriptions).toList();
     expect(stderrNoDescriptions, <String>[
       ...expectedMainErrors,
       'Found 18 snippet code errors.',
@@ -79,7 +75,7 @@ void main() {
       '', // because we end with a newline, split gives us an extra blank line
     ]);
     expect(process.exitCode, 1);
-  }, skip: true); // TODO(scheglov): Restore after landing Dart SDK changes, https://github.com/flutter/flutter/issues/154413
+  });
 
   test('Analyzes dart:ui code', () {
     final ProcessResult process = Process.runSync(
@@ -93,10 +89,8 @@ void main() {
     );
     expect(process.stdout, isEmpty);
     final List<String> stderrLines = process.stderr.toString().split('\n');
-    expect(stderrLines.length, stderrLines.toSet().length,
-        reason: 'found duplicates in $stderrLines');
-    final List<String> stderrNoDescriptions =
-        stderrLines.map(removeLintDescriptions).toList();
+    expect(stderrLines.length, stderrLines.toSet().length, reason: 'found duplicates in $stderrLines');
+    final List<String> stderrNoDescriptions = stderrLines.map(removeLintDescriptions).toList();
     expect(stderrNoDescriptions, <String>[
       ...expectedUiErrors,
       ...expectedMainErrors,
@@ -105,5 +99,5 @@ void main() {
       '', // because we end with a newline, split gives us an extra blank line
     ]);
     expect(process.exitCode, 1);
-  }, skip: true); // TODO(scheglov): Restore after landing Dart SDK changes, https://github.com/flutter/flutter/issues/154413
+  });
 }
