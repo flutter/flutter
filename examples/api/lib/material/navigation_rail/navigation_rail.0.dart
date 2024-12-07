@@ -94,6 +94,8 @@ class _NavRailExampleState extends State<NavRailExample> {
                 const SizedBox(height: 10),
                 OverflowBar(
                   spacing: 10.0,
+                  overflowAlignment: OverflowBarAlignment.center,
+                  overflowSpacing: 10.0,
                   children: <Widget>[
                     ElevatedButton(
                       onPressed: () {
@@ -126,6 +128,8 @@ class _NavRailExampleState extends State<NavRailExample> {
                 const SizedBox(height: 10),
                 OverflowBar(
                   spacing: 10.0,
+                  overflowAlignment: OverflowBarAlignment.center,
+                  overflowSpacing: 10,
                   children: <Widget>[
                     ElevatedButton(
                       onPressed: () {
@@ -156,6 +160,8 @@ class _NavRailExampleState extends State<NavRailExample> {
                 const SizedBox(height: 20),
                 OverflowBar(
                   spacing: 10.0,
+                  overflowAlignment: OverflowBarAlignment.center,
+                  overflowSpacing: 10.0,
                   children: <Widget>[
                     ElevatedButton(
                       onPressed: () {

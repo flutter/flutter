@@ -99,4 +99,15 @@ void main() {
     );
     expect(messagesBadge.label, isNotNull);
   });
+
+  testWidgets('Overflow buttons are aligned in the center', (WidgetTester tester) async {
+    await tester.pumpWidget(const example.NavigationRailExampleApp());
+
+    final Iterable<OverflowBar> overflowBars = tester.widgetList<OverflowBar>(find.byType(OverflowBar));
+
+    for (final OverflowBar overflowBar in overflowBars) {
+      expect(overflowBar.overflowAlignment, OverflowBarAlignment.center);
+      expect(overflowBar.overflowSpacing, 10.0);
+    }
+  });
 }
