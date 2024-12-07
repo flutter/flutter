@@ -481,6 +481,14 @@ class Context {
       }
     }
 
+    String flavor = '';
+    if (environment['CONFIGURATION'] != null) {
+      final int indexOfSplitter = environment['CONFIGURATION']!.indexOf('-');
+      if (indexOfSplitter != -1) {
+        flavor = environment['CONFIGURATION']!.substring(indexOfSplitter + 1);
+      }
+    }
+
     flutterArgs.addAll(<String>[
       'assemble',
       '--no-version-check',
@@ -488,7 +496,7 @@ class Context {
       '-dTargetPlatform=ios',
       '-dTargetFile=$targetPath',
       '-dBuildMode=$buildMode',
-      if (environment['FLAVOR'] != null) '-dFlavor=${environment['FLAVOR']}',
+      '-dFlavor=$flavor',
       '-dIosArchs=$archs',
       '-dSdkRoot=${environment['SDKROOT'] ?? ''}',
       '-dSplitDebugInfo=${environment['SPLIT_DEBUG_INFO'] ?? ''}',
