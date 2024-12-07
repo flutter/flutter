@@ -3091,6 +3091,38 @@ void main() {
 
     expect(selectedText, isNot(contains('A')));
   });
+
+  testWidgets('Tooltip mouse cursor behavior', (WidgetTester tester) async {
+    const SystemMouseCursor customCursor = SystemMouseCursors.grab;
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: tooltipText,
+            mouseCursor: customCursor,
+            child: SizedBox.square(dimension: 50),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+   );
+
+    final Offset chip = tester.getCenter(find.byType(Tooltip));
+    await gesture.moveTo(chip);
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      customCursor,
+    );
+  });
 }
 
 Future<void> setWidgetForTooltipMode(
