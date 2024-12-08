@@ -15,13 +15,9 @@ G_DECLARE_FINAL_TYPE(FlKeyboardPendingEvent,
                      KEYBOARD_PENDING_EVENT,
                      GObject);
 
-FlKeyboardPendingEvent* fl_keyboard_pending_event_new(FlKeyEvent* event,
-                                                      uint64_t sequence_id);
+FlKeyboardPendingEvent* fl_keyboard_pending_event_new(FlKeyEvent* event);
 
 FlKeyEvent* fl_keyboard_pending_event_get_event(FlKeyboardPendingEvent* event);
-
-uint64_t fl_keyboard_pending_event_get_sequence_id(
-    FlKeyboardPendingEvent* event);
 
 uint64_t fl_keyboard_pending_event_get_hash(FlKeyboardPendingEvent* event);
 
