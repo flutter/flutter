@@ -1620,7 +1620,7 @@ void main() {
         tester.widget<ListTile>(find.byType(ListTile).first);
     expect(clickedListTile.shape, equals(customShape));
   });
-  
+
 
   testWidgets('ExpansionTile uses ListTileTheme controlAffinity', (WidgetTester tester) async {
     Widget buildView(ListTileControlAffinity controlAffinity) {
