@@ -7,3 +7,7 @@ on all platforms.
 
 See the [getting started guide](https://flutter.dev/getting-started/) for
 information about using Flutter.
+
+# modifying carousel
+add new  features to controller carousel tha  permit to move next  and back
+when devices is  windows , web .

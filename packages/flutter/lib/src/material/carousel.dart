@@ -1531,7 +1531,32 @@ class CarouselController extends ScrollController {
       oldPosition: oldPosition,
     );
   }
+  void nextPage() {
+    if (_carouselState != null) {
+      final position = _carouselState!._controller.position;
+      final itemExtent = _carouselState!._itemExtent;
+      final nextOffset = position.pixels + itemExtent;
+      _carouselState!._controller.animateTo(
+        nextOffset,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
 
+  void previousPage() {
+    if (_carouselState != null) {
+      final position = _carouselState!._controller.position;
+      final itemExtent = _carouselState!._itemExtent;
+      final previousOffset = position.pixels - itemExtent;
+      _carouselState!._controller.animateTo(
+        previousOffset,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+
+}
   @override
   void attach(ScrollPosition position) {
     super.attach(position);
