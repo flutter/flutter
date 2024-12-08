@@ -21,7 +21,7 @@ class VsCodeValidator extends DoctorValidator {
   }
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     final List<ValidationMessage> validationMessages =
       List<ValidationMessage>.from(_vsCode.validationMessages);
 
