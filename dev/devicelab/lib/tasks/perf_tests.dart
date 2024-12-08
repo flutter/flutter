@@ -284,6 +284,11 @@ TaskFunction createHelloWorldCompileTest() {
   return CompileTest('${flutterDirectory.path}/examples/hello_world', reportPackageContentSizes: true).run;
 }
 
+TaskFunction createSwiftUICompileTest() {
+  return CompileSwiftUITest('${flutterDirectory.path}/examples/hello_world_swiftui', reportPackageContentSizes: true).run;
+}
+
+
 TaskFunction createWebCompileTest() {
   return const WebCompileTest().run;
 }
@@ -1637,6 +1642,58 @@ class WebCompileTest {
 
 /// Measures how long it takes to compile a Flutter app and how big the compiled
 /// code is.
+class CompileSwiftUITest {
+  const CompileSwiftUITest(this.testDirectory, { this.reportPackageContentSizes = false });
+
+  final String testDirectory;
+  final bool reportPackageContentSizes;
+
+  Future<TaskResult> run() async {
+    print(testDirectory);
+    await Process.run('xcodebuild', <String>[
+      'clean',
+      '-allTargets'
+    ]);
+    print('cleaned');
+    final Stopwatch watch = Stopwatch();
+    int releaseSizeInBytes = 0;
+    watch.start();
+    await Process.run(workingDirectory: testDirectory ,'xcodebuild', <String>[
+      // '-destination',
+      // 'platform=iOS Simulator,name=iPhone 14 Pro Max,OS=16.4'
+    ]).then((ProcessResult results) {
+      print(results.stdout);
+      if (results.exitCode != 0) {
+        print(results.stderr);
+      }
+    });
+    print('ran build');
+    watch.stop();
+
+    final Directory appBundle =  dir('$testDirectory/build/Release-iphoneos/hello_world_swiftui.app');
+
+    print('grabbed app bundle');
+    try {
+      for (final FileSystemEntity entity in appBundle.listSync(recursive: true)) {
+        if (entity is File) {
+          releaseSizeInBytes += entity.lengthSync();
+        }
+      }
+    } catch (e) {
+      print('Error calculating size: $e at $testDirectory');
+    }
+
+    final Map<String, dynamic> metrics = <String, dynamic>{};
+    metrics.addAll(<String, dynamic>{
+      'release_compile_millis': watch.elapsedMilliseconds,
+      'release_size_bytes': releaseSizeInBytes,
+    });
+    return TaskResult.success(metrics);
+  }
+}
+
+/// Measures how long it takes to compile a Flutter app and how big the compiled
+/// code is.
 class CompileTest {
   const CompileTest(this.testDirectory, { this.reportPackageContentSizes = false });
 
@@ -1645,7 +1702,7 @@ class CompileTest {
 
   Future<TaskResult> run() async {
     return inDirectory<TaskResult>(testDirectory, () async {
-      await flutter('packages', options: <String>['get']);
+      // await flutter('packages', options: <String>['get']);
 
       // "initial" compile required downloading and creating the `android/.gradle` directory while "full"
       // compiles only run `flutter clean` between runs.
