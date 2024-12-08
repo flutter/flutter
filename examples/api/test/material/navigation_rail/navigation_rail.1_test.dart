@@ -37,12 +37,12 @@ void main() {
     expect(find.text('Label type: all'), findsOneWidget);
 
     // switch to selected label type
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Selected'));
+    await tester.tap(find.text('Selected'));
     await tester.pumpAndSettle();
     expect(find.text('Label type: selected'), findsOneWidget);
 
     // switch to none label type
-    await tester.tap(find.widgetWithText(ElevatedButton, 'None'));
+    await tester.tap(find.text('None'));
     await tester.pumpAndSettle();
     expect(find.text('Label type: none'), findsOneWidget);
   });
@@ -54,12 +54,12 @@ void main() {
     expect(find.text('Group alignment: -1.0'), findsOneWidget);
 
     // switch to center alignment
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Center'));
+    await tester.tap(find.text('Center'));
     await tester.pumpAndSettle();
     expect(find.text('Group alignment: 0.0'), findsOneWidget);
 
     // switch to bottom alignment
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Bottom'));
+    await tester.tap(find.text('Bottom'));
     await tester.pumpAndSettle();
     expect(find.text('Group alignment: 1.0'), findsOneWidget);
   });
@@ -72,13 +72,13 @@ void main() {
     expect(find.byType(IconButton), findsNothing);
 
     // Tap to show leading Widget.
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Show Leading'));
+    await tester.tap(find.text('Show Leading'));
     await tester.pumpAndSettle();
     expect(find.byType(FloatingActionButton), findsOneWidget);
     expect(find.byType(IconButton), findsNothing);
 
     // Tap to show trailing Widget.
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Show Trailing'));
+    await tester.tap(find.text('Show Trailing'));
     await tester.pumpAndSettle();
     expect(find.byType(FloatingActionButton), findsOneWidget);
     expect(find.byType(IconButton), findsOneWidget);
@@ -98,16 +98,5 @@ void main() {
       find.ancestor(of: find.byIcon(Icons.star_border), matching: find.byType(Badge)),
     );
     expect(messagesBadge.label, isNotNull);
-  });
-
-  testWidgets('Overflow buttons are aligned in the center', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.NavigationRailExampleApp());
-
-    final Iterable<OverflowBar> overflowBars = tester.widgetList<OverflowBar>(find.byType(OverflowBar));
-
-    for (final OverflowBar overflowBar in overflowBars) {
-      expect(overflowBar.overflowAlignment, OverflowBarAlignment.center);
-      expect(overflowBar.overflowSpacing, 10.0);
-    }
   });
 }
