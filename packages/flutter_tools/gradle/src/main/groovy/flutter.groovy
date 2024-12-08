@@ -62,7 +62,7 @@ class FlutterExtension {
      * Chosen as default version of the AGP version below as found in
      * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp.
      */
-    public final String ndkVersion = "26.1.10909125"
+    public final String ndkVersion = "26.3.11579264"
 
     /**
      * Specifies the relative directory to the Flutter project directory.
@@ -279,6 +279,7 @@ class FlutterPlugin implements Plugin<Project> {
         extension.flutterVersionName = flutterVersionName ?: "1.0"
 
         this.addFlutterTasks(project)
+        forceNdkDownload(project, flutterRootPath)
 
         // By default, assembling APKs generates fat APKs if multiple platforms are passed.
         // Configuring split per ABI allows to generate separate APKs for each abi.
@@ -857,6 +858,18 @@ class FlutterPlugin implements Plugin<Project> {
             return version1
         }
         return version2
+    }
+
+    private void forceNdkDownload(Project gradleProject, String flutterSdkRootPath) {
+        gradleProject.android {
+            externalNativeBuild {
+                cmake {
+                    // Respect the existing configuration if it exists - the NDK will already be
+                    // downloaded in this case.
+                    path = path ?: flutterSdkRootPath + "/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+                }
+            }
+        }
     }
 
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
