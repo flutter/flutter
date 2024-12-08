@@ -229,7 +229,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        String flutterRootPath = resolveProperty("flutter.sdk", System.env.FLUTTER_ROOT)
+        String flutterRootPath = resolveProperty("flutter.sdk", System.getenv("FLUTTER_ROOT"))
         if (flutterRootPath == null) {
             throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file or with a FLUTTER_ROOT environment variable.")
         }
