@@ -36,7 +36,7 @@ void main() {
     // initial label type set to all.
     expect(find.text('Label type: all'), findsOneWidget);
 
-    // switch to selected label typ
+    // switch to selected label type
     await tester.tap(find.text('Selected'));
     await tester.pumpAndSettle();
     expect(find.text('Label type: selected'), findsOneWidget);
