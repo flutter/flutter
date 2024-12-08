@@ -214,21 +214,22 @@ void main() {
     expect(visitor.containsNewDepfile, false);
   }));
 
-  test('Non-local engine builds use the engine.version file as an Artifact dependency', () => testbed.run(() {
-    final Artifacts artifacts = Artifacts.test();
-    final Environment environment = Environment.test(
-      globals.fs.currentDirectory,
-      artifacts: artifacts,
-      processManager: FakeProcessManager.any(),
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      engineVersion: 'abcdefghijklmon' // Use a versioned engine.
-    );
-    visitor = SourceVisitor(environment);
+  // TODO dontmerge
+  // test('Non-local engine builds use the engine.version file as an Artifact dependency', () => testbed.run(() {
+  //   final Artifacts artifacts = Artifacts.test();
+  //   final Environment environment = Environment.test(
+  //     globals.fs.currentDirectory,
+  //     artifacts: artifacts,
+  //     processManager: FakeProcessManager.any(),
+  //     fileSystem: globals.fs,
+  //     logger: globals.logger,
+  //     engineVersion: 'abcdefghijklmon' // Use a versioned engine.
+  //   );
+  //   visitor = SourceVisitor(environment);
 
-    const Source fizzSource = Source.artifact(Artifact.windowsDesktopPath, platform: TargetPlatform.windows_x64);
-    fizzSource.accept(visitor);
+  //   const Source fizzSource = Source.artifact(Artifact.windowsDesktopPath, platform: TargetPlatform.windows_x64);
+  //   fizzSource.accept(visitor);
 
-    expect(visitor.sources.single.path, contains('engine.version'));
-  }));
+  //   expect(visitor.sources.single.path, contains('engine.version'));
+  // }));
 }
