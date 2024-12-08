@@ -762,6 +762,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
                 trailing: widget.showTrailingIcon ? widget.trailing ?? _buildTrailingIcon(context) : null,
                 minTileHeight: widget.minTileHeight,
                 internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
+                shape: ShapeBorder.lerp(widget.shape, widget.collapsedShape, _animationController.value),
               ),
             ),
           ),
@@ -785,7 +786,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       return Material(
         clipBehavior: clipBehavior,
         color: backgroundColor,
-        shape: expansionTileBorder,
+        shape: ShapeBorder.lerp(widget.shape, widget.collapsedShape, _animationController.value),
         child: tile,
       );
     }
