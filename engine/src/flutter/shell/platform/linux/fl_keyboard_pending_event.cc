@@ -19,9 +19,6 @@ struct _FlKeyboardPendingEvent {
   // The target event.
   FlKeyEvent* event;
 
-  // Unique ID to identify pending responds.
-  uint64_t sequence_id;
-
   // True if the embedder responder has replied.
   bool embedder_replied;
 
@@ -58,13 +55,11 @@ static void fl_keyboard_pending_event_init(FlKeyboardPendingEvent* self) {}
 
 // Creates a new FlKeyboardPendingEvent by providing the target event,
 // the sequence ID, and the number of responders that will reply.
-FlKeyboardPendingEvent* fl_keyboard_pending_event_new(FlKeyEvent* event,
-                                                      uint64_t sequence_id) {
+FlKeyboardPendingEvent* fl_keyboard_pending_event_new(FlKeyEvent* event) {
   FlKeyboardPendingEvent* self = FL_KEYBOARD_PENDING_EVENT(
       g_object_new(fl_keyboard_pending_event_get_type(), nullptr));
 
   self->event = FL_KEY_EVENT(g_object_ref(event));
-  self->sequence_id = sequence_id;
   self->hash = fl_key_event_hash(self->event);
 
   return self;
@@ -73,12 +68,6 @@ FlKeyboardPendingEvent* fl_keyboard_pending_event_new(FlKeyEvent* event,
 FlKeyEvent* fl_keyboard_pending_event_get_event(FlKeyboardPendingEvent* self) {
   g_return_val_if_fail(FL_IS_KEYBOARD_PENDING_EVENT(self), nullptr);
   return self->event;
-}
-
-uint64_t fl_keyboard_pending_event_get_sequence_id(
-    FlKeyboardPendingEvent* self) {
-  g_return_val_if_fail(FL_IS_KEYBOARD_PENDING_EVENT(self), 0);
-  return self->sequence_id;
 }
 
 uint64_t fl_keyboard_pending_event_get_hash(FlKeyboardPendingEvent* self) {
