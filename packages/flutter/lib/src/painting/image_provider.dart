@@ -1407,6 +1407,26 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   }
 }
 
+/// The strategy for [Image.network] to decide whether to use <img> elements in
+/// a platform view to display an image instead of fetching bytes.
+///
+/// See [Image.network] for more explanation on the impact.
+///
+/// This option is only effective on the Web platform.
+enum WebImgElementStrategy {
+  /// Never use <img> elements.
+  never,
+
+  /// Use <img> elements when fetching bytes is not available.
+  ///
+  /// This strategy uses <img> elements if `header` is empty and the fetch
+  /// encounters errors.
+  whenNecessary,
+
+  /// Always use <img> elements as long as `header` is empty.
+  always,
+}
+
 /// Fetches the given URL from the network, associating it with the given scale.
 ///
 /// The image will be cached regardless of cache headers from the server.
@@ -1424,7 +1444,12 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
   ///
   /// The [scale] argument is the linear scale factor for drawing this image at
   /// its intended size. See [ImageInfo.scale] for more information.
-  const factory NetworkImage(String url, { double scale, Map<String, String>? headers }) = network_image.NetworkImage;
+  const factory NetworkImage(
+    String url, {
+      double scale,
+      Map<String, String>? headers,
+      WebImgElementStrategy webImgElementStrategy,
+    }) = network_image.NetworkImage;
 
   /// The URL from which the image will be fetched.
   String get url;
@@ -1436,6 +1461,8 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
   ///
   /// When running Flutter on the web, headers are not used.
   Map<String, String>? get headers;
+
+  WebImgElementStrategy get webImgElementStrategy;
 
   @override
   ImageStreamCompleter loadBuffer(NetworkImage key, DecoderBufferCallback decode);

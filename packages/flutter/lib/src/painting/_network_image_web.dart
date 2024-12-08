@@ -64,7 +64,12 @@ class NetworkImage
     extends image_provider.ImageProvider<image_provider.NetworkImage>
     implements image_provider.NetworkImage {
   /// Creates an object that fetches the image at the given URL.
-  const NetworkImage(this.url, {this.scale = 1.0, this.headers});
+  const NetworkImage(
+    this.url, {
+    this.scale = 1.0,
+    this.headers,
+    this.webImgElementStrategy = image_provider.WebImgElementStrategy.never,
+  });
 
   @override
   final String url;
@@ -74,6 +79,9 @@ class NetworkImage
 
   @override
   final Map<String, String>? headers;
+
+  @override
+  final image_provider.WebImgElementStrategy webImgElementStrategy;
 
   @override
   Future<NetworkImage> obtainKey(image_provider.ImageConfiguration configuration) {
@@ -139,19 +147,7 @@ class NetworkImage
   ) async {
     assert(key == this);
 
-    final Uri resolved = Uri.base.resolve(key.url);
-
-    final bool containsNetworkImageHeaders = key.headers?.isNotEmpty ?? false;
-
-    // We use a different method when headers are set because the
-    // `ui_web.createImageCodecFromUrl` method is not capable of handling headers.
-    if (containsNetworkImageHeaders) {
-      // It is not possible to load an <img> element and pass the headers with
-      // the request to fetch the image. Since the user has provided headers,
-      // this function should assume the headers are required to resolve to
-      // the correct resource and should not attempt to load the image in an
-      // <img> tag without the headers.
-
+    Future<ImageStreamCompleter> loadViaDecode() async {
       // Resolve the Codec before passing it to
       // [MultiFrameImageStreamCompleter] so any errors aren't reported
       // twice (once from the MultiFrameImageStreamCompleter and again
@@ -164,39 +160,43 @@ class NetworkImage
         debugLabel: key.url,
         informationCollector: _imageStreamInformationCollector(key),
       );
-    } else if (isSkiaWeb) {
-      try {
-        // Resolve the Codec before passing it to
-        // [MultiFrameImageStreamCompleter] so any errors aren't reported
-        // twice (once from the MultiFrameImageStreamCompleter and again
-        // from the wrapping [ForwardingImageStreamCompleter]).
-        final ui.Codec codec = await _fetchImageBytes(decode);
-        return MultiFrameImageStreamCompleter(
-          chunkEvents: chunkEvents.stream,
-          codec: Future<ui.Codec>.value(codec),
-          scale: key.scale,
-          debugLabel: key.url,
-          informationCollector: _imageStreamInformationCollector(key),
-        );
-      } catch (e) {
-        // If we failed to fetch the bytes, try to load the image in an <img>
-        // element instead.
-        final web.HTMLImageElement imageElement = imgElementFactory();
-        imageElement.src = key.url;
-        // Decode the <img> element before creating the ImageStreamCompleter
-        // to avoid double reporting the error.
-        await imageElement.decode().toDart;
-        return OneFrameImageStreamCompleter(
-          Future<ImageInfo>.value(
-            WebImageInfo(
-              imageElement,
-              debugLabel: key.url,
-            ),
+    }
+
+    Future<ImageStreamCompleter> loadViaImgElement() async {
+      // If we failed to fetch the bytes, try to load the image in an <img>
+      // element instead.
+      final web.HTMLImageElement imageElement = imgElementFactory();
+      imageElement.src = key.url;
+      // Decode the <img> element before creating the ImageStreamCompleter
+      // to avoid double reporting the error.
+      await imageElement.decode().toDart;
+      return OneFrameImageStreamCompleter(
+        Future<ImageInfo>.value(
+          WebImageInfo(
+            imageElement,
+            debugLabel: key.url,
           ),
-          informationCollector: _imageStreamInformationCollector(key),
-        )..debugLabel = key.url;
-      }
-    } else {
+        ),
+        informationCollector: _imageStreamInformationCollector(key),
+      )..debugLabel = key.url;
+    }
+
+    final bool containsNetworkImageHeaders = key.headers?.isNotEmpty ?? false;
+    // When headers are set, the image can only be loaded by decoding.
+    //
+    // For the HTML renderer, `ui_web.createImageCodecFromUrl` method is not
+    // capable of handling headers.
+    //
+    // For CanvasKit and Skwasm, it is not possible to load an <img> element and
+    // pass the headers with the request to fetch the image. Since the user has
+    // provided headers, this function should assume the headers are required to
+    // resolve to the correct resource and should not attempt to load the image
+    // in an <img> tag without the headers.
+    if (containsNetworkImageHeaders) {
+      return loadViaDecode();
+    }
+
+    if (!isSkiaWeb) {
       // This branch is only hit by the HTML renderer, which is deprecated. The
       // HTML renderer supports loading images with CORS restrictions, so we
       // don't need to catch errors and try loading the image in an <img> tag
@@ -206,6 +206,7 @@ class NetworkImage
       // [MultiFrameImageStreamCompleter] so any errors aren't reported
       // twice (once from the MultiFrameImageStreamCompleter) and again
       // from the wrapping [ForwardingImageStreamCompleter].
+      final Uri resolved = Uri.base.resolve(key.url);
       final ui.Codec codec = await ui_web.createImageCodecFromUrl(
           resolved,
           chunkCallback: (int bytes, int total) {
@@ -220,6 +221,19 @@ class NetworkImage
         debugLabel: key.url,
         informationCollector: _imageStreamInformationCollector(key),
       );
+    }
+
+    switch (webImgElementStrategy) {
+      case image_provider.WebImgElementStrategy.never:
+        return loadViaDecode();
+      case image_provider.WebImgElementStrategy.always:
+        return loadViaImgElement();
+      case image_provider.WebImgElementStrategy.whenNecessary:
+        try {
+          return loadViaDecode();
+        } catch (e) {
+          return loadViaImgElement();
+        }
     }
   }
 

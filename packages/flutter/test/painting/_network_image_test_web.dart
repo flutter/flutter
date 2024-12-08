@@ -105,7 +105,7 @@ void runTests() {
         'HTTP request failed, statusCode: 200, https://www.example.com/images/frame3.png');
   });
 
-  testWidgets('emits a WebImageInfo if the image is cross-origin',
+  testWidgets('throws error if the image is cross-origin by default',
       (WidgetTester tester) async {
     final TestHttpRequest failingRequest = TestHttpRequest()
       ..status = 500
@@ -122,6 +122,48 @@ void runTests() {
     };
 
     const NetworkImage networkImage = NetworkImage('https://www.example.com/images/frame4.png');
+    ImageInfo? imageInfo;
+    Object? recordedError;
+    Completer<void>? imageCompleter;
+    await tester.runAsync(() async {
+      imageCompleter = Completer<void>();
+      final ImageStream stream = networkImage.resolve(ImageConfiguration.empty);
+      stream.addListener(ImageStreamListener((ImageInfo info, bool isSync) {
+        imageInfo = info;
+        imageCompleter!.complete();
+      }, onError: (Object error, StackTrace? stackTrace) {
+        recordedError = error;
+        imageCompleter!.complete();
+      }));
+    });
+    await tester.runAsync(() async {
+      testImg.decodeSuccess();
+      await imageCompleter!.future;
+    });
+    expect(recordedError, isNotNull);
+    expect(imageInfo, isNull);
+  }, skip: !isSkiaWeb);
+
+  testWidgets('emits a WebImageInfo if the image is cross-origin and strategy is .whenNecessary',
+      (WidgetTester tester) async {
+    final TestHttpRequest failingRequest = TestHttpRequest()
+      ..status = 500
+      ..mockEvent = MockEvent('load', web.Event('bytes inaccessible'))
+      ..response = (Uint8List.fromList(<int>[])).buffer;
+    final TestImgElement testImg = TestImgElement();
+
+    httpRequestFactory = () {
+      return failingRequest.getMock() as web_shim.XMLHttpRequest;
+    };
+
+    imgElementFactory = () {
+      return testImg.getMock() as web_shim.HTMLImageElement;
+    };
+
+    const NetworkImage networkImage = NetworkImage(
+      'https://www.example.com/images/frame4.png',
+      webImgElementStrategy: WebImgElementStrategy.whenNecessary,
+    );
     ImageInfo? imageInfo;
     Object? recordedError;
     Completer<void>? imageCompleter;
