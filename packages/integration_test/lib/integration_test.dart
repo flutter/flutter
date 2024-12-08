@@ -17,7 +17,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:test_api/src/backend/group.dart';
+import 'package:test_api/src/backend/test.dart';
+import 'package:test_api/src/backend/group_entry.dart';
 import 'package:vm_service/vm_service.dart' as vm;
+import 'package:test_api/src/backend/invoker.dart';
 
 import 'common.dart';
 import 'src/callback.dart' as driver_actions;
@@ -38,38 +42,27 @@ const bool _shouldReportResultsToNative = bool.fromEnvironment(
   defaultValue: true,
 );
 
-/// A subclass of [LiveTestWidgetsFlutterBinding] that reports tests results
-/// on a channel to adapt them to native instrumentation test format.
-class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding implements IntegrationTestResults {
-  /// Sets up a listener to report that the tests are finished when everything is
-  /// torn down.
-  IntegrationTestWidgetsFlutterBinding() {
-    tearDownAll(() async {
-      if (!_allTestsPassed.isCompleted) {
-        _allTestsPassed.complete(failureMethodsDetails.isEmpty);
+void _buildFlatTestList(GroupEntry entry, List<String> testList) {
+  switch (entry) {
+    case Group g:
+      for (final GroupEntry child in g.entries) {
+        _buildFlatTestList(child, testList);
       }
-      callbackManager.cleanup();
+    case Test t:
+      testList.add(t.name);
+  }
+}
 
-      // TODO(jiahaog): Print the message directing users to run with
-      // `flutter test` when Web is supported.
-      if (!_shouldReportResultsToNative || kIsWeb) {
-        return;
-      }
+// TODO(johnmccutchan): We may want to include the hierarchy information as
+// well.
+List<String> buildFlatTestList(GroupEntry entry) {
+  final List<String> r = <String>[];
+  _buildFlatTestList(entry, r);
+  return r;
+}
 
-      try {
-        await integrationTestChannel.invokeMethod<void>(
-          'allTestsFinished',
-          <String, dynamic>{
-            'results': results.map<String, dynamic>((String name, Object result) {
-              if (result is Failure) {
-                return MapEntry<String, dynamic>(name, result.details);
-              }
-              return MapEntry<String, Object>(name, result);
-            }),
-          },
-        );
-      } on MissingPluginException {
-        debugPrint(r'''
+void warnOnMissingIntegrationTestPlugin() {
+  debugPrint(r'''
 Warning: integration_test plugin was not detected.
 
 If you're running the tests with `flutter drive`, please make sure your tests
@@ -82,6 +75,60 @@ how to set up the integration_test plugin:
 
 https://docs.flutter.dev/testing/integration-tests
 ''');
+}
+
+/// A subclass of [LiveTestWidgetsFlutterBinding] that reports tests results
+/// on a channel to adapt them to native instrumentation test format.
+class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
+    implements IntegrationTestResults {
+  /// Sets up a listener to report that the tests are finished when everything is
+  /// torn down.
+  IntegrationTestWidgetsFlutterBinding() {
+    setUpAll(() async {
+      print('JOHN setUpAll');
+      final Group topLevelGroup = Invoker.current!.liveTest.groups.first;
+      assert(topLevelGroup.name == '');
+      List<String> testList = buildFlatTestList(topLevelGroup);
+      print('JOHN $testList');
+
+      try {
+        print('JOHN invoking populateTestList.');
+        await integrationTestChannel.invokeMethod<void>(
+            'populateTestList', <String, dynamic>{'testList': testList});
+      } on MissingPluginException {
+        warnOnMissingIntegrationTestPlugin();
+      }
+    });
+
+    tearDownAll(() async {
+      print('JOHN tearDown');
+      if (!_allTestsPassed.isCompleted) {
+        _allTestsPassed.complete(failureMethodsDetails.isEmpty);
+      }
+      callbackManager.cleanup();
+
+      // TODO(jiahaog): Print the message directing users to run with
+      // `flutter test` when Web is supported.
+      if (!_shouldReportResultsToNative || kIsWeb) {
+        return;
+      }
+
+      try {
+        print('JOHN invoking allTestsFinished.');
+        await integrationTestChannel.invokeMethod<void>(
+          'allTestsFinished',
+          <String, dynamic>{
+            'results':
+                results.map<String, dynamic>((String name, Object result) {
+              if (result is Failure) {
+                return MapEntry<String, dynamic>(name, result.details);
+              }
+              return MapEntry<String, Object>(name, result);
+            }),
+          },
+        );
+      } on MissingPluginException {
+        warnOnMissingIntegrationTestPlugin();
       }
     });
 
@@ -120,7 +167,8 @@ https://docs.flutter.dev/testing/integration-tests
   @override
   ViewConfiguration createViewConfigurationFor(RenderView renderView) {
     final FlutterView view = renderView.flutterView;
-    final Size? surfaceSize = view == platformDispatcher.implicitView ? _surfaceSize : null;
+    final Size? surfaceSize =
+        view == platformDispatcher.implicitView ? _surfaceSize : null;
     return TestViewConfiguration.fromView(
       size: surfaceSize ?? view.physicalSize / view.devicePixelRatio,
       view: view,
@@ -132,11 +180,13 @@ https://docs.flutter.dev/testing/integration-tests
   final Completer<bool> _allTestsPassed = Completer<bool>();
 
   @override
-  List<Failure> get failureMethodsDetails => results.values.whereType<Failure>().toList();
+  List<Failure> get failureMethodsDetails =>
+      results.values.whereType<Failure>().toList();
 
   @override
   void initInstances() {
     super.initInstances();
+    print('JOHN initInstance');
     _instance = this;
   }
 
@@ -145,7 +195,8 @@ https://docs.flutter.dev/testing/integration-tests
   /// Provides access to the features exposed by this class. The binding must
   /// be initialized before using this getter; this is typically done by calling
   /// [IntegrationTestWidgetsFlutterBinding.ensureInitialized].
-  static IntegrationTestWidgetsFlutterBinding get instance => BindingBase.checkInstance(_instance);
+  static IntegrationTestWidgetsFlutterBinding get instance =>
+      BindingBase.checkInstance(_instance);
   static IntegrationTestWidgetsFlutterBinding? _instance;
 
   /// Returns an instance of the [IntegrationTestWidgetsFlutterBinding], creating and
@@ -185,10 +236,12 @@ https://docs.flutter.dev/testing/integration-tests
   ///
   /// On Android, you need to call `convertFlutterSurfaceToImage()`, and
   /// pump a frame before taking a screenshot.
-  Future<List<int>> takeScreenshot(String screenshotName, [Map<String, Object?>? args]) async {
+  Future<List<int>> takeScreenshot(String screenshotName,
+      [Map<String, Object?>? args]) async {
     reportData ??= <String, dynamic>{};
     reportData!['screenshots'] ??= <dynamic>[];
-    final Map<String, dynamic> data = await callbackManager.takeScreenshot(screenshotName, args);
+    final Map<String, dynamic> data =
+        await callbackManager.takeScreenshot(screenshotName, args);
     assert(data.containsKey('bytes'));
 
     (reportData!['screenshots']! as List<dynamic>).add(data);
@@ -231,11 +284,11 @@ https://docs.flutter.dev/testing/integration-tests
     VoidCallback invariantTester, {
     String description = '',
     @Deprecated(
-      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
-      'This feature was deprecated after v2.6.0-1.0.pre.'
-    )
+        'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
+        'This feature was deprecated after v2.6.0-1.0.pre.')
     Duration? timeout,
   }) async {
+    print('JOHN runTest $description');
     await super.runTest(
       testBody,
       invariantTester,
@@ -263,11 +316,14 @@ https://docs.flutter.dev/testing/integration-tests
       _vmService = vmService;
     }
     if (_vmService == null) {
-      final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
+      final developer.ServiceProtocolInfo info =
+          await developer.Service.getInfo();
       assert(info.serverUri != null);
-      final String address = 'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws';
+      final String address =
+          'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws';
       try {
-        _vmService = await _vmServiceConnectUri(address, httpClient: httpClient);
+        _vmService =
+            await _vmServiceConnectUri(address, httpClient: httpClient);
       } on SocketException catch (e, s) {
         throw StateError(
           'Failed to connect to VM Service at $address.\n'
@@ -368,7 +424,8 @@ https://docs.flutter.dev/testing/integration-tests
     reportData![reportKey] = timeline.toJson();
   }
 
-  Future<_GarbageCollectionInfo> _runAndGetGCInfo(Future<void> Function() action) async {
+  Future<_GarbageCollectionInfo> _runAndGetGCInfo(
+      Future<void> Function() action) async {
     if (kIsWeb) {
       await action();
       return const _GarbageCollectionInfo();
@@ -379,11 +436,15 @@ https://docs.flutter.dev/testing/integration-tests
       streams: <String>['GC'],
     );
 
-    final int oldGenGCCount = timeline.traceEvents!.where((vm.TimelineEvent event) {
-      return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectOldGeneration';
+    final int oldGenGCCount =
+        timeline.traceEvents!.where((vm.TimelineEvent event) {
+      return event.json!['cat'] == 'GC' &&
+          event.json!['name'] == 'CollectOldGeneration';
     }).length;
-    final int newGenGCCount = timeline.traceEvents!.where((vm.TimelineEvent event) {
-      return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectNewGeneration';
+    final int newGenGCCount =
+        timeline.traceEvents!.where((vm.TimelineEvent event) {
+      return event.json!['cat'] == 'GC' &&
+          event.json!['name'] == 'CollectNewGeneration';
     }).length;
     return _GarbageCollectionInfo(
       oldCount: oldGenGCCount,
@@ -426,7 +487,8 @@ https://docs.flutter.dev/testing/integration-tests
       }
     }
 
-    await Future<void>.delayed(const Duration(seconds: 2)); // flush old FrameTimings
+    await Future<void>.delayed(
+        const Duration(seconds: 2)); // flush old FrameTimings
     final TimingsCallback watcher = frameTimings.addAll;
     addTimingsCallback(watcher);
     final _GarbageCollectionInfo gcInfo = await _runAndGetGCInfo(action);
@@ -445,6 +507,14 @@ https://docs.flutter.dev/testing/integration-tests
 
   @override
   Timeout defaultTestTimeout = Timeout.none;
+
+  @override
+  Widget wrapWithDefaultView(Widget rootWidget) {
+    // This is a workaround where screenshots of root widgets have incorrect
+    // bounds.
+    // TODO(jiahaog): Remove when https://github.com/flutter/flutter/issues/66006 is fixed.
+    return super.wrapWithDefaultView(RepaintBoundary(child: rootWidget));
+  }
 
   @override
   void reportExceptionNoticed(FlutterErrorDetails exception) {
@@ -479,7 +549,8 @@ Future<vm.VmService> _vmServiceConnectUri(
   String wsUri, {
   HttpClient? httpClient,
 }) async {
-  final WebSocket socket = await WebSocket.connect(wsUri, customClient: httpClient);
+  final WebSocket socket =
+      await WebSocket.connect(wsUri, customClient: httpClient);
   final StreamController<dynamic> controller = StreamController<dynamic>();
   final Completer<void> streamClosedCompleter = Completer<void>();
 
