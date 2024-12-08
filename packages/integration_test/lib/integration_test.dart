@@ -12,6 +12,7 @@ import 'dart:developer' as developer;
 import 'dart:io' show HttpClient, SocketException, WebSocket;
 import 'dart:ui';
 
+import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -40,7 +41,7 @@ const bool _shouldReportResultsToNative = bool.fromEnvironment(
 
 /// A subclass of [LiveTestWidgetsFlutterBinding] that reports tests results
 /// on a channel to adapt them to native instrumentation test format.
-class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding implements IntegrationTestResults {
+class IntegrationTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding implements IntegrationTestResults {
   /// Sets up a listener to report that the tests are finished when everything is
   /// torn down.
   IntegrationTestWidgetsFlutterBinding() {
@@ -86,12 +87,25 @@ https://docs.flutter.dev/testing/integration-tests
     });
 
     final TestExceptionReporter oldTestExceptionReporter = reportTestException;
-    reportTestException =
-        (FlutterErrorDetails details, String testDescription) {
+    reportTestException = (FlutterErrorDetails details, String testDescription) {
       results[testDescription] = Failure(testDescription, details.toString());
       oldTestExceptionReporter(details, testDescription);
     };
   }
+
+  /// Formerly was the strategy for [pump]ing and requesting new frames.
+  ///
+  /// [framePolicy] used to be inherited from [LiveTestWidgetsFlutterBinding],
+  /// which is no longer the base class of [IntegrationTestWidgetsFlutterBinding];
+  /// see https://github.com/flutter/flutter/issues/81534 for details.
+  @Deprecated(
+    'This field no longer has any effect and can be safely removed. '
+    'IntegrationTestWidgetsFlutterBinding no longer inherits from LiveTestWidgetsFlutterBinding '
+    'and as a result does not have a framePolicy. Remove all references to this field. '
+    'This feature was deprecated after v3.27.0-0.2.pre.'
+  )
+  LiveTestWidgetsFlutterBindingFramePolicy get framePolicy => throw UnsupportedError('IntegrationTestWidgetsFlutterBinding no longer inherits from LiveTestWidgetsFlutterBinding');
+  set framePolicy(LiveTestWidgetsFlutterBindingFramePolicy _) {}
 
   @override
   bool get overrideHttpClient => false;
@@ -108,7 +122,6 @@ https://docs.flutter.dev/testing/integration-tests
   @override
   Future<void> setSurfaceSize(Size? size) {
     return TestAsyncUtils.guard<void>(() async {
-      assert(inTest);
       if (_surfaceSize == size) {
         return;
       }
@@ -226,28 +239,58 @@ https://docs.flutter.dev/testing/integration-tests
   }
 
   @override
+  bool get inTest => _inTest;
+  bool _inTest = false;
+
+  @override
   Future<void> runTest(
     Future<void> Function() testBody,
     VoidCallback invariantTester, {
     String description = '',
-    @Deprecated(
-      'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
-      'This feature was deprecated after v2.6.0-1.0.pre.'
-    )
-    Duration? timeout,
   }) async {
-    await super.runTest(
-      testBody,
-      invariantTester,
-      description: description,
-    );
-    results[description] ??= _success;
+    assert(!inTest);
+    _inTest = true;
+    try {
+      await testBody();
+      invariantTester();
+      results[description] = _success;
+    } catch (e) {
+      results[description] = '$e';
+    }
   }
 
-  // Do not paint a description label because it could show up in screenshots
-  // of the integration test.
   @override
-  void setLabel(String value) {}
+  void postTest() {
+    assert(inTest);
+    _inTest = false;
+  }
+
+  @override
+  Future<void> delayed(Duration duration) => Future<void>.delayed(duration);
+
+  @override
+  Future<void> pump([Duration? duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate]) async {
+    if (duration != null) {
+      await delayed(duration);
+    }
+    scheduleFrame();
+    await endOfFrame;
+  }
+
+  @override
+  Future<T?> runAsync<T>(Future<T> Function() callback) async {
+    return callback();
+  }
+
+  @override
+  Clock get clock => const Clock();
+
+  @override
+  int get microtaskCount {
+    // The Dart SDK doesn't report this number.
+    assert(false, 'microtaskCount cannot be reported when running in real time');
+    return -1;
+  }
 
   vm.VmService? _vmService;
 

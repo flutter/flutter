@@ -14,7 +14,7 @@ import 'package:path/path.dart' as path;
 final String bat = Platform.isWindows ? '.bat' : '';
 final String _flutterBin = path.join(Directory.current.parent.parent.path, 'bin', 'flutter$bat');
 const String _integrationResultsPrefix = 'IntegrationTestWidgetsFlutterBinding test results:';
-const String _failureExcerpt = r'Expected: <false>\n  Actual: <true>';
+const String _failureExcerpt = 'Expected: <false>\n  Actual: <true>';
 
 Future<void> main() async {
   group('Integration binding result', () {
@@ -91,5 +91,6 @@ Future<Map<String, dynamic>?> _runTest(String scriptPath) async {
           .firstWhere((String message) => message.startsWith(_integrationResultsPrefix)))
       .replaceAll(_integrationResultsPrefix, '');
 
+  printOnFailure('[Results of flutter test --machine $scriptPath]:\n$testResults');
   return jsonDecode(testResults) as Map<String, dynamic>?;
 }
