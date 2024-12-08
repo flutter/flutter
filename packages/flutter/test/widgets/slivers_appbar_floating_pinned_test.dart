@@ -106,7 +106,7 @@ void main() {
                   ],
                 ),
                 TestSemantics(
-                  actions: <SemanticsAction>[SemanticsAction.scrollUp],
+                  actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset],
                   flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                   scrollIndex: 0,
                   children: <TestSemantics>[
@@ -171,7 +171,7 @@ void main() {
                   ],
                 ),
                 TestSemantics(
-                  actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown],
+                  actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown, SemanticsAction.scrollToOffset],
                   flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                   scrollIndex: 11,
                   children: <TestSemantics>[

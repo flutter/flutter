@@ -94,7 +94,7 @@ void _tests() {
                     flags: <SemanticsFlag>[
                       SemanticsFlag.hasImplicitScrolling,
                     ],
-                    actions: <SemanticsAction>[SemanticsAction.scrollUp],
+                    actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset],
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 3,
@@ -165,6 +165,7 @@ void _tests() {
                     actions: <SemanticsAction>[
                       SemanticsAction.scrollUp,
                       SemanticsAction.scrollDown,
+                      SemanticsAction.scrollToOffset,
                     ],
                     flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                     children: <TestSemantics>[
@@ -244,6 +245,7 @@ void _tests() {
                     actions: <SemanticsAction>[
                       SemanticsAction.scrollUp,
                       SemanticsAction.scrollDown,
+                      SemanticsAction.scrollToOffset,
                     ],
                     children: <TestSemantics>[
                       TestSemantics(
@@ -339,6 +341,7 @@ void _tests() {
                     actions: <SemanticsAction>[
                       SemanticsAction.scrollUp,
                       SemanticsAction.scrollDown,
+                      SemanticsAction.scrollToOffset,
                     ],
                     children: <TestSemantics>[
                       TestSemantics(
@@ -521,6 +524,7 @@ void _tests() {
                     actions: <SemanticsAction>[
                       SemanticsAction.scrollUp,
                       SemanticsAction.scrollDown,
+                      SemanticsAction.scrollToOffset,
                     ],
                     flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                     children: <TestSemantics>[
@@ -633,6 +637,7 @@ void _tests() {
                     actions: <SemanticsAction>[
                       SemanticsAction.scrollUp,
                       SemanticsAction.scrollDown,
+                      SemanticsAction.scrollToOffset,
                     ],
                     flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                     children: <TestSemantics>[
@@ -736,6 +741,7 @@ void _tests() {
                     actions: <SemanticsAction>[
                       SemanticsAction.scrollUp,
                       SemanticsAction.scrollDown,
+                      SemanticsAction.scrollToOffset,
                     ],
                     children: <TestSemantics>[
                       TestSemantics(
@@ -851,6 +857,7 @@ void _tests() {
                     actions: <SemanticsAction>[
                       SemanticsAction.scrollUp,
                       SemanticsAction.scrollDown,
+                      SemanticsAction.scrollToOffset,
                     ],
                     children: <TestSemantics>[
                       TestSemantics(
@@ -1007,6 +1014,7 @@ void _tests() {
                     actions: <SemanticsAction>[
                       SemanticsAction.scrollUp,
                       SemanticsAction.scrollDown,
+                      SemanticsAction.scrollToOffset,
                     ],
                     flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                     children: <TestSemantics>[
@@ -1069,6 +1077,7 @@ void _tests() {
                     actions: <SemanticsAction>[
                       SemanticsAction.scrollUp,
                       SemanticsAction.scrollDown,
+                      SemanticsAction.scrollToOffset,
                     ],
                     children: <TestSemantics>[
                       TestSemantics(

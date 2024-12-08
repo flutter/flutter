@@ -674,7 +674,7 @@ void main() {
       children: <TestSemantics>[
         TestSemantics(
           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-          actions: <SemanticsAction>[SemanticsAction.scrollUp],
+          actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset],
           children: <TestSemantics>[
             TestSemantics(
               children: <TestSemantics>[

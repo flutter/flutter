@@ -611,12 +611,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   // Only call this from places that will definitely trigger a rebuild.
   void _updatePosition() {
     _configuration = widget.scrollBehavior ?? ScrollConfiguration.of(context);
-    _physics = _configuration.getScrollPhysics(context);
-    if (widget.physics != null) {
-      _physics = widget.physics!.applyTo(_physics);
-    } else if (widget.scrollBehavior != null) {
-      _physics = widget.scrollBehavior!.getScrollPhysics(context).applyTo(_physics);
-    }
+    final ScrollPhysics? physicsFromWidget = widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context);
+    _physics =  _configuration.getScrollPhysics(context);
+    _physics = physicsFromWidget?.applyTo(_physics) ?? _physics;
+
     final ScrollPosition? oldPosition = _position;
     if (oldPosition != null) {
       _effectiveScrollController.detach(oldPosition);
@@ -1032,6 +1030,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
           key: _scrollSemanticsKey,
           position: position,
           allowImplicitScrolling: _physics!.allowImplicitScrolling,
+          axis: widget.axis,
           semanticChildCount: widget.semanticChildCount,
           child: result,
         )
@@ -1556,6 +1555,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
     super.key,
     required this.position,
     required this.allowImplicitScrolling,
+    required this.axis,
     required this.semanticChildCount,
     super.child,
   }) : assert(semanticChildCount == null || semanticChildCount >= 0);
@@ -1563,6 +1563,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
   final ScrollPosition position;
   final bool allowImplicitScrolling;
   final int? semanticChildCount;
+  final Axis axis;
 
   @override
   _RenderScrollSemantics createRenderObject(BuildContext context) {
@@ -1570,6 +1571,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
       position: position,
       allowImplicitScrolling: allowImplicitScrolling,
       semanticChildCount: semanticChildCount,
+      axis: axis,
     );
   }
 
@@ -1577,6 +1579,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderScrollSemantics renderObject) {
     renderObject
       ..allowImplicitScrolling = allowImplicitScrolling
+      ..axis = axis
       ..position = position
       ..semanticChildCount = semanticChildCount;
   }
@@ -1586,6 +1589,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
   _RenderScrollSemantics({
     required ScrollPosition position,
     required bool allowImplicitScrolling,
+    required this.axis,
     required int? semanticChildCount,
     RenderBox? child,
   }) : _position = position,
@@ -1619,6 +1623,8 @@ class _RenderScrollSemantics extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  Axis axis;
+
   int? get semanticChildCount => _semanticChildCount;
   int? _semanticChildCount;
   set semanticChildCount(int? value) {
@@ -1627,6 +1633,14 @@ class _RenderScrollSemantics extends RenderProxyBox {
     }
     _semanticChildCount = value;
     markNeedsSemanticsUpdate();
+  }
+
+  void _onScrollToOffset(Offset targetOffset) {
+    final double offset = switch (axis) {
+      Axis.horizontal => targetOffset.dx,
+      Axis.vertical   => targetOffset.dy,
+    };
+    _position.jumpTo(offset);
   }
 
   @override
@@ -1640,6 +1654,9 @@ class _RenderScrollSemantics extends RenderProxyBox {
           ..scrollExtentMax = _position.maxScrollExtent
           ..scrollExtentMin = _position.minScrollExtent
           ..scrollChildCount = semanticChildCount;
+      if (position.maxScrollExtent > position.minScrollExtent && allowImplicitScrolling) {
+          config.onScrollToOffset = _onScrollToOffset;
+      }
     }
   }
 

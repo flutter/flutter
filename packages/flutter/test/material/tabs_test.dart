@@ -3677,7 +3677,7 @@ void main() {
     const String tab10title = 'This is a very wide tab #10\nTab 11 of 20';
 
     const List<SemanticsFlag> hiddenFlags = <SemanticsFlag>[SemanticsFlag.isHidden, SemanticsFlag.isFocusable, SemanticsFlag.hasSelectedState];
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollToOffset]));
     expect(semantics, includesNodeWith(label: tab0title));
     expect(semantics, includesNodeWith(label: tab10title, flags: hiddenFlags));
 
@@ -3685,18 +3685,18 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(semantics, includesNodeWith(label: tab0title, flags: hiddenFlags));
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight]));
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight, SemanticsAction.scrollToOffset]));
     expect(semantics, includesNodeWith(label: tab10title));
 
     controller.index = 19;
     await tester.pumpAndSettle();
 
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollRight]));
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollRight, SemanticsAction.scrollToOffset]));
 
     controller.index = 0;
     await tester.pumpAndSettle();
 
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollToOffset]));
     expect(semantics, includesNodeWith(label: tab0title));
     expect(semantics, includesNodeWith(label: tab10title, flags: hiddenFlags));
 
