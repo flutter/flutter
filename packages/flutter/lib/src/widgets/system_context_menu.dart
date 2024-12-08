@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'basic.dart';
 import 'editable_text.dart';
 import 'framework.dart';
+import 'localizations.dart';
 import 'media_query.dart';
 import 'text_selection_toolbar_anchors.dart';
 
@@ -49,6 +50,7 @@ class SystemContextMenu extends StatefulWidget {
   const SystemContextMenu._({
     super.key,
     required this.anchor,
+    this.items,
     this.onSystemHide,
   });
 
@@ -57,6 +59,7 @@ class SystemContextMenu extends StatefulWidget {
   factory SystemContextMenu.editableText({
     Key? key,
     required EditableTextState editableTextState,
+    List<SystemContextMenuItem>? items,
   }) {
     final (
       startGlyphHeight: double startGlyphHeight,
@@ -72,6 +75,7 @@ class SystemContextMenu extends StatefulWidget {
           editableTextState.textEditingValue.selection,
         ),
       ),
+      items: items,
       onSystemHide: () {
         editableTextState.hideToolbar();
       },
@@ -80,6 +84,8 @@ class SystemContextMenu extends StatefulWidget {
 
   /// The [Rect] that the context menu should point to.
   final Rect anchor;
+
+  final List<SystemContextMenuItem>? items;
 
   /// Called when the system hides this context menu.
   ///
@@ -102,7 +108,67 @@ class SystemContextMenu extends StatefulWidget {
 }
 
 class _SystemContextMenuState extends State<SystemContextMenu> {
+  bool isFirstBuild = true;
   late final SystemContextMenuController _systemContextMenuController;
+
+  /// Convert the given items to the format required to be sent over
+  /// [MethodChannel.invokeMethod].
+  static List<Map<String, dynamic>> _itemsToJson(List<SystemContextMenuItem> items, WidgetsLocalizations localizations) {
+    // TODO(justinmc): I could cache the result for each item. Is that overoptimization or is the localization lookup expensive enough for it to matter?
+    return items
+        .map<Map<String, dynamic>>((SystemContextMenuItem item) => _itemToJson(item, localizations))
+        .toList();
+  }
+
+  /// Convet the given single item to the format required to be sent over
+  /// [MethodChannel.invokeMethod].
+  static Map<String, dynamic> _itemToJson(SystemContextMenuItem item, WidgetsLocalizations localizations) {
+      return <String, dynamic>{
+      'type': item.type.name,
+      'action': item.action.name,
+      // TODO(justinmc): I guess Flutter should always pass a title for the default actions. Encode that into the backend or no?
+      // TODO(justinmc): But the engine ignores the title for cut/copy/paste/selectall. See:
+      // https://github.com/flutter/engine/pull/56362#issuecomment-2512589800
+      'title': item.title ?? _getTitleForAction(item.action, localizations),
+      'callbackId': item.hashCode, // TODO(justinmc): Effective?
+    };
+  }
+
+  // Returns the localized title string for the given SystemContextMenuAction.
+  static String _getTitleForAction(SystemContextMenuAction action, WidgetsLocalizations localizations) {
+    return switch (action) {
+      SystemContextMenuAction.copy => localizations.copyButtonLabel,
+      SystemContextMenuAction.cut => localizations.cutButtonLabel,
+      SystemContextMenuAction.lookUp => localizations.lookUpButtonLabel,
+      SystemContextMenuAction.paste => localizations.pasteButtonLabel,
+      SystemContextMenuAction.searchWeb => localizations.searchWebButtonLabel,
+      SystemContextMenuAction.selectAll => localizations.selectAllButtonLabel,
+      SystemContextMenuAction.share => localizations.shareButtonLabel,
+      SystemContextMenuAction.custom => throw AssertionError('Custom type has no title.'),
+    };
+  }
+
+  SystemContextMenuItemData _itemToData(SystemContextMenuItem item, WidgetsLocalizations localizations) {
+    return switch (item.action) {
+      SystemContextMenuAction.cut => const SystemContextMenuItemData.cut(),
+      SystemContextMenuAction.copy => const SystemContextMenuItemData.copy(),
+      SystemContextMenuAction.paste => const SystemContextMenuItemData.paste(),
+      SystemContextMenuAction.selectAll => const SystemContextMenuItemData.selectAll(),
+      SystemContextMenuAction.lookUp => SystemContextMenuItemData.lookUp(
+        title: item.title ?? _getTitleForAction(item.action, localizations),
+      ),
+      SystemContextMenuAction.share => SystemContextMenuItemData.share(
+        title: item.title ?? _getTitleForAction(item.action, localizations),
+      ),
+      SystemContextMenuAction.searchWeb => SystemContextMenuItemData.searchWeb(
+        title: item.title ?? _getTitleForAction(item.action, localizations),
+      ),
+      SystemContextMenuAction.custom => SystemContextMenuItemData.custom(
+        title: item.title!,
+        onPressed: item.onPressed!,
+      ),
+    };
+  }
 
   @override
   void initState() {
@@ -110,14 +176,21 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
     _systemContextMenuController = SystemContextMenuController(
       onSystemHide: widget.onSystemHide,
     );
-    _systemContextMenuController.show(widget.anchor);
   }
 
   @override
   void didUpdateWidget(SystemContextMenu oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // TODO(justinmc): Or if items changed.
     if (widget.anchor != oldWidget.anchor) {
-      _systemContextMenuController.show(widget.anchor);
+      // TODO(justinmc): Deduplicate with the `show` call in the first build below.
+      final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+      final Iterable<SystemContextMenuItemData>? datas =
+        widget.items?.map((SystemContextMenuItem item) => _itemToData(item, localizations));
+      _systemContextMenuController.show(
+        widget.anchor,
+        datas?.toList(),
+      );
     }
   }
 
@@ -130,6 +203,17 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
   @override
   Widget build(BuildContext context) {
     assert(SystemContextMenu.isSupported(context));
+    if (isFirstBuild) {
+      isFirstBuild = false;
+      final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+      final Iterable<SystemContextMenuItemData>? datas =
+        widget.items?.map((SystemContextMenuItem item) => _itemToData(item, localizations));
+      _systemContextMenuController.show(
+        widget.anchor,
+        datas?.toList(),
+      );
+    }
+
     return const SizedBox.shrink();
   }
 }

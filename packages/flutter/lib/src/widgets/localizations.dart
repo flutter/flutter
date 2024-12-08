@@ -187,6 +187,29 @@ abstract class WidgetsLocalizations {
   /// list one space right in the list.
   String get reorderItemRight;
 
+  // TODO(justinmc): Did I move all of these localizations correctly?
+
+  /// Label for "copy" edit buttons and menu items.
+  String get copyButtonLabel;
+
+  /// Label for "cut" edit buttons and menu items.
+  String get cutButtonLabel;
+
+  /// Label for "paste" edit buttons and menu items.
+  String get pasteButtonLabel;
+
+  /// Label for "select all" edit buttons and menu items.
+  String get selectAllButtonLabel;
+
+  /// Label for "look up" edit buttons and menu items.
+  String get lookUpButtonLabel;
+
+  /// Label for "search web" edit buttons and menu items.
+  String get searchWebButtonLabel;
+
+  /// Label for "share" edit buttons and menu items.
+  String get shareButtonLabel;
+
   /// The `WidgetsLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
@@ -255,6 +278,27 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
 
   @override
   String get reorderItemToStart => 'Move to the start';
+
+  @override
+  String get copyButtonLabel => 'Copy';
+
+  @override
+  String get cutButtonLabel => 'Cut';
+
+  @override
+  String get pasteButtonLabel => 'Paste';
+
+  @override
+  String get selectAllButtonLabel => 'Select all';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
+  String get searchWebButtonLabel => 'Search Web';
+
+  @override
+  String get shareButtonLabel => 'Share';
 
   @override
   TextDirection get textDirection => TextDirection.ltr;

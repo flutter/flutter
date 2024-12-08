@@ -2493,6 +2493,8 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// After calling [dispose], this instance can no longer be used.
   bool _isDisposed = false;
 
+  final Map<int, VoidCallback> _buttonCallbacks = <int, VoidCallback>{};
+
   // Begin SystemContextMenuClient.
 
   @override
@@ -2508,6 +2510,16 @@ class SystemContextMenuController with SystemContextMenuClient {
     }
     _hiddenBySystem = true;
     onSystemHide?.call();
+  }
+
+  @override
+  void handleTapCustomActionItem(int callbackId) {
+    if (!_isVisible) {
+      return;
+    }
+    final VoidCallback? callback = _buttonCallbacks[callbackId];
+    assert(callback != null, 'Tap received for non-existent callbackId $callbackId.');
+    _buttonCallbacks[callbackId]!();
   }
 
   // End SystemContextMenuClient.
@@ -2533,22 +2545,35 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///  * [hide], which hides the menu shown by this method.
   ///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates whether
   ///    this method is supported on the current platform.
-  Future<void> show(Rect targetRect) {
+  Future<void> show(Rect targetRect, [ List<SystemContextMenuItemData>? items ]) {
     assert(!_isDisposed);
     assert(
       TextInput._instance._currentConnection != null,
       'Currently, the system context menu can only be shown for an active text input connection',
     );
 
+    // TODO(justinmc): Check the items here too!
     // Don't show the same thing that's already being shown.
     if (_lastShown != null && _lastShown!._isVisible && _lastShown!._lastTargetRect == targetRect) {
       return Future<void>.value();
     }
 
+    // TODO(justinmc): The itemsJson is an implementation detail. This class is public. You should hide it in here.
+
     assert(
       _lastShown == null || _lastShown == this || !_lastShown!._isVisible,
       'Attempted to show while another instance was still visible.',
     );
+
+    _buttonCallbacks.clear();
+    if (items != null) {
+      for (final SystemContextMenuItemData item in items) {
+        if (item.action == SystemContextMenuAction.custom) {
+          assert(item.onPressed != null, 'Custom SystemContextMenuItemDatas must define an onPressed callback.');
+          _buttonCallbacks[item.hashCode] = item.onPressed!;
+        }
+      }
+    }
 
     _lastTargetRect = targetRect;
     _lastShown = this;
@@ -2562,6 +2587,9 @@ class SystemContextMenuController with SystemContextMenuClient {
           'width': targetRect.width,
           'height': targetRect.height,
         },
+        if (items != null)
+          // TODO(justinmc): Yeah it seems like the json stuff should be here, right? Or maybe SystemContextMenuItemData will be moved here.
+          'items': SystemContextMenuItemData.itemsToJson(items),
       },
     );
   }
@@ -2586,6 +2614,7 @@ class SystemContextMenuController with SystemContextMenuClient {
       return;
     }
     _lastShown = null;
+    _buttonCallbacks.clear();
     // This may be called unnecessarily in the case where the user has already
     // hidden the menu (for example by tapping the screen).
     return _channel.invokeMethod<void>(
@@ -2606,3 +2635,356 @@ class SystemContextMenuController with SystemContextMenuClient {
     _isDisposed = true;
   }
 }
+
+/*
+/// Represents a single menu item in a system context menu.
+class SystemContextMenuItem {
+  /// Creates an instance of [SystemContextMenuItem].
+  SystemContextMenuItem({
+    required this.action,
+    required this.type,
+    this.onPressed,
+    this.title,
+  }) : assert(_actionsRequiringTitle.contains(action));
+
+  /// The set of [SystemContextMenuAction]s that require a title to be passed to
+  /// [SystemContextMenuItem].
+  ///
+  /// All other [SystemContextMenuAction]s require that no title be given.
+  static const Set<SystemContextMenuAction> _actionsRequiringTitle= <SystemContextMenuAction>{
+    SystemContextMenuAction.lookUp,
+    SystemContextMenuAction.searchWeb,
+    SystemContextMenuAction.share,
+  };
+
+  /// The action to take when this menu item is invoked.
+  final SystemContextMenuAction action;
+
+  /// The text to display to the user.
+  final String? title;
+
+  /// The type of this menu item.
+  final SystemContextMenuItemType type;
+
+  final VoidCallback? onPressed;
+}
+
+class SystemContextMenuItemWithTitle {
+  /// Creates an instance of [SystemContextMenuItemWithTitle].
+  const SystemContextMenuItemWithTitle({
+    required this.action,
+    required this.type,
+    this.onPressed,
+    this.title,
+  });
+
+  /// The action to take when this menu item is invoked.
+  final SystemContextMenuAction action;
+
+  /// The text to display to the user.
+  final String? title;
+
+  /// The type of this menu item.
+  final SystemContextMenuItemType type;
+
+  final VoidCallback? onPressed;
+}
+*/
+
+class SystemContextMenuItem {
+  /// Creates an instance of [SystemContextMenuItem] for the
+  /// system's built-in cut button.
+  SystemContextMenuItem.cut(
+  ) : action = SystemContextMenuAction.cut,
+      type = SystemContextMenuItemType.builtIn,
+      onPressed = null,
+      title = null;
+
+  /// Creates an instance of [SystemContextMenuItem] for the
+  /// system's built-in copy button.
+  SystemContextMenuItem.copy(
+  ) : action = SystemContextMenuAction.copy,
+      type = SystemContextMenuItemType.builtIn,
+      onPressed = null,
+      title = null;
+
+  /// Creates an instance of [SystemContextMenuItem] for the
+  /// system's built-in paste button.
+  SystemContextMenuItem.paste(
+  ) : action = SystemContextMenuAction.paste,
+      type = SystemContextMenuItemType.builtIn,
+      onPressed = null,
+      title = null;
+
+  /// Creates an instance of [SystemContextMenuItem] for the
+  /// system's built-in select all button.
+  SystemContextMenuItem.selectAll(
+  ) : action = SystemContextMenuAction.selectAll,
+      type = SystemContextMenuItemType.builtIn,
+      onPressed = null,
+      title = null;
+
+  /// Creates an instance of [SystemContextMenuItem] for the
+  /// system's built-in search web button.
+  SystemContextMenuItem.searchWeb({
+    this.title,
+  }) : action = SystemContextMenuAction.searchWeb,
+       type = SystemContextMenuItemType.builtIn,
+       onPressed = null;
+
+  /// Creates an instance of [SystemContextMenuItem] for the
+  /// system's built-in look up button.
+  ///
+  /// Looks up the current selection in a dictionary.
+  SystemContextMenuItem.lookUp({
+    this.title,
+  }) : action = SystemContextMenuAction.lookUp,
+       onPressed = null,
+       type = SystemContextMenuItemType.builtIn;
+
+  SystemContextMenuItem.share({
+    this.title,
+  }) : action = SystemContextMenuAction.share,
+       onPressed = null,
+       type = SystemContextMenuItemType.builtIn;
+
+  SystemContextMenuItem.custom({
+    required this.onPressed,
+    required this.title,
+  }) : action = SystemContextMenuAction.custom,
+       type = SystemContextMenuItemType.custom,
+       assert(onPressed != null),
+       assert(title != null);
+
+  // TODO(justinmc): Make private.
+  /// The action to take when this menu item is invoked.
+  final SystemContextMenuAction action;
+
+  /// The text to display to the user.
+  final String? title;
+
+  // TODO(justinmc): This should be inferred.
+  /// The type of this menu item.
+  final SystemContextMenuItemType type;
+
+  final VoidCallback? onPressed;
+}
+
+// TODO(justinmc): Move to text_input.dart.
+// TODO(justinmc): Check how the hashCode thing for callback works with this.
+class SystemContextMenuItemData {
+  /// Creates an instance of [SystemContextMenuItem] for the
+  /// system's built-in cut button.
+  const SystemContextMenuItemData.cut(
+  ) : action = SystemContextMenuAction.cut,
+      type = SystemContextMenuItemType.builtIn,
+      onPressed = null,
+      title = null;
+
+  /// Creates an instance of [SystemContextMenuItemData] for the system's
+  /// built-in copy button.
+  const SystemContextMenuItemData.copy(
+  ) : action = SystemContextMenuAction.copy,
+      type = SystemContextMenuItemType.builtIn,
+      onPressed = null,
+      title = null;
+
+  /// Creates an instance of [SystemContextMenuItemData] for the system's
+  /// built-in paste button.
+  const SystemContextMenuItemData.paste(
+  ) : action = SystemContextMenuAction.paste,
+      type = SystemContextMenuItemType.builtIn,
+      onPressed = null,
+      title = null;
+
+  /// Creates an instance of [SystemContextMenuItemData] for the system's
+  /// built-in select all button.
+  const SystemContextMenuItemData.selectAll(
+  ) : action = SystemContextMenuAction.selectAll,
+      type = SystemContextMenuItemType.builtIn,
+      onPressed = null,
+      title = null;
+
+  /// Creates an instance of [SystemContextMenuItemData] for the system's
+  /// built-in search web button.
+  const SystemContextMenuItemData.searchWeb({
+    required String title,
+  }) : action = SystemContextMenuAction.searchWeb,
+       type = SystemContextMenuItemType.builtIn,
+       onPressed = null,
+       title = title;
+
+  /// Creates an instance of [SystemContextMenuItemData] for the system's
+  /// built-in look up button.
+  ///
+  /// Looks up the current selection in a dictionary.
+  const SystemContextMenuItemData.lookUp({
+    required String title,
+  }) : action = SystemContextMenuAction.lookUp,
+       onPressed = null,
+       type = SystemContextMenuItemType.builtIn,
+       title = title;
+
+  /// Creates an instance of [SystemContextMenuItemData] for the system's
+  /// built-in share up button.
+  const SystemContextMenuItemData.share({
+    required String title,
+  }) : action = SystemContextMenuAction.share,
+       onPressed = null,
+       type = SystemContextMenuItemType.builtIn,
+       title = title;
+
+  /// Creates an instance of [SystemContextMenuItemData] for the a user-defined
+  /// button.
+  const SystemContextMenuItemData.custom({
+    required VoidCallback onPressed,
+    required String title,
+  }) : action = SystemContextMenuAction.custom,
+       onPressed = onPressed,
+       type = SystemContextMenuItemType.builtIn,
+       title = title;
+
+  final SystemContextMenuAction action;
+
+  /// The text to display to the user.
+  final String? title;
+
+  /// The type of this menu item.
+  final SystemContextMenuItemType type;
+
+  final VoidCallback? onPressed;
+
+  // TODO(justinmc): Could put this in text_input.dart as a private static method.
+  /// Convert the given items to the format required to be sent over
+  /// [MethodChannel.invokeMethod].
+  static List<Map<String, dynamic>> itemsToJson(List<SystemContextMenuItemData> items) {
+    return items
+        .map<Map<String, dynamic>>((SystemContextMenuItemData item) => item._json)
+        .toList();
+  }
+
+  /// Convet the given single item to the format required to be sent over
+  /// [MethodChannel.invokeMethod].
+  Map<String, dynamic> get _json {
+    return <String, dynamic>{
+      'action': action.name,
+      'callbackId': hashCode, // TODO(justinmc): Effective?
+      if (title != null)
+        'title': title,
+      'type': type.name,
+    };
+  }
+}
+
+/*
+// TODO(justinmc): Rename to be iOS-specific?
+enum SystemContextMenuAction {
+  cut._(ContextMenuButtonType.cut),
+  copy._(ContextMenuButtonType.copy),
+  paste._(ContextMenuButtonType.paste),
+  selectAll._(ContextMenuButtonType.selectAll),
+  lookUp._(ContextMenuButtonType.lookUp),
+  searchWeb._(ContextMenuButtonType.searchWeb),
+  share._(ContextMenuButtonType.share);
+
+  const SystemContextMenuAction._(this._contextMenuButtonType);
+
+  final ContextMenuButtonType _contextMenuButtonType;
+}
+*/
+
+// TODO(justinmc): Name conflicts with ContextMenuButtonItemType.
+/// The type of a [SystemContextMenuItem].
+///
+/// See also:
+///
+///  * [SystemContextMenuAction], which specifies the action to take when a menu
+///    item is invoked.
+enum SystemContextMenuItemType {
+  /// Indicates an item that is built-in to the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [SystemContextMenuAction], which contains all of the supported built-in
+  ///    items.
+  builtIn,
+
+  // TODO(justinmc): Support the "custom" type.
+  // https://github.com/flutter/flutter/issues/103163
+  custom,
+}
+
+// TODO(justinmc): Reconcile with ContextMenuButtonType.
+/// The supported actions that are built-in to the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenuItem], for which this specifies the action.
+///  * [ContextMenuButtonType], which performs a similar role for Flutter-drawn
+///    context menus.
+enum SystemContextMenuAction {
+  /// Copies the currently selected text.
+  copy,
+
+  /// Cuts the currently selected text.
+  cut,
+
+  /// Looks up the current selection in a dictionary.
+  lookUp,
+
+  /// Pastes from the clipboard.
+  paste,
+
+  /// Searches the web for the current selection.
+  searchWeb,
+
+  /// Selects everything in the current field.
+  selectAll,
+
+  /// Opens the share dialog with the current selection.
+  share,
+
+  // A user-defined action.
+  custom,
+}
+
+// TODO(justinmc): Actually this is not needed, done via binding.dart?
+/*
+class SystemContextMenu {
+  SystemContextMenu._() {
+    _channel = SystemChannels.systemContextMenu;
+    _channel.setMethodCallHandler(_loudlyHandleInvocation);
+  }
+
+  late MethodChannel _channel;
+
+  Future<dynamic> _loudlyHandleInvocation(MethodCall call) async {
+    try {
+      return await _handleInvocation(call);
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'services library',
+        context: ErrorDescription('during method call ${call.method}'),
+        informationCollector: () => <DiagnosticsNode>[
+          DiagnosticsProperty<MethodCall>('call', call, style: DiagnosticsTreeStyle.errorProperty),
+        ],
+      ));
+      rethrow;
+    }
+  }
+
+  Future<dynamic> _handleInvocation(MethodCall methodCall) async {
+    final String method = methodCall.method;
+    final String method = methodCall.method;
+    switch (method) {
+      case 'ContextMenu.onTapCustomActionItem':
+        final List<dynamic> args = methodCall.arguments as List<dynamic>;
+        final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;
+        final String key = firstArg['key'] as String;
+        // notifier listeners key was pressed.
+    }
+  }
+}
+*/
