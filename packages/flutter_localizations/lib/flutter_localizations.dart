@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// Localizations for the Flutter library.
-library flutter_localizations;
+library;
 
 export 'src/cupertino_localizations.dart';
 export 'src/l10n/generated_cupertino_localizations.dart';

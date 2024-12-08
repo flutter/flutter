@@ -19,7 +19,7 @@
 /// @docImport 'src/painting/box_decoration.dart';
 /// @docImport 'src/painting/decoration.dart';
 /// @docImport 'src/painting/text_painter.dart';
-library painting;
+library;
 
 export 'dart:ui' show PlaceholderAlignment, Shadow, TextHeightBehavior, TextLeadingDistribution, kTextHeightNone;
 
