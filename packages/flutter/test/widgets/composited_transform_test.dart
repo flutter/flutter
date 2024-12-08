@@ -365,6 +365,133 @@ void main() {
       ),
     );
   });
+
+  group('Adaptative positionning', () {
+    final GlobalKey key = GlobalKey();
+    const double leaderWidth = 20.0;
+    const double leaderHeight = 10.0;
+    const double followerWidth = 200.0;
+    const double followerHeight = 100.0;
+
+    Widget build({
+      required Alignment targetAlignment,
+      required Alignment followerAlignment,
+      required Offset targetOffset,
+      required Rect allowedRect,
+    }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Positioned(
+              left: targetOffset.dx,
+              top: targetOffset.dy,
+              child: CompositedTransformTarget(
+                link: link,
+                child: const SizedBox(
+                  width: leaderWidth,
+                  height: leaderHeight,
+                ),
+              ),
+            ),
+            Positioned(
+              left: 787.0,
+              top: 343.0,
+              child: CompositedTransformFollower(
+                link: link,
+                targetAnchor: targetAlignment,
+                followerAnchor: followerAlignment,
+                allowedRect: allowedRect,
+                child: SizedBox(
+                  key: key,
+                  width: followerWidth,
+                  height: followerHeight,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    group('when targetAlignment = top and followerAlignment = top', () {
+      testWidgets('follower moves above to avoid bottom overflow', (WidgetTester tester) async {
+        const double targetTop = 500.0;
+        // Simulates 1 pixel overflow.
+        const double allowedBottom = targetTop + followerHeight - 1;
+
+        await tester.pumpWidget(build(
+          targetAlignment: Alignment.topLeft,
+          followerAlignment: Alignment.topLeft,
+          targetOffset: const Offset(100.0, targetTop),
+          allowedRect: const Rect.fromLTRB(0, 0, 800, allowedBottom),
+        ));
+        final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
+        expect(
+          box.localToGlobal(Offset.zero),
+          const Offset(100, targetTop - followerHeight),
+        );
+      });
+
+      testWidgets('follower does not move above when no bottom overflow', (WidgetTester tester) async {
+        const double targetTop = 500.0;
+        // Can fit below.
+        const double allowedBottom = targetTop + followerHeight;
+
+        await tester.pumpWidget(build(
+          targetAlignment: Alignment.topLeft,
+          followerAlignment: Alignment.topLeft,
+          targetOffset: const Offset(100.0, targetTop),
+          allowedRect: const Rect.fromLTRB(0, 0, 800, allowedBottom),
+        ));
+        final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
+        expect(
+          box.localToGlobal(Offset.zero),
+          const Offset(100, targetTop),
+        );
+      });
+    });
+
+    group('when targetAlignment = bottom and followerAlignment = top', () {
+      testWidgets('follower moves above to avoid bottom overflow', (WidgetTester tester) async {
+        const double targetTop = 500.0;
+        const double targetBottom = targetTop + leaderHeight;
+          // Simulates 1 pixel overflow.
+        const double allowedBottom = targetBottom + followerHeight - 1;
+
+        await tester.pumpWidget(build(
+          targetAlignment: Alignment.bottomLeft,
+          followerAlignment: Alignment.topLeft,
+          targetOffset: const Offset(100.0, targetTop),
+          allowedRect: const Rect.fromLTWH(0, 0, 800, allowedBottom),
+        ));
+        final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
+        expect(
+          box.localToGlobal(Offset.zero),
+          const Offset(100, targetTop - followerHeight),
+        );
+      });
+
+      testWidgets('follower does not move above when no bottom overflow', (WidgetTester tester) async {
+        const double targetTop = 500.0;
+        const double targetBottom = targetTop + leaderHeight;
+        // Can fit below.
+        const double allowedBottom = targetBottom + followerHeight;
+
+        await tester.pumpWidget(build(
+          targetAlignment: Alignment.bottomLeft,
+          followerAlignment: Alignment.topLeft,
+          targetOffset: const Offset(100.0, targetTop),
+          allowedRect: const Rect.fromLTWH(0, 0, 800, allowedBottom),
+        ));
+        final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
+        expect(
+          box.localToGlobal(Offset.zero),
+          const Offset(100, targetBottom),
+        );
+      });
+    });
+  });
 }
 
 class _CustomWidget extends SingleChildRenderObjectWidget {

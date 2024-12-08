@@ -3868,57 +3868,107 @@ void main() {
       );
     });
 
-    testWidgets('Menu follows content position when a LayerLink is provided', (WidgetTester tester) async {
-      final MenuController controller = MenuController();
-      final UniqueKey contentKey = UniqueKey();
+    group('When a LayerLink is provided', () {
+      testWidgets('menu follows content position', (WidgetTester tester) async {
+        final MenuController controller = MenuController();
+        final UniqueKey contentKey = UniqueKey();
 
-      Widget boilerplate(double bottomInsets) {
-        return MaterialApp(
-          home: MediaQuery(
-            data: MediaQueryData(
-              viewInsets: EdgeInsets.only(bottom: bottomInsets),
-            ),
-            child: Scaffold(
-              body: Center(
-                child: MenuAnchor(
-                  controller: controller,
-                  layerLink: LayerLink(),
-                  menuChildren: <Widget>[
-                    MenuItemButton(
-                      onPressed: () {},
-                      child: const Text('Button 1'),
-                    ),
-                  ],
-                  builder: (BuildContext context, MenuController controller, Widget? child) {
-                    return SizedBox(key: contentKey, width: 100, height: 100);
-                  },
+        Widget boilerplate(double bottomInsets) {
+          return MaterialApp(
+            home: MediaQuery(
+              data: MediaQueryData(
+                viewInsets: EdgeInsets.only(bottom: bottomInsets),
+              ),
+              child: Scaffold(
+                body: Center(
+                  child: MenuAnchor(
+                    controller: controller,
+                    layerLink: LayerLink(),
+                    menuChildren: <Widget>[
+                      MenuItemButton(
+                        onPressed: () {},
+                        child: const Text('Button 1'),
+                      ),
+                    ],
+                    builder: (BuildContext context, MenuController controller, Widget? child) {
+                      return SizedBox(key: contentKey, width: 100, height: 100);
+                    },
+                  ),
                 ),
               ),
             ),
+          );
+        }
+
+        // Build once without bottom insets and open the menu.
+        await tester.pumpWidget(boilerplate(0.0));
+        controller.open();
+        await tester.pump();
+
+        // Menu vertical position is just under the content.
+        expect(
+          tester.getRect(findMenuPanels()).top,
+          tester.getRect(find.byKey(contentKey)).bottom,
+        );
+
+        // Simulate the keyboard opening resizing the view.
+        await tester.pumpWidget(boilerplate(100.0));
+        await tester.pump();
+
+        // Menu vertical position is just under the content.
+        expect(
+          tester.getRect(findMenuPanels()).top,
+          tester.getRect(find.byKey(contentKey)).bottom,
+        );
+      });
+
+      testWidgets('vertically constrained menus are positioned above the anchor', (WidgetTester tester) async {
+        await changeSurfaceSize(tester, const Size(800, 600));
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Builder(
+              builder: (BuildContext context) {
+                return Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Align(
+                    alignment: Alignment.bottomLeft,
+                    child: MenuAnchor(
+                      layerLink: LayerLink(),
+                      menuChildren: const <Widget>[
+                        MenuItemButton(
+                          child: Text('Button1'),
+                        ),
+                      ],
+                      builder: (BuildContext context, MenuController controller, Widget? child) {
+                        return FilledButton(
+                          onPressed: () {
+                            if (controller.isOpen) {
+                              controller.close();
+                            } else {
+                              controller.open();
+                            }
+                          },
+                          child: const Text('Tap me'),
+                        );
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
         );
-      }
 
-      // Build once without bottom insets and open the menu.
-      await tester.pumpWidget(boilerplate(0.0));
-      controller.open();
-      await tester.pump();
+        await tester.pump();
+        await tester.tap(find.text('Tap me'));
+        await tester.pump();
 
-      // Menu vertical position is just under the content.
-      expect(
-        tester.getRect(findMenuPanels()).top,
-        tester.getRect(find.byKey(contentKey)).bottom,
-      );
-
-      // Simulate the keyboard opening resizing the view.
-      await tester.pumpWidget(boilerplate(100.0));
-      await tester.pump();
-
-      // Menu vertical position is just under the content.
-      expect(
-        tester.getRect(findMenuPanels()).top,
-        tester.getRect(find.byKey(contentKey)).bottom,
-      );
+        expect(find.byType(MenuItemButton), findsNWidgets(1));
+        expect(
+          collectSubmenuRects().first,
+          rectMoreOrLessEquals(const Rect.fromLTRB(0.0, 488.0, 122.7, 552.0), epsilon: 0.001),
+        );
+      });
     });
 
     testWidgets('Menu is correctly offsetted when a LayerLink is provided and alignmentOffset is set', (WidgetTester tester) async {

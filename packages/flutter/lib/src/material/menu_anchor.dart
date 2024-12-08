@@ -3608,7 +3608,8 @@ class _Submenu extends StatelessWidget {
         .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
     final BuildContext anchorContext = anchor._anchorKey.currentContext!;
-    final RenderBox overlay = Overlay.of(anchorContext).context.findRenderObject()! as RenderBox;
+    final BuildContext overlayContext = Overlay.of(anchorContext).context;
+    final RenderBox overlay = overlayContext.findRenderObject()! as RenderBox;
 
     Offset upperLeft = Offset.zero;
     Offset bottomRight = Offset.zero;
@@ -3619,7 +3620,34 @@ class _Submenu extends StatelessWidget {
     }
     final Rect anchorRect = Rect.fromPoints(upperLeft, bottomRight);
 
-    Widget child = Theme(
+    Widget menuPanel = _MenuPanel(
+      menuStyle: menuStyle,
+      clipBehavior: clipBehavior,
+      orientation: anchor._orientation,
+      crossAxisUnconstrained: crossAxisUnconstrained,
+      children: menuChildren,
+    );
+
+    if (layerLink != null) {
+      final Size overlaySize = MediaQuery.sizeOf(overlayContext);
+      final EdgeInsets overlayViewInsets = MediaQuery.viewInsetsOf(overlayContext);
+      final Rect allowedRect = Rect.fromLTWH(
+        overlayViewInsets.left,
+        overlayViewInsets.top,
+        overlaySize.width - overlayViewInsets.horizontal,
+        overlaySize.height - overlayViewInsets.vertical,
+      );
+
+      menuPanel = CompositedTransformFollower(
+        link: layerLink!,
+        targetAnchor: Alignment.bottomLeft,
+        allowedRect: allowedRect,
+        offset: Offset(dx, -dy),
+        child: menuPanel,
+      );
+    }
+
+    return Theme(
       data: Theme.of(context).copyWith(
         visualDensity: visualDensity,
       ),
@@ -3655,13 +3683,7 @@ class _Submenu extends StatelessWidget {
                   },
                   child: Shortcuts(
                     shortcuts: _kMenuTraversalShortcuts,
-                    child: _MenuPanel(
-                      menuStyle: menuStyle,
-                      clipBehavior: clipBehavior,
-                      orientation: anchor._orientation,
-                      crossAxisUnconstrained: crossAxisUnconstrained,
-                      children: menuChildren,
-                    ),
+                    child: menuPanel,
                   ),
                 ),
               ),
@@ -3670,16 +3692,6 @@ class _Submenu extends StatelessWidget {
         ),
       ),
     );
-
-    if (layerLink != null) {
-      child = CompositedTransformFollower(
-        link: layerLink!,
-        targetAnchor: Alignment.bottomLeft,
-        child: child,
-      );
-    }
-
-    return child;
   }
 }
 
