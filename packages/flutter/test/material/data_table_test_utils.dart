@@ -15,6 +15,7 @@ class Dessert {
   final int iron;
 }
 
+// dart format off
 final List<Dessert> kDesserts = <Dessert>[
   Dessert('Frozen yogurt',                        159,  6.0,  24,  4.0,  87, 14,  1),
   Dessert('Ice cream sandwich',                   237,  9.0,  37,  4.3, 129,  8,  1),
@@ -27,3 +28,4 @@ final List<Dessert> kDesserts = <Dessert>[
   Dessert('Donut',                                452, 25.0,  51,  4.9, 326,  2, 22),
   Dessert('KitKat',                               518, 26.0,  65,  7.0,  54, 12,  6),
 ];
+// dart format on

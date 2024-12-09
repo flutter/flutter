@@ -476,8 +476,9 @@ void main() {
       ),
     );
     await tester.pump(const Duration(seconds: 2)); // the text styles are animated when we change dense
-    //                                                                          LEFT                 TOP                   WIDTH  HEIGHT
 
+    // dart format off
+    //                                                                          LEFT                  TOP           WIDTH  HEIGHT
     expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,           0.0, 800.0, 328.0));
     expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         144.0,  40.0,  40.0));
     expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0,         152.0,  24.0,  24.0));
@@ -516,7 +517,7 @@ void main() {
     const double height = 300;
     const double avatarTop = 130.0;
     const double placeholderTop = 138.0;
-    //                                                                          LEFT                 TOP          WIDTH  HEIGHT
+    //                                                                          LEFT                 TOP             WIDTH  HEIGHT
     expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,            0.0, 800.0, height));
     expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,      avatarTop,  40.0,  40.0));
     expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0, placeholderTop,  24.0,  24.0));
@@ -550,7 +551,7 @@ void main() {
         ),
       ),
     );
-    //                                                                          LEFT                 TOP          WIDTH  HEIGHT
+    //                                                                          LEFT                 TOP           WIDTH  HEIGHT
     expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, height));
     expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,          8.0,  40.0,  40.0));
     expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0,          8.0,  24.0,  24.0));
@@ -589,6 +590,7 @@ void main() {
     expect(tester.getRect(find.byType(Placeholder).at(2)),  const Rect.fromLTWH(               16.0, 328.0 + 22.0,  24.0,  12.0));
     expect(tester.getRect(find.byType(Placeholder).at(3)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0, 328.0 + 16.0,  24.0,  24.0));
   });
+  // dart format on
 
   testWidgets('ListTile leading icon height does not exceed ListTile height', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/28765
@@ -2733,7 +2735,9 @@ void main() {
           ),
         ),
       );
-      //                                                                          LEFT                  TOP          WIDTH  HEIGHT
+
+      // dart format off
+      //                                                                          LEFT                 TOP           WIDTH  HEIGHT
       expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 177.0));
       expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
       expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
@@ -2764,7 +2768,7 @@ void main() {
         ),
       );
       await tester.pump(const Duration(seconds: 2)); // the text styles are animated when we change dense
-      //                                                                          LEFT                 TOP                   WIDTH  HEIGHT
+      //                                                                          LEFT                 TOP           WIDTH  HEIGHT
       expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 216.0));
       expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
       expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
@@ -2798,7 +2802,7 @@ void main() {
           ),
         ),
       );
-      //                                                                          LEFT                 TOP          WIDTH  HEIGHT
+      //                                                                          LEFT                 TOP           WIDTH  HEIGHT
       expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 180.0));
       expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
       expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
@@ -2830,7 +2834,7 @@ void main() {
           ),
         ),
       );
-      //                                                                          LEFT                 TOP          WIDTH  HEIGHT
+      //                                                                          LEFT                 TOP           WIDTH  HEIGHT
       expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 180.0));
       expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
       expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
@@ -2866,7 +2870,7 @@ void main() {
           ),
         ),
       );
-      //                                                                          LEFT                 TOP          WIDTH  HEIGHT
+      //                                                                          LEFT                 TOP           WIDTH  HEIGHT
       expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 180.0));
       expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
       expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
@@ -2900,7 +2904,7 @@ void main() {
           ),
         ),
       );
-      //                                                                          LEFT                 TOP          WIDTH  HEIGHT
+      //                                                                          LEFT                 TOP           WIDTH  HEIGHT
       expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 180.0));
       expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
       expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
@@ -2939,6 +2943,7 @@ void main() {
       expect(tester.getRect(find.byType(Placeholder).at(2)),  const Rect.fromLTWH(               16.0, 216.0 + 16.0,  24.0,  12.0));
       expect(tester.getRect(find.byType(Placeholder).at(3)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0, 216.0 + 16.0,  24.0,  24.0));
     });
+    // dart format on
 
     testWidgets('ListTile leading icon height does not exceed ListTile height', (WidgetTester tester) async {
       // regression test for https://github.com/flutter/flutter/issues/28765

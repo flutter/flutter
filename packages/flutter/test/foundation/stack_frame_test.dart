@@ -128,6 +128,7 @@ const String stackString = '''
 #12     SingleChildRenderObjectElement.mount (package:flutter/blah.dart:999:9)
 #13     main (package:hello_flutter/main.dart:10:4)''';
 
+// dart format off
 const List<StackFrame> stackFrames = <StackFrame>[
   StackFrame(number: 0,  className: '_AssertionError',                method: '_doThrowNew',    packageScheme: 'dart',    package: 'core-patch',    packagePath: 'errors_patch.dart',          line: 42,   column: 39,                      source: '#0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:42:39)'),
   StackFrame(number: 1,  className: '_AssertionError',                method: '_throwNew',      packageScheme: 'dart',    package: 'core-patch',    packagePath: 'errors_patch.dart',          line: 38,   column: 5,                       source: '#1      _AssertionError._throwNew (dart:core-patch/errors_patch.dart:38:5)'),
