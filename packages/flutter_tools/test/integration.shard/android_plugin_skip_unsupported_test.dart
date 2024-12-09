@@ -194,7 +194,7 @@ void main() {
 const String pubspecWithPluginPath = r'''
 name: test
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.7.0-0
 dependencies:
   flutter:
     sdk: flutter
@@ -206,7 +206,7 @@ dependencies:
 /// Project that load's a plugin from the specified path.
 class PluginWithPathAndroidProjectWithoutDeferred extends PluginProject {
   // Intentionally omit; this test case has nothing to do with deferred
-  // components and a DefererdComponentsConfig will cause duplicates of files
+  // components and a DeferredComponentsConfig will cause duplicates of files
   // such as build.gradle{.kts}, settings.gradle{kts} and related to be
   // generated, which in turn adds ambiguity to how the tests are built and
   // executed.

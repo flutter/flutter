@@ -48,6 +48,11 @@ class ProgressIndicatorThemeData with Diagnosticable {
     this.constraints,
     this.trackGap,
     this.circularTrackPadding,
+    @Deprecated(
+      'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
+      'This feature was deprecated after v3.27.0-0.2.pre.'
+    )
+    this.year2023,
   });
 
   /// The color of the [ProgressIndicator]'s indicator.
@@ -114,6 +119,23 @@ class ProgressIndicatorThemeData with Diagnosticable {
   /// Overrides the padding of the [CircularProgressIndicator].
   final EdgeInsetsGeometry? circularTrackPadding;
 
+  /// Overrides the [CircularProgressIndicator.year2023] and
+  /// [LinearProgressIndicator.year2023] properties.
+  ///
+  /// When true, the [CircularProgressIndicator] and [LinearProgressIndicator]
+  /// will use the 2023 Material Design 3 appearance. Defaults to true.
+  ///
+  /// If this is set to false, the [CircularProgressIndicator] and
+  /// [LinearProgressIndicator] will use the latest Material Design 3 appearance,
+  /// which was introduced in December 2023.
+  ///
+  /// If [ThemeData.useMaterial3] is false, then this property is ignored.
+  @Deprecated(
+    'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
+    'This feature was deprecated after v3.27.0-0.2.pre.'
+  )
+  final bool? year2023;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ProgressIndicatorThemeData copyWith({
@@ -131,6 +153,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
     BoxConstraints? constraints,
     double? trackGap,
     EdgeInsetsGeometry? circularTrackPadding,
+    bool? year2023,
   }) {
     return ProgressIndicatorThemeData(
       color: color ?? this.color,
@@ -147,6 +170,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
       constraints: constraints ?? this.constraints,
       trackGap : trackGap ?? this.trackGap,
       circularTrackPadding: circularTrackPadding ?? this.circularTrackPadding,
+      year2023: year2023 ?? this.year2023,
     );
   }
 
@@ -172,6 +196,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
       constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
       trackGap : lerpDouble(a?.trackGap, b?.trackGap, t),
       circularTrackPadding: EdgeInsetsGeometry.lerp(a?.circularTrackPadding, b?.circularTrackPadding, t),
+      year2023: t < 0.5 ? a?.year2023 : b?.year2023,
     );
   }
 
@@ -191,6 +216,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
     constraints,
     trackGap,
     circularTrackPadding,
+    year2023,
   );
 
   @override
@@ -215,7 +241,8 @@ class ProgressIndicatorThemeData with Diagnosticable {
       && other.strokeCap == strokeCap
       && other.constraints == constraints
       && other.trackGap == trackGap
-      && other.circularTrackPadding == circularTrackPadding;
+      && other.circularTrackPadding == circularTrackPadding
+      && other.year2023 == year2023;
   }
 
   @override
@@ -235,6 +262,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
     properties.add(DoubleProperty('trackGap', trackGap, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('circularTrackPadding', circularTrackPadding, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('year2023', year2023, defaultValue: null));
   }
 }
 

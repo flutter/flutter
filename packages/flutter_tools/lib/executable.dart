@@ -43,6 +43,7 @@ import 'src/commands/symbolize.dart';
 import 'src/commands/test.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
+import 'src/commands/widget_preview.dart';
 import 'src/devtools_launcher.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
@@ -250,6 +251,7 @@ List<FlutterCommand> generateCommands({
     verbose: verbose,
     nativeAssetsBuilder: globals.nativeAssetsBuilder,
   ),
+  WidgetPreviewCommand(),
   UpgradeCommand(verboseHelp: verboseHelp),
   SymbolizeCommand(
     stdio: globals.stdio,

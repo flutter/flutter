@@ -1036,10 +1036,15 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   }
 
   @override
-  Duration get transitionDuration => _bottomSheetEnterDuration;
+  Duration get transitionDuration => transitionAnimationController?.duration
+    ?? sheetAnimationStyle?.duration
+    ?? _bottomSheetEnterDuration;
 
   @override
-  Duration get reverseTransitionDuration => _bottomSheetExitDuration;
+  Duration get reverseTransitionDuration => transitionAnimationController?.reverseDuration
+    ?? transitionAnimationController?.duration
+    ?? sheetAnimationStyle?.reverseDuration
+    ?? _bottomSheetExitDuration;
 
   @override
   bool get barrierDismissible => isDismissible;
