@@ -17,14 +17,12 @@ DeviceBufferGLES::DeviceBufferGLES(DeviceBufferDescriptor desc,
                                    std::shared_ptr<Allocation> backing_store)
     : DeviceBuffer(desc),
       reactor_(std::move(reactor)),
-      handle_(reactor_ ? reactor_->CreateHandle(HandleType::kBuffer)
-                       : HandleGLES::DeadHandle()),
       backing_store_(std::move(backing_store)) {}
 
 // |DeviceBuffer|
 DeviceBufferGLES::~DeviceBufferGLES() {
-  if (!handle_.IsDead()) {
-    reactor_->CollectHandle(handle_);
+  if (handle_.has_value() && !handle_->IsDead()) {
+    reactor_->CollectHandle(*handle_);
   }
 }
 
@@ -57,7 +55,11 @@ bool DeviceBufferGLES::OnCopyHostBuffer(const uint8_t* source,
 }
 
 std::optional<GLuint> DeviceBufferGLES::GetHandle() const {
-  return reactor_->GetGLHandle(handle_);
+  if (handle_.has_value()) {
+    return reactor_->GetGLHandle(*handle_);
+  } else {
+    return std::nullopt;
+  }
 }
 
 void DeviceBufferGLES::Flush(std::optional<Range> range) const {
@@ -90,7 +92,16 @@ bool DeviceBufferGLES::BindAndUploadDataIfNecessary(BindingType type) const {
     return false;
   }
 
-  auto buffer = reactor_->GetGLHandle(handle_);
+  if (!handle_.has_value()) {
+    handle_ = reactor_->CreateUntrackedHandle(HandleType::kBuffer);
+#ifdef IMPELLER_DEBUG
+    if (handle_.has_value() && label_.has_value()) {
+      reactor_->SetDebugLabel(*handle_, *label_);
+    }
+#endif
+  }
+
+  auto buffer = reactor_->GetGLHandle(*handle_);
   if (!buffer.has_value()) {
     return false;
   }
@@ -118,7 +129,10 @@ bool DeviceBufferGLES::BindAndUploadDataIfNecessary(BindingType type) const {
 // |DeviceBuffer|
 bool DeviceBufferGLES::SetLabel(std::string_view label) {
 #ifdef IMPELLER_DEBUG
-  reactor_->SetDebugLabel(handle_, label);
+  label_ = label;
+  if (handle_.has_value()) {
+    reactor_->SetDebugLabel(*handle_, label);
+  }
 #endif  // IMPELLER_DEBUG
   return true;
 }

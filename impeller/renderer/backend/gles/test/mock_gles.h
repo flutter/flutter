@@ -35,6 +35,7 @@ class IMockGLESImpl {
                                       GLenum target,
                                       GLuint64* result) {}
   virtual void DeleteQueriesEXT(GLsizei size, const GLuint* queries) {}
+  virtual void GenBuffers(GLsizei n, GLuint* buffers) {}
 };
 
 class MockGLESImpl : public IMockGLESImpl {
@@ -68,6 +69,7 @@ class MockGLESImpl : public IMockGLESImpl {
               DeleteQueriesEXT,
               (GLsizei size, const GLuint* queries),
               (override));
+  MOCK_METHOD(void, GenBuffers, (GLsizei n, GLuint* buffers), (override));
 };
 
 /// @brief      Provides a mocked version of the |ProcTableGLES| class.

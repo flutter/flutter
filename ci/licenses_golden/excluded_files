@@ -183,6 +183,7 @@
 ../../../flutter/impeller/golden_tests/README.md
 ../../../flutter/impeller/playground
 ../../../flutter/impeller/renderer/backend/gles/buffer_bindings_gles_unittests.cc
+../../../flutter/impeller/renderer/backend/gles/device_buffer_gles_unittests.cc
 ../../../flutter/impeller/renderer/backend/gles/test
 ../../../flutter/impeller/renderer/backend/gles/unique_handle_gles_unittests.cc
 ../../../flutter/impeller/renderer/backend/metal/allocator_mtl_unittests.mm
