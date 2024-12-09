@@ -26,6 +26,12 @@
 namespace impeller {
 namespace compiler {
 
+namespace {
+constexpr const char* kEGLImageExternalExtension = "GL_OES_EGL_image_external";
+constexpr const char* kEGLImageExternalExtension300 =
+    "GL_OES_EGL_image_external_essl3";
+}  // namespace
+
 static uint32_t ParseMSLVersion(const std::string& msl_version) {
   std::stringstream sstream(msl_version);
   std::string version_part;
@@ -147,7 +153,11 @@ static CompilerBackend CreateGLSLCompiler(const spirv_cross::ParsedIR& ir,
   // incompatible with ES 310+.
   for (auto& id : ir.ids_for_constant_or_variable) {
     if (StringStartsWith(ir.get_name(id), kExternalTexturePrefix)) {
-      gl_compiler->require_extension("GL_OES_EGL_image_external");
+      if (source_options.gles_language_version >= 300) {
+        gl_compiler->require_extension(kEGLImageExternalExtension300);
+      } else {
+        gl_compiler->require_extension(kEGLImageExternalExtension);
+      }
       break;
     }
   }
