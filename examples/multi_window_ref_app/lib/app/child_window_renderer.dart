@@ -8,11 +8,13 @@ class ChildWindowRenderer extends StatelessWidget {
       {required this.windowManagerModel,
       required this.windowSettings,
       required this.controller,
+      this.renderParentlessWindows = false,
       super.key});
 
   final WindowManagerModel windowManagerModel;
   final WindowSettings windowSettings;
   final WindowController controller;
+  final bool renderParentlessWindows;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +24,9 @@ class ChildWindowRenderer extends StatelessWidget {
           final List<Widget> childViews = <Widget>[];
           for (final KeyedWindowController child
               in windowManagerModel.windows) {
-            if (child.parent == controller && !child.isMainWindow) {
+            if ((child.parent == controller ||
+                    (child.parent == null && renderParentlessWindows)) &&
+                !child.isMainWindow) {
               childViews.add(WindowControllerRender(
                 controller: child.controller,
                 key: child.key,

@@ -25,7 +25,8 @@ class PopupWindowContent extends StatelessWidget {
         child: Scaffold(
             backgroundColor: Colors.transparent,
             body: SingleChildScrollView(
-                child: Container(
+                child: Center(
+                    child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -69,6 +70,6 @@ class PopupWindowContent extends StatelessWidget {
                   ),
                 ),
               ),
-            ))));
+            )))));
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:multi_window_ref_app/app/child_window_renderer.dart';
 import 'package:multi_window_ref_app/app/window_controller_render.dart';
 
 import 'window_settings.dart';
@@ -57,28 +58,11 @@ class _MainWindowState extends State<MainWindow> {
     );
 
     return ViewAnchor(
-        view: ListenableBuilder(
-            listenable: widget._windowManagerModel,
-            builder: (BuildContext context, Widget? _) {
-              final List<Widget> childViews = <Widget>[];
-              for (final KeyedWindowController controller
-                  in widget._windowManagerModel.windows) {
-                if (controller.parent == null && !controller.isMainWindow) {
-                  childViews.add(WindowControllerRender(
-                    controller: controller.controller,
-                    key: controller.key,
-                    windowSettings: widget._settings,
-                    windowManagerModel: widget._windowManagerModel,
-                    onDestroyed: () =>
-                        widget._windowManagerModel.remove(controller),
-                    onError: () =>
-                        widget._windowManagerModel.remove(controller),
-                  ));
-                }
-              }
-
-              return ViewCollection(views: childViews);
-            }),
+        view: ChildWindowRenderer(
+            windowManagerModel: widget._windowManagerModel,
+            windowSettings: widget._settings,
+            controller: widget._windowManagerModel.windows[0].controller,
+            renderParentlessWindows: true),
         child: child);
   }
 }
