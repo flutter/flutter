@@ -55,6 +55,8 @@ class _RegularWindowContentState extends State<RegularWindowContent>
 
   @override
   Widget build(BuildContext context) {
+    final dpr = MediaQuery.of(context).devicePixelRatio;
+
     final child = Scaffold(
       appBar: AppBar(title: Text('${widget.window.type}')),
       body: Center(
@@ -94,8 +96,9 @@ class _RegularWindowContentState extends State<RegularWindowContent>
                     return Text(
                       'View #${widget.window.view?.viewId ?? "Unknown"}\n'
                       'Parent View: ${widget.window.parentViewId}\n'
-                      'Logical Size: ${widget.window.size?.width ?? "?"}\u00D7${widget.window.size?.height ?? "?"}\n'
-                      'DPR: ${MediaQuery.of(context).devicePixelRatio}',
+                      'View Size: ${(widget.window.view!.physicalSize.width / dpr).toStringAsFixed(1)}\u00D7${(widget.window.view!.physicalSize.height / dpr).toStringAsFixed(1)}\n'
+                      'Window Size: ${widget.window.size?.width}\u00D7${widget.window.size?.height}\n'
+                      'Device Pixel Ratio: $dpr',
                       textAlign: TextAlign.center,
                     );
                   })
