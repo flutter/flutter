@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as flutter_goldens;
+import '_goldens_io.dart' if (dart.library.js_interop) '_goldens_web.dart' as flutter_goldens;
 
 Future<void> testExecutable(FutureOr<void> Function() testMain) {
   // Enable golden file testing using Skia Gold.
