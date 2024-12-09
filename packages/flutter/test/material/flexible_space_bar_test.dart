@@ -333,7 +333,7 @@ void main() {
                           id: 14,
                           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           rect: TestSemantics.fullScreen,
-                          actions: <SemanticsAction>[SemanticsAction.scrollUp],
+                          actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset],
                           children: <TestSemantics>[
                             TestSemantics(
                               id: 5,
@@ -441,7 +441,7 @@ void main() {
                           id: 14,
                           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           rect: TestSemantics.fullScreen,
-                          actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown],
+                          actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown, SemanticsAction.scrollToOffset],
                           children: <TestSemantics>[
                             TestSemantics(
                               id: 5,
@@ -598,7 +598,7 @@ void main() {
                           id: 14,
                           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           rect: TestSemantics.fullScreen,
-                          actions: <SemanticsAction>[SemanticsAction.scrollUp],
+                          actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset],
                           children: <TestSemantics>[
                             TestSemantics(
                               id: 5,
@@ -706,7 +706,7 @@ void main() {
                           id: 14,
                           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           rect: TestSemantics.fullScreen,
-                          actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown],
+                          actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown, SemanticsAction.scrollToOffset],
                           children: <TestSemantics>[
                             TestSemantics(
                               id: 5,
