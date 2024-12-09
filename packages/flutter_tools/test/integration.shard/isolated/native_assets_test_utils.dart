@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
-import '../test_utils.dart' show ProcessResultMatcher, fileSystem;
+import '../test_utils.dart' show ProcessResultMatcher, fileSystem, flutterBin;
 import '../transition_test_utils.dart';
 
 Future<Directory> createTestProject(String packageName, Directory tempDirectory) async {
@@ -57,61 +59,6 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
   return packageDirectory;
 }
 
-Future<Directory> createTestProjectWithNoCBuild(String packageName, Directory tempDirectory) async {
-  final ProcessResult result = processManager.runSync(
-    <String>[
-      flutterBin,
-      'create',
-      '--no-pub',
-      packageName,
-    ],
-    workingDirectory: tempDirectory.path,
-  );
-  if (result.exitCode != 0) {
-    throw Exception(
-      'flutter create failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
-    );
-  }
-
-  final Directory packageDirectory = tempDirectory.childDirectory(packageName);
-
-  final ProcessResult result2 = await processManager.run(
-    <String>[
-      flutterBin,
-      'pub',
-      'add',
-      'native_assets_cli',
-    ],
-    workingDirectory: packageDirectory.path,
-  );
-  expect(result2, const ProcessResultMatcher());
-
-  await pinDependencies(packageDirectory.childFile('pubspec.yaml'));
-
-  final ProcessResult result3 = await processManager.run(
-    <String>[
-      flutterBin,
-      'pub',
-      'get',
-    ],
-    workingDirectory: packageDirectory.path,
-  );
-  expect(result3, const ProcessResultMatcher());
-
-  // Add build hook that does nothing to the package.
-  final File buildHook = packageDirectory.childDirectory('hook').childFile('build.dart');
-  buildHook.createSync(recursive: true);
-  buildHook.writeAsStringSync('''
-import 'package:native_assets_cli/native_assets_cli.dart';
-
-void main(List<String> args) async {
-  await build(args, (config, output) async {});
-}
-''');
-
-  return packageDirectory;
-}
-
 Future<void> addLinkHookDependency(String packageName, Directory packageDirectory) async {
   final Directory flutterDirectory = fileSystem.currentDirectory.parent.parent;
   final Directory linkHookDirectory = flutterDirectory
@@ -120,18 +67,43 @@ Future<void> addLinkHookDependency(String packageName, Directory packageDirector
       .childDirectory('link_hook');
   expect(linkHookDirectory, exists);
 
-  final File pubspecFile = packageDirectory.childFile('pubspec.yaml');
-  final String pubspecOld =
-      (await pubspecFile.readAsString()).replaceAll('\r\n', '\n');
-  final String pubspecNew = pubspecOld.replaceFirst('''
-dependencies:
-''', '''
-dependencies:
-  link_hook:
-    path: ${linkHookDirectory.path}
-''');
-  expect(pubspecNew, isNot(pubspecOld));
-  await pubspecFile.writeAsString(pubspecNew);
+  final File linkHookPubspecFile = linkHookDirectory.childFile('pubspec.yaml');
+  final File thisPubspecFile = packageDirectory.childFile('pubspec.yaml');
+
+  final Map<String, Object?> linkHookPubspec = _pubspecAsMutableJson(linkHookPubspecFile.readAsStringSync());
+  final Map<String, Object?> linkHooksDependencies = linkHookPubspec['dependencies']! as Map<String, Object?>;
+  final Map<String, Object?> linkHooksDevDependencies = linkHookPubspec['dev_dependencies']! as Map<String, Object?>;
+
+  final Map<String, Object?> thisPubspec = _pubspecAsMutableJson(thisPubspecFile.readAsStringSync());
+
+  final Map<String, Object?> thisDependencies = thisPubspec['dependencies']! as Map<String, Object?>;
+  final Map<String, Object?> thisDevDependencies = thisPubspec['dev_dependencies']! as Map<String, Object?>;
+
+  // Flutter CI uses pinned dependencies for all packages (including
+  // dev/integration_tests/link_hook) for deterministic testing on CI.
+  //
+  // The ffi template that was generated with `flutter create` does not use
+  // pinned dependencies.
+  //
+  // We ensure that the test package we generate here will have versions
+  // compatible with the one from flutter CIs pinned dependencies.
+  _updateDependencies(thisDependencies, linkHooksDependencies);
+  _updateDependencies(thisDevDependencies, linkHooksDependencies);
+  // Resolving dependencies for this package wouldn't normally use
+  // the dev dependencies of the `link_hook` package. But there may be some
+  // non-dev `link_hook` dependencies that affect resolution of dev
+  // dependencies. So by making this compatible to `link_hook`s dev dependencies
+  // we implicitly also make it compatible to `link_hook`s non-dev dependencies.
+  //
+  // Example: `link_hook` has `test_core` as dependency and `test` as dev
+  // dependency. By using the same version of `test` in this package as
+  // `link_hook` we implicitly are guaranteed to also get a version of
+  // `test_core` that is compatible (and `test_core` is pinned in `link_hook`)
+  _updateDependencies(thisDependencies, linkHooksDevDependencies);
+  _updateDependencies(thisDevDependencies, linkHooksDevDependencies);
+  thisDependencies['link_hook'] = <String, Object?>{ 'path' : linkHookDirectory.path };
+
+  await thisPubspecFile.writeAsString(json.encode(thisPubspec));
 
   final File dartFile =
       packageDirectory.childDirectory('lib').childFile('$packageName.dart');
@@ -156,6 +128,16 @@ import '${packageName}_bindings_generated.dart' as bindings;
   );
   expect(dartFileNew2, isNot(dartFileNew));
   await dartFile.writeAsString(dartFileNew2);
+}
+
+Map<String, Object?> _pubspecAsMutableJson(String pubspecContent) {
+  return json.decode(json.encode(loadYaml(pubspecContent))) as Map<String, Object?>;
+}
+
+void _updateDependencies(Map<String, Object?> to, Map<String, Object?> from) {
+  for (final String packageName in to.keys) {
+    to[packageName] = from[packageName] ?? to[packageName];
+  }
 }
 
 /// Adds a native library to be built by the builder and dynamically link it to

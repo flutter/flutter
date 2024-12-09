@@ -123,9 +123,11 @@ const String numberFormatNamedTemplate = '''
 ''';
 
 const String dateFormatTemplate = '''
-    final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat.@(format)(localeName);
+    final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat.@(format)(localeName)@(addedFormats);
     final String @(placeholder)String = @(placeholder)DateFormat.format(@(placeholder));
 ''';
+
+const String dateFormatAddFormatTemplate = '''.add_@(format)()''';
 
 const String dateFormatCustomTemplate = '''
     final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat(@(format), localeName);
@@ -171,7 +173,9 @@ const String dateVariableTemplate = '''
     String @(varName) = intl.DateFormat.@(formatType)(localeName).format(@(argument));''';
 
 const String classFileTemplate = '''
-@(header)@(requiresIntlImport)import '@(fileName)';
+@(header)// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import '@(fileName)';
 
 // ignore_for_file: type=lint
 

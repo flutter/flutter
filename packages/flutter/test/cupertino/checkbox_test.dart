@@ -516,7 +516,7 @@ void main() {
         home: Center(
           child: CupertinoCheckbox(
             value: value,
-            onChanged: enabled ? (bool? value) => true : null,
+            onChanged: enabled ? (bool? value) {} : null,
             mouseCursor: const _CheckboxMouseCursor(),
             focusNode: focusNode
           ),
