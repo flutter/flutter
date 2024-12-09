@@ -861,12 +861,28 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private void forceNdkDownload(Project gradleProject, String flutterSdkRootPath) {
+        // If the project is already configuring a native build, we don't need to do anything.
+        Boolean forcingNotRequired = gradleProject.android.externalNativeBuild.cmake.path != null
+        if (forcingNotRequired) {
+            return
+        }
+
+        // Otherwise, point to an empty CMakeLists.txt, and ignore associated warnings.
         gradleProject.android {
             externalNativeBuild {
                 cmake {
                     // Respect the existing configuration if it exists - the NDK will already be
                     // downloaded in this case.
-                    path = path ?: flutterSdkRootPath + "/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+                    path = flutterSdkRootPath + "/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+                    //arguments "-Wno-dev"
+                }
+            }
+
+            defaultConfig {
+                externalNativeBuild {
+                    cmake {
+                        arguments("-Wno-dev", "--no-warn-unused-cli")
+                    }
                 }
             }
         }
