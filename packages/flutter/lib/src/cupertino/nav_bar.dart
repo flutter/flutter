@@ -904,7 +904,8 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
          bottomMode == null || bottom != null,
          'A bottomMode was provided without a corresponding bottom.',
        ),
-       onSearchActiveChanged = null;
+       onSearchActiveChanged = null,
+       _searchable = false;
 
   /// Create a navigation bar for scrolling lists with [bottom] set to a
   /// [CupertinoSearchTextField] with padding.
@@ -938,7 +939,8 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
          'false. Either provide a largeTitle or set automaticallyImplyTitle to '
          'true.',
        ),
-       bottom = const _NavigationBarSearchField();
+       bottom = null,
+       _searchable = true;
 
   /// The navigation bar's title.
   ///
@@ -1065,6 +1067,9 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// Defaults to `false`.
   final bool stretch;
 
+  /// True if the [CupertinoSliverNavigationBar.search] constructor is used.
+  final bool _searchable;
+
   @override
   State<CupertinoSliverNavigationBar> createState() => _CupertinoSliverNavigationBarState();
 }
@@ -1093,6 +1098,8 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   late Animation<double> persistentHeightAnimation;
   late Animation<double> largeTitleHeightAnimation;
   bool atTop = false;
+  final GlobalKey searchKey = GlobalKey();
+  PreferredSizeWidget? defaultSearchField;
 
   @override
   void initState() {
@@ -1111,6 +1118,9 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
         setState(() { });
       });
     largeTitleHeightAnimation = largeTitleHeightTween.animate(_animationController);
+    if (widget._searchable) {
+      defaultSearchField = _NavigationBarSearchField(searchKey: searchKey);
+    }
   }
 
   @override
@@ -1138,7 +1148,8 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     }
 
     double? target;
-    final bool canScrollBottom = widget.bottom != null && (widget.bottomMode == NavigationBarBottomMode.automatic || widget.bottomMode == null);
+    final bool canScrollBottom = (widget.bottom != null || widget._searchable)
+                              && (widget.bottomMode == NavigationBarBottomMode.automatic || widget.bottomMode == null);
     final double bottomScrollOffset = canScrollBottom ? widget.bottom!.preferredSize.height : 0.0;
 
     if (canScrollBottom && position.pixels < bottomScrollOffset) {
@@ -1164,56 +1175,54 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
 
   @override
   Widget build(BuildContext context) {
-    if (widget.bottom is _NavigationBarSearchField && !atTop) {
-      effectiveBottom = GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        child: widget.bottom,
-        onTap: () {
-          setState(() {
-            atTop = true;
-            effectiveLeading = const SizedBox.shrink();
-            effectiveTrailing = const SizedBox.shrink();
-            effectiveBottomMode = NavigationBarBottomMode.always;
-            effectiveStretch = false;
-            if (widget.onSearchActiveChanged != null) {
-              widget.onSearchActiveChanged!(atTop);
-            }
-            _animationController.forward();
-            _fadeController.forward();
-          });
-        },
-      );
-    }
-
-    else if (widget.bottom is _NavigationBarSearchField && atTop) {
-      effectiveBottom = Row(
-        children: <Widget>[
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(8.0, 0.0, 0.0, 0.0),
-              child: (widget.bottom! as _NavigationBarSearchField).searchField,
-            ),
-          ),
-          Center(
-            child: CupertinoButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                setState(() {
-                  atTop = false;
-                  effectiveLeading = widget.leading;
-                  effectiveTrailing = widget.trailing;
-                  effectiveBottomMode = widget.bottomMode;
-                  effectiveStretch = widget.stretch;
-                  if (widget.onSearchActiveChanged != null) {
-                    widget.onSearchActiveChanged!(atTop);
-                  }
-                  _animationController.reverse();
-                  _fadeController.reverse();
-                });
-              }),
-          ),
-        ],
-      );
+    if (widget._searchable) {
+      effectiveBottom = atTop
+        ? Row(
+            children: <Widget>[
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(8.0, 0.0, 0.0, 0.0),
+                  child: searchKey.currentWidget,
+                ),
+              ),
+              Center(
+                child: CupertinoButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    setState(() {
+                      atTop = false;
+                      effectiveLeading = widget.leading;
+                      effectiveTrailing = widget.trailing;
+                      effectiveBottomMode = widget.bottomMode;
+                      effectiveStretch = widget.stretch;
+                      if (widget.onSearchActiveChanged != null) {
+                        widget.onSearchActiveChanged!(atTop);
+                      }
+                      _animationController.reverse();
+                      _fadeController.reverse();
+                    });
+                  }),
+              ),
+            ],
+          )
+        : GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            child: defaultSearchField,
+            onTap: () {
+              setState(() {
+                atTop = true;
+                effectiveLeading = const SizedBox.shrink();
+                effectiveTrailing = const SizedBox.shrink();
+                effectiveBottomMode = NavigationBarBottomMode.always;
+                effectiveStretch = false;
+                if (widget.onSearchActiveChanged != null) {
+                  widget.onSearchActiveChanged!(atTop);
+                }
+                _animationController.forward();
+                _fadeController.forward();
+              });
+            },
+          );
     }
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
@@ -1258,7 +1267,9 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
               enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
               bottom: effectiveBottom ?? widget.bottom ?? const SizedBox.shrink(),
               bottomMode: effectiveBottomMode ?? widget.bottomMode ?? NavigationBarBottomMode.automatic,
-              bottomHeight: widget.bottom != null ? widget.bottom!.preferredSize.height : 0.0,
+              bottomHeight: defaultSearchField != null
+                ? defaultSearchField!.preferredSize.height
+                : widget.bottom?.preferredSize.height ?? 0.0,
             ),
           );
         }
@@ -3079,10 +3090,11 @@ Widget _navBarHeroFlightShuttleBuilder(
 }
 
 class _NavigationBarSearchField extends StatelessWidget implements PreferredSizeWidget {
-  const _NavigationBarSearchField();
+  const _NavigationBarSearchField({required this.searchKey});
 
   static const double padding = 8.0;
   static const double searchFieldHeight = 35.0;
+  final GlobalKey searchKey;
 
   @override
   Widget build(BuildContext context) {
@@ -3091,7 +3103,7 @@ class _NavigationBarSearchField extends StatelessWidget implements PreferredSize
         padding: const EdgeInsets.symmetric(horizontal: padding, vertical: padding),
         child: SizedBox(
           height: searchFieldHeight,
-          child: searchField,
+          child: CupertinoSearchTextField(key: searchKey),
         ),
       ),
     );
@@ -3099,6 +3111,4 @@ class _NavigationBarSearchField extends StatelessWidget implements PreferredSize
 
   @override
   Size get preferredSize => const Size.fromHeight(searchFieldHeight + padding * 2);
-
-  Widget get searchField => const CupertinoSearchTextField();
 }
