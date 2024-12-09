@@ -3934,7 +3934,8 @@ class SemanticsConfiguration {
   /// The callback, if not `null`, should typically set the scroll offset of
   /// the associated scrollable container to the given `targetOffset` without
   /// animation as it is already animated by the caller: the iOS focus engine
-  /// invokes the callback every frame during the scroll animation.
+  /// invokes [onScrollToOffset] every frame during the scroll animation with
+  /// animated scroll offset values.
   ScrollToOffsetHandler? get onScrollToOffset => _onScrollToOffset;
   ScrollToOffsetHandler? _onScrollToOffset;
   set onScrollToOffset(ScrollToOffsetHandler? value) {
