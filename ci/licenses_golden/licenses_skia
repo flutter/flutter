@@ -1,4 +1,4 @@
-Signature: 9876b5ab742ae79914a5bbd67d5a002a
+Signature: a4491fcc5578e3c1714db99d545cc295
 
 ====================================================================================================
 LIBRARY: etc1
@@ -402,6 +402,7 @@ FILE: ../../../flutter/third_party/skia/package-lock.json
 FILE: ../../../flutter/third_party/skia/relnotes/GpuStats.md
 FILE: ../../../flutter/third_party/skia/relnotes/GraphiteLogPriority.md
 FILE: ../../../flutter/third_party/skia/relnotes/SkColorSpaceMakeCICP.md
+FILE: ../../../flutter/third_party/skia/relnotes/debugtrace.md
 FILE: ../../../flutter/third_party/skia/relnotes/precompilecontext.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
