@@ -167,6 +167,8 @@ struct _FlKeyboardManager {
   GdkKeymap* keymap;
   gulong keymap_keys_changed_cb_id;  // Signal connection ID for
                                      // keymap-keys-changed
+
+  GCancellable* cancellable;
 };
 
 G_DEFINE_TYPE(FlKeyboardManager, fl_keyboard_manager, G_TYPE_OBJECT);
@@ -274,17 +276,28 @@ static void responder_handle_embedder_event_callback(bool handled,
   responder_handle_event_callback(self, data->pending);
 }
 
-static void responder_handle_channel_event_callback(bool handled,
-                                                    gpointer user_data) {
+static void responder_handle_channel_event_cb(GObject* object,
+                                              GAsyncResult* result,
+                                              gpointer user_data) {
   g_autoptr(FlKeyboardManagerData) data = FL_KEYBOARD_MANAGER_DATA(user_data);
 
-  fl_keyboard_pending_event_mark_channel_replied(data->pending, handled);
+  g_autoptr(GError) error = nullptr;
+  gboolean handled;
+  if (!fl_key_channel_responder_handle_event_finish(
+          FL_KEY_CHANNEL_RESPONDER(object), result, &handled, &error)) {
+    if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+      g_warning("Failed to handle key event in platform: %s", error->message);
+    }
+    return;
+  }
 
   g_autoptr(FlKeyboardManager) self =
       FL_KEYBOARD_MANAGER(g_weak_ref_get(&data->manager));
   if (self == nullptr) {
     return;
   }
+
+  fl_keyboard_pending_event_mark_channel_replied(data->pending, handled);
 
   responder_handle_event_callback(self, data->pending);
 }
@@ -395,6 +408,8 @@ static void guarantee_layout(FlKeyboardManager* self, FlKeyEvent* event) {
 static void fl_keyboard_manager_dispose(GObject* object) {
   FlKeyboardManager* self = FL_KEYBOARD_MANAGER(object);
 
+  g_cancellable_cancel(self->cancellable);
+
   g_weak_ref_clear(&self->engine);
   g_weak_ref_clear(&self->view_delegate);
 
@@ -411,6 +426,7 @@ static void fl_keyboard_manager_dispose(GObject* object) {
     g_signal_handler_disconnect(self->keymap, self->keymap_keys_changed_cb_id);
     self->keymap_keys_changed_cb_id = 0;
   }
+  g_clear_object(&self->cancellable);
 
   G_OBJECT_CLASS(fl_keyboard_manager_parent_class)->dispose(object);
 }
@@ -439,6 +455,7 @@ static void fl_keyboard_manager_init(FlKeyboardManager* self) {
   self->keymap = gdk_keymap_get_for_display(gdk_display_get_default());
   self->keymap_keys_changed_cb_id = g_signal_connect_swapped(
       self->keymap, "keys-changed", G_CALLBACK(keymap_keys_changed_cb), self);
+  self->cancellable = g_cancellable_new();
 }
 
 FlKeyboardManager* fl_keyboard_manager_new(
@@ -499,7 +516,7 @@ gboolean fl_keyboard_manager_handle_event(FlKeyboardManager* self,
       responder_handle_embedder_event_callback, g_object_ref(data));
   fl_key_channel_responder_handle_event(
       self->key_channel_responder, event, specified_logical_key,
-      responder_handle_channel_event_callback, g_object_ref(data));
+      self->cancellable, responder_handle_channel_event_cb, g_object_ref(data));
 
   return TRUE;
 }
