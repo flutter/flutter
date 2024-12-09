@@ -514,6 +514,7 @@ optional("jpeg_decode") {
 
 optional("jpeg_encode") {
   enabled = skia_use_libjpeg_turbo_encode && !skia_use_ndk_images
+  public_defines = [ "SK_CODEC_ENCODES_JPEG" ]
 
   deps = [ "//flutter/third_party/libjpeg-turbo:libjpeg" ]
   public = skia_encode_jpeg_public
@@ -538,22 +539,27 @@ optional("xps") {
   sources = skia_xps_sources
 }
 
-optional("png_decode") {
+optional("png_decode_libpng") {
   enabled = skia_use_libpng_decode
   public_defines = [
     "SK_CODEC_DECODES_PNG",
     "SK_CODEC_DECODES_ICO",
+    "SK_CODEC_DECODES_PNG_WITH_LIBPNG",
   ]
 
   deps = [ "//flutter/third_party/libpng" ]
-  sources = [ "$_skia_root/src/codec/SkIcoCodec.cpp" ]
-  sources += skia_codec_png
+  sources = [ "$_skia_root/src/codec/SkIcoCodec.cpp" ] + skia_codec_png_base +
+            skia_codec_libpng_srcs
 }
 
 optional("png_encode") {
   enabled = skia_use_libpng_encode && !skia_use_ndk_images
-  public = skia_encode_png_public
+  public_defines = [
+    "SK_CODEC_ENCODES_PNG",
+    "SK_CODEC_ENCODES_PNG_WITH_LIBPNG",
+  ]
 
+  public = skia_encode_png_public
   deps = [ "//flutter/third_party/libpng" ]
   sources = skia_encode_png_srcs
 }
@@ -576,6 +582,7 @@ optional("webp_decode") {
 
 optional("webp_encode") {
   enabled = skia_use_libwebp_encode && !skia_use_ndk_images
+  public_defines = [ "SK_CODEC_ENCODES_WEBP" ]
   public = skia_encode_webp_public
 
   deps = [ "//flutter/third_party/libwebp" ]
@@ -634,7 +641,7 @@ skia_component("skia") {
     ":hsw",
     ":jpeg_decode",
     ":ndk_images",
-    ":png_decode",
+    ":png_decode_libpng",
     ":webp_decode",
     ":wuffs",
     ":xml",
