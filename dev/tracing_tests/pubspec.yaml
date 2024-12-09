@@ -2,7 +2,7 @@ name: tracing_tests
 description: Various tests for tracing in flutter/flutter
 
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.7.0-0
 
 dependencies:
   flutter:

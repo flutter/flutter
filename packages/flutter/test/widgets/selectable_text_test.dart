@@ -3593,7 +3593,7 @@ void main() {
     final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
     final Offset pPos = textOffsetToPosition(tester, testValue.indexOf('p'));
 
-    // A double tap + drag should take precendence over parent drags.
+    // A double tap + drag should take precedence over parent drags.
     final TestGesture gesture = await tester.startGesture(gPos);
     await tester.pump();
     await gesture.up();
