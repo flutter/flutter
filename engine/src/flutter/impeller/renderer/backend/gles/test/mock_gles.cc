@@ -177,6 +177,13 @@ void mockGenTextures(GLsizei n, GLuint* textures) {
 static_assert(CheckSameSignature<decltype(mockGenTextures),  //
                                  decltype(glGenTextures)>::value);
 
+void mockGenBuffers(GLsizei n, GLuint* buffers) {
+  CallMockMethod(&IMockGLESImpl::GenBuffers, n, buffers);
+}
+
+static_assert(CheckSameSignature<decltype(mockGenTextures),  //
+                                 decltype(glGenTextures)>::value);
+
 void mockObjectLabelKHR(GLenum identifier,
                         GLuint name,
                         GLsizei length,
@@ -248,6 +255,8 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockGenTextures);
   } else if (strcmp(name, "glObjectLabelKHR") == 0) {
     return reinterpret_cast<void*>(mockObjectLabelKHR);
+  } else if (strcmp(name, "glGenBuffers") == 0) {
+    return reinterpret_cast<void*>(mockGenBuffers);
   } else {
     return reinterpret_cast<void*>(&doNothing);
   }
