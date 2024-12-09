@@ -80,7 +80,7 @@ struct Command {
   //----------------------------------------------------------------------------
   /// The pipeline to use for this command.
   ///
-  std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline;
+  PipelineRef pipeline;
 
   /// An offset into render pass storage where bound buffers/texture metadata is
   /// stored.
