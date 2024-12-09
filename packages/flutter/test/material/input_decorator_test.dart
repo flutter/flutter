@@ -1708,7 +1708,7 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/159942.
-    testWidgets('OutlineBorder does not overlap with the label when there is no radius', (WidgetTester tester) async {
+    testWidgets('OutlineBorder does not overlap with the label at the default radius', (WidgetTester tester) async {
       Widget buildFrame(TextDirection textDirection) {
         return MaterialApp(
           home: Scaffold(
