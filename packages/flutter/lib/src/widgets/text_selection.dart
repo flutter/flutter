@@ -798,11 +798,13 @@ class TextSelectionOverlay {
     }
 
     final TextSelection newSelection;
-    final bool dragStartSelectionNormalized = _dragStartSelection!.extentOffset >= _dragStartSelection!.baseOffset;
     switch (defaultTargetPlatform) {
       // On Apple platforms, dragging the base handle makes it the extent.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
+        // Use this instead of dragStartSelection.isNormalized because TextRange.isNormalized
+        // always returns true for a TextSelection.
+        final bool dragStartSelectionNormalized = _dragStartSelection!.extentOffset >= _dragStartSelection!.baseOffset;
         newSelection = TextSelection(
           baseOffset: dragStartSelectionNormalized
                       ? _dragStartSelection!.baseOffset
@@ -910,11 +912,13 @@ class TextSelectionOverlay {
     }
 
     final TextSelection newSelection;
-    final bool dragStartSelectionNormalized = _dragStartSelection!.extentOffset >= _dragStartSelection!.baseOffset;
     switch (defaultTargetPlatform) {
       // On Apple platforms, dragging the base handle makes it the extent.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
+        // Use this instead of dragStartSelection.isNormalized because TextRange.isNormalized
+        // always returns true for a TextSelection.
+        final bool dragStartSelectionNormalized = _dragStartSelection!.extentOffset >= _dragStartSelection!.baseOffset;
         newSelection = TextSelection(
           baseOffset: dragStartSelectionNormalized
                       ? _dragStartSelection!.extentOffset
