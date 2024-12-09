@@ -1213,10 +1213,12 @@ class RenderBackdropFilter extends RenderProxyBox {
     required ui.ImageFilter filter,
     BlendMode blendMode = BlendMode.srcOver,
     bool enabled = true,
+    BackdropKey? backdropKey,
   })
     : _filter = filter,
       _enabled = enabled,
       _blendMode = blendMode,
+      _backdropKey = backdropKey,
       super(child);
 
   @override
@@ -1261,6 +1263,19 @@ class RenderBackdropFilter extends RenderProxyBox {
     _blendMode = value;
     markNeedsPaint();
   }
+  /// The backdrop key that identifies the [BackdropGroup] this filter will
+  /// read from.
+  ///
+  /// The default value for the backdrop key is `null`.
+  BackdropKey? get backdropKey => _backdropKey;
+  BackdropKey? _backdropKey;
+  set backdropKey(BackdropKey? value) {
+    if (value == _backdropKey) {
+      return;
+    }
+    _backdropKey = value;
+    markNeedsPaint();
+  }
 
   @override
   bool get alwaysNeedsCompositing => child != null;
@@ -1277,6 +1292,7 @@ class RenderBackdropFilter extends RenderProxyBox {
       layer ??= BackdropFilterLayer();
       layer!.filter = _filter;
       layer!.blendMode = _blendMode;
+      layer!.backdropKey = _backdropKey;
       context.pushLayer(layer!, super.paint, offset);
       assert(() {
         layer!.debugCreator = debugCreator;

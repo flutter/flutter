@@ -51,7 +51,7 @@ class WebTemplate {
     }
 
     if (!baseHref.startsWith('/')) {
-      throw ToolExit(
+      throwToolExit(
         'Error: The base href in "web/index.html" must be absolute (i.e. start '
         'with a "/"), but found: `${baseElement!.outerHtml}`.\n'
         '$_kBasePathExample',
@@ -59,7 +59,7 @@ class WebTemplate {
     }
 
     if (!baseHref.endsWith('/')) {
-      throw ToolExit(
+      throwToolExit(
         'Error: The base href in "web/index.html" must end with a "/", but found: `${baseElement!.outerHtml}`.\n'
         '$_kBasePathExample',
       );

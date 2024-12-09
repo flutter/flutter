@@ -488,7 +488,7 @@ class Environment {
   /// The path to the package configuration file to use for compilation.
   ///
   /// This is used by package:package_config to locate the actual package_config.json
-  /// file. If not provided, defaults to `.dart_tool/package_config.json`.
+  /// file. If not provided in tests, defaults to `.dart_tool/package_config.json`.
   final String packageConfigPath;
 
   /// The `BUILD_DIR` environment variable.

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:native_assets_cli/native_assets_cli_internal.dart';
+import 'package:native_assets_cli/code_assets_builder.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
@@ -12,7 +12,7 @@ import '../../../globals.dart' as globals;
 /// Flutter expects `clang++` to be on the path on Linux hosts.
 ///
 /// Search for the accompanying `clang`, `ar`, and `ld`.
-Future<CCompilerConfigImpl> cCompilerConfigLinux() async {
+Future<CCompilerConfig> cCompilerConfigLinux() async {
   const String kClangPlusPlusBinary = 'clang++';
   const String kClangBinary = 'clang';
   const String kArBinary = 'llvm-ar';
@@ -34,7 +34,7 @@ Future<CCompilerConfigImpl> cCompilerConfigLinux() async {
     }
     binaryPaths[binary] = binaryFile.uri;
   }
-  return CCompilerConfigImpl(
+  return CCompilerConfig(
     archiver: binaryPaths[kArBinary],
     compiler: binaryPaths[kClangBinary],
     linker: binaryPaths[kLdBinary],
