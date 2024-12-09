@@ -434,6 +434,10 @@ def to_gn_args(args):
     gn_args['enable_unittests'] = False
 
   # Skia GN args.
+  gn_args['skia_use_libpng_decode'] = True
+  gn_args['skia_use_libpng_encode'] = True
+  gn_args['skia_use_rust_png_decode'] = False
+  gn_args['skia_use_rust_png_encode'] = False
   gn_args['skia_use_dng_sdk'] = False  # RAW image handling.
   gn_args['skia_enable_pdf'] = False  # PDF handling.
   gn_args['skia_use_x11'] = False  # Never add the X11 dependency (only takes effect on Linux).

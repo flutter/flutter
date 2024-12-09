@@ -2805,6 +2805,7 @@
 ../../../flutter/third_party/skia/modules/canvaskit/wasm_tools/SIMD/.gitignore
 ../../../flutter/third_party/skia/modules/jetski/BUILD.bazel
 ../../../flutter/third_party/skia/modules/jetski/README
+../../../flutter/third_party/skia/modules/jsonreader/BUILD.bazel
 ../../../flutter/third_party/skia/modules/pathkit/.gitignore
 ../../../flutter/third_party/skia/modules/pathkit/BUILD.bazel
 ../../../flutter/third_party/skia/modules/pathkit/CHANGELOG.md
