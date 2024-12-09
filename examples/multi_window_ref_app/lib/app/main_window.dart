@@ -121,7 +121,7 @@ class _ActiveWindowsTable extends StatelessWidget {
                     return Theme.of(context)
                         .colorScheme
                         .primary
-                        .withOpacity(0.08);
+                        .withAlpha(20);
                   }
                   return Colors.transparent;
                 }),

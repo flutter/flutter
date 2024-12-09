@@ -11,14 +11,19 @@ import 'package:flutter/services.dart';
 enum WindowArchetype {
   /// Regular top-level window.
   regular,
+
   /// A window that is on a layer above regular windows and is not dockable.
   floating_regular,
+
   /// Dialog window.
   dialog,
+
   /// Satellite window attached to a regular, floating_regular or dialog window.
   satellite,
+
   /// Popup.
   popup,
+
   /// Tooltip.
   tip
 }
@@ -330,9 +335,9 @@ class _GenericWindowState extends State<_GenericWindow> {
     });
 
     _future!.then((WindowCreationResult metadata) async {
-      _viewId = metadata.flView.viewId;
+      _viewId = metadata.view.viewId;
       if (widget.controller != null) {
-        widget.controller!.view = metadata.flView;
+        widget.controller!.view = metadata.view;
         widget.controller!.parentViewId = metadata.parent;
         widget.controller!.size = metadata.size;
       }
@@ -341,7 +346,7 @@ class _GenericWindowState extends State<_GenericWindow> {
           _WindowingAppContext.of(context);
       assert(windowingAppContext != null);
       _listener = _WindowListener(
-          viewId: metadata.flView.viewId,
+          viewId: metadata.view.viewId,
           onChanged: (_WindowChangeProperties properties) {
             if (widget.controller == null) {
               return;
@@ -399,9 +404,9 @@ class _GenericWindowState extends State<_GenericWindow> {
           }
 
           return View(
-              view: metadata.data!.flView,
+              view: metadata.data!.view,
               child: WindowContext(
-                  viewId: metadata.data!.flView.viewId, child: widget.child));
+                  viewId: metadata.data!.view.viewId, child: widget.child));
         });
   }
 }
@@ -416,9 +421,8 @@ class RegularWindow extends StatelessWidget {
       this.onDestroyed,
       this.onError,
       super.key,
-      required Size preferredSize,
-      required this.child})
-      : _preferredSize = preferredSize;
+      required this.preferredSize,
+      required this.child});
 
   /// Controller for this widget.
   final RegularWindowController? controller;
@@ -429,7 +433,8 @@ class RegularWindow extends StatelessWidget {
   /// Called when an error is encountered during the creation of this widget.
   final void Function(String?)? onError;
 
-  final Size _preferredSize;
+  /// Preferred size of the window.
+  final Size preferredSize;
 
   /// The content rendered into this window.
   final Widget child;
@@ -440,7 +445,7 @@ class RegularWindow extends StatelessWidget {
         onDestroyed: onDestroyed,
         onError: onError,
         key: key,
-        createFuture: () => createRegular(size: _preferredSize),
+        createFuture: () => createRegular(size: preferredSize),
         controller: controller,
         child: child);
   }
@@ -503,10 +508,10 @@ class WindowContext extends InheritedWidget {
   /// [window] the [Window]
   const WindowContext({super.key, required this.viewId, required super.child});
 
-  /// The view ID in this context
+  /// The id of the current window.
   final int viewId;
 
-  /// Returns the [WindowContext] if any
+    /// Returns the [WindowContext] if any
   static WindowContext? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<WindowContext>();
   }
@@ -521,13 +526,13 @@ class WindowContext extends InheritedWidget {
 class WindowCreationResult {
   /// Creates a new window.
   WindowCreationResult(
-      {required this.flView,
+      {required this.view,
       required this.archetype,
       required this.size,
       this.parent});
 
   /// The view associated with the window.
-  final FlutterView flView;
+  final FlutterView view;
 
   /// The archetype of the window.
   final WindowArchetype archetype;
@@ -607,7 +612,7 @@ Future<WindowCreationResult> _createWindow(
   );
 
   return WindowCreationResult(
-      flView: flView,
+      view: flView,
       archetype: archetype,
       size: Size((size[0]! as int).toDouble(), (size[1]! as int).toDouble()),
       parent: parentViewId);

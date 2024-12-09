@@ -5,7 +5,7 @@ import 'window_manager_model.dart';
 import 'window_settings.dart';
 
 class WindowControllerRender extends StatelessWidget {
-  WindowControllerRender(
+  const WindowControllerRender(
       {required this.controller,
       required this.onDestroyed,
       required this.onError,
