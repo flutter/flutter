@@ -6,20 +6,19 @@ import 'window_settings_dialog.dart';
 import 'window_manager_model.dart';
 
 class MainWindow extends StatefulWidget {
-  MainWindow({super.key, required WindowController mainController})
-      : _mainKeyedController =
-            KeyedWindowController(controller: mainController);
+  MainWindow({super.key, required WindowController mainController}) {
+    _windowManagerModel.add(
+        KeyedWindowController(isMainWindow: true, controller: mainController));
+  }
 
-  final KeyedWindowController _mainKeyedController;
+  final WindowManagerModel _windowManagerModel = WindowManagerModel();
+  final WindowSettings _settings = WindowSettings();
 
   @override
   State<MainWindow> createState() => _MainWindowState();
 }
 
 class _MainWindowState extends State<MainWindow> {
-  final WindowManagerModel _windowManagerModel = WindowManagerModel();
-  final WindowSettings _settings = WindowSettings();
-
   @override
   Widget build(BuildContext context) {
     final child = Scaffold(
@@ -34,8 +33,7 @@ class _MainWindowState extends State<MainWindow> {
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: _ActiveWindowsTable(
-                  mainController: widget._mainKeyedController,
-                  windowManagerModel: _windowManagerModel),
+                  windowManagerModel: widget._windowManagerModel),
             ),
           ),
           Expanded(
@@ -44,12 +42,12 @@ class _MainWindowState extends State<MainWindow> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 ListenableBuilder(
-                    listenable: _windowManagerModel,
+                    listenable: widget._windowManagerModel,
                     builder: (BuildContext context, Widget? child) {
                       return _WindowCreatorCard(
-                          selectedWindow: _windowManagerModel.selected,
-                          windowManagerModel: _windowManagerModel,
-                          windowSettings: _settings);
+                          selectedWindow: widget._windowManagerModel.selected,
+                          windowManagerModel: widget._windowManagerModel,
+                          windowSettings: widget._settings);
                     })
               ],
             ),
@@ -60,19 +58,21 @@ class _MainWindowState extends State<MainWindow> {
 
     return ViewAnchor(
         view: ListenableBuilder(
-            listenable: _windowManagerModel,
-            builder: (BuildContext context, Widget? widget) {
+            listenable: widget._windowManagerModel,
+            builder: (BuildContext context, Widget? _) {
               final List<Widget> childViews = <Widget>[];
               for (final KeyedWindowController controller
-                  in _windowManagerModel.windows) {
-                if (controller.parent == null) {
+                  in widget._windowManagerModel.windows) {
+                if (controller.parent == null && !controller.isMainWindow) {
                   childViews.add(WindowControllerRender(
                     controller: controller.controller,
                     key: controller.key,
-                    windowSettings: _settings,
-                    windowManagerModel: _windowManagerModel,
-                    onDestroyed: () => _windowManagerModel.remove(controller),
-                    onError: () => _windowManagerModel.remove(controller),
+                    windowSettings: widget._settings,
+                    windowManagerModel: widget._windowManagerModel,
+                    onDestroyed: () =>
+                        widget._windowManagerModel.remove(controller),
+                    onError: () =>
+                        widget._windowManagerModel.remove(controller),
                   ));
                 }
               }
@@ -84,10 +84,8 @@ class _MainWindowState extends State<MainWindow> {
 }
 
 class _ActiveWindowsTable extends StatelessWidget {
-  const _ActiveWindowsTable(
-      {required this.mainController, required this.windowManagerModel});
+  const _ActiveWindowsTable({required this.windowManagerModel});
 
-  final KeyedWindowController mainController;
   final WindowManagerModel windowManagerModel;
 
   @override
@@ -130,7 +128,7 @@ class _ActiveWindowsTable extends StatelessWidget {
                   ),
                   numeric: true),
             ],
-            rows: ([mainController] + windowManagerModel.windows)
+            rows: (windowManagerModel.windows)
                 .map<DataRow>((KeyedWindowController controller) {
               return DataRow(
                 key: controller.key,
