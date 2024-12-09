@@ -26,7 +26,7 @@ class SafeAreaExampleApp extends StatelessWidget {
     scaffoldBackgroundColor: const Color(0xFFD0FFE8),
     listTileTheme: const ListTileThemeData(
       tileColor: Colors.white70,
-      contentPadding: EdgeInsets.all(6.0),
+      visualDensity: VisualDensity(horizontal: -4, vertical: -4),
     ),
     appBarTheme: AppBarTheme(
       backgroundColor: colors.secondary,
@@ -65,7 +65,7 @@ class SafeAreaExample extends StatelessWidget {
 
   static final Widget controls = Column(
     children: <Widget>[
-      const SizedBox(height: 14),
+      const SizedBox(height: 6),
       Builder(
         builder: (BuildContext context) => Text(
           Toggle.safeArea.of(context) ? 'safe area!' : 'no safe area',
