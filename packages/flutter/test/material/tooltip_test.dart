@@ -3113,7 +3113,7 @@ void main() {
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.basic,
-   );
+    );
 
     final Offset chip = tester.getCenter(find.byType(Tooltip));
     await gesture.moveTo(chip);
