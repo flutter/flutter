@@ -732,6 +732,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       case TargetPlatform.windows:
         break;
     }
+    final ShapeBorder? shape = widget.shape ?? expansionTileTheme.shape;
+    final ShapeBorder? collapsedShape = widget.collapsedShape ?? expansionTileTheme.collapsedShape;
+    final ShapeBorder? lerpShape = ShapeBorder.lerp(shape, collapsedShape, _animationController.value);
 
     final Decoration decoration = ShapeDecoration(
       color: backgroundColor,
@@ -786,7 +789,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       return Material(
         clipBehavior: clipBehavior,
         color: backgroundColor,
-        shape: ShapeBorder.lerp(widget.shape, widget.collapsedShape, _animationController.value),
+        shape: lerpShape,
         child: tile,
       );
     }

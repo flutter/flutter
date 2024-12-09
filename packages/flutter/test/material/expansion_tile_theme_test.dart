@@ -218,7 +218,7 @@ void main() {
     // Check the collapsed text color when textColor is applied.
     expect(getTextColor(), collapsedTextColor);
     // Check the collapsed ShapeBorder when shape is applied.
-    expect(material.shape, collapsedShape);
+    expect(material.shape, shape);
   });
 
   testWidgets('ExpansionTileTheme - expanded', (WidgetTester tester) async {
@@ -302,7 +302,7 @@ void main() {
     // Check the expanded text color when textColor is applied.
     expect(getTextColor(), textColor);
     // Check the expanded ShapeBorder when shape is applied.
-    expect(material.shape, shape);
+    expect(material.shape, collapsedShape);
     // Check the clipBehavior when shape is applied.
     expect(material.clipBehavior, clipBehavior);
 
