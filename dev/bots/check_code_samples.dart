@@ -310,7 +310,6 @@ class SampleChecker {
 // See https://github.com/flutter/flutter/issues/130459
 final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/color_scheme/dynamic_content_color.0_test.dart',
-  'examples/api/test/painting/star_border/star_border.0_test.dart',
   'examples/api/test/widgets/navigator/navigator.restorable_push_and_remove_until.0_test.dart',
   'examples/api/test/widgets/navigator/navigator.restorable_push.0_test.dart',
   'examples/api/test/widgets/navigator/navigator_state.restorable_push_replacement.0_test.dart',
