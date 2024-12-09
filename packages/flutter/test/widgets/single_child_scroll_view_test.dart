@@ -354,6 +354,7 @@ void main() {
             ],
             actions: <SemanticsAction>[
               SemanticsAction.scrollUp,
+              SemanticsAction.scrollToOffset,
             ],
             children: generateSemanticsChildren(endHidden: 3),
           ),
@@ -375,6 +376,7 @@ void main() {
             actions: <SemanticsAction>[
               SemanticsAction.scrollUp,
               SemanticsAction.scrollDown,
+              SemanticsAction.scrollToOffset,
             ],
             children: generateSemanticsChildren(startHidden: 14, endHidden: 18),
           ),
@@ -395,6 +397,7 @@ void main() {
             ],
             actions: <SemanticsAction>[
               SemanticsAction.scrollDown,
+              SemanticsAction.scrollToOffset,
             ],
             children: generateSemanticsChildren(startHidden: 26),
           ),
