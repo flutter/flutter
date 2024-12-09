@@ -353,7 +353,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
 /// Route for displaying an iOS sheet styled page.
 ///
 /// The `CupertinoSheetRoute` will slide up from the bottom of the screen and stop
-/// below the top of the screen. If the previous route is a non-sheet route, than
+/// below the top of the screen. If the previous route is a non-sheet route, then
 /// it will animate downwards to stack behind the new sheet. If the previous route
 /// is a sheet route, then it will animate slightly upwards to look like it is laying
 /// on top of the previous stack of sheets.
@@ -439,7 +439,7 @@ class _CupertinoSheetScope extends InheritedWidget {
   });
 
   static _CupertinoSheetScope? maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_CupertinoSheetScope>();
+    return context.getInheritedWidgetOfExactType<_CupertinoSheetScope>();
   }
 
   @override
