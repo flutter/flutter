@@ -233,9 +233,10 @@ class ValidationMessage {
 
   bool get isInformation => type == ValidationMessageType.information;
 
+  // dart format off
   String get indicator => switch (type) {
-    ValidationMessageType.error => '✗',
-    ValidationMessageType.hint => '!',
+    ValidationMessageType.error       => '✗',
+    ValidationMessageType.hint        => '!',
     ValidationMessageType.information => '•',
   };
 
@@ -246,6 +247,7 @@ class ValidationMessage {
       ValidationMessageType.information => TerminalColor.green,
     });
   }
+  // dart format on
 
   @override
   String toString() => message;

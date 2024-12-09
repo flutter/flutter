@@ -1169,6 +1169,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   double _getThetaForTime(TimeOfDay time) {
+    // dart format off
     final int hoursFactor = switch (widget.hourDialType) {
       _HourDialType.twentyFourHour           => TimeOfDay.hoursPerDay,
       _HourDialType.twentyFourHourDoubleRing => TimeOfDay.hoursPerPeriod,
@@ -1178,6 +1179,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       _HourMinuteMode.hour   => (time.hour / hoursFactor) % hoursFactor,
       _HourMinuteMode.minute => (time.minute / TimeOfDay.minutesPerHour) % TimeOfDay.minutesPerHour,
     };
+    // dart format on
     return (math.pi / 2 - fraction * _kTwoPi) % _kTwoPi;
   }
 

@@ -624,6 +624,7 @@ class _AndroidMotionEventConverter {
       return null;
     }
 
+    // dart format off
     final int? action = switch (event) {
       PointerDownEvent() when numPointers == 1 => AndroidViewController.kActionDown,
       PointerUpEvent()   when numPointers == 1 => AndroidViewController.kActionUp,
@@ -633,6 +634,7 @@ class _AndroidMotionEventConverter {
       PointerCancelEvent() => AndroidViewController.kActionCancel,
       _ => null,
     };
+    // dart format on
     if (action == null) {
       return null;
     }
@@ -661,6 +663,7 @@ class _AndroidMotionEventConverter {
   }
 
   static int sourceFor(PointerEvent event) {
+    // dart format off
     return switch (event.kind) {
       PointerDeviceKind.touch          => AndroidViewController.kInputDeviceSourceTouchScreen,
       PointerDeviceKind.trackpad       => AndroidViewController.kInputDeviceSourceTouchPad,
@@ -669,6 +672,7 @@ class _AndroidMotionEventConverter {
       PointerDeviceKind.invertedStylus => AndroidViewController.kInputDeviceSourceStylus,
       PointerDeviceKind.unknown        => AndroidViewController.kInputDeviceSourceUnknown,
     };
+    // dart format on
   }
 
 

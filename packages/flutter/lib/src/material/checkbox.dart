@@ -513,10 +513,12 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     final VisualDensity effectiveVisualDensity = widget.visualDensity
       ?? checkboxTheme.visualDensity
       ?? defaults.visualDensity!;
+    // dart format off
     Size size = switch (effectiveMaterialTapTargetSize) {
       MaterialTapTargetSize.padded     => const Size(kMinInteractiveDimension,       kMinInteractiveDimension),
       MaterialTapTargetSize.shrinkWrap => const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0),
     };
+    // dart format on
     size += effectiveVisualDensity.baseSizeAdjustment;
 
     final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {

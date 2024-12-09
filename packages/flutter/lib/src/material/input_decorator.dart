@@ -1602,6 +1602,7 @@ class _Decorator extends SlottedMultiChildRenderObjectWidget<_DecorationSlot, Re
 
   @override
   Widget? childForSlot(_DecorationSlot slot) {
+    // dart format off
     return switch (slot) {
       _DecorationSlot.icon        => decoration.icon,
       _DecorationSlot.input       => decoration.input,
@@ -1615,6 +1616,7 @@ class _Decorator extends SlottedMultiChildRenderObjectWidget<_DecorationSlot, Re
       _DecorationSlot.counter     => decoration.counter,
       _DecorationSlot.container   => decoration.container,
     };
+    // dart format on
   }
 
   @override

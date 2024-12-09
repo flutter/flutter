@@ -52,6 +52,7 @@ class _${blockName}DefaultsM3 extends FloatingActionButtonThemeData {
   @override Color? get focusColor => ${componentColor("md.comp.fab.primary.focus.state-layer")};
   @override Color? get hoverColor => ${componentColor("md.comp.fab.primary.hover.state-layer")};
 
+  // dart format off
   @override
   ShapeBorder? get shape => switch (type) {
     _FloatingActionButtonType.regular  => ${shape("md.comp.fab.primary.container")},
@@ -67,6 +68,7 @@ class _${blockName}DefaultsM3 extends FloatingActionButtonThemeData {
     _FloatingActionButtonType.large    => ${getToken("md.comp.fab.primary.large.icon.size")},
     _FloatingActionButtonType.extended => ${getToken("md.comp.extended-fab.primary.icon.size")},
   };
+  // dart format on
 
   @override EdgeInsetsGeometry? get extendedPadding => EdgeInsetsDirectional.only(start: hasChild && _isExtended ? 16.0 : 20.0, end: 20.0);
   @override TextStyle? get extendedTextStyle => ${textStyle("md.comp.extended-fab.primary.label-text")};

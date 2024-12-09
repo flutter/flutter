@@ -47,6 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  // dart format off
   static Widget get _buttonText => switch (defaultTargetPlatform) {
     TargetPlatform.android => const Text('Continue in Android view'),
     TargetPlatform.iOS     => const Text('Continue in iOS view'),
@@ -55,6 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
     TargetPlatform.linux   => const Text('Continue in Linux view'),
     TargetPlatform.fuchsia => throw UnimplementedError('Platform not yet implemented'),
   };
+  // dart format on
 
   Future<void> _launchPlatformCount() async {
     final int? platformCounter =

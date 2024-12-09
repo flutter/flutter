@@ -327,6 +327,7 @@ enum SourceElementType {
 
 /// Converts the enum type [SourceElementType] to a human readable string.
 String sourceElementTypeAsString(SourceElementType type) {
+    // dart format off
   return switch (type) {
     SourceElementType.classType            => 'class',
     SourceElementType.fieldType            => 'field',
@@ -337,6 +338,7 @@ String sourceElementTypeAsString(SourceElementType type) {
     SourceElementType.functionType         => 'function',
     SourceElementType.unknownType          => 'unknown',
   };
+    // dart format on
 }
 
 /// A class that represents a Dart element in a source file.

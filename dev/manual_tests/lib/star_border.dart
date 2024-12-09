@@ -474,6 +474,7 @@ const Color lerpToColor = Colors.red;
 const BorderSide lerpToBorder = BorderSide(width: 5, color: lerpToColor);
 
 ShapeBorder? lerpBorder(StarBorder border, LerpTarget target, double t, {bool to = true}) {
+  // dart format off
   final OutlinedBorder targetBorder = switch (target) {
     LerpTarget.circle      => const CircleBorder(side: lerpToBorder, eccentricity: 0.5),
     LerpTarget.rect        => const RoundedRectangleBorder(side: lerpToBorder),
@@ -482,5 +483,6 @@ ShapeBorder? lerpBorder(StarBorder border, LerpTarget target, double t, {bool to
     LerpTarget.star        => const StarBorder(side: lerpToBorder, innerRadiusRatio: 0.5),
     LerpTarget.roundedRect => RoundedRectangleBorder(side: lerpToBorder, borderRadius: BorderRadius.circular(10)),
   };
+  // dart format on
   return to ? border.lerpTo(targetBorder, t) : border.lerpFrom(targetBorder, t);
 }

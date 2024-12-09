@@ -337,6 +337,7 @@ class _HighlightSpan {
   }
 
   TextStyle? textStyle(SyntaxHighlighterStyle? style) {
+    // dart format off
     return switch (type) {
       _HighlightType.number      => style!.numberStyle,
       _HighlightType.comment     => style!.commentStyle,
@@ -346,5 +347,6 @@ class _HighlightSpan {
       _HighlightType.klass       => style!.classStyle,
       _HighlightType.constant    => style!.constantStyle,
     };
+    // dart format on
   }
 }
