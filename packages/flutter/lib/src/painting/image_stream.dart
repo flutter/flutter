@@ -1095,6 +1095,11 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       );
       return;
     }
+    if (_codec == null) {
+      // codec was disposed during getNextFrame
+      return;
+    }
+
     if (_codec!.frameCount == 1) {
       // ImageStreamCompleter listeners removed while waiting for next frame to
       // be decoded.
@@ -1156,6 +1161,9 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _chunkSubscription?.onData(null);
       _chunkSubscription?.cancel();
       _chunkSubscription = null;
+
+      _codec?.dispose();
+      _codec = null;
     }
   }
 }
