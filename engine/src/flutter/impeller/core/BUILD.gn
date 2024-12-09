@@ -23,6 +23,8 @@ impeller_component("core") {
     "platform.h",
     "range.cc",
     "range.h",
+    "raw_ptr.cc",
+    "raw_ptr.h",
     "resource_binder.cc",
     "resource_binder.h",
     "runtime_types.cc",

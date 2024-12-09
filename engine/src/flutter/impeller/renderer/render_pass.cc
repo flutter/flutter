@@ -81,9 +81,13 @@ const std::shared_ptr<const Context>& RenderPass::GetContext() const {
   return context_;
 }
 
+void RenderPass::SetPipeline(PipelineRef pipeline) {
+  pending_.pipeline = pipeline;
+}
+
 void RenderPass::SetPipeline(
     const std::shared_ptr<Pipeline<PipelineDescriptor>>& pipeline) {
-  pending_.pipeline = pipeline;
+  SetPipeline(PipelineRef(pipeline));
 }
 
 void RenderPass::SetCommandLabel(std::string_view label) {
