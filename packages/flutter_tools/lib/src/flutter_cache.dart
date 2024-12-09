@@ -427,7 +427,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
       final RunResult processResult = await globals.processUtils.run(
         <String>[
           gradleExecutable,
-          '-b', globals.fs.path.join(flutterSdk, 'packages', 'flutter_tools', 'gradle', 'resolve_dependencies.gradle'),
+          '-b', globals.fs.path.join(flutterSdk, 'packages', 'flutter_tools', 'gradle', 'resolve_dependencies.gradle.kts'),
           '--project-cache-dir', tempDir.path,
           'resolveDependencies',
         ],
