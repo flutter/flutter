@@ -696,6 +696,9 @@ class TextSelectionOverlay {
   // corresponds to, in global coordinates.
   late double _endHandleDragTarget;
 
+  // The initial selection when a selection handle drag has started.
+  TextSelection? _dragStartSelection;
+
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
     if (!renderObject.attached) {
       return;
@@ -721,6 +724,7 @@ class TextSelectionOverlay {
         centerOfLineGlobal,
       ),
     );
+    _dragStartSelection ??= _selection;
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -760,6 +764,7 @@ class TextSelectionOverlay {
     if (!renderObject.attached) {
       return;
     }
+    assert(_dragStartSelection != null);
 
     // This is NOT the same as details.localPosition. That is relative to the
     // selection handle, whereas this is relative to the RenderEditable.
@@ -780,7 +785,7 @@ class TextSelectionOverlay {
 
     final TextPosition position = renderObject.getPositionForPoint(handleTargetGlobal);
 
-    if (_selection.isCollapsed) {
+    if (_dragStartSelection!.isCollapsed) {
       _selectionOverlay.updateMagnifier(_buildMagnifier(
         currentTextPosition: position,
         globalGesturePosition: details.globalPosition,
@@ -797,13 +802,15 @@ class TextSelectionOverlay {
       // On Apple platforms, dragging the base handle makes it the extent.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
+        // Use this instead of _dragStartSelection.isNormalized because TextRange.isNormalized
+        // always returns true for a TextSelection.
+        final bool dragStartSelectionNormalized = _dragStartSelection!.extentOffset >= _dragStartSelection!.baseOffset;
         newSelection = TextSelection(
+          baseOffset: dragStartSelectionNormalized
+                      ? _dragStartSelection!.baseOffset
+                      : _dragStartSelection!.extentOffset,
           extentOffset: position.offset,
-          baseOffset: _selection.start,
         );
-        if (position.offset <= _selection.start) {
-          return; // Don't allow order swapping.
-        }
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -859,6 +866,7 @@ class TextSelectionOverlay {
         centerOfLineGlobal,
       ),
     );
+    _dragStartSelection ??= _selection;
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -873,6 +881,7 @@ class TextSelectionOverlay {
     if (!renderObject.attached) {
       return;
     }
+    assert(_dragStartSelection != null);
 
     // This is NOT the same as details.localPosition. That is relative to the
     // selection handle, whereas this is relative to the RenderEditable.
@@ -890,7 +899,7 @@ class TextSelectionOverlay {
     );
     final TextPosition position = renderObject.getPositionForPoint(handleTargetGlobal);
 
-    if (_selection.isCollapsed) {
+    if (_dragStartSelection!.isCollapsed) {
       _selectionOverlay.updateMagnifier(_buildMagnifier(
         currentTextPosition: position,
         globalGesturePosition: details.globalPosition,
@@ -907,13 +916,15 @@ class TextSelectionOverlay {
       // On Apple platforms, dragging the base handle makes it the extent.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
+        // Use this instead of _dragStartSelection.isNormalized because TextRange.isNormalized
+        // always returns true for a TextSelection.
+        final bool dragStartSelectionNormalized = _dragStartSelection!.extentOffset >= _dragStartSelection!.baseOffset;
         newSelection = TextSelection(
+          baseOffset: dragStartSelectionNormalized
+                      ? _dragStartSelection!.extentOffset
+                      : _dragStartSelection!.baseOffset,
           extentOffset: position.offset,
-          baseOffset: _selection.end,
         );
-        if (newSelection.extentOffset >= _selection.end) {
-          return; // Don't allow order swapping.
-        }
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -940,6 +951,7 @@ class TextSelectionOverlay {
     if (!context.mounted) {
       return;
     }
+    _dragStartSelection = null;
     if (selectionControls is! TextSelectionHandleControls) {
       _selectionOverlay.hideMagnifier();
       if (!_selection.isCollapsed) {
@@ -1603,7 +1615,10 @@ class SelectionOverlay {
   Widget _buildStartHandle(BuildContext context) {
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
-    if (selectionControls == null) {
+    if (selectionControls == null
+        || (_startHandleType == TextSelectionHandleType.collapsed && _isDraggingEndHandle)) {
+      // Hide the start handle when dragging the end handle and collapsing
+      // the selection.
       handle = const SizedBox.shrink();
     } else {
       handle = _SelectionHandleOverlay(
@@ -1629,8 +1644,11 @@ class SelectionOverlay {
   Widget _buildEndHandle(BuildContext context) {
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
-    if (selectionControls == null || _startHandleType == TextSelectionHandleType.collapsed) {
-      // Hide the second handle when collapsed.
+    if (selectionControls == null
+        || (_endHandleType == TextSelectionHandleType.collapsed && _isDraggingStartHandle)
+        || (_endHandleType == TextSelectionHandleType.collapsed && !_isDraggingStartHandle && !_isDraggingEndHandle)) {
+      // Hide the end handle when dragging the start handle and collapsing the selection
+      // or when the selection is collapsed and no handle is being dragged.
       handle = const SizedBox.shrink();
     } else {
       handle = _SelectionHandleOverlay(
