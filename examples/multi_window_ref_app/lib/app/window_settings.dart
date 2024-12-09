@@ -14,7 +14,7 @@ class ValueNotifier<T> extends ChangeNotifier {
 class WindowSettings {
   WindowSettings(
       {Size regularSize = const Size(400, 300),
-      Size popupSize = const Size(200, 200),
+      Size popupSize = const Size(200, 300),
       Rect anchorRect = const Rect.fromLTWH(0, 0, 1000, 1000),
       bool anchorToWindow = false})
       : _regularSize = ValueNotifier(value: regularSize),

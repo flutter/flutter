@@ -5,16 +5,22 @@
 import 'dart:ui' show FlutterView;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-/// Defines the type of the Window
+/// Defines the type of the Window.
 enum WindowArchetype {
-  /// Defines a traditional window
+  /// Regular top-level window.
   regular,
-
-  /// Defines a popup window
-  popup
+  /// A window that is on a layer above regular windows and is not dockable.
+  floating_regular,
+  /// Dialog window.
+  dialog,
+  /// Satellite window attached to a regular, floating_regular or dialog window.
+  satellite,
+  /// Popup.
+  popup,
+  /// Tooltip.
+  tip
 }
 
 /// Defines the anchor point for the anchor rectangle or child [Window] when
@@ -331,33 +337,32 @@ class _GenericWindowState extends State<_GenericWindow> {
         widget.controller!.size = metadata.size;
       }
 
-      SchedulerBinding.instance.addPostFrameCallback((_) async {
-        final _WindowingAppContext? windowingAppContext =
-            _WindowingAppContext.of(context);
-        assert(windowingAppContext != null);
-        _listener = _WindowListener(
-            viewId: metadata.flView.viewId,
-            onChanged: (_WindowChangeProperties properties) {
-              if (widget.controller == null) {
-                return;
-              }
+      final _WindowingAppContext? windowingAppContext =
+          _WindowingAppContext.of(context);
+      assert(windowingAppContext != null);
+      _listener = _WindowListener(
+          viewId: metadata.flView.viewId,
+          onChanged: (_WindowChangeProperties properties) {
+            if (widget.controller == null) {
+              return;
+            }
 
-              if (properties.size != null) {
-                widget.controller!.size = properties.size;
-              }
+            if (properties.size != null) {
+              widget.controller!.size = properties.size;
+            }
 
-              if (properties.parentViewId != null) {
-                widget.controller!.parentViewId = properties.parentViewId;
-              }
-            },
-            onDestroyed: () {
-              widget.onDestroyed?.call();
-              _hasBeenDestroyed = true;
-            });
-        _app = windowingAppContext!.windowingApp;
-        _app!._registerListener(_listener!);
-      });
+            if (properties.parentViewId != null) {
+              widget.controller!.parentViewId = properties.parentViewId;
+            }
+          },
+          onDestroyed: () {
+            widget.onDestroyed?.call();
+            _hasBeenDestroyed = true;
+          });
+      _app = windowingAppContext!.windowingApp;
+      _app!._registerListener(_listener!);
     }).catchError((Object? error) {
+      print(error.toString());
       widget.onError?.call(error.toString());
     });
   }
