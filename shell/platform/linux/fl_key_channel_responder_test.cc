@@ -57,8 +57,11 @@ TEST(FlKeyChannelResponderTest, SendKeyEvent) {
   g_autoptr(FlKeyEvent) event1 = fl_key_event_new(
       12345, TRUE, 0x04, GDK_KEY_A, static_cast<GdkModifierType>(0), 0);
   fl_key_channel_responder_handle_event(
-      responder, event1, 0,
-      [](bool handled, gpointer user_data) {
+      responder, event1, 0, nullptr,
+      [](GObject* object, GAsyncResult* result, gpointer user_data) {
+        gboolean handled;
+        EXPECT_TRUE(fl_key_channel_responder_handle_event_finish(
+            FL_KEY_CHANNEL_RESPONDER(object), result, &handled, nullptr));
         EXPECT_FALSE(handled);
         g_main_loop_quit(static_cast<GMainLoop*>(user_data));
       },
@@ -73,8 +76,11 @@ TEST(FlKeyChannelResponderTest, SendKeyEvent) {
   g_autoptr(FlKeyEvent) event2 = fl_key_event_new(
       23456, FALSE, 0x04, GDK_KEY_A, static_cast<GdkModifierType>(0), 0);
   fl_key_channel_responder_handle_event(
-      responder, event2, 0,
-      [](bool handled, gpointer user_data) {
+      responder, event2, 0, nullptr,
+      [](GObject* object, GAsyncResult* result, gpointer user_data) {
+        gboolean handled;
+        EXPECT_TRUE(fl_key_channel_responder_handle_event_finish(
+            FL_KEY_CHANNEL_RESPONDER(object), result, &handled, nullptr));
         EXPECT_FALSE(handled);
         g_main_loop_quit(static_cast<GMainLoop*>(user_data));
       },
@@ -97,8 +103,11 @@ void test_lock_event(guint key_code,
   g_autoptr(FlKeyEvent) event1 = fl_key_event_new(
       12345, TRUE, 0x04, key_code, static_cast<GdkModifierType>(0), 0);
   fl_key_channel_responder_handle_event(
-      responder, event1, 0,
-      [](bool handled, gpointer user_data) {
+      responder, event1, 0, nullptr,
+      [](GObject* object, GAsyncResult* result, gpointer user_data) {
+        gboolean handled;
+        EXPECT_TRUE(fl_key_channel_responder_handle_event_finish(
+            FL_KEY_CHANNEL_RESPONDER(object), result, &handled, nullptr));
         EXPECT_FALSE(handled);
         g_main_loop_quit(static_cast<GMainLoop*>(user_data));
       },
@@ -109,8 +118,11 @@ void test_lock_event(guint key_code,
   g_autoptr(FlKeyEvent) event2 = fl_key_event_new(
       12346, FALSE, 0x04, key_code, static_cast<GdkModifierType>(0), 0);
   fl_key_channel_responder_handle_event(
-      responder, event2, 0,
-      [](bool handled, gpointer user_data) {
+      responder, event2, 0, nullptr,
+      [](GObject* object, GAsyncResult* result, gpointer user_data) {
+        gboolean handled;
+        EXPECT_TRUE(fl_key_channel_responder_handle_event_finish(
+            FL_KEY_CHANNEL_RESPONDER(object), result, &handled, nullptr));
         EXPECT_FALSE(handled);
         g_main_loop_quit(static_cast<GMainLoop*>(user_data));
       },
@@ -162,8 +174,11 @@ TEST(FlKeyChannelResponderTest, TestKeyEventHandledByFramework) {
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       12345, TRUE, 0x04, GDK_KEY_A, static_cast<GdkModifierType>(0), 0);
   fl_key_channel_responder_handle_event(
-      responder, event, 0,
-      [](bool handled, gpointer user_data) {
+      responder, event, 0, nullptr,
+      [](GObject* object, GAsyncResult* result, gpointer user_data) {
+        gboolean handled;
+        EXPECT_TRUE(fl_key_channel_responder_handle_event_finish(
+            FL_KEY_CHANNEL_RESPONDER(object), result, &handled, nullptr));
         EXPECT_TRUE(handled);
         g_main_loop_quit(static_cast<GMainLoop*>(user_data));
       },
@@ -189,8 +204,11 @@ TEST(FlKeyChannelResponderTest, UseSpecifiedLogicalKey) {
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       12345, TRUE, 0x04, GDK_KEY_A, static_cast<GdkModifierType>(0), 0);
   fl_key_channel_responder_handle_event(
-      responder, event, 888,
-      [](bool handled, gpointer user_data) {
+      responder, event, 888, nullptr,
+      [](GObject* object, GAsyncResult* result, gpointer user_data) {
+        gboolean handled;
+        EXPECT_TRUE(fl_key_channel_responder_handle_event_finish(
+            FL_KEY_CHANNEL_RESPONDER(object), result, &handled, nullptr));
         EXPECT_TRUE(handled);
         g_main_loop_quit(static_cast<GMainLoop*>(user_data));
       },

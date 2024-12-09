@@ -9,71 +9,6 @@
 
 #include "flutter/shell/platform/linux/fl_key_event_channel.h"
 
-/* Declare and define FlKeyChannelUserData */
-
-/**
- * FlKeyChannelUserData:
- * The user_data used when #FlKeyChannelResponder sends message through the
- * channel.
- */
-G_DECLARE_FINAL_TYPE(FlKeyChannelUserData,
-                     fl_key_channel_user_data,
-                     FL,
-                     KEY_CHANNEL_USER_DATA,
-                     GObject);
-
-struct _FlKeyChannelUserData {
-  GObject parent_instance;
-
-  // The current responder.
-  GWeakRef responder;
-  // The callback provided by the caller #FlKeyboardHandler.
-  FlKeyChannelResponderAsyncCallback callback;
-  // The user_data provided by the caller #FlKeyboardHandler.
-  gpointer user_data;
-};
-
-// Definition for FlKeyChannelUserData private class.
-G_DEFINE_TYPE(FlKeyChannelUserData, fl_key_channel_user_data, G_TYPE_OBJECT)
-
-// Dispose method for FlKeyChannelUserData private class.
-static void fl_key_channel_user_data_dispose(GObject* object) {
-  g_return_if_fail(FL_IS_KEY_CHANNEL_USER_DATA(object));
-  FlKeyChannelUserData* self = FL_KEY_CHANNEL_USER_DATA(object);
-
-  g_weak_ref_clear(&self->responder);
-
-  G_OBJECT_CLASS(fl_key_channel_user_data_parent_class)->dispose(object);
-}
-
-// Class initialization method for FlKeyChannelUserData private class.
-static void fl_key_channel_user_data_class_init(
-    FlKeyChannelUserDataClass* klass) {
-  G_OBJECT_CLASS(klass)->dispose = fl_key_channel_user_data_dispose;
-}
-
-// Instance initialization method for FlKeyChannelUserData private class.
-static void fl_key_channel_user_data_init(FlKeyChannelUserData* self) {}
-
-// Creates a new FlKeyChannelUserData private class with all information.
-//
-// The callback and the user_data might be nullptr.
-static FlKeyChannelUserData* fl_key_channel_user_data_new(
-    FlKeyChannelResponder* responder,
-    FlKeyChannelResponderAsyncCallback callback,
-    gpointer user_data) {
-  FlKeyChannelUserData* self = FL_KEY_CHANNEL_USER_DATA(
-      g_object_new(fl_key_channel_user_data_get_type(), nullptr));
-
-  g_weak_ref_init(&self->responder, responder);
-  self->callback = callback;
-  self->user_data = user_data;
-  return self;
-}
-
-/* Define FlKeyChannelResponder */
-
-// Definition of the FlKeyChannelResponder GObject class.
 struct _FlKeyChannelResponder {
   GObject parent_instance;
 
@@ -87,20 +22,17 @@ G_DEFINE_TYPE(FlKeyChannelResponder, fl_key_channel_responder, G_TYPE_OBJECT)
 static void handle_response(GObject* object,
                             GAsyncResult* result,
                             gpointer user_data) {
-  g_autoptr(FlKeyChannelUserData) data = FL_KEY_CHANNEL_USER_DATA(user_data);
-
-  g_autoptr(FlKeyChannelResponder) self =
-      FL_KEY_CHANNEL_RESPONDER(g_weak_ref_get(&data->responder));
-  if (self == nullptr) {
-    return;
-  }
+  g_autoptr(GTask) task = G_TASK(user_data);
 
   gboolean handled = FALSE;
   g_autoptr(GError) error = nullptr;
   if (!fl_key_event_channel_send_finish(object, result, &handled, &error)) {
     g_warning("Unable to retrieve framework response: %s", error->message);
   }
-  data->callback(handled, data->user_data);
+
+  gboolean* return_value = g_new0(gboolean, 1);
+  *return_value = handled;
+  g_task_return_pointer(task, return_value, g_free);
 }
 
 // Disposes of an FlKeyChannelResponder instance.
@@ -136,12 +68,12 @@ FlKeyChannelResponder* fl_key_channel_responder_new(
   return self;
 }
 
-void fl_key_channel_responder_handle_event(
-    FlKeyChannelResponder* self,
-    FlKeyEvent* event,
-    uint64_t specified_logical_key,
-    FlKeyChannelResponderAsyncCallback callback,
-    gpointer user_data) {
+void fl_key_channel_responder_handle_event(FlKeyChannelResponder* self,
+                                           FlKeyEvent* event,
+                                           uint64_t specified_logical_key,
+                                           GCancellable* cancellable,
+                                           GAsyncReadyCallback callback,
+                                           gpointer user_data) {
   g_return_if_fail(event != nullptr);
   g_return_if_fail(callback != nullptr);
 
@@ -198,10 +130,25 @@ void fl_key_channel_responder_handle_event(
   state |= (shift_lock_pressed || caps_lock_pressed) ? GDK_LOCK_MASK : 0x0;
   state |= num_lock_pressed ? GDK_MOD2_MASK : 0x0;
 
-  FlKeyChannelUserData* data =
-      fl_key_channel_user_data_new(self, callback, user_data);
-  fl_key_event_channel_send(self->channel, type, scan_code,
-                            fl_key_event_get_keyval(event), state,
-                            unicode_scalar_values, specified_logical_key,
-                            nullptr, handle_response, data);
+  fl_key_event_channel_send(
+      self->channel, type, scan_code, fl_key_event_get_keyval(event), state,
+      unicode_scalar_values, specified_logical_key, nullptr, handle_response,
+      g_task_new(self, cancellable, callback, user_data));
+}
+
+gboolean fl_key_channel_responder_handle_event_finish(
+    FlKeyChannelResponder* self,
+    GAsyncResult* result,
+    gboolean* handled,
+    GError** error) {
+  g_return_val_if_fail(g_task_is_valid(result, self), FALSE);
+
+  g_autofree gboolean* return_value =
+      static_cast<gboolean*>(g_task_propagate_pointer(G_TASK(result), error));
+  if (return_value == nullptr) {
+    return FALSE;
+  }
+
+  *handled = *return_value;
+  return TRUE;
 }
