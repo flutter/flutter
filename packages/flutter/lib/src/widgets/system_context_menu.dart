@@ -111,29 +111,6 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
   bool isFirstBuild = true;
   late final SystemContextMenuController _systemContextMenuController;
 
-  /// Convert the given items to the format required to be sent over
-  /// [MethodChannel.invokeMethod].
-  static List<Map<String, dynamic>> _itemsToJson(List<SystemContextMenuItem> items, WidgetsLocalizations localizations) {
-    // TODO(justinmc): I could cache the result for each item. Is that overoptimization or is the localization lookup expensive enough for it to matter?
-    return items
-        .map<Map<String, dynamic>>((SystemContextMenuItem item) => _itemToJson(item, localizations))
-        .toList();
-  }
-
-  /// Convet the given single item to the format required to be sent over
-  /// [MethodChannel.invokeMethod].
-  static Map<String, dynamic> _itemToJson(SystemContextMenuItem item, WidgetsLocalizations localizations) {
-      return <String, dynamic>{
-      'type': item.type.name,
-      'action': item.action.name,
-      // TODO(justinmc): I guess Flutter should always pass a title for the default actions. Encode that into the backend or no?
-      // TODO(justinmc): But the engine ignores the title for cut/copy/paste/selectall. See:
-      // https://github.com/flutter/engine/pull/56362#issuecomment-2512589800
-      'title': item.title ?? _getTitleForAction(item.action, localizations),
-      'callbackId': item.hashCode, // TODO(justinmc): Effective?
-    };
-  }
-
   // Returns the localized title string for the given SystemContextMenuAction.
   static String _getTitleForAction(SystemContextMenuAction action, WidgetsLocalizations localizations) {
     return switch (action) {

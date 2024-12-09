@@ -2579,7 +2579,6 @@ class SystemContextMenuController with SystemContextMenuClient {
           'height': targetRect.height,
         },
         if (items != null)
-          // TODO(justinmc): Yeah it seems like the json stuff should be here, right? Or maybe SystemContextMenuItemData will be moved here.
           'items': SystemContextMenuItemData.itemsToJson(items),
       },
     );
@@ -2627,125 +2626,87 @@ class SystemContextMenuController with SystemContextMenuClient {
   }
 }
 
-/*
-/// Represents a single menu item in a system context menu.
-class SystemContextMenuItem {
-  /// Creates an instance of [SystemContextMenuItem].
-  SystemContextMenuItem({
-    required this.action,
-    required this.type,
-    this.onPressed,
-    this.title,
-  }) : assert(_actionsRequiringTitle.contains(action));
-
-  /// The set of [SystemContextMenuAction]s that require a title to be passed to
-  /// [SystemContextMenuItem].
-  ///
-  /// All other [SystemContextMenuAction]s require that no title be given.
-  static const Set<SystemContextMenuAction> _actionsRequiringTitle= <SystemContextMenuAction>{
-    SystemContextMenuAction.lookUp,
-    SystemContextMenuAction.searchWeb,
-    SystemContextMenuAction.share,
-  };
-
-  /// The action to take when this menu item is invoked.
-  final SystemContextMenuAction action;
-
-  /// The text to display to the user.
-  final String? title;
-
-  /// The type of this menu item.
-  final SystemContextMenuItemType type;
-
-  final VoidCallback? onPressed;
-}
-
-class SystemContextMenuItemWithTitle {
-  /// Creates an instance of [SystemContextMenuItemWithTitle].
-  const SystemContextMenuItemWithTitle({
-    required this.action,
-    required this.type,
-    this.onPressed,
-    this.title,
-  });
-
-  /// The action to take when this menu item is invoked.
-  final SystemContextMenuAction action;
-
-  /// The text to display to the user.
-  final String? title;
-
-  /// The type of this menu item.
-  final SystemContextMenuItemType type;
-
-  final VoidCallback? onPressed;
-}
-*/
-
+/// Describes a context menu button that will be rendered in the system context
+/// menu and not by Flutter itself.
+///
+/// See also:
+///
+///  * [ContextMenuButtonItem], which performs a similar role for Flutter-drawn
+///    context menus.
 class SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItem] for the
   /// system's built-in cut button.
+  ///
+  /// Should only appear when there is a selection that can be cut.
   SystemContextMenuItem.cut(
   ) : action = SystemContextMenuAction.cut,
-      type = SystemContextMenuItemType.builtIn,
       onPressed = null,
       title = null;
 
   /// Creates an instance of [SystemContextMenuItem] for the
   /// system's built-in copy button.
+  ///
+  /// Should only appear when there is a selection that can be copied.
   SystemContextMenuItem.copy(
   ) : action = SystemContextMenuAction.copy,
-      type = SystemContextMenuItemType.builtIn,
       onPressed = null,
       title = null;
 
   /// Creates an instance of [SystemContextMenuItem] for the
   /// system's built-in paste button.
+  ///
+  /// Should only appear when the field can receive pasted content.
   SystemContextMenuItem.paste(
   ) : action = SystemContextMenuAction.paste,
-      type = SystemContextMenuItemType.builtIn,
       onPressed = null,
       title = null;
 
   /// Creates an instance of [SystemContextMenuItem] for the
   /// system's built-in select all button.
+  ///
+  /// Should only appear when the field can have its selection changed.
   SystemContextMenuItem.selectAll(
   ) : action = SystemContextMenuAction.selectAll,
-      type = SystemContextMenuItemType.builtIn,
       onPressed = null,
       title = null;
 
   /// Creates an instance of [SystemContextMenuItem] for the
   /// system's built-in search web button.
+  ///
+  /// Should only appear when content is selected.
   SystemContextMenuItem.searchWeb({
     this.title,
   }) : action = SystemContextMenuAction.searchWeb,
-       type = SystemContextMenuItemType.builtIn,
        onPressed = null;
 
   /// Creates an instance of [SystemContextMenuItem] for the
   /// system's built-in look up button.
   ///
   /// Looks up the current selection in a dictionary.
+  ///
+  /// Should only appear when content is selected.
   SystemContextMenuItem.lookUp({
     this.title,
   }) : action = SystemContextMenuAction.lookUp,
-       onPressed = null,
-       type = SystemContextMenuItemType.builtIn;
+       onPressed = null;
 
+  /// Creates an instance of [SystemContextMenuItem] for the
+  /// system's built-in share button.
+  ///
+  /// Opens the system share dialog.
+  ///
+  /// Should only appear when shareable content is selected.
   SystemContextMenuItem.share({
     this.title,
   }) : action = SystemContextMenuAction.share,
-       onPressed = null,
-       type = SystemContextMenuItemType.builtIn;
+       onPressed = null;
 
+  /// Creates an instance of [SystemContextMenuItem] for a custom button whose
+  /// [title] and [onPressed] callback are as specified.
   SystemContextMenuItem.custom({
-    required this.onPressed,
-    required this.title,
-  }) : action = SystemContextMenuAction.custom,
-       type = SystemContextMenuItemType.custom,
-       assert(onPressed != null),
-       assert(title != null);
+    required VoidCallback this.onPressed,
+    required String this.title,
+  }) : action = SystemContextMenuAction.custom;
 
   // TODO(justinmc): Make private.
   /// The action to take when this menu item is invoked.
@@ -2754,10 +2715,7 @@ class SystemContextMenuItem {
   /// The text to display to the user.
   final String? title;
 
-  // TODO(justinmc): This should be inferred.
-  /// The type of this menu item.
-  final SystemContextMenuItemType type;
-
+  /// The callback to be called when the menu item is pressed.
   final VoidCallback? onPressed;
 }
 
@@ -2768,7 +2726,6 @@ class SystemContextMenuItemData {
   /// system's built-in cut button.
   const SystemContextMenuItemData.cut(
   ) : action = SystemContextMenuAction.cut,
-      type = SystemContextMenuItemType.builtIn,
       onPressed = null,
       title = null;
 
@@ -2776,7 +2733,6 @@ class SystemContextMenuItemData {
   /// built-in copy button.
   const SystemContextMenuItemData.copy(
   ) : action = SystemContextMenuAction.copy,
-      type = SystemContextMenuItemType.builtIn,
       onPressed = null,
       title = null;
 
@@ -2784,7 +2740,6 @@ class SystemContextMenuItemData {
   /// built-in paste button.
   const SystemContextMenuItemData.paste(
   ) : action = SystemContextMenuAction.paste,
-      type = SystemContextMenuItemType.builtIn,
       onPressed = null,
       title = null;
 
@@ -2792,7 +2747,6 @@ class SystemContextMenuItemData {
   /// built-in select all button.
   const SystemContextMenuItemData.selectAll(
   ) : action = SystemContextMenuAction.selectAll,
-      type = SystemContextMenuItemType.builtIn,
       onPressed = null,
       title = null;
 
@@ -2801,8 +2755,8 @@ class SystemContextMenuItemData {
   const SystemContextMenuItemData.searchWeb({
     required String title,
   }) : action = SystemContextMenuAction.searchWeb,
-       type = SystemContextMenuItemType.builtIn,
        onPressed = null,
+       // TODO(justinmc): Fix all these warnings by doing required String this.title.
        title = title;
 
   /// Creates an instance of [SystemContextMenuItemData] for the system's
@@ -2813,17 +2767,14 @@ class SystemContextMenuItemData {
     required String title,
   }) : action = SystemContextMenuAction.lookUp,
        onPressed = null,
-       type = SystemContextMenuItemType.builtIn,
        title = title;
 
   /// Creates an instance of [SystemContextMenuItemData] for the system's
   /// built-in share up button.
   const SystemContextMenuItemData.share({
-    required String title,
+    required String this.title,
   }) : action = SystemContextMenuAction.share,
-       onPressed = null,
-       type = SystemContextMenuItemType.builtIn,
-       title = title;
+       onPressed = null;
 
   /// Creates an instance of [SystemContextMenuItemData] for the a user-defined
   /// button.
@@ -2832,16 +2783,12 @@ class SystemContextMenuItemData {
     required String title,
   }) : action = SystemContextMenuAction.custom,
        onPressed = onPressed,
-       type = SystemContextMenuItemType.builtIn,
        title = title;
 
   final SystemContextMenuAction action;
 
   /// The text to display to the user.
   final String? title;
-
-  /// The type of this menu item.
-  final SystemContextMenuItemType type;
 
   final VoidCallback? onPressed;
 
@@ -2862,7 +2809,7 @@ class SystemContextMenuItemData {
       'callbackId': hashCode, // TODO(justinmc): Effective?
       if (title != null)
         'title': title,
-      'type': type.name,
+      'type': action == SystemContextMenuAction.custom ? 'custom' : 'builtIn',
     };
   }
 }
@@ -2884,29 +2831,9 @@ enum SystemContextMenuAction {
 }
 */
 
-// TODO(justinmc): Name conflicts with ContextMenuButtonItemType.
-/// The type of a [SystemContextMenuItem].
-///
-/// See also:
-///
-///  * [SystemContextMenuAction], which specifies the action to take when a menu
-///    item is invoked.
-enum SystemContextMenuItemType {
-  /// Indicates an item that is built-in to the platform.
-  ///
-  /// See also:
-  ///
-  ///  * [SystemContextMenuAction], which contains all of the supported built-in
-  ///    items.
-  builtIn,
-
-  // TODO(justinmc): Support the "custom" type.
-  // https://github.com/flutter/flutter/issues/103163
-  custom,
-}
-
 // TODO(justinmc): Reconcile with ContextMenuButtonType.
-/// The supported actions that are built-in to the platform.
+// TODO(justinmc): Still should be called action, or type is better?
+/// The actions supported by the items in a system context menu.
 ///
 /// See also:
 ///
@@ -2935,6 +2862,8 @@ enum SystemContextMenuAction {
   /// Opens the share dialog with the current selection.
   share,
 
+  // TODO(justinmc): Support the "custom" type.
+  // https://github.com/flutter/flutter/issues/103163
   // A user-defined action.
   custom,
 }
