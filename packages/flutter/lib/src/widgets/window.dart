@@ -80,9 +80,8 @@ class RegularWindow extends StatefulWidget {
       this.onDestroyed,
       this.onError,
       super.key,
-      required Size preferredSize,
-      required this.child})
-      : _preferredSize = preferredSize;
+      required this.preferredSize,
+      required this.child});
 
   /// Controller for this widget.
   final RegularWindowController? controller;
@@ -93,7 +92,8 @@ class RegularWindow extends StatefulWidget {
   /// Called when an error is encountered during the creation of this widget.
   final void Function(String?)? onError;
 
-  final Size _preferredSize;
+  /// Preferred size of the window.
+  final Size preferredSize;
 
   /// The content rendered into this window.
   final Widget child;
@@ -113,15 +113,15 @@ class _RegularWindowState extends State<RegularWindow> {
   void initState() {
     super.initState();
     final Future<WindowCreationResult> createRegularFuture =
-        createRegular(size: widget._preferredSize);
+        createRegular(size: widget.preferredSize);
     setState(() {
       _future = createRegularFuture;
     });
 
     createRegularFuture.then((WindowCreationResult metadata) async {
-      _viewId = metadata.flView.viewId;
+      _viewId = metadata.view.viewId;
       if (widget.controller != null) {
-        widget.controller!.view = metadata.flView;
+        widget.controller!.view = metadata.view;
         widget.controller!.parentViewId = metadata.parent;
         widget.controller!.size = metadata.size;
       }
@@ -131,7 +131,7 @@ class _RegularWindowState extends State<RegularWindow> {
             _WindowingAppContext.of(context);
         assert(windowingAppContext != null);
         _listener = _WindowListener(
-            viewId: metadata.flView.viewId,
+            viewId: metadata.view.viewId,
             onChanged: (_WindowChangeProperties properties) {
               if (widget.controller == null) {
                 return;
@@ -165,7 +165,7 @@ class _RegularWindowState extends State<RegularWindow> {
     }
 
     // In the event that we're being disposed before we've been destroyed
-    // we need to destroy ther window on our way out.
+    // we need to destroy the window on our way out.
     if (!_hasBeenDestroyed && _viewId != null) {
       // In the event of an argument error, we do nothing. We assume that
       // the window has been successfully destroyed somehow else. 
@@ -189,9 +189,9 @@ class _RegularWindowState extends State<RegularWindow> {
           }
 
           return View(
-              view: metadata.data!.flView,
+              view: metadata.data!.view,
               child: WindowContext(
-                  viewId: metadata.data!.flView.viewId, child: widget.child));
+                  viewId: metadata.data!.view.viewId, child: widget.child));
         });
   }
 }
@@ -219,13 +219,13 @@ class WindowContext extends InheritedWidget {
 class WindowCreationResult {
   /// Creates a new window.
   WindowCreationResult(
-      {required this.flView,
+      {required this.view,
       required this.archetype,
       required this.size,
       this.parent});
 
   /// The view associated with the window.
-  final FlutterView flView;
+  final FlutterView view;
 
   /// The archetype of the window.
   final WindowArchetype archetype;
@@ -271,7 +271,7 @@ Future<WindowCreationResult> _createWindow(
   );
 
   return WindowCreationResult(
-      flView: flView,
+      view: flView,
       archetype: archetype,
       size: Size((size[0]! as int).toDouble(), (size[1]! as int).toDouble()),
       parent: parentViewId);

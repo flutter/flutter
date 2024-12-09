@@ -137,7 +137,7 @@ class _ActiveWindowsTable extends StatelessWidget {
                     return Theme.of(context)
                         .colorScheme
                         .primary
-                        .withOpacity(0.08);
+                        .withAlpha(20);
                   }
                   return Colors.transparent;
                 }),
@@ -185,7 +185,7 @@ class _ActiveWindowsTable extends StatelessWidget {
 }
 
 class _WindowCreatorCard extends StatelessWidget {
-  _WindowCreatorCard(
+  const _WindowCreatorCard(
       {required this.selectedWindow,
       required this.windowManagerModel,
       required this.windowSettings});
