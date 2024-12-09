@@ -4,20 +4,19 @@ import 'window_manager_model.dart';
 import 'window_settings.dart';
 
 class WindowControllerRender extends StatelessWidget {
-  WindowControllerRender(
+  const WindowControllerRender(
       {required this.controller,
       required this.onDestroyed,
       required this.onError,
       required this.windowSettings,
       required this.windowManagerModel,
-      required this.key});
+      required super.key});
 
   final WindowController controller;
   final VoidCallback onDestroyed;
   final VoidCallback onError;
   final WindowSettings windowSettings;
   final WindowManagerModel windowManagerModel;
-  final Key key;
 
   @override
   Widget build(BuildContext context) {
