@@ -964,24 +964,11 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   // something like a ModalRoute.of() dependency triggers an update.
   Widget? _page;
 
-  // This is the combination of the two animations for the route.
-  late Listenable _listenable;
-
   /// The node this scope will use for its root [FocusScope] widget.
   final FocusScopeNode focusScopeNode = FocusScopeNode(
     debugLabel: '$_ModalScopeState Focus Scope',
   );
   final ScrollController primaryScrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    final List<Listenable> animations = <Listenable>[
-      if (widget.route.animation != null) widget.route.animation!,
-      if (widget.route.secondaryAnimation != null) widget.route.secondaryAnimation!,
-    ];
-    _listenable = Listenable.merge(animations);
-  }
 
   @override
   void didUpdateWidget(_ModalScope<T> oldWidget) {
@@ -1075,13 +1062,10 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     child: FocusScope.withExternalFocusNode(
                       focusScopeNode: focusScopeNode, // immutable
                       child: RepaintBoundary(
-                        child: ListenableBuilder(
-                          listenable: _listenable, // immutable
-                          builder: (BuildContext context, Widget? child) {
-                            return widget.route._buildFlexibleTransitions(
+                        child: widget.route._buildFlexibleTransitions(
                               context,
-                              widget.route.animation!,
-                              widget.route.secondaryAnimation!,
+                              widget.route.animation,
+                              widget.route.secondaryAnimation,
                               // This additional ListenableBuilder is include because if the
                               // value of the userGestureInProgressNotifier changes, it's
                               // only necessary to rebuild the IgnorePointer widget and set
@@ -1096,23 +1080,20 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                                     child: child,
                                   );
                                 },
-                                child: child,
+                                child: _page ??= RepaintBoundary(
+                                  key: widget.route._subtreeKey, // immutable
+                                  child: Builder(
+                                    builder: (BuildContext context) {
+                                      return widget.route.buildPage(
+                                        context,
+                                        widget.route.animation,
+                                        widget.route.secondaryAnimation,
+                                      );
+                                    },
+                                  ),
+                                ),
                               ),
-                            );
-                          },
-                          child: _page ??= RepaintBoundary(
-                            key: widget.route._subtreeKey, // immutable
-                            child: Builder(
-                              builder: (BuildContext context) {
-                                return widget.route.buildPage(
-                                  context,
-                                  widget.route.animation!,
-                                  widget.route.secondaryAnimation!,
-                                );
-                              },
                             ),
-                          ),
-                        ),
                       ),
                     ),
                   ),
