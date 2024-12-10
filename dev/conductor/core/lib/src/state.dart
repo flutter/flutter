@@ -187,11 +187,12 @@ String phaseInstructions(pb.ConductorState state) {
         repoName: 'engine',
         state: state,
       );
+      final String consoleLink = luciConsoleLink(state.engine.candidateBranch, 'engine');
       return <String>[
         'Your working branch ${state.engine.workingBranch} was pushed to your mirror.',
         'You must now open a pull request at $newPrLink, verify pre-submit CI',
         'builds on your engine pull request are successful, merge your pull request,',
-        'validate post-submit CI, and then codesign the binaries on the merge commit.',
+        'validate post-submit CI at $consoleLink.',
       ].join('\n');
     case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
       final List<pb.Cherrypick> outstandingCherrypicks =
