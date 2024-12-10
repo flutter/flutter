@@ -45,19 +45,6 @@ void main() {
     final Directory exampleAppDir =
         tempDir.childDirectory(testName).childDirectory('example');
 
-    final File buildGradleFile = exampleAppDir.childDirectory('android').childFile('build.gradle.kts');
-    expect(buildGradleFile, exists);
-
-    final String buildGradle = buildGradleFile.readAsStringSync();
-    final RegExp androidPluginRegExp =
-        RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
-
-    // Use AGP 7.2.0
-    final String newBuildGradle = buildGradle.replaceAll(
-        androidPluginRegExp, 'com.android.tools.build:gradle:7.2.0');
-    buildGradleFile.writeAsStringSync(newBuildGradle);
-
-    // Run flutter build apk using AGP 7.2.0
     result = processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
