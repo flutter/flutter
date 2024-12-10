@@ -2958,7 +2958,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     if (!isRepaintBoundary && _wasRepaintBoundary) {
       _needsPaint = false;
       _needsCompositedLayerUpdate = false;
-      owner?._nodesNeedingPaint.remove(this);
+      owner?._nodesNeedingPaint.removeWhere((RenderObject t) => identical(t, this));
       _needsCompositingBitsUpdate = false;
       markNeedsPaint();
     } else if (oldNeedsCompositing != _needsCompositing) {
