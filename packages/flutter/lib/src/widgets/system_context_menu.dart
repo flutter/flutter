@@ -162,6 +162,7 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
         widget.items?.map((SystemContextMenuItem item) => _itemToData(item, localizations));
       _systemContextMenuController.show(
         widget.anchor,
+        // TODO(justinmc): Don't show irrelevant items, like don't show "search" if there is no selection.
         datas?.toList(),
       );
     }

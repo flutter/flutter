@@ -2649,13 +2649,11 @@ sealed class SystemContextMenuItemData {
   /// pressed.
   VoidCallback? get onPressed;
 
-  // TODO(justinmc): I could put this inside of the json conversion, to minimize
-  // the chance of invalid strings getting in here? Or actually I should make
-  // this a private enum!
   // Corresponds to the "type" field from the method channel method
   // "ContextMenu.showSystemContextMenu".
-  String get _type;
+  _SystemContextMenuItemType get _type;
 
+  // TODO(justinmc): Should this json stuff be here or on SystemContextMenuController?
   /// Returns json for use in the method channel method
   /// `ContextMenu.showSystemContextMenu`.
   static List<Map<String, dynamic>> _itemsToJson(List<SystemContextMenuItemData> items) {
@@ -2671,7 +2669,7 @@ sealed class SystemContextMenuItemData {
       'callbackId': hashCode, // TODO(justinmc): Effective?
       if (title != null)
         'title': title,
-      'type': _type,
+      'type': _type.name,
     };
   }
 }
@@ -2680,7 +2678,7 @@ class SystemContextMenuItemDataCopy extends SystemContextMenuItemData {
   const SystemContextMenuItemDataCopy();
 
   @override
-  String get _type => 'copy';
+  _SystemContextMenuItemType get _type => _SystemContextMenuItemType.copy;
 
   @override
   VoidCallback? get onPressed => null;
@@ -2693,7 +2691,7 @@ class SystemContextMenuItemDataCut extends SystemContextMenuItemData {
   const SystemContextMenuItemDataCut();
 
   @override
-  String get _type => 'cut';
+  _SystemContextMenuItemType get _type => _SystemContextMenuItemType.cut;
 
   @override
   VoidCallback? get onPressed => null;
@@ -2706,7 +2704,7 @@ class SystemContextMenuItemDataPaste extends SystemContextMenuItemData {
   const SystemContextMenuItemDataPaste();
 
   @override
-  String get _type => 'paste';
+  _SystemContextMenuItemType get _type => _SystemContextMenuItemType.paste;
 
   @override
   VoidCallback? get onPressed => null;
@@ -2719,7 +2717,7 @@ class SystemContextMenuItemDataSelectAll extends SystemContextMenuItemData {
   const SystemContextMenuItemDataSelectAll();
 
   @override
-  String get _type => 'selectAll';
+  _SystemContextMenuItemType get _type => _SystemContextMenuItemType.selectAll;
 
   @override
   VoidCallback? get onPressed => null;
@@ -2734,7 +2732,7 @@ class SystemContextMenuItemDataLookUp extends SystemContextMenuItemData {
   });
 
   @override
-  String get _type => 'lookUp';
+  _SystemContextMenuItemType get _type => _SystemContextMenuItemType.lookUp;
 
   @override
   VoidCallback? get onPressed => null;
@@ -2749,7 +2747,7 @@ class SystemContextMenuItemDataSearchWeb extends SystemContextMenuItemData {
   });
 
   @override
-  String get _type => 'searchWeb';
+  _SystemContextMenuItemType get _type => _SystemContextMenuItemType.searchWeb;
 
   @override
   VoidCallback? get onPressed => null;
@@ -2764,7 +2762,7 @@ class SystemContextMenuItemDataShare extends SystemContextMenuItemData {
   });
 
   @override
-  String get _type => 'share';
+  _SystemContextMenuItemType get _type => _SystemContextMenuItemType.share;
 
   @override
   VoidCallback? get onPressed => null;
@@ -2780,13 +2778,26 @@ class SystemContextMenuItemDataCustom extends SystemContextMenuItemData {
   });
 
   @override
-  String get _type => 'custom';
+  _SystemContextMenuItemType get _type => _SystemContextMenuItemType.custom;
 
   @override
   final String title;
 
   @override
   final VoidCallback onPressed;
+}
+
+/// All of the values that are accepted in the 'type' field of the method
+/// channel method 'ContextMenu.showSystemContextMenu'.
+enum _SystemContextMenuItemType {
+  copy,
+  cut,
+  paste,
+  selectAll,
+  lookUp,
+  searchWeb,
+  share,
+  custom,
 }
 
 // TODO(justinmc): The bad thing about tons of constructors is...
