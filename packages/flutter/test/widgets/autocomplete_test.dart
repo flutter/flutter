@@ -1074,7 +1074,7 @@ void main() {
     expect(find.byKey(optionsKey), findsNothing);
     expect(find.text('aardvark'), findsNothing);
 
-    // Enter text to show the options.
+    // Tap to show the options.
     await tester.tap(find.byKey(fieldKey));
     await tester.pump();
     expect(find.byKey(fieldKey), findsOneWidget);

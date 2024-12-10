@@ -514,9 +514,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
         child: LayoutBuilder(
           key: _fieldKey,
           builder: (BuildContext context, BoxConstraints constraints) {
-            // A post frame callback is used to get the field constraints so
-            // that the options view overlay is rebuilt when the field
-            // constraints change.
+            // The options view is not in the same subtree as the field view, so
+            // when the field constraints change, the options view isn't rebuilt
+            // in the same frame.
             SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
               if (!mounted) {
                 return;
@@ -623,10 +623,10 @@ class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
       showWhenUnlinked: false,
       child: CustomSingleChildLayout(
         delegate: _RawAutocompleteOptionsLayoutDelegate(
-          fieldSize: widget.optionsLayerLink.leaderSize,
+          fieldSize: widget.optionsLayerLink.leaderSize!,
           fieldOffset: fieldOffset,
           optionsViewOpenDirection: widget.optionsViewOpenDirection,
-          textDirection: Directionality.maybeOf(context),
+          textDirection: Directionality.of(context),
         ),
         child: TextFieldTapRegion(
           child: AutocompleteHighlightedOption(
@@ -649,11 +649,11 @@ class _RawAutocompleteOptionsLayoutDelegate extends SingleChildLayoutDelegate {
     required this.fieldSize,
     required this.fieldOffset,
     required this.optionsViewOpenDirection,
-    required TextDirection? textDirection,
-  }) : textDirection = textDirection ?? TextDirection.ltr;
+    required this.textDirection,
+  });
 
   /// The size of the field in [RawAutocomplete.fieldViewBuilder].
-  final Size? fieldSize;
+  final Size fieldSize;
 
   /// The position of the field in [RawAutocomplete.fieldViewBuilder].
   final Offset fieldOffset;
@@ -680,11 +680,11 @@ class _RawAutocompleteOptionsLayoutDelegate extends SingleChildLayoutDelegate {
     return BoxConstraints(
       // The field width may be zero if this is a split RawAutocomplete with no
       // field of its own. In that case, don't change the constraints width.
-      maxWidth: fieldSize!.width == 0.0 ? constraints.maxWidth : fieldSize!.width,
+      maxWidth: fieldSize.width == 0.0 ? constraints.maxWidth : fieldSize.width,
       maxHeight: max(
         _kMinUsableHeight,
         switch (optionsViewOpenDirection) {
-          OptionsViewOpenDirection.down => constraints.maxHeight - fieldOffset.dy - fieldSize!.height,
+          OptionsViewOpenDirection.down => constraints.maxHeight - fieldOffset.dy - fieldSize.height,
           OptionsViewOpenDirection.up => fieldOffset.dy,
         },
       ),
@@ -697,11 +697,11 @@ class _RawAutocompleteOptionsLayoutDelegate extends SingleChildLayoutDelegate {
   Offset getPositionForChild(Size size, Size childSize) {
     final double dx = switch (textDirection) {
       TextDirection.ltr => 0.0,
-      TextDirection.rtl => fieldSize!.width - childSize.width,
+      TextDirection.rtl => fieldSize.width - childSize.width,
     };
     final double dy = switch (optionsViewOpenDirection) {
       OptionsViewOpenDirection.down => min(
-        fieldSize!.height,
+        fieldSize.height,
         size.height - childSize.height - fieldOffset.dy,
       ),
       OptionsViewOpenDirection.up => size.height - min(childSize.height, fieldOffset.dy),
@@ -711,7 +711,7 @@ class _RawAutocompleteOptionsLayoutDelegate extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_RawAutocompleteOptionsLayoutDelegate oldDelegate) {
-    if (!fieldOffset.isFinite || fieldSize == null || !fieldSize!.isFinite) {
+    if (!fieldOffset.isFinite || !fieldSize.isFinite) {
       return false;
     }
     return fieldSize != oldDelegate.fieldSize
