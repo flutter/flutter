@@ -30,7 +30,6 @@
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/geometry/size.h"
-#include "impeller/renderer/command.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/pipeline_builder.h"
 #include "impeller/renderer/pipeline_descriptor.h"
