@@ -270,13 +270,21 @@ https://docs.flutter.dev/testing/integration-tests
 
   @override
   Future<void> pump([Duration? duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate]) async {
-    print('>>> pump()');
     if (duration != null) {
       await delayed(duration);
     }
-    print('>>> pump() :: scheduleFrame()');
+    assert(
+      hasScheduledFrame || framesEnabled,
+      'The returned future for pump() will never complete because frames are not enabled, '
+      'either because the application is in the background, or an initial widget was never '
+      'bound to the root as a result of runApp() or similar.\n'
+      '\n'
+      'In a previous iteration of package:integration_test, IntegrationTestWidgetsFlutterBinding '
+      'would pump frames even if an application was not started, so if you are seeing this '
+      'message in a test that used to pass, ensure that a root widget is attached and that the '
+      'app is not in the background.',
+    );
     scheduleFrame();
-    print('>>> pump():: await endOfFrame()');
     await endOfFrame;
   }
 
