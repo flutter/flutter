@@ -590,4 +590,9 @@ abstract final class SystemChannels {
   static const MethodChannel keyboard = OptionalMethodChannel(
     'flutter/keyboard',
   );
+
+  /// A [MethodChannel] for interacting with the windowing system.
+  static const MethodChannel windowing = OptionalMethodChannel(
+    'flutter/windowing'
+  );
 }
