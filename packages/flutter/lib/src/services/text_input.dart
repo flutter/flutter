@@ -2670,23 +2670,24 @@ sealed class SystemContextMenuItemData {
   }
 }
 
-class SystemContextMenuItemDataCopy extends SystemContextMenuItemData {
-  const SystemContextMenuItemDataCopy();
-}
+/// A [SystemContextMenuButtonItemData] for the system's built-in copy button.
+class SystemContextMenuItemDataCopy extends SystemContextMenuItemData {}
 
-class SystemContextMenuItemDataCut extends SystemContextMenuItemData {
-  const SystemContextMenuItemDataCut();
-}
+/// A [SystemContextMenuButtonItemData] for the system's built-in cut button.
+class SystemContextMenuItemDataCut extends SystemContextMenuItemData {}
 
-class SystemContextMenuItemDataPaste extends SystemContextMenuItemData {
-  const SystemContextMenuItemDataPaste();
-}
+/// A [SystemContextMenuButtonItemData] for the system's built-in paste button.
+class SystemContextMenuItemDataPaste extends SystemContextMenuItemData {}
 
-class SystemContextMenuItemDataSelectAll extends SystemContextMenuItemData {
-  const SystemContextMenuItemDataSelectAll();
-}
+/// A [SystemContextMenuButtonItemData] for the system's built-in select all
+/// button.
+class SystemContextMenuItemDataSelectAll extends SystemContextMenuItemData {}
 
+/// A [SystemContextMenuButtonItemData] for the system's built-in look up
+/// button.
 class SystemContextMenuItemDataLookUp extends SystemContextMenuItemData {
+  /// Creates an instance of [SystemContextMenuItemDataLookUp] with the given
+  /// [title].
   const SystemContextMenuItemDataLookUp({
     required this.title,
   });
@@ -2695,7 +2696,11 @@ class SystemContextMenuItemDataLookUp extends SystemContextMenuItemData {
   final String title;
 }
 
+/// A [SystemContextMenuButtonItemData] for the system's built-in search web
+/// button.
 class SystemContextMenuItemDataSearchWeb extends SystemContextMenuItemData {
+  /// Creates an instance of [SystemContextMenuItemDataSearchWeb] with the given
+  /// [title].
   const SystemContextMenuItemDataSearchWeb({
     required this.title,
   });
@@ -2704,7 +2709,10 @@ class SystemContextMenuItemDataSearchWeb extends SystemContextMenuItemData {
   final String title;
 }
 
+/// A [SystemContextMenuButtonItemData] for the system's built-in share button.
 class SystemContextMenuItemDataShare extends SystemContextMenuItemData {
+  /// Creates an instance of [SystemContextMenuItemDataShare] with the given
+  /// [title].
   const SystemContextMenuItemDataShare({
     required this.title,
   });
@@ -2713,7 +2721,11 @@ class SystemContextMenuItemDataShare extends SystemContextMenuItemData {
   final String title;
 }
 
+/// A [SystemContextMenuButtonItemData] for a custom button whose title and
+/// callback are defined by the app developer.
 class SystemContextMenuItemDataCustom extends SystemContextMenuItemData {
+  /// Creates an instance of [SystemContextMenuItemDataCustom] with the given
+  /// [title] and [onPressed] callback.
   const SystemContextMenuItemDataCustom({
     required this.onPressed,
     required this.title,
