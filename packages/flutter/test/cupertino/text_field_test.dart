@@ -503,7 +503,7 @@ void main() {
     );
   });
 
-  testWidgets('Activates the text field when receives semantics focus on Mac, Windows', (WidgetTester tester) async {
+  testWidgets('Activates the text field when receives semantics focus on desktops', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final FocusNode focusNode = FocusNode();
@@ -538,6 +538,7 @@ void main() {
                           SemanticsAction.tap,
                           SemanticsAction.focus,
                           SemanticsAction.didGainAccessibilityFocus,
+                          SemanticsAction.didLoseAccessibilityFocus,
                         ],
                         textDirection: TextDirection.ltr,
                       ),
@@ -557,8 +558,11 @@ void main() {
     semanticsOwner.performAction(4, SemanticsAction.didGainAccessibilityFocus);
     await tester.pumpAndSettle();
     expect(focusNode.hasFocus, isTrue);
+    semanticsOwner.performAction(4, SemanticsAction.didLoseAccessibilityFocus);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isFalse);
     semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows }));
+  }, variant: TargetPlatformVariant.desktop());
 
   testWidgets(
     'takes available space horizontally and takes intrinsic space vertically no-strut',
@@ -10458,8 +10462,13 @@ void main() {
                         actions: <SemanticsAction>[
                           SemanticsAction.tap,
                           SemanticsAction.focus,
-                          if (defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.macOS)
-                            SemanticsAction.didGainAccessibilityFocus,
+                          if (defaultTargetPlatform == TargetPlatform.linux
+                              || defaultTargetPlatform == TargetPlatform.windows
+                              || defaultTargetPlatform == TargetPlatform.macOS)
+                            ...<SemanticsAction>[
+                              SemanticsAction.didGainAccessibilityFocus,
+                              SemanticsAction.didLoseAccessibilityFocus,
+                            ],
                           // TODO(gspencergoog): also test for the presence of SemanticsAction.focus when
                           // this iOS issue is addressed: https://github.com/flutter/flutter/issues/150030
                         ],
@@ -10515,8 +10524,13 @@ void main() {
                           SemanticsFlag.isReadOnly,
                         ],
                         actions: <SemanticsAction>[
-                          if (defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.macOS)
-                            SemanticsAction.didGainAccessibilityFocus,
+                          if (defaultTargetPlatform == TargetPlatform.linux
+                              || defaultTargetPlatform == TargetPlatform.windows
+                              || defaultTargetPlatform == TargetPlatform.macOS)
+                            ...<SemanticsAction>[
+                              SemanticsAction.didGainAccessibilityFocus,
+                              SemanticsAction.didLoseAccessibilityFocus,
+                            ],
                         ],
                       ),
                     ],
