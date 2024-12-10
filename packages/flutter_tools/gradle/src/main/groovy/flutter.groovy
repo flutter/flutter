@@ -1303,7 +1303,7 @@ class FlutterPlugin implements Plugin<Project> {
                 validateDeferredComponents(validateDeferredComponentsValue)
                 flavor(flavorValue)
             }
-            Task compileTask = compileTaskProvider.get();
+            Task compileTask = compileTaskProvider.get()
             File libJar = project.file(project.layout.buildDirectory.dir("$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar"))
             TaskProvider<Jar> packJniLibsTaskProvider = project.tasks.register("packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", Jar) {
                 destinationDirectory = libJar.parentFile
@@ -1330,7 +1330,7 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
-            Task packJniLibsTask = packJniLibsTaskProvider.get();
+            Task packJniLibsTask = packJniLibsTaskProvider.get()
             addApiDependencies(project, variant.name, project.files {
                 packJniLibsTask
             })
