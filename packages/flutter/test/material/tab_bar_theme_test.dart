@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'tabs_test.dart' show boilerplate;
 import 'tabs_utils.dart';
 
 const String _tab1Text = 'tab 1';
@@ -1790,5 +1791,54 @@ void main() {
     rect = const Rect.fromLTRB(115.0, 0.0, 165.0, 48.0);
     targetRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
     expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
+  });
+  
+  testWidgets('splashBorderRadius is passed to InkWell.borderRadius', (WidgetTester tester) async {
+    const Color hoverColor = Color(0xfff44336);
+    const double radius = 20;
+    await tester.pumpWidget(
+      boilerplate(
+        child: DefaultTabController(
+          length: 1,
+          child: TabBarTheme(
+            data: TabBarThemeData(
+               splashBorderRadius: BorderRadius.circular(radius),
+            ),
+            child: TabBar(
+              overlayColor: MaterialStateProperty.resolveWith<Color>(
+                (Set<MaterialState> states) {
+                  if (states.contains(MaterialState.hovered)) {
+                    return hoverColor;
+                  }
+                  return Colors.black54;
+                },
+              ),
+
+              tabs: const <Widget>[
+                Tab(
+                  child: Text(''),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.moveTo(tester.getCenter(find.byType(Tab)));
+    await tester.pumpAndSettle();
+    final RenderObject object = tester.allRenderObjects.firstWhere((RenderObject element) => element.runtimeType.toString() == '_RenderInkFeatures');
+    expect(
+      object,
+      paints..rrect(
+        color: hoverColor,
+        rrect: RRect.fromRectAndRadius(
+          tester.getRect(find.byType(InkWell)),
+          const Radius.circular(radius)
+        ),
+      ),
+    );
+    gesture.removePointer();
   });
 }
