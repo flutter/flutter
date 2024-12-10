@@ -836,8 +836,8 @@ class IconButton extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(StringProperty('tooltip', tooltip, defaultValue: null, quoted: false));
     properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    properties.add(ObjectFlagProperty<ValueChanged<bool>>('onHover', onHover));
-    properties.add(ObjectFlagProperty<VoidCallback>('onLongPress', onLongPress));
+    properties.add(ObjectFlagProperty<ValueChanged<bool>>('onHover', onHover, ifNull: 'disabled'));
+    properties.add(ObjectFlagProperty<VoidCallback>('onLongPress', onLongPress, ifNull: 'disabled'));
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
