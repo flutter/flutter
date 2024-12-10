@@ -96,8 +96,9 @@ class SensitiveContentSetting {
     contentSensitivityStateForView.removeWidgetWithContentSensitivity(widgetSensitivityLevel);
 
     if (contentSensitivityStateForView.getTotalNumberOfWidgets() == 0) {
+      print('CAMILLE: RETURNING TO DEFAULT SENSITIVITY MODE');
       // There is no more content to mark sensitive. Reset to the default mode (autoSensitive).
-      _sensitiveContentService.setContentSensitivity(viewId, ContentSensitivity.autoSensitive);
+      _sensitiveContentService.setContentSensitivity(viewId, ContentSensitivity.notSensitive);
       return;
     }
 
@@ -193,11 +194,13 @@ class _SensitiveContentState extends State<SensitiveContent> {
   @override
   void initState() {
     super.initState();
+    print('CAMILLE: SENSITIVE CONTENT WIDGET INIT!');
     SensitiveContentSetting.register(widget.viewId, widget.sensitivityLevel);
   }
 
   @override
   void dispose() {
+    print('CAMILLE: SENSITIVE CONTENT WIDGET DISPOSED!');
     SensitiveContentSetting.unregister(widget.viewId, widget.sensitivityLevel);
     super.dispose();
   }
