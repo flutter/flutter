@@ -1243,7 +1243,7 @@ class FlutterPlugin implements Plugin<Project> {
             addTasksForOutputsAppLinkSettings(project)
         }
         List<String> targetPlatforms = getTargetPlatforms()
-        def addFlutterDeps = {ApplicationVariantImpl variant ->
+        def addFlutterDeps = { variant ->
             if (shouldSplitPerAbi()) {
                 variant.outputs.each { output ->
                     // Assigns the new version code to versionCodeOverride, which changes the version code
@@ -1407,7 +1407,7 @@ class FlutterPlugin implements Plugin<Project> {
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
         if (isFlutterAppProject()) {
-            project.android.applicationVariants.all { ApplicationVariantImpl variant ->
+            project.android.applicationVariants.all { variant ->
                 Task assembleTask = getAssembleTask(variant)
                 if (!shouldConfigureFlutterTask(assembleTask)) {
                     return
