@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
-import 'package:process/process.dart';
 import 'package:process_runner/process_runner.dart';
 
 Future<int> main(List<String> arguments) async {
@@ -29,17 +28,12 @@ Future<int> main(List<String> arguments) async {
   }
 
   final File script = File.fromUri(Platform.script).absolute;
-  final Directory flutterRoot = script.parent.parent.parent;
+  final Directory flutterRoot = script.parent.parent.parent.parent;
 
-  const ProcessManager processManager = LocalProcessManager();
-  final String baseGitRef = await _getDiffBaseRevision(processManager, flutterRoot);
-
-  final bool result = (await _checkDartFormat(
-      flutterRoot: flutterRoot,
-      fixing: options['fix'] as bool,
-      allFiles: options['all-files'] as bool,
-      baseGitRef: baseGitRef,
-    )) == 0;
+  final bool result = (await DartFormatChecker(
+    flutterRoot: flutterRoot,
+    allFiles: options['all-files'] as bool,
+  ).check(fix: options['fix'] as bool)) == 0;
 
   exit(result ? 0 : 1);
 }
@@ -50,46 +44,180 @@ void _usage(ArgParser parser, {int exitCode = 1}) {
   exit(exitCode);
 }
 
-Future<String> _getDiffBaseRevision(ProcessManager processManager, Directory repoDir) async {
-  final ProcessRunner processRunner = ProcessRunner(
-    defaultWorkingDirectory: repoDir,
-    processManager: processManager,
+class DartFormatChecker {
+  DartFormatChecker({
+    required this.flutterRoot,
+    required this.allFiles,
+  }) : processRunner = ProcessRunner(
+    defaultWorkingDirectory: flutterRoot,
   );
-  String upstream = 'upstream';
-  final String upstreamUrl = await _runGit(
-    <String>['remote', 'get-url', upstream],
-    processRunner,
-    failOk: true,
-  );
-  if (upstreamUrl.isEmpty) {
-    upstream = 'origin';
-  }
-  await _runGit(<String>['fetch', upstream, 'main'], processRunner);
-  String result = '';
-  try {
-    // This is the preferred command to use, but developer checkouts often do
-    // not have a clear fork point, so we fall back to just the regular
-    // merge-base in that case.
-    result = await _runGit(
-      <String>['merge-base', '--fork-point', 'FETCH_HEAD', 'HEAD'],
-      processRunner,
-    );
-  } on ProcessRunnerException {
-    result = await _runGit(<String>['merge-base', 'FETCH_HEAD', 'HEAD'], processRunner);
-  }
-  return result.trim();
-}
 
-Future<String> _runGit(
-    List<String> args,
-    ProcessRunner processRunner, {
-      bool failOk = false,
-    }) async {
-  final ProcessRunnerResult result = await processRunner.runProcess(
-    <String>['git', ...args],
-    failOk: failOk,
-  );
-  return result.stdout;
+  final Directory flutterRoot;
+  final bool allFiles;
+  final ProcessRunner processRunner;
+
+  Future<int> check({required bool fix}) async {
+    final String baseGitRef = await _getDiffBaseRevision();
+    final List<String> filesToCheck = await _getFileList(
+      types: <String>['*.dart'],
+      allFiles: allFiles,
+      baseGitRef: baseGitRef,
+    );
+    return _checkFormat(
+      filesToCheck: filesToCheck,
+      fix: fix,
+    );
+  }
+
+  Future<String> _getDiffBaseRevision() async {
+    String upstream = 'upstream';
+    final String upstreamUrl = await _runGit(
+      <String>['remote', 'get-url', upstream],
+      processRunner,
+      failOk: true,
+    );
+    if (upstreamUrl.isEmpty) {
+      upstream = 'origin';
+    }
+    await _runGit(<String>['fetch', upstream, 'main'], processRunner);
+    String result = '';
+    try {
+      // This is the preferred command to use, but developer checkouts often do
+      // not have a clear fork point, so we fall back to just the regular
+      // merge-base in that case.
+      result = await _runGit(
+        <String>['merge-base', '--fork-point', 'FETCH_HEAD', 'HEAD'],
+        processRunner,
+      );
+    } on ProcessRunnerException {
+      result = await _runGit(<String>['merge-base', 'FETCH_HEAD', 'HEAD'], processRunner);
+    }
+    return result.trim();
+  }
+
+  Future<String> _runGit(
+      List<String> args,
+      ProcessRunner processRunner, {
+        bool failOk = false,
+      }) async {
+    final ProcessRunnerResult result = await processRunner.runProcess(
+      <String>['git', ...args],
+      failOk: failOk,
+    );
+    return result.stdout;
+  }
+
+  Future<List<String>> _getFileList({
+    required List<String> types,
+    required bool allFiles,
+    required String baseGitRef,
+  }) async {
+    String output;
+    if (allFiles) {
+      output = await _runGit(<String>[
+        'ls-files',
+        '--',
+        ...types,
+      ], processRunner);
+    } else {
+      output = await _runGit(<String>[
+        'diff',
+        '-U0',
+        '--no-color',
+        '--diff-filter=d',
+        '--name-only',
+        baseGitRef,
+        '--',
+        ...types,
+      ], processRunner);
+    }
+    return output.split('\n').where((String line) => line.isNotEmpty).toList();
+  }
+
+  Future<int> _checkFormat({
+    required List<String> filesToCheck,
+    required bool fix,
+  }) async {
+    final List<String> cmd = <String>[
+      path.join(flutterRoot.path, 'bin', 'dart'),
+      'format',
+      '--set-exit-if-changed',
+      '--show=none',
+      if (!fix) '--output=show',
+      if (fix) '--output=write',
+    ];
+    final List<WorkerJob> jobs = <WorkerJob>[];
+    for (final String file in filesToCheck) {
+      jobs.add(WorkerJob(<String>[...cmd, file]));
+    }
+    print(jobs);
+    final ProcessPool dartFmt = ProcessPool(
+      processRunner: processRunner,
+      printReport: _namedReport('dart format'),
+    );
+
+    Iterable<WorkerJob> incorrect;
+    if (!fix) {
+      final Stream<WorkerJob> completedJobs = dartFmt.startWorkers(jobs);
+      final List<WorkerJob> diffJobs = <WorkerJob>[];
+      await for (final WorkerJob completedJob in completedJobs) {
+        if (completedJob.result.exitCode == 1) {
+          diffJobs.add(
+            WorkerJob(
+              <String>[
+                'git',
+                'diff',
+                '--no-index',
+                '--no-color',
+                '--ignore-cr-at-eol',
+                '--',
+                completedJob.command.last,
+                '-',
+              ],
+              stdinRaw: _codeUnitsAsStream(completedJob.result.stdoutRaw),
+            ),
+          );
+        }
+      }
+      final ProcessPool diffPool = ProcessPool(
+        processRunner: processRunner,
+        printReport: _namedReport('diff'),
+      );
+      final List<WorkerJob> completedDiffs = await diffPool.runToCompletion(diffJobs);
+      incorrect = completedDiffs.where((WorkerJob job) => job.result.exitCode != 0);
+    } else {
+      final List<WorkerJob> completedJobs = await dartFmt.runToCompletion(jobs);
+      incorrect = completedJobs.where((WorkerJob job) => job.result.exitCode == 1);
+    }
+
+    _clearOutput();
+
+    if (incorrect.isNotEmpty) {
+      final bool plural = incorrect.length > 1;
+      if (fix) {
+        stdout.writeln('Fixing ${incorrect.length} dart file${plural ? 's' : ''}'
+            ' which ${plural ? 'were' : 'was'} formatted incorrectly.');
+      } else {
+        stderr.writeln('Found ${incorrect.length} Dart file${plural ? 's' : ''}'
+            ' which ${plural ? 'were' : 'was'} formatted incorrectly.');
+        stdout.writeln('To fix, run `./dev/tools/format` or:');
+        stdout.writeln();
+        stdout.writeln('git apply <<DONE');
+        for (final WorkerJob job in incorrect) {
+          stdout.write(job.result.stdout
+              .replaceFirst('b/-', 'b/${job.command[job.command.length - 2]}')
+              .replaceFirst('b/-', 'b/${job.command[job.command.length - 2]}')
+              .replaceFirst(RegExp('\\+Formatted \\d+ files? \\(\\d+ changed\\) in \\d+.\\d+ seconds.\n'), '')
+          );
+        }
+        stdout.writeln('DONE');
+        stdout.writeln();
+      }
+    } else {
+      stdout.writeln('All dart files formatted correctly.');
+    }
+    return incorrect.length;
+  }
 }
 
 ProcessPoolProgressReporter _namedReport(String name) {
@@ -110,129 +238,8 @@ ProcessPoolProgressReporter _namedReport(String name) {
   };
 }
 
-Future<int> _checkDartFormat({
-  required Directory flutterRoot,
-  required bool fixing,
-  required bool allFiles,
-  required String baseGitRef,
-}) async {
-  final ProcessRunner processRunner = ProcessRunner(
-    defaultWorkingDirectory: flutterRoot,
-  );
-
-  final List<String> filesToCheck = await _getFileList(
-    types: <String>['*.dart'],
-    allFiles: allFiles,
-    baseGitRef: baseGitRef,
-    processRunner: processRunner,
-  );
-
-  final List<String> cmd = <String>[
-    path.join(flutterRoot.path, 'bin', 'dart'),
-    'format',
-    '--set-exit-if-changed',
-    '--show=none',
-    if (!fixing) '--output=show',
-    if (fixing) '--output=write',
-  ];
-  final List<WorkerJob> jobs = <WorkerJob>[];
-  for (final String file in filesToCheck) {
-    jobs.add(WorkerJob(<String>[...cmd, file]));
-  }
-  final ProcessPool dartFmt = ProcessPool(
-    processRunner: processRunner,
-    printReport: _namedReport('dart format'),
-  );
-
-  Iterable<WorkerJob> incorrect;
-  if (!fixing) {
-    final Stream<WorkerJob> completedJobs = dartFmt.startWorkers(jobs);
-    final List<WorkerJob> diffJobs = <WorkerJob>[];
-    await for (final WorkerJob completedJob in completedJobs) {
-      if (completedJob.result.exitCode == 1) {
-        diffJobs.add(
-          WorkerJob(
-            <String>[
-              'git',
-              'diff',
-              '--no-index',
-              '--no-color',
-              '--ignore-cr-at-eol',
-              '--',
-              completedJob.command.last,
-              '-',
-            ],
-            stdinRaw: _codeUnitsAsStream(completedJob.result.stdoutRaw),
-          ),
-        );
-      }
-    }
-    final ProcessPool diffPool = ProcessPool(
-      processRunner: processRunner,
-      printReport: _namedReport('diff'),
-    );
-    final List<WorkerJob> completedDiffs = await diffPool.runToCompletion(diffJobs);
-    incorrect = completedDiffs.where((WorkerJob job) {
-      return job.result.exitCode != 0;
-    });
-  } else {
-    final List<WorkerJob> completedJobs = await dartFmt.runToCompletion(jobs);
-    incorrect = completedJobs.where((WorkerJob job) => job.result.exitCode == 1);
-  }
-
-  if (incorrect.isNotEmpty) {
-    final bool plural = incorrect.length > 1;
-    if (fixing) {
-      stdout.writeln('Fixing ${incorrect.length} dart file${plural ? 's' : ''}'
-          ' which ${plural ? 'were' : 'was'} formatted incorrectly.');
-    } else {
-      stderr.writeln('Found ${incorrect.length} Dart file${plural ? 's' : ''}'
-          ' which ${plural ? 'were' : 'was'} formatted incorrectly.');
-      stdout.writeln('To fix, run `et format` or:');
-      stdout.writeln();
-      stdout.writeln('git apply <<DONE');
-      for (final WorkerJob job in incorrect) {
-        stdout.write(job.result.stdout
-            .replaceFirst('b/-', 'b/${job.command[job.command.length - 2]}')
-            .replaceFirst('b/-', 'b/${job.command[job.command.length - 2]}')
-            .replaceFirst(RegExp('\\+Formatted \\d+ files? \\(\\d+ changed\\) in \\d+.\\d+ seconds.\n'), '')
-        );
-      }
-      stdout.writeln('DONE');
-      stdout.writeln();
-    }
-  } else {
-    stdout.writeln('All dart files formatted correctly.');
-  }
-  return incorrect.length;
-}
-
-Future<List<String>> _getFileList({
-  required List<String> types,
-  required bool allFiles,
-  required String baseGitRef,
-  required ProcessRunner processRunner,
-}) async {
-  String output;
-  if (allFiles) {
-    output = await _runGit(<String>[
-      'ls-files',
-      '--',
-      ...types,
-    ], processRunner);
-  } else {
-    output = await _runGit(<String>[
-      'diff',
-      '-U0',
-      '--no-color',
-      '--diff-filter=d',
-      '--name-only',
-      baseGitRef,
-      '--',
-      ...types,
-    ], processRunner);
-  }
-  return output.split('\n').where((String line) => line.isNotEmpty).toList();
+void _clearOutput() {
+  stdout.write('\r${' ' * 100}\r');
 }
 
 Stream<List<int>> _codeUnitsAsStream(List<int>? input) async* {
