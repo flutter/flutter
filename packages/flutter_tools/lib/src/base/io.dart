@@ -174,6 +174,7 @@ class ProcessSignal {
   const ProcessSignal(this._delegate, {@visibleForTesting Platform platform = const LocalPlatform()})
     : _platform = platform;
 
+  static const ProcessSignal sighup = PosixProcessSignal(io.ProcessSignal.sighup);
   static const ProcessSignal sigwinch = PosixProcessSignal(io.ProcessSignal.sigwinch);
   static const ProcessSignal sigterm = PosixProcessSignal(io.ProcessSignal.sigterm);
   static const ProcessSignal sigusr1 = PosixProcessSignal(io.ProcessSignal.sigusr1);

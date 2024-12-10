@@ -2,13 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=1000"
-@Tags(<String>['no-shuffle'])
-library;
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -24,7 +17,6 @@ final String automatedTestsDirectory = fileSystem.path.join('..', '..', 'dev', '
 final String missingDependencyDirectory = fileSystem.path.join('..', '..', 'dev', 'missing_dependency_tests');
 final String flutterTestDirectory = fileSystem.path.join(automatedTestsDirectory, 'flutter_test');
 final String integrationTestDirectory = fileSystem.path.join(automatedTestsDirectory, 'integration_test');
-final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
 
 // Running Integration Tests in the Flutter Tester will still exercise the same
 // flows specific to Integration Tests.

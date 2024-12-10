@@ -97,6 +97,217 @@ void main() {
     expect(findZoomPageTransition(), findsOneWidget);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
+  testWidgets('Default background color when FadeForwardsPageTransitionBuilder is used', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+        ),
+      ),
+      '/b': (BuildContext context) => const Text('page b'),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: FadeForwardsPageTransitionsBuilder()
+            }
+          ),
+          colorScheme: ThemeData().colorScheme.copyWith(surface: Colors.pink)
+        ),
+        routes: routes,
+      ),
+    );
+
+    Finder findFadeForwardsPageTransition() {
+      return find.descendant(
+        of: find.byType(MaterialApp),
+        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_FadeForwardsPageTransition'),
+      );
+    }
+    expect(findFadeForwardsPageTransition(), findsOneWidget);
+
+    await tester.tap(find.text('push'));
+    await tester.pump(const Duration(milliseconds: 400));
+
+    final Finder coloredBoxFinder = find.byType(ColoredBox).last;
+    expect(coloredBoxFinder, findsOneWidget);
+    final ColoredBox coloredBox = tester.widget<ColoredBox>(coloredBoxFinder);
+    expect(coloredBox.color, Colors.pink);
+
+    await tester.pumpAndSettle();
+    expect(find.text('page b'), findsOneWidget);
+    expect(findFadeForwardsPageTransition(), findsOneWidget);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('Override background color in FadeForwardsPageTransitionBuilder', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+        ),
+      ),
+      '/b': (BuildContext context) => const Text('page b'),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: FadeForwardsPageTransitionsBuilder(
+                backgroundColor: Colors.lightGreen,
+              )
+            }
+          ),
+          colorScheme: ThemeData().colorScheme.copyWith(surface: Colors.pink)
+        ),
+        routes: routes,
+      ),
+    );
+
+    Finder findFadeForwardsPageTransition() {
+      return find.descendant(
+        of: find.byType(MaterialApp),
+        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_FadeForwardsPageTransition'),
+      );
+    }
+    expect(findFadeForwardsPageTransition(), findsOneWidget);
+
+    await tester.tap(find.text('push'));
+    await tester.pump(const Duration(milliseconds: 400));
+
+    final Finder coloredBoxFinder = find.byType(ColoredBox).last;
+    expect(coloredBoxFinder, findsOneWidget);
+    final ColoredBox coloredBox = tester.widget<ColoredBox>(coloredBoxFinder);
+    expect(coloredBox.color, Colors.lightGreen);
+
+    await tester.pumpAndSettle();
+    expect(find.text('page b'), findsOneWidget);
+    expect(findFadeForwardsPageTransition(), findsOneWidget);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('FadeForwardsPageTransitionBuilder default duration is 800ms', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+        ),
+      ),
+      '/b': (BuildContext context) => const Text('page b'),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: FadeForwardsPageTransitionsBuilder()
+            }
+          ),
+        ),
+        routes: routes,
+      ),
+    );
+
+    Finder findFadeForwardsPageTransition() {
+      return find.descendant(
+        of: find.byType(MaterialApp),
+        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_FadeForwardsPageTransition'),
+      );
+    }
+    expect(findFadeForwardsPageTransition(), findsOneWidget);
+
+    await tester.tap(find.text('push'));
+    await tester.pump(const Duration(milliseconds: 799));
+    expect(find.text('page b'), findsNothing);
+    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox).last);
+    expect(coloredBox.color, isNot(Colors.transparent)); // Color is not transparent during animation.
+
+    await tester.pump(const Duration(milliseconds: 801));
+    expect(find.text('page b'), findsOneWidget);
+    coloredBox = tester.widget(find.byType(ColoredBox).last);
+    expect(coloredBox.color, Colors.transparent); // Color is transparent during animation.
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('Animation duration changes accordingly when page transition builder changes', (WidgetTester tester) async {
+    Widget buildApp(PageTransitionsBuilder pageTransitionBuilder) {
+      return MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: pageTransitionBuilder,
+            }
+          )
+        ),
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => Material(
+            child: TextButton(
+              child: const Text('push'),
+              onPressed: () { Navigator.of(context).pushNamed('/b'); },
+            ),
+          ),
+          '/b': (BuildContext context) => Material(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                TextButton(
+                  child: const Text('pop'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                const Text('page b'),
+              ],
+            )
+          ),
+        },
+      );
+    }
+
+    await tester.pumpWidget(buildApp(const FadeForwardsPageTransitionsBuilder()));
+
+    Finder findFadeForwardsPageTransition() {
+      return find.descendant(
+        of: find.byType(MaterialApp),
+        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_FadeForwardsPageTransition'),
+      );
+    }
+    expect(findFadeForwardsPageTransition(), findsOneWidget);
+
+    await tester.tap(find.text('push'));
+    await tester.pump(const Duration(milliseconds: 799));
+    expect(find.text('page b'), findsNothing);
+    ColoredBox coloredBox = tester.widget(find.byType(ColoredBox).last);
+    expect(coloredBox.color, isNot(Colors.transparent)); // The color is not transparent during animation.
+
+    await tester.pump(const Duration(milliseconds: 801));
+    expect(find.text('page b'), findsOneWidget);
+    coloredBox = tester.widget(find.byType(ColoredBox).last);
+    expect(coloredBox.color, Colors.transparent); // The color is transparent during animation.
+
+    await tester.pumpWidget(buildApp(const FadeUpwardsPageTransitionsBuilder()));
+    await tester.pumpAndSettle();
+    expect(find.descendant(
+      of: find.byType(MaterialApp),
+      matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_FadeUpwardsPageTransition'),
+    ), findsOneWidget);
+    await tester.tap(find.text('pop'));
+    await tester.pump(const Duration(milliseconds: 299));
+    expect(find.text('page b'), findsOneWidget);
+    expect(find.byType(ColoredBox), findsNothing); // ColoredBox doesn't exist in FadeUpwardsPageTransition.
+
+    await tester.pump(const Duration(milliseconds: 301));
+    expect(find.text('page b'), findsNothing);
+    expect(find.text('push'), findsOneWidget); // The first page
+    expect(find.byType(ColoredBox), findsNothing);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
   testWidgets('PageTransitionsTheme override builds a _OpenUpwardsPageTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
