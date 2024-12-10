@@ -177,7 +177,7 @@ RenderPass::GetOrCreatePipeline() {
 }
 
 bool RenderPass::Draw() {
-  render_pass_->SetPipeline(impeller::PipelineRef(GetOrCreatePipeline()));
+  render_pass_->SetPipeline(GetOrCreatePipeline());
 
   for (const auto& [_, buffer] : vertex_uniform_bindings) {
     render_pass_->BindDynamicResource(

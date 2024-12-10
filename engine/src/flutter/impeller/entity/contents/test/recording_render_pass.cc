@@ -15,7 +15,8 @@ RecordingRenderPass::RecordingRenderPass(
     : RenderPass(context, render_target), delegate_(std::move(delegate)) {}
 
 // |RenderPass|
-void RecordingRenderPass::SetPipeline(PipelineRef pipeline) {
+void RecordingRenderPass::SetPipeline(
+    const std::shared_ptr<Pipeline<PipelineDescriptor>>& pipeline) {
   pending_.pipeline = pipeline;
   if (delegate_) {
     delegate_->SetPipeline(pipeline);

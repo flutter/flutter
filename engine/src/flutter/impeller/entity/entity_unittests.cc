@@ -15,7 +15,6 @@
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
-#include "impeller/core/raw_ptr.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/conical_gradient_contents.h"
@@ -1697,7 +1696,7 @@ TEST_P(EntityTest, RuntimeEffect) {
   ASSERT_TRUE(runtime_stage->IsDirty());
 
   bool expect_dirty = true;
-  PipelineRef first_pipeline;
+  Pipeline<PipelineDescriptor>* first_pipeline;
   std::unique_ptr<Geometry> geom = Geometry::MakeCover();
 
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
@@ -1724,10 +1723,10 @@ TEST_P(EntityTest, RuntimeEffect) {
     bool result = contents->Render(context, entity, pass);
 
     if (expect_dirty) {
-      EXPECT_NE(first_pipeline, pass.GetCommands().back().pipeline);
-      first_pipeline = pass.GetCommands().back().pipeline;
+      EXPECT_NE(first_pipeline, pass.GetCommands().back().pipeline.get());
+      first_pipeline = pass.GetCommands().back().pipeline.get();
     } else {
-      EXPECT_EQ(pass.GetCommands().back().pipeline, first_pipeline);
+      EXPECT_EQ(pass.GetCommands().back().pipeline.get(), first_pipeline);
     }
 
     expect_dirty = false;
