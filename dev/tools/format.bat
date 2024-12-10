@@ -1,5 +1,5 @@
 @ECHO off
-REM Copyright 2013 The Flutter Authors. All rights reserved.
+REM Copyright 2014 The Flutter Authors. All rights reserved.
 REM Use of this source code is governed by a BSD-style license that can be
 REM found in the LICENSE file.
 
@@ -19,4 +19,5 @@ cd "%tools_dir%"
 REM Do not use the CALL command in the next line to execute Dart. CALL causes
 REM Windows to re-read the line from disk after the CALL command has finished
 REM regardless of the ampersand chain.
+"%dart%" pub get & exit /B !ERRORLEVEL!
 "%dart%" bin\format.dart %* & exit /B !ERRORLEVEL!

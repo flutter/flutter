@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2013 The Flutter Authors. All rights reserved.
+# Copyright 2014 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -32,6 +32,7 @@ FLUTTER_DIR="$(cd "$SCRIPT_DIR/../.."; pwd -P)"
 DART="${FLUTTER_DIR}/bin/dart"
 
 cd "$SCRIPT_DIR"
+"$DART" pub get
 "$DART" \
   bin/format.dart \
   "$@"
