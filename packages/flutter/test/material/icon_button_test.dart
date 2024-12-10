@@ -3036,7 +3036,7 @@ void main() {
   testWidgets('IconButton hovered & onLongPressed M2 - M3', (WidgetTester tester) async {
     late bool onHovered;
     bool onLongPressed = false;
-    Widget _build({bool enabled = true, bool useM3 = true}) {
+    Widget build({bool enabled = true, bool useM3 = true}) {
       return MaterialApp(
         theme: ThemeData(
           useMaterial3: useM3
@@ -3061,7 +3061,7 @@ void main() {
     for (int i = 0; i < 1; i++) {
       final bool useM3 = i == 0;
 
-      await tester.pumpWidget(_build(useM3: useM3));
+      await tester.pumpWidget(build(useM3: useM3));
       final Offset iconButtonOffset = tester.getCenter(find.byType(IconButton));
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer();
@@ -3077,7 +3077,7 @@ void main() {
       onHovered = false;
       onLongPressed = false;
 
-      await tester.pumpWidget(_build(enabled: false, useM3: useM3));
+      await tester.pumpWidget(build(enabled: false, useM3: useM3));
       await gesture.moveTo(iconButtonOffset);
       await tester.pumpAndSettle();
       expect(onHovered, false);
