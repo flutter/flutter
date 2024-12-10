@@ -21,6 +21,7 @@ class Dessert {
 }
 
 class DessertDataSource extends DataTableSource {
+  // dart format off
   final List<Dessert> _desserts = <Dessert>[
     Dessert('Frozen yogurt',                        159,  6.0,  24,  4.0,  87, 14,  1),
     Dessert('Ice cream sandwich',                   237,  9.0,  37,  4.3, 129,  8,  1),
@@ -77,6 +78,7 @@ class DessertDataSource extends DataTableSource {
     Dessert('Coconut slice and donut',              611, 40.0,  58,  6.4, 335,  2, 28),
     Dessert('Coconut slice and KitKat',             677, 41.0,  72,  8.5,  63, 12, 12),
   ];
+  // dart format on
 
   void _sort<T>(Comparable<T> Function(Dessert d) getField, bool ascending) {
     _desserts.sort((Dessert a, Dessert b) {

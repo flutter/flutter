@@ -1554,6 +1554,7 @@ class TextInputConnection {
 }
 
 TextInputAction _toTextInputAction(String action) {
+  // dart format off
   return switch (action) {
     'TextInputAction.none'           => TextInputAction.none,
     'TextInputAction.unspecified'    => TextInputAction.unspecified,
@@ -1570,6 +1571,7 @@ TextInputAction _toTextInputAction(String action) {
     'TextInputAction.newline'        => TextInputAction.newline,
     _ => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text input action: $action')]),
   };
+  // dart format on
 }
 
 FloatingCursorDragState _toTextCursorAction(String state) {

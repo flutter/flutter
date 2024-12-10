@@ -1233,6 +1233,7 @@ class PubspecHeader extends PubspecLine {
     final List<String> parts = strippedLine.split(':');
     final String sectionName = parts.first;
     final String value = parts.last.trim();
+    // dart format off
     return switch (sectionName) {
       'dependencies'         => PubspecHeader(line, Section.dependencies),
       'dev_dependencies'     => PubspecHeader(line, Section.devDependencies),
@@ -1241,6 +1242,7 @@ class PubspecHeader extends PubspecLine {
       'name' || 'version'    => PubspecHeader(line, Section.header, name: sectionName, value: value),
       _                      => PubspecHeader(line, Section.other),
     };
+    // dart format on
   }
 
   /// Returns the input after removing trailing spaces and anything after the

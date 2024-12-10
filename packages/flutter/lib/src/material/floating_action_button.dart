@@ -821,6 +821,7 @@ class _FABDefaultsM3 extends FloatingActionButtonThemeData {
   @override Color? get focusColor => _colors.onPrimaryContainer.withOpacity(0.1);
   @override Color? get hoverColor => _colors.onPrimaryContainer.withOpacity(0.08);
 
+  // dart format off
   @override
   ShapeBorder? get shape => switch (type) {
     _FloatingActionButtonType.regular  => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
@@ -836,6 +837,7 @@ class _FABDefaultsM3 extends FloatingActionButtonThemeData {
     _FloatingActionButtonType.large    => 36.0,
     _FloatingActionButtonType.extended => 24.0,
   };
+  // dart format on
 
   @override EdgeInsetsGeometry? get extendedPadding => EdgeInsetsDirectional.only(start: hasChild && _isExtended ? 16.0 : 20.0, end: 20.0);
   @override TextStyle? get extendedTextStyle => _textTheme.labelLarge;

@@ -105,6 +105,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
 
   String _title(BuildContext context) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+    // dart format off
     return switch (widget.type) {
       AlertDemoType.alert            => localizations.demoCupertinoAlertTitle,
       AlertDemoType.alertTitle       => localizations.demoCupertinoAlertWithTitleTitle,
@@ -112,6 +113,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
       AlertDemoType.alertButtonsOnly => localizations.demoCupertinoAlertButtonsOnlyTitle,
       AlertDemoType.actionSheet      => localizations.demoCupertinoActionSheetTitle,
     };
+    // dart format on
   }
 
   static Route<String> _alertDemoDialog(
@@ -299,6 +301,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
       child: Builder(
         builder: (BuildContext context) {
           final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
+          // dart format off
           final Widget showAlertButton = CupertinoButton.filled(
             onPressed: () => switch (widget.type) {
               AlertDemoType.alert            => _alertDialogRoute,
@@ -309,6 +312,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
             }.present(),
             child: Text(localizations.cupertinoShowAlert),
           );
+          // dart format on
 
           return Column(
             children: <Widget>[

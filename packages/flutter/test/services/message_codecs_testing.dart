@@ -55,6 +55,7 @@ bool deepEqualsTypedData(TypedData valueA, TypedData valueB) {
     );
   }
 
+  // dart format off
   return switch (valueA) {
     Uint8List()   => valueB is Uint8List   && deepEqualsList(valueA, valueB),
     Int32List()   => valueB is Int32List   && deepEqualsList(valueA, valueB),
@@ -63,6 +64,7 @@ bool deepEqualsTypedData(TypedData valueA, TypedData valueB) {
     Float64List() => valueB is Float64List && deepEqualsList(valueA, valueB),
     _ => throw 'Unexpected typed data: $valueA',
   };
+  // dart format on
 }
 
 bool deepEqualsList(List<dynamic> valueA, List<dynamic> valueB) {

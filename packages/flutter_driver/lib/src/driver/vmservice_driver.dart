@@ -597,6 +597,7 @@ const Duration _kPauseBetweenIsolateRefresh = Duration(milliseconds: 100);
 // See `timeline_streams` in
 // https://github.com/dart-lang/sdk/blob/main/runtime/vm/timeline.cc
 List<String> _timelineStreamsToString(List<TimelineStream> streams) {
+  // dart format off
   return streams.map<String>((TimelineStream stream) => switch (stream) {
     TimelineStream.all      => 'all',
     TimelineStream.api      => 'API',
@@ -609,6 +610,7 @@ List<String> _timelineStreamsToString(List<TimelineStream> streams) {
     TimelineStream.compiler => 'Compiler',
     TimelineStream.compilerVerbose => 'CompilerVerbose',
   }).toList();
+  // dart format on
 }
 
 void _log(String message) {
