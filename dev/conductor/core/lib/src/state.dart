@@ -47,21 +47,19 @@ const String stablePostReleaseMsg = """
 // * `String presentState(pb.ConductorState state)` - pretty print the state file.
 // This is a little easier to read than the raw JSON.
 
-String luciConsoleLink(String channel, String groupName) {
+String luciConsoleLink(String candidateBranch, String repoName) {
   assert(
-    globals.kReleaseChannels.contains(channel),
-    'channel "$channel" not recognized',
+    globals.releaseCandidateBranchRegex.hasMatch(candidateBranch),
+    'Malformed $candidateBranch argument passed: $candidateBranch',
   );
   assert(
-    <String>['flutter', 'engine', 'packaging'].contains(groupName),
-    'group named $groupName not recognized',
+    <String>['flutter', 'engine', 'packaging'].contains(repoName),
+    'group named $repoName not recognized',
   );
-  final String consoleName =
-      channel == 'master' ? groupName : '${channel}_$groupName';
-  if (groupName == 'packaging') {
+  if (repoName == 'packaging') {
     return 'https://luci-milo.appspot.com/p/dart-internal/g/flutter_packaging/console';
   }
-  return 'https://ci.chromium.org/p/flutter/g/$consoleName/console';
+  return 'https://flutter-dashboard.appspot.com/#/build?repo=$repoName&branch=$candidateBranch';
 }
 
 String defaultStateFilePath(Platform platform) {
@@ -93,7 +91,7 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('\tCurrent git HEAD: ${state.engine.currentGitHead}');
   buffer.writeln('\tPath to checkout: ${state.engine.checkoutPath}');
   buffer.writeln(
-      '\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'engine')}');
+      '\tPost-submit LUCI dashboard: ${luciConsoleLink(state.engine.candidateBranch, 'engine')}');
   if (state.engine.cherrypicks.isNotEmpty) {
     buffer.writeln('${state.engine.cherrypicks.length} Engine Cherrypicks:');
     for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
@@ -111,7 +109,7 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('\tCurrent git HEAD: ${state.framework.currentGitHead}');
   buffer.writeln('\tPath to checkout: ${state.framework.checkoutPath}');
   buffer.writeln(
-      '\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'flutter')}');
+      '\tPost-submit LUCI dashboard: ${luciConsoleLink(state.framework.candidateBranch, 'flutter')}');
   if (state.framework.cherrypicks.isNotEmpty) {
     buffer.writeln(
         '${state.framework.cherrypicks.length} Framework Cherrypicks:');
@@ -180,7 +178,7 @@ String phaseInstructions(pb.ConductorState state) {
     case ReleasePhase.VERIFY_ENGINE_CI:
       if (!requiresEnginePR(state)) {
         return 'You must verify engine CI has passed: '
-            '${luciConsoleLink(state.releaseChannel, 'engine')}';
+            '${luciConsoleLink(state.engine.candidateBranch, 'engine')}';
       }
       // User's working branch was pushed to their mirror, but a PR needs to be
       // opened on GitHub.
@@ -232,7 +230,7 @@ String phaseInstructions(pb.ConductorState state) {
         'pull request, validate post-submit CI.',
       ].join('\n');
     case ReleasePhase.VERIFY_RELEASE:
-      return 'Release archive packages must be verified on cloud storage: ${luciConsoleLink(state.releaseChannel, 'packaging')}';
+      return 'Release archive packages must be verified on cloud storage: ${luciConsoleLink(state.framework.candidateBranch, 'packaging')}';
     case ReleasePhase.RELEASE_COMPLETED:
       if (state.releaseChannel == 'beta') {
         return <String>[
