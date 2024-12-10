@@ -1202,7 +1202,27 @@ plugins {
         );
       });
     });
+
+    group('manifest', () {
+      _testInMemory('can be replaced', () async {
+        final FlutterProject project = await someProject(includePubspec: true);
+        final String originalPubspecContents = project.pubspecFile.readAsStringSync();
+        final FlutterManifest updated = FlutterManifest.createFromString(
+          validPubspecWithDependencies,
+          logger: logger,
+        )!;
+        // Verifies the pubspec.yaml from [project] is overwritten with the pubspec
+        // defined by [updated], both in the [FlutterProject] and on disk.
+        expect(project.manifest, isNot(equals(updated)));
+        project.replacePubspec(updated);
+        expect(project.manifest, equals(updated));
+        final String updatedPubspecContents = project.pubspecFile.readAsStringSync();
+        expect(updatedPubspecContents, isNot(equals(originalPubspecContents)));
+        expect(updatedPubspecContents, validPubspecWithDependenciesAndNullValues);
+      });
+    });
   });
+
   group('watch companion', () {
     late MemoryFileSystem fs;
     late FakePlistParser testPlistParser;
@@ -1706,6 +1726,16 @@ dependencies:
   plugin_a:
   plugin_b:
 ''';
+
+/// This is the equivalent to [validPubspecWithDependencies] after it's been
+/// passed through [YamlEditor], which explicitly populates the null values
+/// even if they were specified implicitly.
+String get validPubspecWithDependenciesAndNullValues => '''
+name: hello
+flutter: null
+dependencies:
+  plugin_a: null
+  plugin_b: null''';
 
 
 String get invalidPubspec => '''
