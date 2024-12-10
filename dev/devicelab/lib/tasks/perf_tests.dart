@@ -284,6 +284,11 @@ TaskFunction createHelloWorldCompileTest() {
   return CompileTest('${flutterDirectory.path}/examples/hello_world', reportPackageContentSizes: true).run;
 }
 
+TaskFunction createSwiftUICompileTest() {
+  return CompileSwiftUITest('${flutterDirectory.path}/examples/hello_world_swiftui', reportPackageContentSizes: true).run;
+}
+
+
 TaskFunction createWebCompileTest() {
   return const WebCompileTest().run;
 }
@@ -1637,6 +1642,89 @@ class WebCompileTest {
 
 /// Measures how long it takes to compile a Flutter app and how big the compiled
 /// code is.
+class CompileSwiftUITest {
+  const CompileSwiftUITest(this.testDirectory, { this.reportPackageContentSizes = false });
+
+  final String testDirectory;
+  final bool reportPackageContentSizes;
+
+  Future<TaskResult> run() async {
+    print(testDirectory);
+    await Process.run('xcodebuild', <String>[
+      'clean',
+      '-allTargets'
+    ]);
+    final Stopwatch watch = Stopwatch();
+    int releaseSizeInBytes = 0;
+    watch.start();
+    await Process.run(workingDirectory: testDirectory ,'xcodebuild', <String>[
+      '-scheme',
+      'hello_world_swiftui',
+      '-target',
+      'hello_world_swiftui',
+      '-sdk',
+      'iphoneos',
+      'build'
+    ]).then((ProcessResult results) {
+      print(results.stdout);
+      if (results.exitCode != 0) {
+        print(results.stderr);
+      }
+    });
+    print('ran build');
+    await Process.run(workingDirectory: testDirectory ,'xcodebuild', <String>[
+      '-scheme',
+      'hello_world_swiftui',
+      '-target',
+      'hello_world_swiftui',
+      '-sdk',
+      'iphoneos',
+      '-archivePath',
+      'hello_world_swiftuiArchive',
+      'archive'
+    ]).then((ProcessResult results) {
+      print(results.stdout);
+      if (results.exitCode != 0) {
+        print(results.stderr);
+      }
+    });
+    print('archive');
+    await Process.run(workingDirectory: testDirectory ,'xcodebuild', <String>[
+      '-exportArchive',
+      '-archivePath',
+      'hello_world_swiftuiArchive.xcarchive',
+      '-exportOptionsPlist',
+      'exportOptions.plist',
+      '-exportPath',
+      'hello_world_swiftuiIPA'
+    ]).then((ProcessResult results) {
+      print(results.stdout);
+      if (results.exitCode != 0) {
+        print(results.stderr);
+      }
+    });
+    print('exported ipa');
+
+    watch.stop();
+    print('$testDirectory/build/Release-iphoneos/hello_world_swiftui.app');
+
+    final File appBundle =  file('$testDirectory/hello_world_swiftuiIPA/hello_world_swiftui.ipa');
+
+
+    print('grabbed app bundle');
+    releaseSizeInBytes = appBundle.lengthSync();
+
+    final Map<String, dynamic> metrics = <String, dynamic>{};
+    metrics.addAll(<String, dynamic>{
+      'release_compile_millis': watch.elapsedMilliseconds,
+      'release_size_bytes': releaseSizeInBytes,
+    });
+    return TaskResult.success(metrics);
+  }
+}
+
+/// Measures how long it takes to compile a Flutter app and how big the compiled
+/// code is.
 class CompileTest {
   const CompileTest(this.testDirectory, { this.reportPackageContentSizes = false });
 
@@ -1645,7 +1733,7 @@ class CompileTest {
 
   Future<TaskResult> run() async {
     return inDirectory<TaskResult>(testDirectory, () async {
-      await flutter('packages', options: <String>['get']);
+      // await flutter('packages', options: <String>['get']);
 
       // "initial" compile required downloading and creating the `android/.gradle` directory while "full"
       // compiles only run `flutter clean` between runs.
