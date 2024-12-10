@@ -7,9 +7,9 @@ import com.android.build.OutputFile
 import groovy.json.JsonGenerator
 import groovy.xml.QName
 import java.nio.file.Paths
+import org.apache.tools.ant.taskdefs.condition.Os
 import com.android.build.gradle.internal.dsl.BuildType
 import com.android.build.gradle.internal.api.ApplicationVariantImpl
-import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
@@ -246,7 +246,7 @@ class FlutterPlugin implements Plugin<Project> {
 
         engineRealm = Paths.get(flutterRoot.absolutePath, "bin", "internal", "engine.realm").toFile().text.trim()
         if (engineRealm) {
-            engineRealm = "/"
+            engineRealm += "/"
         }
 
         // Configure the Maven repository.
@@ -476,7 +476,7 @@ class FlutterPlugin implements Plugin<Project> {
         project.tasks.register("printBuildVariants") {
             description "Prints out all build variants for this Android project"
             doLast {
-                project.android.applicationVariants.all { ApplicationVariantImpl variant ->
+                project.android.applicationVariants.all {ApplicationVariantImpl variant ->
                     println "BuildVariant: ${variant.name}"
                 }
             }
@@ -783,7 +783,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        Closure addEmbeddingDependencyToPlugin = { BuildType buildType ->
+        Closure addEmbeddingDependencyToPlugin = { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
             // In AGP 3.5, the embedding must be added as an API implementation,
             // so java8 features are desugared against the runtime classpath.
@@ -1149,7 +1149,7 @@ class FlutterPlugin implements Plugin<Project> {
         return false
     }
 
-    private static Task getAssembleTask(ApplicationVariantImpl variant) {
+    private static Task getAssembleTask(variant) {
         // `assemble` became `assembleProvider` in AGP 3.3.0.
         return variant.hasProperty("assembleProvider") ? variant.assembleProvider.get() : variant.assemble
     }
@@ -1243,14 +1243,14 @@ class FlutterPlugin implements Plugin<Project> {
             addTasksForOutputsAppLinkSettings(project)
         }
         List<String> targetPlatforms = getTargetPlatforms()
-        def addFlutterDeps = { ApplicationVariantImpl variant ->
+        def addFlutterDeps = {ApplicationVariantImpl variant ->
             if (shouldSplitPerAbi()) {
                 variant.outputs.each { output ->
                     // Assigns the new version code to versionCodeOverride, which changes the version code
                     // for only the output APK, not for the variant itself. Skipping this step simply
                     // causes Gradle to use the value of variant.versionCode for the APK.
                     // For more, see https://developer.android.com/studio/build/configure-apk-splits
-                    Integer abiVersionCode = ABI_VERSION[output.getFilter(OutputFile.ABI)]
+                    ABI_VERSION[output.getFilter(OutputFile.ABI)]
                     if (abiVersionCode != null) {
                         output.versionCodeOverride =
                                 abiVersionCode * 1000 + variant.versionCode
@@ -1472,7 +1472,7 @@ class FlutterPlugin implements Plugin<Project> {
         // Wait for the host app project configuration.
         appProject.afterEvaluate {
             assert(appProject.android != null)
-            project.android.libraryVariants.all {libraryVariant ->
+            project.android.libraryVariants.all { libraryVariant ->
                 Task copyFlutterAssetsTask
                 appProject.android.applicationVariants.all { appProjectVariant ->
                     Task appAssembleTask = getAssembleTask(appProjectVariant)
