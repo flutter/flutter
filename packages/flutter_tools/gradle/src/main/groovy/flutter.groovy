@@ -606,7 +606,7 @@ class FlutterPlugin implements Plugin<Project> {
      *
      * @return "debug", "profile", or "release" (fall-back).
      */
-    private static String buildModeFor(BuildType buildType) {
+    private static String buildModeFor(buildType) {
         if (buildType.name == "profile") {
             return "profile"
         } else if (buildType.debuggable) {
