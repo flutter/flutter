@@ -653,6 +653,8 @@ static void SendFakeTouchEvent(UIScreen* screen,
   weakPlatformView->SetNextFrameCallback([weakSelf,
                                           platformTaskRunner = self.engine.platformTaskRunner,
                                           rasterTaskRunner = self.engine.rasterTaskRunner]() {
+    FML_DCHECK(platformTaskRunner);
+    FML_DCHECK(rasterTaskRunner);
     FML_DCHECK(rasterTaskRunner->RunsTasksOnCurrentThread());
     // Get callback on raster thread and jump back to platform thread.
     platformTaskRunner->PostTask([weakSelf]() { [weakSelf onFirstFrameRendered]; });
@@ -1822,7 +1824,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     });
   };
 
-  _keyboardAnimationVSyncClient = [[VSyncClient alloc] initWithTaskRunner:[self.engine uiTaskRunner]
+  _keyboardAnimationVSyncClient = [[VSyncClient alloc] initWithTaskRunner:self.engine.uiTaskRunner
                                                                  callback:uiCallback];
   _keyboardAnimationVSyncClient.allowPauseAfterVsync = NO;
   [_keyboardAnimationVSyncClient await];
@@ -2105,6 +2107,9 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return;
   }
   fml::WeakPtr<flutter::PlatformView> platformView = self.engine.platformView;
+  if (!platformView) {
+    return;
+  }
   int32_t flags = self.accessibilityFlags;
 #if TARGET_OS_SIMULATOR
   // There doesn't appear to be any way to determine whether the accessibility

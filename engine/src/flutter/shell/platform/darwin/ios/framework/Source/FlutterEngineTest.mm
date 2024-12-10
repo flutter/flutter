@@ -69,6 +69,19 @@ FLUTTER_ASSERT_ARC
   XCTAssertNotNil(engine);
 }
 
+- (void)testShellGetters {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  XCTAssertNotNil(engine);
+
+  // Ensure getters don't deref _shell when it's null, and instead return nullptr.
+  XCTAssertEqual(engine.platformView.get(), nullptr);
+  XCTAssertEqual(engine.iosPlatformView, nullptr);
+  XCTAssertEqual(engine.platformTaskRunner.get(), nullptr);
+  XCTAssertEqual(engine.uiTaskRunner.get(), nullptr);
+  XCTAssertEqual(engine.rasterTaskRunner.get(), nullptr);
+}
+
 - (void)testInfoPlist {
   // Check the embedded Flutter.framework Info.plist, not the linked dylib.
   NSURL* flutterFrameworkURL =

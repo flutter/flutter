@@ -70,9 +70,9 @@ double VsyncWaiterIOS::GetRefreshRate() const {
 
 - (instancetype)initWithTaskRunner:(fml::RefPtr<fml::TaskRunner>)task_runner
                           callback:(flutter::VsyncWaiter::Callback)callback {
-  self = [super init];
+  FML_DCHECK(task_runner);
 
-  if (self) {
+  if (self = [super init]) {
     _refreshRate = DisplayLinkManager.displayRefreshRate;
     _allowPauseAfterVsync = YES;
     _callback = std::move(callback);
