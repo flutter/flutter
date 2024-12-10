@@ -30,6 +30,9 @@ analyzer:
       # Ignore protoc generated files
     - "dev/conductor/lib/proto/*"
 
+formatter:
+  page_width: 100
+
 linter:
   rules:
     # This list is derived from the list of all available lints located at

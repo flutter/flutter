@@ -996,7 +996,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ),
         );
 
-        // Intitially the exit select button is on the left.
+        // Initially the exit select button is on the left.
         final Finder exitButton = buttonFinder('EXIT SELECT MODE');
         expect(exitButton, findsOneWidget);
         final Finder moveRightButton = buttonFinder('MOVE RIGHT');

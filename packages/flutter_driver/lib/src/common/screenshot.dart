@@ -58,7 +58,7 @@ class ScreenshotCommand extends Command {
 
 /// base64 encode a PNG
 class ScreenshotResult extends Result {
-  /// Consructs a screenshot result with PNG or raw RGBA byte data.
+  /// Constructs a screenshot result with PNG or raw RGBA byte data.
   ScreenshotResult(this._data);
 
   final Uint8List _data;

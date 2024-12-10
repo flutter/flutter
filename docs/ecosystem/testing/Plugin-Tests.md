@@ -195,7 +195,7 @@ See below for instructions on bringing up test scaffolding in a plugin (*does no
 1. Use of OCMock in new tests, especially Swift tests, is discouraged in favor of protocol-based
    programming and dependency injection. However, if your XCTests require OCMock, open the
    Package Dependencies section of the project in Xcode, and add the following dependency to
-   the RunnnerTests target:
+   the RunnerTests target:
 
    ```
    https://github.com/erikdoe/ocmock
