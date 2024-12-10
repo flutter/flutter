@@ -270,10 +270,13 @@ https://docs.flutter.dev/testing/integration-tests
 
   @override
   Future<void> pump([Duration? duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate]) async {
+    print('>>> pump()');
     if (duration != null) {
       await delayed(duration);
     }
+    print('>>> pump() :: scheduleFrame()');
     scheduleFrame();
+    print('>>> pump():: await endOfFrame()');
     await endOfFrame;
   }
 

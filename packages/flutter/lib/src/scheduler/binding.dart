@@ -420,6 +420,7 @@ mixin SchedulerBinding on BindingBase {
       return;
     }
     _lifecycleState = state;
+    print('>>> handleAppLifecycleStateChanged($state)');
     switch (state) {
       case AppLifecycleState.resumed:
       case AppLifecycleState.inactive:
@@ -830,12 +831,16 @@ mixin SchedulerBinding on BindingBase {
   /// time, since frames are not scheduled while the device's screen is turned
   /// off.
   Future<void> get endOfFrame {
+    print('>>> endOfFrame');
     if (_nextFrameCompleter == null) {
+      print('>>> nextFrameCompleter == null');
       if (schedulerPhase == SchedulerPhase.idle) {
         scheduleFrame();
+        print('>>> scheduleFrame()');
       }
       _nextFrameCompleter = Completer<void>();
       addPostFrameCallback((Duration timeStamp) {
+        print('>>> addPostFrameCallback invoked, completing nextFrameCompleter');
         _nextFrameCompleter!.complete();
         _nextFrameCompleter = null;
       }, debugLabel: 'SchedulerBinding.completeFrame');
@@ -854,14 +859,15 @@ mixin SchedulerBinding on BindingBase {
   /// Whether frames are currently being scheduled when [scheduleFrame] is called.
   ///
   /// This value depends on the value of the [lifecycleState].
-  bool get framesEnabled => _framesEnabled;
+  bool get framesEnabled => true;
 
   bool _framesEnabled = true;
   void _setFramesEnabledState(bool enabled) {
     if (_framesEnabled == enabled) {
       return;
     }
-    _framesEnabled = enabled;
+    print('>>> _setFramesEnabledState($enabled)');
+    _framesEnabled = true;
     if (enabled) {
       scheduleFrame();
     }
@@ -871,6 +877,7 @@ mixin SchedulerBinding on BindingBase {
   /// [PlatformDispatcher.onDrawFrame] are registered.
   @protected
   void ensureFrameCallbacksRegistered() {
+    print('ensureFrameCallbacksRegistered :: platformDispatcher.onBeginFrame=${platformDispatcher.onBeginFrame}');
     platformDispatcher.onBeginFrame ??= _handleBeginFrame;
     platformDispatcher.onDrawFrame ??= _handleDrawFrame;
   }
@@ -929,6 +936,7 @@ mixin SchedulerBinding on BindingBase {
   ///  * [scheduleWarmUpFrame], which ignores the "Vsync" signal entirely and
   ///    triggers a frame immediately.
   void scheduleFrame() {
+    print('>>> scheduleFrame(), and _hasScheduledFrame=${_hasScheduledFrame}, framesEnabled=${framesEnabled}');
     if (_hasScheduledFrame || !framesEnabled) {
       return;
     }
@@ -1202,6 +1210,7 @@ mixin SchedulerBinding on BindingBase {
   /// statements printed during a frame from those printed between frames (e.g.
   /// in response to events or timers).
   void handleBeginFrame(Duration? rawTimeStamp) {
+    print('>>> handleBeginFrame()');
     _frameTimelineTask?.start('Frame');
     _firstRawTimeStampInEpoch ??= rawTimeStamp;
     _currentFrameTimeStamp = _adjustForEpoch(rawTimeStamp ?? _lastRawTimeStamp);
@@ -1309,6 +1318,7 @@ mixin SchedulerBinding on BindingBase {
   /// See [handleBeginFrame] for a discussion about debugging hooks that may be
   /// useful when working with frame callbacks.
   void handleDrawFrame() {
+    print('>>> handleDrawFrame()');
     assert(_schedulerPhase == SchedulerPhase.midFrameMicrotasks);
     _frameTimelineTask?.finish(); // end the "Animate" phase
     try {
@@ -1322,6 +1332,7 @@ mixin SchedulerBinding on BindingBase {
       _schedulerPhase = SchedulerPhase.postFrameCallbacks;
       final List<FrameCallback> localPostFrameCallbacks =
           List<FrameCallback>.of(_postFrameCallbacks);
+      print('>>> Invoking ${localPostFrameCallbacks.length} postFrameCallbacks');
       _postFrameCallbacks.clear();
       if (!kReleaseMode) {
         FlutterTimeline.startSync('POST_FRAME');
