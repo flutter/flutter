@@ -2549,8 +2549,6 @@ class SystemContextMenuController with SystemContextMenuClient {
       return Future<void>.value();
     }
 
-    // TODO(justinmc): The itemsJson is an implementation detail. This class is public. You should hide it in here.
-
     assert(
       _lastShown == null || _lastShown == this || !_lastShown!._isVisible,
       'Attempted to show while another instance was still visible.',
@@ -2578,7 +2576,9 @@ class SystemContextMenuController with SystemContextMenuClient {
           'height': targetRect.height,
         },
         if (items != null)
-          'items': SystemContextMenuItemData._itemsToJson(items),
+          'items': items
+              .map<Map<String, dynamic>>((SystemContextMenuItemData item) => item._json)
+              .toList(),
       },
     );
   }
@@ -2637,105 +2637,59 @@ class SystemContextMenuController with SystemContextMenuClient {
 sealed class SystemContextMenuItemData {
   const SystemContextMenuItemData();
 
-  /// The text to display to the user.
-  ///
-  /// Not exposed for some built-in menu items whose title is always set by the
-  /// platform.
-  String? get title;
-
   /// The callback to be called when the menu item is pressed.
   ///
   /// Not exposed for built-in menu items, which handle their own action when
   /// pressed.
-  VoidCallback? get onPressed;
+  VoidCallback? get onPressed => null;
 
-  // Corresponds to the "type" field from the method channel method
-  // "ContextMenu.showSystemContextMenu".
-  _SystemContextMenuItemType get _type;
+  /// The text to display to the user.
+  ///
+  /// Not exposed for some built-in menu items whose title is always set by the
+  /// platform.
+  String? get title => null;
 
-  // TODO(justinmc): Should this json stuff be here or on SystemContextMenuController?
-  /// Returns json for use in the method channel method
-  /// `ContextMenu.showSystemContextMenu`.
-  static List<Map<String, dynamic>> _itemsToJson(List<SystemContextMenuItemData> items) {
-    return items
-        .map<Map<String, dynamic>>((SystemContextMenuItemData item) => item._json)
-        .toList();
-  }
-
-  /// Returns json for use in the method channel method
+  /// Returns json for use in method channel calls, specifically
   /// `ContextMenu.showSystemContextMenu`.
   Map<String, dynamic> get _json {
     return <String, dynamic>{
       'callbackId': hashCode, // TODO(justinmc): Effective?
       if (title != null)
         'title': title,
-      'type': _type.name,
+      'type': switch (this) {
+        SystemContextMenuItemDataCopy() => 'copy',
+        SystemContextMenuItemDataCut() => 'cut',
+        SystemContextMenuItemDataPaste() => 'paste',
+        SystemContextMenuItemDataSelectAll() => 'selectAll',
+        SystemContextMenuItemDataShare() => 'share',
+        SystemContextMenuItemDataSearchWeb() => 'searchWeb',
+        SystemContextMenuItemDataLookUp() => 'lookUp',
+        SystemContextMenuItemDataCustom() => 'custom',
+      },
     };
   }
 }
 
 class SystemContextMenuItemDataCopy extends SystemContextMenuItemData {
   const SystemContextMenuItemDataCopy();
-
-  @override
-  _SystemContextMenuItemType get _type => _SystemContextMenuItemType.copy;
-
-  @override
-  VoidCallback? get onPressed => null;
-
-  @override
-  String? get title => null;
 }
 
 class SystemContextMenuItemDataCut extends SystemContextMenuItemData {
   const SystemContextMenuItemDataCut();
-
-  @override
-  _SystemContextMenuItemType get _type => _SystemContextMenuItemType.cut;
-
-  @override
-  VoidCallback? get onPressed => null;
-
-  @override
-  String? get title => null;
 }
 
 class SystemContextMenuItemDataPaste extends SystemContextMenuItemData {
   const SystemContextMenuItemDataPaste();
-
-  @override
-  _SystemContextMenuItemType get _type => _SystemContextMenuItemType.paste;
-
-  @override
-  VoidCallback? get onPressed => null;
-
-  @override
-  String? get title => null;
 }
 
 class SystemContextMenuItemDataSelectAll extends SystemContextMenuItemData {
   const SystemContextMenuItemDataSelectAll();
-
-  @override
-  _SystemContextMenuItemType get _type => _SystemContextMenuItemType.selectAll;
-
-  @override
-  VoidCallback? get onPressed => null;
-
-  @override
-  String? get title => null;
 }
 
 class SystemContextMenuItemDataLookUp extends SystemContextMenuItemData {
   const SystemContextMenuItemDataLookUp({
     required this.title,
   });
-
-  @override
-  _SystemContextMenuItemType get _type => _SystemContextMenuItemType.lookUp;
-
-  @override
-  VoidCallback? get onPressed => null;
 
   @override
   final String title;
@@ -2747,12 +2701,6 @@ class SystemContextMenuItemDataSearchWeb extends SystemContextMenuItemData {
   });
 
   @override
-  _SystemContextMenuItemType get _type => _SystemContextMenuItemType.searchWeb;
-
-  @override
-  VoidCallback? get onPressed => null;
-
-  @override
   final String title;
 }
 
@@ -2762,42 +2710,20 @@ class SystemContextMenuItemDataShare extends SystemContextMenuItemData {
   });
 
   @override
-  _SystemContextMenuItemType get _type => _SystemContextMenuItemType.share;
-
-  @override
-  VoidCallback? get onPressed => null;
-
-  @override
   final String title;
 }
 
 class SystemContextMenuItemDataCustom extends SystemContextMenuItemData {
   const SystemContextMenuItemDataCustom({
-    required this.title,
     required this.onPressed,
+    required this.title,
   });
 
   @override
-  _SystemContextMenuItemType get _type => _SystemContextMenuItemType.custom;
+  final VoidCallback onPressed;
 
   @override
   final String title;
-
-  @override
-  final VoidCallback onPressed;
-}
-
-/// All of the values that are accepted in the 'type' field of the method
-/// channel method 'ContextMenu.showSystemContextMenu'.
-enum _SystemContextMenuItemType {
-  copy,
-  cut,
-  paste,
-  selectAll,
-  lookUp,
-  searchWeb,
-  share,
-  custom,
 }
 
 // TODO(justinmc): The bad thing about tons of constructors is...
