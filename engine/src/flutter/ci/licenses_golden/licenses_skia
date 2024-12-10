@@ -1,4 +1,4 @@
-Signature: 7f26d1550cef3678c79bfeed907ae5be
+Signature: 67fca2af1137b4cb027fb7bdd3773b05
 
 ====================================================================================================
 LIBRARY: etc1
@@ -4992,6 +4992,7 @@ ORIGIN: ../../../flutter/third_party/skia/include/private/base/SkSpan_impl.h + .
 ORIGIN: ../../../flutter/third_party/skia/include/private/base/SkTo.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/private/gpu/vk/SkiaVulkan.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/utils/SkTextUtils.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/jsonreader/SkJSONReader.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skcms/skcms.cc + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skcms/src/Transform_inl.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skcms/src/skcms_internals.h + ../../../flutter/third_party/skia/LICENSE
@@ -5141,8 +5142,6 @@ ORIGIN: ../../../flutter/third_party/skia/src/sksl/ir/SkSLVariableReference.cpp 
 ORIGIN: ../../../flutter/third_party/skia/src/text/gpu/SDFMaskFilter.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/text/gpu/SkChromeRemoteGlyphCache.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/utils/SkCallableTraits.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/utils/SkJSON.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/utils/SkJSON.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/utils/SkTextUtils.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/utils/mac/SkUniqueCFRef.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/utils/win/SkDWriteNTDDI_VERSION.h + ../../../flutter/third_party/skia/LICENSE
@@ -5206,6 +5205,7 @@ FILE: ../../../flutter/third_party/skia/include/private/base/SkSpan_impl.h
 FILE: ../../../flutter/third_party/skia/include/private/base/SkTo.h
 FILE: ../../../flutter/third_party/skia/include/private/gpu/vk/SkiaVulkan.h
 FILE: ../../../flutter/third_party/skia/include/utils/SkTextUtils.h
+FILE: ../../../flutter/third_party/skia/modules/jsonreader/SkJSONReader.cpp
 FILE: ../../../flutter/third_party/skia/modules/skcms/skcms.cc
 FILE: ../../../flutter/third_party/skia/modules/skcms/src/Transform_inl.h
 FILE: ../../../flutter/third_party/skia/modules/skcms/src/skcms_internals.h
@@ -5355,8 +5355,6 @@ FILE: ../../../flutter/third_party/skia/src/sksl/ir/SkSLVariableReference.cpp
 FILE: ../../../flutter/third_party/skia/src/text/gpu/SDFMaskFilter.cpp
 FILE: ../../../flutter/third_party/skia/src/text/gpu/SkChromeRemoteGlyphCache.cpp
 FILE: ../../../flutter/third_party/skia/src/utils/SkCallableTraits.h
-FILE: ../../../flutter/third_party/skia/src/utils/SkJSON.cpp
-FILE: ../../../flutter/third_party/skia/src/utils/SkJSON.h
 FILE: ../../../flutter/third_party/skia/src/utils/SkTextUtils.cpp
 FILE: ../../../flutter/third_party/skia/src/utils/mac/SkUniqueCFRef.h
 FILE: ../../../flutter/third_party/skia/src/utils/win/SkDWriteNTDDI_VERSION.h
