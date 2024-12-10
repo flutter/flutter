@@ -490,6 +490,8 @@ class IconButton extends StatelessWidget {
   final ValueChanged<bool>? onHover;
 
   /// The callback that is called when the button is long-presses.
+  ///
+  /// If onPressed is set to null, the onLongPress will be disabled.
   final VoidCallback? onLongPress;
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
@@ -742,7 +744,7 @@ class IconButton extends StatelessWidget {
         style: adjustedStyle,
         onPressed: onPressed,
         onHover: onHover,
-        onLongPress: onLongPress,
+        onLongPress: onPressed != null ? onLongPress : null,
         autofocus: autofocus,
         focusNode: focusNode,
         isSelected: isSelected,
@@ -800,7 +802,7 @@ class IconButton extends StatelessWidget {
       canRequestFocus: onPressed != null,
       onTap: onPressed,
       onHover: onHover,
-      onLongPress: onLongPress,
+      onLongPress: onPressed != null ? onLongPress : null,
       mouseCursor: mouseCursor ?? (onPressed == null ? SystemMouseCursors.basic : SystemMouseCursors.click),
       enableFeedback: effectiveEnableFeedback,
       focusColor: focusColor ?? theme.focusColor,
@@ -916,7 +918,7 @@ class _SelectableIconButtonState extends State<_SelectableIconButton> {
       focusNode: widget.focusNode,
       onPressed: widget.onPressed,
       onHover: widget.onHover,
-      onLongPress: widget.onLongPress,
+      onLongPress: widget.onPressed != null ? widget.onLongPress : null,
       variant: widget.variant,
       toggleable: toggleable,
       tooltip: widget.tooltip,
