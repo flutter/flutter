@@ -2,7 +2,7 @@
 //  hello_world_swiftuiUITestsLaunchTests.swift
 //  hello_world_swiftuiUITests
 //
-//  Created by Louise Hsu on 12/3/24.
+//  Created by Louise Hsu on 12/10/24.
 //
 
 import XCTest
@@ -17,7 +17,6 @@ final class hello_world_swiftuiUITestsLaunchTests: XCTestCase {
         continueAfterFailure = false
     }
 
-    @MainActor
     func testLaunch() throws {
         let app = XCUIApplication()
         app.launch()
