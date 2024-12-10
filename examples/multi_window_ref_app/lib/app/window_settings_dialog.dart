@@ -7,51 +7,20 @@ Future<void> windowSettingsDialog(
       barrierDismissible: true,
       context: context,
       builder: (BuildContext ctx) {
-        return SimpleDialog(
+        return AlertDialog(
           contentPadding: const EdgeInsets.all(4),
           titlePadding: const EdgeInsets.fromLTRB(24, 10, 24, 0),
           title: const Center(
             child: Text('Window Settings'),
           ),
-          children: [
-            SizedBox(
-              width: 600,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(children: [
-                    Expanded(
-                      child: _RegularWindowSettingsTile(settings: settings),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _PopupWindowSettingsTile(settings: settings),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 2,
-                    ),
-                    const Divider(),
-                    Row(children: [
-                      Expanded(
-                        child: _AnchorSettingsTile(settings: settings),
-                      ),
-                    ]),
-                    const SizedBox(
-                      height: 2,
-                    ),
-                  ]),
-                ],
-              ),
-            ),
+          content: SingleChildScrollView(
+              child: ListBody(children: [
+            _RegularWindowSettingsTile(settings: settings),
+            _PopupWindowSettingsTile(settings: settings),
+            const Divider(),
+            _AnchorSettingsTile(settings: settings),
+          ])),
+          actions: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextButton(
@@ -60,10 +29,7 @@ Future<void> windowSettingsDialog(
                 },
                 child: const Text('Apply'),
               ),
-            ),
-            const SizedBox(
-              height: 2,
-            ),
+            )
           ],
         );
       });
