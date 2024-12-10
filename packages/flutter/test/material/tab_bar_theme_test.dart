@@ -15,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'tabs_test.dart' show boilerplate;
 import 'tabs_utils.dart';
 
 const String _tab1Text = 'tab 1';
@@ -1797,28 +1796,35 @@ void main() {
     const Color hoverColor = Color(0xfff44336);
     const double radius = 20;
     await tester.pumpWidget(
-      boilerplate(
-        child: DefaultTabController(
-          length: 1,
-          child: TabBarTheme(
-            data: TabBarThemeData(
-               splashBorderRadius: BorderRadius.circular(radius),
-            ),
-            child: TabBar(
-              overlayColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.hovered)) {
-                    return hoverColor;
-                  }
-                  return Colors.black54;
-                },
+      Material(
+        child: Localizations(
+          locale: const Locale('en', 'US'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+          ],
+          child: DefaultTabController(
+            length: 1,
+            child: TabBarTheme(
+              data: TabBarThemeData(
+                 splashBorderRadius: BorderRadius.circular(radius),
               ),
-
-              tabs: const <Widget>[
-                Tab(
-                  child: Text(''),
+              child: TabBar(
+                overlayColor: MaterialStateProperty.resolveWith<Color>(
+                  (Set<MaterialState> states) {
+                    if (states.contains(MaterialState.hovered)) {
+                      return hoverColor;
+                    }
+                    return Colors.black54;
+                  },
                 ),
-              ],
+        
+                tabs: const <Widget>[
+                  Tab(
+                    child: Text(''),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
