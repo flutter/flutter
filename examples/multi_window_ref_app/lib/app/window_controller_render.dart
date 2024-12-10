@@ -43,7 +43,9 @@ class WindowControllerRender extends StatelessWidget {
             onDestroyed: onDestroyed,
             onError: (String? reason) => onError(),
             preferredSize: windowSettings.popupSizeNotifier.value,
-            anchorRect: windowSettings.anchorRectNotifier.value,
+            anchorRect: windowSettings.anchorToWindowNotifier.value
+                ? null
+                : windowSettings.anchorRectNotifier.value,
             positioner: WindowPositioner(
                 parentAnchor: positionerSettingsModifier.selected.parentAnchor,
                 childAnchor: positionerSettingsModifier.selected.childAnchor,
