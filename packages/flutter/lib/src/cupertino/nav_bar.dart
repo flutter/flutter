@@ -1080,11 +1080,14 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
 class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigationBar> with TickerProviderStateMixin {
   late _NavigationBarStaticComponentsKeys keys;
   ScrollableState? _scrollableState;
-  Widget? effectiveBottom;
+  Widget? searchableBottom;
   Widget? effectiveLeading;
   Widget? effectiveTrailing;
   bool? effectiveStretch;
-  NavigationBarBottomMode? effectiveBottomMode;
+  final GlobalKey searchKey = GlobalKey();
+  PreferredSizeWidget? defaultSearchField;
+  PreferredSizeWidget? effectiveBottom;
+  NavigationBarBottomMode? searchableBottomMode;
   late AnimationController _animationController;
   late AnimationController _fadeController;
   Tween<double> persistentHeightTween = Tween<double>(
@@ -1098,8 +1101,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   late Animation<double> persistentHeightAnimation;
   late Animation<double> largeTitleHeightAnimation;
   bool atTop = false;
-  final GlobalKey searchKey = GlobalKey();
-  PreferredSizeWidget? defaultSearchField;
 
   @override
   void initState() {
@@ -1121,6 +1122,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     if (widget._searchable) {
       defaultSearchField = _NavigationBarSearchField(searchKey: searchKey);
     }
+    effectiveBottom = defaultSearchField ?? widget.bottom;
   }
 
   @override
@@ -1148,9 +1150,9 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     }
 
     double? target;
-    final bool canScrollBottom = (widget.bottom != null || widget._searchable)
+    final bool canScrollBottom = effectiveBottom != null
                               && (widget.bottomMode == NavigationBarBottomMode.automatic || widget.bottomMode == null);
-    final double bottomScrollOffset = canScrollBottom ? widget.bottom!.preferredSize.height : 0.0;
+    final double bottomScrollOffset = canScrollBottom ? effectiveBottom!.preferredSize.height : 0.0;
 
     if (canScrollBottom && position.pixels < bottomScrollOffset) {
       target = position.pixels > bottomScrollOffset / 2
@@ -1176,7 +1178,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   @override
   Widget build(BuildContext context) {
     if (widget._searchable) {
-      effectiveBottom = atTop
+      searchableBottom = atTop
         ? Row(
             children: <Widget>[
               Expanded(
@@ -1193,7 +1195,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                       atTop = false;
                       effectiveLeading = widget.leading;
                       effectiveTrailing = widget.trailing;
-                      effectiveBottomMode = widget.bottomMode;
+                      searchableBottomMode = widget.bottomMode;
                       effectiveStretch = widget.stretch;
                       if (widget.onSearchActiveChanged != null) {
                         widget.onSearchActiveChanged!(atTop);
@@ -1213,7 +1215,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                 atTop = true;
                 effectiveLeading = const SizedBox.shrink();
                 effectiveTrailing = const SizedBox.shrink();
-                effectiveBottomMode = NavigationBarBottomMode.always;
+                searchableBottomMode = NavigationBarBottomMode.always;
                 effectiveStretch = false;
                 if (widget.onSearchActiveChanged != null) {
                   widget.onSearchActiveChanged!(atTop);
@@ -1265,11 +1267,9 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
               alwaysShowMiddle: widget.alwaysShowMiddle && widget.middle != null,
               stretchConfiguration: effectiveStretch ?? widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
               enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
-              bottom: effectiveBottom ?? widget.bottom ?? const SizedBox.shrink(),
-              bottomMode: effectiveBottomMode ?? widget.bottomMode ?? NavigationBarBottomMode.automatic,
-              bottomHeight: defaultSearchField != null
-                ? defaultSearchField!.preferredSize.height
-                : widget.bottom?.preferredSize.height ?? 0.0,
+              bottom: searchableBottom ?? effectiveBottom ?? const SizedBox.shrink(),
+              bottomMode: searchableBottomMode ?? widget.bottomMode ?? NavigationBarBottomMode.automatic,
+              bottomHeight: effectiveBottom?.preferredSize.height ?? 0.0,
             ),
           );
         }
