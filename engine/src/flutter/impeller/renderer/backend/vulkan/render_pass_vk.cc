@@ -293,8 +293,9 @@ SharedHandleVK<vk::Framebuffer> RenderPassVK::CreateVKFramebuffer(
 }
 
 // |RenderPass|
-void RenderPassVK::SetPipeline(PipelineRef pipeline) {
-  pipeline_ = pipeline;
+void RenderPassVK::SetPipeline(
+    const std::shared_ptr<Pipeline<PipelineDescriptor>>& pipeline) {
+  pipeline_ = pipeline.get();
   if (!pipeline_) {
     return;
   }
@@ -304,7 +305,7 @@ void RenderPassVK::SetPipeline(PipelineRef pipeline) {
 
   if (pipeline_uses_input_attachments_) {
     if (bound_image_offset_ >= kMaxBindings) {
-      pipeline_ = PipelineRef(nullptr);
+      pipeline_ = nullptr;
       return;
     }
     vk::DescriptorImageInfo image_info;
@@ -463,7 +464,7 @@ fml::Status RenderPassVK::Draw() {
   /// Jank can be completely eliminated by pre-populating known YUV conversion
   /// pipelines.
   if (immutable_sampler_) {
-    std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline_variant =
+    std::shared_ptr<PipelineVK> pipeline_variant =
         PipelineVK::Cast(*pipeline_)
             .CreateVariantForImmutableSamplers(immutable_sampler_);
     if (!pipeline_variant) {
@@ -471,7 +472,7 @@ fml::Status RenderPassVK::Draw() {
           fml::StatusCode::kAborted,
           "Could not create pipeline variant with immutable sampler.");
     }
-    pipeline_ = raw_ptr(pipeline_variant);
+    pipeline_ = pipeline_variant.get();
   }
 
   const auto& context_vk = ContextVK::Cast(*context_);
@@ -538,7 +539,7 @@ fml::Status RenderPassVK::Draw() {
   instance_count_ = 1u;
   base_vertex_ = 0u;
   element_count_ = 0u;
-  pipeline_ = PipelineRef(nullptr);
+  pipeline_ = nullptr;
   pipeline_uses_input_attachments_ = false;
   immutable_sampler_ = nullptr;
   return fml::Status();

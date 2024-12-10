@@ -8,7 +8,6 @@
 #include <future>
 
 #include "compute_pipeline_descriptor.h"
-#include "impeller/core/raw_ptr.h"
 #include "impeller/renderer/compute_pipeline_builder.h"
 #include "impeller/renderer/compute_pipeline_descriptor.h"
 #include "impeller/renderer/context.h"
@@ -78,12 +77,6 @@ class Pipeline {
 
   Pipeline& operator=(const Pipeline&) = delete;
 };
-
-/// @brief A raw ptr to a pipeline object.
-///
-/// These pipeline refs are safe to use as the context will keep the
-/// pipelines alive throughout rendering.
-using PipelineRef = raw_ptr<Pipeline<PipelineDescriptor>>;
 
 extern template class Pipeline<PipelineDescriptor>;
 extern template class Pipeline<ComputePipelineDescriptor>;

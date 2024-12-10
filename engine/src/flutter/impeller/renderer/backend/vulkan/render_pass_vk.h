@@ -49,7 +49,7 @@ class RenderPassVK final : public RenderPass {
   size_t element_count_ = 0u;
   bool has_index_buffer_ = false;
   bool has_label_ = false;
-  PipelineRef pipeline_ = PipelineRef(nullptr);
+  const Pipeline<PipelineDescriptor>* pipeline_;
   bool pipeline_uses_input_attachments_ = false;
   std::shared_ptr<SamplerVK> immutable_sampler_;
 
@@ -58,7 +58,8 @@ class RenderPassVK final : public RenderPass {
                std::shared_ptr<CommandBufferVK> command_buffer);
 
   // |RenderPass|
-  void SetPipeline(PipelineRef pipeline) override;
+  void SetPipeline(
+      const std::shared_ptr<Pipeline<PipelineDescriptor>>& pipeline) override;
 
   // |RenderPass|
   void SetCommandLabel(std::string_view label) override;

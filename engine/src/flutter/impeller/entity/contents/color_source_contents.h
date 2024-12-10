@@ -104,7 +104,8 @@ class ColorSourceContents : public Contents {
   using PipelineBuilderMethod = std::shared_ptr<Pipeline<PipelineDescriptor>> (
       impeller::ContentContext::*)(ContentContextOptions) const;
   using PipelineBuilderCallback =
-      std::function<PipelineRef(ContentContextOptions)>;
+      std::function<std::shared_ptr<Pipeline<PipelineDescriptor>>(
+          ContentContextOptions)>;
   using CreateGeometryCallback =
       std::function<GeometryResult(const ContentContext& renderer,
                                    const Entity& entity,
