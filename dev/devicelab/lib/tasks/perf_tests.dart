@@ -1654,13 +1654,17 @@ class CompileSwiftUITest {
       'clean',
       '-allTargets'
     ]);
-    print('cleaned');
     final Stopwatch watch = Stopwatch();
     int releaseSizeInBytes = 0;
     watch.start();
     await Process.run(workingDirectory: testDirectory ,'xcodebuild', <String>[
-      // '-destination',
-      // 'platform=iOS Simulator,name=iPhone 14 Pro Max,OS=16.4'
+      '-scheme',
+      'hello_world_swiftui',
+      '-target',
+      'hello_world_swiftui',
+      '-sdk',
+      'iphoneos',
+      'build'
     ]).then((ProcessResult results) {
       print(results.stdout);
       if (results.exitCode != 0) {
@@ -1668,20 +1672,47 @@ class CompileSwiftUITest {
       }
     });
     print('ran build');
-    watch.stop();
+    await Process.run(workingDirectory: testDirectory ,'xcodebuild', <String>[
+      '-scheme',
+      'hello_world_swiftui',
+      '-target',
+      'hello_world_swiftui',
+      '-sdk',
+      'iphoneos',
+      '-archivePath',
+      'hello_world_swiftuiArchive',
+      'archive'
+    ]).then((ProcessResult results) {
+      print(results.stdout);
+      if (results.exitCode != 0) {
+        print(results.stderr);
+      }
+    });
+    print('archive');
+    await Process.run(workingDirectory: testDirectory ,'xcodebuild', <String>[
+      '-exportArchive',
+      '-archivePath',
+      'hello_world_swiftuiArchive.xcarchive',
+      '-exportOptionsPlist',
+      'exportOptions.plist',
+      '-exportPath',
+      'hello_world_swiftuiIPA'
+    ]).then((ProcessResult results) {
+      print(results.stdout);
+      if (results.exitCode != 0) {
+        print(results.stderr);
+      }
+    });
+    print('exported ipa');
 
-    final Directory appBundle =  dir('$testDirectory/build/Release-iphoneos/hello_world_swiftui.app');
+    watch.stop();
+    print('$testDirectory/build/Release-iphoneos/hello_world_swiftui.app');
+
+    final File appBundle =  file('$testDirectory/hello_world_swiftuiIPA/hello_world_swiftui.ipa');
+
 
     print('grabbed app bundle');
-    try {
-      for (final FileSystemEntity entity in appBundle.listSync(recursive: true)) {
-        if (entity is File) {
-          releaseSizeInBytes += entity.lengthSync();
-        }
-      }
-    } catch (e) {
-      print('Error calculating size: $e at $testDirectory');
-    }
+    releaseSizeInBytes = appBundle.lengthSync();
 
     final Map<String, dynamic> metrics = <String, dynamic>{};
     metrics.addAll(<String, dynamic>{

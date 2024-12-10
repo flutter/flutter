@@ -1,21 +1,29 @@
-//
-//  ContentView.swift
-//  hello_world_swiftui
-//
-//  Created by Louise Hsu on 12/3/24.
-//
-
 import SwiftUI
 
 struct ContentView: View {
+    @State private var items: [String] = Array(repeating: "dash", count: 20)
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        List {
+            ForEach(items, id: \.self) { item in
+                Image(item)
+                    .resizable()
+                    .scaledToFit()
+                    .onAppear {
+                        if items.last == item {
+                            loadMoreItems()
+                        }
+                    }
+            }
         }
-        .padding()
+    }
+
+    func loadMoreItems() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            for _ in 0..<20 { // Add 20 more images
+                items.append("dash")
+            }
+        }
     }
 }
 
