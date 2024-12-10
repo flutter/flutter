@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 /// The Flutter developer tooling library.
-/// 
+///
 /// Includes functionality useful for developers writing Flutter applications.
-/// 
+///
 /// To use, import `package:flutter/developer.dart`.
 library developer;
 

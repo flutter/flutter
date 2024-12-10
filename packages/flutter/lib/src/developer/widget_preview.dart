@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 /// previewing of the [Widget] in the widget previewer.
 ///
 /// WARNING: This interface is not stable and **will change**.
-/// 
+///
 /// See also:
 ///
 ///  * [Preview], an annotation class used to mark functions returning widget

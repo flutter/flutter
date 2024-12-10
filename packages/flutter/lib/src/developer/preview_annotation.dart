@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// Annotation used to mark functions that return widget previews.
-/// 
+///
 /// {@tool snippet}
 ///
 /// Functions annotated with `@Preview()` should return a `List<WidgetPreview>`
