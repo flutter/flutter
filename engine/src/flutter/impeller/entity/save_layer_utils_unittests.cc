@@ -280,77 +280,61 @@ TEST(SaveLayerUtilsTest,
   EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 0, 50, 50));
 }
 
-TEST(SaveLayerUtilsTest,
-     PartiallyIntersectingCoverageIgnoresOriginWithSlideSemanticsX) {
+TEST(SaveLayerUtilsTest, RoundUpCoverageWhenCloseToCoverageLimit) {
   // X varies, translation is performed on coverage.
   auto coverage = ComputeSaveLayerCoverage(
-      /*content_coverage=*/Rect::MakeLTRB(5, 0, 210, 210),  //
-      /*effect_transform=*/{},                              //
-      /*coverage_limit=*/Rect::MakeLTRB(0, 0, 100, 100),    //
-      /*image_filter=*/nullptr                              //
+      /*content_coverage=*/Rect::MakeLTRB(0, 0, 90, 90),  //
+      /*effect_transform=*/{},                            //
+      /*coverage_limit=*/Rect::MakeLTRB(0, 0, 100, 100),  //
+      /*image_filter=*/nullptr                            //
   );
 
   ASSERT_TRUE(coverage.has_value());
   // Size that matches coverage limit
-  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(5, 0, 105, 100));
+  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 0, 100, 100));
+}
+
+TEST(SaveLayerUtilsTest, DontRoundUpCoverageWhenNotCloseToCoverageLimitWidth) {
+  // X varies, translation is performed on coverage.
+  auto coverage = ComputeSaveLayerCoverage(
+      /*content_coverage=*/Rect::MakeLTRB(0, 0, 50, 90),  //
+      /*effect_transform=*/{},                            //
+      /*coverage_limit=*/Rect::MakeLTRB(0, 0, 100, 100),  //
+      /*image_filter=*/nullptr                            //
+  );
+
+  ASSERT_TRUE(coverage.has_value());
+  // Size that matches coverage limit
+  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 0, 50, 90));
+}
+
+TEST(SaveLayerUtilsTest, DontRoundUpCoverageWhenNotCloseToCoverageLimitHeight) {
+  // X varies, translation is performed on coverage.
+  auto coverage = ComputeSaveLayerCoverage(
+      /*content_coverage=*/Rect::MakeLTRB(0, 0, 90, 50),  //
+      /*effect_transform=*/{},                            //
+      /*coverage_limit=*/Rect::MakeLTRB(0, 0, 100, 100),  //
+      /*image_filter=*/nullptr                            //
+  );
+
+  ASSERT_TRUE(coverage.has_value());
+  // Size that matches coverage limit
+  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 0, 90, 50));
 }
 
 TEST(SaveLayerUtilsTest,
-     PartiallyIntersectingCoverageIgnoresOriginWithSlideSemanticsY) {
-  // Y varies, translation is performed on coverage.
+     DontRoundUpCoverageWhenNotCloseToCoverageLimitWidthHeight) {
+  // X varies, translation is performed on coverage.
   auto coverage = ComputeSaveLayerCoverage(
-      /*content_coverage=*/Rect::MakeLTRB(0, 5, 210, 210),  //
-      /*effect_transform=*/{},                              //
-      /*coverage_limit=*/Rect::MakeLTRB(0, 0, 100, 100),    //
-      /*image_filter=*/nullptr                              //
+      /*content_coverage=*/Rect::MakeLTRB(0, 0, 50, 50),  //
+      /*effect_transform=*/{},                            //
+      /*coverage_limit=*/Rect::MakeLTRB(0, 0, 100, 100),  //
+      /*image_filter=*/nullptr                            //
   );
 
   ASSERT_TRUE(coverage.has_value());
   // Size that matches coverage limit
-  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 5, 100, 105));
-}
-
-TEST(SaveLayerUtilsTest, PartiallyIntersectingCoverageIgnoresOriginBothXAndY) {
-  // Both X and Y vary, no transation is performed.
-  auto coverage = ComputeSaveLayerCoverage(
-      /*content_coverage=*/Rect::MakeLTRB(5, 5, 210, 210),  //
-      /*effect_transform=*/{},                              //
-      /*coverage_limit=*/Rect::MakeLTRB(0, 0, 100, 100),    //
-      /*image_filter=*/nullptr                              //
-  );
-
-  ASSERT_TRUE(coverage.has_value());
-  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(5, 5, 100, 100));
-}
-
-TEST(SaveLayerUtilsTest, PartiallyIntersectingCoverageWithOveriszedThresholdY) {
-  // Y varies, translation is not performed on coverage because it is too far
-  // offscreen.
-  auto coverage = ComputeSaveLayerCoverage(
-      /*content_coverage=*/Rect::MakeLTRB(0, 80, 200, 200),  //
-      /*effect_transform=*/{},                               //
-      /*coverage_limit=*/Rect::MakeLTRB(0, 0, 100, 100),     //
-      /*image_filter=*/nullptr                               //
-  );
-
-  ASSERT_TRUE(coverage.has_value());
-  // Size that matches coverage limit
-  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 80, 100, 100));
-}
-
-TEST(SaveLayerUtilsTest, PartiallyIntersectingCoverageWithOveriszedThresholdX) {
-  // X varies, translation is not performed on coverage because it is too far
-  // offscreen.
-  auto coverage = ComputeSaveLayerCoverage(
-      /*content_coverage=*/Rect::MakeLTRB(80, 0, 200, 200),  //
-      /*effect_transform=*/{},                               //
-      /*coverage_limit=*/Rect::MakeLTRB(0, 0, 100, 100),     //
-      /*image_filter=*/nullptr                               //
-  );
-
-  ASSERT_TRUE(coverage.has_value());
-  // Size that matches coverage limit
-  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(80, 0, 100, 100));
+  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 0, 50, 50));
 }
 
 }  // namespace testing

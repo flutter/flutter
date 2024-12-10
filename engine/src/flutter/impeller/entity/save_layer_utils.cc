@@ -12,6 +12,8 @@ bool SizeDifferenceUnderThreshold(Size a, Size b, Scalar threshold) {
   return (std::abs(a.width - b.width) / b.width) < threshold &&
          (std::abs(a.height - b.height) / b.height) < threshold;
 }
+
+static constexpr Scalar kDefaultSizeThreshold = 0.3;
 }  // namespace
 
 std::optional<Rect> ComputeSaveLayerCoverage(
@@ -84,7 +86,8 @@ std::optional<Rect> ComputeSaveLayerCoverage(
         transformed_coverage.Intersection(source_coverage_limit.value());
     if (intersected_coverage.has_value() &&
         SizeDifferenceUnderThreshold(transformed_coverage.GetSize(),
-                                     intersected_coverage->GetSize(), 0.2)) {
+                                     intersected_coverage->GetSize(),
+                                     kDefaultSizeThreshold)) {
       // Returning the transformed coverage is always correct, it just may
       // be larger than the clip area or onscreen texture.
       return transformed_coverage;
@@ -113,35 +116,16 @@ std::optional<Rect> ComputeSaveLayerCoverage(
   if (!intersection.has_value()) {
     return std::nullopt;
   }
-
-  // Sometimes a saveLayer is only slightly shifted outside of the cull rect,
-  // but is being animated in. This is common for the Android slide in page
-  // transitions. In these cases, computing a cull that is too tight can cause
-  // thrashing of the texture cache. Instead, we try to determine the
-  // intersection using only the sizing by shifting the coverage rect into the
-  // cull rect origin.
-  Point delta = coverage_limit.GetOrigin() - transformed_coverage.GetOrigin();
-
-  // This herustic is limited to perfectly vertical or horizontal transitions
-  // that slide in, limited to a fixed threshold of ~30%. This value is based on
-  // the Android slide in page transition which experimental has threshold
-  // values of up to 28%.
-  static constexpr Scalar kThresholdLimit = 0.3;
-
-  if (ScalarNearlyEqual(delta.y, 0) || ScalarNearlyEqual(delta.x, 0)) {
-    Scalar threshold = std::max(std::abs(delta.x / coverage_limit.GetWidth()),
-                                std::abs(delta.y / coverage_limit.GetHeight()));
-    if (threshold < kThresholdLimit) {
-      std::optional<Rect> shifted_intersected_value =
-          transformed_coverage.Shift(delta).Intersection(coverage_limit);
-
-      if (shifted_intersected_value.has_value()) {
-        return shifted_intersected_value.value().Shift(-delta);
-      }
-    }
+  // The the resulting coverage rect is nearly the same as the coverage_limit,
+  // round up to the coverage_limit.
+  Rect intersect_rect = intersection.value();
+  if (SizeDifferenceUnderThreshold(intersect_rect.GetSize(),
+                                   coverage_limit.GetSize(),
+                                   kDefaultSizeThreshold)) {
+    return coverage_limit;
   }
 
-  return intersection;
+  return intersect_rect;
 }
 
 }  // namespace impeller
