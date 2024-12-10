@@ -50,7 +50,7 @@ const String stablePostReleaseMsg = """
 String luciConsoleLink(String candidateBranch, String repoName) {
   assert(
     globals.releaseCandidateBranchRegex.hasMatch(candidateBranch),
-    'Malformed $candidateBranch argument passed: $candidateBranch',
+    'Malformed candidateBranch argument passed: "$candidateBranch"',
   );
   assert(
     <String>['flutter', 'engine', 'packaging'].contains(repoName),
