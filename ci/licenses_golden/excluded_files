@@ -991,7 +991,6 @@
 ../../../flutter/third_party/boringssl/src/crypto/curve25519/x25519_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/dh_extra/dh_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/digest_extra/digest_test.cc
-../../../flutter/third_party/boringssl/src/crypto/dilithium/dilithium_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/dsa/dsa_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/ecdh_extra/ecdh_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/err/err_test.cc
@@ -1050,7 +1049,6 @@
 ../../../flutter/third_party/boringssl/src/crypto/self_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/siphash/siphash_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/slhdsa/slhdsa_test.cc
-../../../flutter/third_party/boringssl/src/crypto/spx/spx_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/stack/stack_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/test
 ../../../flutter/third_party/boringssl/src/crypto/thread_test.cc
