@@ -74,16 +74,15 @@ std::unique_ptr<fml::Mapping> LoadFile(int namespace_fd,
 
 std::unique_ptr<fml::FileMapping> MakeFileMapping(const char* path,
                                                   bool executable) {
-  auto flags = fuchsia::io::OpenFlags::RIGHT_READABLE;
+  fuchsia::io::Flags flags = fuchsia::io::PERM_READABLE;
   if (executable) {
-    flags |= fuchsia::io::OpenFlags::RIGHT_EXECUTABLE;
+    flags |= fuchsia::io::PERM_EXECUTABLE;
   }
 
   // The returned file descriptor is compatible with standard posix operations
   // such as close, mmap, etc. We only need to treat open/open_at specially.
   int fd;
-  const zx_status_t status =
-      fdio_open_fd(path, static_cast<uint32_t>(flags), &fd);
+  const zx_status_t status = fdio_open3_fd(path, uint64_t{flags}, &fd);
   if (status != ZX_OK) {
     return nullptr;
   }

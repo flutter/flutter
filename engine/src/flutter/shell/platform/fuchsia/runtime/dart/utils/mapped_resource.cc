@@ -103,26 +103,16 @@ MappedResource::~MappedResource() {
 
 static int OpenFdExec(const std::string& path, int dirfd) {
   int fd = -1;
-  zx_status_t result;
-  if (dirfd == AT_FDCWD) {
-    // fdio_open_fd_at does not support AT_FDCWD, by design.  Use fdio_open_fd
-    // and expect an absolute path for that usage pattern.
-    FML_CHECK(path[0] == '/');
-    result = fdio_open_fd(
-        path.c_str(),
-        static_cast<uint32_t>(fuchsia::io::OpenFlags::RIGHT_READABLE |
-                              fuchsia::io::OpenFlags::RIGHT_EXECUTABLE),
-        &fd);
-  } else {
-    FML_CHECK(path[0] != '/');
-    result = fdio_open_fd_at(
-        dirfd, path.c_str(),
-        static_cast<uint32_t>(fuchsia::io::OpenFlags::RIGHT_READABLE |
-                              fuchsia::io::OpenFlags::RIGHT_EXECUTABLE),
-        &fd);
+  // fdio_open3_fd_at only allows relative paths
+  const char* path_ptr = path.c_str();
+  if (path_ptr && path_ptr[0] == '/') {
+    ++path_ptr;
   }
+  zx_status_t result = fdio_open3_fd_at(
+      dirfd, path_ptr,
+      uint64_t{fuchsia::io::PERM_READABLE | fuchsia::io::PERM_EXECUTABLE}, &fd);
   if (result != ZX_OK) {
-    FML_LOG(ERROR) << "fdio_open_fd_at(" << path << ") "
+    FML_LOG(ERROR) << "fdio_open3_fd_at(" << path << ") "
                    << "failed: " << zx_status_get_string(result);
     return -1;
   }
