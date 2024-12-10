@@ -206,7 +206,7 @@ class DartFormatChecker {
         final String fileList = incorrect.map(
           (WorkerJob job) => job.command[job.command.length - 2]
         ).join(' ');
-        stdout.writeln('To fix, run `flutter format $fileList` or:');
+        stdout.writeln('To fix, run `dart format $fileList` or:');
         stdout.writeln();
         stdout.writeln('git apply <<DONE');
         for (final WorkerJob job in incorrect) {
