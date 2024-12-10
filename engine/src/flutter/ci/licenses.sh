@@ -173,7 +173,7 @@ function verify_licenses() (
 
   local actualLicenseCount
   actualLicenseCount="$(tail -n 1 flutter/ci/licenses_golden/licenses_flutter | tr -dc '0-9')"
-  local expectedLicenseCount=919
+  local expectedLicenseCount=918
 
   if [[ $actualLicenseCount -ne $expectedLicenseCount ]]; then
     echo "=============================== ERROR ==============================="
