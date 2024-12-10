@@ -305,6 +305,9 @@ Future<XcodeBuildResult> buildXcodeProject({
     for (final MapEntry<String, String> signingConfig in autoSigningConfigs.entries) {
       buildCommands.add('${signingConfig.key}=${signingConfig.value}');
     }
+  }
+
+  if (codesign) {
     buildCommands.add('-allowProvisioningUpdates');
     buildCommands.add('-allowProvisioningDeviceRegistration');
   }
