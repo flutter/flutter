@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-
 import 'app/main_window.dart';
 
 void main() {
-  runWidget(MultiWindowApp(initialWindows: [
-    (BuildContext context) => createRegular(
-        context: context,
-        size: const Size(800, 600),
-        builder: (context) {
-          return const MaterialApp(home: MainWindow());
-        })
+  final RegularWindowController controller = RegularWindowController();
+  runWidget(WindowingApp(children: <Widget>[
+    RegularWindow(
+        controller: controller,
+        preferredSize: const Size(800, 600),
+        child: MaterialApp(home: MainWindow(mainController: controller)))
   ]));
 }
