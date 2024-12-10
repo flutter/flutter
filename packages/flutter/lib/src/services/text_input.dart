@@ -2493,6 +2493,8 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// After calling [dispose], this instance can no longer be used.
   bool _isDisposed = false;
 
+  final Map<int, VoidCallback> _buttonCallbacks = <int, VoidCallback>{};
+
   // Begin SystemContextMenuClient.
 
   @override
@@ -2508,6 +2510,16 @@ class SystemContextMenuController with SystemContextMenuClient {
     }
     _hiddenBySystem = true;
     onSystemHide?.call();
+  }
+
+  @override
+  void handleTapCustomActionItem(int callbackId) {
+    if (!_isVisible) {
+      return;
+    }
+    final VoidCallback? callback = _buttonCallbacks[callbackId];
+    assert(callback != null, 'Tap received for non-existent callbackId $callbackId.');
+    _buttonCallbacks[callbackId]!();
   }
 
   // End SystemContextMenuClient.
@@ -2533,22 +2545,34 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///  * [hide], which hides the menu shown by this method.
   ///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates whether
   ///    this method is supported on the current platform.
-  Future<void> show(Rect targetRect) {
+  Future<void> show(Rect targetRect, [ List<SystemContextMenuItemData>? items ]) {
     assert(!_isDisposed);
     assert(
       TextInput._instance._currentConnection != null,
       'Currently, the system context menu can only be shown for an active text input connection',
     );
 
+    // TODO(justinmc): Check the items here too!
     // Don't show the same thing that's already being shown.
     if (_lastShown != null && _lastShown!._isVisible && _lastShown!._lastTargetRect == targetRect) {
       return Future<void>.value();
     }
 
+    // TODO(justinmc): The itemsJson is an implementation detail. This class is public. You should hide it in here.
+
     assert(
       _lastShown == null || _lastShown == this || !_lastShown!._isVisible,
       'Attempted to show while another instance was still visible.',
     );
+
+    _buttonCallbacks.clear();
+    if (items != null) {
+      for (final SystemContextMenuItemData item in items) {
+        if (item is SystemContextMenuItemDataCustom) {
+          _buttonCallbacks[item.hashCode] = item.onPressed;
+        }
+      }
+    }
 
     _lastTargetRect = targetRect;
     _lastShown = this;
@@ -2562,6 +2586,8 @@ class SystemContextMenuController with SystemContextMenuClient {
           'width': targetRect.width,
           'height': targetRect.height,
         },
+        if (items != null)
+          'items': SystemContextMenuItemData._itemsToJson(items),
       },
     );
   }
@@ -2586,6 +2612,7 @@ class SystemContextMenuController with SystemContextMenuClient {
       return;
     }
     _lastShown = null;
+    _buttonCallbacks.clear();
     // This may be called unnecessarily in the case where the user has already
     // hidden the menu (for example by tapping the screen).
     return _channel.invokeMethod<void>(
@@ -2606,3 +2633,242 @@ class SystemContextMenuController with SystemContextMenuClient {
     _isDisposed = true;
   }
 }
+
+/// Describes a context menu button that will be rendered in the system context
+/// menu.
+///
+/// See also:
+///
+///  * [SystemContextMenuItem], which performs a similar role but at the widget
+///    level, where the titles can be replaced with default localized values.
+///  * [ContextMenuButtonItem], which performs a similar role for Flutter-drawn
+///    context menus.
+sealed class SystemContextMenuItemData {
+  const SystemContextMenuItemData();
+
+  /// The text to display to the user.
+  ///
+  /// Not exposed for some built-in menu items whose title is always set by the
+  /// platform.
+  String? get title;
+
+  /// The callback to be called when the menu item is pressed.
+  ///
+  /// Not exposed for built-in menu items, which handle their own action when
+  /// pressed.
+  VoidCallback? get onPressed;
+
+  // TODO(justinmc): I could put this inside of the json conversion, to minimize
+  // the chance of invalid strings getting in here? Or actually I should make
+  // this a private enum! Same for type below.
+  // Corresponds to the "action" field from the method channel method
+  // "ContextMenu.showSystemContextMenu".
+  String get _action;
+
+  // Corresponds to the "type" field from the method channel method
+  // "ContextMenu.showSystemContextMenu".
+  String get _type;
+
+  /// Returns json for use in the method channel method
+  /// `ContextMenu.showSystemContextMenu`.
+  static List<Map<String, dynamic>> _itemsToJson(List<SystemContextMenuItemData> items) {
+    return items
+        .map<Map<String, dynamic>>((SystemContextMenuItemData item) => item._json)
+        .toList();
+  }
+
+  /// Returns json for use in the method channel method
+  /// `ContextMenu.showSystemContextMenu`.
+  Map<String, dynamic> get _json {
+    return <String, dynamic>{
+      'action': _action,
+      'callbackId': hashCode, // TODO(justinmc): Effective?
+      if (title != null)
+        'title': title,
+      'type': _type,
+    };
+  }
+}
+
+class SystemContextMenuItemDataCopy extends SystemContextMenuItemData {
+  const SystemContextMenuItemDataCopy();
+
+  @override
+  String get _action => 'copy';
+
+  @override
+  String get _type => 'builtIn';
+
+  @override
+  VoidCallback? get onPressed => null;
+
+  @override
+  String? get title => null;
+}
+
+class SystemContextMenuItemDataCut extends SystemContextMenuItemData {
+  const SystemContextMenuItemDataCut();
+
+  @override
+  String get _action => 'cut';
+
+  @override
+  String get _type => 'builtIn';
+
+  @override
+  VoidCallback? get onPressed => null;
+
+  @override
+  String? get title => null;
+}
+
+class SystemContextMenuItemDataPaste extends SystemContextMenuItemData {
+  const SystemContextMenuItemDataPaste();
+
+  @override
+  String get _action => 'paste';
+
+  @override
+  String get _type => 'builtIn';
+
+  @override
+  VoidCallback? get onPressed => null;
+
+  @override
+  String? get title => null;
+}
+
+class SystemContextMenuItemDataSelectAll extends SystemContextMenuItemData {
+  const SystemContextMenuItemDataSelectAll();
+
+  @override
+  String get _action => 'selectAll';
+
+  @override
+  String get _type => 'builtIn';
+
+  @override
+  VoidCallback? get onPressed => null;
+
+  @override
+  String? get title => null;
+}
+
+class SystemContextMenuItemDataLookUp extends SystemContextMenuItemData {
+  const SystemContextMenuItemDataLookUp({
+    required this.title,
+  });
+
+  @override
+  String get _action => 'lookUp';
+
+  @override
+  String get _type => 'builtIn';
+
+  @override
+  VoidCallback? get onPressed => null;
+
+  @override
+  final String title;
+}
+
+class SystemContextMenuItemDataSearchWeb extends SystemContextMenuItemData {
+  const SystemContextMenuItemDataSearchWeb({
+    required this.title,
+  });
+
+  @override
+  String get _action => 'searchWeb';
+
+  @override
+  String get _type => 'builtIn';
+
+  @override
+  VoidCallback? get onPressed => null;
+
+  @override
+  final String title;
+}
+
+class SystemContextMenuItemDataShare extends SystemContextMenuItemData {
+  const SystemContextMenuItemDataShare({
+    required this.title,
+  });
+
+  @override
+  String get _action => 'share';
+
+  @override
+  String get _type => 'builtIn';
+
+  @override
+  VoidCallback? get onPressed => null;
+
+  @override
+  final String title;
+}
+
+class SystemContextMenuItemDataCustom extends SystemContextMenuItemData {
+  const SystemContextMenuItemDataCustom({
+    required this.title,
+    required this.onPressed,
+  });
+
+  @override
+  String get _action => 'custom';
+
+  @override
+  String get _type => 'custom';
+
+  @override
+  final String title;
+
+  @override
+  final VoidCallback onPressed;
+}
+
+// TODO(justinmc): The bad thing about tons of constructors is...
+// The bad thing about sealed classes is that I have to define two sets of sealed classes that are nearly identical. One for the SystemContextMenu rules (some don't need a title because the title will be defaulted to a localized string), and one for SystemContextMenuController (more strict about needing a title).
+/// The bad thing about taking `type` as a parameter is that you have to enforce the rules about what other parameters you need in assertions, rather than at compile time.
+
+
+// TODO(justinmc): Actually this is not needed, done via binding.dart?
+/*
+class SystemContextMenu {
+  SystemContextMenu._() {
+    _channel = SystemChannels.systemContextMenu;
+    _channel.setMethodCallHandler(_loudlyHandleInvocation);
+  }
+
+  late MethodChannel _channel;
+
+  Future<dynamic> _loudlyHandleInvocation(MethodCall call) async {
+    try {
+      return await _handleInvocation(call);
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'services library',
+        context: ErrorDescription('during method call ${call.method}'),
+        informationCollector: () => <DiagnosticsNode>[
+          DiagnosticsProperty<MethodCall>('call', call, style: DiagnosticsTreeStyle.errorProperty),
+        ],
+      ));
+      rethrow;
+    }
+  }
+
+  Future<dynamic> _handleInvocation(MethodCall methodCall) async {
+    final String method = methodCall.method;
+    final String method = methodCall.method;
+    switch (method) {
+      case 'ContextMenu.onTapCustomActionItem':
+        final List<dynamic> args = methodCall.arguments as List<dynamic>;
+        final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;
+        final String key = firstArg['key'] as String;
+        // notifier listeners key was pressed.
+    }
+  }
+}
+*/
