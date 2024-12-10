@@ -135,40 +135,6 @@ class TooltipSemanticsEvent extends SemanticsEvent {
   }
 }
 
-/// An event to notify native OS that flutter starts or stops the semantics tree
-/// generation
-///
-/// The [generating] indicate whether flutter starts generating the semantics
-/// tree. If true, flutter will start sending semantics update to platform
-/// embedding.
-///
-/// Embeddings must be ready to receive semantics update after they receive this
-/// event with [generating] set to true as framework will start sending
-/// semantics update in the next frame.
-///
-/// If [generating] is false, embeddings need to clean up previous updates as
-/// the framework semantics tree was completely destroyed.
-class GeneratingSemanticsTreeSemanticsEvent extends SemanticsEvent {
-
-  /// Constructs an event that notify platform whether it is generating
-  /// semantics tree.
-  const GeneratingSemanticsTreeSemanticsEvent(this.generating)
-      : super('generatingSemanticsTree');
-
-  /// Whether framework starts generating the semantics tree.
-  ///
-  /// If true, flutter starts sending semantics update to platform
-  /// embedding.
-  final bool generating;
-
-  @override
-  Map<String, dynamic> getDataMap() {
-    return <String, dynamic> {
-      'generating': generating,
-    };
-  }
-}
-
 /// An event which triggers long press semantic feedback.
 ///
 /// Currently only honored on Android. Triggers a long-press specific sound

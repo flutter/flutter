@@ -38,7 +38,7 @@ void main () {
 
     testWidgets('forTap', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
-      semanticEvents.clear();
+
       await tester.pumpWidget(TestWidget(
         tapHandler: (BuildContext context) {
           return () => Feedback.forTap(context);
@@ -67,7 +67,7 @@ void main () {
 
     testWidgets('forTap Wrapper', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
-      semanticEvents.clear();
+
       int callbackCount = 0;
       void callback() {
         callbackCount++;
@@ -102,7 +102,7 @@ void main () {
 
     testWidgets('forLongPress', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
-      semanticEvents.clear();
+
       await tester.pumpWidget(TestWidget(
         longPressHandler: (BuildContext context) {
           return () => Feedback.forLongPress(context);
@@ -130,7 +130,6 @@ void main () {
 
     testWidgets('forLongPress Wrapper', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
-      semanticEvents.clear();
       int callbackCount = 0;
       void callback() {
         callbackCount++;
