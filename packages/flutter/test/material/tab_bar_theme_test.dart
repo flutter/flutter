@@ -1792,8 +1792,8 @@ void main() {
     targetRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
     expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
   });
-  
-  testWidgets('splashBorderRadius is passed to InkWell.borderRadius', (WidgetTester tester) async {
+
+  testWidgets('splashBorderRadius is passed from TabBarThemeData', (WidgetTester tester) async {
     const Color hoverColor = Color(0xfff44336);
     const double radius = 20;
     await tester.pumpWidget(
