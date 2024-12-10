@@ -9,9 +9,6 @@
 
 namespace dart_utils {
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-
 class VMServiceObject : public vfs::LazyDir {
  public:
   static constexpr const char* kDirName = "DartVM";
@@ -23,8 +20,6 @@ class VMServiceObject : public vfs::LazyDir {
                       uint64_t id,
                       std::string name) const override;
 };
-
-#pragma clang diagnostic pop
 
 }  // namespace dart_utils
 

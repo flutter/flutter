@@ -235,42 +235,45 @@ ComponentV2::ComponentV2(
 
   // ComponentStartInfo::runtime_dir (optional).
   if (start_info.has_runtime_dir()) {
-    runtime_dir_->Serve(fuchsia::io::OpenFlags::RIGHT_READABLE |
-                            fuchsia::io::OpenFlags::RIGHT_WRITABLE |
-                            fuchsia::io::OpenFlags::DIRECTORY,
-                        start_info.mutable_runtime_dir()->TakeChannel());
+    fidl::ServerEnd<fuchsia_io::Directory> server_end{
+        start_info.mutable_runtime_dir()->TakeChannel()};
+    runtime_dir_->Serve(
+        fuchsia_io::wire::kPermReadable | fuchsia_io::wire::kPermWritable,
+        std::move(server_end));
   }
 
   // ComponentStartInfo::outgoing_dir (optional).
   if (start_info.has_outgoing_dir()) {
-    outgoing_dir_->Serve(fuchsia::io::OpenFlags::RIGHT_READABLE |
-                             fuchsia::io::OpenFlags::RIGHT_WRITABLE |
-                             fuchsia::io::OpenFlags::DIRECTORY,
-                         start_info.mutable_outgoing_dir()->TakeChannel());
+    fidl::ServerEnd<fuchsia_io::Directory> server_end{
+        start_info.mutable_outgoing_dir()->TakeChannel()};
+    outgoing_dir_->Serve(
+        fuchsia_io::wire::kPermReadable | fuchsia_io::wire::kPermWritable,
+        std::move(server_end));
   }
 
   directory_request_ = directory_ptr_.NewRequest();
 
   fuchsia::io::DirectoryHandle flutter_public_dir;
-  // TODO(anmittal): when fixing enumeration using new c++ vfs, make sure that
-  // flutter_public_dir is only accessed once we receive OnOpen Event.
-  // That will prevent FL-175 for public directory
-  auto request = flutter_public_dir.NewRequest().TakeChannel();
-  fdio_service_connect_at(directory_ptr_.channel().get(), "svc",
-                          request.release());
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+  {
+    auto request = flutter_public_dir.NewRequest().TakeChannel();
+    const zx_status_t status =
+        fdio_open3_at(directory_ptr_.channel().get(), "svc",
+                      uint64_t{fuchsia::io::PERM_READABLE}, request.release());
+    if (status != ZX_OK) {
+      FML_LOG(ERROR) << "Failed to open /svc in outgoing directory: "
+                     << zx_status_get_string(status);
+      return;
+    }
+  }
 
   auto composed_service_dir = std::make_unique<vfs::ComposedServiceDir>();
   composed_service_dir->set_fallback(std::move(flutter_public_dir));
 
-#pragma clang diagnostic pop
-
-  // Clone and check if client is servicing the directory.
-  directory_ptr_->Clone(fuchsia::io::OpenFlags::DESCRIBE |
-                            fuchsia::io::OpenFlags::CLONE_SAME_RIGHTS,
-                        cloned_directory_ptr_.NewRequest());
+  // Request an event from the directory to ensure it is servicing requests.
+  directory_ptr_->Open3(".",
+                        fuchsia::io::Flags::PROTOCOL_NODE |
+                            fuchsia::io::Flags::FLAG_SEND_REPRESENTATION,
+                        {}, cloned_directory_ptr_.NewRequest().TakeChannel());
 
   // Collect our standard set of directories along with directories that are
   // included in the cml file to expose.
@@ -279,24 +282,18 @@ ComponentV2::ComponentV2(
     other_dirs.push_back(dir);
   }
 
-  cloned_directory_ptr_.events().OnOpen = [this, other_dirs](zx_status_t status,
-                                                             auto unused) {
+  cloned_directory_ptr_.events().OnRepresentation = [this,
+                                                     other_dirs](auto unused) {
     cloned_directory_ptr_.Unbind();
-    if (status != ZX_OK) {
-      FML_LOG(ERROR) << "could not bind out directory for flutter component("
-                     << debug_label_ << "): " << zx_status_get_string(status);
-      return;
-    }
-
     // add other directories as RemoteDirs.
     for (auto& dir_str : other_dirs) {
       fuchsia::io::DirectoryHandle dir;
       auto request = dir.NewRequest().TakeChannel();
-      auto status = fdio_open_at(
-          directory_ptr_.channel().get(), dir_str.c_str(),
-          static_cast<uint32_t>(fuchsia::io::OpenFlags::DIRECTORY |
-                                fuchsia::io::OpenFlags::RIGHT_READABLE),
-          request.release());
+      const zx_status_t status =
+          fdio_open3_at(directory_ptr_.channel().get(), dir_str.c_str(),
+                        uint64_t{fuchsia::io::Flags::PROTOCOL_DIRECTORY |
+                                 fuchsia::io::PERM_READABLE},
+                        request.release());
       if (status == ZX_OK) {
         outgoing_dir_->AddEntry(
             dir_str.c_str(),

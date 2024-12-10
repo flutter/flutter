@@ -183,10 +183,8 @@ zx_status_t FdFromPath(const char* path, fml::UniqueFD& fd) {
     path++;
   }
   int raw_fd;
-  if (zx_status_t status = fdio_open_fd_at(
-          dir_fd.get(), path,
-          static_cast<uint32_t>(fuchsia::io::OpenFlags::RIGHT_READABLE),
-          &raw_fd);
+  if (zx_status_t status = fdio_open3_fd_at(
+          dir_fd.get(), path, uint64_t{fuchsia::io::PERM_READABLE}, &raw_fd);
       status != ZX_OK) {
     return status;
   }
