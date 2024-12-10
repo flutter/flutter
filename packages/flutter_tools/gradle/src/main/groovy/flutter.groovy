@@ -7,6 +7,7 @@ import com.android.build.OutputFile
 import groovy.json.JsonGenerator
 import groovy.xml.QName
 import java.nio.file.Paths
+import com.android.build.gradle.internal.dsl.BuildType
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -603,7 +604,7 @@ class FlutterPlugin implements Plugin<Project> {
      *
      * @return "debug", "profile", or "release" (fall-back).
      */
-    private static String buildModeFor(buildType) {
+    private static String buildModeFor(BuildType buildType) {
         if (buildType.name == "profile") {
             return "profile"
         } else if (buildType.debuggable) {
@@ -618,7 +619,7 @@ class FlutterPlugin implements Plugin<Project> {
      *    1. The embedding
      *    2. libflutter.so
      */
-    void addFlutterDependencies(buildType) {
+    void addFlutterDependencies(BuildType buildType) {
         String flutterBuildMode = buildModeFor(buildType)
         if (!supportsBuildMode(flutterBuildMode)) {
             return
@@ -771,7 +772,7 @@ class FlutterPlugin implements Plugin<Project> {
         pluginProject.extensions.create("flutter", FlutterExtension)
 
         // Add plugin dependency to the app project.
-        project.android.buildTypes.each { buildType ->
+        project.android.buildTypes.each { BuildType buildType ->
             String flutterBuildMode = buildModeFor(buildType)
             if (flutterBuildMode != "release" || !pluginObject.dev_dependency) {
                 // Only add dependency on dev dependencies in non-release builds.
@@ -781,7 +782,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        Closure addEmbeddingDependencyToPlugin = { buildType ->
+        Closure addEmbeddingDependencyToPlugin = { BuildType buildType ->
             String flutterBuildMode = buildModeFor(buildType)
             // In AGP 3.5, the embedding must be added as an API implementation,
             // so java8 features are desugared against the runtime classpath.
