@@ -32,7 +32,7 @@ FLUTTER_DIR="$(cd "$SCRIPT_DIR/../.."; pwd -P)"
 DART="${FLUTTER_DIR}/bin/dart"
 
 cd "$SCRIPT_DIR"
-"$DART" pub get
+"$DART" pub get > /dev/null
 "$DART" \
   bin/format.dart \
   "$@"

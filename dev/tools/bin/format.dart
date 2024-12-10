@@ -203,7 +203,10 @@ class DartFormatChecker {
       } else {
         stderr.writeln('Found ${incorrect.length} Dart file${plural ? 's' : ''}'
             ' which ${plural ? 'were' : 'was'} formatted incorrectly.');
-        stdout.writeln('To fix, run `./dev/tools/format --fix` or:');
+        final String fileList = incorrect.map(
+          (WorkerJob job) => job.command[job.command.length - 2]
+        ).join(' ');
+        stdout.writeln('To fix, run `flutter format $fileList` or:');
         stdout.writeln();
         stdout.writeln('git apply <<DONE');
         for (final WorkerJob job in incorrect) {
