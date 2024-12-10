@@ -554,6 +554,74 @@ void main() {
       expect(reorderedListEntries[1].data, equals('item 1'));
       expect(reorderedListEntries[2].data, equals('item 2'));
     });
+
+    testWidgets('SliverAnimatedList correctly handles insertion and removal of items with duplicate keys', (WidgetTester tester) async {
+      final List<String> items = <String>['0'];
+      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverAnimatedList(
+                key: listKey,
+                initialItemCount: items.length,
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+                  return SlideTransition(
+                    key: ValueKey<String>(items[index]),
+                    position: Tween<Offset>(
+                      begin: const Offset(1, 0),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: Text(items[index]),
+                  );
+                },
+                findChildIndexCallback: (Key key) {
+                  final int index = items.indexOf((key as ValueKey<String>).value);
+                  return index == -1 ? null : index;
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Get all list entries in order.
+      final List<Text> listEntries = find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
+      expect(listEntries[0].data, equals('0'));
+
+      items.insert(0, '1');
+      listKey.currentState?.insertItem(0, duration: const Duration(milliseconds: 100));
+      await tester.pumpAndSettle();
+
+      items.insert(0, '1');
+      listKey.currentState?.insertItem(0, duration: const Duration(milliseconds: 100));
+      await tester.pumpAndSettle();
+
+      items.insert(0, '1');
+      listKey.currentState?.insertItem(0, duration: const Duration(milliseconds: 100));
+      await tester.pumpAndSettle();
+
+      final List<Text> updatedListEntries = find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
+      expect(updatedListEntries[0].data, equals('1'));
+      expect(updatedListEntries[1].data, equals('1'));
+      expect(updatedListEntries[2].data, equals('1'));
+      expect(updatedListEntries[3].data, equals('0'));
+
+      // Remove the first item.
+      items.removeAt(0);
+      listKey.currentState?.removeItem(0, (BuildContext context, Animation<double> animation) {
+        return const SizedBox.shrink();
+      }, duration: const Duration(milliseconds: 100));
+      await tester.pumpAndSettle();
+
+      final List<Text> finalListEntries = find.byType(Text).evaluate().map((Element e) => e.widget as Text).toList();
+      expect(finalListEntries.length, 3);
+      expect(finalListEntries[0].data, equals('1'));
+      expect(finalListEntries[1].data, equals('1'));
+      expect(finalListEntries[2].data, equals('0'));
+    });
   });
 
   testWidgets(
