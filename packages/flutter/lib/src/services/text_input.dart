@@ -2651,11 +2651,7 @@ sealed class SystemContextMenuItemData {
 
   // TODO(justinmc): I could put this inside of the json conversion, to minimize
   // the chance of invalid strings getting in here? Or actually I should make
-  // this a private enum! Same for type below.
-  // Corresponds to the "action" field from the method channel method
-  // "ContextMenu.showSystemContextMenu".
-  String get _action;
-
+  // this a private enum!
   // Corresponds to the "type" field from the method channel method
   // "ContextMenu.showSystemContextMenu".
   String get _type;
@@ -2672,7 +2668,6 @@ sealed class SystemContextMenuItemData {
   /// `ContextMenu.showSystemContextMenu`.
   Map<String, dynamic> get _json {
     return <String, dynamic>{
-      'action': _action,
       'callbackId': hashCode, // TODO(justinmc): Effective?
       if (title != null)
         'title': title,
@@ -2685,10 +2680,7 @@ class SystemContextMenuItemDataCopy extends SystemContextMenuItemData {
   const SystemContextMenuItemDataCopy();
 
   @override
-  String get _action => 'copy';
-
-  @override
-  String get _type => 'builtIn';
+  String get _type => 'copy';
 
   @override
   VoidCallback? get onPressed => null;
@@ -2701,10 +2693,7 @@ class SystemContextMenuItemDataCut extends SystemContextMenuItemData {
   const SystemContextMenuItemDataCut();
 
   @override
-  String get _action => 'cut';
-
-  @override
-  String get _type => 'builtIn';
+  String get _type => 'cut';
 
   @override
   VoidCallback? get onPressed => null;
@@ -2717,10 +2706,7 @@ class SystemContextMenuItemDataPaste extends SystemContextMenuItemData {
   const SystemContextMenuItemDataPaste();
 
   @override
-  String get _action => 'paste';
-
-  @override
-  String get _type => 'builtIn';
+  String get _type => 'paste';
 
   @override
   VoidCallback? get onPressed => null;
@@ -2733,10 +2719,7 @@ class SystemContextMenuItemDataSelectAll extends SystemContextMenuItemData {
   const SystemContextMenuItemDataSelectAll();
 
   @override
-  String get _action => 'selectAll';
-
-  @override
-  String get _type => 'builtIn';
+  String get _type => 'selectAll';
 
   @override
   VoidCallback? get onPressed => null;
@@ -2751,10 +2734,7 @@ class SystemContextMenuItemDataLookUp extends SystemContextMenuItemData {
   });
 
   @override
-  String get _action => 'lookUp';
-
-  @override
-  String get _type => 'builtIn';
+  String get _type => 'lookUp';
 
   @override
   VoidCallback? get onPressed => null;
@@ -2769,10 +2749,7 @@ class SystemContextMenuItemDataSearchWeb extends SystemContextMenuItemData {
   });
 
   @override
-  String get _action => 'searchWeb';
-
-  @override
-  String get _type => 'builtIn';
+  String get _type => 'searchWeb';
 
   @override
   VoidCallback? get onPressed => null;
@@ -2787,10 +2764,7 @@ class SystemContextMenuItemDataShare extends SystemContextMenuItemData {
   });
 
   @override
-  String get _action => 'share';
-
-  @override
-  String get _type => 'builtIn';
+  String get _type => 'share';
 
   @override
   VoidCallback? get onPressed => null;
@@ -2804,9 +2778,6 @@ class SystemContextMenuItemDataCustom extends SystemContextMenuItemData {
     required this.title,
     required this.onPressed,
   });
-
-  @override
-  String get _action => 'custom';
 
   @override
   String get _type => 'custom';
