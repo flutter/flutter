@@ -2,6 +2,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 set(EPHEMERAL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ephemeral")
+set(CMAKE_CXX_STANDARD 20)
 
 # Configuration provided via flutter tool.
 include(${EPHEMERAL_DIR}/generated_config.cmake)
@@ -52,12 +53,16 @@ list(TRANSFORM CPP_WRAPPER_SOURCES_PLUGIN PREPEND "${WRAPPER_ROOT}/")
 list(APPEND CPP_WRAPPER_SOURCES_APP
   "flutter_engine.cc"
   "flutter_view_controller.cc"
+  "flutter_window_controller.cc"
+  "flutter_win32_window.cc"
+  "win32_window.cc"
 )
 list(TRANSFORM CPP_WRAPPER_SOURCES_APP PREPEND "${WRAPPER_ROOT}/")
 
 # Wrapper sources needed for a plugin.
 add_library(flutter_wrapper_plugin STATIC
   ${CPP_WRAPPER_SOURCES_CORE}
+  ${CPP_WRAPPER_SOURCES_WINDOWING}
   ${CPP_WRAPPER_SOURCES_PLUGIN}
 )
 apply_standard_settings(flutter_wrapper_plugin)
@@ -74,6 +79,7 @@ add_dependencies(flutter_wrapper_plugin flutter_assemble)
 # Wrapper sources needed for the runner.
 add_library(flutter_wrapper_app STATIC
   ${CPP_WRAPPER_SOURCES_CORE}
+  ${CPP_WRAPPER_SOURCES_WINDOWING}
   ${CPP_WRAPPER_SOURCES_APP}
 )
 apply_standard_settings(flutter_wrapper_app)
@@ -91,7 +97,7 @@ set(PHONY_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/_phony_")
 set_source_files_properties("${PHONY_OUTPUT}" PROPERTIES SYMBOLIC TRUE)
 add_custom_command(
   OUTPUT ${FLUTTER_LIBRARY} ${FLUTTER_LIBRARY_HEADERS}
-    ${CPP_WRAPPER_SOURCES_CORE} ${CPP_WRAPPER_SOURCES_PLUGIN}
+    ${CPP_WRAPPER_SOURCES_CORE} ${CPP_WRAPPER_SOURCES_WINDOWING} ${CPP_WRAPPER_SOURCES_PLUGIN}
     ${CPP_WRAPPER_SOURCES_APP}
     ${PHONY_OUTPUT}
   COMMAND ${CMAKE_COMMAND} -E env
@@ -104,6 +110,7 @@ add_custom_target(flutter_assemble DEPENDS
   "${FLUTTER_LIBRARY}"
   ${FLUTTER_LIBRARY_HEADERS}
   ${CPP_WRAPPER_SOURCES_CORE}
+  ${CPP_WRAPPER_SOURCES_WINDOWING}
   ${CPP_WRAPPER_SOURCES_PLUGIN}
   ${CPP_WRAPPER_SOURCES_APP}
 )
