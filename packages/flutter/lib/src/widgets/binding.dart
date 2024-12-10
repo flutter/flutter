@@ -1216,7 +1216,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   )
   Element? get renderViewElement => rootElement;
 
-  bool _readyToProduceFrames = true;
+  bool _readyToProduceFrames = false;
 
   @override
   bool get framesEnabled => super.framesEnabled && _readyToProduceFrames;
