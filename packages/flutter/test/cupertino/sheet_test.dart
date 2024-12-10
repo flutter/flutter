@@ -439,7 +439,7 @@ void main() {
           CupertinoButton(
           onPressed: () {
             Navigator.of(context).push(
-              CupertinoPageRoute(
+              CupertinoPageRoute<void>(
                 builder: (BuildContext context) {
                   return CupertinoPageScaffold(
                     child: Column(
