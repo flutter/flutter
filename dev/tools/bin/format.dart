@@ -150,7 +150,6 @@ class DartFormatChecker {
     for (final String file in filesToCheck) {
       jobs.add(WorkerJob(<String>[...cmd, file]));
     }
-    print(jobs);
     final ProcessPool dartFmt = ProcessPool(
       processRunner: processRunner,
       printReport: _namedReport('dart format'),
@@ -200,7 +199,7 @@ class DartFormatChecker {
       } else {
         stderr.writeln('Found ${incorrect.length} Dart file${plural ? 's' : ''}'
             ' which ${plural ? 'were' : 'was'} formatted incorrectly.');
-        stdout.writeln('To fix, run `./dev/tools/format` or:');
+        stdout.writeln('To fix, run `./dev/tools/format --fix` or:');
         stdout.writeln();
         stdout.writeln('git apply <<DONE');
         for (final WorkerJob job in incorrect) {
