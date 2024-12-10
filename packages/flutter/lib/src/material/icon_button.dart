@@ -741,6 +741,8 @@ class IconButton extends StatelessWidget {
       return _SelectableIconButton(
         style: adjustedStyle,
         onPressed: onPressed,
+        onHover: onHover,
+        onLongPress: onLongPress,
         autofocus: autofocus,
         focusNode: focusNode,
         isSelected: isSelected,
@@ -832,6 +834,8 @@ class IconButton extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(StringProperty('tooltip', tooltip, defaultValue: null, quoted: false));
     properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(ObjectFlagProperty<ValueChanged<bool>>('onHover', onHover));
+    properties.add(ObjectFlagProperty<VoidCallback>('onLongPress', onLongPress));
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
@@ -848,6 +852,8 @@ class _SelectableIconButton extends StatefulWidget {
     this.isSelected,
     this.style,
     this.focusNode,
+    this.onLongPress,
+    this.onHover,
     required this.variant,
     required this.autofocus,
     required this.onPressed,
@@ -863,6 +869,8 @@ class _SelectableIconButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final String? tooltip;
   final Widget child;
+  final VoidCallback? onLongPress;
+  final ValueChanged<bool>? onHover;
 
   @override
   State<_SelectableIconButton> createState() => _SelectableIconButtonState();
@@ -907,6 +915,8 @@ class _SelectableIconButtonState extends State<_SelectableIconButton> {
       autofocus: widget.autofocus,
       focusNode: widget.focusNode,
       onPressed: widget.onPressed,
+      onHover: widget.onHover,
+      onLongPress: widget.onLongPress,
       variant: widget.variant,
       toggleable: toggleable,
       tooltip: widget.tooltip,
@@ -929,6 +939,8 @@ class _IconButtonM3 extends ButtonStyleButton {
     required super.onPressed,
     super.style,
     super.focusNode,
+    super.onHover,
+    super.onLongPress,
     super.autofocus = false,
     super.statesController,
     required this.variant,
@@ -936,8 +948,6 @@ class _IconButtonM3 extends ButtonStyleButton {
     super.tooltip,
     required Widget super.child,
   }) : super(
-      onLongPress: null,
-      onHover: null,
       onFocusChange: null,
       clipBehavior: Clip.none);
 
