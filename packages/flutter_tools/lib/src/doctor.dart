@@ -282,7 +282,7 @@ class Doctor {
       final StringBuffer lineBuffer = StringBuffer();
       ValidationResult result;
       try {
-        result = await asyncGuard<ValidationResult>(() => validator.validate());
+        result = await asyncGuard<ValidationResult>(() => validator.validateImpl());
       } on Exception catch (exception) {
         // We're generating a summary, so drop the stack trace.
         result = ValidationResult.crash(exception);
@@ -434,12 +434,23 @@ class Doctor {
         DoctorResultEvent(validator: validator, result: result).send();
       }
 
+      final String executionDuration = () {
+        final Duration? executionTime = result.executionTime;
+        if (!verbose || executionTime == null) {
+          return '';
+        }
+        final String formatted = executionTime.inSeconds < 2
+            ? getElapsedAsMilliseconds(executionTime)
+            : getElapsedAsSeconds(executionTime);
+        return ' [$formatted]';
+      }();
+
       final String leadingBox = showColor ? result.coloredLeadingBox : result.leadingBox;
       if (result.statusInfo != null) {
-        _logger.printStatus('$leadingBox ${validator.title} (${result.statusInfo})',
+        _logger.printStatus('$leadingBox ${validator.title} (${result.statusInfo})$executionDuration',
             hangingIndent: result.leadingBox.length + 1);
       } else {
-        _logger.printStatus('$leadingBox ${validator.title}',
+        _logger.printStatus('$leadingBox ${validator.title}$executionDuration',
             hangingIndent: result.leadingBox.length + 1);
       }
 
@@ -528,7 +539,7 @@ class FlutterValidator extends DoctorValidator {
   final OperatingSystemUtils _operatingSystemUtils;
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     String? versionChannel;
     String? frameworkVersion;
@@ -713,7 +724,7 @@ class DeviceValidator extends DoctorValidator {
   String get slowWarning => 'Scanning for devices is taking a long time...';
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     final List<Device> devices = await _deviceManager.refreshAllDevices(
       timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
     );

@@ -448,25 +448,25 @@ void main() {
     testUsingContext('validate verbose output format', () async {
       expect(await FakeDoctor(logger).diagnose(), isFalse);
       expect(logger.statusText, equals(
-              '[✓] Passing Validator (with statusInfo)\n'
+              '[✓] Passing Validator (with statusInfo) [0ms]\n'
               '    • A helpful message\n'
               '    • A second, somewhat longer helpful message\n'
               '\n'
-              '[✗] Missing Validator\n'
+              '[✗] Missing Validator [0ms]\n'
               '    ✗ A useful error message\n'
               '    • A message that is not an error\n'
               '    ! A hint message\n'
               '\n'
-              '[!] Not Available Validator\n'
+              '[!] Not Available Validator [0ms]\n'
               '    ✗ A useful error message\n'
               '    • A message that is not an error\n'
               '    ! A hint message\n'
               '\n'
-              '[!] Partial Validator with only a Hint\n'
+              '[!] Partial Validator with only a Hint [0ms]\n'
               '    ! There is a hint here\n'
               '    • But there is no error\n'
               '\n'
-              '[!] Partial Validator with Errors\n'
+              '[!] Partial Validator with Errors [0ms]\n'
               '    ✗ An error message indicating partial installation\n'
               '    ! Maybe a hint will help the user\n'
               '    • An extra message with some verbose details\n'
@@ -480,7 +480,7 @@ void main() {
     testUsingContext('validate PII can be hidden', () async {
       expect(await FakePiiDoctor(logger).diagnose(showPii: false), isTrue);
       expect(logger.statusText, equals(
-        '[✓] PII Validator\n'
+        '[✓] PII Validator [0ms]\n'
         '    • Does not contain PII\n'
         '\n'
         '• No issues found!\n'
@@ -489,7 +489,7 @@ void main() {
       // PII shown.
       expect(await FakePiiDoctor(logger).diagnose(), isTrue);
       expect(logger.statusText, equals(
-          '[✓] PII Validator\n'
+          '[✓] PII Validator [0ms]\n'
               '    • Contains PII path/to/username\n'
               '\n'
               '• No issues found!\n'
@@ -511,12 +511,12 @@ void main() {
     testUsingContext('PII separated, events only sent once', () async {
       final Doctor fakeDoctor = FakePiiDoctor(logger);
       final DoctorText doctorText = DoctorText(logger,doctor: fakeDoctor);
-      const String expectedPiiText = '[✓] PII Validator\n'
+      const String expectedPiiText = '[✓] PII Validator [0ms]\n'
           '    • Contains PII path/to/username\n'
           '\n'
           '• No issues found!\n';
       const String expectedPiiStrippedText =
-          '[✓] PII Validator\n'
+          '[✓] PII Validator [0ms]\n'
           '    • Does not contain PII\n'
           '\n'
           '• No issues found!\n';
@@ -595,30 +595,31 @@ void main() {
     expect(await FakeDoctor(wrapLogger).diagnose(), isFalse);
     expect(wrapLogger.statusText, equals(
         '[✓] Passing Validator (with\n'
-        '    statusInfo)\n'
+        '    statusInfo) [0ms]\n'
         '    • A helpful message\n'
         '    • A second, somewhat\n'
         '      longer helpful message\n'
         '\n'
-        '[✗] Missing Validator\n'
+        '[✗] Missing Validator [0ms]\n'
         '    ✗ A useful error message\n'
         '    • A message that is not an\n'
         '      error\n'
         '    ! A hint message\n'
         '\n'
         '[!] Not Available Validator\n'
+        '    [0ms]\n'
         '    ✗ A useful error message\n'
         '    • A message that is not an\n'
         '      error\n'
         '    ! A hint message\n'
         '\n'
         '[!] Partial Validator with\n'
-        '    only a Hint\n'
+        '    only a Hint [0ms]\n'
         '    ! There is a hint here\n'
         '    • But there is no error\n'
         '\n'
         '[!] Partial Validator with\n'
-        '    Errors\n'
+        '    Errors [0ms]\n'
         '    ✗ An error message\n'
         '      indicating partial\n'
         '      installation\n'
@@ -638,11 +639,11 @@ void main() {
     testUsingContext('validate diagnose combines validator output', () async {
       expect(await FakeGroupedDoctor(logger).diagnose(), isTrue);
       expect(logger.statusText, equals(
-              '[✓] Category 1\n'
+              '[✓] Category 1 [0ms]\n'
               '    • A helpful message\n'
               '    • A helpful message\n'
               '\n'
-              '[!] Category 2\n'
+              '[!] Category 2 [0ms]\n'
               '    • A helpful message\n'
               '    ✗ A useful error message\n'
               '\n'
@@ -656,7 +657,7 @@ void main() {
       // There are two subvalidators. Only the second contains statusInfo.
       expect(await FakeGroupedDoctorWithStatus(logger).diagnose(), isTrue);
       expect(logger.statusText, equals(
-              '[✓] First validator title (A status message)\n'
+              '[✓] First validator title (A status message) [0ms]\n'
               '    • A helpful message\n'
               '    • A different message\n'
               '\n'
@@ -1014,12 +1015,12 @@ class PassingValidator extends DoctorValidator {
   PassingValidator(super.title);
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage('A helpful message'),
       ValidationMessage('A second, somewhat longer helpful message'),
     ];
-    return const ValidationResult(ValidationType.success, messages, statusInfo: 'with statusInfo');
+    return ZeroExecutionTimeValidationResult(ValidationType.success, messages, statusInfo: 'with statusInfo');
   }
 }
 
@@ -1027,11 +1028,11 @@ class PiiValidator extends DoctorValidator {
   PiiValidator() : super('PII Validator');
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage('Contains PII path/to/username', piiStrippedMessage: 'Does not contain PII'),
     ];
-    return const ValidationResult(ValidationType.success, messages);
+    return ZeroExecutionTimeValidationResult(ValidationType.success, messages);
   }
 }
 
@@ -1039,13 +1040,13 @@ class MissingValidator extends DoctorValidator {
   MissingValidator() : super('Missing Validator');
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage.error('A useful error message'),
       ValidationMessage('A message that is not an error'),
       ValidationMessage.hint('A hint message'),
     ];
-    return const ValidationResult(ValidationType.missing, messages);
+    return ZeroExecutionTimeValidationResult(ValidationType.missing, messages);
   }
 }
 
@@ -1053,13 +1054,13 @@ class NotAvailableValidator extends DoctorValidator {
   NotAvailableValidator() : super('Not Available Validator');
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage.error('A useful error message'),
       ValidationMessage('A message that is not an error'),
       ValidationMessage.hint('A hint message'),
     ];
-    return const ValidationResult(ValidationType.notAvailable, messages);
+    return ZeroExecutionTimeValidationResult(ValidationType.notAvailable, messages);
   }
 }
 
@@ -1067,7 +1068,7 @@ class StuckValidator extends DoctorValidator {
   StuckValidator() : super('Stuck validator that never completes');
 
   @override
-  Future<ValidationResult> validate() {
+  Future<ValidationResult> validateImpl() {
     final Completer<ValidationResult> completer = Completer<ValidationResult>();
 
     // This future will never complete
@@ -1079,13 +1080,13 @@ class PartialValidatorWithErrors extends DoctorValidator {
   PartialValidatorWithErrors() : super('Partial Validator with Errors');
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage.error('An error message indicating partial installation'),
       ValidationMessage.hint('Maybe a hint will help the user'),
       ValidationMessage('An extra message with some verbose details'),
     ];
-    return const ValidationResult(ValidationType.partial, messages);
+    return ZeroExecutionTimeValidationResult(ValidationType.partial, messages);
   }
 }
 
@@ -1093,12 +1094,12 @@ class PartialValidatorWithHintsOnly extends DoctorValidator {
   PartialValidatorWithHintsOnly() : super('Partial Validator with only a Hint');
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage.hint('There is a hint here'),
       ValidationMessage('But there is no error'),
     ];
-    return const ValidationResult(ValidationType.partial, messages);
+    return ZeroExecutionTimeValidationResult(ValidationType.partial, messages);
   }
 }
 
@@ -1106,7 +1107,7 @@ class CrashingValidator extends DoctorValidator {
   CrashingValidator() : super('Crashing validator');
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     throw StateError('fatal error');
   }
 }
@@ -1117,7 +1118,7 @@ class AsyncCrashingValidator extends DoctorValidator {
   final FakeAsync _time;
 
   @override
-  Future<ValidationResult> validate() {
+  Future<ValidationResult> validateImpl() {
     const Duration delay = Duration(seconds: 1);
     final Future<ValidationResult> result = Future<ValidationResult>.delayed(
       delay,
@@ -1261,11 +1262,11 @@ class PassingGroupedValidator extends DoctorValidator {
   PassingGroupedValidator(super.title);
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage('A helpful message'),
     ];
-    return const ValidationResult(ValidationType.success, messages);
+    return ZeroExecutionTimeValidationResult(ValidationType.success, messages);
   }
 }
 
@@ -1273,11 +1274,11 @@ class MissingGroupedValidator extends DoctorValidator {
   MissingGroupedValidator(super.title);
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage.error('A useful error message'),
     ];
-    return const ValidationResult(ValidationType.missing, messages);
+    return ZeroExecutionTimeValidationResult(ValidationType.missing, messages);
   }
 }
 
@@ -1285,11 +1286,11 @@ class PartialGroupedValidator extends DoctorValidator {
   PartialGroupedValidator(super.title);
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage.error('An error message for partial installation'),
     ];
-    return const ValidationResult(ValidationType.partial, messages);
+    return ZeroExecutionTimeValidationResult(ValidationType.partial, messages);
   }
 }
 
@@ -1297,11 +1298,11 @@ class PassingGroupedValidatorWithStatus extends DoctorValidator {
   PassingGroupedValidatorWithStatus(super.title);
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage('A different message'),
     ];
-    return const ValidationResult(ValidationType.success, messages, statusInfo: 'A status message');
+    return ZeroExecutionTimeValidationResult(ValidationType.success, messages, statusInfo: 'A status message');
   }
 }
 
@@ -1450,4 +1451,11 @@ class FakeTerminal extends Fake implements AnsiTerminal {
 
   @override
   bool get isCliAnimationEnabled => supportsColor;
+}
+
+class ZeroExecutionTimeValidationResult extends ValidationResult {
+  ZeroExecutionTimeValidationResult(super.type, super.messages, {super.statusInfo});
+
+  @override
+  Duration? get executionTime => Duration.zero;
 }
