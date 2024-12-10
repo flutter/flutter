@@ -45,7 +45,11 @@ class RenderPass : public ResourceBinder {
 
   //----------------------------------------------------------------------------
   /// The pipeline to use for this command.
-  virtual void SetPipeline(
+  virtual void SetPipeline(PipelineRef pipeline);
+
+  //----------------------------------------------------------------------------
+  /// The pipeline to use for this command.
+  void SetPipeline(
       const std::shared_ptr<Pipeline<PipelineDescriptor>>& pipeline);
 
   //----------------------------------------------------------------------------

@@ -233,8 +233,7 @@ static bool Bind(PassBindingsCacheMTL& pass,
 }
 
 // |RenderPass|
-void RenderPassMTL::SetPipeline(
-    const std::shared_ptr<Pipeline<PipelineDescriptor>>& pipeline) {
+void RenderPassMTL::SetPipeline(PipelineRef pipeline) {
   const PipelineDescriptor& pipeline_desc = pipeline->GetDescriptor();
   primitive_type_ = pipeline_desc.GetPrimitiveType();
   pass_bindings_.SetRenderPipelineState(
