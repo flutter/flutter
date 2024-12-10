@@ -1707,6 +1707,74 @@ void main() {
       );
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/159942.
+    testWidgets('OutlineBorder does not overlap with the label at the default radius', (WidgetTester tester) async {
+      Widget buildFrame(TextDirection textDirection) {
+        return MaterialApp(
+          home: Scaffold(
+            body: Container(
+              padding: const EdgeInsets.all(16.0),
+              alignment: Alignment.center,
+              child: Directionality(
+                textDirection: textDirection,
+                child: const RepaintBoundary(
+                  child: InputDecorator(
+                    isFocused: true,
+                    decoration: InputDecoration(
+                      labelText: labelText,
+                      border: OutlineInputBorder(
+                        gapPadding: 0.0,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame(TextDirection.ltr));
+      Rect labelRect = getLabelRect(tester);
+      RenderBox borderBox = InputDecorator.containerOf(tester.element(findBorderPainter()))!;
+      expect(findBorderPainter(), paints
+        ..save()
+        ..path(
+          // The points of the label edge should be part of the border.
+          includes: <Offset>[
+            borderBox.globalToLocal(labelRect.centerLeft),
+            borderBox.globalToLocal(labelRect.centerRight),
+          ],
+          // The points inside the label should not be part of the border.
+          excludes: <Offset>[
+            borderBox.globalToLocal(labelRect.centerLeft) + const Offset(1, 0),
+            borderBox.globalToLocal(labelRect.centerRight) + const Offset(-1, 0),
+          ],
+        )
+        ..restore(),
+      );
+
+      await tester.pumpWidget(buildFrame(TextDirection.rtl));
+      labelRect = getLabelRect(tester);
+      borderBox = InputDecorator.containerOf(tester.element(findBorderPainter()))!;
+      expect(findBorderPainter(), paints
+        ..save()
+        ..path(
+          // The points of the label edge should be part of the border.
+          includes: <Offset>[
+            borderBox.globalToLocal(labelRect.centerLeft),
+            borderBox.globalToLocal(labelRect.centerRight),
+          ],
+          // The points inside the label should not be part of the border.
+          excludes: <Offset>[
+            borderBox.globalToLocal(labelRect.centerLeft) + const Offset(1, 0),
+            borderBox.globalToLocal(labelRect.centerRight) + const Offset(-1, 0),
+          ],
+        )
+        ..restore(),
+      );
+    });
+
     testWidgets('OutlineBorder does not draw over label when input decorator is focused and has an icon', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/18111.
       Widget buildFrame(TextDirection textDirection) {
