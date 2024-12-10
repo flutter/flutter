@@ -46,6 +46,7 @@ class _ExclusiveMouseRegion extends MouseRegion {
   const _ExclusiveMouseRegion({
     super.onEnter,
     super.onExit,
+    super.cursor,
     super.child,
   });
 
@@ -54,6 +55,7 @@ class _ExclusiveMouseRegion extends MouseRegion {
     return _RenderExclusiveMouseRegion(
       onEnter: onEnter,
       onExit: onExit,
+      cursor: cursor,
     );
   }
 }
@@ -62,6 +64,7 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
   _RenderExclusiveMouseRegion({
     super.onEnter,
     super.onExit,
+    super.cursor,
   });
 
   static bool isOutermostMouseRegion = true;
@@ -195,6 +198,7 @@ class Tooltip extends StatefulWidget {
     this.triggerMode,
     this.enableFeedback,
     this.onTriggered,
+    this.mouseCursor,
     this.child,
   }) :  assert((message == null) != (richMessage == null), 'Either `message` or `richMessage` must be specified'),
         assert(
@@ -362,6 +366,12 @@ class Tooltip extends StatefulWidget {
   /// The tooltip is triggered after a tap when [triggerMode] is [TooltipTriggerMode.tap]
   /// or after a long press when [triggerMode] is [TooltipTriggerMode.longPress].
   final TooltipTriggeredCallback? onTriggered;
+
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// If this property is null, [MouseCursor.defer] will be used.
+  final MouseCursor? mouseCursor;
 
   static final List<TooltipState> _openedTooltips = <TooltipState>[];
 
@@ -839,6 +849,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       result = _ExclusiveMouseRegion(
         onEnter: _handleMouseEnter,
         onExit: _handleMouseExit,
+        cursor: widget.mouseCursor ?? MouseCursor.defer,
         child: Listener(
           onPointerDown: _handlePointerDown,
           behavior: HitTestBehavior.opaque,
