@@ -76,7 +76,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     usesDartDefineOption();
-    usesWebRendererOption();
     usesDeviceUserOption();
     usesFlavorOption();
     addEnableImpellerFlag(verboseHelp: verboseHelp);
@@ -336,10 +335,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     return super.verifyThenRunCommand(commandPath);
   }
 
-  WebRendererMode get webRenderer => WebRendererMode.fromCliOption(
-    stringArg(FlutterOptions.kWebRendererFlag),
-    useWasm: useWasm
-  );
+  // Keep in sync with the [RunCommandBase.webRenderer] getter.
+  WebRendererMode get webRenderer {
+    final List<String> dartDefines = extractDartDefines(
+      defineConfigJsonMap: extractDartDefineConfigJsonMap()
+    );
+    return WebRendererMode.fromDartDefines(dartDefines, useWasm: useWasm);
+  }
 
   @override
   Future<FlutterCommandResult> runCommand() async {

@@ -356,7 +356,7 @@ void _defineTests() {
     final Set<SemanticsAction> allActions = SemanticsAction.values.toSet()
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
       ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
-      ..removeWhere((SemanticsAction action) => action.index == 1 << 23);
+      ..remove(SemanticsAction.scrollToOffset); // scrollToOffset is not user-exposed
 
     const int expectedId = 2;
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -406,6 +406,7 @@ void _defineTests() {
         case SemanticsAction.scrollLeft:
         case SemanticsAction.scrollRight:
         case SemanticsAction.scrollUp:
+        case SemanticsAction.scrollToOffset:
         case SemanticsAction.showOnScreen:
         case SemanticsAction.tap:
         case SemanticsAction.focus:
