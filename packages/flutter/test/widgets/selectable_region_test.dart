@@ -320,7 +320,7 @@ void main() {
       final Offset gPos = textOffsetToPosition(paragraph, testValue.indexOf('g'));
       final Offset pPos = textOffsetToPosition(paragraph, testValue.indexOf('p'));
 
-      // A double tap + drag should take precendence over parent drags.
+      // A double tap + drag should take precedence over parent drags.
       final TestGesture gesture = await tester.startGesture(gPos);
       addTearDown(gesture.removePointer);
       await tester.pump();
@@ -382,7 +382,7 @@ void main() {
       final Offset gPos = textOffsetToPosition(paragraph, testValue.indexOf('g'));
       final Offset pPos = textOffsetToPosition(paragraph, testValue.indexOf('p'));
 
-      // A double tap + drag should take precendence over parent drags.
+      // A double tap + drag should take precedence over parent drags.
       final TestGesture gesture = await tester.startGesture(gPos);
       addTearDown(gesture.removePointer);
       await tester.pump();
@@ -1429,6 +1429,87 @@ void main() {
       expect(paragraph.selections[0], const TextSelection(baseOffset: 5, extentOffset: 11));
 
       await gesture.up();
+    }, variant: TargetPlatformVariant.mobile());
+
+    testWidgets('mouse drag finalizes the selection', (WidgetTester tester) async {
+      SelectableRegionSelectionStatus? selectionStatus;
+      final GlobalKey textKey = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            selectionControls: materialTextSelectionControls,
+            child: Center(
+              child: Text(
+                key: textKey,
+                'How are you',
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(textKey.currentContext, isNotNull);
+      final ValueListenable<SelectableRegionSelectionStatus>? selectionStatusNotifier = SelectableRegionSelectionStatusScope.maybeOf(textKey.currentContext!);
+      void onSelectionStatusChange() {
+        selectionStatus = selectionStatusNotifier?.value;
+      }
+      selectionStatusNotifier?.addListener(onSelectionStatusChange);
+      addTearDown(() {
+        selectionStatusNotifier?.removeListener(onSelectionStatusChange);
+      });
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 4));
+      await tester.pump();
+      expect(selectionStatus, SelectableRegionSelectionStatus.changing);
+      await gesture.up();
+      await tester.pump();
+
+      expect(paragraph.selections.length, 1);
+      expect(selectionStatus, SelectableRegionSelectionStatus.finalized);
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('touch drag does not finalize selection on mobile platforms', (WidgetTester tester) async {
+      SelectableRegionSelectionStatus? selectionStatus;
+      final GlobalKey textKey = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            selectionControls: materialTextSelectionControls,
+            child: Center(
+              child: Text(
+                key: textKey,
+                'How are you',
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(textKey.currentContext, isNotNull);
+      final ValueListenable<SelectableRegionSelectionStatus>? selectionStatusNotifier = SelectableRegionSelectionStatusScope.maybeOf(textKey.currentContext!);
+      void onSelectionStatusChange() {
+        selectionStatus = selectionStatusNotifier?.value;
+      }
+      selectionStatusNotifier?.addListener(onSelectionStatusChange);
+      addTearDown(() {
+        selectionStatusNotifier?.removeListener(onSelectionStatusChange);
+      });
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2));
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 4));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(paragraph.selections.length, 0);
+      expect(selectionStatus, isNull);
     }, variant: TargetPlatformVariant.mobile());
 
     testWidgets('mouse can select word-by-word on double click drag', (WidgetTester tester) async {
@@ -4634,7 +4715,7 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    // Clear selection programatically.
+    // Clear selection programmatically.
     state.clearSelection();
     expect(paragraph1.selections, isEmpty);
     expect(paragraph2.selections, isEmpty);

@@ -4744,7 +4744,7 @@ void main() {
 
       // Test default track shape.
       const Radius trackOuterCornerRadius = Radius.circular(8.0);
-      const Radius trackInnerCornderRadius = Radius.circular(2.0);
+      const Radius trackInnerCornerRadius = Radius.circular(2.0);
       expect(
         material,
         paints
@@ -4753,20 +4753,20 @@ void main() {
             rrect: RRect.fromLTRBAndCorners(
               24.0, 292.0, 356.4, 308.0,
               topLeft: trackOuterCornerRadius,
-              topRight: trackInnerCornderRadius,
-              bottomRight: trackInnerCornderRadius,
+              topRight: trackInnerCornerRadius,
+              bottomRight: trackInnerCornerRadius,
               bottomLeft: trackOuterCornerRadius,
             ),
             color: activeTrackColor,
           )
-          // Inctive track.
+          // Inactive track.
           ..rrect(
             rrect: RRect.fromLTRBAndCorners(
               368.4, 292.0, 776.0, 308.0,
-              topLeft: trackInnerCornderRadius,
+              topLeft: trackInnerCornerRadius,
               topRight: trackOuterCornerRadius,
               bottomRight: trackOuterCornerRadius,
-              bottomLeft: trackInnerCornderRadius,
+              bottomLeft: trackInnerCornerRadius,
             ),
             color: inactiveTrackColor,
           )

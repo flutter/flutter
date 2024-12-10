@@ -29,7 +29,6 @@ import 'package:flutter_tools/src/flutter_project_metadata.dart' show FlutterPro
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -42,6 +41,7 @@ import '../../src/fake_http_client.dart';
 import '../../src/fakes.dart';
 import '../../src/pubspec_schema.dart';
 import '../../src/test_flutter_command_runner.dart';
+import 'utils/project_testing_utils.dart';
 
 const String _kNoPlatformsMessage = "You've created a plugin project that doesn't yet support any platforms.\n";
 const String frameworkRevision = '12345678';
@@ -84,7 +84,7 @@ void main() {
 
   setUpAll(() async {
     Cache.disableLocking();
-    await _ensureFlutterToolsSnapshot();
+    await ensureFlutterToolsSnapshot();
   });
 
   setUp(() {
@@ -109,7 +109,7 @@ void main() {
   });
 
   tearDownAll(() async {
-    await _restoreFlutterToolsSnapshot();
+    await restoreFlutterToolsSnapshot();
   });
 
   test('createAndroidIdentifier emits a valid identifier', () {
@@ -2472,7 +2472,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
     await _getPackages(projectDir);
-    await _analyzeProject(projectDir.path);
+    await analyzeProject(projectDir.path);
     await _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
@@ -2489,7 +2489,7 @@ void main() {
     final Directory exampleDir = projectDir.childDirectory('example');
 
     await _getPackages(exampleDir);
-    await _analyzeProject(exampleDir.path);
+    await analyzeProject(exampleDir.path);
     await _runFlutterTest(exampleDir);
   });
 
@@ -2554,7 +2554,7 @@ void main() {
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
 
     await _getPackages(projectDir);
-    await _analyzeProject(projectDir.path);
+    await analyzeProject(projectDir.path);
     await _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
@@ -3603,7 +3603,7 @@ void main() {
       '$relativePath:31:26: use_full_hex_values_for_flutter_colors',
     ];
     expect(expectedFailures.length, '// LINT:'.allMatches(toAnalyze.readAsStringSync()).length);
-    await _analyzeProject(
+    await analyzeProject(
       projectDir.path,
       expectedFailures: expectedFailures,
     );
@@ -4116,122 +4116,7 @@ Future<void> _createAndAnalyzeProject(
     unexpectedPaths: unexpectedPaths,
     expectedGitignoreLines: expectedGitignoreLines,
   );
-  await _analyzeProject(dir.path);
-}
-
-Future<void> _ensureFlutterToolsSnapshot() async {
-  final String flutterToolsPath = globals.fs.path.absolute(globals.fs.path.join(
-    'bin',
-    'flutter_tools.dart',
-  ));
-  final String flutterToolsSnapshotPath = globals.fs.path.absolute(globals.fs.path.join(
-    '..',
-    '..',
-    'bin',
-    'cache',
-    'flutter_tools.snapshot',
-  ));
-  final String packageConfig = globals.fs.path.absolute(globals.fs.path.join(
-    '.dart_tool',
-    'package_config.json'
-  ));
-
-  final File snapshotFile = globals.fs.file(flutterToolsSnapshotPath);
-  if (snapshotFile.existsSync()) {
-    snapshotFile.renameSync('$flutterToolsSnapshotPath.bak');
-  }
-
-  final List<String> snapshotArgs = <String>[
-    '--snapshot=$flutterToolsSnapshotPath',
-    '--packages=$packageConfig',
-    flutterToolsPath,
-  ];
-  final ProcessResult snapshotResult = await Process.run(
-    '../../bin/cache/dart-sdk/bin/dart',
-    snapshotArgs,
-  );
-  printOnFailure('Results of generating snapshot:');
-  printOnFailure(snapshotResult.stdout.toString());
-  printOnFailure(snapshotResult.stderr.toString());
-  expect(snapshotResult.exitCode, 0);
-}
-
-Future<void> _restoreFlutterToolsSnapshot() async {
-  final String flutterToolsSnapshotPath = globals.fs.path.absolute(globals.fs.path.join(
-    '..',
-    '..',
-    'bin',
-    'cache',
-    'flutter_tools.snapshot',
-  ));
-
-  final File snapshotBackup = globals.fs.file('$flutterToolsSnapshotPath.bak');
-  if (!snapshotBackup.existsSync()) {
-    // No backup to restore.
-    return;
-  }
-
-  snapshotBackup.renameSync(flutterToolsSnapshotPath);
-}
-
-Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures = const <String>[] }) async {
-  final String flutterToolsSnapshotPath = globals.fs.path.absolute(globals.fs.path.join(
-    '..',
-    '..',
-    'bin',
-    'cache',
-    'flutter_tools.snapshot',
-  ));
-
-  final List<String> args = <String>[
-    flutterToolsSnapshotPath,
-    'analyze',
-  ];
-
-  final ProcessResult exec = await Process.run(
-    globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
-    args,
-    workingDirectory: workingDir,
-  );
-  if (expectedFailures.isEmpty) {
-    printOnFailure('Results of running analyzer:');
-    printOnFailure(exec.stdout.toString());
-    printOnFailure(exec.stderr.toString());
-    expect(exec.exitCode, 0);
-    return;
-  }
-  expect(exec.exitCode, isNot(0));
-  String lineParser(String line) {
-    try {
-      final String analyzerSeparator = globals.platform.isWindows ? ' - ' : ' • ';
-      final List<String> lineComponents = line.trim().split(analyzerSeparator);
-      final String lintName = lineComponents.removeLast();
-      final String location = lineComponents.removeLast();
-      return '$location: $lintName';
-    } on RangeError catch (err) {
-      throw RangeError('Received "$err" while trying to parse: "$line".');
-    }
-  }
-  final String stdout = exec.stdout.toString();
-  final List<String> errors = <String>[];
-  try {
-    bool analyzeLineFound = false;
-    const LineSplitter().convert(stdout).forEach((String line) {
-      // Conditional to filter out any stdout from `pub get`
-      if (!analyzeLineFound && line.startsWith('Analyzing')) {
-        analyzeLineFound = true;
-        return;
-      }
-
-      if (analyzeLineFound && line.trim().isNotEmpty) {
-        errors.add(lineParser(line.trim()));
-      }
-    });
-  } on Exception catch (err) {
-    fail('$err\n\nComplete STDOUT was:\n\n$stdout');
-  }
-  expect(errors, unorderedEquals(expectedFailures),
-      reason: 'Failed with stdout:\n\n$stdout');
+  await analyzeProject(dir.path);
 }
 
 Future<void> _getPackages(Directory workingDir) async {
@@ -4285,35 +4170,7 @@ Future<void> _runFlutterTest(Directory workingDir, { String? target }) async {
   expect(exec.exitCode, 0);
 }
 
-/// A ProcessManager that invokes a real process manager, but keeps
-/// track of all commands sent to it.
-class LoggingProcessManager extends LocalProcessManager {
-  List<List<String>> commands = <List<String>>[];
 
-  @override
-  Future<Process> start(
-    List<Object> command, {
-    String? workingDirectory,
-    Map<String, String>? environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    ProcessStartMode mode = ProcessStartMode.normal,
-  }) {
-    commands.add(command.map((Object arg) => arg.toString()).toList());
-    return super.start(
-      command,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      runInShell: runInShell,
-      mode: mode,
-    );
-  }
-
-  void clear() {
-    commands.clear();
-  }
-}
 
 String _getStringValueFromPlist({required File plistFile, String? key}) {
   final List<String> plist = plistFile.readAsLinesSync().map((String line) => line.trim()).toList();
