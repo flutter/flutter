@@ -85,6 +85,7 @@ class SystemContextMenu extends StatefulWidget {
   /// The [Rect] that the context menu should point to.
   final Rect anchor;
 
+  /// A list of the items to be displayed in the system context menu.
   final List<SystemContextMenuItem>? items;
 
   /// Called when the system hides this context menu.
@@ -111,36 +112,31 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
   bool isFirstBuild = true;
   late final SystemContextMenuController _systemContextMenuController;
 
-  // Returns the localized title string for the given SystemContextMenuAction.
-  static String _getTitleForAction(SystemContextMenuAction action, WidgetsLocalizations localizations) {
-    return switch (action) {
-      SystemContextMenuAction.copy => localizations.copyButtonLabel,
-      SystemContextMenuAction.cut => localizations.cutButtonLabel,
-      SystemContextMenuAction.lookUp => localizations.lookUpButtonLabel,
-      SystemContextMenuAction.paste => localizations.pasteButtonLabel,
-      SystemContextMenuAction.searchWeb => localizations.searchWebButtonLabel,
-      SystemContextMenuAction.selectAll => localizations.selectAllButtonLabel,
-      SystemContextMenuAction.share => localizations.shareButtonLabel,
-      SystemContextMenuAction.custom => throw AssertionError('Custom type has no title.'),
-    };
-  }
-
+  /// Return the SystemContextMenuItemData for the given SystemContextMenuItem.
+  ///
+  /// SystemContextMenuItem is a format that is designed to be consumed as
+  /// SystemContextMenu.items, where users might want a default localized title
+  /// to be set for them.
+  ///
+  /// SystemContextMenuItemData is a format that is meant to be consumed by
+  /// SystemContextMenuController.show, where there is no expectation that
+  /// localizations can be used under the hood.
   SystemContextMenuItemData _itemToData(SystemContextMenuItem item, WidgetsLocalizations localizations) {
-    return switch (item.action) {
-      SystemContextMenuAction.cut => const SystemContextMenuItemData.cut(),
-      SystemContextMenuAction.copy => const SystemContextMenuItemData.copy(),
-      SystemContextMenuAction.paste => const SystemContextMenuItemData.paste(),
-      SystemContextMenuAction.selectAll => const SystemContextMenuItemData.selectAll(),
-      SystemContextMenuAction.lookUp => SystemContextMenuItemData.lookUp(
-        title: item.title ?? _getTitleForAction(item.action, localizations),
+    return switch (item) {
+      SystemContextMenuItemCut() => const SystemContextMenuItemDataCut(),
+      SystemContextMenuItemCopy() => const SystemContextMenuItemDataCopy(),
+      SystemContextMenuItemPaste() => const SystemContextMenuItemDataPaste(),
+      SystemContextMenuItemSelectAll() => const SystemContextMenuItemDataSelectAll(),
+      SystemContextMenuItemLookUp() => SystemContextMenuItemDataLookUp(
+        title: item.title ?? localizations.lookUpButtonLabel,
       ),
-      SystemContextMenuAction.share => SystemContextMenuItemData.share(
-        title: item.title ?? _getTitleForAction(item.action, localizations),
+      SystemContextMenuItemShare() => SystemContextMenuItemDataShare(
+        title: item.title ?? localizations.shareButtonLabel,
       ),
-      SystemContextMenuAction.searchWeb => SystemContextMenuItemData.searchWeb(
-        title: item.title ?? _getTitleForAction(item.action, localizations),
+      SystemContextMenuItemSearchWeb() => SystemContextMenuItemDataSearchWeb(
+        title: item.title ?? localizations.searchWebButtonLabel,
       ),
-      SystemContextMenuAction.custom => SystemContextMenuItemData.custom(
+      SystemContextMenuItemCustom() => SystemContextMenuItemDataCustom(
         title: item.title!,
         onPressed: item.onPressed!,
       ),
