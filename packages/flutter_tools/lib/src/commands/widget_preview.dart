@@ -238,60 +238,6 @@ class WidgetPreviewStartCommand extends FlutterCommand
       command: pubAdd,
       touchesPackageConfig: true,
     );
-
-    // Generate package_config.json.
-    await pub.get(
-      context: PubContext.create,
-      project: widgetPreviewScaffoldProject,
-      offline: offline,
-      outputMode: PubOutputMode.summaryOnly,
-    );
-
-    if (rootProject.manifest.generateSyntheticPackage) {
-      maybeAddFlutterGenToPackageConfig(
-        rootProject: rootProject,
-      );
-    }
-  }
-
-  /// Manually adds an entry for package:flutter_gen to the preview scaffold's
-  /// package_config.json if the target project makes use of localization.
-  ///
-  /// The Flutter Tool does this when running a Flutter project with
-  /// localization instead of modifying the user's pubspec.yaml to depend on it
-  /// as a path dependency. Unfortunately, the preview scaffold still needs to
-  /// add it directly to its package_config.json as the generated package name
-  /// isn't actually flutter_gen, which pub doesn't really like, and using the
-  /// actual package name will break applications which import
-  /// package:flutter_gen.
-  void maybeAddFlutterGenToPackageConfig({
-    required FlutterProject rootProject,
-  }) {
-    if (!rootProject.manifest.generateSyntheticPackage) {
-      return;
-    }
-    final FlutterProject widgetPreviewScaffoldProject =
-        rootProject.widgetPreviewScaffoldProject;
-    final File packageConfig = widgetPreviewScaffoldProject.packageConfig;
-    final String previewPackageConfigPath = packageConfig.path;
-    if (!packageConfig.existsSync()) {
-      throw StateError(
-        "Could not find preview project's package_config.json at "
-        '$previewPackageConfigPath',
-      );
-    }
-    final Map<String, Object?> packageConfigJson = json.decode(
-      packageConfig.readAsStringSync(),
-    ) as Map<String, Object?>;
-    (packageConfigJson['packages'] as List<dynamic>?)!
-        .cast<Map<String, String>>()
-        .add(flutterGenPackageConfigEntry);
-    packageConfig.writeAsStringSync(
-      json.encode(packageConfigJson),
-    );
-    globals.logger.printStatus(
-      'Added flutter_gen dependency to $previewPackageConfigPath',
-    );
   }
 }
 
