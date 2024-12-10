@@ -1,0 +1,242 @@
+import 'dart:io';
+
+import 'package:args/args.dart';
+import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
+import 'package:process_runner/process_runner.dart';
+
+Future<int> main(List<String> arguments) async {
+  final ArgParser parser = ArgParser();
+  parser.addFlag('help', help: 'Print help.', abbr: 'h');
+  parser.addFlag('fix',
+      abbr: 'f',
+      help: 'Instead of just checking for formatting errors, fix them in place.');
+  parser.addFlag('all-files',
+      abbr: 'a',
+      help: 'Instead of just checking for formatting errors in changed files, '
+          'check for them in all files.');
+
+  late final ArgResults options;
+  try {
+    options = parser.parse(arguments);
+  } on FormatException catch (e) {
+    stderr.writeln('ERROR: $e');
+    _usage(parser, exitCode: 0);
+  }
+
+  if (options['help'] as bool) {
+    _usage(parser, exitCode: 0);
+  }
+
+  final File script = File.fromUri(Platform.script).absolute;
+  final Directory flutterRoot = script.parent.parent.parent;
+
+  const ProcessManager processManager = LocalProcessManager();
+  final String baseGitRef = await _getDiffBaseRevision(processManager, flutterRoot);
+
+  final bool result = (await _checkDartFormat(
+      flutterRoot: flutterRoot,
+      fixing: options['fix'] as bool,
+      allFiles: options['all-files'] as bool,
+      baseGitRef: baseGitRef,
+    )) == 0;
+
+  exit(result ? 0 : 1);
+}
+
+void _usage(ArgParser parser, {int exitCode = 1}) {
+  stderr.writeln('format.dart [--help] [--fix] [--all-files]');
+  stderr.writeln(parser.usage);
+  exit(exitCode);
+}
+
+Future<String> _getDiffBaseRevision(ProcessManager processManager, Directory repoDir) async {
+  final ProcessRunner processRunner = ProcessRunner(
+    defaultWorkingDirectory: repoDir,
+    processManager: processManager,
+  );
+  String upstream = 'upstream';
+  final String upstreamUrl = await _runGit(
+    <String>['remote', 'get-url', upstream],
+    processRunner,
+    failOk: true,
+  );
+  if (upstreamUrl.isEmpty) {
+    upstream = 'origin';
+  }
+  await _runGit(<String>['fetch', upstream, 'main'], processRunner);
+  String result = '';
+  try {
+    // This is the preferred command to use, but developer checkouts often do
+    // not have a clear fork point, so we fall back to just the regular
+    // merge-base in that case.
+    result = await _runGit(
+      <String>['merge-base', '--fork-point', 'FETCH_HEAD', 'HEAD'],
+      processRunner,
+    );
+  } on ProcessRunnerException {
+    result = await _runGit(<String>['merge-base', 'FETCH_HEAD', 'HEAD'], processRunner);
+  }
+  return result.trim();
+}
+
+Future<String> _runGit(
+    List<String> args,
+    ProcessRunner processRunner, {
+      bool failOk = false,
+    }) async {
+  final ProcessRunnerResult result = await processRunner.runProcess(
+    <String>['git', ...args],
+    failOk: failOk,
+  );
+  return result.stdout;
+}
+
+ProcessPoolProgressReporter _namedReport(String name) {
+  return (int total, int completed, int inProgress, int pending, int failed) {
+    final String percent =
+    total == 0 ? '100' : ((100 * completed) ~/ total).toString().padLeft(3);
+    final String completedStr = completed.toString().padLeft(3);
+    final String totalStr = total.toString().padRight(3);
+    final String inProgressStr = inProgress.toString().padLeft(2);
+    final String pendingStr = pending.toString().padLeft(3);
+    final String failedStr = failed.toString().padLeft(3);
+
+    stdout.write('$name Jobs: $percent% done, '
+        '$completedStr/$totalStr completed, '
+        '$inProgressStr in progress, '
+        '$pendingStr pending, '
+        '$failedStr failed.${' ' * 20}\r');
+  };
+}
+
+Future<int> _checkDartFormat({
+  required Directory flutterRoot,
+  required bool fixing,
+  required bool allFiles,
+  required String baseGitRef,
+}) async {
+  final ProcessRunner processRunner = ProcessRunner(
+    defaultWorkingDirectory: flutterRoot,
+  );
+
+  final List<String> filesToCheck = await _getFileList(
+    types: <String>['*.dart'],
+    allFiles: allFiles,
+    baseGitRef: baseGitRef,
+    processRunner: processRunner,
+  );
+
+  final List<String> cmd = <String>[
+    path.join(flutterRoot.path, 'bin', 'dart'),
+    'format',
+    '--set-exit-if-changed',
+    '--show=none',
+    if (!fixing) '--output=show',
+    if (fixing) '--output=write',
+  ];
+  final List<WorkerJob> jobs = <WorkerJob>[];
+  for (final String file in filesToCheck) {
+    jobs.add(WorkerJob(<String>[...cmd, file]));
+  }
+  final ProcessPool dartFmt = ProcessPool(
+    processRunner: processRunner,
+    printReport: _namedReport('dart format'),
+  );
+
+  Iterable<WorkerJob> incorrect;
+  if (!fixing) {
+    final Stream<WorkerJob> completedJobs = dartFmt.startWorkers(jobs);
+    final List<WorkerJob> diffJobs = <WorkerJob>[];
+    await for (final WorkerJob completedJob in completedJobs) {
+      if (completedJob.result.exitCode == 1) {
+        diffJobs.add(
+          WorkerJob(
+            <String>[
+              'git',
+              'diff',
+              '--no-index',
+              '--no-color',
+              '--ignore-cr-at-eol',
+              '--',
+              completedJob.command.last,
+              '-',
+            ],
+            stdinRaw: _codeUnitsAsStream(completedJob.result.stdoutRaw),
+          ),
+        );
+      }
+    }
+    final ProcessPool diffPool = ProcessPool(
+      processRunner: processRunner,
+      printReport: _namedReport('diff'),
+    );
+    final List<WorkerJob> completedDiffs = await diffPool.runToCompletion(diffJobs);
+    incorrect = completedDiffs.where((WorkerJob job) {
+      return job.result.exitCode != 0;
+    });
+  } else {
+    final List<WorkerJob> completedJobs = await dartFmt.runToCompletion(jobs);
+    incorrect = completedJobs.where((WorkerJob job) => job.result.exitCode == 1);
+  }
+
+  if (incorrect.isNotEmpty) {
+    final bool plural = incorrect.length > 1;
+    if (fixing) {
+      stdout.writeln('Fixing ${incorrect.length} dart file${plural ? 's' : ''}'
+          ' which ${plural ? 'were' : 'was'} formatted incorrectly.');
+    } else {
+      stderr.writeln('Found ${incorrect.length} Dart file${plural ? 's' : ''}'
+          ' which ${plural ? 'were' : 'was'} formatted incorrectly.');
+      stdout.writeln('To fix, run `et format` or:');
+      stdout.writeln();
+      stdout.writeln('git apply <<DONE');
+      for (final WorkerJob job in incorrect) {
+        stdout.write(job.result.stdout
+            .replaceFirst('b/-', 'b/${job.command[job.command.length - 2]}')
+            .replaceFirst('b/-', 'b/${job.command[job.command.length - 2]}')
+            .replaceFirst(RegExp('\\+Formatted \\d+ files? \\(\\d+ changed\\) in \\d+.\\d+ seconds.\n'), '')
+        );
+      }
+      stdout.writeln('DONE');
+      stdout.writeln();
+    }
+  } else {
+    stdout.writeln('All dart files formatted correctly.');
+  }
+  return incorrect.length;
+}
+
+Future<List<String>> _getFileList({
+  required List<String> types,
+  required bool allFiles,
+  required String baseGitRef,
+  required ProcessRunner processRunner,
+}) async {
+  String output;
+  if (allFiles) {
+    output = await _runGit(<String>[
+      'ls-files',
+      '--',
+      ...types,
+    ], processRunner);
+  } else {
+    output = await _runGit(<String>[
+      'diff',
+      '-U0',
+      '--no-color',
+      '--diff-filter=d',
+      '--name-only',
+      baseGitRef,
+      '--',
+      ...types,
+    ], processRunner);
+  }
+  return output.split('\n').where((String line) => line.isNotEmpty).toList();
+}
+
+Stream<List<int>> _codeUnitsAsStream(List<int>? input) async* {
+  if (input != null) {
+    yield input;
+  }
+}
