@@ -361,7 +361,7 @@ class FlutterPlugin implements Plugin<Project> {
             // Add profile build type.
             profile {
                 initWith(debug)
-                if (buildType.hasProperty("matchingFallbacks")) {
+                if (it.hasProperty("matchingFallbacks")) {
                     matchingFallbacks = ["debug", "release"]
                 }
             }
