@@ -357,7 +357,7 @@ class FlutterPlugin implements Plugin<Project> {
 
         String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
                 "gradle", "flutter_proguard_rules.pro")
-        project.android.buildTypes { BuildType buildType
+        project.android.buildTypes { BuildType buildType ->
             // Add profile build type.
             profile {
                 initWith(debug)
@@ -620,7 +620,7 @@ class FlutterPlugin implements Plugin<Project> {
      *    1. The embedding
      *    2. libflutter.so
      */
-    void addFlutterDependencies(BuildType buildType) {
+    void addFlutterDependencies(buildType) {
         String flutterBuildMode = buildModeFor(buildType)
         if (!supportsBuildMode(flutterBuildMode)) {
             return
