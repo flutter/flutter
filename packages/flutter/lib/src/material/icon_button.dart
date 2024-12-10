@@ -197,6 +197,8 @@ class IconButton extends StatelessWidget {
     this.splashColor,
     this.disabledColor,
     required this.onPressed,
+    this.onHover,
+    this.onLongPress,
     this.mouseCursor,
     this.focusNode,
     this.autofocus = false,
@@ -228,6 +230,8 @@ class IconButton extends StatelessWidget {
     this.splashColor,
     this.disabledColor,
     required this.onPressed,
+    this.onHover,
+    this.onLongPress,
     this.mouseCursor,
     this.focusNode,
     this.autofocus = false,
@@ -261,6 +265,8 @@ class IconButton extends StatelessWidget {
     this.splashColor,
     this.disabledColor,
     required this.onPressed,
+    this.onHover,
+    this.onLongPress,
     this.mouseCursor,
     this.focusNode,
     this.autofocus = false,
@@ -293,6 +299,8 @@ class IconButton extends StatelessWidget {
     this.splashColor,
     this.disabledColor,
     required this.onPressed,
+    this.onHover,
+    this.onLongPress,
     this.mouseCursor,
     this.focusNode,
     this.autofocus = false,
@@ -477,6 +485,12 @@ class IconButton extends StatelessWidget {
   ///
   /// If this is set to null, the button will be disabled.
   final VoidCallback? onPressed;
+
+  /// The callback that is called when the button is hovered.
+  final ValueChanged<bool>? onHover;
+
+  /// The callback that is called when the button is long-presses.
+  final VoidCallback? onLongPress;
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
@@ -783,6 +797,8 @@ class IconButton extends StatelessWidget {
       autofocus: autofocus,
       canRequestFocus: onPressed != null,
       onTap: onPressed,
+      onHover: onHover,
+      onLongPress: onLongPress,
       mouseCursor: mouseCursor ?? (onPressed == null ? SystemMouseCursors.basic : SystemMouseCursors.click),
       enableFeedback: effectiveEnableFeedback,
       focusColor: focusColor ?? theme.focusColor,
