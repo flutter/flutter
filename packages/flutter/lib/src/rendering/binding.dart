@@ -790,19 +790,9 @@ class _BindingPipelineManifold extends ChangeNotifier implements PipelineManifol
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
     _binding.addSemanticsEnabledListener(notifyListeners);
-    if (_binding.semanticsEnabled) {
-      SystemChannels.accessibility.send(const GeneratingSemanticsTreeSemanticsEvent(true).toMap());
-    }
   }
 
   final RendererBinding _binding;
-
-  @protected
-  @override
-  void notifyListeners() {
-    SystemChannels.accessibility.send(GeneratingSemanticsTreeSemanticsEvent(_binding.semanticsEnabled).toMap());
-    super.notifyListeners();
-  }
 
   @override
   void requestVisualUpdate() {
