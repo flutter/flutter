@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:multi_window_ref_app/app/child_window_renderer.dart';
+import 'package:multi_window_ref_app/app/positioner_settings.dart';
 import 'package:multi_window_ref_app/app/window_controller_text.dart';
 import 'window_settings.dart';
 import 'window_manager_model.dart';
@@ -9,10 +10,12 @@ class PopupWindowContent extends StatelessWidget {
       {super.key,
       required this.controller,
       required this.windowSettings,
+      required this.positionerSettingsModifier,
       required this.windowManagerModel});
 
   final PopupWindowController controller;
   final WindowSettings windowSettings;
+  final PositionerSettingsModifier positionerSettingsModifier;
   final WindowManagerModel windowManagerModel;
 
   @override
@@ -21,6 +24,7 @@ class PopupWindowContent extends StatelessWidget {
         view: ChildWindowRenderer(
             windowManagerModel: windowManagerModel,
             windowSettings: windowSettings,
+            positionerSettingsModifier: positionerSettingsModifier,
             controller: controller),
         child: Scaffold(
             backgroundColor: Colors.transparent,

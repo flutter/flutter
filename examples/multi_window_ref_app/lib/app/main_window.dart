@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:multi_window_ref_app/app/child_window_renderer.dart';
-import 'package:multi_window_ref_app/app/window_controller_render.dart';
 
 import 'window_settings.dart';
 import 'window_settings_dialog.dart';
 import 'window_manager_model.dart';
+import 'positioner_settings.dart';
+import 'custom_positioner_dialog.dart';
 
 class MainWindow extends StatefulWidget {
   MainWindow({super.key, required WindowController mainController}) {
@@ -14,6 +15,8 @@ class MainWindow extends StatefulWidget {
 
   final WindowManagerModel _windowManagerModel = WindowManagerModel();
   final WindowSettings _settings = WindowSettings();
+  final PositionerSettingsModifier _positionerSettingsModifier =
+      PositionerSettingsModifier();
 
   @override
   State<MainWindow> createState() => _MainWindowState();
@@ -49,7 +52,11 @@ class _MainWindowState extends State<MainWindow> {
                           selectedWindow: widget._windowManagerModel.selected,
                           windowManagerModel: widget._windowManagerModel,
                           windowSettings: widget._settings);
-                    })
+                    }),
+                const SizedBox(height: 12),
+                _PositionerEditorCard(
+                    positionerSettingsModifier:
+                        widget._positionerSettingsModifier)
               ],
             ),
           ),
@@ -61,6 +68,7 @@ class _MainWindowState extends State<MainWindow> {
         view: ChildWindowRenderer(
             windowManagerModel: widget._windowManagerModel,
             windowSettings: widget._settings,
+            positionerSettingsModifier: widget._positionerSettingsModifier,
             controller: widget._windowManagerModel.windows[0].controller,
             renderParentlessWindows: true),
         child: child);
@@ -118,10 +126,7 @@ class _ActiveWindowsTable extends StatelessWidget {
                 key: controller.key,
                 color: WidgetStateColor.resolveWith((states) {
                   if (states.contains(WidgetState.selected)) {
-                    return Theme.of(context)
-                        .colorScheme
-                        .primary
-                        .withAlpha(20);
+                    return Theme.of(context).colorScheme.primary.withAlpha(20);
                   }
                   return Colors.transparent;
                 }),
@@ -234,6 +239,98 @@ class _WindowCreatorCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _PositionerEditorCard extends StatefulWidget {
+  const _PositionerEditorCard({required this.positionerSettingsModifier});
+
+  final PositionerSettingsModifier positionerSettingsModifier;
+
+  @override
+  State<_PositionerEditorCard> createState() => _PositionerEditorCardState();
+}
+
+class _PositionerEditorCardState extends State<_PositionerEditorCard> {
+  @override
+  Widget build(BuildContext context) {
+    return Card.outlined(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 15, 5),
+          child: ListenableBuilder(
+              listenable: widget.positionerSettingsModifier,
+              builder: (BuildContext context, _) {
+                final positionerSettingsList = widget
+                    .positionerSettingsModifier.mapping.positionerSettingsList;
+                final selectedName = positionerSettingsList[
+                        widget.positionerSettingsModifier.positionerIndex]
+                    .name;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(top: 10),
+                      child: Text(
+                        'Positioner',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.0,
+                        ),
+                      ),
+                    ),
+                    ListTile(
+                      title: const Text('Preset'),
+                      subtitle: DropdownButton(
+                        items: positionerSettingsList
+                            .map((PositionerSetting setting) =>
+                                DropdownMenuItem<String>(
+                                  value: setting.name,
+                                  child: Text(setting.name),
+                                ))
+                            .toList(),
+                        value: selectedName,
+                        isExpanded: true,
+                        focusColor: Colors.transparent,
+                        onChanged: (String? value) {
+                          setState(() {
+                            widget.positionerSettingsModifier.setSelectedIndex(
+                              positionerSettingsList.indexWhere(
+                                  (setting) => setting.name == value),
+                            );
+                          });
+                        },
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: TextButton(
+                          child: const Text('CUSTOM PRESET'),
+                          onPressed: () async {
+                            final settings = await customPositionerDialog(
+                              context,
+                              positionerSettingsList.last,
+                            );
+                            if (settings != null) {
+                              setState(() {
+                                final pos = positionerSettingsList.length - 1;
+                                widget.positionerSettingsModifier
+                                    .setAtIndex(settings, pos);
+                                widget.positionerSettingsModifier
+                                    .setSelectedIndex(pos);
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                );
+              })),
     );
   }
 }

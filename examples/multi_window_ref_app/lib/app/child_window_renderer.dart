@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:multi_window_ref_app/app/positioner_settings.dart';
 import 'window_controller_render.dart';
 import 'window_manager_model.dart';
 import 'window_settings.dart';
@@ -7,12 +8,14 @@ class ChildWindowRenderer extends StatelessWidget {
   const ChildWindowRenderer(
       {required this.windowManagerModel,
       required this.windowSettings,
+      required this.positionerSettingsModifier,
       required this.controller,
       this.renderParentlessWindows = false,
       super.key});
 
   final WindowManagerModel windowManagerModel;
   final WindowSettings windowSettings;
+  final PositionerSettingsModifier positionerSettingsModifier;
   final WindowController controller;
   final bool renderParentlessWindows;
 
@@ -31,6 +34,7 @@ class ChildWindowRenderer extends StatelessWidget {
                 controller: child.controller,
                 key: child.key,
                 windowSettings: windowSettings,
+                positionerSettingsModifier: positionerSettingsModifier,
                 windowManagerModel: windowManagerModel,
                 onDestroyed: () => windowManagerModel.remove(child),
                 onError: () => windowManagerModel.remove(child),

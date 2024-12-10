@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:multi_window_ref_app/app/positioner_settings.dart';
 import 'child_window_renderer.dart';
 import 'window_manager_model.dart';
 import 'window_settings.dart';
@@ -10,10 +11,12 @@ class RegularWindowContent extends StatefulWidget {
       {super.key,
       required this.controller,
       required this.windowSettings,
+      required this.positionerSettingsModifier,
       required this.windowManagerModel});
 
   final RegularWindowController controller;
   final WindowSettings windowSettings;
+  final PositionerSettingsModifier positionerSettingsModifier;
   final WindowManagerModel windowManagerModel;
 
   @override
@@ -109,6 +112,7 @@ class _RegularWindowContentState extends State<RegularWindowContent>
         view: ChildWindowRenderer(
             windowManagerModel: widget.windowManagerModel,
             windowSettings: widget.windowSettings,
+            positionerSettingsModifier: widget.positionerSettingsModifier,
             controller: widget.controller),
         child: child);
   }
