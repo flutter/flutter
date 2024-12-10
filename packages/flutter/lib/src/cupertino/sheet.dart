@@ -98,31 +98,35 @@ Future<T?> showCupertinoSheet<T>({
   bool useNestedNavigation = false,
 }) {
   final WidgetBuilder builder;
+  final GlobalKey<NavigatorState> nestedNavigatorKey = GlobalKey<NavigatorState>();
   if (!useNestedNavigation) {
     builder = pageBuilder;
   } else {
     builder = (BuildContext context) {
       return NavigatorPopHandler(
         onPopWithResult: (T? result) {
-          Navigator.of(context, rootNavigator: true).maybePop(result);
+          nestedNavigatorKey.currentState!.maybePop();
         },
         child: Navigator(
+          key: nestedNavigatorKey,
           initialRoute: '/',
-          onGenerateRoute: (RouteSettings settings) {
-            return CupertinoPageRoute<void>(
-              builder: (BuildContext context) {
-                return PopScope(
-                  canPop: settings.name != '/',
-                  onPopInvokedWithResult: (bool didPop, Object? result) {
-                    if (didPop) {
-                      return;
-                    }
-                    Navigator.of(context, rootNavigator: true).pop(result);
-                  },
-                  child: pageBuilder(context),
-                );
-              }
-            );
+          onGenerateInitialRoutes: (NavigatorState navigator, String initialRouteName) {
+            return <Route<void>>[
+              CupertinoPageRoute<void>(
+                builder: (BuildContext context) {
+                  return PopScope(
+                    canPop: false,
+                    onPopInvokedWithResult: (bool didPop, Object? result) {
+                      if (didPop) {
+                        return;
+                      }
+                      Navigator.of(context, rootNavigator: true).pop(result);
+                    },
+                    child: pageBuilder(context),
+                  );
+                }
+              )
+            ];
           },
         ),
       );
