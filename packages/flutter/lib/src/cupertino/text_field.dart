@@ -1304,13 +1304,13 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;
     VoidCallback? handleDidGainAccessibilityFocus;
+    VoidCallback? handleDidLoseAccessibilityFocus;
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
         textSelectionControls ??= cupertinoTextSelectionHandleControls;
-
+      case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         textSelectionControls ??= cupertinoDesktopTextSelectionHandleControls;
@@ -1319,6 +1319,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
           if (!_effectiveFocusNode.hasFocus && _effectiveFocusNode.canRequestFocus) {
             _effectiveFocusNode.requestFocus();
           }
+        };
+        handleDidLoseAccessibilityFocus = () {
+          _effectiveFocusNode.unfocus();
         };
     }
 
@@ -1484,6 +1487,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         _requestKeyboard();
       },
       onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
+      onDidLoseAccessibilityFocus: handleDidLoseAccessibilityFocus,
       onFocus: enabled
         ? () {
             assert(
