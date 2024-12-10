@@ -2625,191 +2625,15 @@ class SystemContextMenuController with SystemContextMenuClient {
   }
 }
 
-// TODO(justinmc): Still need to decide to name this as ios specific or not.
-// Probably should make it ios-specific, because these classes encode
-// ios-specific logic, such as the fact that you can't change the title of the
-// paste button, etc.
 /// Describes a context menu button that will be rendered in the system context
-/// menu and not by Flutter itself.
+/// menu.
 ///
 /// See also:
 ///
+///  * [SystemContextMenuItem], which performs a similar role but at the widget
+///    level, where the titles can be replaced with default localized values.
 ///  * [ContextMenuButtonItem], which performs a similar role for Flutter-drawn
 ///    context menus.
-sealed class SystemContextMenuItem {
-  /// The text to display to the user.
-  ///
-  /// Not exposed for some built-in menu items whose title is always set by the
-  /// platform.
-  final String? title = null;
-
-  /// The callback to be called when the menu item is pressed.
-  ///
-  /// Not exposed for built-in menu items, which handle their own action when
-  /// pressed.
-  final VoidCallback? onPressed = null;
-
-// TODO(justinmc): Well I think this is an option, too.
-/*
-  final String _action;
-  final String _type;
-  */
-
-/*
-  Map<String, dynamic> get _json {
-    return <String, dynamic>{
-      //'action': _action.name,
-      'action': switch (this) {
-        SystemContextMenuItemCustom() => 'custom',
-        SystemContextMenuItemCut() => 'cut',
-        _ => 'ok',
-      },
-      'callbackId': hashCode, // TODO(justinmc): Effective?
-      if (title != null)
-        'title': title,
-      'type': switch (this) {
-        SystemContextMenuItemCustom() => 'custom',
-        _ => 'builtIn',
-      },
-    };
-  }
-  */
-}
-
-/// Creates an instance of [SystemContextMenuItem] for the system's built-in cut
-/// button.
-///
-/// Should only appear when there is a selection that can be cut.
-class SystemContextMenuItemCut implements SystemContextMenuItem {
-  /// Creates an instance of [SystemContextMenuItemCut].
-  const SystemContextMenuItemCut();
-
-  @override
-  String? get title => null;
-
-  @override
-  VoidCallback? get onPressed => null;
-}
-
-/// Creates an instance of [SystemContextMenuItem] for the system's built-in
-/// copy button.
-///
-/// Should only appear when there is a selection that can be copied.
-class SystemContextMenuItemCopy implements SystemContextMenuItem {
-  /// Creates an instance of [SystemContextMenuItemCopy].
-  const SystemContextMenuItemCopy();
-
-  @override
-  String? get title => null;
-
-  @override
-  VoidCallback? get onPressed => null;
-}
-
-/// Creates an instance of [SystemContextMenuItem] for the system's built-in
-/// paste button.
-///
-/// Should only appear when the field can receive pasted content.
-class SystemContextMenuItemPaste implements SystemContextMenuItem {
-  /// Creates an instance of [SystemContextMenuItemPaste].
-  const SystemContextMenuItemPaste();
-
-  @override
-  String? get title => null;
-
-  @override
-  VoidCallback? get onPressed => null;
-}
-
-/// Creates an instance of [SystemContextMenuItem] for the system's built-in
-/// select all button.
-///
-/// Should only appear when the field can have its selection changed.
-class SystemContextMenuItemSelectAll implements SystemContextMenuItem {
-  /// Creates an instance of [SystemContextMenuItemSelectAll].
-  const SystemContextMenuItemSelectAll();
-
-  @override
-  String? get title => null;
-
-  @override
-  VoidCallback? get onPressed => null;
-}
-
-/// Creates an instance of [SystemContextMenuItem] for the
-/// system's built-in search web button.
-///
-/// Should only appear when content is selected.
-class SystemContextMenuItemSearchWeb implements SystemContextMenuItem {
-  /// Creates an instance of [SystemContextMenuItemSearchWeb].
-  const SystemContextMenuItemSearchWeb({
-    this.title,
-  });
-
-  @override
-  final String? title;
-
-  @override
-  VoidCallback? get onPressed => null;
-}
-
-/// Creates an instance of [SystemContextMenuItem] for the
-/// system's built-in look up button.
-///
-/// Should only appear when content is selected.
-class SystemContextMenuItemLookUp implements SystemContextMenuItem {
-  /// Creates an instance of [SystemContextMenuItemLookUp].
-  const SystemContextMenuItemLookUp({
-    this.title,
-  });
-
-  @override
-  final String? title;
-
-  @override
-  VoidCallback? get onPressed => null;
-}
-
-/// Creates an instance of [SystemContextMenuItem] for the
-/// system's built-in share button.
-///
-/// Opens the system share dialog.
-///
-/// Should only appear when shareable content is selected.
-class SystemContextMenuItemShare implements SystemContextMenuItem {
-  /// Creates an instance of [SystemContextMenuItemShare].
-  ///
-  /// If no [title] is given, [WidgetsLocalizations.shareButtonLabel] should be
-  /// used.
-  const SystemContextMenuItemShare({
-    this.title,
-  });
-
-  @override
-  final String? title;
-
-  @override
-  VoidCallback? get onPressed => null;
-}
-
-// TODO(justinmc): Support the "custom" type.
-// https://github.com/flutter/flutter/issues/103163
-/// Creates an instance of [SystemContextMenuItem] for a custom menu item whose
-/// [title] and [onPressed] are as specified.
-class SystemContextMenuItemCustom implements SystemContextMenuItem {
-  /// Creates an instance of [SystemContextMenuItemCustom].
-  const SystemContextMenuItemCustom({
-    required String this.title,
-    required VoidCallback this.onPressed,
-  });
-
-  @override
-  final String? title;
-
-  @override
-  final VoidCallback? onPressed;
-}
-
 sealed class SystemContextMenuItemData {
   const SystemContextMenuItemData();
 
@@ -2825,6 +2649,9 @@ sealed class SystemContextMenuItemData {
   /// pressed.
   VoidCallback? get onPressed;
 
+  // TODO(justinmc): I could put this inside of the json conversion, to minimize
+  // the chance of invalid strings getting in here? Or actually I should make
+  // this a private enum! Same for type below.
   // Corresponds to the "action" field from the method channel method
   // "ContextMenu.showSystemContextMenu".
   String get _action;
