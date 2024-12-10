@@ -320,27 +320,37 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 }
 
 - (fml::WeakPtr<flutter::PlatformView>)platformView {
-  FML_DCHECK(_shell);
+  if (!_shell) {
+    return {};
+  }
   return _shell->GetPlatformView();
 }
 
 - (flutter::PlatformViewIOS*)iosPlatformView {
-  FML_DCHECK(_shell);
+  if (!_shell) {
+    return nullptr;
+  }
   return static_cast<flutter::PlatformViewIOS*>(_shell->GetPlatformView().get());
 }
 
 - (fml::RefPtr<fml::TaskRunner>)platformTaskRunner {
-  FML_DCHECK(_shell);
+  if (!_shell) {
+    return {};
+  }
   return _shell->GetTaskRunners().GetPlatformTaskRunner();
 }
 
 - (fml::RefPtr<fml::TaskRunner>)uiTaskRunner {
-  FML_DCHECK(_shell);
+  if (!_shell) {
+    return {};
+  }
   return _shell->GetTaskRunners().GetUITaskRunner();
 }
 
 - (fml::RefPtr<fml::TaskRunner>)rasterTaskRunner {
-  FML_DCHECK(_shell);
+  if (!_shell) {
+    return {};
+  }
   return _shell->GetTaskRunners().GetRasterTaskRunner();
 }
 
@@ -392,6 +402,9 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 }
 
 - (void)ensureSemanticsEnabled {
+  if (!self.iosPlatformView) {
+    return;
+  }
   self.iosPlatformView->SetSemanticsEnabled(true);
 }
 
@@ -419,6 +432,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 }
 
 - (void)attachView {
+  FML_DCHECK(self.iosPlatformView);
   self.iosPlatformView->attachView();
 }
 
@@ -1224,6 +1238,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 #pragma mark - FlutterTextureRegistry
 
 - (int64_t)registerTexture:(NSObject<FlutterTexture>*)texture {
+  FML_DCHECK(self.iosPlatformView);
   int64_t textureId = self.nextTextureId++;
   self.iosPlatformView->RegisterExternalTexture(textureId, texture);
   return textureId;
