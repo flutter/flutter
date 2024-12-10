@@ -9,6 +9,7 @@ import groovy.xml.QName
 import java.nio.file.Paths
 import com.android.build.gradle.internal.dsl.BuildType
 import com.android.build.gradle.internal.api.ApplicationVariantImpl
+import com.android.build.gradle.api.LibraryVariant
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -1472,7 +1473,7 @@ class FlutterPlugin implements Plugin<Project> {
         // Wait for the host app project configuration.
         appProject.afterEvaluate {
             assert(appProject.android != null)
-            project.android.libraryVariants.all { libraryVariant ->
+            project.android.libraryVariants.all { LibraryVariant libraryVariant ->
                 Task copyFlutterAssetsTask
                 appProject.android.applicationVariants.all { appProjectVariant ->
                     Task appAssembleTask = getAssembleTask(appProjectVariant)
