@@ -3033,13 +3033,13 @@ void main() {
     );
   });
 
-  testWidgets('IconButton hovered & onLongPressed M2 - M3', (WidgetTester tester) async {
+  testWidgets('Material2 - IconButton hovered & onLongPressed', (WidgetTester tester) async {
     late bool onHovered;
     bool onLongPressed = false;
-    Widget build({bool enabled = true, bool useM3 = true}) {
+    Widget build({bool enabled = true}) {
       return MaterialApp(
         theme: ThemeData(
-          useMaterial3: useM3
+          useMaterial3: false
         ),
         home: Material(
           child: Directionality(
@@ -3058,35 +3058,81 @@ void main() {
         ),
       );
     }
-    for (int i = 0; i < 1; i++) {
-      final bool useM3 = i == 0;
+    await tester.pumpWidget(build());
+    final Offset iconButtonOffset = tester.getCenter(find.byType(IconButton));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
 
-      await tester.pumpWidget(build(useM3: useM3));
-      final Offset iconButtonOffset = tester.getCenter(find.byType(IconButton));
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await gesture.addPointer();
+    await gesture.moveTo(iconButtonOffset);
+    await tester.pumpAndSettle();
+    expect(onHovered, true);
 
-      await gesture.moveTo(iconButtonOffset);
-      await tester.pumpAndSettle();
-      expect(onHovered, true);
+    await tester.longPressAt(iconButtonOffset);
+    await tester.pumpAndSettle();
+    expect(onLongPressed, true);
 
-      await tester.longPressAt(iconButtonOffset);
-      await tester.pumpAndSettle();
-      expect(onLongPressed, true);
+    onHovered = false;
+    onLongPressed = false;
 
-      onHovered = false;
-      onLongPressed = false;
+    await tester.pumpWidget(build(enabled: false));
+    await gesture.moveTo(iconButtonOffset);
+    await tester.pumpAndSettle();
+    expect(onHovered, false);
 
-      await tester.pumpWidget(build(enabled: false, useM3: useM3));
-      await gesture.moveTo(iconButtonOffset);
-      await tester.pumpAndSettle();
-      expect(onHovered, false);
+    await tester.longPressAt(iconButtonOffset);
+    await tester.pumpAndSettle();
+    expect(onLongPressed, false);
+  });
 
-      await tester.longPressAt(iconButtonOffset);
-      await tester.pumpAndSettle();
-      expect(onLongPressed, false);
-
+  testWidgets('Material3 - IconButton hovered & onLongPressed', (WidgetTester tester) async {
+    late bool onHovered;
+    bool onLongPressed = false;
+    Widget build({bool enabled = true}) {
+      return MaterialApp(
+        theme: ThemeData(
+          useMaterial3: true
+        ),
+        home: Material(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: IconButton(
+              icon: const Icon(Icons.favorite),
+              onPressed: enabled ? () {} : null,
+              onHover: (bool hover) {
+                onHovered = hover;
+              },
+              onLongPress: () {
+                onLongPressed = true;
+              },
+            ),
+          ),
+        ),
+      );
     }
+    await tester.pumpWidget(build());
+    final Offset iconButtonOffset = tester.getCenter(find.byType(IconButton));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+
+    await gesture.moveTo(iconButtonOffset);
+    await tester.pumpAndSettle();
+    expect(onHovered, true);
+
+    await tester.longPressAt(iconButtonOffset);
+    await tester.pumpAndSettle();
+    expect(onLongPressed, true);
+
+    onHovered = false;
+    onLongPressed = false;
+
+    await tester.pumpWidget(build(enabled: false));
+    await gesture.moveTo(iconButtonOffset);
+    await tester.pumpAndSettle();
+    expect(onHovered, false);
+
+    await tester.longPressAt(iconButtonOffset);
+    await tester.pumpAndSettle();
+    expect(onLongPressed, false);
   });
 }
 
