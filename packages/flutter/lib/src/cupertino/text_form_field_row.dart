@@ -157,6 +157,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
       color: CupertinoColors.placeholderText,
     ),
     EditableTextContextMenuBuilder? contextMenuBuilder = _defaultContextMenuBuilder,
+    SpellCheckConfiguration? spellCheckConfiguration,
     super.restorationId,
   })  : assert(initialValue == null || controller == null),
         assert(obscuringCharacter.length == 1),
@@ -234,6 +235,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
                   placeholder: placeholder,
                   placeholderStyle: placeholderStyle,
                   contextMenuBuilder: contextMenuBuilder,
+                  spellCheckConfiguration: spellCheckConfiguration
                 ),
               ),
             );
