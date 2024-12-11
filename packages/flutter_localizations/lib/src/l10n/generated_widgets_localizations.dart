@@ -1516,6 +1516,14 @@ class WidgetsLocalizationLv extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Pārvietot uz augšu';
 }
 
+/// The translations for Literary Chinese (`lzh`).
+class WidgetsLocalizationLzh extends WidgetsLocalizationZhHant {
+  /// Create an instance of the translation bundle for Literary Chinese.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
+  const WidgetsLocalizationLzh();
+}
+
 /// The translations for Macedonian (`mk`).
 class WidgetsLocalizationMk extends GlobalWidgetsLocalizations {
   /// Create an instance of the translation bundle for Macedonian.
@@ -1670,6 +1678,22 @@ class WidgetsLocalizationMy extends GlobalWidgetsLocalizations {
 
   @override
   String get reorderItemUp => 'အပေါ်သို့ ရွှေ့ရန်';
+}
+
+/// The translations for Hokkien (`nan`).
+class WidgetsLocalizationNan extends WidgetsLocalizationZhHant {
+  /// Create an instance of the translation bundle for Hokkien.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
+  const WidgetsLocalizationNan();
+}
+
+/// The translations for Hokkien, using the Traditional Han script (`nan_Hant`).
+class WidgetsLocalizationNanHant extends WidgetsLocalizationNan {
+  /// Create an instance of the translation bundle for Hokkien, using the Traditional Han script.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
+  const WidgetsLocalizationNanHant();
 }
 
 /// The translations for Norwegian Bokmål (`nb`).
@@ -2419,6 +2443,22 @@ class WidgetsLocalizationVi extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Di chuyển lên';
 }
 
+/// The translations for Cantonese (`yue`).
+class WidgetsLocalizationYue extends WidgetsLocalizationZhHantHk {
+  /// Create an instance of the translation bundle for Cantonese.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
+  const WidgetsLocalizationYue();
+}
+
+/// The translations for Cantonese, using the Traditional Han script (`yue_Hant`).
+class WidgetsLocalizationYueHant extends WidgetsLocalizationYue {
+  /// Create an instance of the translation bundle for Cantonese, using the Traditional Han script.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
+  const WidgetsLocalizationYueHant();
+}
+
 /// The translations for Chinese (`zh`).
 class WidgetsLocalizationZh extends GlobalWidgetsLocalizations {
   /// Create an instance of the translation bundle for Chinese.
@@ -2445,17 +2485,17 @@ class WidgetsLocalizationZh extends GlobalWidgetsLocalizations {
   String get reorderItemUp => '上移';
 }
 
-/// The translations for Chinese, using the Han script (`zh_Hans`).
+/// The translations for Chinese, using the Simplified Han script (`zh_Hans`).
 class WidgetsLocalizationZhHans extends WidgetsLocalizationZh {
-  /// Create an instance of the translation bundle for Chinese, using the Han script.
+  /// Create an instance of the translation bundle for Chinese, using the Simplified Han script.
   ///
   /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
   const WidgetsLocalizationZhHans();
 }
 
-/// The translations for Chinese, using the Han script (`zh_Hant`).
+/// The translations for Chinese, using the Traditional Han script (`zh_Hant`).
 class WidgetsLocalizationZhHant extends WidgetsLocalizationZh {
-  /// Create an instance of the translation bundle for Chinese, using the Han script.
+  /// Create an instance of the translation bundle for Chinese, using the Traditional Han script.
   ///
   /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
   const WidgetsLocalizationZhHant();
@@ -2470,35 +2510,35 @@ class WidgetsLocalizationZhHant extends WidgetsLocalizationZh {
   String get reorderItemRight => '向右移';
 
   @override
-  String get reorderItemToEnd => '移到最後';
-
-  @override
-  String get reorderItemToStart => '移到開頭';
-
-  @override
-  String get reorderItemUp => '向上移';
-}
-
-/// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
-class WidgetsLocalizationZhHantHk extends WidgetsLocalizationZhHant {
-  /// Create an instance of the translation bundle for Chinese, as used in Hong Kong, using the Han script.
-  ///
-  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
-  const WidgetsLocalizationZhHantHk();
-}
-
-/// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
-class WidgetsLocalizationZhHantTw extends WidgetsLocalizationZhHant {
-  /// Create an instance of the translation bundle for Chinese, as used in Taiwan, using the Han script.
-  ///
-  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
-  const WidgetsLocalizationZhHantTw();
+  String get reorderItemToEnd => '移至結尾';
 
   @override
   String get reorderItemToStart => '移至開頭';
 
   @override
-  String get reorderItemToEnd => '移至結尾';
+  String get reorderItemUp => '向上移';
+}
+
+/// The translations for Chinese, as used in Hong Kong, using the Traditional Han script (`zh_Hant_HK`).
+class WidgetsLocalizationZhHantHk extends WidgetsLocalizationZhHant {
+  /// Create an instance of the translation bundle for Chinese, as used in Hong Kong, using the Traditional Han script.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
+  const WidgetsLocalizationZhHantHk();
+
+  @override
+  String get reorderItemToEnd => '移到最後';
+
+  @override
+  String get reorderItemToStart => '移到開頭';
+}
+
+/// The translations for Chinese, as used in Taiwan, using the Traditional Han script (`zh_Hant_TW`).
+class WidgetsLocalizationZhHantTw extends WidgetsLocalizationZhHant {
+  /// Create an instance of the translation bundle for Chinese, as used in Taiwan, using the Traditional Han script.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
+  const WidgetsLocalizationZhHantTw();
 }
 
 /// The translations for Zulu (`zu`).
@@ -2583,12 +2623,14 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
   'lo', // Lao
   'lt', // Lithuanian
   'lv', // Latvian
+  'lzh', // Literary Chinese
   'mk', // Macedonian
   'ml', // Malayalam
   'mn', // Mongolian
   'mr', // Marathi
   'ms', // Malay
   'my', // Burmese
+  'nan', // Hokkien
   'nb', // Norwegian Bokmål
   'ne', // Nepali
   'nl', // Dutch Flemish
@@ -2616,6 +2658,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
   'ur', // Urdu
   'uz', // Uzbek
   'vi', // Vietnamese
+  'yue', // Cantonese
   'zh', // Chinese
   'zu', // Zulu
 ]);
@@ -2674,12 +2717,14 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
 ///  * `lo` - Lao
 ///  * `lt` - Lithuanian
 ///  * `lv` - Latvian
+///  * `lzh` - Literary Chinese
 ///  * `mk` - Macedonian
 ///  * `ml` - Malayalam
 ///  * `mn` - Mongolian
 ///  * `mr` - Marathi
 ///  * `ms` - Malay
 ///  * `my` - Burmese
+///  * `nan` - Hokkien (plus 1 script)
 ///  * `nb` - Norwegian Bokmål
 ///  * `ne` - Nepali
 ///  * `nl` - Dutch Flemish
@@ -2707,6 +2752,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
 ///  * `ur` - Urdu
 ///  * `uz` - Uzbek
 ///  * `vi` - Vietnamese
+///  * `yue` - Cantonese (plus 1 script)
 ///  * `zh` - Chinese (plus 2 country variations and 2 scripts)
 ///  * `zu` - Zulu
 /// {@endtemplate}
@@ -2877,6 +2923,8 @@ GlobalWidgetsLocalizations? getWidgetsTranslation(
       return const WidgetsLocalizationLt();
     case 'lv':
       return const WidgetsLocalizationLv();
+    case 'lzh':
+      return const WidgetsLocalizationLzh();
     case 'mk':
       return const WidgetsLocalizationMk();
     case 'ml':
@@ -2889,6 +2937,14 @@ GlobalWidgetsLocalizations? getWidgetsTranslation(
       return const WidgetsLocalizationMs();
     case 'my':
       return const WidgetsLocalizationMy();
+    case 'nan': {
+      switch (locale.scriptCode) {
+        case 'Hant': {
+          return const WidgetsLocalizationNanHant();
+        }
+      }
+      return const WidgetsLocalizationNan();
+    }
     case 'nb':
       return const WidgetsLocalizationNb();
     case 'ne':
@@ -2957,6 +3013,14 @@ GlobalWidgetsLocalizations? getWidgetsTranslation(
       return const WidgetsLocalizationUz();
     case 'vi':
       return const WidgetsLocalizationVi();
+    case 'yue': {
+      switch (locale.scriptCode) {
+        case 'Hant': {
+          return const WidgetsLocalizationYueHant();
+        }
+      }
+      return const WidgetsLocalizationYue();
+    }
     case 'zh': {
       switch (locale.scriptCode) {
         case 'Hans': {
