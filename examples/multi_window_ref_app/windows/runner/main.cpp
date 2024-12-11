@@ -1,8 +1,6 @@
 #include <flutter/generated_plugin_registrant.h>
-#include <flutter/method_channel.h>
 #include <flutter/dart_project.h>
-#include <flutter/flutter_window_controller.h>
-#include <windows.h>
+#include <flutter/flutter_engine.h>
 
 #include "utils.h"
 
@@ -26,7 +24,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
 
   auto const engine{std::make_shared<flutter::FlutterEngine>(project)};
   RegisterPlugins(engine.get());
-  flutter::FlutterWindowController::GetInstance().SetEngine(engine);
   engine->Run();
 
   ::MSG msg;
