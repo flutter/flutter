@@ -1684,7 +1684,7 @@ class CompileSwiftUITest {
       '-archivePath',
       'hello_world_swiftuiArchive',
       'archive',
-          '-allowProvisioningUpdates',
+      '-allowProvisioningUpdates',
       'CODE_SIGNING_ALLOWED=NO'
     ]).then((ProcessResult results) {
       print(results.stdout);
