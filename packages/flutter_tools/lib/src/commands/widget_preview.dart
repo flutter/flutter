@@ -238,6 +238,14 @@ class WidgetPreviewStartCommand extends FlutterCommand
       command: pubAdd,
       touchesPackageConfig: true,
     );
+
+    // Generate package_config.json.
+    await pub.get(
+      context: PubContext.create,
+      project: widgetPreviewScaffoldProject,
+      offline: offline,
+      outputMode: PubOutputMode.summaryOnly,
+    );
   }
 }
 
