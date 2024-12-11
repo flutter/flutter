@@ -24,18 +24,31 @@ const String kChromeEnvironment = 'CHROME_EXECUTABLE';
 /// An environment variable used to override the location of Microsoft Edge.
 const String kEdgeEnvironment = 'EDGE_ENVIRONMENT';
 
+/// An environment variable used to override the location of Firefox.
+const String kFirefoxEnvironment = 'FIREFOX_EXECUTABLE';
+
 /// The expected executable name on linux.
 const String kLinuxExecutable = 'google-chrome';
+
+/// The expected Firefox executable name on Linux.
+const String kLinuxFirefoxExecutable = 'firefox';
 
 /// The expected executable name on macOS.
 const String kMacOSExecutable =
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+
+/// The expected Firefox executable name on macOS.
+const String kMacOSFirefoxExecutable =
+    '/Applications/Firefox.app/Contents/MacOS/firefox';
 
 /// The expected Chrome executable name on Windows.
 const String kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
 
 /// The expected Edge executable name on Windows.
 const String kWindowsEdgeExecutable = r'Microsoft\Edge\Application\msedge.exe';
+
+/// The expected Firefox executable name on Windows.
+const String kWindowsFirefoxExecutable = r'Mozilla Firefox\firefox.exe';
 
 /// Used by [ChromiumLauncher] to detect a glibc bug and retry launching the
 /// browser.
@@ -108,6 +121,36 @@ String findEdgeExecutable(Platform platform, FileSystem fileSystem) {
   }
   // Not yet supported for macOS and Linux.
   return '';
+}
+
+/// Find the Firefox executable on the current platform.
+///
+/// Does not verify whether the executable exists.
+String findFirefoxExecutable(Platform platform, FileSystem fileSystem) {
+  if (platform.environment.containsKey(kFirefoxEnvironment)) {
+    return platform.environment[kFirefoxEnvironment]!;
+  }
+  if (platform.isLinux) {
+    return kLinuxFirefoxExecutable;
+  }
+  if (platform.isMacOS) {
+    return kMacOSFirefoxExecutable;
+  }
+  if (platform.isWindows) {
+    /// The possible locations where Firefox executable can be located on windows.
+    final List<String> kWindowsPrefixes = <String>[
+      if (platform.environment.containsKey('PROGRAMFILES'))
+        platform.environment['PROGRAMFILES']!,
+      if (platform.environment.containsKey('PROGRAMFILES(X86)'))
+        platform.environment['PROGRAMFILES(X86)']!,
+    ];
+    final String windowsPrefix = kWindowsPrefixes.firstWhere((String prefix) {
+      final String path = fileSystem.path.join(prefix, kWindowsFirefoxExecutable);
+      return fileSystem.file(path).existsSync();
+    }, orElse: () => '.');
+    return fileSystem.path.join(windowsPrefix, kWindowsFirefoxExecutable);
+  }
+  throwToolExit('Platform ${platform.operatingSystem} is not supported.');
 }
 
 /// A launcher for Chromium browsers with devtools configured.

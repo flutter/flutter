@@ -243,6 +243,78 @@ class GoogleChromeDevice extends ChromiumDevice {
   }
 }
 
+/// Mozilla Firefox browser.
+class FirefoxDevice extends ChromiumDevice {
+  FirefoxDevice({
+    required Platform platform,
+    required ProcessManager processManager,
+    required ChromiumLauncher chromiumLauncher,
+    required super.logger,
+    required super.fileSystem,
+  }) : _platform = platform,
+       _processManager = processManager,
+       super(
+          name: 'firefox',
+          chromeLauncher: chromiumLauncher,
+       );
+
+  final Platform _platform;
+  final ProcessManager _processManager;
+
+  @override
+  String get name => 'Firefox';
+
+  @override
+  late final Future<String> sdkNameAndVersion = _computeSdkNameAndVersion();
+
+  Future<String> _computeSdkNameAndVersion() async {
+    if (!isSupported()) {
+      return 'unknown';
+    }
+
+    String version = 'unknown';
+    if (_platform.isWindows) {
+      if (_processManager.canRun('reg')) {
+        final ProcessResult result = await _processManager.run(<String>[
+          r'reg', 'query', r'HKEY_LOCAL_MACHINE\Software\Mozilla\Mozilla Firefox', '/v', 'CurrentVersion',
+        ]);
+        if (result.exitCode == 0) {
+          final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
+          if (parts.length > 2) {
+            version = 'Mozilla Firefox ${parts[parts.length - 2]}';
+          }
+        }
+      }
+    } else {
+      final String firefox = chromeLauncher.findExecutable();
+      final ProcessResult result = await _processManager.run(<String>[
+        firefox,
+        '--version',
+      ]);
+      if (result.exitCode == 0) {
+        version = result.stdout as String;
+      }
+    }
+    return version.trim();
+  }
+
+  @override
+  bool isSupported() {
+    // Verify Firefox executable can be found
+    if (!chromeLauncher.canFindExecutable()) {
+      return false;
+    }
+    // Add extra Firefox-specific checks if needed
+    return true;
+  }
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) {
+    // Ensure web directory exists for Firefox projects
+    return flutterProject.web.existsSync();
+  }
+}
+
 /// The Microsoft Edge browser based on Chromium.
 class MicrosoftEdgeDevice extends ChromiumDevice {
   MicrosoftEdgeDevice({
@@ -305,7 +377,7 @@ class WebDevices extends PollingDeviceDiscovery {
        _webServerDevice = WebServerDevice(
          logger: logger,
        ),
-       super('Chrome') {
+       super('Web') {  // Changed from 'Chrome' to 'Web' to be more generic
     final OperatingSystemUtils operatingSystemUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
       platform: platform,
@@ -319,6 +391,20 @@ class WebDevices extends PollingDeviceDiscovery {
       processManager: processManager,
       chromiumLauncher: ChromiumLauncher(
         browserFinder: findChromeExecutable,
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: operatingSystemUtils,
+        logger: logger,
+      ),
+    );
+    _firefoxDevice = FirefoxDevice(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      processManager: processManager,
+      chromiumLauncher: ChromiumLauncher(
+        browserFinder: findFirefoxExecutable,
         fileSystem: fileSystem,
         platform: platform,
         processManager: processManager,
@@ -344,6 +430,7 @@ class WebDevices extends PollingDeviceDiscovery {
   }
 
   late final GoogleChromeDevice _chromeDevice;
+  late final FirefoxDevice _firefoxDevice;
   final WebServerDevice _webServerDevice;
   MicrosoftEdgeDevice? _edgeDevice;
   final FeatureFlags _featureFlags;
@@ -362,16 +449,18 @@ class WebDevices extends PollingDeviceDiscovery {
         _webServerDevice,
       if (_chromeDevice.isSupported())
         _chromeDevice,
+      if (_firefoxDevice.isSupported())
+        _firefoxDevice,
       if (edgeDevice != null && await edgeDevice._meetsVersionConstraint())
         edgeDevice,
     ];
   }
 
   @override
-  bool get supportsPlatform =>  _featureFlags.isWebEnabled;
+  bool get supportsPlatform => _featureFlags.isWebEnabled;
 
   @override
-  List<String> get wellKnownIds => const <String>['chrome', 'web-server', 'edge'];
+  List<String> get wellKnownIds => const <String>['chrome', 'web-server', 'edge', 'firefox'];
 }
 
 @visibleForTesting
