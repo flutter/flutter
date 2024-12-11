@@ -23,6 +23,7 @@
 #include "flutter/shell/platform/linux/fl_socket_accessible.h"
 #include "flutter/shell/platform/linux/fl_text_input_handler.h"
 #include "flutter/shell/platform/linux/fl_text_input_view_delegate.h"
+#include "flutter/shell/platform/linux/fl_touch_manager.h"
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
 #include "flutter/shell/platform/linux/fl_window_state_monitor.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
@@ -60,6 +61,9 @@ struct _FlView {
 
   // Manages pointer events.
   FlPointerManager* pointer_manager;
+
+  // Manages touch events.
+  FlTouchManager* touch_manager;
 
   // Manages keyboard events.
   FlKeyboardManager* keyboard_manager;
@@ -145,6 +149,11 @@ static void init_scrolling(FlView* self) {
   g_clear_object(&self->scrolling_manager);
   self->scrolling_manager =
       fl_scrolling_manager_new(self->engine, self->view_id);
+}
+
+static void init_touch(FlView* self) {
+  g_clear_object(&self->touch_manager);
+  self->touch_manager = fl_touch_manager_new(self->engine, self->view_id);
 }
 
 static FlutterPointerDeviceKind get_device_kind(GdkEvent* event) {
@@ -266,6 +275,7 @@ static void update_semantics_cb(FlEngine* engine,
 static void on_pre_engine_restart_cb(FlView* self) {
   init_keyboard(self);
   init_scrolling(self);
+  init_touch(self);
 }
 
 // Implements FlRenderable::redraw
@@ -407,11 +417,25 @@ static gboolean scroll_event_cb(FlView* self, GdkEventScroll* event) {
   return TRUE;
 }
 
+static gboolean touch_event_cb(FlView* self, GdkEventTouch* event) {
+  fl_touch_manager_handle_touch_event(
+      self->touch_manager, event,
+      gtk_widget_get_scale_factor(GTK_WIDGET(self)));
+  return TRUE;
+}
+
 // Signal handler for GtkWidget::motion-notify-event
 static gboolean motion_notify_event_cb(FlView* self,
                                        GdkEventMotion* motion_event) {
   GdkEvent* event = reinterpret_cast<GdkEvent*>(motion_event);
   sync_modifier_if_needed(self, event);
+
+  // return if touch event
+  auto event_type = gdk_event_get_event_type(event);
+  if (event_type == GDK_TOUCH_BEGIN || event_type == GDK_TOUCH_UPDATE ||
+      event_type == GDK_TOUCH_END || event_type == GDK_TOUCH_CANCEL) {
+    return FALSE;
+  }
 
   gdouble x = 0.0, y = 0.0;
   gdk_event_get_coords(event, &x, &y);
@@ -481,6 +505,7 @@ static GdkGLContext* create_context_cb(FlView* self) {
                              gtk_widget_get_parent_window(GTK_WIDGET(self)));
 
   init_scrolling(self);
+  init_touch(self);
 
   g_autoptr(GError) error = nullptr;
   if (!fl_renderer_gdk_create_contexts(self->renderer, &error)) {
@@ -616,6 +641,7 @@ static void fl_view_dispose(GObject* object) {
   g_clear_object(&self->window_state_monitor);
   g_clear_object(&self->scrolling_manager);
   g_clear_object(&self->pointer_manager);
+  g_clear_object(&self->touch_manager);
   g_clear_object(&self->keyboard_manager);
   g_clear_object(&self->keyboard_handler);
   g_clear_object(&self->view_accessible);
@@ -692,7 +718,7 @@ static void fl_view_init(FlView* self) {
   gtk_widget_add_events(event_box,
                         GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK |
                             GDK_BUTTON_RELEASE_MASK | GDK_SCROLL_MASK |
-                            GDK_SMOOTH_SCROLL_MASK);
+                            GDK_SMOOTH_SCROLL_MASK | GDK_TOUCH_MASK);
 
   g_signal_connect_swapped(event_box, "button-press-event",
                            G_CALLBACK(button_press_event_cb), self);
@@ -718,6 +744,8 @@ static void fl_view_init(FlView* self) {
   g_signal_connect_swapped(rotate, "angle-changed",
                            G_CALLBACK(gesture_rotation_update_cb), self);
   g_signal_connect_swapped(rotate, "end", G_CALLBACK(gesture_rotation_end_cb),
+                           self);
+  g_signal_connect_swapped(event_box, "touch-event", G_CALLBACK(touch_event_cb),
                            self);
 
   self->gl_area = GTK_GL_AREA(gtk_gl_area_new());

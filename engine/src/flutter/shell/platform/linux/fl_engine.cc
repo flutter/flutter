@@ -933,6 +933,136 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
   self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1);
 }
 
+void fl_engine_send_touch_up_event(FlEngine* self,
+                                   FlutterViewId view_id,
+                                   size_t timestamp,
+                                   double x,
+                                   double y,
+                                   int32_t device) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  if (self->engine == nullptr) {
+    return;
+  }
+
+  FlutterPointerEvent event;
+  event.timestamp = timestamp;
+  event.x = x;
+  event.y = y;
+  event.device_kind = kFlutterPointerDeviceKindTouch;
+  event.device = device;
+  event.buttons = 0;
+  event.view_id = view_id;
+  event.phase = FlutterPointerPhase::kUp;
+  event.struct_size = sizeof(event);
+
+  self->embedder_api.SendPointerEvent(self->engine, &event, 1);
+}
+
+void fl_engine_send_touch_down_event(FlEngine* self,
+                                     FlutterViewId view_id,
+                                     size_t timestamp,
+                                     double x,
+                                     double y,
+                                     int32_t device) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  if (self->engine == nullptr) {
+    return;
+  }
+
+  FlutterPointerEvent event;
+  event.timestamp = timestamp;
+  event.x = x;
+  event.y = y;
+  event.device_kind = kFlutterPointerDeviceKindTouch;
+  event.device = device;
+  event.buttons = FlutterPointerMouseButtons::kFlutterPointerButtonMousePrimary;
+  event.view_id = view_id;
+  event.phase = FlutterPointerPhase::kDown;
+  event.struct_size = sizeof(event);
+
+  self->embedder_api.SendPointerEvent(self->engine, &event, 1);
+}
+
+void fl_engine_send_touch_move_event(FlEngine* self,
+                                     FlutterViewId view_id,
+                                     size_t timestamp,
+                                     double x,
+                                     double y,
+                                     int32_t device) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  if (self->engine == nullptr) {
+    return;
+  }
+
+  FlutterPointerEvent event;
+  event.timestamp = timestamp;
+  event.x = x;
+  event.y = y;
+  event.device_kind = kFlutterPointerDeviceKindTouch;
+  event.device = device;
+  event.buttons = FlutterPointerMouseButtons::kFlutterPointerButtonMousePrimary;
+  event.view_id = view_id;
+  event.phase = FlutterPointerPhase::kMove;
+  event.struct_size = sizeof(event);
+
+  self->embedder_api.SendPointerEvent(self->engine, &event, 1);
+}
+
+void fl_engine_send_touch_add_event(FlEngine* self,
+                                    FlutterViewId view_id,
+                                    size_t timestamp,
+                                    double x,
+                                    double y,
+                                    int32_t device) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  if (self->engine == nullptr) {
+    return;
+  }
+
+  FlutterPointerEvent event;
+  event.timestamp = timestamp;
+  event.x = x;
+  event.y = y;
+  event.device_kind = kFlutterPointerDeviceKindTouch;
+  event.device = device;
+  event.buttons = 0;
+  event.view_id = view_id;
+  event.phase = FlutterPointerPhase::kAdd;
+  event.struct_size = sizeof(event);
+
+  self->embedder_api.SendPointerEvent(self->engine, &event, 1);
+}
+
+void fl_engine_send_touch_remove_event(FlEngine* self,
+                                       FlutterViewId view_id,
+                                       size_t timestamp,
+                                       double x,
+                                       double y,
+                                       int32_t device) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  if (self->engine == nullptr) {
+    return;
+  }
+
+  FlutterPointerEvent event;
+  event.timestamp = timestamp;
+  event.x = x;
+  event.y = y;
+  event.device_kind = kFlutterPointerDeviceKindTouch;
+  event.device = device;
+  event.buttons = 0;
+  event.view_id = view_id;
+  event.phase = FlutterPointerPhase::kRemove;
+  event.struct_size = sizeof(event);
+
+  self->embedder_api.SendPointerEvent(self->engine, &event, 1);
+}
+
 void fl_engine_send_pointer_pan_zoom_event(FlEngine* self,
                                            FlutterViewId view_id,
                                            size_t timestamp,
