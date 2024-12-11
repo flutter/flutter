@@ -184,6 +184,12 @@ Future<void> run(List<String> arguments) async {
     options: <String>['--flutter-repo', ...arguments],
   );
 
+  printProgress('Check formatting of Dart files...');
+  await runCommand(dart, <String>[
+    '--enable-asserts',
+    path.join(flutterRoot, 'dev', 'tools', 'bin', 'format.dart'),
+  ], workingDirectory: flutterRoot);
+
   if (dartAnalyzeResult.exitCode == 0) {
     // Only run the private lints when the code is free of type errors. The
     // lints are easier to write when they can assume, for example, there is no
