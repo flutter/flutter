@@ -1548,7 +1548,7 @@ void main() {
 
     // Validate all fields manually using FormState.
     expect(formKey.currentState!.validate(), isFalse);
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     // Check error messages are displayed.
     expect(find.text('foo/error'), findsOneWidget);
