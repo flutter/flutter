@@ -7,8 +7,6 @@ import 'dart:io' as io;
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
-import '../bin/format.dart' as target;
-
 class FileContentPair {
   FileContentPair({required this.name, required this.original, required this.formatted});
 
@@ -70,8 +68,12 @@ class TestFileFixture {
 void main() {
   final io.File script = io.File(path.current).absolute;
   final io.Directory flutterRoot = script.parent.parent;
-  final String formatterPath =
-      '${flutterRoot.path}/dev/tools/format.${io.Platform.isWindows ? 'bat' : 'sh'}';
+  final String formatterPath = path.join(
+    flutterRoot.path,
+    'dev',
+    'tools',
+    'format.${io.Platform.isWindows ? 'bat' : 'sh'}',
+  );
 
   test('Can fix Dart formatting errors', () {
     final TestFileFixture fixture = TestFileFixture(<FileContentPair>[
