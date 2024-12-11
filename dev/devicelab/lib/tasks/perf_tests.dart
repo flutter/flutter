@@ -1665,7 +1665,8 @@ class CompileSwiftUITest {
       '-sdk',
       'iphoneos',
       'build',
-      '-allowProvisioningUpdates'
+      '-allowProvisioningUpdates',
+      'CODE_SIGNING_ALLOWED=NO'
     ]).then((ProcessResult results) {
       print(results.stdout);
       if (results.exitCode != 0) {
