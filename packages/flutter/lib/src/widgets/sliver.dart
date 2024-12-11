@@ -873,22 +873,6 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       final SplayTreeMap<int, Element?> newChildren = SplayTreeMap<int, Element?>();
       final Map<int, double> indexToLayoutOffset = HashMap<int, double>();
       final SliverMultiBoxAdaptorWidget adaptorWidget = widget as SliverMultiBoxAdaptorWidget;
-      // Checks if the provided key has a duplicate.
-      bool hasDuplicate(Key? key) {
-        if (key == null || _childElements.isEmpty) {
-          return false;
-        }
-        bool hasBeenFound = false;
-        for (final Element child in _childElements.values.nonNulls) {
-          if (child.widget.key == key) {
-            if (hasBeenFound) {
-              return true;
-            }
-            hasBeenFound = true;
-          }
-        }
-        return false;
-      }
       void processElement(int index) {
         _currentlyUpdatingChildIndex = index;
         if (_childElements[index] != null && _childElements[index] != newChildren[index]) {
@@ -924,33 +908,19 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
           indexToLayoutOffset[index] = childParentData.layoutOffset!;
         }
 
-        // Initialize availableIndex to the current index to track the next free position if needed.
-        int availableIndex = index;
-
         if (newIndex != null && newIndex != index) {
           // The layout offset of the child being moved is no longer accurate.
           if (childParentData != null) {
             childParentData.layoutOffset = null;
           }
-          if (hasDuplicate(key)) {
-            // If a duplicate key is detected, skip reordering the item directly.
-            // Instead, assign it to the next available slot to avoid index conflicts.
-            while (newChildren.containsKey(availableIndex)) {
-              availableIndex++;
-            }
-            newChildren[availableIndex] = _childElements[index];
-          } else {
-            // The child is being moved to a new index.
-            childParentData?.layoutOffset = null;
 
-            newChildren[newIndex] = _childElements[index];
-          }
+          newChildren[newIndex] = _childElements[index];
           if (_replaceMovedChildren) {
             // We need to make sure the original index gets processed.
             newChildren.putIfAbsent(index, () => null);
           }
           // We do not want the remapped child to get deactivated during processElement.
-          _childElements.remove(availableIndex);
+          _childElements.remove(index);
         } else {
           newChildren.putIfAbsent(index, () => _childElements[index]);
         }
@@ -976,12 +946,34 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     } finally {
       _currentlyUpdatingChildIndex = null;
       renderObject.debugChildIntegrityEnabled = true;
-      renderObject.markNeedsLayout();
     }
   }
 
   Widget? _build(int index, SliverMultiBoxAdaptorWidget widget) {
-    return widget.delegate.build(this, index);
+    int keyCounter = 0;
+    Widget? child = widget.delegate.build(this, index);
+
+    bool hasDuplicate(Key? key) {
+      if (key == null || _childElements.isEmpty) {
+        return false;
+      }
+      return _childElements.values.nonNulls.any((Element element) => element.widget.key == key);
+    }
+
+    // Handle key management to avoid duplicates
+    if (child != null) {
+      final Key? key = child.key;
+
+      // Check for duplicate keys and handle them
+      if (key != null && hasDuplicate(key)) {
+        // Generates a unique key using a counter, ensuring greater determinism in the process.
+        final ValueKey<String> newKey = ValueKey<String>('${key}_$keyCounter');
+        keyCounter++;
+        child = KeyedSubtree(key: newKey, child: child);
+      }
+    }
+
+    return child;
   }
 
   @override
