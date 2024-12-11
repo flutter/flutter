@@ -239,6 +239,7 @@ void main() {
                 ..trunkRevision = 'abc123'
                 ..state = pb.CherrypickState.PENDING
               )
+            ..candidateBranch = 'flutter-1.0-candidate.0'
           )
           ..currentPhase = ReleasePhase.VERIFY_ENGINE_CI
         );
