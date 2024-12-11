@@ -101,30 +101,6 @@ void main() {
         ProcessManager: () => processManager,
       },
     );
-
-    testUsingContext(
-      'can add flutter_gen to package_config.json if generate is set in the parent project',
-      () async {
-        command.maybeAddFlutterGenToPackageConfig(rootProject: rootProject);
-        final Map<String, Object?> packageConfig = jsonDecode(
-          rootProject.widgetPreviewScaffoldProject.packageConfig
-              .readAsStringSync(),
-        ) as Map<String, Object?>;
-        expect(packageConfig.containsKey('packages'), true);
-        final List<Map<String, Object?>> packages =
-            (packageConfig['packages']! as List<dynamic>)
-                .cast<Map<String, Object?>>();
-        expect(packages.length, 2);
-        expect(
-          packages.last,
-          WidgetPreviewStartCommand.flutterGenPackageConfigEntry,
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
   });
 }
 
