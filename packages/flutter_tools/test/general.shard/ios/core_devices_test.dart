@@ -4,25 +4,44 @@
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/ios/core_devices.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
-class LocalFileSystemFake extends LocalFileSystem {
-  LocalFileSystemFake.test({required super.signals}) : super.test();
-
+class LocalFileSystemFake extends Fake implements LocalFileSystem {
   MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
 
   @override
   Directory get systemTempDirectory => memoryFileSystem.systemTempDirectory;
+
+  @override
+  Directory directory(dynamic path) => memoryFileSystem.directory(path);
+
+  @override
+  File file(dynamic path) => memoryFileSystem.file(path);
+
+  @override
+  Context get path => memoryFileSystem.path;
+
+  @override
+  Future<void> dispose() async {
+    _disposed = true;
+  }
+
+  @override
+  bool get disposed => _disposed;
+
+  bool _disposed = false;
 }
 
 void main() {
@@ -1411,12 +1430,13 @@ invalid JSON
       });
 
       testWithoutContext('Handles file system disposal', () async {
-        final LocalFileSystem localFs = LocalFileSystemFake.test(signals: Signals.test());
+        final LocalFileSystem localFs = LocalFileSystemFake();
+        final ErrorHandlingFileSystem fs = ErrorHandlingFileSystem(delegate: localFs, platform: FakePlatform());
         deviceControl = IOSCoreDeviceControl(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
-          fileSystem: localFs,
+          fileSystem: fs,
         );
         final Directory tempDir = localFs.systemTempDirectory
             .childDirectory('core_devices.rand0');
