@@ -21,6 +21,20 @@ DlLinearGradientColorSource::DlLinearGradientColorSource(
 }
 
 DlLinearGradientColorSource::DlLinearGradientColorSource(
+    const DlPoint start_point,
+    const DlPoint end_point,
+    uint32_t stop_count,
+    const DlScalar* colors,
+    const float* stops,
+    DlTileMode tile_mode,
+    const DlMatrix* matrix)
+    : DlGradientColorSourceBase(stop_count, tile_mode, matrix),
+      start_point_(start_point),
+      end_point_(end_point) {
+  store_color_stops(this + 1, colors, stops);
+}
+
+DlLinearGradientColorSource::DlLinearGradientColorSource(
     const DlLinearGradientColorSource* source)
     : DlGradientColorSourceBase(source->stop_count(),
                                 source->tile_mode(),

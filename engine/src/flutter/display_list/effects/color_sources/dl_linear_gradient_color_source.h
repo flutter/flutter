@@ -41,6 +41,14 @@ class DlLinearGradientColorSource final : public DlGradientColorSourceBase {
                               DlTileMode tile_mode,
                               const DlMatrix* matrix = nullptr);
 
+  DlLinearGradientColorSource(const DlPoint start_point,
+                              const DlPoint end_point,
+                              uint32_t stop_count,
+                              const DlScalar* colors,
+                              const float* stops,
+                              DlTileMode tile_mode,
+                              const DlMatrix* matrix = nullptr);
+
   explicit DlLinearGradientColorSource(
       const DlLinearGradientColorSource* source);
 
