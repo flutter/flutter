@@ -2452,9 +2452,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// Not shown until [show] is called.
   SystemContextMenuController({
     this.onSystemHide,
-  }) {
-    ServicesBinding.registerSystemContextMenuClient(this);
-  }
+  });
 
   /// Called when the system has hidden the context menu.
   ///
@@ -2491,11 +2489,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   @override
   void handleSystemHide() {
     assert(!_isDisposed);
-    // If this instance wasn't being shown, then it wasn't the instance that was
-    // hidden.
-    if (!_isVisible) {
-      return;
-    }
+    assert(_isVisible);
     if (_lastShown == this) {
       _lastShown = null;
     }
@@ -2505,11 +2499,13 @@ class SystemContextMenuController with SystemContextMenuClient {
 
   @override
   void handleTapCustomActionItem(int callbackId) {
-    if (!_isVisible) {
+    assert(!_isDisposed);
+    assert(_isVisible);
+    final VoidCallback? callback = _buttonCallbacks[callbackId];
+    if (callback == null) {
+      assert(false, 'Tap received for non-existent item with id $callbackId.');
       return;
     }
-    final VoidCallback? callback = _buttonCallbacks[callbackId];
-    assert(callback != null, 'Tap received for non-existent item with id $callbackId.');
     _buttonCallbacks[callbackId]!();
   }
 
@@ -2563,6 +2559,8 @@ class SystemContextMenuController with SystemContextMenuClient {
       }
     }
 
+    ServicesBinding.registerSystemContextMenuClient(this);
+
     _lastTargetRect = targetRect;
     _lastShown = this;
     _hiddenBySystem = false;
@@ -2597,13 +2595,14 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///    the system context menu is supported on the current platform.
   Future<void> hide() async {
     assert(!_isDisposed);
-    // This check prevents a given instance from accidentally hiding some other
+    // This check prevents the instance from accidentally hiding some other
     // instance, since only one can be visible at a time.
     if (this != _lastShown) {
       return;
     }
     _lastShown = null;
     _buttonCallbacks.clear();
+    ServicesBinding.unregisterSystemContextMenuClient(this);
     // This may be called unnecessarily in the case where the user has already
     // hidden the menu (for example by tapping the screen).
     return _channel.invokeMethod<void>(
@@ -2620,7 +2619,6 @@ class SystemContextMenuController with SystemContextMenuClient {
   void dispose() {
     assert(!_isDisposed);
     hide();
-    ServicesBinding.unregisterSystemContextMenuClient(this);
     _isDisposed = true;
   }
 }
@@ -2806,6 +2804,8 @@ class SystemContextMenuItemDataShare extends SystemContextMenuItemData {
   final String title;
 }
 
+// TODO(justinmc): Support the "custom" type.
+// https://github.com/flutter/flutter/issues/103163
 /// A [SystemContextMenuButtonItemData] for a custom button whose title and
 /// callback are defined by the app developer.
 ///

@@ -387,16 +387,21 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       // the user taps outside the menu. Not called when Flutter shows a new
       // system context menu while an old one is still visible.
       case 'ContextMenu.onDismissSystemContextMenu':
-        for (final SystemContextMenuClient client in _systemContextMenuClients) {
-          client.handleSystemHide();
+        if (_systemContextMenuClient == null) {
+          assert(false, 'Platform sent onDismissSystemContextMenu when no SystemContextMenuClient was registered.');
+          return;
         }
+        _systemContextMenuClient!.handleSystemHide();
+        unregisterSystemContextMenuClient(_systemContextMenuClient!);
+        _systemContextMenuClient = null;
       case 'ContextMenu.onTapCustomActionItem':
-        for (final SystemContextMenuClient client in _systemContextMenuClients) {
-          final List<dynamic> args = methodCall.arguments as List<dynamic>;
-          final int callbackId = args.first as int;
-          // TODO(justinmc): Should this thing know about visibility? Keep track of only one visible client at a time?
-          client.handleTapCustomActionItem(callbackId);
+        if (_systemContextMenuClient == null) {
+          assert(false, 'Platform sent onTapCustomActionItem when no SystemContextMenuClient was registered.');
+          return;
         }
+        final List<dynamic> args = methodCall.arguments as List<dynamic>;
+        final int callbackId = args.first as int;
+        _systemContextMenuClient!.handleTapCustomActionItem(callbackId);
       case 'SystemChrome.systemUIChange':
         final List<dynamic> args = methodCall.arguments as List<dynamic>;
         if (_systemUiChangeCallback != null) {
@@ -551,17 +556,19 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     await SystemChannels.platform.invokeMethod('System.initializationComplete');
   }
 
-  final Set<SystemContextMenuClient> _systemContextMenuClients = <SystemContextMenuClient>{};
+  SystemContextMenuClient? _systemContextMenuClient;
 
   /// Registers a [SystemContextMenuClient] that will receive system context
   /// menu calls from the engine.
   static void registerSystemContextMenuClient(SystemContextMenuClient client) {
-    instance._systemContextMenuClients.add(client);
+    assert(instance._systemContextMenuClient == null, 'Attempted to register a SystemContextMenuClient while another was still registered. Call unregisterSystemContextMenuClient first.');
+    instance._systemContextMenuClient = client;
   }
 
   /// Unregisters a [SystemContextMenuClient] so that it is no longer called.
   static void unregisterSystemContextMenuClient(SystemContextMenuClient client) {
-    instance._systemContextMenuClients.remove(client);
+    assert(client == instance._systemContextMenuClient, 'Attempted to unregister a SystemContextMenuClient that was not currently registered.');
+    instance._systemContextMenuClient = null;
   }
 }
 
@@ -650,6 +657,10 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
 /// See also:
 ///  * [SystemContextMenuController], which uses this to provide a fully
 ///    featured way to control the system context menu.
+///  * [ServicesBinding.registerSystemContextMenuClient], which must be called
+///    to register an active client to receive events.
+///  * [ServicesBinding.unregisterSystemContextMenuClient], which must be called
+///    to remove an inactive client from receiving events.
 ///  * [MediaQuery.maybeSupportsShowingSystemContextMenu], which indicates
 ///    whether the system context menu is supported.
 ///  * [SystemContextMenu], which provides a widget interface for displaying the
@@ -657,14 +668,13 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
 mixin SystemContextMenuClient {
   /// Handles the system hiding a context menu.
   ///
-  /// This is called for all instances of [SystemContextMenuController], so it's
-  /// not guaranteed that this instance was the one that was hidden.
+  /// Called only on the single active instance registered with
+  /// [ServicesBinding.registerSystemContextMenuClient].
   void handleSystemHide();
 
   /// Called when a custom system context menu button receives a tap.
   ///
-  /// This is called for all instances of [SystemContextMenuController], so it's
-  /// not guaranteed that this instance is visible at the time that this is
-  /// called.
+  /// Called only on the single active instance registered with
+  /// [ServicesBinding.registerSystemContextMenuClient].
   void handleTapCustomActionItem(int callbackId);
 }
