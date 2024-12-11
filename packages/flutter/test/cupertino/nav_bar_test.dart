@@ -2409,26 +2409,37 @@ void main() {
       ),
     );
 
+    final Finder searchFieldFinder = find.byType(CupertinoSearchTextField);
+    final Finder largeTitleFinder = find.ancestor(
+      of: find.text('Large title').first,
+      matching: find.byType(Padding),
+    ).first;
+    final Finder middleFinder = find.ancestor(
+      of: find.text('middle').first,
+      matching: find.byType(Padding),
+    ).first;
+
     // Initially, all widgets are visible.
     expect(find.byIcon(CupertinoIcons.person_2), findsOneWidget);
     expect(find.byIcon(CupertinoIcons.add_circled), findsOneWidget);
-    expect(find.text('Large title'), findsOneWidget);
-    expect(find.text('middle'), findsOneWidget);
-
-    final Finder searchFieldFinder = find.byType(CupertinoSearchTextField);
+    expect(largeTitleFinder, findsOneWidget);
+    expect(middleFinder.hitTestable(), findsOneWidget);
     expect(searchFieldFinder, findsOneWidget);
+    expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsNothing);
 
     // Tap the search field.
     await tester.tap(searchFieldFinder, warnIfMissed: false);
     await tester.pumpAndSettle();
 
-    // After tapping, leading, trailing, large title, and middle are collapsed.
+    // After tapping, the leading and trailing widgets are removed from the
+    // widget tree, the large title is collapsed, and middle is hidden
+    // underneath the navigation bar.
     expect(find.byIcon(CupertinoIcons.person_2), findsNothing);
     expect(find.byIcon(CupertinoIcons.add_circled), findsNothing);
-    // expect(find.text('Large title'), findsNothing);
-    // expect(find.text('middle'), findsNothing);
+    expect(tester.getBottomRight(largeTitleFinder).dy, 0.0);
+    expect(middleFinder.hitTestable(), findsNothing);
 
-    // Search field and Cancel button should be visible
+    // Search field and 'Cancel' button are visible.
     expect(searchFieldFinder, findsOneWidget);
     expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
   });
@@ -2474,15 +2485,11 @@ void main() {
       return widget is Container && widget.color == unfocusedColor;
     }), findsOneWidget);
 
-    await tester.pumpAndSettle();
-
-    expect(searchFieldFinder, findsOneWidget);
-
     // Tap the search field.
     await tester.tap(searchFieldFinder, warnIfMissed: false);
     await tester.pumpAndSettle();
 
-    // Search field and Cancel button should be visible
+    // Search field and 'Cancel' button should be visible.
     expect(isFocused, true);
     expect(searchFieldFinder, findsOneWidget);
     expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
