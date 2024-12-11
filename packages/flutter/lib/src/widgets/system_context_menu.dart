@@ -207,84 +207,62 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
 ///  * [ContextMenuButtonItem], which performs a similar role for Flutter-drawn
 ///    context menus.
 sealed class SystemContextMenuItem {
+  const SystemContextMenuItem();
+
   /// The text to display to the user.
   ///
   /// Not exposed for some built-in menu items whose title is always set by the
   /// platform.
-  final String? title = null;
+  String? get title => null;
 
   /// The callback to be called when the menu item is pressed.
   ///
   /// Not exposed for built-in menu items, which handle their own action when
   /// pressed.
-  final VoidCallback? onPressed = null;
+  VoidCallback? get onPressed => null;
 }
 
 /// Creates an instance of [SystemContextMenuItem] for the system's built-in cut
 /// button.
 ///
 /// Should only appear when there is a selection that can be cut.
-class SystemContextMenuItemCut implements SystemContextMenuItem {
+class SystemContextMenuItemCut extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemCut].
   const SystemContextMenuItemCut();
-
-  @override
-  String? get title => null;
-
-  @override
-  VoidCallback? get onPressed => null;
 }
 
 /// Creates an instance of [SystemContextMenuItem] for the system's built-in
 /// copy button.
 ///
 /// Should only appear when there is a selection that can be copied.
-class SystemContextMenuItemCopy implements SystemContextMenuItem {
+class SystemContextMenuItemCopy extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemCopy].
   const SystemContextMenuItemCopy();
-
-  @override
-  String? get title => null;
-
-  @override
-  VoidCallback? get onPressed => null;
 }
 
 /// Creates an instance of [SystemContextMenuItem] for the system's built-in
 /// paste button.
 ///
 /// Should only appear when the field can receive pasted content.
-class SystemContextMenuItemPaste implements SystemContextMenuItem {
+class SystemContextMenuItemPaste extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemPaste].
   const SystemContextMenuItemPaste();
-
-  @override
-  String? get title => null;
-
-  @override
-  VoidCallback? get onPressed => null;
 }
 
 /// Creates an instance of [SystemContextMenuItem] for the system's built-in
 /// select all button.
 ///
 /// Should only appear when the field can have its selection changed.
-class SystemContextMenuItemSelectAll implements SystemContextMenuItem {
+class SystemContextMenuItemSelectAll extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemSelectAll].
   const SystemContextMenuItemSelectAll();
-
-  @override
-  String? get title => null;
-
-  @override
-  VoidCallback? get onPressed => null;
 }
 
 /// Creates an instance of [SystemContextMenuItem] for the
 /// system's built-in search web button.
 ///
 /// Should only appear when content is selected.
-class SystemContextMenuItemSearchWeb implements SystemContextMenuItem {
+class SystemContextMenuItemSearchWeb extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemSearchWeb].
   const SystemContextMenuItemSearchWeb({
     this.title,
@@ -292,16 +270,13 @@ class SystemContextMenuItemSearchWeb implements SystemContextMenuItem {
 
   @override
   final String? title;
-
-  @override
-  VoidCallback? get onPressed => null;
 }
 
 /// Creates an instance of [SystemContextMenuItem] for the
 /// system's built-in look up button.
 ///
 /// Should only appear when content is selected.
-class SystemContextMenuItemLookUp implements SystemContextMenuItem {
+class SystemContextMenuItemLookUp extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemLookUp].
   const SystemContextMenuItemLookUp({
     this.title,
@@ -309,9 +284,6 @@ class SystemContextMenuItemLookUp implements SystemContextMenuItem {
 
   @override
   final String? title;
-
-  @override
-  VoidCallback? get onPressed => null;
 }
 
 /// Creates an instance of [SystemContextMenuItem] for the
@@ -320,7 +292,7 @@ class SystemContextMenuItemLookUp implements SystemContextMenuItem {
 /// Opens the system share dialog.
 ///
 /// Should only appear when shareable content is selected.
-class SystemContextMenuItemShare implements SystemContextMenuItem {
+class SystemContextMenuItemShare extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemShare].
   ///
   /// If no [title] is given, [WidgetsLocalizations.shareButtonLabel] should be
@@ -331,16 +303,13 @@ class SystemContextMenuItemShare implements SystemContextMenuItem {
 
   @override
   final String? title;
-
-  @override
-  VoidCallback? get onPressed => null;
 }
 
 // TODO(justinmc): Support the "custom" type.
 // https://github.com/flutter/flutter/issues/103163
 /// Creates an instance of [SystemContextMenuItem] for a custom menu item whose
 /// [title] and [onPressed] are as specified.
-class SystemContextMenuItemCustom implements SystemContextMenuItem {
+class SystemContextMenuItemCustom extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemCustom].
   const SystemContextMenuItemCustom({
     required String this.title,

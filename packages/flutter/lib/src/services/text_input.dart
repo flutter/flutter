@@ -2671,17 +2671,29 @@ sealed class SystemContextMenuItemData {
 }
 
 /// A [SystemContextMenuButtonItemData] for the system's built-in copy button.
-class SystemContextMenuItemDataCopy extends SystemContextMenuItemData {}
+class SystemContextMenuItemDataCopy extends SystemContextMenuItemData {
+  /// Creates an instance of [SystemContextMenuItemDataCopy].
+  const SystemContextMenuItemDataCopy();
+}
 
 /// A [SystemContextMenuButtonItemData] for the system's built-in cut button.
-class SystemContextMenuItemDataCut extends SystemContextMenuItemData {}
+class SystemContextMenuItemDataCut extends SystemContextMenuItemData {
+  /// Creates an instance of [SystemContextMenuItemDataCut].
+  const SystemContextMenuItemDataCut();
+}
 
 /// A [SystemContextMenuButtonItemData] for the system's built-in paste button.
-class SystemContextMenuItemDataPaste extends SystemContextMenuItemData {}
+class SystemContextMenuItemDataPaste extends SystemContextMenuItemData {
+  /// Creates an instance of [SystemContextMenuItemDataPaste].
+  const SystemContextMenuItemDataPaste();
+}
 
 /// A [SystemContextMenuButtonItemData] for the system's built-in select all
 /// button.
-class SystemContextMenuItemDataSelectAll extends SystemContextMenuItemData {}
+class SystemContextMenuItemDataSelectAll extends SystemContextMenuItemData {
+  /// Creates an instance of [SystemContextMenuItemDataSelectAll].
+  const SystemContextMenuItemDataSelectAll();
+}
 
 /// A [SystemContextMenuButtonItemData] for the system's built-in look up
 /// button.
