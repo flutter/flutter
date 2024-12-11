@@ -77,6 +77,7 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
  private:
   std::weak_ptr<Context> context_;
   std::shared_ptr<TextureSourceVK> source_;
+  bool has_validation_layers_ = false;
 
   // |Texture|
   void SetLabel(std::string_view label) override;
