@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/services/spell_check.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -25,6 +26,29 @@ void main() {
 
     final CupertinoTextField textFieldWidget = tester.widget(textFieldFinder);
     expect(textFieldWidget.textAlign, alignment);
+  });
+
+  testWidgets('Passes spellCheckConfiguration to underlying CupertinoTextField', (WidgetTester tester) async {
+    final SpellCheckConfiguration spellCheckConfig = SpellCheckConfiguration(
+      spellCheckService: DefaultSpellCheckService(),
+      misspelledSelectionColor: const Color.fromARGB(255, 255, 255, 0)
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextFormFieldRow(
+            spellCheckConfiguration: spellCheckConfig,
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(CupertinoTextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final CupertinoTextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.spellCheckConfiguration, spellCheckConfig);
   });
 
   testWidgets('Passes scrollPhysics to underlying TextField', (WidgetTester tester) async {
