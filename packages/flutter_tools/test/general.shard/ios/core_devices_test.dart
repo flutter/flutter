@@ -25,6 +25,12 @@ class LocalFileSystemFake extends LocalFileSystem {
 
   @override
   Directory get systemTempDirectory => memoryFileSystem.systemTempDirectory;
+
+  @override
+  Directory directory(dynamic path) => memoryFileSystem.directory(path);
+
+  @override
+  File file(dynamic path) => memoryFileSystem.file(path);
 }
 
 void main() {

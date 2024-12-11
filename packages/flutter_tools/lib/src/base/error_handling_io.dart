@@ -7,7 +7,6 @@ import 'dart:io' as io show Directory, File, Link, Process, ProcessException, Pr
 import 'dart:typed_data';
 
 import 'package:file/file.dart';
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
 
