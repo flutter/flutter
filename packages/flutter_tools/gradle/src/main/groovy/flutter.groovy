@@ -880,6 +880,9 @@ class FlutterPlugin implements Plugin<Project> {
             defaultConfig {
                 externalNativeBuild {
                     cmake {
+                        // CMake will print warnings when you try to build an empty project.
+                        // These arguments silence the warnings - our project is intentionally
+                        // empty.
                         arguments("-Wno-dev", "--no-warn-unused-cli")
                     }
                 }

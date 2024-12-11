@@ -8,6 +8,8 @@ android {
     compileSdk = 34
 
     // Flutter's CI installs the NDK at a non-standard path.
+    // This non-standard structure is initially created by
+    // https://github.com/flutter/engine/blob/main/tools/android_sdk/create_cipd_packages.sh.
     val systemNdkPath: String? = System.getenv("ANDROID_NDK_PATH")
     if (systemNdkPath != null) {
         ndkVersion = "26.3.11579264"
