@@ -79,7 +79,13 @@ class IOSCoreDeviceControl {
 
     try {
       final RunResult result = await _processUtils.run(command, throwOnError: true);
-      final bool isToolPossiblyShutdown = _fileSystem is LocalFileSystem && _fileSystem.disposed;
+      bool isToolPossiblyShutdown = false;
+      if (_fileSystem is ErrorHandlingFileSystem) {
+        final FileSystem delegate = _fileSystem.fileSystem;
+        if (delegate is LocalFileSystem) {
+          isToolPossiblyShutdown = delegate.disposed;
+        }
+      }
 
       // It's possible that the tool is in the process of shutting down, which
       // could result in the temp directory being deleted after the shutdown hooks run

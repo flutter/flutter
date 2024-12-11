@@ -690,6 +690,24 @@ abstract class ImageStreamCompleter with Diagnosticable {
 
   bool _disposed = false;
 
+  /// Called when this [ImageStreamCompleter] has actually been disposed.
+  ///
+  /// Subclasses should override this if they need to clean up resources when
+  /// they are disposed.
+  @mustCallSuper
+  @protected
+  void onDisposed() {}
+
+  /// Disposes this [ImageStreamCompleter] unless:
+  ///   1. It has never had a listener
+  ///   2. It is already disposed
+  ///   3. It has listeners.
+  ///   4. It has active "keep alive" handles.
+  @nonVirtual
+  void maybeDispose() {
+    _maybeDispose();
+  }
+
   @mustCallSuper
   void _maybeDispose() {
     if (!_hadAtLeastOneListener || _disposed || _listeners.isNotEmpty || _keepAliveHandles != 0) {
@@ -700,6 +718,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _currentImage?.dispose();
     _currentImage = null;
     _disposed = true;
+    onDisposed();
   }
 
   void _checkDisposed() {

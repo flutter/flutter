@@ -17,7 +17,6 @@ import '../../src/fake_vm_services.dart';
 import '../../src/fakes.dart';
 import '../../src/testbed.dart';
 import '../resident_runner_helpers.dart';
-import 'fake_native_assets_build_runner.dart';
 
 void main() {
   late Testbed testbed;
@@ -55,8 +54,7 @@ void main() {
         ]);
         globals.fs
             .file(globals.fs.path.join('lib', 'main.dart'))
-            .createSync(recursive: true);
-        final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner();
+                .createSync(recursive: true);
         final HotRunner residentRunner = HotRunner(
           <FlutterDevice>[
             flutterDevice,
@@ -71,19 +69,12 @@ void main() {
           )),
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
-          nativeAssetsBuilder: FakeHotRunnerNativeAssetsBuilder(buildRunner),
           analytics: FakeAnalytics(),
           nativeAssetsYamlFile: 'foo.yaml',
         );
 
         final int result = await residentRunner.run();
         expect(result, 0);
-
-        expect(buildRunner.buildInvocations, 0);
-        expect(buildRunner.buildDryRunInvocations, 0);
-        expect(buildRunner.linkInvocations, 0);
-        expect(buildRunner.hasPackageConfigInvocations, 0);
-        expect(buildRunner.packagesWithNativeAssetsInvocations, 0);
 
         expect(residentCompiler.recompileCalled, true);
         expect(residentCompiler.receivedNativeAssetsYaml, globals.fs.path.toUri('foo.yaml'));

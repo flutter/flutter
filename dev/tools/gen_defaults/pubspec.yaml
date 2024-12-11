@@ -3,7 +3,7 @@ description: A command line script to generate Material component defaults from 
 version: 1.0.0
 
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.7.0-0
 
 dependencies:
   args: 2.6.0

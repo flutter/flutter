@@ -304,12 +304,17 @@ class Scrollable extends StatefulWidget {
   /// {@endtemplate}
   final String? restorationId;
 
-  /// {@macro flutter.widgets.shadow.scrollBehavior}
+  /// {@template flutter.widgets.scrollable.scrollBehavior}
+  /// A [ScrollBehavior] that will be applied to this widget individually.
+  ///
+  /// Defaults to null, wherein the inherited [ScrollBehavior] is copied and
+  /// modified to alter the viewport decoration, like [Scrollbar]s.
   ///
   /// [ScrollBehavior]s also provide [ScrollPhysics]. If an explicit
   /// [ScrollPhysics] is provided in [physics], it will take precedence,
   /// followed by [scrollBehavior], and then the inherited ancestor
   /// [ScrollBehavior].
+  /// {@endtemplate}
   final ScrollBehavior? scrollBehavior;
 
   /// {@macro flutter.material.Material.clipBehavior}
@@ -606,12 +611,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   // Only call this from places that will definitely trigger a rebuild.
   void _updatePosition() {
     _configuration = widget.scrollBehavior ?? ScrollConfiguration.of(context);
-    _physics = _configuration.getScrollPhysics(context);
-    if (widget.physics != null) {
-      _physics = widget.physics!.applyTo(_physics);
-    } else if (widget.scrollBehavior != null) {
-      _physics = widget.scrollBehavior!.getScrollPhysics(context).applyTo(_physics);
-    }
+    final ScrollPhysics? physicsFromWidget = widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context);
+    _physics =  _configuration.getScrollPhysics(context);
+    _physics = physicsFromWidget?.applyTo(_physics) ?? _physics;
+
     final ScrollPosition? oldPosition = _position;
     if (oldPosition != null) {
       _effectiveScrollController.detach(oldPosition);
@@ -626,6 +629,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     _effectiveScrollController.attach(position);
   }
 
+  @protected
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_persistedScrollOffset, 'offset');
@@ -635,6 +639,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     }
   }
 
+  @protected
   @override
   void saveOffset(double offset) {
     assert(debugIsSerializableForRestoration(offset));
@@ -644,6 +649,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     ServicesBinding.instance.restorationManager.flushData();
   }
 
+  @protected
   @override
   void initState() {
     if (widget.controller == null) {
@@ -652,6 +658,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     super.initState();
   }
 
+  @protected
   @override
   void didChangeDependencies() {
     _mediaQueryGestureSettings = MediaQuery.maybeGestureSettingsOf(context);
@@ -680,6 +687,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     return widget.controller?.runtimeType != oldWidget.controller?.runtimeType;
   }
 
+  @protected
   @override
   void didUpdateWidget(Scrollable oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -711,6 +719,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     }
   }
 
+  @protected
   @override
   void dispose() {
     if (widget.controller != null) {
@@ -980,6 +989,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   // DESCRIPTION
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(_position != null);
@@ -1020,6 +1030,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
           key: _scrollSemanticsKey,
           position: position,
           allowImplicitScrolling: _physics!.allowImplicitScrolling,
+          axis: widget.axis,
           semanticChildCount: widget.semanticChildCount,
           child: result,
         )
@@ -1064,6 +1075,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     return (<Future<void>>[ ensureVisibleFuture ], this);
   }
 
+  @protected
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -1543,6 +1555,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
     super.key,
     required this.position,
     required this.allowImplicitScrolling,
+    required this.axis,
     required this.semanticChildCount,
     super.child,
   }) : assert(semanticChildCount == null || semanticChildCount >= 0);
@@ -1550,6 +1563,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
   final ScrollPosition position;
   final bool allowImplicitScrolling;
   final int? semanticChildCount;
+  final Axis axis;
 
   @override
   _RenderScrollSemantics createRenderObject(BuildContext context) {
@@ -1557,6 +1571,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
       position: position,
       allowImplicitScrolling: allowImplicitScrolling,
       semanticChildCount: semanticChildCount,
+      axis: axis,
     );
   }
 
@@ -1564,6 +1579,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderScrollSemantics renderObject) {
     renderObject
       ..allowImplicitScrolling = allowImplicitScrolling
+      ..axis = axis
       ..position = position
       ..semanticChildCount = semanticChildCount;
   }
@@ -1573,6 +1589,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
   _RenderScrollSemantics({
     required ScrollPosition position,
     required bool allowImplicitScrolling,
+    required this.axis,
     required int? semanticChildCount,
     RenderBox? child,
   }) : _position = position,
@@ -1606,6 +1623,8 @@ class _RenderScrollSemantics extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  Axis axis;
+
   int? get semanticChildCount => _semanticChildCount;
   int? _semanticChildCount;
   set semanticChildCount(int? value) {
@@ -1614,6 +1633,14 @@ class _RenderScrollSemantics extends RenderProxyBox {
     }
     _semanticChildCount = value;
     markNeedsSemanticsUpdate();
+  }
+
+  void _onScrollToOffset(Offset targetOffset) {
+    final double offset = switch (axis) {
+      Axis.horizontal => targetOffset.dx,
+      Axis.vertical   => targetOffset.dy,
+    };
+    _position.jumpTo(offset);
   }
 
   @override
@@ -1627,6 +1654,9 @@ class _RenderScrollSemantics extends RenderProxyBox {
           ..scrollExtentMax = _position.maxScrollExtent
           ..scrollExtentMin = _position.minScrollExtent
           ..scrollChildCount = semanticChildCount;
+      if (position.maxScrollExtent > position.minScrollExtent && allowImplicitScrolling) {
+          config.onScrollToOffset = _onScrollToOffset;
+      }
     }
   }
 
@@ -1934,6 +1964,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
     return _horizontalInnerScrollableKey.currentState!;
   }
 
+  @protected
   @override
   void initState() {
     if (widget.verticalDetails.controller == null) {
@@ -1945,6 +1976,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
     super.initState();
   }
 
+  @protected
   @override
   void didUpdateWidget(TwoDimensionalScrollable oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -1985,6 +2017,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
     }
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(
@@ -2049,6 +2082,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
     );
   }
 
+  @protected
   @override
   void dispose() {
     _verticalFallbackController?.dispose();

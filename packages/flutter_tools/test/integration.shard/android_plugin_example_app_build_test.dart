@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(matanlurey): Remove after debugging https://github.com/flutter/flutter/issues/159000.
-@Tags(<String>['flutter-build-apk'])
-library;
-
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -49,19 +45,6 @@ void main() {
     final Directory exampleAppDir =
         tempDir.childDirectory(testName).childDirectory('example');
 
-    final File buildGradleFile = exampleAppDir.childDirectory('android').childFile('build.gradle.kts');
-    expect(buildGradleFile, exists);
-
-    final String buildGradle = buildGradleFile.readAsStringSync();
-    final RegExp androidPluginRegExp =
-        RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
-
-    // Use AGP 7.2.0
-    final String newBuildGradle = buildGradle.replaceAll(
-        androidPluginRegExp, 'com.android.tools.build:gradle:7.2.0');
-    buildGradleFile.writeAsStringSync(newBuildGradle);
-
-    // Run flutter build apk using AGP 7.2.0
     result = processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),

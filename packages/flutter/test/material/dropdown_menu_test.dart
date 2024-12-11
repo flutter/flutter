@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -1516,7 +1517,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/152375.
-  testWidgets('Searching can hightlight entry after keyboard navigation while focused', (WidgetTester tester) async {
+  testWidgets('Searching can highlight entry after keyboard navigation while focused', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
@@ -1874,8 +1875,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(menuAnchor.controller!.isOpen, true);
 
-    // Simulate `TextInputAction.done` on textfield
-    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
     expect(menuAnchor.controller!.isOpen, false);
   });
@@ -1915,31 +1915,29 @@ void main() {
     // Open the menu
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
-
     final bool isMobile = switch (themeData.platform) {
       TargetPlatform.android || TargetPlatform.iOS || TargetPlatform.fuchsia => true,
       TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => false,
     };
-    int expectedCount = isMobile ? 0 : 1;
+    int expectedCount = 1;
 
     // Test onSelected on key press
     await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
-    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
     expect(selectionCount, expectedCount);
-    // The desktop platform closed the menu when a completion action is pressed. So we need to reopen it.
-    if (!isMobile) {
-      await tester.tap(find.byType(DropdownMenu<TestMenu>));
-      await tester.pump();
-    }
+
+    // Open the menu
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
 
     // Disabled item doesn't trigger onSelected callback.
     final Finder item1 = findMenuItemButton('Item 1');
     await tester.tap(item1);
     await tester.pumpAndSettle();
 
-    expect(controller.text, isMobile ? '' : 'Item 0');
+    expect(controller.text, 'Item 0');
     expect(selectionCount, expectedCount);
 
     final Finder item2 = findMenuItemButton('Item 2');
@@ -3366,47 +3364,6 @@ void main() {
     expect(controller.offset, 0.0);
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/149037.
-  testWidgets('Dropdown menu follows the text field when keyboard opens', (WidgetTester tester) async {
-    Widget boilerplate(double bottomInsets) {
-      return MaterialApp(
-        home: MediaQuery(
-          data: MediaQueryData(viewInsets: EdgeInsets.only(bottom: bottomInsets)),
-          child: Scaffold(
-            body: Center(
-              child: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren),
-            ),
-          ),
-        ),
-      );
-    }
-
-    // Build once without bottom insets and open the menu.
-    await tester.pumpWidget(boilerplate(0.0));
-    await tester.tap(find.byType(TextField).first);
-    await tester.pump();
-
-    Finder findMenuPanels() {
-      return find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MenuPanel');
-    }
-
-    // Menu vertical position is just under the text field.
-    expect(
-      tester.getRect(findMenuPanels()).top,
-      tester.getRect(find.byType(TextField).first).bottom,
-    );
-
-    // Simulate the keyboard opening resizing the view.
-    await tester.pumpWidget(boilerplate(100.0));
-    await tester.pump();
-
-    // Menu vertical position is just under the text field.
-    expect(
-      tester.getRect(findMenuPanels()).top,
-      tester.getRect(find.byType(TextField).first).bottom,
-    );
-  });
-
   testWidgets('DropdownMenu with expandedInsets can be aligned', (WidgetTester tester) async {
     Widget buildMenuAnchor({ AlignmentGeometry alignment = Alignment.topCenter }) {
       return MaterialApp(
@@ -3529,6 +3486,182 @@ void main() {
     // None of the menus should be closed.
     expect(dropdownMenuAnchor.controller!.isOpen, true);
   });
+
+  group('The menu is attached at the bottom of the TextField', () {
+    // Define the expected text field bottom instead of querying it using
+    // tester.getRect because when tight constraints are applied to the
+    // Dropdown the TextField bounds are expanded while the visible size
+    // remains 56 pixels.
+    const double textFieldBottom = 56.0;
+
+    testWidgets('when given loose constraints and expandedInsets is set', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            expandedInsets: EdgeInsets.zero,
+            initialSelection: TestMenu.mainMenu3,
+            dropdownMenuEntries: menuChildrenWithIcons,
+          ),
+        ),
+      ));
+
+      // Open the menu.
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      expect(tester.getRect(findMenuMaterial()).top, textFieldBottom);
+    });
+
+    testWidgets('when given tight constraints and expandedInsets is set', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 200,
+            height: 300,
+            child: DropdownMenu<TestMenu>(
+              expandedInsets: EdgeInsets.zero,
+              initialSelection: TestMenu.mainMenu3,
+              dropdownMenuEntries: menuChildrenWithIcons,
+            ),
+          ),
+        ),
+      ));
+
+      // Open the menu.
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      expect(tester.getRect(findMenuMaterial()).top, textFieldBottom);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/147076.
+    testWidgets('when given loose constraints and expandedInsets is not set', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            initialSelection: TestMenu.mainMenu3,
+            dropdownMenuEntries: menuChildrenWithIcons,
+          ),
+        ),
+      ));
+
+      // Open the menu.
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      expect(tester.getRect(findMenuMaterial()).top, textFieldBottom);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/147076.
+    testWidgets('when given tight constraints and expandedInsets is not set', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 200,
+            height: 300,
+            child: DropdownMenu<TestMenu>(
+              initialSelection: TestMenu.mainMenu3,
+              dropdownMenuEntries: menuChildrenWithIcons,
+            ),
+          ),
+        ),
+      ));
+
+      // Open the menu.
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      expect(tester.getRect(findMenuMaterial()).top, textFieldBottom);
+    });
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/143505.
+  testWidgets('Using keyboard navigation to select', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    TestMenu? selectedMenu;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: DropdownMenu<TestMenu>(
+              focusNode: focusNode,
+              dropdownMenuEntries: menuChildren,
+              onSelected: (TestMenu? menu) {
+                selectedMenu = menu;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    // Pressing the tab key 3 times moves the focus to the icon button.
+    for (int i = 0; i < 3; i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+    }
+
+    // Now the focus is on the icon button.
+    final Element iconButton = tester.firstElement(find.byIcon(Icons.arrow_drop_down));
+    expect(Focus.of(iconButton).hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+
+    expect(selectedMenu, TestMenu.mainMenu0);
+  }, variant: TargetPlatformVariant.all());
+
+  // Regression test for https://github.com/flutter/flutter/issues/143505.
+  testWidgets('Using keyboard navigation to select and without setting the FocusNode parameter',
+  (WidgetTester tester) async {
+    TestMenu? selectedMenu;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              onSelected: (TestMenu? menu) {
+                selectedMenu = menu;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    // If there is no `FocusNode`, by default, `TextField` can receive focus
+    // on desktop platforms, but not on mobile platforms. Therefore, on desktop
+    // platforms, it takes 3 tabs to reach the icon button.
+    final int tabCount = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS || TargetPlatform.android || TargetPlatform.fuchsia => 2,
+      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => 3,
+    };
+    for (int i = 0; i < tabCount; i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+    }
+
+    // Now the focus is on the icon button.
+    final Element iconButton = tester.firstElement(find.byIcon(Icons.arrow_drop_down));
+    expect(Focus.of(iconButton).hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+
+    expect(selectedMenu, TestMenu.mainMenu0);
+  }, variant: TargetPlatformVariant.all());
 }
 
 enum TestMenu {

@@ -320,7 +320,7 @@ void main() {
       final Offset gPos = textOffsetToPosition(paragraph, testValue.indexOf('g'));
       final Offset pPos = textOffsetToPosition(paragraph, testValue.indexOf('p'));
 
-      // A double tap + drag should take precendence over parent drags.
+      // A double tap + drag should take precedence over parent drags.
       final TestGesture gesture = await tester.startGesture(gPos);
       addTearDown(gesture.removePointer);
       await tester.pump();
@@ -382,7 +382,7 @@ void main() {
       final Offset gPos = textOffsetToPosition(paragraph, testValue.indexOf('g'));
       final Offset pPos = textOffsetToPosition(paragraph, testValue.indexOf('p'));
 
-      // A double tap + drag should take precendence over parent drags.
+      // A double tap + drag should take precedence over parent drags.
       final TestGesture gesture = await tester.startGesture(gPos);
       addTearDown(gesture.removePointer);
       await tester.pump();
@@ -1429,6 +1429,87 @@ void main() {
       expect(paragraph.selections[0], const TextSelection(baseOffset: 5, extentOffset: 11));
 
       await gesture.up();
+    }, variant: TargetPlatformVariant.mobile());
+
+    testWidgets('mouse drag finalizes the selection', (WidgetTester tester) async {
+      SelectableRegionSelectionStatus? selectionStatus;
+      final GlobalKey textKey = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            selectionControls: materialTextSelectionControls,
+            child: Center(
+              child: Text(
+                key: textKey,
+                'How are you',
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(textKey.currentContext, isNotNull);
+      final ValueListenable<SelectableRegionSelectionStatus>? selectionStatusNotifier = SelectableRegionSelectionStatusScope.maybeOf(textKey.currentContext!);
+      void onSelectionStatusChange() {
+        selectionStatus = selectionStatusNotifier?.value;
+      }
+      selectionStatusNotifier?.addListener(onSelectionStatusChange);
+      addTearDown(() {
+        selectionStatusNotifier?.removeListener(onSelectionStatusChange);
+      });
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 4));
+      await tester.pump();
+      expect(selectionStatus, SelectableRegionSelectionStatus.changing);
+      await gesture.up();
+      await tester.pump();
+
+      expect(paragraph.selections.length, 1);
+      expect(selectionStatus, SelectableRegionSelectionStatus.finalized);
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('touch drag does not finalize selection on mobile platforms', (WidgetTester tester) async {
+      SelectableRegionSelectionStatus? selectionStatus;
+      final GlobalKey textKey = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            selectionControls: materialTextSelectionControls,
+            child: Center(
+              child: Text(
+                key: textKey,
+                'How are you',
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(textKey.currentContext, isNotNull);
+      final ValueListenable<SelectableRegionSelectionStatus>? selectionStatusNotifier = SelectableRegionSelectionStatusScope.maybeOf(textKey.currentContext!);
+      void onSelectionStatusChange() {
+        selectionStatus = selectionStatusNotifier?.value;
+      }
+      selectionStatusNotifier?.addListener(onSelectionStatusChange);
+      addTearDown(() {
+        selectionStatusNotifier?.removeListener(onSelectionStatusChange);
+      });
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2));
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 4));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(paragraph.selections.length, 0);
+      expect(selectionStatus, isNull);
     }, variant: TargetPlatformVariant.mobile());
 
     testWidgets('mouse can select word-by-word on double click drag', (WidgetTester tester) async {
@@ -4634,7 +4715,7 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    // Clear selection programatically.
+    // Clear selection programmatically.
     state.clearSelection();
     expect(paragraph1.selections, isEmpty);
     expect(paragraph2.selections, isEmpty);
@@ -4691,6 +4772,251 @@ void main() {
     variant: TargetPlatformVariant.all(),
     skip: kIsWeb, // [intended] Web uses its native context menu.
   );
+
+  testWidgets('SelectionListener onSelectionChanged is accurate with WidgetSpans', (WidgetTester tester) async {
+    final List<String> dataModel = <String>[
+      'Hello world, ',
+      'how are you today.',
+    ];
+    final SelectionListenerNotifier selectionNotifier = SelectionListenerNotifier();
+    addTearDown(selectionNotifier.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          selectionControls: materialTextSelectionControls,
+          child: SelectionListener(
+            selectionNotifier: selectionNotifier,
+            child: Column(
+              children: <Widget>[
+                Text.rich(
+                  TextSpan(
+                    text: dataModel[0],
+                    children: <InlineSpan>[
+                      WidgetSpan(
+                        child: Text(
+                          dataModel[1],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('Hello world'), matching: find.byType(RichText).first));
+    final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('how are you today.'), matching: find.byType(RichText)));
+    final TestGesture mouseGesture = await tester.startGesture(textOffsetToPosition(paragraph1, 0), kind: PointerDeviceKind.mouse);
+
+    addTearDown(mouseGesture.removePointer);
+    await tester.pump();
+
+    SelectedContentRange? selectedRange;
+
+    // Selection on paragraph1.
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 1));
+    await tester.pumpAndSettle();
+    expect(selectionNotifier.selection.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.selection.range;
+    expect(selectedRange, isNotNull);
+    expect(selectedRange!.startOffset, 0);
+    expect(selectedRange.endOffset, 1);
+
+    // Selection on paragraph1.
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 10));
+    await tester.pumpAndSettle();
+    expect(selectionNotifier.selection.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.selection.range;
+    expect(selectedRange, isNotNull);
+    expect(selectedRange!.startOffset, 0);
+    expect(selectedRange.endOffset, 10);
+
+    // Selection on paragraph1 and paragraph2.
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph2, 10));
+    await tester.pumpAndSettle();
+    expect(selectionNotifier.selection.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.selection.range;
+    expect(selectedRange, isNotNull);
+    expect(selectedRange!.startOffset, 0);
+    expect(selectedRange.endOffset, 23);
+    await mouseGesture.up();
+    await tester.pump();
+    expect(selectionNotifier.selection.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.selection.range;
+    expect(selectedRange, isNotNull);
+    expect(selectedRange!.startOffset, 0);
+    expect(selectedRange.endOffset, 23);
+
+    // Collapsed selection.
+    await mouseGesture.down(textOffsetToPosition(paragraph2, 3));
+    await tester.pump();
+    await mouseGesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+    expect(selectionNotifier.selection.status, SelectionStatus.collapsed);
+    selectedRange = selectionNotifier.selection.range;
+    expect(selectedRange, isNotNull);
+    expect(selectedRange!.startOffset, 16);
+    expect(selectedRange.endOffset, 16);
+
+    // Backwards selection.
+    await mouseGesture.down(textOffsetToPosition(paragraph2, 4));
+    await tester.pump();
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 0));
+    await tester.pumpAndSettle();
+    expect(selectionNotifier.selection.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.selection.range;
+    expect(selectedRange, isNotNull);
+    expect(selectedRange!.startOffset, 17);
+    expect(selectedRange.endOffset, 0);
+    await mouseGesture.up();
+    await tester.pump();
+    expect(selectionNotifier.selection.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.selection.range;
+    expect(selectedRange, isNotNull);
+    expect(selectedRange!.startOffset, 17);
+    expect(selectedRange.endOffset, 0);
+
+    // Collapsed selection.
+    await mouseGesture.down(textOffsetToPosition(paragraph1, 0));
+    await tester.pumpAndSettle();
+    await mouseGesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+    expect(selectionNotifier.selection.status, SelectionStatus.collapsed);
+    selectedRange = selectionNotifier.selection.range;
+    expect(selectedRange, isNotNull);
+    expect(selectedRange!.startOffset, 0);
+    expect(selectedRange.endOffset, 0);
+  });
+
+  testWidgets('onSelectionChanged SelectedContentRange is accurate', (WidgetTester tester) async {
+    final List<String> dataModel = <String>[
+      'How are you?',
+      'Good, and you?',
+      'Fine, thank you.',
+    ];
+    final SelectionListenerNotifier selectionNotifier = SelectionListenerNotifier();
+    SelectedContentRange? selectedRange;
+    addTearDown(selectionNotifier.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          selectionControls: materialTextSelectionControls,
+          child: SelectionListener(
+            selectionNotifier: selectionNotifier,
+            child: Column(
+              children: <Widget>[
+                Text(
+                  dataModel[0],
+                ),
+                Text(
+                  dataModel[1],
+                ),
+                Text(
+                  dataModel[2],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+    final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
+    final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
+    final TestGesture mouseGesture = await tester.startGesture(textOffsetToPosition(paragraph1, 4), kind: PointerDeviceKind.mouse);
+
+    addTearDown(mouseGesture.removePointer);
+    await tester.pump();
+
+    // Selection on paragraph1.
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 7));
+    await tester.pumpAndSettle();
+    expect(selectionNotifier.selection.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.selection.range;
+    expect(selectedRange, isNotNull);
+    expect(selectedRange!.startOffset, 4);
+    expect(selectedRange.endOffset, 7);
+
+    // Selection on paragraph1.
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 10));
+    await tester.pumpAndSettle();
+    expect(selectionNotifier.selection.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.selection.range;
+    expect(selectedRange, isNotNull);
+    expect(selectedRange!.startOffset, 4);
+    expect(selectedRange.endOffset, 10);
+
+    // Selection on paragraph1 and paragraph2.
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph2, 10));
+    await tester.pumpAndSettle();
+    expect(selectionNotifier.selection.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.selection.range;
+    expect(selectedRange, isNotNull);
+    expect(selectedRange!.startOffset, 4);
+    expect(selectedRange.endOffset, 22);
+
+    // Selection on paragraph1, paragraph2, and paragraph3.
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph3, 10));
+    await tester.pumpAndSettle();
+    expect(selectionNotifier.selection.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.selection.range;
+    expect(selectedRange, isNotNull);
+    expect(selectedRange!.startOffset, 4);
+    expect(selectedRange.endOffset, 36);
+    await mouseGesture.up();
+    await tester.pump();
+    expect(selectionNotifier.selection.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.selection.range;
+    expect(selectedRange, isNotNull);
+    expect(selectedRange!.startOffset, 4);
+    expect(selectedRange.endOffset, 36);
+
+    // Collapsed selection.
+    await mouseGesture.down(textOffsetToPosition(paragraph1, 3));
+    await tester.pump();
+    await mouseGesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+    expect(selectionNotifier.selection.status, SelectionStatus.collapsed);
+    selectedRange = selectionNotifier.selection.range;
+    expect(selectedRange, isNotNull);
+    expect(selectedRange!.startOffset, 3);
+    expect(selectedRange.endOffset, 3);
+
+    // Backwards selection.
+    await mouseGesture.down(textOffsetToPosition(paragraph3, 4));
+    await tester.pump();
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph1, 0));
+    await tester.pumpAndSettle();
+    expect(selectionNotifier.selection.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.selection.range;
+    expect(selectedRange, isNotNull);
+    expect(selectedRange!.startOffset, 30);
+    expect(selectedRange.endOffset, 0);
+    await mouseGesture.up();
+    await tester.pump();
+    expect(selectionNotifier.selection.status, SelectionStatus.uncollapsed);
+    selectedRange = selectionNotifier.selection.range;
+    expect(selectedRange, isNotNull);
+    expect(selectedRange!.startOffset, 30);
+    expect(selectedRange.endOffset, 0);
+
+    // Collapsed selection.
+    await mouseGesture.down(textOffsetToPosition(paragraph1, 0));
+    await tester.pumpAndSettle();
+    await mouseGesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+    expect(selectionNotifier.selection.status, SelectionStatus.collapsed);
+    selectedRange = selectionNotifier.selection.range;
+    expect(selectedRange, isNotNull);
+    expect(selectedRange!.startOffset, 0);
+    expect(selectedRange.endOffset, 0);
+  });
 
   testWidgets('onSelectionChange is called when the selection changes through gestures', (WidgetTester tester) async {
     SelectedContent? content;
@@ -5140,6 +5466,14 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
+  SelectedContentRange? getSelection() {
+    return null;
+  }
+
+  @override
+  int get contentLength => 1;
+
+  @override
   final SelectionGeometry value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
@@ -5220,6 +5554,14 @@ class RenderSelectAll extends RenderProxyBox
   SelectedContent? getSelectedContent() {
     return const SelectedContent(plainText: 'content');
   }
+
+  @override
+  SelectedContentRange? getSelection() {
+    return null;
+  }
+
+  @override
+  int get contentLength => 1;
 
   @override
   SelectionGeometry get value => _value;
