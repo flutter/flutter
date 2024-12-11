@@ -33,21 +33,19 @@ class DlLinearGradientColorSource final : public DlGradientColorSourceBase {
   bool equals_(DlColorSource const& other) const override;
 
  private:
+  template <typename Colors>
   DlLinearGradientColorSource(const DlPoint start_point,
                               const DlPoint end_point,
                               uint32_t stop_count,
-                              const DlColor* colors,
+                              Colors colors,
                               const float* stops,
                               DlTileMode tile_mode,
-                              const DlMatrix* matrix = nullptr);
-
-  DlLinearGradientColorSource(const DlPoint start_point,
-                              const DlPoint end_point,
-                              uint32_t stop_count,
-                              const DlScalar* colors,
-                              const float* stops,
-                              DlTileMode tile_mode,
-                              const DlMatrix* matrix = nullptr);
+                              const DlMatrix* matrix = nullptr)
+      : DlGradientColorSourceBase(stop_count, tile_mode, matrix),
+        start_point_(start_point),
+        end_point_(end_point) {
+    store_color_stops(this + 1, colors, stops);
+  }
 
   explicit DlLinearGradientColorSource(
       const DlLinearGradientColorSource* source);

@@ -60,7 +60,8 @@ class DlColorSource : public DlAttribute<DlColorSource, DlColorSourceType> {
       const DlMatrix* matrix = nullptr);
 
   /// @brief Make a linear gradient.
-  /// @param colors_argb Array of DlScalars that represents colors in the ARGB.
+  /// @param colors_argb Array of DlScalars that represents colors in the ARGB
+  /// format, in the extended srgb colorspace.
   static std::shared_ptr<DlColorSource> MakeLinear(
       const DlPoint start_point,
       const DlPoint end_point,
@@ -79,6 +80,18 @@ class DlColorSource : public DlAttribute<DlColorSource, DlColorSourceType> {
       DlTileMode tile_mode,
       const DlMatrix* matrix = nullptr);
 
+  /// @brief Make a radial gradient.
+  /// @param colors_argb Array of DlScalars that represents colors in the ARGB
+  /// format, in the extended srgb colorspace.
+  static std::shared_ptr<DlColorSource> MakeRadial(
+      DlPoint center,
+      DlScalar radius,
+      uint32_t stop_count,
+      const DlScalar* colors_argb,
+      const float* stops,
+      DlTileMode tile_mode,
+      const DlMatrix* matrix = nullptr);
+
   static std::shared_ptr<DlColorSource> MakeConical(
       DlPoint start_center,
       DlScalar start_radius,
@@ -90,12 +103,39 @@ class DlColorSource : public DlAttribute<DlColorSource, DlColorSourceType> {
       DlTileMode tile_mode,
       const DlMatrix* matrix = nullptr);
 
+  /// @brief Make a conical gradient.
+  /// @param colors_argb colors_argb Array of DlScalars that represents colors
+  /// in the ARGB format, in the extended srgb colorspace.
+  static std::shared_ptr<DlColorSource> MakeConical(
+      DlPoint start_center,
+      DlScalar start_radius,
+      DlPoint end_center,
+      DlScalar end_radius,
+      uint32_t stop_count,
+      const DlScalar* colors_argb,
+      const float* stops,
+      DlTileMode tile_mode,
+      const DlMatrix* matrix = nullptr);
+
   static std::shared_ptr<DlColorSource> MakeSweep(
       DlPoint center,
       DlScalar start,
       DlScalar end,
       uint32_t stop_count,
       const DlColor* colors,
+      const float* stops,
+      DlTileMode tile_mode,
+      const DlMatrix* matrix = nullptr);
+
+  /// @brief Make a sweep gradient.
+  /// @param colors_argb Array of DlScalars that represents colors in the ARGB
+  /// format, in the extended srgb colorspace.
+  static std::shared_ptr<DlColorSource> MakeSweep(
+      DlPoint center,
+      DlScalar start,
+      DlScalar end,
+      uint32_t stop_count,
+      const DlScalar* colors_argb,
       const float* stops,
       DlTileMode tile_mode,
       const DlMatrix* matrix = nullptr);
