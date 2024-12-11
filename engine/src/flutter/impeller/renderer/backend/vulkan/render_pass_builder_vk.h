@@ -8,12 +8,15 @@
 #include <map>
 #include <optional>
 
-#include "flutter/fml/macros.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
 namespace impeller {
+
+static constexpr size_t kMaxColorAttachments = 16;
+static constexpr size_t kMaxAttachments =
+    (kMaxColorAttachments * 2) + 1;  // MSAA + resolve plus depth/stencil
 
 class RenderPassBuilderVK {
  public:

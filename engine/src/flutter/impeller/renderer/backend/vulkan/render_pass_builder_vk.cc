@@ -4,8 +4,6 @@
 
 #include "impeller/renderer/backend/vulkan/render_pass_builder_vk.h"
 
-#include <vector>
-
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "vulkan/vulkan_enums.hpp"
@@ -119,57 +117,64 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
     color_attachments_count++;
   }
 
-  std::vector<vk::AttachmentDescription> attachments;
-
-  std::vector<vk::AttachmentReference> color_refs(color_attachments_count,
-                                                  kUnusedAttachmentReference);
-  std::vector<vk::AttachmentReference> resolve_refs(color_attachments_count,
-                                                    kUnusedAttachmentReference);
+  std::array<vk::AttachmentDescription, kMaxAttachments> attachments;
+  std::array<vk::AttachmentReference, kMaxColorAttachments> color_refs;
+  std::array<vk::AttachmentReference, kMaxColorAttachments> resolve_refs;
   vk::AttachmentReference depth_stencil_ref = kUnusedAttachmentReference;
+  size_t attachments_index = 0;
+  size_t color_index = 0;
+  size_t resolve_index = 0;
 
   if (color0_.has_value()) {
     vk::AttachmentReference color_ref;
-    color_ref.attachment = attachments.size();
+    color_ref.attachment = attachments_index;
     color_ref.layout = vk::ImageLayout::eGeneral;
-    color_refs[0] = color_ref;
-    attachments.push_back(color0_.value());
+    color_refs.at(color_index++) = color_ref;
+    attachments.at(attachments_index++) = color0_.value();
 
     if (color0_resolve_.has_value()) {
       vk::AttachmentReference resolve_ref;
-      resolve_ref.attachment = attachments.size();
+      resolve_ref.attachment = attachments_index;
       resolve_ref.layout = vk::ImageLayout::eGeneral;
-      resolve_refs[0] = resolve_ref;
-      attachments.push_back(color0_resolve_.value());
+      resolve_refs.at(resolve_index++) = resolve_ref;
+      attachments.at(attachments_index++) = color0_resolve_.value();
+    } else {
+      resolve_refs.at(resolve_index++) = kUnusedAttachmentReference;
     }
   }
 
   for (const auto& color : colors_) {
     vk::AttachmentReference color_ref;
-    color_ref.attachment = attachments.size();
+    color_ref.attachment = attachments_index;
     color_ref.layout = vk::ImageLayout::eGeneral;
-    color_refs[color.first] = color_ref;
-    attachments.push_back(color.second);
+    color_refs.at(color_index++) = color_ref;
+    attachments.at(attachments_index++) = color.second;
 
     if (auto found = resolves_.find(color.first); found != resolves_.end()) {
       vk::AttachmentReference resolve_ref;
-      resolve_ref.attachment = attachments.size();
+      resolve_ref.attachment = attachments_index;
       resolve_ref.layout = vk::ImageLayout::eGeneral;
-      resolve_refs[color.first] = resolve_ref;
-      attachments.push_back(found->second);
+      resolve_refs.at(resolve_index++) = resolve_ref;
+      attachments.at(attachments_index++) = found->second;
+    } else {
+      resolve_refs.at(resolve_index++) = kUnusedAttachmentReference;
     }
   }
 
   if (depth_stencil_.has_value()) {
-    depth_stencil_ref.attachment = attachments.size();
+    depth_stencil_ref.attachment = attachments_index;
     depth_stencil_ref.layout = vk::ImageLayout::eGeneral;
-    attachments.push_back(depth_stencil_.value());
+    attachments.at(attachments_index++) = depth_stencil_.value();
   }
 
   vk::SubpassDescription subpass0;
   subpass0.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
-  subpass0.setInputAttachments(color_refs);
-  subpass0.setColorAttachments(color_refs);
-  subpass0.setResolveAttachments(resolve_refs);
+  subpass0.setPInputAttachments(color_refs.data());
+  subpass0.setInputAttachmentCount(color_index);
+  subpass0.setPColorAttachments(color_refs.data());
+  subpass0.setColorAttachmentCount(color_index);
+  subpass0.setPResolveAttachments(resolve_refs.data());
+
   subpass0.setPDepthStencilAttachment(&depth_stencil_ref);
 
   vk::SubpassDependency self_dep;
@@ -182,7 +187,8 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
   self_dep.dependencyFlags = kSelfDependencyFlags;
 
   vk::RenderPassCreateInfo render_pass_desc;
-  render_pass_desc.setAttachments(attachments);
+  render_pass_desc.setPAttachments(attachments.data());
+  render_pass_desc.setAttachmentCount(attachments_index);
   render_pass_desc.setSubpasses(subpass0);
   render_pass_desc.setDependencies(self_dep);
 
