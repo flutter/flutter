@@ -957,7 +957,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       if (key == null || _childElements.isEmpty) {
         return false;
       }
-      return _childElements.values.nonNulls.any((Element element) => element.widget.key == key);
+      return _childElements.values.nonNulls
+        .where((Element element) => element.widget.key == key)
+        .length > 1;
     }
 
     if (child != null) {
