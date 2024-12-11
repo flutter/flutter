@@ -62,7 +62,7 @@ final class NativeResult extends Result {
   Map<String, dynamic> toJson() => const <String, Object?>{};
 }
 
-/// An object that descrbes searching for _native_ elements.
+/// An object that describes searching for _native_ elements.
 sealed class NativeFinder {
   const NativeFinder();
 

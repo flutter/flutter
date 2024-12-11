@@ -70,9 +70,8 @@ void main() {
     final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=module']);
 
-    final BuildBundleCommand command = await runCommandIn(projectPath);
+    await runCommandIn(projectPath);
 
-    expect((await command.usageValues).commandBuildBundleIsModule, true);
     expect(
       fakeAnalytics.sentEvents,
       contains(
@@ -544,6 +543,5 @@ class FakeBundleBuilder extends Fake implements BundleBuilder {
     String? assetDirPath,
     bool buildNativeAssets = true,
     @visibleForTesting BuildSystem? buildSystem,
-    required bool useImplicitPubspecResolution,
   }) async {}
 }

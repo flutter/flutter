@@ -270,6 +270,17 @@ void main() {
     WebRunnerFactory: () => FakeWebRunnerFactory(),
   });
 
+  testUsingContext('WebDriverService starts an app with provided web headers', () async {
+    final WebDriverService service = setUpDriverService();
+    final FakeDevice device = FakeDevice();
+    final Map<String, String> webHeaders = <String, String>{'test-header': 'test-value'};
+    await service.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, webHeaders: webHeaders, ipv6: true));
+    await service.stop();
+    expect(FakeResidentRunner.instance.debuggingOptions.webHeaders, equals(webHeaders));
+  }, overrides: <Type, Generator>{
+    WebRunnerFactory: () => FakeWebRunnerFactory(),
+  });
+
   testUsingContext('WebDriverService will throw when an invalid launch url is provided', () async {
     final WebDriverService service = setUpDriverService();
     final FakeDevice device = FakeDevice();
@@ -310,7 +321,7 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
     bool? stayResident,
     FlutterProject? flutterProject,
     bool? ipv6,
-    DebuggingOptions? debuggingOptions,
+    required DebuggingOptions debuggingOptions,
     UrlTunneller? urlTunneller,
     Logger? logger,
     FileSystem? fileSystem,
@@ -318,11 +329,11 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
     Usage? usage,
     Analytics? analytics,
     bool machine = false,
-    required bool useImplicitPubspecResolution,
   }) {
     expect(stayResident, isTrue);
     return FakeResidentRunner(
       doResolveToError: doResolveToError,
+      debuggingOptions: debuggingOptions,
     );
   }
 }
@@ -330,6 +341,7 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
 class FakeResidentRunner extends Fake implements ResidentRunner {
   FakeResidentRunner({
     required this.doResolveToError,
+    required this.debuggingOptions,
   }) {
     instance = this;
   }
@@ -337,6 +349,8 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
   static late FakeResidentRunner instance;
 
   final bool doResolveToError;
+  @override
+  final DebuggingOptions debuggingOptions;
   final Completer<int> _exitCompleter = Completer<int>();
   final List<String> callLog = <String>[];
 
@@ -382,7 +396,6 @@ WebDriverService setUpDriverService() {
       processManager: FakeProcessManager.any(),
     ),
     dartSdkPath: 'dart',
-    useImplicitPubspecResolution: true,
   );
 }
 

@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
@@ -34,6 +35,7 @@ import '../../src/common.dart';
 import '../../src/context.dart' hide FakeXcodeProjectInterpreter;
 import '../../src/fake_devices.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
 
 List<String> _xattrArgs(FlutterProject flutterProject) {
@@ -74,12 +76,7 @@ const List<String> kRunReleaseArgs = <String>[
 // label which plugins are dependency plugins.
 //
 // Ideally processPodsIfNeeded should rely on the command (removing this call).
-const List<String> kCheckDartPubDeps = <String> [
-  'dart',
-  'pub',
-  'deps',
-  '--json',
-];
+final Pub fakePubBecauseRefreshPluginsList = FakePubWithPrimedDeps();
 
 const String kConcurrentBuildErrorMessage = '''
 "/Developer/Xcode/DerivedData/foo/XCBuildData/build.db":
@@ -144,7 +141,6 @@ void main() {
       final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter', 'My Super Awesome App');
 
       processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
-      processManager.addCommand(const FakeCommand(command: kCheckDartPubDeps));
       processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
 
       final LaunchResult launchResult = await iosDevice.startApp(
@@ -166,6 +162,7 @@ void main() {
       );
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
+      Pub: () => fakePubBecauseRefreshPluginsList,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       OperatingSystemUtils: () => os,
@@ -219,7 +216,6 @@ void main() {
       fileSystem.directory('build/ios/Release-iphoneos/My Super Awesome App.app').createSync(recursive: true);
 
       processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
-      processManager.addCommand(const FakeCommand(command: kCheckDartPubDeps));
       processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
       processManager.addCommand(const FakeCommand(command: <String>[
         'rsync',
@@ -258,6 +254,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
+      Pub: () => fakePubBecauseRefreshPluginsList,
       FileSystem: () => fileSystem,
       Logger: () => logger,
       OperatingSystemUtils: () => os,
@@ -280,7 +277,6 @@ void main() {
       fileSystem.directory('build/ios/Release-iphoneos/My Super Awesome App.app').createSync(recursive: true);
 
       processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
-      processManager.addCommand(const FakeCommand(command: kCheckDartPubDeps));
       processManager.addCommand(const FakeCommand(command: <String>[
         'xcrun',
         'xcodebuild',
@@ -347,6 +343,7 @@ void main() {
       OperatingSystemUtils: () => FakeOperatingSystemUtils(
         hostPlatform: HostPlatform.darwin_x64,
       ),
+      Pub: () => fakePubBecauseRefreshPluginsList,
       Platform: () => macPlatform,
       XcodeProjectInterpreter: () => fakeXcodeProjectInterpreter,
       Xcode: () => xcode,
@@ -364,7 +361,6 @@ void main() {
       final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter', 'My Super Awesome App');
 
       processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
-      processManager.addCommand(const FakeCommand(command: kCheckDartPubDeps));
       // The first xcrun call should fail with a
       // concurrent build exception.
       processManager.addCommand(
@@ -407,7 +403,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       })));
 
-      // Wait until all asyncronous time has been elapsed.
+      // Wait until all asynchronous time has been elapsed.
       do {
         fakeAsync.elapse(const Duration(seconds: 2));
       } while (fakeAsync.pendingTimers.isNotEmpty);
@@ -419,6 +415,7 @@ void main() {
         hostPlatform: HostPlatform.darwin_arm64,
       ),
       Platform: () => macPlatform,
+      Pub: () => fakePubBecauseRefreshPluginsList,
       XcodeProjectInterpreter: () => fakeXcodeProjectInterpreter,
       Xcode: () => xcode,
     });
@@ -472,6 +469,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubBecauseRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -507,6 +505,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubBecauseRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -542,6 +541,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubBecauseRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -578,6 +578,7 @@ void main() {
         expect(coreDeviceControl.argumentsUsedForLaunch, contains('--enable-dart-profiling'));
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubBecauseRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -645,6 +646,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubBecauseRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -721,6 +723,7 @@ void main() {
           expect(processManager, hasNoRemainingExpectations);
         }, overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
+          Pub: () => fakePubBecauseRefreshPluginsList,
           FileSystem: () => fileSystem,
           Logger: () => logger,
           OperatingSystemUtils: () => os,
@@ -802,6 +805,7 @@ void main() {
         expect(contents.contains('CONFIGURATION_BUILD_DIR'), isFalse);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubBecauseRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,
@@ -842,6 +846,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubBecauseRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         Platform: () => macPlatform,
@@ -881,6 +886,7 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
+        Pub: () => fakePubBecauseRefreshPluginsList,
         FileSystem: () => fileSystem,
         Logger: () => logger,
         OperatingSystemUtils: () => os,

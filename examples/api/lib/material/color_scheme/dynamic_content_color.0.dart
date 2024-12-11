@@ -12,7 +12,10 @@ const double narrowScreenWidthThreshold = 400;
 void main() => runApp(const DynamicColorExample());
 
 class DynamicColorExample extends StatefulWidget {
-  const DynamicColorExample({super.key});
+  const DynamicColorExample({
+    this.loadColorScheme,
+    super.key,
+  });
 
   static const List<ImageProvider> images = <NetworkImage>[
     NetworkImage(
@@ -28,6 +31,11 @@ class DynamicColorExample extends StatefulWidget {
     NetworkImage(
         'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_6.png'),
   ];
+
+  final Future<ColorScheme> Function(
+    ImageProvider<Object> provider,
+    Brightness brightness,
+  )? loadColorScheme;
 
   @override
   State<DynamicColorExample> createState() => _DynamicColorExampleState();
@@ -186,8 +194,18 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
   }
 
   Future<void> _updateImage(ImageProvider provider) async {
-    final ColorScheme newColorScheme = await ColorScheme.fromImageProvider(
-        provider: provider, brightness: isLight ? Brightness.light : Brightness.dark);
+    final ColorScheme newColorScheme;
+    if (widget.loadColorScheme != null) {
+      newColorScheme = await widget.loadColorScheme!(
+        provider,
+        isLight ? Brightness.light : Brightness.dark,
+      );
+    } else {
+      newColorScheme = await ColorScheme.fromImageProvider(
+        provider: provider,
+        brightness: isLight ? Brightness.light : Brightness.dark,
+      );
+    }
     if (!mounted) {
       return;
     }

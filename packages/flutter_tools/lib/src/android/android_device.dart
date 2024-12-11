@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../application_package.dart';
 import '../base/common.dart' show throwToolExit;
@@ -21,6 +22,7 @@ import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
+import '../vmservice.dart';
 import 'android.dart';
 import 'android_builder.dart';
 import 'android_console.dart';
@@ -618,6 +620,7 @@ class AndroidDevice extends Device {
         await AdbLogReader.createLogReader(
           this,
           _processManager,
+          _logger,
         ),
         portForwarder: portForwarder,
         hostPort: debuggingOptions.hostVmServicePort,
@@ -796,12 +799,14 @@ class AndroidDevice extends Device {
       return _pastLogReader ??= await AdbLogReader.createLogReader(
         this,
         _processManager,
+        _logger,
         includePastLogs: true,
       );
     } else {
       return _logReader ??= await AdbLogReader.createLogReader(
         this,
         _processManager,
+        _logger,
       );
     }
   }
@@ -1042,15 +1047,20 @@ class AndroidMemoryInfo extends MemoryInfo {
 
 /// A log reader that logs from `adb logcat`.
 class AdbLogReader extends DeviceLogReader {
-  AdbLogReader._(this._adbProcess, this.name);
+  AdbLogReader._(this._adbProcess, this.name, this._logger);
 
   @visibleForTesting
-  factory AdbLogReader.test(Process adbProcess, String name) = AdbLogReader._;
+  factory AdbLogReader.test(
+    Process adbProcess,
+    String name,
+    Logger logger,
+  ) = AdbLogReader._;
 
   /// Create a new [AdbLogReader] from an [AndroidDevice] instance.
   static Future<AdbLogReader> createLogReader(
     AndroidDevice device,
-    ProcessManager processManager, {
+    ProcessManager processManager,
+    Logger logger, {
     bool includePastLogs = false,
   }) async {
     // logcat -T is not supported on Android releases before Lollipop.
@@ -1085,10 +1095,14 @@ class AdbLogReader extends DeviceLogReader {
       ]);
     }
     final Process process = await processManager.start(device.adbCommandForDevice(args));
-    return AdbLogReader._(process, device.name);
+    return AdbLogReader._(process, device.name, logger);
   }
 
+  int? _appPid;
+
   final Process _adbProcess;
+
+  final Logger _logger;
 
   @override
   final String name;
@@ -1100,6 +1114,17 @@ class AdbLogReader extends DeviceLogReader {
 
   @override
   Stream<String> get logLines => _linesController.stream;
+
+  @override
+  Future<void> provideVmService(FlutterVmService connectedVmService) async {
+    final VM? vm = await connectedVmService.getVmGuarded();
+    if (vm == null) {
+      _logger.printError('An error occurred when setting up filtering for adb logs. '
+        'Unable to communicate with the VM service.');
+    } else {
+      _appPid = vm.pid;
+    }
+  }
 
   void _start() {
     // We expect logcat streams to occasionally contain invalid utf-8,
@@ -1189,7 +1214,7 @@ class AdbLogReader extends DeviceLogReader {
             _fatalCrash = false;
           }
         }
-      } else if (appPid != null && int.parse(logMatch.group(1)!) == appPid) {
+      } else if (_appPid != null && int.parse(logMatch.group(1)!) == _appPid) {
         acceptLine = !_surfaceSyncerSpam.hasMatch(line);
 
         if (_fatalLog.hasMatch(line)) {

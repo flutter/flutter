@@ -2,16 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@Timeout(Duration(minutes: 10))
-library;
-
 import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
 
 import '../../src/common.dart';
-import '../test_utils.dart' show platform;
+import '../test_utils.dart' show flutterBin, platform;
 import '../transition_test_utils.dart';
 import 'native_assets_test_utils.dart';
 
@@ -19,7 +16,7 @@ const String packageName = 'package_with_native_assets';
 
 /// The AGP versions to run these tests against.
 final List<String> agpVersions = <String>[
-  '8.4'
+  '8.4.0'
 ];
 
 /// The build modes to target for each flutter command that supports passing
@@ -54,50 +51,59 @@ for (final String agpVersion in agpVersions) {
           final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
           final Directory exampleDirectory = packageDirectory.childDirectory('example');
 
-        File buildGradleFile = exampleDirectory.childDirectory('android').childFile('build.gradle');
-        if (!buildGradleFile.existsSync()) {
-          buildGradleFile = exampleDirectory.childDirectory('android').childFile('build.gradle.kts');
-        }
-
         File appBuildGradleFile = exampleDirectory.childDirectory('android').childDirectory('app').childFile('build.gradle');
         if (!appBuildGradleFile.existsSync()) {
           appBuildGradleFile = exampleDirectory.childDirectory('android').childDirectory('app').childFile('build.gradle.kts');
         }
 
-        expect(buildGradleFile, exists);
+        final File settingsGradleFile = exampleDirectory.childDirectory('android').childFile('settings.gradle.kts');
+
         expect(appBuildGradleFile, exists);
+        expect(settingsGradleFile, exists);
 
         // Use expected AGP version.
-        final String buildGradle = buildGradleFile.readAsStringSync();
+        final String settingsGradle = settingsGradleFile.readAsStringSync();
+
         final RegExp androidPluginRegExp =
-            RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
-        final String newBuildGradle = buildGradle.replaceAll(
-            androidPluginRegExp, 'com.android.tools.build:gradle:$agpVersion');
-        buildGradleFile.writeAsStringSync(newBuildGradle);
+            RegExp(r'id\("com\.android\.application"\)\s+version\s+"([^"]+)"\s+apply\s+false');
+        expect(androidPluginRegExp.firstMatch(settingsGradle), isNotNull);
+
+        final String newSettingsGradle = settingsGradle.replaceAll(
+            androidPluginRegExp, 'id("com.android.application") version "$agpVersion" apply false');
+        settingsGradleFile.writeAsStringSync(newSettingsGradle);
 
         // Use Android app with multiple flavors.
         final String appBuildGradle = appBuildGradleFile.readAsStringSync().replaceAll('\r\n', '\n');
         final RegExp buildTypesBlockRegExp = RegExp(r'buildTypes {\n[ \t]+release {((.|\n)*)\n[ \t]+}\n[ \t]+}');
-        final String buildTypesBlock = buildTypesBlockRegExp.firstMatch(appBuildGradle)!.toString();
+        final String buildTypesBlock = buildTypesBlockRegExp.firstMatch(appBuildGradle)![0]!;
         final String appBuildGradleSegmentDefiningFlavors = '''
     $buildTypesBlock
 
-    flavorDimensions "mode"
+    flavorDimensions += "mode"
 
     productFlavors {
-        flavorOne {}
-        flavorTwo {}
-        flavorThree {}
+        create("flavorOne") {
+            dimension = "mode"
+        }
+        create("flavorTwo") {
+            dimension = "mode"
+        }
+        create("flavorThree") {
+            dimension = "mode"
+        }
     }
 ''';
-        appBuildGradle.replaceFirst(
+        final String newAppBuildGradle = appBuildGradle.replaceFirst(
             buildTypesBlockRegExp, appBuildGradleSegmentDefiningFlavors);
+        appBuildGradleFile.writeAsStringSync(newAppBuildGradle);
 
           final ProcessResult result = processManager.runSync(
             <String>[
               flutterBin,
               'build',
               'apk',
+              '--flavor',
+              'flavorOne',
               '--$buildMode',
             ],
             workingDirectory: exampleDirectory.path,

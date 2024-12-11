@@ -21,7 +21,6 @@ import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
 import '../template.dart';
 
 const List<String> _kAvailablePlatforms = <String>[
@@ -49,96 +48,15 @@ const String _kDefaultPlatformArgumentHelp =
     'Platform folders (e.g. android/) will be generated in the target project. '
     'Adding desktop platforms requires the corresponding desktop config setting to be enabled.';
 
-/// Common behavior for `flutter create` commands.
-abstract class CreateBase extends FlutterCommand {
-  CreateBase({
-    required bool verboseHelp,
-  }) {
-    argParser.addFlag(
-      'pub',
-      defaultsTo: true,
-      help:
-          'Whether to run "flutter pub get" after the project has been created.',
-    );
-    argParser.addFlag(
-      'offline',
-      help:
-          'When "flutter pub get" is run by the create command, this indicates '
-          'whether to run it in offline mode or not. In offline mode, it will need to '
-          'have all dependencies already available in the pub cache to succeed.',
-    );
-    argParser.addFlag(
-      'with-driver-test',
-      help: '(deprecated) Historically, this added a flutter_driver dependency and generated a '
-            'sample "flutter drive" test. Now it does nothing. Consider using the '
-            '"integration_test" package: https://pub.dev/packages/integration_test',
-      hide: !verboseHelp,
-    );
-    argParser.addFlag(
-      'overwrite',
-      help: 'When performing operations, overwrite existing files.',
-    );
-    argParser.addOption(
-      'description',
-      defaultsTo: 'A new Flutter project.',
-      help:
-          'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.',
-    );
-    argParser.addOption(
-      'org',
-      defaultsTo: 'com.example',
-      help:
-          'The organization responsible for your new Flutter project, in reverse domain name notation. '
-          'This string is used in Java package names and as prefix in the iOS bundle identifier.',
-    );
-    argParser.addOption(
-      'project-name',
-      help:
-          'The project name for this new Flutter project. This must be a valid dart package name.',
-    );
-    argParser.addOption(
-      'ios-language',
-      abbr: 'i',
-      defaultsTo: 'swift',
-      allowed: <String>['objc', 'swift'],
-      help: '(deprecated) The language to use for iOS-specific code, either Swift (recommended) or Objective-C (legacy).',
-      hide: !verboseHelp,
-    );
-    argParser.addOption(
-      'android-language',
-      abbr: 'a',
-      defaultsTo: 'kotlin',
-      allowed: <String>['java', 'kotlin'],
-      help: 'The language to use for Android-specific code, either Kotlin (recommended) or Java (legacy).',
-    );
-    argParser.addFlag(
-      'skip-name-checks',
-      help:
-          'Allow the creation of applications and plugins with invalid names. '
-          'This is only intended to enable testing of the tool itself.',
-      hide: !verboseHelp,
-    );
-    argParser.addFlag(
-      'implementation-tests',
-      help:
-          'Include implementation tests that verify the template functions correctly. '
-          'This is only intended to enable testing of the tool itself.',
-      hide: !verboseHelp,
-    );
-    argParser.addOption(
-      'initial-create-revision',
-      help: 'The Flutter SDK git commit hash to store in .migrate_config. This parameter is used by the tool '
-            'internally and should generally not be used manually.',
-      hide: !verboseHelp,
-    );
-  }
-
+/// Common behavior for `flutter create` and `flutter widget-preview start` commands.
+mixin CreateBase on FlutterCommand {
   /// Pattern for a Windows file system drive (e.g. "D:").
   ///
   /// `dart:io` does not recognize strings matching this pattern as absolute
   /// paths, as they have no top level back-slash; however, users often specify
   /// this
   @visibleForTesting
+  @protected
   static final RegExp kWindowsDrivePattern = RegExp(r'^[a-zA-Z]:$');
 
   /// The output directory of the command.
@@ -161,6 +79,35 @@ abstract class CreateBase extends FlutterCommand {
   @protected
   String get projectDirPath {
     return globals.fs.path.normalize(projectDir.absolute.path);
+  }
+
+  @protected
+  bool get shouldCallPubGet {
+    return boolArg('pub');
+  }
+
+  @protected
+  bool get offline {
+    return boolArg('offline');
+  }
+
+  /// Adds `--pub` and `--offline` options.
+  @protected
+  void addPubOptions() {
+    argParser
+      ..addFlag(
+        'pub',
+        defaultsTo: true,
+        help:
+            'Whether to run "flutter pub get" after the project has been created.',
+      )
+      ..addFlag(
+        'offline',
+        help:
+            'When "flutter pub get" is run by the create command, this indicates '
+            'whether to run it in offline mode or not. In offline mode, it will need to '
+            'have all dependencies already available in the pub cache to succeed.',
+      );
   }
 
   /// Adds a `--platforms` argument.
@@ -559,7 +506,7 @@ abstract class CreateBase extends FlutterCommand {
     final bool windowsPlatform = templateContext['windows'] as bool? ?? false;
     final bool webPlatform = templateContext['web'] as bool? ?? false;
 
-    if (boolArg('pub')) {
+    if (shouldCallPubGet) {
       final Environment environment = Environment(
         artifacts: globals.artifacts!,
         logger: globals.logger,
@@ -575,7 +522,6 @@ abstract class CreateBase extends FlutterCommand {
         projectDir: project.directory,
         packageConfigPath: packageConfigPath(),
         generateDartPluginRegistry: true,
-        useImplicitPubspecResolution: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
       );
 
       // Generate the l10n synthetic package that will be injected into the
