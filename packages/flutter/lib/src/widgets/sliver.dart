@@ -960,11 +960,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       return _childElements.values.nonNulls.any((Element element) => element.widget.key == key);
     }
 
-    // Handle key management to avoid duplicates
     if (child != null) {
       final Key? key = child.key;
 
-      // Check for duplicate keys and handle them
       if (key != null && hasDuplicate(key)) {
         // Generates a unique key using a counter, ensuring greater determinism in the process.
         final ValueKey<String> newKey = ValueKey<String>('${key}_$keyCounter');
