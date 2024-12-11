@@ -1765,7 +1765,7 @@ class SubmenuButton extends StatefulWidget {
   ///  * [WidgetState.focused].
   ///
   /// If this is null, then the value of [MenuThemeData.submenuIcon] is used.
-  /// If that is also null, then defaults to right arrow icon with the size
+  /// If that is also null, then defaults to a right arrow icon with the size
   /// of 24 pixels.
   final MaterialStateProperty<Widget?>? submenuIcon;
 
