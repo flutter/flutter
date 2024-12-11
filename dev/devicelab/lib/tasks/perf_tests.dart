@@ -1683,7 +1683,9 @@ class CompileSwiftUITest {
       'iphoneos',
       '-archivePath',
       'hello_world_swiftuiArchive',
-      'archive'
+      'archive',
+          '-allowProvisioningUpdates',
+      'CODE_SIGNING_ALLOWED=NO'
     ]).then((ProcessResult results) {
       print(results.stdout);
       if (results.exitCode != 0) {
@@ -1698,7 +1700,9 @@ class CompileSwiftUITest {
       '-exportOptionsPlist',
       'exportOptions.plist',
       '-exportPath',
-      'hello_world_swiftuiIPA'
+      'hello_world_swiftuiIPA',
+      '-allowProvisioningUpdates',
+      'CODE_SIGNING_ALLOWED=NO'
     ]).then((ProcessResult results) {
       print(results.stdout);
       if (results.exitCode != 0) {
