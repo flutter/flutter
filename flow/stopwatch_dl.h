@@ -18,10 +18,18 @@ namespace flutter {
 ///       optimizations.
 class DlStopwatchVisualizer : public StopwatchVisualizer {
  public:
-  explicit DlStopwatchVisualizer(const Stopwatch& stopwatch)
-      : StopwatchVisualizer(stopwatch) {}
+  explicit DlStopwatchVisualizer(const Stopwatch& stopwatch,
+                                 std::vector<DlPoint>& vertices_storage,
+                                 std::vector<DlColor>& color_storage)
+      : StopwatchVisualizer(stopwatch),
+        vertices_storage_(vertices_storage),
+        color_storage_(color_storage) {}
 
-  void Visualize(DlCanvas* canvas, const SkRect& rect) const override;
+  void Visualize(DlCanvas* canvas, const DlRect& rect) const override;
+
+ private:
+  std::vector<DlPoint>& vertices_storage_;
+  std::vector<DlColor>& color_storage_;
 };
 
 /// @brief Provides canvas-like painting methods that actually build vertices.
@@ -38,17 +46,22 @@ class DlStopwatchVisualizer : public StopwatchVisualizer {
 /// possible (i.e. not having to do triangle-math).
 class DlVertexPainter final {
  public:
+  DlVertexPainter(std::vector<DlPoint>& vertices_storage,
+                  std::vector<DlColor>& color_storage);
+
   /// Draws a rectangle with the given color to a buffer.
-  void DrawRect(const SkRect& rect, const DlColor& color);
+  void DrawRect(const DlRect& rect, const DlColor& color);
 
   /// Converts the buffered vertices into a |DlVertices| object.
   ///
   /// @note This method clears the buffer.
-  std::shared_ptr<DlVertices> IntoVertices();
+  std::shared_ptr<DlVertices> IntoVertices(const DlRect& bounds_rect);
 
  private:
-  std::vector<SkPoint> vertices_;
-  std::vector<DlColor> colors_;
+  std::vector<DlPoint>& vertices_;
+  std::vector<DlColor>& colors_;
+  size_t vertices_offset_ = 0u;
+  size_t colors_offset_ = 0u;
 };
 
 }  // namespace flutter
