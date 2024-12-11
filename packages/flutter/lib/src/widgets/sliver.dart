@@ -958,8 +958,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
         return false;
       }
       return _childElements.values.nonNulls
-        .where((Element element) => element.widget.key == key)
-        .length > 1;
+        .where((Element element) => element.widget.key == key && element != _childElements[index])
+        .isNotEmpty;
     }
 
     if (child != null) {
