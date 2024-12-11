@@ -1824,7 +1824,7 @@ class _TabBarState extends State<TabBar> {
               wrappedTabs[index],
               Semantics(
                 selected: index == _currentIndex,
-                label: localizations.tabLabel(tabIndex: index + 1, tabCount: tabCount),
+                label: kIsWeb ? null : localizations.tabLabel(tabIndex: index + 1, tabCount: tabCount),
               ),
             ],
           ),
