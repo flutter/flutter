@@ -561,13 +561,11 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// Registers a [SystemContextMenuClient] that will receive system context
   /// menu calls from the engine.
   static void registerSystemContextMenuClient(SystemContextMenuClient client) {
-    assert(instance._systemContextMenuClient == null, 'Attempted to register a SystemContextMenuClient while another was still registered. Call unregisterSystemContextMenuClient first.');
     instance._systemContextMenuClient = client;
   }
 
   /// Unregisters a [SystemContextMenuClient] so that it is no longer called.
   static void unregisterSystemContextMenuClient(SystemContextMenuClient client) {
-    assert(client == instance._systemContextMenuClient, 'Attempted to unregister a SystemContextMenuClient that was not currently registered.');
     instance._systemContextMenuClient = null;
   }
 }
