@@ -201,6 +201,8 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
 ///
 /// See also:
 ///
+///  * [SystemContextMenu], a widget that can be used to display the system
+///    context menu.
 ///  * [SystemContextMenuItemData], which performs a similar role but at the
 ///    method channel level and mirrors the requirements of the method channel
 ///    API.
@@ -226,6 +228,15 @@ sealed class SystemContextMenuItem {
 /// button.
 ///
 /// Should only appear when there is a selection that can be cut.
+///
+/// The title and action are both handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenu], a widget that can be used to display the system
+///    context menu.
+///  * [SystemContextMenuItemDataCut], which specifies the data to be sent to
+///    the platform for this same button.
 class SystemContextMenuItemCut extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemCut].
   const SystemContextMenuItemCut();
@@ -235,6 +246,15 @@ class SystemContextMenuItemCut extends SystemContextMenuItem {
 /// copy button.
 ///
 /// Should only appear when there is a selection that can be copied.
+///
+/// The title and action are both handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenu], a widget that can be used to display the system
+///    context menu.
+///  * [SystemContextMenuItemDataCopy], which specifies the data to be sent to
+///    the platform for this same button.
 class SystemContextMenuItemCopy extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemCopy].
   const SystemContextMenuItemCopy();
@@ -244,6 +264,15 @@ class SystemContextMenuItemCopy extends SystemContextMenuItem {
 /// paste button.
 ///
 /// Should only appear when the field can receive pasted content.
+///
+/// The title and action are both handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenu], a widget that can be used to display the system
+///    context menu.
+///  * [SystemContextMenuItemDataPaste], which specifies the data to be sent to
+///    the platform for this same button.
 class SystemContextMenuItemPaste extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemPaste].
   const SystemContextMenuItemPaste();
@@ -253,6 +282,15 @@ class SystemContextMenuItemPaste extends SystemContextMenuItem {
 /// select all button.
 ///
 /// Should only appear when the field can have its selection changed.
+///
+/// The title and action are both handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenu], a widget that can be used to display the system
+///    context menu.
+///  * [SystemContextMenuItemDataSelectAll], which specifies the data to be sent
+///    to the platform for this same button.
 class SystemContextMenuItemSelectAll extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemSelectAll].
   const SystemContextMenuItemSelectAll();
@@ -262,6 +300,19 @@ class SystemContextMenuItemSelectAll extends SystemContextMenuItem {
 /// system's built-in search web button.
 ///
 /// Should only appear when content is selected.
+///
+/// The [title] is optional, but it must be specified before being sent to the
+/// platform. Typically it should be set to
+/// [WidgetsLocalizations.searchWebButtonlabel].
+///
+/// The action is handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenu], a widget that can be used to display the system
+///    context menu.
+///  * [SystemContextMenuItemDataSearchWeb], which specifies the data to be sent
+///    to the platform for this same button.
 class SystemContextMenuItemSearchWeb extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemSearchWeb].
   const SystemContextMenuItemSearchWeb({
@@ -276,6 +327,19 @@ class SystemContextMenuItemSearchWeb extends SystemContextMenuItem {
 /// system's built-in look up button.
 ///
 /// Should only appear when content is selected.
+///
+/// The [title] is optional, but it must be specified before being sent to the
+/// platform. Typically it should be set to
+/// [WidgetsLocalizations.lookUpButtonLabel].
+///
+/// The action is handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenu], a widget that can be used to display the system
+///    context menu.
+///  * [SystemContextMenuItemDataLookup], which specifies the data to be sent to
+///    the platform for this same button.
 class SystemContextMenuItemLookUp extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemLookUp].
   const SystemContextMenuItemLookUp({
@@ -292,11 +356,19 @@ class SystemContextMenuItemLookUp extends SystemContextMenuItem {
 /// Opens the system share dialog.
 ///
 /// Should only appear when shareable content is selected.
+///
+/// The [title] is optional, but it must be specified before being sent to the
+/// platform. Typically it should be set to
+/// [WidgetsLocalizations.shareButtonLabel].
+///
+/// See also:
+///
+///  * [SystemContextMenu], a widget that can be used to display the system
+///    context menu.
+///  * [SystemContextMenuItemDataShare], which specifies the data to be sent to
+///    the platform for this same button.
 class SystemContextMenuItemShare extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemShare].
-  ///
-  /// If no [title] is given, [WidgetsLocalizations.shareButtonLabel] should be
-  /// used.
   const SystemContextMenuItemShare({
     this.title,
   });
@@ -309,6 +381,13 @@ class SystemContextMenuItemShare extends SystemContextMenuItem {
 // https://github.com/flutter/flutter/issues/103163
 /// Creates an instance of [SystemContextMenuItem] for a custom menu item whose
 /// [title] and [onPressed] are as specified.
+///
+/// See also:
+///
+///  * [SystemContextMenu], a widget that can be used to display the system
+///    context menu.
+///  * [SystemContextMenuItemDataCustom], which specifies the data to be sent
+///    to the platform for this same button.
 class SystemContextMenuItemCustom extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemCustom].
   const SystemContextMenuItemCustom({

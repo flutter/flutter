@@ -2509,7 +2509,7 @@ class SystemContextMenuController with SystemContextMenuClient {
       return;
     }
     final VoidCallback? callback = _buttonCallbacks[callbackId];
-    assert(callback != null, 'Tap received for non-existent callbackId $callbackId.');
+    assert(callback != null, 'Tap received for non-existent item with id $callbackId.');
     _buttonCallbacks[callbackId]!();
   }
 
@@ -2630,6 +2630,8 @@ class SystemContextMenuController with SystemContextMenuClient {
 ///
 /// See also:
 ///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
 ///  * [SystemContextMenuItem], which performs a similar role but at the widget
 ///    level, where the titles can be replaced with default localized values.
 ///  * [ContextMenuButtonItem], which performs a similar role for Flutter-drawn
@@ -2671,18 +2673,45 @@ sealed class SystemContextMenuItemData {
 }
 
 /// A [SystemContextMenuButtonItemData] for the system's built-in copy button.
+///
+/// The title and action are both handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [SystemContextMenuItemCopy], which performs a similar role but at the
+///    widget level.
 class SystemContextMenuItemDataCopy extends SystemContextMenuItemData {
   /// Creates an instance of [SystemContextMenuItemDataCopy].
   const SystemContextMenuItemDataCopy();
 }
 
 /// A [SystemContextMenuButtonItemData] for the system's built-in cut button.
+///
+/// The title and action are both handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [SystemContextMenuItemCut], which performs a similar role but at the
+///    widget level.
 class SystemContextMenuItemDataCut extends SystemContextMenuItemData {
   /// Creates an instance of [SystemContextMenuItemDataCut].
   const SystemContextMenuItemDataCut();
 }
 
 /// A [SystemContextMenuButtonItemData] for the system's built-in paste button.
+///
+/// The title and action are both handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [SystemContextMenuItemPaste], which performs a similar role but at the
+///    widget level.
 class SystemContextMenuItemDataPaste extends SystemContextMenuItemData {
   /// Creates an instance of [SystemContextMenuItemDataPaste].
   const SystemContextMenuItemDataPaste();
@@ -2690,6 +2719,15 @@ class SystemContextMenuItemDataPaste extends SystemContextMenuItemData {
 
 /// A [SystemContextMenuButtonItemData] for the system's built-in select all
 /// button.
+///
+/// The title and action are both handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [SystemContextMenuItemSelectAll], which performs a similar role but at
+///    the widget level.
 class SystemContextMenuItemDataSelectAll extends SystemContextMenuItemData {
   /// Creates an instance of [SystemContextMenuItemDataSelectAll].
   const SystemContextMenuItemDataSelectAll();
@@ -2697,9 +2735,20 @@ class SystemContextMenuItemDataSelectAll extends SystemContextMenuItemData {
 
 /// A [SystemContextMenuButtonItemData] for the system's built-in look up
 /// button.
+///
+/// Must specify a [title], typically [WidgetsLocalizations.lookUpButtonLabel].
+///
+/// The action is handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [SystemContextMenuItemLookUp], which performs a similar role but at the
+///    widget level, where the title can be replaced with a default localized
+///    value.
 class SystemContextMenuItemDataLookUp extends SystemContextMenuItemData {
-  /// Creates an instance of [SystemContextMenuItemDataLookUp] with the given
-  /// [title].
+  /// Creates an instance of [SystemContextMenuItemDataLookUp].
   const SystemContextMenuItemDataLookUp({
     required this.title,
   });
@@ -2710,9 +2759,21 @@ class SystemContextMenuItemDataLookUp extends SystemContextMenuItemData {
 
 /// A [SystemContextMenuButtonItemData] for the system's built-in search web
 /// button.
+///
+/// Must specify a [title], typically
+/// [WidgetsLocalizations.searchWebButtonLabel].
+///
+/// The action is handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [SystemContextMenuItemSearchWeb], which performs a similar role but at
+///    the widget level, where the title can be replaced with a default localized
+///    value.
 class SystemContextMenuItemDataSearchWeb extends SystemContextMenuItemData {
-  /// Creates an instance of [SystemContextMenuItemDataSearchWeb] with the given
-  /// [title].
+  /// Creates an instance of [SystemContextMenuItemDataSearchWeb].
   const SystemContextMenuItemDataSearchWeb({
     required this.title,
   });
@@ -2722,9 +2783,21 @@ class SystemContextMenuItemDataSearchWeb extends SystemContextMenuItemData {
 }
 
 /// A [SystemContextMenuButtonItemData] for the system's built-in share button.
+///
+/// Must specify a [title], typically
+/// [WidgetsLocalizations.shareButtonLabel].
+///
+/// The action is handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [SystemContextMenuItemShare], which performs a similar role but at
+///    the widget level, where the title can be replaced with a default
+///    localized value.
 class SystemContextMenuItemDataShare extends SystemContextMenuItemData {
-  /// Creates an instance of [SystemContextMenuItemDataShare] with the given
-  /// [title].
+  /// Creates an instance of [SystemContextMenuItemDataShare].
   const SystemContextMenuItemDataShare({
     required this.title,
   });
@@ -2735,6 +2808,15 @@ class SystemContextMenuItemDataShare extends SystemContextMenuItemData {
 
 /// A [SystemContextMenuButtonItemData] for a custom button whose title and
 /// callback are defined by the app developer.
+///
+/// Must specify a [title] and [onPressed].
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [SystemContextMenuItemCustom], which performs a similar role but at
+///    the widget level.
 class SystemContextMenuItemDataCustom extends SystemContextMenuItemData {
   /// Creates an instance of [SystemContextMenuItemDataCustom] with the given
   /// [title] and [onPressed] callback.
