@@ -1664,7 +1664,8 @@ class CompileSwiftUITest {
       'hello_world_swiftui',
       '-sdk',
       'iphoneos',
-      'build'
+      'build',
+      '-allowProvisioningUpdates'
     ]).then((ProcessResult results) {
       print(results.stdout);
       if (results.exitCode != 0) {
