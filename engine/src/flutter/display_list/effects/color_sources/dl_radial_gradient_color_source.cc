@@ -6,19 +6,6 @@
 
 namespace flutter {
 
-DlRadialGradientColorSource::DlRadialGradientColorSource(DlPoint center,
-                                                         DlScalar radius,
-                                                         uint32_t stop_count,
-                                                         const DlColor* colors,
-                                                         const float* stops,
-                                                         DlTileMode tile_mode,
-                                                         const DlMatrix* matrix)
-    : DlGradientColorSourceBase(stop_count, tile_mode, matrix),
-      center_(center),
-      radius_(radius) {
-  store_color_stops(this + 1, colors, stops);
-}
-
 DlRadialGradientColorSource::DlRadialGradientColorSource(
     const DlRadialGradientColorSource* source)
     : DlGradientColorSourceBase(source->stop_count(),

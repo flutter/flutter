@@ -7,24 +7,6 @@
 namespace flutter {
 
 DlConicalGradientColorSource::DlConicalGradientColorSource(
-    DlPoint start_center,
-    DlScalar start_radius,
-    DlPoint end_center,
-    DlScalar end_radius,
-    uint32_t stop_count,
-    const DlColor* colors,
-    const float* stops,
-    DlTileMode tile_mode,
-    const DlMatrix* matrix)
-    : DlGradientColorSourceBase(stop_count, tile_mode, matrix),
-      start_center_(start_center),
-      start_radius_(start_radius),
-      end_center_(end_center),
-      end_radius_(end_radius) {
-  store_color_stops(this + 1, colors, stops);
-}
-
-DlConicalGradientColorSource::DlConicalGradientColorSource(
     const DlConicalGradientColorSource* source)
     : DlGradientColorSourceBase(source->stop_count(),
                                 source->tile_mode(),
