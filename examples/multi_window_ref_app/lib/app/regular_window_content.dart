@@ -58,63 +58,62 @@ class _RegularWindowContentState extends State<RegularWindowContent>
 
   @override
   Widget build(BuildContext context) {
-    final child = Scaffold(
-        appBar: AppBar(title: Text('${widget.controller.type}')),
-        body: Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AnimatedBuilder(
-                    animation: _animation,
-                    builder: (context, child) {
-                      return CustomPaint(
-                        size: const Size(200, 200),
-                        painter: _RotatedWireCube(
-                            angle: _animation.value, color: cubeColor),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      widget.windowManagerModel.add(KeyedWindowController(
-                          controller: RegularWindowController()));
-                    },
-                    child: const Text('Create Regular Window'),
-                  ),
-                  const SizedBox(height: 20),
-                  ListenableBuilder(
-                      listenable: widget.controller,
-                      builder: (BuildContext context, Widget? _) {
-                        return Text(
-                          'View #${widget.controller.view?.viewId ?? "Unknown"}\n'
-                          'Parent View: ${widget.controller.parentViewId}\n'
-                          'Logical Size: ${widget.controller.size?.width ?? "?"}\u00D7${widget.controller.size?.height ?? "?"}\n'
-                          'DPR: ${MediaQuery.of(context).devicePixelRatio}',
-                          textAlign: TextAlign.center,
-                        );
-                      })
-                ],
-              ),
-            ],
-          ),
-        ));
-
     return ViewAnchor(
         view: ChildWindowRenderer(
             windowManagerModel: widget.windowManagerModel,
             windowSettings: widget.windowSettings,
             positionerSettingsModifier: widget.positionerSettingsModifier,
             controller: widget.controller),
-        child: child);
+        child: Scaffold(
+            appBar: AppBar(title: Text('${widget.controller.type}')),
+            body: SingleChildScrollView(
+                child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AnimatedBuilder(
+                        animation: _animation,
+                        builder: (context, child) {
+                          return CustomPaint(
+                            size: const Size(200, 200),
+                            painter: _RotatedWireCube(
+                                angle: _animation.value, color: cubeColor),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          widget.windowManagerModel.add(KeyedWindowController(
+                              controller: RegularWindowController()));
+                        },
+                        child: const Text('Create Regular Window'),
+                      ),
+                      const SizedBox(height: 20),
+                      ListenableBuilder(
+                          listenable: widget.controller,
+                          builder: (BuildContext context, Widget? _) {
+                            return Text(
+                              'View #${widget.controller.view?.viewId ?? "Unknown"}\n'
+                              'Parent View: ${widget.controller.parentViewId}\n'
+                              'Logical Size: ${widget.controller.size?.width ?? "?"}\u00D7${widget.controller.size?.height ?? "?"}\n'
+                              'DPR: ${MediaQuery.of(context).devicePixelRatio}',
+                              textAlign: TextAlign.center,
+                            );
+                          })
+                    ],
+                  ),
+                ],
+              ),
+            ))));
   }
 }
 
