@@ -1294,11 +1294,15 @@ mixin WidgetInspectorService {
       registerExtension: registerExtension,
     );
     _registerServiceExtensionWithArg(
+      name: WidgetInspectorServiceExtensions.getSelectedLocalWidget.name,
+      callback: _getSelectedLocalWidget,
+      registerExtension: registerExtension,
+    );
+    _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name,
       callback: _getSelectedSummaryWidget,
       registerExtension: registerExtension,
     );
-
     _registerSignalServiceExtension(
       name: WidgetInspectorServiceExtensions.isWidgetCreationTracked.name,
       callback: isWidgetCreationTracked,
@@ -2396,16 +2400,54 @@ mixin WidgetInspectorService {
   }
 
   Map<String, Object?>? _getSelectedWidget(String? previousSelectionId, String groupName) {
+    return _getSelectedWidgetHelper(
+      previousSelectionId,
+      groupName,
+      requireLocalWidget: false,
+    );
+  }
+
+  Map<String, Object?>? _getSelectedLocalWidget(String? previousSelectionId, String groupName) {
+    return _getSelectedWidgetHelper(
+      previousSelectionId,
+      groupName,
+      requireLocalWidget: true,
+    );
+  }
+
+  Map<String, Object?>? _getSelectedWidgetHelper(
+    String? previousSelectionId,
+    String groupName, {
+    required bool requireLocalWidget,
+  }) {
     return _nodeToJson(
-      _getSelectedWidgetDiagnosticsNode(previousSelectionId),
+      _getSelectedWidgetDiagnosticsNode(
+        previousSelectionId,
+        requireLocalWidget: requireLocalWidget,
+      ),
       InspectorSerializationDelegate(groupName: groupName, service: this),
     );
   }
 
-  DiagnosticsNode? _getSelectedWidgetDiagnosticsNode(String? previousSelectionId) {
+  DiagnosticsNode? _getSelectedWidgetDiagnosticsNode(String? previousSelectionId,
+      {bool requireLocalWidget = false}) {
     final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
     final Element? current = selection.currentElement;
-    return current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode();
+    if (current == null) {
+      return null;
+    }
+    if (current == previousSelection?.value) {
+      return previousSelection;
+    }
+    if (!requireLocalWidget) {
+      return current.toDiagnosticsNode();
+    }
+    final Element parentCreatedByLocalProject = current.debugGetDiagnosticChain().firstWhere(
+          (Element el) => _isValueCreatedByLocalProject(el),
+          // If no parent is found, then default to the current selected element.
+          orElse: () => current,
+        );
+    return parentCreatedByLocalProject.toDiagnosticsNode();
   }
 
   /// Returns a [DiagnosticsNode] representing the currently selected [Element]

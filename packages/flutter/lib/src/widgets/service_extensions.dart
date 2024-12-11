@@ -446,6 +446,19 @@ enum WidgetInspectorServiceExtensions {
   getSelectedWidget,
 
   /// Name of service extension that, when called, will return the
+  /// [DiagnosticsNode] data for the currently selected [Element] or the first
+  /// ancestor of that widget which was created in the local project.
+  ///
+  /// See also:
+  ///
+  /// * [WidgetInspectorServiceExtensions.getSelectedWidget], which returns the
+  ///    currently selected widget, regardless of whether or not it was created
+  ///    in the local project.
+  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  ///   extension is registered.
+  getSelectedLocalWidget,
+
+  /// Name of service extension that, when called, will return the
   /// [DiagnosticsNode] data for the currently selected [Element] in the summary
   /// tree, which only includes [Element]s created in user code.
   ///
