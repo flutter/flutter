@@ -6,6 +6,7 @@
 // late BuildContext context;
 
 /// @docImport 'package:flutter/widgets.dart';
+/// @docImport '_web_image_info_io.dart';
 library;
 
 import 'dart:async';
