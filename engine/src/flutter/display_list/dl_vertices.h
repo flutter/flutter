@@ -155,6 +155,9 @@ class DlVertices {
     /// promised by (index_count > 0).
     void store_indices(const uint16_t indices[]);
 
+    /// @brief Overwrite the internal bounds with a precomputed bounding rect.
+    void store_bounds(DlRect bounds);
+
     /// @brief Finalizes and the constructed DlVertices object.
     ///
     /// fails if any of the optional data promised in the constructor is
@@ -167,6 +170,7 @@ class DlVertices {
     bool needs_texture_coords_;
     bool needs_colors_;
     bool needs_indices_;
+    bool needs_bounds_ = true;
   };
 
   //--------------------------------------------------------------------------
@@ -183,7 +187,8 @@ class DlVertices {
                                           const SkPoint texture_coordinates[],
                                           const DlColor colors[],
                                           int index_count = 0,
-                                          const uint16_t indices[] = nullptr);
+                                          const uint16_t indices[] = nullptr,
+                                          const DlRect* bounds = nullptr);
 
   /// Returns the size of the object including all of the inlined data.
   size_t size() const;

@@ -19,7 +19,7 @@ class SkStopwatchVisualizer : public StopwatchVisualizer {
   explicit SkStopwatchVisualizer(const Stopwatch& stopwatch)
       : StopwatchVisualizer(stopwatch) {}
 
-  void Visualize(DlCanvas* canvas, const SkRect& rect) const override;
+  void Visualize(DlCanvas* canvas, const DlRect& rect) const override;
 
  private:
   /// Initializes the |SkSurface| used for drawing the stopwatch.

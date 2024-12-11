@@ -199,6 +199,7 @@ TEST_F(PerformanceOverlayLayerTest, SimpleRasterizerStatistics) {
   const SkRect layer_bounds = SkRect::MakeLTRB(0.0f, 0.0f, 64.0f, 64.0f);
   const uint64_t overlay_opts = kDisplayRasterizerStatistics;
   auto layer = std::make_shared<PerformanceOverlayLayer>(overlay_opts);
+  auto font = PerformanceOverlayLayer::MakeStatisticsFont("");
 
   // TODO(): Note calling code has to call set_paint_bounds right now.  Make
   // this a constructor parameter and move the set_paint_bounds into Preroll
@@ -210,7 +211,7 @@ TEST_F(PerformanceOverlayLayerTest, SimpleRasterizerStatistics) {
 
   layer->Paint(display_list_paint_context());
   auto overlay_text = PerformanceOverlayLayer::MakeStatisticsText(
-      display_list_paint_context().raster_time, "Raster", "");
+      display_list_paint_context().raster_time, font, "Raster");
   auto overlay_text_data = overlay_text->serialize(SkSerialProcs{});
   // Historically SK_ColorGRAY (== 0xFF888888) was used here
   DlPaint text_paint(DlColor(0xFF888888));
