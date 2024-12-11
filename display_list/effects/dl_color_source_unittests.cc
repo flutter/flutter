@@ -189,6 +189,32 @@ TEST(DisplayListColorSource, LinearGradientConstructor) {
       DlTileMode::kClamp, &kTestMatrix1);
 }
 
+TEST(DisplayListColorSource, LinearGradientARGBConstructor) {
+  std::array<DlScalar, kTestStopCount * 4> colors;
+  for (int i = 0; i < kTestStopCount; ++i) {
+    colors[i * 4 + 0] = kTestColors[i].getAlphaF();  //
+    colors[i * 4 + 1] = kTestColors[i].getRedF();    //
+    colors[i * 4 + 2] = kTestColors[i].getGreenF();  //
+    colors[i * 4 + 3] = kTestColors[i].getBlueF();
+  }
+  std::shared_ptr<DlColorSource> source = DlColorSource::MakeLinear(
+      kTestPoints[0], kTestPoints[1], kTestStopCount, colors.data(), kTestStops,
+      DlTileMode::kClamp, &kTestMatrix1);
+  ASSERT_TRUE(source);
+  ASSERT_TRUE(source->asLinearGradient());
+  EXPECT_EQ(source->asLinearGradient()->start_point(), kTestPoints[0]);
+  EXPECT_EQ(source->asLinearGradient()->end_point(), kTestPoints[1]);
+  EXPECT_EQ(source->asLinearGradient()->stop_count(), kTestStopCount);
+  for (int i = 0; i < kTestStopCount; i++) {
+    EXPECT_EQ(source->asLinearGradient()->colors()[i],
+              kTestColors[i].withColorSpace(DlColorSpace::kExtendedSRGB));
+    EXPECT_EQ(source->asLinearGradient()->stops()[i], kTestStops[i]);
+  }
+  EXPECT_EQ(source->asLinearGradient()->tile_mode(), DlTileMode::kClamp);
+  EXPECT_EQ(source->asLinearGradient()->matrix(), kTestMatrix1);
+  EXPECT_EQ(source->is_opaque(), true);
+}
+
 TEST(DisplayListColorSource, LinearGradientShared) {
   std::shared_ptr<DlColorSource> source = DlColorSource::MakeLinear(
       kTestPoints[0], kTestPoints[1], kTestStopCount, kTestColors, kTestStops,

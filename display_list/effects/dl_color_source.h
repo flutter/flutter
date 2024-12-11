@@ -59,6 +59,17 @@ class DlColorSource : public DlAttribute<DlColorSource, DlColorSourceType> {
       DlTileMode tile_mode,
       const DlMatrix* matrix = nullptr);
 
+  /// @brief Make a linear gradient.
+  /// @param colors_argb Array of DlScalars that represents colors in the ARGB.
+  static std::shared_ptr<DlColorSource> MakeLinear(
+      const DlPoint start_point,
+      const DlPoint end_point,
+      uint32_t stop_count,
+      const DlScalar* colors_argb,
+      const float* stops,
+      DlTileMode tile_mode,
+      const DlMatrix* matrix = nullptr);
+
   static std::shared_ptr<DlColorSource> MakeRadial(
       DlPoint center,
       DlScalar radius,

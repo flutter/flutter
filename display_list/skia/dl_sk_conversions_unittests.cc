@@ -302,7 +302,8 @@ TEST(DisplayListSkConversions, ToSkDitheringEnabledForGradients) {
 
   // Set the paint to be a gradient.
   dl_paint.setColorSource(DlColorSource::MakeLinear(
-      DlPoint(0, 0), DlPoint(100, 100), 0, 0, 0, DlTileMode::kClamp));
+      DlPoint(0, 0), DlPoint(100, 100), 0,
+      std::array<DlColor, 1>{DlColor(0)}.data(), 0, DlTileMode::kClamp));
 
   {
     SkPaint sk_paint = ToSk(dl_paint);
