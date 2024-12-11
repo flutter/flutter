@@ -23,6 +23,8 @@ final FileContentPair ccContentPair = FileContentPair(
     'int main(){return 0;}\n', 'int main() {\n  return 0;\n}\n');
 final FileContentPair hContentPair =
     FileContentPair('int\nmain\n()\n;\n', 'int main();\n');
+final FileContentPair dartContentPair = FileContentPair(
+    'enum \n\nfoo {\n  entry1,\n  entry2,\n}', 'enum foo { entry1, entry2 }\n');
 final FileContentPair gnContentPair = FileContentPair(
     'test\n(){testvar=true}\n', 'test() {\n  testvar = true\n}\n');
 final FileContentPair javaContentPair = FileContentPair(
@@ -60,6 +62,10 @@ class TestFileFixture {
         final io.File hFile = io.File('${repoDir.path}/format_test.h');
         hFile.writeAsStringSync(hContentPair.original);
         files.add(hFile);
+      case target.FormatCheck.dart:
+        final io.File dartFile = io.File('${repoDir.path}/format_test.dart');
+        dartFile.writeAsStringSync(dartContentPair.original);
+        files.add(dartFile);
       case target.FormatCheck.gn:
         final io.File gnFile = io.File('${repoDir.path}/format_test.gn');
         gnFile.writeAsStringSync(gnContentPair.original);
@@ -116,6 +122,11 @@ class TestFileFixture {
                 ? ccContentPair.formatted
                 : hContentPair.formatted,
           );
+        case target.FormatCheck.dart:
+          return FileContentPair(
+            content,
+            dartContentPair.formatted,
+          );
         case target.FormatCheck.gn:
           return FileContentPair(
             content,
@@ -155,6 +166,22 @@ void main() {
     try {
       fixture.gitAdd();
       io.Process.runSync(formatterPath, <String>['--check', 'clang', '--fix'],
+          workingDirectory: repoDir.path);
+
+      final Iterable<FileContentPair> files = fixture.getFileContents();
+      for (final FileContentPair pair in files) {
+        expect(pair.original, equals(pair.formatted));
+      }
+    } finally {
+      fixture.gitRemove();
+    }
+  });
+
+  test('Can fix Dart formatting errors', () {
+    final TestFileFixture fixture = TestFileFixture(target.FormatCheck.dart);
+    try {
+      fixture.gitAdd();
+      io.Process.runSync(formatterPath, <String>['--check', 'dart', '--fix'],
           workingDirectory: repoDir.path);
 
       final Iterable<FileContentPair> files = fixture.getFileContents();
