@@ -42,6 +42,10 @@ class DlGradientColorSourceBase : public DlMatrixColorSourceBase {
                          const DlColor* color_data,
                          const float* stop_data);
 
+  void store_color_stops(void* pod,
+                         const DlScalar* color_data_argb,
+                         const float* stop_data);
+
  private:
   DlTileMode mode_;
   uint32_t stop_count_;
