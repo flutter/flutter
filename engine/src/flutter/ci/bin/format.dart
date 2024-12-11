@@ -40,6 +40,7 @@ enum MessageType {
 }
 
 enum FormatCheck {
+  dart,
   gn,
   java,
   python,
@@ -53,6 +54,8 @@ FormatCheck nameToFormatCheck(String name) {
   switch (name) {
     case 'clang':
       return FormatCheck.clang;
+    case 'dart':
+      return FormatCheck.dart;
     case 'gn':
       return FormatCheck.gn;
     case 'java':
@@ -72,6 +75,8 @@ String formatCheckToName(FormatCheck check) {
   switch (check) {
     case FormatCheck.clang:
       return 'C++/ObjC/Shader';
+    case FormatCheck.dart:
+      return 'Dart';
     case FormatCheck.gn:
       return 'GN';
     case FormatCheck.java:
@@ -87,8 +92,7 @@ String formatCheckToName(FormatCheck check) {
 
 List<String> formatCheckNames() {
   return FormatCheck.values
-      .map<String>((FormatCheck check) =>
-          check.toString().replaceFirst('$FormatCheck.', ''))
+      .map<String>((FormatCheck check) => check.name)
       .toList();
 }
 
@@ -138,6 +142,14 @@ abstract class FormatChecker {
           baseGitRef: baseGitRef,
           repoDir: repoDir,
           srcDir: srcDir,
+          allFiles: allFiles,
+          messageCallback: messageCallback,
+        );
+      case FormatCheck.dart:
+        return DartFormatChecker(
+          processManager: processManager,
+          baseGitRef: baseGitRef,
+          repoDir: repoDir,
           allFiles: allFiles,
           messageCallback: messageCallback,
         );
@@ -786,6 +798,133 @@ class GnFormatChecker extends FormatChecker {
   }
 }
 
+/// Checks the format of any .dart files using the "dart format" command.
+class DartFormatChecker extends FormatChecker {
+  DartFormatChecker({
+    super.processManager,
+    required super.baseGitRef,
+    required Directory repoDir,
+    super.allFiles,
+    super.messageCallback,
+  }) : super(
+    repoDir: repoDir,
+  ) {
+    // $ENGINE/flutter/third_party/dart/tools/sdks/dart-sdk/bin/dart
+    _dartBin = path.join(
+      repoDir.absolute.parent.path,
+      'flutter',
+      'third_party',
+      'dart',
+      'tools',
+      'sdks',
+      'dart-sdk',
+      'bin',
+      Platform.isWindows ? 'dart.exe' : 'dart',
+    );
+  }
+
+  late final String _dartBin;
+
+  @override
+  Future<bool> checkFormatting() async {
+    message('Checking Dart formatting...');
+    return (await _runDartFormat(fixing: false)) == 0;
+  }
+
+  @override
+  Future<bool> fixFormatting() async {
+    message('Fixing Dart formatting...');
+    await _runDartFormat(fixing: true);
+    // The dart formatter shouldn't fail when fixing errors.
+    return true;
+  }
+
+  Future<int> _runDartFormat({required bool fixing}) async {
+    final List<String> filesToCheck = await getFileList(<String>['*.dart']);
+
+    final List<String> cmd = <String>[
+      _dartBin,
+      'format',
+      '--set-exit-if-changed',
+      '--show=none',
+      if (!fixing) '--output=show',
+      if (fixing) '--output=write',
+    ];
+    final List<WorkerJob> jobs = <WorkerJob>[];
+    for (final String file in filesToCheck) {
+      jobs.add(WorkerJob(<String>[...cmd, file]));
+    }
+    final ProcessPool dartFmt = ProcessPool(
+      processRunner: _processRunner,
+      printReport: namedReport('dart format'),
+    );
+
+    Iterable<WorkerJob> incorrect;
+    if (!fixing) {
+      final Stream<WorkerJob> completedJobs = dartFmt.startWorkers(jobs);
+      final List<WorkerJob> diffJobs = <WorkerJob>[];
+      await for (final WorkerJob completedJob in completedJobs) {
+        if (completedJob.result.exitCode == 1) {
+          diffJobs.add(
+            WorkerJob(
+              <String>[
+                'git',
+                'diff',
+                '--no-index',
+                '--no-color',
+                '--ignore-cr-at-eol',
+                '--',
+                completedJob.command.last,
+                '-',
+              ],
+              stdinRaw: codeUnitsAsStream(completedJob.result.stdoutRaw),
+            ),
+          );
+        }
+      }
+      final ProcessPool diffPool = ProcessPool(
+        processRunner: _processRunner,
+        printReport: namedReport('diff'),
+      );
+      final List<WorkerJob> completedDiffs = await diffPool.runToCompletion(diffJobs);
+      incorrect = completedDiffs.where((WorkerJob job) {
+        return job.result.exitCode != 0;
+      });
+    } else {
+      final List<WorkerJob> completedJobs = await dartFmt.runToCompletion(jobs);
+      incorrect = completedJobs.where((WorkerJob job) => job.result.exitCode == 1);
+    }
+
+    reportDone();
+
+    if (incorrect.isNotEmpty) {
+      final bool plural = incorrect.length > 1;
+      if (fixing) {
+        message('Fixing ${incorrect.length} dart file${plural ? 's' : ''}'
+            ' which ${plural ? 'were' : 'was'} formatted incorrectly.');
+      } else {
+        error('Found ${incorrect.length} Dart file${plural ? 's' : ''}'
+            ' which ${plural ? 'were' : 'was'} formatted incorrectly.');
+        stdout.writeln('To fix, run `et format` or:');
+        stdout.writeln();
+        stdout.writeln('git apply <<DONE');
+        for (final WorkerJob job in incorrect) {
+          stdout.write(job.result.stdout
+              .replaceFirst('b/-', 'b/${job.command[job.command.length - 2]}')
+              .replaceFirst('b/-', 'b/${job.command[job.command.length - 2]}')
+              .replaceFirst(RegExp('\\+Formatted \\d+ files? \\(\\d+ changed\\) in \\d+.\\d+ seconds.\n'), '')
+          );
+        }
+        stdout.writeln('DONE');
+        stdout.writeln();
+      }
+    } else {
+      message('All dart files formatted correctly.');
+    }
+    return incorrect.length;
+  }
+}
+
 /// Checks the format of any .py files using the "yapf" command.
 class PythonFormatChecker extends FormatChecker {
   PythonFormatChecker({
@@ -1144,7 +1283,8 @@ Future<int> main(List<String> arguments) async {
   parser.addMultiOption('check',
       abbr: 'c',
       allowed: formatCheckNames(),
-      defaultsTo: formatCheckNames(),
+      // TODO(goderbauer): Enable dart by default when we turned on the formatter.
+      defaultsTo: formatCheckNames()..remove(FormatCheck.dart.name),
       help: 'Specifies which checks will be performed. Defaults to all checks. '
           'May be specified more than once to perform multiple types of checks. ');
   parser.addFlag('verbose', help: 'Print verbose output.', defaultsTo: verbose);
