@@ -408,6 +408,17 @@ void main() {
     );
   });
 
+  testWidgets('isSystemTextScaler', (WidgetTester tester) async {
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+    tester.platformDispatcher.textScaleFactorTestValue = 123;
+
+    final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
+    final TextScaler systemScaler = mediaQueryData.textScaler;
+    expect(systemScaler, isSystemTextScaler());
+    expect(systemScaler, isSystemTextScaler(withScaleFactor: 123));
+    expect(systemScaler, isNot(isSystemTextScaler(withScaleFactor: 2)));
+  });
+
   group('coversSameAreaAs', () {
     test('empty Paths', () {
       expect(
