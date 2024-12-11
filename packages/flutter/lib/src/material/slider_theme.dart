@@ -299,6 +299,11 @@ class SliderThemeData with Diagnosticable {
     this.padding,
     this.thumbSize,
     this.trackGap,
+    @Deprecated(
+      'Use SliderTheme to customize the Slider appearance. '
+      'This feature was deprecated after v3.27.0-0.2.pre.'
+    )
+    this.year2023,
   });
 
   /// Generates a SliderThemeData from three main colors.
@@ -623,6 +628,21 @@ class SliderThemeData with Diagnosticable {
   /// Defaults to 6.0 pixels of gap between the active and inactive tracks.
   final double? trackGap;
 
+ /// Overrides the default value of [Slider.year2023].
+  ///
+  /// When true, the [Slider] will use the 2023 Material Design 3 appearance.
+  /// Defaults to true.
+  ///
+  /// If this is set to false, the [Slider] will use the latest Material Design 3
+  /// appearance, which was introduced in December 2023.
+  ///
+  /// If [ThemeData.useMaterial3] is false, then this property is ignored.
+  @Deprecated(
+    'Use SliderTheme to customize the Slider appearance. '
+    'This feature was deprecated after v3.27.0-0.2.pre.'
+  )
+  final bool? year2023;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   SliderThemeData copyWith({
@@ -661,6 +681,7 @@ class SliderThemeData with Diagnosticable {
     EdgeInsetsGeometry? padding,
     MaterialStateProperty<Size?>? thumbSize,
     double? trackGap,
+    bool? year2023,
   }) {
     return SliderThemeData(
       trackHeight: trackHeight ?? this.trackHeight,
@@ -698,6 +719,7 @@ class SliderThemeData with Diagnosticable {
       padding: padding ?? this.padding,
       thumbSize: thumbSize ?? this.thumbSize,
       trackGap: trackGap ?? this.trackGap,
+      year2023: year2023 ?? this.year2023,
     );
   }
 
@@ -744,6 +766,7 @@ class SliderThemeData with Diagnosticable {
       padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t),
       thumbSize: MaterialStateProperty.lerp<Size?>(a.thumbSize, b.thumbSize, t, Size.lerp),
       trackGap: lerpDouble(a.trackGap, b.trackGap, t),
+      year2023: t < 0.5 ? a.year2023 : b.year2023,
     );
   }
 
@@ -784,6 +807,7 @@ class SliderThemeData with Diagnosticable {
       padding,
       thumbSize,
       trackGap,
+      year2023,
     ),
   );
 
@@ -830,7 +854,8 @@ class SliderThemeData with Diagnosticable {
         && other.allowedInteraction == allowedInteraction
         && other.padding == padding
         && other.thumbSize == thumbSize
-        && other.trackGap == trackGap;
+        && other.trackGap == trackGap
+        && other.year2023 == year2023;
   }
 
   @override
@@ -872,6 +897,7 @@ class SliderThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: defaultData.padding));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('thumbSize', thumbSize, defaultValue: defaultData.thumbSize));
     properties.add(DoubleProperty('trackGap', trackGap, defaultValue: defaultData.trackGap));
+    properties.add(DiagnosticsProperty<bool>('year2023', year2023, defaultValue: defaultData.year2023));
   }
 }
 
@@ -1550,6 +1576,10 @@ abstract class RangeSliderTrackShape {
     bool isDiscrete = false,
     required TextDirection textDirection,
   });
+
+  /// Whether the track shape is rounded. This is used to determine the correct
+  /// position of the thumbs in relation to the track. Defaults to false.
+  bool get isRounded => false;
 }
 
 /// Base track shape that provides an implementation of [getPreferredRect] for
@@ -2080,15 +2110,6 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape with BaseRa
       ),
       inactivePaint,
     );
-    context.canvas.drawRect(
-      Rect.fromLTRB(
-        leftThumbOffset.dx,
-        trackRect.top - (additionalActiveTrackHeight / 2),
-        rightThumbOffset.dx,
-        trackRect.bottom + (additionalActiveTrackHeight / 2),
-      ),
-      activePaint,
-    );
     context.canvas.drawRRect(
       RRect.fromLTRBAndCorners(
         rightThumbOffset.dx,
@@ -2100,7 +2121,20 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape with BaseRa
       ),
       inactivePaint,
     );
+    context.canvas.drawRRect(
+      RRect.fromLTRBR(
+        leftThumbOffset.dx - (sliderTheme.trackHeight! / 2),
+        trackRect.top - (additionalActiveTrackHeight / 2),
+        rightThumbOffset.dx + (sliderTheme.trackHeight! / 2),
+        trackRect.bottom + (additionalActiveTrackHeight / 2),
+        trackRadius,
+      ),
+      activePaint,
+    );
   }
+
+  @override
+  bool get isRounded => true;
 }
 
 /// The default shape of each [Slider] tick mark.

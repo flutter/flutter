@@ -1762,7 +1762,7 @@ class EditableText extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [ScribbleClient], which can be mixed into an arbirtrary widget to
+  ///   * [ScribbleClient], which can be mixed into an arbitrary widget to
   ///     provide iOS Scribble functionality.
   ///   * [Scribe], which can be used to interact with Android Scribe directly.
   final bool stylusHandwritingEnabled;

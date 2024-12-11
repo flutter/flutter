@@ -503,7 +503,7 @@ class CocoaPods {
         }
       }
     } else if (stdout.contains('unknown ISA `PBXFileSystemSynchronizedRootGroup`')) {
-      // CocoaPods must be at least verison 1.16.2 to handle synchronized
+      // CocoaPods must be at least version 1.16.2 to handle synchronized
       // groups/folders https://github.com/CocoaPods/CocoaPods/issues/12456
       _logger.printError(
         'Error: Your Cocoapods might be out-of-date and unable to support synchronized groups/folders. '
