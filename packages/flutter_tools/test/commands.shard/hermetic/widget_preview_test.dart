@@ -6,7 +6,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
-import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/test.dart';

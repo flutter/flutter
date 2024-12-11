@@ -10,7 +10,6 @@ import '../base/deferred_component.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../cache.dart';
-import '../convert.dart';
 import '../dart/pub.dart';
 import '../flutter_manifest.dart';
 
