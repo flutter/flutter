@@ -394,6 +394,7 @@ class HtmlViewEmbedder {
           .endRecording();
       await rasterizer.rasterizeToCanvas(
           renderCanvas.displayCanvas!, <CkPicture>[renderPicture]);
+      renderPicture.dispose();
     }
 
     for (final CkPictureRecorder recorder

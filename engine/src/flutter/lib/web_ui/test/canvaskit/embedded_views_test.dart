@@ -35,6 +35,7 @@ void testMain() {
     tearDown(() {
       PlatformViewManager.instance.debugClear();
       CanvasKitRenderer.instance.debugClear();
+      Instrumentation.enabled = false;
     });
 
     test('embeds interactive platform views', () async {
@@ -1573,6 +1574,36 @@ void testMain() {
           .toList();
       expect(picturesPerCanvasInSecondRendering, <int>[19]);
       debugOverrideJsConfiguration(null);
+    });
+
+    test('disposes render pictures', () async {
+      Instrumentation.enabled = true;
+      Instrumentation.instance.debugCounters.clear();
+
+      ui_web.platformViewRegistry.registerViewFactory(
+        'test-view',
+        (int viewId) => createDomHTMLDivElement()..className = 'platform-view',
+      );
+
+      CkPicture rectPicture(ui.Rect rect) {
+        return paintPicture(rect, (CkCanvas canvas) {
+          canvas.drawRect(
+              rect, CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0));
+        });
+      }
+      final CkPicture picture = rectPicture(const ui.Rect.fromLTWH(0, 0, 20, 20));
+
+      await createPlatformView(0, 'test-view');
+
+      final LayerSceneBuilder sb = LayerSceneBuilder();
+      sb.addPicture(ui.Offset.zero, picture);
+      sb.addPlatformView(0, width: 20, height: 20);
+      final LayerScene scene = sb.build();
+      await renderScene(scene);
+
+      picture.dispose();
+      final Map<String, int> debugCounters = Instrumentation.instance.debugCounters;
+      expect(debugCounters['Picture Created'], debugCounters['Picture Deleted']);
     });
   });
 }
