@@ -16,8 +16,6 @@ SET dart=%FLUTTER_ROOT%\bin\dart.bat
 
 cd "%tools_dir%"
 
-ECHO Checking formatting...
-
 REM Do not use the CALL command in the next line to execute Dart. CALL causes
 REM Windows to re-read the line from disk after the CALL command has finished
 REM regardless of the ampersand chain.
