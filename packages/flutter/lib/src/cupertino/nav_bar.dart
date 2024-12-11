@@ -1177,11 +1177,11 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     switch (status) {
       case AnimationStatus.completed:
       case AnimationStatus.dismissed:
-        atTop = !atTop;
         setState(() { });
       case AnimationStatus.forward:
+        atTop = true;
       case AnimationStatus.reverse:
-        break;
+        atTop = false;
     }
   }
 
@@ -1207,7 +1207,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                       searchableBottomMode = widget.bottomMode;
                       effectiveStretch = widget.stretch;
                       if (widget.onSearchActiveChanged != null) {
-                        widget.onSearchActiveChanged!(atTop);
+                        widget.onSearchActiveChanged!(!atTop);
                       }
                       _animationController.reverse();
                       _fadeController.reverse();
@@ -1226,7 +1226,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                 searchableBottomMode = NavigationBarBottomMode.always;
                 effectiveStretch = false;
                 if (widget.onSearchActiveChanged != null) {
-                  widget.onSearchActiveChanged!(atTop);
+                  widget.onSearchActiveChanged!(!atTop);
                 }
                 _animationController.forward();
                 _fadeController.forward();

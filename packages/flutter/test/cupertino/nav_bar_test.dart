@@ -2388,6 +2388,109 @@ void main() {
     expect(renderOpacity?.opacity.value, 0.0);
   });
 
+  testWidgets('CupertinoSliverNavigationBar.search field collapses nav bar on tap', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            CupertinoSliverNavigationBar.search(
+              leading: Icon(CupertinoIcons.person_2),
+              trailing: Icon(CupertinoIcons.add_circled),
+              largeTitle: Text('Large title'),
+              middle: Text('middle'),
+            ),
+            SliverFillRemaining(
+              child: SizedBox(
+                height: 1000.0,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Initially, all widgets are visible.
+    expect(find.byIcon(CupertinoIcons.person_2), findsOneWidget);
+    expect(find.byIcon(CupertinoIcons.add_circled), findsOneWidget);
+    expect(find.text('Large title'), findsOneWidget);
+    expect(find.text('middle'), findsOneWidget);
+
+    final Finder searchFieldFinder = find.byType(CupertinoSearchTextField);
+    expect(searchFieldFinder, findsOneWidget);
+
+    // Tap the search field.
+    await tester.tap(searchFieldFinder, warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    // After tapping, leading, trailing, large title, and middle are collapsed.
+    expect(find.byIcon(CupertinoIcons.person_2), findsNothing);
+    expect(find.byIcon(CupertinoIcons.add_circled), findsNothing);
+    // expect(find.text('Large title'), findsNothing);
+    // expect(find.text('middle'), findsNothing);
+
+    // Search field and Cancel button should be visible
+    expect(searchFieldFinder, findsOneWidget);
+    expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
+  });
+
+  testWidgets('isSearchActiveChanged callback', (WidgetTester tester) async {
+    bool isFocused = false;
+    const Color focusedColor = Color(0x0000000A);
+    const Color unfocusedColor = Color(0x0000000B);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return CustomScrollView(
+              slivers: <Widget>[
+                CupertinoSliverNavigationBar.search(
+                  onSearchActiveChanged: (bool value) {
+                    setState(() {
+                      isFocused = value;
+                    });
+                  },
+                  largeTitle: const Text('Large title'),
+                  middle: const Text('middle'),
+                  bottomMode: NavigationBarBottomMode.always,
+                ),
+                SliverFillRemaining(
+                  child: Container(
+                    color: isFocused ? focusedColor : unfocusedColor,
+                  ),
+                ),
+              ],
+            );
+          }
+        ),
+      ),
+    );
+
+    // Initially, all widgets are visible.
+    expect(find.text('Large title'), findsOneWidget);
+    expect(find.text('middle'), findsOneWidget);
+    final Finder searchFieldFinder = find.byType(CupertinoSearchTextField);
+    expect(searchFieldFinder, findsOneWidget);
+    expect(find.byWidgetPredicate((Widget widget) {
+      return widget is Container && widget.color == unfocusedColor;
+    }), findsOneWidget);
+
+    await tester.pumpAndSettle();
+
+    expect(searchFieldFinder, findsOneWidget);
+
+    // Tap the search field.
+    await tester.tap(searchFieldFinder, warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    // Search field and Cancel button should be visible
+    expect(isFocused, true);
+    expect(searchFieldFinder, findsOneWidget);
+    expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
+    expect(find.byWidgetPredicate((Widget widget) {
+      return widget is Container && widget.color == focusedColor;
+    }), findsOneWidget);
+  });
+
   testWidgets('CupertinoNavigationBar with bottom widget', (WidgetTester tester) async {
     const double persistentHeight = 44.0;
     const double bottomHeight = 10.0;
