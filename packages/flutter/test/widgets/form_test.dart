@@ -1540,7 +1540,7 @@ void main() {
 
     // Focus on the first field.
     await tester.tap(find.byKey(fieldKey));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     // Check no error messages are displayed initially.
     expect(find.text('foo/error'), findsNothing);
