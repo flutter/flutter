@@ -1115,9 +1115,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       duration: const Duration(milliseconds: 150),
     );
     persistentHeightAnimation = persistentHeightTween.animate(_animationController)
-      ..addListener(() {
-        setState(() { });
-      });
+      ..addStatusListener(_handleSearchFieldStatusChanged);
     largeTitleHeightAnimation = largeTitleHeightTween.animate(_animationController);
     if (widget._searchable) {
       defaultSearchField = _NavigationBarSearchField(searchKey: searchKey);
@@ -1175,6 +1173,18 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     }
   }
 
+  void _handleSearchFieldStatusChanged(AnimationStatus status) {
+    switch (status) {
+      case AnimationStatus.completed:
+      case AnimationStatus.dismissed:
+        atTop = !atTop;
+        setState(() { });
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget._searchable) {
@@ -1192,7 +1202,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                   child: const Text('Cancel'),
                   onPressed: () {
                     setState(() {
-                      atTop = false;
                       effectiveLeading = widget.leading;
                       effectiveTrailing = widget.trailing;
                       searchableBottomMode = widget.bottomMode;
@@ -1212,7 +1221,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
             child: defaultSearchField,
             onTap: () {
               setState(() {
-                atTop = true;
                 effectiveLeading = const SizedBox.shrink();
                 effectiveTrailing = const SizedBox.shrink();
                 searchableBottomMode = NavigationBarBottomMode.always;
@@ -1236,8 +1244,11 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       previousPageTitle: widget.previousPageTitle,
       userMiddle: _animationController.isAnimating ? const Text('') : widget.middle,
       userTrailing: effectiveTrailing ?? widget.trailing,
-      userLargeTitle: atTop
-        ? FadeTransition(opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_fadeController), child: widget.largeTitle)
+      userLargeTitle: _animationController.isAnimating
+        ? FadeTransition(
+            opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_fadeController),
+            child: widget.largeTitle,
+          )
         : widget.largeTitle,
       padding: widget.padding,
       large: true,
