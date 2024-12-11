@@ -383,8 +383,8 @@ class AnimationController extends Animation<double>
   ///  * [stop], which aborts the animation without changing its value or status
   ///    and without dispatching any notifications other than completing or
   ///    canceling the [TickerFuture].
-  ///  * [forward], [reverse], [animateTo], [animateWith], [fling], and [repeat],
-  ///    which start the animation controller.
+  ///  * [forward], [reverse], [animateTo], [animateWith], [animateBackWith],
+  ///    [fling], and [repeat], which start the animation controller.
   set value(double newValue) {
     stop();
     _internalSetValue(newValue);
