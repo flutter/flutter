@@ -218,7 +218,7 @@ class ChromeInstaller {
       // version directory. However, the zip file contains a top-level directory
       // named e.g. 'chrome-linux'. We need to copy the files out of that
       // directory and into the version directory.
-      final io.Directory tmpDir = await io.Directory.systemTemp.createTemp();
+      final io.Directory tmpDir = await chromeInstallationDir.createTemp();
       final io.Directory unzipDir = tmpDir;
       final io.ProcessResult unzipResult =
           await io.Process.run('unzip', <String>[
