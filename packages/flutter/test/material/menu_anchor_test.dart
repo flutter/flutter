@@ -4757,6 +4757,92 @@ void main() {
     expect(openCount, 1);
     expect(closeCount, 1);
   });
+
+  testWidgets('SubmenuButton.submenuIcon updates default arrow icon', (WidgetTester tester) async {
+    const IconData disabledIcon = Icons.close;
+    const IconData hoveredIcon = Icons.bolt;
+    const IconData focusedIcon = Icons.favorite;
+    const IconData defaultIcon = Icons.add;
+    final WidgetStateProperty<Widget?> submenuIcon = WidgetStateProperty.resolveWith<Widget?>(
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
+          return const Icon(disabledIcon);
+        }
+        if (states.contains(WidgetState.hovered)) {
+          return const Icon(hoveredIcon);
+        }
+        if (states.contains(WidgetState.focused)) {
+          return const Icon(focusedIcon);
+        }
+        return const Icon(defaultIcon);
+    });
+
+    Widget buildMenu({
+      WidgetStateProperty<Widget?>? icon,
+      bool enabled = true,
+    }) {
+      return MaterialApp(
+        home: Material(
+          child: MenuBar(
+            controller: controller,
+            children: <Widget>[
+              SubmenuButton(
+                menuChildren: <Widget>[
+                  SubmenuButton(
+                    submenuIcon: icon,
+                    menuChildren: enabled
+                      ? <Widget>[
+                          MenuItemButton(
+                          child: Text(TestMenu.mainMenu0.label),
+                          ),
+                        ]
+                      : <Widget>[],
+                    child: Text(TestMenu.subSubMenu110.label),
+                  ),
+                ],
+                child: Text(TestMenu.subMenu00.label),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildMenu());
+    await tester.tap(find.text(TestMenu.subMenu00.label));
+    await tester.pump();
+
+    expect(find.byIcon(Icons.arrow_right), findsOneWidget);
+
+    controller.close();
+    await tester.pump();
+
+    await tester.pumpWidget(buildMenu(icon: submenuIcon));
+    await tester.tap(find.text(TestMenu.subMenu00.label));
+    await tester.pump();
+    expect(find.byIcon(defaultIcon), findsOneWidget);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(find.byIcon(focusedIcon), findsOneWidget);
+
+    controller.close();
+    await tester.pump();
+
+    await tester.tap(find.text(TestMenu.subMenu00.label));
+    await tester.pump();
+    await hoverOver(tester, find.text(TestMenu.subSubMenu110.label));
+    await tester.pump();
+    expect(find.byIcon(hoveredIcon), findsOneWidget);
+
+    controller.close();
+    await tester.pump();
+
+    await tester.pumpWidget(buildMenu(icon: submenuIcon, enabled: false));
+    await tester.tap(find.text(TestMenu.subMenu00.label));
+    await tester.pump();
+    expect(find.byIcon(disabledIcon), findsOneWidget);
+  });
 }
 
 List<Widget> createTestMenus({
