@@ -2124,6 +2124,13 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getSelectedWidget(null, groupName));
   }
 
+  /// Returns a [DiagnosticsNode] representing the currently selected [Element]
+  /// if it was created by the local project, or its nearest ancestor that was.
+  @protected
+  String getSelectedLocalWidget(String groupName) {
+    return _safeJsonEncode(_getSelectedLocalWidget(null, groupName));
+  }
+
   /// Captures an image of the current state of an [object] that is a
   /// [RenderObject] or [Element].
   ///

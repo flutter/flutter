@@ -1971,6 +1971,60 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               );
             },
           );
+
+          testWidgets(
+            'getSelectedLocalWidget finds the closest widget created by the local project',
+            (WidgetTester tester) async {
+              await pumpWidgetTreeWithABC(tester);
+              final Element richText =
+                  find
+                      .descendant(of: find.text('a'), matching: find.byType(RichText))
+                      .evaluate()
+                      .first;
+              service.setSelection(richText, 'my-group');
+              service.addPubRootDirectories(<String>[pubRootTest]);
+
+              // This RichText widget is created by the build method of the Text widget
+              // thus the creation location is in text.dart not basic.dart
+              final Map<String, Object?> jsonObject =
+                  json.decode(service.getSelectedWidget(null, 'my-group'))
+                      as Map<String, Object?>;
+              expect(jsonObject['description'], equals('RichText'));
+              expect(jsonObject, isNot(contains('createdByLocalProject')));
+
+              // Its parent Text widget is created in basic.dart.
+              final Map<String, Object?> localJsonObject =
+                  json.decode(service.getSelectedLocalWidget('my-group')) as Map<String, Object?>;
+              expect(localJsonObject['description'], equals('Text'));
+              expect(localJsonObject, contains('createdByLocalProject'));
+            },
+          );
+
+          testWidgets(
+            'getSelectedLocalWidget returns the selected widget if it was created by the local project',
+            (WidgetTester tester) async {
+              await pumpWidgetTreeWithABC(tester);
+              final Element textWidget =
+                  find.text('a')
+                      .evaluate()
+                      .first;
+              service.setSelection(textWidget, 'my-group');
+              service.addPubRootDirectories(<String>[pubRootTest]);
+
+              final Map<String, Object?> jsonObject =
+                  json.decode(service.getSelectedWidget(null, 'my-group'))
+                      as Map<String, Object?>;
+              final Map<String, Object?> localJsonObject =
+                  json.decode(service.getSelectedLocalWidget('my-group'))
+                    as Map<String, Object?>;
+              
+              // In this case getSelectedWidget and getSelectedLocalWidget both
+              // return the Text widget, because it was created in basic.dart.
+              expect(localJsonObject['valueRef'], equals(jsonObject['valueRef']));
+              expect(localJsonObject['description'], equals('Text'));
+              expect(localJsonObject, contains('createdByLocalProject'));
+            },
+          );
         });
 
         testWidgets('creationLocation', (WidgetTester tester) async {
