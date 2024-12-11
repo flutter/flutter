@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "display_list/dl_color.h"
 #include "flutter/flow/stopwatch_dl.h"
 #include "gtest/gtest.h"
 
@@ -19,16 +20,18 @@ static SkRect MakeRectFromVertices(SkPoint vertices[6]) {
 }
 
 TEST(DlVertexPainter, DrawRectIntoVertices) {
-  auto painter = DlVertexPainter();
+  std::vector<DlPoint> point_storage(12);
+  std::vector<DlColor> color_storage(12);
+  auto painter = DlVertexPainter(point_storage, color_storage);
 
   // Paint a red rectangle.
-  painter.DrawRect(SkRect::MakeLTRB(0, 0, 10, 10), DlColor::kRed());
+  painter.DrawRect(DlRect::MakeLTRB(0, 0, 10, 10), DlColor::kRed());
 
   // Paint a blue rectangle.
-  painter.DrawRect(SkRect::MakeLTRB(10, 10, 20, 20), DlColor::kBlue());
+  painter.DrawRect(DlRect::MakeLTRB(10, 10, 20, 20), DlColor::kBlue());
 
   // Convert the buffered vertices into a |DlVertices| object.
-  auto vertices = painter.IntoVertices();
+  auto vertices = painter.IntoVertices(DlRect::MakeLTRB(0, 0, 20, 20));
 
   // Verify the vertices.
   EXPECT_EQ(vertices->mode(), DlVertexMode::kTriangles);

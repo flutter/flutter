@@ -43,7 +43,8 @@ std::shared_ptr<DlVertices> DlVertices::Make(
     const SkPoint texture_coordinates[],
     const DlColor colors[],
     int index_count,
-    const uint16_t indices[]) {
+    const uint16_t indices[],
+    const DlRect* bounds) {
   if (!vertices || vertex_count <= 0) {
     vertex_count = 0;
     texture_coordinates = nullptr;
@@ -74,6 +75,9 @@ std::shared_ptr<DlVertices> DlVertices::Make(
   }
   if (indices) {
     builder.store_indices(indices);
+  }
+  if (bounds != nullptr) {
+    builder.store_bounds(*bounds);
   }
 
   return builder.build();
@@ -223,8 +227,8 @@ static void store_points(char* dst, int offset, const float* src, int count) {
 }
 
 void DlVertices::Builder::store_vertices(const SkPoint vertices[]) {
-  FML_CHECK(is_valid());
-  FML_CHECK(needs_vertices_);
+  FML_DCHECK(is_valid());
+  FML_DCHECK(needs_vertices_);
   char* pod = reinterpret_cast<char*>(vertices_.get());
   size_t bytes = vertices_->vertex_count_ * sizeof(vertices[0]);
   memcpy(pod + vertices_->vertices_offset_, vertices, bytes);
@@ -232,8 +236,8 @@ void DlVertices::Builder::store_vertices(const SkPoint vertices[]) {
 }
 
 void DlVertices::Builder::store_vertices(const float vertices[]) {
-  FML_CHECK(is_valid());
-  FML_CHECK(needs_vertices_);
+  FML_DCHECK(is_valid());
+  FML_DCHECK(needs_vertices_);
   char* pod = reinterpret_cast<char*>(vertices_.get());
   store_points(pod, vertices_->vertices_offset_, vertices,
                vertices_->vertex_count_);
@@ -241,8 +245,8 @@ void DlVertices::Builder::store_vertices(const float vertices[]) {
 }
 
 void DlVertices::Builder::store_texture_coordinates(const SkPoint coords[]) {
-  FML_CHECK(is_valid());
-  FML_CHECK(needs_texture_coords_);
+  FML_DCHECK(is_valid());
+  FML_DCHECK(needs_texture_coords_);
   char* pod = reinterpret_cast<char*>(vertices_.get());
   size_t bytes = vertices_->vertex_count_ * sizeof(coords[0]);
   memcpy(pod + vertices_->texture_coordinates_offset_, coords, bytes);
@@ -250,8 +254,8 @@ void DlVertices::Builder::store_texture_coordinates(const SkPoint coords[]) {
 }
 
 void DlVertices::Builder::store_texture_coordinates(const float coords[]) {
-  FML_CHECK(is_valid());
-  FML_CHECK(needs_texture_coords_);
+  FML_DCHECK(is_valid());
+  FML_DCHECK(needs_texture_coords_);
   char* pod = reinterpret_cast<char*>(vertices_.get());
   store_points(pod, vertices_->texture_coordinates_offset_, coords,
                vertices_->vertex_count_);
@@ -259,8 +263,8 @@ void DlVertices::Builder::store_texture_coordinates(const float coords[]) {
 }
 
 void DlVertices::Builder::store_colors(const DlColor colors[]) {
-  FML_CHECK(is_valid());
-  FML_CHECK(needs_colors_);
+  FML_DCHECK(is_valid());
+  FML_DCHECK(needs_colors_);
   char* pod = reinterpret_cast<char*>(vertices_.get());
   size_t bytes = vertices_->vertex_count_ * sizeof(colors[0]);
   memcpy(pod + vertices_->colors_offset_, colors, bytes);
@@ -268,8 +272,8 @@ void DlVertices::Builder::store_colors(const DlColor colors[]) {
 }
 
 void DlVertices::Builder::store_colors(const uint32_t colors[]) {
-  FML_CHECK(is_valid());
-  FML_CHECK(needs_colors_);
+  FML_DCHECK(is_valid());
+  FML_DCHECK(needs_colors_);
   char* pod = reinterpret_cast<char*>(vertices_.get());
   DlColor* dlcolors_ptr =
       reinterpret_cast<DlColor*>(pod + vertices_->colors_offset_);
@@ -280,29 +284,37 @@ void DlVertices::Builder::store_colors(const uint32_t colors[]) {
 }
 
 void DlVertices::Builder::store_indices(const uint16_t indices[]) {
-  FML_CHECK(is_valid());
-  FML_CHECK(needs_indices_);
+  FML_DCHECK(is_valid());
+  FML_DCHECK(needs_indices_);
   char* pod = reinterpret_cast<char*>(vertices_.get());
   size_t bytes = vertices_->index_count_ * sizeof(indices[0]);
   memcpy(pod + vertices_->indices_offset_, indices, bytes);
   needs_indices_ = false;
 }
 
+void DlVertices::Builder::store_bounds(DlRect bounds) {
+  vertices_->bounds_ = SkRect::MakeLTRB(bounds.GetLeft(), bounds.GetTop(),
+                                        bounds.GetRight(), bounds.GetBottom());
+  needs_bounds_ = false;
+}
+
 std::shared_ptr<DlVertices> DlVertices::Builder::build() {
-  FML_CHECK(is_valid());
+  FML_DCHECK(is_valid());
   if (vertices_->vertex_count() <= 0) {
     // We set this to true in the constructor to make sure that they
     // call store_vertices() only once, but if there are no vertices
     // then we will not object to them never having stored any vertices
     needs_vertices_ = false;
   }
-  FML_CHECK(!needs_vertices_);
-  FML_CHECK(!needs_texture_coords_);
-  FML_CHECK(!needs_colors_);
-  FML_CHECK(!needs_indices_);
+  FML_DCHECK(!needs_vertices_);
+  FML_DCHECK(!needs_texture_coords_);
+  FML_DCHECK(!needs_colors_);
+  FML_DCHECK(!needs_indices_);
 
-  vertices_->bounds_ =
-      compute_bounds(vertices_->vertices(), vertices_->vertex_count_);
+  if (needs_bounds_) {
+    vertices_->bounds_ =
+        compute_bounds(vertices_->vertices(), vertices_->vertex_count_);
+  }
 
   return std::move(vertices_);
 }

@@ -512,6 +512,9 @@ class Shell final : public PlatformView::Delegate,
   // Used to communicate the right frame bounds via service protocol.
   double device_pixel_ratio_ = 0.0;
 
+  // Cached refresh rate used by the performance overlay.
+  std::optional<fml::Milliseconds> cached_display_refresh_rate_;
+
   // How many frames have been timed since last report.
   size_t UnreportedFramesCount() const;
 

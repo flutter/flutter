@@ -106,7 +106,7 @@ class StopwatchVisualizer {
   ///
   /// @param      canvas  The canvas to draw on.
   /// @param[in]  rect    The rectangle to draw in.
-  virtual void Visualize(DlCanvas* canvas, const SkRect& rect) const = 0;
+  virtual void Visualize(DlCanvas* canvas, const DlRect& rect) const = 0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(StopwatchVisualizer);
 

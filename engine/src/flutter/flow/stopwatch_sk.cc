@@ -86,9 +86,9 @@ void SkStopwatchVisualizer::InitVisualizeSurface(SkISize size) const {
 }
 
 void SkStopwatchVisualizer::Visualize(DlCanvas* canvas,
-                                      const SkRect& rect) const {
+                                      const DlRect& rect) const {
   // Initialize visualize cache if it has not yet been initialized.
-  InitVisualizeSurface(SkISize::Make(rect.width(), rect.height()));
+  InitVisualizeSurface(SkISize::Make(rect.GetWidth(), rect.GetHeight()));
 
   SkCanvas* cache_canvas = visualize_cache_surface_->getCanvas();
   SkPaint paint;
@@ -180,7 +180,7 @@ void SkStopwatchVisualizer::Visualize(DlCanvas* canvas,
 
   // Draw the cached surface onto the output canvas.
   auto image = DlImage::Make(visualize_cache_surface_->makeImageSnapshot());
-  canvas->DrawImage(image, SkPoint{rect.x(), rect.y()},
+  canvas->DrawImage(image, SkPoint{rect.GetX(), rect.GetY()},
                     DlImageSampling::kNearestNeighbor);
 }
 

@@ -22,9 +22,11 @@ const int kVisualizeEngineStatistics = 1 << 3;
 
 class PerformanceOverlayLayer : public Layer {
  public:
+  static SkFont MakeStatisticsFont(std::string_view font_path);
+
   static sk_sp<SkTextBlob> MakeStatisticsText(const Stopwatch& stopwatch,
-                                              const std::string& label_prefix,
-                                              const std::string& font_path);
+                                              const SkFont& font,
+                                              std::string_view label_prefix);
 
   bool IsReplacing(DiffContext* context, const Layer* layer) const override {
     return layer->as_performance_overlay_layer() != nullptr;

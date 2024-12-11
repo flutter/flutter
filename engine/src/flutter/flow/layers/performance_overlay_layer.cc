@@ -34,26 +34,25 @@ void VisualizeStopWatch(DlCanvas* canvas,
                         bool show_graph,
                         bool show_labels,
                         const std::string& label_prefix,
-                        const std::string& font_path) {
+                        std::vector<DlPoint>& point_storage,
+                        std::vector<DlColor>& color_storage,
+                        const SkFont& font) {
   const int label_x = 8;    // distance from x
   const int label_y = -10;  // distance from y+height
 
   if (show_graph) {
-    SkRect visualization_rect = SkRect::MakeXYWH(x, y, width, height);
-    std::unique_ptr<StopwatchVisualizer> visualizer;
-
+    DlRect visualization_rect = DlRect::MakeXYWH(x, y, width, height);
     if (impeller_enabled) {
-      visualizer = std::make_unique<DlStopwatchVisualizer>(stopwatch);
+      DlStopwatchVisualizer(stopwatch, point_storage, color_storage)
+          .Visualize(canvas, visualization_rect);
     } else {
-      visualizer = std::make_unique<SkStopwatchVisualizer>(stopwatch);
+      SkStopwatchVisualizer(stopwatch).Visualize(canvas, visualization_rect);
     }
-
-    visualizer->Visualize(canvas, visualization_rect);
   }
 
   if (show_labels) {
-    auto text = PerformanceOverlayLayer::MakeStatisticsText(
-        stopwatch, label_prefix, font_path);
+    auto text = PerformanceOverlayLayer::MakeStatisticsText(stopwatch, font,
+                                                            label_prefix);
     // Historically SK_ColorGRAY (== 0xFF888888) was used here
     DlPaint paint(DlColor(0xFF888888));
 #ifdef IMPELLER_SUPPORTS_RENDERING
@@ -69,24 +68,28 @@ void VisualizeStopWatch(DlCanvas* canvas,
 
 }  // namespace
 
-sk_sp<SkTextBlob> PerformanceOverlayLayer::MakeStatisticsText(
-    const Stopwatch& stopwatch,
-    const std::string& label_prefix,
-    const std::string& font_path) {
-  SkFont font;
+// static
+SkFont PerformanceOverlayLayer::MakeStatisticsFont(std::string_view font_path) {
   sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
   if (font_path == "") {
     if (sk_sp<SkTypeface> face = font_mgr->matchFamilyStyle(nullptr, {})) {
-      font = SkFont(face, 15);
+      return SkFont(face, 15);
     } else {
       // In Skia's Android fontmgr, matchFamilyStyle can return null instead
       // of falling back to a default typeface. If that's the case, we can use
       // legacyMakeTypeface, which *does* use that default typeface.
-      font = SkFont(font_mgr->legacyMakeTypeface(nullptr, {}), 15);
+      return SkFont(font_mgr->legacyMakeTypeface(nullptr, {}), 15);
     }
   } else {
-    font = SkFont(font_mgr->makeFromFile(font_path.c_str()), 15);
+    return SkFont(font_mgr->makeFromFile(font_path.data()), 15);
   }
+}
+
+// static
+sk_sp<SkTextBlob> PerformanceOverlayLayer::MakeStatisticsText(
+    const Stopwatch& stopwatch,
+    const SkFont& font,
+    std::string_view label_prefix) {
   // Make sure there's not an empty typeface returned, or we won't see any text.
   FML_DCHECK(font.getTypeface()->countGlyphs() > 0);
 
@@ -134,16 +137,22 @@ void PerformanceOverlayLayer::Paint(PaintContext& context) const {
   SkScalar width = paint_bounds().width() - (padding * 2);
   SkScalar height = paint_bounds().height() / 2;
   auto mutator = context.state_stack.save();
+  // Cached storage for vertex output.
+  std::vector<DlPoint> vertices_storage;
+  std::vector<DlColor> color_storage;
+  SkFont font = MakeStatisticsFont(font_path_);
 
-  VisualizeStopWatch(
-      context.canvas, context.impeller_enabled, context.raster_time, x, y,
-      width, height - padding, options_ & kVisualizeRasterizerStatistics,
-      options_ & kDisplayRasterizerStatistics, "Raster", font_path_);
+  VisualizeStopWatch(context.canvas, context.impeller_enabled,
+                     context.raster_time, x, y, width, height - padding,
+                     options_ & kVisualizeRasterizerStatistics,
+                     options_ & kDisplayRasterizerStatistics, "Raster",
+                     vertices_storage, color_storage, font);
 
   VisualizeStopWatch(context.canvas, context.impeller_enabled, context.ui_time,
                      x, y + height, width, height - padding,
                      options_ & kVisualizeEngineStatistics,
-                     options_ & kDisplayEngineStatistics, "UI", font_path_);
+                     options_ & kDisplayEngineStatistics, "UI",
+                     vertices_storage, color_storage, font);
 }
 
 }  // namespace flutter
