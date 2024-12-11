@@ -507,23 +507,23 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   Widget build(BuildContext context) {
     final Widget fieldView = widget.fieldViewBuilder?.call(context, _textEditingController, _focusNode, _onFieldSubmitted)
                           ?? const SizedBox.shrink();
-    return OverlayPortal.targetsRootOverlay(
-      controller: _optionsViewController,
-      overlayChildBuilder: _buildOptionsView,
-      child: TextFieldTapRegion(
-        child: LayoutBuilder(
-          key: _fieldKey,
-          builder: (BuildContext context, BoxConstraints constraints) {
-            // The options view is not in the same subtree as the field view, so
-            // when the field constraints change, the options view isn't rebuilt
-            // in the same frame.
-            SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-              if (!mounted) {
-                return;
-              }
-              _fieldBoxConstraints.value = constraints;
-            });
-            return Shortcuts(
+    return LayoutBuilder(
+      key: _fieldKey,
+      builder: (BuildContext context, BoxConstraints constraints) {
+        // The options view is not in the same subtree as the field view, so
+        // when the field constraints change, the options view isn't rebuilt
+        // in the same frame.
+        SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+          if (!mounted) {
+            return;
+          }
+          _fieldBoxConstraints.value = constraints;
+        });
+        return OverlayPortal.targetsRootOverlay(
+          controller: _optionsViewController,
+          overlayChildBuilder: _buildOptionsView,
+          child: TextFieldTapRegion(
+            child: Shortcuts(
               shortcuts: _shortcuts,
               child: Actions(
                 actions: _actionMap,
@@ -532,10 +532,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
                   child: fieldView,
                 ),
               ),
-            );
-          },
-        ),
-      ),
+            ),
+          ),
+        );
+      }
     );
   }
 }
