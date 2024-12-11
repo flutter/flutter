@@ -950,7 +950,6 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   Widget? _build(int index, SliverMultiBoxAdaptorWidget widget) {
-    int keyCounter = 0;
     Widget? child = widget.delegate.build(this, index);
 
     bool hasDuplicate(Key? key) {
@@ -966,9 +965,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       final Key? key = child.key;
 
       if (key != null && hasDuplicate(key)) {
-        // Generates a unique key using a counter, ensuring greater determinism in the process.
-        final ValueKey<String> newKey = ValueKey<String>('${key}_$keyCounter');
-        keyCounter++;
+        // Creates a new key based on the string representation of the child.
+        final ValueKey<String> newKey = ValueKey<String>(child.toString());
         child = KeyedSubtree(key: newKey, child: child);
       }
     }
