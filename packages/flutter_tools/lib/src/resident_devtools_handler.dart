@@ -8,18 +8,29 @@
 
 import 'dart:async';
 
-import 'package:browser_launcher/browser_launcher.dart';
 import 'package:meta/meta.dart';
 
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
+import 'web/chrome.dart';
 
-typedef ResidentDevtoolsHandlerFactory = ResidentDevtoolsHandler Function(DevtoolsLauncher?, ResidentRunner, Logger);
+typedef ResidentDevtoolsHandlerFactory = ResidentDevtoolsHandler Function(
+  DevtoolsLauncher?,
+  ResidentRunner,
+  Logger,
+  ChromiumLauncher,
+);
 
-ResidentDevtoolsHandler createDefaultHandler(DevtoolsLauncher? launcher, ResidentRunner runner, Logger logger) {
-  return FlutterResidentDevtoolsHandler(launcher, runner, logger);
+ResidentDevtoolsHandler createDefaultHandler(
+  DevtoolsLauncher? launcher,
+  ResidentRunner runner,
+  Logger logger,
+  ChromiumLauncher chromiumLauncher,
+) {
+  return FlutterResidentDevtoolsHandler(launcher, runner, logger, chromiumLauncher);
 }
 
 /// Helper class to manage the life-cycle of devtools and its interaction with
@@ -61,12 +72,18 @@ abstract class ResidentDevtoolsHandler {
 }
 
 class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
-  FlutterResidentDevtoolsHandler(this._devToolsLauncher, this._residentRunner, this._logger);
+  FlutterResidentDevtoolsHandler(
+    this._devToolsLauncher,
+    this._residentRunner,
+    this._logger,
+    this._chromiumLauncher,
+  );
 
   static const Duration launchInBrowserTimeout = Duration(seconds: 15);
 
   final DevtoolsLauncher? _devToolsLauncher;
   final ResidentRunner _residentRunner;
+  final ChromiumLauncher _chromiumLauncher;
   final Logger _logger;
   bool _shutdown = false;
 
@@ -175,7 +192,15 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
         queryParameters: <String, dynamic>{'uri': '${device!.vmService!.httpAddress}'},
       ).toString();
       _logger.printStatus('Launching Flutter DevTools for ${device.device!.name} at $devToolsUrl');
-      unawaited(Chrome.start(<String>[devToolsUrl]));
+
+      _chromiumLauncher.launch(devToolsUrl).catchError((Object e) {
+        _logger.printError('Failed to launch web browser: $e');
+        throw ProcessException(
+          'Chrome',
+          <String>[devToolsUrl],
+          'Failed to launch browser for dev tools',
+        );
+			}).ignore();
     }
     launchedInBrowser = true;
   }
@@ -312,7 +337,12 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 }
 
 @visibleForTesting
-NoOpDevtoolsHandler createNoOpHandler(DevtoolsLauncher? launcher, ResidentRunner runner, Logger logger) {
+NoOpDevtoolsHandler createNoOpHandler(
+  DevtoolsLauncher? launcher,
+  ResidentRunner runner,
+  Logger logger,
+  ChromiumLauncher? chromiumLauncher,
+) {
   return NoOpDevtoolsHandler();
 }
 
