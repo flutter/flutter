@@ -68,19 +68,9 @@ void CanvasGradient::initRadial(double center_x,
     dl_matrix = ToDlMatrix(matrix4);
   }
 
-  std::vector<DlColor> dl_colors;
-  dl_colors.reserve(num_colors);
-  for (int i = 0; i < colors.num_elements(); i += 4) {
-    DlScalar a = colors[i + 0];
-    DlScalar r = colors[i + 1];
-    DlScalar g = colors[i + 2];
-    DlScalar b = colors[i + 3];
-    dl_colors.emplace_back(DlColor(a, r, g, b, DlColorSpace::kExtendedSRGB));
-  }
-
   dl_shader_ = DlColorSource::MakeRadial(
       DlPoint(SafeNarrow(center_x), SafeNarrow(center_y)), SafeNarrow(radius),
-      num_colors, dl_colors.data(), color_stops.data(), tile_mode,
+      num_colors, colors.data(), color_stops.data(), tile_mode,
       has_matrix ? &dl_matrix : nullptr);
   // Just a sanity check, all gradient shaders should be thread-safe
   FML_DCHECK(dl_shader_->isUIThreadSafe());
@@ -104,21 +94,11 @@ void CanvasGradient::initSweep(double center_x,
     dl_matrix = ToDlMatrix(matrix4);
   }
 
-  std::vector<DlColor> dl_colors;
-  dl_colors.reserve(num_colors);
-  for (int i = 0; i < colors.num_elements(); i += 4) {
-    DlScalar a = colors[i + 0];
-    DlScalar r = colors[i + 1];
-    DlScalar g = colors[i + 2];
-    DlScalar b = colors[i + 3];
-    dl_colors.emplace_back(DlColor(a, r, g, b, DlColorSpace::kExtendedSRGB));
-  }
-
   dl_shader_ = DlColorSource::MakeSweep(
       DlPoint(SafeNarrow(center_x), SafeNarrow(center_y)),
       SafeNarrow(start_angle) * 180.0f / static_cast<float>(M_PI),
       SafeNarrow(end_angle) * 180.0f / static_cast<float>(M_PI), num_colors,
-      dl_colors.data(), color_stops.data(), tile_mode,
+      colors.data(), color_stops.data(), tile_mode,
       has_matrix ? &dl_matrix : nullptr);
   // Just a sanity check, all gradient shaders should be thread-safe
   FML_DCHECK(dl_shader_->isUIThreadSafe());
@@ -144,20 +124,10 @@ void CanvasGradient::initTwoPointConical(double start_x,
     dl_matrix = ToDlMatrix(matrix4);
   }
 
-  std::vector<DlColor> dl_colors;
-  dl_colors.reserve(num_colors);
-  for (int i = 0; i < colors.num_elements(); i += 4) {
-    DlScalar a = colors[i + 0];
-    DlScalar r = colors[i + 1];
-    DlScalar g = colors[i + 2];
-    DlScalar b = colors[i + 3];
-    dl_colors.emplace_back(DlColor(a, r, g, b, DlColorSpace::kExtendedSRGB));
-  }
-
   dl_shader_ = DlColorSource::MakeConical(
       DlPoint(SafeNarrow(start_x), SafeNarrow(start_y)),
       SafeNarrow(start_radius), DlPoint(SafeNarrow(end_x), SafeNarrow(end_y)),
-      SafeNarrow(end_radius), num_colors, dl_colors.data(), color_stops.data(),
+      SafeNarrow(end_radius), num_colors, colors.data(), color_stops.data(),
       tile_mode, has_matrix ? &dl_matrix : nullptr);
   // Just a sanity check, all gradient shaders should be thread-safe
   FML_DCHECK(dl_shader_->isUIThreadSafe());

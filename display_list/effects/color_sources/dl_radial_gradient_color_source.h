@@ -33,13 +33,19 @@ class DlRadialGradientColorSource final : public DlGradientColorSourceBase {
   bool equals_(DlColorSource const& other) const override;
 
  private:
+  template <typename Colors>
   DlRadialGradientColorSource(DlPoint center,
                               DlScalar radius,
                               uint32_t stop_count,
-                              const DlColor* colors,
+                              Colors colors,
                               const float* stops,
                               DlTileMode tile_mode,
-                              const DlMatrix* matrix = nullptr);
+                              const DlMatrix* matrix = nullptr)
+      : DlGradientColorSourceBase(stop_count, tile_mode, matrix),
+        center_(center),
+        radius_(radius) {
+    store_color_stops(this + 1, colors, stops);
+  }
 
   explicit DlRadialGradientColorSource(
       const DlRadialGradientColorSource* source);
