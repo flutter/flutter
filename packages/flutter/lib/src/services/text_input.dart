@@ -2473,6 +2473,11 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// Null if [show] has not been called.
   Rect? _lastTargetRect;
 
+  /// The [SystemContextMenuItemData]s that were last given to [show].
+  ///
+  /// Null if [show] has not been called.
+  List<SystemContextMenuItemData>? _lastItems;
+
   /// True when the instance most recently [show]n has been hidden by the
   /// system.
   bool _hiddenBySystem = false;
@@ -2516,14 +2521,17 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// The [Rect] represents what the context menu is pointing to. For example,
   /// for some text selection, this would be the selection [Rect].
   ///
+  /// Optionally, `items` can be provided to specify the menu items. If none are
+  /// given, then the platform will infer which menu items should be visible
+  /// based on the state of the current [TextInputConnection].
+  ///
+  /// Currently this system context menu is bound to text input. Using this
+  /// without an active [TextInputConnection] will be a noop, even when
+  /// specifying custom `items`.
+  ///
   /// There can only be one system context menu visible at a time. Calling this
   /// while another system context menu is already visible will remove the old
   /// menu before showing the new menu.
-  ///
-  /// Currently this system context menu is bound to text input. The buttons
-  /// that are shown and the actions they perform are dependent on the
-  /// currently active [TextInputConnection]. Using this without an active
-  /// [TextInputConnection] will be a noop.
   ///
   /// This is only supported on iOS 16.0 and later.
   ///
@@ -2539,9 +2547,10 @@ class SystemContextMenuController with SystemContextMenuClient {
       'Currently, the system context menu can only be shown for an active text input connection',
     );
 
-    // TODO(justinmc): Check the items here too!
     // Don't show the same thing that's already being shown.
-    if (_lastShown != null && _lastShown!._isVisible && _lastShown!._lastTargetRect == targetRect) {
+    if (_lastShown != null && _lastShown!._isVisible
+        && _lastShown!._lastTargetRect == targetRect
+        && listEquals(_lastShown!._lastItems, items)) {
       return Future<void>.value();
     }
 
@@ -2562,6 +2571,7 @@ class SystemContextMenuController with SystemContextMenuClient {
     ServicesBinding.registerSystemContextMenuClient(this);
 
     _lastTargetRect = targetRect;
+    _lastItems = items;
     _lastShown = this;
     _hiddenBySystem = false;
     return _channel.invokeMethod<Map<String, dynamic>>(
@@ -2634,8 +2644,37 @@ class SystemContextMenuController with SystemContextMenuClient {
 ///    level, where the titles can be replaced with default localized values.
 ///  * [ContextMenuButtonItem], which performs a similar role for Flutter-drawn
 ///    context menus.
+@immutable
 sealed class SystemContextMenuItemData {
   const SystemContextMenuItemData();
+
+  /// Returns a [SystemContextMenuItemData] of the correct subclass given its
+  /// json data.
+  factory SystemContextMenuItemData.fromJson(Map<String, dynamic> json) {
+    final String? type = json['type'] as String?;
+    final String? title = json['title'] as String?;
+    final VoidCallback? onPressed = json['onPressed'] as VoidCallback?;
+    return switch (type) {
+      'copy' => const SystemContextMenuItemDataCopy(),
+      'cut' => const SystemContextMenuItemDataCut(),
+      'paste' => const SystemContextMenuItemDataPaste(),
+      'selectAll' => const SystemContextMenuItemDataSelectAll(),
+      'searchWeb' => SystemContextMenuItemDataSearchWeb(
+        title: title!,
+      ),
+      'share' => SystemContextMenuItemDataShare(
+        title: title!,
+      ),
+      'lookUp' => SystemContextMenuItemDataLookUp(
+        title: title!,
+      ),
+      'custom' => SystemContextMenuItemDataCustom(
+        title: title!,
+        onPressed: onPressed!,
+      ),
+      _ => throw FlutterError('Invalid json for SystemContextMenuItemData.type $type.'),
+    };
+  }
 
   /// The callback to be called when the menu item is pressed.
   ///
@@ -2667,6 +2706,23 @@ sealed class SystemContextMenuItemData {
         SystemContextMenuItemDataCustom() => 'custom',
       },
     };
+  }
+
+  // TODO(justinmc): Override hashcode and == for SystemContextMenuItem, too.
+  @override
+  int get hashCode => Object.hash(title, onPressed);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is SystemContextMenuItemData
+        && other.title == title
+        && other.onPressed == onPressed;
   }
 }
 
