@@ -240,8 +240,8 @@ bool TextureContents::GetStrictSourceRect() const {
   return strict_source_rect_enabled_;
 }
 
-void TextureContents::SetSamplerDescriptor(SamplerDescriptor desc) {
-  sampler_descriptor_ = std::move(desc);
+void TextureContents::SetSamplerDescriptor(const SamplerDescriptor& desc) {
+  sampler_descriptor_ = desc;
 }
 
 const SamplerDescriptor& TextureContents::GetSamplerDescriptor() const {

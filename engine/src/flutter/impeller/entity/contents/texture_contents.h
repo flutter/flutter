@@ -33,7 +33,7 @@ class TextureContents final : public Contents {
 
   std::shared_ptr<Texture> GetTexture() const;
 
-  void SetSamplerDescriptor(SamplerDescriptor desc);
+  void SetSamplerDescriptor(const SamplerDescriptor& desc);
 
   const SamplerDescriptor& GetSamplerDescriptor() const;
 

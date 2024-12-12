@@ -237,7 +237,7 @@ bool RenderPass::BindResource(ShaderStage stage,
                               const SampledImageSlot& slot,
                               const ShaderMetadata* metadata,
                               std::shared_ptr<const Texture> texture,
-                              const std::unique_ptr<const Sampler>& sampler) {
+                              raw_ptr<const Sampler> sampler) {
   if (!sampler) {
     return false;
   }
@@ -263,13 +263,12 @@ bool RenderPass::BindDynamicResource(ShaderStage stage,
   return BindBuffer(stage, slot, std::move(resouce));
 }
 
-bool RenderPass::BindDynamicResource(
-    ShaderStage stage,
-    DescriptorType type,
-    const SampledImageSlot& slot,
-    std::unique_ptr<ShaderMetadata> metadata,
-    std::shared_ptr<const Texture> texture,
-    const std::unique_ptr<const Sampler>& sampler) {
+bool RenderPass::BindDynamicResource(ShaderStage stage,
+                                     DescriptorType type,
+                                     const SampledImageSlot& slot,
+                                     std::unique_ptr<ShaderMetadata> metadata,
+                                     std::shared_ptr<const Texture> texture,
+                                     raw_ptr<const Sampler> sampler) {
   if (!sampler) {
     return false;
   }
@@ -296,11 +295,11 @@ bool RenderPass::BindBuffer(ShaderStage stage,
 bool RenderPass::BindTexture(ShaderStage stage,
                              const SampledImageSlot& slot,
                              TextureResource resource,
-                             const std::unique_ptr<const Sampler>& sampler) {
+                             raw_ptr<const Sampler> sampler) {
   TextureAndSampler data = TextureAndSampler{
       .stage = stage,
       .texture = std::move(resource),
-      .sampler = &sampler,
+      .sampler = sampler,
   };
 
   if (!bound_textures_start_.has_value()) {

@@ -60,7 +60,7 @@ class ComputePassMTL final : public ComputePass {
                     const SampledImageSlot& slot,
                     const ShaderMetadata* metadata,
                     std::shared_ptr<const Texture> texture,
-                    const std::unique_ptr<const Sampler>& sampler) override;
+                    raw_ptr<const Sampler> sampler) override;
 
   // |ComputePass|
   bool EncodeCommands() const override;

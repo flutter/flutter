@@ -20,8 +20,8 @@ void MatrixFilterContents::SetRenderingMode(
   FilterContents::SetRenderingMode(rendering_mode);
 }
 
-void MatrixFilterContents::SetSamplerDescriptor(SamplerDescriptor desc) {
-  sampler_descriptor_ = std::move(desc);
+void MatrixFilterContents::SetSamplerDescriptor(const SamplerDescriptor& desc) {
+  sampler_descriptor_ = desc;
 }
 
 namespace {

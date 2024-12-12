@@ -36,7 +36,7 @@ class VerticesSimpleBlendContents final : public Contents {
 
   void SetLazyTexture(const LazyTexture& lazy_texture);
 
-  void SetSamplerDescriptor(SamplerDescriptor descriptor);
+  void SetSamplerDescriptor(const SamplerDescriptor& descriptor);
 
   void SetTileMode(Entity::TileMode tile_mode_x, Entity::TileMode tile_mode_y);
 

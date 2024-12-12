@@ -122,7 +122,7 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
     FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
     VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
 
-    const std::unique_ptr<const Sampler>& sampler =
+    raw_ptr<const Sampler> sampler =
         renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
     FS::BindTextureSampler(pass, input_snapshot->texture, sampler);
 

@@ -128,7 +128,7 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
     src_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
     src_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
   }
-  const std::unique_ptr<const Sampler>& src_sampler =
+  raw_ptr<const Sampler> src_sampler =
       renderer.GetContext()->GetSamplerLibrary()->GetSampler(
           src_sampler_descriptor);
   FS::BindTextureSamplerSrc(pass, src_snapshot->texture, src_sampler);

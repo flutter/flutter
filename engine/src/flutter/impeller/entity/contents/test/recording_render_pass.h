@@ -56,7 +56,7 @@ class RecordingRenderPass : public RenderPass {
                     const SampledImageSlot& slot,
                     const ShaderMetadata* metadata,
                     std::shared_ptr<const Texture> texture,
-                    const std::unique_ptr<const Sampler>& sampler) override;
+                    raw_ptr<const Sampler> sampler) override;
 
   // |RenderPass|
   bool BindDynamicResource(ShaderStage stage,
@@ -66,13 +66,12 @@ class RecordingRenderPass : public RenderPass {
                            BufferView view) override;
 
   // |RenderPass|
-  bool BindDynamicResource(
-      ShaderStage stage,
-      DescriptorType type,
-      const SampledImageSlot& slot,
-      std::unique_ptr<ShaderMetadata> metadata,
-      std::shared_ptr<const Texture> texture,
-      const std::unique_ptr<const Sampler>& sampler) override;
+  bool BindDynamicResource(ShaderStage stage,
+                           DescriptorType type,
+                           const SampledImageSlot& slot,
+                           std::unique_ptr<ShaderMetadata> metadata,
+                           std::shared_ptr<const Texture> texture,
+                           raw_ptr<const Sampler> sampler) override;
 
   // |RenderPass|
   void OnSetLabel(std::string_view label) override;

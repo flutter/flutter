@@ -38,13 +38,13 @@
 
 struct ImGui_ImplImpeller_Data {
   explicit ImGui_ImplImpeller_Data(
-      const std::unique_ptr<const impeller::Sampler>& p_sampler)
+      impeller::raw_ptr<const impeller::Sampler> p_sampler)
       : sampler(p_sampler) {}
 
   std::shared_ptr<impeller::Context> context;
   std::shared_ptr<impeller::Texture> font_texture;
   std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>> pipeline;
-  const std::unique_ptr<const impeller::Sampler>& sampler;
+  impeller::raw_ptr<const impeller::Sampler> sampler;
 };
 
 static ImGui_ImplImpeller_Data* ImGui_ImplImpeller_GetBackendData() {
