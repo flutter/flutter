@@ -27,7 +27,11 @@ void main() {
 
   OperatingSystemUtils createOSUtils(Platform platform) {
     return OperatingSystemUtils(
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: MemoryFileSystem.test(
+        style: platform.isWindows ?
+          FileSystemStyle.windows :
+          FileSystemStyle.posix,
+      ),
       logger: BufferLogger.test(),
       platform: platform,
       processManager: fakeProcessManager,
@@ -567,7 +571,7 @@ void main() {
       // on POSIX systems we use the `unzip` binary, which will fail to extract
       // files with paths outside the target directory
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
-      final MemoryFileSystem fs = MemoryFileSystem.test();
+      final MemoryFileSystem fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
       final File fakeZipFile = fs.file('archive.zip');
       final Directory targetDirectory = fs.directory('output')..createSync(recursive: true);
       const String content = 'hello, world!';
