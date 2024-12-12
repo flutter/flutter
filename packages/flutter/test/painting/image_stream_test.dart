@@ -44,10 +44,16 @@ class MockCodec implements Codec {
 
   int numFramesAsked = 0;
 
+  bool disposed = false;
+
   Completer<FrameInfo> _nextFrameCompleter = Completer<FrameInfo>();
 
   @override
   Future<FrameInfo> getNextFrame() {
+    if (disposed) {
+      throw StateError('Codec is disposed');
+    }
+
     numFramesAsked += 1;
     return _nextFrameCompleter.future;
   }
@@ -62,7 +68,13 @@ class MockCodec implements Codec {
   }
 
   @override
-  void dispose() { }
+  void dispose() {
+    if (disposed) {
+      throw StateError('Codec is already disposed');
+    }
+
+    disposed = true;
+   }
 
 }
 
