@@ -4740,8 +4740,12 @@ class Flex extends MultiChildRenderObjectWidget {
     this.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
     this.clipBehavior = Clip.none,
     this.spacing = 0.0,
+    this.inversedChildren = false,
     super.children,
-  }) : assert(!identical(crossAxisAlignment, CrossAxisAlignment.baseline) || textBaseline != null, 'textBaseline is required if you specify the crossAxisAlignment with CrossAxisAlignment.baseline');
+  }) : assert(!identical(crossAxisAlignment, CrossAxisAlignment.baseline) || textBaseline != null, 'textBaseline is required if you specify the crossAxisAlignment with CrossAxisAlignment.baseline'),
+        super(
+        children: inversedChildren ? children?.reversed.toList() : children,
+      );
   // Cannot use == in the assert above instead of identical because of https://github.com/dart-lang/language/issues/1811.
 
   /// The direction to use as the main axis.
@@ -4849,6 +4853,9 @@ class Flex extends MultiChildRenderObjectWidget {
   /// {@macro flutter.rendering.RenderFlex.spacing}
   final double spacing;
 
+  /// If passed true, the passed children gonna be rendered inversed
+  final double inversedChildren;
+
   bool get _needTextDirection {
     switch (direction) {
       case Axis.horizontal:
@@ -4920,6 +4927,7 @@ class Flex extends MultiChildRenderObjectWidget {
     properties.add(EnumProperty<TextBaseline>('textBaseline', textBaseline, defaultValue: null));
     properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.none));
     properties.add(DoubleProperty('spacing', spacing, defaultValue: 0.0));
+    properties.add(FlagProperty('inversedChildren', value: inversedChildren, ifTrue: 'children reversed'));
   }
 }
 
@@ -5127,6 +5135,7 @@ class Row extends Flex {
     super.verticalDirection,
     super.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
     super.spacing,
+    super.inversedChildren = false,
     super.children,
   }) : super(
     direction: Axis.horizontal,
@@ -5319,6 +5328,7 @@ class Column extends Flex {
     super.verticalDirection,
     super.textBaseline,
     super.spacing,
+    super.inversedChildren,
     super.children,
   }) : super(
     direction: Axis.vertical,
