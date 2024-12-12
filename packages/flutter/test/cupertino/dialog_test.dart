@@ -1890,7 +1890,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should take the right side of the screen
-      expect(tester.getTopLeft(find.byType(Placeholder)), offsetMoreOrLessEquals(const Offset(410.0, -0.01)));
+      expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(410.0, 0.00));
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
     });
 
