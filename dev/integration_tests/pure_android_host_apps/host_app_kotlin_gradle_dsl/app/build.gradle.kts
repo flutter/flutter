@@ -12,7 +12,7 @@ android {
     // https://github.com/flutter/engine/blob/3.27.0/tools/android_sdk/create_cipd_packages.sh.
     val systemNdkPath: String? = System.getenv("ANDROID_NDK_PATH")
     if (systemNdkPath != null) {
-        ndkVersion = "26.3.11579264"
+        ndkVersion = "26.3.11579264" // This version must exactly match the version of the NDK that the recipe pulls from CIPD.
         ndkPath = systemNdkPath
     }
 
