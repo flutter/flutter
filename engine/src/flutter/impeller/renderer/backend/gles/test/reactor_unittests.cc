@@ -131,8 +131,8 @@ TEST(ReactorGLES, PerThreadOperationQueues) {
   fml::AutoResetWaitableEvent event;
   bool op2_called = false;
   std::thread thread([&] {
-    EXPECT_TRUE(
-        reactor->AddOperation([&](const ReactorGLES&) { op2_called = true; }));
+    EXPECT_TRUE(reactor->AddOperation(
+        [&](const ReactorGLES&) { op2_called = true; }, true));
     event.Wait();
     EXPECT_TRUE(reactor->React());
   });
