@@ -1795,13 +1795,7 @@ void main() {
     });
     await tester.pump();
 
-    // The field width changes, but the options width is scheduled to change in
-    // the next frame.
-    expect(fieldBox.size.width, 200.0);
-    expect(optionsBox.size.width, 100.0);
-    await tester.pump();
-
-    // The options width finally changes to match the field width.
+    // The options width changes to match the field width.
     expect(fieldBox.size.width, 200.0);
     expect(optionsBox.size.width, 200.0);
   });
@@ -1869,13 +1863,7 @@ void main() {
     });
     await tester.pump();
 
-    // The field width changes, but the options width is scheduled to change in
-    // the next frame.
-    expect(fieldBox.size.width, 200.0);
-    expect(optionsBox.size.width, 100.0);
-    await tester.pump();
-
-    // The options width finally changes to match the field width.
+    // The options width changes to match the field width.
     expect(fieldBox.size.width, 200.0);
     expect(optionsBox.size.width, 200.0);
   });

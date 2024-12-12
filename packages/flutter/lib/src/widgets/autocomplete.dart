@@ -510,15 +510,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     return LayoutBuilder(
       key: _fieldKey,
       builder: (BuildContext context, BoxConstraints constraints) {
-        // The options view is not in the same subtree as the field view, so
-        // when the field constraints change, the options view isn't rebuilt
-        // in the same frame.
-        SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-          if (!mounted) {
-            return;
-          }
-          _fieldBoxConstraints.value = constraints;
-        });
+        // TODO(victorsanni): Also track the field's layout so that the options view maintains the same width as the field if its constraints remain unchanged.
+        _fieldBoxConstraints.value = constraints;
         return OverlayPortal.targetsRootOverlay(
           controller: _optionsViewController,
           overlayChildBuilder: _buildOptionsView,
@@ -613,32 +606,38 @@ class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
 
   @override
   Widget build(BuildContext context) {
-    return CompositedTransformFollower(
-      link: widget.optionsLayerLink,
-      followerAnchor: switch (widget.optionsViewOpenDirection) {
-        OptionsViewOpenDirection.up => Alignment.bottomLeft,
-        OptionsViewOpenDirection.down => Alignment.topLeft,
-      },
-      // When the field goes offscreen, don't show the options.
-      showWhenUnlinked: false,
-      child: CustomSingleChildLayout(
-        delegate: _RawAutocompleteOptionsLayoutDelegate(
-          fieldSize: widget.optionsLayerLink.leaderSize!,
-          fieldOffset: fieldOffset,
-          optionsViewOpenDirection: widget.optionsViewOpenDirection,
-          textDirection: Directionality.of(context),
-        ),
-        child: TextFieldTapRegion(
-          child: AutocompleteHighlightedOption(
-            highlightIndexNotifier: widget.highlightIndexNotifier,
-            // optionsViewBuilder must be able to look up
-            // AutocompleteHighlightedOption in its context.
-            child: Builder(
-              builder: widget.builder,
+    // Wrap the options view in a LayoutBuilder so it can retrieve the most
+    // updated leader size.
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return CompositedTransformFollower(
+          link: widget.optionsLayerLink,
+          followerAnchor: switch (widget.optionsViewOpenDirection) {
+            OptionsViewOpenDirection.up => Alignment.bottomLeft,
+            OptionsViewOpenDirection.down => Alignment.topLeft,
+          },
+          // When the field goes offscreen, don't show the options.
+          showWhenUnlinked: false,
+          child: CustomSingleChildLayout(
+            delegate: _RawAutocompleteOptionsLayoutDelegate(
+              fieldSize: widget.optionsLayerLink.leaderSize!,
+              fieldOffset: fieldOffset,
+              optionsViewOpenDirection: widget.optionsViewOpenDirection,
+              textDirection: Directionality.of(context),
+            ),
+            child: TextFieldTapRegion(
+              child: AutocompleteHighlightedOption(
+                highlightIndexNotifier: widget.highlightIndexNotifier,
+                // optionsViewBuilder must be able to look up
+                // AutocompleteHighlightedOption in its context.
+                child: Builder(
+                  builder: widget.builder,
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      }
     );
   }
 }
