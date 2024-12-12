@@ -154,9 +154,7 @@ void testMain() {
   late EngineSceneView sceneView;
   late StubPictureRenderer stubPictureRenderer;
 
-  setUpAll(() async {
-    await bootstrapAndRunApp(withImplicitView: true);
-  });
+  setUpImplicitView();
 
   setUp(() {
     stubPictureRenderer = StubPictureRenderer();

@@ -11,7 +11,10 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/matchers.dart';
+import '../common/test_initialization.dart';
 import 'history_test.dart';
+
+EngineFlutterWindow get myWindow => EnginePlatformDispatcher.instance.implicitView!;
 
 Map<String, dynamic> _tagStateWithSerialCount(dynamic state, int serialCount) {
   return <String, dynamic> {
@@ -25,20 +28,7 @@ void main() {
 }
 
 void testMain() {
-  late EngineFlutterWindow myWindow;
-
-  final EnginePlatformDispatcher dispatcher = EnginePlatformDispatcher.instance;
-
-  setUp(() {
-    myWindow = EngineFlutterView.implicit(dispatcher, createDomHTMLDivElement());
-    dispatcher.viewManager.registerView(myWindow);
-  });
-
-  tearDown(() async {
-    dispatcher.viewManager.unregisterView(myWindow.viewId);
-    await myWindow.resetHistory();
-    myWindow.dispose();
-  });
+  setUpImplicitView();
 
   // For now, web always has an implicit view provided by the web engine.
   test('EnginePlatformDispatcher.instance.implicitView should be non-null', () async {

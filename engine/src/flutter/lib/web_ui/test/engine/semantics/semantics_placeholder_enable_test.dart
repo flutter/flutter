@@ -20,7 +20,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await bootstrapAndRunApp(withImplicitView: true);
+  setUpImplicitView();
 
   test('EngineSemantics is enabled via a placeholder click', () async {
     expect(semantics().semanticsEnabled, isFalse);

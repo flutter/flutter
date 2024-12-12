@@ -52,7 +52,8 @@ void testMain() {
     expect(engineInitializer, isNotNull);
     expect(js_util.hasProperty(engineInitializer!, 'initializeEngine'), isTrue, reason: 'Missing FlutterEngineInitializer method: initializeEngine.');
     expect(js_util.hasProperty(engineInitializer!, 'autoStart'), isTrue, reason: 'Missing FlutterEngineInitializer method: autoStart.');
-  });
+    // https://github.com/flutter/flutter/issues/160096
+  }, skip: ui_web.browser.isFirefox);
 
   test('bootstrapEngine does auto-start when _flutter.loader.didCreateEngineInitializer does not exist', () async {
     loader = null;
@@ -81,7 +82,8 @@ void testMain() {
     // After starting the engine, the meta-generator tag should be on the page
     final DomElement? meta = domDocument.querySelector('meta[name=generator][content=Flutter]');
     expect(meta, isNotNull, reason: 'The generator meta-tag should be added when Flutter initializes its UI.');
-  });
+    // https://github.com/flutter/flutter/issues/160096
+  }, skip: ui_web.browser.isFirefox);
 
   // We cannot test anymore, because by now the engine has registered some stuff that can't be rewound back.
   // Like the `ext.flutter.disassemble` developer extension.

@@ -37,9 +37,7 @@ void main() {
 }
 
 void testMain() {
-  setUpAll(() async {
-    await bootstrapAndRunApp(withImplicitView: true);
-  });
+  setUpImplicitView();
 
   test('createHistoryForExistingState', () {
     TestUrlStrategy strategy;
