@@ -1436,6 +1436,36 @@ void main() {
       );
     });
 
+    testWidgets('InteractiveViewer.raw constructor does not translate child', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer.raw(
+                transformationController: transformationController,
+                builder: (BuildContext context, Quad viewportQuad) {
+                  return const SizedBox(width: 200.0, height: 200.0);
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Finder child = find.byType(SizedBox);
+      Rect rect = tester.getRect(child);
+
+      expect(rect.topLeft, const Offset(300, 200));
+
+      final Offset center = tester.getCenter(find.byType(InteractiveViewer));
+      await scrollAt(center, tester, const Offset(0.0, -20.0));
+      await tester.pumpAndSettle();
+
+      rect = tester.getRect(child);
+
+      expect(rect.topLeft, const Offset(300, 200));
+    });
+
     testWidgets('builder can change widgets that are off-screen', (WidgetTester tester) async {
       const double childHeight = 10.0;
       await tester.pumpWidget(
