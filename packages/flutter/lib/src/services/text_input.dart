@@ -835,6 +835,7 @@ class TextEditingValue {
     this.composing = TextRange.empty,
   });
 
+  // TODO(justinmc): Move into tests. A user should never need this.
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
     final String text = encoded['text'] as String;
@@ -2708,7 +2709,6 @@ sealed class SystemContextMenuItemData {
     };
   }
 
-  // TODO(justinmc): Override hashcode and == for SystemContextMenuItem, too.
   @override
   int get hashCode => Object.hash(title, onPressed);
 

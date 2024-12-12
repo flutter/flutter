@@ -208,6 +208,7 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
 ///    API.
 ///  * [ContextMenuButtonItem], which performs a similar role for Flutter-drawn
 ///    context menus.
+@immutable
 sealed class SystemContextMenuItem {
   const SystemContextMenuItem();
 
@@ -222,6 +223,22 @@ sealed class SystemContextMenuItem {
   /// Not exposed for built-in menu items, which handle their own action when
   /// pressed.
   VoidCallback? get onPressed => null;
+
+  @override
+  int get hashCode => Object.hash(title, onPressed);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is SystemContextMenuItem
+        && other.title == title
+        && other.onPressed == onPressed;
+  }
 }
 
 /// Creates an instance of [SystemContextMenuItem] for the system's built-in cut
