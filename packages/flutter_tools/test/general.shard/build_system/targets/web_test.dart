@@ -399,7 +399,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -415,7 +414,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -446,7 +444,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -462,7 +459,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -492,7 +488,6 @@ void main() {
         ..._kDart2jsLinuxArgs,
         '--enable-experiment=non-nullable',
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -509,7 +504,6 @@ void main() {
         ..._kDart2jsLinuxArgs,
         '--enable-experiment=non-nullable',
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -537,7 +531,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -553,7 +546,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -581,7 +573,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -597,7 +588,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -625,7 +615,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -642,7 +631,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -671,7 +659,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -687,7 +674,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -715,7 +701,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -734,7 +719,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -771,7 +755,6 @@ void main() {
         '-Ddart.vm.product=true',
         '-DFOO=bar',
         '-DBAZ=qux',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -789,7 +772,6 @@ void main() {
         '-Ddart.vm.product=true',
         '-DFOO=bar',
         '-DBAZ=qux',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -817,7 +799,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -832,7 +813,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -860,7 +840,6 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -878,7 +857,6 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -908,7 +886,6 @@ void main() {
         ..._kDart2jsLinuxArgs,
         '-DFOO=bar',
         '-DBAZ=qux',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -926,7 +903,6 @@ void main() {
         ..._kDart2jsLinuxArgs,
         '-DFOO=bar',
         '-DBAZ=qux',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -957,7 +933,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -973,7 +948,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -1004,7 +978,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -1020,7 +993,6 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
         '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
@@ -1072,12 +1044,10 @@ void main() {
                     ],
                     ...defines.map((String define) => '-D$define'),
                     if (renderer == WebRendererMode.skwasm) ...<String>[
-                      '-DFLUTTER_WEB_AUTO_DETECT=false',
                       '-DFLUTTER_WEB_USE_SKIA=false',
                       '-DFLUTTER_WEB_USE_SKWASM=true',
                     ],
                     if (renderer == WebRendererMode.canvaskit) ...<String>[
-                      '-DFLUTTER_WEB_AUTO_DETECT=false',
                       '-DFLUTTER_WEB_USE_SKIA=true',
                       '-DFLUTTER_WEB_USE_SKWASM=false',
                     ],
