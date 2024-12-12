@@ -2620,6 +2620,7 @@ class _RestorableDatePickerDialogTestWidget extends StatefulWidget {
   _RestorableDatePickerDialogTestWidgetState createState() => _RestorableDatePickerDialogTestWidgetState();
 }
 
+@pragma('vm:entry-point')
 class _RestorableDatePickerDialogTestWidgetState extends State<_RestorableDatePickerDialogTestWidget> with RestorationMixin {
   @override
   String? get restorationId => 'scaffold_state';
