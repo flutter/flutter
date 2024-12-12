@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -165,6 +167,22 @@ void main() {
     );
     expect(view2.constraints, constraints);
   });
+
+  test('schedule semantics and clear semantics calls setSemanticsTreeEnabled', () {
+    final FlutterView view = RendererBinding.instance.platformDispatcher.views.single;
+    final TestPlatformDispatcher dispatcher = TestPlatformDispatcher(platformDispatcher: view.platformDispatcher);
+    final TestDisplay display = TestDisplay(dispatcher, view.display);
+    final FlutterViewSpy spy = FlutterViewSpy(view: view, platformDispatcher: dispatcher, display: display);
+    final RenderView renderView = RenderView(
+      view: spy,
+    );
+    expect(spy.enabled, isNull);
+
+    renderView.scheduleInitialSemantics();
+    expect(spy.enabled, isTrue);
+    renderView.clearSemantics();
+    expect(spy.enabled, isFalse);
+  });
 }
 
 const Color orange = Color(0xFFFF9000);
@@ -184,5 +202,18 @@ class TestRenderObject extends RenderBox {
       orangeRect,
       Paint()..color = orange,
     );
+  }
+}
+
+class FlutterViewSpy extends TestFlutterView  {
+  FlutterViewSpy({
+    required super.view,
+    required super.platformDispatcher,
+    required super.display,
+  });
+  bool? enabled;
+  @override
+  void setSemanticsTreeEnabled(bool enabled) {
+    this.enabled = enabled;
   }
 }
