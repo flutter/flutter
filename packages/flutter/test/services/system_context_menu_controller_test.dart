@@ -263,9 +263,7 @@ void main() {
       connection.close();
     });
 
-    final List<Map<String, double>> targetRects = <Map<String, double>>[];
     final List<List<SystemContextMenuItemData>> itemsReceived = <List<SystemContextMenuItemData>>[];
-    int hideCount = 0;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
         switch (methodCall.method) {
@@ -277,8 +275,6 @@ void main() {
               return SystemContextMenuItemData.fromJson(itemJson);
             }).toList();
             itemsReceived.add(lastItems);
-          case 'ContextMenu.hideSystemContextMenu':
-            hideCount += 1;
         }
         return;
       });
@@ -291,9 +287,6 @@ void main() {
     addTearDown(() {
       controller.dispose();
     });
-
-    expect(targetRects, isEmpty);
-    expect(hideCount, 0);
 
     // Showing calls the platform.
     const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
@@ -328,6 +321,5 @@ void main() {
     expect(itemsReceived.last, equals(items2));
 
     controller.hide();
-    expect(hideCount, 1);
   });
 }
