@@ -175,7 +175,7 @@ std::optional<Snapshot> TiledTextureContents::RenderToSnapshot(
     const std::optional<SamplerDescriptor>& sampler_descriptor,
     bool msaa_enabled,
     int32_t mip_count,
-    const std::string& label) const {
+    std::string_view label) const {
   std::optional<Rect> geometry_coverage = GetGeometry()->GetCoverage({});
   if (GetInverseEffectTransform().IsIdentity() &&
       GetGeometry()->IsAxisAlignedRect() &&

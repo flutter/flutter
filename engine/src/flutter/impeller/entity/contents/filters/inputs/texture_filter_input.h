@@ -16,7 +16,7 @@ class TextureFilterInput final : public FilterInput {
   ~TextureFilterInput() override;
 
   // |FilterInput|
-  std::optional<Snapshot> GetSnapshot(const std::string& label,
+  std::optional<Snapshot> GetSnapshot(std::string_view label,
                                       const ContentContext& renderer,
                                       const Entity& entity,
                                       std::optional<Rect> coverage_limit,

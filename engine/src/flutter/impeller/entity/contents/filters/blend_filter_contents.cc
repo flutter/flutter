@@ -30,6 +30,24 @@
 
 namespace impeller {
 
+namespace {
+
+#ifdef IMPELLER_DEBUG
+
+#define _IMPELLER_BLEND_MODE_FILTER_NAME_LIST(blend_mode) \
+  "Blend Filter " #blend_mode,
+
+static constexpr const char* kBlendModeFilterNames[] = {
+    IMPELLER_FOR_EACH_BLEND_MODE(_IMPELLER_BLEND_MODE_FILTER_NAME_LIST)};
+
+const std::string_view BlendModeToFilterString(BlendMode blend_mode) {
+  return kBlendModeFilterNames[static_cast<std::underlying_type_t<BlendMode>>(
+      blend_mode)];
+}
+#endif  // IMPELLER_DEBUG
+
+}  // namespace
+
 std::optional<BlendMode> InvertPorterDuffBlend(BlendMode blend_mode) {
   switch (blend_mode) {
     case BlendMode::kClear:
@@ -173,8 +191,7 @@ static std::optional<Entity> AdvancedBlend(
     PipelineRef pipeline = std::invoke(pipeline_proc, renderer, options);
 
 #ifdef IMPELLER_DEBUG
-    pass.SetCommandLabel(
-        SPrintF("Advanced Blend Filter (%s)", BlendModeToString(blend_mode)));
+    pass.SetCommandLabel(BlendModeToFilterString(blend_mode));
 #endif  // IMPELLER_DEBUG
     pass.SetVertexBuffer(std::move(vtx_buffer));
     pass.SetPipeline(pipeline);
@@ -296,8 +313,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
         CreateVertexBuffer(vertices, renderer.GetTransientsBuffer());
 
 #ifdef IMPELLER_DEBUG
-    pass.SetCommandLabel(SPrintF("Foreground Advanced Blend Filter (%s)",
-                                 BlendModeToString(blend_mode)));
+    pass.SetCommandLabel(BlendModeToFilterString(blend_mode));
 #endif  // IMPELLER_DEBUG
     pass.SetVertexBuffer(std::move(vtx_buffer));
     auto options = OptionsFromPassAndEntity(pass, entity);
@@ -449,8 +465,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
         CreateVertexBuffer(vertices, renderer.GetTransientsBuffer());
 
 #ifdef IMPELLER_DEBUG
-    pass.SetCommandLabel(SPrintF("Foreground PorterDuff Blend Filter (%s)",
-                                 BlendModeToString(blend_mode)));
+    pass.SetCommandLabel(BlendModeToFilterString(blend_mode));
 #endif  // IMPELLER_DEBUG
     pass.SetVertexBuffer(std::move(vtx_buffer));
     auto options = OptionsFromPassAndEntity(pass, entity);
@@ -548,8 +563,7 @@ static std::optional<Entity> PipelineBlend(
     auto& host_buffer = renderer.GetTransientsBuffer();
 
 #ifdef IMPELLER_DEBUG
-    pass.SetCommandLabel(
-        SPrintF("Pipeline Blend Filter (%s)", BlendModeToString(blend_mode)));
+    pass.SetCommandLabel(BlendModeToFilterString(blend_mode));
 #endif  // IMPELLER_DEBUG
     auto options = OptionsFromPass(pass);
     options.primitive_type = PrimitiveType::kTriangleStrip;

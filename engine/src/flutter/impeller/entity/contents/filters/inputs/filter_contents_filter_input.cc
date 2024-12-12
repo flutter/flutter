@@ -18,20 +18,19 @@ FilterContentsFilterInput::FilterContentsFilterInput(
 FilterContentsFilterInput::~FilterContentsFilterInput() = default;
 
 std::optional<Snapshot> FilterContentsFilterInput::GetSnapshot(
-    const std::string& label,
+    std::string_view label,
     const ContentContext& renderer,
     const Entity& entity,
     std::optional<Rect> coverage_limit,
     int32_t mip_count) const {
   if (!snapshot_.has_value()) {
-    snapshot_ = filter_->RenderToSnapshot(
-        renderer,        // renderer
-        entity,          // entity
-        coverage_limit,  // coverage_limit
-        std::nullopt,    // sampler_descriptor
-        true,            // msaa_enabled
-        /*mip_count=*/mip_count,
-        SPrintF("Filter to %s Filter Snapshot", label.c_str()));  // label
+    snapshot_ = filter_->RenderToSnapshot(renderer,        // renderer
+                                          entity,          // entity
+                                          coverage_limit,  // coverage_limit
+                                          std::nullopt,    // sampler_descriptor
+                                          true,            // msaa_enabled
+                                          /*mip_count=*/mip_count,  //
+                                          label);                   // label
   }
   return snapshot_;
 }
