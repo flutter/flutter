@@ -1174,7 +1174,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 
   @override
   Simulation createSimulation({ required bool forward }) {
-    assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
+    assert(!debugTransitionCompleted(), 'Cannot reuse a $runtimeType after disposing it.');
     final double end = forward ? 1.0 : 0.0;
     return SpringSimulation(
       _kStandardSpring,
@@ -1450,7 +1450,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
 
   @override
   Simulation createSimulation({ required bool forward }) {
-    assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
+    assert(!debugTransitionCompleted(), 'Cannot reuse a $runtimeType after disposing it.');
     final double end = forward ? 1.0 : 0.0;
     return SpringSimulation(
       _kStandardSpring,
