@@ -16,7 +16,7 @@
 #include "flutter/fml/thread.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTouchInterceptingView_Test.h"
@@ -4319,8 +4319,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Create an IOSContext and GrDirectContext.
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
   [engine run];
-  XCTAssertTrue([engine iosPlatformView] != nullptr);
-  auto ios_context = [engine iosPlatformView]->GetIosContext();
+  XCTAssertTrue(engine.platformView != nullptr);
+  auto ios_context = engine.platformView->GetIosContext();
   auto gr_context = ios_context->GetMainContext();
 
   auto pool = flutter::OverlayLayerPool{};

@@ -14,6 +14,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFakeKeyEvents.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
@@ -26,14 +27,6 @@
 FLUTTER_ASSERT_ARC
 
 using namespace flutter::testing;
-
-@interface FlutterEngine ()
-- (FlutterTextInputPlugin*)textInputPlugin;
-- (void)sendKeyEvent:(const FlutterKeyEvent&)event
-            callback:(nullable FlutterKeyEventCallback)callback
-            userData:(nullable void*)userData;
-- (fml::RefPtr<fml::TaskRunner>)uiTaskRunner;
-@end
 
 /// Sometimes we have to use a custom mock to avoid retain cycles in OCMock.
 /// Used for testing low memory notification.
