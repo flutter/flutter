@@ -2071,6 +2071,7 @@ Widget createAppWithCenteredButton(Widget child) {
 }
 
 
+@pragma('vm:entry-point')
 class _RestorableDialogTestWidget extends StatelessWidget {
   const _RestorableDialogTestWidget();
 
