@@ -1079,6 +1079,13 @@ const SpringDescription _kStandardSpring = SpringDescription(
   stiffness: _kStandardStiffness,
   damping: _kStandardDamping,
 );
+// The iOS spring animation lasts for 0.404 seconds according to the properties
+// of `CASpringAnimation` in Xcode. Since x(0.404) for the standard spring is
+// about 0.9990000, it's reasonable to think that the ending time is computed
+// with position tolerance 1e-3 (which is exactly the default value
+// _epsilonDefault).  However, dx(0.404) is about 0.02. Therefore a larger
+// velocity tolerance must be used.
+const Tolerance _kStandardTolerance = Tolerance(velocity: 0.03);
 
 /// A route that shows a modal iOS-style popup that slides up from the
 /// bottom of the screen.
@@ -1166,7 +1173,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   Simulation createSimulation({ required bool forward }) {
     assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
     final double end = forward ? 1.0 : 0.0;
-    return SpringSimulation(_kStandardSpring, controller!.value, end, 0);
+    return SpringSimulation(_kStandardSpring, controller!.value, end, 0, tolerance: _kStandardTolerance);
   }
 
   @override
@@ -1435,7 +1442,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
   Simulation createSimulation({ required bool forward }) {
     assert(!debugIsDisposed(), 'Cannot reuse a $runtimeType after disposing it.');
     final double end = forward ? 1.0 : 0.0;
-    return SpringSimulation(_kStandardSpring, controller!.value, end, 0);
+    return SpringSimulation(_kStandardSpring, controller!.value, end, 0, tolerance: _kStandardTolerance);
   }
 
   @override
