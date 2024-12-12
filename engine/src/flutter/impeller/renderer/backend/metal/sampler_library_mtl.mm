@@ -13,16 +13,16 @@ SamplerLibraryMTL::SamplerLibraryMTL(id<MTLDevice> device) : device_(device) {}
 
 SamplerLibraryMTL::~SamplerLibraryMTL() = default;
 
-static const std::unique_ptr<const Sampler> kNullSampler = nullptr;
-
-const std::unique_ptr<const Sampler>& SamplerLibraryMTL::GetSampler(
-    SamplerDescriptor descriptor) {
-  auto found = samplers_.find(descriptor);
-  if (found != samplers_.end()) {
-    return found->second;
+raw_ptr<const Sampler> SamplerLibraryMTL::GetSampler(
+    const SamplerDescriptor& descriptor) {
+  uint64_t p_key = SamplerDescriptor::ToKey(descriptor);
+  for (const auto& [key, value] : samplers_) {
+    if (key == p_key) {
+      return raw_ptr(value);
+    }
   }
   if (!device_) {
-    return kNullSampler;
+    return raw_ptr<const Sampler>(nullptr);
   }
   auto desc = [[MTLSamplerDescriptor alloc] init];
   desc.minFilter = ToMTLSamplerMinMagFilter(descriptor.min_filter);
@@ -42,12 +42,13 @@ const std::unique_ptr<const Sampler>& SamplerLibraryMTL::GetSampler(
 
   auto mtl_sampler = [device_ newSamplerStateWithDescriptor:desc];
   if (!mtl_sampler) {
-    return kNullSampler;
+    return raw_ptr<const Sampler>(nullptr);
+    ;
   }
   auto sampler =
-      std::unique_ptr<SamplerMTL>(new SamplerMTL(descriptor, mtl_sampler));
-
-  return (samplers_[descriptor] = std::move(sampler));
+      std::shared_ptr<SamplerMTL>(new SamplerMTL(descriptor, mtl_sampler));
+  samplers_.push_back(std::make_pair(p_key, std::move(sampler)));
+  return raw_ptr(samplers_.back().second);
 }
 
 }  // namespace impeller

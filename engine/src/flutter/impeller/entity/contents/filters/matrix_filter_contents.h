@@ -21,7 +21,7 @@ class MatrixFilterContents final : public FilterContents {
   // |FilterContents|
   void SetRenderingMode(Entity::RenderingMode rendering_mode) override;
 
-  void SetSamplerDescriptor(SamplerDescriptor desc);
+  void SetSamplerDescriptor(const SamplerDescriptor& desc);
 
   // |FilterContents|
   std::optional<Rect> GetFilterCoverage(

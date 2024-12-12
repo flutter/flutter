@@ -601,13 +601,12 @@ bool RenderPassVK::BindResource(size_t binding,
   return true;
 }
 
-bool RenderPassVK::BindDynamicResource(
-    ShaderStage stage,
-    DescriptorType type,
-    const SampledImageSlot& slot,
-    std::unique_ptr<ShaderMetadata> metadata,
-    std::shared_ptr<const Texture> texture,
-    const std::unique_ptr<const Sampler>& sampler) {
+bool RenderPassVK::BindDynamicResource(ShaderStage stage,
+                                       DescriptorType type,
+                                       const SampledImageSlot& slot,
+                                       std::unique_ptr<ShaderMetadata> metadata,
+                                       std::shared_ptr<const Texture> texture,
+                                       raw_ptr<const Sampler> sampler) {
   return BindResource(stage, type, slot, nullptr, texture, sampler);
 }
 
@@ -616,7 +615,7 @@ bool RenderPassVK::BindResource(ShaderStage stage,
                                 const SampledImageSlot& slot,
                                 const ShaderMetadata* metadata,
                                 std::shared_ptr<const Texture> texture,
-                                const std::unique_ptr<const Sampler>& sampler) {
+                                raw_ptr<const Sampler> sampler) {
   if (bound_buffer_offset_ >= kMaxBindings) {
     return false;
   }

@@ -59,7 +59,7 @@ struct TextureAndSampler {
   SampledImageSlot slot;
   ShaderStage stage;
   TextureResource texture;
-  const std::unique_ptr<const Sampler>* sampler;
+  raw_ptr<const Sampler> sampler;
 };
 
 //------------------------------------------------------------------------------

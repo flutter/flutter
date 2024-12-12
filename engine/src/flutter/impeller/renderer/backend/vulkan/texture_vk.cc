@@ -227,7 +227,7 @@ std::shared_ptr<SamplerVK> TextureVK::GetImmutableSamplerVariant(
   if (!source_) {
     return nullptr;
   }
-  auto conversion = source_->GetYUVConversion();
+  std::shared_ptr<YUVConversionVK> conversion = source_->GetYUVConversion();
   if (!conversion) {
     // Most textures don't need a sampler conversion and will go down this path.
     // Only needed for YUV sampling from external textures.

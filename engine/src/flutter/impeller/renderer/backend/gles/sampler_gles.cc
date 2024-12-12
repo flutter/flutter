@@ -6,13 +6,14 @@
 
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/sampler_descriptor.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 #include "impeller/renderer/backend/gles/texture_gles.h"
 
 namespace impeller {
 
-SamplerGLES::SamplerGLES(SamplerDescriptor desc) : Sampler(std::move(desc)) {}
+SamplerGLES::SamplerGLES(const SamplerDescriptor& desc) : Sampler(desc) {}
 
 SamplerGLES::~SamplerGLES() = default;
 
@@ -81,7 +82,7 @@ bool SamplerGLES::ConfigureBoundTexture(const TextureGLES& texture,
   if (!target.has_value()) {
     return false;
   }
-  const auto& desc = GetDescriptor();
+  const SamplerDescriptor& desc = GetDescriptor();
 
   GLint mag_filter = ToParam(desc.mag_filter);
 

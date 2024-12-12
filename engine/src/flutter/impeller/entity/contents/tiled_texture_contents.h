@@ -37,7 +37,7 @@ class TiledTextureContents final : public ColorSourceContents {
 
   void SetTileModes(Entity::TileMode x_tile_mode, Entity::TileMode y_tile_mode);
 
-  void SetSamplerDescriptor(SamplerDescriptor desc);
+  void SetSamplerDescriptor(const SamplerDescriptor& desc);
 
   /// @brief Set a color filter to apply directly to this tiled texture
   /// @param color_filter

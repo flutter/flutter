@@ -47,8 +47,8 @@ void TiledTextureContents::SetTileModes(Entity::TileMode x_tile_mode,
   y_tile_mode_ = y_tile_mode;
 }
 
-void TiledTextureContents::SetSamplerDescriptor(SamplerDescriptor desc) {
-  sampler_descriptor_ = std::move(desc);
+void TiledTextureContents::SetSamplerDescriptor(const SamplerDescriptor& desc) {
+  sampler_descriptor_ = desc;
 }
 
 void TiledTextureContents::SetColorFilter(ColorFilterProc color_filter) {

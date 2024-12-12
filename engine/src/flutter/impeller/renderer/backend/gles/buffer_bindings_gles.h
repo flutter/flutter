@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_BUFFER_BINDINGS_GLES_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_BUFFER_BINDINGS_GLES_H_
 
-#include <unordered_map>
 #include <vector>
 
 #include "flutter/third_party/abseil-cpp/absl/container/flat_hash_map.h"

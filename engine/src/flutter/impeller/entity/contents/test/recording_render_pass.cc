@@ -135,7 +135,7 @@ bool RecordingRenderPass::BindDynamicResource(
     const SampledImageSlot& slot,
     std::unique_ptr<ShaderMetadata> metadata,
     std::shared_ptr<const Texture> texture,
-    const std::unique_ptr<const Sampler>& sampler) {
+    raw_ptr<const Sampler> sampler) {
   if (delegate_) {
     return delegate_->BindDynamicResource(
         stage, type, slot, std::move(metadata), texture, sampler);
@@ -143,13 +143,12 @@ bool RecordingRenderPass::BindDynamicResource(
   return true;
 }
 
-bool RecordingRenderPass::BindResource(
-    ShaderStage stage,
-    DescriptorType type,
-    const SampledImageSlot& slot,
-    const ShaderMetadata* metadata,
-    std::shared_ptr<const Texture> texture,
-    const std::unique_ptr<const Sampler>& sampler) {
+bool RecordingRenderPass::BindResource(ShaderStage stage,
+                                       DescriptorType type,
+                                       const SampledImageSlot& slot,
+                                       const ShaderMetadata* metadata,
+                                       std::shared_ptr<const Texture> texture,
+                                       raw_ptr<const Sampler> sampler) {
   if (delegate_) {
     return delegate_->BindResource(stage, type, slot, metadata, texture,
                                    sampler);

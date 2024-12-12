@@ -105,13 +105,12 @@ bool ComputePassMTL::BindResource(ShaderStage stage,
 }
 
 // |ComputePass|
-bool ComputePassMTL::BindResource(
-    ShaderStage stage,
-    DescriptorType type,
-    const SampledImageSlot& slot,
-    const ShaderMetadata* metadata,
-    std::shared_ptr<const Texture> texture,
-    const std::unique_ptr<const Sampler>& sampler) {
+bool ComputePassMTL::BindResource(ShaderStage stage,
+                                  DescriptorType type,
+                                  const SampledImageSlot& slot,
+                                  const ShaderMetadata* metadata,
+                                  std::shared_ptr<const Texture> texture,
+                                  raw_ptr<const Sampler> sampler) {
   if (!sampler || !texture->IsValid()) {
     return false;
   }

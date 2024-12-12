@@ -412,7 +412,7 @@ struct Viewport {
 /// @brief      Describes how the texture should be sampled when the texture
 ///             is being shrunk (minified) or expanded (magnified) to fit to
 ///             the sample point.
-enum class MinMagFilter {
+enum class MinMagFilter : uint8_t {
   /// Select nearest to the sample point. Most widely supported.
   kNearest,
 
@@ -422,7 +422,7 @@ enum class MinMagFilter {
 };
 
 /// @brief      Options for selecting and filtering between mipmap levels.
-enum class MipFilter {
+enum class MipFilter : uint8_t {
   /// @brief    The texture is sampled as if it only had a single mipmap level.
   ///
   ///           All samples are read from level 0.
@@ -438,7 +438,7 @@ enum class MipFilter {
   kLinear,
 };
 
-enum class SamplerAddressMode {
+enum class SamplerAddressMode : uint8_t {
   kClampToEdge,
   kRepeat,
   kMirror,

@@ -6,8 +6,8 @@
 
 namespace impeller {
 
-SamplerMTL::SamplerMTL(SamplerDescriptor desc, id<MTLSamplerState> state)
-    : Sampler(std::move(desc)), state_(state) {
+SamplerMTL::SamplerMTL(const SamplerDescriptor& desc, id<MTLSamplerState> state)
+    : Sampler(desc), state_(state) {
   FML_DCHECK(state_);
 }
 

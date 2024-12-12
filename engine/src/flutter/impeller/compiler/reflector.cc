@@ -1390,7 +1390,7 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
         .argument_name = "texture",
     });
     proto.args.push_back(BindPrototypeArgument{
-        .type_name = "const std::unique_ptr<const Sampler>&",
+        .type_name = "raw_ptr<const Sampler>",
         .argument_name = "sampler",
     });
   }

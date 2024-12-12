@@ -9,6 +9,7 @@
 
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/raw_ptr.h"
 #include "impeller/core/sampler.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/core/texture.h"
@@ -34,7 +35,7 @@ struct ResourceBinder {
                             const SampledImageSlot& slot,
                             const ShaderMetadata* metadata,
                             std::shared_ptr<const Texture> texture,
-                            const std::unique_ptr<const Sampler>& sampler) = 0;
+                            raw_ptr<const Sampler>) = 0;
 };
 
 }  // namespace impeller

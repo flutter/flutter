@@ -25,7 +25,7 @@ class SamplerGLES final : public Sampler,
  private:
   friend class SamplerLibraryGLES;
 
-  explicit SamplerGLES(SamplerDescriptor desc);
+  explicit SamplerGLES(const SamplerDescriptor&);
 
   SamplerGLES(const SamplerGLES&) = delete;
 

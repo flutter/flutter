@@ -96,7 +96,7 @@ std::optional<Entity> ColorMatrixFilterContents::RenderFilter(
         absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
             ? input_snapshot->opacity
             : 1.0f;
-    const std::unique_ptr<const Sampler>& sampler =
+    raw_ptr<const Sampler> sampler =
         renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
     FS::BindInputTexture(pass, input_snapshot->texture, sampler);
     FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
