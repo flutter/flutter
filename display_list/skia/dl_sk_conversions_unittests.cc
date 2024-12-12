@@ -198,12 +198,12 @@ TEST(DisplayListSkConversions, ConvertWithZeroAndNegativeVerticesAndIndices) {
   std::shared_ptr<DlVertices> vertices1 = DlVertices::Make(
       DlVertexMode::kTriangles, 0, nullptr, nullptr, nullptr, 0, nullptr);
   EXPECT_NE(vertices1, nullptr);
-  EXPECT_NE(ToSk(vertices1), nullptr);
+  EXPECT_EQ(ToSk(vertices1), nullptr);
 
   std::shared_ptr<DlVertices> vertices2 = DlVertices::Make(
       DlVertexMode::kTriangles, -1, nullptr, nullptr, nullptr, -1, nullptr);
   EXPECT_NE(vertices2, nullptr);
-  EXPECT_NE(ToSk(vertices2), nullptr);
+  EXPECT_EQ(ToSk(vertices2), nullptr);
 }
 
 TEST(DisplayListVertices, ConvertWithZeroAndNegativeVerticesAndIndices) {
@@ -212,14 +212,14 @@ TEST(DisplayListVertices, ConvertWithZeroAndNegativeVerticesAndIndices) {
   EXPECT_TRUE(builder1.is_valid());
   std::shared_ptr<DlVertices> vertices1 = builder1.build();
   EXPECT_NE(vertices1, nullptr);
-  EXPECT_NE(ToSk(vertices1), nullptr);
+  EXPECT_EQ(ToSk(vertices1), nullptr);
 
   DlVertices::Builder builder2(DlVertexMode::kTriangles, -1,
                                DlVertices::Builder::kNone, -1);
   EXPECT_TRUE(builder2.is_valid());
   std::shared_ptr<DlVertices> vertices2 = builder2.build();
   EXPECT_NE(vertices2, nullptr);
-  EXPECT_NE(ToSk(vertices2), nullptr);
+  EXPECT_EQ(ToSk(vertices2), nullptr);
 }
 
 TEST(DisplayListColorSource, ConvertRuntimeEffect) {
