@@ -1773,7 +1773,22 @@ class SliverMainAxisGroup extends MultiChildRenderObjectWidget {
   }) : super(children: slivers);
 
   @override
+  MultiChildRenderObjectElement createElement() => _SliverMainAxisGroupElement(this);
+
+  @override
   RenderSliverMainAxisGroup createRenderObject(BuildContext context) {
     return RenderSliverMainAxisGroup();
+  }
+}
+
+class _SliverMainAxisGroupElement extends MultiChildRenderObjectElement {
+  _SliverMainAxisGroupElement(SliverMainAxisGroup super.widget);
+
+  @override
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
+    children.where((Element e) {
+      final RenderSliver renderSliver = e.renderObject! as RenderSliver;
+      return renderSliver.geometry!.visible;
+    }).forEach(visitor);
   }
 }

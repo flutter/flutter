@@ -78,6 +78,7 @@ class WebDriverService extends DriverService {
           hostname: debuggingOptions.hostname,
           webRenderer: debuggingOptions.webRenderer,
           webUseWasm: debuggingOptions.webUseWasm,
+          webHeaders: debuggingOptions.webHeaders,
         )
         : DebuggingOptions.enabled(
           buildInfo,
@@ -86,6 +87,7 @@ class WebDriverService extends DriverService {
           disablePortPublication: debuggingOptions.disablePortPublication,
           webRenderer: debuggingOptions.webRenderer,
           webUseWasm: debuggingOptions.webUseWasm,
+          webHeaders: debuggingOptions.webHeaders,
         ),
       stayResident: true,
       flutterProject: FlutterProject.current(),

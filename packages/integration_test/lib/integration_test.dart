@@ -447,14 +447,6 @@ https://docs.flutter.dev/testing/integration-tests
   Timeout defaultTestTimeout = Timeout.none;
 
   @override
-  Widget wrapWithDefaultView(Widget rootWidget) {
-    // This is a workaround where screenshots of root widgets have incorrect
-    // bounds.
-    // TODO(jiahaog): Remove when https://github.com/flutter/flutter/issues/66006 is fixed.
-    return super.wrapWithDefaultView(RepaintBoundary(child: rootWidget));
-  }
-
-  @override
   void reportExceptionNoticed(FlutterErrorDetails exception) {
     // This method is called to log errors as they happen, and they will also
     // be eventually logged again at the end of the tests. The superclass

@@ -115,7 +115,7 @@ class ShaderCompiler {
       case TargetPlatform.linux_arm64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
-        return <String>['--sksl', '--runtime-stage-gles', '--runtime-stage-vulkan'];
+        return <String>['--sksl', '--runtime-stage-gles',  '--runtime-stage-gles3', '--runtime-stage-vulkan'];
 
       case TargetPlatform.ios:
       case TargetPlatform.darwin:

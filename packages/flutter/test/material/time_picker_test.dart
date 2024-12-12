@@ -1646,6 +1646,45 @@ void main() {
         expect(find.text(errorInvalidText), findsOneWidget);
       });
 
+      testWidgets('TimePicker default entry icons', (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: TimePickerDialog(initialTime: TimeOfDay.now()),
+        ));
+
+        // Check that the default icon for the dial mode is displayed.
+        expect(find.byIcon(Icons.keyboard_outlined), findsOneWidget);
+        expect(find.byIcon(Icons.access_time), findsNothing);
+        // Tap the icon to switch to input mode.
+        await tester.tap(find.byIcon(Icons.keyboard_outlined));
+        await tester.pumpAndSettle();
+        // Check that the icon for the input mode is displayed.
+        expect(find.byIcon(Icons.access_time), findsOneWidget);
+        expect(find.byIcon(Icons.keyboard_outlined), findsNothing);
+      });
+
+      testWidgets('Can override TimePicker entry icons', (WidgetTester tester) async {
+        const Icon customInputIcon = Icon(Icons.text_fields);
+        const Icon customTimerIcon = Icon(Icons.watch);
+
+        await tester.pumpWidget(MaterialApp(
+          home: TimePickerDialog(
+            initialTime: TimeOfDay.now(),
+            switchToInputEntryModeIcon: customInputIcon,
+            switchToTimerEntryModeIcon: customTimerIcon,
+          ),
+        ));
+
+        // Check that the custom icons are displayed.
+        expect(find.byIcon(Icons.text_fields), findsOneWidget);
+        expect(find.byIcon(Icons.watch), findsNothing);
+        // Tap the custom icon to switch to input mode.
+        await tester.tap(find.byIcon(Icons.text_fields));
+        await tester.pumpAndSettle();
+        // Check that the custom icon for the input mode is displayed.
+        expect(find.byIcon(Icons.text_fields), findsNothing);
+        expect(find.byIcon(Icons.watch), findsOneWidget);
+      });
+
       testWidgets('Can switch from input to dial entry mode', (WidgetTester tester) async {
         await mediaQueryBoilerplate(
           tester,
@@ -2035,7 +2074,6 @@ void main() {
     // Enter invalid hour.
     await tester.enterText(find.byType(TextField).first, 'AB');
     await tester.tap(find.text(okString));
-    await tester.pumpAndSettle();
 
     expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
   });
@@ -2054,7 +2092,6 @@ void main() {
     // Enter invalid hour.
     await tester.enterText(find.byType(TextField).first, 'AB');
     await tester.tap(find.text(okString));
-    await tester.pumpAndSettle();
 
     expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
   });
@@ -2175,6 +2212,7 @@ class _TimePickerLauncher extends StatefulWidget {
   _TimePickerLauncherState createState() => _TimePickerLauncherState();
 }
 
+@pragma('vm:entry-point')
 class _TimePickerLauncherState extends State<_TimePickerLauncher> with RestorationMixin {
   @override
   String? get restorationId => widget.restorationId;

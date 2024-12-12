@@ -31,7 +31,6 @@ import '../preview_device.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../reporting/unified_analytics.dart';
-import '../web/compile.dart';
 import 'flutter_command_runner.dart';
 import 'target_devices.dart';
 
@@ -154,7 +153,6 @@ abstract final class FlutterOptions {
   static const String kFatalWarnings = 'fatal-warnings';
   static const String kUseApplicationBinary = 'use-application-binary';
   static const String kWebBrowserFlag = 'web-browser-flag';
-  static const String kWebRendererFlag = 'web-renderer';
   static const String kWebResourcesCdnFlag = 'web-resources-cdn';
   static const String kWebWasmFlag = 'wasm';
 }
@@ -251,7 +249,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption('web-hostname',
       defaultsTo: 'localhost',
       help:
-        'The hostname that the web sever will use to resolve an IP to serve '
+        'The hostname that the web server will use to resolve an IP to serve '
         'from. The unresolved hostname is used to launch Chrome when using '
         'the chrome Device. The name "any" may also be used to serve on any '
         'IPV4 for either the Chrome or web-server device.',
@@ -704,32 +702,6 @@ abstract class FlutterCommand extends Command<void> {
           'Entries from "--${FlutterOptions.kDartDefinesOption}" with identical keys take precedence over entries from these files.',
       valueHelp: 'use-define-config.json|.env',
       splitCommas: false,
-    );
-  }
-
-  // This option is deprecated and is no longer publicly supported, and
-  // therefore is hidden.
-  //
-  // The option still exists for internal testing, and to give existing users
-  // time to migrate off the HTML renderer, but it is no longer advertised as a
-  // supported mode.
-  //
-  // See also:
-  //   * https://github.com/flutter/flutter/issues/151786
-  //   * https://github.com/flutter/flutter/issues/145954
-  void usesWebRendererOption() {
-    argParser.addOption(
-      hide: true,
-      FlutterOptions.kWebRendererFlag,
-      allowed: WebRendererMode.values.map((WebRendererMode e) => e.name),
-      help: 'This option is deprecated and will be removed in a future Flutter '
-            'release.\n'
-            'Selects the renderer implementation to use when building for the '
-            'web. The supported renderers are "canvaskit" when compiling to '
-            'JavaScript, and "skwasm" when compiling to WebAssembly. Other '
-            'renderer and compiler combinations are no longer supported. '
-            'Consider migrating your app to a supported renderer.',
-      allowedHelp: CliEnum.allowedHelp(WebRendererMode.values)
     );
   }
 
@@ -1790,7 +1762,9 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         // The preview device does not currently support any plugins.
         allowedPlugins = PreviewDevice.supportedPubPlugins;
       }
-      await project.regeneratePlatformSpecificTooling(allowedPlugins: allowedPlugins);
+      await project.regeneratePlatformSpecificTooling(
+        allowedPlugins: allowedPlugins,
+      );
       if (reportNullSafety) {
         await _sendNullSafetyAnalyticsEvents(project);
       }
