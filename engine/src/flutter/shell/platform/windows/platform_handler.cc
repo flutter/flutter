@@ -60,7 +60,7 @@ class ScopedGlobalMemory {
     memory_ = ::GlobalAlloc(flags, bytes);
     if (!memory_) {
       FML_LOG(ERROR) << "Unable to allocate global memory: "
-                     << ::GetLastError();
+                     << static_cast<int>(::GetLastError());
     }
   }
 
@@ -68,7 +68,7 @@ class ScopedGlobalMemory {
     if (memory_) {
       if (::GlobalFree(memory_) != nullptr) {
         FML_LOG(ERROR) << "Failed to free global allocation: "
-                       << ::GetLastError();
+                       << static_cast<int>(::GetLastError());
       }
     }
   }
@@ -175,12 +175,12 @@ std::variant<std::wstring, int> ScopedClipboard::GetString() {
 
   HANDLE data = ::GetClipboardData(CF_UNICODETEXT);
   if (data == nullptr) {
-    return ::GetLastError();
+    return static_cast<int>(::GetLastError());
   }
   ScopedGlobalLock locked_data(data);
 
   if (!locked_data.get()) {
-    return ::GetLastError();
+    return static_cast<int>(::GetLastError());
   }
   return static_cast<wchar_t*>(locked_data.get());
 }
