@@ -625,7 +625,7 @@ void main() {
     // instead of a Container.
     Material material = getMaterial(tester);
     // ExpansionTile should be collapsed initially.
-    expect(material.shape, shape);
+    expect(material.shape, collapsedShape);
     expect(material.clipBehavior, Clip.antiAlias);
 
     await tester.tap(find.text('ExpansionTile'));
@@ -633,7 +633,7 @@ void main() {
 
     // ExpansionTile should be Expanded now.
     material = getMaterial(tester);
-    expect(material.shape, collapsedShape);
+    expect(material.shape, shape);
     expect(material.clipBehavior, Clip.antiAlias);
   });
 
@@ -933,7 +933,7 @@ void main() {
 
   testWidgets('Collapsed ExpansionTile properties can be updated with setState', (WidgetTester tester) async {
     const Key expansionTileKey = Key('expansionTileKey');
-    ShapeBorder shape = const RoundedRectangleBorder(
+    ShapeBorder collapsedShape = const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(4)),
     );
     Color collapsedTextColor = const Color(0xffffffff);
@@ -948,7 +948,7 @@ void main() {
               children: <Widget>[
                 ExpansionTile(
                   key: expansionTileKey,
-                  shape: shape,
+                  collapsedShape: collapsedShape,
                   collapsedTextColor: collapsedTextColor,
                   collapsedBackgroundColor: collapsedBackgroundColor,
                   collapsedIconColor: collapsedIconColor,
@@ -962,7 +962,7 @@ void main() {
                 FilledButton(
                   onPressed: () {
                     setState(() {
-                      shape = const RoundedRectangleBorder(
+                      collapsedShape = const RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(16)),
                       );
                       collapsedTextColor = const Color(0xff000000);
@@ -985,7 +985,7 @@ void main() {
     Material material = getMaterial(tester);
 
     // Test initial ExpansionTile properties.
-    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
+    expect(material.shape, collapsedShape);
     expect(material.color, const Color(0xffff0000));
     expect(material.clipBehavior, Clip.antiAlias);
     expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xffffffff));
@@ -1022,7 +1022,7 @@ void main() {
               children: <Widget>[
                 ExpansionTile(
                   key: expansionTileKey,
-                  collapsedShape: shape,
+                  shape: shape,
                   textColor: textColor,
                   backgroundColor: backgroundColor,
                   iconColor: iconColor,
@@ -1063,7 +1063,7 @@ void main() {
     Material material = getMaterial(tester);
 
     // Test initial ExpansionTile properties.
-    expect(material.shape, shape);
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))));
     expect(material.color, const Color(0xff0000ff));
     expect(material.clipBehavior, Clip.antiAlias);
     expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xff00ffff));
@@ -1078,7 +1078,7 @@ void main() {
     textColor = tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
 
     // Test updated ExpansionTile properties.
-    expect(material.shape, shape);
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(6))));
     expect(material.color, const Color(0xff123456));
     expect(material.clipBehavior, Clip.antiAlias);
     expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xffffffff));
@@ -1592,7 +1592,9 @@ void main() {
 
   testWidgets('ExpansionTile passes shape to ListTile',
       (WidgetTester tester) async {
-    final RoundedRectangleBorder customShape =
+    final RoundedRectangleBorder shape =
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(16));
+    final RoundedRectangleBorder collapsedShape =
         RoundedRectangleBorder(borderRadius: BorderRadius.circular(16));
 
     Widget buildAppWithExpansionTile() => MaterialApp(
@@ -1600,7 +1602,8 @@ void main() {
             body: Center(
               child: ExpansionTile(
                 title: const Text('Test Tile'),
-                shape: customShape,
+                shape: shape,
+                collapsedShape: collapsedShape,
               ),
             ),
           ),
@@ -1612,13 +1615,13 @@ void main() {
     expect(listTileFinder, findsOneWidget);
 
     final ListTile listTile = tester.widget<ListTile>(listTileFinder.first);
-    expect(listTile.shape, equals(customShape));
+    expect(listTile.shape, equals(collapsedShape));
 
     await tester.tap(listTileFinder);
     expect(find.byType(ListTile), findsOneWidget);
     final ListTile clickedListTile =
         tester.widget<ListTile>(find.byType(ListTile).first);
-    expect(clickedListTile.shape, equals(customShape));
+    expect(clickedListTile.shape, equals(shape));
   });
 
 
