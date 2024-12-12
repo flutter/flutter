@@ -2461,9 +2461,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// Not shown until [show] is called.
   SystemContextMenuController({
     this.onSystemHide,
-  }) {
-    ServicesBinding.registerSystemContextMenuClient(this);
-  }
+  });
 
   /// Called when the system has hidden the context menu.
   ///
@@ -2484,6 +2482,11 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// Null if [show] has not been called.
   Rect? _lastTargetRect;
 
+  /// The [SystemContextMenuItemData]s that were last given to [show].
+  ///
+  /// Null if [show] has not been called.
+  List<SystemContextMenuItemData>? _lastItems;
+
   /// True when the instance most recently [show]n has been hidden by the
   /// system.
   bool _hiddenBySystem = false;
@@ -2493,21 +2496,31 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// After calling [dispose], this instance can no longer be used.
   bool _isDisposed = false;
 
+  final Map<int, VoidCallback> _buttonCallbacks = <int, VoidCallback>{};
+
   // Begin SystemContextMenuClient.
 
   @override
   void handleSystemHide() {
     assert(!_isDisposed);
-    // If this instance wasn't being shown, then it wasn't the instance that was
-    // hidden.
-    if (!_isVisible) {
-      return;
-    }
+    assert(_isVisible);
     if (_lastShown == this) {
       _lastShown = null;
     }
     _hiddenBySystem = true;
     onSystemHide?.call();
+  }
+
+  @override
+  void handleTapCustomActionItem(int callbackId) {
+    assert(!_isDisposed);
+    assert(_isVisible);
+    final VoidCallback? callback = _buttonCallbacks[callbackId];
+    if (callback == null) {
+      assert(false, 'Tap received for non-existent item with id $callbackId.');
+      return;
+    }
+    _buttonCallbacks[callbackId]!();
   }
 
   // End SystemContextMenuClient.
@@ -2517,14 +2530,17 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// The [Rect] represents what the context menu is pointing to. For example,
   /// for some text selection, this would be the selection [Rect].
   ///
+  /// Optionally, `items` can be provided to specify the menu items. If none are
+  /// given, then the platform will infer which menu items should be visible
+  /// based on the state of the current [TextInputConnection].
+  ///
+  /// Currently this system context menu is bound to text input. Using this
+  /// without an active [TextInputConnection] will be a noop, even when
+  /// specifying custom `items`.
+  ///
   /// There can only be one system context menu visible at a time. Calling this
   /// while another system context menu is already visible will remove the old
   /// menu before showing the new menu.
-  ///
-  /// Currently this system context menu is bound to text input. The buttons
-  /// that are shown and the actions they perform are dependent on the
-  /// currently active [TextInputConnection]. Using this without an active
-  /// [TextInputConnection] will be a noop.
   ///
   /// This is only supported on iOS 16.0 and later.
   ///
@@ -2533,7 +2549,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///  * [hide], which hides the menu shown by this method.
   ///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates whether
   ///    this method is supported on the current platform.
-  Future<void> show(Rect targetRect) {
+  Future<void> show(Rect targetRect, [ List<SystemContextMenuItemData>? items ]) {
     assert(!_isDisposed);
     assert(
       TextInput._instance._currentConnection != null,
@@ -2541,7 +2557,9 @@ class SystemContextMenuController with SystemContextMenuClient {
     );
 
     // Don't show the same thing that's already being shown.
-    if (_lastShown != null && _lastShown!._isVisible && _lastShown!._lastTargetRect == targetRect) {
+    if (_lastShown != null && _lastShown!._isVisible
+        && _lastShown!._lastTargetRect == targetRect
+        && listEquals(_lastShown!._lastItems, items)) {
       return Future<void>.value();
     }
 
@@ -2550,7 +2568,19 @@ class SystemContextMenuController with SystemContextMenuClient {
       'Attempted to show while another instance was still visible.',
     );
 
+    _buttonCallbacks.clear();
+    if (items != null) {
+      for (final SystemContextMenuItemData item in items) {
+        if (item is SystemContextMenuItemDataCustom) {
+          _buttonCallbacks[item.hashCode] = item.onPressed;
+        }
+      }
+    }
+
+    ServicesBinding.registerSystemContextMenuClient(this);
+
     _lastTargetRect = targetRect;
+    _lastItems = items;
     _lastShown = this;
     _hiddenBySystem = false;
     return _channel.invokeMethod<Map<String, dynamic>>(
@@ -2562,6 +2592,10 @@ class SystemContextMenuController with SystemContextMenuClient {
           'width': targetRect.width,
           'height': targetRect.height,
         },
+        if (items != null)
+          'items': items
+              .map<Map<String, dynamic>>((SystemContextMenuItemData item) => item._json)
+              .toList(),
       },
     );
   }
@@ -2580,12 +2614,14 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///    the system context menu is supported on the current platform.
   Future<void> hide() async {
     assert(!_isDisposed);
-    // This check prevents a given instance from accidentally hiding some other
+    // This check prevents the instance from accidentally hiding some other
     // instance, since only one can be visible at a time.
     if (this != _lastShown) {
       return;
     }
     _lastShown = null;
+    _buttonCallbacks.clear();
+    ServicesBinding.unregisterSystemContextMenuClient(this);
     // This may be called unnecessarily in the case where the user has already
     // hidden the menu (for example by tapping the screen).
     return _channel.invokeMethod<void>(
@@ -2602,7 +2638,261 @@ class SystemContextMenuController with SystemContextMenuClient {
   void dispose() {
     assert(!_isDisposed);
     hide();
-    ServicesBinding.unregisterSystemContextMenuClient(this);
     _isDisposed = true;
   }
+}
+
+/// Describes a context menu button that will be rendered in the system context
+/// menu.
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [SystemContextMenuItem], which performs a similar role but at the widget
+///    level, where the titles can be replaced with default localized values.
+///  * [ContextMenuButtonItem], which performs a similar role for Flutter-drawn
+///    context menus.
+@immutable
+sealed class SystemContextMenuItemData {
+  const SystemContextMenuItemData();
+
+  /// Returns a [SystemContextMenuItemData] of the correct subclass given its
+  /// json data.
+  factory SystemContextMenuItemData.fromJson(Map<String, dynamic> json) {
+    final String? type = json['type'] as String?;
+    final String? title = json['title'] as String?;
+    final VoidCallback? onPressed = json['onPressed'] as VoidCallback?;
+    return switch (type) {
+      'copy' => const SystemContextMenuItemDataCopy(),
+      'cut' => const SystemContextMenuItemDataCut(),
+      'paste' => const SystemContextMenuItemDataPaste(),
+      'selectAll' => const SystemContextMenuItemDataSelectAll(),
+      'searchWeb' => SystemContextMenuItemDataSearchWeb(
+        title: title!,
+      ),
+      'share' => SystemContextMenuItemDataShare(
+        title: title!,
+      ),
+      'lookUp' => SystemContextMenuItemDataLookUp(
+        title: title!,
+      ),
+      'custom' => SystemContextMenuItemDataCustom(
+        title: title!,
+        onPressed: onPressed!,
+      ),
+      _ => throw FlutterError('Invalid json for SystemContextMenuItemData.type $type.'),
+    };
+  }
+
+  /// The callback to be called when the menu item is pressed.
+  ///
+  /// Not exposed for built-in menu items, which handle their own action when
+  /// pressed.
+  VoidCallback? get onPressed => null;
+
+  /// The text to display to the user.
+  ///
+  /// Not exposed for some built-in menu items whose title is always set by the
+  /// platform.
+  String? get title => null;
+
+  /// Returns json for use in method channel calls, specifically
+  /// `ContextMenu.showSystemContextMenu`.
+  Map<String, dynamic> get _json {
+    return <String, dynamic>{
+      'callbackId': hashCode, // TODO(justinmc): Effective?
+      if (title != null)
+        'title': title,
+      'type': switch (this) {
+        SystemContextMenuItemDataCopy() => 'copy',
+        SystemContextMenuItemDataCut() => 'cut',
+        SystemContextMenuItemDataPaste() => 'paste',
+        SystemContextMenuItemDataSelectAll() => 'selectAll',
+        SystemContextMenuItemDataShare() => 'share',
+        SystemContextMenuItemDataSearchWeb() => 'searchWeb',
+        SystemContextMenuItemDataLookUp() => 'lookUp',
+        SystemContextMenuItemDataCustom() => 'custom',
+      },
+    };
+  }
+
+  // TODO(justinmc): Override hashcode and == for SystemContextMenuItem, too.
+  @override
+  int get hashCode => Object.hash(title, onPressed);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is SystemContextMenuItemData
+        && other.title == title
+        && other.onPressed == onPressed;
+  }
+}
+
+/// A [SystemContextMenuButtonItemData] for the system's built-in copy button.
+///
+/// The title and action are both handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [SystemContextMenuItemCopy], which performs a similar role but at the
+///    widget level.
+class SystemContextMenuItemDataCopy extends SystemContextMenuItemData {
+  /// Creates an instance of [SystemContextMenuItemDataCopy].
+  const SystemContextMenuItemDataCopy();
+}
+
+/// A [SystemContextMenuButtonItemData] for the system's built-in cut button.
+///
+/// The title and action are both handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [SystemContextMenuItemCut], which performs a similar role but at the
+///    widget level.
+class SystemContextMenuItemDataCut extends SystemContextMenuItemData {
+  /// Creates an instance of [SystemContextMenuItemDataCut].
+  const SystemContextMenuItemDataCut();
+}
+
+/// A [SystemContextMenuButtonItemData] for the system's built-in paste button.
+///
+/// The title and action are both handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [SystemContextMenuItemPaste], which performs a similar role but at the
+///    widget level.
+class SystemContextMenuItemDataPaste extends SystemContextMenuItemData {
+  /// Creates an instance of [SystemContextMenuItemDataPaste].
+  const SystemContextMenuItemDataPaste();
+}
+
+/// A [SystemContextMenuButtonItemData] for the system's built-in select all
+/// button.
+///
+/// The title and action are both handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [SystemContextMenuItemSelectAll], which performs a similar role but at
+///    the widget level.
+class SystemContextMenuItemDataSelectAll extends SystemContextMenuItemData {
+  /// Creates an instance of [SystemContextMenuItemDataSelectAll].
+  const SystemContextMenuItemDataSelectAll();
+}
+
+/// A [SystemContextMenuButtonItemData] for the system's built-in look up
+/// button.
+///
+/// Must specify a [title], typically [WidgetsLocalizations.lookUpButtonLabel].
+///
+/// The action is handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [SystemContextMenuItemLookUp], which performs a similar role but at the
+///    widget level, where the title can be replaced with a default localized
+///    value.
+class SystemContextMenuItemDataLookUp extends SystemContextMenuItemData {
+  /// Creates an instance of [SystemContextMenuItemDataLookUp].
+  const SystemContextMenuItemDataLookUp({
+    required this.title,
+  });
+
+  @override
+  final String title;
+}
+
+/// A [SystemContextMenuButtonItemData] for the system's built-in search web
+/// button.
+///
+/// Must specify a [title], typically
+/// [WidgetsLocalizations.searchWebButtonLabel].
+///
+/// The action is handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [SystemContextMenuItemSearchWeb], which performs a similar role but at
+///    the widget level, where the title can be replaced with a default localized
+///    value.
+class SystemContextMenuItemDataSearchWeb extends SystemContextMenuItemData {
+  /// Creates an instance of [SystemContextMenuItemDataSearchWeb].
+  const SystemContextMenuItemDataSearchWeb({
+    required this.title,
+  });
+
+  @override
+  final String title;
+}
+
+/// A [SystemContextMenuButtonItemData] for the system's built-in share button.
+///
+/// Must specify a [title], typically
+/// [WidgetsLocalizations.shareButtonLabel].
+///
+/// The action is handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [SystemContextMenuItemShare], which performs a similar role but at
+///    the widget level, where the title can be replaced with a default
+///    localized value.
+class SystemContextMenuItemDataShare extends SystemContextMenuItemData {
+  /// Creates an instance of [SystemContextMenuItemDataShare].
+  const SystemContextMenuItemDataShare({
+    required this.title,
+  });
+
+  @override
+  final String title;
+}
+
+// TODO(justinmc): Support the "custom" type.
+// https://github.com/flutter/flutter/issues/103163
+/// A [SystemContextMenuButtonItemData] for a custom button whose title and
+/// callback are defined by the app developer.
+///
+/// Must specify a [title] and [onPressed].
+///
+/// See also:
+///
+///  * [SystemContextMenuController], which is used to show the system context
+///    menu.
+///  * [SystemContextMenuItemCustom], which performs a similar role but at
+///    the widget level.
+class SystemContextMenuItemDataCustom extends SystemContextMenuItemData {
+  /// Creates an instance of [SystemContextMenuItemDataCustom] with the given
+  /// [title] and [onPressed] callback.
+  const SystemContextMenuItemDataCustom({
+    required this.onPressed,
+    required this.title,
+  });
+
+  @override
+  final VoidCallback onPressed;
+
+  @override
+  final String title;
 }

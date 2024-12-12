@@ -254,4 +254,81 @@ void main() {
     controller2.hide();
     expect(hideCount, 2);
   });
+
+  test('showing a controller with custom items', () {
+    // Create an active connection, which is required to show the system menu.
+    final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
+    addTearDown(() {
+      connection.close();
+    });
+
+    const String searchTitle = 'Special search';
+    final List<Map<String, double>> targetRects = <Map<String, double>>[];
+    final List<List<SystemContextMenuItemData>> itemsReceived = <List<SystemContextMenuItemData>>[];
+    int hideCount = 0;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+        switch (methodCall.method) {
+          case 'ContextMenu.showSystemContextMenu':
+            final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
+            final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
+            final List<SystemContextMenuItemData> lastItems = untypedItems.map((dynamic value) {
+              final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+              return SystemContextMenuItemData.fromJson(itemJson);
+            }).toList();
+            itemsReceived.add(lastItems);
+          case 'ContextMenu.hideSystemContextMenu':
+            hideCount += 1;
+        }
+        return;
+      });
+    addTearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, null);
+    });
+
+    final SystemContextMenuController controller = SystemContextMenuController();
+    addTearDown(() {
+      controller.dispose();
+    });
+
+    expect(targetRects, isEmpty);
+    expect(hideCount, 0);
+
+    // Showing calls the platform.
+    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    final List<SystemContextMenuItemData> items1 = <SystemContextMenuItemData>[
+        const SystemContextMenuItemDataCut(),
+        const SystemContextMenuItemDataCopy(),
+        const SystemContextMenuItemDataPaste(),
+        const SystemContextMenuItemDataSelectAll(),
+        const SystemContextMenuItemDataSearchWeb(
+          title: searchTitle,
+        ),
+        // TODO(justinmc): Support the "custom" item type.
+        // https://github.com/flutter/flutter/issues/103163
+      ];
+
+    controller.show(rect, items1);
+    expect(itemsReceived, hasLength(1));
+    expect(itemsReceived.last, hasLength(items1.length));
+    expect(itemsReceived.last, equals(items1));
+
+    // Showing the same thing again does nothing.
+    controller.show(rect, items1);
+    expect(itemsReceived, hasLength(1));
+
+    // Showing new items calls the platform.
+    final List<SystemContextMenuItemData> items2 = <SystemContextMenuItemData>[
+      const SystemContextMenuItemDataCut(),
+    ];
+    controller.show(rect, items2);
+    expect(itemsReceived, hasLength(2));
+    expect(itemsReceived.last, hasLength(items2.length));
+    expect(itemsReceived.last, equals(items2));
+
+    controller.hide();
+    expect(hideCount, 1);
+  });
 }
