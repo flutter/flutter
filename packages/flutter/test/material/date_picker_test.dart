@@ -1723,6 +1723,7 @@ void main() {
 
         // Input mode toggle button
         expect(tester.getSemantics(switchToInputIcon), matchesSemantics(
+          label: (defaultTargetPlatform == TargetPlatform.iOS) ? null : 'Switch to input',
           tooltip: 'Switch to input',
           isButton: true,
           hasTapAction: true,
@@ -1776,6 +1777,7 @@ void main() {
 
         // Input mode toggle button
         expect(tester.getSemantics(switchToCalendarIcon), matchesSemantics(
+          label: (defaultTargetPlatform == TargetPlatform.iOS) ? null : 'Switch to calendar',
           tooltip: 'Switch to calendar',
           isButton: true,
           hasTapAction: true,
