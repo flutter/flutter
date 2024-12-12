@@ -156,8 +156,19 @@ class Cache {
     fileSystem ??= rootOverride?.fileSystem ?? MemoryFileSystem.test();
     platform ??= FakePlatform(environment: <String, String>{});
     logger ??= BufferLogger.test();
+    rootOverride ??= fileSystem.currentDirectory;
+
+    final File engineVersionFile = rootOverride
+        .childDirectory('bin')
+        .childDirectory('cache')
+        .childFile('engine-dart-sdk.stamp');
+    if (!engineVersionFile.existsSync()) {
+      engineVersionFile.createSync(recursive: true);
+      engineVersionFile.writeAsStringSync('testEngineSdkStamp');
+    }
+
     return Cache(
-      rootOverride: rootOverride ?? fileSystem.currentDirectory,
+      rootOverride: rootOverride,
       artifacts: artifacts ?? <ArtifactSet>[],
       logger: logger,
       fileSystem: fileSystem,
@@ -447,10 +458,24 @@ class Cache {
   }
   String? _dartSdkBuild;
 
-
   /// The current version of the Flutter engine the flutter tool will download.
   String get engineRevision {
-    _engineRevision ??= getVersionFor('engine');
+    if (_engineRevision != null) {
+      return _engineRevision!;
+    }
+    final String path = _fileSystem.path.join(
+      _rootOverride?.path ?? flutterRoot!,
+      'bin',
+      'cache',
+      'engine-dart-sdk.stamp',
+    );
+    _logger.printBox(path);
+    _logger.printError('@');
+    _logger.printError(path);
+    final File engineStampFile = _fileSystem.file(path);
+    _engineRevision = engineStampFile.existsSync()
+        ? engineStampFile.readAsStringSync().trim()
+        : null;
     if (_engineRevision == null) {
       throwToolExit('Could not determine engine revision.');
     }
