@@ -259,6 +259,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     List<String> options = const <String>[],
     required FlutterProject project,
     required List<GradleHandledError> localGradleErrors,
+    required String gradleExecutablePath,
     int retry = 0,
     VoidCallback? preRunTask,
     VoidCallback? postRunTask,
@@ -309,7 +310,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       "Running Gradle task '$taskName'...",
     );
     final List<String> command = <String>[
-      _gradleUtils.getExecutable(project),
+      gradleExecutablePath,
       ...options, // suppresses gradle output.
       taskName,
     ];
@@ -361,6 +362,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
               preRunTask: preRunTask,
               postRunTask: postRunTask,
               localGradleErrors: localGradleErrors,
+              gradleExecutablePath: gradleExecutablePath,
               retry: retry,
               project: project,
               maxRetries: maxRetries,
@@ -427,6 +429,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
         project: project, buildInfo: androidBuildInfo.buildInfo);
     
     final List<String> options = <String>[];
+
+    final String gradleExecutablePath = _gradleUtils.getExecutable(project);
 
     // All automatically created files should exist.
     if (configOnly) {
@@ -536,7 +540,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
         options: options,
         project: project,
         maxRetries: maxRetries,
-        localGradleErrors: localGradleErrors
+        localGradleErrors: localGradleErrors,
+        gradleExecutablePath: gradleExecutablePath,
     );
 
     if (exitCode != 0) {
@@ -809,6 +814,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
           options: const <String>['-q'],
           project: project,
           localGradleErrors: gradleErrors,
+          gradleExecutablePath: _gradleUtils.getExecutable(project),
         outputParser: (String line) {
           if (_kBuildVariantRegex.firstMatch(line) case final RegExpMatch match) {
             results.add(match.namedGroup(_kBuildVariantRegexGroupName)!);
@@ -857,6 +863,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         options: <String>['-q', '-PoutputPath=$outputPath'],
         project: project,
         localGradleErrors: gradleErrors,
+        gradleExecutablePath: _gradleUtils.getExecutable(project),
       );
     } on Error catch(error) {
       _logger.printError(error.toString());
