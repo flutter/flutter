@@ -748,4 +748,132 @@ TEST(FlEngineTest, RemoveViewEngineError) {
   g_main_loop_run(loop);
 }
 
+TEST(FlEngineTest, SendKeyEvent) {
+  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
+
+  g_autoptr(FlEngine) engine = make_mock_engine();
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  bool called;
+  embedder_api->SendKeyEvent = MOCK_ENGINE_PROC(
+      SendKeyEvent,
+      ([&called](auto engine, const FlutterKeyEvent* event,
+                 FlutterKeyEventCallback callback, void* user_data) {
+        called = true;
+        EXPECT_EQ(event->timestamp, 1234);
+        EXPECT_EQ(event->type, kFlutterKeyEventTypeUp);
+        EXPECT_EQ(event->physical, static_cast<uint64_t>(42));
+        EXPECT_EQ(event->logical, static_cast<uint64_t>(123));
+        EXPECT_TRUE(event->synthesized);
+        EXPECT_EQ(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
+        callback(TRUE, user_data);
+        return kSuccess;
+      }));
+
+  FlutterKeyEvent event = {.struct_size = sizeof(FlutterKeyEvent),
+                           .timestamp = 1234,
+                           .type = kFlutterKeyEventTypeUp,
+                           .physical = 42,
+                           .logical = 123,
+                           .character = nullptr,
+                           .synthesized = true,
+                           .device_type = kFlutterKeyEventDeviceTypeKeyboard};
+  fl_engine_send_key_event(
+      engine, &event, nullptr,
+      [](GObject* object, GAsyncResult* result, gpointer user_data) {
+        gboolean handled;
+        g_autoptr(GError) error = nullptr;
+        EXPECT_TRUE(fl_engine_send_key_event_finish(FL_ENGINE(object), result,
+                                                    &handled, &error));
+        EXPECT_EQ(error, nullptr);
+        EXPECT_TRUE(handled);
+        g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+      },
+      loop);
+
+  g_main_loop_run(loop);
+  EXPECT_TRUE(called);
+}
+
+TEST(FlEngineTest, SendKeyEventNotHandled) {
+  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
+
+  g_autoptr(FlEngine) engine = make_mock_engine();
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  bool called;
+  embedder_api->SendKeyEvent = MOCK_ENGINE_PROC(
+      SendKeyEvent,
+      ([&called](auto engine, const FlutterKeyEvent* event,
+                 FlutterKeyEventCallback callback, void* user_data) {
+        called = true;
+        callback(FALSE, user_data);
+        return kSuccess;
+      }));
+
+  FlutterKeyEvent event = {.struct_size = sizeof(FlutterKeyEvent),
+                           .timestamp = 1234,
+                           .type = kFlutterKeyEventTypeUp,
+                           .physical = 42,
+                           .logical = 123,
+                           .character = nullptr,
+                           .synthesized = true,
+                           .device_type = kFlutterKeyEventDeviceTypeKeyboard};
+  fl_engine_send_key_event(
+      engine, &event, nullptr,
+      [](GObject* object, GAsyncResult* result, gpointer user_data) {
+        gboolean handled;
+        g_autoptr(GError) error = nullptr;
+        EXPECT_TRUE(fl_engine_send_key_event_finish(FL_ENGINE(object), result,
+                                                    &handled, &error));
+        EXPECT_EQ(error, nullptr);
+        EXPECT_FALSE(handled);
+        g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+      },
+      loop);
+
+  g_main_loop_run(loop);
+  EXPECT_TRUE(called);
+}
+
+TEST(FlEngineTest, SendKeyEventError) {
+  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
+
+  g_autoptr(FlEngine) engine = make_mock_engine();
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  bool called;
+  embedder_api->SendKeyEvent = MOCK_ENGINE_PROC(
+      SendKeyEvent,
+      ([&called](auto engine, const FlutterKeyEvent* event,
+                 FlutterKeyEventCallback callback, void* user_data) {
+        called = true;
+        return kInvalidArguments;
+      }));
+
+  FlutterKeyEvent event = {.struct_size = sizeof(FlutterKeyEvent),
+                           .timestamp = 1234,
+                           .type = kFlutterKeyEventTypeUp,
+                           .physical = 42,
+                           .logical = 123,
+                           .character = nullptr,
+                           .synthesized = true,
+                           .device_type = kFlutterKeyEventDeviceTypeKeyboard};
+  fl_engine_send_key_event(
+      engine, &event, nullptr,
+      [](GObject* object, GAsyncResult* result, gpointer user_data) {
+        gboolean handled;
+        g_autoptr(GError) error = nullptr;
+        EXPECT_FALSE(fl_engine_send_key_event_finish(FL_ENGINE(object), result,
+                                                     &handled, &error));
+        EXPECT_NE(error, nullptr);
+        EXPECT_STREQ(error->message, "Failed to send key event");
+        g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+      },
+      loop);
+
+  g_main_loop_run(loop);
+  EXPECT_TRUE(called);
+}
+
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)
