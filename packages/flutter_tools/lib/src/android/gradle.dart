@@ -427,7 +427,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     // from the local.properties file.
     updateLocalProperties(
         project: project, buildInfo: androidBuildInfo.buildInfo);
-    
+
     final List<String> options = <String>[];
 
     final String gradleExecutablePath = _gradleUtils.getExecutable(project);
@@ -821,7 +821,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
           }
         }
       );
-    } on Error catch(error) {
+    } on Error catch (error) {
       _logger.printError(error.toString());
     }
 
@@ -865,7 +865,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         localGradleErrors: gradleErrors,
         gradleExecutablePath: _gradleUtils.getExecutable(project),
       );
-    } on Error catch(error) {
+    } on Error catch (error) {
       _logger.printError(error.toString());
     }
 
