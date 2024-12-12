@@ -95,7 +95,7 @@ TEST(ReactorGLES, UntrackedHandle) {
   EXPECT_TRUE(reactor->React());
 }
 
-TEST(ReactorGLES, DISABLED_NameUntrackedHandle) {
+TEST(ReactorGLES, NameUntrackedHandle) {
   auto mock_gles_impl = std::make_unique<MockGLESImpl>();
 
   EXPECT_CALL(*mock_gles_impl, GenTextures(1, _))
@@ -108,6 +108,11 @@ TEST(ReactorGLES, DISABLED_NameUntrackedHandle) {
       MockGLES::Init(std::move(mock_gles_impl));
   ProcTableGLES::Resolver resolver = kMockResolverGLES;
   auto proc_table = std::make_unique<ProcTableGLES>(resolver);
+
+  if (!proc_table->SupportsDebugLabels()) {
+    GTEST_SKIP() << "This device doesn't support labelling.";
+  }
+
   auto worker = std::make_shared<TestWorker>();
   auto reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
   reactor->AddWorker(worker);
