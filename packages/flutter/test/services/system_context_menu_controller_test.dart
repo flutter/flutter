@@ -263,7 +263,6 @@ void main() {
       connection.close();
     });
 
-    const String searchTitle = 'Special search';
     final List<Map<String, double>> targetRects = <Map<String, double>>[];
     final List<List<SystemContextMenuItemData>> itemsReceived = <List<SystemContextMenuItemData>>[];
     int hideCount = 0;
@@ -304,7 +303,7 @@ void main() {
         const SystemContextMenuItemDataPaste(),
         const SystemContextMenuItemDataSelectAll(),
         const SystemContextMenuItemDataSearchWeb(
-          title: searchTitle,
+          title: 'Special Search',
         ),
         // TODO(justinmc): Support the "custom" item type.
         // https://github.com/flutter/flutter/issues/103163
