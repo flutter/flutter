@@ -1095,17 +1095,51 @@ void fl_engine_send_pointer_pan_zoom_event(FlEngine* self,
   self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1);
 }
 
+static void send_key_event_cb(bool handled, void* user_data) {
+  g_autoptr(GTask) task = G_TASK(user_data);
+  gboolean* return_value = g_new0(gboolean, 1);
+  *return_value = handled;
+  g_task_return_pointer(task, return_value, g_free);
+}
+
 void fl_engine_send_key_event(FlEngine* self,
                               const FlutterKeyEvent* event,
-                              FlutterKeyEventCallback callback,
-                              void* user_data) {
+                              GCancellable* cancellable,
+                              GAsyncReadyCallback callback,
+                              gpointer user_data) {
   g_return_if_fail(FL_IS_ENGINE(self));
 
+  g_autoptr(GTask) task = g_task_new(self, cancellable, callback, user_data);
+
   if (self->engine == nullptr) {
+    g_task_return_new_error(task, fl_engine_error_quark(),
+                            FL_ENGINE_ERROR_FAILED, "No engine");
     return;
   }
 
-  self->embedder_api.SendKeyEvent(self->engine, event, callback, user_data);
+  if (self->embedder_api.SendKeyEvent(self->engine, event, send_key_event_cb,
+                                      g_object_ref(task)) != kSuccess) {
+    g_task_return_new_error(task, fl_engine_error_quark(),
+                            FL_ENGINE_ERROR_FAILED, "Failed to send key event");
+    g_object_unref(task);
+  }
+}
+
+gboolean fl_engine_send_key_event_finish(FlEngine* self,
+                                         GAsyncResult* result,
+                                         gboolean* handled,
+                                         GError** error) {
+  g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
+  g_return_val_if_fail(g_task_is_valid(result, self), FALSE);
+
+  g_autofree gboolean* return_value =
+      static_cast<gboolean*>(g_task_propagate_pointer(G_TASK(result), error));
+  if (return_value == nullptr) {
+    return FALSE;
+  }
+
+  *handled = *return_value;
+  return TRUE;
 }
 
 void fl_engine_dispatch_semantics_action(FlEngine* self,

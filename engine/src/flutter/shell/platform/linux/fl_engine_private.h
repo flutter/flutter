@@ -369,11 +369,37 @@ void fl_engine_send_pointer_pan_zoom_event(FlEngine* engine,
 
 /**
  * fl_engine_send_key_event:
+ * @engine: an #FlEngine.
+ * @event: key event to send.
+ * @cancellable: (allow-none): a #GCancellable or %NULL.
+ * @callback: (scope async): a #GAsyncReadyCallback to call when the request is
+ * satisfied.
+ * @user_data: (closure): user data to pass to @callback.
+ *
+ * Send a key event to the engine.
  */
 void fl_engine_send_key_event(FlEngine* engine,
                               const FlutterKeyEvent* event,
-                              FlutterKeyEventCallback callback,
-                              void* user_data);
+                              GCancellable* cancellable,
+                              GAsyncReadyCallback callback,
+                              gpointer user_data);
+
+/**
+ * fl_engine_send_key_event_finish:
+ * @engine: an #FlEngine.
+ * @result: a #GAsyncResult.
+ * @handled: location to write if this event was handled by the engine.
+ * @error: (allow-none): #GError location to store the error occurring, or %NULL
+ * to ignore.
+ *
+ * Completes request started with fl_engine_send_key_event().
+ *
+ * Returns: %TRUE on success.
+ */
+gboolean fl_engine_send_key_event_finish(FlEngine* engine,
+                                         GAsyncResult* result,
+                                         gboolean* handled,
+                                         GError** error);
 
 /**
  * fl_engine_dispatch_semantics_action:

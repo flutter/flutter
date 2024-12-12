@@ -9,6 +9,7 @@
 #include <memory>
 #include <string>
 
+#include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_key_channel_responder.h"
 #include "flutter/shell/platform/linux/fl_key_embedder_responder.h"
 #include "flutter/shell/platform/linux/fl_keyboard_layout.h"
@@ -479,8 +480,35 @@ FlKeyboardManager* fl_keyboard_manager_new(
         } else {
           g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
           if (engine != nullptr) {
-            fl_engine_send_key_event(engine, event, callback,
-                                     callback_user_data);
+            typedef struct {
+              FlutterKeyEventCallback callback;
+              void* callback_user_data;
+            } SendKeyEventData;
+            SendKeyEventData* data = g_new0(SendKeyEventData, 1);
+            data->callback = callback;
+            data->callback_user_data = callback_user_data;
+            fl_engine_send_key_event(
+                engine, event, self->cancellable,
+                [](GObject* object, GAsyncResult* result, gpointer user_data) {
+                  g_autofree SendKeyEventData* data =
+                      static_cast<SendKeyEventData*>(user_data);
+                  gboolean handled = FALSE;
+                  g_autoptr(GError) error = nullptr;
+                  if (!fl_engine_send_key_event_finish(
+                          FL_ENGINE(object), result, &handled, &error)) {
+                    if (g_error_matches(error, G_IO_ERROR,
+                                        G_IO_ERROR_CANCELLED)) {
+                      return;
+                    }
+
+                    g_warning("Failed to send key event: %s", error->message);
+                  }
+
+                  if (data->callback != nullptr) {
+                    data->callback(handled, data->callback_user_data);
+                  }
+                },
+                data);
           }
         }
       },
