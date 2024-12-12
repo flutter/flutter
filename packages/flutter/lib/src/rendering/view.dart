@@ -366,6 +366,18 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     }
   }
 
+  @override
+  void scheduleInitialSemantics() {
+    super.scheduleInitialSemantics();
+    _view.setSemanticsTreeEnabled(true);
+  }
+
+  @override
+  void clearSemantics() {
+    _view.setSemanticsTreeEnabled(false);
+    super.clearSemantics();
+  }
+
   /// Sends the provided [ui.SemanticsUpdate] to the [ui.FlutterView] associated with
   /// this [RenderView].
   ///
@@ -374,6 +386,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void updateSemantics(ui.SemanticsUpdate update) {
     _view.updateSemantics(update);
   }
+
 
   void _updateSystemChrome() {
     // Take overlay style from the place where a system status bar and system
