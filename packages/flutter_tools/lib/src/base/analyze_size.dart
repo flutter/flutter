@@ -149,7 +149,7 @@ class SizeAnalyzer {
     final Map<List<String>, int> pathsToSize = <List<String>, int>{};
 
     for (final ArchiveFile archiveFile in archive.files) {
-      final InputStreamBase? rawContent = archiveFile.rawContent;
+      final FileContent? rawContent = archiveFile.rawContent;
       if (rawContent != null) {
         pathsToSize[_fileSystem.path.split(archiveFile.name)] = rawContent.length;
       }
