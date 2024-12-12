@@ -30,8 +30,8 @@ TEST_F(ColorFilterLayerTest, PaintingEmptyLayerDies) {
   auto layer = std::make_shared<ColorFilterLayer>(nullptr);
 
   layer->Preroll(preroll_context());
-  EXPECT_EQ(layer->paint_bounds(), kEmptyRect);
-  EXPECT_EQ(layer->child_paint_bounds(), kEmptyRect);
+  EXPECT_EQ(layer->paint_bounds(), DlRect());
+  EXPECT_EQ(layer->child_paint_bounds(), DlRect());
   EXPECT_FALSE(layer->needs_painting(paint_context()));
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
@@ -39,24 +39,24 @@ TEST_F(ColorFilterLayerTest, PaintingEmptyLayerDies) {
 }
 
 TEST_F(ColorFilterLayerTest, PaintBeforePrerollDies) {
-  const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
-  const SkPath child_path = SkPath().addRect(child_bounds);
+  const DlRect child_bounds = DlRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
+  const DlPath child_path = DlPath::MakeRect(child_bounds);
   auto mock_layer = std::make_shared<MockLayer>(child_path);
 
   auto layer = std::make_shared<ColorFilterLayer>(nullptr);
   layer->Add(mock_layer);
 
-  EXPECT_EQ(layer->paint_bounds(), kEmptyRect);
-  EXPECT_EQ(layer->child_paint_bounds(), kEmptyRect);
+  EXPECT_EQ(layer->paint_bounds(), DlRect());
+  EXPECT_EQ(layer->child_paint_bounds(), DlRect());
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
                             "needs_painting\\(context\\)");
 }
 #endif
 
 TEST_F(ColorFilterLayerTest, EmptyFilter) {
-  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
-  const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
-  const SkPath child_path = SkPath().addRect(child_bounds);
+  const DlMatrix initial_transform = DlMatrix::MakeTranslation({0.5f, 1.0f});
+  const DlRect child_bounds = DlRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
+  const DlPath child_path = DlPath::MakeRect(child_bounds);
   const DlPaint child_paint = DlPaint(DlColor::kYellow());
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<ColorFilterLayer>(nullptr);
@@ -84,9 +84,9 @@ TEST_F(ColorFilterLayerTest, EmptyFilter) {
 }
 
 TEST_F(ColorFilterLayerTest, SimpleFilter) {
-  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
-  const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
-  const SkPath child_path = SkPath().addRect(child_bounds);
+  const DlMatrix initial_transform = DlMatrix::MakeTranslation({0.5f, 1.0f});
+  const DlRect child_bounds = DlRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
+  const DlPath child_path = DlPath::MakeRect(child_bounds);
   const DlPaint child_paint = DlPaint(DlColor::kYellow());
 
   auto dl_color_filter = DlColorFilter::MakeLinearToSrgbGamma();
@@ -105,7 +105,7 @@ TEST_F(ColorFilterLayerTest, SimpleFilter) {
   /* ColorFilterLayer::Paint() */ {
     DlPaint dl_paint;
     dl_paint.setColorFilter(dl_color_filter.get());
-    expected_builder.SaveLayer(&child_bounds, &dl_paint);
+    expected_builder.SaveLayer(child_bounds, &dl_paint);
     {
       /* MockLayer::Paint() */ {
         expected_builder.DrawPath(child_path, DlPaint(DlColor::kYellow()));
@@ -120,11 +120,10 @@ TEST_F(ColorFilterLayerTest, SimpleFilter) {
 }
 
 TEST_F(ColorFilterLayerTest, MultipleChildren) {
-  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
-  const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 2.5f, 3.5f);
-  const SkPath child_path1 = SkPath().addRect(child_bounds);
-  const SkPath child_path2 =
-      SkPath().addRect(child_bounds.makeOffset(3.0f, 0.0f));
+  const DlMatrix initial_transform = DlMatrix::MakeTranslation({0.5f, 1.0f});
+  const DlRect child_bounds = DlRect::MakeLTRB(5.0f, 6.0f, 2.5f, 3.5f);
+  const DlPath child_path1 = DlPath::MakeRect(child_bounds);
+  const DlPath child_path2 = DlPath::MakeRect(child_bounds.Shift(3.0f, 0.0f));
   const DlPaint child_paint1 = DlPaint(DlColor::kYellow());
   const DlPaint child_paint2 = DlPaint(DlColor::kCyan());
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
@@ -134,12 +133,12 @@ TEST_F(ColorFilterLayerTest, MultipleChildren) {
   layer->Add(mock_layer1);
   layer->Add(mock_layer2);
 
-  SkRect children_bounds = child_path1.getBounds();
-  children_bounds.join(child_path2.getBounds());
+  DlRect children_bounds =
+      child_path1.GetBounds().Union(child_path2.GetBounds());
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
   layer->Preroll(preroll_context());
-  EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.getBounds());
-  EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.getBounds());
+  EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.GetBounds());
+  EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.GetBounds());
   EXPECT_EQ(layer->paint_bounds(), children_bounds);
   EXPECT_EQ(layer->child_paint_bounds(), children_bounds);
   EXPECT_TRUE(mock_layer1->needs_painting(paint_context()));
@@ -152,7 +151,7 @@ TEST_F(ColorFilterLayerTest, MultipleChildren) {
   /* ColorFilterLayer::Paint() */ {
     DlPaint dl_paint;
     dl_paint.setColorFilter(dl_color_filter.get());
-    expected_builder.SaveLayer(&children_bounds, &dl_paint);
+    expected_builder.SaveLayer(children_bounds, &dl_paint);
     {
       /* MockLayer::Paint() */ {
         expected_builder.DrawPath(child_path1, DlPaint(DlColor::kYellow()));
@@ -170,11 +169,10 @@ TEST_F(ColorFilterLayerTest, MultipleChildren) {
 }
 
 TEST_F(ColorFilterLayerTest, Nested) {
-  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
-  const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 2.5f, 3.5f);
-  const SkPath child_path1 = SkPath().addRect(child_bounds);
-  const SkPath child_path2 =
-      SkPath().addRect(child_bounds.makeOffset(3.0f, 0.0f));
+  const DlMatrix initial_transform = DlMatrix::MakeTranslation({0.5f, 1.0f});
+  const DlRect child_bounds = DlRect::MakeLTRB(5.0f, 6.0f, 2.5f, 3.5f);
+  const DlPath child_path1 = DlPath::MakeRect(child_bounds);
+  const DlPath child_path2 = DlPath::MakeRect(child_bounds.Shift(3.0f, 0.0f));
   const DlPaint child_paint1 = DlPaint(DlColor::kYellow());
   const DlPaint child_paint2 = DlPaint(DlColor::kCyan());
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
@@ -187,12 +185,12 @@ TEST_F(ColorFilterLayerTest, Nested) {
   layer1->Add(mock_layer1);
   layer1->Add(layer2);
 
-  SkRect children_bounds = child_path1.getBounds();
-  children_bounds.join(child_path2.getBounds());
+  const DlRect children_bounds =
+      child_path1.GetBounds().Union(child_path2.GetBounds());
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
   layer1->Preroll(preroll_context());
-  EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.getBounds());
-  EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.getBounds());
+  EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.GetBounds());
+  EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.GetBounds());
   EXPECT_EQ(layer1->paint_bounds(), children_bounds);
   EXPECT_EQ(layer1->child_paint_bounds(), children_bounds);
   EXPECT_EQ(layer2->paint_bounds(), mock_layer2->paint_bounds());
@@ -208,7 +206,7 @@ TEST_F(ColorFilterLayerTest, Nested) {
   /* ColorFilterLayer::Paint() */ {
     DlPaint dl_paint;
     dl_paint.setColorFilter(dl_color_filter.get());
-    expected_builder.SaveLayer(&children_bounds, &dl_paint);
+    expected_builder.SaveLayer(children_bounds, &dl_paint);
     {
       /* MockLayer::Paint() */ {
         expected_builder.DrawPath(child_path1, DlPaint(DlColor::kYellow()));
@@ -217,7 +215,7 @@ TEST_F(ColorFilterLayerTest, Nested) {
         DlPaint child_dl_paint;
         child_dl_paint.setColor(DlColor::kBlack());
         child_dl_paint.setColorFilter(dl_color_filter.get());
-        expected_builder.SaveLayer(&child_path2.getBounds(), &child_dl_paint);
+        expected_builder.SaveLayer(child_path2.GetBounds(), &child_dl_paint);
 
         /* MockLayer::Paint() */ {
           expected_builder.DrawPath(child_path2, DlPaint(DlColor::kCyan()));
@@ -235,7 +233,7 @@ TEST_F(ColorFilterLayerTest, Nested) {
 }
 
 TEST_F(ColorFilterLayerTest, Readback) {
-  auto initial_transform = SkMatrix();
+  DlMatrix initial_transform;
 
   // ColorFilterLayer does not read from surface
   auto layer = std::make_shared<ColorFilterLayer>(
@@ -246,7 +244,7 @@ TEST_F(ColorFilterLayerTest, Readback) {
   EXPECT_FALSE(preroll_context()->surface_needs_readback);
 
   // ColorFilterLayer blocks child with readback
-  auto mock_layer = std::make_shared<MockLayer>(SkPath(), DlPaint());
+  auto mock_layer = std::make_shared<MockLayer>(DlPath(), DlPaint());
   mock_layer->set_fake_reads_surface(true);
   layer->Add(mock_layer);
   preroll_context()->surface_needs_readback = false;
@@ -256,15 +254,15 @@ TEST_F(ColorFilterLayerTest, Readback) {
 
 TEST_F(ColorFilterLayerTest, CacheChild) {
   auto layer_filter = DlColorFilter::MakeSrgbToLinearGamma();
-  auto initial_transform = SkMatrix::Translate(50.0, 25.5);
-  auto other_transform = SkMatrix::Scale(1.0, 2.0);
-  const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
+  auto initial_transform = DlMatrix::MakeTranslation({50.0f, 25.5f});
+  auto other_transform = DlMatrix::MakeScale({1.0f, 2.0f, 1.0f});
+  const DlPath child_path = DlPath::MakeRect(DlRect::MakeWH(5.0f, 5.0f));
   DlPaint paint = DlPaint();
   auto mock_layer = std::make_shared<MockLayer>(child_path);
   auto layer = std::make_shared<ColorFilterLayer>(layer_filter);
   layer->Add(mock_layer);
 
-  SkMatrix cache_ctm = initial_transform;
+  DlMatrix cache_ctm = initial_transform;
   DisplayListBuilder cache_canvas;
   cache_canvas.Transform(cache_ctm);
   DisplayListBuilder other_canvas;
@@ -297,10 +295,10 @@ TEST_F(ColorFilterLayerTest, CacheChild) {
 
 TEST_F(ColorFilterLayerTest, CacheChildren) {
   auto layer_filter = DlColorFilter::MakeSrgbToLinearGamma();
-  auto initial_transform = SkMatrix::Translate(50.0, 25.5);
-  auto other_transform = SkMatrix::Scale(1.0, 2.0);
-  const SkPath child_path1 = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
-  const SkPath child_path2 = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
+  auto initial_transform = DlMatrix::MakeTranslation({50.0f, 25.5f});
+  auto other_transform = DlMatrix::MakeScale({1.0f, 2.0f, 1.0f});
+  const DlPath child_path1 = DlPath::MakeRect(DlRect::MakeWH(5.0f, 5.0f));
+  const DlPath child_path2 = DlPath::MakeRect(DlRect::MakeWH(5.0f, 5.0f));
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1);
   auto mock_layer2 = std::make_shared<MockLayer>(child_path2);
   auto layer = std::make_shared<ColorFilterLayer>(layer_filter);
@@ -308,7 +306,7 @@ TEST_F(ColorFilterLayerTest, CacheChildren) {
   layer->Add(mock_layer2);
   DlPaint paint = DlPaint();
 
-  SkMatrix cache_ctm = initial_transform;
+  DlMatrix cache_ctm = initial_transform;
   DisplayListBuilder cache_canvas;
   cache_canvas.Transform(cache_ctm);
   DisplayListBuilder other_canvas;
@@ -343,10 +341,10 @@ TEST_F(ColorFilterLayerTest, CacheChildren) {
 
 TEST_F(ColorFilterLayerTest, CacheColorFilterLayerSelf) {
   auto layer_filter = DlColorFilter::MakeSrgbToLinearGamma();
-  auto initial_transform = SkMatrix::Translate(50.0, 25.5);
-  auto other_transform = SkMatrix::Scale(1.0, 2.0);
-  const SkPath child_path1 = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
-  const SkPath child_path2 = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
+  auto initial_transform = DlMatrix::MakeTranslation({50.0, 25.5});
+  auto other_transform = DlMatrix::MakeScale({1.0, 2.0, 1.0f});
+  const DlPath child_path1 = DlPath::MakeRect(DlRect::MakeWH(5.0f, 5.0f));
+  const DlPath child_path2 = DlPath::MakeRect(DlRect::MakeWH(5.0f, 5.0f));
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1);
   auto mock_layer2 = std::make_shared<MockLayer>(child_path2);
   auto layer = std::make_shared<ColorFilterLayer>(layer_filter);
@@ -354,7 +352,7 @@ TEST_F(ColorFilterLayerTest, CacheColorFilterLayerSelf) {
   layer->Add(mock_layer2);
   DlPaint paint = DlPaint();
 
-  SkMatrix cache_ctm = initial_transform;
+  DlMatrix cache_ctm = initial_transform;
   DisplayListBuilder cache_canvas;
   cache_canvas.Transform(cache_ctm);
   DisplayListBuilder other_canvas;
@@ -409,8 +407,8 @@ TEST_F(ColorFilterLayerTest, OpacityInheritance) {
   };
   // clang-format on
   auto layer_filter = DlColorFilter::MakeMatrix(matrix);
-  auto initial_transform = SkMatrix::Translate(50.0, 25.5);
-  const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
+  auto initial_transform = DlMatrix::MakeTranslation({50.0, 25.5});
+  const DlPath child_path = DlPath::MakeRect(DlRect::MakeWH(5.0f, 5.0f));
   auto mock_layer = std::make_shared<MockLayer>(child_path);
   auto color_filter_layer =
       std::make_shared<ColorFilterLayer>(DlColorFilter::MakeMatrix(matrix));
@@ -425,10 +423,10 @@ TEST_F(ColorFilterLayerTest, OpacityInheritance) {
             LayerStateStack::kCallerCanApplyOpacity);
 
   int opacity_alpha = 0x7F;
-  SkPoint offset = SkPoint::Make(10, 10);
+  DlPoint offset = DlPoint(10, 10);
   auto opacity_layer = std::make_shared<OpacityLayer>(opacity_alpha, offset);
   opacity_layer->Add(color_filter_layer);
-  preroll_context()->state_stack.set_preroll_delegate(SkMatrix::I());
+  preroll_context()->state_stack.set_preroll_delegate(DlMatrix());
   opacity_layer->Preroll(context);
   EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
 
@@ -436,12 +434,12 @@ TEST_F(ColorFilterLayerTest, OpacityInheritance) {
   /* OpacityLayer::Paint() */ {
     expected_builder.Save();
     {
-      expected_builder.Translate(offset.fX, offset.fY);
+      expected_builder.Translate(offset.x, offset.y);
       /* ColorFilterLayer::Paint() */ {
         DlPaint dl_paint;
         dl_paint.setColor(DlColor(opacity_alpha << 24));
         dl_paint.setColorFilter(layer_filter);
-        expected_builder.SaveLayer(&child_path.getBounds(), &dl_paint);
+        expected_builder.SaveLayer(child_path.GetBounds(), &dl_paint);
         /* MockLayer::Paint() */ {
           expected_builder.DrawPath(child_path, DlPaint(DlColor(0xFF000000)));
         }

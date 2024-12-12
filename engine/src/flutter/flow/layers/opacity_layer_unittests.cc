@@ -29,13 +29,13 @@ using OpacityLayerTest = LayerTest;
 
 #ifndef NDEBUG
 TEST_F(OpacityLayerTest, PaintingEmptyLayerDies) {
-  auto mock_layer = std::make_shared<MockLayer>(SkPath());
+  auto mock_layer = std::make_shared<MockLayer>(DlPath());
   auto layer =
-      std::make_shared<OpacityLayer>(SK_AlphaOPAQUE, SkPoint::Make(0.0f, 0.0f));
+      std::make_shared<OpacityLayer>(DlColor::toAlpha(1.0f), DlPoint());
   layer->Add(mock_layer);
 
   layer->Preroll(preroll_context());
-  EXPECT_EQ(mock_layer->paint_bounds(), SkPath().getBounds());
+  EXPECT_EQ(mock_layer->paint_bounds(), DlPath().GetBounds());
   EXPECT_EQ(layer->paint_bounds(), mock_layer->paint_bounds());
   EXPECT_EQ(layer->child_paint_bounds(), mock_layer->paint_bounds());
   EXPECT_FALSE(mock_layer->needs_painting(paint_context()));
@@ -46,11 +46,10 @@ TEST_F(OpacityLayerTest, PaintingEmptyLayerDies) {
 }
 
 TEST_F(OpacityLayerTest, PaintBeforePrerollDies) {
-  SkPath child_path;
-  child_path.addRect(5.0f, 6.0f, 20.5f, 21.5f);
+  const DlPath child_path = DlPath::MakeRectLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   auto mock_layer = std::make_shared<MockLayer>(child_path);
   auto layer =
-      std::make_shared<OpacityLayer>(SK_AlphaOPAQUE, SkPoint::Make(0.0f, 0.0f));
+      std::make_shared<OpacityLayer>(DlColor::toAlpha(1.0f), DlPoint());
   layer->Add(mock_layer);
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
@@ -59,35 +58,34 @@ TEST_F(OpacityLayerTest, PaintBeforePrerollDies) {
 #endif
 
 TEST_F(OpacityLayerTest, TranslateChildren) {
-  SkPath child_path1;
-  child_path1.addRect(10.0f, 10.0f, 20.0f, 20.f);
+  const DlPath child_path1 = DlPath::MakeRectLTRB(10.0f, 10.0f, 20.0f, 20.f);
   DlPaint child_paint1 = DlPaint(DlColor::kMidGrey());
-  auto layer = std::make_shared<OpacityLayer>(0.5, SkPoint::Make(10, 10));
+  auto layer =
+      std::make_shared<OpacityLayer>(DlColor::toAlpha(0.5f), DlPoint(10, 10));
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
   layer->Add(mock_layer1);
 
-  auto initial_transform = SkMatrix::Scale(2.0, 2.0);
+  auto initial_transform = DlMatrix::MakeScale({2.0f, 2.0f, 1.0f});
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
   layer->Preroll(preroll_context());
 
-  SkRect layer_bounds = mock_layer1->paint_bounds();
-  mock_layer1->parent_matrix().mapRect(&layer_bounds);
+  DlRect layer_bounds = mock_layer1->paint_bounds().TransformAndClipBounds(
+      mock_layer1->parent_matrix());
 
-  EXPECT_EQ(layer_bounds, SkRect::MakeXYWH(40, 40, 20, 20));
+  EXPECT_EQ(layer_bounds, DlRect::MakeXYWH(40, 40, 20, 20));
 }
 
 TEST_F(OpacityLayerTest, CacheChild) {
-  const SkAlpha alpha_half = 255 / 2;
-  auto initial_transform = SkMatrix::Translate(50.0, 25.5);
-  auto other_transform = SkMatrix::Scale(1.0, 2.0);
-  const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
+  const uint8_t alpha_half = DlColor::toAlpha(0.5f);
+  auto initial_transform = DlMatrix::MakeTranslation({50.0f, 25.5f});
+  auto other_transform = DlMatrix::MakeScale({1.0f, 2.0f, 1.0f});
+  const DlPath child_path = DlPath::MakeRect(DlRect::MakeWH(5.0f, 5.0f));
   auto mock_layer = std::make_shared<MockLayer>(child_path);
-  auto layer =
-      std::make_shared<OpacityLayer>(alpha_half, SkPoint::Make(0.0f, 0.0f));
+  auto layer = std::make_shared<OpacityLayer>(alpha_half, DlPoint());
   layer->Add(mock_layer);
   DlPaint paint;
 
-  SkMatrix cache_ctm = initial_transform;
+  DlMatrix cache_ctm = initial_transform;
   DisplayListBuilder cache_canvas;
   cache_canvas.Transform(cache_ctm);
   DisplayListBuilder other_canvas;
@@ -123,20 +121,19 @@ TEST_F(OpacityLayerTest, CacheChild) {
 }
 
 TEST_F(OpacityLayerTest, CacheChildren) {
-  const SkAlpha alpha_half = 255 / 2;
-  auto initial_transform = SkMatrix::Translate(50.0, 25.5);
-  auto other_transform = SkMatrix::Scale(1.0, 2.0);
-  const SkPath child_path1 = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
-  const SkPath child_path2 = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
+  const uint8_t alpha_half = DlColor::toAlpha(0.5f);
+  auto initial_transform = DlMatrix::MakeTranslation({50.0f, 25.5f});
+  auto other_transform = DlMatrix::MakeScale({1.0f, 2.0f, 1.0f});
+  const DlPath child_path1 = DlPath::MakeRect(DlRect::MakeWH(5.0f, 5.0f));
+  const DlPath child_path2 = DlPath::MakeRect(DlRect::MakeWH(5.0f, 5.0f));
   DlPaint paint;
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1);
   auto mock_layer2 = std::make_shared<MockLayer>(child_path2);
-  auto layer =
-      std::make_shared<OpacityLayer>(alpha_half, SkPoint::Make(0.0f, 0.0f));
+  auto layer = std::make_shared<OpacityLayer>(alpha_half, DlPoint());
   layer->Add(mock_layer1);
   layer->Add(mock_layer2);
 
-  SkMatrix cache_ctm = initial_transform;
+  DlMatrix cache_ctm = initial_transform;
   DisplayListBuilder cache_canvas;
   cache_canvas.Transform(cache_ctm);
   DisplayListBuilder other_canvas;
@@ -173,9 +170,8 @@ TEST_F(OpacityLayerTest, CacheChildren) {
 
 TEST_F(OpacityLayerTest, ShouldNotCacheChildren) {
   DlPaint paint;
-  auto opacity_layer =
-      std::make_shared<OpacityLayer>(128, SkPoint::Make(20, 20));
-  auto mock_layer = MockLayer::MakeOpacityCompatible(SkPath());
+  auto opacity_layer = std::make_shared<OpacityLayer>(128, DlPoint(20, 20));
+  auto mock_layer = MockLayer::MakeOpacityCompatible(DlPath());
   opacity_layer->Add(mock_layer);
 
   PrerollContext* context = preroll_context();
@@ -204,27 +200,26 @@ TEST_F(OpacityLayerTest, ShouldNotCacheChildren) {
 }
 
 TEST_F(OpacityLayerTest, FullyOpaque) {
-  const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
-  const SkPoint layer_offset = SkPoint::Make(0.5f, 1.5f);
-  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 0.5f);
-  const SkMatrix layer_transform =
-      SkMatrix::Translate(layer_offset.fX, layer_offset.fY);
+  const DlPath child_path = DlPath::MakeRect(DlRect::MakeWH(5.0f, 5.0f));
+  const DlPoint layer_offset = DlPoint(0.5f, 1.5f);
+  const DlMatrix initial_transform = DlMatrix::MakeTranslation({0.5f, 0.5f});
+  const DlMatrix layer_transform = DlMatrix::MakeTranslation(layer_offset);
   const DlPaint child_paint = DlPaint(DlColor::kGreen());
-  const SkRect expected_layer_bounds =
-      layer_transform.mapRect(child_path.getBounds());
+  const DlRect expected_layer_bounds =
+      child_path.GetBounds().TransformAndClipBounds(layer_transform);
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
-  auto layer = std::make_shared<OpacityLayer>(SK_AlphaOPAQUE, layer_offset);
+  auto layer =
+      std::make_shared<OpacityLayer>(DlColor::toAlpha(1.0f), layer_offset);
   layer->Add(mock_layer);
 
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
   layer->Preroll(preroll_context());
-  EXPECT_EQ(mock_layer->paint_bounds(), child_path.getBounds());
+  EXPECT_EQ(mock_layer->paint_bounds(), child_path.GetBounds());
   EXPECT_EQ(layer->paint_bounds(), expected_layer_bounds);
-  EXPECT_EQ(layer->child_paint_bounds(), child_path.getBounds());
+  EXPECT_EQ(layer->child_paint_bounds(), child_path.GetBounds());
   EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
   EXPECT_TRUE(layer->needs_painting(paint_context()));
-  EXPECT_EQ(mock_layer->parent_matrix(),
-            SkMatrix::Concat(initial_transform, layer_transform));
+  EXPECT_EQ(mock_layer->parent_matrix(), initial_transform * layer_transform);
   EXPECT_EQ(mock_layer->parent_mutators(),
             std::vector({Mutator(layer_transform)}));
 
@@ -232,7 +227,7 @@ TEST_F(OpacityLayerTest, FullyOpaque) {
   /* (Opacity)layer::Paint */ {
     expected_builder.Save();
     {
-      expected_builder.Translate(layer_offset.fX, layer_offset.fY);
+      expected_builder.Translate(layer_offset.x, layer_offset.y);
       // Opaque alpha needs no SaveLayer, just recurse into painting mock_layer
       /* mock_layer::Paint */ {
         expected_builder.DrawPath(child_path, child_paint);
@@ -245,41 +240,37 @@ TEST_F(OpacityLayerTest, FullyOpaque) {
 }
 
 TEST_F(OpacityLayerTest, FullyTransparent) {
-  const SkRect child_bounds = SkRect::MakeWH(5.0f, 5.0f);
-  const SkPath child_path = SkPath().addRect(child_bounds);
-  const SkPoint layer_offset = SkPoint::Make(0.5f, 1.5f);
-  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 0.5f);
-  const SkMatrix layer_transform =
-      SkMatrix::Translate(layer_offset.fX, layer_offset.fY);
+  const DlRect child_bounds = DlRect::MakeWH(5.0f, 5.0f);
+  const DlPath child_path = DlPath::MakeRect(child_bounds);
+  const DlPoint layer_offset = DlPoint(0.5f, 1.5f);
+  const DlMatrix initial_transform = DlMatrix::MakeTranslation({0.5f, 0.5f});
+  const DlMatrix layer_transform = DlMatrix::MakeTranslation(layer_offset);
   const DlPaint child_paint = DlPaint(DlColor::kGreen());
-  const SkRect expected_layer_bounds =
-      layer_transform.mapRect(child_path.getBounds());
+  const DlRect expected_layer_bounds =
+      child_path.GetBounds().TransformAndClipBounds(layer_transform);
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
-  auto layer =
-      std::make_shared<OpacityLayer>(SK_AlphaTRANSPARENT, layer_offset);
+  auto layer = std::make_shared<OpacityLayer>(0u, layer_offset);
   layer->Add(mock_layer);
 
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
   layer->Preroll(preroll_context());
-  EXPECT_EQ(mock_layer->paint_bounds(), child_path.getBounds());
+  EXPECT_EQ(mock_layer->paint_bounds(), child_path.GetBounds());
   EXPECT_EQ(layer->paint_bounds(), expected_layer_bounds);
-  EXPECT_EQ(layer->child_paint_bounds(), child_path.getBounds());
+  EXPECT_EQ(layer->child_paint_bounds(), child_path.GetBounds());
   EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
   EXPECT_TRUE(layer->needs_painting(paint_context()));
-  EXPECT_EQ(mock_layer->parent_matrix(),
-            SkMatrix::Concat(initial_transform, layer_transform));
-  EXPECT_EQ(
-      mock_layer->parent_mutators(),
-      std::vector({Mutator(layer_transform), Mutator(SK_AlphaTRANSPARENT)}));
+  EXPECT_EQ(mock_layer->parent_matrix(), initial_transform * layer_transform);
+  EXPECT_EQ(mock_layer->parent_mutators(),
+            std::vector({Mutator(layer_transform), Mutator(0u)}));
 
   DisplayListBuilder expected_builder;
   /* (Opacity)layer::Paint */ {
     expected_builder.Save();
     {
-      expected_builder.Translate(layer_offset.fX, layer_offset.fY);
+      expected_builder.Translate(layer_offset.x, layer_offset.y);
       /* (Opacity)layer::PaintChildren */ {
         DlPaint save_paint(DlPaint().setOpacity(layer->opacity()));
-        expected_builder.SaveLayer(&child_bounds, &save_paint);
+        expected_builder.SaveLayer(child_bounds, &save_paint);
         /* mock_layer::Paint */ {
           expected_builder.DrawPath(child_path, child_paint);
         }
@@ -293,43 +284,40 @@ TEST_F(OpacityLayerTest, FullyTransparent) {
 }
 
 TEST_F(OpacityLayerTest, HalfTransparent) {
-  const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
-  const SkPoint layer_offset = SkPoint::Make(0.5f, 1.5f);
-  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 0.5f);
-  const SkMatrix layer_transform =
-      SkMatrix::Translate(layer_offset.fX, layer_offset.fY);
+  const DlPath child_path = DlPath::MakeRect(DlRect::MakeWH(5.0f, 5.0f));
+  const DlPoint layer_offset = DlPoint(0.5f, 1.5f);
+  const DlMatrix initial_transform = DlMatrix::MakeTranslation({0.5f, 0.5f});
+  const DlMatrix layer_transform = DlMatrix::MakeTranslation(layer_offset);
   const DlPaint child_paint = DlPaint(DlColor::kGreen());
-  const SkRect expected_layer_bounds =
-      layer_transform.mapRect(child_path.getBounds());
-  const SkAlpha alpha_half = 255 / 2;
+  const DlRect expected_layer_bounds =
+      child_path.GetBounds().TransformAndClipBounds(layer_transform);
+  const uint8_t alpha_half = DlColor::toAlpha(0.5f);
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<OpacityLayer>(alpha_half, layer_offset);
   layer->Add(mock_layer);
 
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
   layer->Preroll(preroll_context());
-  EXPECT_EQ(mock_layer->paint_bounds(), child_path.getBounds());
+  EXPECT_EQ(mock_layer->paint_bounds(), child_path.GetBounds());
   EXPECT_EQ(layer->paint_bounds(), expected_layer_bounds);
-  EXPECT_EQ(layer->child_paint_bounds(), child_path.getBounds());
+  EXPECT_EQ(layer->child_paint_bounds(), child_path.GetBounds());
   EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
   EXPECT_TRUE(layer->needs_painting(paint_context()));
-  EXPECT_EQ(mock_layer->parent_matrix(),
-            SkMatrix::Concat(initial_transform, layer_transform));
+  EXPECT_EQ(mock_layer->parent_matrix(), initial_transform * layer_transform);
   EXPECT_EQ(mock_layer->parent_mutators(),
             std::vector({Mutator(layer_transform), Mutator(alpha_half)}));
 
-  SkRect opacity_bounds;
-  expected_layer_bounds.makeOffset(-layer_offset.fX, -layer_offset.fY)
-      .roundOut(&opacity_bounds);
+  DlRect opacity_bounds =
+      DlRect::RoundOut(expected_layer_bounds.Shift(-layer_offset));
   DlPaint save_paint = DlPaint().setAlpha(alpha_half);
   DlPaint child_dl_paint = DlPaint(DlColor::kGreen());
 
   auto expected_builder = DisplayListBuilder();
   /* (Opacity)layer::Paint */ {
     expected_builder.Save();
-    expected_builder.Translate(layer_offset.fX, layer_offset.fY);
+    expected_builder.Translate(layer_offset.x, layer_offset.y);
     /* (Opacity)layer::PaintChildren */ {
-      expected_builder.SaveLayer(&opacity_bounds, &save_paint);
+      expected_builder.SaveLayer(opacity_bounds, &save_paint);
       /* mock_layer::Paint */ {
         expected_builder.DrawPath(child_path, child_dl_paint);
       }
@@ -344,21 +332,19 @@ TEST_F(OpacityLayerTest, HalfTransparent) {
 }
 
 TEST_F(OpacityLayerTest, Nested) {
-  const SkPath child1_path = SkPath().addRect(SkRect::MakeWH(5.0f, 6.0f));
-  const SkPath child2_path = SkPath().addRect(SkRect::MakeWH(2.0f, 7.0f));
-  const SkPath child3_path = SkPath().addRect(SkRect::MakeWH(6.0f, 6.0f));
-  const SkPoint layer1_offset = SkPoint::Make(0.5f, 1.5f);
-  const SkPoint layer2_offset = SkPoint::Make(2.5f, 0.5f);
-  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 0.5f);
-  const SkMatrix layer1_transform =
-      SkMatrix::Translate(layer1_offset.fX, layer1_offset.fY);
-  const SkMatrix layer2_transform =
-      SkMatrix::Translate(layer2_offset.fX, layer2_offset.fY);
+  const DlPath child1_path = DlPath::MakeRect(DlRect::MakeWH(5.0f, 6.0f));
+  const DlPath child2_path = DlPath::MakeRect(DlRect::MakeWH(2.0f, 7.0f));
+  const DlPath child3_path = DlPath::MakeRect(DlRect::MakeWH(6.0f, 6.0f));
+  const DlPoint layer1_offset = DlPoint(0.5f, 1.5f);
+  const DlPoint layer2_offset = DlPoint(2.5f, 0.5f);
+  const DlMatrix initial_transform = DlMatrix::MakeTranslation({0.5f, 0.5f});
+  const DlMatrix layer1_transform = DlMatrix::MakeTranslation(layer1_offset);
+  const DlMatrix layer2_transform = DlMatrix::MakeTranslation(layer2_offset);
   const DlPaint child1_paint = DlPaint(DlColor::kRed());
   const DlPaint child2_paint = DlPaint(DlColor::kBlue());
   const DlPaint child3_paint = DlPaint(DlColor::kGreen());
-  const SkAlpha alpha1 = 155;
-  const SkAlpha alpha2 = 224;
+  const uint8_t alpha1 = 155u;
+  const uint8_t alpha2 = 224u;
   auto mock_layer1 = std::make_shared<MockLayer>(child1_path, child1_paint);
   auto mock_layer2 = std::make_shared<MockLayer>(child2_path, child2_paint);
   auto mock_layer3 = std::make_shared<MockLayer>(child3_path, child3_paint);
@@ -369,67 +355,61 @@ TEST_F(OpacityLayerTest, Nested) {
   layer1->Add(layer2);
   layer1->Add(mock_layer3);  // Ensure something is processed after recursion
 
-  const SkRect expected_layer2_bounds =
-      layer2_transform.mapRect(child2_path.getBounds());
-  SkRect layer1_child_bounds = expected_layer2_bounds;
-  layer1_child_bounds.join(child1_path.getBounds());
-  layer1_child_bounds.join(child3_path.getBounds());
-  SkRect expected_layer1_bounds = layer1_transform.mapRect(layer1_child_bounds);
+  const DlRect expected_layer2_bounds =
+      child2_path.GetBounds().TransformAndClipBounds(layer2_transform);
+  const DlRect layer1_child_bounds =       //
+      expected_layer2_bounds               //
+          .Union(child1_path.GetBounds())  //
+          .Union(child3_path.GetBounds());
+  const DlRect expected_layer1_bounds =
+      layer1_child_bounds.TransformAndClipBounds(layer1_transform);
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
   layer1->Preroll(preroll_context());
-  EXPECT_EQ(mock_layer1->paint_bounds(), child1_path.getBounds());
-  EXPECT_EQ(mock_layer2->paint_bounds(), child2_path.getBounds());
-  EXPECT_EQ(mock_layer3->paint_bounds(), child3_path.getBounds());
+  EXPECT_EQ(mock_layer1->paint_bounds(), child1_path.GetBounds());
+  EXPECT_EQ(mock_layer2->paint_bounds(), child2_path.GetBounds());
+  EXPECT_EQ(mock_layer3->paint_bounds(), child3_path.GetBounds());
   EXPECT_EQ(layer1->paint_bounds(), expected_layer1_bounds);
   EXPECT_EQ(layer1->child_paint_bounds(), layer1_child_bounds);
   EXPECT_EQ(layer2->paint_bounds(), expected_layer2_bounds);
-  EXPECT_EQ(layer2->child_paint_bounds(), child2_path.getBounds());
+  EXPECT_EQ(layer2->child_paint_bounds(), child2_path.GetBounds());
   EXPECT_TRUE(mock_layer1->needs_painting(paint_context()));
   EXPECT_TRUE(mock_layer2->needs_painting(paint_context()));
   EXPECT_TRUE(mock_layer3->needs_painting(paint_context()));
   EXPECT_TRUE(layer1->needs_painting(paint_context()));
   EXPECT_TRUE(layer2->needs_painting(paint_context()));
-  EXPECT_EQ(mock_layer1->parent_matrix(),
-            SkMatrix::Concat(initial_transform, layer1_transform));
+  EXPECT_EQ(mock_layer1->parent_matrix(), initial_transform * layer1_transform);
   EXPECT_EQ(mock_layer1->parent_mutators(),
             std::vector({Mutator(layer1_transform), Mutator(alpha1)}));
-  EXPECT_EQ(
-      mock_layer2->parent_matrix(),
-      SkMatrix::Concat(SkMatrix::Concat(initial_transform, layer1_transform),
-                       layer2_transform));
+  EXPECT_EQ(mock_layer2->parent_matrix(),
+            (initial_transform * layer1_transform) * layer2_transform);
   EXPECT_EQ(mock_layer2->parent_mutators(),
             std::vector({Mutator(layer1_transform), Mutator(alpha1),
                          Mutator(layer2_transform), Mutator(alpha2)}));
-  EXPECT_EQ(mock_layer3->parent_matrix(),
-            SkMatrix::Concat(initial_transform, layer1_transform));
+  EXPECT_EQ(mock_layer3->parent_matrix(), initial_transform * layer1_transform);
   EXPECT_EQ(mock_layer3->parent_mutators(),
             std::vector({Mutator(layer1_transform), Mutator(alpha1)}));
 
-  SkRect opacity1_bounds =
-      expected_layer1_bounds.makeOffset(-layer1_offset.fX, -layer1_offset.fY);
-  SkRect opacity2_bounds =
-      expected_layer2_bounds.makeOffset(-layer2_offset.fX, -layer2_offset.fY);
-  DlPaint opacity1_paint;
-  opacity1_paint.setOpacity(alpha1 * (1.0 / SK_AlphaOPAQUE));
-  DlPaint opacity2_paint;
-  opacity2_paint.setOpacity(alpha2 * (1.0 / SK_AlphaOPAQUE));
+  DlRect opacity1_bounds = expected_layer1_bounds.Shift(-layer1_offset);
+  DlRect opacity2_bounds = expected_layer2_bounds.Shift(-layer2_offset);
+  DlPaint opacity1_paint = DlPaint().setAlpha(alpha1);
+  DlPaint opacity2_paint = DlPaint().setAlpha(alpha2);
 
   DisplayListBuilder expected_builder;
   /* (Opacity)layer1::Paint */ {
     expected_builder.Save();
     {
-      expected_builder.Translate(layer1_offset.fX, layer1_offset.fY);
+      expected_builder.Translate(layer1_offset.x, layer1_offset.y);
       /* (Opacity)layer1::PaintChildren */ {
-        expected_builder.SaveLayer(&opacity1_bounds, &opacity1_paint);
+        expected_builder.SaveLayer(opacity1_bounds, &opacity1_paint);
         /* mock_layer1::Paint */ {
           expected_builder.DrawPath(child1_path, child1_paint);
         }
         /* (Opacity)layer2::Paint */ {
           expected_builder.Save();
           {
-            expected_builder.Translate(layer2_offset.fX, layer2_offset.fY);
+            expected_builder.Translate(layer2_offset.x, layer2_offset.y);
             /* (Opacity)layer2::PaintChidren */ {
-              expected_builder.SaveLayer(&opacity2_bounds, &opacity2_paint);
+              expected_builder.SaveLayer(opacity2_bounds, &opacity2_paint);
               {
                 /* mock_layer2::Paint */ {
                   expected_builder.DrawPath(child2_path, child2_paint);
@@ -453,8 +433,8 @@ TEST_F(OpacityLayerTest, Nested) {
 }
 
 TEST_F(OpacityLayerTest, Readback) {
-  auto layer = std::make_shared<OpacityLayer>(kOpaque_SkAlphaType, SkPoint());
-  layer->Add(std::make_shared<MockLayer>(SkPath()));
+  auto layer = std::make_shared<OpacityLayer>(0xff, DlPoint());
+  layer->Add(std::make_shared<MockLayer>(DlPath()));
 
   // OpacityLayer does not read from surface
   preroll_context()->surface_needs_readback = false;
@@ -462,7 +442,7 @@ TEST_F(OpacityLayerTest, Readback) {
   EXPECT_FALSE(preroll_context()->surface_needs_readback);
 
   // OpacityLayer blocks child with readback
-  auto mock_layer = std::make_shared<MockLayer>(SkPath(), DlPaint());
+  auto mock_layer = std::make_shared<MockLayer>(DlPath(), DlPaint());
   mock_layer->set_fake_reads_surface(true);
   layer->Add(mock_layer);
   preroll_context()->surface_needs_readback = false;
@@ -472,21 +452,19 @@ TEST_F(OpacityLayerTest, Readback) {
 
 TEST_F(OpacityLayerTest, CullRectIsTransformed) {
   auto clip_rect_layer = std::make_shared<ClipRectLayer>(
-      SkRect::MakeLTRB(0, 0, 10, 10), Clip::kHardEdge);
-  auto opacity_layer =
-      std::make_shared<OpacityLayer>(128, SkPoint::Make(20, 20));
-  auto mock_layer = std::make_shared<MockLayer>(SkPath());
+      DlRect::MakeLTRB(0, 0, 10, 10), Clip::kHardEdge);
+  auto opacity_layer = std::make_shared<OpacityLayer>(128u, DlPoint(20, 20));
+  auto mock_layer = std::make_shared<MockLayer>(DlPath());
   clip_rect_layer->Add(opacity_layer);
   opacity_layer->Add(mock_layer);
   clip_rect_layer->Preroll(preroll_context());
-  EXPECT_EQ(mock_layer->parent_cull_rect().fLeft, -20);
-  EXPECT_EQ(mock_layer->parent_cull_rect().fTop, -20);
+  EXPECT_EQ(mock_layer->parent_cull_rect().GetLeft(), -20);
+  EXPECT_EQ(mock_layer->parent_cull_rect().GetTop(), -20);
 }
 
 TEST_F(OpacityLayerTest, OpacityInheritanceCompatibleChild) {
-  auto opacity_layer =
-      std::make_shared<OpacityLayer>(128, SkPoint::Make(20, 20));
-  auto mock_layer = MockLayer::MakeOpacityCompatible(SkPath());
+  auto opacity_layer = std::make_shared<OpacityLayer>(128u, DlPoint(20, 20));
+  auto mock_layer = MockLayer::MakeOpacityCompatible(DlPath());
   opacity_layer->Add(mock_layer);
 
   PrerollContext* context = preroll_context();
@@ -497,9 +475,8 @@ TEST_F(OpacityLayerTest, OpacityInheritanceCompatibleChild) {
 }
 
 TEST_F(OpacityLayerTest, OpacityInheritanceIncompatibleChild) {
-  auto opacity_layer =
-      std::make_shared<OpacityLayer>(128, SkPoint::Make(20, 20));
-  auto mock_layer = MockLayer::Make(SkPath());
+  auto opacity_layer = std::make_shared<OpacityLayer>(128u, DlPoint(20, 20));
+  auto mock_layer = MockLayer::Make(DlPath());
   opacity_layer->Add(mock_layer);
 
   PrerollContext* context = preroll_context();
@@ -510,10 +487,9 @@ TEST_F(OpacityLayerTest, OpacityInheritanceIncompatibleChild) {
 }
 
 TEST_F(OpacityLayerTest, OpacityInheritanceThroughContainer) {
-  auto opacity_layer =
-      std::make_shared<OpacityLayer>(128, SkPoint::Make(20, 20));
+  auto opacity_layer = std::make_shared<OpacityLayer>(128u, DlPoint(20, 20));
   auto container_layer = std::make_shared<ContainerLayer>();
-  auto mock_layer = MockLayer::MakeOpacityCompatible(SkPath());
+  auto mock_layer = MockLayer::MakeOpacityCompatible(DlPath());
   container_layer->Add(mock_layer);
   opacity_layer->Add(container_layer);
 
@@ -525,10 +501,10 @@ TEST_F(OpacityLayerTest, OpacityInheritanceThroughContainer) {
 }
 
 TEST_F(OpacityLayerTest, OpacityInheritanceThroughTransform) {
-  auto opacity_layer =
-      std::make_shared<OpacityLayer>(128, SkPoint::Make(20, 20));
-  auto transformLayer = std::make_shared<TransformLayer>(SkMatrix::Scale(2, 2));
-  auto mock_layer = MockLayer::MakeOpacityCompatible(SkPath());
+  auto opacity_layer = std::make_shared<OpacityLayer>(128u, DlPoint(20, 20));
+  auto transformLayer =
+      std::make_shared<TransformLayer>(DlMatrix::MakeScale({2.0f, 2.0f, 1.0f}));
+  auto mock_layer = MockLayer::MakeOpacityCompatible(DlPath());
   transformLayer->Add(mock_layer);
   opacity_layer->Add(transformLayer);
 
@@ -540,11 +516,10 @@ TEST_F(OpacityLayerTest, OpacityInheritanceThroughTransform) {
 }
 
 TEST_F(OpacityLayerTest, OpacityInheritanceThroughImageFilter) {
-  auto opacity_layer =
-      std::make_shared<OpacityLayer>(128, SkPoint::Make(20, 20));
+  auto opacity_layer = std::make_shared<OpacityLayer>(128u, DlPoint(20, 20));
   auto filter_layer = std::make_shared<ImageFilterLayer>(
       DlImageFilter::MakeBlur(5.0, 5.0, DlTileMode::kClamp));
-  auto mock_layer = MockLayer::MakeOpacityCompatible(SkPath());
+  auto mock_layer = MockLayer::MakeOpacityCompatible(DlPath());
   filter_layer->Add(mock_layer);
   opacity_layer->Add(filter_layer);
 
@@ -556,11 +531,11 @@ TEST_F(OpacityLayerTest, OpacityInheritanceThroughImageFilter) {
 }
 
 TEST_F(OpacityLayerTest, OpacityInheritanceNestedWithCompatibleChild) {
-  SkPoint offset1 = SkPoint::Make(10, 20);
-  SkPoint offset2 = SkPoint::Make(20, 10);
-  SkPath mock_path = SkPath::Rect({10, 10, 20, 20});
-  auto opacity_layer_1 = std::make_shared<OpacityLayer>(128, offset1);
-  auto opacity_layer_2 = std::make_shared<OpacityLayer>(64, offset2);
+  DlPoint offset1 = DlPoint(10, 20);
+  DlPoint offset2 = DlPoint(20, 10);
+  DlPath mock_path = DlPath::MakeRectLTRB(10, 10, 20, 20);
+  auto opacity_layer_1 = std::make_shared<OpacityLayer>(128u, offset1);
+  auto opacity_layer_2 = std::make_shared<OpacityLayer>(64u, offset2);
   auto mock_layer = MockLayer::MakeOpacityCompatible(mock_path);
   opacity_layer_2->Add(mock_layer);
   opacity_layer_1->Add(opacity_layer_2);
@@ -573,19 +548,19 @@ TEST_F(OpacityLayerTest, OpacityInheritanceNestedWithCompatibleChild) {
   EXPECT_TRUE(opacity_layer_2->children_can_accept_opacity());
 
   DlPaint savelayer_paint;
-  SkScalar inherited_opacity = 128 * 1.0 / SK_AlphaOPAQUE;
-  inherited_opacity *= 64 * 1.0 / SK_AlphaOPAQUE;
+  DlScalar inherited_opacity = DlColor::toOpacity(128u);
+  inherited_opacity *= DlColor::toOpacity(64u);
   savelayer_paint.setOpacity(inherited_opacity);
 
   DisplayListBuilder expected_builder;
   /* opacity_layer_1::Paint */ {
     expected_builder.Save();
     {
-      expected_builder.Translate(offset1.fX, offset1.fY);
+      expected_builder.Translate(offset1.x, offset1.y);
       /* opacity_layer_2::Paint */ {
         expected_builder.Save();
         {
-          expected_builder.Translate(offset2.fX, offset2.fY);
+          expected_builder.Translate(offset2.x, offset2.y);
           /* mock_layer::Paint */ {
             expected_builder.DrawPath(mock_path,
                                       DlPaint().setOpacity(inherited_opacity));
@@ -602,11 +577,11 @@ TEST_F(OpacityLayerTest, OpacityInheritanceNestedWithCompatibleChild) {
 }
 
 TEST_F(OpacityLayerTest, OpacityInheritanceNestedWithIncompatibleChild) {
-  SkPoint offset1 = SkPoint::Make(10, 20);
-  SkPoint offset2 = SkPoint::Make(20, 10);
-  SkPath mock_path = SkPath::Rect({10, 10, 20, 20});
-  auto opacity_layer_1 = std::make_shared<OpacityLayer>(128, offset1);
-  auto opacity_layer_2 = std::make_shared<OpacityLayer>(64, offset2);
+  DlPoint offset1 = DlPoint(10, 20);
+  DlPoint offset2 = DlPoint(20, 10);
+  DlPath mock_path = DlPath::MakeRectLTRB(10, 10, 20, 20);
+  auto opacity_layer_1 = std::make_shared<OpacityLayer>(128u, offset1);
+  auto opacity_layer_2 = std::make_shared<OpacityLayer>(64u, offset2);
   auto mock_layer = MockLayer::Make(mock_path);
   opacity_layer_2->Add(mock_layer);
   opacity_layer_1->Add(opacity_layer_2);
@@ -619,20 +594,20 @@ TEST_F(OpacityLayerTest, OpacityInheritanceNestedWithIncompatibleChild) {
   EXPECT_FALSE(opacity_layer_2->children_can_accept_opacity());
 
   DlPaint savelayer_paint;
-  SkScalar inherited_opacity = 128 * 1.0 / SK_AlphaOPAQUE;
-  inherited_opacity *= 64 * 1.0 / SK_AlphaOPAQUE;
+  DlScalar inherited_opacity = DlColor::toOpacity(128);
+  inherited_opacity *= DlColor::toOpacity(64u);
   savelayer_paint.setOpacity(inherited_opacity);
 
   DisplayListBuilder expected_builder;
   /* opacity_layer_1::Paint */ {
     expected_builder.Save();
     {
-      expected_builder.Translate(offset1.fX, offset1.fY);
+      expected_builder.Translate(offset1.x, offset1.y);
       /* opacity_layer_2::Paint */ {
         expected_builder.Save();
         {
-          expected_builder.Translate(offset2.fX, offset2.fY);
-          expected_builder.SaveLayer(&mock_layer->paint_bounds(),
+          expected_builder.Translate(offset2.x, offset2.y);
+          expected_builder.SaveLayer(mock_layer->paint_bounds(),
                                      &savelayer_paint);
           /* mock_layer::Paint */ {
             expected_builder.DrawPath(mock_path, DlPaint());
@@ -652,39 +627,39 @@ using OpacityLayerDiffTest = DiffContextTest;
 
 TEST_F(OpacityLayerDiffTest, FractionalTranslation) {
   auto picture = CreateDisplayListLayer(
-      CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60)));
-  auto layer = CreateOpacityLater({picture}, 128, SkPoint::Make(0.5, 0.5));
+      CreateDisplayList(DlRect::MakeLTRB(10, 10, 60, 60)));
+  auto layer = CreateOpacityLater({picture}, 128u, DlPoint(0.5f, 0.5f));
 
   MockLayerTree tree1;
   tree1.root()->Add(layer);
 
-  auto damage = DiffLayerTree(tree1, MockLayerTree(), SkIRect::MakeEmpty(), 0,
-                              0, /*use_raster_cache=*/false);
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(10, 10, 61, 61));
+  auto damage = DiffLayerTree(tree1, MockLayerTree(), DlIRect(), 0, 0,
+                              /*use_raster_cache=*/false);
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(10, 10, 61, 61));
 }
 
 TEST_F(OpacityLayerDiffTest, FractionalTranslationWithRasterCache) {
   auto picture = CreateDisplayListLayer(
-      CreateDisplayList(SkRect::MakeLTRB(10, 10, 60, 60)));
-  auto layer = CreateOpacityLater({picture}, 128, SkPoint::Make(0.5, 0.5));
+      CreateDisplayList(DlRect::MakeLTRB(10, 10, 60, 60)));
+  auto layer = CreateOpacityLater({picture}, 128u, DlPoint(0.5f, 0.5f));
 
   MockLayerTree tree1;
   tree1.root()->Add(layer);
 
-  auto damage = DiffLayerTree(tree1, MockLayerTree(), SkIRect::MakeEmpty(), 0,
-                              0, /*use_raster_cache=*/true);
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(11, 11, 61, 61));
+  auto damage = DiffLayerTree(tree1, MockLayerTree(), DlIRect(), 0, 0,
+                              /*use_raster_cache=*/true);
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(11, 11, 61, 61));
 }
 
 TEST_F(OpacityLayerTest, FullyOpaqueWithFractionalValues) {
   use_mock_raster_cache();  // Ensure pixel-snapped alignment.
 
-  const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
-  const SkPoint layer_offset = SkPoint::Make(0.5f, 1.5f);
-  const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 0.5f);
+  const DlPath child_path = DlPath::MakeRect(DlRect::MakeWH(5.0f, 5.0f));
+  const DlPoint layer_offset = DlPoint(0.5f, 1.5f);
+  const DlMatrix initial_transform = DlMatrix::MakeTranslation({0.5f, 0.5f});
   const DlPaint child_paint = DlPaint(DlColor::kGreen());
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
-  auto layer = std::make_shared<OpacityLayer>(SK_AlphaOPAQUE, layer_offset);
+  auto layer = std::make_shared<OpacityLayer>(0xff, layer_offset);
   layer->Add(mock_layer);
 
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
@@ -693,13 +668,12 @@ TEST_F(OpacityLayerTest, FullyOpaqueWithFractionalValues) {
   auto expected_builder = DisplayListBuilder();
   /* (Opacity)layer::Paint */ {
     expected_builder.Save();
-    expected_builder.Translate(layer_offset.fX, layer_offset.fY);
+    expected_builder.Translate(layer_offset.x, layer_offset.y);
     // Opaque alpha needs no SaveLayer, just recurse into painting mock_layer
     // but since we use the mock raster cache we pixel snap the transform
     expected_builder.TransformReset();
-    expected_builder.Transform2DAffine(
-        1, 0, SkScalarRoundToScalar(layer_offset.fX),  //
-        0, 1, SkScalarRoundToScalar(layer_offset.fY));
+    expected_builder.Transform2DAffine(1, 0, std::round(layer_offset.x),  //
+                                       0, 1, std::round(layer_offset.y));
     /* mock_layer::Paint */ {
       expected_builder.DrawPath(child_path, child_paint);
     }
@@ -712,15 +686,14 @@ TEST_F(OpacityLayerTest, FullyOpaqueWithFractionalValues) {
 }
 
 TEST_F(OpacityLayerTest, FullyTransparentDoesNotCullPlatformView) {
-  const SkPoint opacity_offset = SkPoint::Make(0.5f, 1.5f);
-  const SkPoint view_offset = SkPoint::Make(0.0f, 0.0f);
-  const SkSize view_size = SkSize::Make(8.0f, 8.0f);
+  const DlPoint opacity_offset = DlPoint(0.5f, 1.5f);
+  const DlPoint view_offset = DlPoint(0.0f, 0.0f);
+  const DlSize view_size = DlSize(8.0f, 8.0f);
   const int64_t view_id = 42;
   auto platform_view =
       std::make_shared<PlatformViewLayer>(view_offset, view_size, view_id);
 
-  auto opacity =
-      std::make_shared<OpacityLayer>(SK_AlphaTRANSPARENT, opacity_offset);
+  auto opacity = std::make_shared<OpacityLayer>(0u, opacity_offset);
   opacity->Add(platform_view);
 
   auto embedder = MockViewEmbedder();

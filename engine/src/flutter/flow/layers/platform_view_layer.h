@@ -14,14 +14,14 @@ namespace flutter {
 
 class PlatformViewLayer : public Layer {
  public:
-  PlatformViewLayer(const SkPoint& offset, const SkSize& size, int64_t view_id);
+  PlatformViewLayer(const DlPoint& offset, const DlSize& size, int64_t view_id);
 
   void Preroll(PrerollContext* context) override;
   void Paint(PaintContext& context) const override;
 
  private:
-  SkPoint offset_;
-  SkSize size_;
+  DlPoint offset_;
+  DlSize size_;
   int64_t view_id_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewLayer);

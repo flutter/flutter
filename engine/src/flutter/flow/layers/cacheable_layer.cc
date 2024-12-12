@@ -8,7 +8,7 @@ namespace flutter {
 
 AutoCache::AutoCache(RasterCacheItem* raster_cache_item,
                      PrerollContext* context,
-                     const SkMatrix& matrix)
+                     const DlMatrix& matrix)
     : raster_cache_item_(raster_cache_item),
       context_(context),
       matrix_(matrix) {

@@ -245,13 +245,11 @@ void ShellTest::PumpOneFrame(Shell* shell, FrameContent frame_content) {
         // causing flaky assertion errors.
 
         for (auto& [view_id, view_content] : frame_content) {
-          SkMatrix identity;
-          identity.setIdentity();
-          auto root_layer = std::make_shared<TransformLayer>(identity);
+          auto root_layer = std::make_shared<TransformLayer>(DlMatrix());
           auto layer_tree = std::make_unique<LayerTree>(
               root_layer,
-              SkISize::Make(view_content.viewport_metrics.physical_width,
-                            view_content.viewport_metrics.physical_height));
+              DlISize(view_content.viewport_metrics.physical_width,
+                      view_content.viewport_metrics.physical_height));
           float device_pixel_ratio = static_cast<float>(
               view_content.viewport_metrics.device_pixel_ratio);
           if (view_content.builder) {

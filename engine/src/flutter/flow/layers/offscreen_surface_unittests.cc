@@ -7,27 +7,21 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-#include "include/core/SkColor.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkData.h"
 
 namespace flutter::testing {
 
 TEST(OffscreenSurfaceTest, EmptySurfaceIsInvalid) {
-  auto surface =
-      std::make_unique<OffscreenSurface>(nullptr, SkISize::MakeEmpty());
+  auto surface = std::make_unique<OffscreenSurface>(nullptr, DlISize());
   ASSERT_FALSE(surface->IsValid());
 }
 
 TEST(OffscreenSurfaceTest, OnexOneSurfaceIsValid) {
-  auto surface =
-      std::make_unique<OffscreenSurface>(nullptr, SkISize::Make(1, 1));
+  auto surface = std::make_unique<OffscreenSurface>(nullptr, DlISize(1, 1));
   ASSERT_TRUE(surface->IsValid());
 }
 
 TEST(OffscreenSurfaceTest, PaintSurfaceBlack) {
-  auto surface =
-      std::make_unique<OffscreenSurface>(nullptr, SkISize::Make(1, 1));
+  auto surface = std::make_unique<OffscreenSurface>(nullptr, DlISize(1, 1));
 
   DlCanvas* canvas = surface->GetCanvas();
   canvas->Clear(DlColor::kBlack());

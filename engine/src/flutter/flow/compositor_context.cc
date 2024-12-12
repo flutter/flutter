@@ -11,7 +11,7 @@
 
 namespace flutter {
 
-std::optional<SkRect> FrameDamage::ComputeClipRect(
+std::optional<DlRect> FrameDamage::ComputeClipRect(
     flutter::LayerTree& layer_tree,
     bool has_raster_cache,
     bool impeller_enabled) {
@@ -21,8 +21,7 @@ std::optional<SkRect> FrameDamage::ComputeClipRect(
                         prev_layer_tree_ ? prev_layer_tree_->paint_region_map()
                                          : empty_paint_region_map,
                         has_raster_cache, impeller_enabled);
-    context.PushCullRect(SkRect::MakeIWH(layer_tree.frame_size().width(),
-                                         layer_tree.frame_size().height()));
+    context.PushCullRect(DlRect::MakeSize(layer_tree.frame_size()));
     {
       DiffContext::AutoSubtreeRestore subtree(&context);
       const Layer* prev_root_layer = nullptr;
@@ -30,8 +29,7 @@ std::optional<SkRect> FrameDamage::ComputeClipRect(
           prev_layer_tree_->frame_size() != layer_tree.frame_size()) {
         // If there is no previous layer tree assume the entire frame must be
         // repainted.
-        context.MarkSubtreeDirty(SkRect::MakeIWH(
-            layer_tree.frame_size().width(), layer_tree.frame_size().height()));
+        context.MarkSubtreeDirty(DlRect::MakeSize(layer_tree.frame_size()));
       } else {
         prev_root_layer = prev_layer_tree_->root_layer();
       }
@@ -41,7 +39,7 @@ std::optional<SkRect> FrameDamage::ComputeClipRect(
     damage_ =
         context.ComputeDamage(additional_damage_, horizontal_clip_alignment_,
                               vertical_clip_alignment_);
-    return SkRect::Make(damage_->buffer_damage);
+    return DlRect::Make(damage_->buffer_damage);
   }
   return std::nullopt;
 }
@@ -120,7 +118,7 @@ RasterStatus CompositorContext::ScopedFrame::Raster(
     FrameDamage* frame_damage) {
   TRACE_EVENT0("flutter", "CompositorContext::ScopedFrame::Raster");
 
-  std::optional<SkRect> clip_rect;
+  std::optional<DlRect> clip_rect;
   if (frame_damage) {
     clip_rect = frame_damage->ComputeClipRect(layer_tree, !ignore_raster_cache,
                                               !gr_context_);
@@ -159,7 +157,7 @@ RasterStatus CompositorContext::ScopedFrame::Raster(
 
 void CompositorContext::ScopedFrame::PaintLayerTreeSkia(
     flutter::LayerTree& layer_tree,
-    std::optional<SkRect> clip_rect,
+    std::optional<DlRect> clip_rect,
     bool needs_save_layer,
     bool ignore_raster_cache) {
   DlAutoCanvasRestore restore(canvas(), clip_rect.has_value());
@@ -171,7 +169,7 @@ void CompositorContext::ScopedFrame::PaintLayerTreeSkia(
 
     if (needs_save_layer) {
       TRACE_EVENT0("flutter", "Canvas::saveLayer");
-      SkRect bounds = SkRect::Make(layer_tree.frame_size());
+      SkRect bounds = SkRect::Make(ToSkISize(layer_tree.frame_size()));
       DlPaint paint;
       paint.setBlendMode(DlBlendMode::kSrc);
       canvas()->SaveLayer(&bounds, &paint);
@@ -185,10 +183,10 @@ void CompositorContext::ScopedFrame::PaintLayerTreeSkia(
 
 void CompositorContext::ScopedFrame::PaintLayerTreeImpeller(
     flutter::LayerTree& layer_tree,
-    std::optional<SkRect> clip_rect,
+    std::optional<DlRect> clip_rect,
     bool ignore_raster_cache) {
   if (canvas() && clip_rect) {
-    canvas()->Translate(-clip_rect->x(), -clip_rect->y());
+    canvas()->Translate(-clip_rect->GetX(), -clip_rect->GetY());
   }
 
   layer_tree.Paint(*this, ignore_raster_cache);
@@ -208,17 +206,17 @@ void CompositorContext::ScopedFrame::PaintLayerTreeImpeller(
 constexpr float kImpellerRepaintRatio = 0.7f;
 
 bool CompositorContext::ShouldPerformPartialRepaint(
-    std::optional<SkRect> damage_rect,
-    SkISize layer_tree_size) {
+    std::optional<DlRect> damage_rect,
+    DlISize layer_tree_size) {
   if (!damage_rect.has_value()) {
     return false;
   }
-  if (damage_rect->width() >= layer_tree_size.width() &&
-      damage_rect->height() >= layer_tree_size.height()) {
+  if (damage_rect->GetWidth() >= layer_tree_size.width &&
+      damage_rect->GetHeight() >= layer_tree_size.height) {
     return false;
   }
-  auto rx = damage_rect->width() / layer_tree_size.width();
-  auto ry = damage_rect->height() / layer_tree_size.height();
+  auto rx = damage_rect->GetWidth() / layer_tree_size.width;
+  auto ry = damage_rect->GetHeight() / layer_tree_size.height;
   return rx <= kImpellerRepaintRatio || ry <= kImpellerRepaintRatio;
 }
 

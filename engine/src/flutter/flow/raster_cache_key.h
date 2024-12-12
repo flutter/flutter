@@ -12,6 +12,7 @@
 #include <utility>
 #include <vector>
 
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkMatrix.h"

@@ -9,13 +9,9 @@
 
 namespace flutter {
 
-// Be careful that SkMatrix's default constructor doesn't initialize the matrix
-// at all. Hence |set_transform| must be called with an initialized SkMatrix.
 class TransformLayer : public ContainerLayer {
  public:
-  explicit TransformLayer(const SkMatrix& transform)
-      : TransformLayer(SkM44(transform)) {}
-  explicit TransformLayer(const SkM44& transform);
+  explicit TransformLayer(const DlMatrix& transform);
 
   void Diff(DiffContext* context, const Layer* old_layer) override;
 
@@ -24,7 +20,7 @@ class TransformLayer : public ContainerLayer {
   void Paint(PaintContext& context) const override;
 
  private:
-  SkM44 transform_;
+  DlMatrix transform_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TransformLayer);
 };

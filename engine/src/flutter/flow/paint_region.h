@@ -8,8 +8,9 @@
 #include <memory>
 #include <utility>
 #include <vector>
+
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/logging.h"
-#include "third_party/skia/include/core/SkRect.h"
 
 namespace flutter {
 
@@ -27,7 +28,7 @@ namespace flutter {
 class PaintRegion {
  public:
   PaintRegion() = default;
-  PaintRegion(std::shared_ptr<std::vector<SkRect>> rects,
+  PaintRegion(std::shared_ptr<std::vector<DlRect>> rects,
               size_t from,
               size_t to,
               bool has_readback,
@@ -38,18 +39,18 @@ class PaintRegion {
         has_readback_(has_readback),
         has_texture_(has_texture) {}
 
-  std::vector<SkRect>::const_iterator begin() const {
+  std::vector<DlRect>::const_iterator begin() const {
     FML_DCHECK(is_valid());
     return rects_->begin() + from_;
   }
 
-  std::vector<SkRect>::const_iterator end() const {
+  std::vector<DlRect>::const_iterator end() const {
     FML_DCHECK(is_valid());
     return rects_->begin() + to_;
   }
 
   // Compute bounds for this region
-  SkRect ComputeBounds() const;
+  DlRect ComputeBounds() const;
 
   bool is_valid() const { return rects_ != nullptr; }
 
@@ -62,7 +63,7 @@ class PaintRegion {
   bool has_texture() const { return has_texture_; }
 
  private:
-  std::shared_ptr<std::vector<SkRect>> rects_;
+  std::shared_ptr<std::vector<DlRect>> rects_;
   size_t from_ = 0;
   size_t to_ = 0;
   bool has_readback_ = false;

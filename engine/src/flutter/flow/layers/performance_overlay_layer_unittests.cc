@@ -84,7 +84,7 @@ static void TestPerformanceOverlayLayerGold(int refresh_rate) {
           flutter::kDisplayEngineStatistics |
           flutter::kVisualizeEngineStatistics,
       flutter::GetFontFile().c_str());
-  layer.set_paint_bounds(SkRect::MakeWH(1000, 400));
+  layer.set_paint_bounds(DlRect::MakeWH(1000, 400));
   surface->getCanvas()->clear(SK_ColorTRANSPARENT);
   layer.Paint(paint_context);
 
@@ -166,7 +166,7 @@ TEST_F(PerformanceOverlayLayerTest, PaintingEmptyLayerDies) {
   auto layer = std::make_shared<PerformanceOverlayLayer>(overlay_opts);
 
   layer->Preroll(preroll_context());
-  EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
+  EXPECT_EQ(layer->paint_bounds(), DlRect());
   EXPECT_FALSE(layer->needs_painting(paint_context()));
 
   // Crashes reading a nullptr.
@@ -174,7 +174,7 @@ TEST_F(PerformanceOverlayLayerTest, PaintingEmptyLayerDies) {
 }
 
 TEST_F(PerformanceOverlayLayerTest, InvalidOptions) {
-  const SkRect layer_bounds = SkRect::MakeLTRB(0.0f, 0.0f, 64.0f, 64.0f);
+  const DlRect layer_bounds = DlRect::MakeLTRB(0.0f, 0.0f, 64.0f, 64.0f);
   const uint64_t overlay_opts = 0;
   auto layer = std::make_shared<PerformanceOverlayLayer>(overlay_opts);
 
@@ -196,7 +196,7 @@ TEST_F(PerformanceOverlayLayerTest, InvalidOptions) {
 }
 
 TEST_F(PerformanceOverlayLayerTest, SimpleRasterizerStatistics) {
-  const SkRect layer_bounds = SkRect::MakeLTRB(0.0f, 0.0f, 64.0f, 64.0f);
+  const DlRect layer_bounds = DlRect::MakeLTRB(0.0f, 0.0f, 64.0f, 64.0f);
   const uint64_t overlay_opts = kDisplayRasterizerStatistics;
   auto layer = std::make_shared<PerformanceOverlayLayer>(overlay_opts);
   auto font = PerformanceOverlayLayer::MakeStatisticsFont("");
@@ -239,7 +239,7 @@ TEST_F(PerformanceOverlayLayerTest, MarkAsDirtyWhenResized) {
   // Create a PerformanceOverlayLayer.
   const uint64_t overlay_opts = kVisualizeRasterizerStatistics;
   auto layer = std::make_shared<PerformanceOverlayLayer>(overlay_opts);
-  layer->set_paint_bounds(SkRect::MakeLTRB(0.0f, 0.0f, 48.0f, 48.0f));
+  layer->set_paint_bounds(DlRect::MakeLTRB(0.0f, 0.0f, 48.0f, 48.0f));
   layer->Preroll(preroll_context());
   layer->Paint(display_list_paint_context());
   DlISize first_draw_size;
@@ -254,7 +254,7 @@ TEST_F(PerformanceOverlayLayerTest, MarkAsDirtyWhenResized) {
 
   // Create a second PerformanceOverlayLayer with different bounds.
   layer = std::make_shared<PerformanceOverlayLayer>(overlay_opts);
-  layer->set_paint_bounds(SkRect::MakeLTRB(0.0f, 0.0f, 64.0f, 64.0f));
+  layer->set_paint_bounds(DlRect::MakeLTRB(0.0f, 0.0f, 64.0f, 64.0f));
   layer->Preroll(preroll_context());
   reset_display_list();
   layer->Paint(display_list_paint_context());

@@ -17,15 +17,14 @@ namespace testing {
 using TextureLayerTest = LayerTest;
 
 TEST_F(TextureLayerTest, InvalidTexture) {
-  const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
-  const SkSize layer_size = SkSize::Make(8.0f, 8.0f);
+  const DlPoint layer_offset = DlPoint(0.0f, 0.0f);
+  const DlSize layer_size = DlSize(8.0f, 8.0f);
   auto layer = std::make_shared<TextureLayer>(
       layer_offset, layer_size, 0, false, DlImageSampling::kNearestNeighbor);
 
   layer->Preroll(preroll_context());
   EXPECT_EQ(layer->paint_bounds(),
-            (SkRect::MakeSize(layer_size)
-                 .makeOffset(layer_offset.fX, layer_offset.fY)));
+            DlRect::MakeOriginSize(layer_offset, layer_size));
   EXPECT_TRUE(layer->needs_painting(paint_context()));
 
   layer->Paint(display_list_paint_context());
@@ -34,8 +33,8 @@ TEST_F(TextureLayerTest, InvalidTexture) {
 
 #ifndef NDEBUG
 TEST_F(TextureLayerTest, PaintingEmptyLayerDies) {
-  const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
-  const SkSize layer_size = SkSize::Make(0.0f, 0.0f);
+  const DlPoint layer_offset = DlPoint(0.0f, 0.0f);
+  const DlSize layer_size = DlSize(0.0f, 0.0f);
   const int64_t texture_id = 0;
   auto mock_texture = std::make_shared<MockTexture>(texture_id);
   auto layer =
@@ -46,7 +45,7 @@ TEST_F(TextureLayerTest, PaintingEmptyLayerDies) {
   preroll_context()->texture_registry->RegisterTexture(mock_texture);
 
   layer->Preroll(preroll_context());
-  EXPECT_EQ(layer->paint_bounds(), kEmptyRect);
+  EXPECT_EQ(layer->paint_bounds(), DlRect());
   EXPECT_FALSE(layer->needs_painting(paint_context()));
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
@@ -54,8 +53,8 @@ TEST_F(TextureLayerTest, PaintingEmptyLayerDies) {
 }
 
 TEST_F(TextureLayerTest, PaintBeforePrerollDies) {
-  const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
-  const SkSize layer_size = SkSize::Make(8.0f, 8.0f);
+  const DlPoint layer_offset = DlPoint(0.0f, 0.0f);
+  const DlSize layer_size = DlSize(8.0f, 8.0f);
   const int64_t texture_id = 0;
   auto mock_texture = std::make_shared<MockTexture>(texture_id);
   auto layer = std::make_shared<TextureLayer>(
@@ -70,10 +69,9 @@ TEST_F(TextureLayerTest, PaintBeforePrerollDies) {
 #endif
 
 TEST_F(TextureLayerTest, PaintingWithLinearSampling) {
-  const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
-  const SkSize layer_size = SkSize::Make(8.0f, 8.0f);
-  const SkRect layer_bounds =
-      SkRect::MakeSize(layer_size).makeOffset(layer_offset.fX, layer_offset.fY);
+  const DlPoint layer_offset = DlPoint(0.0f, 0.0f);
+  const DlSize layer_size = DlSize(8.0f, 8.0f);
+  const DlRect layer_bounds = DlRect::MakeOriginSize(layer_offset, layer_size);
   const int64_t texture_id = 0;
   const auto texture_image = MockTexture::MakeTestTexture(20, 20, 5);
   auto mock_texture = std::make_shared<MockTexture>(texture_id, texture_image);
@@ -102,33 +100,31 @@ TEST_F(TextureLayerDiffTest, TextureInRetainedLayer) {
   MockLayerTree tree1;
   auto container = std::make_shared<ContainerLayer>();
   tree1.root()->Add(container);
-  auto layer = std::make_shared<TextureLayer>(SkPoint::Make(0, 0),
-                                              SkSize::Make(100, 100), 0, false,
-                                              DlImageSampling::kLinear);
+  auto layer = std::make_shared<TextureLayer>(DlPoint(), DlSize(100, 100), 0,
+                                              false, DlImageSampling::kLinear);
   container->Add(layer);
 
   MockLayerTree tree2;
   tree2.root()->Add(container);  // retained layer
 
   auto damage = DiffLayerTree(tree1, MockLayerTree());
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 100, 100));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(0, 0, 100, 100));
 
   damage = DiffLayerTree(tree2, tree1);
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 100, 100));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(0, 0, 100, 100));
 }
 
 TEST_F(TextureLayerTest, OpacityInheritance) {
-  const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
-  const SkSize layer_size = SkSize::Make(8.0f, 8.0f);
-  const SkRect layer_bounds =
-      SkRect::MakeSize(layer_size).makeOffset(layer_offset.fX, layer_offset.fY);
+  const DlPoint layer_offset = DlPoint();
+  const DlSize layer_size = DlSize(8.0f, 8.0f);
+  const DlRect layer_bounds = DlRect::MakeOriginSize(layer_offset, layer_size);
   const int64_t texture_id = 0;
   const auto texture_image = MockTexture::MakeTestTexture(20, 20, 5);
   auto mock_texture = std::make_shared<MockTexture>(texture_id, texture_image);
-  SkAlpha alpha = 0x7f;
+  uint8_t alpha = 0x7f;
   auto texture_layer = std::make_shared<TextureLayer>(
       layer_offset, layer_size, texture_id, false, DlImageSampling::kLinear);
-  auto layer = std::make_shared<OpacityLayer>(alpha, SkPoint::Make(0.0f, 0.0f));
+  auto layer = std::make_shared<OpacityLayer>(alpha, DlPoint());
   layer->Add(texture_layer);
 
   // Ensure the texture is located by the Layer.

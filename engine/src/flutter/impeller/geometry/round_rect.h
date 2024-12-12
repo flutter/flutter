@@ -182,8 +182,8 @@ struct RoundRect {
   constexpr RoundRect(const Rect& bounds, const RoundingRadii& radii)
       : bounds_(bounds), radii_(radii) {}
 
-  const Rect bounds_;
-  const RoundingRadii radii_;
+  Rect bounds_;
+  RoundingRadii radii_;
 };
 
 }  // namespace impeller

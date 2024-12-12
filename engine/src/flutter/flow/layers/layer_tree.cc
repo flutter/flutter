@@ -18,7 +18,7 @@
 namespace flutter {
 
 LayerTree::LayerTree(const std::shared_ptr<Layer>& root_layer,
-                     const SkISize& frame_size)
+                     const DlISize& frame_size)
     : root_layer_(root_layer), frame_size_(frame_size) {}
 
 inline SkColorSpace* GetColorSpace(DlCanvas* canvas) {
@@ -27,7 +27,7 @@ inline SkColorSpace* GetColorSpace(DlCanvas* canvas) {
 
 bool LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
                         bool ignore_raster_cache,
-                        SkRect cull_rect) {
+                        DlRect cull_rect) {
   TRACE_EVENT0("flutter", "LayerTree::Preroll");
 
   if (!root_layer_) {
@@ -37,8 +37,8 @@ bool LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
 
   SkColorSpace* color_space = GetColorSpace(frame.canvas());
   LayerStateStack state_stack;
-  state_stack.set_preroll_delegate(cull_rect,
-                                   frame.root_surface_transformation());
+  state_stack.set_preroll_delegate(
+      cull_rect, ToDlMatrix(frame.root_surface_transformation()));
 
   raster_cache_items_.clear();
 
@@ -145,7 +145,7 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
 }
 
 sk_sp<DisplayList> LayerTree::Flatten(
-    const SkRect& bounds,
+    const DlRect& bounds,
     const std::shared_ptr<TextureRegistry>& texture_registry,
     GrDirectContext* gr_context) {
   TRACE_EVENT0("flutter", "LayerTree::Flatten");

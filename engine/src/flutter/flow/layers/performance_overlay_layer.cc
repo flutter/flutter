@@ -132,10 +132,10 @@ void PerformanceOverlayLayer::Paint(PaintContext& context) const {
     return;
   }
 
-  SkScalar x = paint_bounds().x() + padding;
-  SkScalar y = paint_bounds().y() + padding;
-  SkScalar width = paint_bounds().width() - (padding * 2);
-  SkScalar height = paint_bounds().height() / 2;
+  DlScalar x = paint_bounds().GetX() + padding;
+  DlScalar y = paint_bounds().GetY() + padding;
+  DlScalar width = paint_bounds().GetWidth() - (padding * 2);
+  DlScalar height = paint_bounds().GetHeight() / 2;
   auto mutator = context.state_stack.save();
   // Cached storage for vertex output.
   std::vector<DlPoint> vertices_storage;

@@ -65,7 +65,7 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
   void getDestinationClipBounds(Dart_Handle rect_handle);
   void getLocalClipBounds(Dart_Handle rect_handle);
 
-  void drawColor(SkColor color, DlBlendMode blend_mode);
+  void drawColor(uint32_t color, DlBlendMode blend_mode);
 
   void drawLine(double x1,
                 double y1,
@@ -180,7 +180,7 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
                         Dart_Handle cull_rect_handle);
 
   void drawShadow(const CanvasPath* path,
-                  SkColor color,
+                  uint32_t color,
                   double elevation,
                   bool transparentOccluder);
 
