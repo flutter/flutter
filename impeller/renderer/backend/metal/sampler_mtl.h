@@ -29,7 +29,7 @@ class SamplerMTL final : public Sampler,
 
   id<MTLSamplerState> state_ = nullptr;
 
-  SamplerMTL(SamplerDescriptor desc, id<MTLSamplerState> state);
+  SamplerMTL(const SamplerDescriptor& desc, id<MTLSamplerState> state);
 
   SamplerMTL(const SamplerMTL&) = delete;
 

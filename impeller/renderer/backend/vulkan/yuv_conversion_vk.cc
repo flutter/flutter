@@ -6,6 +6,7 @@
 
 #include "flutter/fml/hash_combine.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/sampler_descriptor.h"
 #include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "impeller/renderer/backend/vulkan/sampler_vk.h"
 
@@ -107,12 +108,13 @@ ImmutableSamplerKeyVK::ImmutableSamplerKeyVK(const SamplerVK& sampler)
 }
 
 bool ImmutableSamplerKeyVK::IsEqual(const ImmutableSamplerKeyVK& other) const {
-  return sampler.IsEqual(other.sampler) &&
+  return SamplerDescriptor::ToKey(sampler) ==
+             SamplerDescriptor::ToKey(other.sampler) &&
          YUVConversionDescriptorVKEqual{}(yuv_conversion, other.yuv_conversion);
 }
 
 std::size_t ImmutableSamplerKeyVK::GetHash() const {
-  return fml::HashCombine(sampler.GetHash(),
+  return fml::HashCombine(SamplerDescriptor::ToKey(sampler),
                           YUVConversionDescriptorVKHash{}(yuv_conversion));
 }
 

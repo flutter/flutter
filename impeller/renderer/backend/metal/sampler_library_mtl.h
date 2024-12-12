@@ -27,13 +27,13 @@ class SamplerLibraryMTL final
   friend class ContextMTL;
 
   id<MTLDevice> device_ = nullptr;
-  SamplerMap samplers_;
+  std::vector<std::pair<uint64_t, std::shared_ptr<const Sampler>>> samplers_;
 
   explicit SamplerLibraryMTL(id<MTLDevice> device);
 
   // |SamplerLibrary|
-  const std::unique_ptr<const Sampler>& GetSampler(
-      SamplerDescriptor descriptor) override;
+  raw_ptr<const Sampler> GetSampler(
+      const SamplerDescriptor& descriptor) override;
 
   SamplerLibraryMTL(const SamplerLibraryMTL&) = delete;
 

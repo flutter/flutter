@@ -210,7 +210,7 @@ static bool Bind(PassBindingsCacheMTL& pass,
 static bool Bind(PassBindingsCacheMTL& pass,
                  ShaderStage stage,
                  size_t bind_index,
-                 const std::unique_ptr<const Sampler>& sampler,
+                 raw_ptr<const Sampler> sampler,
                  const Texture& texture) {
   if (!sampler || !texture.IsValid()) {
     return false;
@@ -400,13 +400,12 @@ bool RenderPassMTL::BindDynamicResource(
 }
 
 // |RenderPass|
-bool RenderPassMTL::BindResource(
-    ShaderStage stage,
-    DescriptorType type,
-    const SampledImageSlot& slot,
-    const ShaderMetadata* metadata,
-    std::shared_ptr<const Texture> texture,
-    const std::unique_ptr<const Sampler>& sampler) {
+bool RenderPassMTL::BindResource(ShaderStage stage,
+                                 DescriptorType type,
+                                 const SampledImageSlot& slot,
+                                 const ShaderMetadata* metadata,
+                                 std::shared_ptr<const Texture> texture,
+                                 raw_ptr<const Sampler> sampler) {
   if (!texture) {
     return false;
   }
@@ -419,7 +418,7 @@ bool RenderPassMTL::BindDynamicResource(
     const SampledImageSlot& slot,
     std::unique_ptr<ShaderMetadata> metadata,
     std::shared_ptr<const Texture> texture,
-    const std::unique_ptr<const Sampler>& sampler) {
+    raw_ptr<const Sampler> sampler) {
   if (!texture) {
     return false;
   }

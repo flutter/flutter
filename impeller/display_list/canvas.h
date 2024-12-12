@@ -209,14 +209,14 @@ class Canvas {
   void DrawImage(const std::shared_ptr<Texture>& image,
                  Point offset,
                  const Paint& paint,
-                 SamplerDescriptor sampler = {});
+                 const SamplerDescriptor& sampler = {});
 
   void DrawImageRect(
       const std::shared_ptr<Texture>& image,
       Rect source,
       Rect dest,
       const Paint& paint,
-      SamplerDescriptor sampler = {},
+      const SamplerDescriptor& sampler = {},
       SourceRectConstraint src_rect_constraint = SourceRectConstraint::kFast);
 
   void DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
