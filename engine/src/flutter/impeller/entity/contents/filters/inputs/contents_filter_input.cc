@@ -7,8 +7,6 @@
 #include <optional>
 #include <utility>
 
-#include "impeller/base/strings.h"
-
 namespace impeller {
 
 ContentsFilterInput::ContentsFilterInput(std::shared_ptr<Contents> contents,
@@ -18,7 +16,7 @@ ContentsFilterInput::ContentsFilterInput(std::shared_ptr<Contents> contents,
 ContentsFilterInput::~ContentsFilterInput() = default;
 
 std::optional<Snapshot> ContentsFilterInput::GetSnapshot(
-    const std::string& label,
+    std::string_view label,
     const ContentContext& renderer,
     const Entity& entity,
     std::optional<Rect> coverage_limit,
@@ -27,14 +25,14 @@ std::optional<Snapshot> ContentsFilterInput::GetSnapshot(
     coverage_limit = entity.GetContents()->GetCoverageHint();
   }
   if (!snapshot_.has_value()) {
-    snapshot_ = contents_->RenderToSnapshot(
-        renderer,        // renderer
-        entity,          // entity
-        coverage_limit,  // coverage_limit
-        std::nullopt,    // sampler_descriptor
-        msaa_enabled_,   // msaa_enabled
-        /*mip_count=*/mip_count,
-        SPrintF("Contents to %s Filter Snapshot", label.c_str()));  // label
+    snapshot_ = contents_->RenderToSnapshot(renderer,        // renderer
+                                            entity,          // entity
+                                            coverage_limit,  // coverage_limit
+                                            std::nullopt,  // sampler_descriptor
+                                            msaa_enabled_,  // msaa_enabled
+                                            /*mip_count=*/mip_count,  //
+                                            label                     //
+    );
   }
   return snapshot_;
 }

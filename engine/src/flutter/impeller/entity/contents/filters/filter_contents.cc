@@ -253,7 +253,7 @@ std::optional<Snapshot> FilterContents::RenderToSnapshot(
     const std::optional<SamplerDescriptor>& sampler_descriptor,
     bool msaa_enabled,
     int32_t mip_count,
-    const std::string& label) const {
+    std::string_view label) const {
   // Resolve the render instruction (entity) from the filter and render it to a
   // snapshot.
   if (std::optional<Entity> result =
@@ -266,7 +266,8 @@ std::optional<Snapshot> FilterContents::RenderToSnapshot(
         std::nullopt,    // sampler_descriptor
         true,            // msaa_enabled
         /*mip_count=*/mip_count,
-        label);  // label
+        label  // label
+    );
   }
 
   return std::nullopt;

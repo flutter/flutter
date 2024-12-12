@@ -59,7 +59,7 @@ class TiledTextureContents final : public ColorSourceContents {
       const std::optional<SamplerDescriptor>& sampler_descriptor = std::nullopt,
       bool msaa_enabled = true,
       int32_t mip_count = 1,
-      const std::string& label = "Tiled Texture Snapshot") const override;
+      std::string_view label = "Tiled Texture Snapshot") const override;
 
  private:
   std::shared_ptr<Texture> CreateFilterTexture(
