@@ -44,12 +44,19 @@ class FocusableText extends StatelessWidget {
         // would be the one given the FocusableText build function, and that
         // would start looking for a Focus widget ancestor of the FocusableText
         // instead of finding the one inside of its build function.
-        return Container(
-          padding: const EdgeInsets.all(8.0),
-          // Change the color based on whether or not this Container has focus.
-          color: Focus.of(context).hasPrimaryFocus ? Colors.red : Colors.white,
-          child: Text(data),
-        );
+        
+        // Wrap Container in GestureDetector to change focus on tap
+        return GestureDetector(
+            onTap: () {
+              Focus.of(context).requestFocus();
+            },
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              // Change the color based on whether or not this Container has focus.
+              color:
+                  Focus.of(context).hasPrimaryFocus ? Colors.red : Colors.white,
+              child: Text(data),
+            ));
       }),
     );
   }
