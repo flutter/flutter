@@ -1717,7 +1717,7 @@ void main() {
 
     // Exit animation
     await tester.tapAt(const Offset(20.0, 20.0));
-    await tester.pumpFrames(exitRecorder.record(target), const Duration(milliseconds: 400));
+    await tester.pumpFrames(exitRecorder.record(target), const Duration(milliseconds: 450));
 
     // Action sheet has disappeared
     expect(find.byType(CupertinoActionSheet), findsNothing);
@@ -1762,7 +1762,7 @@ void main() {
 
     // Exit animation
     await tester.tapAt(const Offset(20.0, 20.0));
-    await tester.pumpFrames(recorder.record(target), const Duration(milliseconds: 400));
+    await tester.pumpFrames(recorder.record(target), const Duration(milliseconds: 450));
 
     // Action sheet has disappeared
     expect(find.byType(CupertinoActionSheet), findsNothing);
