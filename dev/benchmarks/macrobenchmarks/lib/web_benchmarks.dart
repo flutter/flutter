@@ -36,8 +36,6 @@ import 'src/web/recorder.dart';
 
 typedef RecorderFactory = Recorder Function();
 
-const bool isSkwasm = bool.fromEnvironment('FLUTTER_WEB_USE_SKWASM');
-
 /// List of all benchmarks that run in the devicelab.
 ///
 /// When adding a new benchmark, add it to this map. Make sure that the name
