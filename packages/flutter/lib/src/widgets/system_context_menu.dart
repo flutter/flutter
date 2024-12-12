@@ -311,33 +311,6 @@ class SystemContextMenuItemSelectAll extends SystemContextMenuItem {
 }
 
 /// Creates an instance of [SystemContextMenuItem] for the
-/// system's built-in search web button.
-///
-/// Should only appear when content is selected.
-///
-/// The [title] is optional, but it must be specified before being sent to the
-/// platform. Typically it should be set to
-/// [WidgetsLocalizations.searchWebButtonlabel].
-///
-/// The action is handled by the platform.
-///
-/// See also:
-///
-///  * [SystemContextMenu], a widget that can be used to display the system
-///    context menu.
-///  * [SystemContextMenuItemDataSearchWeb], which specifies the data to be sent
-///    to the platform for this same button.
-class SystemContextMenuItemSearchWeb extends SystemContextMenuItem {
-  /// Creates an instance of [SystemContextMenuItemSearchWeb].
-  const SystemContextMenuItemSearchWeb({
-    this.title,
-  });
-
-  @override
-  final String? title;
-}
-
-/// Creates an instance of [SystemContextMenuItem] for the
 /// system's built-in look up button.
 ///
 /// Should only appear when content is selected.
@@ -362,6 +335,43 @@ class SystemContextMenuItemLookUp extends SystemContextMenuItem {
 
   @override
   final String? title;
+
+  @override
+  String toString() {
+    return 'SystemContextMenuItemLookUp(title: $title)';
+  }
+}
+
+/// Creates an instance of [SystemContextMenuItem] for the
+/// system's built-in search web button.
+///
+/// Should only appear when content is selected.
+///
+/// The [title] is optional, but it must be specified before being sent to the
+/// platform. Typically it should be set to
+/// [WidgetsLocalizations.searchWebButtonlabel].
+///
+/// The action is handled by the platform.
+///
+/// See also:
+///
+///  * [SystemContextMenu], a widget that can be used to display the system
+///    context menu.
+///  * [SystemContextMenuItemDataSearchWeb], which specifies the data to be sent
+///    to the platform for this same button.
+class SystemContextMenuItemSearchWeb extends SystemContextMenuItem {
+  /// Creates an instance of [SystemContextMenuItemSearchWeb].
+  const SystemContextMenuItemSearchWeb({
+    this.title,
+  });
+
+  @override
+  final String? title;
+
+  @override
+  String toString() {
+    return 'SystemContextMenuItemSearchWeb(title: $title)';
+  }
 }
 
 /// Creates an instance of [SystemContextMenuItem] for the
@@ -389,6 +399,11 @@ class SystemContextMenuItemShare extends SystemContextMenuItem {
 
   @override
   final String? title;
+
+  @override
+  String toString() {
+    return 'SystemContextMenuItemShare(title: $title)';
+  }
 }
 
 // TODO(justinmc): Support the "custom" type.
@@ -414,4 +429,9 @@ class SystemContextMenuItemCustom extends SystemContextMenuItem {
 
   @override
   final VoidCallback? onPressed;
+
+  @override
+  String toString() {
+    return 'SystemContextMenuItemCustom(title: $title, onPressed: $onPressed)';
+  }
 }

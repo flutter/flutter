@@ -2726,8 +2726,6 @@ sealed class SystemContextMenuItemData {
         && other.title == title
         && other.onPressed == onPressed;
   }
-
-  // TODO(justinmc): Override toStirng for this and the other class too.
 }
 
 /// A [SystemContextMenuButtonItemData] for the system's built-in copy button.
@@ -2813,6 +2811,11 @@ class SystemContextMenuItemDataLookUp extends SystemContextMenuItemData {
 
   @override
   final String title;
+
+  @override
+  String toString() {
+    return 'SystemContextMenuItemDataLookUp(title: $title)';
+  }
 }
 
 /// A [SystemContextMenuButtonItemData] for the system's built-in search web
@@ -2838,6 +2841,11 @@ class SystemContextMenuItemDataSearchWeb extends SystemContextMenuItemData {
 
   @override
   final String title;
+
+  @override
+  String toString() {
+    return 'SystemContextMenuItemDataSearchWeb(title: $title)';
+  }
 }
 
 /// A [SystemContextMenuButtonItemData] for the system's built-in share button.
@@ -2862,6 +2870,11 @@ class SystemContextMenuItemDataShare extends SystemContextMenuItemData {
 
   @override
   final String title;
+
+  @override
+  String toString() {
+    return 'SystemContextMenuItemDataShare(title: $title)';
+  }
 }
 
 // TODO(justinmc): Support the "custom" type.
@@ -2890,4 +2903,9 @@ class SystemContextMenuItemDataCustom extends SystemContextMenuItemData {
 
   @override
   final String title;
+
+  @override
+  String toString() {
+    return 'SystemContextMenuItemDataCustom(title: $title, onPressed: $onPressed)';
+  }
 }
