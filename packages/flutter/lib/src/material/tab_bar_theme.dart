@@ -531,6 +531,6 @@ class TabBarThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TabAlignment?>('tabAlignment', tabAlignment, defaultValue: null));
     properties.add(DiagnosticsProperty<TextScaler?>('textScaler', textScaler, defaultValue: null));
     properties.add(DiagnosticsProperty<TabIndicatorAnimation?>('indicatorAnimation', indicatorAnimation, defaultValue: null));
-     properties.add(DiagnosticsProperty<BorderRadius?>('splashBorderRadius', splashBorderRadius, defaultValue: null));
+    properties.add(DiagnosticsProperty<BorderRadius?>('splashBorderRadius', splashBorderRadius, defaultValue: null));
   }
 }
