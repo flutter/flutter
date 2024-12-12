@@ -40,7 +40,6 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
     TabAlignment? tabAlignment,
     TextScaler? textScaler,
     TabIndicatorAnimation? indicatorAnimation,
-    BorderRadius? splashBorderRadius,
     TabBarThemeData? data,
     Widget? child,
   }) : assert(
@@ -65,7 +64,6 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
     _tabAlignment = tabAlignment,
     _textScaler = textScaler,
     _indicatorAnimation = indicatorAnimation,
-    _splashBorderRadius = splashBorderRadius,
     _data = data,
     super(child: child ?? const SizedBox());
 
@@ -86,7 +84,6 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
   final TabAlignment? _tabAlignment;
   final TextScaler? _textScaler;
   final TabIndicatorAnimation? _indicatorAnimation;
-  final BorderRadius? _splashBorderRadius;
 
   /// Overrides the default value for [TabBar.indicator].
   ///
@@ -184,12 +181,6 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
   /// please use the [TabBarThemeData.indicatorAnimation] property in [data] instead.
   TabIndicatorAnimation? get indicatorAnimation => _data != null ? _data.indicatorAnimation : _indicatorAnimation;
 
-  /// Overrides the default value for [TabBar.splashBorderRadius].
-  ///
-  /// This property is obsolete and will be deprecated in a future release:
-  /// please use the [TabBarThemeData.splashBorderRadius] property in [data] instead.
-  BorderRadius? get splashBorderRadius => _data != null ? _data.splashBorderRadius : _splashBorderRadius;
-
   /// The properties used for all descendant [TabBar] widgets.
   TabBarThemeData get data => _data ?? TabBarThemeData(
     indicator: _indicator,
@@ -208,7 +199,6 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
     tabAlignment: _tabAlignment,
     textScaler: _textScaler,
     indicatorAnimation: _indicatorAnimation,
-    splashBorderRadius: _splashBorderRadius,
   );
 
   /// Creates a copy of this object but with the given fields replaced with the
@@ -252,7 +242,6 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
       tabAlignment: tabAlignment ?? this.tabAlignment,
       textScaler: textScaler ?? this.textScaler,
       indicatorAnimation: indicatorAnimation ?? this.indicatorAnimation,
-      splashBorderRadius: splashBorderRadius ?? this.splashBorderRadius,
     );
   }
 
@@ -289,7 +278,6 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
       tabAlignment: t < 0.5 ? a.tabAlignment : b.tabAlignment,
       textScaler: t < 0.5 ? a.textScaler : b.textScaler,
       indicatorAnimation: t < 0.5 ? a.indicatorAnimation : b.indicatorAnimation,
-      splashBorderRadius: BorderRadius.lerp(a.splashBorderRadius, b.splashBorderRadius, t),
     );
   }
 
