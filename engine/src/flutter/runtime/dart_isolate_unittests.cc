@@ -716,7 +716,7 @@ class FakePlatformConfigurationClient : public PlatformConfigurationClient {
       std::unique_ptr<PlatformMessage> message) override {}
   FontCollection& GetFontCollection() override {
     FML_UNREACHABLE();
-    return *(FontCollection*)(this);
+    return *reinterpret_cast<FontCollection*>(this);
   }
   std::shared_ptr<AssetManager> GetAssetManager() override { return nullptr; }
   void UpdateIsolateDescription(const std::string isolate_name,

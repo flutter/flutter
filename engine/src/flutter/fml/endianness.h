@@ -41,11 +41,11 @@ constexpr T ByteSwap(T n) {
   if constexpr (sizeof(T) == 1) {
     return n;
   } else if constexpr (sizeof(T) == 2) {
-    return (T)FML_BYTESWAP_16((uint16_t)n);
+    return static_cast<T>(FML_BYTESWAP_16((uint16_t)n));
   } else if constexpr (sizeof(T) == 4) {
-    return (T)FML_BYTESWAP_32((uint32_t)n);
+    return static_cast<T>(FML_BYTESWAP_32((uint32_t)n));
   } else if constexpr (sizeof(T) == 8) {
-    return (T)FML_BYTESWAP_64((uint64_t)n);
+    return static_cast<T>(FML_BYTESWAP_64((uint64_t)n));
   } else {
     static_assert(!sizeof(T), "Unsupported size");
   }

@@ -67,9 +67,9 @@ class EventChannel {
     BinaryMessageHandler binary_handler =
         [shared_handler, codec, channel_name, messenger,
          // Mutable state to track the handler's listening status.
-         is_listening = bool(false)](const uint8_t* message,
-                                     const size_t message_size,
-                                     const BinaryReply& reply) mutable {
+         is_listening = false](const uint8_t* message,
+                               const size_t message_size,
+                               const BinaryReply& reply) mutable {
           constexpr char kOnListenMethod[] = "listen";
           constexpr char kOnCancelMethod[] = "cancel";
 

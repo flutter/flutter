@@ -754,143 +754,154 @@ void vkDestroyFramebuffer(VkDevice device,
 PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
                                             const char* pName) {
   if (strcmp("vkEnumerateInstanceExtensionProperties", pName) == 0) {
-    return (PFN_vkVoidFunction)vkEnumerateInstanceExtensionProperties;
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        vkEnumerateInstanceExtensionProperties);
   } else if (strcmp("vkEnumerateInstanceLayerProperties", pName) == 0) {
-    return (PFN_vkVoidFunction)vkEnumerateInstanceLayerProperties;
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        vkEnumerateInstanceLayerProperties);
   } else if (strcmp("vkEnumeratePhysicalDevices", pName) == 0) {
-    return (PFN_vkVoidFunction)vkEnumeratePhysicalDevices;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkEnumeratePhysicalDevices);
   } else if (strcmp("vkGetPhysicalDeviceFormatProperties", pName) == 0) {
-    return (PFN_vkVoidFunction)vkGetPhysicalDeviceFormatProperties;
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        vkGetPhysicalDeviceFormatProperties);
   } else if (strcmp("vkGetPhysicalDeviceProperties", pName) == 0) {
-    return (PFN_vkVoidFunction)vkGetPhysicalDeviceProperties;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkGetPhysicalDeviceProperties);
   } else if (strcmp("vkGetPhysicalDeviceQueueFamilyProperties", pName) == 0) {
-    return (PFN_vkVoidFunction)vkGetPhysicalDeviceQueueFamilyProperties;
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        vkGetPhysicalDeviceQueueFamilyProperties);
   } else if (strcmp("vkEnumerateDeviceExtensionProperties", pName) == 0) {
-    return (PFN_vkVoidFunction)vkEnumerateDeviceExtensionProperties;
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        vkEnumerateDeviceExtensionProperties);
   } else if (strcmp("vkCreateDevice", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCreateDevice;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreateDevice);
   } else if (strcmp("vkCreateInstance", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCreateInstance;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreateInstance);
   } else if (strcmp("vkGetPhysicalDeviceMemoryProperties", pName) == 0) {
-    return (PFN_vkVoidFunction)vkGetPhysicalDeviceMemoryProperties;
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        vkGetPhysicalDeviceMemoryProperties);
   } else if (strcmp("vkCreatePipelineCache", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCreatePipelineCache;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreatePipelineCache);
   } else if (strcmp("vkCreateCommandPool", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCreateCommandPool;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreateCommandPool);
   } else if (strcmp("vkResetCommandPool", pName) == 0) {
-    return (PFN_vkVoidFunction)vkResetCommandPool;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkResetCommandPool);
   } else if (strcmp("vkAllocateCommandBuffers", pName) == 0) {
-    return (PFN_vkVoidFunction)vkAllocateCommandBuffers;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkAllocateCommandBuffers);
   } else if (strcmp("vkBeginCommandBuffer", pName) == 0) {
-    return (PFN_vkVoidFunction)vkBeginCommandBuffer;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkBeginCommandBuffer);
   } else if (strcmp("vkCreateImage", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCreateImage;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreateImage);
   } else if (strcmp("vkGetInstanceProcAddr", pName) == 0) {
-    return (PFN_vkVoidFunction)GetMockVulkanProcAddress;
+    return reinterpret_cast<PFN_vkVoidFunction>(GetMockVulkanProcAddress);
   } else if (strcmp("vkGetDeviceProcAddr", pName) == 0) {
-    return (PFN_vkVoidFunction)GetMockVulkanProcAddress;
+    return reinterpret_cast<PFN_vkVoidFunction>(GetMockVulkanProcAddress);
   } else if (strcmp("vkGetImageMemoryRequirements2KHR", pName) == 0 ||
              strcmp("vkGetImageMemoryRequirements2", pName) == 0) {
-    return (PFN_vkVoidFunction)vkGetImageMemoryRequirements2KHR;
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        vkGetImageMemoryRequirements2KHR);
   } else if (strcmp("vkAllocateMemory", pName) == 0) {
-    return (PFN_vkVoidFunction)vkAllocateMemory;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkAllocateMemory);
   } else if (strcmp("vkBindImageMemory", pName) == 0) {
-    return (PFN_vkVoidFunction)vkBindImageMemory;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkBindImageMemory);
   } else if (strcmp("vkCreateImageView", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCreateImageView;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreateImageView);
   } else if (strcmp("vkCreateBuffer", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCreateBuffer;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreateBuffer);
   } else if (strcmp("vkGetBufferMemoryRequirements2KHR", pName) == 0 ||
              strcmp("vkGetBufferMemoryRequirements2", pName) == 0) {
-    return (PFN_vkVoidFunction)vkGetBufferMemoryRequirements2KHR;
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        vkGetBufferMemoryRequirements2KHR);
   } else if (strcmp("vkBindBufferMemory", pName) == 0) {
-    return (PFN_vkVoidFunction)vkBindBufferMemory;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkBindBufferMemory);
   } else if (strcmp("vkCreateRenderPass", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCreateRenderPass;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreateRenderPass);
   } else if (strcmp("vkCreateDescriptorSetLayout", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCreateDescriptorSetLayout;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreateDescriptorSetLayout);
   } else if (strcmp("vkCreatePipelineLayout", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCreatePipelineLayout;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreatePipelineLayout);
   } else if (strcmp("vkCreateGraphicsPipelines", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCreateGraphicsPipelines;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreateGraphicsPipelines);
   } else if (strcmp("vkDestroyDevice", pName) == 0) {
-    return (PFN_vkVoidFunction)vkDestroyDevice;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyDevice);
   } else if (strcmp("vkDestroyPipeline", pName) == 0) {
-    return (PFN_vkVoidFunction)vkDestroyPipeline;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyPipeline);
   } else if (strcmp("vkCreateShaderModule", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCreateShaderModule;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreateShaderModule);
   } else if (strcmp("vkDestroyShaderModule", pName) == 0) {
-    return (PFN_vkVoidFunction)vkDestroyShaderModule;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyShaderModule);
   } else if (strcmp("vkDestroyPipelineCache", pName) == 0) {
-    return (PFN_vkVoidFunction)vkDestroyPipelineCache;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyPipelineCache);
   } else if (strcmp("vkCmdBindPipeline", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCmdBindPipeline;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCmdBindPipeline);
   } else if (strcmp("vkCmdSetStencilReference", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCmdSetStencilReference;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCmdSetStencilReference);
   } else if (strcmp("vkCmdSetScissor", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCmdSetScissor;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCmdSetScissor);
   } else if (strcmp("vkCmdSetViewport", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCmdSetViewport;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCmdSetViewport);
   } else if (strcmp("vkDestroyCommandPool", pName) == 0) {
-    return (PFN_vkVoidFunction)vkDestroyCommandPool;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyCommandPool);
   } else if (strcmp("vkFreeCommandBuffers", pName) == 0) {
-    return (PFN_vkVoidFunction)vkFreeCommandBuffers;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkFreeCommandBuffers);
   } else if (strcmp("vkEndCommandBuffer", pName) == 0) {
-    return (PFN_vkVoidFunction)vkEndCommandBuffer;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkEndCommandBuffer);
   } else if (strcmp("vkCreateFence", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCreateFence;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreateFence);
   } else if (strcmp("vkDestroyFence", pName) == 0) {
-    return (PFN_vkVoidFunction)vkDestroyFence;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyFence);
   } else if (strcmp("vkQueueSubmit", pName) == 0) {
-    return (PFN_vkVoidFunction)vkQueueSubmit;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkQueueSubmit);
   } else if (strcmp("vkWaitForFences", pName) == 0) {
-    return (PFN_vkVoidFunction)vkWaitForFences;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkWaitForFences);
   } else if (strcmp("vkGetFenceStatus", pName) == 0) {
-    return (PFN_vkVoidFunction)vkGetFenceStatus;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkGetFenceStatus);
   } else if (strcmp("vkResetFences", pName) == 0) {
-    return (PFN_vkVoidFunction)vkResetFences;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkResetFences);
   } else if (strcmp("vkCreateDebugUtilsMessengerEXT", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCreateDebugUtilsMessengerEXT;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreateDebugUtilsMessengerEXT);
   } else if (strcmp("vkSetDebugUtilsObjectNameEXT", pName) == 0) {
-    return (PFN_vkVoidFunction)vkSetDebugUtilsObjectNameEXT;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkSetDebugUtilsObjectNameEXT);
   } else if (strcmp("vkCreateQueryPool", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCreateQueryPool;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreateQueryPool);
   } else if (strcmp("vkDestroyQueryPool", pName) == 0) {
-    return (PFN_vkVoidFunction)vkDestroyQueryPool;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyQueryPool);
   } else if (strcmp("vkGetQueryPoolResults", pName) == 0) {
-    return (PFN_vkVoidFunction)vkGetQueryPoolResults;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkGetQueryPoolResults);
   } else if (strcmp("vkCreateDescriptorPool", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCreateDescriptorPool;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreateDescriptorPool);
   } else if (strcmp("vkDestroyDescriptorPool", pName) == 0) {
-    return (PFN_vkVoidFunction)vkDestroyDescriptorPool;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyDescriptorPool);
   } else if (strcmp("vkResetDescriptorPool", pName) == 0) {
-    return (PFN_vkVoidFunction)vkResetDescriptorPool;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkResetDescriptorPool);
   } else if (strcmp("vkAllocateDescriptorSets", pName) == 0) {
-    return (PFN_vkVoidFunction)vkAllocateDescriptorSets;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkAllocateDescriptorSets);
   } else if (strcmp("vkGetPhysicalDeviceSurfaceFormatsKHR", pName) == 0) {
-    return (PFN_vkVoidFunction)vkGetPhysicalDeviceSurfaceFormatsKHR;
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        vkGetPhysicalDeviceSurfaceFormatsKHR);
   } else if (strcmp("vkGetPhysicalDeviceSurfaceCapabilitiesKHR", pName) == 0) {
-    return (PFN_vkVoidFunction)vkGetPhysicalDeviceSurfaceCapabilitiesKHR;
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR);
   } else if (strcmp("vkGetPhysicalDeviceSurfaceSupportKHR", pName) == 0) {
-    return (PFN_vkVoidFunction)vkGetPhysicalDeviceSurfaceSupportKHR;
+    return reinterpret_cast<PFN_vkVoidFunction>(
+        vkGetPhysicalDeviceSurfaceSupportKHR);
   } else if (strcmp("vkCreateSwapchainKHR", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCreateSwapchainKHR;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreateSwapchainKHR);
   } else if (strcmp("vkDestroySwapchainKHR", pName) == 0) {
-    return (PFN_vkVoidFunction)vkDestroySwapchainKHR;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroySwapchainKHR);
   } else if (strcmp("vkGetSwapchainImagesKHR", pName) == 0) {
-    return (PFN_vkVoidFunction)vkGetSwapchainImagesKHR;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkGetSwapchainImagesKHR);
   } else if (strcmp("vkCreateSemaphore", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCreateSemaphore;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreateSemaphore);
   } else if (strcmp("vkDestroySemaphore", pName) == 0) {
-    return (PFN_vkVoidFunction)vkDestroySemaphore;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroySemaphore);
   } else if (strcmp("vkDestroySurfaceKHR", pName) == 0) {
-    return (PFN_vkVoidFunction)vkDestroySurfaceKHR;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroySurfaceKHR);
   } else if (strcmp("vkAcquireNextImageKHR", pName) == 0) {
-    return (PFN_vkVoidFunction)vkAcquireNextImageKHR;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkAcquireNextImageKHR);
   } else if (strcmp("vkCreateFramebuffer", pName) == 0) {
-    return (PFN_vkVoidFunction)vkCreateFramebuffer;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkCreateFramebuffer);
   } else if (strcmp("vkDestroyFramebuffer", pName) == 0) {
-    return (PFN_vkVoidFunction)vkDestroyFramebuffer;
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyFramebuffer);
   }
   return noop;
 }

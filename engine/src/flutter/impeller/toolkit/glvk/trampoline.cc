@@ -272,12 +272,12 @@ bool Trampoline::BlitTextureOpenGLToVulkan(
   gl.BufferData(GL_ARRAY_BUFFER, sizeof(kVertData), kVertData, GL_STATIC_DRAW);
   gl.EnableVertexAttribArray(kAttributeIndexPosition);
   gl.EnableVertexAttribArray(kAttributeIndexTexCoord);
-  gl.VertexAttribPointer(kAttributeIndexPosition, 2, GL_FLOAT, GL_FALSE,
-                         sizeof(VertexData),
-                         (void*)offsetof(VertexData, position));
-  gl.VertexAttribPointer(kAttributeIndexTexCoord, 2, GL_FLOAT, GL_FALSE,
-                         sizeof(VertexData),
-                         (void*)offsetof(VertexData, tex_coord));
+  gl.VertexAttribPointer(
+      kAttributeIndexPosition, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData),
+      reinterpret_cast<void*>(offsetof(VertexData, position)));
+  gl.VertexAttribPointer(
+      kAttributeIndexTexCoord, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData),
+      reinterpret_cast<void*>(offsetof(VertexData, tex_coord)));
 
   gl.ActiveTexture(GL_TEXTURE0);
   gl.BindTexture(src_texture.target, src_texture.texture);

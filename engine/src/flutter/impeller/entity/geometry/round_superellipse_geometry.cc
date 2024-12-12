@@ -56,8 +56,8 @@ constexpr Scalar kRatioStep =
 Scalar LerpPrecomputedVariable(size_t column, Scalar ratio) {
   Scalar steps =
       std::clamp<Scalar>((ratio - kMinRatio) / kRatioStep, 0, kNumRecords - 1);
-  size_t left =
-      std::clamp<size_t>((size_t)std::floor(steps), 0, kNumRecords - 2);
+  size_t left = std::clamp<size_t>(static_cast<size_t>(std::floor(steps)), 0,
+                                   kNumRecords - 2);
   Scalar frac = steps - left;
 
   return (1 - frac) * kPrecomputedVariables[left][column] +
@@ -95,7 +95,8 @@ Scalar CalculateStep(Scalar minDimension, Scalar fullAngle) {
   // Assumes at least 1 point is needed per pixel to achieve sufficient
   // smoothness.
   constexpr Scalar pointsPerPixel = 1.0;
-  size_t pointsByDimension = (size_t)std::ceil(minDimension * pointsPerPixel);
+  size_t pointsByDimension =
+      static_cast<size_t>(std::ceil(minDimension * pointsPerPixel));
   Scalar angleByDimension = fullAngle / pointsByDimension;
 
   return std::min(kMinAngleStep, angleByDimension);

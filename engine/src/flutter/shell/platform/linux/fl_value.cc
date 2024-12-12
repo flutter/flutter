@@ -450,7 +450,7 @@ G_MODULE_EXPORT void fl_value_unref(FlValue* self) {
     case FL_VALUE_TYPE_CUSTOM: {
       FlValueCustom* v = reinterpret_cast<FlValueCustom*>(self);
       if (v->destroy_notify != nullptr) {
-        v->destroy_notify((gpointer)v->value);
+        v->destroy_notify(const_cast<gpointer>(v->value));
       }
       break;
     }

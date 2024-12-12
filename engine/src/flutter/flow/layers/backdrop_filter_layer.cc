@@ -42,7 +42,7 @@ void BackdropFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
 
 void BackdropFilterLayer::Preroll(PrerollContext* context) {
   Layer::AutoPrerollSaveLayerState save =
-      Layer::AutoPrerollSaveLayerState::Create(context, true, bool(filter_));
+      Layer::AutoPrerollSaveLayerState::Create(context, true, bool{filter_});
   if (filter_ && context->view_embedder != nullptr) {
     context->view_embedder->PushFilterToVisitedPlatformViews(
         filter_, ToSkRect(context->state_stack.device_cull_rect()));

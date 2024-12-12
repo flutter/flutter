@@ -86,14 +86,16 @@ class HandleGLES {
   HandleGLES(HandleType p_type, UniqueID p_name)
       : type_(p_type),
         name_(p_name),
-        hash_(fml::HashCombine(std::underlying_type_t<decltype(p_type)>(p_type),
-                               p_name)) {}
+        hash_(fml::HashCombine(
+            static_cast<std::underlying_type_t<decltype(p_type)>>(p_type),
+            p_name)) {}
 
   HandleGLES(HandleType p_type, std::optional<UniqueID> p_name)
       : type_(p_type),
         name_(p_name),
-        hash_(fml::HashCombine(std::underlying_type_t<decltype(p_type)>(p_type),
-                               p_name)) {}
+        hash_(fml::HashCombine(
+            static_cast<std::underlying_type_t<decltype(p_type)>>(p_type),
+            p_name)) {}
 
   static HandleGLES Create(HandleType type) {
     return HandleGLES{type, UniqueID{}};

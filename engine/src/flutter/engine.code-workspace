@@ -123,7 +123,9 @@
       "__std_stream": "cpp",
       "*.ipp": "cpp",
       "csetjmp": "cpp",
-      "cfenv": "cpp"
+      "cfenv": "cpp",
+      "execution": "cpp",
+      "print": "cpp"
     },
     "C_Cpp.default.includePath": [
       "${default}",

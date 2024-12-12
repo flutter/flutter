@@ -1014,7 +1014,8 @@ void Canvas::SaveLayer(const Paint& paint,
     subpass_size = ISize(subpass_coverage.GetSize());
   } else {
     did_round_out = true;
-    subpass_size = ISize(IRect::RoundOut(subpass_coverage).GetSize());
+    subpass_size =
+        static_cast<ISize>(IRect::RoundOut(subpass_coverage).GetSize());
   }
   if (subpass_size.IsEmpty()) {
     return SkipUntilMatchingRestore(total_content_depth);

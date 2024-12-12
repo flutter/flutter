@@ -36,7 +36,7 @@ void ImageExternalTextureGLSkia::BindImageToTexture(
   }
   glBindTexture(GL_TEXTURE_EXTERNAL_OES, tex);
   glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES,
-                               (GLeglImageOES)image.get().image);
+                               static_cast<GLeglImageOES>(image.get().image));
 }
 
 sk_sp<flutter::DlImage> ImageExternalTextureGLSkia::CreateDlImage(

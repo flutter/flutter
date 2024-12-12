@@ -1016,7 +1016,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
     }
     if ([self validateOneVisualEffectView:subview
                             expectedFrame:CGRectMake(0, 0, 10, 10)
-                              inputRadius:(CGFloat)expectInputRadius]) {
+                              inputRadius:expectInputRadius]) {
       [newVisualEffectViews addObject:subview];
     }
   }
@@ -1072,7 +1072,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
     }
     if ([self validateOneVisualEffectView:subview
                             expectedFrame:CGRectMake(0, 0, 10, 10)
-                              inputRadius:(CGFloat)expectInputRadius]) {
+                              inputRadius:expectInputRadius]) {
       [newVisualEffectViews addObject:subview];
     }
   }
@@ -1127,7 +1127,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
     }
     if ([self validateOneVisualEffectView:subview
                             expectedFrame:CGRectMake(0, 0, 10, 10)
-                              inputRadius:(CGFloat)expectInputRadius]) {
+                              inputRadius:expectInputRadius]) {
       [newVisualEffectViews addObject:subview];
     }
   }

@@ -17,7 +17,6 @@ Checks: >-
   -google-default-arguments,
   -google-objc-global-variable-declaration,
   -google-objc-avoid-throwing-exception,
-  -google-readability-casting,
   -clang-analyzer-nullability.NullPassedToNonnull,
   -clang-analyzer-nullability.NullablePassedToNonnull,
   -clang-analyzer-nullability.NullReturnedFromNonnull,

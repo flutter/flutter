@@ -62,8 +62,8 @@ static std::string JoinVKDebugUtilsObjectNameInfoEXT(
     size_t count) {
   std::stringstream stream;
   for (size_t i = 0u; i < count; i++) {
-    stream << vk::to_string(vk::ObjectType(names[i].objectType)) << " ["
-           << names[i].objectHandle << "] [";
+    stream << vk::to_string(static_cast<vk::ObjectType>(names[i].objectType))
+           << " [" << names[i].objectHandle << "] [";
     if (names[i].pObjectName != nullptr) {
       stream << names[i].pObjectName;
     } else {
