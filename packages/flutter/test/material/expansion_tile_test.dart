@@ -985,7 +985,7 @@ void main() {
     Material material = getMaterial(tester);
 
     // Test initial ExpansionTile properties.
-    expect(material.shape, collapsedShape);
+    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
     expect(material.color, const Color(0xffff0000));
     expect(material.clipBehavior, Clip.antiAlias);
     expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xffffffff));
