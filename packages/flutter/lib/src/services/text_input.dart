@@ -2483,7 +2483,9 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// system.
   bool _hiddenBySystem = false;
 
-  bool get _isVisible => this == _lastShown && !_hiddenBySystem;
+  /// Indicates whether the system context menu managed by this controller is
+  /// currently being displayed to the user.
+  bool get isVisible => this == _lastShown && !_hiddenBySystem;
 
   /// After calling [dispose], this instance can no longer be used.
   bool _isDisposed = false;
@@ -2495,7 +2497,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   @override
   void handleSystemHide() {
     assert(!_isDisposed);
-    assert(_isVisible);
+    assert(isVisible);
     if (_lastShown == this) {
       _lastShown = null;
     }
@@ -2506,7 +2508,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   @override
   void handleTapCustomActionItem(int callbackId) {
     assert(!_isDisposed);
-    assert(_isVisible);
+    assert(isVisible);
     final VoidCallback? callback = _buttonCallbacks[callbackId];
     if (callback == null) {
       assert(false, 'Tap received for non-existent item with id $callbackId.');
@@ -2549,14 +2551,14 @@ class SystemContextMenuController with SystemContextMenuClient {
     );
 
     // Don't show the same thing that's already being shown.
-    if (_lastShown != null && _lastShown!._isVisible
+    if (_lastShown != null && _lastShown!.isVisible
         && _lastShown!._lastTargetRect == targetRect
         && listEquals(_lastShown!._lastItems, items)) {
       return Future<void>.value();
     }
 
     assert(
-      _lastShown == null || _lastShown == this || !_lastShown!._isVisible,
+      _lastShown == null || _lastShown == this || !_lastShown!.isVisible,
       'Attempted to show while another instance was still visible.',
     );
 
@@ -2623,7 +2625,7 @@ class SystemContextMenuController with SystemContextMenuClient {
 
   @override
   String toString() {
-    return 'SystemContextMenuController(onSystemHide=$onSystemHide, _hiddenBySystem=$_hiddenBySystem, _isVisible=$_isVisible, _isDisposed=$_isDisposed)';
+    return 'SystemContextMenuController(onSystemHide=$onSystemHide, _hiddenBySystem=$_hiddenBySystem, _isVisible=$isVisible, _isDisposed=$_isDisposed)';
   }
 
   /// Used to release resources when this instance will never be used again.
@@ -2724,6 +2726,8 @@ sealed class SystemContextMenuItemData {
         && other.title == title
         && other.onPressed == onPressed;
   }
+
+  // TODO(justinmc): Override toStirng for this and the other class too.
 }
 
 /// A [SystemContextMenuButtonItemData] for the system's built-in copy button.

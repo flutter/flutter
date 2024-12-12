@@ -5,6 +5,7 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
@@ -76,9 +77,7 @@ class SystemContextMenu extends StatefulWidget {
         ),
       ),
       items: items,
-      onSystemHide: () {
-        editableTextState.hideToolbar();
-      },
+      onSystemHide: editableTextState.hideToolbar,
     );
   }
 
@@ -143,6 +142,17 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
     };
   }
 
+  void _show() {
+    final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+    final Iterable<SystemContextMenuItemData>? datas =
+        widget.items?.map((SystemContextMenuItem item) => _itemToData(item, localizations));
+    _systemContextMenuController.show(
+      widget.anchor,
+      // TODO(justinmc): Don't show irrelevant items, like don't show "search" if there is no selection.
+      datas?.toList(),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -154,17 +164,10 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
   @override
   void didUpdateWidget(SystemContextMenu oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // TODO(justinmc): Or if items changed.
-    if (widget.anchor != oldWidget.anchor) {
-      // TODO(justinmc): Deduplicate with the `show` call in the first build below.
-      final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-      final Iterable<SystemContextMenuItemData>? datas =
-        widget.items?.map((SystemContextMenuItem item) => _itemToData(item, localizations));
-      _systemContextMenuController.show(
-        widget.anchor,
-        // TODO(justinmc): Don't show irrelevant items, like don't show "search" if there is no selection.
-        datas?.toList(),
-      );
+    if (_systemContextMenuController.isVisible
+        && (widget.anchor != oldWidget.anchor
+            || !listEquals(widget.items, oldWidget.items))) {
+      _show();
     }
   }
 
@@ -179,13 +182,7 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
     assert(SystemContextMenu.isSupported(context));
     if (isFirstBuild) {
       isFirstBuild = false;
-      final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-      final Iterable<SystemContextMenuItemData>? datas =
-        widget.items?.map((SystemContextMenuItem item) => _itemToData(item, localizations));
-      _systemContextMenuController.show(
-        widget.anchor,
-        datas?.toList(),
-      );
+      _show();
     }
 
     return const SizedBox.shrink();
