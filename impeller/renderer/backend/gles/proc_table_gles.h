@@ -314,6 +314,8 @@ class ProcTableGLES {
 
   bool IsCurrentFramebufferComplete() const;
 
+  bool SupportsDebugLabels() const;
+
   bool SetDebugLabel(DebugResourceType type,
                      GLint name,
                      std::string_view label) const;
