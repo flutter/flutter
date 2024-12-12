@@ -391,6 +391,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
 
   - name: Linux packages_autoroller
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/159544
     presubmit: false
     bringup: true # https://github.com/flutter/flutter/issues/160055
     recipe: pub_autoroller/pub_autoroller
