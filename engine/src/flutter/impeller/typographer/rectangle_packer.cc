@@ -31,7 +31,7 @@ class SkylineRectanglePacker final : public RectanglePacker {
   bool AddRect(int w, int h, IPoint16* loc) final;
 
   Scalar PercentFull() const final {
-    return area_so_far_ / ((float)width() * height());
+    return area_so_far_ / (static_cast<float>(width()) * height());
   }
 
  private:
@@ -60,8 +60,8 @@ class SkylineRectanglePacker final : public RectanglePacker {
 };
 
 bool SkylineRectanglePacker::AddRect(int p_width, int p_height, IPoint16* loc) {
-  if ((unsigned)p_width > (unsigned)width() ||
-      (unsigned)p_height > (unsigned)height()) {
+  if (static_cast<unsigned>(p_width) > static_cast<unsigned>(width()) ||
+      static_cast<unsigned>(p_height) > static_cast<unsigned>(height())) {
     return false;
   }
 

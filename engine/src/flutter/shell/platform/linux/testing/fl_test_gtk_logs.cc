@@ -12,13 +12,14 @@ namespace {
 
 bool gtk_initialized = false;
 GLogWriterFunc log_writer_cb = nullptr;
-GLogLevelFlags fl_received_log_levels = (GLogLevelFlags)0x0;
+GLogLevelFlags fl_received_log_levels = static_cast<GLogLevelFlags>(0x0);
 
 GLogWriterOutput log_writer(GLogLevelFlags log_level,
                             const GLogField* fields,
                             gsize n_fields,
                             gpointer user_data) {
-  fl_received_log_levels = (GLogLevelFlags)(log_level | fl_received_log_levels);
+  fl_received_log_levels =
+      static_cast<GLogLevelFlags>(log_level | fl_received_log_levels);
   if (log_writer_cb == nullptr) {
     return g_log_writer_default(log_level, fields, n_fields, user_data);
   }
@@ -43,7 +44,7 @@ void fl_ensure_gtk_init(GLogWriterFunc writer) {
 }
 
 void fl_reset_received_gtk_log_levels() {
-  fl_received_log_levels = (GLogLevelFlags)0x0;
+  fl_received_log_levels = static_cast<GLogLevelFlags>(0x0);
 }
 
 GLogLevelFlags fl_get_received_gtk_log_levels() {

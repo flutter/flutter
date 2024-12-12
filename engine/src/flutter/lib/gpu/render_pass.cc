@@ -84,6 +84,8 @@ bool RenderPass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
 }
 
 void RenderPass::SetPipeline(fml::RefPtr<RenderPipeline> pipeline) {
+  // On debug this makes a difference, but not on release builds.
+  // NOLINTNEXTLINE(performance-move-const-arg)
   render_pipeline_ = std::move(pipeline);
 }
 

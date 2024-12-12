@@ -50,7 +50,7 @@ uint32_t FlutterStandardCodecHelperReadSize(unsigned long* location,
                                             CFDataRef data) {
   uint8_t byte = FlutterStandardCodecHelperReadByte(location, data);
   if (byte < 254) {
-    return (uint32_t)byte;
+    return static_cast<uint32_t>(byte);
   } else if (byte == 254) {
     UInt16 value;
     FlutterStandardCodecHelperReadBytes(location, 2, &value, data);
@@ -107,7 +107,7 @@ CFTypeRef FlutterStandardCodecHelperReadValueOfType(
     CFTypeRef (*ReadValue)(CFTypeRef),
     CFTypeRef (*ReadTypedDataOfType)(FlutterStandardField, CFTypeRef),
     CFTypeRef user_data) {
-  FlutterStandardField field = (FlutterStandardField)type;
+  FlutterStandardField field = static_cast<FlutterStandardField>(type);
   switch (field) {
     case FlutterStandardFieldNil:
       return nil;
@@ -190,7 +190,7 @@ void FlutterStandardCodecHelperWriteSize(CFMutableDataRef data, uint32_t size) {
     FlutterStandardCodecHelperWriteByte(data, size);
   } else if (size <= 0xffff) {
     FlutterStandardCodecHelperWriteByte(data, 254);
-    UInt16 value = (UInt16)size;
+    UInt16 value = static_cast<UInt16>(size);
     FlutterStandardCodecHelperWriteBytes(data, &value, 2);
   } else {
     FlutterStandardCodecHelperWriteByte(data, 255);
@@ -240,7 +240,7 @@ bool FlutterStandardCodecHelperWriteNumber(CFMutableDataRef data,
                                            CFNumberRef number) {
   bool success = false;
   if (CFGetTypeID(number) == CFBooleanGetTypeID()) {
-    bool b = CFBooleanGetValue((CFBooleanRef)number);
+    bool b = CFBooleanGetValue(reinterpret_cast<CFBooleanRef>(number));
     FlutterStandardCodecHelperWriteByte(
         data, (b ? FlutterStandardFieldTrue : FlutterStandardFieldFalse));
     success = true;

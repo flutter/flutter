@@ -48,8 +48,9 @@ sk_sp<flutter::DlImage> ImageExternalTextureGLImpeller::CreateDlImage(
     return nullptr;
   }
   // Associate the hardware buffer image with the texture.
-  glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES,
-                               (GLeglImageOES)egl_image.get().image);
+  glEGLImageTargetTexture2DOES(
+      GL_TEXTURE_EXTERNAL_OES,
+      static_cast<GLeglImageOES>(egl_image.get().image));
   gl_entries_[id.value_or(0)] = GlEntry{
       .egl_image = std::move(egl_image),
   };

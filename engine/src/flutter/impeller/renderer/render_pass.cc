@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "impeller/renderer/render_pass.h"
+
+#include <utility>
 #include "fml/status.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/vertex_buffer.h"
@@ -82,7 +84,9 @@ const std::shared_ptr<const Context>& RenderPass::GetContext() const {
 }
 
 void RenderPass::SetPipeline(PipelineRef pipeline) {
-  pending_.pipeline = pipeline;
+  // On debug this makes a difference, but not on release builds.
+  // NOLINTNEXTLINE(performance-move-const-arg)
+  pending_.pipeline = std::move(pipeline);
 }
 
 void RenderPass::SetPipeline(

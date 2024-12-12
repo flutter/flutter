@@ -196,7 +196,7 @@
     @autoreleasepool {
       id<CAMetalDrawable> drawable = [layer nextDrawable];
       XCTAssertNotNil(drawable);
-      texture = (id<MTLTexture>)drawable.texture;
+      texture = drawable.texture;
       // Dropping the drawable must return texture to pool, so
       // next drawable should return the same texture.
     }

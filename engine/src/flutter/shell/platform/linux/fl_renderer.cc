@@ -271,7 +271,8 @@ static void render_with_textures(FlRenderer* self,
     GLint texcoord_index = glGetAttribLocation(priv->program, "in_texcoord");
     glEnableVertexAttribArray(texcoord_index);
     glVertexAttribPointer(texcoord_index, 2, GL_FLOAT, GL_FALSE,
-                          sizeof(GLfloat) * 4, (void*)(sizeof(GLfloat) * 2));
+                          sizeof(GLfloat) * 4,
+                          reinterpret_cast<void*>(sizeof(GLfloat) * 2));
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -323,9 +324,9 @@ static void fl_renderer_init(FlRenderer* self) {
       fl_renderer_get_instance_private(self));
   priv->views = g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr,
                                       free_weak_ref);
-  priv->framebuffers_by_view_id =
-      g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr,
-                            (GDestroyNotify)g_ptr_array_unref);
+  priv->framebuffers_by_view_id = g_hash_table_new_full(
+      g_direct_hash, g_direct_equal, nullptr,
+      reinterpret_cast<GDestroyNotify>(g_ptr_array_unref));
 }
 
 void fl_renderer_set_engine(FlRenderer* self, FlEngine* engine) {

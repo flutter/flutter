@@ -416,7 +416,7 @@ static void DrawTextFrame(const hpp::TypographyContext& tc,
 
   hpp::ParagraphBuilder p_builder(tc);
   p_builder.PushStyle(p_style);
-  p_builder.AddText((const uint8_t*)text, sizeof(text));
+  p_builder.AddText(reinterpret_cast<const uint8_t*>(text), sizeof(text));
 
   auto left_p = p_builder.Build(box_rect.width - 20.0);
   ImpellerPoint pt = {20.0f + x_offset, 20.0f};

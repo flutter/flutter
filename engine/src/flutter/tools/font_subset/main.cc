@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
     while (std::cin >> raw_codepoint) {
       bool optional = false;
       auto codepoint =
-          ParseCodepoint(std::string_view(raw_codepoint), optional);
+          ParseCodepoint(std::string_view{raw_codepoint}, optional);
       if (!codepoint) {
         std::cerr << "Invalid codepoint for " << raw_codepoint << "; exiting."
                   << std::endl;
