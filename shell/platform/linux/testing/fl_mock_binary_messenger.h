@@ -102,6 +102,11 @@ void fl_mock_binary_messenger_set_json_method_channel(
     FlMockBinaryMessengerMethodChannelHandler handler,
     gpointer user_data);
 
+void fl_mock_binary_messenger_set_error_channel(FlMockBinaryMessenger* self,
+                                                const gchar* channel,
+                                                gint code,
+                                                const gchar* message);
+
 void fl_mock_binary_messenger_send(FlMockBinaryMessenger* self,
                                    const gchar* channel,
                                    GBytes* message,
