@@ -223,6 +223,7 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
     TabAlignment? tabAlignment,
     TextScaler? textScaler,
     TabIndicatorAnimation? indicatorAnimation,
+    BorderRadius? splashBorderRadius,
   }) {
     return TabBarTheme(
       indicator: indicator ?? this.indicator,
@@ -327,6 +328,7 @@ class TabBarThemeData with Diagnosticable {
     this.tabAlignment,
     this.textScaler,
     this.indicatorAnimation,
+    this.splashBorderRadius
   });
 
   /// Overrides the default value for [TabBar.indicator].
@@ -389,6 +391,9 @@ class TabBarThemeData with Diagnosticable {
   /// Overrides the default value for [TabBar.indicatorAnimation].
   final TabIndicatorAnimation? indicatorAnimation;
 
+  /// Defines the clipping radius of splashes that extend outside the bounds of the tab.
+  final BorderRadius? splashBorderRadius;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   TabBarThemeData copyWith({
@@ -408,6 +413,7 @@ class TabBarThemeData with Diagnosticable {
     TabAlignment? tabAlignment,
     TextScaler? textScaler,
     TabIndicatorAnimation? indicatorAnimation,
+    BorderRadius? splashBorderRadius,
   }) {
     return TabBarThemeData(
       indicator: indicator ?? this.indicator,
@@ -426,6 +432,7 @@ class TabBarThemeData with Diagnosticable {
       tabAlignment: tabAlignment ?? this.tabAlignment,
       textScaler: textScaler ?? this.textScaler,
       indicatorAnimation: indicatorAnimation ?? this.indicatorAnimation,
+      splashBorderRadius: splashBorderRadius ?? this.splashBorderRadius,
     );
   }
 
@@ -453,6 +460,7 @@ class TabBarThemeData with Diagnosticable {
       tabAlignment: t < 0.5 ? a.tabAlignment : b.tabAlignment,
       textScaler: t < 0.5 ? a.textScaler : b.textScaler,
       indicatorAnimation: t < 0.5 ? a.indicatorAnimation : b.indicatorAnimation,
+      splashBorderRadius: BorderRadius.lerp(a.splashBorderRadius, a.splashBorderRadius, t)
     );
   }
 
@@ -474,6 +482,7 @@ class TabBarThemeData with Diagnosticable {
     tabAlignment,
     textScaler,
     indicatorAnimation,
+    splashBorderRadius,
   );
 
   @override
@@ -500,7 +509,8 @@ class TabBarThemeData with Diagnosticable {
         && other.mouseCursor == mouseCursor
         && other.tabAlignment == tabAlignment
         && other.textScaler == textScaler
-        && other.indicatorAnimation == indicatorAnimation;
+        && other.indicatorAnimation == indicatorAnimation
+        && other.splashBorderRadius == splashBorderRadius;
   }
 
   @override
@@ -522,5 +532,6 @@ class TabBarThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TabAlignment?>('tabAlignment', tabAlignment, defaultValue: null));
     properties.add(DiagnosticsProperty<TextScaler?>('textScaler', textScaler, defaultValue: null));
     properties.add(DiagnosticsProperty<TabIndicatorAnimation?>('indicatorAnimation', indicatorAnimation, defaultValue: null));
+     properties.add(DiagnosticsProperty<BorderRadius?>('splashBorderRadius', splashBorderRadius, defaultValue: null));
   }
 }
