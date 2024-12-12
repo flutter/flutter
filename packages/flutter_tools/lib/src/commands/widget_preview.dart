@@ -264,6 +264,10 @@ class WidgetPreviewStartCommand extends FlutterCommand
   /// isn't actually flutter_gen, which pub doesn't really like, and using the
   /// actual package name will break applications which import
   /// package:flutter_gen.
+  ///
+  // TODO(andrewkolos): package:flutter_gen is deprecated (see
+  //  https://docs.flutter.dev/release/breaking-changes/flutter-generate-i10n-source).
+  //  This code should be deleted once package:flutter_gen is removed.
   void maybeAddFlutterGenToPackageConfig({
     required FlutterProject rootProject,
   }) {
