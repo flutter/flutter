@@ -12,9 +12,6 @@
 #include "display_list/utils/dl_matrix_clip_tracker.h"
 #include "flutter/flow/paint_region.h"
 #include "flutter/fml/macros.h"
-#include "third_party/skia/include/core/SkM44.h"
-#include "third_party/skia/include/core/SkMatrix.h"
-#include "third_party/skia/include/core/SkRect.h"
 
 namespace flutter {
 
@@ -27,14 +24,14 @@ struct Damage {
   // If embedder supports partial update, this is the region that needs to be
   // repainted.
   // Corresponds to "surface damage" from EGL_KHR_partial_update.
-  SkIRect frame_damage;
+  DlIRect frame_damage;
 
   // Reflects actual change to target framebuffer; This is frame_damage +
   // damage previously acumulated for target framebuffer.
   // All drawing will be clipped to this region. Knowing the affected area
   // upfront may be useful for tile based GPUs.
   // Corresponds to "buffer damage" from EGL_KHR_partial_update.
-  SkIRect buffer_damage;
+  DlIRect buffer_damage;
 };
 
 // Layer Unique Id to PaintRegion
@@ -43,7 +40,7 @@ using PaintRegionMap = std::map<uint64_t, PaintRegion>;
 // Tracks state during tree diffing process and computes resulting damage
 class DiffContext {
  public:
-  explicit DiffContext(SkISize frame_size,
+  explicit DiffContext(DlISize frame_size,
                        PaintRegionMap& this_frame_paint_region_map,
                        const PaintRegionMap& last_frame_paint_region_map,
                        bool has_raster_cache,
@@ -71,15 +68,14 @@ class DiffContext {
   };
 
   // Pushes additional transform for current subtree
-  void PushTransform(const SkMatrix& transform);
-  void PushTransform(const SkM44& transform);
+  void PushTransform(const DlMatrix& transform);
 
   // Pushes cull rect for current subtree
-  bool PushCullRect(const SkRect& clip);
+  bool PushCullRect(const DlRect& clip);
 
   // Function that adjusts layer bounds (in device coordinates) depending
   // on filter.
-  using FilterBoundsAdjustment = std::function<SkRect(SkRect)>;
+  using FilterBoundsAdjustment = std::function<DlRect(DlRect)>;
 
   // Pushes filter bounds adjustment to current subtree. Every layer in this
   // subtree will have bounds adjusted by this function.
@@ -91,11 +87,8 @@ class DiffContext {
   // Returns current transform as DlMatrix.
   const DlMatrix& GetMatrix() const;
 
-  // Returns current transform as SkMatrix.
-  SkMatrix GetTransform3x3() const;
-
   // Return cull rect for current subtree (in local coordinates).
-  SkRect GetCullRect() const;
+  DlRect GetCullRect() const;
 
   // Sets the dirty flag on current subtree.
   //
@@ -106,7 +99,7 @@ class DiffContext {
   // added to damage.
   void MarkSubtreeDirty(
       const PaintRegion& previous_paint_region = PaintRegion());
-  void MarkSubtreeDirty(const SkRect& previous_paint_region);
+  void MarkSubtreeDirty(const DlRect& previous_paint_region);
 
   bool IsSubtreeDirty() const { return state_.dirty; }
 
@@ -116,7 +109,7 @@ class DiffContext {
 
   // Add layer bounds to current paint region; rect is in "local" (layer)
   // coordinates.
-  void AddLayerBounds(const SkRect& rect);
+  void AddLayerBounds(const DlRect& rect);
 
   // Add entire paint region of retained layer for current subtree. This can
   // only be used in subtrees that are not dirty, otherwise ancestor transforms
@@ -130,8 +123,8 @@ class DiffContext {
   //              coordinates)
   // readback_rect - rectangle where the filter samples from (in screen
   //                 coordinates)
-  void AddReadbackRegion(const SkIRect& paint_rect,
-                         const SkIRect& readback_rect);
+  void AddReadbackRegion(const DlIRect& paint_rect,
+                         const DlIRect& readback_rect);
 
   // Returns the paint region for current subtree; Each rect in paint region is
   // in screen coordinates; Once a layer accumulates the paint regions of its
@@ -146,7 +139,7 @@ class DiffContext {
   //
   // clip_alignment controls the alignment of resulting frame and surface
   // damage.
-  Damage ComputeDamage(const SkIRect& additional_damage,
+  Damage ComputeDamage(const DlIRect& additional_damage,
                        int horizontal_clip_alignment = 0,
                        int vertical_clip_alignment = 0) const;
 
@@ -205,7 +198,7 @@ class DiffContext {
 
   Statistics& statistics() { return statistics_; }
 
-  SkRect MapRect(const SkRect& rect);
+  DlRect MapRect(const DlRect& rect);
 
  private:
   struct State {
@@ -239,26 +232,26 @@ class DiffContext {
 
   void MakeTransformIntegral(DisplayListMatrixClipState& matrix_clip);
 
-  std::shared_ptr<std::vector<SkRect>> rects_;
+  std::shared_ptr<std::vector<DlRect>> rects_;
   State state_;
-  SkISize frame_size_;
+  DlISize frame_size_;
   std::vector<State> state_stack_;
   std::vector<FilterBoundsAdjustment> filter_bounds_adjustment_stack_;
 
   // Applies the filter bounds adjustment stack on provided rect.
   // Rect must be in device coordinates.
-  SkRect ApplyFilterBoundsAdjustment(SkRect rect) const;
+  DlRect ApplyFilterBoundsAdjustment(DlRect rect) const;
 
-  SkRect damage_ = SkRect::MakeEmpty();
+  DlRect damage_;
 
   PaintRegionMap& this_frame_paint_region_map_;
   const PaintRegionMap& last_frame_paint_region_map_;
   bool has_raster_cache_;
   bool impeller_enabled_;
 
-  void AddDamage(const SkRect& rect);
+  void AddDamage(const DlRect& rect);
 
-  void AlignRect(SkIRect& rect,
+  void AlignRect(DlIRect& rect,
                  int horizontal_alignment,
                  int vertical_clip_alignment) const;
 
@@ -268,10 +261,10 @@ class DiffContext {
     size_t position;
 
     // Paint region of the filter performing readback, in screen coordinates.
-    SkIRect paint_rect;
+    DlIRect paint_rect;
 
     // Readback area of the filter, in screen coordinates.
-    SkIRect readback_rect;
+    DlIRect readback_rect;
   };
 
   std::vector<Readback> readbacks_;

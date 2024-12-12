@@ -8,14 +8,13 @@
 
 namespace flutter {
 
-PlatformViewLayer::PlatformViewLayer(const SkPoint& offset,
-                                     const SkSize& size,
+PlatformViewLayer::PlatformViewLayer(const DlPoint& offset,
+                                     const DlSize& size,
                                      int64_t view_id)
     : offset_(offset), size_(size), view_id_(view_id) {}
 
 void PlatformViewLayer::Preroll(PrerollContext* context) {
-  set_paint_bounds(SkRect::MakeXYWH(offset_.x(), offset_.y(), size_.width(),
-                                    size_.height()));
+  set_paint_bounds(DlRect::MakeOriginSize(offset_, size_));
 
   if (context->view_embedder == nullptr) {
     FML_DLOG(ERROR) << "Trying to embed a platform view but the PrerollContext "
@@ -27,8 +26,8 @@ void PlatformViewLayer::Preroll(PrerollContext* context) {
   MutatorsStack mutators;
   context->state_stack.fill(&mutators);
   std::unique_ptr<EmbeddedViewParams> params =
-      std::make_unique<EmbeddedViewParams>(context->state_stack.transform_3x3(),
-                                           size_, mutators);
+      std::make_unique<EmbeddedViewParams>(
+          ToSkMatrix(context->state_stack.matrix()), ToSkSize(size_), mutators);
   context->view_embedder->PrerollCompositeEmbeddedView(view_id_,
                                                        std::move(params));
   context->view_embedder->PushVisitedPlatformView(view_id_);

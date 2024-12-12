@@ -22,14 +22,6 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/trace_event.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkColor.h"
-#include "third_party/skia/include/core/SkColorFilter.h"
-#include "third_party/skia/include/core/SkMatrix.h"
-#include "third_party/skia/include/core/SkPath.h"
-#include "third_party/skia/include/core/SkRRect.h"
-#include "third_party/skia/include/core/SkRect.h"
-#include "third_party/skia/include/utils/SkNWayCanvas.h"
 
 class GrDirectContext;
 
@@ -45,7 +37,7 @@ class PerformanceOverlayLayer;
 class TextureLayer;
 class RasterCacheItem;
 
-static constexpr SkRect kGiantRect = SkRect::MakeLTRB(-1E9F, -1E9F, 1E9F, 1E9F);
+static constexpr DlRect kGiantRect = DlRect::MakeLTRB(-1E9F, -1E9F, 1E9F, 1E9F);
 
 // This should be an exact copy of the Clip enum in painting.dart.
 enum Clip { kNone, kHardEdge, kAntiAlias, kAntiAliasWithSaveLayer };
@@ -201,7 +193,7 @@ class Layer {
   // as determined during Preroll().  The bounds should include any
   // transform, clip or distortions performed by the layer itself,
   // but not any similar modifications inherited from its ancestors.
-  const SkRect& paint_bounds() const { return paint_bounds_; }
+  const DlRect& paint_bounds() const { return paint_bounds_; }
 
   // This must be set by the time Preroll() returns otherwise the layer will
   // be assumed to have empty paint bounds (paints no content).
@@ -214,12 +206,12 @@ class Layer {
   // paint operation that arises due to the caching, the clip will
   // be the bounds of the layer needing caching, not the cull_rect
   // that we saw in the overall Preroll operation.
-  void set_paint_bounds(const SkRect& paint_bounds) {
+  void set_paint_bounds(const DlRect& paint_bounds) {
     paint_bounds_ = paint_bounds;
   }
 
   // Determines if the layer has any content.
-  bool is_empty() const { return paint_bounds_.isEmpty(); }
+  bool is_empty() const { return paint_bounds_.IsEmpty(); }
 
   // Determines if the Paint() method is necessary based on the properties
   // of the indicated PaintContext object.
@@ -260,7 +252,7 @@ class Layer {
   virtual const testing::MockLayer* as_mock_layer() const { return nullptr; }
 
  private:
-  SkRect paint_bounds_;
+  DlRect paint_bounds_;
   uint64_t unique_id_;
   uint64_t original_layer_id_;
   bool subtree_has_platform_view_ = false;

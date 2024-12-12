@@ -25,14 +25,14 @@ namespace testing {
 // verify the data against expected values.
 class MockLayer : public Layer {
  public:
-  explicit MockLayer(const SkPath& path, DlPaint paint = DlPaint());
+  explicit MockLayer(const DlPath& path, DlPaint paint = DlPaint());
 
-  static std::shared_ptr<MockLayer> Make(const SkPath& path,
+  static std::shared_ptr<MockLayer> Make(const DlPath& path,
                                          DlPaint paint = DlPaint()) {
     return std::make_shared<MockLayer>(path, std::move(paint));
   }
 
-  static std::shared_ptr<MockLayer> MakeOpacityCompatible(const SkPath& path) {
+  static std::shared_ptr<MockLayer> MakeOpacityCompatible(const DlPath& path) {
     auto mock_layer = std::make_shared<MockLayer>(path, DlPaint());
     mock_layer->set_fake_opacity_compatible(true);
     return mock_layer;
@@ -42,8 +42,8 @@ class MockLayer : public Layer {
   void Paint(PaintContext& context) const override;
 
   const MutatorsStack& parent_mutators() { return parent_mutators_; }
-  const SkMatrix& parent_matrix() { return parent_matrix_; }
-  const SkRect& parent_cull_rect() { return parent_cull_rect_; }
+  const DlMatrix& parent_matrix() { return parent_matrix_; }
+  const DlRect& parent_cull_rect() { return parent_cull_rect_; }
 
   bool IsReplacing(DiffContext* context, const Layer* layer) const override;
   void Diff(DiffContext* context, const Layer* old_layer) override;
@@ -103,17 +103,17 @@ class MockLayer : public Layer {
     return *this;
   }
 
-  void set_expected_paint_matrix(const SkMatrix& matrix) {
+  void set_expected_paint_matrix(const DlMatrix& matrix) {
     expected_paint_matrix_ = matrix;
   }
 
  private:
   MutatorsStack parent_mutators_;
-  SkMatrix parent_matrix_;
-  SkRect parent_cull_rect_ = SkRect::MakeEmpty();
-  SkPath fake_paint_path_;
+  DlMatrix parent_matrix_;
+  DlRect parent_cull_rect_;
+  DlPath fake_paint_path_;
   DlPaint fake_paint_;
-  std::optional<SkMatrix> expected_paint_matrix_;
+  std::optional<DlMatrix> expected_paint_matrix_;
 
   static constexpr int kParentHasPlatformView = 1 << 0;
   static constexpr int kParentHasTextureLayer = 1 << 1;
@@ -153,7 +153,7 @@ class MockLayerCacheableItem : public LayerRasterCacheItem {
 };
 class MockCacheableLayer : public MockLayer {
  public:
-  explicit MockCacheableLayer(const SkPath& path,
+  explicit MockCacheableLayer(const DlPath& path,
                               DlPaint paint = DlPaint(),
                               int render_limit = 3)
       : MockLayer(path, std::move(paint)) {

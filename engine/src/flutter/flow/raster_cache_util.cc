@@ -67,4 +67,30 @@ bool RasterCacheUtil::ComputeIntegralTransCTM(const SkM44& in, SkM44* out) {
   return false;
 }
 
+bool RasterCacheUtil::ComputeIntegralTransCTM(const DlMatrix& in,
+                                              DlMatrix* out) {
+  // Avoid integral snapping if the matrix has complex transformation to avoid
+  // the artifact observed in https://github.com/flutter/flutter/issues/41654.
+  if (!in.IsTranslationScaleOnly()) {
+    return false;
+  }
+
+  DlScalar in_tx = in.m[12];
+  DlScalar in_ty = in.m[13];
+  DlScalar out_tx = std::round(in_tx);
+  DlScalar out_ty = std::round(in_ty);
+  if (out_tx != in_tx || out_ty != in_ty) {
+    // As a side effect of those tests we also know that neither translation
+    // component was a NaN
+    *out = in;
+    out->m[12] = out_tx;
+    out->m[13] = out_ty;
+    // No need to worry about Z translation because it has no effect
+    // without perspective entries...
+    return true;
+  }
+
+  return false;
+}
+
 }  // namespace flutter

@@ -182,7 +182,7 @@ void DlDeferredImageGPUSkia::ImageWrapper::SnapshotDisplayList(
         }
         if (layer_tree) {
           auto display_list =
-              layer_tree->Flatten(SkRect::MakeWH(wrapper->image_info_.width(),
+              layer_tree->Flatten(DlRect::MakeWH(wrapper->image_info_.width(),
                                                  wrapper->image_info_.height()),
                                   snapshot_delegate->GetTextureRegistry(),
                                   snapshot_delegate->GetGrContext());

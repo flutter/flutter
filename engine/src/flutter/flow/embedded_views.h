@@ -117,6 +117,14 @@ class Mutator {
         filter_mutation_(
             std::make_shared<ImageFilterMutation>(filter, filter_rect)) {}
 
+  explicit Mutator(const DlRect& rect) : Mutator(ToSkRect(rect)) {}
+  explicit Mutator(const DlRoundRect& rrect) : Mutator(ToSkRRect(rrect)) {}
+  explicit Mutator(const DlPath& path) : Mutator(path.GetSkPath()) {}
+  explicit Mutator(const DlMatrix& matrix) : Mutator(ToSkMatrix(matrix)) {}
+  explicit Mutator(const std::shared_ptr<DlImageFilter>& filter,
+                   const DlRect& filter_rect)
+      : Mutator(filter, ToSkRect(filter_rect)) {}
+
   const MutatorType& GetType() const { return type_; }
   const SkRect& GetRect() const { return rect_; }
   const SkRRect& GetRRect() const { return rrect_; }

@@ -71,7 +71,7 @@ std::unique_ptr<DisplayListRasterCacheItem> DisplayListRasterCacheItem::Make(
 }
 
 void DisplayListRasterCacheItem::PrerollSetup(PrerollContext* context,
-                                              const SkMatrix& matrix) {
+                                              const DlMatrix& matrix) {
   cache_state_ = CacheState::kNone;
   DisplayListComplexityCalculator* complexity_calculator =
       context->gr_context ? DisplayListComplexityCalculator::GetForBackend(
@@ -84,7 +84,7 @@ void DisplayListRasterCacheItem::PrerollSetup(PrerollContext* context,
     return;
   }
 
-  transformation_matrix_ = matrix;
+  transformation_matrix_ = ToSkMatrix(matrix);
   transformation_matrix_.preTranslate(offset_.x(), offset_.y());
 
   if (!transformation_matrix_.invert(nullptr)) {
@@ -100,16 +100,16 @@ void DisplayListRasterCacheItem::PrerollSetup(PrerollContext* context,
 }
 
 void DisplayListRasterCacheItem::PrerollFinalize(PrerollContext* context,
-                                                 const SkMatrix& matrix) {
+                                                 const DlMatrix& matrix) {
   if (cache_state_ == CacheState::kNone || !context->raster_cache ||
       !context->raster_cached_entries) {
     return;
   }
   auto* raster_cache = context->raster_cache;
-  SkRect bounds = display_list_->bounds().makeOffset(offset_.x(), offset_.y());
+  DlRect bounds = display_list_->GetBounds().Shift(offset_.x(), offset_.y());
   bool visible = !context->state_stack.content_culled(bounds);
   RasterCache::CacheInfo cache_info =
-      raster_cache->MarkSeen(key_id_, matrix, visible);
+      raster_cache->MarkSeen(key_id_, ToSkMatrix(matrix), visible);
   if (!visible ||
       cache_info.accesses_since_visible <= raster_cache->access_threshold()) {
     cache_state_ = kNone;

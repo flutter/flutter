@@ -22,7 +22,7 @@ namespace flutter {
 class LayerTree {
  public:
   LayerTree(const std::shared_ptr<Layer>& root_layer,
-            const SkISize& frame_size);
+            const DlISize& frame_size);
 
   // Perform a preroll pass on the tree and return information about
   // the tree that affects rendering this frame.
@@ -33,7 +33,7 @@ class LayerTree {
   //   from the root surface.
   bool Preroll(CompositorContext::ScopedFrame& frame,
                bool ignore_raster_cache = false,
-               SkRect cull_rect = kGiantRect);
+               DlRect cull_rect = kGiantRect);
 
 #if !SLIMPELLER
   static void TryToRasterCache(
@@ -46,19 +46,19 @@ class LayerTree {
              bool ignore_raster_cache = false) const;
 
   sk_sp<DisplayList> Flatten(
-      const SkRect& bounds,
+      const DlRect& bounds,
       const std::shared_ptr<TextureRegistry>& texture_registry = nullptr,
       GrDirectContext* gr_context = nullptr);
 
   Layer* root_layer() const { return root_layer_.get(); }
-  const SkISize& frame_size() const { return frame_size_; }
+  const DlISize& frame_size() const { return frame_size_; }
 
   const PaintRegionMap& paint_region_map() const { return paint_region_map_; }
   PaintRegionMap& paint_region_map() { return paint_region_map_; }
 
  private:
   std::shared_ptr<Layer> root_layer_;
-  SkISize frame_size_ = SkISize::MakeEmpty();  // Physical pixels.
+  DlISize frame_size_;  // Physical pixels.
 
   PaintRegionMap paint_region_map_;
 

@@ -28,12 +28,11 @@ void BackdropFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
 
   if (filter_) {
     paint_bounds = context->MapRect(paint_bounds);
-    auto filter_target_bounds = paint_bounds.roundOut();
+    auto filter_target_bounds = DlIRect::RoundOut(paint_bounds);
     DlIRect filter_input_bounds;  // in screen coordinates
-    filter_->get_input_device_bounds(ToDlIRect(filter_target_bounds),
-                                     context->GetMatrix(), filter_input_bounds);
-    context->AddReadbackRegion(filter_target_bounds,
-                               ToSkIRect(filter_input_bounds));
+    filter_->get_input_device_bounds(filter_target_bounds, context->GetMatrix(),
+                                     filter_input_bounds);
+    context->AddReadbackRegion(filter_target_bounds, filter_input_bounds);
   }
 
   DiffChildren(context, prev);
@@ -46,11 +45,12 @@ void BackdropFilterLayer::Preroll(PrerollContext* context) {
       Layer::AutoPrerollSaveLayerState::Create(context, true, bool(filter_));
   if (filter_ && context->view_embedder != nullptr) {
     context->view_embedder->PushFilterToVisitedPlatformViews(
-        filter_, context->state_stack.device_cull_rect());
+        filter_, ToSkRect(context->state_stack.device_cull_rect()));
   }
-  SkRect child_paint_bounds = SkRect::MakeEmpty();
+  DlRect child_paint_bounds;
   PrerollChildren(context, &child_paint_bounds);
-  child_paint_bounds.join(context->state_stack.local_cull_rect());
+  child_paint_bounds =
+      child_paint_bounds.Union(context->state_stack.local_cull_rect());
   set_paint_bounds(child_paint_bounds);
   context->renderable_state_flags = kSaveLayerRenderFlags;
 }

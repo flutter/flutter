@@ -42,6 +42,7 @@ static_assert(sizeof(SkIRect) == sizeof(DlIRect));
 static_assert(sizeof(SkVector) == sizeof(DlSize));
 
 static constexpr DlScalar kEhCloseEnough = impeller::kEhCloseEnough;
+static constexpr DlScalar kPi = impeller::kPi;
 
 constexpr inline bool DlScalarNearlyZero(DlScalar x,
                                          DlScalar tolerance = kEhCloseEnough) {
@@ -142,6 +143,11 @@ inline const SkIRect& ToSkIRect(const DlIRect& rect) {
   return *reinterpret_cast<const SkIRect*>(&rect);
 }
 
+inline std::optional<const SkIRect> ToOptSkIRect(
+    std::optional<const DlIRect> rect) {
+  return rect.has_value() ? std::optional(ToSkIRect(*rect)) : std::nullopt;
+}
+
 inline const SkRect* ToSkRect(const DlRect* rect) {
   return rect == nullptr ? nullptr : reinterpret_cast<const SkRect*>(rect);
 }
@@ -156,6 +162,10 @@ inline SkRect* ToSkRect(DlRect* rect) {
 
 inline const SkRect* ToSkRects(const DlRect* rects) {
   return rects == nullptr ? nullptr : reinterpret_cast<const SkRect*>(rects);
+}
+
+inline const SkSize& ToSkSize(const DlSize& size) {
+  return *reinterpret_cast<const SkSize*>(&size);
 }
 
 inline const SkISize& ToSkISize(const DlISize& size) {

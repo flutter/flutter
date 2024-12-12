@@ -12,7 +12,7 @@ using flutter::RRect;
 
 namespace tonic {
 
-// Construct an SkRRect from a Dart RRect object.
+// Construct an DlRoundRect from a Dart RRect object.
 // The Dart RRect is a Float32List containing
 //   [left, top, right, bottom, xRadius, yRadius]
 RRect DartConverter<flutter::RRect>::FromDart(Dart_Handle value) {
@@ -24,13 +24,14 @@ RRect DartConverter<flutter::RRect>::FromDart(Dart_Handle value) {
     return result;
   }
 
-  SkVector radii[4] = {{buffer[4], buffer[5]},
-                       {buffer[6], buffer[7]},
-                       {buffer[8], buffer[9]},
-                       {buffer[10], buffer[11]}};
+  impeller::RoundingRadii radii = {{buffer[4], buffer[5]},
+                                   {buffer[6], buffer[7]},
+                                   {buffer[10], buffer[11]},
+                                   {buffer[8], buffer[9]}};
 
-  result.sk_rrect.setRectRadii(
-      SkRect::MakeLTRB(buffer[0], buffer[1], buffer[2], buffer[3]), radii);
+  result.rrect = flutter::DlRoundRect::MakeRectRadii(
+      flutter::DlRect::MakeLTRB(buffer[0], buffer[1], buffer[2], buffer[3]),
+      radii);
 
   result.is_null = false;
   return result;

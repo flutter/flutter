@@ -13,7 +13,7 @@ namespace flutter {
 class ShaderMaskLayer : public CacheableContainerLayer {
  public:
   ShaderMaskLayer(std::shared_ptr<DlColorSource> color_source,
-                  const SkRect& mask_rect,
+                  const DlRect& mask_rect,
                   DlBlendMode blend_mode);
 
   void Diff(DiffContext* context, const Layer* old_layer) override;
@@ -24,7 +24,7 @@ class ShaderMaskLayer : public CacheableContainerLayer {
 
  private:
   std::shared_ptr<DlColorSource> color_source_;
-  SkRect mask_rect_;
+  DlRect mask_rect_;
   DlBlendMode blend_mode_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ShaderMaskLayer);

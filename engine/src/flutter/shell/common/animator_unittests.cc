@@ -167,7 +167,7 @@ TEST_F(ShellTest, AnimatorDoesNotNotifyIdleBeforeRender) {
         ASSERT_FALSE(delegate.notify_idle_called_);
         EXPECT_CALL(delegate, OnAnimatorBeginFrame).WillOnce([&] {
           auto layer_tree =
-              std::make_unique<LayerTree>(nullptr, SkISize::Make(600, 800));
+              std::make_unique<LayerTree>(nullptr, DlISize(600, 800));
           animator->Render(kImplicitViewId, std::move(layer_tree), 1.0);
           render_latch.Signal();
         });
@@ -248,7 +248,7 @@ TEST_F(ShellTest, AnimatorDoesNotNotifyDelegateIfPipelineIsNotEmpty) {
     task_runners.GetUITaskRunner()->PostTask([&] {
       EXPECT_CALL(delegate, OnAnimatorBeginFrame).WillOnce([&] {
         auto layer_tree =
-            std::make_unique<LayerTree>(nullptr, SkISize::Make(600, 800));
+            std::make_unique<LayerTree>(nullptr, DlISize(600, 800));
         animator->Render(kImplicitViewId, std::move(layer_tree), 1.0);
         begin_frame_latch.Signal();
       });

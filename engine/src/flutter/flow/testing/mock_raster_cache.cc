@@ -19,8 +19,7 @@ MockRasterCacheResult::MockRasterCacheResult(SkRect device_rect)
 
 void MockRasterCache::AddMockLayer(int width, int height) {
   SkMatrix ctm = SkMatrix::I();
-  SkPath path;
-  path.addRect(100, 100, 100 + width, 100 + height);
+  DlPath path = DlPath::MakeRectLTRB(100, 100, 100 + width, 100 + height);
   int layer_cached_threshold = 1;
   MockCacheableLayer layer =
       MockCacheableLayer(path, DlPaint(), layer_cached_threshold);
@@ -31,7 +30,7 @@ void MockRasterCache::AddMockLayer(int width, int height) {
       .gr_context         = preroll_context_.gr_context,
       .dst_color_space    = preroll_context_.dst_color_space,
       .matrix             = ctm,
-      .logical_rect       = layer.paint_bounds(),
+      .logical_rect       = ToSkRect(layer.paint_bounds()),
       // clang-format on
   };
   UpdateCacheEntry(
@@ -62,7 +61,7 @@ void MockRasterCache::AddMockPicture(int width, int height) {
   DisplayListRasterCacheItem display_list_item(display_list, SkPoint(), true,
                                                false);
   for (size_t i = 0; i < access_threshold(); i++) {
-    AutoCache(&display_list_item, &preroll_context_, ctm);
+    AutoCache(&display_list_item, &preroll_context_, ToDlMatrix(ctm));
   }
   RasterCache::Context r_context = {
       // clang-format off
@@ -138,7 +137,7 @@ bool RasterCacheItemPrerollAndTryToRasterCache(
     DisplayListRasterCacheItem& display_list_item,
     PrerollContext& context,
     PaintContext& paint_context,
-    const SkMatrix& matrix) {
+    const DlMatrix& matrix) {
   RasterCacheItemPreroll(display_list_item, context, matrix);
   context.raster_cache->EvictUnusedCacheEntries();
   return RasterCacheItemTryToRasterCache(display_list_item, paint_context);
@@ -146,7 +145,7 @@ bool RasterCacheItemPrerollAndTryToRasterCache(
 
 void RasterCacheItemPreroll(DisplayListRasterCacheItem& display_list_item,
                             PrerollContext& context,
-                            const SkMatrix& matrix) {
+                            const DlMatrix& matrix) {
   display_list_item.PrerollSetup(&context, matrix);
   display_list_item.PrerollFinalize(&context, matrix);
 }

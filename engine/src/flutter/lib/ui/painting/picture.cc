@@ -131,8 +131,8 @@ Dart_Handle Picture::RasterizeLayerTreeToImage(
     Dart_Handle raw_image_callback) {
   FML_DCHECK(layer_tree != nullptr);
   auto frame_size = layer_tree->frame_size();
-  return DoRasterizeToImage(nullptr, std::move(layer_tree), frame_size.width(),
-                            frame_size.height(), raw_image_callback);
+  return DoRasterizeToImage(nullptr, std::move(layer_tree), frame_size.width,
+                            frame_size.height, raw_image_callback);
 }
 
 Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
@@ -206,17 +206,17 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
       fml::MakeCopyable([ui_task_runner, snapshot_delegate, display_list, width,
                          height, ui_task,
                          layer_tree = std::move(layer_tree)]() mutable {
-        auto picture_bounds = SkISize::Make(width, height);
+        auto picture_bounds = DlISize(width, height);
         sk_sp<DisplayList> snapshot_display_list = display_list;
         if (layer_tree) {
           FML_DCHECK(picture_bounds == layer_tree->frame_size());
           snapshot_display_list =
-              layer_tree->Flatten(SkRect::MakeWH(width, height),
+              layer_tree->Flatten(DlRect::MakeWH(width, height),
                                   snapshot_delegate->GetTextureRegistry(),
                                   snapshot_delegate->GetGrContext());
         }
         snapshot_delegate->MakeRasterSnapshot(
-            snapshot_display_list, picture_bounds,
+            snapshot_display_list, ToSkISize(picture_bounds),
             [ui_task_runner, ui_task](const sk_sp<DlImage>& image) {
               fml::TaskRunner::RunNowOrPostTask(
                   ui_task_runner, [ui_task, image]() { ui_task(image); });

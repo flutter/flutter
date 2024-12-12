@@ -5,6 +5,7 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_RRECT_H_
 #define FLUTTER_LIB_UI_PAINTING_RRECT_H_
 
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/tonic/converter/dart_converter.h"
@@ -13,7 +14,7 @@ namespace flutter {
 
 class RRect {
  public:
-  SkRRect sk_rrect;
+  DlRoundRect rrect;
   bool is_null;
 };
 

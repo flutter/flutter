@@ -25,7 +25,7 @@ PictureRecorder::PictureRecorder() {}
 
 PictureRecorder::~PictureRecorder() {}
 
-sk_sp<DisplayListBuilder> PictureRecorder::BeginRecording(SkRect bounds) {
+sk_sp<DisplayListBuilder> PictureRecorder::BeginRecording(DlRect bounds) {
   display_list_builder_ =
       sk_make_sp<DisplayListBuilder>(bounds, /*prepare_rtree=*/true);
   return display_list_builder_;

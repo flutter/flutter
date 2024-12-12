@@ -702,8 +702,8 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
 
   DlCanvas* embedder_root_canvas = nullptr;
   if (external_view_embedder_) {
-    external_view_embedder_->PrepareFlutterView(layer_tree.frame_size(),
-                                                device_pixel_ratio);
+    external_view_embedder_->PrepareFlutterView(
+        ToSkISize(layer_tree.frame_size()), device_pixel_ratio);
     // TODO(dkwingsmt): Add view ID here.
     embedder_root_canvas = external_view_embedder_->GetRootCanvas();
   }
@@ -712,7 +712,7 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
   //
   // Deleting a surface also clears the GL context. Therefore, acquire the
   // frame after calling `BeginFrame` as this operation resets the GL context.
-  auto frame = surface_->AcquireFrame(layer_tree.frame_size());
+  auto frame = surface_->AcquireFrame(ToSkISize(layer_tree.frame_size()));
   if (frame == nullptr) {
     return DrawSurfaceStatus::kFailed;
   }
@@ -755,7 +755,7 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
       auto existing_damage = frame->framebuffer_info().existing_damage;
       if (existing_damage.has_value() && !force_full_repaint) {
         damage->SetPreviousLayerTree(GetLastLayerTree(view_id));
-        damage->AddAdditionalDamage(existing_damage.value());
+        damage->AddAdditionalDamage(ToDlIRect(existing_damage.value()));
         damage->SetClipAlignment(
             frame->framebuffer_info().horizontal_clip_alignment,
             frame->framebuffer_info().vertical_clip_alignment);
@@ -779,8 +779,8 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
     SurfaceFrame::SubmitInfo submit_info;
     submit_info.presentation_time = presentation_time;
     if (damage) {
-      submit_info.frame_damage = damage->GetFrameDamage();
-      submit_info.buffer_damage = damage->GetBufferDamage();
+      submit_info.frame_damage = ToOptSkIRect(damage->GetFrameDamage());
+      submit_info.buffer_damage = ToOptSkIRect(damage->GetBufferDamage());
     }
 
     frame->set_submit_info(submit_info);
@@ -827,7 +827,7 @@ static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
   FML_DCHECK(tree != nullptr);
   SkPictureRecorder recorder;
   recorder.beginRecording(
-      SkRect::MakeWH(tree->frame_size().width(), tree->frame_size().height()));
+      SkRect::MakeWH(tree->frame_size().width, tree->frame_size().height));
 
   SkMatrix root_surface_transformation;
   root_surface_transformation.reset();
@@ -919,16 +919,13 @@ ScreenshotLayerTreeAsImageImpeller(
     return {nullptr, Rasterizer::ScreenshotFormat::kUnknown};
   }
 
-  DisplayListBuilder builder(SkRect::MakeSize(
-      SkSize::Make(tree->frame_size().fWidth, tree->frame_size().fHeight)));
+  DisplayListBuilder builder(DlRect::MakeSize(tree->frame_size()));
 
   RenderFrameForScreenshot(compositor_context, &builder, tree, nullptr,
                            aiks_context);
 
   std::shared_ptr<impeller::Texture> texture = impeller::DisplayListToTexture(
-      builder.Build(),
-      impeller::ISize(tree->frame_size().fWidth, tree->frame_size().fHeight),
-      *aiks_context);
+      builder.Build(), impeller::ISize(tree->frame_size()), *aiks_context);
   if (!texture) {
     FML_LOG(ERROR) << "Failed to render to texture";
     return {nullptr, Rasterizer::ScreenshotFormat::kUnknown};
@@ -1074,12 +1071,12 @@ Rasterizer::Screenshot Rasterizer::ScreenshotLastLayerTree(
     auto b64_data = SkData::MakeUninitialized(b64_size);
     Base64::Encode(data.first->data(), data.first->size(),
                    b64_data->writable_data());
-    return Rasterizer::Screenshot{b64_data, layer_tree->frame_size(), format,
-                                  data.second};
+    return Rasterizer::Screenshot{b64_data, ToSkISize(layer_tree->frame_size()),
+                                  format, data.second};
   }
 
-  return Rasterizer::Screenshot{data.first, layer_tree->frame_size(), format,
-                                data.second};
+  return Rasterizer::Screenshot{data.first, ToSkISize(layer_tree->frame_size()),
+                                format, data.second};
 }
 
 void Rasterizer::SetNextFrameCallback(const fml::closure& callback) {

@@ -198,7 +198,7 @@ void CanvasPath::addPolygon(const tonic::Float32List& points, bool close) {
 }
 
 void CanvasPath::addRRect(const RRect& rrect) {
-  sk_path_.addRRect(rrect.sk_rrect);
+  sk_path_.addRRect(ToSkRRect(rrect.rrect));
   resetVolatility();
 }
 

@@ -5,6 +5,7 @@
 #ifndef FLUTTER_FLOW_RASTER_CACHE_UTIL_H_
 #define FLUTTER_FLOW_RASTER_CACHE_UTIL_H_
 
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/logging.h"
 #include "include/core/SkM44.h"
 #include "include/core/SkMatrix.h"
@@ -83,6 +84,24 @@ struct RasterCacheUtil {
   }
 
   /**
+   * @brief Snap the translation components of the matrix to integers.
+   *
+   * The snapping will only happen if the matrix only has scale and translation
+   * transformations. This is used, along with GetRoundedOutDeviceBounds, to
+   * ensure that the textures drawn by the raster cache are exactly aligned to
+   * physical pixels. Any layers that participate in raster caching must align
+   * themselves to physical pixels even when not cached to prevent a change in
+   * apparent location if caching is later applied.
+   *
+   * @param ctm the current transformation matrix.
+   * @return SkMatrix the snapped transformation matrix.
+   */
+  static DlMatrix GetIntegralTransCTM(const DlMatrix& ctm) {
+    DlMatrix integral;
+    return ComputeIntegralTransCTM(ctm, &integral) ? integral : ctm;
+  }
+
+  /**
    * @brief Snap the translation components of the |in| matrix to integers
    *        and store the snapped matrix in |out|.
    *
@@ -137,6 +156,25 @@ struct RasterCacheUtil {
    * @return true if the integral modification was needed, false otherwise.
    */
   static bool ComputeIntegralTransCTM(const SkM44& in, SkM44* out);
+
+  /**
+   * @brief Snap the translation components of the |in| matrix to integers
+   *        and store the snapped matrix in |out|.
+   *
+   * The snapping will only happen if the matrix only has scale and translation
+   * transformations. This is used, along with GetRoundedOutDeviceBounds, to
+   * ensure that the textures drawn by the raster cache are exactly aligned to
+   * physical pixels. Any layers that participate in raster caching must align
+   * themselves to physical pixels even when not cached to prevent a change in
+   * apparent location if caching is later applied.
+   *
+   * The |out| matrix will not be modified if this method returns false.
+   *
+   * @param in the current transformation matrix.
+   * @param out the storage for the snapped matrix.
+   * @return true if the integral modification was needed, false otherwise.
+   */
+  static bool ComputeIntegralTransCTM(const DlMatrix& in, DlMatrix* out);
 };
 
 }  // namespace flutter

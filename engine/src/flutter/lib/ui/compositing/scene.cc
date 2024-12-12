@@ -91,7 +91,7 @@ static sk_sp<DlImage> CreateDeferredImage(
 #else   // SLIMPELLER
   const auto& frame_size = layer_tree->frame_size();
   const SkImageInfo image_info =
-      SkImageInfo::Make(frame_size.width(), frame_size.height(),
+      SkImageInfo::Make(frame_size.width, frame_size.height,
                         kRGBA_8888_SkColorType, kPremul_SkAlphaType);
   return DlDeferredImageGPUSkia::MakeFromLayerTree(
       image_info, std::move(layer_tree), std::move(snapshot_delegate),
@@ -130,7 +130,7 @@ std::unique_ptr<LayerTree> Scene::BuildLayerTree(uint32_t width,
     return nullptr;
   }
   return std::make_unique<LayerTree>(layer_tree_root_layer_,
-                                     SkISize::Make(width, height));
+                                     DlISize(width, height));
 }
 
 }  // namespace flutter

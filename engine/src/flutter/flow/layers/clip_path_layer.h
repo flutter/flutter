@@ -17,7 +17,7 @@ class ClipPathLayer : public ClipShapeLayer<DlPath> {
                          Clip clip_behavior = Clip::kAntiAlias);
 
  protected:
-  const SkRect& clip_shape_bounds() const override;
+  const DlRect clip_shape_bounds() const override;
 
   void ApplyClip(LayerStateStack::MutatorContext& mutator) const override;
 

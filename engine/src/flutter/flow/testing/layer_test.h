@@ -24,8 +24,6 @@
 namespace flutter {
 namespace testing {
 
-static constexpr SkRect kEmptyRect = SkRect::MakeEmpty();
-
 // This fixture allows generating tests which can |Paint()| and |Preroll()|
 // |Layer|'s.
 // |LayerTest| is a default implementation based on |::testing::Test|.
@@ -76,7 +74,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
             // clang-format on
         } {
     use_null_raster_cache();
-    preroll_state_stack_.set_preroll_delegate(kGiantRect, SkMatrix::I());
+    preroll_state_stack_.set_preroll_delegate(kGiantRect, DlMatrix());
     display_list_state_stack_.set_delegate(&display_list_builder_);
   }
 

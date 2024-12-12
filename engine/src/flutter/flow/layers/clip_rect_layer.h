@@ -9,12 +9,12 @@
 
 namespace flutter {
 
-class ClipRectLayer : public ClipShapeLayer<SkRect> {
+class ClipRectLayer : public ClipShapeLayer<DlRect> {
  public:
-  ClipRectLayer(const SkRect& clip_rect, Clip clip_behavior);
+  ClipRectLayer(const DlRect& clip_rect, Clip clip_behavior);
 
  protected:
-  const SkRect& clip_shape_bounds() const override;
+  const DlRect clip_shape_bounds() const override;
 
   void ApplyClip(LayerStateStack::MutatorContext& mutator) const override;
 

@@ -41,7 +41,7 @@ void ColorFilterLayer::Preroll(PrerollContext* context) {
       Layer::AutoPrerollSaveLayerState::Create(context);
 #if !SLIMPELLER
   AutoCache cache = AutoCache(layer_raster_cache_item_.get(), context,
-                              context->state_stack.transform_3x3());
+                              context->state_stack.matrix());
 #endif  //  !SLIMPELLER
 
   ContainerLayer::Preroll(context);

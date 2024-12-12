@@ -11,7 +11,6 @@
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
 #include "gtest/gtest.h"
-#include "include/core/SkMatrix.h"
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
 // NOLINTBEGIN(bugprone-unchecked-optional-access)
@@ -42,8 +41,8 @@ TEST_F(ContainerLayerTest, PaintingEmptyLayerDies) {
   auto layer = std::make_shared<ContainerLayer>();
 
   layer->Preroll(preroll_context());
-  EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
-  EXPECT_EQ(layer->child_paint_bounds(), SkRect::MakeEmpty());
+  EXPECT_EQ(layer->paint_bounds(), DlRect());
+  EXPECT_EQ(layer->child_paint_bounds(), DlRect());
   EXPECT_FALSE(layer->needs_painting(paint_context()));
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
@@ -51,24 +50,21 @@ TEST_F(ContainerLayerTest, PaintingEmptyLayerDies) {
 }
 
 TEST_F(ContainerLayerTest, PaintBeforePrerollDies) {
-  SkPath child_path;
-  child_path.addRect(5.0f, 6.0f, 20.5f, 21.5f);
+  DlPath child_path = DlPath::MakeRectLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   auto mock_layer = std::make_shared<MockLayer>(child_path);
   auto layer = std::make_shared<ContainerLayer>();
   layer->Add(mock_layer);
 
-  EXPECT_EQ(layer->paint_bounds(), SkRect::MakeEmpty());
-  EXPECT_EQ(layer->child_paint_bounds(), SkRect::MakeEmpty());
+  EXPECT_EQ(layer->paint_bounds(), DlRect());
+  EXPECT_EQ(layer->child_paint_bounds(), DlRect());
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
                             "needs_painting\\(context\\)");
 }
 #endif
 
 TEST_F(ContainerLayerTest, LayerWithParentHasTextureLayerNeedsResetFlag) {
-  SkPath child_path1;
-  child_path1.addRect(5.0f, 6.0f, 20.5f, 21.5f);
-  SkPath child_path2;
-  child_path2.addRect(8.0f, 2.0f, 16.5f, 14.5f);
+  DlPath child_path1 = DlPath::MakeRectLTRB(5.0f, 6.0f, 20.5f, 21.5f);
+  DlPath child_path2 = DlPath::MakeRectLTRB(8.0f, 2.0f, 16.5f, 14.5f);
   DlPaint child_paint1 = DlPaint(DlColor::kMidGrey());
   DlPaint child_paint2 = DlPaint(DlColor::kGreen());
 
@@ -92,10 +88,9 @@ TEST_F(ContainerLayerTest, LayerWithParentHasTextureLayerNeedsResetFlag) {
 }
 
 TEST_F(ContainerLayerTest, Simple) {
-  SkPath child_path;
-  child_path.addRect(5.0f, 6.0f, 20.5f, 21.5f);
+  DlPath child_path = DlPath::MakeRectLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   DlPaint child_paint = DlPaint(DlColor::kGreen());
-  SkMatrix initial_transform = SkMatrix::Translate(-0.5f, -0.5f);
+  DlMatrix initial_transform = DlMatrix::MakeTranslation({-0.5f, -0.5f});
 
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<ContainerLayer>();
@@ -104,8 +99,8 @@ TEST_F(ContainerLayerTest, Simple) {
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
   layer->Preroll(preroll_context());
   EXPECT_FALSE(preroll_context()->has_platform_view);
-  EXPECT_EQ(mock_layer->paint_bounds(), child_path.getBounds());
-  EXPECT_EQ(layer->paint_bounds(), child_path.getBounds());
+  EXPECT_EQ(mock_layer->paint_bounds(), child_path.GetBounds());
+  EXPECT_EQ(layer->paint_bounds(), child_path.GetBounds());
   EXPECT_EQ(layer->child_paint_bounds(), layer->paint_bounds());
   EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
   EXPECT_TRUE(layer->needs_painting(paint_context()));
@@ -123,13 +118,11 @@ TEST_F(ContainerLayerTest, Simple) {
 }
 
 TEST_F(ContainerLayerTest, Multiple) {
-  SkPath child_path1;
-  child_path1.addRect(5.0f, 6.0f, 20.5f, 21.5f);
-  SkPath child_path2;
-  child_path2.addRect(8.0f, 2.0f, 16.5f, 14.5f);
+  DlPath child_path1 = DlPath::MakeRectLTRB(5.0f, 6.0f, 20.5f, 21.5f);
+  DlPath child_path2 = DlPath::MakeRectLTRB(8.0f, 2.0f, 16.5f, 14.5f);
   DlPaint child_paint1 = DlPaint(DlColor::kMidGrey());
   DlPaint child_paint2 = DlPaint(DlColor::kGreen());
-  SkMatrix initial_transform = SkMatrix::Translate(-0.5f, -0.5f);
+  DlMatrix initial_transform = DlMatrix::MakeTranslation({-0.5f, -0.5f});
 
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
   mock_layer1->set_fake_has_platform_view(true);
@@ -138,13 +131,13 @@ TEST_F(ContainerLayerTest, Multiple) {
   layer->Add(mock_layer1);
   layer->Add(mock_layer2);
 
-  SkRect expected_total_bounds = child_path1.getBounds();
-  expected_total_bounds.join(child_path2.getBounds());
+  DlRect expected_total_bounds =
+      child_path1.GetBounds().Union(child_path2.GetBounds());
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
   layer->Preroll(preroll_context());
   EXPECT_TRUE(preroll_context()->has_platform_view);
-  EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.getBounds());
-  EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.getBounds());
+  EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.GetBounds());
+  EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.GetBounds());
   EXPECT_EQ(layer->paint_bounds(), expected_total_bounds);
   EXPECT_EQ(layer->child_paint_bounds(), layer->paint_bounds());
   EXPECT_TRUE(mock_layer1->needs_painting(paint_context()));
@@ -170,14 +163,13 @@ TEST_F(ContainerLayerTest, Multiple) {
 }
 
 TEST_F(ContainerLayerTest, MultipleWithEmpty) {
-  SkPath child_path1;
-  child_path1.addRect(5.0f, 6.0f, 20.5f, 21.5f);
+  DlPath child_path1 = DlPath::MakeRectLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   DlPaint child_paint1 = DlPaint(DlColor::kMidGrey());
   DlPaint child_paint2 = DlPaint(DlColor::kGreen());
-  SkMatrix initial_transform = SkMatrix::Translate(-0.5f, -0.5f);
+  DlMatrix initial_transform = DlMatrix::MakeTranslation({-0.5f, -0.5f});
 
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
-  auto mock_layer2 = std::make_shared<MockLayer>(SkPath(), child_paint2);
+  auto mock_layer2 = std::make_shared<MockLayer>(DlPath(), child_paint2);
   auto layer = std::make_shared<ContainerLayer>();
   layer->Add(mock_layer1);
   layer->Add(mock_layer2);
@@ -185,9 +177,9 @@ TEST_F(ContainerLayerTest, MultipleWithEmpty) {
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
   layer->Preroll(preroll_context());
   EXPECT_FALSE(preroll_context()->has_platform_view);
-  EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.getBounds());
-  EXPECT_EQ(mock_layer2->paint_bounds(), SkPath().getBounds());
-  EXPECT_EQ(layer->paint_bounds(), child_path1.getBounds());
+  EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.GetBounds());
+  EXPECT_EQ(mock_layer2->paint_bounds(), DlPath().GetBounds());
+  EXPECT_EQ(layer->paint_bounds(), child_path1.GetBounds());
   EXPECT_EQ(layer->child_paint_bounds(), layer->paint_bounds());
   EXPECT_TRUE(mock_layer1->needs_painting(paint_context()));
   EXPECT_FALSE(mock_layer2->needs_painting(paint_context()));
@@ -209,13 +201,11 @@ TEST_F(ContainerLayerTest, MultipleWithEmpty) {
 }
 
 TEST_F(ContainerLayerTest, NeedsSystemComposite) {
-  SkPath child_path1;
-  child_path1.addRect(5.0f, 6.0f, 20.5f, 21.5f);
-  SkPath child_path2;
-  child_path2.addRect(8.0f, 2.0f, 16.5f, 14.5f);
+  DlPath child_path1 = DlPath::MakeRectLTRB(5.0f, 6.0f, 20.5f, 21.5f);
+  DlPath child_path2 = DlPath::MakeRectLTRB(8.0f, 2.0f, 16.5f, 14.5f);
   DlPaint child_paint1 = DlPaint(DlColor::kMidGrey());
   DlPaint child_paint2 = DlPaint(DlColor::kGreen());
-  SkMatrix initial_transform = SkMatrix::Translate(-0.5f, -0.5f);
+  DlMatrix initial_transform = DlMatrix::MakeTranslation({-0.5f, -0.5f});
 
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
   mock_layer1->set_fake_has_platform_view(false);
@@ -224,13 +214,13 @@ TEST_F(ContainerLayerTest, NeedsSystemComposite) {
   layer->Add(mock_layer1);
   layer->Add(mock_layer2);
 
-  SkRect expected_total_bounds = child_path1.getBounds();
-  expected_total_bounds.join(child_path2.getBounds());
+  DlRect expected_total_bounds =
+      child_path1.GetBounds().Union(child_path2.GetBounds());
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
   layer->Preroll(preroll_context());
   EXPECT_FALSE(preroll_context()->has_platform_view);
-  EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.getBounds());
-  EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.getBounds());
+  EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.GetBounds());
+  EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.GetBounds());
   EXPECT_EQ(layer->paint_bounds(), expected_total_bounds);
   EXPECT_EQ(layer->child_paint_bounds(), layer->paint_bounds());
   EXPECT_TRUE(mock_layer1->needs_painting(paint_context()));
@@ -256,9 +246,9 @@ TEST_F(ContainerLayerTest, NeedsSystemComposite) {
 
 TEST_F(ContainerLayerTest, RasterCacheTest) {
   // LTRB
-  const SkPath child_path1 = SkPath().addRect(5.0f, 6.0f, 20.5f, 21.5f);
-  const SkPath child_path2 = SkPath().addRect(21.0f, 6.0f, 25.5f, 21.5f);
-  const SkPath child_path3 = SkPath().addRect(26.0f, 6.0f, 30.5f, 21.5f);
+  const DlPath child_path1 = DlPath::MakeRectLTRB(5.0f, 6.0f, 20.5f, 21.5f);
+  const DlPath child_path2 = DlPath::MakeRectLTRB(21.0f, 6.0f, 25.5f, 21.5f);
+  const DlPath child_path3 = DlPath::MakeRectLTRB(26.0f, 6.0f, 30.5f, 21.5f);
   const DlPaint child_paint1 = DlPaint(DlColor::kMidGrey());
   const DlPaint child_paint2 = DlPaint(DlColor::kGreen());
   const DlPaint paint;
@@ -289,7 +279,7 @@ TEST_F(ContainerLayerTest, RasterCacheTest) {
   // clang-format on
 
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
-  auto mock_layer2 = std::make_shared<MockLayer>(SkPath(), child_paint2);
+  auto mock_layer2 = std::make_shared<MockLayer>(DlPath(), child_paint2);
   auto mock_layer3 = std::make_shared<MockLayer>(child_path2, paint);
 
   cacheable_container_layer1->Add(mock_layer1);
@@ -311,13 +301,13 @@ TEST_F(ContainerLayerTest, RasterCacheTest) {
   layer->Preroll(preroll_context());
 
   EXPECT_EQ(mock_layer1->paint_bounds(),
-            SkRect::MakeLTRB(5.f, 6.f, 20.5f, 21.5f));
+            DlRect::MakeLTRB(5.f, 6.f, 20.5f, 21.5f));
   EXPECT_EQ(mock_layer3->paint_bounds(),
-            SkRect::MakeLTRB(21.0f, 6.0f, 25.5f, 21.5f));
+            DlRect::MakeLTRB(21.0f, 6.0f, 25.5f, 21.5f));
   EXPECT_EQ(cacheable_layer111->paint_bounds(),
-            SkRect::MakeLTRB(26.0f, 6.0f, 30.5f, 21.5f));
+            DlRect::MakeLTRB(26.0f, 6.0f, 30.5f, 21.5f));
   EXPECT_EQ(cacheable_container_layer1->paint_bounds(),
-            SkRect::MakeLTRB(5.f, 6.f, 30.5f, 21.5f));
+            DlRect::MakeLTRB(5.f, 6.f, 30.5f, 21.5f));
 
   // the preroll context's raster cache is nullptr
   EXPECT_EQ(preroll_context()->raster_cached_entries->size(),
@@ -476,7 +466,7 @@ TEST_F(ContainerLayerTest, RasterCacheTest) {
 }
 
 TEST_F(ContainerLayerTest, OpacityInheritance) {
-  auto path1 = SkPath().addRect({10, 10, 30, 30});
+  auto path1 = DlPath::MakeRectLTRB(10, 10, 30, 30);
   auto mock1 = MockLayer::MakeOpacityCompatible(path1);
   auto container1 = std::make_shared<ContainerLayer>();
   container1->Add(mock1);
@@ -487,7 +477,7 @@ TEST_F(ContainerLayerTest, OpacityInheritance) {
   EXPECT_EQ(context->renderable_state_flags,
             LayerStateStack::kCallerCanApplyOpacity);
 
-  auto path2 = SkPath().addRect({40, 40, 50, 50});
+  auto path2 = DlPath::MakeRectLTRB(40, 40, 50, 50);
   auto mock2 = MockLayer::MakeOpacityCompatible(path2);
   container1->Add(mock2);
 
@@ -497,7 +487,7 @@ TEST_F(ContainerLayerTest, OpacityInheritance) {
   EXPECT_EQ(context->renderable_state_flags,
             LayerStateStack::kCallerCanApplyOpacity);
 
-  auto path3 = SkPath().addRect({20, 20, 40, 40});
+  auto path3 = DlPath::MakeRectLTRB(20, 20, 40, 40);
   auto mock3 = MockLayer::MakeOpacityCompatible(path3);
   container1->Add(mock3);
 
@@ -515,7 +505,7 @@ TEST_F(ContainerLayerTest, OpacityInheritance) {
   EXPECT_EQ(context->renderable_state_flags,
             LayerStateStack::kCallerCanApplyOpacity);
 
-  auto path4 = SkPath().addRect({60, 60, 70, 70});
+  auto path4 = DlPath::MakeRectLTRB(60, 60, 70, 70);
   auto mock4 = MockLayer::Make(path4);
   container2->Add(mock4);
 
@@ -526,12 +516,11 @@ TEST_F(ContainerLayerTest, OpacityInheritance) {
 }
 
 TEST_F(ContainerLayerTest, CollectionCacheableLayer) {
-  SkPath child_path;
-  child_path.addRect(5.0f, 6.0f, 20.5f, 21.5f);
+  DlPath child_path = DlPath::MakeRectLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   DlPaint child_paint = DlPaint(DlColor::kGreen());
-  SkMatrix initial_transform = SkMatrix::Translate(-0.5f, -0.5f);
+  DlMatrix initial_transform = DlMatrix::MakeTranslation({-0.5f, -0.5f});
 
-  auto mock_layer1 = std::make_shared<MockLayer>(SkPath(), child_paint);
+  auto mock_layer1 = std::make_shared<MockLayer>(DlPath(), child_paint);
   auto mock_cacheable_container_layer1 =
       std::make_shared<MockCacheableContainerLayer>();
   auto mock_container_layer = std::make_shared<ContainerLayer>();
@@ -564,9 +553,9 @@ using ContainerLayerDiffTest = DiffContextTest;
 
 // Insert PictureLayer amongst container layers
 TEST_F(ContainerLayerDiffTest, PictureLayerInsertion) {
-  auto pic1 = CreateDisplayList(SkRect::MakeLTRB(0, 0, 50, 50));
-  auto pic2 = CreateDisplayList(SkRect::MakeLTRB(100, 0, 150, 50));
-  auto pic3 = CreateDisplayList(SkRect::MakeLTRB(200, 0, 250, 50));
+  auto pic1 = CreateDisplayList(DlRect::MakeLTRB(0, 0, 50, 50));
+  auto pic2 = CreateDisplayList(DlRect::MakeLTRB(100, 0, 150, 50));
+  auto pic3 = CreateDisplayList(DlRect::MakeLTRB(200, 0, 250, 50));
 
   MockLayerTree t1;
 
@@ -577,7 +566,7 @@ TEST_F(ContainerLayerDiffTest, PictureLayerInsertion) {
   t1.root()->Add(t1_c2);
 
   auto damage = DiffLayerTree(t1, MockLayerTree());
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 150, 50));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(0, 0, 150, 50));
 
   // Add in the middle
 
@@ -593,7 +582,7 @@ TEST_F(ContainerLayerDiffTest, PictureLayerInsertion) {
   t2.root()->Add(t2_c2);
 
   damage = DiffLayerTree(t2, t1);
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 50));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(200, 0, 250, 50));
 
   // Add in the beginning
 
@@ -602,7 +591,7 @@ TEST_F(ContainerLayerDiffTest, PictureLayerInsertion) {
   t2.root()->Add(t2_c1);
   t2.root()->Add(t2_c2);
   damage = DiffLayerTree(t2, t1);
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 50));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(200, 0, 250, 50));
 
   // Add at the end
 
@@ -611,21 +600,21 @@ TEST_F(ContainerLayerDiffTest, PictureLayerInsertion) {
   t2.root()->Add(t2_c2);
   t2.root()->Add(CreateDisplayListLayer(pic3));
   damage = DiffLayerTree(t2, t1);
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 50));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(200, 0, 250, 50));
 }
 
 // Insert picture layer amongst other picture layers
 TEST_F(ContainerLayerDiffTest, PictureInsertion) {
-  auto pic1 = CreateDisplayList(SkRect::MakeLTRB(0, 0, 50, 50));
-  auto pic2 = CreateDisplayList(SkRect::MakeLTRB(100, 0, 150, 50));
-  auto pic3 = CreateDisplayList(SkRect::MakeLTRB(200, 0, 250, 50));
+  auto pic1 = CreateDisplayList(DlRect::MakeLTRB(0, 0, 50, 50));
+  auto pic2 = CreateDisplayList(DlRect::MakeLTRB(100, 0, 150, 50));
+  auto pic3 = CreateDisplayList(DlRect::MakeLTRB(200, 0, 250, 50));
 
   MockLayerTree t1;
   t1.root()->Add(CreateDisplayListLayer(pic1));
   t1.root()->Add(CreateDisplayListLayer(pic2));
 
   auto damage = DiffLayerTree(t1, MockLayerTree());
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 150, 50));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(0, 0, 150, 50));
 
   MockLayerTree t2;
   t2.root()->Add(CreateDisplayListLayer(pic3));
@@ -633,7 +622,7 @@ TEST_F(ContainerLayerDiffTest, PictureInsertion) {
   t2.root()->Add(CreateDisplayListLayer(pic2));
 
   damage = DiffLayerTree(t2, t1);
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 50));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(200, 0, 250, 50));
 
   MockLayerTree t3;
   t3.root()->Add(CreateDisplayListLayer(pic1));
@@ -641,7 +630,7 @@ TEST_F(ContainerLayerDiffTest, PictureInsertion) {
   t3.root()->Add(CreateDisplayListLayer(pic2));
 
   damage = DiffLayerTree(t3, t1);
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 50));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(200, 0, 250, 50));
 
   MockLayerTree t4;
   t4.root()->Add(CreateDisplayListLayer(pic1));
@@ -649,13 +638,13 @@ TEST_F(ContainerLayerDiffTest, PictureInsertion) {
   t4.root()->Add(CreateDisplayListLayer(pic3));
 
   damage = DiffLayerTree(t4, t1);
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 50));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(200, 0, 250, 50));
 }
 
 TEST_F(ContainerLayerDiffTest, LayerDeletion) {
-  auto path1 = SkPath().addRect(SkRect::MakeLTRB(0, 0, 50, 50));
-  auto path2 = SkPath().addRect(SkRect::MakeLTRB(100, 0, 150, 50));
-  auto path3 = SkPath().addRect(SkRect::MakeLTRB(200, 0, 250, 50));
+  auto path1 = DlPath::MakeRectLTRB(0, 0, 50, 50);
+  auto path2 = DlPath::MakeRectLTRB(100, 0, 150, 50);
+  auto path3 = DlPath::MakeRectLTRB(200, 0, 250, 50);
 
   auto c1 = CreateContainerLayer(std::make_shared<MockLayer>(path1));
   auto c2 = CreateContainerLayer(std::make_shared<MockLayer>(path2));
@@ -667,56 +656,56 @@ TEST_F(ContainerLayerDiffTest, LayerDeletion) {
   t1.root()->Add(c3);
 
   auto damage = DiffLayerTree(t1, MockLayerTree());
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 250, 50));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(0, 0, 250, 50));
 
   MockLayerTree t2;
   t2.root()->Add(c2);
   t2.root()->Add(c3);
 
   damage = DiffLayerTree(t2, t1);
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 50, 50));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(0, 0, 50, 50));
 
   MockLayerTree t3;
   t3.root()->Add(c1);
   t3.root()->Add(c3);
 
   damage = DiffLayerTree(t3, t1);
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(100, 0, 150, 50));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(100, 0, 150, 50));
 
   MockLayerTree t4;
   t4.root()->Add(c1);
   t4.root()->Add(c2);
 
   damage = DiffLayerTree(t4, t1);
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 50));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(200, 0, 250, 50));
 
   MockLayerTree t5;
   t5.root()->Add(c1);
 
   damage = DiffLayerTree(t5, t1);
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(100, 0, 250, 50));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(100, 0, 250, 50));
 
   MockLayerTree t6;
   t6.root()->Add(c2);
 
   damage = DiffLayerTree(t6, t1);
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 250, 50));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(0, 0, 250, 50));
 
   MockLayerTree t7;
   t7.root()->Add(c3);
 
   damage = DiffLayerTree(t7, t1);
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 150, 50));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(0, 0, 150, 50));
 }
 
 TEST_F(ContainerLayerDiffTest, ReplaceLayer) {
-  auto path1 = SkPath().addRect(SkRect::MakeLTRB(0, 0, 50, 50));
-  auto path2 = SkPath().addRect(SkRect::MakeLTRB(100, 0, 150, 50));
-  auto path3 = SkPath().addRect(SkRect::MakeLTRB(200, 0, 250, 50));
+  auto path1 = DlPath::MakeRectLTRB(0, 0, 50, 50);
+  auto path2 = DlPath::MakeRectLTRB(100, 0, 150, 50);
+  auto path3 = DlPath::MakeRectLTRB(200, 0, 250, 50);
 
-  auto path1a = SkPath().addRect(SkRect::MakeLTRB(0, 100, 50, 150));
-  auto path2a = SkPath().addRect(SkRect::MakeLTRB(100, 100, 150, 150));
-  auto path3a = SkPath().addRect(SkRect::MakeLTRB(200, 100, 250, 150));
+  auto path1a = DlPath::MakeRectLTRB(0, 100, 50, 150);
+  auto path2a = DlPath::MakeRectLTRB(100, 100, 150, 150);
+  auto path3a = DlPath::MakeRectLTRB(200, 100, 250, 150);
 
   auto c1 = CreateContainerLayer(std::make_shared<MockLayer>(path1));
   auto c2 = CreateContainerLayer(std::make_shared<MockLayer>(path2));
@@ -728,7 +717,7 @@ TEST_F(ContainerLayerDiffTest, ReplaceLayer) {
   t1.root()->Add(c3);
 
   auto damage = DiffLayerTree(t1, MockLayerTree());
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 250, 50));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(0, 0, 250, 50));
 
   MockLayerTree t2;
   t2.root()->Add(c1);
@@ -736,7 +725,7 @@ TEST_F(ContainerLayerDiffTest, ReplaceLayer) {
   t2.root()->Add(c3);
 
   damage = DiffLayerTree(t2, t1);
-  EXPECT_TRUE(damage.frame_damage.isEmpty());
+  EXPECT_TRUE(damage.frame_damage.IsEmpty());
 
   MockLayerTree t3;
   t3.root()->Add(CreateContainerLayer({std::make_shared<MockLayer>(path1a)}));
@@ -744,7 +733,7 @@ TEST_F(ContainerLayerDiffTest, ReplaceLayer) {
   t3.root()->Add(c3);
 
   damage = DiffLayerTree(t3, t1);
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(0, 0, 50, 150));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(0, 0, 50, 150));
 
   MockLayerTree t4;
   t4.root()->Add(c1);
@@ -752,7 +741,7 @@ TEST_F(ContainerLayerDiffTest, ReplaceLayer) {
   t4.root()->Add(c3);
 
   damage = DiffLayerTree(t4, t1);
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(100, 0, 150, 150));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(100, 0, 150, 150));
 
   MockLayerTree t5;
   t5.root()->Add(c1);
@@ -760,7 +749,7 @@ TEST_F(ContainerLayerDiffTest, ReplaceLayer) {
   t5.root()->Add(CreateContainerLayer(std::make_shared<MockLayer>(path3a)));
 
   damage = DiffLayerTree(t5, t1);
-  EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(200, 0, 250, 150));
+  EXPECT_EQ(damage.frame_damage, DlIRect::MakeLTRB(200, 0, 250, 150));
 }
 
 }  // namespace testing

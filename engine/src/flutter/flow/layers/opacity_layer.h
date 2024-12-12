@@ -7,7 +7,6 @@
 
 #include "flutter/flow/layers/cacheable_layer.h"
 #include "flutter/flow/layers/layer.h"
-#include "include/core/SkMatrix.h"
 
 namespace flutter {
 
@@ -27,7 +26,7 @@ class OpacityLayer : public CacheableContainerLayer {
   // the retained rendering inefficient as a small offset change could propagate
   // to many leaf layers. Therefore we try to capture that offset here to stop
   // the propagation as repainting the OpacityLayer is expensive.
-  OpacityLayer(SkAlpha alpha, const SkPoint& offset);
+  OpacityLayer(uint8_t alpha, const DlPoint& offset);
 
   void Diff(DiffContext* context, const Layer* old_layer) override;
 
@@ -45,11 +44,11 @@ class OpacityLayer : public CacheableContainerLayer {
     children_can_accept_opacity_ = value;
   }
 
-  SkScalar opacity() const { return alpha_ * 1.0f / SK_AlphaOPAQUE; }
+  DlScalar opacity() const { return DlColor::toOpacity(alpha_); }
 
  private:
-  SkAlpha alpha_;
-  SkPoint offset_;
+  uint8_t alpha_;
+  DlPoint offset_;
   bool children_can_accept_opacity_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(OpacityLayer);

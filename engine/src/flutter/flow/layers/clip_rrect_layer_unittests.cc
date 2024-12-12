@@ -24,14 +24,14 @@ using ClipOp = DlCanvas::ClipOp;
 
 #ifndef NDEBUG
 TEST_F(ClipRRectLayerTest, ClipNoneBehaviorDies) {
-  const SkRRect layer_rrect = SkRRect::MakeEmpty();
+  const DlRoundRect layer_rrect = DlRoundRect();
   EXPECT_DEATH_IF_SUPPORTED(
       auto clip = std::make_shared<ClipRRectLayer>(layer_rrect, Clip::kNone),
       "clip_behavior != Clip::kNone");
 }
 
 TEST_F(ClipRRectLayerTest, PaintingEmptyLayerDies) {
-  const SkRRect layer_rrect = SkRRect::MakeEmpty();
+  const DlRoundRect layer_rrect = DlRoundRect();
   auto layer = std::make_shared<ClipRRectLayer>(layer_rrect, Clip::kHardEdge);
 
   layer->Preroll(preroll_context());
@@ -40,8 +40,8 @@ TEST_F(ClipRRectLayerTest, PaintingEmptyLayerDies) {
   EXPECT_EQ(preroll_context()->state_stack.device_cull_rect(), kGiantRect);
   EXPECT_TRUE(preroll_context()->state_stack.is_empty());
 
-  EXPECT_EQ(layer->paint_bounds(), kEmptyRect);
-  EXPECT_EQ(layer->child_paint_bounds(), kEmptyRect);
+  EXPECT_EQ(layer->paint_bounds(), DlRect());
+  EXPECT_EQ(layer->child_paint_bounds(), DlRect());
   EXPECT_FALSE(layer->needs_painting(paint_context()));
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
@@ -49,11 +49,11 @@ TEST_F(ClipRRectLayerTest, PaintingEmptyLayerDies) {
 }
 
 TEST_F(ClipRRectLayerTest, PaintBeforePrerollDies) {
-  const SkRect layer_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
-  const SkRRect layer_rrect = SkRRect::MakeRect(layer_bounds);
+  const DlRect layer_bounds = DlRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
+  const DlRoundRect layer_rrect = DlRoundRect::MakeRect(layer_bounds);
   auto layer = std::make_shared<ClipRRectLayer>(layer_rrect, Clip::kHardEdge);
-  EXPECT_EQ(layer->paint_bounds(), kEmptyRect);
-  EXPECT_EQ(layer->child_paint_bounds(), kEmptyRect);
+  EXPECT_EQ(layer->paint_bounds(), DlRect());
+  EXPECT_EQ(layer->child_paint_bounds(), DlRect());
   EXPECT_FALSE(layer->needs_painting(paint_context()));
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Paint(paint_context()),
@@ -61,12 +61,12 @@ TEST_F(ClipRRectLayerTest, PaintBeforePrerollDies) {
 }
 
 TEST_F(ClipRRectLayerTest, PaintingCulledLayerDies) {
-  const SkMatrix initial_matrix = SkMatrix::Translate(0.5f, 1.0f);
-  const SkRect child_bounds = SkRect::MakeXYWH(1.0, 2.0, 2.0, 2.0);
-  const SkRect layer_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
-  const SkRect distant_bounds = SkRect::MakeXYWH(100.0, 100.0, 10.0, 10.0);
-  const SkPath child_path = SkPath().addRect(child_bounds);
-  const SkRRect layer_rrect = SkRRect::MakeRect(layer_bounds);
+  const DlMatrix initial_matrix = DlMatrix::MakeTranslation({0.5f, 1.0f});
+  const DlRect child_bounds = DlRect::MakeXYWH(1.0, 2.0, 2.0, 2.0);
+  const DlRect layer_bounds = DlRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
+  const DlRect distant_bounds = DlRect::MakeXYWH(100.0, 100.0, 10.0, 10.0);
+  const DlPath child_path = DlPath::MakeRect(child_bounds);
+  const DlRoundRect layer_rrect = DlRoundRect::MakeRect(layer_bounds);
   const DlPaint child_paint = DlPaint(DlColor::kYellow());
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<ClipRRectLayer>(layer_rrect, Clip::kHardEdge);
@@ -86,7 +86,7 @@ TEST_F(ClipRRectLayerTest, PaintingCulledLayerDies) {
   EXPECT_EQ(layer->child_paint_bounds(), child_bounds);
   EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
   EXPECT_TRUE(layer->needs_painting(paint_context()));
-  EXPECT_EQ(mock_layer->parent_cull_rect(), kEmptyRect);
+  EXPECT_EQ(mock_layer->parent_cull_rect(), DlRect());
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(), std::vector({Mutator(layer_rrect)}));
 
@@ -100,22 +100,23 @@ TEST_F(ClipRRectLayerTest, PaintingCulledLayerDies) {
 #endif
 
 TEST_F(ClipRRectLayerTest, ChildOutsideBounds) {
-  const SkMatrix initial_matrix = SkMatrix::Translate(0.5f, 1.0f);
-  const SkRect local_cull_bounds = SkRect::MakeXYWH(0.0, 0.0, 2.0, 4.0);
-  const SkRect device_cull_bounds = initial_matrix.mapRect(local_cull_bounds);
-  const SkRect child_bounds = SkRect::MakeXYWH(2.5, 5.0, 4.5, 4.0);
-  const SkRect clip_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
-  const SkPath child_path = SkPath().addRect(child_bounds);
-  const SkRRect clip_rrect = SkRRect::MakeRect(clip_bounds);
+  const DlMatrix initial_matrix = DlMatrix::MakeTranslation({0.5f, 1.0f});
+  const DlRect local_cull_bounds = DlRect::MakeXYWH(0.0, 0.0, 2.0, 4.0);
+  const DlRect device_cull_bounds =
+      local_cull_bounds.TransformAndClipBounds(initial_matrix);
+  const DlRect child_bounds = DlRect::MakeXYWH(2.5, 5.0, 4.5, 4.0);
+  const DlRect clip_bounds = DlRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
+  const DlPath child_path = DlPath::MakeRect(child_bounds);
+  const DlRoundRect clip_rrect = DlRoundRect::MakeRect(clip_bounds);
   const DlPaint child_paint = DlPaint(DlColor::kYellow());
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<ClipRRectLayer>(clip_rrect, Clip::kHardEdge);
   layer->Add(mock_layer);
 
-  SkRect clip_cull_rect = clip_bounds;
-  ASSERT_TRUE(clip_cull_rect.intersect(local_cull_bounds));
-  SkRect clip_layer_bounds = child_bounds;
-  ASSERT_TRUE(clip_layer_bounds.intersect(clip_bounds));
+  auto clip_cull_rect = clip_bounds.Intersection(local_cull_bounds);
+  ASSERT_TRUE(clip_cull_rect.has_value());
+  auto clip_layer_bounds = child_bounds.Intersection(clip_bounds);
+  ASSERT_TRUE(clip_layer_bounds.has_value());
 
   // Set up both contexts to cull clipped child
   preroll_context()->state_stack.set_preroll_delegate(device_cull_bounds,
@@ -132,9 +133,9 @@ TEST_F(ClipRRectLayerTest, ChildOutsideBounds) {
   EXPECT_TRUE(preroll_context()->state_stack.is_empty());
 
   EXPECT_EQ(mock_layer->paint_bounds(), child_bounds);
-  EXPECT_EQ(layer->paint_bounds(), clip_layer_bounds);
+  EXPECT_EQ(layer->paint_bounds(), clip_layer_bounds.value());
   EXPECT_EQ(layer->child_paint_bounds(), child_bounds);
-  EXPECT_EQ(mock_layer->parent_cull_rect(), clip_cull_rect);
+  EXPECT_EQ(mock_layer->parent_cull_rect(), clip_cull_rect.value());
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(), std::vector({Mutator(clip_rrect)}));
 
@@ -145,12 +146,13 @@ TEST_F(ClipRRectLayerTest, ChildOutsideBounds) {
 }
 
 TEST_F(ClipRRectLayerTest, FullyContainedChild) {
-  const SkMatrix initial_matrix = SkMatrix::Translate(0.5f, 1.0f);
-  const SkRect child_bounds = SkRect::MakeXYWH(1.0, 2.0, 2.0, 2.0);
-  const SkRect layer_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
-  const SkPath child_path =
-      SkPath().addRect(child_bounds).addOval(child_bounds.makeInset(0.1, 0.1));
-  const SkRRect layer_rrect = SkRRect::MakeRectXY(layer_bounds, 0.1, 0.1);
+  const DlMatrix initial_matrix = DlMatrix::MakeTranslation({0.5f, 1.0f});
+  const DlRect child_bounds = DlRect::MakeXYWH(1.0, 2.0, 2.0, 2.0);
+  const DlRect layer_bounds = DlRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
+  const DlPath child_path = DlPath::MakeRect(child_bounds) +
+                            DlPath::MakeOval(child_bounds.Expand(-0.1f));
+  const DlRoundRect layer_rrect =
+      DlRoundRect::MakeRectXY(layer_bounds, 0.1, 0.1);
   const DlPaint child_paint = DlPaint(DlColor::kYellow());
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<ClipRRectLayer>(layer_rrect, Clip::kHardEdge);
@@ -177,7 +179,7 @@ TEST_F(ClipRRectLayerTest, FullyContainedChild) {
   /* (ClipRRect)layer::Paint */ {
     expected_builder.Save();
     {
-      expected_builder.ClipRRect(layer_rrect);
+      expected_builder.ClipRoundRect(layer_rrect);
       /* mock_layer::Paint */ {
         expected_builder.DrawPath(child_path, child_paint);
       }
@@ -188,23 +190,24 @@ TEST_F(ClipRRectLayerTest, FullyContainedChild) {
 }
 
 TEST_F(ClipRRectLayerTest, PartiallyContainedChild) {
-  const SkMatrix initial_matrix = SkMatrix::Translate(0.5f, 1.0f);
-  const SkRect local_cull_bounds = SkRect::MakeXYWH(0.0, 0.0, 4.0, 5.5);
-  const SkRect device_cull_bounds = initial_matrix.mapRect(local_cull_bounds);
-  const SkRect child_bounds = SkRect::MakeXYWH(2.5, 5.0, 4.5, 4.0);
-  const SkRect clip_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
-  const SkPath child_path =
-      SkPath().addRect(child_bounds).addOval(child_bounds.makeInset(0.1, 0.1));
-  const SkRRect clip_rrect = SkRRect::MakeRectXY(clip_bounds, 0.1, 0.1);
+  const DlMatrix initial_matrix = DlMatrix::MakeTranslation({0.5f, 1.0f});
+  const DlRect local_cull_bounds = DlRect::MakeXYWH(0.0, 0.0, 4.0, 5.5);
+  const DlRect device_cull_bounds =
+      local_cull_bounds.TransformAndClipBounds(initial_matrix);
+  const DlRect child_bounds = DlRect::MakeXYWH(2.5, 5.0, 4.5, 4.0);
+  const DlRect clip_bounds = DlRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
+  const DlPath child_path = DlPath::MakeRect(child_bounds) +
+                            DlPath::MakeOval(child_bounds.Expand(-0.1f));
+  const DlRoundRect clip_rrect = DlRoundRect::MakeRectXY(clip_bounds, 0.1, 0.1);
   const DlPaint child_paint = DlPaint(DlColor::kYellow());
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<ClipRRectLayer>(clip_rrect, Clip::kHardEdge);
   layer->Add(mock_layer);
 
-  SkRect clip_cull_rect = clip_bounds;
-  ASSERT_TRUE(clip_cull_rect.intersect(local_cull_bounds));
-  SkRect clip_layer_bounds = child_bounds;
-  ASSERT_TRUE(clip_layer_bounds.intersect(clip_bounds));
+  auto clip_cull_rect = clip_bounds.Intersection(local_cull_bounds);
+  ASSERT_TRUE(clip_cull_rect.has_value());
+  auto clip_layer_bounds = child_bounds.Intersection(clip_bounds);
+  ASSERT_TRUE(clip_layer_bounds.has_value());
 
   preroll_context()->state_stack.set_preroll_delegate(device_cull_bounds,
                                                       initial_matrix);
@@ -218,9 +221,9 @@ TEST_F(ClipRRectLayerTest, PartiallyContainedChild) {
   EXPECT_TRUE(preroll_context()->state_stack.is_empty());
 
   EXPECT_EQ(mock_layer->paint_bounds(), child_bounds);
-  EXPECT_EQ(layer->paint_bounds(), clip_layer_bounds);
+  EXPECT_EQ(layer->paint_bounds(), clip_layer_bounds.value());
   EXPECT_EQ(layer->child_paint_bounds(), child_bounds);
-  EXPECT_EQ(mock_layer->parent_cull_rect(), clip_cull_rect);
+  EXPECT_EQ(mock_layer->parent_cull_rect(), clip_cull_rect.value());
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(), std::vector({Mutator(clip_rrect)}));
 
@@ -229,7 +232,7 @@ TEST_F(ClipRRectLayerTest, PartiallyContainedChild) {
   /* (ClipRRect)layer::Paint */ {
     expected_builder.Save();
     {
-      expected_builder.ClipRRect(clip_rrect);
+      expected_builder.ClipRoundRect(clip_rrect);
       /* mock_layer::Paint */ {
         expected_builder.DrawPath(child_path, child_paint);
       }
@@ -243,8 +246,8 @@ static bool ReadbackResult(PrerollContext* context,
                            Clip clip_behavior,
                            const std::shared_ptr<Layer>& child,
                            bool before) {
-  const SkRect layer_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
-  const SkRRect layer_rrect = SkRRect::MakeRect(layer_bounds);
+  const DlRect layer_bounds = DlRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
+  const DlRoundRect layer_rrect = DlRoundRect::MakeRect(layer_bounds);
   auto layer = std::make_shared<ClipRRectLayer>(layer_rrect, clip_behavior);
   if (child != nullptr) {
     layer->Add(child);
@@ -256,7 +259,7 @@ static bool ReadbackResult(PrerollContext* context,
 
 TEST_F(ClipRRectLayerTest, Readback) {
   PrerollContext* context = preroll_context();
-  SkPath path;
+  DlPath path;
   DlPaint paint;
 
   const Clip hard = Clip::kHardEdge;
@@ -300,10 +303,10 @@ TEST_F(ClipRRectLayerTest, Readback) {
 }
 
 TEST_F(ClipRRectLayerTest, OpacityInheritance) {
-  auto path1 = SkPath().addRect({10, 10, 30, 30});
+  auto path1 = DlPath::MakeRectLTRB(10, 10, 30, 30);
   auto mock1 = MockLayer::MakeOpacityCompatible(path1);
-  SkRect clip_rect = SkRect::MakeWH(500, 500);
-  SkRRect clip_rrect = SkRRect::MakeRectXY(clip_rect, 20, 20);
+  DlRect clip_rect = DlRect::MakeWH(500, 500);
+  DlRoundRect clip_rrect = DlRoundRect::MakeRectXY(clip_rect, 20, 20);
   auto clip_rrect_layer =
       std::make_shared<ClipRRectLayer>(clip_rrect, Clip::kHardEdge);
   clip_rrect_layer->Add(mock1);
@@ -314,7 +317,7 @@ TEST_F(ClipRRectLayerTest, OpacityInheritance) {
   EXPECT_EQ(context->renderable_state_flags,
             LayerStateStack::kCallerCanApplyOpacity);
 
-  auto path2 = SkPath().addRect({40, 40, 50, 50});
+  auto path2 = DlPath::MakeRectLTRB(40, 40, 50, 50);
   auto mock2 = MockLayer::MakeOpacityCompatible(path2);
   clip_rrect_layer->Add(mock2);
 
@@ -324,7 +327,7 @@ TEST_F(ClipRRectLayerTest, OpacityInheritance) {
   EXPECT_EQ(context->renderable_state_flags,
             LayerStateStack::kCallerCanApplyOpacity);
 
-  auto path3 = SkPath().addRect({20, 20, 40, 40});
+  auto path3 = DlPath::MakeRectLTRB(20, 20, 40, 40);
   auto mock3 = MockLayer::MakeOpacityCompatible(path3);
   clip_rrect_layer->Add(mock3);
 
@@ -351,7 +354,7 @@ TEST_F(ClipRRectLayerTest, OpacityInheritance) {
   }
 
   // An incompatible, but non-overlapping child for the following tests
-  auto path4 = SkPath().addRect({60, 60, 70, 70});
+  auto path4 = DlPath::MakeRectLTRB(60, 60, 70, 70);
   auto mock4 = MockLayer::Make(path4);
 
   {
@@ -393,12 +396,12 @@ TEST_F(ClipRRectLayerTest, OpacityInheritance) {
 }
 
 TEST_F(ClipRRectLayerTest, OpacityInheritancePainting) {
-  auto path1 = SkPath().addRect({10, 10, 30, 30});
+  auto path1 = DlPath::MakeRectLTRB(10, 10, 30, 30);
   auto mock1 = MockLayer::MakeOpacityCompatible(path1);
-  auto path2 = SkPath().addRect({40, 40, 50, 50});
+  auto path2 = DlPath::MakeRectLTRB(40, 40, 50, 50);
   auto mock2 = MockLayer::MakeOpacityCompatible(path2);
-  SkRect clip_rect = SkRect::MakeWH(500, 500);
-  SkRRect clip_rrect = SkRRect::MakeRectXY(clip_rect, 20, 20);
+  DlRect clip_rect = DlRect::MakeWH(500, 500);
+  DlRoundRect clip_rrect = DlRoundRect::MakeRectXY(clip_rect, 20, 20);
   auto clip_rect_layer =
       std::make_shared<ClipRRectLayer>(clip_rrect, Clip::kAntiAlias);
   clip_rect_layer->Add(mock1);
@@ -412,7 +415,7 @@ TEST_F(ClipRRectLayerTest, OpacityInheritancePainting) {
             LayerStateStack::kCallerCanApplyOpacity);
 
   int opacity_alpha = 0x7F;
-  SkPoint offset = SkPoint::Make(10, 10);
+  DlPoint offset = DlPoint(10, 10);
   auto opacity_layer = std::make_shared<OpacityLayer>(opacity_alpha, offset);
   opacity_layer->Add(clip_rect_layer);
   opacity_layer->Preroll(context);
@@ -422,10 +425,10 @@ TEST_F(ClipRRectLayerTest, OpacityInheritancePainting) {
   /* OpacityLayer::Paint() */ {
     expected_builder.Save();
     {
-      expected_builder.Translate(offset.fX, offset.fY);
+      expected_builder.Translate(offset.x, offset.y);
       /* ClipRectLayer::Paint() */ {
         expected_builder.Save();
-        expected_builder.ClipRRect(clip_rrect, ClipOp::kIntersect, true);
+        expected_builder.ClipRoundRect(clip_rrect, ClipOp::kIntersect, true);
         /* child layer1 paint */ {
           expected_builder.DrawPath(path1, DlPaint().setAlpha(opacity_alpha));
         }
@@ -443,14 +446,13 @@ TEST_F(ClipRRectLayerTest, OpacityInheritancePainting) {
 }
 
 TEST_F(ClipRRectLayerTest, OpacityInheritanceSaveLayerPainting) {
-  auto path1 = SkPath().addRect({10, 10, 30, 30});
+  auto path1 = DlPath::MakeRectLTRB(10, 10, 30, 30);
   auto mock1 = MockLayer::MakeOpacityCompatible(path1);
-  auto path2 = SkPath().addRect({20, 20, 40, 40});
+  auto path2 = DlPath::MakeRectLTRB(20, 20, 40, 40);
   auto mock2 = MockLayer::MakeOpacityCompatible(path2);
-  auto children_bounds = path1.getBounds();
-  children_bounds.join(path2.getBounds());
-  SkRect clip_rect = SkRect::MakeWH(500, 500);
-  SkRRect clip_rrect = SkRRect::MakeRectXY(clip_rect, 20, 20);
+  auto children_bounds = path1.GetBounds().Union(path2.GetBounds());
+  DlRect clip_rect = DlRect::MakeWH(500, 500);
+  DlRoundRect clip_rrect = DlRoundRect::MakeRectXY(clip_rect, 20, 20);
   auto clip_rrect_layer = std::make_shared<ClipRRectLayer>(
       clip_rrect, Clip::kAntiAliasWithSaveLayer);
   clip_rrect_layer->Add(mock1);
@@ -463,7 +465,7 @@ TEST_F(ClipRRectLayerTest, OpacityInheritanceSaveLayerPainting) {
   EXPECT_EQ(context->renderable_state_flags, Layer::kSaveLayerRenderFlags);
 
   int opacity_alpha = 0x7F;
-  SkPoint offset = SkPoint::Make(10, 10);
+  DlPoint offset = DlPoint(10, 10);
   auto opacity_layer = std::make_shared<OpacityLayer>(opacity_alpha, offset);
   opacity_layer->Add(clip_rrect_layer);
   opacity_layer->Preroll(context);
@@ -473,11 +475,11 @@ TEST_F(ClipRRectLayerTest, OpacityInheritanceSaveLayerPainting) {
   /* OpacityLayer::Paint() */ {
     expected_builder.Save();
     {
-      expected_builder.Translate(offset.fX, offset.fY);
+      expected_builder.Translate(offset.x, offset.y);
       /* ClipRectLayer::Paint() */ {
         expected_builder.Save();
-        expected_builder.ClipRRect(clip_rrect, ClipOp::kIntersect, true);
-        expected_builder.SaveLayer(&children_bounds,
+        expected_builder.ClipRoundRect(clip_rrect, ClipOp::kIntersect, true);
+        expected_builder.SaveLayer(children_bounds,
                                    &DlPaint().setAlpha(opacity_alpha));
         /* child layer1 paint */ {
           expected_builder.DrawPath(path1, DlPaint());
@@ -496,17 +498,17 @@ TEST_F(ClipRRectLayerTest, OpacityInheritanceSaveLayerPainting) {
 }
 
 TEST_F(ClipRRectLayerTest, LayerCached) {
-  auto path1 = SkPath().addRect({10, 10, 30, 30});
+  auto path1 = DlPath::MakeRectLTRB(10, 10, 30, 30);
   DlPaint paint = DlPaint();
   auto mock1 = MockLayer::MakeOpacityCompatible(path1);
-  SkRect clip_rect = SkRect::MakeWH(500, 500);
-  SkRRect clip_rrect = SkRRect::MakeRectXY(clip_rect, 20, 20);
+  DlRect clip_rect = DlRect::MakeWH(500, 500);
+  DlRoundRect clip_rrect = DlRoundRect::MakeRectXY(clip_rect, 20, 20);
   auto layer = std::make_shared<ClipRRectLayer>(clip_rrect,
                                                 Clip::kAntiAliasWithSaveLayer);
   layer->Add(mock1);
 
-  auto initial_transform = SkMatrix::Translate(50.0, 25.5);
-  SkMatrix cache_ctm = initial_transform;
+  auto initial_transform = DlMatrix::MakeTranslation({50.0, 25.5});
+  DlMatrix cache_ctm = initial_transform;
   DisplayListBuilder cache_canvas;
   cache_canvas.Transform(cache_ctm);
 
@@ -536,18 +538,15 @@ TEST_F(ClipRRectLayerTest, LayerCached) {
 }
 
 TEST_F(ClipRRectLayerTest, NoSaveLayerShouldNotCache) {
-  auto path1 = SkPath().addRect({10, 10, 30, 30});
+  auto path1 = DlPath::MakeRectLTRB(10, 10, 30, 30);
 
   auto mock1 = MockLayer::MakeOpacityCompatible(path1);
-  SkRect clip_rect = SkRect::MakeWH(500, 500);
-  SkRRect clip_rrect = SkRRect::MakeRectXY(clip_rect, 20, 20);
+  DlRect clip_rect = DlRect::MakeWH(500, 500);
+  DlRoundRect clip_rrect = DlRoundRect::MakeRectXY(clip_rect, 20, 20);
   auto layer = std::make_shared<ClipRRectLayer>(clip_rrect, Clip::kAntiAlias);
   layer->Add(mock1);
 
-  auto initial_transform = SkMatrix::Translate(50.0, 25.5);
-  SkMatrix cache_ctm = initial_transform;
-  SkCanvas cache_canvas;
-  cache_canvas.setMatrix(cache_ctm);
+  auto initial_transform = DlMatrix::MakeTranslation({50.0, 25.5});
 
   use_mock_raster_cache();
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
@@ -572,13 +571,13 @@ TEST_F(ClipRRectLayerTest, NoSaveLayerShouldNotCache) {
 }
 
 TEST_F(ClipRRectLayerTest, EmptyClipDoesNotCullPlatformView) {
-  const SkPoint view_offset = SkPoint::Make(0.0f, 0.0f);
-  const SkSize view_size = SkSize::Make(8.0f, 8.0f);
+  const DlPoint view_offset = DlPoint(0.0f, 0.0f);
+  const DlSize view_size = DlSize(8.0f, 8.0f);
   const int64_t view_id = 42;
   auto platform_view =
       std::make_shared<PlatformViewLayer>(view_offset, view_size, view_id);
 
-  SkRRect clip_rrect = SkRRect::MakeRectXY(kEmptyRect, 20, 20);
+  DlRoundRect clip_rrect = DlRoundRect::MakeRectXY(DlRect(), 20, 20);
   auto clip = std::make_shared<ClipRRectLayer>(clip_rrect, Clip::kAntiAlias);
   clip->Add(platform_view);
 

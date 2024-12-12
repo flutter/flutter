@@ -15,6 +15,22 @@ class DlPath {
  public:
   static constexpr uint32_t kMaxVolatileUses = 2;
 
+  static DlPath MakeRect(DlRect rect);
+  static DlPath MakeRectLTRB(DlScalar left,
+                             DlScalar top,
+                             DlScalar right,
+                             DlScalar bottom);
+  static DlPath MakeRectXYWH(DlScalar x,
+                             DlScalar y,
+                             DlScalar width,
+                             DlScalar height);
+
+  static DlPath MakeOval(DlRect bounds);
+  static DlPath MakeOvalLTRB(DlScalar left,
+                             DlScalar top,
+                             DlScalar right,
+                             DlScalar bottom);
+
   DlPath() : data_(std::make_shared<Data>(SkPath())) {}
   explicit DlPath(const SkPath& path) : data_(std::make_shared<Data>(path)) {}
 
@@ -49,6 +65,8 @@ class DlPath {
 
   bool IsConverted() const;
   bool IsVolatile() const;
+
+  DlPath operator+(const DlPath& other) const;
 
  private:
   struct Data {

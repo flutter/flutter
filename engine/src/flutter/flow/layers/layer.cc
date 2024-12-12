@@ -8,10 +8,7 @@
 
 namespace flutter {
 
-Layer::Layer()
-    : paint_bounds_(SkRect::MakeEmpty()),
-      unique_id_(NextUniqueID()),
-      original_layer_id_(unique_id_) {}
+Layer::Layer() : unique_id_(NextUniqueID()), original_layer_id_(unique_id_) {}
 
 Layer::~Layer() = default;
 

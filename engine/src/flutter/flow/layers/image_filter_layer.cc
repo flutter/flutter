@@ -11,7 +11,7 @@
 namespace flutter {
 
 ImageFilterLayer::ImageFilterLayer(const std::shared_ptr<DlImageFilter>& filter,
-                                   const SkPoint& offset)
+                                   const DlPoint& offset)
     : CacheableContainerLayer(
           RasterCacheUtil::kMinimumRendersBeforeCachingFilterLayer),
       offset_(offset),
@@ -28,7 +28,7 @@ void ImageFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
     }
   }
 
-  context->PushTransform(SkMatrix::Translate(offset_.fX, offset_.fY));
+  context->PushTransform(DlMatrix::MakeTranslation(offset_));
   if (context->has_raster_cache()) {
     context->WillPaintWithIntegralTransform();
   }
@@ -37,11 +37,11 @@ void ImageFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
     auto filter = filter_->makeWithLocalMatrix(context->GetMatrix());
     if (filter) {
       // This transform will be applied to every child rect in the subtree
-      context->PushFilterBoundsAdjustment([filter](SkRect rect) {
+      context->PushFilterBoundsAdjustment([filter](DlRect rect) {
         DlIRect filter_out_bounds;
-        filter->map_device_bounds(ToDlIRect(rect.roundOut()), DlMatrix(),
+        filter->map_device_bounds(DlIRect::RoundOut(rect), DlMatrix(),
                                   filter_out_bounds);
-        return SkRect::Make(ToSkIRect(filter_out_bounds));
+        return DlRect::Make(filter_out_bounds);
       });
     }
   }
@@ -58,15 +58,15 @@ void ImageFilterLayer::Preroll(PrerollContext* context) {
 
 #if !SLIMPELLER
   AutoCache cache = AutoCache(layer_raster_cache_item_.get(), context,
-                              context->state_stack.transform_3x3());
+                              context->state_stack.matrix());
 #endif  //  !SLIMPELLER
 
-  SkRect child_bounds = SkRect::MakeEmpty();
+  DlRect child_bounds;
 
   PrerollChildren(context, &child_bounds);
 
   if (!filter_) {
-    child_bounds.offset(offset_);
+    child_bounds = child_bounds.Shift(offset_);
     set_paint_bounds(child_bounds);
     return;
   }
@@ -78,11 +78,10 @@ void ImageFilterLayer::Preroll(PrerollContext* context) {
       (LayerStateStack::kCallerCanApplyOpacity |
        LayerStateStack::kCallerCanApplyColorFilter);
 
-  const DlIRect filter_in_bounds = ToDlIRect(child_bounds.roundOut());
+  const DlIRect filter_in_bounds = DlIRect::RoundOut(child_bounds);
   DlIRect filter_out_bounds;
   filter_->map_device_bounds(filter_in_bounds, DlMatrix(), filter_out_bounds);
-  child_bounds.set(ToSkIRect(filter_out_bounds));
-  child_bounds.offset(offset_);
+  child_bounds = DlRect::Make(filter_out_bounds).Shift(offset_);
 
   set_paint_bounds(child_bounds);
 

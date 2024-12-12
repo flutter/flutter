@@ -10,6 +10,35 @@
 
 namespace flutter {
 
+DlPath DlPath::MakeRect(DlRect rect) {
+  return DlPath(SkPath::Rect(ToSkRect(rect)));
+}
+
+DlPath DlPath::MakeRectLTRB(DlScalar left,
+                            DlScalar top,
+                            DlScalar right,
+                            DlScalar bottom) {
+  return DlPath(SkPath().addRect(left, top, right, bottom));
+}
+
+DlPath DlPath::MakeRectXYWH(DlScalar x,
+                            DlScalar y,
+                            DlScalar width,
+                            DlScalar height) {
+  return DlPath(SkPath().addRect(SkRect::MakeXYWH(x, y, width, height)));
+}
+
+DlPath DlPath::MakeOval(DlRect bounds) {
+  return DlPath(SkPath::Oval(ToSkRect(bounds)));
+}
+
+DlPath DlPath::MakeOvalLTRB(DlScalar left,
+                            DlScalar top,
+                            DlScalar right,
+                            DlScalar bottom) {
+  return DlPath(SkPath::Oval(SkRect::MakeLTRB(left, top, right, bottom)));
+}
+
 const SkPath& DlPath::GetSkPath() const {
   return data_->sk_path;
 }
@@ -74,6 +103,12 @@ bool DlPath::IsConverted() const {
 
 bool DlPath::IsVolatile() const {
   return data_->sk_path.isVolatile();
+}
+
+DlPath DlPath::operator+(const DlPath& other) const {
+  SkPath path = data_->sk_path;
+  path.addPath(other.data_->sk_path);
+  return DlPath(path);
 }
 
 using Path = impeller::Path;

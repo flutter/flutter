@@ -14,16 +14,16 @@
 
 namespace flutter {
 
-DisplayListLayer::DisplayListLayer(const SkPoint& offset,
+DisplayListLayer::DisplayListLayer(const DlPoint& offset,
                                    sk_sp<DisplayList> display_list,
                                    bool is_complex,
                                    bool will_change)
     : offset_(offset), display_list_(std::move(display_list)) {
   if (display_list_) {
-    bounds_ = display_list_->bounds().makeOffset(offset_.x(), offset_.y());
+    bounds_ = display_list_->GetBounds().Shift(offset_.x, offset_.y);
 #if !SLIMPELLER
     display_list_raster_cache_item_ = DisplayListRasterCacheItem::Make(
-        display_list_, offset_, is_complex, will_change);
+        display_list_, ToSkPoint(offset_), is_complex, will_change);
 #endif  //  !SLIMPELLER
   }
 }
@@ -50,11 +50,11 @@ void DisplayListLayer::Diff(DiffContext* context, const Layer* old_layer) {
                Compare(dummy_statistics, this, prev));
 #endif
   }
-  context->PushTransform(SkMatrix::Translate(offset_.x(), offset_.y()));
+  context->PushTransform(DlMatrix::MakeTranslation(offset_));
   if (context->has_raster_cache()) {
     context->WillPaintWithIntegralTransform();
   }
-  context->AddLayerBounds(display_list()->bounds());
+  context->AddLayerBounds(display_list()->GetBounds());
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
 }
 
@@ -98,7 +98,7 @@ void DisplayListLayer::Preroll(PrerollContext* context) {
 
 #if !SLIMPELLER
   AutoCache cache = AutoCache(display_list_raster_cache_item_.get(), context,
-                              context->state_stack.transform_3x3());
+                              context->state_stack.matrix());
 #endif  //  !SLIMPELLER
   if (disp_list->can_apply_group_opacity()) {
     context->renderable_state_flags = LayerStateStack::kCallerCanApplyOpacity;
@@ -111,7 +111,7 @@ void DisplayListLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
   auto mutator = context.state_stack.save();
-  mutator.translate(offset_.x(), offset_.y());
+  mutator.translate(offset_.x, offset_.y);
 
 #if !SLIMPELLER
   if (context.raster_cache) {
@@ -130,7 +130,7 @@ void DisplayListLayer::Paint(PaintContext& context) const {
   }
 #endif  //  !SLIMPELLER
 
-  SkScalar opacity = context.state_stack.outstanding_opacity();
+  DlScalar opacity = context.state_stack.outstanding_opacity();
   context.canvas->DrawDisplayList(display_list_, opacity);
 }
 

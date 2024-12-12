@@ -13,7 +13,7 @@ namespace flutter {
 class ImageFilterLayer : public CacheableContainerLayer {
  public:
   explicit ImageFilterLayer(const std::shared_ptr<DlImageFilter>& filter,
-                            const SkPoint& offset = SkPoint::Make(0, 0));
+                            const DlPoint& offset = DlPoint());
 
   void Diff(DiffContext* context, const Layer* old_layer) override;
 
@@ -22,7 +22,7 @@ class ImageFilterLayer : public CacheableContainerLayer {
   void Paint(PaintContext& context) const override;
 
  private:
-  SkPoint offset_;
+  DlPoint offset_;
   const std::shared_ptr<DlImageFilter> filter_;
   std::shared_ptr<DlImageFilter> transformed_filter_;
 

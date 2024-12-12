@@ -21,14 +21,12 @@ TEST(LayerStateStack, AccessorsDieWithoutDelegate) {
                             "LayerStateStack state queried without a delegate");
   EXPECT_DEATH_IF_SUPPORTED(state_stack.local_cull_rect(),
                             "LayerStateStack state queried without a delegate");
-  EXPECT_DEATH_IF_SUPPORTED(state_stack.transform_3x3(),
-                            "LayerStateStack state queried without a delegate");
-  EXPECT_DEATH_IF_SUPPORTED(state_stack.transform_4x4(),
+  EXPECT_DEATH_IF_SUPPORTED(state_stack.matrix(),
                             "LayerStateStack state queried without a delegate");
   EXPECT_DEATH_IF_SUPPORTED(state_stack.content_culled({}),
                             "LayerStateStack state queried without a delegate");
   {
-    // state_stack.set_preroll_delegate(kGiantRect, SkMatrix::I());
+    // state_stack.set_preroll_delegate(kGiantRect, DlMatrix());
     auto mutator = state_stack.save();
     mutator.applyOpacity({}, 0.5);
     state_stack.clear_delegate();
@@ -41,16 +39,15 @@ TEST(LayerStateStack, Defaults) {
   LayerStateStack state_stack;
 
   ASSERT_EQ(state_stack.canvas_delegate(), nullptr);
-  ASSERT_EQ(state_stack.outstanding_opacity(), SK_Scalar1);
+  ASSERT_EQ(state_stack.outstanding_opacity(), 1.0f);
   ASSERT_EQ(state_stack.outstanding_color_filter(), nullptr);
   ASSERT_EQ(state_stack.outstanding_image_filter(), nullptr);
-  ASSERT_EQ(state_stack.outstanding_bounds(), SkRect());
+  ASSERT_EQ(state_stack.outstanding_bounds(), DlRect());
 
-  state_stack.set_preroll_delegate(kGiantRect, SkMatrix::I());
+  state_stack.set_preroll_delegate(kGiantRect, DlMatrix());
   ASSERT_EQ(state_stack.device_cull_rect(), kGiantRect);
   ASSERT_EQ(state_stack.local_cull_rect(), kGiantRect);
-  ASSERT_EQ(state_stack.transform_3x3(), SkMatrix::I());
-  ASSERT_EQ(state_stack.transform_4x4(), SkM44());
+  ASSERT_EQ(state_stack.matrix(), DlMatrix());
 
   DlPaint dl_paint;
   state_stack.fill(dl_paint);
@@ -113,7 +110,7 @@ TEST(LayerStateStack, OldDelegateIsRolledBack) {
   ASSERT_TRUE(builder.GetTransform().isIdentity());
   ASSERT_EQ(canvas.GetTransform(), SkMatrix::Translate(10, 10));
 
-  state_stack.set_preroll_delegate(SkRect::MakeWH(100, 100));
+  state_stack.set_preroll_delegate(DlRect::MakeWH(100, 100));
 
   ASSERT_TRUE(builder.GetTransform().isIdentity());
   ASSERT_TRUE(canvas.GetTransform().isIdentity());
@@ -132,10 +129,10 @@ TEST(LayerStateStack, OldDelegateIsRolledBack) {
 }
 
 TEST(LayerStateStack, Opacity) {
-  SkRect rect = {10, 10, 20, 20};
+  DlRect rect = DlRect::MakeLTRB(10, 10, 20, 20);
 
   LayerStateStack state_stack;
-  state_stack.set_preroll_delegate(SkRect::MakeLTRB(0, 0, 50, 50));
+  state_stack.set_preroll_delegate(DlRect::MakeLTRB(0, 0, 50, 50));
   {
     auto mutator = state_stack.save();
     mutator.applyOpacity(rect, 0.5f);
@@ -157,8 +154,8 @@ TEST(LayerStateStack, Opacity) {
         state_stack.set_delegate(&builder);
         {
           auto restore = state_stack.applyState(rect, 0);
-          ASSERT_EQ(state_stack.outstanding_opacity(), SK_Scalar1);
-          ASSERT_EQ(state_stack.outstanding_bounds(), SkRect());
+          ASSERT_EQ(state_stack.outstanding_opacity(), 1.0f);
+          ASSERT_EQ(state_stack.outstanding_bounds(), DlRect());
 
           DlPaint paint;
           state_stack.fill(paint);
@@ -169,7 +166,7 @@ TEST(LayerStateStack, Opacity) {
         DisplayListBuilder expected;
         DlPaint save_paint =
             DlPaint().setOpacity(state_stack.outstanding_opacity());
-        expected.SaveLayer(&rect, &save_paint);
+        expected.SaveLayer(rect, &save_paint);
         expected.DrawRect(rect, DlPaint());
         expected.Restore();
         ASSERT_TRUE(DisplayListsEQ_Verbose(builder.Build(), expected.Build()));
@@ -201,19 +198,19 @@ TEST(LayerStateStack, Opacity) {
     ASSERT_EQ(state_stack.outstanding_bounds(), rect);
   }
 
-  ASSERT_EQ(state_stack.outstanding_opacity(), SK_Scalar1);
-  ASSERT_EQ(state_stack.outstanding_bounds(), SkRect());
+  ASSERT_EQ(state_stack.outstanding_opacity(), 1.0f);
+  ASSERT_EQ(state_stack.outstanding_bounds(), DlRect());
 }
 
 TEST(LayerStateStack, ColorFilter) {
-  SkRect rect = {10, 10, 20, 20};
+  DlRect rect = DlRect::MakeLTRB(10, 10, 20, 20);
   auto outer_filter =
       DlColorFilter::MakeBlend(DlColor::kYellow(), DlBlendMode::kColorBurn);
   auto inner_filter =
       DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kColorBurn);
 
   LayerStateStack state_stack;
-  state_stack.set_preroll_delegate(SkRect::MakeLTRB(0, 0, 50, 50));
+  state_stack.set_preroll_delegate(DlRect::MakeLTRB(0, 0, 50, 50));
   {
     auto mutator = state_stack.save();
     mutator.applyColorFilter(rect, outer_filter);
@@ -244,8 +241,8 @@ TEST(LayerStateStack, ColorFilter) {
         DisplayListBuilder expected;
         DlPaint outer_save_paint = DlPaint().setColorFilter(outer_filter);
         DlPaint inner_save_paint = DlPaint().setColorFilter(inner_filter);
-        expected.SaveLayer(&rect, &outer_save_paint);
-        expected.SaveLayer(&rect, &inner_save_paint);
+        expected.SaveLayer(rect, &outer_save_paint);
+        expected.SaveLayer(rect, &inner_save_paint);
         expected.DrawRect(rect, DlPaint());
         expected.Restore();
         expected.Restore();
@@ -254,7 +251,7 @@ TEST(LayerStateStack, ColorFilter) {
 
       // Verify output with applyState that accepts color filters
       {
-        SkRect rect = {10, 10, 20, 20};
+        DlRect rect = DlRect::MakeLTRB(10, 10, 20, 20);
         DisplayListBuilder builder;
         state_stack.set_delegate(&builder);
         {
@@ -271,7 +268,7 @@ TEST(LayerStateStack, ColorFilter) {
         DisplayListBuilder expected;
         DlPaint save_paint = DlPaint().setColorFilter(outer_filter);
         DlPaint draw_paint = DlPaint().setColorFilter(inner_filter);
-        expected.SaveLayer(&rect, &save_paint);
+        expected.SaveLayer(rect, &save_paint);
         expected.DrawRect(rect, draw_paint);
         ASSERT_TRUE(DisplayListsEQ_Verbose(builder.Build(), expected.Build()));
       }
@@ -284,19 +281,19 @@ TEST(LayerStateStack, ColorFilter) {
 }
 
 TEST(LayerStateStack, ImageFilter) {
-  SkRect rect = {10, 10, 20, 20};
+  DlRect rect = DlRect::MakeLTRB(10, 10, 20, 20);
   std::shared_ptr<DlImageFilter> outer_filter =
       DlImageFilter::MakeBlur(2.0f, 2.0f, DlTileMode::kClamp);
   std::shared_ptr<DlImageFilter> inner_filter =
       DlImageFilter::MakeBlur(3.0f, 3.0f, DlTileMode::kClamp);
-  SkRect inner_src_rect = rect;
+  DlRect inner_src_rect = rect;
   DlRect dl_outer_src_rect;
-  ASSERT_EQ(inner_filter->map_local_bounds(ToDlRect(rect), dl_outer_src_rect),
+  ASSERT_EQ(inner_filter->map_local_bounds(rect, dl_outer_src_rect),
             &dl_outer_src_rect);
-  SkRect outer_src_rect = ToSkRect(dl_outer_src_rect);
+  DlRect outer_src_rect = dl_outer_src_rect;
 
   LayerStateStack state_stack;
-  state_stack.set_preroll_delegate(SkRect::MakeLTRB(0, 0, 50, 50));
+  state_stack.set_preroll_delegate(DlRect::MakeLTRB(0, 0, 50, 50));
   {
     auto mutator = state_stack.save();
     mutator.applyImageFilter(outer_src_rect, outer_filter);
@@ -327,8 +324,8 @@ TEST(LayerStateStack, ImageFilter) {
         DisplayListBuilder expected;
         DlPaint outer_save_paint = DlPaint().setImageFilter(outer_filter);
         DlPaint inner_save_paint = DlPaint().setImageFilter(inner_filter);
-        expected.SaveLayer(&outer_src_rect, &outer_save_paint);
-        expected.SaveLayer(&inner_src_rect, &inner_save_paint);
+        expected.SaveLayer(outer_src_rect, &outer_save_paint);
+        expected.SaveLayer(inner_src_rect, &inner_save_paint);
         expected.DrawRect(rect, DlPaint());
         expected.Restore();
         expected.Restore();
@@ -337,7 +334,7 @@ TEST(LayerStateStack, ImageFilter) {
 
       // Verify output with applyState that accepts color filters
       {
-        SkRect rect = {10, 10, 20, 20};
+        DlRect rect = DlRect::MakeLTRB(10, 10, 20, 20);
         DisplayListBuilder builder;
         state_stack.set_delegate(&builder);
         {
@@ -354,7 +351,7 @@ TEST(LayerStateStack, ImageFilter) {
         DisplayListBuilder expected;
         DlPaint save_paint = DlPaint().setImageFilter(outer_filter);
         DlPaint draw_paint = DlPaint().setImageFilter(inner_filter);
-        expected.SaveLayer(&outer_src_rect, &save_paint);
+        expected.SaveLayer(outer_src_rect, &save_paint);
         expected.DrawRect(rect, draw_paint);
         ASSERT_TRUE(DisplayListsEQ_Verbose(builder.Build(), expected.Build()));
       }
@@ -367,7 +364,7 @@ TEST(LayerStateStack, ImageFilter) {
 }
 
 TEST(LayerStateStack, OpacityAndColorFilterInteraction) {
-  SkRect rect = {10, 10, 20, 20};
+  DlRect rect = DlRect::MakeLTRB(10, 10, 20, 20);
   auto color_filter =
       DlColorFilter::MakeBlend(DlColor::kYellow(), DlBlendMode::kColorBurn);
 
@@ -390,7 +387,7 @@ TEST(LayerStateStack, OpacityAndColorFilterInteraction) {
       // The opacity will have been resolved by a saveLayer
       ASSERT_EQ(builder.GetSaveCount(), 2);
       ASSERT_EQ(state_stack.outstanding_color_filter(), color_filter);
-      ASSERT_EQ(state_stack.outstanding_opacity(), SK_Scalar1);
+      ASSERT_EQ(state_stack.outstanding_opacity(), 1.0f);
     }
     ASSERT_EQ(builder.GetSaveCount(), 1);
     ASSERT_EQ(state_stack.outstanding_color_filter(), nullptr);
@@ -398,7 +395,7 @@ TEST(LayerStateStack, OpacityAndColorFilterInteraction) {
   }
   ASSERT_EQ(builder.GetSaveCount(), 1);
   ASSERT_EQ(state_stack.outstanding_color_filter(), nullptr);
-  ASSERT_EQ(state_stack.outstanding_opacity(), SK_Scalar1);
+  ASSERT_EQ(state_stack.outstanding_opacity(), 1.0f);
 
   {
     auto mutator1 = state_stack.save();
@@ -418,15 +415,15 @@ TEST(LayerStateStack, OpacityAndColorFilterInteraction) {
     }
     ASSERT_EQ(builder.GetSaveCount(), 1);
     ASSERT_EQ(state_stack.outstanding_color_filter(), color_filter);
-    ASSERT_EQ(state_stack.outstanding_opacity(), SK_Scalar1);
+    ASSERT_EQ(state_stack.outstanding_opacity(), 1.0f);
   }
   ASSERT_EQ(builder.GetSaveCount(), 1);
   ASSERT_EQ(state_stack.outstanding_color_filter(), nullptr);
-  ASSERT_EQ(state_stack.outstanding_opacity(), SK_Scalar1);
+  ASSERT_EQ(state_stack.outstanding_opacity(), 1.0f);
 }
 
 TEST(LayerStateStack, OpacityAndImageFilterInteraction) {
-  SkRect rect = {10, 10, 20, 20};
+  DlRect rect = DlRect::MakeLTRB(10, 10, 20, 20);
   std::shared_ptr<DlImageFilter> image_filter =
       DlImageFilter::MakeBlur(2.0f, 2.0f, DlTileMode::kClamp);
 
@@ -457,7 +454,7 @@ TEST(LayerStateStack, OpacityAndImageFilterInteraction) {
   }
   ASSERT_EQ(builder.GetSaveCount(), 1);
   ASSERT_EQ(state_stack.outstanding_image_filter(), nullptr);
-  ASSERT_EQ(state_stack.outstanding_opacity(), SK_Scalar1);
+  ASSERT_EQ(state_stack.outstanding_opacity(), 1.0f);
 
   {
     auto mutator1 = state_stack.save();
@@ -477,15 +474,15 @@ TEST(LayerStateStack, OpacityAndImageFilterInteraction) {
     }
     ASSERT_EQ(builder.GetSaveCount(), 1);
     ASSERT_EQ(state_stack.outstanding_image_filter(), image_filter);
-    ASSERT_EQ(state_stack.outstanding_opacity(), SK_Scalar1);
+    ASSERT_EQ(state_stack.outstanding_opacity(), 1.0f);
   }
   ASSERT_EQ(builder.GetSaveCount(), 1);
   ASSERT_EQ(state_stack.outstanding_image_filter(), nullptr);
-  ASSERT_EQ(state_stack.outstanding_opacity(), SK_Scalar1);
+  ASSERT_EQ(state_stack.outstanding_opacity(), 1.0f);
 }
 
 TEST(LayerStateStack, ColorFilterAndImageFilterInteraction) {
-  SkRect rect = {10, 10, 20, 20};
+  DlRect rect = DlRect::MakeLTRB(10, 10, 20, 20);
   auto color_filter =
       DlColorFilter::MakeBlend(DlColor::kYellow(), DlBlendMode::kColorBurn);
   auto image_filter = DlImageFilter::MakeBlur(2.0f, 2.0f, DlTileMode::kClamp);

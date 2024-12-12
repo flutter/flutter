@@ -1661,7 +1661,7 @@ bool Shell::ShouldDiscardLayerTree(int64_t view_id,
   std::scoped_lock<std::mutex> lock(resize_mutex_);
   auto expected_frame_size = ExpectedFrameSize(view_id);
   return !expected_frame_size.isEmpty() &&
-         tree.frame_size() != expected_frame_size;
+         ToSkISize(tree.frame_size()) != expected_frame_size;
 }
 
 // |ServiceProtocol::Handler|
