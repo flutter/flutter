@@ -11,6 +11,7 @@
 #include "flutter/fml/message_loop.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
 FLUTTER_ASSERT_ARC
@@ -101,7 +102,7 @@ flutter::FakeDelegate fake_delegate;
   XCTAssertNotNil(engine);
   id mockEngine = OCMPartialMock(engine);
   OCMStub([mockEngine notifyLowMemory]);
-  OCMStub([mockEngine iosPlatformView]).andReturn(platform_view.get());
+  OCMStub([mockEngine platformView]).andReturn(platform_view.get());
 
   [engine setViewController:nil];
   OCMVerify([mockEngine notifyLowMemory]);
