@@ -202,7 +202,7 @@ void main() {
     final RenderBox tip = tester.renderObject(_findTooltipContainer(tooltipText));
     expect(tip.size.height, equals(24.0)); // 14.0 height + 5.0 padding * 2 (top, bottom)
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)), equals(const Offset(10.0, 20.0)));
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+  });
 
   testWidgets('Material3 - Does tooltip end up in the right place - top left', (
     WidgetTester tester,
@@ -260,7 +260,7 @@ void main() {
     final RenderBox tip = tester.renderObject(_findTooltipContainer(tooltipText));
     expect(tip.size.height, equals(30.0)); // 20.0 height + 5.0 padding * 2 (top, bottom)
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)), equals(const Offset(10.0, 20.0)));
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+  });
 
   testWidgets('Does tooltip end up in the right place - center prefer above fits', (
     WidgetTester tester,
@@ -574,7 +574,6 @@ void main() {
       expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
       expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(330.0));
     },
-    skip: kIsWeb && !isSkiaWeb, // https://github.com/flutter/flutter/issues/99933
   );
 
   testWidgets('Material2 - Does tooltip end up in the right place - near the edge', (
@@ -698,7 +697,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(310.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(330.0));
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+  });
 
   testWidgets('Tooltip should be fully visible when MediaQuery.viewInsets > 0', (
     WidgetTester tester,
@@ -1207,7 +1206,6 @@ void main() {
       TargetPlatform.linux,
       TargetPlatform.windows,
     }),
-    skip: kIsWeb && !isSkiaWeb, // https://github.com/flutter/flutter/issues/99933
   );
 
   testWidgets('Material2 - Can tooltip decoration be customized', (WidgetTester tester) async {
@@ -2167,7 +2165,7 @@ void main() {
     expect(tester.getSize(find.text(tooltipText)).height, equals(80.0));
     tip = tester.renderObject(_findTooltipContainer(tooltipText));
     expect(tip.size.height, equals(88.0));
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+  });
 
   testWidgets('Tooltip text displays with richMessage', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();

@@ -490,7 +490,7 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true));
 
     semantics.dispose();
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  });
 
   testWidgets('Material2 - Collapsed FlexibleSpaceBar has correct semantics', (
     WidgetTester tester,

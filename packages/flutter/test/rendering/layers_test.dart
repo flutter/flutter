@@ -540,8 +540,6 @@ void main() {
       // layer.
       parent.buildScene(SceneBuilder());
     },
-    // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
-    skip: isBrowser && !isSkiaWeb,
   );
 
   test(
@@ -563,8 +561,6 @@ void main() {
       // layer.
       parent.buildScene(SceneBuilder());
     },
-    // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
-    skip: isBrowser && !isSkiaWeb,
   );
 
   test('PictureLayer does not let you call dispose unless refcount is 0', () {
