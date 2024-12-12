@@ -651,6 +651,7 @@ enum AndroidArch {
   x86,
   x86_64;
 
+  // dart format off
   String get archName => switch (this) {
     AndroidArch.armeabi_v7a => 'armeabi-v7a',
     AndroidArch.arm64_v8a   => 'arm64-v8a',
@@ -664,6 +665,7 @@ enum AndroidArch {
     AndroidArch.x86_64      => 'android-x64',
     AndroidArch.x86         => 'android-x86',
   };
+  // dart format on
 }
 
 /// The default set of iOS device architectures to build for.
@@ -731,6 +733,7 @@ DarwinArch getDarwinArchForName(String arch) {
   };
 }
 
+// dart format off
 String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch}) {
   return switch (platform) {
     TargetPlatform.ios    when darwinArch != null => 'ios-${darwinArch.name}',
@@ -785,6 +788,7 @@ AndroidArch getAndroidArchForName(String platform) {
     _ => throw Exception('Unsupported Android arch name "$platform"'),
   };
 }
+// dart format on
 
 DarwinArch getCurrentDarwinArch() {
   return switch (globals.os.hostPlatform) {

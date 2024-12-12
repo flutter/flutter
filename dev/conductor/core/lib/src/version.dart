@@ -292,11 +292,13 @@ class Version {
 
   @override
   String toString() {
+    // dart format off
     return switch (type) {
       VersionType.stable      => '$x.$y.$z',
       VersionType.development => '$x.$y.$z-$m.$n.pre',
       VersionType.latest      => '$x.$y.$z-$m.$n.pre.$commits',
       VersionType.gitDescribe => '$x.$y.$z-$m.$n.pre.$commits',
     };
+    // dart format on
   }
 }

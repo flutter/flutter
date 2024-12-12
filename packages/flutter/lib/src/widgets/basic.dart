@@ -2956,6 +2956,7 @@ class UnconstrainedBox extends StatelessWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
+  // dart format off
   BoxConstraintsTransform _axisToTransform(Axis? constrainedAxis) {
     return switch (constrainedAxis) {
       Axis.horizontal => ConstraintsTransformBox.heightUnconstrained,
@@ -2963,6 +2964,7 @@ class UnconstrainedBox extends StatelessWidget {
       null            => ConstraintsTransformBox.unconstrained,
     };
   }
+  // dart format on
 
   @override
   Widget build(BuildContext context) {

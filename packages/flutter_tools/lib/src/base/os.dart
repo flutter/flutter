@@ -633,6 +633,7 @@ enum HostPlatform {
   windows_x64,
   windows_arm64;
 
+  // dart format off
   String get platformName => switch (this) {
     HostPlatform.darwin_x64    => 'x64',
     HostPlatform.darwin_arm64  => 'arm64',
@@ -641,6 +642,7 @@ enum HostPlatform {
     HostPlatform.windows_x64   => 'x64',
     HostPlatform.windows_arm64 => 'arm64',
   };
+  // dart format on
 }
 
 String getNameForHostPlatform(HostPlatform platform) {

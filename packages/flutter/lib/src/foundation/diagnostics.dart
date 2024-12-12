@@ -1766,6 +1766,7 @@ abstract class DiagnosticsNode {
   @protected
   TextTreeConfiguration? get textTreeConfiguration {
     assert(style != null);
+    // dart format off
     return switch (style!) {
       DiagnosticsTreeStyle.none          => null,
       DiagnosticsTreeStyle.dense         => denseTextConfiguration,
@@ -1783,6 +1784,7 @@ abstract class DiagnosticsNode {
       // rendering is quite custom.
       DiagnosticsTreeStyle.truncateChildren => whitespaceTextConfiguration,
     };
+    // dart format on
   }
 
   /// Returns a string representation of this node and its descendants.

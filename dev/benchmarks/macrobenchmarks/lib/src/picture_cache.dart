@@ -209,11 +209,13 @@ class ListItem extends StatelessWidget {
   }
 
   String _convertCountToStr(int count) {
+    // dart format off
     return switch (count) {
       < 10000  => count.toString(),
       < 100000 => '${(count / 10000).toStringAsPrecision(2)}w',
       _        => '${(count / 10000).floor()}w',
     };
+    // dart format on
   }
 
   Widget _buildUserInfo() {

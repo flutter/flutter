@@ -12,6 +12,8 @@ import 'basic_types.dart';
 
 /// Utility functions for working with matrices.
 abstract final class MatrixUtils {
+  // dart format off
+
   /// Returns the given [transform] matrix as an [Offset], if the matrix is
   /// nothing but a 2D translation.
   ///
@@ -47,6 +49,7 @@ abstract final class MatrixUtils {
     }
     return null;
   }
+  // dart format on
 
   /// Returns true if the given matrices are exactly equal, and false
   /// otherwise. Null values are assumed to be the identity matrix.

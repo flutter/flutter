@@ -3096,6 +3096,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
+    // dart format off
     return switch (event) {
       PointerDownEvent()          => onPointerDown?.call(event),
       PointerMoveEvent()          => onPointerMove?.call(event),
@@ -3108,6 +3109,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       PointerSignalEvent()        => onPointerSignal?.call(event),
       _ => null,
     };
+    // dart format on
   }
 
   @override

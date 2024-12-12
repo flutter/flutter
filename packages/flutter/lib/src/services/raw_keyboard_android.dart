@@ -229,6 +229,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
 
   @override
   bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any }) {
+    // dart format off
     return switch (key) {
       ModifierKey.controlModifier    => _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl),
       ModifierKey.shiftModifier      => _isLeftRightModifierPressed(side, modifierShift, modifierLeftShift, modifierRightShift),
@@ -240,6 +241,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
       ModifierKey.functionModifier   => metaState & modifierFunction != 0,
       ModifierKey.symbolModifier     => metaState & modifierSym != 0,
     };
+    // dart format on
   }
 
   @override

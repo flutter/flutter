@@ -109,6 +109,7 @@ Future<void> _setAppVersion(int version) async {
 }
 
 String _testTypeToIndexFile(ServiceWorkerTestType type) {
+  // dart format off
   return switch (type) {
     ServiceWorkerTestType.blockedServiceWorkers                   => 'index_with_blocked_service_workers.html',
     ServiceWorkerTestType.withFlutterJs                           => 'index_with_flutterjs.html',
@@ -120,6 +121,7 @@ String _testTypeToIndexFile(ServiceWorkerTestType type) {
     ServiceWorkerTestType.withFlutterJsCustomServiceWorkerVersion => 'index_with_flutterjs_custom_sw_version.html',
     ServiceWorkerTestType.generatedEntrypoint                     => 'generated_entrypoint.html',
   };
+  // dart format on
 }
 
 Future<void> _rebuildApp({ required int version, required ServiceWorkerTestType testType, required String target }) async {
