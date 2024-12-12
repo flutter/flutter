@@ -319,7 +319,6 @@ class WebTestsSuite {
         'web-server',
         '--$buildMode',
         // '--web-renderer=$webRenderer',
-        '--dart-define=FLUTTER_WEB_AUTO_DETECT=false',
         if (webRenderer == 'skwasm') ...<String>[
           // See: WebRendererMode.dartDefines[skwasm]
           '--dart-define=FLUTTER_WEB_USE_SKIA=false',
@@ -462,8 +461,6 @@ class WebTestsSuite {
           '--dart-define=FLUTTER_WEB_USE_SKIA=true',
         if (!canvasKit)
           '--dart-define=FLUTTER_WEB_USE_SKIA=false',
-        if (!canvasKit)
-          '--dart-define=FLUTTER_WEB_AUTO_DETECT=false',
         '--driver=test_driver/transitions_perf_e2e_test.dart',
         '--target=test_driver/transitions_perf_e2e.dart',
         '--browser-name=chrome',
@@ -543,7 +540,6 @@ class WebTestsSuite {
         'chrome',
         '--web-run-headless',
         '--dart-define=FLUTTER_WEB_USE_SKIA=false',
-        '--dart-define=FLUTTER_WEB_AUTO_DETECT=false',
         ...additionalArguments,
         '-t',
         target,
@@ -712,7 +708,6 @@ class WebTestsSuite {
         '-v',
         '--platform=chrome',
         if (useWasm) '--wasm',
-        '--dart-define=FLUTTER_WEB_AUTO_DETECT=false',
         // '--web-renderer=$webRenderer',
         if (webRenderer == 'skwasm') ...<String>[
           // See: WebRendererMode.dartDefines[skwasm]

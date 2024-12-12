@@ -22,7 +22,6 @@ void main() {
     test('canvaskit web-renderer with no dart-defines', () {
       dartDefines = WebRendererMode.canvaskit.updateDartDefines(dartDefines);
       expect(dartDefines, <String>[
-        'FLUTTER_WEB_AUTO_DETECT=false',
         'FLUTTER_WEB_USE_SKIA=true',
         'FLUTTER_WEB_USE_SKWASM=false',
       ]);
@@ -31,7 +30,6 @@ void main() {
     test('html web-renderer with no dart-defines', () {
       dartDefines = WebRendererMode.html.updateDartDefines(dartDefines);
       expect(dartDefines, <String>[
-        'FLUTTER_WEB_AUTO_DETECT=false',
         'FLUTTER_WEB_USE_SKIA=false',
         'FLUTTER_WEB_USE_SKWASM=false',
       ]);
@@ -47,7 +45,6 @@ void main() {
       dartDefines = <String>['FLUTTER_WEB_USE_SKIA=false'];
       dartDefines = WebRendererMode.canvaskit.updateDartDefines(dartDefines);
       expect(dartDefines, <String>[
-        'FLUTTER_WEB_AUTO_DETECT=false',
         'FLUTTER_WEB_USE_SKIA=true',
         'FLUTTER_WEB_USE_SKWASM=false',
       ]);
@@ -57,7 +54,6 @@ void main() {
       dartDefines = <String>['FLUTTER_WEB_USE_SKIA=true'];
       dartDefines = WebRendererMode.html.updateDartDefines(dartDefines);
       expect(dartDefines, <String>[
-        'FLUTTER_WEB_AUTO_DETECT=false',
         'FLUTTER_WEB_USE_SKIA=false',
         'FLUTTER_WEB_USE_SKWASM=false',
       ]);
@@ -67,7 +63,6 @@ void main() {
       dartDefines = <String>['FLUTTER_WEB_USE_SKWASM=false'];
       dartDefines = WebRendererMode.skwasm.updateDartDefines(dartDefines);
       expect(dartDefines, <String>[
-        'FLUTTER_WEB_AUTO_DETECT=false',
         'FLUTTER_WEB_USE_SKIA=false',
         'FLUTTER_WEB_USE_SKWASM=true',
       ]);
