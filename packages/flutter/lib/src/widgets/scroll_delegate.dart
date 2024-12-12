@@ -413,6 +413,17 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   ///
   /// Defaults to true.
   /// {@endtemplate}
+  /// {@tool dartpad}
+  /// This example demonstrates how to use the [SliverChildBuilderDelegate]
+  /// with the [addAutomaticKeepAlives] property.
+  ///
+  /// In this example, when `addAutomaticKeepAlives` is set to true, the
+  /// state of each item in the list will be kept alive even when it is
+  /// scrolled out of view. When it is set to false, the state is not kept
+  /// alive, and the items may lose state when scrolled out of view.
+  ///
+  /// ** See code in examples/api/lib/widgets/automatic_keep_alive/sliver_child_builder_delegate_add_automatic_keep_alives.dart **
+  /// {@end-tool}
   final bool addAutomaticKeepAlives;
 
   /// {@template flutter.widgets.SliverChildBuilderDelegate.addRepaintBoundaries}
@@ -613,6 +624,18 @@ class SliverChildListDelegate extends SliverChildDelegate {
   }) : _keyToIndex = null;
 
   /// {@macro flutter.widgets.SliverChildBuilderDelegate.addAutomaticKeepAlives}
+  ///
+  /// {@tool dartpad}
+  /// This example demonstrates how to use the [SliverChildListDelegate]
+  /// with the `addAutomaticKeepAlives` property.
+  ///
+  /// In this example, when `addAutomaticKeepAlives` is set to true, the
+  /// state of each item in the list will be kept alive even when it is scrolled
+  /// out of view.
+  ///
+  /// ** See code in examples/api/lib/widgets/automatic_keep_alive/sliver_child_list_delegate_add_automatic_keep_alives.dart **
+  /// {@end-tool}
+  ///
   final bool addAutomaticKeepAlives;
 
   /// {@macro flutter.widgets.SliverChildBuilderDelegate.addRepaintBoundaries}
