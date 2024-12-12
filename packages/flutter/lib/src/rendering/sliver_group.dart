@@ -399,8 +399,6 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
     final bool rightWayUp = _getRightWayUp(constraints);
     double delta = childMainAxisPosition(child);
     final double crossAxisDelta = childCrossAxisPosition(child);
-    // print('delts: $delta');
-    // print('child geometry: $child ${child.geometry}');
     if (!rightWayUp) {
       delta = constraints.viewportMainAxisExtent - delta;
     }
