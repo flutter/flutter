@@ -1809,17 +1809,14 @@ void main() {
               data: TabBarThemeData(
                  splashBorderRadius: BorderRadius.circular(radius),
               ),
-              child: TabBar(
-                overlayColor: MaterialStateProperty.resolveWith<Color>(
-                  (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.hovered)) {
-                      return hoverColor;
-                    }
-                    return Colors.black54;
+              child: const TabBar(
+                overlayColor: WidgetStateMapper<Color>(
+                  <WidgetStatesConstraint, Color>{
+                    WidgetState.hovered: hoverColor,
+                    WidgetState.any: Colors.black54,
                   },
                 ),
-
-                tabs: const <Widget>[
+                tabs: <Widget>[
                   Tab(
                     child: Text(''),
                   ),
@@ -1834,14 +1831,15 @@ void main() {
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.moveTo(tester.getCenter(find.byType(Tab)));
     await tester.pumpAndSettle();
-    final RenderObject object = tester.allRenderObjects.firstWhere((RenderObject element) => element.runtimeType.toString() == '_RenderInkFeatures');
+    final Finder findInkWell = find.byType(InkWell);
+    final BuildContext context = tester.element(findInkWell);
     expect(
-      object,
+      Material.of(context),
       paints..rrect(
         color: hoverColor,
         rrect: RRect.fromRectAndRadius(
-          tester.getRect(find.byType(InkWell)),
-          const Radius.circular(radius)
+          tester.getRect(findInkWell),
+          const Radius.circular(radius),
         ),
       ),
     );
