@@ -387,10 +387,45 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
     }
   }
 
+  bool _getRightWayUp(SliverConstraints constraints) {
+    final bool reversed = axisDirectionIsReversed(constraints.axisDirection);
+    return switch (constraints.growthDirection) {
+      GrowthDirection.forward => !reversed,
+      GrowthDirection.reverse => reversed,
+    };
+  }
+
+  void _applyPaintTransformForSliverChild(RenderSliver child, Matrix4 transform) {
+    final bool rightWayUp = _getRightWayUp(constraints);
+    double delta = childMainAxisPosition(child);
+    final double crossAxisDelta = childCrossAxisPosition(child);
+    // print('delts: $delta');
+    // print('child geometry: $child ${child.geometry}');
+    if (!rightWayUp) {
+      delta = constraints.viewportMainAxisExtent - delta;
+    }
+    switch (constraints.axis) {
+      case Axis.horizontal:
+        transform.translate(delta, crossAxisDelta);
+      case Axis.vertical:
+        transform.translate(crossAxisDelta, delta);
+    }
+  }
+
   @override
   void applyPaintTransform(RenderSliver child, Matrix4 transform) {
-    final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
-    childParentData.applyPaintTransform(transform);
+    if (!child.geometry!.visible) {
+      // This can happen if some child asks for the global transform even though
+      // they are not getting painted. In that case, the transform is set to
+      // zero since [applyPaintTransformForBoxChild] would end up throwing due
+      // to the child not being configured correctly for applying a transform.
+      // There's no assert here because asking for the paint transform is a
+      // valid thing to do even if a child would not be painted, but there is no
+      // meaningful non-zero matrix to use in this case.
+      transform.setZero();
+    } else {
+      _applyPaintTransformForSliverChild(child, transform);
+    }
   }
 
   @override
