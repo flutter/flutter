@@ -31,10 +31,10 @@ class ProxyValidator extends DoctorValidator {
     '';
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     if (_httpProxy.isEmpty) {
-      return const ValidationResult(
-          ValidationType.success, <ValidationMessage>[]);
+      return ValidationResult(
+          ValidationType.success, const <ValidationMessage>[]);
     }
 
     final List<ValidationMessage> messages = <ValidationMessage>[
