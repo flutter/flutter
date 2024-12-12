@@ -541,7 +541,7 @@ void main() {
     );
 
     testUsingContext(
-      'runner enabling analytics with flag',
+      '--enable-analytics and --disable-analytics enables/disables telemetry',
       () async {
         io.setExitFunctionForTests((int exitCode) {});
 
@@ -550,8 +550,6 @@ void main() {
         await runner.run(
           <String>['--disable-analytics'],
           () => <FlutterCommand>[],
-          // This flutterVersion disables crash reporting.
-          flutterVersion: '[user-branch]/',
           shutdownHooks: ShutdownHooks(),
         );
 
@@ -560,12 +558,76 @@ void main() {
         await runner.run(
           <String>['--enable-analytics'],
           () => <FlutterCommand>[],
-          // This flutterVersion disables crash reporting.
-          flutterVersion: '[user-branch]/',
           shutdownHooks: ShutdownHooks(),
         );
 
         expect(globals.analytics.telemetryEnabled, true);
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      '--enable-analytics and --disable-analytics send an event when telemetry is enabled/disabled',
+      () async {
+        io.setExitFunctionForTests((int exitCode) {});
+        await globals.analytics.setTelemetry(true);
+
+        await runner.run(
+          <String>['--disable-analytics'],
+          () => <FlutterCommand>[],
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(
+          (globals.analytics as FakeAnalytics).sentEvents,
+          <Event>[Event.analyticsCollectionEnabled(status: false)],
+        );
+
+        (globals.analytics as FakeAnalytics).sentEvents.clear();
+        expect(globals.analytics.telemetryEnabled, false);
+        await runner.run(
+          <String>['--enable-analytics'],
+          () => <FlutterCommand>[],
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect((globals.analytics as FakeAnalytics).sentEvents, <Event>[
+          Event.analyticsCollectionEnabled(status: true),
+        ]);
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      '--enable-analytics and --disable-analytics do not send an event when telemetry is already enabled/disabled',
+      () async {
+        io.setExitFunctionForTests((int exitCode) {});
+
+        await globals.analytics.setTelemetry(false);
+        await runner.run(
+          <String>['--disable-analytics'],
+          () => <FlutterCommand>[],
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect((globals.analytics as FakeAnalytics).sentEvents, isEmpty);
+
+        await globals.analytics.setTelemetry(true);
+        await runner.run(
+          <String>['--enable-analytics'],
+          () => <FlutterCommand>[],
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect((globals.analytics as FakeAnalytics).sentEvents, isEmpty);
       },
       overrides: <Type, Generator>{
         Analytics: () => fakeAnalytics,

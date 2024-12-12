@@ -491,7 +491,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         // the Flutter application.
         clearSelection();
         _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-        _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
+        _finalizeSelectableRegionStatus();
       }
     }
     if (kIsWeb) {
@@ -539,6 +539,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case PointerDeviceKind.unknown:
         return false;
     }
+  }
+
+  void _finalizeSelectableRegionStatus() {
+    if (_selectionStatusNotifier.value != SelectableRegionSelectionStatus.changing) {
+      // Don't finalize the selection again if it is not currently changing.
+      return;
+    }
+    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
   }
 
   // Converts the details.consecutiveTapCount from a TapAndDrag*Details object,
@@ -808,20 +816,22 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleMouseDragEnd(TapDragEndDetails details) {
-    final bool isPointerPrecise = _lastPointerDeviceKind != null && _lastPointerDeviceKind == PointerDeviceKind.mouse;
+    assert(_lastPointerDeviceKind != null);
+    final bool isPointerPrecise = _isPrecisePointerDevice(_lastPointerDeviceKind!);
+    // On mobile platforms like android, fuchsia, and iOS, a drag gesture will
+    // only show the selection overlay when the drag has finished and the pointer
+    // device kind is not precise, for example at the end of a double tap + drag
+    // to select on native iOS.
+    final bool shouldShowSelectionOverlayOnMobile = !isPointerPrecise;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        if (!isPointerPrecise) {
-          // On Android, a drag gesture will only show the selection overlay when
-          // the drag has finished and the pointer device kind is not precise.
+        if (shouldShowSelectionOverlayOnMobile) {
           _showHandles();
           _showToolbar();
         }
       case TargetPlatform.iOS:
-        if (!isPointerPrecise) {
-          // On iOS, a drag gesture will only show the selection toolbar when
-          // the drag has finished and the pointer device kind is not precise.
+        if (shouldShowSelectionOverlayOnMobile) {
           _showToolbar();
         }
       case TargetPlatform.macOS:
@@ -832,7 +842,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
-    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
+    _finalizeSelectableRegionStatus();
   }
 
   void _handleMouseTapUp(TapDragUpDetails details) {
@@ -856,12 +866,10 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             hideToolbar();
             _collapseSelectionAt(offset: details.globalPosition);
             _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
           case TargetPlatform.macOS:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
             // On desktop platforms the selection is set on tap down.
-            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
         }
       case 2:
         final bool isPointerPrecise = _isPrecisePointerDevice(details.kind);
@@ -878,7 +886,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             if (!isPointerPrecise) {
               if (kIsWeb) {
                 // Double tap on iOS web only triggers when a drag begins after the double tap.
-                return;
+                break;
               }
               // On iOS, a double tap will only show the selection toolbar after
               // the following tap up when the pointer device kind is not precise.
@@ -891,24 +899,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
               // on a double click.
               break;
         }
-        _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
-      case 3:
-        switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.iOS:
-            if (_isPrecisePointerDevice(details.kind)) {
-              // Triple tap on static text is only supported on mobile
-              // platforms using a precise pointer device, so we should
-              // only update the SelectableRegionSelectionStatus in that case.
-              _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
-            }
-          case TargetPlatform.macOS:
-          case TargetPlatform.linux:
-          case TargetPlatform.windows:
-            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
-        }
     }
+    _finalizeSelectableRegionStatus();
     _updateSelectedContentIfNeeded();
   }
 
@@ -946,7 +938,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _handleTouchLongPressEnd(LongPressEndDetails details) {
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
-    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
+    _finalizeSelectableRegionStatus();
     _showToolbar();
     if (defaultTargetPlatform == TargetPlatform.android) {
       _showHandles();
@@ -1007,7 +999,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         }
     }
     _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
+    _finalizeSelectableRegionStatus();
     // Restore _lastSecondaryTapDownPosition since it may be cleared if a user
     // accesses contextMenuAnchors.
     _lastSecondaryTapDownPosition = details.globalPosition;
@@ -1064,7 +1056,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
    }
   _finalizeSelection();
   _updateSelectedContentIfNeeded();
-  _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
+  _finalizeSelectableRegionStatus();
  }
 
   void _stopSelectionEndEdgeUpdate() {
@@ -1545,7 +1537,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     );
     _updateSelectedContentIfNeeded();
     _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
+    _finalizeSelectableRegionStatus();
   }
 
   double? _directionalHorizontalBaseline;
@@ -1569,7 +1561,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     );
     _updateSelectedContentIfNeeded();
     _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
+    _finalizeSelectableRegionStatus();
   }
 
   // [TextSelectionDelegate] overrides.
@@ -1602,7 +1594,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.fuchsia:
             clearSelection();
             _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
+            _finalizeSelectableRegionStatus();
           case TargetPlatform.iOS:
             hideToolbar(false);
           case TargetPlatform.linux:
@@ -1633,7 +1625,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.fuchsia:
             clearSelection();
             _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-            _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
+            _finalizeSelectableRegionStatus();
           case TargetPlatform.iOS:
             hideToolbar(false);
           case TargetPlatform.linux:
@@ -1735,7 +1727,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
     _updateSelectedContentIfNeeded();
     _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
+    _finalizeSelectableRegionStatus();
   }
 
   @Deprecated(
@@ -1747,7 +1739,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _copy();
     clearSelection();
     _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-    _selectionStatusNotifier.value = SelectableRegionSelectionStatus.finalized;
+    _finalizeSelectableRegionStatus();
   }
 
   @Deprecated(
@@ -3246,7 +3238,10 @@ final class _SelectableRegionSelectionStatusNotifier extends ChangeNotifier impl
   /// Listeners are notified even if the value did not change.
   @protected
   set value(SelectableRegionSelectionStatus newStatus) {
-    _selectableRegionSelectionStatus = newStatus;
+    assert(newStatus == SelectableRegionSelectionStatus.finalized && value == SelectableRegionSelectionStatus.changing
+           || newStatus == SelectableRegionSelectionStatus.changing,
+           'Attempting to finalize the selection when it is already finalized.');
+     _selectableRegionSelectionStatus = newStatus;
     notifyListeners();
   }
 }
