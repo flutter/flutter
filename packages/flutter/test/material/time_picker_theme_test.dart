@@ -188,22 +188,16 @@ void main() {
         .merge(Typography.material2014().black.labelSmall),
     );
 
-    final CustomPaint dialPaint = tester.widget(findDialPaint);
-    final dynamic dialPainter = dialPaint.painter;
-    // ignore: avoid_dynamic_calls
-    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    final List<TappableLabel> primary, selected;
+    (:primary, :selected) = TappableLabel.labels(tester.widget(findDialPaint));
     expect(
-      // ignore: avoid_dynamic_calls
-      primaryLabels.first.painter.text.style,
+      primary.first.textSpan?.style,
       Typography.material2014().englishLike.bodyLarge!
         .merge(Typography.material2014().black.bodyLarge)
         .copyWith(color: defaultTheme.colorScheme.onSurface),
     );
-    // ignore: avoid_dynamic_calls
-    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
-      selectedLabels.first.painter.text.style,
+      selected.first.textSpan?.style,
       Typography.material2014().englishLike.bodyLarge!
         .merge(Typography.material2014().white.bodyLarge)
         .copyWith(color: defaultTheme.colorScheme.onPrimary),
@@ -337,13 +331,10 @@ void main() {
         ),
     );
 
-    final CustomPaint dialPaint = tester.widget(findDialPaint);
-    final dynamic dialPainter = dialPaint.painter;
-    // ignore: avoid_dynamic_calls
-    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    final List<TappableLabel> primary, selected;
+    (:primary, :selected) = TappableLabel.labels(tester.widget(findDialPaint));
     expect(
-      // ignore: avoid_dynamic_calls
-      primaryLabels.first.painter.text.style,
+      primary.first.textSpan?.style,
       Typography.material2021().englishLike.bodyLarge!
         .merge(Typography.material2021().black.bodyLarge)
         .copyWith(
@@ -351,11 +342,8 @@ void main() {
           decorationColor: defaultTheme.colorScheme.onSurface,
         ),
     );
-    // ignore: avoid_dynamic_calls
-    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
-      selectedLabels.first.painter.text.style,
+      selected.first.textSpan?.style,
       Typography.material2021().englishLike.bodyLarge!
         .merge(Typography.material2021().black.bodyLarge)
         .copyWith(
@@ -581,22 +569,16 @@ void main() {
         .merge(timePickerTheme.helpTextStyle),
     );
 
-    final CustomPaint dialPaint = tester.widget(findDialPaint);
-    final dynamic dialPainter = dialPaint.painter;
-    // ignore: avoid_dynamic_calls
-    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    final List<TappableLabel> primary, selected;
+    (:primary, :selected) = TappableLabel.labels(tester.widget(findDialPaint));
     expect(
-      // ignore: avoid_dynamic_calls
-      primaryLabels.first.painter.text.style,
+      primary.first.textSpan?.style,
       Typography.material2014().englishLike.bodyLarge!
         .merge(Typography.material2014().black.bodyLarge)
         .copyWith(color: _unselectedColor),
     );
-    // ignore: avoid_dynamic_calls
-    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
-      selectedLabels.first.painter.text.style,
+      selected.first.textSpan?.style,
       Typography.material2014().englishLike.bodyLarge!
         .merge(Typography.material2014().white.bodyLarge)
         .copyWith(color: _selectedColor),
@@ -707,22 +689,16 @@ void main() {
         ),
     );
 
-    final CustomPaint dialPaint = tester.widget(findDialPaint);
-    final dynamic dialPainter = dialPaint.painter;
-    // ignore: avoid_dynamic_calls
-    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    final List<TappableLabel> primary, selected;
+    (:primary, :selected) = TappableLabel.labels(tester.widget(findDialPaint));
     expect(
-      // ignore: avoid_dynamic_calls
-      primaryLabels.first.painter.text.style,
+      primary.first.textSpan?.style,
       Typography.material2021().englishLike.bodyLarge!
         .merge(Typography.material2021().black.bodyLarge)
         .copyWith(color: _unselectedColor, decorationColor: theme.colorScheme.onSurface),
     );
-    // ignore: avoid_dynamic_calls
-    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
-      selectedLabels.first.painter.text.style,
+      selected.first.textSpan?.style,
       Typography.material2021().englishLike.bodyLarge!
         .merge(Typography.material2021().black.bodyLarge)
         .copyWith(color: _selectedColor, decorationColor: theme.colorScheme.onSurface),
