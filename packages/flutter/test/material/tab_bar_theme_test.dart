@@ -1792,7 +1792,7 @@ void main() {
     expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
   });
 
-  testWidgets('splashBorderRadius is passed from TabBarThemeData', (WidgetTester tester) async {
+  testWidgets('TabBar inherits splashBorderRadius from theme', (WidgetTester tester) async {
     const Color hoverColor = Color(0xfff44336);
     const double radius = 20;
     await tester.pumpWidget(
@@ -1827,11 +1827,11 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.moveTo(tester.getCenter(find.byType(Tab)));
     await tester.pumpAndSettle();
     final Finder findInkWell = find.byType(InkWell);
+
     final BuildContext context = tester.element(findInkWell);
     expect(
       Material.of(context),

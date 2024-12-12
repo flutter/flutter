@@ -223,7 +223,6 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
     TabAlignment? tabAlignment,
     TextScaler? textScaler,
     TabIndicatorAnimation? indicatorAnimation,
-    BorderRadius? splashBorderRadius,
   }) {
     return TabBarTheme(
       indicator: indicator ?? this.indicator,
