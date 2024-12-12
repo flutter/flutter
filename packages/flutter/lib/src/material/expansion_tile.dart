@@ -732,6 +732,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       case TargetPlatform.windows:
         break;
     }
+    final ShapeBorder? shape = widget.shape ?? expansionTileTheme.shape;
+    final ShapeBorder? collapsedShape = widget.collapsedShape ?? expansionTileTheme.collapsedShape;
+    final ShapeBorder? lerpShape = ShapeBorder.lerp(shape, collapsedShape, _animationController.value);
 
     final Decoration decoration = ShapeDecoration(
       color: backgroundColor,
@@ -762,6 +765,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
                 trailing: widget.showTrailingIcon ? widget.trailing ?? _buildTrailingIcon(context) : null,
                 minTileHeight: widget.minTileHeight,
                 internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
+                shape: ShapeBorder.lerp(widget.shape, widget.collapsedShape, _animationController.value),
               ),
             ),
           ),
@@ -785,7 +789,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       return Material(
         clipBehavior: clipBehavior,
         color: backgroundColor,
-        shape: expansionTileBorder,
+        shape: lerpShape,
         child: tile,
       );
     }
