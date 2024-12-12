@@ -57,7 +57,7 @@
 /// @docImport 'src/controller.dart';
 /// @docImport 'src/test_compat.dart';
 /// @docImport 'src/widget_tester.dart';
-library flutter_test;
+library;
 
 export 'dart:async' show Future;
 
