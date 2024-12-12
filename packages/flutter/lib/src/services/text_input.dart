@@ -835,7 +835,6 @@ class TextEditingValue {
     this.composing = TextRange.empty,
   });
 
-  // TODO(justinmc): Move into tests. A user should never need this.
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
     final String text = encoded['text'] as String;
@@ -2651,6 +2650,7 @@ class SystemContextMenuController with SystemContextMenuClient {
 sealed class SystemContextMenuItemData {
   const SystemContextMenuItemData();
 
+  // TODO(justinmc): Move into tests. A user should never need this.
   /// Returns a [SystemContextMenuItemData] of the correct subclass given its
   /// json data.
   factory SystemContextMenuItemData.fromJson(Map<String, dynamic> json) {
