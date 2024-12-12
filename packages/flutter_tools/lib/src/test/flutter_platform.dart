@@ -5,6 +5,7 @@
 
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -493,29 +494,57 @@ class FlutterPlatform extends PlatformPlugin {
     );
   }
 
-  void _handleStartedDevice(Uri? uri, int testCount) {
-    print('_handleStartedDevice($uri, $testCount)');
+  void _handleStartedDevice(Uri? uri, int testCount, String testPath, {required Logger logger}) {
     if (uri != null) {
       globals.printTrace('test $testCount: VM Service uri is available at $uri');
-
-      // Create websocket URI. Handle any trailing slashes.
-      final List<String> pathSegments = uri.pathSegments.where((String c) => c.isNotEmpty).toList()..add('ws');
-      final Uri wsUri = uri.replace(scheme: 'ws', pathSegments: pathSegments);
-      _listenToVmServiceForGoldens(wsUri);
+      _listenToVmServiceForGoldens(uri, testPath, logger: logger);
     } else {
       globals.printTrace('test $testCount: VM Service uri is not available');
     }
     watcher?.handleStartedDevice(uri);
   }
 
-  Future<void> _listenToVmServiceForGoldens(Uri vmServiceUri) async {
-    print('Connecting');
-    final VmService vmService = await vmServiceConnectUri('$vmServiceUri');
-    vmService.onEvent('integration_test.VmServiceProxyGoldenFileComparator').listen((Event e) {
-      print('kind: ${e.kind}, extensionKind: ${e.extensionKind}');
-      // Here is where I would process the golden requests similar to the web
+  Future<void> _listenToVmServiceForGoldens(Uri vmServiceUri, String testPath, {required Logger logger}) async {
+    final Uri goldensBaseUri = Uri.parse(testPath);
+    final FlutterVmService vmService = await connectToVmService(vmServiceUri, logger: logger);
+    final IsolateRef testAppIsolate = await vmService.findExtensionIsolate('ext.integration_test.VmServiceProxyGoldenFileComparator');
+    await vmService.service.streamListen('integration_test.VmServiceProxyGoldenFileComparator');
+    vmService.service.onEvent('integration_test.VmServiceProxyGoldenFileComparator').listen((Event e) async {
+      switch (e.extensionKind) {
+        case 'compare':
+        case 'update':
+          final Map<String, Object?>? data = e.extensionData?.data;
+          if (data == null) {
+            throw StateError('Expected VM service data, but got null.');
+          }
+          final int id = data['id']! as int;
+          final Uri relativePath = Uri.parse(data['path']! as String);
+          final Uint8List bytes = base64.decode(data['bytes']! as String);
+          final bool update = e.extensionKind == 'update';
+
+          final String? error = await _testGoldenComparator.compareGoldens(
+            goldensBaseUri,
+            bytes,
+            relativePath,
+            update,
+          );
+          await vmService.callMethodWrapper(
+            'ext.integration_test.VmServiceProxyGoldenFileComparator',
+            isolateId: testAppIsolate.id,
+            args: <String, Object?>{
+              'id': id,
+              if (error == null)
+                'result': true
+              else if (error == 'does not match')
+                'result': false
+              else
+                'error': error,
+            },
+          );
+        default:
+          throw StateError('Unknown command: "${e.extensionKind}".');
+      }
     });
-    print('Listening');
   }
 
   Future<_AsyncError?> _startTest(
@@ -635,7 +664,6 @@ class FlutterPlatform extends PlatformPlugin {
       // B. The test device could connect to us, in which case
       // [remoteChannelFuture] will complete.
       globals.printTrace('test $ourTestCount: awaiting connection to test device');
-      print('Connecting...');
       await Future.any<void>(<Future<void>>[
         testDevice.finished,
         () async {
@@ -644,7 +672,7 @@ class FlutterPlatform extends PlatformPlugin {
               // This future may depend on [_handleStartedDevice] having been called
               remoteChannelCompleter.future,
               testDevice.vmServiceUri.then<void>((Uri? processVmServiceUri) {
-                _handleStartedDevice(processVmServiceUri, ourTestCount);
+                _handleStartedDevice(processVmServiceUri, ourTestCount, testPath, logger: globals.logger);
               }),
             ],
             // If [remoteChannelCompleter.future] errors, we may never get the

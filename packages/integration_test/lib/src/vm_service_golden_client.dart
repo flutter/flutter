@@ -101,24 +101,31 @@ final class VmServiceProxyGoldenFileComparator extends GoldenFileComparator {
     Map<String, String> parameters,
   ) async {
     // Treat the method as the ID number of the pending request.
-    final int? methodId = int.tryParse(method);
+    final String? methodIdString = parameters['id'];
+    if (methodIdString == null) {
+      return dev.ServiceExtensionResponse.error(
+        dev.ServiceExtensionResponse.extensionError,
+        'Required parameter "id" not present in response.',
+      );
+    }
+    final int? methodId = int.tryParse(methodIdString);
     if (methodId == null) {
       return dev.ServiceExtensionResponse.error(
         dev.ServiceExtensionResponse.extensionError,
-        'Not a valid (integer) method (id): "$method".',
+        'Required parameter "id" not an integer: "$methodIdString".',
       );
     }
     final Completer<bool>? completer = _pendingRequests[methodId];
     if (completer == null) {
       return dev.ServiceExtensionResponse.error(
         dev.ServiceExtensionResponse.extensionError,
-        'No pending request with method ID "$method".',
+        'No pending request with method ID "$methodIdString".',
       );
     }
     if (completer.isCompleted) {
       return dev.ServiceExtensionResponse.error(
         dev.ServiceExtensionResponse.extensionError,
-        'Result already received for method ID "$method".',
+        'Result already received for method ID "$methodIdString".',
       );
     }
     final String? error = parameters['error'];
@@ -134,6 +141,7 @@ final class VmServiceProxyGoldenFileComparator extends GoldenFileComparator {
       );
     }
     if (bool.tryParse(result) case final bool result) {
+      debugPrint('$methodId = $result');
       completer.complete(result);
       return dev.ServiceExtensionResponse.result('{}');
     } else {
@@ -152,7 +160,6 @@ final class VmServiceProxyGoldenFileComparator extends GoldenFileComparator {
     assert(!_pendingRequests.containsKey(nextId));
 
     final Completer<bool> completer = Completer<bool>();
-    print('>>> Posting $nextId|$golden|${imageBytes.length} bytes');
     dev.postEvent(operation, <String, Object?>{
       'id': nextId,
       'path': '$golden',
