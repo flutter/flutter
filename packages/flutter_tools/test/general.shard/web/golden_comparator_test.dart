@@ -20,11 +20,10 @@ import '../../src/context.dart';
 final Uri goldenKey = Uri.parse('file://golden_key');
 final Uri goldenKey2 = Uri.parse('file://second_golden_key');
 final Uri testUri = Uri.parse('file://test_uri');
-final Uri testUri2  = Uri.parse('file://second_test_uri');
+final Uri testUri2 = Uri.parse('file://second_test_uri');
 final Uint8List imageBytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
 
 void main() {
-
   group('Test that TestGoldenComparator', () {
     late FakeProcessManager processManager;
 
@@ -37,20 +36,22 @@ void main() {
         'success': true,
         'message': 'some message',
       };
-      processManager.addCommand(FakeCommand(
-        command: const <String>[
-          'shell',
-          '--disable-vm-service',
-          '--non-interactive',
-          '--packages=.dart_tool/package_config.json',
-          'compiler_output',
-        ],
-        stdout: '${jsonEncode(expectedResponse)}\n',
-        environment: const <String, String>{
-          'FLUTTER_TEST_BROWSER': 'chrome',
-          'FLUTTER_WEB_RENDERER': 'html',
-        },
-      ));
+      processManager.addCommand(
+        FakeCommand(
+          command: const <String>[
+            'shell',
+            '--disable-vm-service',
+            '--non-interactive',
+            '--packages=.dart_tool/package_config.json',
+            'compiler_output',
+          ],
+          stdout: '${jsonEncode(expectedResponse)}\n',
+          environment: const <String, String>{
+            'FLUTTER_TEST_BROWSER': 'chrome',
+            'FLUTTER_WEB_RENDERER': 'html',
+          },
+        ),
+      );
 
       final TestGoldenComparator comparator = TestGoldenComparator(
         'shell',
@@ -71,15 +72,18 @@ void main() {
         'message': 'some message',
       };
 
-      processManager.addCommand(FakeCommand(
-        command: const <String>[
-          'shell',
-          '--disable-vm-service',
-          '--non-interactive',
-          '--packages=.dart_tool/package_config.json',
-          'compiler_output',
-        ], stdout: '${jsonEncode(expectedResponse)}\n',
-      ));
+      processManager.addCommand(
+        FakeCommand(
+          command: const <String>[
+            'shell',
+            '--disable-vm-service',
+            '--non-interactive',
+            '--packages=.dart_tool/package_config.json',
+            'compiler_output',
+          ],
+          stdout: '${jsonEncode(expectedResponse)}\n',
+        ),
+      );
 
       final TestGoldenComparator comparator = TestGoldenComparator(
         'shell',
@@ -104,15 +108,18 @@ void main() {
         'message': 'some other message',
       };
 
-      processManager.addCommand(FakeCommand(
-        command: const <String>[
-          'shell',
-          '--disable-vm-service',
-          '--non-interactive',
-          '--packages=.dart_tool/package_config.json',
-          'compiler_output',
-        ], stdout: '${jsonEncode(expectedResponse1)}\n${jsonEncode(expectedResponse2)}\n',
-      ));
+      processManager.addCommand(
+        FakeCommand(
+          command: const <String>[
+            'shell',
+            '--disable-vm-service',
+            '--non-interactive',
+            '--packages=.dart_tool/package_config.json',
+            'compiler_output',
+          ],
+          stdout: '${jsonEncode(expectedResponse1)}\n${jsonEncode(expectedResponse2)}\n',
+        ),
+      );
 
       final TestGoldenComparator comparator = TestGoldenComparator(
         'shell',
@@ -123,10 +130,20 @@ void main() {
         webRenderer: WebRendererMode.html,
       );
 
-      final String? result1 = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
+      final String? result1 = await comparator.compareGoldens(
+        testUri,
+        imageBytes,
+        goldenKey,
+        false,
+      );
       expect(result1, 'some message');
 
-      final String? result2 = await comparator.compareGoldens(testUri, imageBytes, goldenKey2, false);
+      final String? result2 = await comparator.compareGoldens(
+        testUri,
+        imageBytes,
+        goldenKey2,
+        false,
+      );
       expect(result2, 'some other message');
     });
 
@@ -140,24 +157,30 @@ void main() {
         'message': 'some other message',
       };
 
-      processManager.addCommand(FakeCommand(
-        command: const <String>[
-          'shell',
-          '--disable-vm-service',
-          '--non-interactive',
-          '--packages=.dart_tool/package_config.json',
-          'compiler_output',
-        ], stdout: '${jsonEncode(expectedResponse1)}\n',
-      ));
-      processManager.addCommand(FakeCommand(
-        command: const <String>[
-          'shell',
-          '--disable-vm-service',
-          '--non-interactive',
-          '--packages=.dart_tool/package_config.json',
-          'compiler_output',
-        ], stdout: '${jsonEncode(expectedResponse2)}\n',
-      ));
+      processManager.addCommand(
+        FakeCommand(
+          command: const <String>[
+            'shell',
+            '--disable-vm-service',
+            '--non-interactive',
+            '--packages=.dart_tool/package_config.json',
+            'compiler_output',
+          ],
+          stdout: '${jsonEncode(expectedResponse1)}\n',
+        ),
+      );
+      processManager.addCommand(
+        FakeCommand(
+          command: const <String>[
+            'shell',
+            '--disable-vm-service',
+            '--non-interactive',
+            '--packages=.dart_tool/package_config.json',
+            'compiler_output',
+          ],
+          stdout: '${jsonEncode(expectedResponse2)}\n',
+        ),
+      );
 
       final TestGoldenComparator comparator = TestGoldenComparator(
         'shell',
@@ -168,10 +191,20 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
       );
 
-      final String? result1 = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
+      final String? result1 = await comparator.compareGoldens(
+        testUri,
+        imageBytes,
+        goldenKey,
+        false,
+      );
       expect(result1, 'some message');
 
-      final String? result2 = await comparator.compareGoldens(testUri2, imageBytes, goldenKey2, false);
+      final String? result2 = await comparator.compareGoldens(
+        testUri2,
+        imageBytes,
+        goldenKey2,
+        false,
+      );
       expect(result2, 'some other message');
     });
 
@@ -183,16 +216,19 @@ void main() {
       };
       final StreamController<List<int>> controller = StreamController<List<int>>();
       final IOSink stdin = IOSink(controller.sink);
-      processManager.addCommand(FakeCommand(
-        command: const <String>[
-          'shell',
-          '--disable-vm-service',
-          '--non-interactive',
-          '--packages=.dart_tool/package_config.json',
-          'compiler_output',
-        ], stdout: '${jsonEncode(expectedResponse)}\n',
-        stdin: stdin,
-      ));
+      processManager.addCommand(
+        FakeCommand(
+          command: const <String>[
+            'shell',
+            '--disable-vm-service',
+            '--non-interactive',
+            '--packages=.dart_tool/package_config.json',
+            'compiler_output',
+          ],
+          stdout: '${jsonEncode(expectedResponse)}\n',
+          stdin: stdin,
+        ),
+      );
 
       final TestGoldenComparator comparator = TestGoldenComparator(
         'shell',
@@ -219,5 +255,5 @@ class FakeTestCompiler extends Fake implements TestCompiler {
   }
 
   @override
-  Future<void> dispose() async { }
+  Future<void> dispose() async {}
 }

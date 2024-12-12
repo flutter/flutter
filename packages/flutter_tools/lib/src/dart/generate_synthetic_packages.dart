@@ -30,9 +30,7 @@ Future<void> generateLocalizationsSyntheticPackage({
 
   final YamlNode yamlNode = loadYamlNode(l10nYamlFile.readAsStringSync());
   if (yamlNode.value != null && yamlNode is! YamlMap) {
-    throwToolExit(
-      'Expected ${l10nYamlFile.path} to contain a map, instead was $yamlNode',
-    );
+    throwToolExit('Expected ${l10nYamlFile.path} to contain a map, instead was $yamlNode');
   }
 
   // If an l10n.yaml file exists and is not empty, attempt to parse settings in
@@ -41,9 +39,7 @@ Future<void> generateLocalizationsSyntheticPackage({
     final YamlMap yamlMap = yamlNode as YamlMap;
     final Object? value = yamlMap['synthetic-package'];
     if (value is! bool && value != null) {
-      throwToolExit(
-        'Expected "synthetic-package" to have a bool value, instead was "$value"',
-      );
+      throwToolExit('Expected "synthetic-package" to have a bool value, instead was "$value"');
     }
 
     // Generate gen_l10n synthetic package only if synthetic-package: true or

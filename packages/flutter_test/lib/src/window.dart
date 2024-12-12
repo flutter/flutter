@@ -71,14 +71,14 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is FakeAccessibilityFeatures
-        && other.accessibleNavigation == accessibleNavigation
-        && other.invertColors == invertColors
-        && other.disableAnimations == disableAnimations
-        && other.boldText == boldText
-        && other.reduceMotion == reduceMotion
-        && other.highContrast == highContrast
-        && other.onOffSwitchLabels == onOffSwitchLabels;
+    return other is FakeAccessibilityFeatures &&
+        other.accessibleNavigation == accessibleNavigation &&
+        other.invertColors == invertColors &&
+        other.disableAnimations == disableAnimations &&
+        other.boldText == boldText &&
+        other.reduceMotion == reduceMotion &&
+        other.highContrast == highContrast &&
+        other.onOffSwitchLabels == onOffSwitchLabels;
   }
 
   @override
@@ -117,18 +117,13 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
 class FakeViewPadding implements ViewPadding {
   /// Instantiates a new [FakeViewPadding] object for faking insets and padding
   /// during tests.
-  const FakeViewPadding({
-    this.left = 0.0,
-    this.top = 0.0,
-    this.right = 0.0,
-    this.bottom = 0.0,
-  });
+  const FakeViewPadding({this.left = 0.0, this.top = 0.0, this.right = 0.0, this.bottom = 0.0});
 
-  FakeViewPadding._wrap(ViewPadding base) :
-    left = base.left,
-    top = base.top,
-    right = base.right,
-    bottom = base.bottom;
+  FakeViewPadding._wrap(ViewPadding base)
+    : left = base.left,
+      top = base.top,
+      right = base.right,
+      bottom = base.bottom;
 
   /// A view padding that has zeros for each edge.
   static const FakeViewPadding zero = FakeViewPadding();
@@ -156,9 +151,8 @@ class FakeViewPadding implements ViewPadding {
 class TestPlatformDispatcher implements PlatformDispatcher {
   /// Constructs a [TestPlatformDispatcher] that defers all behavior to the given
   /// [PlatformDispatcher] unless explicitly overridden for test purposes.
-  TestPlatformDispatcher({
-    required PlatformDispatcher platformDispatcher,
-  }) : _platformDispatcher = platformDispatcher {
+  TestPlatformDispatcher({required PlatformDispatcher platformDispatcher})
+    : _platformDispatcher = platformDispatcher {
     _updateViewsAndDisplays();
     _platformDispatcher.onMetricsChanged = _handleMetricsChanged;
     _platformDispatcher.onViewFocusChange = _handleViewFocusChanged;
@@ -170,8 +164,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   @override
   TestFlutterView? get implicitView {
     return _platformDispatcher.implicitView != null
-      ? _testViews[_platformDispatcher.implicitView!.viewId]!
-      : null;
+        ? _testViews[_platformDispatcher.implicitView!.viewId]!
+        : null;
   }
 
   final Map<int, TestFlutterView> _testViews = <int, TestFlutterView>{};
@@ -184,6 +178,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   set onMetricsChanged(VoidCallback? callback) {
     _onMetricsChanged = callback;
   }
+
   void _handleMetricsChanged() {
     _updateViewsAndDisplays();
     _onMetricsChanged?.call();
@@ -196,6 +191,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   set onViewFocusChange(ViewFocusChangeCallback? callback) {
     _onViewFocusChange = callback;
   }
+
   void _handleViewFocusChanged(ViewFocusEvent event) {
     _updateViewsAndDisplays();
     _currentlyFocusedViewId = switch (event.state) {
@@ -245,21 +241,17 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     required ViewFocusState state,
     required ViewFocusDirection direction,
   }) {
-    _testFocusEvents.add(
-      ViewFocusEvent(
-        viewId: viewId,
-        state: state,
-        direction: direction,
-      ),
-    );
+    _testFocusEvents.add(ViewFocusEvent(viewId: viewId, state: state, direction: direction));
     _platformDispatcher.requestViewFocusChange(viewId: viewId, state: state, direction: direction);
   }
 
   @override
   Locale get locale => _localeTestValue ?? _platformDispatcher.locale;
   Locale? _localeTestValue;
+
   /// Hides the real locale and reports the given [localeTestValue] instead.
-  set localeTestValue(Locale localeTestValue) { // ignore: avoid_setters_without_getters
+  set localeTestValue(Locale localeTestValue) {
+    // ignore: avoid_setters_without_getters
     _localeTestValue = localeTestValue;
     onLocaleChanged?.call();
   }
@@ -273,8 +265,10 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   @override
   List<Locale> get locales => _localesTestValue ?? _platformDispatcher.locales;
   List<Locale>? _localesTestValue;
+
   /// Hides the real locales and reports the given [localesTestValue] instead.
-  set localesTestValue(List<Locale> localesTestValue) { // ignore: avoid_setters_without_getters
+  set localesTestValue(List<Locale> localesTestValue) {
+    // ignore: avoid_setters_without_getters
     _localesTestValue = localesTestValue;
     onLocaleChanged?.call();
   }
@@ -295,8 +289,10 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   @override
   String get initialLifecycleState => _initialLifecycleStateTestValue;
   String _initialLifecycleStateTestValue = '';
+
   /// Sets a faked initialLifecycleState for testing.
-  set initialLifecycleStateTestValue(String state) { // ignore: avoid_setters_without_getters
+  set initialLifecycleStateTestValue(String state) {
+    // ignore: avoid_setters_without_getters
     _initialLifecycleStateTestValue = state;
   }
 
@@ -308,9 +304,11 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   @override
   double get textScaleFactor => _textScaleFactorTestValue ?? _platformDispatcher.textScaleFactor;
   double? _textScaleFactorTestValue;
+
   /// Hides the real text scale factor and reports the given
   /// [textScaleFactorTestValue] instead.
-  set textScaleFactorTestValue(double textScaleFactorTestValue) { // ignore: avoid_setters_without_getters
+  set textScaleFactorTestValue(double textScaleFactorTestValue) {
+    // ignore: avoid_setters_without_getters
     _textScaleFactorTestValue = textScaleFactorTestValue;
     onTextScaleFactorChanged?.call();
   }
@@ -323,7 +321,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  Brightness get platformBrightness => _platformBrightnessTestValue ?? _platformDispatcher.platformBrightness;
+  Brightness get platformBrightness =>
+      _platformBrightnessTestValue ?? _platformDispatcher.platformBrightness;
   Brightness? _platformBrightnessTestValue;
   @override
   VoidCallback? get onPlatformBrightnessChanged => _platformDispatcher.onPlatformBrightnessChanged;
@@ -331,9 +330,11 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   set onPlatformBrightnessChanged(VoidCallback? callback) {
     _platformDispatcher.onPlatformBrightnessChanged = callback;
   }
+
   /// Hides the real platform brightness and reports the given
   /// [platformBrightnessTestValue] instead.
-  set platformBrightnessTestValue(Brightness platformBrightnessTestValue) { // ignore: avoid_setters_without_getters
+  set platformBrightnessTestValue(Brightness platformBrightnessTestValue) {
+    // ignore: avoid_setters_without_getters
     _platformBrightnessTestValue = platformBrightnessTestValue;
     onPlatformBrightnessChanged?.call();
   }
@@ -346,11 +347,14 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  bool get alwaysUse24HourFormat => _alwaysUse24HourFormatTestValue ?? _platformDispatcher.alwaysUse24HourFormat;
+  bool get alwaysUse24HourFormat =>
+      _alwaysUse24HourFormatTestValue ?? _platformDispatcher.alwaysUse24HourFormat;
   bool? _alwaysUse24HourFormatTestValue;
+
   /// Hides the real clock format and reports the given
   /// [alwaysUse24HourFormatTestValue] instead.
-  set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) { // ignore: avoid_setters_without_getters
+  set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) {
+    // ignore: avoid_setters_without_getters
     _alwaysUse24HourFormatTestValue = alwaysUse24HourFormatTestValue;
   }
 
@@ -368,9 +372,12 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  bool get nativeSpellCheckServiceDefined => _nativeSpellCheckServiceDefinedTestValue ?? _platformDispatcher.nativeSpellCheckServiceDefined;
+  bool get nativeSpellCheckServiceDefined =>
+      _nativeSpellCheckServiceDefinedTestValue ??
+      _platformDispatcher.nativeSpellCheckServiceDefined;
   bool? _nativeSpellCheckServiceDefinedTestValue;
-  set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) { // ignore: avoid_setters_without_getters
+  set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) {
+    // ignore: avoid_setters_without_getters
     _nativeSpellCheckServiceDefinedTestValue = nativeSpellCheckServiceDefinedTestValue;
   }
 
@@ -381,9 +388,11 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  bool get supportsShowingSystemContextMenu => _supportsShowingSystemContextMenu ?? _platformDispatcher.supportsShowingSystemContextMenu;
+  bool get supportsShowingSystemContextMenu =>
+      _supportsShowingSystemContextMenu ?? _platformDispatcher.supportsShowingSystemContextMenu;
   bool? _supportsShowingSystemContextMenu;
-  set supportsShowingSystemContextMenu(bool value) { // ignore: avoid_setters_without_getters
+  set supportsShowingSystemContextMenu(bool value) {
+    // ignore: avoid_setters_without_getters
     _supportsShowingSystemContextMenu = value;
   }
 
@@ -393,11 +402,14 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  bool get brieflyShowPassword => _brieflyShowPasswordTestValue ?? _platformDispatcher.brieflyShowPassword;
+  bool get brieflyShowPassword =>
+      _brieflyShowPasswordTestValue ?? _platformDispatcher.brieflyShowPassword;
   bool? _brieflyShowPasswordTestValue;
+
   /// Hides the real [brieflyShowPassword] and reports the given
   /// `brieflyShowPasswordTestValue` instead.
-  set brieflyShowPasswordTestValue(bool brieflyShowPasswordTestValue) { // ignore: avoid_setters_without_getters
+  set brieflyShowPasswordTestValue(bool brieflyShowPasswordTestValue) {
+    // ignore: avoid_setters_without_getters
     _brieflyShowPasswordTestValue = brieflyShowPasswordTestValue;
   }
 
@@ -437,9 +449,11 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   @override
   String get defaultRouteName => _defaultRouteNameTestValue ?? _platformDispatcher.defaultRouteName;
   String? _defaultRouteNameTestValue;
+
   /// Hides the real default route name and reports the given
   /// [defaultRouteNameTestValue] instead.
-  set defaultRouteNameTestValue(String defaultRouteNameTestValue) { // ignore: avoid_setters_without_getters
+  set defaultRouteNameTestValue(String defaultRouteNameTestValue) {
+    // ignore: avoid_setters_without_getters
     _defaultRouteNameTestValue = defaultRouteNameTestValue;
   }
 
@@ -457,9 +471,11 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   @override
   bool get semanticsEnabled => _semanticsEnabledTestValue ?? _platformDispatcher.semanticsEnabled;
   bool? _semanticsEnabledTestValue;
+
   /// Hides the real semantics enabled and reports the given
   /// [semanticsEnabledTestValue] instead.
-  set semanticsEnabledTestValue(bool semanticsEnabledTestValue) { // ignore: avoid_setters_without_getters
+  set semanticsEnabledTestValue(bool semanticsEnabledTestValue) {
+    // ignore: avoid_setters_without_getters
     _semanticsEnabledTestValue = semanticsEnabledTestValue;
     onSemanticsEnabledChanged?.call();
   }
@@ -479,21 +495,25 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  SemanticsActionEventCallback? get onSemanticsActionEvent => _platformDispatcher.onSemanticsActionEvent;
+  SemanticsActionEventCallback? get onSemanticsActionEvent =>
+      _platformDispatcher.onSemanticsActionEvent;
   @override
   set onSemanticsActionEvent(SemanticsActionEventCallback? callback) {
     _platformDispatcher.onSemanticsActionEvent = callback;
   }
 
   @override
-  AccessibilityFeatures get accessibilityFeatures => _accessibilityFeaturesTestValue ?? _platformDispatcher.accessibilityFeatures;
+  AccessibilityFeatures get accessibilityFeatures =>
+      _accessibilityFeaturesTestValue ?? _platformDispatcher.accessibilityFeatures;
   AccessibilityFeatures? _accessibilityFeaturesTestValue;
+
   /// Hides the real accessibility features and reports the given
   /// [accessibilityFeaturesTestValue] instead.
   ///
   /// Consider using [FakeAccessibilityFeatures] to provide specific
   /// values for the various accessibility features under test.
-  set accessibilityFeaturesTestValue(AccessibilityFeatures accessibilityFeaturesTestValue) { // ignore: avoid_setters_without_getters
+  set accessibilityFeaturesTestValue(AccessibilityFeatures accessibilityFeaturesTestValue) {
+    // ignore: avoid_setters_without_getters
     _accessibilityFeaturesTestValue = accessibilityFeaturesTestValue;
     onAccessibilityFeaturesChanged?.call();
   }
@@ -506,7 +526,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  VoidCallback? get onAccessibilityFeaturesChanged => _platformDispatcher.onAccessibilityFeaturesChanged;
+  VoidCallback? get onAccessibilityFeaturesChanged =>
+      _platformDispatcher.onAccessibilityFeaturesChanged;
   @override
   set onAccessibilityFeaturesChanged(VoidCallback? callback) {
     _platformDispatcher.onAccessibilityFeaturesChanged = callback;
@@ -518,11 +539,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  void sendPlatformMessage(
-      String name,
-      ByteData? data,
-      PlatformMessageResponseCallback? callback,
-      ) {
+  void sendPlatformMessage(String name, ByteData? data, PlatformMessageResponseCallback? callback) {
     _platformDispatcher.sendPlatformMessage(name, data, callback);
   }
 
@@ -564,7 +581,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  VoidCallback? get onPlatformConfigurationChanged => _platformDispatcher.onPlatformConfigurationChanged;
+  VoidCallback? get onPlatformConfigurationChanged =>
+      _platformDispatcher.onPlatformConfigurationChanged;
 
   @override
   set onPlatformConfigurationChanged(VoidCallback? onPlatformConfigurationChanged) {
@@ -572,7 +590,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) => _platformDispatcher.computePlatformResolvedLocale(supportedLocales);
+  Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) =>
+      _platformDispatcher.computePlatformResolvedLocale(supportedLocales);
 
   @override
   ByteData? getPersistentIsolateData() => _platformDispatcher.getPersistentIsolateData();
@@ -612,7 +631,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
             'which was expected by FlutterView ($view)',
           );
         }
-      } catch (error){
+      } catch (error) {
         display = _UnsupportedDisplay(this, view, error);
       }
 
@@ -675,9 +694,10 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   @override
   String? get systemFontFamily {
     return _forceSystemFontFamilyToBeNull
-      ? null
-      : _systemFontFamily ?? _platformDispatcher.systemFontFamily;
+        ? null
+        : _systemFontFamily ?? _platformDispatcher.systemFontFamily;
   }
+
   String? _systemFontFamily;
   bool _forceSystemFontFamilyToBeNull = false;
   set systemFontFamily(String? value) {
@@ -731,10 +751,9 @@ class TestFlutterView implements FlutterView {
     required FlutterView view,
     required TestPlatformDispatcher platformDispatcher,
     required TestDisplay display,
-  }) :
-    _view = view,
-    _platformDispatcher = platformDispatcher,
-    _display = display;
+  }) : _view = view,
+       _platformDispatcher = platformDispatcher,
+       _display = display;
 
   /// The [FlutterView] backing this [TestFlutterView].
   final FlutterView _view;
@@ -895,7 +914,8 @@ class TestFlutterView implements FlutterView {
   ///   * [resetSystemGestureInsets] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  FakeViewPadding get systemGestureInsets => _systemGestureInsets ?? FakeViewPadding._wrap(_view.systemGestureInsets);
+  FakeViewPadding get systemGestureInsets =>
+      _systemGestureInsets ?? FakeViewPadding._wrap(_view.systemGestureInsets);
   FakeViewPadding? _systemGestureInsets;
   set systemGestureInsets(FakeViewPadding value) {
     _systemGestureInsets = value;
@@ -1036,7 +1056,8 @@ class TestFlutterView implements FlutterView {
 class TestDisplay implements Display {
   /// Creates a new [TestDisplay] backed by the given [Display].
   TestDisplay(TestPlatformDispatcher platformDispatcher, Display display)
-  : _platformDispatcher = platformDispatcher, _display = display;
+    : _platformDispatcher = platformDispatcher,
+      _display = display;
 
   final Display _display;
   final TestPlatformDispatcher _platformDispatcher;
@@ -1233,7 +1254,7 @@ class _UnsupportedDisplay implements TestDisplay {
 @Deprecated(
   'Use TestPlatformDispatcher (via WidgetTester.platformDispatcher) or TestFlutterView (via WidgetTester.view) instead. '
   'Deprecated to prepare for the upcoming multi-window support. '
-  'This feature was deprecated after v3.9.0-0.1.pre.'
+  'This feature was deprecated after v3.9.0-0.1.pre.',
 )
 class TestWindow implements SingletonFlutterWindow {
   /// Constructs a [TestWindow] that defers all behavior to the given
@@ -1241,11 +1262,10 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use TestPlatformDispatcher (via WidgetTester.platformDispatcher) or TestFlutterView (via WidgetTester.view) instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
-  TestWindow({
-    required SingletonFlutterWindow window,
-  }) : platformDispatcher = TestPlatformDispatcher(platformDispatcher: window.platformDispatcher);
+  TestWindow({required SingletonFlutterWindow window})
+    : platformDispatcher = TestPlatformDispatcher(platformDispatcher: window.platformDispatcher);
 
   /// Constructs a [TestWindow] that defers all behavior to the given
   /// [TestPlatformDispatcher] and its [TestPlatformDispatcher.implicitView].
@@ -1263,13 +1283,13 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use TestPlatformDispatcher (via WidgetTester.platformDispatcher) or TestFlutterView (via WidgetTester.view) instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   TestWindow.fromPlatformDispatcher({
     @Deprecated(
       'Use WidgetTester.platformDispatcher instead. '
       'Deprecated to prepare for the upcoming multi-window support. '
-      'This feature was deprecated after v3.9.0-0.1.pre.'
+      'This feature was deprecated after v3.9.0-0.1.pre.',
     )
     required this.platformDispatcher,
   });
@@ -1277,7 +1297,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   final TestPlatformDispatcher platformDispatcher;
@@ -1287,18 +1307,20 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.devicePixelRatio instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   double get devicePixelRatio => _view.devicePixelRatio;
+
   /// Hides the real device pixel ratio and reports the given [devicePixelRatio]
   /// instead.
   @Deprecated(
     'Use WidgetTester.view.devicePixelRatio instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
-  set devicePixelRatioTestValue(double devicePixelRatio) { // ignore: avoid_setters_without_getters
+  set devicePixelRatioTestValue(double devicePixelRatio) {
+    // ignore: avoid_setters_without_getters
     _view.devicePixelRatio = devicePixelRatio;
   }
 
@@ -1307,7 +1329,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.resetDevicePixelRatio() instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   void clearDevicePixelRatioTestValue() {
     _view.resetDevicePixelRatio();
@@ -1316,18 +1338,20 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.physicalSize instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   Size get physicalSize => _view.physicalSize;
+
   /// Hides the real physical size and reports the given [physicalSizeTestValue]
   /// instead.
   @Deprecated(
     'Use WidgetTester.view.physicalSize instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
-  set physicalSizeTestValue (Size physicalSizeTestValue) { // ignore: avoid_setters_without_getters
+  set physicalSizeTestValue(Size physicalSizeTestValue) {
+    // ignore: avoid_setters_without_getters
     _view.physicalSize = physicalSizeTestValue;
   }
 
@@ -1336,7 +1360,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.resetPhysicalSize() instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   void clearPhysicalSizeTestValue() {
     _view.resetPhysicalSize();
@@ -1345,10 +1369,11 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.viewInsets instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   ViewPadding get viewInsets => _view.viewInsets;
+
   /// Hides the real view insets and reports the given [viewInsetsTestValue]
   /// instead.
   ///
@@ -1356,9 +1381,10 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.viewInsets instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
-  set viewInsetsTestValue(ViewPadding value) { // ignore: avoid_setters_without_getters
+  set viewInsetsTestValue(ViewPadding value) {
+    // ignore: avoid_setters_without_getters
     _view.viewInsets = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
   }
 
@@ -1367,7 +1393,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.resetViewInsets() instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   void clearViewInsetsTestValue() {
     _view.resetViewInsets();
@@ -1376,10 +1402,11 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.viewPadding instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   ViewPadding get viewPadding => _view.viewPadding;
+
   /// Hides the real view padding and reports the given [paddingTestValue]
   /// instead.
   ///
@@ -1387,9 +1414,10 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.viewPadding instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
-  set viewPaddingTestValue(ViewPadding value) { // ignore: avoid_setters_without_getters
+  set viewPaddingTestValue(ViewPadding value) {
+    // ignore: avoid_setters_without_getters
     _view.viewPadding = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
   }
 
@@ -1398,7 +1426,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.resetViewPadding() instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   void clearViewPaddingTestValue() {
     _view.resetViewPadding();
@@ -1407,19 +1435,21 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.padding instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   ViewPadding get padding => _view.padding;
+
   /// Hides the real padding and reports the given [paddingTestValue] instead.
   ///
   /// Use [FakeViewPadding] to set this value for testing.
   @Deprecated(
     'Use WidgetTester.view.padding instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
-  set paddingTestValue(ViewPadding value) { // ignore: avoid_setters_without_getters
+  set paddingTestValue(ViewPadding value) {
+    // ignore: avoid_setters_without_getters
     _view.padding = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
   }
 
@@ -1427,7 +1457,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.resetPadding() instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   void clearPaddingTestValue() {
     _view.resetPadding();
@@ -1436,17 +1466,19 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.gestureSettings instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   GestureSettings get gestureSettings => _view.gestureSettings;
+
   /// Hides the real gesture settings and reports the given [gestureSettingsTestValue] instead.
   @Deprecated(
     'Use WidgetTester.view.gestureSettings instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
-  set gestureSettingsTestValue(GestureSettings gestureSettingsTestValue) { // ignore: avoid_setters_without_getters
+  set gestureSettingsTestValue(GestureSettings gestureSettingsTestValue) {
+    // ignore: avoid_setters_without_getters
     _view.gestureSettings = gestureSettingsTestValue;
   }
 
@@ -1454,7 +1486,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.resetGestureSettings() instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   void clearGestureSettingsTestValue() {
     _view.resetGestureSettings();
@@ -1463,17 +1495,19 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.displayFeatures instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   List<DisplayFeature> get displayFeatures => _view.displayFeatures;
+
   /// Hides the real displayFeatures and reports the given [displayFeaturesTestValue] instead.
   @Deprecated(
     'Use WidgetTester.view.displayFeatures instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
-  set displayFeaturesTestValue(List<DisplayFeature> displayFeaturesTestValue) { // ignore: avoid_setters_without_getters
+  set displayFeaturesTestValue(List<DisplayFeature> displayFeaturesTestValue) {
+    // ignore: avoid_setters_without_getters
     _view.displayFeatures = displayFeaturesTestValue;
   }
 
@@ -1481,7 +1515,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.resetDisplayFeatures() instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   void clearDisplayFeaturesTestValue() {
     _view.resetDisplayFeatures();
@@ -1490,10 +1524,11 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.systemGestureInsets instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   ViewPadding get systemGestureInsets => _view.systemGestureInsets;
+
   /// Hides the real system gesture insets and reports the given
   /// [systemGestureInsetsTestValue] instead.
   ///
@@ -1501,9 +1536,10 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.systemGestureInsets instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
-  set systemGestureInsetsTestValue(ViewPadding value) { // ignore: avoid_setters_without_getters
+  set systemGestureInsetsTestValue(ViewPadding value) {
+    // ignore: avoid_setters_without_getters
     _view.systemGestureInsets = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
   }
 
@@ -1511,7 +1547,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.resetSystemGestureInsets() instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   void clearSystemGestureInsetsTestValue() {
     _view.resetSystemGestureInsets();
@@ -1520,14 +1556,14 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onMetricsChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   VoidCallback? get onMetricsChanged => platformDispatcher.onMetricsChanged;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onMetricsChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   set onMetricsChanged(VoidCallback? callback) {
@@ -1537,7 +1573,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.locale instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   Locale get locale => platformDispatcher.locale;
@@ -1545,7 +1581,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.locales instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   List<Locale> get locales => platformDispatcher.locales;
@@ -1553,14 +1589,14 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onLocaleChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   VoidCallback? get onLocaleChanged => platformDispatcher.onLocaleChanged;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onLocaleChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   set onLocaleChanged(VoidCallback? callback) {
@@ -1570,7 +1606,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.initialLifecycleState instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   String get initialLifecycleState => platformDispatcher.initialLifecycleState;
@@ -1578,7 +1614,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.textScaleFactor instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   double get textScaleFactor => platformDispatcher.textScaleFactor;
@@ -1586,21 +1622,21 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.platformBrightness instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   Brightness get platformBrightness => platformDispatcher.platformBrightness;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onPlatformBrightnessChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   VoidCallback? get onPlatformBrightnessChanged => platformDispatcher.onPlatformBrightnessChanged;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onPlatformBrightnessChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   set onPlatformBrightnessChanged(VoidCallback? callback) {
@@ -1610,7 +1646,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.alwaysUse24HourFormat instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   bool get alwaysUse24HourFormat => platformDispatcher.alwaysUse24HourFormat;
@@ -1618,14 +1654,14 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onTextScaleFactorChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   VoidCallback? get onTextScaleFactorChanged => platformDispatcher.onTextScaleFactorChanged;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onTextScaleFactorChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   set onTextScaleFactorChanged(VoidCallback? callback) {
@@ -1635,23 +1671,25 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.nativeSpellCheckServiceDefined instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   bool get nativeSpellCheckServiceDefined => platformDispatcher.nativeSpellCheckServiceDefined;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.nativeSpellCheckServiceDefinedTestValue instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
-  set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.nativeSpellCheckServiceDefinedTestValue = nativeSpellCheckServiceDefinedTestValue;
+  set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) {
+    // ignore: avoid_setters_without_getters
+    platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        nativeSpellCheckServiceDefinedTestValue;
   }
 
   @Deprecated(
     'Use WidgetTester.platformDispatcher.brieflyShowPassword instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   bool get brieflyShowPassword => platformDispatcher.brieflyShowPassword;
@@ -1659,14 +1697,14 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onBeginFrame instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   FrameCallback? get onBeginFrame => platformDispatcher.onBeginFrame;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onBeginFrame instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   set onBeginFrame(FrameCallback? callback) {
@@ -1676,14 +1714,14 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onDrawFrame instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   VoidCallback? get onDrawFrame => platformDispatcher.onDrawFrame;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onDrawFrame instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   set onDrawFrame(VoidCallback? callback) {
@@ -1693,14 +1731,14 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onReportTimings instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   TimingsCallback? get onReportTimings => platformDispatcher.onReportTimings;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onReportTimings instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   set onReportTimings(TimingsCallback? callback) {
@@ -1710,14 +1748,14 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onPointerDataPacket instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   PointerDataPacketCallback? get onPointerDataPacket => platformDispatcher.onPointerDataPacket;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onPointerDataPacket instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   set onPointerDataPacket(PointerDataPacketCallback? callback) {
@@ -1727,7 +1765,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.defaultRouteName instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   String get defaultRouteName => platformDispatcher.defaultRouteName;
@@ -1735,7 +1773,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.scheduleFrame() instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   void scheduleFrame() {
@@ -1745,7 +1783,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.render(scene) instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   void render(Scene scene, {Size? size}) {
@@ -1755,7 +1793,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.semanticsEnabled instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   bool get semanticsEnabled => platformDispatcher.semanticsEnabled;
@@ -1763,14 +1801,14 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onSemanticsEnabledChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   VoidCallback? get onSemanticsEnabledChanged => platformDispatcher.onSemanticsEnabledChanged;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onSemanticsEnabledChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   set onSemanticsEnabledChanged(VoidCallback? callback) {
@@ -1780,7 +1818,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.accessibilityFeatures instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   AccessibilityFeatures get accessibilityFeatures => platformDispatcher.accessibilityFeatures;
@@ -1788,14 +1826,15 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onAccessibilityFeaturesChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
-  VoidCallback? get onAccessibilityFeaturesChanged => platformDispatcher.onAccessibilityFeaturesChanged;
+  VoidCallback? get onAccessibilityFeaturesChanged =>
+      platformDispatcher.onAccessibilityFeaturesChanged;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onAccessibilityFeaturesChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   set onAccessibilityFeaturesChanged(VoidCallback? callback) {
@@ -1805,7 +1844,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.updateSemantics(update) instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   void updateSemantics(SemanticsUpdate update) {
@@ -1815,7 +1854,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.setIsolateDebugName(name) instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   void setIsolateDebugName(String name) {
@@ -1825,14 +1864,10 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.sendPlatformMessage(name, data, callback) instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
-  void sendPlatformMessage(
-    String name,
-    ByteData? data,
-    PlatformMessageResponseCallback? callback,
-  ) {
+  void sendPlatformMessage(String name, ByteData? data, PlatformMessageResponseCallback? callback) {
     platformDispatcher.sendPlatformMessage(name, data, callback);
   }
 
@@ -1847,7 +1882,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.clearAllTestValues() and WidgetTester.view.reset() instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   void clearAllTestValues() {
     clearDevicePixelRatioTestValue();
@@ -1863,13 +1898,13 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onFrameDataChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   VoidCallback? get onFrameDataChanged => platformDispatcher.onFrameDataChanged;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onFrameDataChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   set onFrameDataChanged(VoidCallback? value) {
@@ -1879,14 +1914,14 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onKeyData instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   KeyDataCallback? get onKeyData => platformDispatcher.onKeyData;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onKeyData instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   set onKeyData(KeyDataCallback? value) {
@@ -1896,14 +1931,14 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onSystemFontFamilyChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   VoidCallback? get onSystemFontFamilyChanged => platformDispatcher.onSystemFontFamilyChanged;
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onSystemFontFamilyChanged instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   set onSystemFontFamilyChanged(VoidCallback? value) {
@@ -1913,7 +1948,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.computePlatformResolvedLocale(supportedLocales) instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
@@ -1923,7 +1958,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.frameData instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   FrameData get frameData => platformDispatcher.frameData;
@@ -1931,7 +1966,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.platformDispatcher.systemFontFamily instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   String? get systemFontFamily => platformDispatcher.systemFontFamily;
@@ -1939,7 +1974,7 @@ class TestWindow implements SingletonFlutterWindow {
   @Deprecated(
     'Use WidgetTester.view.viewId instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
+    'This feature was deprecated after v3.9.0-0.1.pre.',
   )
   @override
   int get viewId => _view.viewId;
