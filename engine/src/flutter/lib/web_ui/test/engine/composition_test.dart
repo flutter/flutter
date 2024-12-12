@@ -51,7 +51,7 @@ GloballyPositionedTextEditingStrategy _enableEditingStrategy({
 }
 
 Future<void> testMain() async {
-  await bootstrapAndRunApp(withImplicitView: true);
+  setUpImplicitView();
 
   const String fakeComposingText = 'ImComposingText';
 
@@ -323,6 +323,14 @@ Future<void> testMain() async {
       _inputElement.dispatchEvent(createDomCompositionEvent(
           _MockWithCompositionAwareMixin._kCompositionUpdate,
           <Object?, Object?>{ 'data': newComposingText }));
+      // On Chrome and Safari, a `compositionupdate` event automatically
+      // triggers a `selectionchange` event, which leads to triggering
+      // `DefaultTextEditingStrategy.handleChange`.
+      //
+      // But in Firefox, `selectionchange` event is not triggered, so we need to
+      // manually dispatch an `input` event to trigger
+      // `DefaultTextEditingStrategy.handleChange`.
+      _inputElement.dispatchEvent(createDomInputEvent('input'));
 
       await containExpect;
     });

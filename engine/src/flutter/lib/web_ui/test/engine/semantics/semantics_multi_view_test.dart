@@ -10,7 +10,6 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../../common/test_initialization.dart';
 import 'semantics_tester.dart';
 
 void main() {
@@ -20,8 +19,6 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await bootstrapAndRunApp();
-
   test('Can create multiple views each with its own semantics tree', () async {
     EngineSemantics.instance.semanticsEnabled = true;
 

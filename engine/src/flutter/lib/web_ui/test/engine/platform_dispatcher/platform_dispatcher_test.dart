@@ -9,6 +9,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../common/test_initialization.dart';
 
@@ -17,12 +18,12 @@ void main() {
 }
 
 void testMain() {
-  setUpAll(() async {
-    await bootstrapAndRunApp(withImplicitView: true);
-  });
-
   group('PlatformDispatcher', () {
     late EnginePlatformDispatcher dispatcher;
+
+    setUpAll(() async {
+      await bootstrapAndRunApp(withImplicitView: true);
+    });
 
     setUp(() {
       dispatcher = EnginePlatformDispatcher();
@@ -435,7 +436,8 @@ void testMain() {
       expect(beginFrameCalled, true);
       expect(drawFrameCalled.isCompleted, true);
     });
-  });
+    // https://github.com/flutter/flutter/issues/160096
+  }, skip: ui_web.browser.isFirefox);
 }
 
 class MockHighContrastSupport implements HighContrastSupport {

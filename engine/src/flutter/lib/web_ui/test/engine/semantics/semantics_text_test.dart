@@ -10,7 +10,6 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../../common/rendering.dart';
 import '../../common/test_initialization.dart';
 import 'semantics_tester.dart';
 
@@ -25,8 +24,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await bootstrapAndRunApp(withImplicitView: true);
-  setUpRenderingForTests();
+  setUpImplicitView();
 
   test('renders label text as DOM', () async {
     semantics()

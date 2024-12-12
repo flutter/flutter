@@ -16,7 +16,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests();
+  setUpImplicitView();
   group('message handler', () {
     const String testText = 'test text';
 

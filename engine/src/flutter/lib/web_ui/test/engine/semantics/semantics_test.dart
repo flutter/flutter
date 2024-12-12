@@ -35,6 +35,12 @@ void main() {
 }
 
 Future<void> testMain() async {
+  if (ui_web.browser.isFirefox) {
+    // Firefox gets stuck in bootstrapAndRunApp for a mysterious reason.
+    // https://github.com/flutter/flutter/issues/160096
+    return;
+  }
+
   await bootstrapAndRunApp(withImplicitView: true);
   setUpRenderingForTests();
   runSemanticsTests();
