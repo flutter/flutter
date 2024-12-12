@@ -8,13 +8,17 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
+import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service_io.dart';
 
 import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -28,7 +32,9 @@ import '../project.dart';
 import '../test/test_wrapper.dart';
 
 import '../vmservice.dart';
+import '../web/compile.dart';
 import 'flutter_tester_device.dart';
+import 'flutter_web_goldens.dart';
 import 'font_config_manager.dart';
 import 'integration_test_device.dart';
 import 'test_compiler.dart';
@@ -55,6 +61,10 @@ FlutterPlatform installHook({
   TestWrapper testWrapper = const TestWrapper(),
   required String shellPath,
   required DebuggingOptions debuggingOptions,
+  required BuildInfo buildInfo,
+  required FileSystem fileSystem,
+  required Logger logger,
+  required ProcessManager processManager,
   TestWatcher? watcher,
   bool enableVmService = false,
   bool machine = false,
@@ -71,7 +81,6 @@ FlutterPlatform installHook({
   String? integrationTestUserIdentifier,
   TestTimeRecorder? testTimeRecorder,
   TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-  BuildInfo? buildInfo,
 }) {
   assert(enableVmService || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
 
@@ -103,6 +112,9 @@ FlutterPlatform installHook({
     testTimeRecorder: testTimeRecorder,
     nativeAssetsBuilder: nativeAssetsBuilder,
     buildInfo: buildInfo,
+    fileSystem: fileSystem,
+    logger: logger,
+    processManager: processManager,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -293,6 +305,10 @@ class FlutterPlatform extends PlatformPlugin {
   FlutterPlatform({
     required this.shellPath,
     required this.debuggingOptions,
+    required this.buildInfo,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required ProcessManager processManager,
     this.watcher,
     this.enableVmService,
     this.machine,
@@ -308,9 +324,19 @@ class FlutterPlatform extends PlatformPlugin {
     this.integrationTestUserIdentifier,
     this.testTimeRecorder,
     this.nativeAssetsBuilder,
-    this.buildInfo,
     this.shutdownHooks,
-  });
+  }) {
+    _testGoldenComparator = TestGoldenComparator(
+      shellPath,
+      () => TestCompiler(buildInfo, flutterProject, testTimeRecorder: testTimeRecorder),
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      // FIXME: Remove this being required.
+      webRenderer: WebRendererMode.defaultForWasm,
+    );
+
+  }
 
   final String shellPath;
   final DebuggingOptions debuggingOptions;
@@ -327,7 +353,7 @@ class FlutterPlatform extends PlatformPlugin {
   final String? icudtlPath;
   final TestTimeRecorder? testTimeRecorder;
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
-  final BuildInfo? buildInfo;
+  final BuildInfo buildInfo;
   final ShutdownHooks? shutdownHooks;
 
   /// The device to run the test on for Integration Tests.
@@ -336,6 +362,7 @@ class FlutterPlatform extends PlatformPlugin {
   /// Tester; otherwise it will run as a Integration Test on this device.
   final Device? integrationTestDevice;
   bool get _isIntegrationTest => integrationTestDevice != null;
+  late TestGoldenComparator _testGoldenComparator;
 
   final String? integrationTestUserIdentifier;
 
@@ -467,12 +494,28 @@ class FlutterPlatform extends PlatformPlugin {
   }
 
   void _handleStartedDevice(Uri? uri, int testCount) {
+    print('_handleStartedDevice($uri, $testCount)');
     if (uri != null) {
       globals.printTrace('test $testCount: VM Service uri is available at $uri');
+
+      // Create websocket URI. Handle any trailing slashes.
+      final List<String> pathSegments = uri.pathSegments.where((String c) => c.isNotEmpty).toList()..add('ws');
+      final Uri wsUri = uri.replace(scheme: 'ws', pathSegments: pathSegments);
+      _listenToVmServiceForGoldens(wsUri);
     } else {
       globals.printTrace('test $testCount: VM Service uri is not available');
     }
     watcher?.handleStartedDevice(uri);
+  }
+
+  Future<void> _listenToVmServiceForGoldens(Uri vmServiceUri) async {
+    print('Connecting');
+    final VmService vmService = await vmServiceConnectUri('$vmServiceUri');
+    vmService.onEvent('integration_test.VmServiceProxyGoldenFileComparator').listen((Event e) {
+      print('kind: ${e.kind}, extensionKind: ${e.extensionKind}');
+      // Here is where I would process the golden requests similar to the web
+    });
+    print('Listening');
   }
 
   Future<_AsyncError?> _startTest(
@@ -592,6 +635,7 @@ class FlutterPlatform extends PlatformPlugin {
       // B. The test device could connect to us, in which case
       // [remoteChannelFuture] will complete.
       globals.printTrace('test $ourTestCount: awaiting connection to test device');
+      print('Connecting...');
       await Future.any<void>(<Future<void>>[
         testDevice.finished,
         () async {
@@ -694,8 +738,7 @@ class FlutterPlatform extends PlatformPlugin {
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl), globals.logger),
-      // This MUST be a file URI.
-      packageConfigUri: buildInfo != null ? globals.fs.path.toUri(buildInfo!.packageConfigPath) : null,
+      packageConfigUri: globals.fs.path.toUri(buildInfo.packageConfigPath),
       host: host!,
       updateGoldens: updateGoldens!,
       flutterTestDep: packageConfig['flutter_test'] != null,
@@ -710,6 +753,7 @@ class FlutterPlatform extends PlatformPlugin {
       await compiler!.dispose();
       compiler = null;
     }
+    await _testGoldenComparator.close();
     await _fontConfigManager.dispose();
   }
 }
