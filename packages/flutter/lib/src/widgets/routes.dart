@@ -256,16 +256,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
     return _controller!.view;
   }
 
-  /// The simulation used by the most recent pushing or popping transition, if
-  /// any.
-  ///
-  /// The value is null before the first transition, or if the route does not
-  /// use simulation for transition.
-  ///
-  /// See also:
-  ///
-  ///  * [createSimulation], which creates this value.
-  Simulation? get simulation => _simulation;
   Simulation? _simulation;
 
   /// Creates the simulation that drives the transition animation for this route.
@@ -285,11 +275,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   /// This method is invoked each time the navigator pushes or pops this route.
   /// The `forward` parameter indicates the direction of the transition: true when
   /// the route is pushed, and false when it is popped.
-  ///
-  /// See also:
-  ///
-  ///  * [simulation], a getter that returns the simulation for the most recent
-  ///    transition.
   Simulation? createSimulation({ required bool forward }) {
     assert(transitionDuration >= Duration.zero,
         'The `duration` must be positive for a non-simulation animation. Received $transitionDuration.');
