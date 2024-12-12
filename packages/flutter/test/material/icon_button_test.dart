@@ -703,6 +703,7 @@ void main() {
                             SemanticsFlag.isButton,
                             SemanticsFlag.isEnabled,
                             SemanticsFlag.isFocusable,
+                            SemanticsFlag.hasSelectedState,
                             SemanticsFlag.isSelected,
                           ],
                           label: 'link',

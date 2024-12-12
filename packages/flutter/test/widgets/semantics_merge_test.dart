@@ -152,6 +152,7 @@ void main() {
             TestSemantics.rootChild(
               id: 1,
               flags: <SemanticsFlag>[
+                SemanticsFlag.hasSelectedState,
                 SemanticsFlag.isSelected,
               ],
               label: 'test1\ntest2',

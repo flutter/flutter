@@ -176,6 +176,12 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   @override
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
+    // Supress previous route from transitioning if this is a fullscreenDialog route.
+    return previousRoute is PageRoute && !fullscreenDialog;
+  }
+
+  @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     final Widget child = buildContent(context);
     return Semantics(
@@ -437,12 +443,15 @@ class CupertinoPageTransition extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.delegatedTransition}
   static Widget? delegatedTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child) {
-    final Animation<Offset> delegatedPositionAnimation =
-      CurvedAnimation(
+    final CurvedAnimation animation = CurvedAnimation(
         parent: secondaryAnimation,
         curve: Curves.linearToEaseOut,
         reverseCurve: Curves.easeInToLinear,
-      ).drive(_kMiddleLeftTween);
+      );
+    final Animation<Offset> delegatedPositionAnimation =
+      animation.drive(_kMiddleLeftTween);
+    animation.dispose();
+
     assert(debugCheckHasDirectionality(context));
     final TextDirection textDirection = Directionality.of(context);
     return SlideTransition(

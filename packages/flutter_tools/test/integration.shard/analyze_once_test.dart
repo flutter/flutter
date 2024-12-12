@@ -451,7 +451,7 @@ class _MyHomePageState extends State<MyHomePage> {
 const String pubspecYamlSrc = r'''
 name: flutter_project
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.7.0-0
 
 dependencies:
   flutter:

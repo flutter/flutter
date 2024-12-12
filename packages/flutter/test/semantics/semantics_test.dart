@@ -730,7 +730,7 @@ void main() {
         '   merge boundary ⛔️\n'
         '   Rect.fromLTRB(60.0, 20.0, 80.0, 50.0)\n'
         '   actions: longPress, scrollUp, showOnScreen\n'
-        '   flags: hasCheckedState, isSelected, isButton\n'
+        '   flags: hasCheckedState, hasSelectedState, isSelected, isButton\n'
         '   label: "Use all the properties"\n'
         '   textDirection: rtl\n'
         '   sortKey: OrdinalSortKey#19df5(order: 1.0)\n',
@@ -738,7 +738,12 @@ void main() {
     );
     expect(
       allProperties.getSemanticsData().toString(),
-      'SemanticsData(Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), [1.0,0.0,0.0,10.0; 0.0,1.0,0.0,10.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0], actions: [longPress, scrollUp, showOnScreen], flags: [hasCheckedState, isSelected, isButton], label: "Use all the properties", textDirection: rtl)',
+      'SemanticsData('
+      'Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), '
+      '[1.0,0.0,0.0,10.0; 0.0,1.0,0.0,10.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0], '
+      'actions: [longPress, scrollUp, showOnScreen], '
+      'flags: [hasCheckedState, hasSelectedState, isSelected, isButton], '
+      'label: "Use all the properties", textDirection: rtl)',
     );
 
     final SemanticsNode scaled = SemanticsNode()
@@ -903,6 +908,7 @@ void main() {
     expect(config.onScrollUp, isNull);
     expect(config.onScrollLeft, isNull);
     expect(config.onScrollRight, isNull);
+    expect(config.onScrollToOffset, isNull);
     expect(config.onLongPress, isNull);
     expect(config.onDecrease, isNull);
     expect(config.onIncrease, isNull);
@@ -927,6 +933,7 @@ void main() {
     void onScrollUp() { }
     void onScrollLeft() { }
     void onScrollRight() { }
+    void onScrollToOffset(Offset _) { }
     void onLongPress() { }
     void onDecrease() { }
     void onIncrease() { }
@@ -940,6 +947,7 @@ void main() {
     config.onScrollUp = onScrollUp;
     config.onScrollLeft = onScrollLeft;
     config.onScrollRight = onScrollRight;
+    config.onScrollToOffset = onScrollToOffset;
     config.onLongPress = onLongPress;
     config.onDecrease = onDecrease;
     config.onIncrease = onIncrease;
@@ -964,6 +972,7 @@ void main() {
     expect(config.onScrollUp, same(onScrollUp));
     expect(config.onScrollLeft, same(onScrollLeft));
     expect(config.onScrollRight, same(onScrollRight));
+    expect(config.onScrollToOffset, same(onScrollToOffset));
     expect(config.onLongPress, same(onLongPress));
     expect(config.onDecrease, same(onDecrease));
     expect(config.onIncrease, same(onIncrease));

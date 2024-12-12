@@ -56,6 +56,12 @@ class _${blockName}DefaultsM3 extends AppBarTheme {
 
   @override
   TextStyle? get titleTextStyle => ${textStyle('md.comp.top-app-bar.small.headline')};
+
+  // TODO(Craftplacer): Consider using EdgeInsets.only(right: 8.0) instead of
+  // EdgeInsets.zero for Material 3 in the future,
+  // https://github.com/flutter/flutter/issues/155747
+  @override
+  EdgeInsets? get actionsPadding => EdgeInsets.zero;
 }
 
 // Variant configuration

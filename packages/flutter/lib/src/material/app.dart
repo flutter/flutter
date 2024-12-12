@@ -22,6 +22,7 @@ import 'package:flutter/services.dart';
 import 'arc.dart';
 import 'colors.dart';
 import 'floating_action_button.dart';
+import 'icon_button.dart';
 import 'icons.dart';
 import 'material_localizations.dart';
 import 'page.dart';
@@ -904,6 +905,9 @@ class MaterialScrollBehavior extends ScrollBehavior {
 }
 
 class _MaterialAppState extends State<MaterialApp> {
+  static const double _moveExitWidgetSelectionIconSize = 32;
+  static const double _moveExitWidgetSelectionTargetSize = 40;
+
   late HeroController _heroController;
 
   bool get _usesRouter => widget.routerDelegate != null || widget.routerConfig != null;
@@ -934,12 +938,63 @@ class _MaterialAppState extends State<MaterialApp> {
     ];
   }
 
-  Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
+  Widget _exitWidgetSelectionButtonBuilder(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    required GlobalKey key,
+  }) {
     return FloatingActionButton(
+      key: key,
       onPressed: onPressed,
       mini: true,
-      child: const Icon(Icons.search),
+      backgroundColor: _widgetSelectionButtonsBackgroundColor(context),
+      foregroundColor: _widgetSelectionButtonsForegroundColor(context),
+      child: const Icon(
+        Icons.close,
+        semanticLabel: 'Exit Select Widget mode.',
+      ),
     );
+  }
+
+  Widget _moveExitWidgetSelectionButtonBuilder(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    bool isLeftAligned = true,
+  }) {
+    return IconButton(
+        color: _widgetSelectionButtonsBackgroundColor(context),
+        padding: EdgeInsets.zero,
+        iconSize: _moveExitWidgetSelectionIconSize,
+        onPressed: onPressed,
+        constraints: const BoxConstraints(
+          minWidth: _moveExitWidgetSelectionTargetSize,
+          minHeight: _moveExitWidgetSelectionTargetSize,
+        ),
+        icon: Icon(
+          isLeftAligned ? Icons.arrow_right : Icons.arrow_left,
+          semanticLabel:
+              'Move "Exit Select Widget mode" button to the ${isLeftAligned ? 'right' : 'left'}.',
+        ));
+  }
+
+  Color _widgetSelectionButtonsForegroundColor(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return _isDarkTheme(context)
+        ? theme.colorScheme.onPrimaryContainer
+        : theme.colorScheme.primaryContainer;
+  }
+
+  Color _widgetSelectionButtonsBackgroundColor(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return _isDarkTheme(context)
+        ? theme.colorScheme.primaryContainer
+        : theme.colorScheme.onPrimaryContainer;
+  }
+
+  bool _isDarkTheme(BuildContext context) {
+    return widget.themeMode == ThemeMode.dark ||
+        widget.themeMode == ThemeMode.system &&
+            MediaQuery.platformBrightnessOf(context) == Brightness.dark;
   }
 
   ThemeData _themeBuilder(BuildContext context) {
@@ -968,25 +1023,35 @@ class _MaterialAppState extends State<MaterialApp> {
 
     Widget childWidget = child ?? const SizedBox.shrink();
 
+    if (widget.builder != null) {
+      childWidget = Builder(
+        builder: (BuildContext context) {
+          // Why are we surrounding a builder with a builder?
+          //
+          // The widget.builder may contain code that invokes
+          // Theme.of(), which should return the theme we selected
+          // above in AnimatedTheme. However, if we invoke
+          // widget.builder() directly as the child of AnimatedTheme
+          // then there is no BuildContext separating them, the
+          // widget.builder() will not find the theme. Therefore, we
+          // surround widget.builder with yet another builder so that
+          // a context separates them and Theme.of() correctly
+          // resolves to the theme we passed to AnimatedTheme.
+          return widget.builder!(context, child);
+        },
+      );
+    }
+
+    childWidget = ScaffoldMessenger(
+      key: widget.scaffoldMessengerKey,
+      child: DefaultSelectionStyle(
+        selectionColor: effectiveSelectionColor,
+        cursorColor: effectiveCursorColor,
+        child: childWidget,
+      ),
+    );
+
     if (widget.themeAnimationStyle != AnimationStyle.noAnimation) {
-      if (widget.builder != null) {
-        childWidget = Builder(
-          builder: (BuildContext context) {
-            // Why are we surrounding a builder with a builder?
-            //
-            // The widget.builder may contain code that invokes
-            // Theme.of(), which should return the theme we selected
-            // above in AnimatedTheme. However, if we invoke
-            // widget.builder() directly as the child of AnimatedTheme
-            // then there is no Context separating them, and the
-            // widget.builder() will not find the theme. Therefore, we
-            // surround widget.builder with yet another builder so that
-            // a context separates them and Theme.of() correctly
-            // resolves to the theme we passed to AnimatedTheme.
-            return widget.builder!(context, child);
-          },
-        );
-      }
       childWidget = AnimatedTheme(
         data: theme,
         duration: widget.themeAnimationStyle?.duration ?? widget.themeAnimationDuration,
@@ -1000,14 +1065,7 @@ class _MaterialAppState extends State<MaterialApp> {
       );
     }
 
-    return ScaffoldMessenger(
-      key: widget.scaffoldMessengerKey,
-      child: DefaultSelectionStyle(
-        selectionColor: effectiveSelectionColor,
-        cursorColor: effectiveCursorColor,
-        child: childWidget,
-      ),
-    );
+    return childWidget;
   }
 
   Widget _buildWidgetApp(BuildContext context) {
@@ -1041,7 +1099,9 @@ class _MaterialAppState extends State<MaterialApp> {
         showPerformanceOverlay: widget.showPerformanceOverlay,
         showSemanticsDebugger: widget.showSemanticsDebugger,
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-        inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
+        exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
+        moveExitWidgetSelectionButtonBuilder:
+            _moveExitWidgetSelectionButtonBuilder,
         shortcuts: widget.shortcuts,
         actions: widget.actions,
         restorationScopeId: widget.restorationScopeId,
@@ -1075,7 +1135,9 @@ class _MaterialAppState extends State<MaterialApp> {
       showPerformanceOverlay: widget.showPerformanceOverlay,
       showSemanticsDebugger: widget.showSemanticsDebugger,
       debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-      inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
+      exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
+      moveExitWidgetSelectionButtonBuilder:
+          _moveExitWidgetSelectionButtonBuilder,
       shortcuts: widget.shortcuts,
       actions: widget.actions,
       restorationScopeId: widget.restorationScopeId,

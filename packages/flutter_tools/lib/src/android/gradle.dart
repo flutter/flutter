@@ -122,6 +122,11 @@ String getAarTaskFor(BuildInfo buildInfo) {
   return _taskFor('assembleAar', buildInfo);
 }
 
+@visibleForTesting
+const String androidX86DeprecationWarning =
+  'Support for Android x86 targets will be removed in the next stable release after 3.27. '
+  'See https://github.com/flutter/flutter/issues/157543 for details.';
+
 /// Returns the output APK file names for a given [AndroidBuildInfo].
 ///
 /// For example, when [splitPerAbi] is true, multiple APKs are created.
@@ -187,6 +192,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (project.isModule) {
       // Module projects artifacts are located in `build/host`.
       outputDirectory = outputDirectory.childDirectory('host');
+    }
+
+    final bool containsX86Targets = androidBuildInfo.where(
+      (AndroidBuildInfo info) => info.containsX86Target,
+    ).isNotEmpty;
+    if (containsX86Targets) {
+      _logger.printWarning(androidX86DeprecationWarning);
     }
     for (final AndroidBuildInfo androidBuildInfo in androidBuildInfo) {
       await buildGradleAar(
@@ -300,6 +312,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
     int retry = 0,
     @visibleForTesting int? maxRetries,
   }) async {
+    if (androidBuildInfo.containsX86Target) {
+      _logger.printWarning(androidX86DeprecationWarning);
+    }
     if (!project.android.isSupportedVersion) {
       _exitWithUnsupportedProjectMessage(_logger.terminal, _analytics);
     }
@@ -629,14 +644,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
       'A summary of your ${kind.toUpperCase()} analysis can be found at: ${outputFile.path}',
     );
 
-    // DevTools expects a file path relative to the .flutter-devtools/ dir.
-    final String relativeAppSizePath = outputFile.path
-        .split('.flutter-devtools/')
-        .last
-        .trim();
     _logger.printStatus(
         '\nTo analyze your app size in Dart DevTools, run the following command:\n'
-            'dart devtools --appSizeBase=$relativeAppSizePath'
+        'dart devtools --appSizeBase=${outputFile.path}'
     );
   }
 

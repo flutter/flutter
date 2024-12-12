@@ -154,7 +154,7 @@ class _AnyWidgetStates implements WidgetStatesConstraint {
 /// Interactive states that some of the widgets can take on when receiving input
 /// from the user.
 ///
-/// States are defined by https://material.io/design/interaction/states.html#usage,
+/// States are defined by https://m3.material.io/foundations/interaction/states,
 /// but are not limited to the Material design system or library.
 ///
 /// Some widgets track their current state in a `Set<WidgetState>`.
@@ -235,7 +235,7 @@ enum WidgetState implements WidgetStatesConstraint {
 
   /// {@template flutter.widgets.WidgetState.any}
   /// To prevent a situation where each [WidgetStatesConstraint]
-  /// isn't satisfied by the given set of states, consier adding
+  /// isn't satisfied by the given set of states, consider adding
   /// [WidgetState.any] as the final [WidgetStateMap] key.
   /// {@endtemplate}
   static const WidgetStatesConstraint any = _AnyWidgetStates();
@@ -260,20 +260,11 @@ typedef WidgetPropertyResolver<T> = T Function(Set<WidgetState> states);
 /// [WidgetStateColor] should only be used with widgets that document
 /// their support, like [TimePickerThemeData.dayPeriodColor].
 ///
-/// To use a [WidgetStateColor], you can either:
+/// A [WidgetStateColor] can be created in one of the following ways:
 ///   1. Create a subclass of [WidgetStateColor] and implement the abstract `resolve` method.
 ///   2. Use [WidgetStateColor.resolveWith] and pass in a callback that
 ///      will be used to resolve the color in the given states.
 ///   3. Use [WidgetStateColor.fromMap] to assign a value using a [WidgetStateMap].
-///
-/// If a [WidgetStateColor] is used for a property or a parameter that doesn't
-/// support resolving [WidgetStateProperty<Color>]s, then its default color
-/// value will be used for all states.
-///
-/// To define a `const` [WidgetStateColor], you'll need to extend
-/// [WidgetStateColor] and override its [resolve] method. You'll also need
-/// to provide a `defaultValue` to the super constructor, so that we can know
-/// at compile-time what its default color is.
 ///
 /// {@tool snippet}
 ///
@@ -318,9 +309,8 @@ abstract class WidgetStateColor extends Color implements WidgetStateProperty<Col
   /// Creates a [WidgetStateColor] from a [WidgetStateMap<Color>].
   ///
   /// {@macro flutter.widgets.WidgetStateProperty.fromMap}
-  ///
-  /// If used as a regular color, the first key that matches an empty
-  /// [Set] of [WidgetState]s will be selected.
+  /// It should only be used with widgets that document support for
+  /// [WidgetStateColor] (throws an error if used as a normal [Color]).
   ///
   /// {@macro flutter.widgets.WidgetState.any}
   const factory WidgetStateColor.fromMap(WidgetStateMap<Color> map) = _WidgetStateColorMapper;
@@ -352,24 +342,8 @@ class _WidgetStateColorTransparent extends WidgetStateColor {
   Color resolve(Set<WidgetState> states) => const Color(0x00000000);
 }
 
-@immutable
-class _WidgetStateColorMapper extends _WidgetStateColorTransparent {
-  const _WidgetStateColorMapper(this.map);
-
-  final WidgetStateMap<Color> map;
-
-  _WidgetStateMapper<Color> get _mapper => _WidgetStateMapper<Color>(map);
-
-  @override
-  Color resolve(Set<WidgetState> states) => _mapper.resolve(states);
-
-  @override
-  bool operator ==(Object other) {
-    return other is _WidgetStateColorMapper && other.map == map;
-  }
-
-  @override
-  int get hashCode => map.hashCode;
+class _WidgetStateColorMapper extends WidgetStateMapper<Color> implements WidgetStateColor {
+  const _WidgetStateColorMapper(super.map);
 }
 
 /// Defines a [MouseCursor] whose value depends on a set of [WidgetState]s which
@@ -383,8 +357,15 @@ class _WidgetStateColorMapper extends _WidgetStateColorTransparent {
 /// is a [WidgetStateMouseCursor.clickable], which resolves to
 /// [SystemMouseCursors.basic] when the button is disabled.
 ///
-/// To use a [WidgetStateMouseCursor], you should create a subclass of
-/// [WidgetStateMouseCursor] and implement the abstract `resolve` method.
+/// This class should only be used for parameters that document their support
+/// for [WidgetStateMouseCursor].
+///
+/// A [WidgetStateMouseCursor] can be created in one of the following ways:
+///   1. Create a subclass of [WidgetStateMouseCursor] and implement
+///      the abstract `resolve` method.
+///   2. Use [WidgetStateMouseCursor.resolveWith] and pass in a callback that
+///      will be used to resolve the color in the given states.
+///   3. Use [WidgetStateMouseCursor.fromMap] to assign a value using a [WidgetStateMap].
 ///
 /// {@tool dartpad}
 /// This example defines a mouse cursor that resolves to
@@ -392,9 +373,6 @@ class _WidgetStateColorMapper extends _WidgetStateColorTransparent {
 ///
 /// ** See code in examples/api/lib/widgets/widget_state/widget_state_mouse_cursor.0.dart **
 /// {@end-tool}
-///
-/// This class should only be used for parameters which are documented to take
-/// [WidgetStateMouseCursor], otherwise only the default state will be used.
 ///
 /// See also:
 ///
@@ -408,10 +386,32 @@ abstract class WidgetStateMouseCursor extends MouseCursor implements WidgetState
   /// const constructors so that they can be used in const expressions.
   const WidgetStateMouseCursor();
 
+  /// Creates a [WidgetStateMouseCursor] using a [WidgetPropertyResolver]
+  /// callback.
+  ///
+  /// A [debugDescription] may optionally be provided.
+  ///
+  /// If used as a regular [MouseCursor], the cursor resolved
+  /// in the default state (the empty set of states) will be used.
+  const factory WidgetStateMouseCursor.resolveWith(
+    WidgetPropertyResolver<MouseCursor> callback, {
+    String debugDescription,
+  }) = _WidgetStateMouseCursor;
+
+  /// Creates a [WidgetStateMouseCursor] from a [WidgetStateMap].
+  ///
+  /// {@macro flutter.widgets.WidgetStateProperty.fromMap}
+  /// It should only be used with classes that document support for
+  /// [WidgetStateMouseCursor] (throws an error if used as a regular
+  /// [MouseCursor].)
+  const factory WidgetStateMouseCursor.fromMap(
+    WidgetStateMap<MouseCursor> map,
+  ) = _WidgetMouseCursorMapper;
+
   @protected
   @override
   MouseCursorSession createSession(int device) {
-    return resolve(<WidgetState>{}).createSession(device);
+    return resolve(const <WidgetState>{}).createSession(device);
   }
 
   /// Returns a [MouseCursor] that's to be used when a component is in the
@@ -426,11 +426,15 @@ abstract class WidgetStateMouseCursor extends MouseCursor implements WidgetState
   /// disabled, the cursor resolves to [SystemMouseCursors.basic].
   ///
   /// This cursor is the default for many widgets.
-  static const WidgetStateMouseCursor clickable = _EnabledAndDisabledMouseCursor(
-    enabledCursor: SystemMouseCursors.click,
-    disabledCursor: SystemMouseCursors.basic,
-    name: 'clickable',
+  static const WidgetStateMouseCursor clickable = WidgetStateMouseCursor.resolveWith(
+    _clickable, debugDescription: 'WidgetStateMouseCursor(clickable)',
   );
+  static MouseCursor _clickable(Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
+      return SystemMouseCursors.basic;
+    }
+    return SystemMouseCursors.click;
+  }
 
   /// A mouse cursor for widgets related to text, which resolves differently
   /// when the widget is disabled.
@@ -439,46 +443,49 @@ abstract class WidgetStateMouseCursor extends MouseCursor implements WidgetState
   /// disabled, the cursor resolves to [SystemMouseCursors.basic].
   ///
   /// This cursor is the default for many widgets.
-  static const WidgetStateMouseCursor textable = _EnabledAndDisabledMouseCursor(
-    enabledCursor: SystemMouseCursors.text,
-    disabledCursor: SystemMouseCursors.basic,
-    name: 'textable',
+  static const WidgetStateMouseCursor textable = WidgetStateMouseCursor.resolveWith(
+    _textable, debugDescription: 'WidgetStateMouseCursor(textable)',
   );
+  static MouseCursor _textable(Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
+      return SystemMouseCursors.basic;
+    }
+    return SystemMouseCursors.text;
+  }
 }
 
-class _EnabledAndDisabledMouseCursor extends WidgetStateMouseCursor {
-  const _EnabledAndDisabledMouseCursor({
-    required this.enabledCursor,
-    required this.disabledCursor,
-    required this.name,
+class _WidgetStateMouseCursor extends WidgetStateMouseCursor {
+  const _WidgetStateMouseCursor(
+    this._resolve, {
+    this.debugDescription = 'WidgetStateMouseCursor()',
   });
 
-  final MouseCursor enabledCursor;
-  final MouseCursor disabledCursor;
-  final String name;
+  final WidgetPropertyResolver<MouseCursor> _resolve;
 
   @override
-  MouseCursor resolve(Set<WidgetState> states) {
-    if (states.contains(WidgetState.disabled)) {
-      return disabledCursor;
-    }
-    return enabledCursor;
-  }
+  MouseCursor resolve(Set<WidgetState> states) => _resolve(states);
 
   @override
-  String get debugDescription => 'WidgetStateMouseCursor($name)';
+  final String debugDescription;
+}
+
+class _WidgetMouseCursorMapper extends WidgetStateMapper<MouseCursor> implements WidgetStateMouseCursor {
+  const _WidgetMouseCursorMapper(super.map);
 }
 
 /// Defines a [BorderSide] whose value depends on a set of [WidgetState]s
 /// which represent the interactive state of a component.
 ///
-/// To use a [WidgetStateBorderSide], you should create a subclass of a
-/// [WidgetStateBorderSide] and override the abstract `resolve` method.
-///
 /// This class enables existing widget implementations with [BorderSide]
 /// properties to be extended to also effectively support `WidgetStateProperty<BorderSide>`
-/// property values. [WidgetStateBorderSide] should only be used with widgets that document
-/// their support, like [ActionChip.side].
+/// property values. It should only be used for parameters that document support
+/// for [WidgetStateBorderSide] objects.
+///
+/// A [WidgetStateBorderSide] can be created in one of the following ways:
+///   1. Create a subclass of [WidgetStateBorderSide] and implement the abstract `resolve` method.
+///   2. Use [WidgetStateBorderSide.resolveWith] and pass in a callback that
+///      will be used to resolve the color in the given states.
+///   3. Use [WidgetStateBorderSide.fromMap] to assign a value using a [WidgetStateMap].
 ///
 /// {@tool dartpad}
 /// This example defines a [WidgetStateBorderSide] which resolves to different
@@ -486,9 +493,6 @@ class _EnabledAndDisabledMouseCursor extends WidgetStateMouseCursor {
 ///
 /// ** See code in examples/api/lib/widgets/widget_state/widget_state_border_side.0.dart **
 /// {@end-tool}
-///
-/// This class should only be used for parameters which are documented to take
-/// [WidgetStateBorderSide], otherwise only the default state will be used.
 ///
 /// See also:
 ///
@@ -502,8 +506,8 @@ abstract class WidgetStateBorderSide extends BorderSide implements WidgetStatePr
   /// Creates a [WidgetStateBorderSide] from a
   /// [WidgetPropertyResolver<BorderSide?>] callback function.
   ///
-  /// If used as a regular [BorderSide], the border resolved in the default state
-  /// (the empty set of states) will be used.
+  /// If used as a regular [BorderSide], its behavior matches an empty
+  /// `BorderSide()` constructor.
   ///
   /// Usage:
   ///
@@ -541,9 +545,9 @@ abstract class WidgetStateBorderSide extends BorderSide implements WidgetStatePr
   /// Creates a [WidgetStateBorderSide] from a [WidgetStateMap].
   ///
   /// {@macro flutter.widgets.WidgetStateProperty.fromMap}
-  ///
-  /// If used as a regular [BorderSide], the first key that matches an empty
-  /// [Set] of [WidgetState]s will be selected.
+  /// It should only be used with widgets that document support for
+  /// [WidgetStateBorderSide] objects (throws an error if used as a
+  /// regular [BorderSide].)
   ///
   /// Example:
   ///
@@ -613,31 +617,18 @@ class _WidgetStateBorderSide extends WidgetStateBorderSide {
   BorderSide? resolve(Set<WidgetState> states) => _resolve(states);
 }
 
-class _WidgetBorderSideMapper extends WidgetStateBorderSide {
-  const _WidgetBorderSideMapper(this.map);
-
-  final WidgetStateMap<BorderSide?> map;
-
-  _WidgetStateMapper<BorderSide?> get _mapper => _WidgetStateMapper<BorderSide?>(map);
-
-  @override
-  BorderSide? resolve(Set<WidgetState> states) => _mapper.resolve(states);
-
-  @override
-  bool operator ==(Object other) {
-    return other is _WidgetBorderSideMapper && other.map == map;
-  }
-
-  @override
-  int get hashCode => map.hashCode;
+class _WidgetBorderSideMapper extends WidgetStateMapper<BorderSide?> implements WidgetStateBorderSide {
+  const _WidgetBorderSideMapper(super.map);
 }
 
 /// Defines an [OutlinedBorder] whose value depends on a set of [WidgetState]s
 /// which represent the interactive state of a component.
 ///
-/// To use a [WidgetStateOutlinedBorder], you should create a subclass of an
-/// [OutlinedBorder] and implement [WidgetStateOutlinedBorder]'s abstract
-/// `resolve` method.
+/// A [WidgetStateOutlinedBorder] can be created in one of the following ways:
+///   1. Create a subclass of [WidgetStateOutlinedBorder] and implement the abstract `resolve` method.
+///   2. Use [WidgetStateOutlinedBorder.resolveWith] and pass in a callback that
+///      will be used to resolve the color in the given states.
+///   3. Use [WidgetStateOutlinedBorder.fromMap] to assign a value using a [WidgetStateMap].
 ///
 /// {@tool dartpad}
 /// This example defines a subclass of [RoundedRectangleBorder] and an
@@ -660,11 +651,48 @@ abstract class WidgetStateOutlinedBorder extends OutlinedBorder implements Widge
   /// const constructors so that they can be used in const expressions.
   const WidgetStateOutlinedBorder();
 
+  /// Creates a [WidgetStateOutlinedBorder] using a [WidgetPropertyResolver]
+  /// callback.
+  ///
+  /// This constructor should only be used with widgets that support
+  /// [WidgetStateOutlinedBorder], such as [ChipThemeData.shape]
+  /// (if used as a regular [OutlinedBorder], it acts the same as
+  /// an empty `RoundedRectangleBorder()` constructor).
+  const factory WidgetStateOutlinedBorder.resolveWith(
+    WidgetPropertyResolver<OutlinedBorder?> callback,
+  ) = _WidgetStateOutlinedBorder;
+
+  /// Creates a [WidgetStateOutlinedBorder] from a [WidgetStateMap].
+  ///
+  /// {@macro flutter.widgets.WidgetStateProperty.fromMap}
+  /// It should only be used with widgets that support
+  /// [WidgetStateOutlinedBorder], such as [ChipThemeData.shape]
+  /// (throws an error if used as a regular [OutlinedBorder]).
+  ///
+  /// Resolves to `null` if no keys match, deferring to the default value
+  /// of the widget or theme.
+  const factory WidgetStateOutlinedBorder.fromMap(
+    WidgetStateMap<OutlinedBorder?> map,
+  ) = _WidgetOutlinedBorderMapper;
+
   /// Returns an [OutlinedBorder] that's to be used when a component is in the
   /// specified state. Return null to defer to the default value of the widget
   /// or theme.
   @override
   OutlinedBorder? resolve(Set<WidgetState> states);
+}
+
+class _WidgetStateOutlinedBorder extends RoundedRectangleBorder implements WidgetStateOutlinedBorder {
+  const _WidgetStateOutlinedBorder(this._resolve);
+
+  final WidgetPropertyResolver<OutlinedBorder?> _resolve;
+
+  @override
+  OutlinedBorder? resolve(Set<WidgetState> states) => _resolve(states);
+}
+
+class _WidgetOutlinedBorderMapper extends WidgetStateMapper<OutlinedBorder?> implements WidgetStateOutlinedBorder {
+  const _WidgetOutlinedBorderMapper(super.map);
 }
 
 /// Defines a [TextStyle] that is also a [WidgetStateProperty].
@@ -679,18 +707,12 @@ abstract class WidgetStateOutlinedBorder extends OutlinedBorder implements Widge
 /// [WidgetStateTextStyle] should only be used with widgets that document
 /// their support, like [InputDecoration.labelStyle].
 ///
-/// To use a [WidgetStateTextStyle], you can either:
+/// A [WidgetStateTextStyle] can be created in one of the following ways:
 ///   1. Create a subclass of [WidgetStateTextStyle] and implement the abstract `resolve` method.
 ///   2. Use [WidgetStateTextStyle.resolveWith] and pass in a callback that
 ///      will be used to resolve the text style in the given states.
 ///   3. Use [WidgetStateTextStyle.fromMap] to assign a style using a [WidgetStateMap].
 ///
-/// If a [WidgetStateTextStyle] is used for a property or a parameter that doesn't
-/// support resolving [WidgetStateProperty<TextStyle>]s, then its default text style
-/// value will be used for all states.
-///
-/// To define a `const` [WidgetStateTextStyle], you'll need to extend
-/// [WidgetStateTextStyle] and override its [resolve] method.
 /// See also:
 ///
 ///  * [MaterialStateTextStyle], the Material specific version of
@@ -703,8 +725,8 @@ abstract class WidgetStateTextStyle extends TextStyle implements WidgetStateProp
   /// Creates a [WidgetStateTextStyle] from a [WidgetPropertyResolver<TextStyle>]
   /// callback function.
   ///
-  /// If used as a regular text style, the style resolved in the default state (the
-  /// empty set of states) will be used.
+  /// Behaves like an empty `TextStyle()` constructor if used as a
+  /// regular [TextStyle].
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
@@ -713,9 +735,9 @@ abstract class WidgetStateTextStyle extends TextStyle implements WidgetStateProp
   /// Creates a [WidgetStateTextStyle] from a [WidgetStateMap].
   ///
   /// {@macro flutter.widgets.WidgetStateProperty.fromMap}
-  ///
-  /// If used as a regular text style, the first key that matches an empty
-  /// [Set] of [WidgetState]s will be selected.
+  /// It should only be used with widgets that document support for
+  /// [WidgetStateTextStyle] objects (throws an error if used as a regular
+  /// [TextStyle]).
   ///
   /// {@macro flutter.widgets.WidgetState.any}
   const factory WidgetStateTextStyle.fromMap(WidgetStateMap<TextStyle> map) = _WidgetTextStyleMapper;
@@ -735,23 +757,8 @@ class _WidgetStateTextStyle extends WidgetStateTextStyle {
   TextStyle resolve(Set<WidgetState> states) => _resolve(states);
 }
 
-class _WidgetTextStyleMapper extends WidgetStateTextStyle {
-  const _WidgetTextStyleMapper(this.map);
-
-  final WidgetStateMap<TextStyle> map;
-
-  _WidgetStateMapper<TextStyle> get _mapper => _WidgetStateMapper<TextStyle>(map);
-
-  @override
-  TextStyle resolve(Set<WidgetState> states) => _mapper.resolve(states);
-
-  @override
-  bool operator ==(Object other) {
-    return other is _WidgetTextStyleMapper && other.map == map;
-  }
-
-  @override
-  int get hashCode => map.hashCode;
+class _WidgetTextStyleMapper extends WidgetStateMapper<TextStyle> implements WidgetStateTextStyle {
+  const _WidgetTextStyleMapper(super.map);
 }
 
 /// Interface for classes that [resolve] to a value of type `T` based
@@ -776,11 +783,23 @@ class _WidgetTextStyleMapper extends WidgetStateTextStyle {
 /// This example shows how the default text and icon color
 /// (the "foreground color") of a [TextButton] can be overridden with a
 /// [WidgetStateProperty]. In this example, the button's text color will be
-/// `Colors.blue` when the button is being pressed, hovered, or focused.
-/// Otherwise, the text color will be `Colors.red`.
+/// colored differently depending on whether the button is pressed, hovered,
+/// or focused.
 ///
 /// ** See code in examples/api/lib/widgets/widget_state/widget_state_property.0.dart **
 /// {@end-tool}
+///
+/// ## Performance Consideration
+///
+/// In order for constructed [WidgetStateProperty] objects to be recognized as
+/// equivalent, they need to either be `const` objects, or have overrides for
+/// [operator==] and [hashCode].
+///
+/// This comes into play when, for instance, two [ThemeData] objects are being
+/// compared for equality.
+///
+/// For a concrete `WidgetStateProperty` object that supports stable
+/// equality checks, consider using [WidgetStateMapper].
 ///
 /// See also:
 ///
@@ -801,13 +820,12 @@ abstract class WidgetStateProperty<T> {
   /// key is satisfied by the set of states, and returns its associated value.
   /// {@endtemplate}
   ///
-  /// Returns `null` if no keys match, or if [T] is non-nullable,
+  /// Resolves to `null` if no keys match, or if [T] is non-nullable,
   /// the method throws an [ArgumentError].
-  ///
   /// {@macro flutter.widgets.WidgetState.any}
   ///
   /// {@macro flutter.widgets.WidgetStateMap}
-  const factory WidgetStateProperty.fromMap(WidgetStateMap<T> map) = _WidgetStateMapper<T>;
+  const factory WidgetStateProperty.fromMap(WidgetStateMap<T> map) = WidgetStateMapper<T>;
 
   /// Resolves the value for the given set of states if `value` is a
   /// [WidgetStateProperty], otherwise returns the value itself.
@@ -830,7 +848,8 @@ abstract class WidgetStateProperty<T> {
   /// Convenience method for creating a [WidgetStateProperty] that resolves
   /// to a single value for all states.
   ///
-  /// If you need a const value, use [WidgetStatePropertyAll] directly.
+  /// Prefer using [WidgetStatePropertyAll] directly, which allows for creating
+  /// `const` values.
   ///
   // TODO(darrenaustin): Deprecate this when we have the ability to create
   // a dart fix that will replace this with WidgetStatePropertyAll:
@@ -946,16 +965,35 @@ class _WidgetStatePropertyWith<T> implements WidgetStateProperty<T> {
 /// {@endtemplate}
 typedef WidgetStateMap<T> = Map<WidgetStatesConstraint, T>;
 
-// A private class, used to create the [WidgetStateProperty.fromMap] constructor.
+/// Uses a [WidgetStateMap] to resolve to a single value of type `T` based on
+/// the current set of Widget states.
+///
+/// {@macro flutter.widgets.WidgetStateMap}
+///
+/// Classes that extend [WidgetStateMapper] can implement any other interface,
+/// but should only be used for fields that document their support for
+/// [WidgetStateProperty] objects.
+///
+/// The only exceptions are classes such as [double] that are marked as
+/// `base` or `final`, since they can't be implemented—a [double] property
+/// can't be set up to also accept [WidgetStateProperty] objects
+/// and would need to pick one or the other.
+///
+/// For example, a [WidgetStateColor.fromMap] object can be passed anywhere that
+/// accepts either a [Color] or a [WidgetStateProperty] object, but attempting
+/// to access a [Color] field (such as [Color.value]) on the mapper object
+/// throws a [FlutterError].
 @immutable
-class _WidgetStateMapper<T> implements WidgetStateProperty<T> {
-  const _WidgetStateMapper(this.map);
+class WidgetStateMapper<T> with Diagnosticable implements WidgetStateProperty<T> {
+  /// Creates a [WidgetStateProperty] object that can resolve
+  /// to a value of type [T] using the provided [map].
+  const WidgetStateMapper(WidgetStateMap<T> map) : _map = map;
 
-  final WidgetStateMap<T> map;
+  final WidgetStateMap<T> _map;
 
   @override
   T resolve(Set<WidgetState> states) {
-    for (final MapEntry<WidgetStatesConstraint, T> entry in map.entries) {
+    for (final MapEntry<WidgetStatesConstraint, T> entry in _map.entries) {
       if (entry.key.isSatisfiedBy(states)) {
         return entry.value;
       }
@@ -976,14 +1014,43 @@ class _WidgetStateMapper<T> implements WidgetStateProperty<T> {
 
   @override
   bool operator ==(Object other) {
-    return other is _WidgetStateMapper && mapEquals(map, other.map);
+    return other is WidgetStateMapper<T> && mapEquals(_map, other._map);
   }
 
   @override
-  int get hashCode => MapEquality<WidgetStatesConstraint, T>().hash(map);
+  int get hashCode => MapEquality<WidgetStatesConstraint, T>().hash(_map);
 
   @override
-  String toString() => '$map';
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'WidgetStateMapper<$T>($_map)';
+  }
+
+  @override
+  Never noSuchMethod(Invocation invocation) {
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary(
+        'There was an attempt to access the "${invocation.memberName}" '
+        'field of a WidgetStateMapper<$T> object.',
+      ),
+      ErrorDescription('$this'),
+      ErrorDescription(
+        'WidgetStateProperty objects should only be used '
+        'in places that document their support.',
+      ),
+      ErrorHint(
+        'Double-check whether the map was used in a place that '
+        'documents support for WidgetStateProperty objects. If so, '
+        'please file a bug report. (The https://pub.dev/ page for a package '
+        'contains a link to "View/report issues".)',
+      ),
+    ]);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties, {String prefix = ''}) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<WidgetStateMap<T>>('map', _map));
+  }
 }
 
 /// Convenience class for creating a [WidgetStateProperty] that

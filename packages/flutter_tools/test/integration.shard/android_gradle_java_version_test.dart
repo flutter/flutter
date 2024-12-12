@@ -24,8 +24,6 @@ void main() {
   testWithoutContext(
       'gradle task exists named javaVersion that prints jdk version', () async {
     // Create a new flutter project.
-    final String flutterBin =
-        fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     ProcessResult result = await processManager.run(<String>[
       flutterBin,
       'create',

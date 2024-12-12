@@ -801,11 +801,9 @@ class IosUsbArtifacts extends CachedArtifact {
   };
 
   @override
-  Map<String, String> get environment {
-    return <String, String>{
-      'DYLD_LIBRARY_PATH': cache.getArtifactDirectory(name).path,
-    };
-  }
+  Map<String, String> get environment => <String, String>{
+    'DYLD_LIBRARY_PATH': cache.getArtifactDirectory(name).path,
+  };
 
   @override
   bool isUpToDateInner(FileSystem fileSystem) {
@@ -912,7 +910,6 @@ const List<List<String>> _androidBinaryDirs = <List<String>>[
   <String>['android-arm64-release', 'android-arm64-release/artifacts.zip'],
   <String>['android-x64-profile', 'android-x64-profile/artifacts.zip'],
   <String>['android-x64-release', 'android-x64-release/artifacts.zip'],
-  <String>['android-x86-jit-release', 'android-x86-jit-release/artifacts.zip'],
 ];
 
 const List<List<String>> _dartSdks = <List<String>> [

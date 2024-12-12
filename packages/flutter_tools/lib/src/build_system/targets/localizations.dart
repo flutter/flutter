@@ -4,6 +4,7 @@
 
 import '../../base/file_system.dart';
 import '../../convert.dart';
+import '../../features.dart';
 import '../../localizations/gen_l10n.dart';
 import '../../localizations/localizations_utils.dart';
 import '../build_system.dart';
@@ -56,6 +57,7 @@ class GenerateLocalizationsTarget extends Target {
       file: configFile,
       logger: environment.logger,
       defaultArbDir: defaultArbDir,
+      defaultSyntheticPackage: !featureFlags.isExplicitPackageDependenciesEnabled,
     );
     await generateLocalizations(
       logger: environment.logger,

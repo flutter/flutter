@@ -545,9 +545,7 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   final bool includeRepeats;
 
   @override
-  Iterable<LogicalKeyboardKey> get triggers {
-    return <LogicalKeyboardKey>[trigger];
-  }
+  Iterable<LogicalKeyboardKey> get triggers => <LogicalKeyboardKey>[trigger];
 
   bool _shouldAcceptModifiers(Set<LogicalKeyboardKey> pressed) {
     return control == pressed.intersection(_controlSynonyms).isNotEmpty

@@ -15,11 +15,25 @@ import 'android_studio.dart';
 
 const String _javaExecutable = 'java';
 
+enum JavaSource {
+  /// JDK bundled with latest Android Studio installation.
+  androidStudio,
+  /// JDK specified by the system's JAVA_HOME environment variable.
+  javaHome,
+  /// JDK available through the system's PATH environment variable.
+  path,
+  /// JDK specified in Flutter's configuration.
+  flutterConfig,
+}
+
+typedef _JavaHomePathWithSource = ({String path, JavaSource source});
+
 /// Represents an installation of Java.
 class Java {
   Java({
     required this.javaHome,
     required this.binaryPath,
+    required this.javaSource,
     required Logger logger,
     required FileSystem fileSystem,
     required OperatingSystemUtils os,
@@ -65,7 +79,7 @@ class Java {
       platform: platform,
       processManager: processManager
     );
-    final String? home = _findJavaHome(
+    final _JavaHomePathWithSource? home = _findJavaHome(
       config: config,
       logger: logger,
       androidStudio: androidStudio,
@@ -73,7 +87,7 @@ class Java {
     );
     final String? binary = _findJavaBinary(
       logger: logger,
-      javaHome: home,
+      javaHome: home?.path,
       fileSystem: fileSystem,
       operatingSystemUtils: os,
       platform: platform
@@ -83,9 +97,14 @@ class Java {
       return null;
     }
 
+    // If javaHome == null and binary is not null, it means that
+    // binary obtained from PATH as fallback.
+    final JavaSource javaSource = home?.source ?? JavaSource.path;
+
     return Java(
-      javaHome: home,
+      javaHome: home?.path,
       binaryPath: binary,
+      javaSource: javaSource,
       logger: logger,
       fileSystem: fileSystem,
       os: os,
@@ -110,6 +129,12 @@ class Java {
   /// to this class instead.
   final String binaryPath;
 
+  /// Indicates the source from where the Java runtime was located.
+  ///
+  /// This information is useful for debugging and logging purposes to track
+  /// which source was used to locate the Java runtime environment.
+  final JavaSource javaSource;
+
   final Logger _logger;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _os;
@@ -123,14 +148,12 @@ class Java {
   ///
   /// This map should be used as the environment when invoking any Java-dependent
   /// processes, such as Gradle or Android SDK tools (avdmanager, sdkmanager, etc.)
-  Map<String, String> get environment {
-    return <String, String>{
-      if (javaHome != null) javaHomeEnvironmentVariable: javaHome!,
-      'PATH': _fileSystem.path.dirname(binaryPath) +
-                        _os.pathVarSeparator +
-                        _platform.environment['PATH']!,
-    };
-  }
+  Map<String, String> get environment => <String, String>{
+    if (javaHome != null) javaHomeEnvironmentVariable: javaHome!,
+    'PATH': _fileSystem.path.dirname(binaryPath) +
+            _os.pathVarSeparator +
+            _platform.environment['PATH']!,
+  };
 
   /// Returns the version of java in the format \d(.\d)+(.\d)+
   /// Returns null if version could not be determined.
@@ -194,7 +217,7 @@ class Java {
   }
 }
 
-String? _findJavaHome({
+_JavaHomePathWithSource? _findJavaHome({
   required Config config,
   required Logger logger,
   required AndroidStudio? androidStudio,
@@ -202,17 +225,17 @@ String? _findJavaHome({
 }) {
   final Object? configured = config.getValue('jdk-dir');
   if (configured != null) {
-    return configured as String;
+    return (path: configured as String, source: JavaSource.flutterConfig);
   }
 
   final String? androidStudioJavaPath = androidStudio?.javaPath;
   if (androidStudioJavaPath != null) {
-    return androidStudioJavaPath;
+    return (path: androidStudioJavaPath, source: JavaSource.androidStudio);
   }
 
   final String? javaHomeEnv = platform.environment[Java.javaHomeEnvironmentVariable];
   if (javaHomeEnv != null) {
-    return javaHomeEnv;
+    return (path: javaHomeEnv, source: JavaSource.javaHome);
   }
   return null;
 }

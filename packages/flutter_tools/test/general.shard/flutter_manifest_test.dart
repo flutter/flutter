@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:yaml_edit/yaml_edit.dart';
 
 import '../src/common.dart';
 
@@ -1479,6 +1480,118 @@ flutter:
 
     expect(flutterManifest, null);
     expect(logger.errorText, 'Expected "default-flavor" to be a string, but got 3 (int).\n');
+  });
+
+  testWithoutContext('FlutterManifest.copyWith generates a valid manifest', () async {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+''';
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    )!;
+
+    final FlutterManifest updatedManifest = flutterManifest.copyWith(
+      logger: logger,
+      assets: <AssetsEntry>[
+        AssetsEntry(
+          uri: Uri(path: 'foo'),
+          flavors: const <String>{'flavor'},
+          transformers: const <AssetTransformerEntry>[
+            AssetTransformerEntry(
+              package: 'package:foo',
+              args: <String>['arg'],
+            ),
+          ],
+        ),
+      ],
+      fonts: <Font>[
+        Font(
+          'fontFamily',
+          <FontAsset>[
+            FontAsset(
+              Uri(path: 'assetUri'),
+              weight: 100,
+              style: 'normal',
+            ),
+          ],
+        ),
+      ],
+      models: <Uri>[
+        Uri(path: 'modelUri'),
+      ],
+      shaders: <Uri>[
+        Uri(path: 'shaderUri'),
+      ],
+      deferredComponents: <DeferredComponent>[
+        DeferredComponent(
+          name: 'deferredComponent',
+          libraries: const <String>['deferredComponentLibrary'],
+          assets: <AssetsEntry>[
+            AssetsEntry(
+              uri: Uri(path: 'deferredComponentUri'),
+              flavors: const <String>{
+                'deferredComponentFlavor',
+              },
+              transformers: const <AssetTransformerEntry>[
+                AssetTransformerEntry(
+                  package: 'package:deferredComponent',
+                  args: <String>['deferredComponentArg'],
+                ),
+              ]
+            ),
+          ],
+        ),
+      ],
+    );
+
+    final YamlEditor editor = YamlEditor('');
+    editor.update(const <String>[], updatedManifest.toYaml());
+    expect(
+      editor.toString(),
+'''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  assets:
+    - path: foo
+      flavors:
+        - flavor
+      transformers:
+        - package: package:foo
+          args:
+            - arg
+  fonts:
+    - family: fontFamily
+      fonts:
+        - weight: 100
+          style: normal
+          asset: assetUri
+  shaders:
+    - shaderUri
+  models:
+    - modelUri
+  deferred-components:
+    - name: deferredComponent
+      libraries:
+        - deferredComponentLibrary
+      assets:
+        - path: deferredComponentUri
+          flavors:
+            - deferredComponentFlavor
+          transformers:
+            - package: package:deferredComponent
+              args:
+                - deferredComponentArg'''
+    );
   });
 }
 

@@ -86,7 +86,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
     required this.clipBehavior,
     this.statesController,
     this.isSemanticButton = true,
-    this.iconAlignment = IconAlignment.start,
+    this.iconAlignment,
     this.tooltip,
     required this.child,
   });
@@ -158,7 +158,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   final bool? isSemanticButton;
 
   /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
-  final IconAlignment iconAlignment;
+  final IconAlignment? iconAlignment;
 
   /// Text that describes the action that will occur when the button is pressed or
   /// hovered over.
@@ -407,7 +407,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final VisualDensity? resolvedVisualDensity = effectiveValue((ButtonStyle? style) => style?.visualDensity);
     final MaterialTapTargetSize? resolvedTapTargetSize = effectiveValue((ButtonStyle? style) => style?.tapTargetSize);
     final Duration? resolvedAnimationDuration = effectiveValue((ButtonStyle? style) => style?.animationDuration);
-    final bool? resolvedEnableFeedback = effectiveValue((ButtonStyle? style) => style?.enableFeedback);
+    final bool resolvedEnableFeedback = effectiveValue((ButtonStyle? style) => style?.enableFeedback) ?? true;
     final AlignmentGeometry? resolvedAlignment = effectiveValue((ButtonStyle? style) => style?.alignment);
     final Offset densityAdjustment = resolvedVisualDensity!.baseSizeAdjustment;
     final InteractiveInkFeatureFactory? resolvedSplashFactory = effectiveValue((ButtonStyle? style) => style?.splashFactory);

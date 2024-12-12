@@ -64,7 +64,7 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('not using synthetic packages', () async {
+  testUsingContext('not using synthetic packages (explicitly)', () async {
     final Directory l10nDirectory = fileSystem.directory(
       fileSystem.path.join('lib', 'l10n'),
     );
@@ -99,6 +99,46 @@ flutter:
     expect(l10nDirectory.existsSync(), true);
     expect(l10nDirectory.childFile('app_localizations_en.dart').existsSync(), true);
     expect(l10nDirectory.childFile('app_localizations.dart').existsSync(), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('not using synthetic packages (due to --no-implicit-pubspec-resolution)', () async {
+    final Directory l10nDirectory = fileSystem.directory(
+      fileSystem.path.join('lib', 'l10n'),
+    );
+    final File arbFile = l10nDirectory.childFile(
+      'app_en.arb',
+    )..createSync(recursive: true);
+
+    arbFile.writeAsStringSync('''
+{
+  "helloWorld": "Hello, World!",
+  "@helloWorld": {
+    "description": "Sample description"
+  }
+}''');
+    fileSystem.file('pubspec.yaml').writeAsStringSync('''
+flutter:
+  generate: true''');
+
+    final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
+    );
+    await createTestCommandRunner(command).run(<String>[
+      '--no-implicit-pubspec-resolution',
+      'gen-l10n',
+    ]);
+
+    expect(l10nDirectory.existsSync(), true);
+    expect(l10nDirectory.childFile('app_localizations_en.dart').existsSync(),
+        true);
+    expect(
+        l10nDirectory.childFile('app_localizations.dart').existsSync(), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
@@ -337,7 +377,7 @@ untranslated-messages-file: lib/l10n/untranslated.json
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/120530.
-  testWithoutContext('dart format is run when generateLocalizations is called through build target', () async {
+  testUsingContext('dart format is run when generateLocalizations is called through build target', () async {
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
@@ -427,7 +467,7 @@ format: true
     pubspecFile.writeAsStringSync('''
   name: test
   environment:
-    sdk: '>=3.2.0-0 <4.0.0'
+    sdk: ^3.7.0-0
 
   dependencies:
     flutter:
@@ -466,7 +506,7 @@ format: true
     pubspecFile.writeAsStringSync('''
   name: test
   environment:
-    sdk: '>=3.2.0-0 <4.0.0'
+    sdk: ^3.7.0-0
 
   dependencies:
     flutter:

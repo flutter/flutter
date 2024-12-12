@@ -9,14 +9,16 @@ import '../utils.dart';
 /// To run this test locally:
 ///
 /// 1. Connect an Android device or emulator.
-/// 2. Run the following command from the root of the Flutter repository:
+/// 2. Run `dart pub get` in dev/bots
+/// 3. Run the following command from the root of the Flutter repository:
 ///
 /// ```sh
 /// SHARD=flutter_driver_android bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 /// ```
 ///
-/// For debugging, it is recommended to instead just run and launch these tests
+/// For debugging, you need to instead run and launch these tests
 /// individually _in_ the `dev/integration_tests/native_driver_test` directory.
+/// Comparisons against goldens cant happen locally.
 Future<void> runFlutterDriverAndroidTests() async {
   print('Running Flutter Driver Android tests...');
 

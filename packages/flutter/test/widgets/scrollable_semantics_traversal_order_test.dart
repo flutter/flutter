@@ -71,6 +71,7 @@ void main() {
                     actions: <SemanticsAction>[
                       SemanticsAction.scrollUp,
                       SemanticsAction.scrollDown,
+                      SemanticsAction.scrollToOffset,
                     ],
                     children: <TestSemantics>[
                       TestSemantics(
@@ -245,6 +246,7 @@ void main() {
                     actions: <SemanticsAction>[
                       SemanticsAction.scrollUp,
                       SemanticsAction.scrollDown,
+                      SemanticsAction.scrollToOffset,
                     ],
                     children: <TestSemantics>[
                       TestSemantics(
@@ -376,6 +378,7 @@ void main() {
                     actions: <SemanticsAction>[
                       SemanticsAction.scrollUp,
                       SemanticsAction.scrollDown,
+                      SemanticsAction.scrollToOffset,
                     ],
                     children: <TestSemantics>[
                       TestSemantics(
@@ -515,6 +518,7 @@ void main() {
                     actions: <SemanticsAction>[
                       SemanticsAction.scrollUp,
                       SemanticsAction.scrollDown,
+                      SemanticsAction.scrollToOffset,
                     ],
                     children: <TestSemantics>[
                       TestSemantics(
@@ -671,6 +675,7 @@ void main() {
                 actions: <SemanticsAction>[
                   SemanticsAction.scrollUp,
                   SemanticsAction.scrollDown,
+                  SemanticsAction.scrollToOffset,
                 ],
                 children: children,
               ),
@@ -744,6 +749,7 @@ void main() {
                     actions: <SemanticsAction>[
                       SemanticsAction.scrollUp,
                       SemanticsAction.scrollDown,
+                      SemanticsAction.scrollToOffset,
                     ],
                     children: <TestSemantics>[
                       TestSemantics(

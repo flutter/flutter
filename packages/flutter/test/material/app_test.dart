@@ -1662,6 +1662,22 @@ void main() {
 
     expect(tester.getSize(find.byType(MaterialApp)), const Size(123, 456));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/156959.
+  testWidgets(
+    'MaterialApp with builder works when themeAnimationStyle is AnimationStyle.noAnimation',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          themeAnimationStyle: AnimationStyle.noAnimation,
+          builder: (BuildContext context, Widget? child) {
+            return const Text('Works');
+          },
+        ),
+      );
+      expect(find.text('Works'), findsOne);
+    },
+  );
 }
 
 class MockScrollBehavior extends ScrollBehavior {

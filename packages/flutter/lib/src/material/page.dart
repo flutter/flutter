@@ -87,7 +87,40 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   Widget buildContent(BuildContext context);
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 300);
+  Duration get transitionDuration => _getPageTransitionBuilder(navigator!.context)?.transitionDuration
+    ?? const Duration(microseconds: 300);
+
+  @override
+  Duration get reverseTransitionDuration => _getPageTransitionBuilder(navigator!.context)?.reverseTransitionDuration
+    ?? const Duration(microseconds: 300);
+
+  PageTransitionsBuilder? _getPageTransitionBuilder(BuildContext context) {
+    final TargetPlatform platform = Theme.of(context).platform;
+    final PageTransitionsTheme pageTransitionsTheme = Theme.of(context).pageTransitionsTheme;
+    return pageTransitionsTheme.builders[platform];
+  }
+
+  // The transitionDuration is used to create the AnimationController which is only
+  // built once, so when page transition builder is updated and transitionDuration
+  // has a new value, the AnimationController cannot be updated automatically. So we
+  // manually update its duration here.
+  // TODO(quncCccccc): Clean up this override method when controller can be updated as the transitionDuration is changed.
+  @override
+  TickerFuture didPush() {
+    controller?.duration = transitionDuration;
+    return super.didPush();
+  }
+
+  // The reverseTransitionDuration is used to create the AnimationController
+  // which is only built once, so when page transition builder is updated and
+  // reverseTransitionDuration has a new value, the AnimationController cannot
+  // be updated automatically. So we manually update its reverseDuration here.
+  // TODO(quncCccccc): Clean up this override method when controller can beupdated as the reverseTransitionDuration is changed.
+  @override
+  bool didPop(T? result) {
+    controller?.reverseDuration = reverseTransitionDuration;
+    return super.didPop(result);
+  }
 
   @override
   Color? get barrierColor => null;
@@ -122,6 +155,12 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
     // one, then this route will already be synced with its transition.
     return nextRouteIsNotFullscreen &&
       ((nextRoute is MaterialRouteTransitionMixin) || nextRouteHasDelegatedTransition);
+  }
+
+  @override
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
+    // Supress previous route from transitioning if this is a fullscreenDialog route.
+    return previousRoute is PageRoute && !fullscreenDialog;
   }
 
   @override

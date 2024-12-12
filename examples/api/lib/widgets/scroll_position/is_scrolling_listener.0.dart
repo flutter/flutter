@@ -56,7 +56,7 @@ class _IsScrollingListenerExampleState extends State<IsScrollingListenerExample>
   }
 
   // After an interactive scroll "ends", auto-scroll so that last item in the
-  // viewport is completely visible. To accomodate mouse-wheel scrolls, other small
+  // viewport is completely visible. To accommodate mouse-wheel scrolls, other small
   // adjustments, and scrolling to the top, scrolls that put the scroll offset at
   // zero or change the scroll offset by less than itemExtent don't trigger
   // an auto-scroll.

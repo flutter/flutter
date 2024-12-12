@@ -153,7 +153,7 @@ void main() {
     expect(checked, isTrue);
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('Title is not created if title is not passed and kIsweb', (WidgetTester tester) async {
+  testWidgets('Title is not created if title is not passed and kIsWeb', (WidgetTester tester) async {
     await tester.pumpWidget(
       WidgetsApp(
         color: const Color(0xFF123456),

@@ -626,7 +626,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       ));
     });
 
-    testUsingContext('parses missing module error', () async{
+    testUsingContext('parses missing module error', () async {
       const List<String> buildCommands = <String>['xcrun', 'cc', 'blah'];
       final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
@@ -663,6 +663,8 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         'Your project uses CocoaPods as a dependency manager, but the following plugin(s) '
         'only support Swift Package Manager: plugin_1_name, plugin_2_name.'
       ));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
@@ -814,6 +816,7 @@ void createFakePlugins(
 class FakeIosProject extends Fake implements IosProject {
   FakeIosProject({
     required MemoryFileSystem fileSystem,
+    this.usesSwiftPackageManager = false,
   }) : hostAppRoot = fileSystem.directory('app_name').childDirectory('ios');
 
   @override
@@ -830,6 +833,9 @@ class FakeIosProject extends Fake implements IosProject {
 
   @override
   File get podfile => hostAppRoot.childFile('Podfile');
+
+  @override
+  final bool usesSwiftPackageManager;
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {
@@ -839,7 +845,8 @@ class FakeFlutterProject extends Fake implements FlutterProject {
     this.isModule = false,
   });
 
-  MemoryFileSystem fileSystem;
+  final MemoryFileSystem fileSystem;
+  final bool usesSwiftPackageManager;
 
   @override
   late final Directory directory = fileSystem.directory('app_name');
@@ -854,10 +861,10 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
 
   @override
-  late final IosProject ios = FakeIosProject(fileSystem: fileSystem);
-
-  @override
-  final bool usesSwiftPackageManager;
+  late final IosProject ios = FakeIosProject(
+    fileSystem: fileSystem,
+    usesSwiftPackageManager: usesSwiftPackageManager,
+  );
 
   @override
   final bool isModule;

@@ -670,14 +670,12 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   }
 
   @override
-  bool get sizedByParent {
-    return switch (fit) {
-      OverflowBoxFit.max => true,
-      // If deferToChild, the size will be as small as its child when non-overflowing,
-      // thus it cannot be sizedByParent.
-      OverflowBoxFit.deferToChild => false,
-    };
-  }
+  bool get sizedByParent => switch (fit) {
+    OverflowBoxFit.max => true,
+    // If deferToChild, the size will be as small as its child when non-overflowing,
+    // thus it cannot be sizedByParent.
+    OverflowBoxFit.deferToChild => false,
+  };
 
   @override
   @protected

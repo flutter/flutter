@@ -23,7 +23,6 @@ import 'constants.dart';
 import 'debug.dart';
 import 'icons.dart';
 import 'ink_well.dart';
-import 'input_border.dart';
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -1010,8 +1009,7 @@ class DropdownButton<T> extends StatefulWidget {
               ),
        assert(itemHeight == null || itemHeight >=  kMinInteractiveDimension),
        _inputDecoration = null,
-       _isEmpty = false,
-       _isFocused = false;
+       _isEmpty = false;
 
   DropdownButton._formField({
     super.key,
@@ -1044,7 +1042,6 @@ class DropdownButton<T> extends StatefulWidget {
     this.padding,
     required InputDecoration inputDecoration,
     required bool isEmpty,
-    required bool isFocused,
   }) : assert(items == null || items.isEmpty || value == null ||
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
@@ -1056,8 +1053,7 @@ class DropdownButton<T> extends StatefulWidget {
               ),
        assert(itemHeight == null || itemHeight >=  kMinInteractiveDimension),
        _inputDecoration = inputDecoration,
-       _isEmpty = isEmpty,
-       _isFocused = isFocused;
+       _isEmpty = isEmpty;
 
   /// The list of items the user can select.
   ///
@@ -1287,8 +1283,6 @@ class DropdownButton<T> extends StatefulWidget {
 
   final bool _isEmpty;
 
-  final bool _isFocused;
-
   @override
   State<DropdownButton<T>> createState() => _DropdownButtonState<T>();
 }
@@ -1300,6 +1294,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   FocusNode? _internalNode;
   FocusNode? get focusNode => widget.focusNode ?? _internalNode;
   late Map<Type, Action<Intent>> _actionMap;
+  bool _isHovering = false;
+  bool _hasPrimaryFocus = false;
 
   // Only used if needed to create _internalNode.
   FocusNode _createFocusNode() {
@@ -1321,14 +1317,24 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         onInvoke: (ButtonActivateIntent intent) => _handleTap(),
       ),
     };
+    focusNode?.addListener(_handleFocusChanged);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _removeDropdownRoute();
+    focusNode?.removeListener(_handleFocusChanged);
     _internalNode?.dispose();
     super.dispose();
+  }
+
+  void _handleFocusChanged() {
+    if (_hasPrimaryFocus != focusNode!.hasPrimaryFocus) {
+      setState(() {
+        _hasPrimaryFocus = focusNode!.hasPrimaryFocus;
+      });
+    }
   }
 
   void _removeDropdownRoute() {
@@ -1586,30 +1592,76 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       },
     );
 
+    // When an InputDecoration is provided, use it instead of using an InkWell
+    // that overflows in some cases (such as showing an errorText) and requires
+    // additional logic to manage clipping properly.
+    // A filled InputDecoration is able to fill the InputDecorator container
+    // without overflowing. It also supports blending the hovered color.
+    // According to the Material specification, the overlay colors should be
+    // visible only for filled dropdown button, see:
+    // https://m2.material.io/components/menus#dropdown-menu
     if (widget._inputDecoration != null) {
-      result = InputDecorator(
-        decoration: widget._inputDecoration!,
-        isEmpty: widget._isEmpty,
-        isFocused: widget._isFocused,
-        child: result,
+      InputDecoration effectiveDecoration = widget._inputDecoration!;
+      if (_hasPrimaryFocus) {
+        final Color? focusColor = widget.focusColor ?? effectiveDecoration.focusColor;
+        // For compatibility, override the fill color when focusColor is set.
+        if (focusColor != null) {
+          effectiveDecoration = effectiveDecoration.copyWith(fillColor: focusColor);
+        }
+      }
+      result = Focus(
+        canRequestFocus: _enabled,
+        focusNode: focusNode,
+        autofocus: widget.autofocus,
+        child: MouseRegion(
+          onEnter: (PointerEnterEvent event) {
+            if (!_isHovering) {
+              setState(() {
+                _isHovering = true;
+              });
+            }
+          },
+          onExit: (PointerExitEvent event) {
+            if (_isHovering) {
+              setState(() {
+                _isHovering = false;
+              });
+            }
+          },
+          cursor: effectiveMouseCursor,
+          child: GestureDetector(
+            onTap: _enabled ? _handleTap : null,
+            behavior: HitTestBehavior.opaque,
+            child: InputDecorator(
+              decoration: effectiveDecoration,
+              isEmpty: widget._isEmpty,
+              isFocused: _hasPrimaryFocus,
+              isHovering: _isHovering,
+              child: widget.padding == null ? result : Padding(padding: widget.padding!, child: result),
+            ),
+          ),
+        ),
+      );
+    } else {
+      result = InkWell(
+        mouseCursor: effectiveMouseCursor,
+        onTap: _enabled ? _handleTap : null,
+        canRequestFocus: _enabled,
+        borderRadius: widget.borderRadius,
+        focusNode: focusNode,
+        autofocus: widget.autofocus,
+        focusColor: widget.focusColor ?? Theme.of(context).focusColor,
+        enableFeedback: false,
+        child: widget.padding == null ? result : Padding(padding: widget.padding!, child: result),
       );
     }
+
     final bool childHasButtonSemantic = hintIndex != null || (_selectedIndex != null && widget.selectedItemBuilder == null);
     return Semantics(
       button: !childHasButtonSemantic,
       child: Actions(
         actions: _actionMap,
-        child: InkWell(
-          mouseCursor: effectiveMouseCursor,
-          onTap: _enabled ? _handleTap : null,
-          canRequestFocus: _enabled,
-          borderRadius: widget.borderRadius,
-          focusNode: focusNode,
-          autofocus: widget.autofocus,
-          focusColor: widget.focusColor ?? Theme.of(context).focusColor,
-          enableFeedback: false,
-          child: widget.padding == null ? result : Padding(padding: widget.padding!, child: result),
-        ),
+        child: result,
       ),
     );
   }
@@ -1679,13 +1731,13 @@ class DropdownButtonFormField<T> extends FormField<T> {
           'with the same value',
         ),
         assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
-        decoration = decoration ?? InputDecoration(focusColor: focusColor),
+        decoration = decoration ?? const InputDecoration(),
         super(
           initialValue: value,
           autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
           builder: (FormFieldState<T> field) {
             final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
-            final InputDecoration decorationArg =  decoration ?? InputDecoration(focusColor: focusColor);
+            final InputDecoration decorationArg =  decoration ?? const InputDecoration();
             final InputDecoration effectiveDecoration = decorationArg.applyDefaults(
               Theme.of(field.context).inputDecorationTheme,
             );
@@ -1707,19 +1759,6 @@ class DropdownButtonFormField<T> extends FormField<T> {
               canRequestFocus: false,
               skipTraversal: true,
               child: Builder(builder: (BuildContext context) {
-                final bool isFocused = Focus.of(context).hasFocus;
-                late final InputBorder? resolvedBorder = switch ((
-                  enabled: effectiveDecoration.enabled,
-                  focused: isFocused,
-                  error: effectiveDecoration.errorText != null,
-                )) {
-                  (enabled: _, focused: true, error: true) => effectiveDecoration.focusedErrorBorder,
-                  (enabled: _, focused: _,    error: true) => effectiveDecoration.errorBorder,
-                  (enabled: _, focused: true,  error: _)   => effectiveDecoration.focusedBorder,
-                  (enabled: true,  focused: _, error: _)   => effectiveDecoration.enabledBorder,
-                  (enabled: false, focused: _, error: _)   => effectiveDecoration.border,
-                };
-
                 return DropdownButtonHideUnderline(
                   child: DropdownButton<T>._formField(
                     items: items,
@@ -1745,18 +1784,13 @@ class DropdownButtonFormField<T> extends FormField<T> {
                     menuMaxHeight: menuMaxHeight,
                     enableFeedback: enableFeedback,
                     alignment: alignment,
-                    borderRadius: borderRadius ?? switch (resolvedBorder) {
-                      final OutlineInputBorder border   => border.borderRadius,
-                      final UnderlineInputBorder border => border.borderRadius,
-                      _ => null,
-                    },
+                    borderRadius: borderRadius,
                     // Clear the decoration hintText because DropdownButton has its own hint logic.
                     inputDecoration: effectiveDecoration.copyWith(
                       errorText: field.errorText,
                       hintText: effectiveDecoration.hintText != null ? '' : null,
                     ),
                     isEmpty: isEmpty,
-                    isFocused: isFocused,
                     padding: padding,
                   ),
                 );

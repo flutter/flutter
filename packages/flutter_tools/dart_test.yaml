@@ -16,3 +16,9 @@ tags:
   # the --test-randomize-ordering-seed for the suites that have this tag.
   no-shuffle:
     allow_test_randomization: false
+
+  # Tests that invoke `flutter build apk` for integration.
+  flutter-build-apk: {}
+
+  # Tests that invoke `flutter test ...` or `flutter run ...` for integration.
+  flutter-test-driver: {}

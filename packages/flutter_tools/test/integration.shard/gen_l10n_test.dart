@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['flutter-test-driver'])
+library;
+
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -133,45 +136,46 @@ void main() {
       '#l10n 75 (she)\n'
       '#l10n 76 (6/26/2023)\n'
       '#l10n 77 (5:23:00 AM)\n'
-      '#l10n 78 (--- es ---)\n'
-      '#l10n 79 (ES - Hello world)\n'
-      '#l10n 80 (ES - Hello _NEWLINE_ World)\n'
-      '#l10n 81 (ES - Hola \$ Mundo)\n'
-      '#l10n 82 (ES - Hello Mundo)\n'
-      '#l10n 83 (ES - Hola Mundo)\n'
-      '#l10n 84 (ES - Hello World on viernes, 1 de enero de 1960)\n'
-      '#l10n 85 (ES - Hello world argument on 1/1/1960 at 0:00)\n'
-      '#l10n 86 (ES - Hello World from 1960 to 2020)\n'
-      '#l10n 87 (ES - Hello for 123)\n'
-      '#l10n 88 (ES - Hello)\n'
-      '#l10n 89 (ES - Hello World)\n'
-      '#l10n 90 (ES - Hello two worlds)\n'
-      '#l10n 91 (ES - Hello)\n'
-      '#l10n 92 (ES - Hello nuevo World)\n'
-      '#l10n 93 (ES - Hello two nuevo worlds)\n'
-      '#l10n 94 (ES - Hello on viernes, 1 de enero de 1960)\n'
-      '#l10n 95 (ES - Hello World, on viernes, 1 de enero de 1960)\n'
-      '#l10n 96 (ES - Hello two worlds, on viernes, 1 de enero de 1960)\n'
-      '#l10n 97 (ES - Hello other 0 worlds, with a total of 100 citizens)\n'
-      '#l10n 98 (ES - Hello World of 101 citizens)\n'
-      '#l10n 99 (ES - Hello two worlds with 102 total citizens)\n'
-      '#l10n 100 (ES - [Hola] -Mundo- #123#)\n'
-      '#l10n 101 (ES - \$!)\n'
-      '#l10n 102 (ES - One \$)\n'
-      "#l10n 103 (ES - Flutter's amazing!)\n"
-      "#l10n 104 (ES - Flutter's amazing, times 2!)\n"
-      '#l10n 105 (ES - Flutter is "amazing"!)\n'
-      '#l10n 106 (ES - Flutter is "amazing", times 2!)\n'
-      '#l10n 107 (ES - 16 wheel truck)\n'
-      "#l10n 108 (ES - Sedan's elegance)\n"
-      '#l10n 109 (ES - Cabriolet has "acceleration")\n'
-      '#l10n 110 (ES - Oh, she found ES - 1 itemES - !)\n'
-      '#l10n 111 (ES - Indeed, ES - they like ES - Flutter!)\n'
-      '#l10n 112 (--- es_419 ---)\n'
-      '#l10n 113 (ES 419 - Hello World)\n'
-      '#l10n 114 (ES 419 - Hello)\n'
-      '#l10n 115 (ES 419 - Hello World)\n'
-      '#l10n 116 (ES 419 - Hello two worlds)\n'
+      '#l10n 78 (10/6/2024 11:29:48 PM and Tuesday, July 4, 2000 12:54:32 3rd quarter)\n'
+      '#l10n 79 (--- es ---)\n'
+      '#l10n 80 (ES - Hello world)\n'
+      '#l10n 81 (ES - Hello _NEWLINE_ World)\n'
+      '#l10n 82 (ES - Hola \$ Mundo)\n'
+      '#l10n 83 (ES - Hello Mundo)\n'
+      '#l10n 84 (ES - Hola Mundo)\n'
+      '#l10n 85 (ES - Hello World on viernes, 1 de enero de 1960)\n'
+      '#l10n 86 (ES - Hello world argument on 1/1/1960 at 0:00)\n'
+      '#l10n 87 (ES - Hello World from 1960 to 2020)\n'
+      '#l10n 88 (ES - Hello for 123)\n'
+      '#l10n 89 (ES - Hello)\n'
+      '#l10n 90 (ES - Hello World)\n'
+      '#l10n 91 (ES - Hello two worlds)\n'
+      '#l10n 92 (ES - Hello)\n'
+      '#l10n 93 (ES - Hello nuevo World)\n'
+      '#l10n 94 (ES - Hello two nuevo worlds)\n'
+      '#l10n 95 (ES - Hello on viernes, 1 de enero de 1960)\n'
+      '#l10n 96 (ES - Hello World, on viernes, 1 de enero de 1960)\n'
+      '#l10n 97 (ES - Hello two worlds, on viernes, 1 de enero de 1960)\n'
+      '#l10n 98 (ES - Hello other 0 worlds, with a total of 100 citizens)\n'
+      '#l10n 99 (ES - Hello World of 101 citizens)\n'
+      '#l10n 100 (ES - Hello two worlds with 102 total citizens)\n'
+      '#l10n 101 (ES - [Hola] -Mundo- #123#)\n'
+      '#l10n 102 (ES - \$!)\n'
+      '#l10n 103 (ES - One \$)\n'
+      "#l10n 104 (ES - Flutter's amazing!)\n"
+      "#l10n 105 (ES - Flutter's amazing, times 2!)\n"
+      '#l10n 106 (ES - Flutter is "amazing"!)\n'
+      '#l10n 107 (ES - Flutter is "amazing", times 2!)\n'
+      '#l10n 108 (ES - 16 wheel truck)\n'
+      "#l10n 109 (ES - Sedan's elegance)\n"
+      '#l10n 110 (ES - Cabriolet has "acceleration")\n'
+      '#l10n 111 (ES - Oh, she found ES - 1 itemES - !)\n'
+      '#l10n 112 (ES - Indeed, ES - they like ES - Flutter!)\n'
+      '#l10n 113 (--- es_419 ---)\n'
+      '#l10n 114 (ES 419 - Hello World)\n'
+      '#l10n 115 (ES 419 - Hello)\n'
+      '#l10n 116 (ES 419 - Hello World)\n'
+      '#l10n 117 (ES 419 - Hello two worlds)\n'
       '#l10n END\n'
 
     );

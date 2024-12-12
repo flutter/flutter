@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['flutter-test-driver'])
+library;
+
 import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
@@ -30,7 +33,6 @@ void main() {
   testWithoutContext('simple build appbundle android-arm64 target succeeds', () async {
     final DeferredComponentsProject project = DeferredComponentsProject(BasicDeferredComponentsConfig());
     await project.setUpIn(tempDir);
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -64,7 +66,6 @@ void main() {
   testWithoutContext('simple build appbundle all targets succeeds', () async {
     final DeferredComponentsProject project = DeferredComponentsProject(BasicDeferredComponentsConfig());
     await project.setUpIn(tempDir);
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -109,7 +110,6 @@ void main() {
   testWithoutContext('simple build appbundle no-deferred-components succeeds', () async {
     final DeferredComponentsProject project = DeferredComponentsProject(BasicDeferredComponentsConfig());
     await project.setUpIn(tempDir);
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -153,7 +153,6 @@ void main() {
   testWithoutContext('simple build appbundle mismatched golden no-validate-deferred-components succeeds', () async {
     final DeferredComponentsProject project = DeferredComponentsProject(MismatchedGoldenDeferredComponentsConfig());
     await project.setUpIn(tempDir);
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -199,7 +198,6 @@ void main() {
   testWithoutContext('simple build appbundle missing android dynamic feature module fails', () async {
     final DeferredComponentsProject project = DeferredComponentsProject(NoAndroidDynamicFeatureModuleDeferredComponentsConfig());
     await project.setUpIn(tempDir);
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -221,7 +219,6 @@ void main() {
   testWithoutContext('simple build appbundle missing golden fails', () async {
     final DeferredComponentsProject project = DeferredComponentsProject(NoGoldenDeferredComponentsConfig());
     await project.setUpIn(tempDir);
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -243,7 +240,6 @@ void main() {
   testWithoutContext('simple build appbundle mismatched golden fails', () async {
     final DeferredComponentsProject project = DeferredComponentsProject(MismatchedGoldenDeferredComponentsConfig());
     await project.setUpIn(tempDir);
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),

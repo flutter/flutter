@@ -29,13 +29,21 @@ class ChannelCommand extends FlutterCommand {
   }
 
   @override
-  final String name = 'channel';
+  String get name => 'channel';
 
   @override
-  final String description = 'List or switch Flutter channels.';
+  String get description => 'List or switch Flutter channels.\n'
+      '\n'
+      'Common commands:\n'
+      '\n'
+      ' flutter channel\n'
+      '   List Flutter channels.\n'
+      '\n'
+      ' flutter channel main\n'
+      "   Switch to Flutter's main channel.";
 
   @override
-  final String category = FlutterCommandCategory.sdk;
+  String get category => FlutterCommandCategory.sdk;
 
   @override
   String get invocation => '${runner?.executableName} $name [<channel-name>]';
@@ -57,7 +65,7 @@ class ChannelCommand extends FlutterCommand {
         await _switchChannel(rest[0]);
         return FlutterCommandResult.success();
       default:
-        throw ToolExit('Too many arguments.\n$usage');
+        throwToolExit('Too many arguments.\n$usage');
     }
   }
 

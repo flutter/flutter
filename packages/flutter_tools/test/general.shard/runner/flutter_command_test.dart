@@ -637,7 +637,7 @@ void main() {
       Pub: () => FakePub(),
       Usage: () => usage,
       FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('use packagesPath to generate BuildInfo', () async {

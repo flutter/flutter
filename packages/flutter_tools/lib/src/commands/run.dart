@@ -28,7 +28,6 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 import '../tracing.dart';
-import '../vmservice.dart';
 import '../web/compile.dart';
 import '../web/web_constants.dart';
 import '../web/web_runner.dart';
@@ -40,7 +39,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
     usesDartDefineOption();
     usesFlavorOption();
-    usesWebRendererOption();
     usesWebResourcesCdnFlag();
     addNativeNullAssertions(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
@@ -235,10 +233,13 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   bool get useWasm => boolArg(FlutterOptions.kWebWasmFlag);
 
-  WebRendererMode get webRenderer => WebRendererMode.fromCliOption(
-    stringArg(FlutterOptions.kWebRendererFlag),
-    useWasm: useWasm
-  );
+  // Keep in sync with the [TestCommand.webRenderer] getter.
+  WebRendererMode get webRenderer {
+    final List<String> dartDefines = extractDartDefines(
+      defineConfigJsonMap: extractDartDefineConfigJsonMap()
+    );
+    return WebRendererMode.fromDartDefines(dartDefines, useWasm: useWasm);
+  }
 
   /// Create a debugging options instance for the current `run` or `drive` invocation.
   @visibleForTesting
@@ -350,9 +351,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 class RunCommand extends RunCommandBase {
   RunCommand({
     bool verboseHelp = false,
-    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
-  }) : _nativeAssetsBuilder = nativeAssetsBuilder,
-       super(verboseHelp: verboseHelp) {
+  }) : super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
@@ -435,8 +434,6 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
       );
   }
-
-  final HotRunnerNativeAssetsBuilder? _nativeAssetsBuilder;
 
   @override
   final String name = 'run';
@@ -696,7 +693,6 @@ class RunCommand extends RunCommandBase {
         stayResident: stayResident,
         analytics: globals.analytics,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
-        nativeAssetsBuilder: _nativeAssetsBuilder,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -766,13 +762,12 @@ class RunCommand extends RunCommandBase {
           packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
           dillOutputPath: stringArg('output-dill'),
           userIdentifier: userIdentifier,
-          nativeAssetsBuilder: _nativeAssetsBuilder,
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());
       }
       final DateTime appStartedTime = globals.systemClock.now();
-      final int result = await app.runner!.waitForAppToFinish();
+      final int result = await app.runner.waitForAppToFinish();
       if (result != 0) {
         throwToolExit(null, exitCode: result);
       }
@@ -860,7 +855,7 @@ class RunCommand extends RunCommandBase {
         throwToolExit(null, exitCode: result);
       }
     } on RPCError catch (error) {
-      if (error.code == RPCErrorCodes.kServiceDisappeared ||
+      if (error.code == RPCErrorKind.kServiceDisappeared.code ||
           error.message.contains('Service connection disposed')) {
         throwToolExit('Lost connection to device.');
       }

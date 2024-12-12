@@ -22,6 +22,7 @@ import '../tools/scene_importer.dart';
 import '../tools/shader_compiler.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
+import 'native_assets.dart';
 
 /// A helper function to copy an asset bundle into an [environment]'s output
 /// directory.
@@ -329,6 +330,7 @@ class CopyAssets extends Target {
   @override
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
+    InstallCodeAssets(),
   ];
 
   @override
@@ -363,6 +365,10 @@ class CopyAssets extends Target {
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],
+      additionalContent: <String, DevFSContent>{
+        'NativeAssetsManifest.json':
+            DevFSFileContent(environment.buildDir.childFile('native_assets.json')),
+      },
     );
     environment.depFileService.writeToFile(
       depfile,
