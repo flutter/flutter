@@ -84,30 +84,30 @@ Base64::Error Base64::Decode(const void* srcv,
     int two = 0;
     int three = 0;
     if (dst) {
-      int one = (uint8_t)(bytes[0] << 2);
+      int one = static_cast<uint8_t>(bytes[0] << 2);
       two = bytes[1];
       one |= two >> 4;
-      two = (uint8_t)((two << 4) & 0xFF);
+      two = static_cast<uint8_t>((two << 4) & 0xFF);
       three = bytes[2];
       two |= three >> 2;
-      three = (uint8_t)((three << 6) & 0xFF);
+      three = static_cast<uint8_t>((three << 6) & 0xFF);
       three |= bytes[3];
       FML_DCHECK(one < 256 && two < 256 && three < 256);
-      dst[i] = (unsigned char)one;
+      dst[i] = static_cast<unsigned char>(one);
     }
     i++;
     if (padTwo) {
       break;
     }
     if (dst) {
-      dst[i] = (unsigned char)two;
+      dst[i] = static_cast<unsigned char>(two);
     }
     i++;
     if (padThree) {
       break;
     }
     if (dst) {
-      dst[i] = (unsigned char)three;
+      dst[i] = static_cast<unsigned char>(three);
     }
     i++;
   }
@@ -141,7 +141,7 @@ size_t Base64::Encode(const void* srcv, size_t length, void* dstv) {
   if (remainder > 0) {
     int k1 = 0;
     int k2 = EncodePad;
-    int a = (uint8_t)*src++;
+    int a = static_cast<uint8_t>(*src++);
     if (remainder == 2) {
       int b = *src++;
       k1 = b >> 4;

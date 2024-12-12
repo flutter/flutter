@@ -1358,11 +1358,11 @@ double PlatformViewAndroidJNIImpl::FlutterViewGetScaledFontSize(
     return -3;
   }
 
-  const jfloat scaledSize =
-      env->CallFloatMethod(java_object.obj(), g_get_scaled_font_size_method,
-                           (jfloat)font_size, (jint)configuration_id);
+  const jfloat scaledSize = env->CallFloatMethod(
+      java_object.obj(), g_get_scaled_font_size_method,
+      static_cast<jfloat>(font_size), static_cast<jint>(configuration_id));
   FML_CHECK(fml::jni::CheckException(env));
-  return (double)scaledSize;
+  return static_cast<double>(scaledSize);
 }
 
 void PlatformViewAndroidJNIImpl::FlutterViewUpdateSemantics(

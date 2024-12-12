@@ -106,7 +106,7 @@ TEST(Base64, DecodeBytes) {
     ASSERT_EQ(err, Base64::Error::kNone);
     FML_CHECK(len <= 256);
     ASSERT_EQ(num, len) << input;
-    for (int i = 0; i < int(len); i++) {
+    for (int i = 0; i < static_cast<int>(len); i++) {
       ASSERT_EQ(uint8_t(buffer[i]), output[i]) << input << i;
     }
   };

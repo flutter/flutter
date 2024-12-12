@@ -61,7 +61,7 @@ DlRegion::SpanChunkHandle DlRegion::SpanBuffer::storeChunk(const Span* begin,
   size_t min_capacity = size_ + chunk_size + 1;
   if (capacity_ < min_capacity) {
     size_t new_capacity = std::max(min_capacity, capacity_ * 2);
-    new_capacity = std::max(new_capacity, size_t(512));
+    new_capacity = std::max(new_capacity, static_cast<size_t>(512));
     reserve(new_capacity);
   }
   SpanChunkHandle res = size_;

@@ -64,7 +64,7 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
 
           Point center = points_[0];
           for (auto& vertex : circle_vertices) {
-            output[offset++] = Point(center + vertex);
+            output[offset++] = static_cast<Point>(center + vertex);
           }
           // For all subequent points, insert a degenerate triangle to break
           // the strip. This could be optimized out if we switched to using
@@ -73,9 +73,9 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
           for (size_t i = 1; i < point_count_; i++) {
             Point center = points_[i];
             output[offset++] = last_point;
-            output[offset++] = Point(center + circle_vertices[0]);
+            output[offset++] = static_cast<Point>(center + circle_vertices[0]);
             for (const Point& vertex : circle_vertices) {
-              output[offset++] = Point(center + vertex);
+              output[offset++] = static_cast<Point>(center + vertex);
             }
             last_point = circle_vertices.back() + center;
           }
