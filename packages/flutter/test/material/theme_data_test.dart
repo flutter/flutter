@@ -856,14 +856,12 @@ void main() {
       canvasColor: Colors.black,
       cardColor: Colors.black,
       colorScheme: const ColorScheme.light(),
-      dialogBackgroundColor: Colors.black,
       disabledColor: Colors.black,
       dividerColor: Colors.black,
       focusColor: Colors.black,
       highlightColor: Colors.black,
       hintColor: Colors.black,
       hoverColor: Colors.black,
-      indicatorColor: Colors.black,
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
       primaryColorLight: Colors.black,
@@ -886,7 +884,6 @@ void main() {
       bottomAppBarTheme: const BottomAppBarTheme(color: Colors.black),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(type: BottomNavigationBarType.fixed),
       bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.black),
-      buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.start),
       buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.dark()),
       cardTheme: const CardThemeData(color: Colors.black),
       checkboxTheme: const CheckboxThemeData(),
@@ -925,6 +922,10 @@ void main() {
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
       tooltipTheme: const TooltipThemeData(height: 100),
+      // DEPRECATED (newest deprecations at the bottom)
+      buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.start),
+      dialogBackgroundColor: Colors.black,
+      indicatorColor: Colors.black,
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -963,19 +964,16 @@ void main() {
       splashFactory: InkRipple.splashFactory,
       useMaterial3: true,
       visualDensity: VisualDensity.standard,
-
       // COLOR
       canvasColor: Colors.white,
       cardColor: Colors.white,
       colorScheme: const ColorScheme.light(),
-      dialogBackgroundColor: Colors.white,
       disabledColor: Colors.white,
       dividerColor: Colors.white,
       focusColor: Colors.white,
       highlightColor: Colors.white,
       hintColor: Colors.white,
       hoverColor: Colors.white,
-      indicatorColor: Colors.white,
       primaryColor: Colors.white,
       primaryColorDark: Colors.white,
       primaryColorLight: Colors.white,
@@ -984,14 +982,12 @@ void main() {
       shadowColor: Colors.white,
       splashColor: Colors.white,
       unselectedWidgetColor: Colors.white,
-
       // TYPOGRAPHY & ICONOGRAPHY
       iconTheme: ThemeData.light().iconTheme,
       primaryIconTheme: ThemeData.light().iconTheme,
       primaryTextTheme: ThemeData.light().textTheme,
       textTheme: ThemeData.light().textTheme,
       typography: Typography.material2018(platform: TargetPlatform.iOS),
-
       // COMPONENT THEMES
       actionIconTheme: const ActionIconThemeData(),
       appBarTheme: const AppBarTheme(backgroundColor: Colors.white),
@@ -1000,7 +996,6 @@ void main() {
       bottomAppBarTheme: const BottomAppBarTheme(color: Colors.white),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(type: BottomNavigationBarType.shifting),
       bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.white),
-      buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.end),
       buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.light()),
       cardTheme: const CardThemeData(color: Colors.white),
       checkboxTheme: const CheckboxThemeData(),
@@ -1039,6 +1034,10 @@ void main() {
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.white),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.white)),
       tooltipTheme: const TooltipThemeData(height: 100),
+      // DEPRECATED (newest deprecations at the bottom)
+      buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.end),
+      dialogBackgroundColor: Colors.white,
+      indicatorColor: Colors.white,
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
@@ -1060,19 +1059,16 @@ void main() {
       splashFactory: otherTheme.splashFactory,
       useMaterial3: otherTheme.useMaterial3,
       visualDensity: otherTheme.visualDensity,
-
       // COLOR
       canvasColor: otherTheme.canvasColor,
       cardColor: otherTheme.cardColor,
       colorScheme: otherTheme.colorScheme,
-      dialogBackgroundColor: otherTheme.dialogBackgroundColor,
       disabledColor: otherTheme.disabledColor,
       dividerColor: otherTheme.dividerColor,
       focusColor: otherTheme.focusColor,
       highlightColor: otherTheme.highlightColor,
       hintColor: otherTheme.hintColor,
       hoverColor: otherTheme.hoverColor,
-      indicatorColor: otherTheme.indicatorColor,
       primaryColor: otherTheme.primaryColor,
       primaryColorDark: otherTheme.primaryColorDark,
       primaryColorLight: otherTheme.primaryColorLight,
@@ -1081,14 +1077,12 @@ void main() {
       shadowColor: otherTheme.shadowColor,
       splashColor: otherTheme.splashColor,
       unselectedWidgetColor: otherTheme.unselectedWidgetColor,
-
       // TYPOGRAPHY & ICONOGRAPHY
       iconTheme: otherTheme.iconTheme,
       primaryIconTheme: otherTheme.primaryIconTheme,
       primaryTextTheme: otherTheme.primaryTextTheme,
       textTheme: otherTheme.textTheme,
       typography: otherTheme.typography,
-
       // COMPONENT THEMES
       actionIconTheme: otherTheme.actionIconTheme,
       appBarTheme: otherTheme.appBarTheme,
@@ -1097,7 +1091,6 @@ void main() {
       bottomAppBarTheme: otherTheme.bottomAppBarTheme,
       bottomNavigationBarTheme: otherTheme.bottomNavigationBarTheme,
       bottomSheetTheme: otherTheme.bottomSheetTheme,
-      buttonBarTheme: otherTheme.buttonBarTheme,
       buttonTheme: otherTheme.buttonTheme,
       cardTheme: otherTheme.cardTheme,
       checkboxTheme: otherTheme.checkboxTheme,
@@ -1134,6 +1127,10 @@ void main() {
       timePickerTheme: otherTheme.timePickerTheme,
       toggleButtonsTheme: otherTheme.toggleButtonsTheme,
       tooltipTheme: otherTheme.tooltipTheme,
+      // DEPRECATED (newest deprecations at the bottom)
+      buttonBarTheme: otherTheme.buttonBarTheme,
+      dialogBackgroundColor: otherTheme.dialogBackgroundColor,
+      indicatorColor: otherTheme.indicatorColor,
     );
 
     // For the sanity of the reader, make sure these properties are in the same
@@ -1154,19 +1151,16 @@ void main() {
     expect(themeDataCopy.splashFactory, equals(otherTheme.splashFactory));
     expect(themeDataCopy.useMaterial3, equals(otherTheme.useMaterial3));
     expect(themeDataCopy.visualDensity, equals(otherTheme.visualDensity));
-
     // COLOR
     expect(themeDataCopy.canvasColor, equals(otherTheme.canvasColor));
     expect(themeDataCopy.cardColor, equals(otherTheme.cardColor));
     expect(themeDataCopy.colorScheme, equals(otherTheme.colorScheme));
-    expect(themeDataCopy.dialogBackgroundColor, equals(otherTheme.dialogBackgroundColor));
     expect(themeDataCopy.disabledColor, equals(otherTheme.disabledColor));
     expect(themeDataCopy.dividerColor, equals(otherTheme.dividerColor));
     expect(themeDataCopy.focusColor, equals(otherTheme.focusColor));
     expect(themeDataCopy.highlightColor, equals(otherTheme.highlightColor));
     expect(themeDataCopy.hintColor, equals(otherTheme.hintColor));
     expect(themeDataCopy.hoverColor, equals(otherTheme.hoverColor));
-    expect(themeDataCopy.indicatorColor, equals(otherTheme.indicatorColor));
     expect(themeDataCopy.primaryColor, equals(otherTheme.primaryColor));
     expect(themeDataCopy.primaryColorDark, equals(otherTheme.primaryColorDark));
     expect(themeDataCopy.primaryColorLight, equals(otherTheme.primaryColorLight));
@@ -1175,14 +1169,12 @@ void main() {
     expect(themeDataCopy.shadowColor, equals(otherTheme.shadowColor));
     expect(themeDataCopy.splashColor, equals(otherTheme.splashColor));
     expect(themeDataCopy.unselectedWidgetColor, equals(otherTheme.unselectedWidgetColor));
-
     // TYPOGRAPHY & ICONOGRAPHY
     expect(themeDataCopy.iconTheme, equals(otherTheme.iconTheme));
     expect(themeDataCopy.primaryIconTheme, equals(otherTheme.primaryIconTheme));
     expect(themeDataCopy.primaryTextTheme, equals(otherTheme.primaryTextTheme));
     expect(themeDataCopy.textTheme, equals(otherTheme.textTheme));
     expect(themeDataCopy.typography, equals(otherTheme.typography));
-
     // COMPONENT THEMES
     expect(themeDataCopy.actionIconTheme, equals(otherTheme.actionIconTheme));
     expect(themeDataCopy.appBarTheme, equals(otherTheme.appBarTheme));
@@ -1191,7 +1183,6 @@ void main() {
     expect(themeDataCopy.bottomAppBarTheme, equals(otherTheme.bottomAppBarTheme));
     expect(themeDataCopy.bottomNavigationBarTheme, equals(otherTheme.bottomNavigationBarTheme));
     expect(themeDataCopy.bottomSheetTheme, equals(otherTheme.bottomSheetTheme));
-    expect(themeDataCopy.buttonBarTheme, equals(otherTheme.buttonBarTheme));
     expect(themeDataCopy.buttonTheme, equals(otherTheme.buttonTheme));
     expect(themeDataCopy.cardTheme, equals(otherTheme.cardTheme));
     expect(themeDataCopy.checkboxTheme, equals(otherTheme.checkboxTheme));
@@ -1230,6 +1221,10 @@ void main() {
     expect(themeDataCopy.timePickerTheme, equals(otherTheme.timePickerTheme));
     expect(themeDataCopy.toggleButtonsTheme, equals(otherTheme.toggleButtonsTheme));
     expect(themeDataCopy.tooltipTheme, equals(otherTheme.tooltipTheme));
+    // DEPRECATED (newest deprecations at the bottom)
+    expect(themeDataCopy.buttonBarTheme, equals(otherTheme.buttonBarTheme));
+    expect(themeDataCopy.dialogBackgroundColor, equals(otherTheme.dialogBackgroundColor));
+    expect(themeDataCopy.indicatorColor, equals(otherTheme.indicatorColor));
   });
 
   testWidgets('ThemeData.toString has less than 200 characters output', (WidgetTester tester) async {
@@ -1300,8 +1295,6 @@ void main() {
       'unselectedWidgetColor',
       'disabledColor',
       'secondaryHeaderColor',
-      'dialogBackgroundColor',
-      'indicatorColor',
       'hintColor',
       // TYPOGRAPHY & ICONOGRAPHY
       'typography',
@@ -1317,7 +1310,6 @@ void main() {
       'bottomAppBarTheme',
       'bottomNavigationBarTheme',
       'bottomSheetTheme',
-      'buttonBarTheme',
       'buttonTheme',
       'cardTheme',
       'checkboxTheme',
@@ -1356,6 +1348,10 @@ void main() {
       'timePickerTheme',
       'toggleButtonsTheme',
       'tooltipTheme',
+      // DEPRECATED (newest deprecations at the bottom)
+      'buttonBarTheme',
+      'dialogBackgroundColor',
+      'indicatorColor',
     };
 
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();

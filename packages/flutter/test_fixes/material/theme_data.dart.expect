@@ -451,4 +451,12 @@ void main() {
   themeData = themeData.copyWith(dialogTheme: DialogThemeData(backgroundColor: Colors.orange));
   themeData = themeData.copyWith(dialogTheme: DialogThemeData(backgroundColor: Colors.red));
   themeData.dialogBackgroundColor; // Removing field reference not supported.
+
+  // Changes made in https://github.com/flutter/flutter/pull/160024
+  ThemeData themeData = ThemeData();
+  themeData = ThemeData(tabBarTheme: TabBarThemeData(indicatorColor: Colors.red));
+  themeData = ThemeData(tabBarTheme: TabBarThemeData(indicatorColor: Colors.green));
+  themeData = themeData.copyWith(tabBarTheme: TabBarThemeData(indicatorColor: Colors.red));
+  themeData = themeData.copyWith(tabBarTheme: TabBarThemeData(indicatorColor: Colors.green));
+  themeData.indicatorColor; // Removing field reference not supported.
 }
