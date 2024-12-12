@@ -8,7 +8,7 @@
 
 namespace flutter {
 
-ContainerLayer::ContainerLayer() : child_paint_bounds_(SkRect::MakeEmpty()) {}
+ContainerLayer::ContainerLayer() {}
 
 void ContainerLayer::Diff(DiffContext* context, const Layer* old_layer) {
   auto old_container = static_cast<const ContainerLayer*>(old_layer);
@@ -108,7 +108,7 @@ void ContainerLayer::Add(std::shared_ptr<Layer> layer) {
 }
 
 void ContainerLayer::Preroll(PrerollContext* context) {
-  SkRect child_paint_bounds = SkRect::MakeEmpty();
+  DlRect child_paint_bounds;
   PrerollChildren(context, &child_paint_bounds);
   set_paint_bounds(child_paint_bounds);
 }
@@ -119,15 +119,8 @@ void ContainerLayer::Paint(PaintContext& context) const {
   PaintChildren(context);
 }
 
-static bool safe_intersection_test(const SkRect* rect1, const SkRect& rect2) {
-  if (rect1->isEmpty() || rect2.isEmpty()) {
-    return false;
-  }
-  return rect1->intersects(rect2);
-}
-
 void ContainerLayer::PrerollChildren(PrerollContext* context,
-                                     SkRect* child_paint_bounds) {
+                                     DlRect* child_paint_bounds) {
   // Platform views have no children, so context->has_platform_view should
   // always be false.
   FML_DCHECK(!context->has_platform_view);
@@ -151,13 +144,13 @@ void ContainerLayer::PrerollChildren(PrerollContext* context,
     layer->Preroll(context);
 
     all_renderable_state_flags &= context->renderable_state_flags;
-    if (safe_intersection_test(child_paint_bounds, layer->paint_bounds())) {
+    if (child_paint_bounds->IntersectsWithRect(layer->paint_bounds())) {
       // This will allow inheritance by a linear sequence of non-overlapping
       // children, but will fail with a grid or other arbitrary 2D layout.
       // See https://github.com/flutter/flutter/issues/93899
       all_renderable_state_flags = 0;
     }
-    child_paint_bounds->join(layer->paint_bounds());
+    *child_paint_bounds = child_paint_bounds->Union(layer->paint_bounds());
 
     child_has_platform_view =
         child_has_platform_view || context->has_platform_view;

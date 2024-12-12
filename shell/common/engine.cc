@@ -483,7 +483,7 @@ void Engine::Render(int64_t view_id,
   }
 
   // Ensure frame dimensions are sane.
-  if (layer_tree->frame_size().isEmpty() || device_pixel_ratio <= 0.0f) {
+  if (layer_tree->frame_size().IsEmpty() || device_pixel_ratio <= 0.0f) {
     return;
   }
 

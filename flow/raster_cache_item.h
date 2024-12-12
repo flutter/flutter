@@ -39,10 +39,10 @@ class RasterCacheItem {
         child_items_(child_entries) {}
 
   virtual void PrerollSetup(PrerollContext* context,
-                            const SkMatrix& matrix) = 0;
+                            const DlMatrix& matrix) = 0;
 
   virtual void PrerollFinalize(PrerollContext* context,
-                               const SkMatrix& matrix) = 0;
+                               const DlMatrix& matrix) = 0;
 
   virtual bool Draw(const PaintContext& context,
                     const DlPaint* paint) const = 0;
@@ -58,6 +58,7 @@ class RasterCacheItem {
 
   unsigned child_items() const { return child_items_; }
 
+  void set_matrix(const DlMatrix& matrix) { matrix_ = ToSkMatrix(matrix); }
   void set_matrix(const SkMatrix& matrix) { matrix_ = matrix; }
 
   CacheState cache_state() const { return cache_state_; }

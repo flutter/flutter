@@ -6,10 +6,10 @@
 
 namespace flutter {
 
-ClipRectLayer::ClipRectLayer(const SkRect& clip_rect, Clip clip_behavior)
+ClipRectLayer::ClipRectLayer(const DlRect& clip_rect, Clip clip_behavior)
     : ClipShapeLayer(clip_rect, clip_behavior) {}
 
-const SkRect& ClipRectLayer::clip_shape_bounds() const {
+const DlRect ClipRectLayer::clip_shape_bounds() const {
   return clip_shape();
 }
 

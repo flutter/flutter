@@ -6,10 +6,10 @@
 
 namespace flutter {
 
-SkRect PaintRegion::ComputeBounds() const {
-  SkRect res = SkRect::MakeEmpty();
+DlRect PaintRegion::ComputeBounds() const {
+  DlRect res;
   for (const auto& r : *this) {
-    res.join(r);
+    res = res.Union(r);
   }
   return res;
 }

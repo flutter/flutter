@@ -6,13 +6,12 @@
 
 #include "flutter/flow/layers/cacheable_layer.h"
 #include "flutter/flow/raster_cache_util.h"
-#include "third_party/skia/include/core/SkPaint.h"
 
 namespace flutter {
 
 // the opacity_layer couldn't cache itself, so the cache_threshold is the
 // max_int
-OpacityLayer::OpacityLayer(SkAlpha alpha, const SkPoint& offset)
+OpacityLayer::OpacityLayer(uint8_t alpha, const DlPoint& offset)
     : CacheableContainerLayer(std::numeric_limits<int>::max(), true),
       alpha_(alpha),
       offset_(offset) {}
@@ -26,7 +25,7 @@ void OpacityLayer::Diff(DiffContext* context, const Layer* old_layer) {
       context->MarkSubtreeDirty(context->GetOldLayerPaintRegion(old_layer));
     }
   }
-  context->PushTransform(SkMatrix::Translate(offset_.fX, offset_.fY));
+  context->PushTransform(DlMatrix::MakeTranslation(offset_));
   if (context->has_raster_cache()) {
     context->WillPaintWithIntegralTransform();
   }
@@ -37,11 +36,11 @@ void OpacityLayer::Diff(DiffContext* context, const Layer* old_layer) {
 void OpacityLayer::Preroll(PrerollContext* context) {
   auto mutator = context->state_stack.save();
   mutator.translate(offset_);
-  mutator.applyOpacity(SkRect(), DlColor::toOpacity(alpha_));
+  mutator.applyOpacity(DlRect(), opacity());
 
 #if !SLIMPELLER
   AutoCache auto_cache = AutoCache(layer_raster_cache_item_.get(), context,
-                                   context->state_stack.transform_3x3());
+                                   context->state_stack.matrix());
 #endif  //  !SLIMPELLER
 
   Layer::AutoPrerollSaveLayerState save =
@@ -57,7 +56,7 @@ void OpacityLayer::Preroll(PrerollContext* context) {
   // regardless of what our children are capable of
   context->renderable_state_flags |= LayerStateStack::kCallerCanApplyOpacity;
 
-  set_paint_bounds(paint_bounds().makeOffset(offset_.fX, offset_.fY));
+  set_paint_bounds(paint_bounds().Shift(offset_));
 
 #if !SLIMPELLER
   if (children_can_accept_opacity()) {
@@ -73,7 +72,7 @@ void OpacityLayer::Paint(PaintContext& context) const {
   FML_DCHECK(needs_painting(context));
 
   auto mutator = context.state_stack.save();
-  mutator.translate(offset_.fX, offset_.fY);
+  mutator.translate(offset_.x, offset_.y);
 
 #if !SLIMPELLER
   if (context.raster_cache) {

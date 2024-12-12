@@ -9,14 +9,13 @@ namespace flutter {
 ClipPathLayer::ClipPathLayer(const DlPath& clip_path, Clip clip_behavior)
     : ClipShapeLayer(clip_path, clip_behavior) {}
 
-const SkRect& ClipPathLayer::clip_shape_bounds() const {
-  return clip_shape().GetSkPath().getBounds();
+const DlRect ClipPathLayer::clip_shape_bounds() const {
+  return clip_shape().GetBounds();
 }
 
 void ClipPathLayer::ApplyClip(LayerStateStack::MutatorContext& mutator) const {
   clip_shape().WillRenderSkPath();
-  mutator.clipPath(clip_shape().GetSkPath(),
-                   clip_behavior() != Clip::kHardEdge);
+  mutator.clipPath(clip_shape(), clip_behavior() != Clip::kHardEdge);
 }
 
 }  // namespace flutter

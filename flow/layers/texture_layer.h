@@ -6,15 +6,13 @@
 #define FLUTTER_FLOW_LAYERS_TEXTURE_LAYER_H_
 
 #include "flutter/flow/layers/layer.h"
-#include "third_party/skia/include/core/SkPoint.h"
-#include "third_party/skia/include/core/SkSize.h"
 
 namespace flutter {
 
 class TextureLayer : public Layer {
  public:
-  TextureLayer(const SkPoint& offset,
-               const SkSize& size,
+  TextureLayer(const DlPoint& offset,
+               const DlSize& size,
                int64_t texture_id,
                bool freeze,
                DlImageSampling sampling);
@@ -31,8 +29,8 @@ class TextureLayer : public Layer {
   void Paint(PaintContext& context) const override;
 
  private:
-  SkPoint offset_;
-  SkSize size_;
+  DlPoint offset_;
+  DlSize size_;
   int64_t texture_id_;
   bool freeze_;
   DlImageSampling sampling_;
