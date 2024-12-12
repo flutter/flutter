@@ -950,7 +950,28 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   Widget? _build(int index, SliverMultiBoxAdaptorWidget widget) {
-    return widget.delegate.build(this, index);
+    Widget? child = widget.delegate.build(this, index);
+
+    bool hasDuplicate(Key? key) {
+      if (key == null || _childElements.isEmpty) {
+        return false;
+      }
+      return _childElements.values.nonNulls
+        .where((Element element) => element.widget.key == key && element != _childElements[index])
+        .isNotEmpty;
+    }
+
+    if (child != null) {
+      final Key? key = child.key;
+
+      if (key != null && hasDuplicate(key)) {
+        // Creates a new key based on the string representation of the child.
+        final ValueKey<String> newKey = ValueKey<String>(child.toString());
+        child = KeyedSubtree(key: newKey, child: child);
+      }
+    }
+
+    return child;
   }
 
   @override
