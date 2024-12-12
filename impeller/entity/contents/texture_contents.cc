@@ -77,7 +77,7 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
     const std::optional<SamplerDescriptor>& sampler_descriptor,
     bool msaa_enabled,
     int32_t mip_count,
-    const std::string& label) const {
+    std::string_view label) const {
   // Passthrough textures that have simple rectangle paths and complete source
   // rects.
   auto bounds = destination_rect_;

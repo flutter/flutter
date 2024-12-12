@@ -95,7 +95,7 @@ class Contents {
       const std::optional<SamplerDescriptor>& sampler_descriptor = std::nullopt,
       bool msaa_enabled = true,
       int32_t mip_count = 1,
-      const std::string& label = "Snapshot") const;
+      std::string_view label = "Snapshot") const;
 
   //----------------------------------------------------------------------------
   /// @brief  Return the color source's intrinsic size, if available.
