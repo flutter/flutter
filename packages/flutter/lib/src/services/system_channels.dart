@@ -273,8 +273,8 @@ abstract final class SystemChannels {
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).
   static const MethodChannel textInput = OptionalMethodChannel(
-      'flutter/textinput',
-      JSONMethodCodec(),
+    'flutter/textinput',
+    JSONMethodCodec(),
   );
 
   /// A [MethodChannel] for handling Android Scribe stylus handwriting input.
@@ -325,7 +325,7 @@ abstract final class SystemChannels {
   ///     was canceled. The arguments are the [String] to be spell checked
   ///     and the [Locale] for the text to be spell checked with.
   static const MethodChannel spellCheck = OptionalMethodChannel(
-      'flutter/spellcheck',
+    'flutter/spellcheck',
   );
 
   /// A JSON [MethodChannel] for handling undo events.
