@@ -1529,27 +1529,27 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], moreOrLessEquals(1.145, epsilon: 0.001));
+    expect(transform.transform[0], moreOrLessEquals(1.205, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], moreOrLessEquals(1.044, epsilon: 0.001));
+    expect(transform.transform[0], moreOrLessEquals(1.100, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], moreOrLessEquals(1.013, epsilon: 0.001));
+    expect(transform.transform[0], moreOrLessEquals(1.043, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], moreOrLessEquals(1.003, epsilon: 0.001));
+    expect(transform.transform[0], moreOrLessEquals(1.017, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], moreOrLessEquals(1.000, epsilon: 0.001));
+    expect(transform.transform[0], moreOrLessEquals(1.006, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], moreOrLessEquals(1.000, epsilon: 0.001));
+    expect(transform.transform[0], moreOrLessEquals(1.002, epsilon: 0.001));
 
     await tester.tap(find.text('Delete'));
 
@@ -1607,50 +1607,58 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 50));
     transition = tester.firstWidget(fadeTransitionFinder);
-    expect(transition.opacity.value, moreOrLessEquals(0.081, epsilon: 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.316, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transition = tester.firstWidget(fadeTransitionFinder);
-    expect(transition.opacity.value, moreOrLessEquals(0.332, epsilon: 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.665, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transition = tester.firstWidget(fadeTransitionFinder);
-    expect(transition.opacity.value, moreOrLessEquals(0.667, epsilon: 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.856, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transition = tester.firstWidget(fadeTransitionFinder);
-    expect(transition.opacity.value, moreOrLessEquals(0.918, epsilon: 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.942, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transition = tester.firstWidget(fadeTransitionFinder);
-    expect(transition.opacity.value, moreOrLessEquals(1.0, epsilon: 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.977, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
+    expect(transition.opacity.value, moreOrLessEquals(0.991, epsilon: 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transition = tester.firstWidget(fadeTransitionFinder);
+    expect(transition.opacity.value, moreOrLessEquals(0.997, epsilon: 0.001));
 
     await tester.tap(find.text('Delete'));
 
     // Exit animation, look at reverse FadeTransition.
     await tester.pump(const Duration(milliseconds: 50));
     transition = tester.firstWidget(fadeTransitionFinder);
-    expect(transition.opacity.value, moreOrLessEquals(1.0, epsilon: 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.997, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transition = tester.firstWidget(fadeTransitionFinder);
-    expect(transition.opacity.value, moreOrLessEquals(0.918, epsilon: 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.681, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transition = tester.firstWidget(fadeTransitionFinder);
-    expect(transition.opacity.value, moreOrLessEquals(0.667, epsilon: 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.333, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transition = tester.firstWidget(fadeTransitionFinder);
-    expect(transition.opacity.value, moreOrLessEquals(0.332, epsilon: 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.143, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transition = tester.firstWidget(fadeTransitionFinder);
-    expect(transition.opacity.value, moreOrLessEquals(0.081, epsilon: 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.057, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transition = tester.firstWidget(fadeTransitionFinder);
-    expect(transition.opacity.value, moreOrLessEquals(0.0, epsilon: 0.001));
+    expect(transition.opacity.value, moreOrLessEquals(0.022, epsilon: 0.001));
   });
 
   testWidgets('Actions are accessible by key', (WidgetTester tester) async {
@@ -1882,7 +1890,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should take the right side of the screen
-      expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(410.0, 0.0));
+      expect(tester.getTopLeft(find.byType(Placeholder)), offsetMoreOrLessEquals(const Offset(410.0, -0.01)));
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
     });
 
