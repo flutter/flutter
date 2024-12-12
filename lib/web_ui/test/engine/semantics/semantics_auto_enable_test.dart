@@ -22,7 +22,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await bootstrapAndRunApp(withImplicitView: true);
+  setUpImplicitView();
 
   test('EngineSemanticsOwner auto-enables semantics on update', () async {
     expect(semantics().semanticsEnabled, isFalse);

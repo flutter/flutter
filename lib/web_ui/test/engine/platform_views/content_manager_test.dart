@@ -14,9 +14,7 @@ void main() {
 }
 
 void testMain() {
-  setUpAll(() async {
-    await bootstrapAndRunApp();
-  });
+  setUpImplicitView();
 
   group('PlatformViewManager', () {
     const String viewType = 'forTest';

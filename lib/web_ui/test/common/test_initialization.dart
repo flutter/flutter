@@ -51,6 +51,23 @@ void setUpUnitTests({
   });
 }
 
+void setUpImplicitView() {
+  late engine.EngineFlutterWindow myWindow;
+
+  final engine.EnginePlatformDispatcher dispatcher = engine.EnginePlatformDispatcher.instance;
+
+  setUp(() {
+    myWindow = engine.EngineFlutterView.implicit(dispatcher, null);
+    dispatcher.viewManager.registerView(myWindow);
+  });
+
+  tearDown(() async {
+    dispatcher.viewManager.unregisterView(myWindow.viewId);
+    await myWindow.resetHistory();
+    myWindow.dispose();
+  });
+}
+
 Future<void> bootstrapAndRunApp({bool withImplicitView = false}) async {
   final Completer<void> completer = Completer<void>();
   await ui_web.bootstrapEngine(runApp: () => completer.complete());

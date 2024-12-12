@@ -17,7 +17,7 @@ void main() {
 List<String>? testFiles;
 
 Future<void> testMain() async {
-  setUpUnitTests();
+  setUpImplicitView();
 
   Future<List<String>> createTestFiles() async {
     final HttpFetchResponse listingResponse = await httpFetch('/test_images/');

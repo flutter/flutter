@@ -9,6 +9,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' hide window;
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../common/test_initialization.dart';
 import 'semantics_tester.dart';
@@ -35,9 +36,7 @@ void main() {
 }
 
 void testMain() {
-  setUpAll(() async {
-    await bootstrapAndRunApp(withImplicitView: true);
-  });
+  setUpImplicitView();
 
   setUp(() {
     EngineSemantics.debugResetSemantics();
@@ -474,7 +473,8 @@ void testMain() {
       );
 
       strategy.disable();
-    });
+      // Firefox strips out `-webkit-text-security` from outerHTML.
+    }, skip: ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox);
 
     test('Does not position or size its DOM element', () {
       strategy.enable(

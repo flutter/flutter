@@ -43,17 +43,11 @@ void testMain() {
   group('with implicit view', () {
     late TestUrlStrategy strategy;
 
-    setUpAll(() async {
-      await bootstrapAndRunApp(withImplicitView: true);
-    });
+    setUpImplicitView();
 
     setUp(() async {
       strategy = TestUrlStrategy();
       await implicitView.debugInitializeHistory(strategy, useSingle: true);
-    });
-
-    tearDown(() async {
-      await implicitView.resetHistory();
     });
 
     test('Tracks pushed, replaced and popped routes', () async {
