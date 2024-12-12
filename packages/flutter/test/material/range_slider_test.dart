@@ -1113,8 +1113,8 @@ void main() {
       sliderBox,
       paints
         ..rrect(color: sliderTheme.inactiveTrackColor)
-        ..rect(color: sliderTheme.activeTrackColor)
-        ..rrect(color: sliderTheme.inactiveTrackColor),
+        ..rrect(color: sliderTheme.inactiveTrackColor)
+        ..rrect(color: sliderTheme.activeTrackColor),
     );
     expect(
       sliderBox,
@@ -1142,8 +1142,8 @@ void main() {
       sliderBox,
       paints
         ..rrect(color: sliderTheme.inactiveTrackColor)
-        ..rect(color: activeColor)
-        ..rrect(color: sliderTheme.inactiveTrackColor),
+        ..rrect(color: sliderTheme.inactiveTrackColor)
+        ..rrect(color: activeColor),
     );
     expect(
       sliderBox,
@@ -1170,8 +1170,8 @@ void main() {
       sliderBox,
       paints
         ..rrect(color: inactiveColor)
-        ..rect(color: sliderTheme.activeTrackColor)
-        ..rrect(color: inactiveColor),
+        ..rrect(color: inactiveColor)
+        ..rrect(color: sliderTheme.activeTrackColor),
     );
     expect(
       sliderBox,
@@ -1202,8 +1202,8 @@ void main() {
       sliderBox,
       paints
         ..rrect(color: inactiveColor)
-        ..rect(color: activeColor)
-        ..rrect(color: inactiveColor),
+        ..rrect(color: inactiveColor)
+        ..rrect(color: activeColor),
     );
     expect(
       sliderBox,
@@ -1229,8 +1229,8 @@ void main() {
       sliderBox,
       paints
         ..rrect(color: sliderTheme.inactiveTrackColor)
-        ..rect(color: sliderTheme.activeTrackColor)
-        ..rrect(color: sliderTheme.inactiveTrackColor),
+        ..rrect(color: sliderTheme.inactiveTrackColor)
+        ..rrect(color: sliderTheme.activeTrackColor),
     );
     expect(
       sliderBox,
@@ -1267,8 +1267,8 @@ void main() {
       sliderBox,
       paints
         ..rrect(color: inactiveColor)
-        ..rect(color: activeColor)
-        ..rrect(color: inactiveColor),
+        ..rrect(color: inactiveColor)
+        ..rrect(color: activeColor),
     );
     expect(
       sliderBox,
@@ -1300,8 +1300,8 @@ void main() {
       sliderBox,
       paints
         ..rrect(color: sliderTheme.disabledInactiveTrackColor)
-        ..rect(color: sliderTheme.disabledActiveTrackColor)
-        ..rrect(color: sliderTheme.disabledInactiveTrackColor),
+        ..rrect(color: sliderTheme.disabledInactiveTrackColor)
+        ..rrect(color: sliderTheme.disabledActiveTrackColor),
     );
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.activeTrackColor)));
@@ -1327,8 +1327,8 @@ void main() {
       sliderBox,
       paints
         ..rrect(color: sliderTheme.disabledInactiveTrackColor)
-        ..rect(color: sliderTheme.disabledActiveTrackColor)
-        ..rrect(color: sliderTheme.disabledInactiveTrackColor),
+        ..rrect(color: sliderTheme.disabledInactiveTrackColor)
+        ..rrect(color: sliderTheme.disabledActiveTrackColor),
     );
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.activeTrackColor)));
@@ -2046,8 +2046,8 @@ void main() {
       'divisions: 4',
       'labelStart: "lowerValue"',
       'labelEnd: "upperValue"',
-      'activeColor: MaterialColor(primary value: Color(0xff2196f3))',
-      'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
+      'activeColor: MaterialColor(primary value: ${const Color(0xff2196f3)})',
+      'inactiveColor: MaterialColor(primary value: ${const Color(0xff9e9e9e)})',
     ]);
   });
 
@@ -2080,10 +2080,10 @@ void main() {
       paints
         // left inactive track RRect
         ..rrect(rrect: RRect.fromLTRBAndCorners(-24.0, 3.0, -12.0, 7.0, topLeft: const Radius.circular(2.0), bottomLeft: const Radius.circular(2.0)))
-        // active track RRect
-        ..rect(rect: const Rect.fromLTRB(-12.0, 2.0, 0.0, 8.0))
         // right inactive track RRect
         ..rrect(rrect: RRect.fromLTRBAndCorners(0.0, 3.0, 24.0, 7.0, topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
+        // active track RRect
+        ..rrect(rrect: RRect.fromLTRBR(-14.0, 2.0, 2.0, 8.0, const Radius.circular(2.0)))
         // thumbs
         ..circle(x: -12.0, y: 5.0, radius: 10.0)
         ..circle(x: 0.0, y: 5.0, radius: 10.0),
@@ -2161,22 +2161,41 @@ void main() {
     await tester.pumpWidget(buildFrame(15));
     await tester.pumpAndSettle(); // Finish the animation.
 
-    late Rect activeTrackRect;
-    expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawRect) {
+    late RRect activeTrackRRect;
+    expect(renderObject, paints
+      ..rrect()
+      ..rrect()
+      ..something((Symbol method, List<dynamic> arguments) {
+      if (method != #drawRRect) {
         return false;
       }
-      activeTrackRect = arguments[0] as Rect;
+      activeTrackRRect = arguments[0] as RRect;
       return true;
     }));
 
+    const double padding = 4.0;
     // The 1st thumb should at one-third(5 / 15) of the Slider.
     // The 2nd thumb should at (8 / 15) of the Slider.
     // The left of the active track shape is the position of the 1st thumb.
     // The right of the active track shape is the position of the 2nd thumb.
-    // 24.0 is the default margin, (800.0 - 24.0 - 24.0) is the slider's width.
-    expect(nearEqual(activeTrackRect.left, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
-    expect(nearEqual(activeTrackRect.right, (800.0 - 24.0 - 24.0) * (8 / 15) + 24.0, 0.01), true);
+    // 24.0 is the default margin, (800.0 - 24.0 - 24.0 - padding) is the slider's width.
+    // Where the padding value equals to the track height.
+    expect(
+      nearEqual(
+        activeTrackRRect.left,
+        (800.0 - 24.0 - 24.0 - padding) * (5 / 15) + 24.0,
+        0.01,
+      ),
+      true,
+    );
+    expect(
+      nearEqual(
+        activeTrackRRect.right,
+        (800.0 - 24.0 - 24.0 - padding) * (8 / 15) + 24.0 + padding,
+        0.01,
+      ),
+      true,
+    );
   });
 
   testWidgets('RangeSlider changes mouse cursor when hovered', (WidgetTester tester) async {

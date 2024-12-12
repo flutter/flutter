@@ -144,6 +144,7 @@ class MenuAnchor extends StatefulWidget {
     this.childFocusNode,
     this.style,
     this.alignmentOffset = Offset.zero,
+    this.layerLink,
     this.clipBehavior = Clip.hardEdge,
     @Deprecated(
       'Use consumeOutsideTap instead. '
@@ -204,6 +205,13 @@ class MenuAnchor extends StatefulWidget {
   /// Defaults to [Offset.zero].
   /// {@endtemplate}
   final Offset? alignmentOffset;
+
+  /// An optional [LayerLink] to attach the menu to the widget that this
+  /// [MenuAnchor] surrounds.
+  ///
+  /// When provided, the menu will follow the widget that this [MenuAnchor]
+  /// surrounds if it moves because of view insets changes.
+  final LayerLink? layerLink;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
@@ -274,6 +282,9 @@ class MenuAnchor extends StatefulWidget {
   ///
   /// If not supplied, then the [MenuAnchor] will be the size that its parent
   /// allocates for it.
+  ///
+  /// If provided, the builder will be called each time the menu is opened or
+  /// closed.
   final MenuAnchorChildBuilder? builder;
 
   /// The optional child to be passed to the [builder].
@@ -387,11 +398,20 @@ class _MenuAnchorState extends State<MenuAnchor> {
 
   @override
   Widget build(BuildContext context) {
+    Widget contents = _buildContents(context);
+    if (widget.layerLink != null) {
+      contents = CompositedTransformTarget(
+        link: widget.layerLink!,
+        child: contents,
+      );
+    }
+
     Widget child = OverlayPortal(
       controller: _overlayController,
       overlayChildBuilder: (BuildContext context) {
         return _Submenu(
           anchor: this,
+          layerLink: widget.layerLink,
           menuStyle: widget.style,
           alignmentOffset: widget.alignmentOffset ?? Offset.zero,
           menuPosition: _menuPosition,
@@ -400,7 +420,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
           crossAxisUnconstrained: widget.crossAxisUnconstrained,
         );
       },
-      child: _buildContents(context),
+      child: contents,
     );
 
     if (!widget.anchorTapClosesMenu) {
@@ -415,11 +435,20 @@ class _MenuAnchorState extends State<MenuAnchor> {
       );
     }
 
-    return _MenuAnchorScope(
-      anchorKey: _anchorKey,
-      anchor: this,
-      isOpen: _isOpen,
-      child: child,
+    // This `Shortcuts` is needed so that shortcuts work when the focus is on
+    // MenuAnchor (specifically, the root menu, since submenus have their own
+    // `Shortcuts`).
+    return Shortcuts(
+      shortcuts: _kMenuTraversalShortcuts,
+      // Ignore semantics here and since the same information is typically
+      // also provided by the children.
+      includeSemantics: false,
+      child: _MenuAnchorScope(
+        anchorKey: _anchorKey,
+        anchor: this,
+        isOpen: _isOpen,
+        child: child,
+      ),
     );
   }
 
@@ -428,7 +457,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       actions: <Type, Action<Intent>>{
         DismissIntent: DismissMenuAction(controller: _menuController),
       },
-      child:  Builder(
+      child: Builder(
         key: _anchorKey,
         builder: (BuildContext context) {
           return widget.builder?.call(context, _menuController, widget.child)
@@ -548,6 +577,11 @@ class _MenuAnchorState extends State<MenuAnchor> {
     }
 
     widget.onOpen?.call();
+    if (mounted && SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
+      setState(() {
+        // Mark dirty to ensure UI updates
+      });
+    }
   }
 
   /// Close the menu.
@@ -622,8 +656,7 @@ class MenuController {
 
   /// Whether or not the associated menu is currently open.
   bool get isOpen {
-    assert(_anchor != null);
-    return _anchor!._isOpen;
+    return _anchor?._isOpen ?? false;
   }
 
   /// Close the menu that this menu controller is associated with.
@@ -636,8 +669,7 @@ class MenuController {
   /// scrolled by an ancestor, or the view changes size, then any open menu will
   /// automatically close.
   void close() {
-    assert(_anchor != null);
-    _anchor!._close();
+    _anchor?._close();
   }
 
   /// Opens the menu that this menu controller is associated with.
@@ -979,6 +1011,13 @@ class MenuItemButton extends StatefulWidget {
   /// [disabledBackgroundColor] to specify the button's disabled icon and fill
   /// color.
   ///
+  /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
+  /// parameters are used to construct [ButtonStyle.mouseCursor].
+  ///
+  /// The [iconColor], [disabledIconColor] are used to construct
+  /// [ButtonStyle.iconColor] and [iconSize] is used to construct
+  /// [ButtonStyle.iconSize].
+  ///
   /// All of the other parameters are either used directly or used to create a
   /// [WidgetStateProperty] with a single value for all states.
   ///
@@ -1008,6 +1047,8 @@ class MenuItemButton extends StatefulWidget {
     Color? shadowColor,
     Color? surfaceTintColor,
     Color? iconColor,
+    double? iconSize,
+    Color? disabledIconColor,
     TextStyle? textStyle,
     Color? overlayColor,
     double? elevation,
@@ -1034,6 +1075,8 @@ class MenuItemButton extends StatefulWidget {
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
       iconColor: iconColor,
+      iconSize: iconSize,
+      disabledIconColor: disabledIconColor,
       textStyle: textStyle,
       overlayColor: overlayColor,
       elevation: elevation,
@@ -1649,6 +1692,7 @@ class SubmenuButton extends StatefulWidget {
     this.statesController,
     this.leadingIcon,
     this.trailingIcon,
+    this.submenuIcon,
     required this.menuChildren,
     required this.child,
   });
@@ -1713,6 +1757,18 @@ class SubmenuButton extends StatefulWidget {
   /// An optional icon to display before the [child].
   final Widget? leadingIcon;
 
+  /// If provided, the widget replaces the default [SubmenuButton] arrow icon.
+  ///
+  /// Resolves in the following states:
+  ///  * [WidgetState.disabled].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///
+  /// If this is null, then the value of [MenuThemeData.submenuIcon] is used.
+  /// If that is also null, then defaults to a right arrow icon with the size
+  /// of 24 pixels.
+  final MaterialStateProperty<Widget?>? submenuIcon;
+
   /// An optional icon to display after the [child].
   final Widget? trailingIcon;
 
@@ -1760,6 +1816,13 @@ class SubmenuButton extends StatefulWidget {
   /// [disabledBackgroundColor] to specify the button's disabled icon and fill
   /// color.
   ///
+  /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
+  /// parameters are used to construct [ButtonStyle.mouseCursor].
+  ///
+  /// The [iconColor], [disabledIconColor] are used to construct
+  /// [ButtonStyle.iconColor] and [iconSize] is used to construct
+  /// [ButtonStyle.iconSize].
+  ///
   /// All of the other parameters are either used directly or used to create a
   /// [WidgetStateProperty] with a single value for all states.
   ///
@@ -1787,6 +1850,8 @@ class SubmenuButton extends StatefulWidget {
     Color? shadowColor,
     Color? surfaceTintColor,
     Color? iconColor,
+    double? iconSize,
+    Color? disabledIconColor,
     TextStyle? textStyle,
     Color? overlayColor,
     double? elevation,
@@ -1813,6 +1878,8 @@ class SubmenuButton extends StatefulWidget {
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
       iconColor: iconColor,
+      disabledIconColor: disabledIconColor,
+      iconSize: iconSize,
       textStyle: textStyle,
       overlayColor: overlayColor,
       elevation: elevation,
@@ -1928,6 +1995,17 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       (Axis.vertical, TextDirection.rtl)   => Offset(0, -menuPadding.top),
       (Axis.vertical, TextDirection.ltr)   => Offset(0, -menuPadding.top),
     };
+    final Set<MaterialState> states = <MaterialState>{
+      if (!_enabled) MaterialState.disabled,
+      if (_isHovered) MaterialState.hovered,
+      if (_buttonFocusNode.hasFocus) MaterialState.focused,
+    };
+    final Widget submenuIcon = widget.submenuIcon?.resolve(states)
+      ?? MenuTheme.of(context).submenuIcon?.resolve(states)
+      ?? const Icon(
+           Icons.arrow_right, // Automatically switches with text direction.
+           size: _kDefaultSubmenuIconSize,
+         );
 
     return Actions(
       actions: actions,
@@ -2001,6 +2079,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
                   trailingIcon: widget.trailingIcon,
                   hasSubmenu: true,
                   showDecoration: (controller._anchor!._parent?._orientation ?? Axis.horizontal) == Axis.vertical,
+                  submenuIcon: submenuIcon,
                   child: child,
                 ),
               ),
@@ -3005,6 +3084,7 @@ class _MenuItemLabel extends StatelessWidget {
     this.shortcut,
     this.semanticsLabel,
     this.overflowAxis = Axis.vertical,
+    this.submenuIcon,
     this.child,
   });
 
@@ -3034,6 +3114,9 @@ class _MenuItemLabel extends StatelessWidget {
 
   /// The direction in which the menu item expands.
   final Axis overflowAxis;
+
+  /// The submenu icon that is displayed when [showDecoration] and [hasSubmenu] are true.
+  final Widget? submenuIcon;
 
   /// An optional child widget that is displayed in the label.
   final Widget? child;
@@ -3102,10 +3185,7 @@ class _MenuItemLabel extends StatelessWidget {
         if (showDecoration && hasSubmenu)
           Padding(
             padding: EdgeInsetsDirectional.only(start: horizontalPadding),
-            child: const Icon(
-              Icons.arrow_right, // Automatically switches with text direction.
-              size: _kDefaultSubmenuIconSize,
-            ),
+            child: submenuIcon,
           ),
       ],
     );
@@ -3335,7 +3415,7 @@ class _MenuPanel extends StatefulWidget {
   /// The layout orientation of this panel.
   final Axis orientation;
 
-  /// The list of widgets to use as children of this menu bar.
+  /// The list of widgets to use as children of this menu panel.
   ///
   /// These are the top level [SubmenuButton]s.
   final List<Widget> children;
@@ -3497,6 +3577,7 @@ class _MenuPanelState extends State<_MenuPanel> {
 class _Submenu extends StatelessWidget {
   const _Submenu({
     required this.anchor,
+    required this.layerLink,
     required this.menuStyle,
     required this.menuPosition,
     required this.alignmentOffset,
@@ -3506,6 +3587,7 @@ class _Submenu extends StatelessWidget {
   });
 
   final _MenuAnchorState anchor;
+  final LayerLink? layerLink;
   final MenuStyle? menuStyle;
   final Offset? menuPosition;
   final Offset alignmentOffset;
@@ -3553,12 +3635,17 @@ class _Submenu extends StatelessWidget {
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
     final BuildContext anchorContext = anchor._anchorKey.currentContext!;
     final RenderBox overlay = Overlay.of(anchorContext).context.findRenderObject()! as RenderBox;
-    final RenderBox anchorBox = anchorContext.findRenderObject()! as RenderBox;
-    final Offset upperLeft = anchorBox.localToGlobal(Offset(dx, -dy), ancestor: overlay);
-    final Offset bottomRight = anchorBox.localToGlobal(anchorBox.paintBounds.bottomRight, ancestor: overlay);
+
+    Offset upperLeft = Offset.zero;
+    Offset bottomRight = Offset.zero;
+    if (layerLink == null) {
+      final RenderBox anchorBox = anchorContext.findRenderObject()! as RenderBox;
+      upperLeft = anchorBox.localToGlobal(Offset(dx, -dy), ancestor: overlay);
+      bottomRight = anchorBox.localToGlobal(anchorBox.paintBounds.bottomRight, ancestor: overlay);
+    }
     final Rect anchorRect = Rect.fromPoints(upperLeft, bottomRight);
 
-    return Theme(
+    Widget child = Theme(
       data: Theme.of(context).copyWith(
         visualDensity: visualDensity,
       ),
@@ -3609,6 +3696,16 @@ class _Submenu extends StatelessWidget {
         ),
       ),
     );
+
+    if (layerLink != null) {
+      child = CompositedTransformFollower(
+        link: layerLink!,
+        targetAnchor: Alignment.bottomLeft,
+        child: child,
+      );
+    }
+
+    return child;
   }
 }
 
@@ -3673,7 +3770,6 @@ bool get _isCupertino {
 bool get _usesSymbolicModifiers {
   return _isCupertino;
 }
-
 
 bool get _platformSupportsAccelerators {
   // On iOS and macOS, pressing the Option key (a.k.a. the Alt key) causes a

@@ -63,6 +63,10 @@ void main() {
       valueIndicatorTextStyle: TextStyle(color: Colors.black),
       mouseCursor: MaterialStateMouseCursor.clickable,
       allowedInteraction: SliderInteraction.tapOnly,
+      padding: EdgeInsets.all(1.0),
+      thumbSize: WidgetStatePropertyAll<Size>(Size(20, 20)),
+      trackGap: 10.0,
+      year2023: false,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -72,22 +76,22 @@ void main() {
 
     expect(description, <String>[
       'trackHeight: 7.0',
-      'activeTrackColor: Color(0xff000001)',
-      'inactiveTrackColor: Color(0xff000002)',
-      'secondaryActiveTrackColor: Color(0xff000003)',
-      'disabledActiveTrackColor: Color(0xff000004)',
-      'disabledInactiveTrackColor: Color(0xff000005)',
-      'disabledSecondaryActiveTrackColor: Color(0xff000006)',
-      'activeTickMarkColor: Color(0xff000007)',
-      'inactiveTickMarkColor: Color(0xff000008)',
-      'disabledActiveTickMarkColor: Color(0xff000009)',
-      'disabledInactiveTickMarkColor: Color(0xff000010)',
-      'thumbColor: Color(0xff000011)',
-      'overlappingShapeStrokeColor: Color(0xff000012)',
-      'disabledThumbColor: Color(0xff000013)',
-      'overlayColor: Color(0xff000014)',
-      'valueIndicatorColor: Color(0xff000015)',
-      'valueIndicatorStrokeColor: Color(0xff000015)',
+      'activeTrackColor: ${const Color(0xff000001)}',
+      'inactiveTrackColor: ${const Color(0xff000002)}',
+      'secondaryActiveTrackColor: ${const Color(0xff000003)}',
+      'disabledActiveTrackColor: ${const Color(0xff000004)}',
+      'disabledInactiveTrackColor: ${const Color(0xff000005)}',
+      'disabledSecondaryActiveTrackColor: ${const Color(0xff000006)}',
+      'activeTickMarkColor: ${const Color(0xff000007)}',
+      'inactiveTickMarkColor: ${const Color(0xff000008)}',
+      'disabledActiveTickMarkColor: ${const Color(0xff000009)}',
+      'disabledInactiveTickMarkColor: ${const Color(0xff000010)}',
+      'thumbColor: ${const Color(0xff000011)}',
+      'overlappingShapeStrokeColor: ${const Color(0xff000012)}',
+      'disabledThumbColor: ${const Color(0xff000013)}',
+      'overlayColor: ${const Color(0xff000014)}',
+      'valueIndicatorColor: ${const Color(0xff000015)}',
+      'valueIndicatorStrokeColor: ${const Color(0xff000015)}',
       "overlayShape: Instance of 'RoundSliderOverlayShape'",
       "tickMarkShape: Instance of 'RoundSliderTickMarkShape'",
       "thumbShape: Instance of 'RoundSliderThumbShape'",
@@ -98,9 +102,13 @@ void main() {
       "rangeTrackShape: Instance of 'RoundedRectRangeSliderTrackShape'",
       "rangeValueIndicatorShape: Instance of 'PaddleRangeSliderValueIndicatorShape'",
       'showValueIndicator: always',
-      'valueIndicatorTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
+      'valueIndicatorTextStyle: TextStyle(inherit: true, color: ${const Color(0xff000000)})',
       'mouseCursor: WidgetStateMouseCursor(clickable)',
-      'allowedInteraction: tapOnly'
+      'allowedInteraction: tapOnly',
+      'padding: EdgeInsets.all(1.0)',
+      'thumbSize: WidgetStatePropertyAll(Size(20.0, 20.0))',
+      'trackGap: 10.0',
+      'year2023: false',
     ]);
   });
 
@@ -423,7 +431,8 @@ void main() {
       );
       expect(material, paints..shadow(color: Colors.black)..circle(color: sliderTheme.disabledThumbColor));
       expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
-      expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
+      // These 2 colors are too close to distinguish.
+      // expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.inactiveTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.secondaryActiveTrackColor)));
 
@@ -440,7 +449,8 @@ void main() {
           ..circle(color: sliderTheme.disabledThumbColor),
       );
       expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
-      expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
+      // These 2 colors are too close to distinguish.
+      // expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.inactiveTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.secondaryActiveTrackColor)));
       expect(material, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
@@ -457,7 +467,8 @@ void main() {
       );
       expect(material, paints..circle(color: sliderTheme.disabledThumbColor));
       expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
-      expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
+      // These colors are too close to distinguish.
+      // expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.inactiveTrackColor)));
       expect(material, isNot(paints..rrect(color: sliderTheme.secondaryActiveTrackColor)));
 
@@ -684,22 +695,22 @@ void main() {
     const Color middleGrey = Color(0xff7f7f7f);
 
     expect(lerp.trackHeight, equals(4.0));
-    expect(lerp.activeTrackColor, equals(middleGrey.withAlpha(0xff)));
-    expect(lerp.inactiveTrackColor, equals(middleGrey.withAlpha(0x3d)));
-    expect(lerp.secondaryActiveTrackColor, equals(middleGrey.withAlpha(0x8a)));
-    expect(lerp.disabledActiveTrackColor, equals(middleGrey.withAlpha(0x52)));
-    expect(lerp.disabledInactiveTrackColor, equals(middleGrey.withAlpha(0x1f)));
-    expect(lerp.disabledSecondaryActiveTrackColor, equals(middleGrey.withAlpha(0x1f)));
-    expect(lerp.activeTickMarkColor, equals(middleGrey.withAlpha(0x8a)));
-    expect(lerp.inactiveTickMarkColor, equals(middleGrey.withAlpha(0x8a)));
-    expect(lerp.disabledActiveTickMarkColor, equals(middleGrey.withAlpha(0x1f)));
-    expect(lerp.disabledInactiveTickMarkColor, equals(middleGrey.withAlpha(0x1f)));
-    expect(lerp.thumbColor, equals(middleGrey.withAlpha(0xff)));
-    expect(lerp.disabledThumbColor, equals(middleGrey.withAlpha(0x52)));
-    expect(lerp.overlayColor, equals(middleGrey.withAlpha(0x1f)));
-    expect(lerp.valueIndicatorColor, equals(middleGrey.withAlpha(0xff)));
-    expect(lerp.valueIndicatorStrokeColor, equals(middleGrey.withAlpha(0xff)));
-    expect(lerp.valueIndicatorTextStyle!.color, equals(middleGrey.withAlpha(0xff)));
+    expect(lerp.activeTrackColor, isSameColorAs(middleGrey.withAlpha(0xff)));
+    expect(lerp.inactiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x3d)));
+    expect(lerp.secondaryActiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x8a)));
+    expect(lerp.disabledActiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x52)));
+    expect(lerp.disabledInactiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.disabledSecondaryActiveTrackColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.activeTickMarkColor, isSameColorAs(middleGrey.withAlpha(0x8a)));
+    expect(lerp.inactiveTickMarkColor, isSameColorAs(middleGrey.withAlpha(0x8a)));
+    expect(lerp.disabledActiveTickMarkColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.disabledInactiveTickMarkColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.thumbColor, isSameColorAs(middleGrey.withAlpha(0xff)));
+    expect(lerp.disabledThumbColor, isSameColorAs(middleGrey.withAlpha(0x52)));
+    expect(lerp.overlayColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
+    expect(lerp.valueIndicatorColor, isSameColorAs(middleGrey.withAlpha(0xff)));
+    expect(lerp.valueIndicatorStrokeColor, isSameColorAs(middleGrey.withAlpha(0xff)));
+    expect(lerp.valueIndicatorTextStyle!.color, isSameColorAs(middleGrey.withAlpha(0xff)));
   });
 
   testWidgets('Default slider track draws correctly', (WidgetTester tester) async {
@@ -1522,8 +1533,6 @@ void main() {
           topLeft: const Radius.circular(2.0),
           bottomLeft: const Radius.circular(2.0),
         ))
-      // active track RRect Start 10 pixels from left screen.
-        ..rect(rect:const Rect.fromLTRB(10.0, 297.0, 790.0, 303.0),)
         // inactive track RRect. Ends 10 pixels from right of screen.
         ..rrect(rrect: RRect.fromLTRBAndCorners(
           790.0,
@@ -1533,6 +1542,11 @@ void main() {
           topRight: const Radius.circular(2.0),
           bottomRight: const Radius.circular(2.0),
         ))
+        // active track RRect Start 10 pixels from left screen.
+        ..rrect(rrect: RRect.fromLTRBR(
+          8.0, 297.0, 792.0, 303.0,
+          const Radius.circular(2.0))
+        )
         // The thumb Left.
         ..circle(x: 10.0, y: 300.0, radius: 10.0)
         // The thumb Right.
@@ -1795,12 +1809,15 @@ void main() {
             topLeft: const Radius.circular(2.0),
             bottomLeft: const Radius.circular(2.0),
           ))
-          ..rect(rect: const Rect.fromLTRB(24.0, 297.0, 24.0, 303.0))
           ..rrect(rrect: RRect.fromLTRBAndCorners(
             24.0, 298.0, 776.0, 302.0,
             topRight: const Radius.circular(2.0),
             bottomRight: const Radius.circular(2.0),
           ))
+          ..rrect(rrect: RRect.fromLTRBR(
+            22.0, 297.0, 26.0, 303.0,
+            const Radius.circular(2.0)),
+          )
           ..circle(x: 24.0, y: 300.0)
           ..shadow(elevation: 1.0)
           ..circle(x: 24.0, y: 300.0)
@@ -1844,12 +1861,15 @@ void main() {
           topLeft: const Radius.circular(2.0),
           bottomLeft: const Radius.circular(2.0),
         ))
-        ..rect(rect: const Rect.fromLTRB(24.0, 297.0, 24.0, 303.0))
         ..rrect(rrect: RRect.fromLTRBAndCorners(
           24.0, 298.0, 776.0, 302.0,
           topRight: const Radius.circular(2.0),
           bottomRight: const Radius.circular(2.0),
         ))
+        ..rrect(rrect: RRect.fromLTRBR(
+          22.0, 297.0, 26.0, 303.0,
+          const Radius.circular(2)),
+        )
         ..circle(x: 24.0, y: 300.0)
         ..path(strokeWidth: 1.0 * 2.0, color: Colors.black)
         ..circle(x: 24.0, y: 300.0)
@@ -2543,9 +2563,360 @@ void main() {
     });
   });
 
-  testWidgets('SliderTrackShape isRounded defaults', (WidgetTester tester) async {
+  testWidgets('Track shape isRounded defaults', (WidgetTester tester) async {
     expect(const RectangularSliderTrackShape().isRounded, isFalse);
     expect(const RoundedRectSliderTrackShape().isRounded, isTrue);
+    expect(const RectangularRangeSliderTrackShape().isRounded, isFalse);
+    expect(const RoundedRectRangeSliderTrackShape().isRounded, isTrue);
+  });
+
+  testWidgets('SliderThemeData.padding can override the default Slider padding', (WidgetTester tester) async {
+    Widget buildSlider({ EdgeInsetsGeometry? padding }) {
+      return MaterialApp(
+        theme: ThemeData(sliderTheme: SliderThemeData(padding: padding)),
+        home: Material(
+          child: Center(
+            child: IntrinsicHeight(
+              child: Slider(
+                value: 0.5,
+                onChanged: (double value) {},
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    RenderBox sliderRenderBox() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderSlider') as RenderBox;
+    }
+
+    // Test Slider height and tracks spacing with zero padding.
+    await tester.pumpWidget(buildSlider(padding: EdgeInsets.zero));
+    await tester.pumpAndSettle();
+
+    // The height equals to the default thumb height.
+    expect(sliderRenderBox().size, const Size(800, 20));
+    expect(
+      find.byType(Slider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(398.0, 8.0, 800.0, 12.0,  const Radius.circular(2.0)),
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 7.0, 402.0, 13.0,  const Radius.circular(3.0)),
+        ),
+    );
+
+    // Test Slider height and tracks spacing with directional padding.
+    const double startPadding = 100;
+    const double endPadding = 20;
+    await tester.pumpWidget(buildSlider(
+      padding: const EdgeInsetsDirectional.only(
+        start: startPadding,
+        end: endPadding,
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(sliderRenderBox().size, const Size(800 - startPadding - endPadding, 20));
+    expect(
+      find.byType(Slider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(338.0, 8.0, 680.0, 12.0,  const Radius.circular(2.0)),
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 7.0, 342.0, 13.0,  const Radius.circular(3.0)),
+        ),
+    );
+
+
+    // Test Slider height and tracks spacing with top and bottom padding.
+    const double topPadding = 100;
+    const double bottomPadding = 20;
+    const double trackHeight = 20;
+    await tester.pumpWidget(buildSlider(padding: const EdgeInsetsDirectional.only(top: topPadding, bottom: bottomPadding)));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(Slider)), const Size(800, topPadding + trackHeight + bottomPadding));
+    expect(sliderRenderBox().size, const Size(800, 20));
+    expect(
+      find.byType(Slider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(398.0, 8.0, 800.0, 12.0,  const Radius.circular(2.0)),
+        )
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 7.0, 402.0, 13.0,  const Radius.circular(3.0)),
+        ),
+    );
+  });
+
+  testWidgets('Can customize track gap when year2023 is false', (WidgetTester tester) async {
+    Widget buildSlider({ double? trackGap }) {
+      return MaterialApp(
+        theme: ThemeData(
+          sliderTheme: SliderThemeData(
+            trackGap: trackGap,
+          ),
+        ),
+        home: Material(
+          child: Center(
+            child: Slider(
+              year2023: false,
+              value: 0.5,
+              onChanged: (double value) { },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSlider(trackGap: 0));
+
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
+
+    // Test default track shape.
+    const Radius trackOuterCornerRadius = Radius.circular(8.0);
+    const Radius trackInnerCornerRadius = Radius.circular(2.0);
+    expect(
+      material,
+      paints
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            24.0, 292.0, 400.0, 308.0,
+            topLeft: trackOuterCornerRadius,
+            topRight: trackInnerCornerRadius,
+            bottomRight: trackInnerCornerRadius,
+            bottomLeft: trackOuterCornerRadius,
+          ),
+        )
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            400.0, 292.0, 776.0, 308.0,
+            topLeft: trackInnerCornerRadius,
+            topRight: trackOuterCornerRadius,
+            bottomRight: trackOuterCornerRadius,
+            bottomLeft: trackInnerCornerRadius,
+          ),
+        )
+    );
+
+    await tester.pumpWidget(buildSlider(trackGap: 10));
+    await tester.pumpAndSettle();
+    expect(
+      material,
+      paints
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            24.0, 292.0, 390.0, 308.0,
+            topLeft: trackOuterCornerRadius,
+            topRight: trackInnerCornerRadius,
+            bottomRight: trackInnerCornerRadius,
+            bottomLeft: trackOuterCornerRadius,
+          ),
+        )
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            410.0, 292.0, 776.0, 308.0,
+            topLeft: trackInnerCornerRadius,
+            topRight: trackOuterCornerRadius,
+            bottomRight: trackOuterCornerRadius,
+            bottomLeft: trackInnerCornerRadius,
+          ),
+        )
+    );
+  });
+
+  testWidgets('Can customize thumb size when year2023 is false', (WidgetTester tester) async {
+    Widget buildSlider({ WidgetStateProperty<Size?>? thumbSize }) {
+      return MaterialApp(
+        theme: ThemeData(
+          sliderTheme: SliderThemeData(
+            thumbSize: thumbSize,
+          ),
+        ),
+        home: Material(
+          child: Center(
+            child: Slider(
+              year2023: false,
+              value: 0.5,
+              onChanged: (double value) { },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSlider(thumbSize: const WidgetStatePropertyAll<Size>(Size(20, 20))));
+
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
+    expect(
+      material,
+      paints
+        ..circle()
+        ..rrect(
+          rrect: RRect.fromLTRBR(
+          390.0, 290.0, 410.0, 310.0,
+          const Radius.circular(10.0),
+        ),
+    ));
+
+    await tester.pumpWidget(buildSlider(thumbSize: const WidgetStateProperty<Size?>.fromMap(
+      <WidgetStatesConstraint, Size>{
+        WidgetState.pressed: Size(20, 20),
+        WidgetState.any:  Size(10, 10),
+      },
+    )));
+    await tester.pumpAndSettle();
+
+    expect(
+      material,
+      paints
+        ..circle()
+        ..rrect(
+          rrect: RRect.fromLTRBR(
+          395.0, 295.0, 405.0, 305.0,
+          const Radius.circular(5.0),
+        ),
+    ));
+
+
+    final Offset center = tester.getCenter(find.byType(Slider));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pumpAndSettle();
+
+    expect(
+      material,
+      paints
+        ..circle()
+        ..rrect(
+          rrect: RRect.fromLTRBR(
+          390.0, 295.0, 410.0, 305.0,
+          const Radius.circular(5.0),
+        ),
+    ));
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('Opt into 2024 Slider appearance with SliderThemeData.year2023', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(year2023: false),
+    );
+    final ColorScheme colorScheme = theme.colorScheme;
+    final Color activeTrackColor = colorScheme.primary;
+    final Color inactiveTrackColor = colorScheme.secondaryContainer;
+    const double value = 0.45;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: Slider(
+              value: value,
+              onChanged: (double value) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
+
+    // Test default track shape.
+    const Radius trackOuterCornerRadius = Radius.circular(8.0);
+    const Radius trackInnerCornderRadius = Radius.circular(2.0);
+    expect(
+      material,
+      paints
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            24.0, 292.0, 356.4, 308.0,
+            topLeft: trackOuterCornerRadius,
+            topRight: trackInnerCornderRadius,
+            bottomRight: trackInnerCornderRadius,
+            bottomLeft: trackOuterCornerRadius,
+          ),
+          color: activeTrackColor,
+        )
+        // Inctive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            368.4, 292.0, 776.0, 308.0,
+            topLeft: trackInnerCornderRadius,
+            topRight: trackOuterCornerRadius,
+            bottomRight: trackOuterCornerRadius,
+            bottomLeft: trackInnerCornderRadius,
+          ),
+          color: inactiveTrackColor,
+        ),
+    );
+  });
+
+  testWidgets('Slider.year2023 overrides SliderThemeData.year2023', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      sliderTheme: const SliderThemeData(year2023: false),
+    );
+    final ColorScheme colorScheme = theme.colorScheme;
+    final Color activeTrackColor = colorScheme.primary;
+    final Color inactiveTrackColor = colorScheme.surfaceContainerHighest;
+    const double value = 0.45;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Theme(
+              data: theme,
+              child: Slider(
+                year2023: true,
+                value: value,
+                onChanged: (double value) { },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
+
+    // Test default track shape.
+    const Radius activeTrackCornerRadius = Radius.circular(3.0);
+    const Radius inactiveTrackCornerRadius = Radius.circular(2.0);
+    expect(
+      material,
+      paints
+        // Active track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(
+            360.4, 298.0, 776.0, 302.0,
+            inactiveTrackCornerRadius,
+          ),
+          color: inactiveTrackColor,
+        )
+        // Inctive track.
+        ..rrect(
+          rrect: RRect.fromLTRBR(
+            24.0, 297.0, 364.4, 303.0,
+            activeTrackCornerRadius,
+          ),
+          color: activeTrackColor,
+        ),
+    );
   });
 
   group('Material 2', () {
@@ -2586,17 +2957,14 @@ void main() {
               };
           return MaterialApp(
             theme: theme,
-            home: Directionality(
-              textDirection: TextDirection.ltr,
-              child: Material(
-                child: Center(
-                  child: Slider(
-                    value: value,
-                    secondaryTrackValue: 0.75,
-                    label: '$value',
-                    divisions: divisions,
-                    onChanged: onChanged,
-                  ),
+            home: Material(
+              child: Center(
+                child: Slider(
+                  value: value,
+                  secondaryTrackValue: 0.75,
+                  label: '$value',
+                  divisions: divisions,
+                  onChanged: onChanged,
                 ),
               ),
             ),
@@ -2718,23 +3086,20 @@ void main() {
         Widget buildApp(String value, { double sliderValue = 0.5, TextScaler textScaler = TextScaler.noScaling }) {
           return MaterialApp(
             theme: theme,
-            home: Directionality(
-              textDirection: TextDirection.ltr,
-              child: MediaQuery(
-                data: MediaQueryData(textScaler: textScaler),
-                child: Material(
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Slider(
-                          value: sliderValue,
-                          label: value,
-                          divisions: 3,
-                          onChanged: (double d) { },
-                        ),
+            home: MediaQuery(
+              data: MediaQueryData(textScaler: textScaler),
+              child: Material(
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Slider(
+                        value: sliderValue,
+                        label: value,
+                        divisions: 3,
+                        onChanged: (double d) { },
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),

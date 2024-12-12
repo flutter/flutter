@@ -197,8 +197,9 @@ void main() {
     editable.paint(context, paintOffset);
 
     final List<LeaderLayer> leaderLayers = context.pushedLayers.whereType<LeaderLayer>().toList();
-    expect(leaderLayers, hasLength(1), reason: '_paintHandleLayers will paint a LeaderLayer');
-    expect(leaderLayers.single.offset, endpoint + paintOffset, reason: 'offset should respect paintOffset');
+    expect(leaderLayers, hasLength(2), reason: '_paintHandleLayers will paint LeaderLayers');
+    expect(leaderLayers.first.offset, endpoint + paintOffset, reason: 'offset should respect paintOffset');
+    expect(leaderLayers.last.offset, endpoint + paintOffset, reason: 'offset should respect paintOffset');
   });
 
   // Test that clipping will be used even when the text fits within the visible

@@ -79,7 +79,7 @@ Please avoid setting any other timeouts.
 
 The integration tests can be configured to use a specific local engine
 variant by setting the `FLUTTER_LOCAL_ENGINE` and `FLUTTER_LOCAL_ENGINE_HOST`
-environment svariable to the name of the local engines (e.g. `android_debug_unopt`
+environment variables to the name of the local engines (e.g. `android_debug_unopt`
 and `host_debug_unopt`). If the local engine build requires a source path, this
 can be provided by setting the `FLUTTER_LOCAL_ENGINE_SRC_PATH` environment
 variable. This second variable is not necessary if the `flutter` and `engine`

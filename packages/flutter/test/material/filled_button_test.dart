@@ -10,6 +10,13 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
+  TextStyle iconStyle(WidgetTester tester, IconData icon) {
+    final RichText iconRichText = tester.widget<RichText>(
+      find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+    );
+    return iconRichText.text.style!;
+  }
+
   testWidgets('FilledButton, FilledButton.icon defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     final ThemeData theme = ThemeData.from(useMaterial3: false, colorScheme: colorScheme);
@@ -729,14 +736,13 @@ void main() {
       ),
     );
 
-    Color iconColor() => _iconStyle(tester, Icons.add).color!;
     // Default, not disabled.
-    expect(iconColor(), equals(defaultColor));
+    expect(iconStyle(tester, Icons.add).color, equals(defaultColor));
 
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(iconColor(), focusedColor);
+    expect(iconStyle(tester, Icons.add).color, focusedColor);
 
     // Hovered.
     final Offset center = tester.getCenter(find.byKey(buttonKey));
@@ -746,13 +752,13 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    expect(iconColor(), hoverColor);
+    expect(iconStyle(tester, Icons.add).color, hoverColor);
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
-    expect(iconColor(), pressedColor);
+    expect(iconStyle(tester, Icons.add).color, pressedColor);
     focusNode.dispose();
   });
 
@@ -2402,7 +2408,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgets('Default iconAlignment', (WidgetTester tester) async {
+  testWidgets('Default FilledButton icon alignment', (WidgetTester tester) async {
     Widget buildWidget({ required TextDirection textDirection }) {
       return MaterialApp(
         home: Directionality(
@@ -2437,7 +2443,7 @@ void main() {
     expect(buttonTopRight.dx, iconTopRight.dx + 16.0); // 16.0 - padding between icon and button edge.
   });
 
-  testWidgets('iconAlignment can be customized', (WidgetTester tester) async {
+  testWidgets('FilledButton icon alignment can be customized', (WidgetTester tester) async {
     Widget buildWidget({
       required TextDirection textDirection,
       required IconAlignment iconAlignment,
@@ -2512,6 +2518,64 @@ void main() {
 
     // The icon is aligned to the left of the button.
     expect(buttonTopLeft.dx, iconTopLeft.dx - 24.0); // 24.0 - padding between icon and button edge.
+  });
+
+  testWidgets('FilledButton icon alignment respects ButtonStyle.iconAlignment', (WidgetTester tester) async {
+    Widget buildButton({ IconAlignment? iconAlignment }) {
+      return MaterialApp(
+        home: Center(
+          child: FilledButton.icon(
+            style: ButtonStyle(iconAlignment: iconAlignment),
+            onPressed: () {},
+            icon: const Icon(Icons.add),
+            label: const Text('button'),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildButton());
+
+    final Offset buttonTopLeft = tester.getTopLeft(find.byType(Material).last);
+    final Offset iconTopLeft = tester.getTopLeft(find.byIcon(Icons.add));
+
+    expect(buttonTopLeft.dx, iconTopLeft.dx - 16.0);
+
+    await tester.pumpWidget(buildButton(iconAlignment: IconAlignment.end));
+
+    final Offset buttonTopRight = tester.getTopRight(find.byType(Material).last);
+    final Offset iconTopRight = tester.getTopRight(find.byIcon(Icons.add));
+
+    expect(buttonTopRight.dx, iconTopRight.dx + 24.0);
+  });
+
+  testWidgets('FilledButton tonal button icon alignment respects ButtonStyle.iconAlignment', (WidgetTester tester) async {
+    Widget buildButton({ IconAlignment? iconAlignment }) {
+      return MaterialApp(
+        home: Center(
+          child: FilledButton.tonalIcon(
+            style: ButtonStyle(iconAlignment: iconAlignment),
+            onPressed: () {},
+            icon: const Icon(Icons.add),
+            label: const Text('button'),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildButton());
+
+    final Offset buttonTopLeft = tester.getTopLeft(find.byType(Material).last);
+    final Offset iconTopLeft = tester.getTopLeft(find.byIcon(Icons.add));
+
+    expect(buttonTopLeft.dx, iconTopLeft.dx - 16.0);
+
+    await tester.pumpWidget(buildButton(iconAlignment: IconAlignment.end));
+
+    final Offset buttonTopRight = tester.getTopRight(find.byType(Material).last);
+    final Offset iconTopRight = tester.getTopRight(find.byIcon(Icons.add));
+
+    expect(buttonTopRight.dx, iconTopRight.dx + 24.0);
   });
 
   testWidgets('Tonal icon default iconAlignment', (WidgetTester tester) async {
@@ -2625,11 +2689,43 @@ void main() {
     // The icon is aligned to the left of the button.
     expect(buttonTopLeft.dx, iconTopLeft.dx - 24.0); // 24.0 - padding between icon and button edge.
   });
-}
 
-TextStyle _iconStyle(WidgetTester tester, IconData icon) {
-  final RichText iconRichText = tester.widget<RichText>(
-    find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
-  );
-  return iconRichText.text.style!;
+  // Regression test for https://github.com/flutter/flutter/issues/154798.
+  testWidgets('FilledButton.styleFrom can customize the button icon', (WidgetTester tester) async {
+    const Color iconColor = Color(0xFFF000FF);
+    const double iconSize = 32.0;
+    const Color disabledIconColor = Color(0xFFFFF000);
+    Widget buildButton({ bool enabled = true }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: FilledButton.icon(
+              style: FilledButton.styleFrom(
+                iconColor: iconColor,
+                iconSize: iconSize,
+                iconAlignment: IconAlignment.end,
+                disabledIconColor: disabledIconColor,
+              ),
+              onPressed: enabled ? () {} : null,
+              icon: const Icon(Icons.add),
+              label: const Text('Button'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test enabled button.
+    await tester.pumpWidget(buildButton());
+    expect(tester.getSize(find.byIcon(Icons.add)), const Size(iconSize, iconSize));
+    expect(iconStyle(tester, Icons.add).color, iconColor);
+
+    // Test disabled button.
+    await tester.pumpWidget(buildButton(enabled: false));
+    expect(iconStyle(tester, Icons.add).color, disabledIconColor);
+
+    final Offset buttonTopRight = tester.getTopRight(find.byType(Material).last);
+    final Offset iconTopRight = tester.getTopRight(find.byIcon(Icons.add));
+    expect(buttonTopRight.dx, iconTopRight.dx + 24.0);
+  });
 }

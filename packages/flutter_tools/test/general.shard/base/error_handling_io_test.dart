@@ -884,7 +884,7 @@ void main() {
     });
   });
 
-  testWithoutContext("ErrorHandlingFileSystem.systemTempDirectory wraps delegates filesystem's systemTempDirectory", () {
+  testWithoutContext("ErrorHandlingFileSystem.systemTempDirectory wraps delegate filesystem's systemTempDirectory", () {
     final FileExceptionHandler exceptionHandler = FileExceptionHandler();
 
     final MemoryFileSystem delegate = MemoryFileSystem.test(
@@ -918,6 +918,35 @@ void main() {
       throwsToolExit(message: r'''
 Flutter failed to write to a file at "C:\.tmp_rand0\hello". The flutter tool cannot access the file or directory.
 Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.'''),
+    );
+  });
+
+  testWithoutContext("ErrorHandlingFileSystem.systemTempDirectory handles any exception thrown by the delegate's systemTempDirectory implementation", () {
+    final FileExceptionHandler exceptionHandler = FileExceptionHandler();
+    exceptionHandler.addTempError(
+      FileSystemOp.create,
+      const FileSystemException(
+        'Creation of temporary directory failed',
+        'some/temp/path',
+        OSError(
+          'No space left on device',
+          28,
+        ),
+      ),
+    );
+
+    final MemoryFileSystem delegate = MemoryFileSystem.test(
+      opHandle: exceptionHandler.opHandle,
+    );
+
+    final FileSystem fs = ErrorHandlingFileSystem(
+      delegate: delegate,
+      platform: FakePlatform(),
+    );
+
+    expect(
+      () => fs.systemTempDirectory,
+      throwsToolExit(message: 'Free up space and try again.'),
     );
   });
 
@@ -1108,6 +1137,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
     const int enospc = 28;
     const int eacces = 13;
     const int ebadarch = 86;
+    const int eagain = 35;
 
     testWithoutContext('when writing to a full device', () {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
@@ -1188,6 +1218,24 @@ Please ensure that the SDK and/or project is installed in a location that has re
       expect(() async => processManager.run(<String>['foo', '--bar']),
           throwsToolExit(message: expectedMessage));
       expect(() => processManager.runSync(<String>['foo', '--bar']),
+          throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when up against resource limits (EAGAIN)', () async {
+      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['foo', '--bar'], exception: ProcessException('', <String>[], '', eagain)),
+      ]);
+
+      final ProcessManager processManager = ErrorHandlingProcessManager(
+        delegate: fakeProcessManager,
+        platform: macOSPlatform,
+      );
+
+      const String expectedMessage = 'Flutter failed to run "foo --bar".\n'
+          'Your system may be running into its process limits. '
+          'Consider quitting unused apps and trying again.';
+
+      expect(() async => processManager.start(<String>['foo', '--bar']),
           throwsToolExit(message: expectedMessage));
     });
   });

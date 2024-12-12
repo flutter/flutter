@@ -41,9 +41,6 @@ import 'flutter_application_package.dart';
 import 'flutter_cache.dart';
 import 'flutter_device_manager.dart';
 import 'flutter_features.dart';
-import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
-import 'fuchsia/fuchsia_sdk.dart' show FuchsiaArtifacts, FuchsiaSdk;
-import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow, fuchsiaWorkflow;
 import 'globals.dart' as globals;
 import 'ios/ios_workflow.dart';
 import 'ios/iproxy.dart';
@@ -203,7 +200,6 @@ Future<T> runInContext<T>(
         artifacts: globals.artifacts!,
         flutterVersion: globals.flutterVersion,
         androidWorkflow: androidWorkflow!,
-        fuchsiaWorkflow: fuchsiaWorkflow!,
         xcDevice: globals.xcdevice!,
         userMessages: globals.userMessages,
         windowsWorkflow: windowsWorkflow!,
@@ -211,7 +207,6 @@ Future<T> runInContext<T>(
           platform: globals.platform,
           featureFlags: featureFlags,
         ),
-        fuchsiaSdk: globals.fuchsiaSdk!,
         operatingSystemUtils: globals.os,
         customDevicesConfig: globals.customDevicesConfig,
         nativeAssetsBuilder: globals.nativeAssetsBuilder,
@@ -243,14 +238,6 @@ Future<T> runInContext<T>(
       FlutterVersion: () => FlutterVersion(
         fs: globals.fs,
         flutterRoot: Cache.flutterRoot!,
-      ),
-      FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
-      FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
-      FuchsiaSdk: () => FuchsiaSdk(),
-      FuchsiaWorkflow: () => FuchsiaWorkflow(
-        featureFlags: featureFlags,
-        platform: globals.platform,
-        fuchsiaArtifacts: globals.fuchsiaArtifacts!,
       ),
       GradleUtils: () => GradleUtils(
         operatingSystemUtils: globals.os,
@@ -387,6 +374,7 @@ Future<T> runInContext<T>(
         ),
         fileSystem: globals.fs,
         analytics: globals.analytics,
+        shutdownHooks: globals.shutdownHooks,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         logger: globals.logger,

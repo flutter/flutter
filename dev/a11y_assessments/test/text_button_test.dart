@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:a11y_assessments/use_cases/text_button.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_utils.dart';
@@ -10,22 +11,21 @@ import 'test_utils.dart';
 void main() {
   testWidgets('text button can run', (WidgetTester tester) async {
     await pumpsUseCase(tester, TextButtonUseCase());
-    expect(find.text('Action'), findsOneWidget);
-    expect(find.text('Action Disabled'), findsOneWidget);
+    expect(find.text('Submit'), findsOneWidget);
   });
 
-  testWidgets('text button increments correctly when clicked',
-      (WidgetTester tester) async {
+  testWidgets('submit causes snackbar to show', (WidgetTester tester) async {
     await pumpsUseCase(tester, TextButtonUseCase());
+    final Finder textFormField = find.byType(TextFormField);
+    final Finder submitButton = find.text('Submit');
 
-    expect(find.text('Action'), findsOneWidget);
-    await tester.tap(find.text('Action'));
-    await tester.pumpAndSettle();
-    expect(find.text('Clicked 1 time(s).'), findsOneWidget);
+    // Enter text in field and submit.
+    await tester.enterText(textFormField, 'test text');
+    await tester.tap(submitButton);
+    await tester.pump();
 
-    await tester.tap(find.text('Action'));
-    await tester.pumpAndSettle();
-    expect(find.text('Clicked 2 time(s).'), findsOneWidget);
+    // Verify that the snackbar is visible.
+    expect(find.text('Form submitted'), findsOneWidget);
   });
 
   testWidgets('text button demo page has one h1 tag', (WidgetTester tester) async {

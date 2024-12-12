@@ -1106,14 +1106,12 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     }
   }
 
-  bool get showValueIndicator {
-    return switch (_sliderTheme.showValueIndicator!) {
-      ShowValueIndicator.onlyForDiscrete   => isDiscrete,
-      ShowValueIndicator.onlyForContinuous => !isDiscrete,
-      ShowValueIndicator.always => true,
-      ShowValueIndicator.never  => false,
-    };
-  }
+  bool get showValueIndicator => switch (_sliderTheme.showValueIndicator!) {
+    ShowValueIndicator.onlyForDiscrete   => isDiscrete,
+    ShowValueIndicator.onlyForContinuous => !isDiscrete,
+    ShowValueIndicator.always => true,
+    ShowValueIndicator.never  => false,
+  };
 
   Size get _thumbSize => _sliderTheme.rangeThumbShape!.getPreferredSize(isEnabled, isDiscrete);
 
@@ -1404,8 +1402,32 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         sliderTheme: _sliderTheme,
         isDiscrete: isDiscrete,
     );
-    _startThumbCenter = Offset(trackRect.left + startVisualPosition * trackRect.width, trackRect.center.dy);
-    _endThumbCenter = Offset(trackRect.left + endVisualPosition * trackRect.width, trackRect.center.dy);
+    final double padding = isDiscrete || _sliderTheme.rangeTrackShape!.isRounded ? trackRect.height : 0.0;
+    final double thumbYOffset = trackRect.center.dy;
+    final double startThumbPosition = isDiscrete
+      ? trackRect.left + startVisualPosition * (trackRect.width - padding) + padding / 2
+      : trackRect.left + startVisualPosition * trackRect.width;
+    final double endThumbPosition = isDiscrete
+      ? trackRect.left + endVisualPosition * (trackRect.width - padding) + padding / 2
+      : trackRect.left + endVisualPosition * trackRect.width;
+    final Size thumbPreferredSize = _sliderTheme.rangeThumbShape!.getPreferredSize(isEnabled, isDiscrete);
+    final double thumbPadding = (padding > thumbPreferredSize.width / 2 ? padding / 2 : 0);
+    _startThumbCenter = Offset(
+      clampDouble(
+        startThumbPosition,
+        trackRect.left + thumbPadding,
+        trackRect.right - thumbPadding,
+      ),
+      thumbYOffset,
+    );
+    _endThumbCenter = Offset(
+      clampDouble(
+        endThumbPosition,
+        trackRect.left + thumbPadding,
+        trackRect.right - thumbPadding,
+      ),
+      thumbYOffset,
+    );
     if (isEnabled) {
       final Size overlaySize = sliderTheme.overlayShape!.getPreferredSize(isEnabled, false);
       overlayStartRect = Rect.fromCircle(center: _startThumbCenter, radius: overlaySize.width / 2.0);
@@ -1767,7 +1789,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     return decreasedEndValue >= values.start + _minThumbSeparationValue ? decreasedEndValue : values.end;
   }
 }
-
 
 class _ValueIndicatorRenderObjectWidget extends LeafRenderObjectWidget {
   const _ValueIndicatorRenderObjectWidget({

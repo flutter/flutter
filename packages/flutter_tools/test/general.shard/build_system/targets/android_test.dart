@@ -52,6 +52,7 @@ void main() {
     // create pre-requisites.
     environment.buildDir.childFile('app.dill')
       .writeAsStringSync('abcd');
+    environment.buildDir.childFile('native_assets.json').createSync();
     fileSystem
       .file(artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
       .createSync(recursive: true);
@@ -96,6 +97,7 @@ void main() {
     // create pre-requisites.
     environment.buildDir.childFile('app.dill')
       .writeAsStringSync('abcd');
+    environment.buildDir.childFile('native_assets.json').createSync();
     fileSystem
       .file(artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
       .createSync(recursive: true);
@@ -185,7 +187,7 @@ void main() {
     ));
     environment.buildDir.createSync(recursive: true);
     environment.buildDir.childFile('app.dill').createSync();
-    environment.projectDir.childFile('.packages').writeAsStringSync('\n');
+    environment.buildDir.childFile('native_assets.json').createSync();
     const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
 
     await androidAot.build(environment);
@@ -224,7 +226,7 @@ void main() {
     ));
     environment.buildDir.createSync(recursive: true);
     environment.buildDir.childFile('app.dill').createSync();
-    environment.projectDir.childFile('.packages').writeAsStringSync('\n');
+    environment.buildDir.childFile('native_assets.json').createSync();
     const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
 
     await androidAot.build(environment);
@@ -266,7 +268,7 @@ void main() {
     ));
     environment.buildDir.createSync(recursive: true);
     environment.buildDir.childFile('app.dill').createSync();
-    environment.projectDir.childFile('.packages').writeAsStringSync('\n');
+    environment.buildDir.childFile('native_assets.json').createSync();
 
     await const AndroidAot(TargetPlatform.android_arm64, BuildMode.release)
       .build(environment);
@@ -304,7 +306,7 @@ void main() {
     ));
     environment.buildDir.createSync(recursive: true);
     environment.buildDir.childFile('app.dill').createSync();
-    environment.projectDir.childFile('.packages').writeAsStringSync('\n');
+    environment.buildDir.childFile('native_assets.json').createSync();
 
     await const AndroidAot(TargetPlatform.android_arm64, BuildMode.release)
       .build(environment);
@@ -522,6 +524,7 @@ void main() {
     // create pre-requisites.
     environment.buildDir.childFile('app.dill')
       .writeAsStringSync('abcd');
+    environment.buildDir.childFile('native_assets.json').createSync();
     fileSystem
       .file(artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
       .createSync(recursive: true);
@@ -529,7 +532,10 @@ void main() {
       .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
       .createSync(recursive: true);
     fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello\nflutter:\n  shaders:\n    - shader.glsl');
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
     fileSystem.file('shader.glsl').writeAsStringSync('test');
 
     processManager.addCommands(<FakeCommand>[
@@ -537,6 +543,7 @@ void main() {
         'HostArtifact.impellerc',
         '--sksl',
         '--runtime-stage-gles',
+        '--runtime-stage-gles3',
         '--runtime-stage-vulkan',
         '--iplr',
         '--sl=out/flutter_assets/shader.glsl',

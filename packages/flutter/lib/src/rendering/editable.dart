@@ -1456,10 +1456,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
           ..textDirection = initialDirection
           ..attributedLabel = AttributedString(info.semanticsLabel ?? info.text, attributes: info.stringAttributes);
         switch (info.recognizer) {
-          case TapGestureRecognizer(onTap: final VoidCallback? onTap):
-          case DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? onTap):
-            if (onTap != null) {
-              configuration.onTap = onTap;
+          case TapGestureRecognizer(onTap: final VoidCallback? handler):
+          case DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? handler):
+            if (handler != null) {
+              configuration.onTap = handler;
               configuration.isLink = true;
             }
           case LongPressGestureRecognizer(onLongPress: final GestureLongPressCallback? onLongPress):
@@ -1670,12 +1670,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   Axis get _viewportAxis => _isMultiline ? Axis.vertical : Axis.horizontal;
 
-  Offset get _paintOffset {
-    return switch (_viewportAxis) {
-      Axis.horizontal => Offset(-offset.pixels, 0.0),
-      Axis.vertical   => Offset(0.0, -offset.pixels),
-    };
-  }
+  Offset get _paintOffset => switch (_viewportAxis) {
+    Axis.horizontal => Offset(-offset.pixels, 0.0),
+    Axis.vertical   => Offset(0.0, -offset.pixels),
+  };
 
   double get _viewportExtent {
     assert(hasSize);
@@ -2549,6 +2547,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       );
       context.pushLayer(
         LeaderLayer(link: endHandleLayerLink, offset: endPoint + offset),
+        super.paint,
+        Offset.zero,
+      );
+    } else if (selection!.isCollapsed) {
+      context.pushLayer(
+        LeaderLayer(link: endHandleLayerLink, offset: startPoint + offset),
         super.paint,
         Offset.zero,
       );

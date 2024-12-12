@@ -190,9 +190,9 @@ class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
   AnimationController? snapController;
   double? lastScrollOffset;
 
-  // The distance from the start of the header to the start of the viewport. Whent the
+  // The distance from the start of the header to the start of the viewport. When the
   // header is showing it varies between 0 (completely visible) and childExtent (not visible
-  // because it's just abopve the viewport's starting edge). It's used to compute the
+  // because it's just above the viewport's starting edge). It's used to compute the
   // header's paintExtent which defines where the header will appear - see paint().
   late double effectiveScrollOffset;
 

@@ -114,11 +114,11 @@ void main() {
 
     expect(description, <String>[
       'type: canvas',
-      'color: Color(0xffffffff)',
-      'shadowColor: Color(0xffff0000)',
-      'surfaceTintColor: Color(0xff0000ff)',
+      'color: ${const Color(0xffffffff)}',
+      'shadowColor: ${const Color(0xffff0000)}',
+      'surfaceTintColor: ${const Color(0xff0000ff)}',
       'textStyle.inherit: true',
-      'textStyle.color: Color(0xff00ff00)',
+      'textStyle.color: ${const Color(0xff00ff00)}',
       'borderRadius: BorderRadiusDirectional.circular(10.0)',
     ]);
   });
@@ -392,7 +392,7 @@ void main() {
       final RenderPhysicalShape tintModel = getModel(tester);
 
       // Final color should be the base with a tint of 0.14 opacity or 0xff192c33
-      expect(tintModel.color, equals(const Color(0xff192c33)));
+      expect(tintModel.color, isSameColorAs(const Color(0xff192c33)));
     });
 
   }); // Surface Tint Overlay group
@@ -452,7 +452,7 @@ void main() {
         );
         await tester.pumpAndSettle(); // wait for the elevation animation to finish
         final RenderPhysicalShape model = getModel(tester);
-        expect(model.color, equals(test.color));
+        expect(model.color, isSameColorAs(test.color));
       }
     });
 
@@ -513,8 +513,8 @@ void main() {
       );
 
       final RenderPhysicalShape model = getModel(tester);
-      expect(model.color, equals(surfaceColorWithOverlay));
-      expect(model.color, isNot(equals(surfaceColor)));
+      expect(model.color, isSameColorAs(surfaceColorWithOverlay));
+      expect(model.color, isNot(isSameColorAs(surfaceColor)));
     });
 
     testWidgets('Expected overlay color can be computed using colorWithOverlay', (WidgetTester tester) async {

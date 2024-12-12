@@ -12,6 +12,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'debug.dart';
+import 'drag_boundary.dart';
 import 'framework.dart';
 import 'inherited_theme.dart';
 import 'localizations.dart';
@@ -83,6 +84,37 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 /// The returned value will typically be the [child] wrapped in other widgets.
 typedef ReorderItemProxyDecorator = Widget Function(Widget child, int index, Animation<double> animation);
 
+/// Used to provide drag boundaries during drag-and-drop reordering.
+///
+/// {@tool snippet}
+/// ```dart
+/// DragBoundary(
+///  child: CustomScrollView(
+///    slivers: <Widget>[
+///      SliverReorderableList(
+///        itemBuilder: (BuildContext context, int index) {
+///          return ReorderableDragStartListener(
+///            key: ValueKey<int>(index),
+///            index: index,
+///            child: Text('$index'),
+///          );
+///        },
+///        dragBoundaryProvider: (BuildContext context) {
+///          return DragBoundary.forRectOf(context);
+///        },
+///        itemCount: 5,
+///        onReorder: (int fromIndex, int toIndex) {},
+///      ),
+///    ],
+///  )
+/// )
+/// ```
+/// {@end-tool}
+///
+/// See also:
+/// * [DragBoundary], a widget that provides drag boundaries.
+typedef ReorderDragBoundaryProvider = DragBoundaryDelegate<Rect>? Function(BuildContext context);
+
 /// A scrolling container that allows the user to interactively reorder the
 /// list items.
 ///
@@ -139,6 +171,7 @@ class ReorderableList extends StatefulWidget {
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.autoScrollerVelocityScalar,
+    this.dragBoundaryProvider,
   }) : assert(itemCount >= 0),
         assert(
           (itemExtent == null && prototypeItem == null) ||
@@ -271,6 +304,14 @@ class ReorderableList extends StatefulWidget {
   /// {@macro flutter.widgets.SliverReorderableList.autoScrollerVelocityScalar.default}
   final double? autoScrollerVelocityScalar;
 
+  /// {@template flutter.widgets.reorderable_list.dragBoundaryProvider}
+  /// A callback used to provide drag boundaries during drag-and-drop reordering.
+  ///
+  /// If null, the delegate returned by `DragBoundary.forRectMaybeOf` will be used.
+  /// Defaults to null.
+  /// {@endtemplate}
+  final ReorderDragBoundaryProvider? dragBoundaryProvider;
+
   /// The state from the closest instance of this class that encloses the given
   /// context.
   ///
@@ -388,6 +429,7 @@ class ReorderableListState extends State<ReorderableList> {
     _sliverReorderableListKey.currentState!.cancelReorder();
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
@@ -411,12 +453,14 @@ class ReorderableListState extends State<ReorderableList> {
             itemExtent: widget.itemExtent,
             prototypeItem: widget.prototypeItem,
             itemBuilder: widget.itemBuilder,
+            itemExtentBuilder: widget.itemExtentBuilder,
             itemCount: widget.itemCount,
             onReorder: widget.onReorder,
             onReorderStart: widget.onReorderStart,
             onReorderEnd: widget.onReorderEnd,
             proxyDecorator: widget.proxyDecorator,
             autoScrollerVelocityScalar: widget.autoScrollerVelocityScalar,
+            dragBoundaryProvider: widget.dragBoundaryProvider,
           ),
         ),
       ],
@@ -463,6 +507,7 @@ class SliverReorderableList extends StatefulWidget {
     this.itemExtentBuilder,
     this.prototypeItem,
     this.proxyDecorator,
+    this.dragBoundaryProvider,
     double? autoScrollerVelocityScalar,
   }) : autoScrollerVelocityScalar = autoScrollerVelocityScalar ?? _kDefaultAutoScrollVelocityScalar,
        assert(itemCount >= 0),
@@ -512,6 +557,9 @@ class SliverReorderableList extends StatefulWidget {
   /// Defaults to 50 if not set or set to null.
   /// {@endtemplate}
   final double autoScrollerVelocityScalar;
+
+  /// {@macro flutter.widgets.reorderable_list.dragBoundaryProvider}
+  final ReorderDragBoundaryProvider? dragBoundaryProvider;
 
   @override
   SliverReorderableListState createState() => SliverReorderableListState();
@@ -629,6 +677,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   Axis get _scrollDirection => axisDirectionToAxis(_scrollable.axisDirection);
   bool get _reverse => axisDirectionIsReversed(_scrollable.axisDirection);
 
+  @protected
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -643,6 +692,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     }
   }
 
+  @protected
   @override
   void didUpdateWidget(covariant SliverReorderableList oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -660,6 +710,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     }
   }
 
+  @protected
   @override
   void dispose() {
     _dragReset();
@@ -871,7 +922,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     // Find the new index for inserting the item being dragged.
     int newIndex = _insertIndex!;
     for (final _ReorderableItemState item in _items.values) {
-      if (item.index == _dragIndex! || !item.mounted) {
+      if ((_reverse && item.index == _dragIndex!) || !item.mounted) {
         continue;
       }
 
@@ -902,7 +953,13 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
           newIndex = item.index;
         }
       } else {
-        if (itemStart <= proxyItemStart && proxyItemStart <= itemMiddle) {
+        if (item.index == _dragIndex!) {
+          // If end of the proxy is not in ending half of item,
+          // we don't process, because it's original dragged item.
+          if (itemMiddle <= proxyItemEnd && proxyItemEnd <= itemEnd) {
+            newIndex = _dragIndex!;
+          }
+        } else if (itemStart <= proxyItemStart && proxyItemStart <= itemMiddle) {
           // The start of the proxy is in the beginning half of the item, so
           // we should swap the item with the gap and we are done looking for
           // the new index.
@@ -1023,6 +1080,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
     );
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
@@ -1336,9 +1394,15 @@ class _DragInfo extends Drag {
     index = item.index;
     child = item.widget.child;
     capturedThemes = item.widget.capturedThemes;
-    dragPosition = initialPosition;
     dragOffset = itemRenderBox.globalToLocal(initialPosition);
     itemSize = item.context.size!;
+    _rawDragPosition = initialPosition;
+    if (listState.widget.dragBoundaryProvider != null) {
+      boundary = listState.widget.dragBoundaryProvider!.call(listState.context);
+    } else {
+      boundary = DragBoundary.forRectMaybeOf(listState.context);
+    }
+    dragPosition = _adjustedDragOffset(initialPosition);
     itemExtent = _sizeExtent(itemSize, scrollDirection);
     itemLayoutConstraints = itemRenderBox.constraints;
     scrollable = Scrollable.of(item.context);
@@ -1352,6 +1416,7 @@ class _DragInfo extends Drag {
   final ReorderItemProxyDecorator? proxyDecorator;
   final TickerProvider tickerProvider;
 
+  late DragBoundaryDelegate<Rect>? boundary;
   late SliverReorderableListState listState;
   late int index;
   late Widget child;
@@ -1363,6 +1428,7 @@ class _DragInfo extends Drag {
   late CapturedThemes capturedThemes;
   ScrollableState? scrollable;
   AnimationController? _proxyAnimation;
+  late Offset _rawDragPosition;
 
   void dispose() {
     if (kFlutterMemoryAllocationsEnabled) {
@@ -1387,7 +1453,8 @@ class _DragInfo extends Drag {
   @override
   void update(DragUpdateDetails details) {
     final Offset delta = _restrictAxis(details.delta, scrollDirection);
-    dragPosition += delta;
+    _rawDragPosition += delta;
+    dragPosition = _adjustedDragOffset(_rawDragPosition);
     onUpdate?.call(this, dragPosition, details.delta);
   }
 
@@ -1402,6 +1469,16 @@ class _DragInfo extends Drag {
     _proxyAnimation?.dispose();
     _proxyAnimation = null;
     onCancel?.call(this);
+  }
+
+  Offset _adjustedDragOffset(Offset offset) {
+    if (boundary == null) {
+      return offset;
+    }
+    final Offset adjOffset = boundary!.nearestPositionWithinBoundary(
+      (offset - dragOffset) & itemSize,
+    ).shift(dragOffset).topLeft;
+    return adjOffset;
   }
 
   void _dropCompleted() {

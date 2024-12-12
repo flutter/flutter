@@ -101,30 +101,30 @@ void main() {
         .toList();
 
     expect(description, equalsIgnoringHashCodes(<String>[
-      'backgroundColor: Color(0xfffffff0)',
-      'cancelButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(Color(0xfffffff1)))',
-      'confirmButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(Color(0xfffffff2)))',
-      'dayPeriodBorderSide: BorderSide(color: Color(0xfffffff3))',
-      'dayPeriodColor: Color(0x00000000)',
-      'dayPeriodShape: RoundedRectangleBorder(BorderSide(color: Color(0xfffffff5)), BorderRadius.zero)',
-      'dayPeriodTextColor: Color(0xfffffff6)',
-      'dayPeriodTextStyle: TextStyle(inherit: true, color: Color(0xfffffff7))',
-      'dialBackgroundColor: Color(0xfffffff8)',
-      'dialHandColor: Color(0xfffffff9)',
-      'dialTextColor: Color(0xfffffffa)',
-      'dialTextStyle: TextStyle(inherit: true, color: Color(0xfffffffb))',
+      'backgroundColor: ${const Color(0xfffffff0)}',
+      'cancelButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(${const Color(0xfffffff1)}))',
+      'confirmButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(${const Color(0xfffffff2)}))',
+      'dayPeriodBorderSide: BorderSide(color: ${const Color(0xfffffff3)})',
+      'dayPeriodColor: ${const Color(0x00000000)}',
+      'dayPeriodShape: RoundedRectangleBorder(BorderSide(color: ${const Color(0xfffffff5)}), BorderRadius.zero)',
+      'dayPeriodTextColor: ${const Color(0xfffffff6)}',
+      'dayPeriodTextStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff7)})',
+      'dialBackgroundColor: ${const Color(0xfffffff8)}',
+      'dialHandColor: ${const Color(0xfffffff9)}',
+      'dialTextColor: ${const Color(0xfffffffa)}',
+      'dialTextStyle: TextStyle(inherit: true, color: ${const Color(0xfffffffb)})',
       'elevation: 1.0',
-      'entryModeIconColor: Color(0xfffffffc)',
-      'helpTextStyle: TextStyle(inherit: true, color: Color(0xfffffffd))',
-      'hourMinuteColor: Color(0xfffffffe)',
-      'hourMinuteShape: RoundedRectangleBorder(BorderSide(color: Color(0xffffffff)), BorderRadius.zero)',
-      'hourMinuteTextColor: Color(0xfffffff0)',
-      'hourMinuteTextStyle: TextStyle(inherit: true, color: Color(0xfffffff1))',
-      'inputDecorationTheme: InputDecorationTheme#ff861(labelStyle: TextStyle(inherit: true, color: Color(0xfffffff2)))',
+      'entryModeIconColor: ${const Color(0xfffffffc)}',
+      'helpTextStyle: TextStyle(inherit: true, color: ${const Color(0xfffffffd)})',
+      'hourMinuteColor: ${const Color(0xfffffffe)}',
+      'hourMinuteShape: RoundedRectangleBorder(BorderSide(color: ${const Color(0xffffffff)}), BorderRadius.zero)',
+      'hourMinuteTextColor: ${const Color(0xfffffff0)}',
+      'hourMinuteTextStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff1)})',
+      'inputDecorationTheme: InputDecorationTheme#ff861(labelStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff2)}))',
       'padding: EdgeInsets.all(1.0)',
-      'shape: RoundedRectangleBorder(BorderSide(color: Color(0xfffffff3)), BorderRadius.zero)',
-      'timeSelectorSeparatorColor: WidgetStatePropertyAll(Color(0xfffffff4))',
-      'timeSelectorSeparatorTextStyle: WidgetStatePropertyAll(TextStyle(inherit: true, color: Color(0xfffffff5)))'
+      'shape: RoundedRectangleBorder(BorderSide(color: ${const Color(0xfffffff3)}), BorderRadius.zero)',
+      'timeSelectorSeparatorColor: WidgetStatePropertyAll(${const Color(0xfffffff4)})',
+      'timeSelectorSeparatorTextStyle: WidgetStatePropertyAll(TextStyle(inherit: true, color: ${const Color(0xfffffff5)}))'
     ]));
   });
 
@@ -872,7 +872,6 @@ void main() {
     // Enter invalid hour.
     await tester.enterText(find.byType(TextField).first, 'AB');
     await tester.tap(find.text('OK'));
-    await tester.pumpAndSettle();
 
     expect(tester.getSize(findBorderPainter().first), const Size(96.0, 72.0));
   });
@@ -890,7 +889,6 @@ void main() {
     // Enter invalid hour.
     await tester.enterText(find.byType(TextField).first, 'AB');
     await tester.tap(find.text('OK'));
-    await tester.pumpAndSettle();
 
     expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
   });

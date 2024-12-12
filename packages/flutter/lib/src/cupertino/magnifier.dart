@@ -6,10 +6,19 @@
 library;
 
 import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
+
+import 'theme.dart';
 
 /// A [CupertinoMagnifier] used for magnifying text in cases where a user's
 /// finger may be blocking the point of interest, like a selection handle.
+///
+/// {@tool dartpad}
+/// This sample demonstrates how to use [CupertinoTextMagnifier].
+///
+/// ** See code in examples/api/lib/widgets/magnifier/cupertino_text_magnifier.0.dart **
+/// {@end-tool}
 ///
 /// Delegates styling to [CupertinoMagnifier] with its position depending on
 /// [magnifierInfo].
@@ -209,6 +218,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
 
   @override
   Widget build(BuildContext context) {
+    final CupertinoThemeData themeData = CupertinoTheme.of(context);
     return AnimatedPositioned(
       duration: CupertinoTextMagnifier._kDragAnimationDuration,
       curve: widget.animationCurve,
@@ -217,6 +227,10 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
       child: CupertinoMagnifier(
         inOutAnimation: _ioAnimation,
         additionalFocalPointOffset: Offset(0, _verticalFocalPointAdjustment),
+        borderSide: BorderSide(
+          color: themeData.primaryColor,
+          width: 2.0,
+        ),
       ),
     );
   }
@@ -224,6 +238,12 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
 
 /// A [RawMagnifier] used for magnifying text in cases where a user's
 /// finger may be blocking the point of interest, like a selection handle.
+///
+/// {@tool dartpad}
+/// This sample demonstrates how to use [CupertinoMagnifier].
+///
+/// ** See code in examples/api/lib/widgets/magnifier/cupertino_magnifier.0.dart **
+/// {@end-tool}
 ///
 /// [CupertinoMagnifier] is a wrapper around [RawMagnifier] that handles styling
 /// and transitions.
@@ -240,7 +260,7 @@ class CupertinoMagnifier extends StatelessWidget {
   /// Creates a [RawMagnifier] in the Cupertino style.
   ///
   /// The default constructor parameters and constants were eyeballed on
-  /// an iPhone XR iOS v15.5.
+  /// an iPhone 16 iOS v18.1.
   const CupertinoMagnifier({
     super.key,
     this.size = kDefaultSize,
@@ -256,9 +276,14 @@ class CupertinoMagnifier extends StatelessWidget {
     ],
     this.clipBehavior = Clip.none,
     this.borderSide =
-        const BorderSide(color: Color.fromARGB(255, 232, 232, 232)),
+        const BorderSide(
+          color: Color.fromARGB(255, 0, 124, 255),
+          width: 2.0,
+        ),
     this.inOutAnimation,
-  });
+    this.magnificationScale = 1.0,
+  }) : assert(magnificationScale > 0, 'The magnification scale should be greater than zero.');
+
 
   /// A list of shadows cast by the [Magnifier].
   ///
@@ -334,6 +359,11 @@ class CupertinoMagnifier extends StatelessWidget {
   /// point offset defined in [kMagnifierAboveFocalPoint].
   final Offset additionalFocalPointOffset;
 
+  /// The magnification scale for the magnifier.
+  ///
+  /// Defaults to 1.0, which indicates that the magnifier does not apply any magnification.
+  final double magnificationScale;
+
   @override
   Widget build(BuildContext context) {
     Offset focalPointOffset =
@@ -359,6 +389,7 @@ class CupertinoMagnifier extends StatelessWidget {
           shadows: shadows,
         ),
         clipBehavior: clipBehavior,
+        magnificationScale: magnificationScale,
       ),
     );
   }

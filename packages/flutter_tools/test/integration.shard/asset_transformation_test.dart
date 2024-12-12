@@ -15,7 +15,7 @@ final class _AssetTransformationTestProject extends Project {
   final String pubspec = '''
 name: test
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.7.0-0
 dependencies:
   flutter:
     sdk: flutter
@@ -67,11 +67,6 @@ Future<void> main() async {
         ..createSync(recursive: true)
         ..writeAsStringSync('abc');
 
-      final String flutterBin = fileSystem.path.join(
-        getFlutterRoot(),
-        'bin',
-        'flutter',
-      );
       final ProcessResult result = await processManager.run(
         <String>[
           flutterBin,
@@ -121,7 +116,7 @@ name: capitalizer_transformer
 version: 1.0.0
 
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.7.0-0
 
 dependencies:
   args: ^2.4.2

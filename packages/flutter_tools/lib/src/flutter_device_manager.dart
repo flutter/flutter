@@ -16,9 +16,6 @@ import 'custom_devices/custom_device.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
 import 'features.dart';
-import 'fuchsia/fuchsia_device.dart';
-import 'fuchsia/fuchsia_sdk.dart';
-import 'fuchsia/fuchsia_workflow.dart';
 import 'ios/devices.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/simulators.dart';
@@ -48,11 +45,9 @@ class FlutterDeviceManager extends DeviceManager {
     required XCDevice xcDevice,
     required AndroidWorkflow androidWorkflow,
     required IOSWorkflow iosWorkflow,
-    required FuchsiaWorkflow fuchsiaWorkflow,
     required FlutterVersion flutterVersion,
     required Artifacts artifacts,
     required MacOSWorkflow macOSWorkflow,
-    required FuchsiaSdk fuchsiaSdk,
     required UserMessages userMessages,
     required OperatingSystemUtils operatingSystemUtils,
     required WindowsWorkflow windowsWorkflow,
@@ -76,12 +71,6 @@ class FlutterDeviceManager extends DeviceManager {
     ),
     IOSSimulators(
       iosSimulatorUtils: iosSimulatorUtils,
-    ),
-    FuchsiaDevices(
-      fuchsiaSdk: fuchsiaSdk,
-      logger: logger,
-      fuchsiaWorkflow: fuchsiaWorkflow,
-      platform: platform,
     ),
     FlutterTesterDevices(
       fileSystem: fileSystem,
@@ -141,7 +130,7 @@ class FlutterDeviceManager extends DeviceManager {
       featureFlags: featureFlags,
       processManager: processManager,
       logger: logger,
-      config: customDevicesConfig
+      config: customDevicesConfig,
     ),
   ];
 

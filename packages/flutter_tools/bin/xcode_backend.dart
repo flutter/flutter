@@ -245,6 +245,8 @@ class Context {
         extraArgs: <String>[
           '--filter',
           '- native_assets.yaml',
+          '--filter',
+          '- native_assets.json',
         ],
         nativeAssetsPath,
         xcodeFrameworksDir,
@@ -461,18 +463,20 @@ class Context {
       flutterArgs.add('--local-engine-host=${environment['LOCAL_ENGINE_HOST']}');
     }
 
-    String architectures = environment['ARCHS'] ?? '';
-    if (command == 'prepare') {
-      // The "prepare" command runs in a pre-action script, which doesn't always
-      // filter the "ARCHS" build setting to only the active arch. To workaround,
-      // if "ONLY_ACTIVE_ARCH" is true and the "NATIVE_ARCH" is arm, assume the
-      // active arch is also arm to improve caching. If this assumption is
-      // incorrect, it will later be corrected by the "build" command.
-      if (environment['ONLY_ACTIVE_ARCH'] == 'YES' && environment['NATIVE_ARCH'] != null) {
-        if (environment['NATIVE_ARCH']!.contains('arm')) {
-          architectures = 'arm64';
-        } else {
-          architectures = 'x86_64';
+    // The "prepare" command runs in a pre-action script, which doesn't always
+    // filter the "ARCHS" build setting. Attempt to filter the architecture
+    // to improve caching. If this filter is incorrect, it will later be
+    // corrected by the "build" command.
+    String archs = environment['ARCHS'] ?? '';
+    if (command == 'prepare' && archs.contains(' ')) {
+      // If "ONLY_ACTIVE_ARCH" is "YES", the product includes only code for the
+      // native architecture ("NATIVE_ARCH").
+      final String? nativeArch = environment['NATIVE_ARCH'];
+      if (environment['ONLY_ACTIVE_ARCH'] == 'YES' && nativeArch != null) {
+        if (nativeArch.contains('arm64') && archs.contains('arm64')) {
+          archs = 'arm64';
+        } else if (nativeArch.contains('x86_64') && archs.contains('x86_64')) {
+          archs = 'x86_64';
         }
       }
     }
@@ -485,7 +489,7 @@ class Context {
       '-dTargetFile=$targetPath',
       '-dBuildMode=$buildMode',
       if (environment['FLAVOR'] != null) '-dFlavor=${environment['FLAVOR']}',
-      '-dIosArchs=$architectures',
+      '-dIosArchs=$archs',
       '-dSdkRoot=${environment['SDKROOT'] ?? ''}',
       '-dSplitDebugInfo=${environment['SPLIT_DEBUG_INFO'] ?? ''}',
       '-dTreeShakeIcons=${environment['TREE_SHAKE_ICONS'] ?? ''}',

@@ -91,7 +91,12 @@ for how to set up your development environment, or ask in #hackers-test on Disco
 Developing for Flutter
 ----------------------
 
-If you would prefer to write code, you may wish to start with our list of good first issues for [Flutter](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) or for [Flutter DevTools](https://github.com/flutter/devtools/labels/good%20first%20issue). See the respective sections below for further instructions.
+If you prefer to write code, consider starting with the list of good
+first issues for [Flutter][flutter-gfi] or for [Flutter DevTools][devtools-gfi].
+Reference the respective sections below for further instructions.
+
+[flutter-gfi]: https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22
+[devtools-gfi]: https://github.com/flutter/devtools/labels/good%20first%20issue
 
 ### Framework and Engine
 
@@ -143,6 +148,14 @@ are generally excited about improving the Dart & Flutter developer experience.
 Please see the DevTools [CONTRIBUTING.md](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md)
 guide to get started.
 
+### Helping with existing PRs
+
+Once you've learned the process of contributing, if you aren't sure what to work on next you
+might be interested in helping other developers complete their contributions by picking up an
+incomplete patch from the list of [issues with partial patches][has-partial-patch].
+
+[has-partial-patch]: https://github.com/flutter/flutter/labels/has%20partial%20patch
+
 Outreach
 --------
 
@@ -162,7 +175,7 @@ API documentation
 -----------------
 
 Another great area to contribute in is sample code and API documentation. If this is an area that interests you, join our
-[Discord](./docs/contributing/Chat.md) server and introduce yourself on the #hackers-deverl, #hackers-framework,
+[Discord](./docs/contributing/Chat.md) server and introduce yourself on the #hackers-devrel, #hackers-framework,
 or #hackers-engine channels, describing your area of interest. As our API docs are integrated into our source code, see the
 "developing for Flutter" section above for a guide on how to set up your developer environment.
 

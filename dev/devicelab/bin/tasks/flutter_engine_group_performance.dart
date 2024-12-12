@@ -20,13 +20,7 @@ Future<void> _withApkInstall(
   final DeviceDiscovery devices = DeviceDiscovery();
   final AndroidDevice device = await devices.workingDevice as AndroidDevice;
   await device.unlock();
-  try {
-    // Force proper cleanup before trying to install app. If uninstall fails,
-    // we log exception and proceed with running the test.
-    await device.adb(<String>['uninstall', bundleName]);
-  } on Exception catch (error) {
-    print('adb uninstall failed with exception: $error. Will proceed with test run.');
-  }
+  await device.adb(<String>['uninstall', bundleName], canFail: true);
   await device.adb(<String>['install', '-r', apkPath]);
   try {
     await body(device);

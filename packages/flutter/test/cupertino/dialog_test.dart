@@ -82,7 +82,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Alert dialog control test', (WidgetTester tester) async {
+  testWidgets('Taps on button calls onPressed', (WidgetTester tester) async {
     bool didDelete = false;
 
     await tester.pumpWidget(
@@ -119,6 +119,447 @@ void main() {
 
     expect(didDelete, isTrue);
     expect(find.text('Delete'), findsNothing);
+  });
+
+  testWidgets('Can tap after scrolling', (WidgetTester tester) async {
+    int? wasPressed;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return CupertinoAlertDialog(
+            actions: List<Widget>.generate(20, (int i) =>
+              CupertinoDialogAction(
+                onPressed: () {
+                  expect(wasPressed, null);
+                  wasPressed = i;
+                },
+                child: Text('Button $i'),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+    expect(find.text('Button 19').hitTestable(), findsNothing);
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button 1')));
+    await tester.pumpAndSettle();
+    // The dragging gesture must be dispatched in at least two segments.
+    // The first movement starts the gesture without setting a delta.
+    await gesture.moveBy(const Offset(0, -20));
+    await tester.pumpAndSettle();
+    await gesture.moveBy(const Offset(0, -1000));
+    await tester.pumpAndSettle();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(find.text('Button 19').hitTestable(), findsOne);
+
+    await tester.tap(find.text('Button 19'));
+    await tester.pumpAndSettle();
+    expect(wasPressed, 19);
+  });
+
+  testWidgets('Taps at the padding of buttons calls onPressed', (WidgetTester tester) async {
+    // Ensures that the entire button responds to hit tests, not just the text
+    // part.
+    bool wasPressed = false;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return CupertinoAlertDialog(
+            actions: <Widget>[
+              CupertinoDialogAction(
+                child: const Text('One'),
+                onPressed: () {
+                  expect(wasPressed, false);
+                  wasPressed = true;
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(wasPressed, isFalse);
+
+    await tester.tapAt(
+      tester.getTopLeft(find.text('One')) - const Offset(20, 0),
+    );
+
+    expect(wasPressed, isTrue);
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('One'), findsNothing);
+  });
+
+  testWidgets('Taps on a button can be slided to other buttons', (WidgetTester tester) async {
+    int? pressed;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return CupertinoAlertDialog(
+            actions: <Widget>[
+              CupertinoDialogAction(
+                child: const Text('One'),
+                onPressed: () {
+                  expect(pressed, null);
+                  pressed = 1;
+                  Navigator.pop(context);
+                },
+              ),
+              CupertinoDialogAction(
+                child: const Text('Two'),
+                onPressed: () {
+                  expect(pressed, null);
+                  pressed = 2;
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+    expect(pressed, null);
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Two')));
+    await tester.pumpAndSettle();
+
+    await gesture.moveTo(tester.getCenter(find.text('One')));
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('cupertinoAlertDialog.press-drag.png'),
+    );
+
+    await gesture.up();
+    expect(pressed, 1);
+    await tester.pumpAndSettle();
+    expect(find.text('One'), findsNothing);
+  });
+
+  testWidgets('Taps on the content can be slided to other buttons', (WidgetTester tester) async {
+    bool wasPressed = false;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return CupertinoAlertDialog(
+            title: const Text('The title'),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                child: const Text('One'),
+                onPressed: () {
+                  expect(wasPressed, false);
+                  wasPressed = true;
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+    expect(wasPressed, false);
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('The title')));
+    await tester.pumpAndSettle();
+
+    await gesture.moveTo(tester.getCenter(find.text('One')));
+    await tester.pumpAndSettle();
+    await gesture.up();
+    expect(wasPressed, true);
+    await tester.pumpAndSettle();
+    expect(find.text('One'), findsNothing);
+  });
+
+  testWidgets('Taps on the barrier can not be slided to buttons', (WidgetTester tester) async {
+    bool wasPressed = false;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return CupertinoAlertDialog(
+            title: const Text('The title'),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  expect(wasPressed, false);
+                  wasPressed = true;
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+    expect(wasPressed, false);
+
+    // Press on the barrier.
+    final TestGesture gesture = await tester.startGesture(const Offset(100, 100));
+    await tester.pumpAndSettle();
+
+    await gesture.moveTo(tester.getCenter(find.text('Cancel')));
+    await tester.pumpAndSettle();
+    await gesture.up();
+    expect(wasPressed, false);
+    await tester.pumpAndSettle();
+    expect(find.text('Cancel'), findsOne);
+  });
+
+  testWidgets('Sliding taps can still yield to scrolling after horizontal movement', (WidgetTester tester) async {
+    int? pressed;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return CupertinoAlertDialog(
+            content: Text('Long message' * 200),
+            actions: List<Widget>.generate(10, (int i) =>
+              CupertinoDialogAction(
+                onPressed: () {
+                  expect(pressed, null);
+                  pressed = i;
+                },
+                child: Text('Button $i'),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    // Starts on a button.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Button 0')));
+    await tester.pumpAndSettle();
+    // Move horizontally.
+    await gesture.moveBy(const Offset(-10, 2));
+    await gesture.moveBy(const Offset(-100, 2));
+    await tester.pumpAndSettle();
+    // Scroll up.
+    await gesture.moveBy(const Offset(0, -40));
+    await gesture.moveBy(const Offset(0, -1000));
+    await tester.pumpAndSettle();
+    // Stop scrolling.
+    await gesture.up();
+    await tester.pumpAndSettle();
+    // The actions section should have been scrolled up and Button 9 is visible.
+    await tester.tap(find.text('Button 9'));
+    expect(pressed, 9);
+  });
+
+  testWidgets('Sliding taps is responsive even before the drag starts', (WidgetTester tester) async {
+    int? pressed;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return CupertinoAlertDialog(
+            content: Text('Long message' * 200),
+            actions: List<Widget>.generate(10, (int i) =>
+              CupertinoDialogAction(
+                onPressed: () {
+                  expect(pressed, null);
+                  pressed = i;
+                },
+                child: Text('Button $i'),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    // Find the location right within the upper edge of button 1.
+    final Offset start = tester.getTopLeft(
+      find.widgetWithText(CupertinoDialogAction, 'Button 1'),
+    ) + const Offset(30, 5);
+    // Verify that the start location is within button 1.
+    await tester.tapAt(start);
+    expect(pressed, 1);
+    pressed = null;
+
+    final TestGesture gesture = await tester.startGesture(start);
+    await tester.pumpAndSettle();
+    // Move slightly upwards without starting the drag
+    await gesture.moveBy(const Offset(0, -10));
+    await tester.pumpAndSettle();
+    // Stop scrolling.
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(pressed, 0);
+  });
+
+  testWidgets('Sliding taps only recognizes the primary pointer', (WidgetTester tester) async {
+    int? pressed;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return CupertinoAlertDialog(
+            title: const Text('The title'),
+            actions: List<Widget>.generate(8, (int i) =>
+              CupertinoDialogAction(
+                onPressed: () {
+                  expect(pressed, null);
+                  pressed = i;
+                },
+                child: Text('Button $i'),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    // Start gesture 1 at button 0
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.text('Button 0')));
+    await gesture1.moveBy(const Offset(0, 20)); // Starts the gesture
+    await tester.pumpAndSettle();
+
+    // Start gesture 2 at button 1.
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.text('Button 1')));
+    await gesture2.moveBy(const Offset(0, 20)); // Starts the gesture
+    await tester.pumpAndSettle();
+
+    // Move gesture 1 to button 2 and release.
+    await gesture1.moveTo(tester.getCenter(find.text('Button 2')));
+    await tester.pumpAndSettle();
+    await gesture1.up();
+    await tester.pumpAndSettle();
+
+    expect(pressed, 2);
+    pressed = null;
+
+    // Tap at button 3, which becomes the new primary pointer and is recognized.
+    await tester.tap(find.text('Button 3'));
+    await tester.pumpAndSettle();
+    expect(pressed, 3);
+    pressed = null;
+
+    // Move gesture 2 to button 4 and release.
+    await gesture2.moveTo(tester.getCenter(find.text('Button 4')));
+    await tester.pumpAndSettle();
+    await gesture2.up();
+    await tester.pumpAndSettle();
+
+    // Non-primary pointers should not be recognized.
+    expect(pressed, null);
+  });
+
+  testWidgets('Non-primary pointers can trigger scroll', (WidgetTester tester) async {
+    int? pressed;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return CupertinoAlertDialog(
+            actions: List<Widget>.generate(12, (int i) =>
+              CupertinoDialogAction(
+                onPressed: () {
+                  expect(pressed, null);
+                  pressed = i;
+                },
+                child: Text('Button $i'),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    // Start gesture 1 at button 0
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.text('Button 0')));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.text('Button 11')).dy, greaterThan(400));
+
+    // Start gesture 2 at button 1 and scrolls.
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.text('Button 1')));
+    await gesture2.moveBy(const Offset(0, -20));
+    await gesture2.moveBy(const Offset(0, -500));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.text('Button 11')).dy, lessThan(400));
+
+    // Release gesture 1, which should not trigger any buttons.
+    await gesture1.up();
+    await tester.pumpAndSettle();
+
+    expect(pressed, null);
+  });
+
+  testWidgets('Taps on legacy button calls onPressed and renders correctly', (WidgetTester tester) async {
+    // Legacy buttons are implemented with [GestureDetector.onTap]. Apps that
+    // use customized legacy buttons should continue to work.
+    bool wasPressed = false;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return CupertinoAlertDialog(
+            actions: <Widget>[
+              LegacyAction(
+                child: const Text('Legacy'),
+                onPressed: () {
+                  expect(wasPressed, false);
+                  wasPressed = true;
+                  Navigator.pop(context);
+                },
+              ),
+              CupertinoDialogAction(child: const Text('One'), onPressed: () {}),
+              CupertinoDialogAction(child: const Text('Two'), onPressed: () {}),
+            ],
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+    expect(wasPressed, isFalse);
+
+    // Push the legacy button and hold for a while to activate the pressing effect.
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Legacy')));
+    await tester.pump(const Duration(seconds: 1));
+    expect(wasPressed, isFalse);
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('cupertinoAlertDialog.legacyButton.png'),
+    );
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(wasPressed, isTrue);
+    expect(find.text('Legacy'), findsNothing);
   });
 
   testWidgets('Dialog not barrier dismissible by default', (WidgetTester tester) async {
@@ -238,7 +679,7 @@ void main() {
 
     expect(
       find.byType(CupertinoAlertDialog),
-      paints..rect(color: const Color(0xBF1E1E1E)),
+      paints..rect(color: const Color(0xCC2D2D2D)),
     );
   });
 
@@ -358,6 +799,94 @@ void main() {
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
     expect(widget.style.color!.opacity, equals(1.0));
+  });
+
+  testWidgets('Pressing on disabled buttons does not trigger highlight', (WidgetTester tester) async {
+    bool pressedEnable = false;
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return CupertinoAlertDialog(
+            actions: <Widget>[
+              const CupertinoDialogAction(child: Text('Disabled')),
+              CupertinoDialogAction(
+                isDestructiveAction: true,
+                onPressed: () {
+                  pressedEnable = true;
+                  Navigator.pop(context);
+                },
+                child: const Text('Enabled'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Disabled')));
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    // This should look exactly like an idle dialog.
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('cupertinoAlertDialog.press_disabled.png'),
+    );
+
+    // Verify that gestures that started on a disabled button can slide onto an
+    // enabled button.
+    await gesture.moveTo(tester.getCenter(find.text('Enabled')));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('cupertinoAlertDialog.press_disabled_slide_to_enabled.png'),
+    );
+
+    expect(pressedEnable, false);
+    await gesture.up();
+    expect(pressedEnable, true);
+  });
+
+  testWidgets('Action buttons shows pressed highlight as soon as the pointer is down', (WidgetTester tester) async {
+    // Verifies that the the pressed color is not delayed for some milliseconds,
+    // a symptom if the color relies on a tap gesture timing out.
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return CupertinoAlertDialog(
+            title: const Text('The title'),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                child: const Text('One'),
+                onPressed: () { },
+              ),
+              CupertinoDialogAction(
+                child: const Text('Two'),
+                onPressed: () { },
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    final TestGesture pointer = await tester.startGesture(tester.getCenter(find.text('Two')));
+    // Just `pump`, not `pumpAndSettle`, as we want to verify the very next frame.
+    await tester.pump();
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('cupertinoAlertDialog.pressed.png'),
+    );
+    await pointer.up();
   });
 
   testWidgets('Message is scrollable, has correct padding with large text sizes', (WidgetTester tester) async {
@@ -1534,6 +2063,7 @@ Widget createAppWithCenteredButton(Widget child) {
 }
 
 
+@pragma('vm:entry-point')
 class _RestorableDialogTestWidget extends StatelessWidget {
   const _RestorableDialogTestWidget();
 
@@ -1613,6 +2143,35 @@ class TestScaffoldAppState extends State<TestScaffoldApp> {
               child: const Text('Go'),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// Old-style action sheet buttons, which are implemented with
+// `GestureDetector.onTap`.
+class LegacyAction extends StatelessWidget {
+  const LegacyAction({
+    super.key,
+    required this.onPressed,
+    required this.child,
+  });
+
+  final VoidCallback onPressed;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      behavior: HitTestBehavior.opaque,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 45),
+        child: Container(
+          alignment: AlignmentDirectional.center,
+          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10.0),
+          child: child,
         ),
       ),
     );

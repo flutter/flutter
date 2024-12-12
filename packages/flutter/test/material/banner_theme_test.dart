@@ -55,11 +55,11 @@ void main() {
       .toList();
 
     expect(description, <String>[
-      'backgroundColor: Color(0xfffffff0)',
-      'surfaceTintColor: Color(0xfffffff1)',
-      'shadowColor: Color(0xfffffff2)',
-      'dividerColor: Color(0xfffffff3)',
-      'contentTextStyle: TextStyle(inherit: true, color: Color(0xfffffff4))',
+      'backgroundColor: ${const Color(0xfffffff0)}',
+      'surfaceTintColor: ${const Color(0xfffffff1)}',
+      'shadowColor: ${const Color(0xfffffff2)}',
+      'dividerColor: ${const Color(0xfffffff3)}',
+      'contentTextStyle: TextStyle(inherit: true, color: ${const Color(0xfffffff4)})',
       'elevation: 4.0',
       'padding: EdgeInsets.all(20.0)',
       'leadingPadding: EdgeInsets(8.0, 0.0, 0.0, 0.0)',

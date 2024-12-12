@@ -140,8 +140,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     final ShapeDecoration collapsingContainerDecoration = getDecoratedBox(collapsedKey).decoration as ShapeDecoration;
     expect(collapsingContainerDecoration.color, Colors.transparent);
-    expect((collapsingContainerDecoration.shape as Border).top.color, const Color(0x15222222));
-    expect((collapsingContainerDecoration.shape as Border).bottom.color, const Color(0x15222222));
+    expect((collapsingContainerDecoration.shape as Border).top.color, isSameColorAs(const Color(0x15222222)));
+    expect((collapsingContainerDecoration.shape as Border).bottom.color, isSameColorAs(const Color(0x15222222)));
 
     // Pump all the way to the end now.
     await tester.pump(const Duration(seconds: 1));

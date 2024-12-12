@@ -5,6 +5,7 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -47,12 +48,12 @@ void main() {
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('name: foo\n');
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('web', 'index.html')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     artifacts = Artifacts.test(fileSystem: fileSystem);
     logger = BufferLogger.test();
-    processManager = FakeProcessManager.empty();
+    processManager = FakeProcessManager.any();
     processUtils = ProcessUtils(
       logger: logger,
       processManager: processManager,
@@ -78,25 +79,6 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
-    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => processManager,
-  });
-
-  testUsingContext('Refuses to build a debug build for web', () async {
-    final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
-      artifacts: artifacts,
-      androidSdk: FakeAndroidSdk(),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: fileSystem,
-      logger: logger,
-      processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
-    ));
-
-    expect(() => runner.run(<String>['build', 'web', '--debug', '--no-pub']),
-      throwsA(isA<UsageException>()));
-  }, overrides: <Type, Generator>{
-    Platform: () => fakePlatform,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     ProcessManager: () => processManager,
   });
@@ -178,7 +160,7 @@ void main() {
         'build',
         'web',
         '--no-pub', '--no-web-resources-cdn', '--dart-define=foo=a', '--dart2js-optimization=O0']),
-      throwsUsageException(message: '"O0" is not an allowed value for option "dart2js-optimization"'),
+      throwsUsageException(message: '"O0" is not an allowed value for option "--dart2js-optimization"'),
     );
 
     final Directory buildDir = fileSystem.directory(fileSystem.path.join('build', 'web'));
@@ -188,7 +170,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
       expect(environment.defines, <String, String>{
         'TargetFile': 'lib/main.dart',
@@ -378,6 +360,37 @@ void main() {
     ProcessManager: () => processManager,
   });
 
+  // Tests whether using a deprecated webRenderer toggles a warningText.
+  Future<void> testWebRendererDeprecationMessage(WebRendererMode webRenderer) async {
+    testUsingContext('Using --web-renderer=${webRenderer.name} triggers a warningText.', () async {
+      // Run the command so it parses --web-renderer, but ignore all errors.
+      // We only care about the logger.
+      try {
+        final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+        await createTestCommandRunner(buildCommand).run(<String>[
+          'build',
+          'web',
+          '--no-pub',
+          ...webRenderer.toCliDartDefines,
+        ]);
+      } on ToolExit catch (error) {
+        expect(error, isA<ToolExit>());
+      }
+      expect(logger.warningText, contains(
+        'See: https://docs.flutter.dev/to/web-html-renderer-deprecation'
+      ));
+    }, overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Logger: () => logger,
+    });
+  }
+  /// Do test all the deprecated WebRendererModes
+  WebRendererMode.values
+    .where((WebRendererMode mode) => mode.isDeprecated)
+    .forEach(testWebRendererDeprecationMessage);
+
   testUsingContext('flutter build web option visibility', () async {
     final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
     createTestCommandRunner(buildCommand);
@@ -387,12 +400,6 @@ void main() {
       expect(command.argParser.options.keys, contains(option));
       expect(command.argParser.options[option]!.hide, isFalse);
       expect(command.usage, contains(option));
-    }
-
-    void expectHidden(String option) {
-      expect(command.argParser.options.keys, contains(option));
-      expect(command.argParser.options[option]!.hide, isTrue);
-      expect(command.usage, isNot(contains(option)));
     }
 
     expectVisible('pwa-strategy');
@@ -406,8 +413,6 @@ void main() {
     expectVisible('wasm');
     expectVisible('strip-wasm');
     expectVisible('base-href');
-
-    expectHidden('web-renderer');
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
@@ -421,8 +426,8 @@ void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
   final List<String> dependencies = <String>[
     fileSystem.path.join('packages', 'flutter_tools', 'lib', 'src', 'build_system', 'targets', 'web.dart'),
     fileSystem.path.join('bin', 'cache', 'flutter_web_sdk'),
-    fileSystem.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
     fileSystem.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
+    fileSystem.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dartaotruntime'),
     fileSystem.path.join('bin', 'cache', 'dart-sdk '),
   ];
   for (final String dependency in dependencies) {
@@ -430,10 +435,28 @@ void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
   }
 
   // Project files.
-  fileSystem.file('.packages')
-      .writeAsStringSync('''
-foo:lib/
-fizz:bar/lib/
+  fileSystem
+    .directory('.dart_tool')
+    .childFile('package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+{
+  "packages": [
+    {
+      "name": "foo",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "fizz",
+      "rootUri": "../bar",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    }
+  ],
+  "configVersion": 2
+}
 ''');
   fileSystem.file('pubspec.yaml')
       .writeAsStringSync('''

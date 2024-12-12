@@ -1,16 +1,16 @@
 // Generated file. Do not edit.
 
+plugins {
+    id "com.android.library"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
 def localProperties = new Properties()
 def localPropertiesFile = new File(buildscript.sourceFile.parentFile.parentFile, "local.properties")
 if (localPropertiesFile.exists()) {
     localPropertiesFile.withReader("UTF-8") { reader ->
         localProperties.load(reader)
     }
-}
-
-def flutterRoot = localProperties.getProperty("flutter.sdk")
-if (flutterRoot == null) {
-    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
 }
 
 def flutterVersionCode = localProperties.getProperty("flutter.versionCode")
@@ -22,9 +22,6 @@ def flutterVersionName = localProperties.getProperty("flutter.versionName")
 if (flutterVersionName == null) {
     flutterVersionName = "1.0"
 }
-
-apply plugin: "com.android.library"
-apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 group = "{{androidIdentifier}}"
 version = "1.0"
@@ -47,21 +44,6 @@ android {
     }
 }
 
-android.buildTypes.all {buildType ->
-    if (!android.productFlavors.isEmpty()) {
-        android.productFlavors.all{productFlavor ->
-            android.publishing.singleVariant(productFlavor.name + buildType.name.capitalize()) {
-                withSourcesJar()
-                withJavadocJar()
-            }
-        }
-    } else {
-        android.publishing.singleVariant(buildType.name) {
-            withSourcesJar()
-            withJavadocJar()
-        }
-    }
-}
 
 flutter {
     source = "../.."

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +17,7 @@ TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
   );
   return iconRichText.text.style;
 }
+
 void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
@@ -2966,6 +2968,321 @@ void main() {
         await tester.pump();
         expect(buttonWasPressed, isFalse);
     });
+  });
+
+  testWidgets('AppBar.leading size with custom IconButton', (WidgetTester tester) async {
+    final Key leadingKey = UniqueKey();
+    final Key titleKey = UniqueKey();
+    const double titleSpacing = 16.0;
+    final ThemeData theme = ThemeData();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            key: leadingKey,
+            onPressed: () {},
+            icon: const Icon(Icons.menu),
+          ),
+          centerTitle: false,
+          title: Text(
+            'Title',
+            key: titleKey,
+          ),
+        ),
+      ),
+    ));
+
+    final Finder buttonFinder = find.byType(IconButton);
+    expect(tester.getSize(buttonFinder), const Size(48.0, 48.0));
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(buttonFinder));
+    await tester.pumpAndSettle();
+    expect(
+      buttonFinder,
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(0.0, 0.0, 40.0, 40.0),
+          color: theme.colorScheme.onSurface.withOpacity(0.08),
+        ),
+    );
+
+    // Get the offset of the Center widget that wraps the IconButton.
+    final Offset backButtonOffset = tester.getTopRight(find.ancestor(
+      of: buttonFinder,
+      matching: find.byType(Center),
+    ));
+    final Offset titleOffset = tester.getTopLeft(find.byKey(titleKey));
+    expect(titleOffset.dx, backButtonOffset.dx + titleSpacing);
+  });
+
+  testWidgets('AppBar.leading size with custom BackButton', (WidgetTester tester) async {
+    final Key leadingKey = UniqueKey();
+    final Key titleKey = UniqueKey();
+    const double titleSpacing = 16.0;
+    final ThemeData theme = ThemeData();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          leading: BackButton(
+            key: leadingKey,
+            onPressed: () {},
+          ),
+          centerTitle: false,
+          title: Text(
+            'Title',
+            key: titleKey,
+          ),
+        ),
+      ),
+    ));
+
+    final Finder buttonFinder = find.byType(BackButton);
+    expect(tester.getSize(buttonFinder), const Size(48.0, 48.0));
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(buttonFinder));
+    await tester.pumpAndSettle();
+    expect(
+      buttonFinder,
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(0.0, 0.0, 40.0, 40.0),
+          color: theme.colorScheme.onSurface.withOpacity(0.08),
+        ),
+    );
+
+    // Get the offset of the Center widget that wraps the IconButton.
+    final Offset backButtonOffset = tester.getTopRight(find.ancestor(
+      of: buttonFinder,
+      matching: find.byType(Center),
+    ));
+    final Offset titleOffset = tester.getTopLeft(find.byKey(titleKey));
+    expect(titleOffset.dx, backButtonOffset.dx + titleSpacing);
+  });
+
+  testWidgets('AppBar.leading size with custom CloseButton', (WidgetTester tester) async {
+    final Key leadingKey = UniqueKey();
+    final Key titleKey = UniqueKey();
+    const double titleSpacing = 16.0;
+    final ThemeData theme = ThemeData();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          leading: CloseButton(
+            key: leadingKey,
+            onPressed: () {},
+          ),
+          centerTitle: false,
+          title: Text(
+            'Title',
+            key: titleKey,
+          ),
+        ),
+      ),
+    ));
+
+    final Finder buttonFinder = find.byType(CloseButton);
+    expect(tester.getSize(buttonFinder), const Size(48.0, 48.0));
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(buttonFinder));
+    await tester.pumpAndSettle();
+    expect(
+      buttonFinder,
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(0.0, 0.0, 40.0, 40.0),
+          color: theme.colorScheme.onSurface.withOpacity(0.08),
+        ),
+    );
+
+    // Get the offset of the Center widget that wraps the IconButton.
+    final Offset backButtonOffset = tester.getTopRight(find.ancestor(
+      of: buttonFinder,
+      matching: find.byType(Center),
+    ));
+    final Offset titleOffset = tester.getTopLeft(find.byKey(titleKey));
+    expect(titleOffset.dx, backButtonOffset.dx + titleSpacing);
+  });
+
+  testWidgets('AppBar.leading size with custom DrawerButton', (WidgetTester tester) async {
+    final Key leadingKey = UniqueKey();
+    final Key titleKey = UniqueKey();
+    const double titleSpacing = 16.0;
+    final ThemeData theme = ThemeData();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          leading: DrawerButton(
+            key: leadingKey,
+            onPressed: () {},
+          ),
+          centerTitle: false,
+          title: Text(
+            'Title',
+            key: titleKey,
+          ),
+        ),
+      ),
+    ));
+
+    final Finder buttonFinder = find.byType(DrawerButton);
+    expect(tester.getSize(buttonFinder), const Size(48.0, 48.0));
+
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(buttonFinder));
+    await tester.pumpAndSettle();
+    expect(
+      buttonFinder,
+      paints
+        ..rect(
+          rect: const Rect.fromLTRB(0.0, 0.0, 40.0, 40.0),
+          color: theme.colorScheme.onSurface.withOpacity(0.08),
+        ),
+    );
+
+    // Get the offset of the Center widget that wraps the IconButton.
+    final Offset backButtonOffset = tester.getTopRight(find.ancestor(
+      of: buttonFinder,
+      matching: find.byType(Center),
+    ));
+    final Offset titleOffset = tester.getTopLeft(find.byKey(titleKey));
+    expect(titleOffset.dx, backButtonOffset.dx + titleSpacing);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/152315
+  testWidgets('AppBar back button navigates to previous page on tap with TooltipTriggerMode.tap', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(tooltipTheme: const TooltipThemeData(triggerMode: TooltipTriggerMode.tap)),
+      home: Scaffold(
+        body: Center(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => Scaffold(
+                        appBar: AppBar(
+                          title: const Text('Second Screen'),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('Go to second screen'),
+              );
+            }
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.text('Second Screen'), findsNothing);
+
+    await tester.tap(find.text('Go to second screen'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Second Screen'), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Second Screen'), findsNothing);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/152315
+  testWidgets('Material2 - AppBar back button navigates to previous page on tap with TooltipTriggerMode.tap', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        useMaterial3: false,
+        tooltipTheme: const TooltipThemeData(triggerMode: TooltipTriggerMode.tap),
+      ),
+      home: Scaffold(
+        body: Center(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => Scaffold(
+                        appBar: AppBar(
+                          title: const Text('Second Screen'),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('Go to second screen'),
+              );
+            }
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.text('Second Screen'), findsNothing);
+
+    await tester.tap(find.text('Go to second screen'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Second Screen'), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Second Screen'), findsNothing);
+  });
+
+  testWidgets('AppBar actions padding can be adjusted', (WidgetTester tester) async {
+    final Key appBarKey = UniqueKey();
+    final Key actionKey = UniqueKey();
+
+    Widget buildAppBar({ EdgeInsetsGeometry? actionsPadding }) {
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            key: appBarKey,
+            actions: <Widget>[
+              SizedBox.square(key: actionKey, dimension: 40.0),
+            ],
+            actionsPadding: actionsPadding,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildAppBar());
+
+    // Actions padding default to zero padding.
+    Offset actionsOffset = tester.getTopRight(find.byKey(actionKey));
+    final Offset appBarOffset = tester.getTopRight(find.byKey(appBarKey));
+    expect(appBarOffset.dx - actionsOffset.dx, 0);
+
+    const EdgeInsets actionsPadding = EdgeInsets.only(right: 8.0);
+    await tester.pumpWidget(buildAppBar(actionsPadding: actionsPadding));
+    actionsOffset = tester.getTopRight(find.byKey(actionKey));
+    expect(actionsOffset.dx, equals(appBarOffset.dx - actionsPadding.right));
   });
 
   group('Material 2', () {

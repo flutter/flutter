@@ -411,13 +411,6 @@ TaskFunction createColorFilterWithUnstableChildPerfE2ETest() {
   ).run;
 }
 
-TaskFunction createRasterCacheUseMemoryPerfE2ETest() {
-  return PerfTest.e2e(
-    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test/raster_cache_use_memory_perf_e2e.dart',
-  ).run;
-}
-
 TaskFunction createShaderMaskCachePerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -2049,7 +2042,7 @@ class MemoryTest {
     await receivedNextMessage;
   }
 
-  /// Taps the application and looks for acknowldgement.
+  /// Taps the application and looks for acknowledgement.
   ///
   /// This is used by several tests to ensure scrolling gestures are installed.
   Future<void> tapNotification() async {

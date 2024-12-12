@@ -503,7 +503,7 @@ void main() {
     );
   });
 
-  testWidgets('Activates the text field when receives semantics focus on Mac, Windows', (WidgetTester tester) async {
+  testWidgets('Activates the text field when receives semantics focus on desktops', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final FocusNode focusNode = FocusNode();
@@ -538,6 +538,7 @@ void main() {
                           SemanticsAction.tap,
                           SemanticsAction.focus,
                           SemanticsAction.didGainAccessibilityFocus,
+                          SemanticsAction.didLoseAccessibilityFocus,
                         ],
                         textDirection: TextDirection.ltr,
                       ),
@@ -557,8 +558,11 @@ void main() {
     semanticsOwner.performAction(4, SemanticsAction.didGainAccessibilityFocus);
     await tester.pumpAndSettle();
     expect(focusNode.hasFocus, isTrue);
+    semanticsOwner.performAction(4, SemanticsAction.didLoseAccessibilityFocus);
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isFalse);
     semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows }));
+  }, variant: TargetPlatformVariant.desktop());
 
   testWidgets(
     'takes available space horizontally and takes intrinsic space vertically no-strut',
@@ -5223,7 +5227,7 @@ void main() {
     expect(find.byType(CupertinoButton), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Cannot drag one handle past the other', (WidgetTester tester) async {
+  testWidgets('Cannot drag one handle past the other on non-Apple platform', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'abc def ghi',
     );
@@ -5231,6 +5235,8 @@ void main() {
     // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
     // On macOS, we select the precise position of the tap.
     final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
+    // Provide a [TextSelectionControls] that builds selection handles.
+    final TextSelectionControls selectionControls = CupertinoTextSelectionHandleControls();
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -5238,6 +5244,7 @@ void main() {
           child: CupertinoTextField(
             dragStartBehavior: DragStartBehavior.down,
             controller: controller,
+            selectionControls: selectionControls,
             style: const TextStyle(fontSize: 10.0),
           ),
         ),
@@ -5289,7 +5296,77 @@ void main() {
     // The selection doesn't move beyond the left handle. There's always at
     // least 1 char selected.
     expect(controller.selection.extentOffset, 5);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+  }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+
+  testWidgets('Can drag one handle past the other on iOS', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'abc def ghi',
+    );
+    addTearDown(controller.dispose);
+    // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
+    // On macOS, we select the precise position of the tap.
+    final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
+    // Provide a [TextSelectionControls] that builds selection handles.
+    final TextSelectionControls selectionControls = CupertinoTextSelectionHandleControls();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            selectionControls: selectionControls,
+            style: const TextStyle(fontSize: 10.0),
+          ),
+        ),
+      ),
+    );
+
+    // Double tap on 'e' to select 'def'.
+    final Offset ePos = textOffsetToPosition(tester, 5);
+    await tester.tapAt(ePos, pointer: 7);
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, isTargetPlatformIOS ? 7 : 5);
+    await tester.tapAt(ePos, pointer: 7);
+    await tester.pumpAndSettle();
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 7);
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    expect(endpoints.length, 2);
+
+    // On Mac, the toolbar blocks the drag on the right handle, so hide it.
+    final EditableTextState editableTextState = tester.state(find.byType(EditableText));
+    editableTextState.hideToolbar(false);
+    await tester.pumpAndSettle();
+
+    // Drag the right handle until there's only 1 char selected.
+    // We use a small offset because the endpoint is on the very corner
+    // of the handle.
+    final Offset handlePos = endpoints[1].point;
+    Offset newHandlePos = textOffsetToPosition(tester, 5); // Position of 'e'.
+    final TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 5);
+
+    newHandlePos = textOffsetToPosition(tester, 2); // Position of 'c'.
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    // The selection inverts moving beyond the left handle.
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 2);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('Dragging between multiple lines keeps the contact point at the same place on the handle on Android', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
@@ -8067,6 +8144,73 @@ void main() {
     );
   });
 
+  testWidgets(
+    'CrossAxisAlignment start positions the prefix and suffix at the top of the field',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              padding: EdgeInsets.zero, // Preventing delta position.dy
+              prefix: Icon(CupertinoIcons.add),
+              suffix: Icon(CupertinoIcons.clear),
+              crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+          ),
+        ),
+      );
+
+      final CupertinoTextField cupertinoTextField = tester.widget<CupertinoTextField>(
+        find.byType(CupertinoTextField),
+      );
+
+      expect(find.widgetWithIcon(CupertinoTextField, CupertinoIcons.clear), findsOneWidget);
+      expect(find.widgetWithIcon(CupertinoTextField, CupertinoIcons.add), findsOneWidget);
+      expect(cupertinoTextField.crossAxisAlignment, CrossAxisAlignment.start);
+
+      final double editableDy = tester.getTopLeft(find.byType(EditableText)).dy;
+      final double prefixDy = tester.getTopLeft(find.byIcon(CupertinoIcons.add)).dy;
+      final double suffixDy = tester.getTopLeft(find.byIcon(CupertinoIcons.clear)).dy;
+
+      expect(prefixDy, editableDy);
+      expect(suffixDy, editableDy);
+    },
+  );
+
+  testWidgets(
+    'CrossAxisAlignment end positions the prefix and suffix at the bottom of the field',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              padding: EdgeInsets.zero, // Preventing delta position.dy
+              prefix: SizedBox.square(dimension: 48, child: Icon(CupertinoIcons.add)),
+              suffix: SizedBox.square(dimension: 48, child: Icon(CupertinoIcons.clear)),
+              crossAxisAlignment: CrossAxisAlignment.end,
+            ),
+          ),
+        ),
+      );
+
+      final CupertinoTextField cupertinoTextField = tester.widget<CupertinoTextField>(
+        find.byType(CupertinoTextField),
+      );
+
+      expect(find.widgetWithIcon(CupertinoTextField, CupertinoIcons.clear), findsOneWidget);
+      expect(find.widgetWithIcon(CupertinoTextField, CupertinoIcons.add), findsOneWidget);
+      expect(cupertinoTextField.crossAxisAlignment, CrossAxisAlignment.end);
+
+
+      final double editableDy = tester.getTopLeft(find.byType(EditableText)).dy;
+      final double prefixDy = tester.getTopLeft(find.byIcon(CupertinoIcons.add)).dy;
+      final double suffixDy = tester.getTopLeft(find.byIcon(CupertinoIcons.clear)).dy;
+
+      expect(prefixDy, lessThan(editableDy));
+      expect(suffixDy, lessThan(editableDy));
+    },
+  );
+
   testWidgets('text selection style 1', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure\nhi\nwassssup!',
@@ -10318,8 +10462,13 @@ void main() {
                         actions: <SemanticsAction>[
                           SemanticsAction.tap,
                           SemanticsAction.focus,
-                          if (defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.macOS)
-                            SemanticsAction.didGainAccessibilityFocus,
+                          if (defaultTargetPlatform == TargetPlatform.linux
+                              || defaultTargetPlatform == TargetPlatform.windows
+                              || defaultTargetPlatform == TargetPlatform.macOS)
+                            ...<SemanticsAction>[
+                              SemanticsAction.didGainAccessibilityFocus,
+                              SemanticsAction.didLoseAccessibilityFocus,
+                            ],
                           // TODO(gspencergoog): also test for the presence of SemanticsAction.focus when
                           // this iOS issue is addressed: https://github.com/flutter/flutter/issues/150030
                         ],
@@ -10375,8 +10524,13 @@ void main() {
                           SemanticsFlag.isReadOnly,
                         ],
                         actions: <SemanticsAction>[
-                          if (defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.macOS)
-                            SemanticsAction.didGainAccessibilityFocus,
+                          if (defaultTargetPlatform == TargetPlatform.linux
+                              || defaultTargetPlatform == TargetPlatform.windows
+                              || defaultTargetPlatform == TargetPlatform.macOS)
+                            ...<SemanticsAction>[
+                              SemanticsAction.didGainAccessibilityFocus,
+                              SemanticsAction.didLoseAccessibilityFocus,
+                            ],
                         ],
                       ),
                     ],

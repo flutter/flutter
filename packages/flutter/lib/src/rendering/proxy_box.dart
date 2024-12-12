@@ -1213,10 +1213,12 @@ class RenderBackdropFilter extends RenderProxyBox {
     required ui.ImageFilter filter,
     BlendMode blendMode = BlendMode.srcOver,
     bool enabled = true,
+    BackdropKey? backdropKey,
   })
     : _filter = filter,
       _enabled = enabled,
       _blendMode = blendMode,
+      _backdropKey = backdropKey,
       super(child);
 
   @override
@@ -1261,6 +1263,19 @@ class RenderBackdropFilter extends RenderProxyBox {
     _blendMode = value;
     markNeedsPaint();
   }
+  /// The backdrop key that identifies the [BackdropGroup] this filter will
+  /// read from.
+  ///
+  /// The default value for the backdrop key is `null`.
+  BackdropKey? get backdropKey => _backdropKey;
+  BackdropKey? _backdropKey;
+  set backdropKey(BackdropKey? value) {
+    if (value == _backdropKey) {
+      return;
+    }
+    _backdropKey = value;
+    markNeedsPaint();
+  }
 
   @override
   bool get alwaysNeedsCompositing => child != null;
@@ -1277,6 +1292,7 @@ class RenderBackdropFilter extends RenderProxyBox {
       layer ??= BackdropFilterLayer();
       layer!.filter = _filter;
       layer!.blendMode = _blendMode;
+      layer!.backdropKey = _backdropKey;
       context.pushLayer(layer!, super.paint, offset);
       assert(() {
         layer!.debugCreator = debugCreator;
@@ -2590,8 +2606,7 @@ class RenderTransform extends RenderProxyBox {
           effectiveTransform.storage,
           filterQuality: filterQuality!,
         );
-        if (layer is ImageFilterLayer) {
-          final ImageFilterLayer filterLayer = layer! as ImageFilterLayer;
+        if (layer case final ImageFilterLayer filterLayer) {
           filterLayer.imageFilter = filter;
         } else {
           layer = ImageFilterLayer(imageFilter: filter);
@@ -3081,33 +3096,18 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
-    if (event is PointerDownEvent) {
-      return onPointerDown?.call(event);
-    }
-    if (event is PointerMoveEvent) {
-      return onPointerMove?.call(event);
-    }
-    if (event is PointerUpEvent) {
-      return onPointerUp?.call(event);
-    }
-    if (event is PointerHoverEvent) {
-      return onPointerHover?.call(event);
-    }
-    if (event is PointerCancelEvent) {
-      return onPointerCancel?.call(event);
-    }
-    if (event is PointerPanZoomStartEvent) {
-      return onPointerPanZoomStart?.call(event);
-    }
-    if (event is PointerPanZoomUpdateEvent) {
-      return onPointerPanZoomUpdate?.call(event);
-    }
-    if (event is PointerPanZoomEndEvent) {
-      return onPointerPanZoomEnd?.call(event);
-    }
-    if (event is PointerSignalEvent) {
-      return onPointerSignal?.call(event);
-    }
+    return switch (event) {
+      PointerDownEvent()          => onPointerDown?.call(event),
+      PointerMoveEvent()          => onPointerMove?.call(event),
+      PointerUpEvent()            => onPointerUp?.call(event),
+      PointerHoverEvent()         => onPointerHover?.call(event),
+      PointerCancelEvent()        => onPointerCancel?.call(event),
+      PointerPanZoomStartEvent()  => onPointerPanZoomStart?.call(event),
+      PointerPanZoomUpdateEvent() => onPointerPanZoomUpdate?.call(event),
+      PointerPanZoomEndEvent()    => onPointerPanZoomEnd?.call(event),
+      PointerSignalEvent()        => onPointerSignal?.call(event),
+      _ => null,
+    };
   }
 
   @override

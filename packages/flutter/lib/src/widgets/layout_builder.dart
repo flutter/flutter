@@ -158,7 +158,10 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
 
   @override
   void markNeedsBuild() {
-    super.markNeedsBuild();
+    // Calling super.markNeedsBuild is not needed. This Element does not need
+    // to performRebuild since this call already does what performRebuild does,
+    // So the element is clean as soon as this method returns and does not have
+    // to be added to the dirty list or marked as dirty.
     renderObject.scheduleLayoutCallback();
     _needsBuild = true;
   }

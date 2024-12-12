@@ -82,10 +82,10 @@ void main() {
   }
 
   ShapeDecoration? findDayDecoration(WidgetTester tester, String day) {
-    return tester.widget<DecoratedBox>(
+    return tester.widget<Ink>(
       find.ancestor(
         of: find.text(day),
-        matching: find.byType(DecoratedBox)
+        matching: find.byType(Ink)
       ),
     ).decoration as ShapeDecoration?;
   }
@@ -322,43 +322,43 @@ void main() {
         .toList();
 
     expect(description, equalsIgnoringHashCodes(<String>[
-      'backgroundColor: Color(0xfffffff0)',
+      'backgroundColor: ${const Color(0xfffffff0)}',
       'elevation: 6.0',
-      'shadowColor: Color(0xfffffff1)',
-      'surfaceTintColor: Color(0xfffffff2)',
+      'shadowColor: ${const Color(0xfffffff1)}',
+      'surfaceTintColor: ${const Color(0xfffffff2)}',
       'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
-      'headerBackgroundColor: Color(0xfffffff3)',
-      'headerForegroundColor: Color(0xfffffff4)',
+      'headerBackgroundColor: ${const Color(0xfffffff3)}',
+      'headerForegroundColor: ${const Color(0xfffffff4)}',
       'headerHeadlineStyle: TextStyle(inherit: true, size: 10.0)',
       'headerHelpStyle: TextStyle(inherit: true, size: 11.0)',
       'weekDayStyle: TextStyle(inherit: true, size: 12.0)',
       'dayStyle: TextStyle(inherit: true, size: 13.0)',
-      'dayForegroundColor: WidgetStatePropertyAll(Color(0xfffffff5))',
-      'dayBackgroundColor: WidgetStatePropertyAll(Color(0xfffffff6))',
-      'dayOverlayColor: WidgetStatePropertyAll(Color(0xfffffff7))',
+      'dayForegroundColor: WidgetStatePropertyAll(${const Color(0xfffffff5)})',
+      'dayBackgroundColor: WidgetStatePropertyAll(${const Color(0xfffffff6)})',
+      'dayOverlayColor: WidgetStatePropertyAll(${const Color(0xfffffff7)})',
       'dayShape: WidgetStatePropertyAll(RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero))',
-      'todayForegroundColor: WidgetStatePropertyAll(Color(0xfffffff8))',
-      'todayBackgroundColor: WidgetStatePropertyAll(Color(0xfffffff9))',
+      'todayForegroundColor: WidgetStatePropertyAll(${const Color(0xfffffff8)})',
+      'todayBackgroundColor: WidgetStatePropertyAll(${const Color(0xfffffff9)})',
       'todayBorder: BorderSide(width: 3.0)',
       'yearStyle: TextStyle(inherit: true, size: 13.0)',
-      'yearForegroundColor: WidgetStatePropertyAll(Color(0xfffffffa))',
-      'yearBackgroundColor: WidgetStatePropertyAll(Color(0xfffffffb))',
-      'yearOverlayColor: WidgetStatePropertyAll(Color(0xfffffffc))',
-      'rangePickerBackgroundColor: Color(0xfffffffd)',
+      'yearForegroundColor: WidgetStatePropertyAll(${const Color(0xfffffffa)})',
+      'yearBackgroundColor: WidgetStatePropertyAll(${const Color(0xfffffffb)})',
+      'yearOverlayColor: WidgetStatePropertyAll(${const Color(0xfffffffc)})',
+      'rangePickerBackgroundColor: ${const Color(0xfffffffd)}',
       'rangePickerElevation: 7.0',
-      'rangePickerShadowColor: Color(0xfffffffe)',
-      'rangePickerSurfaceTintColor: Color(0xffffffff)',
+      'rangePickerShadowColor: ${const Color(0xfffffffe)}',
+      'rangePickerSurfaceTintColor: ${const Color(0xffffffff)}',
       'rangePickerShape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
-      'rangePickerHeaderBackgroundColor: Color(0xffffff0f)',
-      'rangePickerHeaderForegroundColor: Color(0xffffff1f)',
+      'rangePickerHeaderBackgroundColor: ${const Color(0xffffff0f)}',
+      'rangePickerHeaderForegroundColor: ${const Color(0xffffff1f)}',
       'rangePickerHeaderHeadlineStyle: TextStyle(inherit: true, size: 14.0)',
       'rangePickerHeaderHelpStyle: TextStyle(inherit: true, size: 15.0)',
-      'rangeSelectionBackgroundColor: Color(0xffffff2f)',
-      'rangeSelectionOverlayColor: WidgetStatePropertyAll(Color(0xffffff3f))',
-      'dividerColor: Color(0xffffff4f)',
-      'inputDecorationTheme: InputDecorationTheme#00000(fillColor: Color(0xffffff5f), border: UnderlineInputBorder())',
-      'cancelButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(Color(0xffffff6f)))',
-      'confirmButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(Color(0xffffff7f)))',
+      'rangeSelectionBackgroundColor: ${const Color(0xffffff2f)}',
+      'rangeSelectionOverlayColor: WidgetStatePropertyAll(${const Color(0xffffff3f)})',
+      'dividerColor: ${const Color(0xffffff4f)}',
+      'inputDecorationTheme: InputDecorationTheme#00000(fillColor: ${const Color(0xffffff5f)}, border: UnderlineInputBorder())',
+      'cancelButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(${const Color(0xffffff6f)}))',
+      'confirmButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(${const Color(0xffffff7f)}))',
       'locale: en',
     ]));
   });
@@ -756,7 +756,6 @@ void main() {
           datePickerTheme: DatePickerThemeData(
             dayOverlayColor: dayOverlayColor,
           ),
-          useMaterial3: true,
         ),
         home: Directionality(
           textDirection: TextDirection.ltr,
@@ -776,17 +775,25 @@ void main() {
       ),
     );
 
+    MaterialInkController findDayGridMaterial(WidgetTester tester) {
+      // All days are painted on the same Material widget.
+      // Use an arbitrary day to find this Material.
+      return Material.of(tester.element(find.text('17')));
+    }
+
     // Test the hover overlay color.
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     final TestGesture gesture = await tester.createGesture(
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.text('20')));
     await tester.pumpAndSettle();
+
     expect(
-      inkFeatures,
+      findDayGridMaterial(tester),
       paints
+        ..circle() // Today decoration.
+        ..circle() // Selected day decoration.
         ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered})),
     );
 
@@ -796,16 +803,20 @@ void main() {
     if (kIsWeb) {
       // An extra circle is painted on the web for the hovered state.
       expect(
-        inkFeatures,
+        findDayGridMaterial(tester),
         paints
+          ..circle() // Today decoration.
+          ..circle() // Selected day decoration.
           ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
           ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
           ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
       );
     } else {
       expect(
-        inkFeatures,
+        findDayGridMaterial(tester),
         paints
+          ..circle() // Today decoration.
+          ..circle() // Selected day decoration.
           ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
           ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
       );
@@ -822,8 +833,10 @@ void main() {
 
     // Test the focused overlay color.
     expect(
-      inkFeatures,
+      findDayGridMaterial(tester),
       paints
+        ..circle() // Today decoration.
+        ..circle() // Selected day decoration.
         ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.focused})),
     );
   });

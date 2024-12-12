@@ -82,7 +82,6 @@ class FilledButton extends ButtonStyleButton {
     super.clipBehavior = Clip.none,
     super.statesController,
     required super.child,
-    super.iconAlignment,
   }) : _variant = _FilledButtonVariant.filled;
 
   /// Create a filled button from [icon] and [label].
@@ -107,7 +106,7 @@ class FilledButton extends ButtonStyleButton {
     MaterialStatesController? statesController,
     Widget? icon,
     required Widget label,
-    IconAlignment iconAlignment = IconAlignment.start,
+    IconAlignment? iconAlignment,
   }) {
      if (icon == null) {
       return FilledButton(
@@ -180,7 +179,7 @@ class FilledButton extends ButtonStyleButton {
     MaterialStatesController? statesController,
     Widget? icon,
     required Widget label,
-    IconAlignment iconAlignment = IconAlignment.start,
+    IconAlignment? iconAlignment,
   }) {
     if (icon == null) {
       return FilledButton.tonal(
@@ -229,6 +228,10 @@ class FilledButton extends ButtonStyleButton {
   /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
   /// parameters are used to construct [ButtonStyle.mouseCursor].
   ///
+  /// The [iconColor], [disabledIconColor] are used to construct
+  /// [ButtonStyle.iconColor] and [iconSize] is used to construct
+  /// [ButtonStyle.iconSize].
+  ///
   /// The button's elevations are defined relative to the [elevation]
   /// parameter. The disabled elevation is the same as the parameter
   /// value, [elevation] + 2 is used when the button is hovered
@@ -270,6 +273,8 @@ class FilledButton extends ButtonStyleButton {
     Color? shadowColor,
     Color? surfaceTintColor,
     Color? iconColor,
+    double? iconSize,
+    IconAlignment? iconAlignment,
     Color? disabledIconColor,
     Color? overlayColor,
     double? elevation,
@@ -291,33 +296,28 @@ class FilledButton extends ButtonStyleButton {
     ButtonLayerBuilder? backgroundBuilder,
     ButtonLayerBuilder? foregroundBuilder,
   }) {
-    final MaterialStateProperty<Color?>? foregroundColorProp = switch ((foregroundColor, disabledForegroundColor)) {
-      (null, null) => null,
-      (_, _) => _FilledButtonDefaultColor(foregroundColor, disabledForegroundColor),
-    };
-    final MaterialStateProperty<Color?>? backgroundColorProp = switch ((backgroundColor, disabledBackgroundColor)) {
-      (null, null) => null,
-      (_, _) => _FilledButtonDefaultColor(backgroundColor, disabledBackgroundColor),
-    };
-    final MaterialStateProperty<Color?>? iconColorProp = switch ((iconColor, disabledIconColor)) {
-      (null, null) => null,
-      (_, _) => _FilledButtonDefaultColor(iconColor, disabledIconColor),
-    };
     final MaterialStateProperty<Color?>? overlayColorProp = switch ((foregroundColor, overlayColor)) {
       (null, null) => null,
-      (_, final Color overlayColor) when overlayColor.value == 0 => const MaterialStatePropertyAll<Color?>(Colors.transparent),
-      (_, _) => _FilledButtonDefaultOverlay((overlayColor ?? foregroundColor)!),
+      (_, Color(a: 0.0)) => WidgetStatePropertyAll<Color?>(overlayColor),
+      (_, final Color color) || (final Color color, _) => WidgetStateProperty<Color?>.fromMap(
+        <WidgetState, Color?>{
+          WidgetState.pressed: color.withOpacity(0.1),
+          WidgetState.hovered: color.withOpacity(0.08),
+          WidgetState.focused: color.withOpacity(0.1),
+        },
+      ),
     };
-    final MaterialStateProperty<MouseCursor?> mouseCursor = _FilledButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
 
     return ButtonStyle(
       textStyle: MaterialStatePropertyAll<TextStyle?>(textStyle),
-      backgroundColor: backgroundColorProp,
-      foregroundColor: foregroundColorProp,
+      backgroundColor: ButtonStyleButton.defaultColor(backgroundColor, disabledBackgroundColor),
+      foregroundColor: ButtonStyleButton.defaultColor(foregroundColor, disabledForegroundColor),
       overlayColor: overlayColorProp,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
-      iconColor: iconColorProp,
+      iconColor: ButtonStyleButton.defaultColor(iconColor, disabledIconColor),
+      iconSize: ButtonStyleButton.allOrNull<double>(iconSize),
+      iconAlignment: iconAlignment,
       elevation: ButtonStyleButton.allOrNull(elevation),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
@@ -325,7 +325,12 @@ class FilledButton extends ButtonStyleButton {
       maximumSize: ButtonStyleButton.allOrNull<Size>(maximumSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
-      mouseCursor: mouseCursor,
+      mouseCursor: WidgetStateProperty<MouseCursor?>.fromMap(
+        <WidgetStatesConstraint, MouseCursor?>{
+          WidgetState.disabled: disabledMouseCursor,
+          WidgetState.any: enabledMouseCursor,
+        },
+      ),
       visualDensity: visualDensity,
       tapTargetSize: tapTargetSize,
       animationDuration: animationDuration,
@@ -483,59 +488,6 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
   );
 }
 
-@immutable
-class _FilledButtonDefaultColor extends MaterialStateProperty<Color?> with Diagnosticable {
-  _FilledButtonDefaultColor(this.color, this.disabled);
-
-  final Color? color;
-  final Color? disabled;
-
-  @override
-  Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
-      return disabled;
-    }
-    return color;
-  }
-}
-
-@immutable
-class _FilledButtonDefaultOverlay extends MaterialStateProperty<Color?> with Diagnosticable {
-  _FilledButtonDefaultOverlay(this.overlay);
-
-  final Color overlay;
-
-  @override
-  Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.pressed)) {
-      return overlay.withOpacity(0.1);
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return overlay.withOpacity(0.08);
-    }
-    if (states.contains(MaterialState.focused)) {
-      return overlay.withOpacity(0.1);
-    }
-    return null;
-  }
-}
-
-@immutable
-class _FilledButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor?> with Diagnosticable {
-  _FilledButtonDefaultMouseCursor(this.enabledCursor, this.disabledCursor);
-
-  final MouseCursor? enabledCursor;
-  final MouseCursor? disabledCursor;
-
-  @override
-  MouseCursor? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
-      return disabledCursor;
-    }
-    return enabledCursor;
-  }
-}
-
 class _FilledButtonWithIcon extends FilledButton {
   _FilledButtonWithIcon({
     super.key,
@@ -550,7 +502,7 @@ class _FilledButtonWithIcon extends FilledButton {
     super.statesController,
     required Widget icon,
     required Widget label,
-    super.iconAlignment,
+    IconAlignment? iconAlignment,
   }) : super(
          autofocus: autofocus ?? false,
          child: _FilledButtonWithIconChild(
@@ -574,7 +526,7 @@ class _FilledButtonWithIcon extends FilledButton {
     super.statesController,
     required Widget icon,
     required Widget label,
-    required IconAlignment iconAlignment,
+    IconAlignment? iconAlignment,
   }) : super.tonal(
          autofocus: autofocus ?? false,
          child: _FilledButtonWithIconChild(
@@ -621,7 +573,7 @@ class _FilledButtonWithIconChild extends StatelessWidget {
   final Widget label;
   final Widget icon;
   final ButtonStyle? buttonStyle;
-  final IconAlignment iconAlignment;
+  final IconAlignment? iconAlignment;
 
   @override
   Widget build(BuildContext context) {
@@ -630,9 +582,14 @@ class _FilledButtonWithIconChild extends StatelessWidget {
     // Adjust the gap based on the text scale factor. Start at 8, and lerp
     // to 4 based on how large the text is.
     final double gap = lerpDouble(8, 4, scale)!;
+    final FilledButtonThemeData filledButtonTheme = FilledButtonTheme.of(context);
+    final IconAlignment effectiveIconAlignment = iconAlignment
+      ?? filledButtonTheme.style?.iconAlignment
+      ?? buttonStyle?.iconAlignment
+      ?? IconAlignment.start;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: iconAlignment == IconAlignment.start
+      children: effectiveIconAlignment == IconAlignment.start
         ? <Widget>[icon, SizedBox(width: gap), Flexible(child: label)]
         : <Widget>[Flexible(child: label), SizedBox(width: gap), icon],
     );

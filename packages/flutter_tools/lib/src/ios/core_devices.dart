@@ -79,14 +79,30 @@ class IOSCoreDeviceControl {
 
     try {
       final RunResult result = await _processUtils.run(command, throwOnError: true);
+      bool isToolPossiblyShutdown = false;
+      if (_fileSystem is ErrorHandlingFileSystem) {
+        final FileSystem delegate = _fileSystem.fileSystem;
+        if (delegate is LocalFileSystem) {
+          isToolPossiblyShutdown = delegate.disposed;
+        }
+      }
 
-      if (!output.existsSync()) {
+      // It's possible that the tool is in the process of shutting down, which
+      // could result in the temp directory being deleted after the shutdown hooks run
+      // before we check if `output` exists. If this happens, we shouldn't crash
+      // but just carry on as if no devices were found as the tool will exit on
+      // its own.
+      //
+      // See https://github.com/flutter/flutter/issues/141892 for details.
+      if (!isToolPossiblyShutdown && !output.existsSync()) {
         _logger.printError('After running the command ${command.join(' ')} the file');
         _logger.printError('${output.path} was expected to exist, but it did not.');
         _logger.printError('The process exited with code ${result.exitCode} and');
         _logger.printError('Stdout:\n\n${result.stdout.trim()}\n');
         _logger.printError('Stderr:\n\n${result.stderr.trim()}');
         throw StateError('Expected the file ${output.path} to exist but it did not');
+      } else if (isToolPossiblyShutdown) {
+        return <Object?>[];
       }
       final String stringOutput = output.readAsStringSync();
       _logger.printTrace(stringOutput);
@@ -396,15 +412,14 @@ class IOSCoreDevice {
     required Logger logger,
   }) {
     final List<_IOSCoreDeviceCapability> capabilitiesList = <_IOSCoreDeviceCapability>[
-      if (data['capabilities'] case final List<Object?> capabilitiesData)
+      if (data case {'capabilities': final List<Object?> capabilitiesData})
         for (final Object? capabilityData in capabilitiesData)
           if (capabilityData != null && capabilityData is Map<String, Object?>)
             _IOSCoreDeviceCapability.fromBetaJson(capabilityData),
     ];
 
     _IOSCoreDeviceConnectionProperties? connectionProperties;
-    if (data['connectionProperties'] is Map<String, Object?>) {
-      final Map<String, Object?> connectionPropertiesData = data['connectionProperties']! as Map<String, Object?>;
+    if (data case {'connectionProperties': final Map<String, Object?> connectionPropertiesData}) {
       connectionProperties = _IOSCoreDeviceConnectionProperties.fromBetaJson(
         connectionPropertiesData,
         logger: logger,
@@ -412,14 +427,12 @@ class IOSCoreDevice {
     }
 
     IOSCoreDeviceProperties? deviceProperties;
-    if (data['deviceProperties'] is Map<String, Object?>) {
-      final Map<String, Object?> devicePropertiesData = data['deviceProperties']! as Map<String, Object?>;
+    if (data case {'deviceProperties': final Map<String, Object?> devicePropertiesData}) {
       deviceProperties = IOSCoreDeviceProperties.fromBetaJson(devicePropertiesData);
     }
 
     _IOSCoreDeviceHardwareProperties? hardwareProperties;
-    if (data['hardwareProperties'] is Map<String, Object?>) {
-      final Map<String, Object?> hardwarePropertiesData = data['hardwareProperties']! as Map<String, Object?>;
+    if (data case {'hardwareProperties': final Map<String, Object?> hardwarePropertiesData}) {
       hardwareProperties = _IOSCoreDeviceHardwareProperties.fromBetaJson(
         hardwarePropertiesData,
         logger: logger,
@@ -535,8 +548,7 @@ class _IOSCoreDeviceConnectionProperties {
     required Logger logger,
   }) {
     List<String>? localHostnames;
-    if (data['localHostnames'] is List<Object?>) {
-      final List<Object?> values = data['localHostnames']! as List<Object?>;
+    if (data case {'localHostnames': final List<Object?> values}) {
       try {
         localHostnames = List<String>.from(values);
       } on TypeError {
@@ -545,8 +557,7 @@ class _IOSCoreDeviceConnectionProperties {
     }
 
     List<String>? potentialHostnames;
-    if (data['potentialHostnames'] is List<Object?>) {
-      final List<Object?> values = data['potentialHostnames']! as List<Object?>;
+    if (data case {'potentialHostnames': final List<Object?> values}) {
       try {
         potentialHostnames = List<String>.from(values);
       } on TypeError {
@@ -700,12 +711,12 @@ class _IOSCoreDeviceHardwareProperties {
     required Logger logger,
   }) {
     _IOSCoreDeviceCPUType? cpuType;
-    if (data['cpuType'] case final Map<String, Object?> betaJson) {
+    if (data case {'cpuType': final Map<String, Object?> betaJson}) {
       cpuType = _IOSCoreDeviceCPUType.fromBetaJson(betaJson);
     }
 
     List<_IOSCoreDeviceCPUType>? supportedCPUTypes;
-    if (data['supportedCPUTypes'] case final List<Object?> values) {
+    if (data case {'supportedCPUTypes': final List<Object?> values}) {
       supportedCPUTypes = <_IOSCoreDeviceCPUType>[
         for (final Object? cpuTypeData in values)
           if (cpuTypeData is Map<String, Object?>)
@@ -714,8 +725,7 @@ class _IOSCoreDeviceHardwareProperties {
     }
 
     List<int>? supportedDeviceFamilies;
-    if (data['supportedDeviceFamilies'] is List<Object?>) {
-      final List<Object?> values = data['supportedDeviceFamilies']! as List<Object?>;
+    if (data case {'supportedDeviceFamilies': final List<Object?> values}) {
       try {
         supportedDeviceFamilies = List<int>.from(values);
       } on TypeError {

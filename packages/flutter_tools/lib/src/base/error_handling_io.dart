@@ -7,7 +7,6 @@ import 'dart:io' as io show Directory, File, Link, Process, ProcessException, Pr
 import 'dart:typed_data';
 
 import 'package:file/file.dart';
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
 
@@ -47,7 +46,6 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
       _platform = platform,
       super(delegate);
 
-  @visibleForTesting
   FileSystem get fileSystem => delegate;
 
   final Platform _platform;
@@ -124,7 +122,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
 
   @override
   Directory get systemTempDirectory {
-    return directory(delegate.systemTempDirectory);
+    return _runSync(() => directory(delegate.systemTempDirectory), platform: _platform);
   }
 
   @override
@@ -777,6 +775,7 @@ void _handlePosixException(Exception e, String? message, int errorCode, String? 
 void _handleMacOSException(Exception e, String? message, int errorCode, String? posixPermissionSuggestion) {
   // https://github.com/apple/darwin-xnu/blob/main/bsd/dev/dtrace/scripts/errno.d
   const int ebadarch = 86;
+  const int eagain = 35;
   if (errorCode == ebadarch) {
     final StringBuffer errorBuffer = StringBuffer();
     if (message != null) {
@@ -786,6 +785,17 @@ void _handleMacOSException(Exception e, String? message, int errorCode, String? 
     errorBuffer.writeln('If you are on an ARM Apple Silicon Mac, Flutter requires the Rosetta translation environment. Try running:');
     errorBuffer.writeln('  sudo softwareupdate --install-rosetta --agree-to-license');
     _throwFileSystemException(errorBuffer.toString());
+  }
+  if (errorCode == eagain) {
+    final StringBuffer errorBuffer = StringBuffer();
+    if (message != null) {
+      errorBuffer.writeln('$message.');
+    }
+    errorBuffer.writeln(
+      'Your system may be running into its process limits. '
+      'Consider quitting unused apps and trying again.',
+    );
+    throwToolExit(errorBuffer.toString());
   }
   _handlePosixException(e, message, errorCode, posixPermissionSuggestion);
 }

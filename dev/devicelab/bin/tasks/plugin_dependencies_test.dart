@@ -11,8 +11,6 @@ import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
-final String platformLineSep = Platform.isWindows ? '\r\n': '\n';
-
 /// Tests that a plugin A can depend on platform code from a plugin B
 /// as long as plugin B is defined as a pub dependency of plugin A.
 ///
@@ -102,7 +100,7 @@ dependencies:
     sdk: flutter
 
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.7.0-0
   flutter: ">=1.5.0"
 ''', flush: true);
 
@@ -154,14 +152,14 @@ public class DummyPluginBClass {
       final File pluginApubspec = File(path.join(pluginADirectory.path, 'pubspec.yaml'));
       String pluginApubspecContent = await pluginApubspec.readAsString();
       pluginApubspecContent = pluginApubspecContent.replaceFirst(
-        '${platformLineSep}dependencies:$platformLineSep',
-        '${platformLineSep}dependencies:$platformLineSep'
-        '  plugin_b:$platformLineSep'
-        '    path: ${pluginBDirectory.path}$platformLineSep'
-        '  plugin_c:$platformLineSep'
-        '    path: ${pluginCDirectory.path}$platformLineSep'
-        '  plugin_d:$platformLineSep'
-        '    path: ${pluginDDirectory.path}$platformLineSep',
+        '${Platform.lineTerminator}dependencies:${Platform.lineTerminator}',
+        '${Platform.lineTerminator}dependencies:${Platform.lineTerminator}'
+        '  plugin_b:${Platform.lineTerminator}'
+        '    path: ${pluginBDirectory.path}${Platform.lineTerminator}'
+        '  plugin_c:${Platform.lineTerminator}'
+        '    path: ${pluginCDirectory.path}${Platform.lineTerminator}'
+        '  plugin_d:${Platform.lineTerminator}'
+        '    path: ${pluginDDirectory.path}${Platform.lineTerminator}',
       );
       await pluginApubspec.writeAsString(pluginApubspecContent, flush: true);
 
@@ -210,7 +208,7 @@ public class DummyPluginAClass {
       final String flutterPluginsDependenciesFileContent = flutterPluginsDependenciesFile.readAsStringSync();
 
       final Map<String, dynamic> jsonContent = json.decode(flutterPluginsDependenciesFileContent) as Map<String, dynamic>;
-      final bool swiftPackageManagerEnabled = jsonContent['swift_package_manager_enabled'] as bool? ?? false;
+      final Map<String, dynamic>? swiftPackageManagerJson = jsonContent['swift_package_manager_enabled'] as Map<String, dynamic>?;
 
       // Verify the dependencyGraph object is valid. The rest of the contents of this file are not relevant to the
       // dependency graph and are tested by unit tests.
@@ -302,6 +300,18 @@ public class DummyPluginAClass {
 
         if (!exists(appBundle)) {
           return TaskResult.failure('Failed to build plugin A example iOS app');
+        }
+
+        final bool? swiftPackageManagerEnabled = swiftPackageManagerJson?['ios'] as bool?;
+        if (swiftPackageManagerEnabled == null) {
+          return TaskResult.failure(
+            '${flutterPluginsDependenciesFile.path} is missing the '
+            '"swift_package_manager_enabled" > "ios" property.\n'
+            '\n'
+            '.flutter_plugin_dependencies content:\n'
+            '\n'
+            '$flutterPluginsDependenciesFileContent',
+          );
         }
 
         if (swiftPackageManagerEnabled) {

@@ -79,7 +79,6 @@ const TextStyle _kActionSheetContentStyle = TextStyle(
 );
 
 // Generic constants shared between Dialog and ActionSheet.
-const double _kBlurAmount = 20.0;
 const double _kCornerRadius = 14.0;
 const double _kDividerThickness = 0.3;
 
@@ -115,7 +114,7 @@ const double _kActionSheetButtonVerticalPaddingBase = 1.8;
 // Extracted from https://developer.apple.com/design/resources/.
 const Color _kDialogColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xCCF2F2F2),
-  darkColor: Color(0xBF1E1E1E),
+  darkColor: Color(0xCC2D2D2D),
 );
 
 // Translucent light gray that is painted on top of the blurred backdrop as the
@@ -123,7 +122,7 @@ const Color _kDialogColor = CupertinoDynamicColor.withBrightness(
 // Eyeballed from iOS 13 beta simulator.
 const Color _kDialogPressedColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFE1E1E1),
-  darkColor: Color(0xFF2E2E2E),
+  darkColor: Color(0xFF404040),
 );
 
 // Translucent light gray that is painted on top of the blurred backdrop as the
@@ -462,14 +461,16 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
                         width: isInAccessibilityMode
                             ? _kAccessibilityCupertinoDialogWidth
                             : _kCupertinoDialogWidth,
-                        child: CupertinoPopupSurface(
-                          isSurfacePainted: false,
-                          child: Semantics(
-                            namesRoute: true,
-                            scopesRoute: true,
-                            explicitChildNodes: true,
-                            label: localizations.alertDialogLabel,
-                            child: _buildBody(context),
+                        child: _ActionSheetGestureDetector(
+                          child: CupertinoPopupSurface(
+                            isSurfacePainted: false,
+                            child: Semantics(
+                              namesRoute: true,
+                              scopesRoute: true,
+                              explicitChildNodes: true,
+                              label: localizations.alertDialogLabel,
+                              child: _buildBody(context),
+                            ),
                           ),
                         ),
                       ),
@@ -492,20 +493,34 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
   }
 }
 
-/// Rounded rectangle surface that looks like an iOS popup surface, e.g., alert dialog
-/// and action sheet.
+/// An iOS-style component for creating modal overlays like dialogs and action
+/// sheets.
 ///
-/// A [CupertinoPopupSurface] can be configured to paint or not paint a white
-/// color on top of its blurred area. Typical usage should paint white on top
-/// of the blur. However, the white paint can be disabled for the purpose of
-/// rendering divider gaps for a more complicated layout, e.g., [CupertinoAlertDialog].
-/// Additionally, the white paint can be disabled to render a blurred rounded
-/// rectangle without any color (similar to iOS's volume control popup).
+/// By default, [CupertinoPopupSurface] generates a rounded rectangle surface
+/// that applies two effects to the background content:
+///
+///   1. Background filter: Saturates and then blurs content behind the surface.
+///   2. Overlay color: Covers the filtered background with a transparent
+///      surface color. The color adapts to the CupertinoTheme's brightness:
+///      light gray when the ambient [CupertinoTheme] brightness is
+///      [Brightness.light], and dark gray when [Brightness.dark].
+///
+/// The blur strength can be changed by setting [blurSigma] to a positive value,
+/// or removed by setting the [blurSigma] to 0.
+///
+/// The saturation effect can be removed for debugging by setting
+/// [debugIsVibrancePainted] to false. The saturation effect is not supported on
+/// web with the skwasm renderer and will not be applied regardless of the value
+/// of [debugIsVibrancePainted].
+///
+/// The surface color can be disabled by setting [isSurfacePainted] to false,
+/// which is useful for more complicated layouts, such as rendering divider gaps
+/// in [CupertinoAlertDialog] or rendering custom surface colors.
 ///
 /// {@tool dartpad}
 /// This sample shows how to use a [CupertinoPopupSurface]. The [CupertinoPopupSurface]
-/// shows a model popup from the bottom of the screen.
-/// Toggling the switch to configure its surface color.
+/// shows a modal popup from the bottom of the screen.
+/// Toggle the switch to configure its surface color.
 ///
 /// ** See code in examples/api/lib/cupertino/dialog/cupertino_popup_surface.0.dart **
 /// {@end-tool}
@@ -519,9 +534,17 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// Creates an iOS-style rounded rectangle popup surface.
   const CupertinoPopupSurface({
     super.key,
+    this.blurSigma = defaultBlurSigma,
     this.isSurfacePainted = true,
-    this.child,
-  });
+    required this.child,
+  }) : assert(blurSigma >= 0, 'CupertinoPopupSurface requires a non-negative blur sigma.');
+
+  /// The strength of the gaussian blur applied to the area beneath this
+  /// surface.
+  ///
+  /// Defaults to [defaultBlurSigma]. Setting [blurSigma] to 0 will remove the
+  /// blur filter.
+  final double blurSigma;
 
   /// Whether or not to paint a translucent white on top of this surface's
   /// blurred background. [isSurfacePainted] should be true for a typical popup
@@ -531,26 +554,158 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// Some popups, like iOS's volume control popup, choose to render a blurred
   /// area without any white paint covering it. To achieve this effect,
   /// [isSurfacePainted] should be set to false.
+  ///
+  /// Defaults to true.
   final bool isSurfacePainted;
 
   /// The widget below this widget in the tree.
-  final Widget? child;
+  // Because [CupertinoPopupSurface] is composed of proxy boxes, which mimic
+  // the size of their child, a [child] is required to ensure that this surface
+  // has a size.
+  final Widget child;
+
+  /// The default strength of the blur applied to widgets underlying a
+  /// [CupertinoPopupSurface].
+  ///
+  /// Eyeballed from the iOS 17 simulator.
+  static const double defaultBlurSigma = 30.0;
+
+  /// The default corner radius of a [CupertinoPopupSurface].
+  static const BorderRadius _clipper = BorderRadius.all(Radius.circular(14));
+
+  // The [ColorFilter] matrix used to saturate widgets underlying a
+  // [CupertinoPopupSurface] when the ambient [CupertinoThemeData.brightness] is
+  // [Brightness.light].
+  //
+  // To derive this matrix, the saturation matrix was taken from
+  // https://docs.rainmeter.net/tips/colormatrix-guide/ and was tweaked to
+  // resemble the iOS 17 simulator.
+  //
+  // The matrix can be derived from the following function:
+  // static List<double> get _lightSaturationMatrix {
+  //    const double lightLumR = 0.26;
+  //    const double lightLumG = 0.4;
+  //    const double lightLumB = 0.17;
+  //    const double saturation = 2.0;
+  //    const double sr = (1 - saturation) * lightLumR;
+  //    const double sg = (1 - saturation) * lightLumG;
+  //    const double sb = (1 - saturation) * lightLumB;
+  //    return <double>[
+  //      sr + saturation, sg, sb, 0.0, 0.0,
+  //      sr, sg + saturation, sb, 0.0, 0.0,
+  //      sr, sg, sb + saturation, 0.0, 0.0,
+  //      0.0, 0.0, 0.0, 1.0, 0.0,
+  //    ];
+  //  }
+  static const List<double> _lightSaturationMatrix = <double>[
+     1.74, -0.40, -0.17, 0.00, 0.00,
+    -0.26,  1.60, -0.17, 0.00, 0.00,
+    -0.26, -0.40,  1.83, 0.00, 0.00,
+     0.00,  0.00,  0.00, 1.00, 0.00
+  ];
+
+  // The [ColorFilter] matrix used to saturate widgets underlying a
+  // [CupertinoPopupSurface] when the ambient [CupertinoThemeData.brightness] is
+  // [Brightness.dark].
+  //
+  // To derive this matrix, the saturation matrix was taken from
+  // https://docs.rainmeter.net/tips/colormatrix-guide/ and was tweaked to
+  // resemble the iOS 17 simulator.
+  //
+  // The matrix can be derived from the following function:
+  // static List<double> get _darkSaturationMatrix {
+  //    const double additive = 0.3;
+  //    const double darkLumR = 0.45;
+  //    const double darkLumG = 0.8;
+  //    const double darkLumB = 0.16;
+  //    const double saturation = 1.7;
+  //    const double sr = (1 - saturation) * darkLumR;
+  //    const double sg = (1 - saturation) * darkLumG;
+  //    const double sb = (1 - saturation) * darkLumB;
+  //    return <double>[
+  //      sr + saturation, sg, sb, 0.0, additive,
+  //      sr, sg + saturation, sb, 0.0, additive,
+  //      sr, sg, sb + saturation, 0.0, additive,
+  //      0.0, 0.0, 0.0, 1.0, 0.0,
+  //    ];
+  //  }
+  static const List<double> _darkSaturationMatrix = <double>[
+     1.39, -0.56, -0.11, 0.00, 0.30,
+    -0.32,  1.14, -0.11, 0.00, 0.30,
+    -0.32, -0.56,  1.59, 0.00, 0.30,
+     0.00,  0.00,  0.00, 1.00, 0.00
+  ];
+
+  /// Whether or not the area beneath this surface should be saturated with a
+  /// [ColorFilter].
+  ///
+  /// The appearance of the [ColorFilter] is determined by the [Brightness]
+  /// value obtained from the ambient [CupertinoTheme].
+  ///
+  /// The vibrance is always painted if asserts are disabled.
+  ///
+  /// Defaults to true.
+  static bool debugIsVibrancePainted = true;
+
+  ImageFilter? _buildFilter(Brightness? brightness) {
+    bool isVibrancePainted = true;
+    assert(() {
+      isVibrancePainted = debugIsVibrancePainted;
+      return true;
+    }());
+    if ((kIsWeb && !isSkiaWeb) || !isVibrancePainted) {
+      if (blurSigma == 0) {
+        return null;
+      }
+      return ImageFilter.blur(
+        sigmaX: blurSigma,
+        sigmaY: blurSigma,
+      );
+    }
+
+    final ColorFilter colorFilter = switch (brightness) {
+      Brightness.dark          => const ColorFilter.matrix(_darkSaturationMatrix),
+      Brightness.light || null => const ColorFilter.matrix(_lightSaturationMatrix)
+    };
+
+    if (blurSigma == 0) {
+      return colorFilter;
+    }
+
+    return ImageFilter.compose(
+      inner: colorFilter,
+      outer: ImageFilter.blur(
+        sigmaX: blurSigma,
+        sigmaY: blurSigma,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    Widget? contents = child;
+    final ImageFilter? filter = _buildFilter(CupertinoTheme.maybeBrightnessOf(context));
+    Widget contents = child;
+
     if (isSurfacePainted) {
       contents = ColoredBox(
         color: CupertinoDynamicColor.resolve(_kDialogColor, context),
         child: contents,
       );
     }
+
+    if (filter != null) {
+      return ClipRRect(
+        borderRadius: _clipper,
+        child: BackdropFilter(
+          filter: filter,
+          child: contents,
+        ),
+      );
+    }
+
     return ClipRRect(
-      borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
-        child: contents,
-      ),
+      borderRadius: _clipper,
+      child: contents,
     );
   }
 }
@@ -666,10 +821,10 @@ class _SlidingTapGestureRecognizer extends VerticalDragGestureRecognizer {
 // Multiple `_SlideTarget`s might be nested.
 // `_TargetSelectionGestureRecognizer` uses a simple algorithm that only
 // compares if the inner-most slide target has changed (which suffices our use
-// case).  Semantically, this means that all outer targets will be treated as
-// identical to the inner-most one, i.e. when the pointer enters or leaves a
-// slide target, the corresponding method will be called on all targets that
-// nest it.
+// case). Semantically, this means that all outer targets will be treated as
+// having the identical area as the inner-most one, i.e. when the pointer enters
+// or leaves a slide target, the corresponding method will be called on all
+// targets that nest it.
 abstract class _SlideTarget {
   // A pointer has entered this region.
   //
@@ -682,7 +837,10 @@ abstract class _SlideTarget {
   //
   // The `fromPointerDown` should be true if this callback is triggered by a
   // PointerDownEvent, i.e. the second case from the list above.
-  void didEnter({required bool fromPointerDown});
+  //
+  // The return value of this method is used as the `innerEnabled` for the next
+  // target, while `innerEnabled` of the innermost target is true.
+  bool didEnter({required bool fromPointerDown, required bool innerEnabled});
 
   // A pointer has exited this region.
   //
@@ -703,6 +861,10 @@ abstract class _SlideTarget {
 
 // Recognizes sliding taps and thereupon interacts with
 // `_SlideTarget`s.
+//
+// TODO(dkwingsmt): It should recompute hit testing when the app is updated,
+// or better, share code with `MouseTracker`.
+// https://github.com/flutter/flutter/issues/155266
 class _TargetSelectionGestureRecognizer extends GestureRecognizer {
   _TargetSelectionGestureRecognizer({super.debugOwner, required this.hitTest})
     : _slidingTap = _SlidingTapGestureRecognizer(debugOwner: debugOwner) {
@@ -775,8 +937,12 @@ class _TargetSelectionGestureRecognizer extends GestureRecognizer {
       _currentTargets
         ..clear()
         ..addAll(foundTargets);
+      bool enabled = true;
       for (final _SlideTarget target in _currentTargets) {
-        target.didEnter(fromPointerDown: fromPointerDown);
+        enabled = target.didEnter(
+          fromPointerDown: fromPointerDown,
+          innerEnabled: enabled,
+        );
       }
     }
   }
@@ -1125,7 +1291,10 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
         child: ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(12.0)),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
+            filter: ImageFilter.blur(
+              sigmaX: CupertinoPopupSurface.defaultBlurSigma,
+              sigmaY: CupertinoPopupSurface.defaultBlurSigma,
+            ),
             child: _ActionSheetMainSheet(
               pressedIndex: _pressedIndex,
               onPressedUpdate: _onPressedUpdate,
@@ -1202,6 +1371,7 @@ class CupertinoActionSheetAction extends StatefulWidget {
     required this.onPressed,
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
+    this.mouseCursor,
     required this.child,
   });
 
@@ -1221,6 +1391,12 @@ class CupertinoActionSheetAction extends StatefulWidget {
   /// Destructive buttons have red text.
   final bool isDestructiveAction;
 
+  /// The cursor that will be shown when hovering over the button.
+  ///
+  /// If null, defaults to [SystemMouseCursors.click] on web and
+  /// [MouseCursor.defer] on other platforms.
+  final MouseCursor? mouseCursor;
+
   /// The widget below this widget in the tree.
   ///
   /// Typically a [Text] widget.
@@ -1234,7 +1410,9 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     implements _SlideTarget {
   // |_SlideTarget|
   @override
-  void didEnter({required bool fromPointerDown}) {}
+  bool didEnter({required bool fromPointerDown, required bool innerEnabled}) {
+    return innerEnabled;
+  }
 
   // |_SlideTarget|
   @override
@@ -1297,7 +1475,7 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
         + fontSize * _kActionSheetButtonVerticalPaddingFactor;
 
     return MouseRegion(
-      cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      cursor: widget.mouseCursor ?? (kIsWeb ? SystemMouseCursors.click : MouseCursor.defer),
       child: MetaData(
         metaData: this,
         behavior: HitTestBehavior.opaque,
@@ -1377,11 +1555,15 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
 
   // |_SlideTarget|
   @override
-  void didEnter({required bool fromPointerDown}) {
+  bool didEnter({required bool fromPointerDown, required bool innerEnabled}) {
+    // Action sheet doesn't support disabled buttons, therefore `innerEnabled`
+    // is always true.
+    assert(innerEnabled);
     widget.onPressStateChange?.call(true);
     if (!fromPointerDown) {
       _emitVibration();
     }
+    return innerEnabled;
   }
 
   // |_SlideTarget|
@@ -1418,7 +1600,7 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
           borderRadius: borderRadius,
         ),
         child: widget.child,
-      )
+      ),
     );
   }
 }
@@ -1843,7 +2025,7 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
 // Renders the background of a button (both the pressed background and the idle
 // background) and reports its state to the parent with `onPressStateChange`.
-class _AlertDialogButtonBackground extends StatelessWidget {
+class _AlertDialogButtonBackground extends StatefulWidget {
   const _AlertDialogButtonBackground({
     required this.idleColor,
     required this.pressedColor,
@@ -1868,37 +2050,58 @@ class _AlertDialogButtonBackground extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget child;
 
-  void onTapDown(TapDownDetails details) {
-    onPressStateChange?.call(true);
+  @override
+  _AlertDialogButtonBackgroundState createState() => _AlertDialogButtonBackgroundState();
+}
+
+class _AlertDialogButtonBackgroundState extends State<_AlertDialogButtonBackground>
+    implements _SlideTarget {
+  void _emitVibration(){
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+        HapticFeedback.selectionClick();
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        break;
+    }
   }
 
-  void onTapUp(TapUpDetails details) {
-    onPressStateChange?.call(false);
+  // |_SlideTarget|
+  @override
+  bool didEnter({required bool fromPointerDown, required bool innerEnabled}) {
+    widget.onPressStateChange?.call(innerEnabled);
+    if (innerEnabled && !fromPointerDown) {
+      _emitVibration();
+    }
+    return innerEnabled;
   }
 
-  void onTapCancel() {
-    onPressStateChange?.call(false);
+  // |_SlideTarget|
+  @override
+  void didLeave() {
+    widget.onPressStateChange?.call(false);
+  }
+
+  // |_SlideTarget|
+  @override
+  void didConfirm() {
+    widget.onPressStateChange?.call(false);
   }
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor = pressed ? pressedColor : idleColor;
-    return MergeSemantics(
-      // TODO(mattcarroll): Button press dynamics need overhaul for iOS:
-      // https://github.com/flutter/flutter/issues/19786
-      child: GestureDetector(
-        excludeFromSemantics: true,
-        behavior: HitTestBehavior.opaque,
-        onTapDown: onTapDown,
-        onTapUp: onTapUp,
-        // TODO(mattcarroll): Cancel is currently triggered when user moves
-        //  past slop instead of off button: https://github.com/flutter/flutter/issues/19783
-        onTapCancel: onTapCancel,
+    final Color backgroundColor = widget.pressed ? widget.pressedColor : widget.idleColor;
+    return MetaData(
+      metaData: this,
+      child: MergeSemantics(
         child: Container(
           decoration: BoxDecoration(
             color: CupertinoDynamicColor.resolve(backgroundColor, context),
           ),
-          child: child,
+          child: widget.child,
         ),
       ),
     );
@@ -1911,7 +2114,7 @@ class _AlertDialogButtonBackground extends StatelessWidget {
 ///
 ///  * [CupertinoAlertDialog], a dialog that informs the user about situations
 ///    that require acknowledgment.
-class CupertinoDialogAction extends StatelessWidget {
+class CupertinoDialogAction extends StatefulWidget {
   /// Creates an action for an iOS-style dialog.
   const CupertinoDialogAction({
     super.key,
@@ -1958,10 +2161,31 @@ class CupertinoDialogAction extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget child;
 
-  /// Whether the button is enabled or disabled. Buttons are disabled by
-  /// default. To enable a button, set its [onPressed] property to a non-null
-  /// value.
-  bool get enabled => onPressed != null;
+  @override
+  State<CupertinoDialogAction> createState() => _CupertinoDialogActionState();
+}
+
+class _CupertinoDialogActionState extends State<CupertinoDialogAction>
+    implements _SlideTarget {
+
+  // The button is enabled when it has [onPressed].
+  bool get enabled => widget.onPressed != null;
+
+  // |_SlideTarget|
+  @override
+  bool didEnter({required bool fromPointerDown, required bool innerEnabled}) {
+    return enabled;
+  }
+
+  // |_SlideTarget|
+  @override
+  void didLeave() {}
+
+  // |_SlideTarget|
+  @override
+  void didConfirm() {
+    widget.onPressed?.call();
+  }
 
   // Dialog action content shrinks to fit, up to a certain point, and if it still
   // cannot fit at the minimum size, the text content is ellipsized.
@@ -1991,7 +2215,7 @@ class CupertinoDialogAction extends StatelessWidget {
         ),
         child: Semantics(
           button: true,
-          onTap: onPressed,
+          onTap: widget.onPressed,
           child: DefaultTextStyle(
             style: textStyle,
             textAlign: TextAlign.center,
@@ -2022,12 +2246,12 @@ class CupertinoDialogAction extends StatelessWidget {
   Widget build(BuildContext context) {
     TextStyle style = _kCupertinoDialogActionStyle.copyWith(
       color: CupertinoDynamicColor.resolve(
-        isDestructiveAction ? CupertinoColors.systemRed : CupertinoTheme.of(context).primaryColor,
+        widget.isDestructiveAction ? CupertinoColors.systemRed : CupertinoTheme.of(context).primaryColor,
         context,
       ),
-    ).merge(textStyle);
+    ).merge(widget.textStyle);
 
-    if (isDefaultAction) {
+    if (widget.isDefaultAction) {
       style = style.copyWith(fontWeight: FontWeight.w600);
     }
 
@@ -2047,20 +2271,19 @@ class CupertinoDialogAction extends StatelessWidget {
     final Widget sizedContent = _isInAccessibilityMode(context)
         ? _buildContentWithAccessibilitySizingPolicy(
             textStyle: style,
-            content: child,
+            content: widget.child,
           )
         : _buildContentWithRegularSizingPolicy(
             context: context,
             textStyle: style,
-            content: child,
+            content: widget.child,
             padding: padding,
           );
 
     return MouseRegion(
-      cursor: onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
-      child: GestureDetector(
-        excludeFromSemantics: true,
-        onTap: onPressed,
+      cursor: widget.onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      child: MetaData(
+        metaData: this,
         behavior: HitTestBehavior.opaque,
         child: ConstrainedBox(
           constraints: const BoxConstraints(

@@ -35,7 +35,7 @@ To resolve it:
 
 ### Gradle task assembleDebug failed with exit code 1
 
-If `assembleDebug` or `assembleRelease` failed but no error message can be seen, you are likely on a older Flutter version (`<= 1.9.1.hotfix4`) which may suppress the root cause of the error.
+If `assembleDebug` or `assembleRelease` failed but no error message can be seen, you are likely on an older Flutter version (`<= 1.9.1.hotfix4`) which may suppress the root cause of the error.
 
 This problem can be solved in two ways:
  - Please try a more recent channel, like `beta` or `dev` and restart the compilation. It may still fail, but the error will now be printed

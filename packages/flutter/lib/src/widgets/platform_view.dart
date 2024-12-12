@@ -655,6 +655,7 @@ class HtmlElementView extends StatelessWidget {
     required this.viewType,
     this.onPlatformViewCreated,
     this.creationParams,
+    this.hitTestBehavior = PlatformViewHitTestBehavior.opaque,
   });
 
   /// Creates a platform view that creates a DOM element specified by [tagName].
@@ -672,12 +673,14 @@ class HtmlElementView extends StatelessWidget {
     required String tagName,
     bool isVisible = true,
     ElementCreatedCallback? onElementCreated,
+    PlatformViewHitTestBehavior hitTestBehavior = PlatformViewHitTestBehavior.opaque,
   }) =>
       HtmlElementViewImpl.createFromTagName(
         key: key,
         tagName: tagName,
         isVisible: isVisible,
         onElementCreated: onElementCreated,
+        hitTestBehavior: hitTestBehavior,
       );
 
   /// The unique identifier for the HTML view type to be embedded by this widget.
@@ -694,6 +697,9 @@ class HtmlElementView extends StatelessWidget {
 
   /// Passed as the 2nd argument (i.e. `params`) of the registered view factory.
   final Object? creationParams;
+
+  /// {@macro flutter.widgets.AndroidView.hitTestBehavior}
+  final PlatformViewHitTestBehavior hitTestBehavior;
 
   @override
   Widget build(BuildContext context) => buildImpl(context);

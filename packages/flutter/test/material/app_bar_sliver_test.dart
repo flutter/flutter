@@ -108,7 +108,11 @@ void main() {
       await tester.pumpAndSettle();
 
       final Finder collapsedTitle = find.text(title).last;
-      final Offset backButtonOffset = tester.getTopRight(find.byType(BackButton));
+      // Get the offset of the Center widget that wraps the IconButton.
+      final Offset backButtonOffset = tester.getTopRight(find.ancestor(
+        of: find.byType(IconButton),
+        matching: find.byType(Center),
+      ));
       final Offset titleOffset = tester.getTopLeft(collapsedTitle);
       expect(titleOffset.dx, backButtonOffset.dx + titleSpacing);
   });
@@ -2268,6 +2272,53 @@ void main() {
 
     final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
     expect(navToolBar.middleSpacing, NavigationToolbar.kMiddleSpacing);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/158158.
+  testWidgets('SliverAppBar should update TabBar before TabBar build', (WidgetTester tester) async {
+    final List<Tab> tabs = <Tab>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return DefaultTabController(
+              length: tabs.length,
+              child: Scaffold(
+                body: CustomScrollView(
+                  slivers: <Widget>[
+                    SliverAppBar(
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text('Add Tab'),
+                          onPressed: () {
+                            setState(() {
+                              tabs.add(Tab(text: 'Tab ${tabs.length + 1}'));
+                            });
+                          },
+                        ),
+                      ],
+                      bottom: TabBar(tabs: tabs),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Initializes with zero tabs.
+    expect(find.text('Tab 1'), findsNothing);
+    expect(find.text('Tab 2'), findsNothing);
+
+    // No crash after tabs added.
+    await tester.tap(find.text('Add Tab'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1'), findsOneWidget);
+    expect(find.text('Tab 2'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   group('Material 2', () {
