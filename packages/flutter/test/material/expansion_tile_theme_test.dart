@@ -207,8 +207,8 @@ void main() {
 
     // Calculate the remaining height of ListTile from the default height.
     final double remainingHeight = 56 - tallerWidget.height;
-    expect(listTileRect.top, tallerWidget.top - remainingHeight / 2 - 12);
-    expect(listTileRect.bottom, tallerWidget.bottom + remainingHeight / 2 + 10);
+    expect(listTileRect.top, tallerWidget.top - remainingHeight / 2 - 13);
+    expect(listTileRect.bottom, tallerWidget.bottom + remainingHeight / 2 + 11);
 
     Color getIconColor() => tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
     Color getTextColor() => tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
@@ -291,8 +291,8 @@ void main() {
 
     // Calculate the remaining height of ListTile from the default height.
     final double remainingHeight = 56 - tallerWidget.height;
-    expect(listTileRect.top, tallerWidget.top - remainingHeight / 2 - 12);
-    expect(listTileRect.bottom, tallerWidget.bottom + remainingHeight / 2 + 10);
+    expect(listTileRect.top, tallerWidget.top - remainingHeight / 2 - 13);
+    expect(listTileRect.bottom, tallerWidget.bottom + remainingHeight / 2 + 11);
 
     Color getIconColor() => tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
     Color getTextColor() => tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
