@@ -687,7 +687,7 @@ void main() {
         .childDirectory('flutter-apk')
         .childFile('app-release.apk')
         ..createSync(recursive: true)
-        ..writeAsBytesSync(ZipEncoder().encode(archive)!);
+        ..writeAsBytesSync(ZipEncoder().encode(archive));
 
       fileSystem.file('foo/snapshot.arm64-v8a.json')
         ..createSync(recursive: true)

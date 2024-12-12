@@ -575,7 +575,7 @@ void main() {
         // This file would be extracted outside of the target extraction dir
         ArchiveFile(r'..\..\..\Target File.txt', content.length, content.codeUnits),
       );
-      final List<int> zipData = ZipEncoder().encode(archive)!;
+      final List<int> zipData = ZipEncoder().encode(archive);
       fakeZipFile.writeAsBytesSync(zipData);
       expect(
         () => utils.unzip(fakeZipFile, targetDirectory),

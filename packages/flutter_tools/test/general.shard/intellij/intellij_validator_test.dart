@@ -528,7 +528,7 @@ void createIntellijFlutterPluginJar(String pluginJarPath, FileSystem fileSystem,
   flutterPlugins.addFile(ArchiveFile('META-INF/plugin.xml', flutterPluginBytes.length, flutterPluginBytes));
   fileSystem.file(pluginJarPath)
     ..createSync(recursive: true)
-    ..writeAsBytesSync(ZipEncoder().encode(flutterPlugins)!);
+    ..writeAsBytesSync(ZipEncoder().encode(flutterPlugins));
 }
 
 /// A helper to create a Intellij Dart plugin jar.
@@ -564,7 +564,7 @@ void createIntellijDartPluginJar(String pluginJarPath, FileSystem fileSystem) {
   dartPlugins.addFile(ArchiveFile('META-INF/plugin.xml', dartPluginBytes.length, dartPluginBytes));
   fileSystem.file(pluginJarPath)
     ..createSync(recursive: true)
-    ..writeAsBytesSync(ZipEncoder().encode(dartPlugins)!);
+    ..writeAsBytesSync(ZipEncoder().encode(dartPlugins));
 }
 
 // TODO(fujino): this should use the MemoryFileSystem and a
