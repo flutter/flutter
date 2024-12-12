@@ -75,8 +75,6 @@ FLUTTER_ASSERT_ARC
   XCTAssertNotNil(engine);
 
   // Ensure getters don't deref _shell when it's null, and instead return nullptr.
-  XCTAssertEqual(engine.platformView.get(), nullptr);
-  XCTAssertEqual(engine.iosPlatformView, nullptr);
   XCTAssertEqual(engine.platformTaskRunner.get(), nullptr);
   XCTAssertEqual(engine.uiTaskRunner.get(), nullptr);
   XCTAssertEqual(engine.rasterTaskRunner.get(), nullptr);
@@ -435,10 +433,10 @@ FLUTTER_ASSERT_ARC
                                         initialRoute:nil
                                       entrypointArgs:nil];
   XCTAssertNotNil(spawn);
-  XCTAssertTrue([engine iosPlatformView] != nullptr);
-  XCTAssertTrue([spawn iosPlatformView] != nullptr);
-  std::shared_ptr<flutter::IOSContext> engine_context = [engine iosPlatformView]->GetIosContext();
-  std::shared_ptr<flutter::IOSContext> spawn_context = [spawn iosPlatformView]->GetIosContext();
+  XCTAssertTrue(engine.platformView != nullptr);
+  XCTAssertTrue(spawn.platformView != nullptr);
+  std::shared_ptr<flutter::IOSContext> engine_context = engine.platformView->GetIosContext();
+  std::shared_ptr<flutter::IOSContext> spawn_context = spawn.platformView->GetIosContext();
   XCTAssertEqual(engine_context, spawn_context);
 }
 

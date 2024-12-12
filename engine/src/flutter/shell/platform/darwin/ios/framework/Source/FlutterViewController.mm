@@ -642,23 +642,10 @@ static void SendFakeTouchEvent(UIScreen* screen,
   if (!self.engine) {
     return;
   }
-
-  fml::WeakPtr<flutter::PlatformViewIOS> weakPlatformView = self.engine.platformView;
-  if (!weakPlatformView) {
-    return;
-  }
-
-  // Start on the platform thread.
   __weak FlutterViewController* weakSelf = self;
-  weakPlatformView->SetNextFrameCallback([weakSelf,
-                                          platformTaskRunner = self.engine.platformTaskRunner,
-                                          rasterTaskRunner = self.engine.rasterTaskRunner]() {
-    FML_DCHECK(platformTaskRunner);
-    FML_DCHECK(rasterTaskRunner);
-    FML_DCHECK(rasterTaskRunner->RunsTasksOnCurrentThread());
-    // Get callback on raster thread and jump back to platform thread.
-    platformTaskRunner->PostTask([weakSelf]() { [weakSelf onFirstFrameRendered]; });
-  });
+  [self.engine installFirstFrameCallback:^{
+    [weakSelf onFirstFrameRendered];
+  }];
 }
 
 #pragma mark - Properties
@@ -749,10 +736,10 @@ static void SendFakeTouchEvent(UIScreen* screen,
     [self installFirstFrameCallback];
     self.platformViewsController.flutterView = self.flutterView;
     self.platformViewsController.flutterViewController = self;
-    [self.engine iosPlatformView]->NotifyCreated();
+    [self.engine notifyViewCreated];
   } else {
     self.displayingFlutterUI = NO;
-    [self.engine iosPlatformView]->NotifyDestroyed();
+    [self.engine notifyViewDestroyed];
     self.platformViewsController.flutterView = nil;
     self.platformViewsController.flutterViewController = nil;
   }
@@ -1333,13 +1320,11 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return;
   }
 
-  flutter::Shell& shell = self.engine.shell;
   auto callback = [](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
     // Do nothing in this block. Just trigger system to callback touch events with correct rate.
   };
   _touchRateCorrectionVSyncClient =
-      [[VSyncClient alloc] initWithTaskRunner:shell.GetTaskRunners().GetPlatformTaskRunner()
-                                     callback:callback];
+      [[VSyncClient alloc] initWithTaskRunner:self.engine.platformTaskRunner callback:callback];
   _touchRateCorrectionVSyncClient.allowPauseAfterVsync = NO;
 }
 
@@ -1416,19 +1401,21 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   // the viewport metrics update tasks.
   if (firstViewBoundsUpdate && applicationOrSceneIsActive && self.engine) {
     [self surfaceUpdated:YES];
-
-    flutter::Shell& shell = self.engine.shell;
-    fml::TimeDelta waitTime =
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
-        fml::TimeDelta::FromMilliseconds(200);
+    NSTimeInterval timeout = 0.2;
 #else
-        fml::TimeDelta::FromMilliseconds(100);
+    NSTimeInterval timeout = 0.1;
 #endif
-    if (shell.WaitForFirstFrame(waitTime).code() == fml::StatusCode::kDeadlineExceeded) {
-      FML_LOG(INFO) << "Timeout waiting for the first frame to render.  This may happen in "
-                    << "unoptimized builds.  If this is a release build, you should load a less "
-                    << "complex frame to avoid the timeout.";
-    }
+    [self.engine
+        waitForFirstFrameSync:timeout
+                     callback:^(BOOL didTimeout) {
+                       if (didTimeout) {
+                         FML_LOG(INFO)
+                             << "Timeout waiting for the first frame to render. This may happen in "
+                                "unoptimized builds. If this is a release build, you should load a "
+                                "less complex frame to avoid the timeout.";
+                       }
+                     }];
   }
 }
 
@@ -2106,26 +2093,22 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if (!self.engine) {
     return;
   }
-  fml::WeakPtr<flutter::PlatformView> platformView = self.engine.platformView;
-  if (!platformView) {
-    return;
-  }
+  BOOL enabled = NO;
   int32_t flags = self.accessibilityFlags;
 #if TARGET_OS_SIMULATOR
   // There doesn't appear to be any way to determine whether the accessibility
   // inspector is enabled on the simulator. We conservatively always turn on the
   // accessibility bridge in the simulator, but never assistive technology.
-  platformView->SetSemanticsEnabled(true);
-  platformView->SetAccessibilityFeatures(flags);
+  enabled = YES;
 #else
   _isVoiceOverRunning = UIAccessibilityIsVoiceOverRunning();
-  bool enabled = _isVoiceOverRunning || UIAccessibilityIsSwitchControlRunning();
+  enabled = _isVoiceOverRunning || UIAccessibilityIsSwitchControlRunning();
   if (enabled) {
     flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kAccessibleNavigation);
   }
-  platformView->SetSemanticsEnabled(enabled || UIAccessibilityIsSpeakScreenEnabled());
-  platformView->SetAccessibilityFeatures(flags);
+  enabled |= UIAccessibilityIsSpeakScreenEnabled();
 #endif
+  [self.engine enableSemantics:enabled withFlags:flags];
 }
 
 - (int32_t)accessibilityFlags {

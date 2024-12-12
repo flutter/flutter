@@ -8,6 +8,7 @@
 #import "flutter/shell/common/shell.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
+#include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
@@ -24,6 +25,8 @@ class ThreadHost;
 @property(readonly, nonatomic) BOOL enableEmbedderAPI;
 
 - (flutter::Shell&)shell;
+- (flutter::PlatformViewIOS*)platformView;
+
 - (void)setBinaryMessenger:(FlutterBinaryMessengerRelay*)binaryMessenger;
 - (flutter::IOSRenderingAPI)platformViewsRenderingAPI;
 - (void)waitForFirstFrame:(NSTimeInterval)timeout callback:(void (^)(BOOL didTimeout))callback;
