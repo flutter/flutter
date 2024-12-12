@@ -1702,7 +1702,10 @@ class CompileSwiftUITest {
       '-exportPath',
       'hello_world_swiftuiIPA',
       '-allowProvisioningUpdates',
-      'CODE_SIGNING_ALLOWED=NO'
+      'CODE_SIGNING_ALLOWED=NO',
+      'CODE_SIGNING_REQUIRED=NO',
+      'CODE_SIGN_IDENTITY=-',
+      'EXPANDED_CODE_SIGN_IDENTITY=-',
     ]).then((ProcessResult results) {
       print(results.stdout);
       if (results.exitCode != 0) {
