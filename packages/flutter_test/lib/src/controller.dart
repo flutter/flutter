@@ -2223,11 +2223,14 @@ abstract class WidgetController {
     Duration duration = const Duration(milliseconds: 50),
   }) {
     return TestAsyncUtils.guard<void>(() async {
+      TestGesture? gesture;
       while (maxIteration > 0 && finder.evaluate().isEmpty) {
-        await drag(view, moveStep);
+        gesture ??= await startGesture(getCenter(view, warnIfMissed: true));
+        await gesture.moveBy(moveStep);
         await pump(duration);
         maxIteration -= 1;
       }
+      await gesture?.up();
       await Scrollable.ensureVisible(element(finder));
     });
   }
