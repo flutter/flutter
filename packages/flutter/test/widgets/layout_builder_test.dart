@@ -894,7 +894,11 @@ void main() {
   });
 
   testWidgets('LayoutBuilder in a subtree that skips layout still rebuilds', (WidgetTester tester) async {
-    final LayoutBuilder layoutBuilder = LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) => const Placeholder());
+    bool rebuilt = false;
+    final LayoutBuilder layoutBuilder = LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      rebuilt = true;
+      return const Placeholder();
+    });
     final OverlayEntry overlayEntry1 = OverlayEntry(maintainState: true, canSizeOverlay: true, builder: (BuildContext context) => layoutBuilder);
     // OverlayEntry2 obstructs OverlayEntry1 and forces it to skip layout.
     final OverlayEntry overlayEntry2 = OverlayEntry(opaque: true, canSizeOverlay: true, builder: (BuildContext context) => const Placeholder());
@@ -910,11 +914,12 @@ void main() {
     tester.state<OverlayState>(find.byType(Overlay)).insert(overlayEntry2);
     await tester.pump();
 
+    rebuilt = false;
     final Element layoutBuilderElement = tester.element(find.byWidget(layoutBuilder, skipOffstage: false));
     layoutBuilderElement.markNeedsBuild();
-    expect(layoutBuilderElement.dirty, isTrue);
+    expect(rebuilt, isFalse);
     await tester.pump();
-    expect(layoutBuilderElement.dirty, isFalse);
+    expect(rebuilt, isTrue);
   });
 }
 
