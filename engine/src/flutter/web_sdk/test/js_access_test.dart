@@ -60,22 +60,6 @@ export 'foo.dart';
       expect(result.violations, isEmpty);
     }
 
-    // Multi-line imports should fail.
-    {
-      final _CheckResult result = _checkFile(
-          File('lib/web_ui/lib/src/engine/alarm_clock.dart'),
-'''
-import 'dart:async';
-import 'package:ui/ui.dart'
-  as ui;
-''',
-      );
-      expect(result.failed, isTrue);
-      expect(result.violations, <String>[
-        "on line 2: import is broken up into multiple lines: import 'package:ui/ui.dart'",
-      ]);
-    }
-
     // A library that doesn't directly access JavaScript API should pass.
     expect(
       _checkFile(
@@ -177,12 +161,6 @@ _CheckResult _checkFile(File dartFile, String code) {
     final String line = lines[i].trim();
     final bool isImport = line.startsWith('import');
     if (!isImport) {
-      continue;
-    }
-
-    final bool isProperlyFormattedImport = line.endsWith(';');
-    if (!isProperlyFormattedImport) {
-      violations.add('on line $lineNumber: import is broken up into multiple lines: $line');
       continue;
     }
 
