@@ -2074,7 +2074,6 @@ void main() {
     // Enter invalid hour.
     await tester.enterText(find.byType(TextField).first, 'AB');
     await tester.tap(find.text(okString));
-    await tester.pumpAndSettle();
 
     expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
   });
@@ -2093,7 +2092,6 @@ void main() {
     // Enter invalid hour.
     await tester.enterText(find.byType(TextField).first, 'AB');
     await tester.tap(find.text(okString));
-    await tester.pumpAndSettle();
 
     expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
   });
@@ -2214,6 +2212,7 @@ class _TimePickerLauncher extends StatefulWidget {
   _TimePickerLauncherState createState() => _TimePickerLauncherState();
 }
 
+@pragma('vm:entry-point')
 class _TimePickerLauncherState extends State<_TimePickerLauncher> with RestorationMixin {
   @override
   String? get restorationId => widget.restorationId;

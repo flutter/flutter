@@ -22,7 +22,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:native_assets_cli/code_assets_builder.dart';
 
 import '../../src/common.dart';
-import '../test_utils.dart' show fileSystem, platform;
+import '../test_utils.dart' show fileSystem, flutterBin, platform;
 import '../transition_test_utils.dart';
 import 'native_assets_test_utils.dart';
 
@@ -220,7 +220,9 @@ void main() {
           }
           expectCCompilerIsConfigured(exampleDirectory);
         });
-      });
+      },
+      tags: <String>['flutter-build-apk'],
+      );
     }
   }
 
@@ -465,7 +467,7 @@ void expectCCompilerIsConfigured(Directory appDirectory) {
   for (final Directory subDir in nativeAssetsBuilderDir.listSync().whereType<Directory>()) {
     // We only want to look at build/link hook invocation directories. The
     // `/shared/*` directory allows the individual hooks to store data that is
-    // reusable across different build/link confiurations.
+    // reusable across different build/link configurations.
     if (subDir.path.endsWith('shared')) {
       continue;
     }

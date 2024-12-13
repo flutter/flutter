@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 const String _kOptionPackages = 'packages';
 const String _kOptionAsset = 'asset-dir';
@@ -33,8 +33,8 @@ const List<String> _kRequiredOptions = <String>[
 
 Future<void> main(List<String> args) {
   return runInContext<void>(() => run(args), overrides: <Type, Generator>{
-    Usage: () => DisabledUsage(),
-  }, useImplicitPubspecResolution: true);
+    Analytics: () => const NoOpAnalytics(),
+  });
 }
 
 Future<void> writeAssetFile(libfs.File outputFile, AssetBundleEntry asset) async {

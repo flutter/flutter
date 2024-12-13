@@ -149,7 +149,6 @@ void main() {
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
-          useImplicitPubspecResolution: true,
           analytics: fakeAnalytics,
         ).restart(fullRestart: true);
         expect(result.isOk, false);
@@ -182,7 +181,6 @@ void main() {
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
-          useImplicitPubspecResolution: true,
           reassembleHelper: (
             List<FlutterDevice?> flutterDevices,
             Map<FlutterDevice?, List<FlutterView>> viewCache,
@@ -232,7 +230,6 @@ void main() {
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
           target: 'main.dart',
           analytics: fakeAnalytics,
-          useImplicitPubspecResolution: true,
         ).cleanupAfterSignal();
         expect(shutdownTestingConfig.shutdownHookCalled, true);
       }, overrides: <Type, Generator>{
@@ -261,7 +258,6 @@ void main() {
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
           target: 'main.dart',
           analytics: fakeAnalytics,
-          useImplicitPubspecResolution: true,
         ).preExit();
         expect(shutdownTestingConfig.shutdownHookCalled, true);
       }, overrides: <Type, Generator>{
@@ -312,7 +308,6 @@ void main() {
           devtoolsHandler: createNoOpHandler,
           stopwatchFactory: fakeStopwatchFactory,
           analytics: fakeAnalytics,
-          useImplicitPubspecResolution: true,
         ).restart(fullRestart: true);
 
         expect(result.isOk, true);
@@ -400,7 +395,6 @@ void main() {
           devtoolsHandler: createNoOpHandler,
           stopwatchFactory: fakeStopwatchFactory,
           analytics: fakeAnalytics,
-          useImplicitPubspecResolution: true,
           reloadSourcesHelper: (
             HotRunner hotRunner,
             List<FlutterDevice?> flutterDevices,
@@ -507,7 +501,6 @@ void main() {
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
           analytics: fakeAnalytics,
-          useImplicitPubspecResolution: true,
         );
 
         await expectLater(runner.restart(fullRestart: true), throwsA(isA<Exception>().having((Exception e) => e.toString(), 'message', 'Exception: updateDevFS failed')));
@@ -543,7 +536,6 @@ void main() {
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
           analytics: fakeAnalytics,
-          useImplicitPubspecResolution: true,
         );
 
         await expectLater(runner.restart(), throwsA(isA<Exception>().having((Exception e) => e.toString(), 'message', 'Exception: updateDevFS failed')));
@@ -597,7 +589,6 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
         analytics: fakeAnalytics,
-        useImplicitPubspecResolution: true,
       ).attach(needsFullRestart: false);
       expect(exitCode, 2);
     }, overrides: <Type, Generator>{
@@ -636,7 +627,6 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
         analytics: fakeAnalytics,
-        useImplicitPubspecResolution: true,
       ).cleanupAtFinish();
 
       expect(device1.disposed, true);

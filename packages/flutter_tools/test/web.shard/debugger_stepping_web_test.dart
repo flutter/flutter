@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['flutter-test-driver'])
+library;
+
 import 'package:file/file.dart';
 
 import '../integration.shard/test_data/stepping_project.dart';
@@ -25,7 +28,7 @@ void main() {
 
     await flutter.run(
       withDebugger: true, startPaused: true, chrome: true,
-      additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+      additionalCommandArgs: <String>['--verbose']);
     await flutter.addBreakpoint(project.breakpointUri, project.breakpointLine);
     await flutter.resume(waitForNextPause: true); // Now we should be on the breakpoint.
     expect((await flutter.getSourceLocation())!.line, equals(project.breakpointLine));

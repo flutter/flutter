@@ -378,7 +378,6 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       config: config,
       logger: logger,
       processManager: _processManager,
-      useImplicitPubspecResolution: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
     );
 
     bool result = true;

@@ -28,6 +28,7 @@ import 'material_state.dart';
 import 'popup_menu_theme.dart';
 import 'text_theme.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'tooltip.dart';
 
 // Examples can assume:
@@ -355,6 +356,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
     widget.onTap?.call();
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -850,7 +852,8 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
 
 class _PopupMenuRoute<T> extends PopupRoute<T> {
   _PopupMenuRoute({
-    required this.position,
+    this.position,
+    this.positionBuilder,
     required this.items,
     required this.itemKeys,
     this.initialValue,
@@ -868,12 +871,15 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     super.settings,
     super.requestFocus,
     this.popUpAnimationStyle,
-  }) : itemSizes = List<Size?>.filled(items.length, null),
+  }) : assert((position != null) != (positionBuilder != null),
+        'Either position or positionBuilder must be provided.'),
+       itemSizes = List<Size?>.filled(items.length, null),
        // Menus always cycle focus through their items irrespective of the
        // focus traversal edge behavior set in the Navigator.
        super(traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop);
 
-  final RelativeRect position;
+  final RelativeRect? position;
+  final PopupMenuPositionBuilder? positionBuilder;
   final List<PopupMenuEntry<T>> items;
   final List<GlobalKey> itemKeys;
   final List<Size?> itemSizes;
@@ -953,11 +959,11 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       removeBottom: true,
       removeLeft: true,
       removeRight: true,
-      child: Builder(
-        builder: (BuildContext context) {
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
           return CustomSingleChildLayout(
             delegate: _PopupMenuRouteLayout(
-              position,
+              positionBuilder?.call(context, constraints) ?? position!,
               itemSizes,
               selectedItemIndex,
               Directionality.of(context),
@@ -982,9 +988,38 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   }
 }
 
-/// Show a popup menu that contains the `items` at `position`.
+/// A builder that creates a [RelativeRect] to position a popup menu.
+/// Both [BuildContext] and [BoxConstraints] are from the [PopupRoute] that
+/// displays this menu.
+///
+/// The returned [RelativeRect] determines the position of the popup menu relative
+/// to the bounds of the [Navigator]'s overlay. The menu dimensions are not yet
+/// known when this callback is invoked, as they depend on the items and other
+/// properties of the menu.
+///
+/// The coordinate system used by the [RelativeRect] has its origin at the top
+/// left of the [Navigator]'s overlay. Positive y coordinates are down (below the
+/// origin), and positive x coordinates are to the right of the origin.
+///
+/// See also:
+///
+///  * [RelativeRect.fromLTRB], which creates a [RelativeRect] from left, top,
+///    right, and bottom coordinates.
+///  * [RelativeRect.fromRect], which creates a [RelativeRect] from two [Rect]s,
+///    one representing the size of the popup menu and one representing the size
+///    of the overlay.
+typedef PopupMenuPositionBuilder = RelativeRect Function(
+  BuildContext context, BoxConstraints constraints);
+
+/// Shows a popup menu that contains the `items` at `position`.
 ///
 /// The `items` parameter must not be empty.
+///
+/// Only one of [position] or [positionBuilder] should be provided. Providing both
+/// throws an assertion error. The [positionBuilder] is called at the time the
+/// menu is shown to compute its position and every time the layout is updated,
+/// which is useful when the position needs
+/// to be determined at runtime based on the current layout.
 ///
 /// If `initialValue` is specified then the first item with a matching value
 /// will be highlighted and the value of `position` gives the rectangle whose
@@ -1045,7 +1080,8 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 ///    semantics.
 Future<T?> showMenu<T>({
   required BuildContext context,
-  required RelativeRect position,
+  RelativeRect? position,
+  PopupMenuPositionBuilder? positionBuilder,
   required List<PopupMenuEntry<T>> items,
   T? initialValue,
   double? elevation,
@@ -1064,6 +1100,8 @@ Future<T?> showMenu<T>({
 }) {
   assert(items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
+  assert((position != null) != (positionBuilder != null),
+  'Either position or positionBuilder must be provided.');
 
   switch (Theme.of(context).platform) {
     case TargetPlatform.iOS:
@@ -1080,6 +1118,7 @@ Future<T?> showMenu<T>({
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
   return navigator.push(_PopupMenuRoute<T>(
     position: position,
+    positionBuilder: positionBuilder,
     items: items,
     itemKeys: menuItemKeys,
     initialValue: initialValue,
@@ -1466,15 +1505,8 @@ class PopupMenuButton<T> extends StatefulWidget {
 /// See [showButtonMenu] for a way to programmatically open the popup menu
 /// of your button state.
 class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
-  /// A method to show a popup menu with the items supplied to
-  /// [PopupMenuButton.itemBuilder] at the position of your [PopupMenuButton].
-  ///
-  /// By default, it is called when the user taps the button and [PopupMenuButton.enabled]
-  /// is set to `true`. Moreover, you can open the button by calling the method manually.
-  ///
-  /// You would access your [PopupMenuButtonState] using a [GlobalKey] and
-  /// show the menu of the button with `globalKey.currentState.showButtonMenu`.
-  void showButtonMenu() {
+
+  RelativeRect _positionBuilder(BuildContext _, BoxConstraints constraints) {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final RenderBox button = context.findRenderObject()! as RenderBox;
     final RenderBox overlay = Navigator.of(
@@ -1500,6 +1532,20 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       ),
       Offset.zero & overlay.size,
     );
+
+    return position;
+  }
+
+  /// A method to show a popup menu with the items supplied to
+  /// [PopupMenuButton.itemBuilder] at the position of your [PopupMenuButton].
+  ///
+  /// By default, it is called when the user taps the button and [PopupMenuButton.enabled]
+  /// is set to `true`. Moreover, you can open the button by calling the method manually.
+  ///
+  /// You would access your [PopupMenuButtonState] using a [GlobalKey] and
+  /// show the menu of the button with `globalKey.currentState.showButtonMenu`.
+  void showButtonMenu() {
+    final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final List<PopupMenuEntry<T>> items = widget.itemBuilder(context);
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
@@ -1511,7 +1557,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         surfaceTintColor: widget.surfaceTintColor ?? popupMenuTheme.surfaceTintColor,
         items: items,
         initialValue: widget.initialValue,
-        position: position,
+        positionBuilder: _positionBuilder,
         shape: widget.shape ?? popupMenuTheme.shape,
         menuPadding: widget.menuPadding ?? popupMenuTheme.menuPadding,
         color: widget.color ?? popupMenuTheme.color,
@@ -1543,6 +1589,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     };
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
@@ -1554,7 +1601,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     assert(debugCheckHasMaterialLocalizations(context));
 
     if (widget.child != null) {
-      return Tooltip(
+      final Widget child = Tooltip(
         message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
         child: InkWell(
           borderRadius: widget.borderRadius,
@@ -1565,6 +1612,17 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
           child: widget.child,
         ),
       );
+      final MaterialTapTargetSize tapTargetSize = widget.style?.tapTargetSize ?? MaterialTapTargetSize.shrinkWrap;
+      if (tapTargetSize == MaterialTapTargetSize.padded) {
+        return ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: kMinInteractiveDimension,
+            minHeight: kMinInteractiveDimension,
+          ),
+          child: child,
+        );
+      }
+      return child;
     }
 
     return IconButton(

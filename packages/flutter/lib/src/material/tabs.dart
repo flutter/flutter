@@ -1772,11 +1772,9 @@ class _TabBarState extends State<TabBar> {
         wrappedTabs[previousIndex] = _buildStyledTab(wrappedTabs[previousIndex], false, animation, _defaults);
       } else {
         // The user is dragging the TabBarView's PageView left or right.
-        if (_currentIndex! < widget.tabs.length) {
-          final int tabIndex = _currentIndex!;
-          final Animation<double> centerAnimation = _DragAnimation(_controller!, tabIndex);
-          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation, _defaults);
-        }
+        final int tabIndex = _currentIndex!;
+        final Animation<double> centerAnimation = _DragAnimation(_controller!, tabIndex);
+        wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation, _defaults);
         if (_currentIndex! > 0) {
           final int tabIndex = _currentIndex! - 1;
           final Animation<double> previousAnimation = ReverseAnimation(_DragAnimation(_controller!, tabIndex));
@@ -1815,7 +1813,7 @@ class _TabBarState extends State<TabBar> {
         enableFeedback: widget.enableFeedback ?? true,
         overlayColor: widget.overlayColor ?? tabBarTheme.overlayColor ?? defaultOverlay,
         splashFactory: widget.splashFactory ?? tabBarTheme.splashFactory ?? _defaults.splashFactory,
-        borderRadius: widget.splashBorderRadius,
+        borderRadius: widget.splashBorderRadius ?? tabBarTheme.splashBorderRadius ?? _defaults.splashBorderRadius,
         child: Padding(
           padding: EdgeInsets.only(bottom: widget.indicatorWeight),
           child: Stack(

@@ -36,9 +36,6 @@ import 'src/web/recorder.dart';
 
 typedef RecorderFactory = Recorder Function();
 
-const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
-const bool isSkwasm = bool.fromEnvironment('FLUTTER_WEB_USE_SKWASM');
-
 /// List of all benchmarks that run in the devicelab.
 ///
 /// When adding a new benchmark, add it to this map. Make sure that the name
@@ -70,34 +67,17 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchMouseRegionGridHover.benchmarkName: () => BenchMouseRegionGridHover(),
   BenchMouseRegionMixedGridHover.benchmarkName: () => BenchMouseRegionMixedGridHover(),
   BenchWrapBoxScroll.benchmarkName: () => BenchWrapBoxScroll(),
-  if (!isSkwasm) ...<String, RecorderFactory>{
-    // Platform views are not yet supported with Skwasm.
-    // https://github.com/flutter/flutter/issues/126346
-    BenchPlatformViewInfiniteScroll.benchmarkName: () => BenchPlatformViewInfiniteScroll.forward(),
-    BenchPlatformViewInfiniteScroll.benchmarkNameBackward: () => BenchPlatformViewInfiniteScroll.backward(),
-  },
+  BenchPlatformViewInfiniteScroll.benchmarkName: () => BenchPlatformViewInfiniteScroll.forward(),
+  BenchPlatformViewInfiniteScroll.benchmarkNameBackward: () => BenchPlatformViewInfiniteScroll.backward(),
   BenchMaterial3Components.benchmarkName: () => BenchMaterial3Components(),
   BenchMaterial3Semantics.benchmarkName: () => BenchMaterial3Semantics(),
   BenchMaterial3ScrollSemantics.benchmarkName: () => BenchMaterial3ScrollSemantics(),
 
-  // Skia-only benchmarks
-  if (isCanvasKit || isSkwasm) ...<String, RecorderFactory>{
-    BenchTextLayout.canvasKitBenchmarkName: () => BenchTextLayout.canvasKit(),
-    BenchBuildColorsGrid.canvasKitBenchmarkName: () => BenchBuildColorsGrid.canvasKit(),
-    BenchTextCachedLayout.canvasKitBenchmarkName: () => BenchTextCachedLayout.canvasKit(),
+  BenchTextLayout.benchmarkName: () => BenchTextLayout(),
+  BenchBuildColorsGrid.benchmarkName: () => BenchBuildColorsGrid(),
+  BenchTextCachedLayout.benchmarkName: () => BenchTextCachedLayout(),
 
-    // The HTML renderer does not decode frame-by-frame. It just drops an <img>
-    // element and lets it animate automatically with no feedback to the
-    // framework. So this benchmark only makes sense in CanvasKit.
-    BenchImageDecoding.benchmarkName: () => BenchImageDecoding(),
-  },
-
-  // HTML-only benchmarks
-  if (!isCanvasKit && !isSkwasm) ...<String, RecorderFactory>{
-    BenchTextLayout.canvasBenchmarkName: () => BenchTextLayout.canvas(),
-    BenchTextCachedLayout.canvasBenchmarkName: () => BenchTextCachedLayout.canvas(),
-    BenchBuildColorsGrid.canvasBenchmarkName: () => BenchBuildColorsGrid.canvas(),
-  },
+  BenchImageDecoding.benchmarkName: () => BenchImageDecoding(),
 };
 
 final LocalBenchmarkServerClient _client = LocalBenchmarkServerClient();

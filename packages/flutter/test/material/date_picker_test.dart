@@ -132,6 +132,21 @@ void main() {
     await callback(date);
   }
 
+  ShapeDecoration? findDayDecoration(WidgetTester tester, String day) {
+    return tester.widget<Ink>(
+      find.ancestor(
+        of: find.text(day),
+        matching: find.byType(Ink)
+      ),
+    ).decoration as ShapeDecoration?;
+  }
+
+  MaterialInkController findDayGridMaterial(WidgetTester tester) {
+    // All days are painted on the same Material widget.
+    // Use an arbitrary day to find this Material.
+    return Material.of(tester.element(find.text('17')));
+  }
+
   group('showDatePicker Dialog', () {
     testWidgets('Default dialog size', (WidgetTester tester) async {
       Future<void> showPicker(WidgetTester tester, Size size) async {
@@ -1264,43 +1279,170 @@ void main() {
         await tester.pump();
         const Color todayColor = Color(0xff2196f3); // default primary color
         expect(
-          Material.of(tester.element(find.text('2'))),
+          findDayGridMaterial(tester),
           // The current day should be painted with a circle outline
           paints..circle(color: todayColor, style: PaintingStyle.stroke, strokeWidth: 1.0),
         );
       });
     });
 
-    testWidgets('Date picker dayOverlayColor resolves pressed state', (WidgetTester tester) async {
-      today = DateTime(2023, 5, 4);
+    testWidgets('Date picker dayOverlayColor resolves hovered state', (WidgetTester tester) async {
       final ThemeData theme = ThemeData();
-      final bool material3 = theme.useMaterial3;
-      await prepareDatePicker(tester, (Future<DateTime?> date) async {
-        await tester.pump();
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {}, theme: theme);
 
-        // Hovered.
-        final Offset center = tester.getCenter(find.text('30'));
-        final TestGesture gesture = await tester.createGesture(
-          kind: PointerDeviceKind.mouse,
-        );
-        await gesture.addPointer();
-        await gesture.moveTo(center);
-        await tester.pumpAndSettle();
-        expect(
-          Material.of(tester.element(find.text('30'))),
-          paints..circle(color: material3 ? theme.colorScheme.onSurfaceVariant.withOpacity(0.08) : theme.colorScheme.onSurfaceVariant.withOpacity(0.08)),
-        );
+      final Offset center = tester.getCenter(find.text('30'));
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.addPointer();
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(center);
+      await tester.pumpAndSettle();
 
-        // Highlighted (pressed).
-        await gesture.down(center);
-        await tester.pumpAndSettle();
-        expect(
-          Material.of(tester.element(find.text('30'))),
-          paints..circle()..circle(color: material3 ? theme.colorScheme.onSurfaceVariant.withOpacity(0.1) : theme.colorScheme.onSurfaceVariant.withOpacity(0.12))
-        );
-        await gesture.up();
-        await tester.pumpAndSettle();
-      }, theme: theme);
+      expect(
+        findDayGridMaterial(tester),
+        paints
+          ..circle() // Today decoration.
+          ..circle() // Selected day decoration.
+          ..circle(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08)),
+      );
+    });
+
+    testWidgets('Date picker dayOverlayColor resolves focused state', (WidgetTester tester) async {
+      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      final ThemeData theme = ThemeData();
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {}, theme: theme);
+
+      // Navigate to the grid.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+
+      // Navigate to day 30.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+
+      expect(
+        findDayGridMaterial(tester),
+        paints
+          ..circle() // Today decoration.
+          ..circle() // Selected day decoration.
+          ..circle(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.10)),
+      );
+    });
+
+    testWidgets('Date picker dayOverlayColor resolves pressed state', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData();
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {}, theme: theme);
+
+      final Offset center = tester.getCenter(find.text('30'));
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.addPointer();
+      addTearDown(gesture.removePointer);
+      await gesture.down(center);
+      await tester.pumpAndSettle();
+
+      expect(
+        findDayGridMaterial(tester),
+        paints
+          ..circle() // Today decoration.
+          ..circle() // Selected day decoration.
+          ..circle() // Hovered decoration.
+          ..circle(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.10)),
+      );
+      await gesture.up();
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/130586.
+    testWidgets('Date picker dayOverlayColor resolves selected and hovered state', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData();
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {}, theme: theme);
+
+      // Select day 30.
+      await tester.tap(find.text('30'));
+      await tester.pumpAndSettle();
+      final ShapeDecoration day30Decoration = findDayDecoration(tester, '30')!;
+      expect(day30Decoration.color, theme.colorScheme.primary);
+
+      final Offset center = tester.getCenter(find.text('30'));
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.addPointer();
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(center);
+      await tester.pumpAndSettle();
+
+      expect(
+        findDayGridMaterial(tester),
+        paints
+          ..circle() // Today decoration.
+          ..circle() // Selected day decoration.
+          ..circle(color: theme.colorScheme.onPrimary.withOpacity(0.08)),
+      );
+    });
+
+    testWidgets('Date picker dayOverlayColor resolves selected and focused state', (WidgetTester tester) async {
+      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      final ThemeData theme = ThemeData();
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {}, theme: theme);
+
+      // Select day 30.
+      await tester.tap(find.text('30'));
+      await tester.pumpAndSettle();
+      final ShapeDecoration day30Decoration = findDayDecoration(tester, '30')!;
+      expect(day30Decoration.color, theme.colorScheme.primary);
+
+      // Navigate to the grid.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      // Day 30 is selected and focused.
+      expect(
+        findDayGridMaterial(tester),
+        paints
+          ..circle() // Today decoration.
+          ..circle() // Selected day decoration.
+          ..circle(color: theme.colorScheme.onPrimary.withOpacity(0.10)),
+      );
+    });
+
+    testWidgets('Date picker dayOverlayColor resolves selected and pressed state', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData();
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {}, theme: theme);
+
+      // Select day 30.
+      await tester.tap(find.text('30'));
+      await tester.pumpAndSettle();
+      final ShapeDecoration day30Decoration = findDayDecoration(tester, '30')!;
+      expect(day30Decoration.color, theme.colorScheme.primary);
+
+      final Offset center = tester.getCenter(find.text('30'));
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.addPointer();
+      addTearDown(gesture.removePointer);
+      await gesture.down(center);
+      await tester.pumpAndSettle();
+
+      expect(
+        findDayGridMaterial(tester),
+        paints
+          ..circle() // Today decoration.
+          ..circle() // Selected day decoration.
+          ..circle() // Hovered decoration.
+          ..circle(color: theme.colorScheme.onPrimary.withOpacity(0.10)),
+      );
+      await gesture.up();
     });
 
     testWidgets('Selecting date does not switch picker to year selection', (WidgetTester tester) async {
@@ -2306,6 +2448,164 @@ void main() {
         });
       });
     });
+
+    testWidgets('Date picker dayOverlayColor resolves hovered state', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: false);
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {}, theme: theme);
+
+      final Offset center = tester.getCenter(find.text('30'));
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.addPointer();
+      await gesture.moveTo(center);
+      await tester.pumpAndSettle();
+
+      expect(
+        findDayGridMaterial(tester),
+        paints
+          ..circle() // Today decoration.
+          ..circle() // Selected day decoration.
+          ..circle(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08)),
+      );
+    });
+
+    testWidgets('Date picker dayOverlayColor resolves focused state', (WidgetTester tester) async {
+      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      final ThemeData theme = ThemeData(useMaterial3: false);
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {}, theme: theme);
+
+      // Navigate to the grid.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+
+      // Navigate to day 30.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+
+      expect(
+        findDayGridMaterial(tester),
+        paints
+          ..circle() // Today decoration.
+          ..circle() // Selected day decoration.
+          ..circle(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.12)),
+      );
+    });
+
+    testWidgets('Date picker dayOverlayColor resolves pressed state', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: false);
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {}, theme: theme);
+
+      final Offset center = tester.getCenter(find.text('30'));
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.addPointer();
+      addTearDown(gesture.removePointer);
+      await gesture.down(center);
+      await tester.pumpAndSettle();
+
+      expect(
+        findDayGridMaterial(tester),
+        paints
+          ..circle() // Today decoration.
+          ..circle() // Selected day decoration.
+          ..circle() // Hovered decoration.
+          ..circle(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.12)),
+      );
+      await gesture.up();
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/130586.
+    testWidgets('Date picker dayOverlayColor resolves selected and hovered state', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: false);
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {}, theme: theme);
+
+      // Select day 30.
+      await tester.tap(find.text('30'));
+      await tester.pumpAndSettle();
+      final ShapeDecoration day30Decoration = findDayDecoration(tester, '30')!;
+      expect(day30Decoration.color, theme.colorScheme.primary);
+
+      final Offset center = tester.getCenter(find.text('30'));
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.addPointer();
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(center);
+      await tester.pumpAndSettle();
+
+      expect(
+        findDayGridMaterial(tester),
+        paints
+          ..circle() // Today decoration.
+          ..circle() // Selected day decoration.
+          ..circle(color: theme.colorScheme.onPrimary.withOpacity(0.08)),
+      );
+    });
+
+    testWidgets('Date picker dayOverlayColor resolves selected and focused state', (WidgetTester tester) async {
+      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      final ThemeData theme = ThemeData(useMaterial3: false);
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {}, theme: theme);
+
+      // Select day 30.
+      await tester.tap(find.text('30'));
+      await tester.pumpAndSettle();
+      final ShapeDecoration day30Decoration = findDayDecoration(tester, '30')!;
+      expect(day30Decoration.color, theme.colorScheme.primary);
+
+      // Navigate to the grid.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      // Day 30 is selected and focused.
+      expect(
+        findDayGridMaterial(tester),
+        paints
+          ..circle() // Today decoration.
+          ..circle() // Selected day decoration.
+          ..circle(color: theme.colorScheme.onPrimary.withOpacity(0.12)),
+      );
+    });
+
+    testWidgets('Date picker dayOverlayColor resolves selected and pressed state', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: false);
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {}, theme: theme);
+
+      // Select day 30.
+      await tester.tap(find.text('30'));
+      await tester.pumpAndSettle();
+      final ShapeDecoration day30Decoration = findDayDecoration(tester, '30')!;
+      expect(day30Decoration.color, theme.colorScheme.primary);
+
+      final Offset center = tester.getCenter(find.text('30'));
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.addPointer();
+      addTearDown(gesture.removePointer);
+      await gesture.down(center);
+      await tester.pumpAndSettle();
+
+      expect(
+        findDayGridMaterial(tester),
+        paints
+          ..circle() // Today decoration.
+          ..circle() // Selected day decoration.
+          ..circle() // Hovered decoration.
+          ..circle(color: theme.colorScheme.onPrimary.withOpacity(0.38)),
+      );
+      await gesture.up();
+    });
   });
 }
 
@@ -2320,6 +2620,7 @@ class _RestorableDatePickerDialogTestWidget extends StatefulWidget {
   _RestorableDatePickerDialogTestWidgetState createState() => _RestorableDatePickerDialogTestWidgetState();
 }
 
+@pragma('vm:entry-point')
 class _RestorableDatePickerDialogTestWidgetState extends State<_RestorableDatePickerDialogTestWidget> with RestorationMixin {
   @override
   String? get restorationId => 'scaffold_state';

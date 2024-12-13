@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:yaml/yaml.dart';
@@ -333,7 +334,7 @@ flutter:
       tempDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: workspace
 environment:
-  sdk: ^3.5.0-0
+  sdk: ^3.7.0-0
 workspace:
   - flutter_project
 ''');
@@ -636,7 +637,7 @@ workspace:
       ),
     });
 
-    testUsingContext('get --no-implicit-pubspec-resolution omits ".flutter-plugins"', () async {
+    testUsingContext('get explicit-packages-resolution omits ".flutter-plugins"', () async {
       final String projectPath = await createProject(
         tempDir,
         arguments: <String>['--template=plugin', '--no-pub', '--platforms=ios,android'],
@@ -646,12 +647,15 @@ workspace:
       removeGeneratedFiles(exampleProjectPath);
 
       // Running flutter packages get also resolves the dependencies in the example/ project.
-      await runCommandIn(projectPath, 'get', globalArgs: <String>['--no-implicit-pubspec-resolution']);
+      await runCommandIn(projectPath, 'get');
 
       expectDependenciesResolved(projectPath);
       expectDependenciesResolved(exampleProjectPath);
       expectPluginInjected(exampleProjectPath, includeLegacyPluginsList: false);
     }, overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(
+        isExplicitPackageDependenciesEnabled: true,
+      ),
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
         fileSystem: globals.fs,

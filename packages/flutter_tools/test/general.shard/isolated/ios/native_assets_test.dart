@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
@@ -159,58 +160,67 @@ void main() {
       }
       final File packageConfig =
           environment.projectDir.childFile('.dart_tool/package_config.json');
-      final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile('native_assets.yaml').uri;
+      final Uri nonFlutterTesterAssetUri = environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
       await packageConfig.parent.create();
       await packageConfig.create();
+
+      List<CodeAsset> codeAssets(OS targetOS, CodeConfig codeConfig) => <CodeAsset>[
+        CodeAsset(
+          package: 'bar',
+          name: 'bar.dart',
+          linkMode: DynamicLoadingBundled(),
+          os: targetOS,
+          architecture: codeConfig.targetArchitecture,
+          file: Uri.file('${codeConfig.targetArchitecture}/libbar.dylib'),
+        ),
+        CodeAsset(
+          package: 'buz',
+          name: 'buz.dart',
+          linkMode: DynamicLoadingBundled(),
+          os: targetOS,
+          architecture: codeConfig.targetArchitecture,
+          file: Uri.file('${codeConfig.targetArchitecture}/libbuz.dylib'),
+        ),
+      ];
       final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
         ],
         onBuild: (BuildConfig config) =>
-            FakeFlutterNativeAssetsBuilderResult.fromAssets(
-              codeAssets: <CodeAsset>[
-                CodeAsset(
-                  package: 'bar',
-                  name: 'bar.dart',
-                  linkMode: DynamicLoadingBundled(),
-                  os: config.targetOS,
-                  architecture: config.codeConfig.targetArchitecture,
-                  file: Uri.file('${config.codeConfig.targetArchitecture}/libbar.dylib'),
-                ),
-                CodeAsset(
-                  package: 'buz',
-                  name: 'buz.dart',
-                  linkMode: DynamicLoadingBundled(),
-                  os: config.targetOS,
-                  architecture: config.codeConfig.targetArchitecture,
-                  file: Uri.file('${config.codeConfig.targetArchitecture}/libbuz.dylib'),
-                ),
-              ],
-        ),
+            FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets(config.targetOS, config.codeConfig)),
+        onLink: (LinkConfig config) =>
+          buildMode == BuildMode.debug
+            ? null
+            : FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets(config.targetOS, config.codeConfig)),
       );
-      await runFlutterSpecificDartBuild(
-        environmentDefines: <String, String>{
-          kBuildMode: buildMode.cliName,
-          kSdkRoot: '.../iPhone Simulator',
-          kIosArchs: 'arm64 x86_64',
-        },
+      final Map<String, String> environmentDefines = <String, String>{
+        kBuildMode: buildMode.cliName,
+        kSdkRoot: '.../iPhone Simulator',
+        kIosArchs: 'arm64 x86_64',
+      };
+      final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+        environmentDefines: environmentDefines,
         targetPlatform: TargetPlatform.ios,
         projectUri: projectUri,
-        nativeAssetsYamlUri: nonFlutterTesterAssetUri,
         fileSystem: fileSystem,
         buildRunner: buildRunner,
+      );
+      await installCodeAssets(
+        dartBuildResult: dartBuildResult,
+        environmentDefines: environmentDefines,
+        targetPlatform: TargetPlatform.ios,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        nativeAssetsFileUri: nonFlutterTesterAssetUri,
       );
       expect(
         (globals.logger as BufferLogger).traceText,
         stringContainsInOrder(<String>[
-          'Building native assets for [ios_arm64, ios_x64] $buildMode.',
-          'Building native assets for [ios_arm64, ios_x64] $buildMode done.',
+          'Building native assets for ios [arm64, x64] $buildMode.',
+          'Building native assets for ios [arm64, x64] $buildMode done.',
         ]),
       );
-      expect(
-        environment.buildDir.childFile('native_assets.yaml'),
-        exists,
-      );
+      expect(environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);
       // Two archs.
       expect(buildRunner.buildInvocations, 2);
       expect(

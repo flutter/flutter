@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['flutter-test-driver'])
+library;
+
 import 'package:file/file.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -38,7 +41,7 @@ void main() {
       await flutter.run(
         withDebugger: true, chrome: true,
         expressionEvaluation: expressionEvaluation,
-        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+        additionalCommandArgs: <String>['--verbose']);
     }
 
     Future<void> breakInBuildMethod(FlutterTestDriver flutter) async {
@@ -145,7 +148,7 @@ void main() {
         withDebugger: true, chrome: true,
         expressionEvaluation: expressionEvaluation,
         startPaused: true, script: project.testFilePath,
-        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+        additionalCommandArgs: <String>['--verbose']);
     }
 
     testWithoutContext('cannot evaluate expressions if feature is disabled', () async {

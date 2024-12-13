@@ -426,6 +426,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
   @visibleForTesting
   final Map<ButtonSegment<T>, MaterialStatesController> statesControllers = <ButtonSegment<T>, MaterialStatesController>{};
 
+  @protected
   @override
   void didUpdateWidget(covariant SegmentedButton<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -464,6 +465,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     }
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     final SegmentedButtonThemeData theme = SegmentedButtonTheme.of(context);
@@ -605,6 +607,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     );
   }
 
+  @protected
   @override
   void dispose() {
     for (final MaterialStatesController controller in statesControllers.values) {

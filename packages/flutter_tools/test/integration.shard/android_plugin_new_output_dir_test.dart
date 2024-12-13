@@ -26,11 +26,6 @@ void main() {
   });
 
   test('plugins use individualized build directories based on their name.', () async {
-    final String flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
     // create flutter module project
     ProcessResult result = processManager.runSync(<String>[
       flutterBin,

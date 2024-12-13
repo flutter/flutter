@@ -26,7 +26,6 @@ import '../macos/swift_packages.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
 import 'create_base.dart';
 
 const String kPlatformHelp =
@@ -36,10 +35,73 @@ const String kPlatformHelp =
   'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform. '
   'Adding desktop platforms requires the corresponding desktop config setting to be enabled.';
 
-class CreateCommand extends CreateBase {
-  CreateCommand({
-    super.verboseHelp = false,
-  }) {
+class CreateCommand extends FlutterCommand with CreateBase {
+  CreateCommand({bool verboseHelp = false}) {
+    addPubOptions();
+    argParser.addFlag(
+      'with-driver-test',
+      help: '(deprecated) Historically, this added a flutter_driver dependency and generated a '
+            'sample "flutter drive" test. Now it does nothing. Consider using the '
+            '"integration_test" package: https://pub.dev/packages/integration_test',
+      hide: !verboseHelp,
+    );
+    argParser.addFlag(
+      'overwrite',
+      help: 'When performing operations, overwrite existing files.',
+    );
+    argParser.addOption(
+      'description',
+      defaultsTo: 'A new Flutter project.',
+      help:
+          'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.',
+    );
+    argParser.addOption(
+      'org',
+      defaultsTo: 'com.example',
+      help:
+          'The organization responsible for your new Flutter project, in reverse domain name notation. '
+          'This string is used in Java package names and as prefix in the iOS bundle identifier.',
+    );
+    argParser.addOption(
+      'project-name',
+      help:
+          'The project name for this new Flutter project. This must be a valid dart package name.',
+    );
+    argParser.addOption(
+      'ios-language',
+      abbr: 'i',
+      defaultsTo: 'swift',
+      allowed: <String>['objc', 'swift'],
+      help: '(deprecated) The language to use for iOS-specific code, either Swift (recommended) or Objective-C (legacy).',
+      hide: !verboseHelp,
+    );
+    argParser.addOption(
+      'android-language',
+      abbr: 'a',
+      defaultsTo: 'kotlin',
+      allowed: <String>['java', 'kotlin'],
+      help: 'The language to use for Android-specific code, either Kotlin (recommended) or Java (legacy).',
+    );
+    argParser.addFlag(
+      'skip-name-checks',
+      help:
+          'Allow the creation of applications and plugins with invalid names. '
+          'This is only intended to enable testing of the tool itself.',
+      hide: !verboseHelp,
+    );
+    argParser.addFlag(
+      'implementation-tests',
+      help:
+          'Include implementation tests that verify the template functions correctly. '
+          'This is only intended to enable testing of the tool itself.',
+      hide: !verboseHelp,
+    );
+    argParser.addOption(
+      'initial-create-revision',
+      help: 'The Flutter SDK git commit hash to store in .migrate_config. This parameter is used by the tool '
+            'internally and should generally not be used manually.',
+      hide: !verboseHelp,
+    );
     addPlatformsOptions(customHelp: kPlatformHelp);
     argParser.addOption(
       'template',
@@ -438,12 +500,12 @@ class CreateCommand extends CreateBase {
         pubContext = PubContext.createPackage;
     }
 
-    if (boolArg('pub')) {
+    if (shouldCallPubGet) {
       final FlutterProject project = FlutterProject.fromDirectory(relativeDir);
       await pub.get(
         context: pubContext,
         project: project,
-        offline: boolArg('offline'),
+        offline: offline,
         outputMode: PubOutputMode.summaryOnly,
       );
       // Setting `includeIos` etc to false as with FlutterProjectType.package
@@ -459,7 +521,6 @@ class CreateCommand extends CreateBase {
           macOSPlatform: includeMacos,
           windowsPlatform: includeWindows,
           webPlatform: includeWeb,
-          useImplicitPubspecResolution: boolArg(FlutterGlobalOptions.kImplicitPubspecResolution, global: true),
         );
       }
     }

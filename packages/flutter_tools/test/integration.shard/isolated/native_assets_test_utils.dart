@@ -10,7 +10,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
-import '../test_utils.dart' show ProcessResultMatcher, fileSystem;
+import '../test_utils.dart' show ProcessResultMatcher, fileSystem, flutterBin;
 import '../transition_test_utils.dart';
 
 Future<Directory> createTestProject(String packageName, Directory tempDirectory) async {
@@ -71,7 +71,8 @@ Future<void> addLinkHookDependency(String packageName, Directory packageDirector
   final File thisPubspecFile = packageDirectory.childFile('pubspec.yaml');
 
   final Map<String, Object?> linkHookPubspec = _pubspecAsMutableJson(linkHookPubspecFile.readAsStringSync());
-  final Map<String, Object?> allLinkHookDeps = linkHookPubspec['dependencies']! as Map<String, Object?>;
+  final Map<String, Object?> linkHooksDependencies = linkHookPubspec['dependencies']! as Map<String, Object?>;
+  final Map<String, Object?> linkHooksDevDependencies = linkHookPubspec['dev_dependencies']! as Map<String, Object?>;
 
   final Map<String, Object?> thisPubspec = _pubspecAsMutableJson(thisPubspecFile.readAsStringSync());
 
@@ -86,8 +87,20 @@ Future<void> addLinkHookDependency(String packageName, Directory packageDirector
   //
   // We ensure that the test package we generate here will have versions
   // compatible with the one from flutter CIs pinned dependencies.
-  _updateDependencies(thisDependencies, allLinkHookDeps);
-  _updateDependencies(thisDevDependencies, allLinkHookDeps);
+  _updateDependencies(thisDependencies, linkHooksDependencies);
+  _updateDependencies(thisDevDependencies, linkHooksDependencies);
+  // Resolving dependencies for this package wouldn't normally use
+  // the dev dependencies of the `link_hook` package. But there may be some
+  // non-dev `link_hook` dependencies that affect resolution of dev
+  // dependencies. So by making this compatible to `link_hook`s dev dependencies
+  // we implicitly also make it compatible to `link_hook`s non-dev dependencies.
+  //
+  // Example: `link_hook` has `test_core` as dependency and `test` as dev
+  // dependency. By using the same version of `test` in this package as
+  // `link_hook` we implicitly are guaranteed to also get a version of
+  // `test_core` that is compatible (and `test_core` is pinned in `link_hook`)
+  _updateDependencies(thisDependencies, linkHooksDevDependencies);
+  _updateDependencies(thisDevDependencies, linkHooksDevDependencies);
   thisDependencies['link_hook'] = <String, Object?>{ 'path' : linkHookDirectory.path };
 
   await thisPubspecFile.writeAsString(json.encode(thisPubspec));

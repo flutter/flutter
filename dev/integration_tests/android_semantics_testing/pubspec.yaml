@@ -1,7 +1,7 @@
 name: android_semantics_testing
 description: Integration testing library for Android semantics
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.7.0-0
 
 dependencies:
   flutter:
