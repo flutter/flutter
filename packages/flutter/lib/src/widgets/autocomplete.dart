@@ -605,8 +605,6 @@ class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
 
   @override
   Widget build(BuildContext context) {
-    // Wrap the options view in a LayoutBuilder so it can retrieve the most
-    // updated leader size.
     return CompositedTransformFollower(
       link: widget.optionsLayerLink,
       followerAnchor: switch (widget.optionsViewOpenDirection) {
