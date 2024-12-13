@@ -93,71 +93,70 @@ class _NavRailExampleState extends State<NavRailExample> {
                 Text('Label type: ${labelType.name}'),
                 const SizedBox(height: 10),
                 SegmentedButton<NavigationRailLabelType>(
-                    segments: const <ButtonSegment<NavigationRailLabelType>>[
-                      ButtonSegment<NavigationRailLabelType>(
-                        value: NavigationRailLabelType.none,
-                        label: Text('None'),
-                      ),
-                      ButtonSegment<NavigationRailLabelType>(
-                        value: NavigationRailLabelType.selected,
-                        label: Text('Selected'),
-                      ),
-                      ButtonSegment<NavigationRailLabelType>(
-                        value: NavigationRailLabelType.all,
-                        label: Text('All'),
-                      ),
-                    ],
-                    selected: <NavigationRailLabelType>{
-                      labelType
-                    },
-                    onSelectionChanged:
-                        (Set<NavigationRailLabelType> newSelection) {
-                      setState(() {
-                        labelType = newSelection.first;
-                      });
-                    }),
+                  segments: const <ButtonSegment<NavigationRailLabelType>>[
+                    ButtonSegment<NavigationRailLabelType>(
+                      value: NavigationRailLabelType.none,
+                      label: Text('None'),
+                    ),
+                    ButtonSegment<NavigationRailLabelType>(
+                      value: NavigationRailLabelType.selected,
+                      label: Text('Selected'),
+                    ),
+                    ButtonSegment<NavigationRailLabelType>(
+                      value: NavigationRailLabelType.all,
+                      label: Text('All'),
+                    ),
+                  ],
+                  selected: <NavigationRailLabelType>{labelType},
+                  onSelectionChanged: (Set<NavigationRailLabelType> newSelection) {
+                    setState(() {
+                      labelType = newSelection.first;
+                    });
+                  },
+                ),
                 const SizedBox(height: 20),
                 Text('Group alignment: $groupAlignment'),
                 const SizedBox(height: 10),
                 SegmentedButton<double>(
-                    segments: const <ButtonSegment<double>>[
-                      ButtonSegment<double>(
-                        value: -1.0,
-                        label: Text('Top'),
-                      ),
-                      ButtonSegment<double>(
-                        value: 0.0,
-                        label: Text('Center'),
-                      ),
-                      ButtonSegment<double>(
-                        value: 1.0,
-                        label: Text('Bottom'),
-                      ),
-                    ],
-                    selected: <double>{
-                      groupAlignment
-                    },
-                    onSelectionChanged: (Set<double> newSelection) {
-                      setState(() {
-                        groupAlignment = newSelection.first;
-                      });
-                    }),
+                  segments: const <ButtonSegment<double>>[
+                    ButtonSegment<double>(
+                      value: -1.0,
+                      label: Text('Top'),
+                    ),
+                    ButtonSegment<double>(
+                      value: 0.0,
+                      label: Text('Center'),
+                    ),
+                    ButtonSegment<double>(
+                      value: 1.0,
+                      label: Text('Bottom'),
+                    ),
+                  ],
+                  selected: <double>{
+                    groupAlignment
+                  },
+                  onSelectionChanged: (Set<double> newSelection) {
+                    setState(() {
+                      groupAlignment = newSelection.first;
+                    });
+                  }
+                ),
                 const SizedBox(height: 20),
                 SwitchListTile(
                   title: Text(showLeading ? 'Hide Leading' : 'Show Leading'),
                   value: showLeading,
-                  onChanged: (bool _) {
+                  onChanged: (bool value) {
                     setState(() {
-                      showLeading = !showLeading;
+                      showLeading = value;
                     });
                   },
                 ),
                 SwitchListTile(
                   title: Text(showTrailing ? 'Hide Trailing' : 'Show Trailing'),
                   value: showTrailing,
-                  onChanged: (bool _) {
+                  onChanged: (bool value) {
                     setState(() {
-                      showTrailing = !showTrailing;
+                      showTrailing = value;
                     });
                   },
                 ),
