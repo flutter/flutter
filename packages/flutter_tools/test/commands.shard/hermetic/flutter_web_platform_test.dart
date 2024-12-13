@@ -8,13 +8,14 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/flutter_web_platform.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/memory_fs.dart';
 import 'package:shelf/shelf.dart' as shelf;
-import 'package:test/test.dart';
 
+import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 
@@ -40,6 +41,7 @@ void main() {
   late Artifacts artifacts;
   late ProcessManager processManager;
   late FakeOperatingSystemUtils operatingSystemUtils;
+  late Directory tempDir;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -48,6 +50,7 @@ void main() {
     artifacts = Artifacts.test(fileSystem: fileSystem);
     processManager = FakeProcessManager.empty();
     operatingSystemUtils = FakeOperatingSystemUtils();
+    tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform_test.');
 
     for (final HostArtifact artifact in <HostArtifact>[
       HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdk,
@@ -69,6 +72,10 @@ void main() {
     }
   });
 
+  tearDown(() {
+    tryToDelete(tempDir);
+  });
+
   testUsingContext(
       'FlutterWebPlatform serves the correct dart_sdk.js (amd module system) for the passed web renderer',
       () async {
@@ -81,15 +88,16 @@ void main() {
       logger: logger,
     );
     final MockServer server = MockServer();
-    fileSystem.directory('/test').createSync();
     final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
       'ProjectRoot',
+      flutterProject: FlutterProject.fromDirectoryTest(tempDir),
       buildInfo: BuildInfo.debug,
       webMemoryFS: WebMemoryFS(),
       fileSystem: fileSystem,
       buildDirectory: fileSystem.directory('build'),
       logger: logger,
       chromiumLauncher: chromiumLauncher,
+      flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
       artifacts: artifacts,
       processManager: processManager,
       webRenderer: WebRendererMode.canvaskit,
@@ -125,9 +133,9 @@ void main() {
       logger: logger,
     );
     final MockServer server = MockServer();
-    fileSystem.directory('/test').createSync();
     final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
       'ProjectRoot',
+      flutterProject: FlutterProject.fromDirectoryTest(tempDir),
       buildInfo: const BuildInfo(
         BuildMode.debug,
         '',
@@ -140,6 +148,7 @@ void main() {
       buildDirectory: fileSystem.directory('build'),
       logger: logger,
       chromiumLauncher: chromiumLauncher,
+      flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
       artifacts: artifacts,
       processManager: processManager,
       webRenderer: WebRendererMode.canvaskit,

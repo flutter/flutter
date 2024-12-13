@@ -33,8 +33,8 @@ import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
-import 'flutter_web_goldens.dart';
 import 'test_compiler.dart';
+import 'test_golden_comparator.dart';
 import 'test_time_recorder.dart';
 
 shelf.Handler createDirectoryHandler(Directory directory, { required bool crossOriginIsolated} ) {
@@ -73,12 +73,12 @@ shelf.Handler createDirectoryHandler(Directory directory, { required bool crossO
 
 class FlutterWebPlatform extends PlatformPlugin {
   FlutterWebPlatform._(this._server, this._config, this._root, {
-    FlutterProject? flutterProject,
-    String? shellPath,
-    this.updateGoldens,
     this.nullAssertions,
+    required this.updateGoldens,
     required this.buildInfo,
     required this.webMemoryFS,
+    required FlutterProject flutterProject,
+    required String flutterTesterBinPath,
     required FileSystem fileSystem,
     required Directory buildDirectory,
     required File testDartJs,
@@ -115,8 +115,8 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(_packageFilesHandler);
     _server.mount(cascade.handler);
     _testGoldenComparator = TestGoldenComparator(
-      shellPath,
-      () => TestCompiler(buildInfo, flutterProject, testTimeRecorder: testTimeRecorder),
+      compilerFactory: () => TestCompiler(buildInfo, flutterProject, testTimeRecorder: testTimeRecorder),
+      flutterTesterBinPath: flutterTesterBinPath,
       fileSystem: _fileSystem,
       logger: _logger,
       processManager: processManager,
@@ -133,7 +133,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   final ChromiumLauncher _chromiumLauncher;
   final Logger _logger;
   final Artifacts? _artifacts;
-  final bool? updateGoldens;
+  final bool updateGoldens;
   final bool? nullAssertions;
   final OneOffHandler _webSocketHandler = OneOffHandler();
   final AsyncMemoizer<void> _closeMemo = AsyncMemoizer<void>();
@@ -154,11 +154,11 @@ class FlutterWebPlatform extends PlatformPlugin {
   }
 
   static Future<FlutterWebPlatform> start(String root, {
-    FlutterProject? flutterProject,
-    String? shellPath,
     bool updateGoldens = false,
     bool pauseAfterLoad = false,
     bool nullAssertions = false,
+    required FlutterProject flutterProject,
+    required String flutterTesterBinPath,
     required BuildInfo buildInfo,
     required WebMemoryFS webMemoryFS,
     required FileSystem fileSystem,
@@ -195,7 +195,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       Configuration.current.change(pauseAfterLoad: pauseAfterLoad),
       root,
       flutterProject: flutterProject,
-      shellPath: shellPath,
+      flutterTesterBinPath: flutterTesterBinPath,
       updateGoldens: updateGoldens,
       buildInfo: buildInfo,
       webMemoryFS: webMemoryFS,
@@ -456,8 +456,17 @@ class FlutterWebPlatform extends PlatformPlugin {
           return shelf.Response.ok('Caught exception: $ex');
         }
       }
-      final String? errorMessage = await _testGoldenComparator.compareGoldens(testUri, bytes, goldenKey, updateGoldens);
-      return shelf.Response.ok(errorMessage ?? 'true');
+      if (updateGoldens) {
+        return switch (await _testGoldenComparator.update(testUri, bytes, goldenKey)) {
+          TestGoldenUpdateDone() => shelf.Response.ok('true'),
+          TestGoldenUpdateError(error: final String error) => shelf.Response.ok(error),
+        };
+      } else {
+        return switch (await _testGoldenComparator.compare(testUri, bytes, goldenKey)) {
+          TestGoldenComparisonDone(matched: final bool matched) => shelf.Response.ok('$matched'),
+          TestGoldenComparisonError(error: final String error) => shelf.Response.ok(error),
+        };
+      }
     } else {
       return shelf.Response.notFound('Not Found');
     }
