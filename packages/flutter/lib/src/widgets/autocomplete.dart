@@ -310,10 +310,6 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
 class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> {
   final GlobalKey _fieldKey = GlobalKey();
   final LayerLink _optionsLayerLink = LayerLink();
-
-  /// The box constraints that the field was last built with.
-  final ValueNotifier<BoxConstraints?> _fieldBoxConstraints = ValueNotifier<BoxConstraints?>(null);
-
   final OverlayPortalController _optionsViewController = OverlayPortalController(debugLabel: '_RawAutocompleteState');
 
   TextEditingController? _internalTextEditingController;
@@ -444,20 +440,15 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   }
 
   Widget _buildOptionsView(BuildContext context) {
-    return ValueListenableBuilder<BoxConstraints?>(
-      valueListenable: _fieldBoxConstraints,
-      builder: (BuildContext context, BoxConstraints? constraints, Widget? child) {
-        return _RawAutocompleteOptions(
-          fieldKey: _fieldKey,
-          optionsLayerLink: _optionsLayerLink,
-          optionsViewOpenDirection: widget.optionsViewOpenDirection,
-          overlayContext: context,
-          textDirection: Directionality.maybeOf(context),
-          highlightIndexNotifier: _highlightedOptionIndex,
-          builder: (BuildContext context) {
-            return widget.optionsViewBuilder(context, _select, _options);
-          },
-        );
+    return _RawAutocompleteOptions(
+      fieldKey: _fieldKey,
+      optionsLayerLink: _optionsLayerLink,
+      optionsViewOpenDirection: widget.optionsViewOpenDirection,
+      overlayContext: context,
+      textDirection: Directionality.maybeOf(context),
+      highlightIndexNotifier: _highlightedOptionIndex,
+      builder: (BuildContext context) {
+        return widget.optionsViewBuilder(context, _select, _options);
       },
     );
   }
@@ -499,7 +490,6 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     widget.focusNode?.removeListener(_updateOptionsViewVisibility);
     _internalFocusNode?.dispose();
     _highlightedOptionIndex.dispose();
-    _fieldBoxConstraints.dispose();
     super.dispose();
   }
 
@@ -507,27 +497,22 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   Widget build(BuildContext context) {
     final Widget fieldView = widget.fieldViewBuilder?.call(context, _textEditingController, _focusNode, _onFieldSubmitted)
                           ?? const SizedBox.shrink();
-    return LayoutBuilder(
+    return OverlayPortal.targetsRootOverlay(
       key: _fieldKey,
-      builder: (BuildContext context, BoxConstraints constraints) {
-        _fieldBoxConstraints.value = constraints;
-        return OverlayPortal.targetsRootOverlay(
-          controller: _optionsViewController,
-          overlayChildBuilder: _buildOptionsView,
-          child: TextFieldTapRegion(
-            child: Shortcuts(
-              shortcuts: _shortcuts,
-              child: Actions(
-                actions: _actionMap,
-                child: CompositedTransformTarget(
-                  link: _optionsLayerLink,
-                  child: fieldView,
-                ),
-              ),
+      controller: _optionsViewController,
+      overlayChildBuilder: _buildOptionsView,
+      child: TextFieldTapRegion(
+        child: Shortcuts(
+          shortcuts: _shortcuts,
+          child: Actions(
+            actions: _actionMap,
+            child: CompositedTransformTarget(
+              link: _optionsLayerLink,
+              child: fieldView,
             ),
           ),
-        );
-      }
+        ),
+      ),
     );
   }
 }
