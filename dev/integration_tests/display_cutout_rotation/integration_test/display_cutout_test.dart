@@ -13,12 +13,12 @@ void main() {
     // Test assumes a custom driver that enables
     // "com.android.internal.display.cutout.emulation.tall".
     testWidgets('cutout should be on top in portrait mode', (tester) async {
-      // Load app widget.
-      await tester.pumpWidget(const MyApp());
       // Force rotation
       SystemChrome.setPreferredOrientations(<DeviceOrientation>[
         DeviceOrientation.portraitUp,
       ]);
+      // Load app widget.
+      await tester.pumpWidget(const MyApp());
       await tester.pumpAndSettle();
       BuildContext context = tester.element(find.byType(Text));
       List<DisplayFeature> displayFeatures = getCutouts(tester, context);
@@ -41,13 +41,15 @@ void main() {
     testWidgets('cutout should be on left in landscape left', (tester) async {
       // Load app widget.
       await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle(const Duration(milliseconds: 5000));
       SystemChrome.setPreferredOrientations(<DeviceOrientation>[
         DeviceOrientation.landscapeLeft,
       ]);
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(const Duration(milliseconds: 5000));
       BuildContext context = tester.element(find.byType(Text));
       // Verify that app code thinks there is a left cutout.
       List<DisplayFeature> displayFeatures = getCutouts(tester, context);
+
       // Test is expecting one cutout setup in the test harness.
       expect(
         displayFeatures.length,
@@ -56,7 +58,7 @@ void main() {
       );
       expect(
         displayFeatures[0].bounds.left,
-        0,
+        0, //closeTo(max(0, View.of(context).viewInsets.left), .1), todo remove
         reason:
             'cutout should start at the left, does the test device have a '
             'camera cutout or window inset?',
@@ -64,6 +66,7 @@ void main() {
     });
 
     testWidgets('cutout handles rotation', (tester) async {
+      await tester.pumpAndSettle(const Duration(milliseconds: 5000));
       SystemChrome.setPreferredOrientations(<DeviceOrientation>[
         DeviceOrientation.portraitUp,
       ]);
@@ -72,7 +75,6 @@ void main() {
       await tester.pumpWidget(widgetUnderTest);
       BuildContext context = tester.element(find.byType(Text));
       List<DisplayFeature> displayFeatures = getCutouts(tester, context);
-
       // Test is expecting one cutout setup in the test harness.
       expect(
         displayFeatures.length,
@@ -91,7 +93,7 @@ void main() {
         DeviceOrientation.landscapeLeft,
       ]);
       await tester.pumpWidget(widgetUnderTest);
-      await tester.pumpAndSettle(Durations.extralong4);
+      await tester.pumpAndSettle(const Duration(milliseconds: 5000));
 
       // Requery for display features after rotation.
       context = tester.element(find.byType(Text));
