@@ -232,6 +232,21 @@ class PackagesGetCommand extends FlutterCommand {
     return argParser;
   }
 
+  bool _validDirectoryArg(String arg) {
+    // Handles `pub add`: it accepts below formats of the argument:
+    //  * foo:{"path":"../foo"}
+    //  * foo:{"hosted":"my-pub.dev"}
+    //  * foo:{"sdk":"flutter"}
+    //  * foo:{"git":"https://github.com/foo/foo"}
+    if (RegExp(r':\{.*}').hasMatch(arg)) {
+      return false;
+    }
+    // For historical reasons, if there is one argument to the command and it
+    // contains a multiple-component path (i.e. contains a slash) then we use
+    // that to determine to which project we're applying the command.
+    return arg.contains('/') || arg.contains(r'\');
+  }
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     List<String> rest = argResults!.rest;
@@ -259,11 +274,7 @@ class PackagesGetCommand extends FlutterCommand {
           // Anything that looks like an argument should not be interpreted as
           // a directory.
           !rest.single.startsWith('-') &&
-          ((rest.single.contains('/') || rest.single.contains(r'\')) ||
-            name == 'get')) {
-        // For historical reasons, if there is one argument to the command and it contains
-        // a multiple-component path (i.e. contains a slash) then we use that to determine
-        // to which project we're applying the command.
+          (_validDirectoryArg(rest.single) || name == 'get')) {
         target = findProjectRoot(globals.fs, rest.single);
 
         globals.printWarning('''
