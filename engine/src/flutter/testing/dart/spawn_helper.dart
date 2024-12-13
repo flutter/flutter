@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@pragma('vm:entry-point', 'get')
 void main() {}
 
 @pragma('vm:entry-point')
