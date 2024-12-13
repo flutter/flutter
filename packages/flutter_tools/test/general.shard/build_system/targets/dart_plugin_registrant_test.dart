@@ -9,10 +9,14 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/dart_plugin_registrant.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fake_pub_deps.dart';
+import '../../../src/fakes.dart';
 
 const String _kEmptyPubspecFile = '''
 name: path_provider_example
@@ -86,6 +90,13 @@ environment:
 ''';
 
 void main() {
+  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
+  // See https://github.com/flutter/flutter/issues/160257 for details.
+  FeatureFlags enableExplicitPackageDependencies() {
+    return TestFeatureFlags(
+      isExplicitPackageDependenciesEnabled: true,
+    );
+  }
 
   group('Dart plugin registrant' , () {
     late FileSystem fileSystem;
@@ -182,6 +193,8 @@ void main() {
       expect(generatedMain.existsSync(), isFalse);
     }, overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
+      FeatureFlags: enableExplicitPackageDependencies,
+      Pub: FakePubWithPrimedDeps.new,
     });
 
     testUsingContext('regenerates dart_plugin_registrant.dart', () async {
@@ -261,6 +274,8 @@ void main() {
       );
     }, overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
+      FeatureFlags: enableExplicitPackageDependencies,
+      Pub: FakePubWithPrimedDeps.new,
     });
 
     testUsingContext('removes dart_plugin_registrant.dart if plugins are removed from pubspec.yaml', () async {
@@ -307,6 +322,8 @@ void main() {
       expect(generatedMain.existsSync(), isFalse);
     }, overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
+      FeatureFlags: enableExplicitPackageDependencies,
+      Pub: FakePubWithPrimedDeps.new,
     });
 
     testUsingContext('target file is outside the current project package', () async {
@@ -387,6 +404,8 @@ void main() {
       );
     }, overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
+      FeatureFlags: enableExplicitPackageDependencies,
+      Pub: FakePubWithPrimedDeps.new,
     });
   });
 }
