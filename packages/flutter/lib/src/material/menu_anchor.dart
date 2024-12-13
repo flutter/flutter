@@ -406,7 +406,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       );
     }
 
-    Widget child = OverlayPortal.targetsRootOverlay(
+    Widget child = OverlayPortal(
       controller: _overlayController,
       overlayChildBuilder: (BuildContext context) {
         return _Submenu(
@@ -1692,6 +1692,7 @@ class SubmenuButton extends StatefulWidget {
     this.statesController,
     this.leadingIcon,
     this.trailingIcon,
+    this.submenuIcon,
     required this.menuChildren,
     required this.child,
   });
@@ -1755,6 +1756,18 @@ class SubmenuButton extends StatefulWidget {
 
   /// An optional icon to display before the [child].
   final Widget? leadingIcon;
+
+  /// If provided, the widget replaces the default [SubmenuButton] arrow icon.
+  ///
+  /// Resolves in the following states:
+  ///  * [WidgetState.disabled].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///
+  /// If this is null, then the value of [MenuThemeData.submenuIcon] is used.
+  /// If that is also null, then defaults to a right arrow icon with the size
+  /// of 24 pixels.
+  final MaterialStateProperty<Widget?>? submenuIcon;
 
   /// An optional icon to display after the [child].
   final Widget? trailingIcon;
@@ -1982,6 +1995,17 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       (Axis.vertical, TextDirection.rtl)   => Offset(0, -menuPadding.top),
       (Axis.vertical, TextDirection.ltr)   => Offset(0, -menuPadding.top),
     };
+    final Set<MaterialState> states = <MaterialState>{
+      if (!_enabled) MaterialState.disabled,
+      if (_isHovered) MaterialState.hovered,
+      if (_buttonFocusNode.hasFocus) MaterialState.focused,
+    };
+    final Widget submenuIcon = widget.submenuIcon?.resolve(states)
+      ?? MenuTheme.of(context).submenuIcon?.resolve(states)
+      ?? const Icon(
+           Icons.arrow_right, // Automatically switches with text direction.
+           size: _kDefaultSubmenuIconSize,
+         );
 
     return Actions(
       actions: actions,
@@ -2055,6 +2079,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
                   trailingIcon: widget.trailingIcon,
                   hasSubmenu: true,
                   showDecoration: (controller._anchor!._parent?._orientation ?? Axis.horizontal) == Axis.vertical,
+                  submenuIcon: submenuIcon,
                   child: child,
                 ),
               ),
@@ -3059,6 +3084,7 @@ class _MenuItemLabel extends StatelessWidget {
     this.shortcut,
     this.semanticsLabel,
     this.overflowAxis = Axis.vertical,
+    this.submenuIcon,
     this.child,
   });
 
@@ -3088,6 +3114,9 @@ class _MenuItemLabel extends StatelessWidget {
 
   /// The direction in which the menu item expands.
   final Axis overflowAxis;
+
+  /// The submenu icon that is displayed when [showDecoration] and [hasSubmenu] are true.
+  final Widget? submenuIcon;
 
   /// An optional child widget that is displayed in the label.
   final Widget? child;
@@ -3156,10 +3185,7 @@ class _MenuItemLabel extends StatelessWidget {
         if (showDecoration && hasSubmenu)
           Padding(
             padding: EdgeInsetsDirectional.only(start: horizontalPadding),
-            child: const Icon(
-              Icons.arrow_right, // Automatically switches with text direction.
-              size: _kDefaultSubmenuIconSize,
-            ),
+            child: submenuIcon,
           ),
       ],
     );

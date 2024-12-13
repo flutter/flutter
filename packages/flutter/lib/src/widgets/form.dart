@@ -354,9 +354,11 @@ class FormState extends State<Form> {
     final bool validateOnFocusChange = widget.autovalidateMode == AutovalidateMode.onUnfocus;
 
     for (final FormFieldState<dynamic> field in _fields) {
-      if (!validateOnFocusChange || !field._focusNode.hasFocus) {
+      final bool hasFocus = field._focusNode.hasFocus;
+
+      if (!validateOnFocusChange || !hasFocus || (validateOnFocusChange && hasFocus)) {
         final bool isFieldValid = field.validate();
-        hasError = !isFieldValid || hasError;
+        hasError |= !isFieldValid;
         // Ensure that only the first error message gets announced to the user.
         if (errorMessage.isEmpty) {
           errorMessage = field.errorText ?? '';

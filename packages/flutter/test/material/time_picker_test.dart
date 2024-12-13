@@ -2212,6 +2212,7 @@ class _TimePickerLauncher extends StatefulWidget {
   _TimePickerLauncherState createState() => _TimePickerLauncherState();
 }
 
+@pragma('vm:entry-point')
 class _TimePickerLauncherState extends State<_TimePickerLauncher> with RestorationMixin {
   @override
   String? get restorationId => widget.restorationId;

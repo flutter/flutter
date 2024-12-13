@@ -334,7 +334,7 @@ flutter:
       tempDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: workspace
 environment:
-  sdk: ^3.5.0-0
+  sdk: ^3.7.0-0
 workspace:
   - flutter_project
 ''');
