@@ -50,7 +50,7 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath {
   void lineTo(double x, double y) => pathLineTo(handle, x, y);
 
   @override
-  void relativeLineTo(double x, double y) => pathRelativeMoveTo(handle, x, y);
+  void relativeLineTo(double x, double y) => pathRelativeLineTo(handle, x, y);
 
   @override
   void quadraticBezierTo(double x1, double y1, double x2, double y2) =>
