@@ -3319,6 +3319,7 @@
 ../../../fuchsia/sdk/linux/bind/fuchsia.register/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.regulator/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.sdio/meta.json
+../../../fuchsia/sdk/linux/bind/fuchsia.sdmmc/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.serial/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.spmi/meta.json
 ../../../fuchsia/sdk/linux/bind/fuchsia.sysmem/meta.json
