@@ -688,6 +688,14 @@ struct TRect {
   }
 
   ONLY_ON_FLOAT_M([[nodiscard]] constexpr static, TRect)
+  RoundIn(const TRect<U>& r) {
+    return TRect::MakeLTRB(saturated::Cast<U, Type>(ceil(r.GetLeft())),
+                           saturated::Cast<U, Type>(ceil(r.GetTop())),
+                           saturated::Cast<U, Type>(floor(r.GetRight())),
+                           saturated::Cast<U, Type>(floor(r.GetBottom())));
+  }
+
+  ONLY_ON_FLOAT_M([[nodiscard]] constexpr static, TRect)
   Round(const TRect<U>& r) {
     return TRect::MakeLTRB(saturated::Cast<U, Type>(round(r.GetLeft())),
                            saturated::Cast<U, Type>(round(r.GetTop())),

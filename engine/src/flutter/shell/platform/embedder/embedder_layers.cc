@@ -21,7 +21,7 @@ EmbedderLayers::~EmbedderLayers() = default;
 
 void EmbedderLayers::PushBackingStoreLayer(
     const FlutterBackingStore* store,
-    const std::vector<SkIRect>& paint_region_vec) {
+    const std::vector<DlIRect>& paint_region_vec) {
   FlutterLayer layer = {};
 
   layer.struct_size = sizeof(FlutterLayer);
@@ -44,7 +44,7 @@ void EmbedderLayers::PushBackingStoreLayer(
 
   for (const auto& rect : paint_region_vec) {
     auto transformed_rect =
-        root_surface_transformation_.mapRect(SkRect::Make(rect));
+        root_surface_transformation_.mapRect(SkRect::Make(ToSkIRect(rect)));
     paint_region_rects->push_back(FlutterRect{
         transformed_rect.x(),
         transformed_rect.y(),

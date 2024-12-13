@@ -20,7 +20,6 @@ DisplayList::DisplayList()
       nested_op_count_(0),
       total_depth_(0),
       unique_id_(0),
-      bounds_({0, 0, 0, 0}),
       can_apply_group_opacity_(true),
       is_ui_thread_safe_(true),
       modifies_transparent_black_(false),
@@ -37,7 +36,7 @@ DisplayList::DisplayList(DisplayListStorage&& storage,
                          size_t nested_byte_count,
                          uint32_t nested_op_count,
                          uint32_t total_depth,
-                         const SkRect& bounds,
+                         const DlRect& bounds,
                          bool can_apply_group_opacity,
                          bool is_ui_thread_safe,
                          bool modifies_transparent_black,
@@ -187,16 +186,16 @@ void DisplayList::Dispatch(DlOpReceiver& receiver) const {
 }
 
 void DisplayList::Dispatch(DlOpReceiver& receiver,
-                           const SkIRect& cull_rect) const {
-  Dispatch(receiver, SkRect::Make(cull_rect));
+                           const DlIRect& cull_rect) const {
+  Dispatch(receiver, DlRect::Make(cull_rect));
 }
 
 void DisplayList::Dispatch(DlOpReceiver& receiver,
-                           const SkRect& cull_rect) const {
-  if (cull_rect.isEmpty()) {
+                           const DlRect& cull_rect) const {
+  if (cull_rect.IsEmpty()) {
     return;
   }
-  if (!has_rtree() || cull_rect.contains(bounds())) {
+  if (!has_rtree() || cull_rect.Contains(GetBounds())) {
     Dispatch(receiver);
   } else {
     auto op_indices = GetCulledIndices(cull_rect);
@@ -366,9 +365,9 @@ static void FillAllIndices(std::vector<DlIndex>& indices, DlIndex size) {
 }
 
 std::vector<DlIndex> DisplayList::GetCulledIndices(
-    const SkRect& cull_rect) const {
+    const DlRect& cull_rect) const {
   std::vector<DlIndex> indices;
-  if (!cull_rect.isEmpty()) {
+  if (!cull_rect.IsEmpty()) {
     if (rtree_) {
       std::vector<int> rect_indices;
       rtree_->search(cull_rect, &rect_indices);

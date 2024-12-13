@@ -195,6 +195,7 @@ class DlVertices {
 
   /// Returns the bounds of the vertices.
   SkRect bounds() const { return bounds_; }
+  DlRect GetBounds() const { return ToDlRect(bounds_); }
 
   /// Returns the vertex mode that defines how the vertices (or the indices)
   /// are turned into triangles.
