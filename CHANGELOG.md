@@ -32,7 +32,7 @@ Initial stable release.
 ## Flutter 3.24 Changes
 
 ### [3.24.5](https://github.com/flutter/flutter/releases/tag/3.24.5)
-- [flutter/158125](https://github.com/flutter/flutter/pull/158125) - [Tool] Fixed a tool issue causing failures when running `flutter build ios-framework --xcframework`.
+- [flutter/158125](https://github.com/flutter/flutter/pull/158125) - [iOS] Fixed a tool issue causing failures when `flutter build ios-framework --xcframework` copies Flutter debug symbols.
 - [flutter/56301](https://github.com/flutter/engine/pull/56301) - [Android] Fixes a crash on Android devices when the surface is released unexpectedly when using PlatformView's.
 
 ### [3.24.4](https://github.com/flutter/flutter/releases/tag/3.24.4)
