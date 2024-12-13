@@ -239,4 +239,13 @@ Future<void> testMain() async {
     expect(newFirstMetric.extractPath(4.0, 10.0).computeMetrics().first.length, 6.0);
   // TODO(hterkelsen): isClosed always returns false in the HTML renderer, https://github.com/flutter/flutter/issues/114446
   }, skip: isHtml);
+
+  test('path relativeLineTo', () {
+    final p = Path();
+    p.moveTo(100, 100);
+    p.relativeLineTo(-50, -50);
+    p.relativeLineTo(100, 0);
+    p.relativeLineTo(-50, 50);
+    expect(p.getBounds(), equals(const Rect.fromLTRB(50.0, 50.0, 150.0, 100.0)));
+  });
 }
