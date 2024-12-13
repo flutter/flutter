@@ -1236,12 +1236,16 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
       route: ModalRoute.of(context),
-      userLeading: Visibility(visible: expanded, child: widget.leading ?? const SizedBox.shrink()),
+      userLeading: widget.leading != null
+        ? Visibility(visible: expanded, maintainState: true, child: widget.leading!)
+        : null,
       automaticallyImplyLeading: widget.automaticallyImplyLeading,
       automaticallyImplyTitle: widget.automaticallyImplyTitle,
       previousPageTitle: widget.previousPageTitle,
       userMiddle: _animationController.isAnimating ? const Text('') : widget.middle,
-      userTrailing: Visibility(visible: expanded, child: widget.trailing ?? const SizedBox.shrink()),
+      userTrailing: widget.trailing != null
+        ? Visibility(visible: expanded, child: widget.trailing!)
+        : null,
       userLargeTitle: _animationController.isAnimating
         ? FadeTransition(
             opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_fadeController),
