@@ -78,6 +78,20 @@ class DeferredComponent {
     };
   }
 
+  /// Returns a descriptor of the component to be used when modifying a
+  /// pubspec.yaml.
+  Map<String, Object?> get descriptor {
+    return <String, Object?>{
+      'name': name,
+      if (libraries.isNotEmpty)
+        'libraries': libraries.toList(),
+      if (assets.isNotEmpty)
+        'assets': assets.map(
+          (AssetsEntry e) => e.descriptor,
+        ).toList(),
+    };
+  }
+
   /// Provides a human readable string representation of the
   /// configuration.
   @override

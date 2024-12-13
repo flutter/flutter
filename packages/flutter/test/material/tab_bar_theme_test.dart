@@ -1791,4 +1791,58 @@ void main() {
     targetRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
     expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
   });
+
+  testWidgets('TabBar inherits splashBorderRadius from theme', (WidgetTester tester) async {
+    const Color hoverColor = Color(0xfff44336);
+    const double radius = 20;
+    await tester.pumpWidget(
+      Material(
+        child: Localizations(
+          locale: const Locale('en', 'US'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+          ],
+          child: DefaultTabController(
+            length: 1,
+            child: TabBarTheme(
+              data: TabBarThemeData(
+                 splashBorderRadius: BorderRadius.circular(radius),
+              ),
+              child: const TabBar(
+                overlayColor: WidgetStateMapper<Color>(
+                  <WidgetStatesConstraint, Color>{
+                    WidgetState.hovered: hoverColor,
+                    WidgetState.any: Colors.black54,
+                  },
+                ),
+                tabs: <Widget>[
+                  Tab(
+                    child: Text(''),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.moveTo(tester.getCenter(find.byType(Tab)));
+    await tester.pumpAndSettle();
+    final Finder findInkWell = find.byType(InkWell);
+
+    final BuildContext context = tester.element(findInkWell);
+    expect(
+      Material.of(context),
+      paints..rrect(
+        color: hoverColor,
+        rrect: RRect.fromRectAndRadius(
+          tester.getRect(findInkWell),
+          const Radius.circular(radius),
+        ),
+      ),
+    );
+    gesture.removePointer();
+  });
 }

@@ -476,14 +476,14 @@ class OutlineInputBorder extends InputBorder {
 
     // Draw top border from top left corner to gap start.
     if (start > scaledRRect.tlRadiusX) {
-      path.lineTo(scaledRRect.left + start, scaledRRect.top);
+      path.lineTo(start, scaledRRect.top);
     }
 
     // Draw top border from gap end to top right corner and draw top right corner.
     const double trCornerArcStart = (3 * math.pi) / 2.0;
     const double trCornerArcSweep = cornerArcSweep;
     if (start + extent < outerWidth - scaledRRect.trRadiusX) {
-      path.moveTo(scaledRRect.left + start + extent, scaledRRect.top);
+      path.moveTo(start + extent, scaledRRect.top);
       path.lineTo(scaledRRect.right - scaledRRect.trRadiusX, scaledRRect.top);
       if (scaledRRect.trRadius != Radius.zero) {
         path.addArc(trCorner, trCornerArcStart, trCornerArcSweep);

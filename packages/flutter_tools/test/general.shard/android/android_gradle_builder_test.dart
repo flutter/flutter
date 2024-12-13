@@ -339,8 +339,7 @@ void main() {
       expect(logger.statusText, contains('Retrying Gradle Build: #2, wait time: 200ms'));
 
       expect(testFnCalled, equals(maxRetries + 1));
-
-      expect(fakeAnalytics.sentEvents, hasLength(7));
+      expect(fakeAnalytics.sentEvents, hasLength(9));
       expect(fakeAnalytics.sentEvents, contains(
         Event.flutterBuildInfo(
           label: 'gradle-random-event-label-failure',

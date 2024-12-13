@@ -141,7 +141,7 @@ class NextContext extends Context {
         if (!autoAccept) {
           final bool response = await prompt(
             'Has CI passed for the engine PR?\n\n'
-            '${state_import.luciConsoleLink(state.releaseChannel, 'engine')}'
+            '${state_import.luciConsoleLink(state.engine.candidateBranch, 'engine')}'
           );
           if (!response) {
             stdio.printError('Aborting command.');

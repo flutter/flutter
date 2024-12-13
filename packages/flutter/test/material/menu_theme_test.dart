@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 
@@ -45,6 +47,49 @@ void main() {
           .first,
     );
   }
+
+  Future<TestGesture> hoverOver(WidgetTester tester, Finder finder) async {
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.moveTo(tester.getCenter(finder));
+    await tester.pumpAndSettle();
+    return gesture;
+  }
+
+  test('MenuThemeData defaults', () {
+    const MenuThemeData menuThemeData = MenuThemeData();
+    expect(menuThemeData.style, isNull);
+    expect(menuThemeData.submenuIcon, isNull);
+  });
+
+  testWidgets('Default MenuThemeData debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const MenuThemeData().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[]);
+  });
+
+  testWidgets('MenuThemeData debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const MenuThemeData(
+      style: MenuStyle(backgroundColor: WidgetStatePropertyAll<Color?>(Color(0xfffffff1))),
+      submenuIcon: WidgetStatePropertyAll<Widget?>(Icon(Icons.add)),
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, equalsIgnoringHashCodes(<String>[
+      'style: MenuStyle#c6d29(backgroundColor: WidgetStatePropertyAll(Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 0.9451, colorSpace: ColorSpace.sRGB)))',
+      'submenuIcon: WidgetStatePropertyAll(Icon(IconData(U+0E047)))'
+    ]));
+  });
 
   test('MenuThemeData lerp special cases', () {
     expect(MenuThemeData.lerp(null, null, 0), null);
@@ -197,6 +242,95 @@ void main() {
             .first)
         .style;
     expect(textButtonStyle?.overlayColor?.resolve(<MaterialState>{MaterialState.hovered}), equals(Colors.blueGrey));
+  });
+
+  testWidgets('SubmenuButton.submenuIcon updates default arrow icon', (WidgetTester tester) async {
+    final  MenuController controller = MenuController();
+    const IconData disabledIcon = Icons.close_fullscreen;
+    const IconData hoveredIcon = Icons.ac_unit;
+    const IconData focusedIcon = Icons.zoom_out;
+    const IconData defaultIcon = Icons.minimize;
+    final WidgetStateProperty<Widget?> submenuIcon = WidgetStateProperty.resolveWith<Widget?>(
+      (Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled)) {
+          return const Icon(disabledIcon);
+        }
+        if (states.contains(WidgetState.hovered)) {
+          return const Icon(hoveredIcon);
+        }
+        if (states.contains(WidgetState.focused)) {
+          return const Icon(focusedIcon);
+        }
+        return const Icon(defaultIcon);
+    });
+
+    Widget buildMenu({
+      WidgetStateProperty<Widget?>? icon,
+      bool enabled = true,
+    }) {
+      return MaterialApp(
+        theme: ThemeData(menuTheme: MenuThemeData(submenuIcon: icon)),
+        home: Material(
+          child: MenuBar(
+            controller: controller,
+            children: <Widget>[
+              SubmenuButton(
+                menuChildren: <Widget>[
+                  SubmenuButton(
+                    menuChildren: enabled
+                      ? <Widget>[
+                        MenuItemButton(
+                          child: Text(TestMenu.mainMenu0.label),
+                        ),
+                      ]
+                      : <Widget>[],
+                    child: Text(TestMenu.subSubMenu110.label),
+                  ),
+                ],
+                child: Text(TestMenu.subMenu00.label),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildMenu());
+    await tester.tap(find.text(TestMenu.subMenu00.label));
+    await tester.pump();
+
+    expect(find.byIcon(Icons.arrow_right), findsOneWidget);
+
+    controller.close();
+    await tester.pump();
+
+    await tester.pumpWidget(buildMenu(icon: submenuIcon));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text(TestMenu.subMenu00.label));
+    await tester.pump();
+    expect(find.byIcon(defaultIcon), findsOneWidget);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(find.byIcon(focusedIcon), findsOneWidget);
+
+    controller.close();
+    await tester.pump();
+
+    await tester.tap(find.text(TestMenu.subMenu00.label));
+    await tester.pump();
+    await hoverOver(tester, find.text(TestMenu.subSubMenu110.label));
+    await tester.pump();
+    expect(find.byIcon(hoveredIcon), findsOneWidget);
+
+    controller.close();
+    await tester.pump();
+
+    await tester.pumpWidget(buildMenu(icon: submenuIcon, enabled: false));
+    await tester.tap(find.text(TestMenu.subMenu00.label));
+    await tester.pump();
+    expect(find.byIcon(disabledIcon), findsOneWidget);
   });
 }
 

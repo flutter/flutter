@@ -281,6 +281,27 @@ void main() {
         'rev-parse',
         'HEAD',
       ], stdout: 'deadbeef'),
+      const FakeCommand(
+        command: <String>[
+          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/dart',
+          'pub',
+          'get',
+        ],
+        workingDirectory: '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/dev/tools',
+      ),
+      FakeCommand(command: const <String>[
+        '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/dart',
+        'compile',
+        'exe',
+        '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/dev/tools/bin/generate_gradle_lockfiles.dart',
+        '-o',
+        '/.tmp_rand0/rand0/generate_gradle_lockfiles',
+      ], onRun: (_) => fileSystem.file('/.tmp_rand0/rand0/generate_gradle_lockfiles').createSync()),
+      const FakeCommand(command: <String>[
+        'chmod',
+        '+x',
+        '/.tmp_rand0/rand0/generate_gradle_lockfiles',
+      ]),
       const FakeCommand(command: <String>[
         'git',
         'ls-remote',
@@ -373,6 +394,27 @@ void main() {
         'rev-parse',
         'HEAD',
       ], stdout: 'deadbeef'),
+      const FakeCommand(
+        command: <String>[
+          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/dart',
+          'pub',
+          'get',
+        ],
+        workingDirectory: '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/dev/tools',
+      ),
+      FakeCommand(command: const <String>[
+        '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/dart',
+        'compile',
+        'exe',
+        '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/dev/tools/bin/generate_gradle_lockfiles.dart',
+        '-o',
+        '/.tmp_rand0/rand0/generate_gradle_lockfiles',
+      ], onRun: (_) => fileSystem.file('/.tmp_rand0/rand0/generate_gradle_lockfiles').createSync()),
+      const FakeCommand(command: <String>[
+        'chmod',
+        '+x',
+        '/.tmp_rand0/rand0/generate_gradle_lockfiles',
+      ]),
       const FakeCommand(command: <String>[
         'git',
         'ls-remote',
@@ -427,8 +469,7 @@ void main() {
         'HEAD',
       ], stdout: '000deadbeef'),
       const FakeCommand(command: <String>[
-        '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/dart',
-        '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/dev/tools/bin/generate_gradle_lockfiles.dart',
+        '/.tmp_rand0/rand0/generate_gradle_lockfiles',
         '--no-gradle-generation',
         '--no-exclusion',
       ]),
