@@ -5,6 +5,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../system_context_menu_utils.dart';
 import './text_input_utils.dart';
 
 void main() {
@@ -300,7 +301,7 @@ void main() {
             final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
             final List<SystemContextMenuItemData> lastItems = untypedItems.map((dynamic value) {
               final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
-              return SystemContextMenuItemData.fromJson(itemJson);
+              return systemContextMenuItemDataFromJson(itemJson);
             }).toList();
             itemsReceived.add(lastItems);
         }

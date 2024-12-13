@@ -8,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import '../system_context_menu_utils.dart';
+
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -152,7 +154,7 @@ void main() {
             final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
             final List<SystemContextMenuItemData> lastItems = untypedItems.map((dynamic value) {
               final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
-              return SystemContextMenuItemData.fromJson(itemJson);
+              return systemContextMenuItemDataFromJson(itemJson);
             }).toList();
             itemsReceived.add(lastItems);
         }

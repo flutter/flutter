@@ -2650,35 +2650,6 @@ class SystemContextMenuController with SystemContextMenuClient {
 sealed class SystemContextMenuItemData {
   const SystemContextMenuItemData();
 
-  // TODO(justinmc): Move into tests. A user should never need this.
-  /// Returns a [SystemContextMenuItemData] of the correct subclass given its
-  /// json data.
-  factory SystemContextMenuItemData.fromJson(Map<String, dynamic> json) {
-    final String? type = json['type'] as String?;
-    final String? title = json['title'] as String?;
-    final VoidCallback? onPressed = json['onPressed'] as VoidCallback?;
-    return switch (type) {
-      'copy' => const SystemContextMenuItemDataCopy(),
-      'cut' => const SystemContextMenuItemDataCut(),
-      'paste' => const SystemContextMenuItemDataPaste(),
-      'selectAll' => const SystemContextMenuItemDataSelectAll(),
-      'searchWeb' => SystemContextMenuItemDataSearchWeb(
-        title: title!,
-      ),
-      'share' => SystemContextMenuItemDataShare(
-        title: title!,
-      ),
-      'lookUp' => SystemContextMenuItemDataLookUp(
-        title: title!,
-      ),
-      'custom' => SystemContextMenuItemDataCustom(
-        title: title!,
-        onPressed: onPressed!,
-      ),
-      _ => throw FlutterError('Invalid json for SystemContextMenuItemData.type $type.'),
-    };
-  }
-
   /// The callback to be called when the menu item is pressed.
   ///
   /// Not exposed for built-in menu items, which handle their own action when
