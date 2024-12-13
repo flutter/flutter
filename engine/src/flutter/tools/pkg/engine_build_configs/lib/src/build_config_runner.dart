@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi' as ffi;
-import 'dart:io' as io show Directory, File, Process, ProcessResult;
+import 'dart:io' as io show Directory, File, Platform, Process, ProcessResult, stdout;
 import 'dart:math';
 
 import 'package:meta/meta.dart' show visibleForTesting;
@@ -565,6 +565,7 @@ final class BuildRunner extends Runner {
 
   static final RegExp _gccRegex =
       RegExp(r'^(.+)(:\d+:\d+:\s+(?:error|note|warning):\s+.*)$');
+  static final RegExp _ansiRegex = RegExp(r'\x1b\[[\d;]*m');
 
   /// Converts relative [path], who is relative to [dirPath] to a relative path
   /// of the `CWD`.
@@ -573,15 +574,22 @@ final class BuildRunner extends Runner {
     return './${p.relative(abs)}';
   }
 
+  static String _stripAnsi(String input) {
+    return input.replaceAll(_ansiRegex, '');
+  }
+
   /// Takes a [line] from compilation and makes the path relative to `CWD` where
   /// the paths are relative to [outDir].
   @visibleForTesting
   static String fixGccPaths(String line, String outDir) {
-    final Match? match = _gccRegex.firstMatch(line);
+    final sansAnsi = _stripAnsi(line);
+    final Match? match = _gccRegex.firstMatch(sansAnsi);
     if (match == null) {
       return line;
     } else {
-      return '${_makeRelative(match.group(1)!, outDir)}${match.group(2)}';
+      final String path = match.group(1)!;
+      final String fixedPath = _makeRelative(match.group(1)!, outDir);
+      return line.replaceFirst(path, fixedPath);
     }
   }
 
@@ -625,10 +633,16 @@ final class BuildRunner extends Runner {
       if (dryRun) {
         processResult = _dryRunResult;
       } else {
+        final bool shouldEmitAnsi =
+            (io.stdout.supportsAnsiEscapes && io.Platform.environment['CLICOLOR_FORCE'] != '0') ||
+            io.Platform.environment['CLICOLOR_FORCE'] == '1';
         final io.Process process = await processRunner.processManager.start(
           command,
           workingDirectory: engineSrcDir.path,
-          environment: rbeConfig.environment,
+          environment: {
+            ...rbeConfig.environment,
+            if (shouldEmitAnsi) 'CLICOLOR_FORCE': '1',
+          }
         );
         final List<int> stderrOutput = <int>[];
         final List<int> stdoutOutput = <int>[];
