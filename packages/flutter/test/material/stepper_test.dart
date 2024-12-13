@@ -1851,7 +1851,6 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
         ),
       ),
     );
-    await tester.pumpAndSettle();
 
     final Finder findConnector = find.descendant(
       of: find.byType(Stepper),
@@ -1890,7 +1889,6 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
       verifyConnector();
     }
   });
-
 }
 
 class _TappableColorWidget extends StatefulWidget {
