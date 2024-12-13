@@ -2666,7 +2666,7 @@ sealed class SystemContextMenuItemData {
   /// `ContextMenu.showSystemContextMenu`.
   Map<String, dynamic> get _json {
     return <String, dynamic>{
-      'callbackId': hashCode, // TODO(justinmc): Effective?
+      'callbackId': hashCode,
       if (title != null)
         'title': title,
       'type': switch (this) {
