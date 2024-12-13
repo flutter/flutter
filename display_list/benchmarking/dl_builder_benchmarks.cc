@@ -267,7 +267,7 @@ static void BM_DisplayListDispatchByVectorDefault(
   DlOpReceiverIgnore receiver;
   while (state.KeepRunning()) {
     std::vector<DlIndex> indices =
-        display_list->GetCulledIndices(display_list->bounds());
+        display_list->GetCulledIndices(display_list->GetBounds());
     for (DlIndex index : indices) {
       display_list->Dispatch(receiver, index);
     }
@@ -299,8 +299,8 @@ static void BM_DisplayListDispatchByVectorCull(
     InvokeAllOps(builder);
   }
   auto display_list = builder.Build();
-  SkRect rect = SkRect::MakeLTRB(0, 0, 100, 100);
-  EXPECT_FALSE(rect.contains(display_list->bounds()));
+  DlRect rect = DlRect::MakeLTRB(0, 0, 100, 100);
+  EXPECT_FALSE(rect.Contains(display_list->GetBounds()));
   DlOpReceiverIgnore receiver;
   while (state.KeepRunning()) {
     std::vector<DlIndex> indices = display_list->GetCulledIndices(rect);

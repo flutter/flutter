@@ -5,10 +5,10 @@
 #ifndef FLUTTER_DISPLAY_LIST_GEOMETRY_DL_REGION_H_
 #define FLUTTER_DISPLAY_LIST_GEOMETRY_DL_REGION_H_
 
-#include "third_party/skia/include/core/SkRect.h"
-
 #include <memory>
 #include <vector>
+
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 
 namespace flutter {
 
@@ -22,10 +22,10 @@ class DlRegion {
 
   /// Creates region by bulk adding the rectangles.
   /// Matches SkRegion::op(rect, SkRegion::kUnion_Op) behavior.
-  explicit DlRegion(const std::vector<SkIRect>& rects);
+  explicit DlRegion(const std::vector<DlIRect>& rects);
 
   /// Creates region covering area of a rectangle.
-  explicit DlRegion(const SkIRect& rect);
+  explicit DlRegion(const DlIRect& rect);
 
   DlRegion(const DlRegion&) = default;
   DlRegion(DlRegion&&) = default;
@@ -46,14 +46,17 @@ class DlRegion {
   /// closely matching SkRegion::Iterator behavior.
   /// If |deband| is true, matching rectangles from adjacent span lines will be
   /// merged into single rectangle.
-  std::vector<SkIRect> getRects(bool deband = true) const;
+  std::vector<DlIRect> getRects(bool deband = true) const;
 
   /// Returns maximum and minimum axis values of rectangles in this region.
   /// If region is empty returns SKIRect::MakeEmpty().
-  const SkIRect& bounds() const { return bounds_; }
+  const DlIRect& bounds() const { return bounds_; }
 
   /// Returns whether this region intersects with a rectangle.
-  bool intersects(const SkIRect& rect) const;
+  bool intersects(const DlIRect& rect) const;
+  bool intersects(const SkIRect& rect) const {
+    return intersects(ToDlIRect(rect));
+  }
 
   /// Returns whether this region intersects with another region.
   bool intersects(const DlRegion& region) const;
@@ -118,7 +121,7 @@ class DlRegion {
     SpanChunkHandle chunk_handle;
   };
 
-  void setRects(const std::vector<SkIRect>& rects);
+  void setRects(const std::vector<DlIRect>& rects);
 
   void appendLine(int32_t top,
                   int32_t bottom,
@@ -164,7 +167,7 @@ class DlRegion {
       std::vector<SpanLine>::const_iterator& b_it);
 
   std::vector<SpanLine> lines_;
-  SkIRect bounds_ = SkIRect::MakeEmpty();
+  DlIRect bounds_;
   SpanBuffer span_buffer_;
 };
 

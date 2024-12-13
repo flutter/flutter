@@ -164,6 +164,10 @@ inline const SkRect* ToSkRects(const DlRect* rects) {
   return rects == nullptr ? nullptr : reinterpret_cast<const SkRect*>(rects);
 }
 
+inline const SkIRect* ToSkIRects(const DlIRect* rects) {
+  return rects == nullptr ? nullptr : reinterpret_cast<const SkIRect*>(rects);
+}
+
 inline const SkSize& ToSkSize(const DlSize& size) {
   return *reinterpret_cast<const SkSize*>(&size);
 }

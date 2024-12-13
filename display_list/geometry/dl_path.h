@@ -36,6 +36,7 @@ class DlPath {
 
   DlPath(const DlPath& path) = default;
   DlPath(DlPath&& path) = default;
+  DlPath& operator=(const DlPath&) = default;
 
   const SkPath& GetSkPath() const;
   impeller::Path GetPath() const;

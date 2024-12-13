@@ -322,10 +322,9 @@ TEST_F(DisplayListLayerTest, RasterCachePreservesRTree) {
                                           false));
   auto root_canvas_dl = expected_root_canvas.Build();
   const auto root_canvas_rects =
-      root_canvas_dl->rtree()->searchAndConsolidateRects(ToSkRect(kGiantRect),
-                                                         true);
-  std::list<SkRect> root_canvas_rects_expected = {
-      SkRect::MakeLTRB(26, 26, 56, 56),
+      root_canvas_dl->rtree()->searchAndConsolidateRects(kGiantRect, true);
+  std::list<DlRect> root_canvas_rects_expected = {
+      DlRect::MakeLTRB(26, 26, 56, 56),
   };
   EXPECT_EQ(root_canvas_rects_expected, root_canvas_rects);
 
@@ -336,14 +335,13 @@ TEST_F(DisplayListLayerTest, RasterCachePreservesRTree) {
                                           true));
   auto overlay_canvas_dl = expected_overlay_canvas.Build();
   const auto overlay_canvas_rects =
-      overlay_canvas_dl->rtree()->searchAndConsolidateRects(
-          ToSkRect(kGiantRect), true);
+      overlay_canvas_dl->rtree()->searchAndConsolidateRects(kGiantRect, true);
 
   // Same bounds as root canvas, but preserves individual rects.
-  std::list<SkRect> overlay_canvas_rects_expected = {
-      SkRect::MakeLTRB(26, 26, 46, 36),
-      SkRect::MakeLTRB(26, 36, 56, 46),
-      SkRect::MakeLTRB(36, 46, 56, 56),
+  std::list<DlRect> overlay_canvas_rects_expected = {
+      DlRect::MakeLTRB(26, 26, 46, 36),
+      DlRect::MakeLTRB(26, 36, 56, 46),
+      DlRect::MakeLTRB(36, 46, 56, 56),
   };
   EXPECT_EQ(overlay_canvas_rects_expected, overlay_canvas_rects);
 };

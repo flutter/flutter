@@ -13,7 +13,6 @@
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/display_list/utils/dl_accumulation_rect.h"
 #include "fml/logging.h"
-#include "third_party/skia/include/core/SkScalar.h"
 
 namespace flutter {
 
@@ -78,7 +77,7 @@ sk_sp<DisplayList> DisplayListBuilder::Build() {
   DlBlendMode max_root_blend_mode = current_layer().max_blend_mode;
 
   sk_sp<DlRTree> rtree;
-  SkRect bounds;
+  DlRect bounds;
   if (rtree_data_.has_value()) {
     auto& rects = rtree_data_->rects;
     auto& indices = rtree_data_->indices;
@@ -90,7 +89,7 @@ sk_sp<DisplayList> DisplayListBuilder::Build() {
     bounds = rtree->bounds();
     rtree_data_.reset();
   } else {
-    bounds = current_layer().global_space_accumulator.bounds();
+    bounds = current_layer().global_space_accumulator.GetBounds();
   }
 
   render_op_count_ = op_index_ = 0;
@@ -598,7 +597,7 @@ void DisplayListBuilder::RestoreLayer() {
   // the total content depth computed above in Restore.
   depth_ += render_op_depth_cost_;
 
-  SkRect content_bounds = current_layer().layer_local_accumulator.bounds();
+  DlRect content_bounds = current_layer().layer_local_accumulator.GetBounds();
 
   SaveLayerOpBase* layer_op = reinterpret_cast<SaveLayerOpBase*>(
       storage_.base() + current_info().save_offset);
@@ -606,18 +605,13 @@ void DisplayListBuilder::RestoreLayer() {
             layer_op->type == DisplayListOpType::kSaveLayerBackdrop);
 
   if (layer_op->options.bounds_from_caller()) {
-    SkRect user_bounds = ToSkRect(layer_op->rect);
-    if (!content_bounds.isEmpty() && !user_bounds.contains(content_bounds)) {
+    DlRect user_bounds = layer_op->rect;
+    if (!content_bounds.IsEmpty() && !user_bounds.Contains(content_bounds)) {
       layer_op->options = layer_op->options.with_content_is_clipped();
-      if (!content_bounds.intersect(user_bounds)) {
-        // Should never happen because we prune ops that don't intersect the
-        // supplied bounds so content_bounds would already be empty and we
-        // wouldn't come into this control block due to the empty test above.
-        content_bounds.setEmpty();
-      }
+      content_bounds = content_bounds.IntersectionOrEmpty(user_bounds);
     }
   }
-  layer_op->rect = ToDlRect(content_bounds);
+  layer_op->rect = content_bounds;
   layer_op->max_blend_mode = current_layer().max_blend_mode;
 
   if (current_layer().contains_backdrop_filter) {
@@ -669,7 +663,7 @@ void DisplayListBuilder::RestoreLayer() {
 //
 // Finally, we will have to adjust the layer's content bounds by the filter
 // and accumulate those into the parent layer's local bounds.
-void DisplayListBuilder::TransferLayerBounds(const SkRect& content_bounds) {
+void DisplayListBuilder::TransferLayerBounds(const DlRect& content_bounds) {
   auto& filter = current_layer().filter;
 
   if (!filter) {
@@ -685,7 +679,7 @@ void DisplayListBuilder::TransferLayerBounds(const SkRect& content_bounds) {
   }
 
   bool parent_is_flooded = false;
-  SkRect bounds_for_parent = content_bounds;
+  DlRect bounds_for_parent = content_bounds;
 
   // First, let's adjust or transfer the global/rtree bounds by the filter.
 
@@ -742,10 +736,10 @@ void DisplayListBuilder::TransferLayerBounds(const SkRect& content_bounds) {
   // to flood the parent due to any of the cases above, we don't need to
   // run the filter on the content bounds only to discover the same
   // condition.
-  if (!parent_is_flooded && !bounds_for_parent.isEmpty()) {
-    DlRect mappable_bounds = ToDlRect(bounds_for_parent);
+  if (!parent_is_flooded && !bounds_for_parent.IsEmpty()) {
+    DlRect mappable_bounds = bounds_for_parent;
     if (filter->map_local_bounds(mappable_bounds, mappable_bounds)) {
-      bounds_for_parent = ToSkRect(mappable_bounds);
+      bounds_for_parent = mappable_bounds;
     } else {
       parent_is_flooded = true;
     }
@@ -778,7 +772,7 @@ bool DisplayListBuilder::AdjustRTreeRects(RTreeData& data,
   int ret = false;
   auto rect_keep = rect_start_index;
   for (size_t i = rect_start_index; i < rects.size(); i++) {
-    DlRect bounds = ToDlRect(rects[i]);
+    DlRect bounds = rects[i];
     DlIRect ibounds = DlIRect::RoundOut(bounds);
     if (filter.map_device_bounds(ibounds, matrix, ibounds)) {
       bounds = DlRect::Make(ibounds);
@@ -789,7 +783,7 @@ bool DisplayListBuilder::AdjustRTreeRects(RTreeData& data,
     auto clipped_bounds = bounds.Intersection(clip);
     if (clipped_bounds.has_value()) {
       indices[rect_keep] = indices[i];
-      rects[rect_keep] = ToSkRect(clipped_bounds.value());
+      rects[rect_keep] = clipped_bounds.value();
       rect_keep++;
     }
   }
@@ -1100,10 +1094,9 @@ void DisplayListBuilder::DrawColor(DlColor color, DlBlendMode mode) {
   }
 }
 void DisplayListBuilder::drawLine(const DlPoint& p0, const DlPoint& p1) {
-  SkRect bounds = SkRect::MakeLTRB(p0.x, p0.y, p1.x, p1.y).makeSorted();
+  DlRect bounds = DlRect::MakeLTRB(p0.x, p0.y, p1.x, p1.y).GetPositive();
   DisplayListAttributeFlags flags =
-      (bounds.width() > 0.0f && bounds.height() > 0.0f) ? kDrawLineFlags
-                                                        : kDrawHVLineFlags;
+      bounds.IsEmpty() ? kDrawHVLineFlags : kDrawLineFlags;
   OpResult result = PaintResult(current_, flags);
   if (result != OpResult::kNoEffect && AccumulateOpBounds(bounds, flags)) {
     Push<DrawLineOp>(0, p0, p1);
@@ -1121,10 +1114,9 @@ void DisplayListBuilder::drawDashedLine(const DlPoint& p0,
                                         const DlPoint& p1,
                                         DlScalar on_length,
                                         DlScalar off_length) {
-  SkRect bounds = SkRect::MakeLTRB(p0.x, p0.y, p1.x, p1.y).makeSorted();
+  DlRect bounds = DlRect::MakeLTRB(p0.x, p0.y, p1.x, p1.y).GetPositive();
   DisplayListAttributeFlags flags =
-      (bounds.width() > 0.0f && bounds.height() > 0.0f) ? kDrawLineFlags
-                                                        : kDrawHVLineFlags;
+      bounds.IsEmpty() ? kDrawHVLineFlags : kDrawLineFlags;
   OpResult result = PaintResult(current_, flags);
   if (result != OpResult::kNoEffect && AccumulateOpBounds(bounds, flags)) {
     Push<DrawDashedLineOp>(0, p0, p1, on_length, off_length);
@@ -1144,7 +1136,7 @@ void DisplayListBuilder::drawRect(const DlRect& rect) {
   DisplayListAttributeFlags flags = kDrawRectFlags;
   OpResult result = PaintResult(current_, flags);
   if (result != OpResult::kNoEffect &&
-      AccumulateOpBounds(ToSkRect(rect.GetPositive()), flags)) {
+      AccumulateOpBounds(rect.GetPositive(), flags)) {
     Push<DrawRectOp>(0, rect);
     CheckLayerOpacityCompatibility();
     UpdateLayerResult(result);
@@ -1158,7 +1150,7 @@ void DisplayListBuilder::drawOval(const DlRect& bounds) {
   DisplayListAttributeFlags flags = kDrawOvalFlags;
   OpResult result = PaintResult(current_, flags);
   if (result != OpResult::kNoEffect &&
-      AccumulateOpBounds(ToSkRect(bounds.GetPositive()), flags)) {
+      AccumulateOpBounds(bounds.GetPositive(), flags)) {
     Push<DrawOvalOp>(0, bounds);
     CheckLayerOpacityCompatibility();
     UpdateLayerResult(result);
@@ -1172,7 +1164,7 @@ void DisplayListBuilder::drawCircle(const DlPoint& center, DlScalar radius) {
   DisplayListAttributeFlags flags = kDrawCircleFlags;
   OpResult result = PaintResult(current_, flags);
   if (result != OpResult::kNoEffect) {
-    SkRect bounds = SkRect::MakeLTRB(center.x - radius, center.y - radius,
+    DlRect bounds = DlRect::MakeLTRB(center.x - radius, center.y - radius,
                                      center.x + radius, center.y + radius);
     if (AccumulateOpBounds(bounds, flags)) {
       Push<DrawCircleOp>(0, center, radius);
@@ -1196,7 +1188,7 @@ void DisplayListBuilder::drawRoundRect(const DlRoundRect& rrect) {
     DisplayListAttributeFlags flags = kDrawRRectFlags;
     OpResult result = PaintResult(current_, flags);
     if (result != OpResult::kNoEffect &&
-        AccumulateOpBounds(ToSkRect(rrect.GetBounds()), flags)) {
+        AccumulateOpBounds(rrect.GetBounds(), flags)) {
       Push<DrawRoundRectOp>(0, rrect);
       CheckLayerOpacityCompatibility();
       UpdateLayerResult(result);
@@ -1213,7 +1205,7 @@ void DisplayListBuilder::drawDiffRoundRect(const DlRoundRect& outer,
   DisplayListAttributeFlags flags = kDrawDRRectFlags;
   OpResult result = PaintResult(current_, flags);
   if (result != OpResult::kNoEffect &&
-      AccumulateOpBounds(ToSkRect(outer.GetBounds()), flags)) {
+      AccumulateOpBounds(outer.GetBounds(), flags)) {
     Push<DrawDiffRoundRectOp>(0, outer, inner);
     CheckLayerOpacityCompatibility();
     UpdateLayerResult(result);
@@ -1229,10 +1221,9 @@ void DisplayListBuilder::drawPath(const DlPath& path) {
   DisplayListAttributeFlags flags = kDrawPathFlags;
   OpResult result = PaintResult(current_, flags);
   if (result != OpResult::kNoEffect) {
-    bool is_visible =
-        path.IsInverseFillType()
-            ? AccumulateUnbounded()
-            : AccumulateOpBounds(ToSkRect(path.GetBounds()), flags);
+    bool is_visible = path.IsInverseFillType()
+                          ? AccumulateUnbounded()
+                          : AccumulateOpBounds(path.GetBounds(), flags);
     if (is_visible) {
       Push<DrawPathOp>(0, path);
       CheckLayerOpacityHairlineCompatibility();
@@ -1257,8 +1248,7 @@ void DisplayListBuilder::drawArc(const DlRect& bounds,
   // This could be tighter if we compute where the start and end
   // angles are and then also consider the quadrants swept and
   // the center if specified.
-  if (result != OpResult::kNoEffect &&
-      AccumulateOpBounds(ToSkRect(bounds), flags)) {
+  if (result != OpResult::kNoEffect && AccumulateOpBounds(bounds, flags)) {
     Push<DrawArcOp>(0, bounds, start, sweep, useCenter);
     if (useCenter) {
       CheckLayerOpacityHairlineCompatibility();
@@ -1308,8 +1298,7 @@ void DisplayListBuilder::drawPoints(PointMode mode,
   for (size_t i = 0; i < count; i++) {
     accumulator.accumulate(pts[i]);
   }
-  SkRect point_bounds = accumulator.bounds();
-  if (!AccumulateOpBounds(point_bounds, flags)) {
+  if (!AccumulateOpBounds(accumulator.GetBounds(), flags)) {
     return;
   }
 
@@ -1355,7 +1344,7 @@ void DisplayListBuilder::drawVertices(
   DisplayListAttributeFlags flags = kDrawVerticesFlags;
   OpResult result = PaintResult(current_, flags);
   if (result != OpResult::kNoEffect &&
-      AccumulateOpBounds(vertices->bounds(), flags)) {
+      AccumulateOpBounds(vertices->GetBounds(), flags)) {
     Push<DrawVerticesOp>(0, vertices, mode);
     // DrawVertices applies its colors to the paint so we have no way
     // of controlling opacity using the current paint attributes.
@@ -1393,7 +1382,7 @@ void DisplayListBuilder::drawImage(const sk_sp<DlImage> image,
   if (result == OpResult::kNoEffect) {
     return;
   }
-  SkRect bounds = SkRect::MakeXYWH(point.x, point.y,  //
+  DlRect bounds = DlRect::MakeXYWH(point.x, point.y,  //
                                    image->width(), image->height());
   if (AccumulateOpBounds(bounds, flags)) {
     render_with_attributes
@@ -1426,8 +1415,7 @@ void DisplayListBuilder::drawImageRect(const sk_sp<DlImage> image,
                                         ? kDrawImageRectWithPaintFlags
                                         : kDrawImageRectFlags;
   OpResult result = PaintResult(current_, flags);
-  if (result != OpResult::kNoEffect &&
-      AccumulateOpBounds(ToSkRect(dst), flags)) {
+  if (result != OpResult::kNoEffect && AccumulateOpBounds(dst, flags)) {
     Push<DrawImageRectOp>(0, image, src, dst, sampling, render_with_attributes,
                           constraint);
     CheckLayerOpacityCompatibility(render_with_attributes);
@@ -1458,8 +1446,7 @@ void DisplayListBuilder::drawImageNine(const sk_sp<DlImage> image,
                                         ? kDrawImageNineWithPaintFlags
                                         : kDrawImageNineFlags;
   OpResult result = PaintResult(current_, flags);
-  if (result != OpResult::kNoEffect &&
-      AccumulateOpBounds(ToSkRect(dst), flags)) {
+  if (result != OpResult::kNoEffect && AccumulateOpBounds(dst, flags)) {
     render_with_attributes
         ? Push<DrawImageNineWithAttrOp>(0, image, center, dst, filter)
         : Push<DrawImageNineOp>(0, image, center, dst, filter);
@@ -1500,14 +1487,14 @@ void DisplayListBuilder::drawAtlas(const sk_sp<DlImage> atlas,
   SkPoint quad[4];
   AccumulationRect accumulator;
   for (int i = 0; i < count; i++) {
-    const SkRect& src = ToSkRect(tex[i]);
-    xform[i].toQuad(src.width(), src.height(), quad);
+    const DlRect& src = tex[i];
+    xform[i].toQuad(src.GetWidth(), src.GetHeight(), quad);
     for (int j = 0; j < 4; j++) {
       accumulator.accumulate(quad[j]);
     }
   }
   if (accumulator.is_empty() ||
-      !AccumulateOpBounds(accumulator.bounds(), flags)) {
+      !AccumulateOpBounds(accumulator.GetBounds(), flags)) {
     return;
   }
   // Accumulating the bounds might not trip the overlap condition if the
@@ -1582,7 +1569,7 @@ void DisplayListBuilder::DrawDisplayList(const sk_sp<DisplayList> display_list,
       current_info().is_nop) {
     return;
   }
-  const SkRect bounds = display_list->bounds();
+  const DlRect bounds = display_list->GetBounds();
   bool accumulated;
   sk_sp<const DlRTree> rtree;
   if (display_list->root_is_unbounded()) {
@@ -1590,10 +1577,10 @@ void DisplayListBuilder::DrawDisplayList(const sk_sp<DisplayList> display_list,
   } else if (!rtree_data_.has_value() || !(rtree = display_list->rtree())) {
     accumulated = AccumulateOpBounds(bounds, kDrawDisplayListFlags);
   } else {
-    std::list<SkRect> rects =
-        rtree->searchAndConsolidateRects(GetLocalClipBounds(), false);
+    std::list<DlRect> rects =
+        rtree->searchAndConsolidateRects(GetLocalClipCoverage(), false);
     accumulated = false;
-    for (const SkRect& rect : rects) {
+    for (const DlRect& rect : rects) {
       // TODO (https://github.com/flutter/flutter/issues/114919): Attributes
       // are not necessarily `kDrawDisplayListFlags`.
       if (AccumulateOpBounds(rect, kDrawDisplayListFlags)) {
@@ -1653,7 +1640,8 @@ void DisplayListBuilder::drawTextBlob(const sk_sp<SkTextBlob> blob,
   if (result == OpResult::kNoEffect) {
     return;
   }
-  bool unclipped = AccumulateOpBounds(blob->bounds().makeOffset(x, y), flags);
+  DlRect bounds = ToDlRect(blob->bounds().makeOffset(x, y));
+  bool unclipped = AccumulateOpBounds(bounds, flags);
   // TODO(https://github.com/flutter/flutter/issues/82202): Remove once the
   // unit tests can use Fuchsia's font manager instead of the empty default.
   // Until then we might encounter empty bounds for otherwise valid text and
@@ -1689,10 +1677,8 @@ void DisplayListBuilder::drawTextFrame(
   if (result == OpResult::kNoEffect) {
     return;
   }
-  impeller::Rect bounds = text_frame->GetBounds();
-  SkRect sk_bounds = SkRect::MakeLTRB(bounds.GetLeft(), bounds.GetTop(),
-                                      bounds.GetRight(), bounds.GetBottom());
-  bool unclipped = AccumulateOpBounds(sk_bounds.makeOffset(x, y), flags);
+  DlRect bounds = text_frame->GetBounds().Shift(x, y);
+  bool unclipped = AccumulateOpBounds(bounds, flags);
   // TODO(https://github.com/flutter/flutter/issues/82202): Remove once the
   // unit tests can use Fuchsia's font manager instead of the empty default.
   // Until then we might encounter empty bounds for otherwise valid text and
@@ -1728,8 +1714,8 @@ void DisplayListBuilder::DrawShadow(const DlPath& path,
                                     DlScalar dpr) {
   OpResult result = PaintResult(DlPaint(color));
   if (result != OpResult::kNoEffect) {
-    SkRect shadow_bounds = DlCanvas::ComputeShadowBounds(
-        path.GetSkPath(), elevation, dpr, GetTransform());
+    DlRect shadow_bounds =
+        DlCanvas::ComputeShadowBounds(path, elevation, dpr, GetMatrix());
     if (AccumulateOpBounds(shadow_bounds, kDrawShadowFlags)) {
       transparent_occluder  //
           ? Push<DrawShadowTransparentOccluderOp>(0, path, color, elevation,
@@ -1741,7 +1727,7 @@ void DisplayListBuilder::DrawShadow(const DlPath& path,
   }
 }
 
-bool DisplayListBuilder::AdjustBoundsForPaint(SkRect& bounds,
+bool DisplayListBuilder::AdjustBoundsForPaint(DlRect& bounds,
                                               DisplayListAttributeFlags flags) {
   if (flags.ignores_paint()) {
     return true;
@@ -1767,7 +1753,7 @@ bool DisplayListBuilder::AdjustBoundsForPaint(SkRect& bounds,
       }
       DlScalar min_stroke_width = 0.01;
       pad *= std::max(current_.getStrokeWidth() * 0.5f, min_stroke_width);
-      bounds.outset(pad, pad);
+      bounds = bounds.Expand(pad, pad);
     }
   }
 
@@ -1778,7 +1764,7 @@ bool DisplayListBuilder::AdjustBoundsForPaint(SkRect& bounds,
         case DlMaskFilterType::kBlur: {
           FML_DCHECK(filter->asBlur());
           DlScalar mask_sigma_pad = filter->asBlur()->sigma() * 3.0;
-          bounds.outset(mask_sigma_pad, mask_sigma_pad);
+          bounds = bounds.Expand(mask_sigma_pad, mask_sigma_pad);
         }
       }
     }
@@ -1793,10 +1779,10 @@ bool DisplayListBuilder::AdjustBoundsForPaint(SkRect& bounds,
     auto filter = current_.getImageFilterPtr();
     if (filter) {
       DlRect dl_bounds;
-      if (!filter->map_local_bounds(ToDlRect(bounds), dl_bounds)) {
+      if (!filter->map_local_bounds(bounds, dl_bounds)) {
         return false;
       }
-      bounds = ToSkRect(dl_bounds);
+      bounds = dl_bounds;
     }
   }
 
@@ -1807,9 +1793,9 @@ bool DisplayListBuilder::AccumulateUnbounded(const SaveInfo& save) {
   if (!save.has_valid_clip) {
     save.layer_info->is_unbounded = true;
   }
-  SkRect global_clip = save.global_state.device_cull_rect();
-  SkRect layer_clip = save.global_state.local_cull_rect();
-  if (global_clip.isEmpty() || !save.layer_state.mapAndClipRect(&layer_clip)) {
+  DlRect global_clip = save.global_state.GetDeviceCullCoverage();
+  DlRect layer_clip = save.global_state.GetLocalCullCoverage();
+  if (global_clip.IsEmpty() || !save.layer_state.mapAndClipRect(&layer_clip)) {
     return false;
   }
   if (rtree_data_.has_value()) {
@@ -1823,7 +1809,7 @@ bool DisplayListBuilder::AccumulateUnbounded(const SaveInfo& save) {
   return true;
 }
 
-bool DisplayListBuilder::AccumulateOpBounds(SkRect& bounds,
+bool DisplayListBuilder::AccumulateOpBounds(DlRect& bounds,
                                             DisplayListAttributeFlags flags) {
   if (AdjustBoundsForPaint(bounds, flags)) {
     return AccumulateBounds(bounds);
@@ -1832,14 +1818,14 @@ bool DisplayListBuilder::AccumulateOpBounds(SkRect& bounds,
   }
 }
 
-bool DisplayListBuilder::AccumulateBounds(const SkRect& bounds,
+bool DisplayListBuilder::AccumulateBounds(const DlRect& bounds,
                                           SaveInfo& layer,
                                           int id) {
-  if (bounds.isEmpty()) {
+  if (bounds.IsEmpty()) {
     return false;
   }
-  SkRect global_bounds;
-  SkRect layer_bounds;
+  DlRect global_bounds;
+  DlRect layer_bounds;
   if (!layer.global_state.mapAndClipRect(bounds, &global_bounds) ||
       !layer.layer_state.mapAndClipRect(bounds, &layer_bounds)) {
     return false;
@@ -1857,11 +1843,11 @@ bool DisplayListBuilder::AccumulateBounds(const SkRect& bounds,
   return true;
 }
 
-bool DisplayListBuilder::SaveInfo::AccumulateBoundsLocal(const SkRect& bounds) {
-  if (bounds.isEmpty()) {
+bool DisplayListBuilder::SaveInfo::AccumulateBoundsLocal(const DlRect& bounds) {
+  if (bounds.IsEmpty()) {
     return false;
   }
-  SkRect local_bounds;
+  DlRect local_bounds;
   if (!layer_state.mapAndClipRect(bounds, &local_bounds)) {
     return false;
   }
