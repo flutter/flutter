@@ -1017,9 +1017,7 @@ class FlutterPlugin implements Plugin<Project> {
         if (localProperties == null) {
             localProperties = readPropertiesIfExist(new File(project.projectDir.parentFile, "local.properties"))
         }
-        String result = project.hasProperty(name) ? project.property(name) : null
-        result = result ?: localProperties?.getProperty(name)
-        return result ?: defaultValue
+        return project.findProperty(name) ?: localProperties?.getProperty(name, defaultValue)
     }
 
     private List<String> getTargetPlatforms() {
