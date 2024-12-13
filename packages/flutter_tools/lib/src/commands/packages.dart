@@ -238,7 +238,7 @@ class PackagesGetCommand extends FlutterCommand {
     //  * foo:{"hosted":"my-pub.dev"}
     //  * foo:{"sdk":"flutter"}
     //  * foo:{"git":"https://github.com/foo/foo"}
-    if (RegExp(r':\{.*}').hasMatch(arg)) {
+    if (name == 'add' && RegExp(r':\{.*}').hasMatch(arg)) {
       return false;
     }
     // For historical reasons, if there is one argument to the command and it
