@@ -56,7 +56,7 @@ You can find where your Android SDK is using `flutter doctor -v`.
 
 ### Warnings
 
-Running DeviceLab tests locally will do things to your environment. 
+Running DeviceLab tests locally will do things to your environment.
 
 Notably:
 
