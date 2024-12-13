@@ -339,8 +339,7 @@ void main() {
       expect(logger.statusText, contains('Retrying Gradle Build: #2, wait time: 200ms'));
 
       expect(testFnCalled, equals(maxRetries + 1));
-
-      expect(fakeAnalytics.sentEvents, hasLength(7));
+      expect(fakeAnalytics.sentEvents, hasLength(9));
       expect(fakeAnalytics.sentEvents, contains(
         Event.flutterBuildInfo(
           label: 'gradle-random-event-label-failure',
@@ -806,6 +805,85 @@ void main() {
         logger.statusText,
         contains('Built build/app/outputs/flutter-apk/app-release.apk (0.0MB)'),
       );
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
+
+    testUsingContext('prints deprecation warning when building for x86', () async {
+      // See https://github.com/flutter/flutter/issues/157543 for details.
+      final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        analytics: fakeAnalytics,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
+      );
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'gradlew',
+          '-q',
+          '-Ptarget-platform=android-x86',
+          '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=android.app.Application',
+          '-Pdart-obfuscation=false',
+          '-Ptrack-widget-creation=false',
+          '-Ptree-shake-icons=false',
+          'assembleRelease',
+        ],
+      ));
+      fileSystem.directory('android')
+        .childFile('build.gradle')
+        .createSync(recursive: true);
+
+      fileSystem.directory('android')
+        .childFile('gradle.properties')
+        .createSync(recursive: true);
+
+      fileSystem.directory('android')
+        .childDirectory('app')
+        .childFile('build.gradle')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+
+      fileSystem.directory('build')
+        .childDirectory('app')
+        .childDirectory('outputs')
+        .childDirectory('flutter-apk')
+        .childFile('app-release.apk')
+        .createSync(recursive: true);
+
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      project.android.appManifestFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+      await builder.buildGradleApp(
+        project: project,
+        androidBuildInfo: const AndroidBuildInfo(
+          BuildInfo(
+            BuildMode.release,
+            null,
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+          ),
+          targetArchs: <AndroidArch>[AndroidArch.x86],
+        ),
+        target: 'lib/main.dart',
+        isBuildingBundle: false,
+        configOnly: false,
+        localGradleErrors: const <GradleHandledError>[],
+      );
+
+      expect(
+        logger.statusText,
+        contains('Built build/app/outputs/flutter-apk/app-release.apk (0.0MB)'),
+      );
+      expect(logger.warningText, contains(androidX86DeprecationWarning));
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),

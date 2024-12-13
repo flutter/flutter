@@ -8,6 +8,7 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'material_state.dart';
 import 'menu_anchor.dart';
 import 'menu_style.dart';
 import 'theme.dart';
@@ -36,7 +37,10 @@ import 'theme.dart';
 @immutable
 class MenuThemeData with Diagnosticable {
   /// Creates a const set of properties used to configure [MenuTheme].
-  const MenuThemeData({this.style});
+  const MenuThemeData({
+    this.style,
+    this.submenuIcon,
+  });
 
   /// The [MenuStyle] of a [SubmenuButton] menu.
   ///
@@ -44,16 +48,30 @@ class MenuThemeData with Diagnosticable {
   /// property.
   final MenuStyle? style;
 
+  /// If provided, the widget replaces the default [SubmenuButton] arrow icon.
+  ///
+  /// Resolves in the following states:
+  ///  * [WidgetState.disabled].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  final MaterialStateProperty<Widget?>? submenuIcon;
+
   /// Linearly interpolate between two menu button themes.
   static MenuThemeData? lerp(MenuThemeData? a, MenuThemeData? b, double t) {
     if (identical(a, b)) {
       return a;
     }
-    return MenuThemeData(style: MenuStyle.lerp(a?.style, b?.style, t));
+    return MenuThemeData(
+      style: MenuStyle.lerp(a?.style, b?.style, t),
+      submenuIcon: t < 0.5 ? a?.submenuIcon : b?.submenuIcon,
+    );
   }
 
   @override
-  int get hashCode => style.hashCode;
+  int get hashCode => Object.hash(
+    style,
+    submenuIcon,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -63,13 +81,16 @@ class MenuThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is MenuThemeData && other.style == style;
+    return other is MenuThemeData
+        && other.style == style
+        && other.submenuIcon == submenuIcon;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MenuStyle>('style', style, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Widget?>>('submenuIcon', submenuIcon, defaultValue: null));
   }
 }
 

@@ -2713,7 +2713,7 @@ final class BuildScope {
   }
 
   bool _debugAssertElementInScope(Element element, Element debugBuildRoot) {
-    final bool isInScope = element._debugIsDescsendantOf(debugBuildRoot)
+    final bool isInScope = element._debugIsDescendantOf(debugBuildRoot)
                         || !element.debugIsActive;
     if (isInScope) {
       return true;
@@ -3674,7 +3674,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     });
   }
 
-  bool _debugIsDescsendantOf(Element target) {
+  bool _debugIsDescendantOf(Element target) {
     Element? element = this;
     while (element != null && element.depth > target.depth) {
       element = element._parent;
@@ -5172,7 +5172,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       if (owner!._debugBuilding) {
         assert(owner!._debugCurrentBuildTarget != null);
         assert(owner!._debugStateLocked);
-        if (_debugIsDescsendantOf(owner!._debugCurrentBuildTarget!)) {
+        if (_debugIsDescendantOf(owner!._debugCurrentBuildTarget!)) {
           return true;
         }
         final List<DiagnosticsNode> information = <DiagnosticsNode>[

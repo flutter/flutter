@@ -356,9 +356,7 @@ void _defineTests() {
     final Set<SemanticsAction> allActions = SemanticsAction.values.toSet()
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
       ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
-      // TODO(LongCatIsLooong): change to `SemanticsAction.scrollToOffset` when available.
-      // https://github.com/flutter/flutter/issues/159515.
-      ..removeWhere((SemanticsAction action) => action.index == 1 << 23);
+      ..remove(SemanticsAction.scrollToOffset); // scrollToOffset is not user-exposed
 
     const int expectedId = 2;
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -381,9 +379,6 @@ void _defineTests() {
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     int expectedLength = 1;
     for (final SemanticsAction action in allActions) {
-      // TODO(LongCatIsLooong): remove after `SemanticsAction.scrollToOffset` is added to dart:ui.
-      // https://github.com/flutter/flutter/issues/159515.
-      // ignore: exhaustive_cases
       switch (action) {
         case SemanticsAction.moveCursorBackwardByCharacter:
         case SemanticsAction.moveCursorForwardByCharacter:
@@ -411,6 +406,7 @@ void _defineTests() {
         case SemanticsAction.scrollLeft:
         case SemanticsAction.scrollRight:
         case SemanticsAction.scrollUp:
+        case SemanticsAction.scrollToOffset:
         case SemanticsAction.showOnScreen:
         case SemanticsAction.tap:
         case SemanticsAction.focus:
