@@ -272,11 +272,8 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        String flutterVersionCode = localProperties.getProperty("flutter.versionCode")
-        extension.flutterVersionCode = flutterVersionCode ?: "1"
-
-        String flutterVersionName = localProperties.getProperty("flutter.versionName")
-        extension.flutterVersionName = flutterVersionName ?: "1.0"
+        extension.flutterVersionCode = localProperties.getProperty("flutter.versionCode", "1")
+        extension.flutterVersionName = localProperties.getProperty("flutter.versionName", "1.0")
 
         this.addFlutterTasks(project)
 
