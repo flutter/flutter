@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'drawer.dart';
+import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -196,9 +197,12 @@ class NavigationDrawerDestination extends StatelessWidget {
     this.enabled = true,
   });
 
-  /// Sets the color of the destination.
+  /// The background color of the destination.
   ///
-  /// If this is null, then [NavigationDrawerThemeData.backgroundColor].
+  /// If this is null, no background is set and [NavigationDrawer.backgroundColor] will be visible.
+  ///
+  /// This is the background color of the whole rectangular area behind the drawer destination.
+  /// To customize only the indicator color consider using [NavigationDrawer.indicatorColor].
   final Color? backgroundColor;
 
   /// The [Widget] (usually an [Icon]) that's displayed for this
@@ -339,9 +343,6 @@ class _NavigationDestinationBuilder extends StatelessWidget {
   /// Defaults to true.
   final bool enabled;
 
-  /// Sets the color of navigation destination.
-  ///
-  /// If this is null, then [NavigationDrawerThemeData.backgroundColor] is used.
   final Color? backgroundColor;
 
   @override
@@ -386,9 +387,8 @@ class _NavigationDestinationBuilder extends StatelessWidget {
       ),
     );
 
-    final Color? color = backgroundColor ?? navigationDrawerTheme.backgroundColor;
-    if (color != null) {
-      return ColoredBox(color: color, child: destination);
+    if (backgroundColor != null) {
+      return Ink(color: backgroundColor, child: destination);
     }
     return destination;
   }

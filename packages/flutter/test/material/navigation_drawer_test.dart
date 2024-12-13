@@ -82,45 +82,66 @@ void main() {
     expect(_getMaterial(tester).color, equals(color));
   });
 
-  testWidgets('NavigationDrawer can update destination background color',
-      (WidgetTester tester) async {
-    const Color color = Colors.yellow;
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme = ThemeData();
+  testWidgets(
+    'NavigationDestinationDrawer background color is customizable',
+    (WidgetTester tester) async {
+      const Color color = Colors.yellow;
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      final ThemeData theme = ThemeData();
 
-    await tester.pumpWidget(
-      _buildWidget(
-        scaffoldKey,
-        NavigationDrawer(
-          children: <Widget>[
-            Text('Headline', style: theme.textTheme.bodyLarge),
-            NavigationDrawerDestination(
-              icon: Icon(Icons.ac_unit, color: theme.iconTheme.color),
-              label: Text('AC', style: theme.textTheme.bodySmall),
-              backgroundColor: color,
-            ),
-            NavigationDrawerDestination(
-              icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
-              label: Text('Alarm', style: theme.textTheme.bodySmall),
-              backgroundColor: color,
-            ),
-          ],
-          onDestinationSelected: (int i) {},
+      await tester.pumpWidget(
+        _buildWidget(
+          scaffoldKey,
+          NavigationDrawer(
+            children: <Widget>[
+              Text('Headline', style: theme.textTheme.bodyLarge),
+              NavigationDrawerDestination(
+                icon: Icon(Icons.ac_unit, color: theme.iconTheme.color),
+                label: Text('AC', style: theme.textTheme.bodySmall),
+              ),
+              NavigationDrawerDestination(
+                icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
+                label: Text('Alarm', style: theme.textTheme.bodySmall),
+                backgroundColor: color,
+              ),
+            ],
+            onDestinationSelected: (int i) {},
+          ),
         ),
-      ),
-    );
+      );
 
-    scaffoldKey.currentState!.openDrawer();
-    await tester.pump(const Duration(seconds: 1)); // animation done
-    final ColoredBox destinationColor = tester.firstWidget<ColoredBox>(
-      find.descendant(
-        of: find.byType(NavigationDrawerDestination),
-        matching: find.byType(ColoredBox),
-      ),
-    );
+      Finder findDestinationInk(String label) {
+        return find.descendant(
+          of: find.ancestor(
+            of: find.text(label),
+            matching: find.byType(NavigationDrawerDestination),
+          ),
+          matching: find.byType(Ink),
+        );
+      }
 
-    expect(destinationColor.color, equals(color));
-  });
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1)); // Animation done.
+
+      // Destination with no custom background color.
+      await tester.tap(find.text('AC'));
+      await tester.pump();
+
+      expect(findDestinationInk('AC'), findsNothing);
+
+      // Destination with a custom background color.
+      await tester.tap(find.byIcon(Icons.access_alarm));
+      await tester.pump();
+
+      // A Material is added with the custom color.
+      expect(findDestinationInk('Alarm'), findsOne);
+      final BoxDecoration destinationDecoration = tester.firstWidget<Ink>(
+        findDestinationInk('Alarm'),
+      ).decoration! as BoxDecoration;
+      expect(destinationDecoration.color, color);
+    },
+  );
 
   testWidgets('NavigationDrawer can update elevation',
       (WidgetTester tester) async {
