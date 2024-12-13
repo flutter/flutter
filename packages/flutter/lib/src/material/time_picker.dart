@@ -2235,7 +2235,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   late final RestorableEnum<TimePickerEntryMode> _entryMode = RestorableEnum<TimePickerEntryMode>(widget.initialEntryMode, values: TimePickerEntryMode.values);
   late final RestorableTimeOfDay _selectedTime = RestorableTimeOfDay(widget.initialTime);
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final RestorableEnum<AutovalidateMode> _autovalidateMode = RestorableEnum<AutovalidateMode>(AutovalidateMode.disabled, values: AutovalidateMode.values);
+  final RestorableEnum<AutoValidateMode> _autovalidateMode = RestorableEnum<AutoValidateMode>(AutoValidateMode.disabled, values: AutoValidateMode.values);
   late final RestorableEnumN<Orientation> _orientation = RestorableEnumN<Orientation>(widget.orientation, values: Orientation.values);
 
   // Base sizes
@@ -2283,7 +2283,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
       setState(() {
         switch (_entryMode.value) {
           case TimePickerEntryMode.dial:
-            _autovalidateMode.value = AutovalidateMode.disabled;
+            _autovalidateMode.value = AutoValidateMode.disabled;
           case TimePickerEntryMode.input:
             _formKey.currentState!.save();
           case TimePickerEntryMode.dialOnly:
@@ -2318,7 +2318,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
       final FormState form = _formKey.currentState!;
       if (!form.validate()) {
         setState(() {
-          _autovalidateMode.value = AutovalidateMode.always;
+          _autovalidateMode.value = AutoValidateMode.always;
         });
         return;
       }

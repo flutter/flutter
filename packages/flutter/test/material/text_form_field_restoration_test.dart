@@ -51,7 +51,7 @@ void main() {
                   return Material(
                     child: TextFormField(
                       key: formState,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      autovalidateMode: AutoValidateMode.onUserInteraction,
                       restorationId: 'text_form_field',
                       initialValue: 'foo',
                       validator: errorText,
@@ -95,7 +95,7 @@ void main() {
     String? errorText(String? value) => '$value/error';
     late GlobalKey<FormFieldState<String>> formState;
 
-    Widget builder(AutovalidateMode mode) {
+    Widget builder(AutoValidateMode mode) {
       return MaterialApp(
         restorationScopeId: 'app',
         home: MediaQuery(
@@ -124,11 +124,11 @@ void main() {
     }
 
     // Start off not autovalidating.
-    await tester.pumpWidget(builder(AutovalidateMode.disabled));
+    await tester.pumpWidget(builder(AutoValidateMode.disabled));
 
     Future<void> checkErrorText(String testValue) async {
       formState.currentState!.reset();
-      await tester.pumpWidget(builder(AutovalidateMode.disabled));
+      await tester.pumpWidget(builder(AutoValidateMode.disabled));
       await tester.enterText(find.byType(TextFormField), testValue);
       await tester.pump();
 
@@ -151,7 +151,7 @@ void main() {
 
       // Try again with autovalidation. Should validate immediately.
       formState.currentState!.reset();
-      await tester.pumpWidget(builder(AutovalidateMode.always));
+      await tester.pumpWidget(builder(AutoValidateMode.always));
       await tester.enterText(find.byType(TextFormField), testValue);
       await tester.pump();
 

@@ -465,7 +465,7 @@ class DatePickerDialog extends StatefulWidget {
 class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMixin {
   late final RestorableDateTimeN _selectedDate = RestorableDateTimeN(widget.initialDate);
   late final _RestorableDatePickerEntryMode _entryMode = _RestorableDatePickerEntryMode(widget.initialEntryMode);
-  final _RestorableAutovalidateMode _autovalidateMode = _RestorableAutovalidateMode(AutovalidateMode.disabled);
+  final _RestorableAutovalidateMode _autovalidateMode = _RestorableAutovalidateMode(AutoValidateMode.disabled);
 
   @override
   void dispose() {
@@ -492,7 +492,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     if (_entryMode.value == DatePickerEntryMode.input || _entryMode.value == DatePickerEntryMode.inputOnly) {
       final FormState form = _formKey.currentState!;
       if (!form.validate()) {
-        setState(() => _autovalidateMode.value = AutovalidateMode.always);
+        setState(() => _autovalidateMode.value = AutoValidateMode.always);
         return;
       }
       form.save();
@@ -512,7 +512,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     setState(() {
       switch (_entryMode.value) {
         case DatePickerEntryMode.calendar:
-          _autovalidateMode.value = AutovalidateMode.disabled;
+          _autovalidateMode.value = AutoValidateMode.disabled;
           _entryMode.value = DatePickerEntryMode.input;
           _handleOnDatePickerModeChange();
         case DatePickerEntryMode.input:
@@ -817,24 +817,24 @@ class _RestorableDatePickerEntryMode extends RestorableValue<DatePickerEntryMode
 // A restorable [AutovalidateMode] value.
 //
 // This serializes each entry as a unique `int` value.
-class _RestorableAutovalidateMode extends RestorableValue<AutovalidateMode> {
+class _RestorableAutovalidateMode extends RestorableValue<AutoValidateMode> {
   _RestorableAutovalidateMode(
-      AutovalidateMode defaultValue,
+      AutoValidateMode defaultValue,
       ) : _defaultValue = defaultValue;
 
-  final AutovalidateMode _defaultValue;
+  final AutoValidateMode _defaultValue;
 
   @override
-  AutovalidateMode createDefaultValue() => _defaultValue;
+  AutoValidateMode createDefaultValue() => _defaultValue;
 
   @override
-  void didUpdateValue(AutovalidateMode? oldValue) {
+  void didUpdateValue(AutoValidateMode? oldValue) {
     assert(debugIsSerializableForRestoration(value.index));
     notifyListeners();
   }
 
   @override
-  AutovalidateMode fromPrimitives(Object? data) => AutovalidateMode.values[data! as int];
+  AutoValidateMode fromPrimitives(Object? data) => AutoValidateMode.values[data! as int];
 
   @override
   Object? toPrimitives() => value.index;

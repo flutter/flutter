@@ -1715,7 +1715,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     InputDecoration? decoration,
     super.onSaved,
     super.validator,
-    AutovalidateMode? autovalidateMode,
+    AutoValidateMode? autovalidateMode,
     double? menuMaxHeight,
     bool? enableFeedback,
     AlignmentGeometry alignment = AlignmentDirectional.centerStart,
@@ -1734,7 +1734,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
         decoration = decoration ?? const InputDecoration(),
         super(
           initialValue: value,
-          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
+          autovalidateMode: autovalidateMode ?? AutoValidateMode.disabled,
           builder: (FormFieldState<T> field) {
             final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
             final InputDecoration decorationArg =  decoration ?? const InputDecoration();
