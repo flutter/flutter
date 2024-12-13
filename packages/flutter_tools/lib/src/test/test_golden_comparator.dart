@@ -203,9 +203,9 @@ final class TestGoldenComparisonError implements TestGoldenComparison {
 }
 
 /// The result of [TestGoldenComparator.update].
-/// 
+///
 /// See also:
-/// 
+///
 ///   * [TestGoldenUpdateDone]
 ///   * [TestGoldenUpdateError]
 @immutable
