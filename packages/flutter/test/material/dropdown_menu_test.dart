@@ -2128,6 +2128,52 @@ void main() {
     },
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/160196.
+  testWidgets(
+    'Updating the menu entries does not reset the text field if no initial selection is given ',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      Widget boilerplate(List<DropdownMenuEntry<TestMenu>> entries) {
+        return MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Scaffold(
+                body: DropdownMenu<TestMenu>(
+                  requestFocusOnTap: true,
+                  dropdownMenuEntries: entries,
+                  controller: controller,
+                ),
+              );
+            }
+          ),
+        );
+      }
+
+      await tester.pumpWidget(boilerplate(menuChildren));
+      expect(controller.text, isEmpty);
+
+      // Open the menu.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      // Enter some text.
+      await tester.enterText(find.byType(TextField).first, 'Flutter');
+      await tester.pump();
+      expect(controller.text, 'Flutter');
+
+      // Update the menu entries with another instance of list containing the
+      // same entries.
+      await tester.pumpWidget(boilerplate(
+        List<DropdownMenuEntry<TestMenu>>.from(menuChildren)
+      ));
+
+      // The text should not be changed.
+      expect(controller.text, 'Flutter');
+    },
+  );
+
   testWidgets('The default text input field should not be focused on mobile platforms '
       'when it is tapped', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
