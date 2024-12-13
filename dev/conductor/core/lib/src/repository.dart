@@ -671,16 +671,23 @@ class FrameworkRepository extends Repository {
       cmd,
       workingDirectory: workingDirectory,
     );
-    process
+    final StreamSubscription<String> stdoutSub = process
         .stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen(stdoutCallback ?? stdio.printTrace);
-    process
+    final StreamSubscription<String> stderrSub = process
         .stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen(stderrCallback ?? stdio.printError);
+    await Future.wait<void>(<Future<void>>[
+      stdoutSub.asFuture<void>(),
+      stderrSub.asFuture<void>(),
+    ]);
+    unawaited(stdoutSub.cancel());
+    unawaited(stderrSub.cancel());
+
     final int exitCode = await process.exitCode;
     if (exitCode != 0) {
       throw io.ProcessException(
