@@ -24,14 +24,23 @@ RRect DartConverter<flutter::RRect>::FromDart(Dart_Handle value) {
     return result;
   }
 
-  impeller::RoundingRadii radii = {{buffer[4], buffer[5]},
-                                   {buffer[6], buffer[7]},
-                                   {buffer[10], buffer[11]},
-                                   {buffer[8], buffer[9]}};
+  // The Flutter rect may be inverted (upside down, backward, or both)
+  // Historically, Skia would normalize such rects but we will do that
+  // manually below when we construct the Impeller RoundRect
+  flutter::DlRect raw_rect =
+      flutter::DlRect::MakeLTRB(buffer[0], buffer[1], buffer[2], buffer[3]);
 
-  result.rrect = flutter::DlRoundRect::MakeRectRadii(
-      flutter::DlRect::MakeLTRB(buffer[0], buffer[1], buffer[2], buffer[3]),
-      radii);
+  // Flutter has radii in TL,TR,BR,BL (clockwise) order,
+  // but Impeller uses TL,TR,BL,BR (zig-zag) order
+  impeller::RoundingRadii radii = {
+      .top_left = flutter::DlSize(buffer[4], buffer[5]),
+      .top_right = flutter::DlSize(buffer[6], buffer[7]),
+      .bottom_left = flutter::DlSize(buffer[10], buffer[11]),
+      .bottom_right = flutter::DlSize(buffer[8], buffer[9]),
+  };
+
+  result.rrect =
+      flutter::DlRoundRect::MakeRectRadii(raw_rect.GetPositive(), radii);
 
   result.is_null = false;
   return result;
