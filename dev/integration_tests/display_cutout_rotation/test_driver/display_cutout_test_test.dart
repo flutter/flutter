@@ -10,17 +10,21 @@ import 'dart:io';
 
 import 'package:flutter_driver/flutter_driver.dart';
 
+// display_cutout needs a custom driver becuase cutout manipulations needs to be
+// done to a device/emulator in order for the tests to pass.
 Future<void> main() async {
   if (!(Platform.isLinux || Platform.isMacOS)) {
+    // Not a fundemental limitation, developer shortcut.
     print('This test must be run on a POSIX host. Skipping...');
     exit(0);
   }
   final bool adbExists =
       Process.runSync('which', <String>['adb']).exitCode == 0;
   if (!adbExists) {
-    print(r'This test needs ADB to exist on the $PATH. Skipping...');
-    exit(0);
+    print(r'This test needs ADB to exist on the $PATH.');
+    exit(1);
   }
+  // Developer settings are required on target device for cutout manipulation.
   bool shouldResetDevSettings = false;
   ProcessResult checkDevSettingsResult = Process.runSync('adb', <String>[
     'shell',
@@ -31,6 +35,8 @@ Future<void> main() async {
   ]);
   if (checkDevSettingsResult.stdout.startsWith('0')) {
     print('Enabling developer settings...');
+    // Developer settings not enabled, enable them and mark that the origional
+    // state should be restored after.
     shouldResetDevSettings = true;
     Process.runSync('adb', <String>[
       'shell',
@@ -41,6 +47,7 @@ Future<void> main() async {
       '1',
     ]);
   }
+  // Assumption of diplay_cutout_test.dart is that there is a "tall" notch.
   print('Adding Synthetic notch...');
   Process.runSync('adb', <String>[
     'shell',
@@ -49,13 +56,13 @@ Future<void> main() async {
     'enable',
     'com.android.internal.display.cutout.emulation.tall',
   ]);
-  // Await future.delay 
+  // TODO Await future.delay
   Process.runSync('sleep', <String>['1']);
   print('Starting test.');
   final FlutterDriver driver = await FlutterDriver.connect();
   final String data = await driver.requestData(
     null,
-    timeout: const Duration(minutes: 1),
+    timeout: const Duration(minutes: 1), // TODO verify this timeout is reasonable.
   );
   await driver.close();
   print('Test finished. Reverting Adb changes...');

@@ -9,7 +9,6 @@ void main() {
   runApp(const MyApp());
 }
 
-
 final class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -25,6 +24,7 @@ class _MyAppState extends State<MyApp> {
     displayFeatures.retainWhere(
         (DisplayFeature feature) => feature.type == DisplayFeatureType.cutout);
     String text;
+    // TODO remove complexisty of the app evaluating features.
     if (displayFeatures.isEmpty) {
       text = 'CutoutNone';
     } else if (displayFeatures.length > 1) {

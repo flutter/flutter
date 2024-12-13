@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,8 +20,22 @@ void main() {
         DeviceOrientation.portraitUp,
       ]);
       await tester.pumpAndSettle();
+
+      List<DisplayFeature> displayFeatures = getCutouts(tester);
+      // Test is expecting one cutout setup in the test harness.
+      expect(
+        displayFeatures.length,
+        1,
+        reason: 'Single cutout display feature expected',
+      );
       // Verify that app code thinks there is a top cutout.
-      expect(find.byKey(const ValueKey('CutoutTop')), findsOneWidget);
+      expect(
+        displayFeatures[0].bounds.top,
+        0,
+        reason:
+            'cutout should start at the top, does the test device have a '
+            'camera cutout or window inset?',
+      );
     });
 
     testWidgets('cutout should be on left in landscape left', (tester) async {
@@ -30,24 +46,66 @@ void main() {
       ]);
       await tester.pumpAndSettle();
       // Verify that app code thinks there is a left cutout.
-      expect(find.byKey(const ValueKey('CutoutLeft')), findsOneWidget);
+      List<DisplayFeature> displayFeatures = getCutouts(tester);
+      // Test is expecting one cutout setup in the test harness.
+      expect(
+        displayFeatures.length,
+        1,
+        reason: 'Single cutout display feature expected',
+      );
+      expect(
+        displayFeatures[0].bounds.left,
+        0,
+        reason:
+            'cutout should start at the left, does the test device have a '
+            'camera cutout or window inset?',
+      );
     });
 
     testWidgets('cutout handles rotation', (tester) async {
-      // TODO try to query mediaquery directly without checking widgets. 
-      // Load app widget.
       SystemChrome.setPreferredOrientations(<DeviceOrientation>[
         DeviceOrientation.portraitUp,
       ]);
-      await tester.pumpWidget(const MyApp());
+      const widgetUnderTest = MyApp();
+      // Load app widget.
+      await tester.pumpWidget(widgetUnderTest);
+      List<DisplayFeature> displayFeatures = getCutouts(tester);
+
+      // Test is expecting one cutout setup in the test harness.
+      expect(
+        displayFeatures.length,
+        1,
+        reason: 'Single cutout display feature expected',
+      );
       // Verify that app code thinks there is a top cutout.
-      expect(find.byKey(const ValueKey('CutoutTop')), findsOneWidget);
+      expect(
+        displayFeatures[0].bounds.top,
+        0,
+        reason:
+            'cutout should start at the top, does the test device have a '
+            'camera cutout or window inset?',
+      );
       SystemChrome.setPreferredOrientations(<DeviceOrientation>[
         DeviceOrientation.landscapeLeft,
       ]);
-      await tester.pumpAndSettle();
-      // Verify that app code thinks there is a left cutout.
-      expect(find.byKey(const ValueKey('CutoutLeft')), findsOneWidget);
+      await tester.pumpWidget(widgetUnderTest);
+      await tester.pumpAndSettle(Durations.extralong4);
+
+      // Requery for display features after rotation.
+      displayFeatures = getCutouts(tester);
+      // Test is expecting one cutout setup in the test harness.
+      expect(
+        displayFeatures.length,
+        1,
+        reason: 'Single cutout display feature expected',
+      );
+      expect(
+        displayFeatures[0].bounds.left,
+        0,
+        reason:
+            'cutout should start at the left, does the test device have a '
+            'camera cutout or window inset?',
+      );
     });
 
     tearDown(() {
@@ -55,14 +113,14 @@ void main() {
       // test pollution.
       SystemChrome.setPreferredOrientations([]);
     });
-
-    // test('cutout should update on screen rotation', () async {
-    //   await nativeDriver.rotateResetDefault();
-    //   await flutterDriver.waitFor(find.byValueKey('CutoutTop'),
-    //       timeout: const Duration(seconds: 5));
-    //   await nativeDriver.rotateToLandscape();
-    //   await flutterDriver.waitFor(find.byValueKey('CutoutLeft'),
-    //       timeout: const Duration(seconds: 5));
-    // }, timeout: Timeout.none);
   });
+}
+
+List<DisplayFeature> getCutouts(WidgetTester tester) {
+  BuildContext context = tester.element(find.byType(Text));
+  List<DisplayFeature> displayFeatures = MediaQuery.of(context).displayFeatures;
+  displayFeatures.retainWhere(
+    (DisplayFeature feature) => feature.type == DisplayFeatureType.cutout,
+  );
+  return displayFeatures;
 }
