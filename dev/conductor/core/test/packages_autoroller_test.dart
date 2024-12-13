@@ -281,6 +281,14 @@ void main() {
         'rev-parse',
         'HEAD',
       ], stdout: 'deadbeef'),
+      const FakeCommand(
+        command: <String>[
+          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/dart',
+          'pub',
+          'get',
+        ],
+        workingDirectory: '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/dev/tools',
+      ),
       FakeCommand(command: const <String>[
         '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/dart',
         'compile',
@@ -386,6 +394,14 @@ void main() {
         'rev-parse',
         'HEAD',
       ], stdout: 'deadbeef'),
+      const FakeCommand(
+        command: <String>[
+          '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/dart',
+          'pub',
+          'get',
+        ],
+        workingDirectory: '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/dev/tools',
+      ),
       FakeCommand(command: const <String>[
         '$checkoutsParentDirectory/flutter_conductor_checkouts/framework/bin/dart',
         'compile',
