@@ -1881,7 +1881,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
 
     const int checkCount = 5;
     final Duration duration = Duration(
-      microseconds: kThemeAnimationDuration.inMicroseconds ~/ (checkCount+1),
+      microseconds: kThemeAnimationDuration.inMicroseconds ~/ (checkCount + 1),
     );
 
     for (int i = 0; i < checkCount; i++) {
