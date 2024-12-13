@@ -28,7 +28,7 @@ import 'tween.dart';
 @immutable
 class AnimationStyle with Diagnosticable {
   /// Creates an instance of Animation Style class.
-  AnimationStyle({
+  const AnimationStyle({
     this.curve,
     this.duration,
     this.reverseCurve,
