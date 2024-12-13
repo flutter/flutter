@@ -784,21 +784,20 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           start: 24.0 + (additionalMarginLeft ?? 0.0)  + (additionalMarginRight ?? 0.0),
           top: 0.0,
           bottom: 0.0,
-          child: SizedBox(
+          width: _stepIconWidth ?? _kStepSize,
+          child: Center(
             // The line is drawn from the center of the circle vertically until
             // it reaches the bottom and then horizontally to the edge of the
             // stepper.
-            width: _stepIconWidth ?? _kStepSize,
-            child: Center(
-              child: SizedBox(
-                width: !_isLast(index) ? (widget.connectorThickness ?? 1.0) : 0.0,
-                child: ColoredBox(color: _connectorColor(widget.steps[index].isActive)),
-              ),
+            child: SizedBox(
+              width: !_isLast(index) ? (widget.connectorThickness ?? 1.0) : 0.0,
+              height: double.infinity,
+              child: ColoredBox(color: _connectorColor(widget.steps[index].isActive)),
             ),
           ),
         ),
         AnimatedCrossFade(
-          firstChild: const SizedBox(height: 0),
+          firstChild: const SizedBox(width: double.infinity, height: 0),
           secondChild: Padding(
             padding: EdgeInsetsDirectional.only(
               // Adjust [controlsBuilder] padding so that the content is
