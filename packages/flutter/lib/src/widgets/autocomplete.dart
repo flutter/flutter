@@ -608,36 +608,32 @@ class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
   Widget build(BuildContext context) {
     // Wrap the options view in a LayoutBuilder so it can retrieve the most
     // updated leader size.
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        return CompositedTransformFollower(
-          link: widget.optionsLayerLink,
-          followerAnchor: switch (widget.optionsViewOpenDirection) {
-            OptionsViewOpenDirection.up => Alignment.bottomLeft,
-            OptionsViewOpenDirection.down => Alignment.topLeft,
-          },
-          // When the field goes offscreen, don't show the options.
-          showWhenUnlinked: false,
-          child: CustomSingleChildLayout(
-            delegate: _RawAutocompleteOptionsLayoutDelegate(
-              fieldSize: widget.optionsLayerLink.leaderSize!,
-              fieldOffset: fieldOffset,
-              optionsViewOpenDirection: widget.optionsViewOpenDirection,
-              textDirection: Directionality.of(context),
-            ),
-            child: TextFieldTapRegion(
-              child: AutocompleteHighlightedOption(
-                highlightIndexNotifier: widget.highlightIndexNotifier,
-                // optionsViewBuilder must be able to look up
-                // AutocompleteHighlightedOption in its context.
-                child: Builder(
-                  builder: widget.builder,
-                ),
-              ),
+    return CompositedTransformFollower(
+      link: widget.optionsLayerLink,
+      followerAnchor: switch (widget.optionsViewOpenDirection) {
+        OptionsViewOpenDirection.up => Alignment.bottomLeft,
+        OptionsViewOpenDirection.down => Alignment.topLeft,
+      },
+      // When the field goes offscreen, don't show the options.
+      showWhenUnlinked: false,
+      child: CustomSingleChildLayout(
+        delegate: _RawAutocompleteOptionsLayoutDelegate(
+          layerLink: widget.optionsLayerLink,
+          fieldOffset: fieldOffset,
+          optionsViewOpenDirection: widget.optionsViewOpenDirection,
+          textDirection: Directionality.of(context),
+        ),
+        child: TextFieldTapRegion(
+          child: AutocompleteHighlightedOption(
+            highlightIndexNotifier: widget.highlightIndexNotifier,
+            // optionsViewBuilder must be able to look up
+            // AutocompleteHighlightedOption in its context.
+            child: Builder(
+              builder: widget.builder,
             ),
           ),
-        );
-      }
+        ),
+      ),
     );
   }
 }
@@ -645,14 +641,15 @@ class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
 /// Positions the options view.
 class _RawAutocompleteOptionsLayoutDelegate extends SingleChildLayoutDelegate {
   _RawAutocompleteOptionsLayoutDelegate({
-    required this.fieldSize,
+    required this.layerLink,
     required this.fieldOffset,
     required this.optionsViewOpenDirection,
     required this.textDirection,
-  });
+  }) : assert(layerLink.leaderSize != null);
 
-  /// The size of the field in [RawAutocomplete.fieldViewBuilder].
-  final Size fieldSize;
+  /// Links the options in [RawAutocomplete.optionsViewBuilder] to the field in
+  /// [RawAutocomplete.fieldViewBuilder].
+  final LayerLink layerLink;
 
   /// The position of the field in [RawAutocomplete.fieldViewBuilder].
   final Offset fieldOffset;
@@ -676,6 +673,7 @@ class _RawAutocompleteOptionsLayoutDelegate extends SingleChildLayoutDelegate {
   // with the same maxWidth constraint as the field has.
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    final Size fieldSize = layerLink.leaderSize!;
     return BoxConstraints(
       // The field width may be zero if this is a split RawAutocomplete with no
       // field of its own. In that case, don't change the constraints width.
@@ -694,6 +692,7 @@ class _RawAutocompleteOptionsLayoutDelegate extends SingleChildLayoutDelegate {
   // side based on text direction.
   @override
   Offset getPositionForChild(Size size, Size childSize) {
+    final Size fieldSize = layerLink.leaderSize!;
     final double dx = switch (textDirection) {
       TextDirection.ltr => 0.0,
       TextDirection.rtl => fieldSize.width - childSize.width,
@@ -710,10 +709,10 @@ class _RawAutocompleteOptionsLayoutDelegate extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_RawAutocompleteOptionsLayoutDelegate oldDelegate) {
-    if (!fieldOffset.isFinite || !fieldSize.isFinite) {
+    if (!fieldOffset.isFinite || !layerLink.leaderSize!.isFinite) {
       return false;
     }
-    return fieldSize != oldDelegate.fieldSize
+    return layerLink != oldDelegate.layerLink
         || fieldOffset != oldDelegate.fieldOffset
         || optionsViewOpenDirection != oldDelegate.optionsViewOpenDirection
         || textDirection != oldDelegate.textDirection;
