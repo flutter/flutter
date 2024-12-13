@@ -8,8 +8,10 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -20,10 +22,19 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_pub_deps.dart';
 import '../src/fakes.dart';
 import 'hot_shared.dart';
 
 void main() {
+  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
+  // See https://github.com/flutter/flutter/issues/160257 for details.
+  FeatureFlags enableExplicitPackageDependencies() {
+    return TestFeatureFlags(
+      isExplicitPackageDependenciesEnabled: true,
+    );
+  }
+
   group('validateReloadReport', () {
     testUsingContext('invalid', () async {
       expect(HotRunner.validateReloadReport(vm_service.ReloadReport.parse(<String, dynamic>{
@@ -160,6 +171,8 @@ void main() {
         FileSystem: () => fileSystem,
         Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('setupHotReload function fails', () async {
@@ -202,6 +215,8 @@ void main() {
         FileSystem: () => fileSystem,
         Platform: () => FakePlatform(),
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
     });
 
