@@ -383,8 +383,8 @@ class AnimationController extends Animation<double>
   ///  * [stop], which aborts the animation without changing its value or status
   ///    and without dispatching any notifications other than completing or
   ///    canceling the [TickerFuture].
-  ///  * [forward], [reverse], [animateTo], [animateWith], [fling], and [repeat],
-  ///    which start the animation controller.
+  ///  * [forward], [reverse], [animateTo], [animateWith], [animateBackWith],
+  ///    [fling], and [repeat], which start the animation controller.
   set value(double newValue) {
     stop();
     _internalSetValue(newValue);
@@ -802,6 +802,7 @@ class AnimationController extends Animation<double>
 
   /// Drives the animation according to the given simulation.
   ///
+  /// {@template flutter.animation.AnimationController.animateWith}
   /// The values from the simulation are clamped to the [lowerBound] and
   /// [upperBound]. To avoid this, consider creating the [AnimationController]
   /// using the [AnimationController.unbounded] constructor.
@@ -811,9 +812,15 @@ class AnimationController extends Animation<double>
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
+  /// {@endtemplate}
   ///
   /// The [status] is always [AnimationStatus.forward] for the entire duration
   /// of the simulation.
+  ///
+  /// See also:
+  ///
+  ///  * [animateBackWith], which is like this method but the status is always
+  ///    [AnimationStatus.reverse].
   TickerFuture animateWith(Simulation simulation) {
     assert(
       _ticker != null,
@@ -822,6 +829,29 @@ class AnimationController extends Animation<double>
     );
     stop();
     _direction = _AnimationDirection.forward;
+    return _startSimulation(simulation);
+  }
+
+  /// Drives the animation according to the given simulation with a [status] of
+  /// [AnimationStatus.reverse].
+  ///
+  /// {@macro flutter.animation.AnimationController.animateWith}
+  ///
+  /// The [status] is always [AnimationStatus.reverse] for the entire duration
+  /// of the simulation.
+  ///
+  /// See also:
+  ///
+  ///  * [animateWith], which is like this method but the status is always
+  ///    [AnimationStatus.forward].
+  TickerFuture animateBackWith(Simulation simulation) {
+    assert(
+      _ticker != null,
+      'AnimationController.animateWith() called after AnimationController.dispose()\n'
+      'AnimationController methods should not be used after calling dispose.',
+    );
+    stop();
+    _direction = _AnimationDirection.reverse;
     return _startSimulation(simulation);
   }
 

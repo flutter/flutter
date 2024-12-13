@@ -3177,6 +3177,7 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
   }
 }
 
+@pragma('vm:entry-point')
 class _RestorableModalTestWidget extends StatelessWidget {
   const _RestorableModalTestWidget();
 
