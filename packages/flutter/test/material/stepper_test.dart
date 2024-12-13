@@ -1721,14 +1721,18 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
       )
     );
 
-    final SizedBox lastConnector = tester.widget<Center>(
+    final Container lastConnector = tester.widget<Center>(
       find.descendant(
         of: find.byType(PositionedDirectional),
         matching: find.byType(Center).last,
       ),
-    ).child! as SizedBox;
+    ).child! as Container;
 
-    expect(lastConnector.width, equals(0.0));
+    final BoxConstraints? constraints = lastConnector.constraints;
+
+    // Check if the constraints ensure a width of 0.0
+    expect(constraints?.maxWidth, equals(0.0));
+    expect(constraints?.minWidth, equals(0.0));
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/66007.
@@ -1814,6 +1818,82 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     await tester.pumpWidget(buildStepper(type: StepperType.horizontal, clipBehavior: Clip.hardEdge));
 
     expect(getContentClipRect().clipBehavior, equals(Clip.hardEdge));
+  });
+
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/160156.
+  testWidgets('Vertical stepper line displays correctly', (WidgetTester tester) async {
+    int index = 0;
+    const Color connectorColor = Color(0xff00ffff);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return Stepper(
+                    currentStep: index,
+                    connectorColor: const WidgetStatePropertyAll<Color>(connectorColor),
+                    onStepTapped: (int value) {
+                      setState(() {
+                        index = value;
+                      });
+                    },
+                    steps: const <Step>[
+                      Step(
+                        title: Text('step1'),
+                        content: Text('step1 content'),
+                      ),
+                      Step(
+                        title: Text('step2'),
+                        content: Text('step2 content'),
+                      ),
+                    ],
+                  );
+                }
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final Finder findConnector = find.descendant(
+      of: find.byType(Stepper),
+      matching: find.descendant(
+        of: find.byType(PositionedDirectional),
+        matching: find.byElementPredicate((BuildContext context) {
+          if (context case BuildContext(
+          widget: ColoredBox(color: connectorColor),
+          size: Size(width: 1.0, height: > 0),
+          )) {
+            return true;
+          }
+          return false;
+        }),
+      ),
+    );
+
+    void verifyConnector() {
+      expect(findConnector, findsOneWidget);
+      final RenderBox renderBox = tester.renderObject(findConnector);
+      expect(renderBox, paints..rect(color: connectorColor));
+    }
+
+    verifyConnector();
+
+    final Finder findStep2 = find.text('step2');
+    await tester.tap(findStep2);
+
+    const int checkCount = 5;
+    final Duration duration = Duration(
+      microseconds: kThemeAnimationDuration.inMicroseconds ~/ (checkCount+1),
+    );
+
+    for (int i = 0; i < checkCount; i++) {
+      await tester.pump(duration);
+      verifyConnector();
+    }
   });
 }
 
