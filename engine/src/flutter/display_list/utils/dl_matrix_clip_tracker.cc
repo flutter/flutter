@@ -66,6 +66,18 @@ bool DisplayListMatrixClipState::mapAndClipRect(const SkRect& src,
   return false;
 }
 
+bool DisplayListMatrixClipState::mapAndClipRect(const DlRect& src,
+                                                DlRect* mapped) const {
+  DlRect dl_mapped = src.TransformAndClipBounds(matrix_);
+  auto dl_intersected = dl_mapped.Intersection(cull_rect_);
+  if (dl_intersected.has_value()) {
+    *mapped = dl_intersected.value();
+    return true;
+  }
+  *mapped = DlRect();
+  return false;
+}
+
 void DisplayListMatrixClipState::clipRect(const DlRect& rect,
                                           ClipOp op,
                                           bool is_aa) {

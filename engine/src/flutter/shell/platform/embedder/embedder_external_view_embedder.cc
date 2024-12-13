@@ -268,7 +268,7 @@ class Layer {
 
   EmbedderRenderTarget* render_target() { return render_target_.get(); }
 
-  std::vector<SkIRect> coverage() {
+  std::vector<DlIRect> coverage() {
     return flutter_contents_region_.getRects();
   }
 

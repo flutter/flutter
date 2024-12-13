@@ -12,49 +12,54 @@
 
 namespace {
 
+using DlIRect = flutter::DlIRect;
+
 template <typename RNG>
-std::vector<SkIRect> GenerateRects(RNG& rng,
-                                   const SkIRect& bounds,
+std::vector<DlIRect> GenerateRects(RNG& rng,
+                                   const DlIRect& bounds,
                                    int numRects,
                                    int maxSize) {
-  auto max_size_x = std::min(maxSize, bounds.width());
-  auto max_size_y = std::min(maxSize, bounds.height());
+  auto max_size_x = std::min(maxSize, bounds.GetWidth());
+  auto max_size_y = std::min(maxSize, bounds.GetHeight());
 
-  std::uniform_int_distribution pos_x(bounds.fLeft, bounds.fRight - max_size_x);
-  std::uniform_int_distribution pos_y(bounds.fTop, bounds.fBottom - max_size_y);
+  std::uniform_int_distribution pos_x(bounds.GetLeft(),
+                                      bounds.GetRight() - max_size_x);
+  std::uniform_int_distribution pos_y(bounds.GetTop(),
+                                      bounds.GetBottom() - max_size_y);
   std::uniform_int_distribution size_x(1, max_size_x);
   std::uniform_int_distribution size_y(1, max_size_y);
 
-  std::vector<SkIRect> rects;
+  std::vector<DlIRect> rects;
   for (int i = 0; i < numRects; ++i) {
-    SkIRect rect =
-        SkIRect::MakeXYWH(pos_x(rng), pos_y(rng), size_x(rng), size_y(rng));
+    DlIRect rect =
+        DlIRect::MakeXYWH(pos_x(rng), pos_y(rng), size_x(rng), size_y(rng));
     rects.push_back(rect);
   }
   return rects;
 }
 
 template <typename RNG>
-SkIRect RandomSubRect(RNG& rng, const SkIRect& rect, double size_factor) {
+DlIRect RandomSubRect(RNG& rng, const DlIRect& rect, double size_factor) {
   FML_DCHECK(size_factor <= 1);
 
-  int32_t width = rect.width() * size_factor;
-  int32_t height = rect.height() * size_factor;
+  int32_t width = rect.GetWidth() * size_factor;
+  int32_t height = rect.GetHeight() * size_factor;
 
-  std::uniform_int_distribution pos_x(0, rect.width() - width);
-  std::uniform_int_distribution pos_y(0, rect.height() - height);
+  std::uniform_int_distribution pos_x(0, rect.GetWidth() - width);
+  std::uniform_int_distribution pos_y(0, rect.GetHeight() - height);
 
-  return SkIRect::MakeXYWH(rect.fLeft + pos_x(rng), rect.fTop + pos_y(rng),
+  return DlIRect::MakeXYWH(rect.GetLeft() + pos_x(rng),
+                           rect.GetTop() + pos_y(rng),  //
                            width, height);
 }
 
 class SkRegionAdapter {
  public:
-  explicit SkRegionAdapter(const std::vector<SkIRect>& rects) {
-    region_.setRects(rects.data(), rects.size());
+  explicit SkRegionAdapter(const std::vector<DlIRect>& rects) {
+    region_.setRects(flutter::ToSkIRects(rects.data()), rects.size());
   }
 
-  SkIRect getBounds() { return region_.getBounds(); }
+  DlIRect getBounds() { return flutter::ToDlIRect(region_.getBounds()); }
 
   static SkRegionAdapter unionRegions(const SkRegionAdapter& a1,
                                       const SkRegionAdapter& a2) {
@@ -74,13 +79,15 @@ class SkRegionAdapter {
     return region_.intersects(region.region_);
   }
 
-  bool intersects(const SkIRect& rect) { return region_.intersects(rect); }
+  bool intersects(const DlIRect& rect) {
+    return region_.intersects(flutter::ToSkIRect(rect));
+  }
 
-  std::vector<SkIRect> getRects() {
-    std::vector<SkIRect> rects;
+  std::vector<DlIRect> getRects() {
+    std::vector<DlIRect> rects;
     SkRegion::Iterator it(region_);
     while (!it.done()) {
-      rects.push_back(it.rect());
+      rects.push_back(flutter::ToDlIRect(it.rect()));
       it.next();
     }
     return rects;
@@ -92,7 +99,7 @@ class SkRegionAdapter {
 
 class DlRegionAdapter {
  public:
-  explicit DlRegionAdapter(const std::vector<SkIRect>& rects)
+  explicit DlRegionAdapter(const std::vector<DlIRect>& rects)
       : region_(rects) {}
 
   static DlRegionAdapter unionRegions(const DlRegionAdapter& a1,
@@ -107,15 +114,15 @@ class DlRegionAdapter {
         flutter::DlRegion::MakeIntersection(a1.region_, a2.region_));
   }
 
-  SkIRect getBounds() { return region_.bounds(); }
+  DlIRect getBounds() { return region_.bounds(); }
 
   bool intersects(const DlRegionAdapter& region) {
     return region_.intersects(region.region_);
   }
 
-  bool intersects(const SkIRect& rect) { return region_.intersects(rect); }
+  bool intersects(const DlIRect& rect) { return region_.intersects(rect); }
 
-  std::vector<SkIRect> getRects() { return region_.getRects(false); }
+  std::vector<DlIRect> getRects() { return region_.getRects(false); }
 
  private:
   explicit DlRegionAdapter(flutter::DlRegion&& region)
@@ -133,9 +140,9 @@ void RunFromRectsBenchmark(benchmark::State& state, int maxSize) {
   std::uniform_int_distribution pos(0, 4000);
   std::uniform_int_distribution size(1, maxSize);
 
-  std::vector<SkIRect> rects;
+  std::vector<DlIRect> rects;
   for (int i = 0; i < 2000; ++i) {
-    SkIRect rect = SkIRect::MakeXYWH(pos(rng), pos(rng), size(rng), size(rng));
+    DlIRect rect = DlIRect::MakeXYWH(pos(rng), pos(rng), size(rng), size(rng));
     rects.push_back(rect);
   }
 
@@ -153,9 +160,9 @@ void RunGetRectsBenchmark(benchmark::State& state, int maxSize) {
   std::uniform_int_distribution pos(0, 4000);
   std::uniform_int_distribution size(1, maxSize);
 
-  std::vector<SkIRect> rects;
+  std::vector<DlIRect> rects;
   for (int i = 0; i < 2000; ++i) {
-    SkIRect rect = SkIRect::MakeXYWH(pos(rng), pos(rng), size(rng), size(rng));
+    DlIRect rect = DlIRect::MakeXYWH(pos(rng), pos(rng), size(rng), size(rng));
     rects.push_back(rect);
   }
 
@@ -178,8 +185,8 @@ void RunRegionOpBenchmark(benchmark::State& state,
   std::seed_seq seed{2, 1, 3};
   std::mt19937 rng(seed);
 
-  SkIRect bounds1 = SkIRect::MakeWH(4000, 4000);
-  SkIRect bounds2 = RandomSubRect(rng, bounds1, sizeFactor);
+  DlIRect bounds1 = DlIRect::MakeWH(4000, 4000);
+  DlIRect bounds2 = RandomSubRect(rng, bounds1, sizeFactor);
 
   auto rects = GenerateRects(rng, bounds1, 500, maxSize);
   Region region1(rects);
@@ -210,8 +217,8 @@ void RunIntersectsRegionBenchmark(benchmark::State& state,
   std::seed_seq seed{2, 1, 3};
   std::mt19937 rng(seed);
 
-  SkIRect bounds1 = SkIRect::MakeWH(4000, 4000);
-  SkIRect bounds2 = RandomSubRect(rng, bounds1, sizeFactor);
+  DlIRect bounds1 = DlIRect::MakeWH(4000, 4000);
+  DlIRect bounds2 = RandomSubRect(rng, bounds1, sizeFactor);
 
   auto rects = GenerateRects(rng, bounds1, 500, maxSize);
   Region region1(rects);
@@ -233,16 +240,16 @@ void RunIntersectsSingleRectBenchmark(benchmark::State& state, int maxSize) {
   std::uniform_int_distribution pos(0, 4000);
   std::uniform_int_distribution size(1, maxSize);
 
-  std::vector<SkIRect> rects;
+  std::vector<DlIRect> rects;
   for (int i = 0; i < 500; ++i) {
-    SkIRect rect = SkIRect::MakeXYWH(pos(rng), pos(rng), size(rng), size(rng));
+    DlIRect rect = DlIRect::MakeXYWH(pos(rng), pos(rng), size(rng), size(rng));
     rects.push_back(rect);
   }
   Region region1(rects);
 
   rects.clear();
   for (int i = 0; i < 100; ++i) {
-    SkIRect rect = SkIRect::MakeXYWH(pos(rng), pos(rng), size(rng), size(rng));
+    DlIRect rect = DlIRect::MakeXYWH(pos(rng), pos(rng), size(rng), size(rng));
     rects.push_back(rect);
   }
 

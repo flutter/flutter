@@ -5,8 +5,6 @@
 #include "flutter/display_list/geometry/dl_rtree.h"
 #include "gtest/gtest.h"
 
-#include "third_party/skia/include/core/SkRect.h"
-
 namespace flutter {
 namespace testing {
 
@@ -21,7 +19,7 @@ TEST(DisplayListRTree, NegativeCount) {
 
 TEST(DisplayListRTree, NullSearchResultVector) {
   DlRTree tree(nullptr, 0);
-  EXPECT_DEATH_IF_SUPPORTED(tree.search(SkRect::MakeLTRB(0, 0, 1, 1), nullptr),
+  EXPECT_DEATH_IF_SUPPORTED(tree.search(DlRect::MakeLTRB(0, 0, 1, 1), nullptr),
                             "results != nullptr");
 }
 #endif
@@ -31,7 +29,7 @@ TEST(DisplayListRTree, NullRectListZeroCount) {
   EXPECT_EQ(tree.leaf_count(), 0);
   EXPECT_EQ(tree.node_count(), 0);
   std::vector<int> results;
-  auto huge = SkRect::MakeLTRB(-1e6, -1e6, 1e6, 1e6);
+  auto huge = DlRect::MakeLTRB(-1e6, -1e6, 1e6, 1e6);
   tree.search(huge, &results);
   EXPECT_EQ(results.size(), 0u);
   auto list = tree.searchAndConsolidateRects(huge);
@@ -45,10 +43,10 @@ TEST(DisplayListRTree, ManySizes) {
   // Rect 2 goes from 20 to 30
   // etc. in both dimensions
   const int kMaxN = 250;
-  SkRect rects[kMaxN + 1];
+  DlRect rects[kMaxN + 1];
   int ids[kMaxN + 1];
   for (int i = 0; i <= kMaxN; i++) {
-    rects[i].setXYWH(i * 20, i * 20, 10, 10);
+    rects[i] = DlRect::MakeXYWH(i * 20, i * 20, 10, 10);
     ids[i] = i + 42;
   }
   std::vector<int> results;
@@ -58,14 +56,14 @@ TEST(DisplayListRTree, ManySizes) {
     EXPECT_EQ(tree.leaf_count(), N) << desc;
     EXPECT_GE(tree.node_count(), N) << desc;
     EXPECT_EQ(tree.id(-1), -1) << desc;
-    EXPECT_EQ(tree.bounds(-1), SkRect::MakeEmpty()) << desc;
+    EXPECT_EQ(tree.bounds(-1), DlRect()) << desc;
     EXPECT_EQ(tree.id(N), -1) << desc;
-    EXPECT_EQ(tree.bounds(N), SkRect::MakeEmpty()) << desc;
+    EXPECT_EQ(tree.bounds(N), DlRect()) << desc;
     results.clear();
-    tree.search(SkRect::MakeEmpty(), &results);
+    tree.search(DlRect(), &results);
     EXPECT_EQ(results.size(), 0u) << desc;
     results.clear();
-    tree.search(SkRect::MakeLTRB(2, 2, 8, 8), &results);
+    tree.search(DlRect::MakeLTRB(2, 2, 8, 8), &results);
     if (N == 0) {
       EXPECT_EQ(results.size(), 0u) << desc;
     } else {
@@ -75,7 +73,7 @@ TEST(DisplayListRTree, ManySizes) {
       EXPECT_EQ(tree.bounds(results[0]), rects[0]) << desc;
       for (int i = 1; i < N; i++) {
         results.clear();
-        auto query = SkRect::MakeXYWH(i * 20 + 2, i * 20 + 2, 6, 6);
+        auto query = DlRect::MakeXYWH(i * 20 + 2, i * 20 + 2, 6, 6);
         tree.search(query, &results);
         EXPECT_EQ(results.size(), 1u) << desc;
         EXPECT_EQ(results[0], i) << desc;
@@ -96,25 +94,25 @@ TEST(DisplayListRTree, HugeSize) {
   // Rect 2 goes from 20 to 30
   // etc. in both dimensions
   const int N = 10000;
-  SkRect rects[N];
+  DlRect rects[N];
   int ids[N];
   for (int i = 0; i < N; i++) {
-    rects[i].setXYWH(i * 20, i * 20, 10, 10);
+    rects[i] = DlRect::MakeXYWH(i * 20, i * 20, 10, 10);
     ids[i] = i + 42;
   }
   DlRTree tree(rects, N, ids);
   EXPECT_EQ(tree.leaf_count(), N);
   EXPECT_GE(tree.node_count(), N);
   EXPECT_EQ(tree.id(-1), -1);
-  EXPECT_EQ(tree.bounds(-1), SkRect::MakeEmpty());
+  EXPECT_EQ(tree.bounds(-1), DlRect());
   EXPECT_EQ(tree.id(N), -1);
-  EXPECT_EQ(tree.bounds(N), SkRect::MakeEmpty());
+  EXPECT_EQ(tree.bounds(N), DlRect());
   std::vector<int> results;
-  tree.search(SkRect::MakeEmpty(), &results);
+  tree.search(DlRect(), &results);
   EXPECT_EQ(results.size(), 0u);
   for (int i = 0; i < N; i++) {
     results.clear();
-    tree.search(SkRect::MakeXYWH(i * 20 + 2, i * 20 + 2, 6, 6), &results);
+    tree.search(DlRect::MakeXYWH(i * 20 + 2, i * 20 + 2, 6, 6), &results);
     EXPECT_EQ(results.size(), 1u);
     EXPECT_EQ(results[0], i);
     EXPECT_EQ(tree.id(results[0]), ids[i]);
@@ -131,14 +129,14 @@ TEST(DisplayListRTree, Grid) {
   const int ROWS = 10;
   const int COLS = 10;
   const int N = ROWS * COLS;
-  SkRect rects[N];
+  DlRect rects[N];
   int ids[N];
   for (int r = 0; r < ROWS; r++) {
     int y = r * 20 + 5;
     for (int c = 0; c < COLS; c++) {
       int x = c * 20 + 5;
       int i = r * COLS + c;
-      rects[i] = SkRect::MakeXYWH(x, y, 10, 10);
+      rects[i] = DlRect::MakeXYWH(x, y, 10, 10);
       ids[i] = i + 42;
     }
   }
@@ -146,11 +144,11 @@ TEST(DisplayListRTree, Grid) {
   EXPECT_EQ(tree.leaf_count(), N);
   EXPECT_GE(tree.node_count(), N);
   EXPECT_EQ(tree.id(-1), -1);
-  EXPECT_EQ(tree.bounds(-1), SkRect::MakeEmpty());
+  EXPECT_EQ(tree.bounds(-1), DlRect());
   EXPECT_EQ(tree.id(N), -1);
-  EXPECT_EQ(tree.bounds(N), SkRect::MakeEmpty());
+  EXPECT_EQ(tree.bounds(N), DlRect());
   std::vector<int> results;
-  tree.search(SkRect::MakeEmpty(), &results);
+  tree.search(DlRect(), &results);
   EXPECT_EQ(results.size(), 0u);
   // Testing eqch rect for a single hit
   for (int r = 0; r < ROWS; r++) {
@@ -161,7 +159,7 @@ TEST(DisplayListRTree, Grid) {
       auto desc =
           "row " + std::to_string(r + 1) + ", col " + std::to_string(c + 1);
       results.clear();
-      auto query = SkRect::MakeXYWH(x + 2, y + 2, 6, 6);
+      auto query = DlRect::MakeXYWH(x + 2, y + 2, 6, 6);
       tree.search(query, &results);
       EXPECT_EQ(results.size(), 1u) << desc;
       EXPECT_EQ(results[0], i) << desc;
@@ -180,7 +178,7 @@ TEST(DisplayListRTree, Grid) {
       auto desc =
           "row " + std::to_string(r + 1) + ", col " + std::to_string(c + 1);
       results.clear();
-      auto query = SkRect::MakeXYWH(x - 8, y - 8, 6, 6);
+      auto query = DlRect::MakeXYWH(x - 8, y - 8, 6, 6);
       tree.search(query, &results);
       EXPECT_EQ(results.size(), 0u) << desc;
       auto list = tree.searchAndConsolidateRects(query);
@@ -197,7 +195,7 @@ TEST(DisplayListRTree, Grid) {
       auto desc =
           "row " + std::to_string(r + 1) + ", col " + std::to_string(c + 1);
       results.clear();
-      auto query = SkRect::MakeXYWH(x - 11, y - 11, 12, 12);
+      auto query = DlRect::MakeXYWH(x - 11, y - 11, 12, 12);
       tree.search(query, &results);
       EXPECT_EQ(results.size(), 4u) << desc;
 
@@ -254,12 +252,12 @@ TEST(DisplayListRTree, OverlappingRects) {
   //                     |            rect2            |
   //                                         |  2 & 3  |
   //                                         |                rect3        |
-  SkRect rects[9];
+  DlRect rects[9];
   for (int r = 0; r < 3; r++) {
     int y = 15 + 20 * r;
     for (int c = 0; c < 3; c++) {
       int x = 15 + 20 * c;
-      rects[r * 3 + c].setLTRB(x - 15, y - 15, x + 15, y + 15);
+      rects[r * 3 + c] = DlRect::MakeLTRB(x - 15, y - 15, x + 15, y + 15);
     }
   }
   DlRTree tree(rects, 9);
@@ -268,7 +266,7 @@ TEST(DisplayListRTree, OverlappingRects) {
     int y = 15 + 20 * r;
     for (int c = 0; c < 3; c++) {
       int x = 15 + 20 * c;
-      auto query = SkRect::MakeLTRB(x - 1, y - 1, x + 1, y + 1);
+      auto query = DlRect::MakeLTRB(x - 1, y - 1, x + 1, y + 1);
       auto list = tree.searchAndConsolidateRects(query);
       EXPECT_EQ(list.size(), 1u);
       EXPECT_EQ(list.front(), rects[r * 3 + c]);
@@ -279,42 +277,42 @@ TEST(DisplayListRTree, OverlappingRects) {
     int c = 1;
     int y = 15 + 20 * r;
     int x = 15 + 20 * c;
-    auto query = SkRect::MakeLTRB(x - 6, y - 1, x + 6, y + 1);
+    auto query = DlRect::MakeLTRB(x - 6, y - 1, x + 6, y + 1);
     auto list = tree.searchAndConsolidateRects(query);
     EXPECT_EQ(list.size(), 1u);
-    EXPECT_EQ(list.front(), SkRect::MakeLTRB(x - 35, y - 15, x + 35, y + 15));
+    EXPECT_EQ(list.front(), DlRect::MakeLTRB(x - 35, y - 15, x + 35, y + 15));
   }
   // Tall rects intersecting 3 source rects vertically
   for (int c = 0; c < 3; c++) {
     int r = 1;
     int x = 15 + 20 * c;
     int y = 15 + 20 * r;
-    auto query = SkRect::MakeLTRB(x - 1, y - 6, x + 1, y + 6);
+    auto query = DlRect::MakeLTRB(x - 1, y - 6, x + 1, y + 6);
     auto list = tree.searchAndConsolidateRects(query);
     EXPECT_EQ(list.size(), 1u);
-    EXPECT_EQ(list.front(), SkRect::MakeLTRB(x - 15, y - 35, x + 15, y + 35));
+    EXPECT_EQ(list.front(), DlRect::MakeLTRB(x - 15, y - 35, x + 15, y + 35));
   }
   // Finally intersecting all 9 rects
-  auto query = SkRect::MakeLTRB(35 - 6, 35 - 6, 35 + 6, 35 + 6);
+  auto query = DlRect::MakeLTRB(35 - 6, 35 - 6, 35 + 6, 35 + 6);
   auto list = tree.searchAndConsolidateRects(query);
   EXPECT_EQ(list.size(), 1u);
-  EXPECT_EQ(list.front(), SkRect::MakeLTRB(0, 0, 70, 70));
+  EXPECT_EQ(list.front(), DlRect::MakeLTRB(0, 0, 70, 70));
 }
 
 TEST(DisplayListRTree, Region) {
-  SkRect rect[9];
+  DlRect rect[9];
   for (int i = 0; i < 9; i++) {
-    rect[i] = SkRect::MakeXYWH(i * 10, i * 10, 20, 20);
+    rect[i] = DlRect::MakeXYWH(i * 10, i * 10, 20, 20);
   }
   DlRTree rtree(rect, 9);
   const auto& region = rtree.region();
   auto rects = region.getRects(true);
-  std::vector<SkIRect> expected_rects{
-      SkIRect::MakeLTRB(0, 0, 20, 10),    SkIRect::MakeLTRB(0, 10, 30, 20),
-      SkIRect::MakeLTRB(10, 20, 40, 30),  SkIRect::MakeLTRB(20, 30, 50, 40),
-      SkIRect::MakeLTRB(30, 40, 60, 50),  SkIRect::MakeLTRB(40, 50, 70, 60),
-      SkIRect::MakeLTRB(50, 60, 80, 70),  SkIRect::MakeLTRB(60, 70, 90, 80),
-      SkIRect::MakeLTRB(70, 80, 100, 90), SkIRect::MakeLTRB(80, 90, 100, 100),
+  std::vector<DlIRect> expected_rects{
+      DlIRect::MakeLTRB(0, 0, 20, 10),    DlIRect::MakeLTRB(0, 10, 30, 20),
+      DlIRect::MakeLTRB(10, 20, 40, 30),  DlIRect::MakeLTRB(20, 30, 50, 40),
+      DlIRect::MakeLTRB(30, 40, 60, 50),  DlIRect::MakeLTRB(40, 50, 70, 60),
+      DlIRect::MakeLTRB(50, 60, 80, 70),  DlIRect::MakeLTRB(60, 70, 90, 80),
+      DlIRect::MakeLTRB(70, 80, 100, 90), DlIRect::MakeLTRB(80, 90, 100, 100),
   };
   EXPECT_EQ(rects.size(), expected_rects.size());
 }

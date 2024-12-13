@@ -11,8 +11,6 @@
 
 #include "flutter/display_list/geometry/dl_region.h"
 #include "flutter/fml/logging.h"
-#include "third_party/skia/include/core/SkColorSpace.h"
-#include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 
 namespace flutter {
@@ -33,7 +31,7 @@ class DlRTree : public SkRefCnt {
   // Leaf nodes at start of vector have an ID,
   // Internal nodes after that have child index and count.
   struct Node {
-    SkRect bounds;
+    DlRect bounds;
     union {
       struct {
         uint32_t index;
@@ -62,7 +60,7 @@ class DlRTree : public SkRefCnt {
   /// way except to eliminate invalid rectangles and IDs that are rejected
   /// by the optional predicate function.
   DlRTree(
-      const SkRect rects[],
+      const DlRect rects[],
       int N,
       const int ids[] = nullptr,
       bool predicate(int id) = [](int) { return true; },
@@ -78,7 +76,7 @@ class DlRTree : public SkRefCnt {
   /// which they were passed into the constructor. The actual rectangle
   /// and ID associated with each index can be retrieved using the
   /// |DlRTree::id| and |DlRTree::bounds| methods.
-  void search(const SkRect& query, std::vector<int>* results) const;
+  void search(const DlRect& query, std::vector<int>* results) const;
 
   /// Return the ID for the indicated result of a query or
   /// invalid_id if the index is not a valid leaf node index.
@@ -89,12 +87,12 @@ class DlRTree : public SkRefCnt {
   }
 
   /// Returns maximum and minimum axis values of rectangles in this R-Tree.
-  /// If R-Tree is empty returns an empty SkRect.
-  const SkRect& bounds() const;
+  /// If R-Tree is empty returns an empty DlRect.
+  const DlRect& bounds() const;
 
   /// Return the rectangle bounds for the indicated result of a query
   /// or an empty rect if the index is not a valid leaf node index.
-  const SkRect& bounds(int result_index) const {
+  const DlRect& bounds(int result_index) const {
     return (result_index >= 0 && result_index < leaf_count_)
                ? nodes_[result_index].bounds
                : kEmpty;
@@ -123,7 +121,7 @@ class DlRTree : public SkRefCnt {
   /// If |deband| is true, then matching rectangles from adjacent DlRegion
   /// spanlines will be joined together. This reduces the number of
   /// rectangles returned, but requires some extra computation.
-  std::list<SkRect> searchAndConsolidateRects(const SkRect& query,
+  std::list<DlRect> searchAndConsolidateRects(const DlRect& query,
                                               bool deband = true) const;
 
   /// Returns DlRegion that represents the union of all rectangles in the
@@ -132,15 +130,16 @@ class DlRTree : public SkRefCnt {
 
   /// Returns DlRegion that represents the union of all rectangles in the
   /// R-Tree intersected with the query rect.
-  DlRegion region(const SkRect& query) const {
-    return DlRegion::MakeIntersection(region(), DlRegion(query.roundOut()));
+  DlRegion region(const DlRect& query) const {
+    return DlRegion::MakeIntersection(region(),
+                                      DlRegion(DlIRect::RoundOut(query)));
   }
 
  private:
-  static constexpr SkRect kEmpty = SkRect::MakeEmpty();
+  static constexpr DlRect kEmpty = DlRect();
 
   void search(const Node& parent,
-              const SkRect& query,
+              const DlRect& query,
               std::vector<int>* results) const;
 
   std::vector<Node> nodes_;

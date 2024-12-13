@@ -149,6 +149,10 @@ class DisplayListMatrixClipState {
     return mapAndClipRect(*rect, rect);
   }
   bool mapAndClipRect(const SkRect& src, SkRect* mapped) const;
+  bool mapAndClipRect(DlRect* rect) const {
+    return mapAndClipRect(*rect, rect);
+  }
+  bool mapAndClipRect(const DlRect& src, DlRect* mapped) const;
 
   void clipRect(const DlRect& rect, ClipOp op, bool is_aa);
   void clipRect(const SkRect& rect, ClipOp op, bool is_aa) {

@@ -271,8 +271,14 @@ class DisplayList : public SkRefCnt {
   ~DisplayList();
 
   void Dispatch(DlOpReceiver& ctx) const;
-  void Dispatch(DlOpReceiver& ctx, const SkRect& cull_rect) const;
-  void Dispatch(DlOpReceiver& ctx, const SkIRect& cull_rect) const;
+  void Dispatch(DlOpReceiver& ctx, const SkRect& cull_rect) const {
+    Dispatch(ctx, ToDlRect(cull_rect));
+  }
+  void Dispatch(DlOpReceiver& ctx, const SkIRect& cull_rect) const {
+    Dispatch(ctx, ToDlIRect(cull_rect));
+  }
+  void Dispatch(DlOpReceiver& ctx, const DlRect& cull_rect) const;
+  void Dispatch(DlOpReceiver& ctx, const DlIRect& cull_rect) const;
 
   // From historical behavior, SkPicture always included nested bytes,
   // but nested ops are only included if requested. The defaults used
@@ -290,8 +296,8 @@ class DisplayList : public SkRefCnt {
 
   uint32_t unique_id() const { return unique_id_; }
 
-  const SkRect& bounds() const { return bounds_; }
-  const DlRect& GetBounds() const { return ToDlRect(bounds_); }
+  const SkRect& bounds() const { return ToSkRect(bounds_); }
+  const DlRect& GetBounds() const { return bounds_; }
 
   bool has_rtree() const { return rtree_ != nullptr; }
   sk_sp<const DlRTree> rtree() const { return rtree_; }
@@ -500,7 +506,7 @@ class DisplayList : public SkRefCnt {
   ///                  primarily for debugging use
   ///
   /// @see |Dispatch(receiver, index)|
-  std::vector<DlIndex> GetCulledIndices(const SkRect& cull_rect) const;
+  std::vector<DlIndex> GetCulledIndices(const DlRect& cull_rect) const;
 
  private:
   DisplayList(DisplayListStorage&& ptr,
@@ -509,7 +515,7 @@ class DisplayList : public SkRefCnt {
               size_t nested_byte_count,
               uint32_t nested_op_count,
               uint32_t total_depth,
-              const SkRect& bounds,
+              const DlRect& bounds,
               bool can_apply_group_opacity,
               bool is_ui_thread_safe,
               bool modifies_transparent_black,
@@ -533,7 +539,7 @@ class DisplayList : public SkRefCnt {
   const uint32_t total_depth_;
 
   const uint32_t unique_id_;
-  const SkRect bounds_;
+  const DlRect bounds_;
 
   const bool can_apply_group_opacity_;
   const bool is_ui_thread_safe_;

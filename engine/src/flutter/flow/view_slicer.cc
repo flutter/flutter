@@ -33,7 +33,7 @@ std::unordered_map<int64_t, SkRect> SliceViews(
 
     slice->end_recording();
 
-    SkRect full_joined_rect = SkRect::MakeEmpty();
+    DlRect full_joined_rect;
 
     // Determinate if Flutter UI intersects with any of the previous
     // platform views stacked by z position.
@@ -49,12 +49,15 @@ std::unordered_map<int64_t, SkRect> SliceViews(
         continue;
       }
 
-      SkRect current_view_rect = maybe_rect->second;
-      const SkIRect rounded_in_platform_view_rect = current_view_rect.roundIn();
+      const SkRect current_view_rect = maybe_rect->second;
+      const DlIRect rounded_in_platform_view_rect =
+          DlIRect::RoundIn(ToDlRect(current_view_rect));
+      const DlRect rounded_out_platform_view_rect =
+          DlRect::RoundOut(ToDlRect(current_view_rect));
 
       // Each rect corresponds to a native view that renders Flutter UI.
-      std::vector<SkIRect> intersection_rects =
-          slice->region(current_view_rect).getRects();
+      std::vector<DlIRect> intersection_rects =
+          slice->region(ToDlRect(current_view_rect)).getRects();
 
       // Ignore intersections of single width/height on the edge of the platform
       // view.
@@ -72,7 +75,7 @@ std::unordered_map<int64_t, SkRect> SliceViews(
         // If intersection_rect does not intersect with the *rounded in*
         // platform view rect, then the intersection must be a single pixel
         // width (or height) on edge.
-        if (!SkIRect::Intersects(*it, rounded_in_platform_view_rect)) {
+        if (!it->IntersectsWithRect(rounded_in_platform_view_rect)) {
           it = intersection_rects.erase(it);
         } else {
           ++it;
@@ -83,14 +86,14 @@ std::unordered_map<int64_t, SkRect> SliceViews(
       //
       // In this case, the rects are merged into a single one that is the union
       // of all the rects.
-      SkRect partial_joined_rect = SkRect::MakeEmpty();
-      for (const SkIRect& rect : intersection_rects) {
-        partial_joined_rect.join(SkRect::Make(rect));
+      DlRect partial_joined_rect;
+      for (const DlIRect& rect : intersection_rects) {
+        partial_joined_rect = partial_joined_rect.Union(DlRect::Make(rect));
       }
 
       // Get the intersection rect with the `current_view_rect`,
-      if (partial_joined_rect.intersect(
-              SkRect::Make(current_view_rect.roundOut()))) {
+      if (partial_joined_rect.IntersectsWithRect(
+              rounded_out_platform_view_rect)) {
         // Join the `partial_joined_rect` into `full_joined_rect` to get the
         // rect above the current `slice`, only if it intersects the indicated
         // view. This should always be the case because we just deleted any
@@ -100,12 +103,12 @@ std::unordered_map<int64_t, SkRect> SliceViews(
         // penalty for not checking the return value of the intersect method
         // would be to join a non-overlapping rectangle into the overlay
         // bounds - if the above implementation ever changes - so we check it.
-        full_joined_rect.join(partial_joined_rect);
+        full_joined_rect = full_joined_rect.Union(partial_joined_rect);
       }
     }
 
-    if (!full_joined_rect.isEmpty()) {
-      overlay_layers.insert({view_id, full_joined_rect});
+    if (!full_joined_rect.IsEmpty()) {
+      overlay_layers.insert({view_id, ToSkRect(full_joined_rect)});
 
       // Clip the background canvas, so it doesn't contain any of the pixels
       // drawn on the overlay layer.

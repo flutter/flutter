@@ -519,7 +519,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
   void* Push(size_t extra, Args&&... args);
 
   struct RTreeData {
-    std::vector<SkRect> rects;
+    std::vector<DlRect> rects;
     std::vector<int> indices;
   };
 
@@ -628,7 +628,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
 
     // Records the given bounds after transforming by the global and
     // layer matrices.
-    bool AccumulateBoundsLocal(const SkRect& bounds);
+    bool AccumulateBoundsLocal(const DlRect& bounds);
 
     // Simply transfers the local bounds to the parent
     void TransferBoundsToParent(const SaveInfo& parent);
@@ -698,7 +698,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
   }
 
   void RestoreLayer();
-  void TransferLayerBounds(const SkRect& content_bounds);
+  void TransferLayerBounds(const DlRect& content_bounds);
   bool AdjustRTreeRects(RTreeData& data,
                         const DlImageFilter& filter,
                         const DlMatrix& matrix,
@@ -811,7 +811,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
 
   // Adjusts the indicated bounds for the given flags and returns true if
   // the calculation was possible, or false if it could not be estimated.
-  bool AdjustBoundsForPaint(SkRect& bounds, DisplayListAttributeFlags flags);
+  bool AdjustBoundsForPaint(DlRect& bounds, DisplayListAttributeFlags flags);
 
   // Records the fact that we encountered an op that either could not
   // estimate its bounds or that fills all of the destination space.
@@ -822,21 +822,21 @@ class DisplayListBuilder final : public virtual DlCanvas,
 
   // Records the bounds for an op after modifying them according to the
   // supplied attribute flags and transforming by the current matrix.
-  bool AccumulateOpBounds(const SkRect& bounds,
+  bool AccumulateOpBounds(const DlRect& bounds,
                           DisplayListAttributeFlags flags) {
-    SkRect safe_bounds = bounds;
+    DlRect safe_bounds = bounds;
     return AccumulateOpBounds(safe_bounds, flags);
   }
 
   // Records the bounds for an op after modifying them according to the
   // supplied attribute flags and transforming by the current matrix
   // and clipping against the current clip.
-  bool AccumulateOpBounds(SkRect& bounds, DisplayListAttributeFlags flags);
+  bool AccumulateOpBounds(DlRect& bounds, DisplayListAttributeFlags flags);
 
   // Records the given bounds after transforming by the current matrix
   // and clipping against the current clip.
-  bool AccumulateBounds(const SkRect& bounds, SaveInfo& layer, int id);
-  bool AccumulateBounds(const SkRect& bounds) {
+  bool AccumulateBounds(const DlRect& bounds, SaveInfo& layer, int id);
+  bool AccumulateBounds(const DlRect& bounds) {
     return AccumulateBounds(bounds, current_info(), op_index_);
   }
 };

@@ -16,7 +16,8 @@
 #include "flutter/flow/raster_cache_item.h"
 #include "flutter/flow/raster_cache_key.h"
 #include "flutter/flow/raster_cache_util.h"
-#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
+#include "flutter/third_party/skia/include/core/SkColorSpace.h"
+#include "flutter/third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
 namespace flutter {
 
