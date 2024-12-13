@@ -7,6 +7,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:async/async.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
@@ -368,6 +369,7 @@ class FlutterPlatform extends PlatformPlugin {
   final String? integrationTestUserIdentifier;
 
   final FontConfigManager _fontConfigManager = FontConfigManager();
+  final AsyncMemoizer<void> _closeMemo = AsyncMemoizer<void>();
 
   /// The test compiler produces dill files for each test main.
   ///
@@ -776,14 +778,11 @@ class FlutterPlatform extends PlatformPlugin {
   }
 
   @override
-  Future<dynamic> close() async {
-    if (compiler != null) {
-      await compiler!.dispose();
-      compiler = null;
-    }
+  Future<void> close() => _closeMemo.runOnce(() async {
+    await compiler?.dispose();
     await _testGoldenComparator.close();
     await _fontConfigManager.dispose();
-  }
+  });
 }
 
 // The [_shellProcessClosed] future can't have errors thrown on it because it
