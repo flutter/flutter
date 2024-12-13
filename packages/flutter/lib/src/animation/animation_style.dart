@@ -75,11 +75,39 @@ class AnimationStyle with Diagnosticable {
       return a;
     }
     return AnimationStyle(
-      curve: t < 0.5 ? a?.curve : b?.curve,
-      duration: t < 0.5 ? a?.duration : b?.duration,
-      reverseCurve: t < 0.5 ? a?.reverseCurve : b?.reverseCurve,
-      reverseDuration: t < 0.5 ? a?.reverseDuration : b?.reverseDuration,
+      curve: _lerpCurve(a?.curve, b?.curve, t),
+      duration: _lerpDuration(a?.duration, b?.duration, t),
+      reverseCurve: _lerpCurve(a?.reverseCurve, b?.reverseCurve, t),
+      reverseDuration: _lerpDuration(a?.reverseDuration, b?.reverseDuration, t),
     );
+  }
+  
+  static Duration? _lerpDuration(Duration? a, Duration? b, double t) {
+    if (t == 0.0) {
+      return a;
+    }
+    if (t == 1.0) {
+      return b;
+    }
+    if (a == null || b == null) {
+      return a ?? b;
+    }
+    return Duration(
+      microseconds: (a.inMicroseconds * (1.0 - t) + b.inMicroseconds * t).round(),
+    );
+  }
+
+  static Curve? _lerpCurve(Curve? a, Curve? b, double t) {
+    if (t == 0.0) {
+      return a;
+    }
+    if (t == 1.0) {
+      return b;
+    }
+    if (a == null || b == null) {
+      return a ?? b;
+    }
+    return _LerpedCurve(a, b, t);
   }
 
   @override
@@ -113,4 +141,31 @@ class AnimationStyle with Diagnosticable {
     properties.add(DiagnosticsProperty<Curve>('reverseCurve', reverseCurve, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('reverseDuration', reverseDuration, defaultValue: null));
   }
+}
+
+class _LerpedCurve extends Curve {
+  const _LerpedCurve(this.first, this.second, this._t);
+
+  final Curve first;
+  final Curve second;
+  final double _t;
+
+  @override
+  double transform(double t) {
+    final double a = first.transform(t);
+    final double b = second.transform(t);
+
+    return a * (1.0 - _t) + b * _t;
+  }
+
+  @override
+  bool operator==(Object other) {
+    return other is _LerpedCurve
+        && other.first == first
+        && other.second == second
+        && other._t == _t;
+  }
+
+  @override
+  int get hashCode => Object.hash(first, second, _t);
 }
