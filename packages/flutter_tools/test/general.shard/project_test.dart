@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -26,6 +27,7 @@ import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_pub_deps.dart';
 import '../src/fakes.dart';
 
 void main() {
@@ -1624,6 +1626,12 @@ void _testInMemory(
             fileSystem: testFileSystem,
             logger: globals.logger,
           ),
+      // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
+      // See https://github.com/flutter/flutter/issues/160257 for details.
+      FeatureFlags: () => TestFeatureFlags(
+        isExplicitPackageDependenciesEnabled: true,
+      ),
+      Pub: FakePubWithPrimedDeps.new,
     },
   );
 }
