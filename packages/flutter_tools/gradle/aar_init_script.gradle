@@ -175,13 +175,12 @@ projectsEvaluated {
             // Configure the `assembleAar<variantName>` task for each plugin's projects and make
             // the module's equivalent task depend on the plugin's task.
             String variantName = variant.name.capitalize()
-            try {
+            
                 Task moduleProjectTask = moduleProject.tasks.named("assembleAar$variantName").get()
+                assert(moduleProjectTask != null)
                 Task pluginProjectTask = pluginProject.tasks.named("assembleAar$variantName").get()
+                assert(pluginProjectTask != null)
                 moduleProjectTask.dependsOn(pluginProjectTask)
-            } catch (UnknownTaskException ignored) {
-
-            }
         }
     }
 }
