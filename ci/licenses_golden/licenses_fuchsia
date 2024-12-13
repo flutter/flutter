@@ -1,4 +1,4 @@
-Signature: af7dc22e916d26ca41f321f9f296e2f8
+Signature: e5d437acbd9ba960c5de4cd8f001d73d
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -12702,6 +12702,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/bind/fuchsia.khadas.platform/fuchsia.khadas.p
 ORIGIN: ../../../fuchsia/sdk/linux/bind/fuchsia.nxp.platform/fuchsia.nxp.platform.bind + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/bind/fuchsia.pwm/fuchsia.pwm.bind + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/bind/fuchsia.realtek.platform/fuchsia.realtek.platform.bind + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/bind/fuchsia.sdmmc/fuchsia.sdmmc.bind + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/bind/fuchsia.test.platform/fuchsia.test.platform.bind + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/bind/fuchsia.ti.platform/fuchsia.ti.platform.bind + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/component.dart + ../../../fuchsia/sdk/linux/LICENSE
@@ -13008,6 +13009,7 @@ FILE: ../../../fuchsia/sdk/linux/bind/fuchsia.khadas.platform/fuchsia.khadas.pla
 FILE: ../../../fuchsia/sdk/linux/bind/fuchsia.nxp.platform/fuchsia.nxp.platform.bind
 FILE: ../../../fuchsia/sdk/linux/bind/fuchsia.pwm/fuchsia.pwm.bind
 FILE: ../../../fuchsia/sdk/linux/bind/fuchsia.realtek.platform/fuchsia.realtek.platform.bind
+FILE: ../../../fuchsia/sdk/linux/bind/fuchsia.sdmmc/fuchsia.sdmmc.bind
 FILE: ../../../fuchsia/sdk/linux/bind/fuchsia.test.platform/fuchsia.test.platform.bind
 FILE: ../../../fuchsia/sdk/linux/bind/fuchsia.ti.platform/fuchsia.ti.platform.bind
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/component.dart
