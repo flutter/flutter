@@ -12,6 +12,10 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
+
+// A typedef for a function that creates an [IconButton] variant.
+typedef IconButtonVariant = IconButton Function({bool enabled});
+
 class MockOnPressedFunction {
   int called = 0;
 
@@ -3033,9 +3037,48 @@ void main() {
     );
   });
 
-  testWidgets('Material2 - IconButton hovered & onLongPressed', (WidgetTester tester) async {
-    late bool onHovered;
-    bool onLongPressed = false;
+  late bool onHovered;
+  bool onLongPressed = false;
+
+  void onHover(bool hover) {
+    onHovered = hover;
+  }
+
+  void onLongPress() {
+    onLongPressed = true;
+  }
+
+  final ValueVariant<IconButtonVariant> iconButtonVariant = ValueVariant<IconButtonVariant>(<IconButtonVariant>{
+    ({bool enabled = true}) => IconButton(
+      icon: const Icon(Icons.favorite),
+      onPressed: enabled ? (){} : null,
+      onHover: onHover,
+      onLongPress: onLongPress,
+    ),
+    ({bool enabled = true}) =>IconButton.filled(
+      icon: const Icon(Icons.favorite),
+      onPressed: enabled ? (){} : null,
+      onHover: onHover,
+      onLongPress: onLongPress,
+    ),
+    ({bool enabled = true}) => IconButton.filledTonal(
+      icon: const Icon(Icons.favorite),
+      onPressed: enabled ? (){} : null,
+      onHover: onHover,
+      onLongPress: onLongPress,
+    ),
+    ({bool enabled = true}) => IconButton.outlined(
+      icon: const Icon(Icons.favorite),
+      onPressed: enabled ? (){} : null,
+      onHover: onHover,
+      onLongPress: onLongPress,
+    ),
+  });
+
+  testWidgets('Material2 - IconButton Variants hovered & onLongPressed', (WidgetTester tester) async {
+
+    final IconButton Function({bool enabled}) currentVariant = iconButtonVariant.currentValue!;
+
     Widget build({bool enabled = true}) {
       return MaterialApp(
         theme: ThemeData(
@@ -3044,20 +3087,12 @@ void main() {
         home: Material(
           child: Directionality(
             textDirection: TextDirection.ltr,
-            child: IconButton(
-              icon: const Icon(Icons.favorite),
-              onPressed: enabled ? () {} : null,
-              onHover: (bool hover) {
-                onHovered = hover;
-              },
-              onLongPress: () {
-                onLongPressed = true;
-              },
-            ),
+            child: currentVariant(enabled: enabled)
           ),
         ),
       );
     }
+
     await tester.pumpWidget(build());
     final Offset iconButtonOffset = tester.getCenter(find.byType(IconButton));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -3082,33 +3117,23 @@ void main() {
     await tester.longPressAt(iconButtonOffset);
     await tester.pumpAndSettle();
     expect(onLongPressed, false);
-  });
+  },variant: iconButtonVariant);
 
-  testWidgets('Material3 - IconButton hovered & onLongPressed', (WidgetTester tester) async {
-    late bool onHovered;
-    bool onLongPressed = false;
+  testWidgets('Material3 - IconButton Variants hovered & onLongPressed', (WidgetTester tester) async {
+
+    final IconButton Function({bool enabled}) currentVariant = iconButtonVariant.currentValue!;
+
     Widget build({bool enabled = true}) {
       return MaterialApp(
-        theme: ThemeData(
-          useMaterial3: true
-        ),
         home: Material(
           child: Directionality(
             textDirection: TextDirection.ltr,
-            child: IconButton(
-              icon: const Icon(Icons.favorite),
-              onPressed: enabled ? () {} : null,
-              onHover: (bool hover) {
-                onHovered = hover;
-              },
-              onLongPress: () {
-                onLongPressed = true;
-              },
-            ),
+            child: currentVariant(enabled: enabled)
           ),
         ),
       );
     }
+
     await tester.pumpWidget(build());
     final Offset iconButtonOffset = tester.getCenter(find.byType(IconButton));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -3133,7 +3158,7 @@ void main() {
     await tester.longPressAt(iconButtonOffset);
     await tester.pumpAndSettle();
     expect(onLongPressed, false);
-  });
+  },variant: iconButtonVariant);
 }
 
 Widget wrap({required Widget child, required bool useMaterial3}) {
