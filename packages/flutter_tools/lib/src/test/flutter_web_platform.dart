@@ -120,7 +120,11 @@ class FlutterWebPlatform extends PlatformPlugin {
       fileSystem: _fileSystem,
       logger: _logger,
       processManager: processManager,
-      webRenderer: webRenderer,
+      environment: <String, String>{
+        // Chrome is the only supported browser currently.
+        'FLUTTER_TEST_BROWSER': 'chrome',
+        'FLUTTER_WEB_RENDERER': webRenderer.name,
+      },
     );
   }
 
