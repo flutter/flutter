@@ -352,11 +352,11 @@ class FlutterPlugin implements Plugin<Project> {
 
         String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
                 "gradle", "flutter_proguard_rules.pro")
-        project.android.buildTypes { BuildType buildType ->
+        project.android.buildTypes {
             // Add profile build type.
             profile {
                 initWith(debug)
-                if (buildType.hasProperty("matchingFallbacks")) {
+                if (it.hasProperty("matchingFallbacks")) {
                     matchingFallbacks = ["debug", "release"]
                 }
             }
