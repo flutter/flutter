@@ -800,7 +800,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           ),
         ),
         AnimatedCrossFade(
-          firstChild: const SizedBox(height: 0),
+          firstChild: const SizedBox(width: double.infinity, height: 0),
           secondChild: Padding(
             padding: EdgeInsetsDirectional.only(
               // Adjust [controlsBuilder] padding so that the content is
