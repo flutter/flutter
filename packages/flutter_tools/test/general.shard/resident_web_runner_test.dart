@@ -19,8 +19,10 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/tools/scene_importer.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
@@ -41,6 +43,7 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
+import '../src/fake_pub_deps.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart' as test_fakes;
 
@@ -109,6 +112,14 @@ void main() {
   late ProcessManager processManager;
   late TestUsage testUsage;
   late FakeAnalytics fakeAnalytics;
+
+  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
+  // See https://github.com/flutter/flutter/issues/160257 for details.
+  FeatureFlags enableExplicitPackageDependencies() {
+    return test_fakes.TestFeatureFlags(
+      isExplicitPackageDependenciesEnabled: true,
+    );
+  }
 
   setUp(() {
     testUsage = TestUsage();
@@ -266,6 +277,8 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('WebRunner copies compiled app.dill to cache during startup',
@@ -297,6 +310,8 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext(
@@ -325,6 +340,8 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/60613
@@ -346,6 +363,8 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext(
@@ -376,6 +395,8 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('Can successfully run and disconnect with --no-resident',
@@ -401,6 +422,8 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('Listens to stdout and stderr streams before running main',
@@ -439,6 +462,8 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('Listens to extension events with structured errors',
@@ -581,6 +606,8 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('Does not run main with --start-paused', () async {
@@ -612,6 +639,8 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('Can hot reload after attaching', () async {
@@ -707,6 +736,8 @@ void main() {
     Analytics: () => fakeAnalytics,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('Can hot restart after attaching', () async {
@@ -800,6 +831,8 @@ void main() {
     Analytics: () => fakeAnalytics,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('Can hot restart after attaching with web-server device',
@@ -836,6 +869,8 @@ void main() {
     Analytics: () => fakeAnalytics,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('web resident runner is debuggable', () {
@@ -870,6 +905,8 @@ void main() {
     Analytics: () => fakeAnalytics,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext(
@@ -909,6 +946,8 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('Fails on compilation errors in hot restart', () async {
@@ -937,6 +976,8 @@ void main() {
     Analytics: () => fakeAnalytics,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext(
@@ -966,6 +1007,8 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('Fails fatally on Vm Service error response', () async {
@@ -995,6 +1038,8 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('printHelp without details shows hot restart help message',
@@ -1034,6 +1079,8 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('cleans up Chrome if tab is closed', () async {
@@ -1055,6 +1102,8 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('Prints target and device name on run', () async {
@@ -1083,6 +1132,8 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('Sends launched app.webLaunchUrl event for Chrome device',
@@ -1148,6 +1199,8 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext(
@@ -1197,6 +1250,8 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('ResidentWebRunner generates files when l10n.yaml exists', () async {
@@ -1261,6 +1316,8 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   // While this file should be ignored on web, generating it here will cause a
@@ -1321,6 +1378,8 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('Turns HttpException from ChromeTab::connect into ToolExit', () async {
@@ -1374,6 +1433,8 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('Successfully turns AppConnectionException into ToolExit',
@@ -1388,6 +1449,8 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('Successfully turns ChromeDebugError into ToolExit',
@@ -1405,6 +1468,8 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('Rethrows unknown Exception type from dwds', () async {
@@ -1418,6 +1483,8 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('Rethrows unknown Error type from dwds tooling', () async {
@@ -1433,6 +1500,8 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   });
 
   testUsingContext('throws when port is an integer outside the valid TCP range', () async {
