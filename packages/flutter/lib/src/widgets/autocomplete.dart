@@ -510,7 +510,6 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     return LayoutBuilder(
       key: _fieldKey,
       builder: (BuildContext context, BoxConstraints constraints) {
-        // TODO(victorsanni): Also track the field's layout so that the options view maintains the same width as the field if its constraints remain unchanged.
         _fieldBoxConstraints.value = constraints;
         return OverlayPortal.targetsRootOverlay(
           controller: _optionsViewController,
