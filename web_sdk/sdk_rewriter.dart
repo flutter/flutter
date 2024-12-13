@@ -79,6 +79,7 @@ List<Replacer> generatePartsPatterns(String libraryName, bool isPublic) {
     // Remove library directives.
     AllReplacer(RegExp(r'\nlibrary .+;'), ''),
     // Remove imports/exports from all part files.
+    AllReplacer(RegExp(r"\nimport '.+'\n\s*if \(dart\.library\..*\) '.*';"), ''),
     AllReplacer(RegExp(r'\nimport\s*.*'), ''),
     AllReplacer(RegExp(r'\nexport\s*.*'), ''),
     AllReplacer(RegExp(r'\n@DefaultAsset(.*)'), ''),

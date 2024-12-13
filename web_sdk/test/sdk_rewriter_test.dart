@@ -192,4 +192,34 @@ void printSomething() {
     expect(getExtraImportsForLibrary('web_test_fonts'), isEmpty);
     expect(getExtraImportsForLibrary('web_locale_keymap'), isEmpty);
   });
+
+  test('allows imports to line-break', () {
+    const String source = '''
+import 'package:some_package/some_package.dart';
+import 'package:ui/src/engine/skwasm/skwasm_impl.dart'
+    if (dart.library.html) 'package:ui/src/engine/skwasm/skwasm_stub.dart';
+import 'package:ui/src/engine/skwasm/skwasm_impl.dart'
+    if (dart.library.js_interop) 'package:ui/src/engine/skwasm/skwasm_stub.dart';
+import 'package:some_package/some_package' as some_package;
+
+void printSomething() {
+  print('something');
+}
+''';
+
+    const String expected = '''
+part of dart._engine;
+
+void printSomething() {
+  print('something');
+}
+''';
+
+    final String result = processSource(
+      source,
+      (String source) => preprocessPartFile(source, 'engine'),
+      generatePartsPatterns('engine', false),
+    );
+    expect(result, expected);
+  });
 }
