@@ -539,6 +539,35 @@ void main() {
     expect(fixed, './$error');
   });
 
+  test('fixes gcc paths with ansi colors', () {
+    final String outDir = path.join(io.Directory.current.path, 'foo', 'bar');
+    // An error string with ANSI escape codes for colors.
+    final List<int> bytes = [
+      27, 91, 49, 109, 46, 46, 47, 46, 46, 47, 102, //
+      108, 117, 116, 116, 101, 114, 47, 105, 109, 112, 101, 108, 108, 101, //
+      114, 47, 100, 105, 115, 112, 108, 97, 121, 95, 108, 105, 115, 116, 47, //
+      100, 108, 95, 100, 105, 115, 112, 97, 116, 99, 104, 101, 114, 46, 99, //
+      99, 58, 55, 51, 52, 58, 55, 58, 32, 27, 91, 48, 109, 27, 91, 48, 59, //
+      49, 59, 51, 49, 109, 101, 114, 114, 111, 114, 58, 32, 27, 91, 48, 109, //
+      27, 91, 49, 109, 117, 115, 101, 32, 111, 102, 32, 117, 110, 100, 101, //
+      99, 108, 97, 114, 101, 100, 32, 105, 100, 101, 110, 116, 105, 102, 105, //
+      101, 114, 32, 39, 114, 111, 99, 107, 101, 116, 39, 27, 91, 48, 109,
+    ];
+    final String error = convert.utf8.decode(bytes);
+    final String fixed = BuildRunner.fixGccPaths(error, outDir);
+    expect(
+      fixed.contains('../../flutter/impeller/display_list/dl_dispatcher.cc'),
+      isFalse,
+      reason: 'Fixed string: $fixed',
+    );
+    expect(
+      fixed.contains('./flutter/impeller/display_list/dl_dispatcher.cc'),
+      isTrue,
+      reason: 'Fixed string: $fixed',
+    );
+    expect(fixed[0], '\x1B', reason: 'Fixed string: $fixed');
+  });
+
   test('GlobalBuildRunner skips generators when runGenerators is false',
       () async {
     final Build targetBuild = buildConfig.builds[0];
