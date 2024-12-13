@@ -4,6 +4,7 @@
 // found in the LICENSE file.
 
 import com.android.build.OutputFile
+import com.android.build.gradle.internal.api.ApplicationVariantImpl
 import groovy.json.JsonGenerator
 import groovy.xml.QName
 import java.nio.file.Paths
@@ -471,7 +472,7 @@ class FlutterPlugin implements Plugin<Project> {
         project.tasks.register("printBuildVariants") {
             description "Prints out all build variants for this Android project"
             doLast {
-                project.android.applicationVariants.all { variant ->
+                project.android.applicationVariants.all { ApplicationVariantImpl variant ->
                     println "BuildVariant: ${variant.name}"
                 }
             }
