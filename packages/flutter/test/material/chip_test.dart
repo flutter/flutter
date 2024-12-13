@@ -5751,10 +5751,10 @@ void main() {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   RawChip(
-                    chipAnimationStyle: ChipAnimationStyle(
+                    chipAnimationStyle: const ChipAnimationStyle(
                       enableAnimation: AnimationStyle(
-                        duration: const Duration(milliseconds: 300),
-                        reverseDuration: const Duration(milliseconds: 150),
+                        duration: Duration(milliseconds: 300),
+                        reverseDuration: Duration(milliseconds: 150),
                       ),
                     ),
                     isEnabled: enabled,
@@ -5825,10 +5825,10 @@ void main() {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   RawChip(
-                    chipAnimationStyle: ChipAnimationStyle(
+                    chipAnimationStyle: const ChipAnimationStyle(
                       selectAnimation: AnimationStyle(
-                        duration: const Duration(milliseconds: 600),
-                        reverseDuration: const Duration(milliseconds: 300),
+                        duration: Duration(milliseconds: 600),
+                        reverseDuration: Duration(milliseconds: 300),
                       ),
                     ),
                     backgroundColor: backgroundColor,
@@ -5899,10 +5899,10 @@ void main() {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   RawChip(
-                    chipAnimationStyle: ChipAnimationStyle(
+                    chipAnimationStyle: const ChipAnimationStyle(
                       avatarDrawerAnimation: AnimationStyle(
-                        duration: const Duration(milliseconds: 800),
-                        reverseDuration: const Duration(milliseconds: 400),
+                        duration: Duration(milliseconds: 800),
+                        reverseDuration: Duration(milliseconds: 400),
                       ),
                     ),
                     checkmarkColor: checkmarkColor,
@@ -5975,10 +5975,10 @@ void main() {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   RawChip(
-                    chipAnimationStyle: ChipAnimationStyle(
+                    chipAnimationStyle: const ChipAnimationStyle(
                       deleteDrawerAnimation: AnimationStyle(
-                        duration: const Duration(milliseconds: 500),
-                        reverseDuration: const Duration(milliseconds: 250),
+                        duration: Duration(milliseconds: 500),
+                        reverseDuration: Duration(milliseconds: 250),
                       ),
                     ),
                     onDeleted: showDeleteIcon ? () {} : null,
@@ -6032,16 +6032,16 @@ void main() {
   }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Chip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
-    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+    const ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
       enableAnimation: AnimationStyle.noAnimation,
       selectAnimation: AnimationStyle(duration: Durations.long3),
     );
 
     await tester.pumpWidget(wrapForChip(
-      child: Center(
+      child: const Center(
         child: Chip(
           chipAnimationStyle: chipAnimationStyle,
-          label: const Text('Chip'),
+          label: Text('Chip'),
         ),
       ),
     ));

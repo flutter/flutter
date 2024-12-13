@@ -603,16 +603,16 @@ void main() {
   });
 
   testWidgets('InputChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
-    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+    const ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
       enableAnimation: AnimationStyle(duration: Durations.short2),
       selectAnimation: AnimationStyle.noAnimation,
     );
 
     await tester.pumpWidget(wrapForChip(
-      child: Center(
+      child: const Center(
         child: InputChip(
           chipAnimationStyle: chipAnimationStyle,
-          label: const Text('InputChip'),
+          label: Text('InputChip'),
         ),
       ),
     ));

@@ -2403,9 +2403,9 @@ void main() {
 
     // Test custom animation style.
     await tester.pumpWidget(buildWidget(
-      sheetAnimationStyle: AnimationStyle(
-        duration: const Duration(milliseconds: 800),
-        reverseDuration: const Duration(milliseconds: 400),
+      sheetAnimationStyle: const AnimationStyle(
+        duration: Duration(milliseconds: 800),
+        reverseDuration: Duration(milliseconds: 400),
       ),
     ));
     await tester.tap(find.text('X'));
@@ -2559,9 +2559,9 @@ void main() {
 
     // Test custom animation style.
     await tester.pumpWidget(buildWidget(
-      sheetAnimationStyle: AnimationStyle(
-        duration: const Duration(milliseconds: 800),
-        reverseDuration: const Duration(milliseconds: 400),
+      sheetAnimationStyle: const AnimationStyle(
+        duration: Duration(milliseconds: 800),
+        reverseDuration: Duration(milliseconds: 400),
       ),
     ));
     await tester.tap(find.text('X'));

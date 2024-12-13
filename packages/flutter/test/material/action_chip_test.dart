@@ -499,16 +499,16 @@ void main() {
   });
 
   testWidgets('ActionChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
-    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+    const ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
       enableAnimation: AnimationStyle(duration: Durations.extralong4),
       selectAnimation: AnimationStyle.noAnimation,
     );
 
     await tester.pumpWidget(wrapForChip(
-      child: Center(
+      child: const Center(
         child: ActionChip(
           chipAnimationStyle: chipAnimationStyle,
-          label: const Text('ActionChip'),
+          label: Text('ActionChip'),
         ),
       ),
     ));
@@ -517,16 +517,16 @@ void main() {
   });
 
   testWidgets('Elevated ActionChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
-    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+    const ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
       enableAnimation: AnimationStyle(duration: Durations.extralong4),
       selectAnimation: AnimationStyle.noAnimation,
     );
 
     await tester.pumpWidget(wrapForChip(
-      child: Center(
+      child: const Center(
         child: ActionChip.elevated(
           chipAnimationStyle: chipAnimationStyle,
-          label: const Text('ActionChip'),
+          label: Text('ActionChip'),
         ),
       ),
     ));
