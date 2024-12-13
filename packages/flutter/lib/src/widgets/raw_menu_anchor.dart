@@ -134,7 +134,7 @@ typedef RawMenuAnchorChildBuilder = Widget Function(
 
 // An inherited widget that provides the [RawMenuAnchor] to its descendants.
 //
-// Used to notify anchor descendents when the menu opens and closes, and to
+// Used to notify anchor descendants when the menu opens and closes, and to
 // access the anchor's controller.
 class _RawMenuAnchorScope extends InheritedWidget {
   const _RawMenuAnchorScope( {
@@ -308,7 +308,7 @@ class RawMenuAnchor extends StatelessWidget {
   ///
   /// Because building a custom menu panel entails managing layout, appearance,
   /// semantics, and interaction, the [MenuBar] widget is the recommended way of
-  /// a creating a horizontal menu panel. However, in cases where finer control
+  /// creating a horizontal menu panel. However, in cases where finer control
   /// over focus behavior is needed, or where a custom layout (such as a
   /// vertical menu bar) is desired, this constructor can be used.
   ///
@@ -543,10 +543,10 @@ class RawMenuAnchor extends StatelessWidget {
     borderRadius: BorderRadius.all(Radius.circular(6.0)),
     color: ui.Color.fromARGB(255, 253, 253, 253),
     border: Border.fromBorderSide(
-        BorderSide(
-          color: ui.Color.fromARGB(255, 255, 255, 255),
-          width: 0.5,
-        ),
+      BorderSide(
+        color: ui.Color.fromARGB(255, 255, 255, 255),
+        width: 0.5,
+      ),
     ),
     boxShadow: <BoxShadow>[
       BoxShadow(
@@ -571,7 +571,7 @@ class RawMenuAnchor extends StatelessWidget {
     border: Border.fromBorderSide(
       BorderSide(
         color: ui.Color.fromARGB(200, 0, 0, 0),
-        width: 0.5
+        width: 0.5,
       ),
     ),
     boxShadow: <BoxShadow>[
@@ -622,10 +622,10 @@ class RawMenuAnchor extends StatelessWidget {
       padding: padding,
       semanticLabel: _semanticLabel,
       decoration: surfaceDecoration
-          ?? switch (MediaQuery.maybePlatformBrightnessOf(context)) {
-                ui.Brightness.dark          => defaultDarkOverlayDecoration,
-                ui.Brightness.light || null => defaultLightOverlayDecoration,
-            },
+        ?? switch (MediaQuery.maybePlatformBrightnessOf(context)) {
+             ui.Brightness.dark          => defaultDarkOverlayDecoration,
+             ui.Brightness.light || null => defaultLightOverlayDecoration,
+           },
     );
   }
 
@@ -887,7 +887,7 @@ class _RawMenuAnchorOverlay extends _RawMenuAnchor {
   final RawMenuAnchorOverlayBuilder overlayBuilder;
 
   // Whether focus is handled by this class (default overlay) or externally
-  // (overlayBuilder)
+  // (overlayBuilder).
   final bool hasExternalFocusScope;
 
   @override
