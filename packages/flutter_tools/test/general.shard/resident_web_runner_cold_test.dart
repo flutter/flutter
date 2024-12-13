@@ -36,7 +36,7 @@ void main() {
 
   // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
   // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDepdendencies() {
+  FeatureFlags enableExplicitPackageDependencies() {
     return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
   }
 
@@ -83,7 +83,7 @@ void main() {
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: enableExplicitPackageDepdendencies,
+    FeatureFlags: enableExplicitPackageDependencies,
     Pub: FakePubWithPrimedDeps.new,
   });
 
@@ -110,7 +110,7 @@ void main() {
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: false)),
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: enableExplicitPackageDepdendencies,
+    FeatureFlags: enableExplicitPackageDependencies,
     Pub: FakePubWithPrimedDeps.new,
   });
 
@@ -137,7 +137,7 @@ void main() {
     BuildSystem: () => TestBuildSystem.error(Exception('foo')),
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: enableExplicitPackageDepdendencies,
+    FeatureFlags: enableExplicitPackageDependencies,
     Pub: FakePubWithPrimedDeps.new,
   });
 
@@ -168,7 +168,7 @@ void main() {
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: enableExplicitPackageDepdendencies,
+    FeatureFlags: enableExplicitPackageDependencies,
     Pub: FakePubWithPrimedDeps.new,
   });
 
@@ -203,7 +203,7 @@ void main() {
     ]),
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: enableExplicitPackageDepdendencies,
+    FeatureFlags: enableExplicitPackageDependencies,
     Pub: FakePubWithPrimedDeps.new,
   });
 }
