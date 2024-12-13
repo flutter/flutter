@@ -497,11 +497,11 @@ class FlutterPlugin implements Plugin<Project> {
     //
     // The output file is parsed and used by devtool.
     private static void addTasksForOutputsAppLinkSettings(Project project) {
-        project.android.applicationVariants.all { variant ->
+        project.android.applicationVariants.all { ApplicationVariantImpl variant ->
             // Warning: The name of this task is used by AndroidBuilder.outputsAppLinkSettings
             project.tasks.register("output${variant.name.capitalize()}AppLinkSettings") {
                 description "stores app links settings for the given build variant of this Android project into a json file."
-                variant.outputs.all { output ->
+                variant.outputs.configureEach { output ->
                     // Deeplinks are defined in AndroidManifest.xml and is only available after
                     // `processResourcesProvider`.
                     Object processResources = output.hasProperty(propProcessResourcesProvider) ?
@@ -512,7 +512,7 @@ class FlutterPlugin implements Plugin<Project> {
                     AppLinkSettings appLinkSettings = new AppLinkSettings()
                     appLinkSettings.applicationId = variant.applicationId
                     appLinkSettings.deeplinks = [] as Set<Deeplink>
-                    variant.outputs.all { output ->
+                    variant.outputs.configureEach { output ->
                         Object processResources = output.hasProperty(propProcessResourcesProvider) ?
                                 output.processResourcesProvider.get() : output.processResources
                         def manifest = new XmlParser().parse(processResources.manifestFile)
