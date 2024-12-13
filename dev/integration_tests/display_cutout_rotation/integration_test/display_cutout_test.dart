@@ -20,8 +20,8 @@ void main() {
         DeviceOrientation.portraitUp,
       ]);
       await tester.pumpAndSettle();
-
-      List<DisplayFeature> displayFeatures = getCutouts(tester);
+      BuildContext context = tester.element(find.byType(Text));
+      List<DisplayFeature> displayFeatures = getCutouts(tester, context);
       // Test is expecting one cutout setup in the test harness.
       expect(
         displayFeatures.length,
@@ -45,8 +45,9 @@ void main() {
         DeviceOrientation.landscapeLeft,
       ]);
       await tester.pumpAndSettle();
+      BuildContext context = tester.element(find.byType(Text));
       // Verify that app code thinks there is a left cutout.
-      List<DisplayFeature> displayFeatures = getCutouts(tester);
+      List<DisplayFeature> displayFeatures = getCutouts(tester, context);
       // Test is expecting one cutout setup in the test harness.
       expect(
         displayFeatures.length,
@@ -69,7 +70,8 @@ void main() {
       const widgetUnderTest = MyApp();
       // Load app widget.
       await tester.pumpWidget(widgetUnderTest);
-      List<DisplayFeature> displayFeatures = getCutouts(tester);
+      BuildContext context = tester.element(find.byType(Text));
+      List<DisplayFeature> displayFeatures = getCutouts(tester, context);
 
       // Test is expecting one cutout setup in the test harness.
       expect(
@@ -92,7 +94,8 @@ void main() {
       await tester.pumpAndSettle(Durations.extralong4);
 
       // Requery for display features after rotation.
-      displayFeatures = getCutouts(tester);
+      context = tester.element(find.byType(Text));
+      displayFeatures = getCutouts(tester, context);
       // Test is expecting one cutout setup in the test harness.
       expect(
         displayFeatures.length,
@@ -102,9 +105,7 @@ void main() {
       expect(
         displayFeatures[0].bounds.left,
         0,
-        reason:
-            'cutout should start at the left, does the test device have a '
-            'camera cutout or window inset?',
+        reason: 'cutout should start at the left or handle camera',
       );
     });
 
@@ -116,8 +117,7 @@ void main() {
   });
 }
 
-List<DisplayFeature> getCutouts(WidgetTester tester) {
-  BuildContext context = tester.element(find.byType(Text));
+List<DisplayFeature> getCutouts(WidgetTester tester, BuildContext context) {
   List<DisplayFeature> displayFeatures = MediaQuery.of(context).displayFeatures;
   displayFeatures.retainWhere(
     (DisplayFeature feature) => feature.type == DisplayFeatureType.cutout,
