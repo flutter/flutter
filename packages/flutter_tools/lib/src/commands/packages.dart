@@ -260,12 +260,12 @@ class PackagesGetCommand extends FlutterCommand {
           // Anything that looks like an argument should not be interpreted as
           // a directory.
           !rest.single.startsWith('-')) {
-        target = findProjectRoot(globals.fs, rest.single);
-
         globals.printWarning('''
   Using a naked argument for directory is deprecated and will stop working in a future Flutter release.
+  (${rest.single})
 
   Use --directory instead.''');
+        target = findProjectRoot(globals.fs, rest.single);
         if (target == null) {
           throwToolExit('Expected to find project root in ${rest.single}.');
         }
