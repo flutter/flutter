@@ -145,10 +145,12 @@ Future<void> testMain() async {
       expect(
           ViewConstraints.fromJs(constraints, size),
           const ViewConstraints(
+            minWidth: 500,
             // ignore: avoid_redundant_argument_values
-            minWidth: 500, maxWidth: double.infinity,
+            maxWidth: double.infinity,
+            minHeight: 300,
             // ignore: avoid_redundant_argument_values
-            minHeight: 300, maxHeight: double.infinity,
+            maxHeight: double.infinity,
           ));
     });
   });

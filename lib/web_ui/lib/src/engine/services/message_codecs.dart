@@ -310,7 +310,8 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
     } else if (value is double) {
       buffer.putUint8(_valueFloat64);
       buffer.putFloat64(value);
-    } else if (value is int) { // ignore: avoid_double_and_int_checks
+      // ignore: avoid_double_and_int_checks
+    } else if (value is int) {
       if (-0x7fffffff - 1 <= value && value <= 0x7fffffff) {
         buffer.putUint8(_valueInt32);
         buffer.putInt32(value);
