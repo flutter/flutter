@@ -51,6 +51,7 @@ class SystemContextMenu extends StatefulWidget {
   const SystemContextMenu._({
     super.key,
     required this.anchor,
+    // TODO(justinmc): Assert there are no duplicate buttons.
     this.items,
     this.onSystemHide,
   });
@@ -142,6 +143,19 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
     };
   }
 
+  bool _include(SystemContextMenuItem item, EditableTextState editableTextState) {
+    return switch (item) {
+      SystemContextMenuItemCopy() => editableTextState.copyEnabled,
+      SystemContextMenuItemCut() => editableTextState.cutEnabled,
+      SystemContextMenuItemPaste() => editableTextState.pasteEnabled,
+      SystemContextMenuItemSelectAll() => editableTextState.selectAllEnabled,
+      SystemContextMenuItemLookUp() => editableTextState.lookUpEnabled,
+      SystemContextMenuItemSearchWeb() => editableTextState.searchWebEnabled,
+      SystemContextMenuItemShare() => editableTextState.shareEnabled,
+      SystemContextMenuItemCustom() => true,
+    };
+  }
+
   void _show() {
     final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
     final Iterable<SystemContextMenuItemData>? datas =
@@ -149,6 +163,7 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
     _systemContextMenuController.show(
       widget.anchor,
       // TODO(justinmc): Don't show irrelevant items, like don't show "search" if there is no selection.
+      // TODO(justinmc): In the flutter-rendered world, this is done with things like EditableText.copyEnabled. If you want to reuse those here, and I think you do, then I need some kind of correlation betweeen ContextMenuButtonItem and SystemContextMenuButtonItem.
       datas?.toList(),
     );
   }
