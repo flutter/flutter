@@ -356,7 +356,7 @@ class ChipThemeData with Diagnosticable {
   /// This property applies to [FilterChip], [InputChip], [RawChip].
   final Color? checkmarkColor;
 
-  /// Overrides the default for [ChipAttributes.splashColor],
+  /// Overrides the default for [TappableChipAttributes.splashColor],
   /// the color of the splash shown when the chip is pressed.
   ///
   final Color? splashColor;

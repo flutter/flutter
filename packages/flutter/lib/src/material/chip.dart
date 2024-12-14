@@ -614,6 +614,9 @@ abstract interface class TappableChipAttributes {
   /// Tooltip string to be used for the body area (where the label and avatar
   /// are) of the chip.
   String? get tooltip;
+
+  /// the color of the splash shown when the chip is pressed.
+  Color? get splashColor;
 }
 
 /// A helper class that overrides the default chip animation parameters.
@@ -895,6 +898,7 @@ class RawChip extends StatefulWidget
     this.deleteIconBoxConstraints,
     this.chipAnimationStyle,
     this.mouseCursor,
+    this.splashColor
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        deleteIcon = deleteIcon ?? _kDefaultDeleteIcon;
@@ -938,6 +942,8 @@ class RawChip extends StatefulWidget
   final Color? selectedColor;
   @override
   final String? tooltip;
+  @override
+  final Color? splashColor;
   @override
   final BorderSide? side;
   @override
@@ -1424,6 +1430,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
         autofocus: widget.autofocus,
         canRequestFocus: widget.isEnabled,
         onTap: canTap ? _handleTap : null,
+        splashColor: widget.splashColor ?? chipTheme.splashColor,
         onTapDown: canTap ? _handleTapDown : null,
         onTapCancel: canTap ? _handleTapCancel : null,
         onHover: canTap ? updateMaterialState(MaterialState.hovered) : null,
