@@ -273,7 +273,7 @@ class Hero extends StatefulWidget {
 
   /// The curve to use in the reverse direction.
   ///
-  /// If this property is null, the default, then curve.flipped is used.
+  /// If this property is null, the flipped version of [curve] is used.
   final Curve? reverseCurve;
 
   // Returns a map of all of the heroes in `context` indexed by hero tag that
@@ -472,13 +472,21 @@ class _HeroFlightManifest {
   CurvedAnimation? _animation;
 
   Animation<double> get animation {
-    final Curve reverseCurve = (type == HeroFlightDirection.push) ?
-        (toHero.widget.reverseCurve ?? toHero.widget.curve.flipped)
-        : (fromHero.widget.reverseCurve ?? fromHero.widget.curve.flipped);
+    final Curve curve, reverseCurve;
+    final Animation<double> parent;
+    if (type == HeroFlightDirection.push) {
+      parent = toRoute.animation!;
+      curve = toHero.widget.curve;
+      reverseCurve = toHero.widget.reverseCurve ?? toHero.widget.curve.flipped;
+    } else {
+      parent = fromRoute.animation!;
+      curve = fromHero.widget.curve;
+      reverseCurve = fromHero.widget.reverseCurve ?? fromHero.widget.curve.flipped;
+    }
 
     return _animation ??= CurvedAnimation(
-      parent: (type == HeroFlightDirection.push) ? toRoute.animation! : fromRoute.animation!,
-      curve: (type == HeroFlightDirection.push) ? toHero.widget.curve : fromHero.widget.curve,
+      parent: parent,
+      curve: curve,
       reverseCurve: isDiverted ? null : reverseCurve,
     );
   }
