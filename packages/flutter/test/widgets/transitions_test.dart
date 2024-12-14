@@ -965,6 +965,43 @@ void main() {
       expect(redrawKeyChild.currentState!.redraws, equals(1));
     });
   });
+
+  testWidgets('ListenableBuilder.multiple rebuilds when changed', (WidgetTester tester) async {
+    final GlobalKey<RedrawCounterState> redrawKey = GlobalKey<RedrawCounterState>();
+    final ChangeNotifier notifier1 = ChangeNotifier();
+    final ChangeNotifier notifier2 = ChangeNotifier();
+    
+    addTearDown(notifier1.dispose);
+    addTearDown(notifier2.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListenableBuilder.multiple(
+          listenables: [notifier1, notifier2],
+          builder: (BuildContext context, Widget? child) {
+            return RedrawCounter(key: redrawKey, child: child);
+          },
+        ),
+      ),
+    );
+
+    expect(redrawKey.currentState!.redraws, equals(1));
+    await tester.pump();
+    expect(redrawKey.currentState!.redraws, equals(1));
+    notifier1.notifyListeners();
+    await tester.pump();
+    expect(redrawKey.currentState!.redraws, equals(2));
+
+    notifier2.notifyListeners();
+    await tester.pump();
+    expect(redrawKey.currentState!.redraws, equals(3));
+
+    // Pump a few more times to make sure that we don't rebuild unnecessarily.
+    await tester.pump();
+    await tester.pump();
+    expect(redrawKey.currentState!.redraws, equals(3));
+  });
 }
 
 class RedrawCounter extends StatefulWidget {
