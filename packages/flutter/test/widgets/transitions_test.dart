@@ -970,7 +970,7 @@ void main() {
     final GlobalKey<RedrawCounterState> redrawKey = GlobalKey<RedrawCounterState>();
     final ChangeNotifier notifier1 = ChangeNotifier();
     final ChangeNotifier notifier2 = ChangeNotifier();
-    
+
     addTearDown(notifier1.dispose);
     addTearDown(notifier2.dispose);
 
