@@ -139,17 +139,25 @@ class SpringSimulation extends Simulation {
   /// The units for the velocity are L/T, where L is the aforementioned
   /// arbitrary unit of length, and T is the time unit used for driving the
   /// [SpringSimulation].
+  ///
+  /// If `snapToEnd` is true, [x] will be set to `end` and [dx] to 0 when
+  /// [isDone] returns true. This is useful for transitions that require the
+  /// simulation to stop exactly at the end value, since the spring may not
+  /// naturally reach the target precisely. Defaults to false.
   SpringSimulation(
     SpringDescription spring,
     double start,
     double end,
     double velocity, {
+    bool snapToEnd = false,
     super.tolerance,
   }) : _endPosition = end,
-       _solution = _SpringSolution(spring, start - end, velocity);
+       _solution = _SpringSolution(spring, start - end, velocity),
+       _snapToEnd = snapToEnd;
 
   final double _endPosition;
   final _SpringSolution _solution;
+  final bool _snapToEnd;
 
   /// The kind of spring being simulated, for debugging purposes.
   ///
@@ -158,10 +166,22 @@ class SpringSimulation extends Simulation {
   SpringType get type => _solution.type;
 
   @override
-  double x(double time) => _endPosition + _solution.x(time);
+  double x(double time) {
+    if (_snapToEnd && isDone(time)) {
+      return _endPosition;
+    } else {
+      return _endPosition + _solution.x(time);
+    }
+  }
 
   @override
-  double dx(double time) => _solution.dx(time);
+  double dx(double time) {
+    if (_snapToEnd && isDone(time)) {
+      return 0;
+    } else {
+      return _solution.dx(time);
+    }
+  }
 
   @override
   bool isDone(double time) {

@@ -392,6 +392,7 @@ targets:
 
   - name: Linux packages_autoroller
     presubmit: false
+    bringup: true # https://github.com/flutter/flutter/issues/160055
     recipe: pub_autoroller/pub_autoroller
     # This takes a while because we need to fetch network dependencies and run
     # Gradle for every android app in the repo
@@ -506,7 +507,6 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
 
   - name: Linux build_tests_4_5
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -567,6 +567,7 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
 
   - name: Linux docs_publish
     recipe: flutter/docs
@@ -1076,6 +1077,24 @@ targets:
       tags: >
         ["devicelab", "hostonly", "linux"]
       task_name: linux_desktop_impeller
+
+  - name: Linux android_release_builds_exclude_dev_dependencies_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:35v1"},
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "open_jdk", "version": "version:17"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: android_release_builds_exclude_dev_dependencies_test
+    runIf:
+      - dev/**
+      - bin/**
+      - .ci.yaml
 
   - name: Linux run_release_test_linux
     recipe: devicelab/devicelab_drone
@@ -3797,6 +3816,7 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
 
   - name: Mac dart_plugin_registry_test
     recipe: devicelab/devicelab_drone
@@ -3867,6 +3887,7 @@ targets:
       - dev/bots/**
 
   - name: Mac_benchmark flutter_view_macos__start_up
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/159540
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -4028,6 +4049,7 @@ targets:
       - .ci.yaml
 
   - name: Mac_benchmark hello_world_macos__compile
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/159542
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -4987,6 +5009,7 @@ targets:
       task_name: macos_chrome_dev_mode
 
   - name: Mac_ios microbenchmarks_ios
+    bringup: true # Flakey https://github.com/flutter/flutter/issues/156457
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -5480,7 +5503,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "android_sdk", "version": "version:35v1"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
@@ -5498,7 +5521,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "android_sdk", "version": "version:35v1"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
@@ -5516,7 +5539,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "android_sdk", "version": "version:35v1"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
@@ -5537,6 +5560,7 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
 
   - name: Windows framework_tests_libraries
     recipe: flutter/flutter_drone

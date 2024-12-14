@@ -78,27 +78,18 @@ enum SliderInteraction {
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ufb4gIPDmEs}
 ///
 /// {@tool dartpad}
-/// ![A legacy slider widget, consisting of 5 divisions and showing the default value
-/// indicator.](https://flutter.github.io/assets-for-api-docs/assets/material/slider.png)
-///
-/// The Sliders value is part of the Stateful widget subclass to change the value
-/// setState was called.
+/// This example showcases non-discrete and discrete [Slider]s.
+/// The [Slider]s will show the updated ![Material 3 Design appearance](https://m3.material.io/components/sliders/overview)
+/// when setting the [Slider.year2023] flag to false.
 ///
 /// ** See code in examples/api/lib/material/slider/slider.0.dart **
-/// {@end-tool}
-///
-/// {@tool dartpad}
-/// This sample shows the creation of a [Slider] using [ThemeData.useMaterial3] flag,
-/// as described in: https://m3.material.io/components/sliders/overview.
-///
-/// ** See code in examples/api/lib/material/slider/slider.1.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
 /// This example shows a [Slider] widget using the [Slider.secondaryTrackValue]
 /// to show a secondary track in the slider.
 ///
-/// ** See code in examples/api/lib/material/slider/slider.2.dart **
+/// ** See code in examples/api/lib/material/slider/slider.1.dart **
 /// {@end-tool}
 ///
 /// A slider can be used to select from either a continuous or a discrete set of
@@ -201,7 +192,7 @@ class Slider extends StatefulWidget {
       'Use SliderTheme to customize the Slider appearance. '
       'This feature was deprecated after v3.27.0-0.1.pre.'
     )
-    this.year2023 = true,
+    this.year2023,
   }) : _sliderType = _SliderType.material,
        assert(min <= max),
        assert(value >= min && value <= max,
@@ -247,7 +238,7 @@ class Slider extends StatefulWidget {
       'Use SliderTheme to customize the Slider appearance. '
       'This feature was deprecated after v3.27.0-0.1.pre.'
     )
-    this.year2023 = true,
+    this.year2023,
   }) : _sliderType = _SliderType.adaptive,
        padding = null,
        assert(min <= max),
@@ -566,17 +557,18 @@ class Slider extends StatefulWidget {
   /// overlay shape, whichever is larger.
   final EdgeInsetsGeometry? padding;
 
-  /// When true, the [Slider] will use the 2023 Material 3 esign appearance.
+  /// When true, the [Slider] will use the 2023 Material Design 3 appearance.
+  /// Defaults to true.
   ///
-  /// Defaults to true. If false, the [Slider] will use the latest Material 3
-  /// Design appearance, which was introduced in December 2023.
+  /// If this is set to false, the [Slider] will use the latest Material Design 3
+  /// appearance, which was introduced in December 2023.
   ///
   /// If [ThemeData.useMaterial3] is false, then this property is ignored.
   @Deprecated(
     'Use SliderTheme to customize the Slider appearance. '
     'This feature was deprecated after v3.27.0-0.1.pre.'
   )
-  final bool year2023;
+  final bool? year2023;
 
   final _SliderType _sliderType ;
 
@@ -810,8 +802,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   Widget _buildMaterialSlider(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     SliderThemeData sliderTheme = SliderTheme.of(context);
+    final bool year2023 = widget.year2023 ?? sliderTheme.year2023 ?? true;
     final SliderThemeData defaults = switch (theme.useMaterial3) {
-      true => widget.year2023
+      true => year2023
         ? _SliderDefaultsM3Year2023(context)
         : _SliderDefaultsM3(context),
       false => _SliderDefaultsM2(context),

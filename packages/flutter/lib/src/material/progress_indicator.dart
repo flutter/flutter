@@ -312,6 +312,8 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 ///
 /// {@tool dartpad}
 /// This example showcases determinate and indeterminate [LinearProgressIndicator]s.
+/// The [LinearProgressIndicator]s will use the ![updated Material 3 Design appearance](https://m3.material.io/components/progress-indicators/overview)
+/// when setting the [LinearProgressIndicator.year2023] flag to false.
 ///
 /// ** See code in examples/api/lib/material/progress_indicator/linear_progress_indicator.0.dart **
 /// {@end-tool}
@@ -351,7 +353,7 @@ class LinearProgressIndicator extends ProgressIndicator {
       'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
       'This feature was deprecated after v3.26.0-0.1.pre.'
     )
-    this.year2023 = true,
+    this.year2023,
   }) : assert(minHeight == null || minHeight > 0);
 
   /// {@template flutter.material.LinearProgressIndicator.trackColor}
@@ -414,18 +416,21 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// If that is null, then defaults to 4.
   final double? trackGap;
 
-  /// When true, the [LinearProgressIndicator] will use the 2023 Material 3
-  /// Design appearance.
+  /// When true, the [LinearProgressIndicator] will use the 2023 Material Design 3
+  /// appearance.
   ///
-  /// Defaults to true. If false, the [LinearProgressIndicator] will use the
-  /// latest Material 3 Design appearance, which was introduced in December 2023.
+  /// If null, then the [ProgressIndicatorThemeData.year2023] will be used.
+  /// If that is null, then defaults to true.
+  ///
+  /// If this is set to false, the [LinearProgressIndicator] will use the
+  /// latest Material Design 3 appearance, which was introduced in December 2023.
   ///
   /// If [ThemeData.useMaterial3] is false, then this property is ignored.
   @Deprecated(
     'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
     'This feature was deprecated after v3.27.0-0.1.pre.'
   )
-  final bool year2023;
+  final bool? year2023;
 
   @override
   State<LinearProgressIndicator> createState() => _LinearProgressIndicatorState();
@@ -463,14 +468,14 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
   }
 
   Widget _buildIndicator(BuildContext context, double animationValue, TextDirection textDirection) {
+    final ProgressIndicatorThemeData indicatorTheme = ProgressIndicatorTheme.of(context);
+    final bool year2023 = widget.year2023 ?? indicatorTheme.year2023 ?? true;
     final ProgressIndicatorThemeData defaults = switch (Theme.of(context).useMaterial3) {
-      true => widget.year2023
+      true => year2023
         ? _LinearProgressIndicatorDefaultsM3Year2023(context)
         : _LinearProgressIndicatorDefaultsM3(context),
       false => _LinearProgressIndicatorDefaultsM2(context),
     };
-
-    final ProgressIndicatorThemeData indicatorTheme = ProgressIndicatorTheme.of(context);
     final Color trackColor = widget.backgroundColor ??
       indicatorTheme.linearTrackColor ??
       defaults.linearTrackColor!;
@@ -480,17 +485,17 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
     final BorderRadiusGeometry? borderRadius = widget.borderRadius
       ?? indicatorTheme.borderRadius
       ?? defaults.borderRadius;
-    final Color? stopIndicatorColor = !widget.year2023
+    final Color? stopIndicatorColor = !year2023
       ? widget.stopIndicatorColor ??
         indicatorTheme.stopIndicatorColor ??
         defaults.stopIndicatorColor
       : null;
-    final double? stopIndicatorRadius = !widget.year2023
+    final double? stopIndicatorRadius = !year2023
       ? widget.stopIndicatorRadius ??
         indicatorTheme.stopIndicatorRadius ??
         defaults.stopIndicatorRadius
       : null;
-    final double? trackGap = !widget.year2023
+    final double? trackGap = !year2023
       ? widget.trackGap ??
         indicatorTheme.trackGap ??
         defaults.trackGap
@@ -704,7 +709,9 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// specify a constant color use: `AlwaysStoppedAnimation<Color>(color)`.
 ///
 /// {@tool dartpad}
-/// This example shows a [CircularProgressIndicator] with a changing value.
+/// This example showcases determinate and indeterminate [CircularProgressIndicator]s.
+/// The [CircularProgressIndicator]s will use the ![updated Material 3 Design appearance](https://m3.material.io/components/progress-indicators/overview)
+/// when setting the [CircularProgressIndicator.year2023] flag to false.
 ///
 /// ** See code in examples/api/lib/material/progress_indicator/circular_progress_indicator.0.dart **
 /// {@end-tool}
@@ -744,7 +751,7 @@ class CircularProgressIndicator extends ProgressIndicator {
       'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
       'This feature was deprecated after v3.27.0-0.1.pre.'
     )
-    this.year2023 = true,
+    this.year2023,
     this.padding,
   }) : _indicatorType = _ActivityIndicatorType.material;
 
@@ -774,7 +781,7 @@ class CircularProgressIndicator extends ProgressIndicator {
       'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
       'This feature was deprecated after v3.27.0-0.2.pre.'
     )
-    this.year2023 = true,
+    this.year2023,
     this.padding,
   }) : _indicatorType = _ActivityIndicatorType.adaptive;
 
@@ -843,18 +850,21 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// If that is null, then defaults to 4.
   final double? trackGap;
 
-  /// When true, the [CircularProgressIndicator] will use the 2023 Material 3
-  /// Design appearance.
+  /// When true, the [CircularProgressIndicator] will use the 2023 Material Design 3
+  /// appearance.
   ///
-  /// Defaults to true. If false, the [CircularProgressIndicator] will use the
-  /// latest Material 3 Design appearance, which was introduced in December 2023.
+  /// If null, then the [ProgressIndicatorThemeData.year2023] will be used.
+  /// If that is null, then defaults to true.
+  ///
+  /// If this is set to false, the [CircularProgressIndicator] will use the
+  /// latest Material Design 3 appearance, which was introduced in December 2023.
   ///
   /// If [ThemeData.useMaterial3] is false, then this property is ignored.
   @Deprecated(
     'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
     'This feature was deprecated after v3.27.0-0.2.pre.'
   )
-  final bool year2023;
+  final bool? year2023;
 
   /// The padding around the indicator track.
   ///
@@ -950,13 +960,14 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   }
 
   Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
+    final ProgressIndicatorThemeData indicatorTheme = ProgressIndicatorTheme.of(context);
+    final bool year2023 = widget.year2023 ?? indicatorTheme.year2023 ?? true;
     final ProgressIndicatorThemeData defaults = switch (Theme.of(context).useMaterial3) {
-      true => widget.year2023
+      true => year2023
         ? _CircularProgressIndicatorDefaultsM3Year2023(context, indeterminate: widget.value == null)
         : _CircularProgressIndicatorDefaultsM3(context, indeterminate: widget.value == null),
       false => _CircularProgressIndicatorDefaultsM2(context, indeterminate: widget.value == null),
     };
-    final ProgressIndicatorThemeData indicatorTheme = ProgressIndicatorTheme.of(context);
     final Color? trackColor = widget.backgroundColor
       ?? indicatorTheme.circularTrackColor
       ?? defaults.circularTrackColor;
@@ -971,7 +982,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
     final BoxConstraints constraints = widget.constraints
       ?? indicatorTheme.constraints
       ?? defaults.constraints!;
-    final double? trackGap = widget.year2023
+    final double? trackGap = year2023
       ? null
       : widget.trackGap ??
         indicatorTheme.trackGap ??
@@ -995,7 +1006,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
           strokeAlign: strokeAlign,
           strokeCap: strokeCap,
           trackGap: trackGap,
-          year2023: widget.year2023,
+          year2023: year2023,
         ),
       ),
     );

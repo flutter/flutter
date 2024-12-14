@@ -23,6 +23,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button_style_button.dart';
 import 'ink_well.dart';
 import 'material_state.dart';
 import 'theme_data.dart';
@@ -174,6 +175,7 @@ class ButtonStyle with Diagnosticable {
     this.maximumSize,
     this.iconColor,
     this.iconSize,
+    this.iconAlignment,
     this.side,
     this.shape,
     this.mouseCursor,
@@ -278,6 +280,22 @@ class ButtonStyle with Diagnosticable {
 
   /// The icon's size inside of the button.
   final MaterialStateProperty<double?>? iconSize;
+
+  /// The alignment of the button's icon.
+  ///
+  /// This property is supported for the following button types:
+  ///
+  ///  * [ElevatedButton.icon].
+  ///  * [FilledButton.icon].
+  ///  * [FilledButton.tonalIcon].
+  ///  * [OutlinedButton.icon].
+  ///  * [TextButton.icon].
+  ///
+  /// See also:
+  ///
+  ///  * [IconAlignment], for more information about the different icon
+  ///    alignments.
+  final IconAlignment? iconAlignment;
 
   /// The color and weight of the button's outline.
   ///
@@ -407,6 +425,7 @@ class ButtonStyle with Diagnosticable {
     MaterialStateProperty<Size?>? maximumSize,
     MaterialStateProperty<Color?>? iconColor,
     MaterialStateProperty<double?>? iconSize,
+    IconAlignment? iconAlignment,
     MaterialStateProperty<BorderSide?>? side,
     MaterialStateProperty<OutlinedBorder?>? shape,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
@@ -433,6 +452,7 @@ class ButtonStyle with Diagnosticable {
       maximumSize: maximumSize ?? this.maximumSize,
       iconColor: iconColor ?? this.iconColor,
       iconSize: iconSize ?? this.iconSize,
+      iconAlignment: iconAlignment ?? this.iconAlignment,
       side: side ?? this.side,
       shape: shape ?? this.shape,
       mouseCursor: mouseCursor ?? this.mouseCursor,
@@ -470,6 +490,7 @@ class ButtonStyle with Diagnosticable {
       maximumSize: maximumSize ?? style.maximumSize,
       iconColor: iconColor ?? style.iconColor,
       iconSize: iconSize ?? style.iconSize,
+      iconAlignment: iconAlignment ?? style.iconAlignment,
       side: side ?? style.side,
       shape: shape ?? style.shape,
       mouseCursor: mouseCursor ?? style.mouseCursor,
@@ -500,6 +521,7 @@ class ButtonStyle with Diagnosticable {
       maximumSize,
       iconColor,
       iconSize,
+      iconAlignment,
       side,
       shape,
       mouseCursor,
@@ -537,6 +559,7 @@ class ButtonStyle with Diagnosticable {
         && other.maximumSize == maximumSize
         && other.iconColor == iconColor
         && other.iconSize == iconSize
+        && other.iconAlignment == iconAlignment
         && other.side == side
         && other.shape == shape
         && other.mouseCursor == mouseCursor
@@ -566,6 +589,7 @@ class ButtonStyle with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('maximumSize', maximumSize, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('iconColor', iconColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('iconSize', iconSize, defaultValue: null));
+    properties.add(EnumProperty<IconAlignment>('iconAlignment', iconAlignment, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<BorderSide?>>('side', side, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
@@ -597,6 +621,7 @@ class ButtonStyle with Diagnosticable {
       maximumSize: MaterialStateProperty.lerp<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
       iconColor: MaterialStateProperty.lerp<Color?>(a?.iconColor, b?.iconColor, t, Color.lerp),
       iconSize: MaterialStateProperty.lerp<double?>(a?.iconSize, b?.iconSize, t, lerpDouble),
+      iconAlignment: t < 0.5 ? a?.iconAlignment : b?.iconAlignment,
       side: _lerpSides(a?.side, b?.side, t),
       shape: MaterialStateProperty.lerp<OutlinedBorder?>(a?.shape, b?.shape, t, OutlinedBorder.lerp),
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,

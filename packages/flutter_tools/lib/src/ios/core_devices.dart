@@ -79,7 +79,13 @@ class IOSCoreDeviceControl {
 
     try {
       final RunResult result = await _processUtils.run(command, throwOnError: true);
-      final bool isToolPossiblyShutdown = _fileSystem is LocalFileSystem && _fileSystem.disposed;
+      bool isToolPossiblyShutdown = false;
+      if (_fileSystem is ErrorHandlingFileSystem) {
+        final FileSystem delegate = _fileSystem.fileSystem;
+        if (delegate is LocalFileSystem) {
+          isToolPossiblyShutdown = delegate.disposed;
+        }
+      }
 
       // It's possible that the tool is in the process of shutting down, which
       // could result in the temp directory being deleted after the shutdown hooks run
@@ -94,10 +100,6 @@ class IOSCoreDeviceControl {
         _logger.printError('The process exited with code ${result.exitCode} and');
         _logger.printError('Stdout:\n\n${result.stdout.trim()}\n');
         _logger.printError('Stderr:\n\n${result.stderr.trim()}');
-        _logger.printError('Using file system type: ${_fileSystem.runtimeType}');
-        if (_fileSystem is LocalFileSystem) {
-          _logger.printError('LocalFileSystem disposed: ${_fileSystem.disposed}');
-        }
         throw StateError('Expected the file ${output.path} to exist but it did not');
       } else if (isToolPossiblyShutdown) {
         return <Object?>[];

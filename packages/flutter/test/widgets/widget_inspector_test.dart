@@ -414,6 +414,30 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         );
       }
 
+      Future<void> panAndVerifyWidgetSelection({
+        required Finder startAt,
+        required Finder endAt,
+        required bool isSelected,
+        required GlobalKey widgetKey,
+      }) async {
+        // Pan to the widget.
+        final ui.Offset start = tester.getCenter(startAt);
+        final ui.Offset end = tester.getCenter(endAt);
+        await tester.dragFrom(
+          tester.getCenter(startAt),
+          Offset(end.dx - start.dx, end.dy - start.dy),
+        );
+        await tester.pump();
+
+        // Verify the pan end was intercepted by the Widget Inspector.
+        final RenderObject renderObject =
+            find.byKey(widgetKey).evaluate().first.renderObject!;
+        expect(
+          WidgetInspectorService.instance.selection.candidates,
+          contains(renderObject),
+        );
+      }
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -464,6 +488,37 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Tap on the bottom button and verify it's selected in the Inspector.
       await tapAndVerifyWidgetSelection(
         find.text('BOTTOM'),
+        isSelected: true,
+        widgetKey: bottomButtonKey,
+      );
+      expect(
+        paragraphText(
+          WidgetInspectorService.instance.selection.current! as RenderParagraph,
+        ),
+        equals('BOTTOM'),
+      );
+      expect(log, equals(<String>[]));
+
+
+      // Now pan to the top button and verify it's selected in the Inspector.
+      await panAndVerifyWidgetSelection(
+        startAt: find.text('BOTTOM'),
+        endAt: find.text('TOP'),
+        isSelected: true,
+        widgetKey: topButtonKey,
+      );
+      expect(
+        paragraphText(
+          WidgetInspectorService.instance.selection.current! as RenderParagraph,
+        ),
+        equals('TOP'),
+      );
+      expect(log, equals(<String>[]));
+
+      // Now pan to the bottom button and verify it's selected in the Inspector.
+      await panAndVerifyWidgetSelection(
+        startAt: find.text('TOP'),
+        endAt: find.text('BOTTOM'),
         isSelected: true,
         widgetKey: bottomButtonKey,
       );
@@ -941,7 +996,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ),
         );
 
-        // Intitially the exit select button is on the left.
+        // Initially the exit select button is on the left.
         final Finder exitButton = buttonFinder('EXIT SELECT MODE');
         expect(exitButton, findsOneWidget);
         final Finder moveRightButton = buttonFinder('MOVE RIGHT');
@@ -2122,7 +2177,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
           /// Gets the children nodes from the JSON response.
           List<Object?> childrenFromJsonResponse(Map<String, Object?> json) {
-            return json['children']! as List<Object?>;
+            return (json['children'] as List<Object?>?) ?? <Object?>[];
           }
 
           /// Gets the children nodes using a call to
@@ -2516,7 +2571,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               ),
               isTrue,
             );
-
             expect(
               allChildrenSatisfyCondition(rootJson,
                 condition: wasCreatedByLocalProject,
@@ -5703,7 +5757,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         node.toJsonMap(const DiagnosticsSerializationDelegate()),
         equals(<String, dynamic>{
           'description': 'description of the deep link',
-          'shouldIndent': true,
           'type': 'DevToolsDeepLinkProperty',
           'name': '',
           'style': 'singleLine',

@@ -205,6 +205,7 @@ void main() {
       .createSync(recursive: true);
     // App kernel
     environment.buildDir.childFile('app.dill').createSync(recursive: true);
+    environment.buildDir.childFile('native_assets.json').createSync();
     // Stub framework
     environment.buildDir
         .childDirectory('App.framework')
@@ -285,6 +286,7 @@ void main() {
     fileSystem.file('shader.glsl').writeAsStringSync('test');
     // App kernel
     environment.buildDir.childFile('app.dill').createSync(recursive: true);
+    environment.buildDir.childFile('native_assets.json').createSync();
     // Stub framework
     environment.buildDir
         .childDirectory('App.framework')
@@ -360,6 +362,7 @@ void main() {
       .childDirectory('App.framework')
       .childFile('App')
       .createSync(recursive: true);
+    environment.buildDir.childFile('native_assets.json').createSync();
 
     // Input dSYM
     environment.buildDir
@@ -425,6 +428,7 @@ void main() {
         .childDirectory('App.framework')
         .childFile('App')
         .createSync(recursive: true);
+    environment.buildDir.childFile('native_assets.json').createSync();
 
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
     final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');

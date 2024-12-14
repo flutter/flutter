@@ -12844,7 +12844,7 @@ void main() {
       selection: TextSelection.collapsed(offset: textAC.length),
     );
 
-    bool isDeskop() {
+    bool isDesktop() {
       return debugDefaultTargetPlatformOverride == TargetPlatform.macOS
           || debugDefaultTargetPlatformOverride == TargetPlatform.windows
           || debugDefaultTargetPlatformOverride == TargetPlatform.linux;
@@ -13032,7 +13032,7 @@ void main() {
       focusNode.requestFocus();
       await tester.pump();
       await waitForThrottling(tester);
-      expect(controller.value, isDeskop() ? textASelected : textACollapsedAtEnd);
+      expect(controller.value, isDesktop() ? textASelected : textACollapsedAtEnd);
 
       // Insert some text.
       await tester.enterText(find.byType(EditableText), textAB);
@@ -13041,7 +13041,7 @@ void main() {
       // Undo the insertion without waiting for the throttling delay.
       await sendUndo(tester);
       expect(controller.value.selection.isValid, true);
-      expect(controller.value, isDeskop() ? textASelected : textACollapsedAtEnd);
+      expect(controller.value, isDesktop() ? textASelected : textACollapsedAtEnd);
 
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
@@ -13056,7 +13056,7 @@ void main() {
       await tester.pump();
       await sendUndo(tester);
       await waitForThrottling(tester);
-      expect(controller.value, isDeskop() ? textASelected : textACollapsedAtEnd);
+      expect(controller.value, isDesktop() ? textASelected : textACollapsedAtEnd);
 
       // Insert some text.
       await tester.enterText(find.byType(EditableText), textAB);
@@ -13066,7 +13066,7 @@ void main() {
       await sendUndo(tester);
 
       // Initial text should have been recorded and restored.
-      expect(controller.value, isDeskop() ? textASelected : textACollapsedAtEnd);
+      expect(controller.value, isDesktop() ? textASelected : textACollapsedAtEnd);
 
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
@@ -16960,7 +16960,7 @@ void main() {
       ),
     );
     await tester.pumpWidget(widget);
-    await tester.showKeyboard(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText, skipOffstage: false));
     await tester.pumpAndSettle();
     expect(scrollController.offset, 75.0);
   });
@@ -17212,6 +17212,51 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/159259.
+  testWidgets('showToolbar does nothing and returns false when already shown', (WidgetTester tester) async {
+    controller.text = 'Lorem ipsum dolor sit amet';
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          key: editableTextKey,
+          autofocus: true,
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionHandleControls,
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+
+    expect(editableTextKey.currentState!.showToolbar(), isTrue);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+
+    expect(editableTextKey.currentState!.showToolbar(), isFalse);
+    await tester.pump();
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+    skip: kIsWeb, // [intended]
+  );
 }
 
 class UnsettableController extends TextEditingController {

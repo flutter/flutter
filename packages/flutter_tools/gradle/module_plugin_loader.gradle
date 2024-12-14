@@ -26,7 +26,7 @@ gradle.getGradle().projectsLoaded { g ->
         p.subprojects { subproject ->
             if (nativePlugins.name.contains(subproject.name)) {
                 File androidPluginBuildOutputDir = new File(flutterModulePath + File.separator
-                        + "plugins_build_output" + File.separator + subproject.name);
+                        + "plugins_build_output" + File.separator + subproject.name)
                 if (!androidPluginBuildOutputDir.exists()) {
                     androidPluginBuildOutputDir.mkdirs()
                 }
