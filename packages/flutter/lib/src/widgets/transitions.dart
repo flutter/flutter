@@ -1115,17 +1115,12 @@ class ListenableBuilder extends AnimatedWidget {
   ///
   /// Returns a new [ListenableBuilder] instance configured to listen to all provided
   /// [listenables].
-  factory ListenableBuilder.multiple({
-    required List<Listenable> listenables,
-    required TransitionBuilder builder,
-    Widget? child,
-  }) {
-    return ListenableBuilder(
-      listenable: Listenable.merge(listenables),
-      builder: builder,
-      child: child,
-    );
-  }
+  ListenableBuilder.multiple({
+    super.key,
+    required Iterable<Listenable> listenables,
+    required this.builder,
+    this.child,
+  }) : super(listenable: Listenable.merge(listenables));
 
   /// The [Listenable] supplied to the constructor.
   ///
