@@ -477,11 +477,11 @@ class _HeroFlightManifest {
     if (type == HeroFlightDirection.push) {
       parent = toRoute.animation!;
       curve = toHero.widget.curve;
-      reverseCurve = toHero.widget.reverseCurve ?? toHero.widget.curve.flipped;
+      reverseCurve = (toHero.widget.reverseCurve ?? toHero.widget.curve).flipped;
     } else {
       parent = fromRoute.animation!;
       curve = fromHero.widget.curve;
-      reverseCurve = fromHero.widget.reverseCurve ?? fromHero.widget.curve.flipped;
+      reverseCurve = (fromHero.widget.reverseCurve ?? fromHero.widget.curve).flipped;
     }
 
     return _animation ??= CurvedAnimation(
