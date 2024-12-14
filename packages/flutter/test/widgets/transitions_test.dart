@@ -978,7 +978,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListenableBuilder.multiple(
-          listenables: [notifier1, notifier2],
+          listenables: <Listenable>[notifier1, notifier2],
           builder: (BuildContext context, Widget? child) {
             return RedrawCounter(key: redrawKey, child: child);
           },
