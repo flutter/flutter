@@ -92,7 +92,8 @@ void main() async {
 
   List<ColorFilter> colorFilters() {
     // Create new color filter instances on each invocation.
-    return <ColorFilter> [                        // ignore: prefer_const_constructors
+    // ignore: prefer_const_constructors
+    return <ColorFilter> [
       ColorFilter.mode(green, BlendMode.color),   // ignore: prefer_const_constructors
       ColorFilter.mode(red, BlendMode.color),     // ignore: prefer_const_constructors
       ColorFilter.mode(red, BlendMode.screen),    // ignore: prefer_const_constructors

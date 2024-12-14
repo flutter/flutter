@@ -294,7 +294,8 @@ typedef _ListStringArgFunction = Object? Function(List<String> args);
 void _runMain(Function startMainIsolateFunction,
               Function userMainFunction,
               List<String> args) {
-  startMainIsolateFunction(() { // ignore: avoid_dynamic_calls
+  // ignore: avoid_dynamic_calls
+  startMainIsolateFunction(() {
     if (userMainFunction is _ListStringArgFunction) {
       userMainFunction(args);
     } else {

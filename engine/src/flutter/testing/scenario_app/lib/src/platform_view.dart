@@ -22,7 +22,8 @@ List<int> _to64(num value) {
   final Uint8List temp = Uint8List(15);
   if (value is double) {
     temp.buffer.asByteData().setFloat64(7, value, Endian.little);
-  } else if (value is int) {  // ignore: avoid_double_and_int_checks
+    // ignore: avoid_double_and_int_checks
+  } else if (value is int) {
     temp.buffer.asByteData().setInt64(7, value, Endian.little);
   }
   return temp;
