@@ -206,7 +206,7 @@ class TextFormField extends FormField<String> {
        super(
          initialValue: controller != null ? controller.text : (initialValue ?? ''),
          enabled: enabled ?? decoration?.enabled ?? true,
-         autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
+         autoValidateMode: autovalidateMode ?? AutovalidateMode.disabled,
          builder: (FormFieldState<String> field) {
            final _TextFormFieldState state = field as _TextFormFieldState;
            final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())

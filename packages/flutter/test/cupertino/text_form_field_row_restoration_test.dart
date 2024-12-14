@@ -52,7 +52,7 @@ void main() {
                   return Material(
                     child: CupertinoTextFormFieldRow(
                       key: formState,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      autoValidateMode: AutovalidateMode.onUserInteraction,
                       restorationId: 'text_form_field',
                       initialValue: 'foo',
                       validator: errorText,
@@ -111,7 +111,7 @@ void main() {
                     child: CupertinoTextFormFieldRow(
                       key: formState,
                       restorationId: 'form_field',
-                      autovalidateMode: mode,
+                      autoValidateMode: mode,
                       initialValue: 'foo',
                       validator: errorText,
                     ),

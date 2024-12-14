@@ -455,9 +455,9 @@ class FormField<T> extends StatefulWidget {
     this.validator,
     this.initialValue,
     this.enabled = true,
-    AutovalidateMode? autovalidateMode,
+    AutovalidateMode? autoValidateMode,
     this.restorationId,
-  }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
+  }) : autoValidateMode = autoValidateMode ?? AutovalidateMode.disabled;
 
   /// An optional method to call with the final value when the form is saved via
   /// [FormState.save].
@@ -530,7 +530,7 @@ class FormField<T> extends StatefulWidget {
   ///
   /// Defaults to [AutovalidateMode.disabled].
   /// {@endtemplate}
-  final AutovalidateMode autovalidateMode;
+  final AutovalidateMode autoValidateMode;
 
   /// Restoration ID to save and restore the state of the form field.
   ///
@@ -728,7 +728,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   @override
   Widget build(BuildContext context) {
     if (widget.enabled) {
-      switch (widget.autovalidateMode) {
+      switch (widget.autoValidateMode) {
         case AutovalidateMode.always:
           _validate();
         case AutovalidateMode.onUserInteraction:
@@ -743,8 +743,8 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
     Form.maybeOf(context)?._register(this);
 
-    if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.onUnfocus && widget.autovalidateMode != AutovalidateMode.always ||
-        widget.autovalidateMode == AutovalidateMode.onUnfocus) {
+    if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.onUnfocus && widget.autoValidateMode != AutovalidateMode.always ||
+        widget.autoValidateMode == AutovalidateMode.onUnfocus) {
       return Focus(
         canRequestFocus: false,
         skipTraversal: true,

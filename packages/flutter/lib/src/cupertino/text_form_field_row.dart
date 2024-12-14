@@ -150,7 +150,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     TextSelectionControls? selectionControls,
     ScrollPhysics? scrollPhysics,
     Iterable<String>? autofillHints,
-    AutovalidateMode super.autovalidateMode = AutovalidateMode.disabled,
+    AutovalidateMode super.autoValidateMode = AutovalidateMode.disabled,
     String? placeholder,
     TextStyle? placeholderStyle = const TextStyle(
       fontWeight: FontWeight.w400,

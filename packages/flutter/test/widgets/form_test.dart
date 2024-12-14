@@ -762,7 +762,7 @@ void main() {
               child: Material(
                 child: FormField<String>(
                   initialValue: 'foo',
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  autoValidateMode: AutovalidateMode.onUserInteraction,
                   builder: (FormFieldState<String> state) {
                     formFieldState = state;
                     return Container();
@@ -798,7 +798,7 @@ void main() {
               child: Material(
                 child: FormField<String>(
                   initialValue: 'foo',
-                  autovalidateMode: AutovalidateMode.always,
+                  autoValidateMode: AutovalidateMode.always,
                   builder: (FormFieldState<String> state) {
                     formFieldState = state;
                     return Container();
