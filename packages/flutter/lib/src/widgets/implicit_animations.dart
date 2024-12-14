@@ -21,6 +21,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'basic.dart';
 import 'container.dart';
 import 'debug.dart';
+import 'default_animation_style.dart';
 import 'framework.dart';
 import 'text.dart';
 import 'ticker_provider.dart';
@@ -286,16 +287,16 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   /// Initializes fields for subclasses.
   const ImplicitlyAnimatedWidget({
     super.key,
-    this.curve = Curves.linear,
-    required this.duration,
+    this.curve,
+    this.duration,
     this.onEnd,
   });
 
   /// The curve to apply when animating the parameters of this container.
-  final Curve curve;
+  final Curve? curve;
 
   /// The duration over which to animate the parameters of this container.
-  final Duration duration;
+  final Duration? duration;
 
   /// Called every time an animation completes.
   ///
@@ -309,7 +310,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
+    properties.add(IntProperty('duration', duration?.inMilliseconds, unit: 'ms'));
   }
 }
 
@@ -369,6 +370,13 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   Animation<double> get animation => _animation;
   late CurvedAnimation _animation = _createCurve();
 
+  late ValueListenable<AnimationStyle> _styleNotifier = DefaultAnimationStyle.getNotifier(context);
+  void _updateCurveAndDuration() {
+    late final AnimationStyle defaultStyle = _styleNotifier.value;
+    _animation.curve = widget.curve ?? defaultStyle.curve ?? DefaultAnimationStyle.fallbackCurve;
+    _controller.duration = widget.duration ?? defaultStyle.duration ?? DefaultAnimationStyle.fallbackDuration;
+  }
+
   @protected
   @override
   void initState() {
@@ -378,6 +386,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
         widget.onEnd?.call();
       }
     });
+    _styleNotifier.addListener(_updateCurveAndDuration..call());
     _constructTweens();
     didUpdateTweens();
   }
@@ -390,7 +399,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
       _animation.dispose();
       _animation = _createCurve();
     }
-    _controller.duration = widget.duration;
+    _updateCurveAndDuration();
     if (_constructTweens()) {
       forEachTween((Tween<dynamic>? tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
         _updateTween(tween, targetValue);
@@ -403,13 +412,26 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     }
   }
 
+  @protected
+  @override
+  void activate() {
+    super.activate();
+    final ValueListenable<AnimationStyle> newNotifier = DefaultAnimationStyle.getNotifier(context);
+    if (newNotifier == _styleNotifier) {
+      return;
+    }
+    _styleNotifier.removeListener(_updateCurveAndDuration);
+    _styleNotifier = newNotifier..addListener(_updateCurveAndDuration..call());
+  }
+
   CurvedAnimation _createCurve() {
-    return CurvedAnimation(parent: _controller, curve: widget.curve);
+    return CurvedAnimation(parent: _controller, curve: widget.curve ?? Curves.linear);
   }
 
   @protected
   @override
   void dispose() {
+    _styleNotifier.removeListener(_updateCurveAndDuration);
     _animation.dispose();
     _controller.dispose();
     super.dispose();
@@ -622,7 +644,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     this.child,
     this.clipBehavior = Clip.none,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   }) : assert(margin == null || margin.isNonNegative),
        assert(padding == null || padding.isNonNegative),
@@ -816,7 +838,7 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
     required this.padding,
     this.child,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   }) : assert(padding.isNonNegative);
 
@@ -904,7 +926,7 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
     this.heightFactor,
     this.widthFactor,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   }) : assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0);
@@ -1043,7 +1065,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     this.width,
     this.height,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   }) : assert(left == null || right == null || width == null),
        assert(top == null || bottom == null || height == null);
@@ -1054,7 +1076,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     required this.child,
     required Rect rect,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   }) : left = rect.left,
        top = rect.top,
@@ -1190,7 +1212,7 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
     this.width,
     this.height,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   }) : assert(start == null || end == null || width == null),
        assert(top == null || bottom == null || height == null);
@@ -1348,7 +1370,7 @@ class AnimatedScale extends ImplicitlyAnimatedWidget {
     this.alignment = Alignment.center,
     this.filterQuality,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   });
 
@@ -1470,7 +1492,7 @@ class AnimatedRotation extends ImplicitlyAnimatedWidget {
     this.alignment = Alignment.center,
     this.filterQuality,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   });
 
@@ -1562,7 +1584,7 @@ class AnimatedSlide extends ImplicitlyAnimatedWidget {
     this.child,
     required this.offset,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   });
 
@@ -1693,7 +1715,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
     this.child,
     required this.opacity,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
     this.alwaysIncludeSemantics = false,
   }) : assert(opacity >= 0.0 && opacity <= 1.0);
@@ -1804,7 +1826,7 @@ class SliverAnimatedOpacity extends ImplicitlyAnimatedWidget {
     this.sliver,
     required this.opacity,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
     this.alwaysIncludeSemantics = false,
   }) : assert(opacity >= 0.0 && opacity <= 1.0);
@@ -1895,7 +1917,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   }) : assert(maxLines == null || maxLines > 0);
 
@@ -2014,7 +2036,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     required this.shadowColor,
     this.animateShadowColor = true,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   }) : assert(elevation >= 0.0);
 
@@ -2157,7 +2179,7 @@ class AnimatedFractionallySizedBox extends ImplicitlyAnimatedWidget {
     this.heightFactor,
     this.widthFactor,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   }) : assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0);
