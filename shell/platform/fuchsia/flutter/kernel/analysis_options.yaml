@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-include: ../../../tools/analysis_options.yaml
+include: ../../../../../analysis_options.yaml
 analyzer:
   errors:
     avoid_catches_without_on_clauses: ignore
