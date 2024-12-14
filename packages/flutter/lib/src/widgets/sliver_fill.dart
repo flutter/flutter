@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'nested_scroll_view.dart';
+/// @docImport 'scroll_physics.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'sliver_prototype_extent_list.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -144,12 +150,10 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 
     final double paddingValue = constraints.viewportMainAxisExtent * viewportFraction;
     _lastResolvedConstraints = constraints;
-    switch (constraints.axis) {
-      case Axis.horizontal:
-        _resolvedPadding = EdgeInsets.symmetric(horizontal: paddingValue);
-      case Axis.vertical:
-        _resolvedPadding = EdgeInsets.symmetric(vertical: paddingValue);
-    }
+    _resolvedPadding = switch (constraints.axis) {
+      Axis.horizontal => EdgeInsets.symmetric(horizontal: paddingValue),
+      Axis.vertical   => EdgeInsets.symmetric(vertical: paddingValue),
+    };
 
     return;
   }

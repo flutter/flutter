@@ -91,17 +91,14 @@ class LinkedScrollController extends ScrollController {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    if (before != null && after != null) {
-      description.add('links: ⬌');
-    } else if (before != null) {
-      description.add('links: ⬅');
-    } else if (after != null) {
-      description.add('links: ➡');
-    } else {
-      description.add('links: none');
-    }
+    final String linkSymbol = switch ((before, after)) {
+      (null, null) => 'none',
+      (null, _)    => '➡',
+      (_, null)    => '⬅',
+      (_, _)       => '⬌',
+    };
+    description.add('links: $linkSymbol');
   }
-
 }
 
 class LinkedScrollPosition extends ScrollPositionWithSingleContext {
@@ -193,12 +190,8 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
   }
 
   void unlink(LinkedScrollActivity activity) {
-    if (_beforeActivities != null) {
-      _beforeActivities!.remove(activity);
-    }
-    if (_afterActivities != null) {
-      _afterActivities!.remove(activity);
-    }
+    _beforeActivities?.remove(activity);
+    _afterActivities?.remove(activity);
   }
 
   @override

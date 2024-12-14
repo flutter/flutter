@@ -21,8 +21,6 @@ class ColdRunner extends ResidentRunner {
     this.traceStartup = false,
     this.awaitFirstFrameWhenTracing = true,
     this.applicationBinary,
-    this.multidexEnabled = false,
-    bool super.ipv6 = false,
     super.stayResident,
     super.machine,
     super.devtoolsHandler,
@@ -33,7 +31,6 @@ class ColdRunner extends ResidentRunner {
   final bool traceStartup;
   final bool awaitFirstFrameWhenTracing;
   final File? applicationBinary;
-  final bool multidexEnabled;
   bool _didAttach = false;
 
   @override
@@ -49,7 +46,6 @@ class ColdRunner extends ResidentRunner {
   Future<int> run({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
-    bool enableDevTools = false,
     String? route,
   }) async {
     try {
@@ -80,18 +76,18 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    if (debuggingEnabled) {
-      if (enableDevTools) {
-        // The method below is guaranteed never to return a failing future.
-        unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-          flutterDevices: flutterDevices,
-          isStartPaused: debuggingOptions.startPaused,
-        ));
-      }
-      if (debuggingOptions.serveObservatory) {
-        await enableObservatory();
-      }
+    if (debuggingEnabled && debuggingOptions.serveObservatory) {
+      await enableObservatory();
+    }
+
+    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
+    if (debuggingEnabled && debuggingOptions.enableDevTools) {
+      // The method below is guaranteed never to return a failing future.
+      unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
+        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
+        flutterDevices: flutterDevices,
+        isStartPaused: debuggingOptions.startPaused,
+      ));
     }
 
     if (flutterDevices.first.vmServiceUris != null) {
@@ -108,7 +104,7 @@ class ColdRunner extends ResidentRunner {
       if (device!.vmService == null) {
         continue;
       }
-      await device.initLogReader();
+      await device.tryInitLogReader();
       globals.printTrace('Connected to ${device.device!.name}');
     }
 
@@ -144,7 +140,6 @@ class ColdRunner extends ResidentRunner {
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
     bool allowExistingDdsInstance = false,
-    bool enableDevTools = false,
     bool needsFullRestart = true,
   }) async {
     _didAttach = true;
@@ -159,7 +154,7 @@ class ColdRunner extends ResidentRunner {
     }
 
     for (final FlutterDevice? device in flutterDevices) {
-      await device!.initLogReader();
+      await device!.tryInitLogReader();
     }
     for (final FlutterDevice? device in flutterDevices) {
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
@@ -168,18 +163,8 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    if (debuggingEnabled) {
-      if (enableDevTools) {
-        // The method below is guaranteed never to return a failing future.
-        unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-          flutterDevices: flutterDevices,
-          isStartPaused: debuggingOptions.startPaused,
-        ));
-      }
-      if (debuggingOptions.serveObservatory) {
-        await enableObservatory();
-      }
+    if (debuggingEnabled && debuggingOptions.serveObservatory) {
+      await enableObservatory();
     }
 
     appStartedCompleter?.complete();
@@ -204,13 +189,12 @@ class ColdRunner extends ResidentRunner {
     for (final FlutterDevice? flutterDevice in flutterDevices) {
       await flutterDevice!.device!.dispose();
     }
-
     await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
   }
 
   @override
-  void printHelp({ required bool details }) {
+  void printHelp({required bool details}) {
     globals.printStatus('Flutter run key commands.');
     if (details) {
       printHelpDetails();

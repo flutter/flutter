@@ -7,12 +7,13 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -25,6 +26,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/fake_vm_services.dart';
+import '../src/fakes.dart';
 
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
@@ -175,12 +177,6 @@ void main() {
       ], web: true);
 
       await terminalHandler.processTerminalInput('a');
-    });
-
-    testWithoutContext('j unsupported jank metrics for web', () async {
-      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], web: true);
-      await terminalHandler.processTerminalInput('j');
-      expect(terminalHandler.logger.warningText.contains('Unable to get jank metrics for web'), true);
     });
 
     testWithoutContext('a - debugToggleProfileWidgetBuilds without service protocol is skipped', () async {
@@ -1125,7 +1121,7 @@ void main() {
         const FakeVmServiceRequest(
           method: 'ext.dwds.screenshot',
           // Failed response,
-          errorCode: RPCErrorCodes.kInternalError,
+          error: FakeRPCError(code: RPCErrorCodes.kInternalError),
         ),
         FakeVmServiceRequest(
           method: 'ext.flutter.debugAllowBanner',
@@ -1165,7 +1161,7 @@ void main() {
             'enabled': 'true',
           },
           // Failed response,
-          errorCode: RPCErrorCodes.kInternalError,
+          error: const FakeRPCError(code: RPCErrorCodes.kInternalError),
         ),
       ],
       logger: logger,
@@ -1308,11 +1304,13 @@ class FakeResidentRunner extends ResidentHandlers {
     return OperationResult(reloadExitCode, '', fatal: fatalReloadError);
   }
 
+  // TODO(bkonyi): remove when ready to serve DevTools from DDS.
   @override
   ResidentDevtoolsHandler get residentDevtoolsHandler => _residentDevtoolsHandler;
   final ResidentDevtoolsHandler _residentDevtoolsHandler = FakeResidentDevtoolsHandler();
 }
 
+// TODO(bkonyi): remove when ready to serve DevTools from DDS.
 class FakeResidentDevtoolsHandler extends Fake implements ResidentDevtoolsHandler {
   bool calledLaunchDevToolsInBrowser = false;
 
@@ -1333,13 +1331,15 @@ class FakeDevice extends Fake implements Device {
   String get name => 'Fake Device';
 
   @override
+  DartDevelopmentService dds = DartDevelopmentService(logger: FakeLogger());
+
+  @override
   Future<void> takeScreenshot(File file) async {
     if (!supportsScreenshot) {
       throw StateError('illegal screenshot attempt');
     }
     file.writeAsBytesSync(<int>[1, 2, 3, 4]);
   }
-
 }
 
 TerminalHandler setUpTerminalHandler(List<FakeVmServiceRequest> requests, {
@@ -1361,12 +1361,15 @@ TerminalHandler setUpTerminalHandler(List<FakeVmServiceRequest> requests, {
   final ProcessInfo processInfo = ProcessInfo.test(MemoryFileSystem.test());
   final FlutterDevice device = FlutterDevice(
     FakeDevice()..supportsScreenshot = supportsScreenshot,
-    buildInfo: BuildInfo(buildMode, '', treeShakeIcons: false),
+    buildInfo: BuildInfo(
+      buildMode,
+      '',
+      treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
+    ),
     generator: FakeResidentCompiler(),
     developmentShaderCompiler: const FakeShaderCompiler(),
-    targetPlatform: web
-      ? TargetPlatform.web_javascript
-      : TargetPlatform.android_arm,
+    targetPlatform: web ? TargetPlatform.web_javascript : TargetPlatform.android_arm,
   );
   device.vmService = FakeVmServiceHost(requests: requests).vmService;
   final FakeResidentRunner residentRunner = FakeResidentRunner(device, testLogger, localFileSystem)
@@ -1475,10 +1478,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(
-    TargetPlatform? platform, {
-    required ImpellerStatus impellerStatus,
-  }) { }
+  void configureCompiler(TargetPlatform? platform) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'date_picker.dart';
+/// @docImport 'text_field.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'date.dart';
@@ -256,21 +260,24 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       ?? theme.inputDecorationTheme.border
       ?? (useMaterial3 ? const OutlineInputBorder() : const UnderlineInputBorder());
 
-    return TextFormField(
-      decoration: InputDecoration(
-        hintText: widget.fieldHintText ?? localizations.dateHelpText,
-        labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
-      ).applyDefaults(inputTheme
-        .merge(datePickerTheme.inputDecorationTheme)
-        .copyWith(border: effectiveInputBorder),
+    return Semantics(
+      container: true,
+      child: TextFormField(
+        decoration: InputDecoration(
+          hintText: widget.fieldHintText ?? localizations.dateHelpText,
+          labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
+        ).applyDefaults(inputTheme
+          .merge(datePickerTheme.inputDecorationTheme)
+          .copyWith(border: effectiveInputBorder),
+        ),
+        validator: _validateDate,
+        keyboardType: widget.keyboardType ?? TextInputType.datetime,
+        onSaved: _handleSaved,
+        onFieldSubmitted: _handleSubmitted,
+        autofocus: widget.autofocus,
+        controller: _controller,
+        focusNode: widget.focusNode,
       ),
-      validator: _validateDate,
-      keyboardType: widget.keyboardType ?? TextInputType.datetime,
-      onSaved: _handleSaved,
-      onFieldSubmitted: _handleSubmitted,
-      autofocus: widget.autofocus,
-      controller: _controller,
-      focusNode: widget.focusNode,
     );
   }
 }

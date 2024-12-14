@@ -21,6 +21,7 @@ import '../convert.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
+import '../device_vm_service_discovery_for_attach.dart';
 import '../globals.dart' as globals;
 import '../macos/xcode.dart';
 import '../project.dart';
@@ -89,6 +90,7 @@ class IOSSimulatorUtils {
         name: name,
         simControl: _simControl,
         simulatorCategory: device.category,
+        logger: _simControl._logger,
       );
     }).whereType<IOSSimulator>().toList();
   }
@@ -182,20 +184,14 @@ class SimControl {
 
   /// Returns all the connected simulator devices.
   Future<List<BootedSimDevice>> getConnectedDevices() async {
-    final List<BootedSimDevice> devices = <BootedSimDevice>[];
-
     final Map<String, Object?> devicesSection = await _listBootedDevices();
 
-    for (final String deviceCategory in devicesSection.keys) {
-      final Object? devicesData = devicesSection[deviceCategory];
-      if (devicesData != null && devicesData is List<Object?>) {
-        for (final Map<String, Object?> data in devicesData.map<Map<String, Object?>?>(castStringKeyedMap).whereType<Map<String, Object?>>()) {
-          devices.add(BootedSimDevice(deviceCategory, data));
-        }
-      }
-    }
-
-    return devices;
+    return <BootedSimDevice>[
+      for (final String deviceCategory in devicesSection.keys)
+        if (devicesSection[deviceCategory] case final List<Object?> devicesData)
+          for (final Object? data in devicesData.map<Map<String, Object?>?>(castStringKeyedMap))
+            if (data is Map<String, Object?>) BootedSimDevice(deviceCategory, data),
+    ];
   }
 
   Future<bool> isInstalled(String deviceId, String appId) {
@@ -361,6 +357,7 @@ class IOSSimulator extends Device {
       required this.name,
       required this.simulatorCategory,
       required SimControl simControl,
+      required super.logger,
     }) : _simControl = simControl,
          super(
            category: Category.mobile,
@@ -477,7 +474,6 @@ class IOSSimulator extends Device {
     required DebuggingOptions debuggingOptions,
     Map<String, Object?> platformArgs = const <String, Object?>{},
     bool prebuiltApplication = false,
-    bool ipv6 = false,
     String? userIdentifier,
   }) async {
     if (!prebuiltApplication && package is BuildableIOSApp) {
@@ -506,7 +502,7 @@ class IOSSimulator extends Device {
     if (debuggingOptions.debuggingEnabled) {
       vmServiceDiscovery = ProtocolDiscovery.vmService(
         getLogReader(app: package),
-        ipv6: ipv6,
+        ipv6: debuggingOptions.ipv6,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
         logger: globals.logger,
@@ -570,7 +566,14 @@ class IOSSimulator extends Device {
       deviceID: id,
     );
     if (!buildResult.success) {
-      await diagnoseXcodeBuildFailure(buildResult, globals.flutterUsage, globals.logger, globals.analytics);
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        analytics: globals.analytics,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: SupportedPlatform.ios,
+        project: app.project.parent,
+      );
       throwToolExit('Could not build the application for the simulator.');
     }
 
@@ -652,6 +655,37 @@ class IOSSimulator extends Device {
         logFile.writeAsBytesSync(<int>[]);
       }
     }
+  }
+
+  @override
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) {
+    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+      device: this,
+      appId: appId,
+      deviceVmservicePort: filterDevicePort,
+      hostVmservicePort: expectedHostPort,
+      usesIpv6: ipv6,
+      useDeviceIPAsHost: false,
+    );
+
+    return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
+      mdnsVMServiceDiscoveryForAttach,
+      super.getVMServiceDiscoveryForAttach(
+        appId: appId,
+        fuchsiaModule: fuchsiaModule,
+        filterDevicePort: filterDevicePort,
+        expectedHostPort: expectedHostPort,
+        ipv6: ipv6,
+        logger: logger,
+      ),
+    ]);
   }
 
   @override
@@ -988,22 +1022,6 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   void dispose() {
     _stop();
   }
-}
-
-int compareIosVersions(String v1, String v2) {
-  final List<int> v1Fragments = v1.split('.').map<int>(int.parse).toList();
-  final List<int> v2Fragments = v2.split('.').map<int>(int.parse).toList();
-
-  int i = 0;
-  while (i < v1Fragments.length && i < v2Fragments.length) {
-    final int v1Fragment = v1Fragments[i];
-    final int v2Fragment = v2Fragments[i];
-    if (v1Fragment != v2Fragment) {
-      return v1Fragment.compareTo(v2Fragment);
-    }
-    i += 1;
-  }
-  return v1Fragments.length.compareTo(v2Fragments.length);
 }
 
 class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {

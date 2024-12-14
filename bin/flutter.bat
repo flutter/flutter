@@ -6,8 +6,8 @@ REM found in the LICENSE file.
 REM ---------------------------------- NOTE ----------------------------------
 REM
 REM Please keep the logic in this file consistent with the logic in the
-REM `flutter` script in the same directory to ensure that Flutter & Dart continue to
-REM work across all platforms!
+REM `flutter` script in the same directory to ensure that Flutter & Dart
+REM continue to work across all platforms!
 REM
 REM --------------------------------------------------------------------------
 
@@ -52,4 +52,4 @@ REM
 REM Do not use the CALL command in the next line to execute Dart. CALL causes
 REM Windows to re-read the line from disk after the CALL command has finished
 REM regardless of the ampersand chain.
-"%dart%" --disable-dart-dev --packages="%flutter_tools_dir%\.dart_tool\package_config.json" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %* & "%exit_with_errorlevel%"
+"%dart%" --packages="%flutter_tools_dir%\.dart_tool\package_config.json" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %* & "%exit_with_errorlevel%"

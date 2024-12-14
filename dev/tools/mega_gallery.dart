@@ -85,8 +85,16 @@ void main(List<String> args) {
   pubspec = pubspec.replaceAll('../../packages/flutter', '../../../packages/flutter');
   _file(out, 'pubspec.yaml').writeAsStringSync(pubspec);
 
-  // Remove the (flutter_gallery specific) analysis_options.yaml file.
-  _file(out, 'analysis_options.yaml').deleteSync();
+  // Replace the (flutter_gallery specific) analysis_options.yaml file with a default one.
+  _file(out, 'analysis_options.yaml').writeAsStringSync(
+    '''
+analyzer:
+  errors:
+    # See analysis_options.yaml in the flutter root for context.
+    deprecated_member_use: ignore
+    deprecated_member_use_from_same_package: ignore
+'''
+  );
 
   _file(out, '.dartignore').writeAsStringSync('');
 
@@ -140,17 +148,13 @@ void _copy(Directory source, Directory target) {
   for (final FileSystemEntity entity in source.listSync(followLinks: false)) {
     final String name = path.basename(entity.path);
 
-    if (entity is Directory) {
-      if (name == 'build' || name.startsWith('.')) {
-        continue;
-      }
-      _copy(entity, Directory(path.join(target.path, name)));
-    } else if (entity is File) {
-      if (name == '.packages' || name == 'pubspec.lock') {
-        continue;
-      }
-      final File dest = File(path.join(target.path, name));
-      dest.writeAsBytesSync(entity.readAsBytesSync());
+    switch (entity) {
+      case Directory() when name != 'build' && !name.startsWith('.'):
+        _copy(entity, Directory(path.join(target.path, name)));
+
+      case File() when name != '.packages' && name != 'pubspec.lock':
+        final File dest = File(path.join(target.path, name));
+        dest.writeAsBytesSync(entity.readAsBytesSync());
     }
   }
 }

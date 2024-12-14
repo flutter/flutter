@@ -2,8 +2,7 @@
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file. -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="dev.flutter.manual_tests">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
    <application
         android:label="manual_tests"
         android:name="${applicationName}"

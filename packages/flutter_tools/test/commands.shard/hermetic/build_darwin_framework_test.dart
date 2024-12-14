@@ -470,7 +470,7 @@ void main() {
 
             final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
             final String podspecContents = expectedPodspec.readAsStringSync();
-            expect(podspecContents, contains("'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64/artifacts.zip'"));
+            expect(podspecContents, contains("'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64/FlutterMacOS.framework.zip'"));
           }, overrides: <Type, Generator>{
             FileSystem: () => memoryFileSystem,
             ProcessManager: () => FakeProcessManager.any(),
@@ -489,7 +489,7 @@ void main() {
 
             final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
             final String podspecContents = expectedPodspec.readAsStringSync();
-            expect(podspecContents, contains("'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64-profile/artifacts.zip'"));
+            expect(podspecContents, contains("'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64-profile/FlutterMacOS.framework.zip'"));
           }, overrides: <Type, Generator>{
             FileSystem: () => memoryFileSystem,
             ProcessManager: () => FakeProcessManager.any(),
@@ -508,7 +508,7 @@ void main() {
 
             final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
             final String podspecContents = expectedPodspec.readAsStringSync();
-            expect(podspecContents, contains("'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64-release/artifacts.zip'"));
+            expect(podspecContents, contains("'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64-release/FlutterMacOS.framework.zip'"));
           }, overrides: <Type, Generator>{
             FileSystem: () => memoryFileSystem,
             ProcessManager: () => FakeProcessManager.any(),
@@ -558,6 +558,8 @@ void main() {
       final Directory parentA = fileSystem.directory('FrameworkA')..createSync();
       final File dSYMA = parentA.childFile('FrameworkA.framework.dSYM')..createSync();
       final Directory frameworkA = parentA.childDirectory('FrameworkA.framework')..createSync();
+      // Flutter.framework.dSYM should be correctly filtered out.
+      parentA.childFile('Flutter.framework.dSYM').createSync();
 
       final Directory parentB = fileSystem.directory('FrameworkB')..createSync();
       final File dSYMB = parentB.childFile('FrameworkB.framework.dSYM')..createSync();

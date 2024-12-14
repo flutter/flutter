@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'tabs.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -26,7 +29,7 @@ class UnderlineTabIndicator extends Decoration {
   /// The radius of the indicator's corners.
   ///
   /// If this value is non-null, rounded rectangular tab indicator is
-  /// drawn, otherwise rectangular tab indictor is drawn.
+  /// drawn, otherwise rectangular tab indicator is drawn.
   final BorderRadius? borderRadius;
 
   /// The color and weight of the horizontal line drawn below the selected tab.

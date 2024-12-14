@@ -240,17 +240,13 @@ void main() {
           painter.paint(testCanvas, size);
           final Rect rect = captureRect();
 
-          switch (direction) {
-            case AxisDirection.up:
-            case AxisDirection.down:
-              expect(
-                margin,
-                textDirection == TextDirection.ltr
-                  ? size.width - rect.right
-                  : rect.left,
-              );
-            case AxisDirection.left:
-            case AxisDirection.right:
+          switch (axisDirectionToAxis(direction)) {
+            case Axis.vertical:
+              expect(margin, switch (textDirection) {
+                TextDirection.ltr => size.width - rect.right,
+                TextDirection.rtl => rect.left,
+              });
+            case Axis.horizontal:
               expect(margin, size.height - rect.bottom);
           }
         }
@@ -1514,7 +1510,63 @@ void main() {
     expect(exception, isAssertionError);
     expect(
       exception.message,
-      contains("The Scrollbar's ScrollController has no ScrollPosition attached."),
+      '''
+The Scrollbar's ScrollController has no ScrollPosition attached.
+A Scrollbar cannot be painted without a ScrollPosition.
+The Scrollbar attempted to use the PrimaryScrollController. This ScrollController should be associated with the ScrollView that the Scrollbar is being applied to.
+If a ScrollController has not been provided, the PrimaryScrollController is used by default on mobile platforms for ScrollViews with an Axis.vertical scroll direction.
+To use the PrimaryScrollController explicitly, set ScrollView.primary to true on the Scrollable widget.''',
+    );
+  });
+
+  testWidgets('Scrollbars assert on multiple scroll positions', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: Row(
+              children: <Widget>[
+                RawScrollbar(
+                  controller: scrollController,
+                  child: const SingleChildScrollView(
+                    child: SizedBox(width: 10.0, height: 4000.0),
+                  ),
+                ),
+                RawScrollbar(
+                  controller: scrollController,
+                  child: const SingleChildScrollView(
+                    child: SizedBox(width: 10.0, height: 4000.0),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    AssertionError? exception = tester.takeException() as AssertionError?;
+    // The scrollbar is not visible and cannot be interacted with, so no assertion.
+    expect(exception, isNull);
+    // Scroll to trigger the scrollbar to come into view.
+    final Finder scrollViews = find.byType(SingleChildScrollView);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(scrollViews.first));
+    await gesture.moveBy(const Offset(0.0, -20.0));
+    exception = tester.takeException() as AssertionError;
+    expect(exception, isAssertionError);
+    expect(
+      exception.message,
+      '''
+The provided ScrollController is attached to more than one ScrollPosition.
+The Scrollbar requires a single ScrollPosition in order to be painted.
+When the scrollbar is interactive, the associated ScrollController must only have one ScrollPosition attached.
+The provided ScrollController cannot be shared by multiple ScrollView widgets.''',
     );
   });
 
@@ -2757,7 +2809,7 @@ void main() {
   });
 
   testWidgets('The thumb should follow the pointer when the scroll metrics changed during dragging', (WidgetTester tester) async {
-    // Regressing test for https://github.com/flutter/flutter/issues/112072
+    // Regression test for https://github.com/flutter/flutter/issues/112072
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
@@ -2828,7 +2880,7 @@ void main() {
   });
 
   testWidgets('The scrollable should not stutter when the scroll metrics shrink during dragging', (WidgetTester tester) async {
-    // Regressing test for https://github.com/flutter/flutter/issues/121574
+    // Regression test for https://github.com/flutter/flutter/issues/121574
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
@@ -2892,7 +2944,7 @@ void main() {
     expect(scrollController.offset, greaterThan(lastPosition));
   });
 
-  testWidgets('The bar support mouse wheel event', (WidgetTester tester) async {
+  testWidgets('The bar supports mouse wheel event', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/109659
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
@@ -2938,4 +2990,503 @@ void main() {
 
     expect(scrollController.offset, 100.0);
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Flinging a vertical scrollbar thumb does not cause a ballistic scroll - non-mobile platforms', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    bool isMobilePlatform() {
+      return const <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.android}
+        .contains(debugDefaultTargetPlatformOverride);
+    }
+
+    Widget buildFrame({ required bool reverse }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              thumbVisibility: true,
+              controller: scrollController,
+              child: CustomScrollView(
+                controller: scrollController,
+                reverse: reverse,
+                slivers: <Widget>[
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        return Container(
+                          height: 100,
+                          alignment: Alignment.center,
+                          child: Text('$index'),
+                        );
+                      },
+                      childCount: 10,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(reverse: false));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Try flinging downward. The flingFrom() method generates 50 moves of about 2
+    // pixels and then a fling with the indicated velocity.
+    await tester.flingFrom(const Offset(797.0, 45.0), const Offset(0, 60.0), 500.0);
+    await tester.pumpAndSettle();
+
+    if (isMobilePlatform()) {
+      expect(scrollController.offset, greaterThan(100.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
+    } else {
+      expect(scrollController.offset, 100.0, reason: 'Ballistic scroll not expected on $debugDefaultTargetPlatformOverride');
+    }
+
+    // Tap at the top of the track to scroll back to the origin.
+    await tester.tapAt(const Offset(797.0, 5.0));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Drag the thumb to the bottom.
+    await tester.dragFrom(const Offset(797.0, 45.0), const Offset(0, 1000.0));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 400.0);
+
+    // Try flinging upward.
+    await tester.flingFrom(const Offset(797.0, 545.0), const Offset(0, -60), 500.0);
+    await tester.pumpAndSettle();
+    if (isMobilePlatform()) {
+      expect(scrollController.offset, lessThan(300.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
+    } else {
+      expect(scrollController.offset, 300.0, reason: 'Ballistic scroll not expected on $debugDefaultTargetPlatformOverride');
+    }
+
+    // Tap at the top of the track to scroll back to the origin.
+    await tester.tapAt(const Offset(797.0, 5.0));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Same tests with reverse: true
+
+    await tester.pumpWidget(buildFrame(reverse: true));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Try flinging upward.
+    await tester.flingFrom(const Offset(797.0, 545.0), const Offset(0, -60), 500.0);
+    await tester.pumpAndSettle();
+    if (isMobilePlatform()) {
+      expect(scrollController.offset, greaterThan(100.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
+    } else {
+      expect(scrollController.offset, 100.0, reason: 'Ballistic scroll not expected on $debugDefaultTargetPlatformOverride');
+    }
+
+    // Tap at the top of the track to scroll to the limit
+    await tester.tapAt(const Offset(797.0, 5.0));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 400.0);
+
+    // Try flinging downward.
+    await tester.flingFrom(const Offset(797.0, 45.0), const Offset(0, 60.0), 500.0);
+    await tester.pumpAndSettle();
+    if (isMobilePlatform()) {
+      expect(scrollController.offset, lessThan(300.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
+    } else {
+      expect(scrollController.offset, 300.0, reason: 'Ballistic scroll not expected on $debugDefaultTargetPlatformOverride');
+    }
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Flinging a horizontal scrollbar thumb does not cause a ballistic scroll - non-mobile platforms', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    bool isMobilePlatform() {
+      return const <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.android}
+        .contains(debugDefaultTargetPlatformOverride);
+    }
+
+    Widget buildFrame({ required bool reverse }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: scrollController,
+            child: RawScrollbar(
+              thumbVisibility: true,
+              controller: scrollController,
+              child: CustomScrollView(
+                controller: scrollController,
+                reverse: reverse,
+                scrollDirection: Axis.horizontal,
+                slivers: <Widget>[
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        return Container(
+                          width: 100,
+                          alignment: Alignment.center,
+                          child: Text('$index'),
+                        );
+                      },
+                      childCount: 10,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(reverse: false));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Try flinging to the right.
+    await tester.flingFrom(const Offset(45.0, 597.0), const Offset(80, 0.0), 500.0);
+    await tester.pumpAndSettle();
+    if (isMobilePlatform()) {
+      expect(scrollController.offset, greaterThan(100.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
+    } else {
+      expect(scrollController.offset, 100.0, reason: 'Ballistic scroll not expected on $debugDefaultTargetPlatformOverride');
+    }
+
+    // Tap at the end of the track to scroll to the limit.
+    await tester.tapAt(const Offset(794.0, 597.0));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 200.0);
+
+    // Try flinging to the left.
+    await tester.flingFrom(const Offset(794.0, 597.0), const Offset(-80, 0), 500.0);
+    await tester.pumpAndSettle();
+    if (isMobilePlatform()) {
+      expect(scrollController.offset, lessThan(100.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
+    } else {
+      expect(scrollController.offset, 100.0, reason: 'Ballistic scroll not expected on $debugDefaultTargetPlatformOverride');
+    }
+
+    // Tap at the beginning of the track to scroll back to the origin.
+    await tester.tapAt(const Offset(6.0, 597.0));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Same tests with reverse: true
+
+    await tester.pumpWidget(buildFrame(reverse: true));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    // Try flinging to the left.
+    await tester.flingFrom(const Offset(794.0, 597.0), const Offset(-80, 0), 500.0);
+    await tester.pumpAndSettle();
+    if (isMobilePlatform()) {
+      expect(scrollController.offset, greaterThan(100.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
+    } else {
+      expect(scrollController.offset, 100.0, reason: 'Ballistic scroll not expected on $debugDefaultTargetPlatformOverride');
+    }
+
+    // Tap at the beginning of the track to scroll to the limit.
+    await tester.tapAt(const Offset(6.0, 597.0));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 200.0);
+
+    // Try flinging to the right.
+    await tester.flingFrom(const Offset(6.0, 597.0), const Offset(80, 0), 500.0);
+    await tester.pumpAndSettle();
+
+    if (isMobilePlatform()) {
+      expect(scrollController.offset, lessThan(100.0), reason: 'Ballistic scroll expected on $debugDefaultTargetPlatformOverride');
+    } else {
+      expect(scrollController.offset, 100.0, reason: 'Ballistic scroll not expected on $debugDefaultTargetPlatformOverride');
+    }
+
+  },
+    variant: TargetPlatformVariant.all(),
+  );
+
+  testWidgets('Safe to drag trackpad when maxScrollExtent is 0 (scrollbar is not painted)', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/149803
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    Widget buildFrame(double sizedBoxHeight) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: SizedBox(width: 100.0, height: sizedBoxHeight),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(100)); // Test viewport has height=600
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(scrollController.position.maxScrollExtent, 0.0);
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(0, -100), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(0, 100), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+
+    await tester.pumpWidget(buildFrame(700));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+    expect(scrollController.position.maxScrollExtent, 100.0);
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(0, -100), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 100.0);
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(0, 100), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0.0);
+  });
+
+  testWidgets('Desktop trackpad drag direction: -X,-Y produces positive scroll offset changes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/149999.
+    // This test doesn't strictly test the scrollbar: trackpad flings
+    // that begin in the center of the scrollable are handled by the
+    // scrollable, not the scrollbar. However: the scrollbar widget does
+    // contain the scrollable and this test verifies that it doesn't
+    // inadvertantly handle thumb down/start/update/end gestures due
+    // to trackpad pan/zoom events. Those callbacks are prevented by
+    // the overrides of isPointerPanZoomAllowed in the scrollbar
+    // gesture recognizers.
+
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    Widget buildFrame(Axis scrollDirection) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            child: SingleChildScrollView(
+              scrollDirection: scrollDirection,
+              controller: scrollController,
+              child: const SizedBox(width: 1600, height: 1200),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Vertical scrolling: -Y trackpad motion produces positive scroll offset change
+
+    await tester.pumpWidget(buildFrame(Axis.vertical));
+    expect(scrollController.offset, 0);
+    expect(scrollController.position.maxScrollExtent, 600);
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(0, -600), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 600);
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(0, 600), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0);
+
+    // Overscroll is OK for (vertical) trackpad gestures.
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(0, -100), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, greaterThan(100));
+    scrollController.jumpTo(600);
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(0, 100), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, lessThan(500));
+    scrollController.jumpTo(0);
+
+    // Horizontal scrolling: -X trackpad motion produces positive scroll offset change
+
+    await tester.pumpWidget(buildFrame(Axis.horizontal));
+    expect(scrollController.offset, 0);
+    expect(scrollController.position.maxScrollExtent, 800);
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(-800, 0), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 800);
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(800, 0), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 0);
+
+    // Overscroll is OK for (horizontal) trackpad gestures.
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(-100, 0), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, greaterThan(100));
+    scrollController.jumpTo(800);
+
+    await tester.trackpadFling(find.byType(SingleChildScrollView), const Offset(100, 0), 500);
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, lessThan(700));
+    scrollController.jumpTo(0);
+
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+    TargetPlatform.macOS,
+    TargetPlatform.linux,
+    TargetPlatform.windows,
+    TargetPlatform.fuchsia,
+  }));
+
+  testWidgets('Desktop trackpad, nested ListViews, no explicit scrollbars, horizontal drag succeeds', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/150236.
+    // This test is similar to "Desktop trackpad drag direction: -X,-Y...".
+    // It's really only verifying that trackpad gestures are being handled
+    // by the scrollable, not the scrollbar.
+
+    final Key outerListViewKey = UniqueKey();
+    final ScrollController scrollControllerY = ScrollController();
+    final ScrollController scrollControllerX = ScrollController();
+    addTearDown(scrollControllerY.dispose);
+    addTearDown(scrollControllerX.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: ListView(
+            key: outerListViewKey,
+            controller: scrollControllerY,
+            children: <Widget>[
+              const SizedBox(width: 200, height: 200),
+              SizedBox(
+                height: 200,
+                child: ListView( // vertically centered within the 600 high viewport
+                  scrollDirection: Axis.horizontal,
+                  controller: scrollControllerX,
+                  children: List<Widget>.generate(5, (int index) {
+                    return SizedBox(
+                      width: 200,
+                      child: Center(child: Text('item $index')),
+                    );
+                  }),
+                ),
+              ),
+              const SizedBox(width: 200, height: 200),
+              const SizedBox(width: 200, height: 200),
+              const SizedBox(width: 200, height: 200),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    Finder outerListView() => find.byKey(outerListViewKey);
+
+    // 800x600 viewport content is 1000x1000
+    expect(tester.getSize(outerListView()), const Size(800, 600));
+    expect(scrollControllerY.offset, 0);
+    expect(scrollControllerY.position.maxScrollExtent, 400);
+    expect(scrollControllerX.offset, 0);
+    expect(scrollControllerX.position.maxScrollExtent, 200);
+
+    // Vertical scrolling: -Y trackpad motion produces positive scroll offset change
+    await tester.trackpadFling(outerListView(), const Offset(0, -600), 500);
+    await tester.pumpAndSettle();
+    expect(scrollControllerY.offset, 400);
+    await tester.trackpadFling(outerListView(), const Offset(0, 600), 500);
+    await tester.pumpAndSettle();
+    expect(scrollControllerY.offset, 0);
+
+    // Horizontal scrolling: -X trackpad motion produces positive scroll offset change
+    await tester.trackpadFling(outerListView(), const Offset(-800, 0), 500);
+    await tester.pumpAndSettle();
+    expect(scrollControllerX.offset, 200);
+    await tester.trackpadFling(outerListView(), const Offset(800, 0), 500);
+    await tester.pumpAndSettle();
+    expect(scrollControllerX.offset, 0);
+
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{
+    TargetPlatform.macOS,
+    TargetPlatform.linux,
+    TargetPlatform.windows,
+    TargetPlatform.fuchsia,
+  }));
+
+  testWidgets('Desktop trackpad, nested ListViews, no explicit scrollbars, horizontal drag succeeds', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/150342
+
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    late Size childSize;
+    late StateSetter rebuildScrollViewChild;
+
+    Widget buildFrame(Axis scrollDirection) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              scrollDirection: scrollDirection,
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  rebuildScrollViewChild = setState;
+                  return SizedBox(width: childSize.width, height: childSize.height);
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    RawGestureDetector getScrollbarGestureDetector() {
+      return tester.widget<RawGestureDetector>(
+        find.descendant(of: find.byType(RawScrollbar), matching: find.byType(RawGestureDetector)).first
+      );
+    }
+
+    // Vertical scrollDirection
+
+    childSize = const Size(800, 600);
+    await tester.pumpWidget(buildFrame(Axis.vertical));
+    // Scrolling isn't possible, so there are no scrollbar gesture recognizers.
+    expect(getScrollbarGestureDetector().gestures.length, 0);
+
+    rebuildScrollViewChild(() { childSize = const Size(800, 800); });
+    await tester.pumpAndSettle();
+    // Scrolling is now possible, so there are scrollbar (thumb and track) gesture recognizers.
+    expect(getScrollbarGestureDetector().gestures.length, greaterThan(1));
+
+    // Horizontal scrollDirection
+
+    childSize = const Size(800, 600);
+    await tester.pumpWidget(buildFrame(Axis.horizontal));
+    await tester.pumpAndSettle();
+    // Scrolling isn't possible, so there are no scrollbar gesture recognizers.
+    expect(getScrollbarGestureDetector().gestures.length, 0);
+
+    rebuildScrollViewChild(() { childSize = const Size(1000, 600); });
+    await tester.pumpAndSettle();
+    // Scrolling is now possible, so there are scrollbar (thumb and track) gesture recognizers.
+    expect(getScrollbarGestureDetector().gestures.length, greaterThan(1));
+  });
 }

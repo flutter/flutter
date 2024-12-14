@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'sliver_fixed_extent_list.dart';
+/// @docImport 'sliver_list.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -348,7 +354,8 @@ class SliverGridDelegateWithFixedCrossAxisCount extends SliverGridDelegate {
   }) : assert(crossAxisCount > 0),
        assert(mainAxisSpacing >= 0),
        assert(crossAxisSpacing >= 0),
-       assert(childAspectRatio > 0);
+       assert(childAspectRatio > 0),
+       assert(mainAxisExtent == null || mainAxisExtent >= 0);
 
   /// The number of children in the cross axis.
   final int crossAxisCount;
@@ -446,8 +453,8 @@ class SliverGridDelegateWithMaxCrossAxisExtent extends SliverGridDelegate {
   }) : assert(maxCrossAxisExtent > 0),
        assert(mainAxisSpacing >= 0),
        assert(crossAxisSpacing >= 0),
-       assert(childAspectRatio > 0);
-
+       assert(childAspectRatio > 0),
+       assert(mainAxisExtent == null || mainAxisExtent >= 0);
   /// The maximum extent of tiles in the cross axis.
   ///
   /// This delegate will select a cross-axis extent for the tiles that is as
@@ -597,8 +604,8 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     final int? targetLastIndex = targetEndScrollOffset.isFinite ?
       layout.getMaxChildIndexForScrollOffset(targetEndScrollOffset) : null;
     if (firstChild != null) {
-      final int leadingGarbage = _calculateLeadingGarbage(firstIndex);
-      final int trailingGarbage = targetLastIndex != null ? _calculateTrailingGarbage(targetLastIndex) : 0;
+      final int leadingGarbage = calculateLeadingGarbage(firstIndex: firstIndex);
+      final int trailingGarbage = targetLastIndex != null ? calculateTrailingGarbage(lastIndex: targetLastIndex) : 0;
       collectGarbage(leadingGarbage, trailingGarbage);
     } else {
       collectGarbage(0, 0);
@@ -707,25 +714,5 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       childManager.setDidUnderflow(true);
     }
     childManager.didFinishLayout();
-  }
-
-  int _calculateLeadingGarbage(int firstIndex) {
-    RenderBox? walker = firstChild;
-    int leadingGarbage = 0;
-    while (walker != null && indexOf(walker) < firstIndex) {
-      leadingGarbage += 1;
-      walker = childAfter(walker);
-    }
-    return leadingGarbage;
-  }
-
-  int _calculateTrailingGarbage(int targetLastIndex) {
-    RenderBox? walker = lastChild;
-    int trailingGarbage = 0;
-    while (walker != null && indexOf(walker) > targetLastIndex) {
-      trailingGarbage += 1;
-      walker = childBefore(walker);
-    }
-    return trailingGarbage;
   }
 }

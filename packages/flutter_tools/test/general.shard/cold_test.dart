@@ -7,7 +7,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -165,7 +165,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   }
 
   @override
-  Future<void> initLogReader() async { }
+  Future<void> tryInitLogReader() async { }
 }
 
 class FakeDevice extends Fake implements Device {
@@ -213,13 +213,9 @@ class TestFlutterDevice extends FlutterDevice {
     GetSkSLMethod? getSkSLMethod,
     FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-    bool enableDds = true,
-    bool cacheStartupProfile = false,
-    bool disableServiceAuthCodes = false,
+    required DebuggingOptions debuggingOptions,
     int? hostVmServicePort,
-    int? ddsPort,
-    bool? ipv6 = false,
-    bool allowExistingDdsInstance = false,
+    required bool allowExistingDdsInstance,
   }) async {
     throw exception;
   }
@@ -279,10 +275,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(
-    TargetPlatform? platform, {
-    required ImpellerStatus impellerStatus,
-  }) { }
+  void configureCompiler(TargetPlatform? platform) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

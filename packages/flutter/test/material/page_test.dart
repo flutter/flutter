@@ -292,6 +292,7 @@ void main() {
       RepaintBoundary(
         key: key,
         child: MaterialApp(
+          debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
           theme: ThemeData(useMaterial3: true),
           onGenerateRoute: (RouteSettings settings) {
             return MaterialPageRoute<void>(
@@ -880,7 +881,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 240));
     expect(
       tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(Scaffold))).dx,
-      moreOrLessEquals(798, epsilon: 1),
+      moreOrLessEquals(794, epsilon: 1),
     );
 
     // Use the navigator to push a route instead of tapping the 'push' button.
@@ -1269,6 +1270,64 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('route'), findsNothing);
+  });
+
+  testWidgets('Setting MaterialPageRoute.requestFocus to false does not request focus on the page', (WidgetTester tester) async {
+    late BuildContext savedContext;
+    const String pageTwoText = 'Page Two';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return Container();
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // Check page two is not on the screen.
+    expect(find.text(pageTwoText), findsNothing);
+
+    // Navigate to page two with text.
+    final NavigatorState navigator = Navigator.of(savedContext);
+    navigator.push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return const Text(pageTwoText);
+        }
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // The page two is showing and the text widget has focus.
+    Element textOnPageTwo = tester.element(find.text(pageTwoText));
+    FocusScopeNode focusScopeNode = FocusScope.of(textOnPageTwo);
+    expect(focusScopeNode.hasFocus, isTrue);
+
+    // Navigate back to page one.
+    navigator.pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Navigate to page two again with requestFocus set to false.
+    navigator.push(
+      MaterialPageRoute<void>(
+        requestFocus: false,
+        builder: (BuildContext context) {
+          return const Text(pageTwoText);
+        }
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // The page two is showing and the text widget is not focused.
+    textOnPageTwo = tester.element(find.text(pageTwoText));
+    focusScopeNode = FocusScope.of(textOnPageTwo);
+    expect(focusScopeNode.hasFocus, isFalse);
   });
 }
 

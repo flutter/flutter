@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'ink_decoration.dart';
+/// @docImport 'ink_splash.dart';
+/// @docImport 'ink_well.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'ink_well.dart' show InteractiveInkFeature;
@@ -92,7 +97,7 @@ class InkHighlight extends InteractiveInkFeature {
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.dismissed && !_active) {
+    if (status.isDismissed && !_active) {
       dispose();
     }
   }

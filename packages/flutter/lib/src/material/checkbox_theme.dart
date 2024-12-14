@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'checkbox.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -61,10 +64,10 @@ class CheckboxThemeData with Diagnosticable {
   /// {@macro flutter.material.checkbox.checkColor}
   ///
   /// Resolves in the following states:
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
   ///
   /// If specified, overrides the default value of [Checkbox.checkColor].
   final MaterialStateProperty<Color?>? checkColor;
@@ -201,7 +204,13 @@ class CheckboxThemeData with Diagnosticable {
     if (identical(a, b)) {
       return a;
     }
-    return BorderSide.lerp(a, b, t);
+    if (a is MaterialStateBorderSide) {
+      a = a.resolve(<WidgetState>{});
+    }
+    if (b is MaterialStateBorderSide) {
+      b = b.resolve(<WidgetState>{});
+    }
+    return BorderSide.lerp(a!, b!, t);
   }
 }
 

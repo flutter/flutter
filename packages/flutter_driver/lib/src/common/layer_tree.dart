@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter_driver/flutter_driver.dart';
+library;
+
 import 'message.dart';
 
 /// A Flutter Driver command that requests a string representation of the layer tree.
@@ -22,13 +25,11 @@ class LayerTree extends Result {
   /// Creates a [LayerTree] object with the given string representation.
   const LayerTree(this.tree);
 
+  /// Deserializes the result from JSON.
+  LayerTree.fromJson(Map<String, dynamic> json) : tree = json['tree'] as String;
+
   /// String representation of the layer tree.
   final String? tree;
-
-  /// Deserializes the result from JSON.
-  static LayerTree fromJson(Map<String, dynamic> json) {
-    return LayerTree(json['tree'] as String);
-  }
 
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{

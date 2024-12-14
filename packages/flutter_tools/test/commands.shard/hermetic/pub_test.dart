@@ -16,6 +16,17 @@ import 'package:test/fake.dart';
 import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
+const String minimalV2EmbeddingManifest = r'''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
+        android:name="${applicationName}">
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+    </application>
+</manifest>
+''';
+
 void main() {
   late FileSystem fileSystem;
   late FakePub pub;
@@ -48,6 +59,9 @@ void main() {
     fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
     fileSystem.currentDirectory.childFile('.flutter-plugins').createSync();
     fileSystem.currentDirectory.childFile('.flutter-plugins-dependencies').createSync();
+    fileSystem.currentDirectory.childDirectory('android').childFile('AndroidManifest.xml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(minimalV2EmbeddingManifest);
 
     final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
@@ -57,7 +71,7 @@ void main() {
     expect(await command.usageValues, const CustomDimensions(
       commandPackagesNumberPlugins: 0,
       commandPackagesProjectModule: false,
-      commandPackagesAndroidEmbeddingVersion: 'v1',
+      commandPackagesAndroidEmbeddingVersion: 'v2',
     ));
   }, overrides: <Type, Generator>{
     Pub: () => pub,
@@ -69,10 +83,12 @@ void main() {
     fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
     fileSystem.currentDirectory.childFile('.flutter-plugins').createSync();
     fileSystem.currentDirectory.childFile('.flutter-plugins-dependencies').createSync();
-    fileSystem.currentDirectory.childFile('.packages').writeAsBytesSync(<int>[0]);
     fileSystem.currentDirectory.childFile('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsBytesSync(<int>[0]);
+    fileSystem.currentDirectory.childDirectory('android').childFile('AndroidManifest.xml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(minimalV2EmbeddingManifest);
 
     final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
@@ -82,7 +98,7 @@ void main() {
     expect(await command.usageValues, const CustomDimensions(
       commandPackagesNumberPlugins: 0,
       commandPackagesProjectModule: false,
-      commandPackagesAndroidEmbeddingVersion: 'v1',
+      commandPackagesAndroidEmbeddingVersion: 'v2',
     ));
   }, overrides: <Type, Generator>{
     Pub: () => pub,
@@ -100,8 +116,9 @@ void main() {
 
     await commandRunner.run(<String>['get', targetDirectory.path]);
     final FlutterProject rootProject = FlutterProject.fromDirectory(targetDirectory);
-    expect(rootProject.packageConfigFile.existsSync(), true);
-    expect(await rootProject.packageConfigFile.readAsString(), '{"configVersion":2,"packages":[]}');
+    final File packageConfigFile = rootProject.dartTool.childFile('package_config.json');
+    expect(packageConfigFile.existsSync(), true);
+    expect(packageConfigFile.readAsStringSync(), '{"configVersion":2,"packages":[]}');
   }, overrides: <Type, Generator>{
     Pub: () => pub,
     ProcessManager: () => FakeProcessManager.any(),
@@ -137,6 +154,9 @@ void main() {
   testUsingContext("pub get skips example directory if it doesn't contain a pubspec.yaml", () async {
     fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
     fileSystem.currentDirectory.childDirectory('example').createSync(recursive: true);
+    fileSystem.currentDirectory.childDirectory('android').childFile('AndroidManifest.xml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(minimalV2EmbeddingManifest);
 
     final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
@@ -146,7 +166,7 @@ void main() {
     expect(await command.usageValues, const CustomDimensions(
       commandPackagesNumberPlugins: 0,
       commandPackagesProjectModule: false,
-      commandPackagesAndroidEmbeddingVersion: 'v1',
+      commandPackagesAndroidEmbeddingVersion: 'v2',
     ));
   }, overrides: <Type, Generator>{
     Pub: () => pub,

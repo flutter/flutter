@@ -144,5 +144,7 @@
   "menuDismissLabel": "Sulge menüü",
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Otsi veebist",
-  "shareButtonLabel": "Jaga …"
+  "shareButtonLabel": "Jagamine",
+  "clearButtonTooltip": "Kustutage tekst",
+  "selectedDateLabel": "Valitud"
 }

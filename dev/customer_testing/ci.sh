@@ -6,7 +6,7 @@
 # This should match the ci.bat file in this directory.
 
 # This is called from .cirrus.yml and the LUCI recipes:
-# https://flutter.googlesource.com/recipes/+/refs/heads/master/recipe_modules/adhoc_validation/resources/customer_testing.sh
+# https://github.com/flutter/flutter/blob/main/dev/bots/suite_runners/run_customer_testing_tests.dart
 
 set -ex
 
@@ -34,4 +34,4 @@ git clone https://github.com/flutter/tests.git ../../bin/cache/pkg/tests
 git -C ../../bin/cache/pkg/tests checkout `dart --enable-asserts ../tools/bin/find_commit.dart . master ../../bin/cache/pkg/tests main`
 
 # Finally, run the tests.
-dart --enable-asserts run_tests.dart --verbose --skip-on-fetch-failure --skip-template ../../bin/cache/pkg/tests/registry/*.test
+dart --enable-asserts run_tests.dart --skip-on-fetch-failure --skip-template ../../bin/cache/pkg/tests/registry/*.test

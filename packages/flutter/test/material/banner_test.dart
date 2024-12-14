@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -234,6 +235,51 @@ void main() {
     final Offset actionsTopRight = tester.getTopRight(find.byType(OverflowBar));
     expect(contentBottomLeft.dy, greaterThan(actionsTopRight.dy));
     expect(contentBottomLeft.dx, lessThan(actionsTopRight.dx));
+  });
+
+    testWidgets('material banner content can scale and has maxScaleFactor', (WidgetTester tester) async {
+
+    const String label = 'A';
+    Widget buildApp({ required TextScaler textScaler }) {
+      return MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(textScaler: textScaler),
+          child: MaterialBanner(
+            forceActionsBelow: true,
+            content: const SizedBox(child:Center(child:Text(label))),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('B'),
+                onPressed: () { },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(textScaler: TextScaler.noScaling));
+    expect(find.text(label), findsOneWidget);
+
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
+      expect(tester.getSize(find.text(label)), const Size(14.25, 20.0));
+    }
+
+    await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(1.1)));
+    await tester.pumpAndSettle();
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
+      expect(_sizeAlmostEqual(tester.getSize(find.text(label)), const Size(15.65, 22.0)), true);
+    }
+
+    await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(1.5)));
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
+      expect(_sizeAlmostEqual(tester.getSize(find.text(label)), const Size(21.25, 30)), true);
+    }
+
+    await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(4)));
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
+      expect(_sizeAlmostEqual(tester.getSize(find.text(label)), const Size(21.25, 30)), true);
+    }
   });
 
   group('MaterialBanner elevation', () {
@@ -1104,6 +1150,66 @@ void main() {
     /// Compare the offset of banner from top left
     expect(topLeft.dx, margin.left);
   });
+
+  testWidgets('minActionBarHeight is respected', (WidgetTester tester) async {
+    const double minActionBarHeight = 20.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home:Scaffold(
+          appBar: AppBar(),
+          body: const MaterialBanner(
+            minActionBarHeight: minActionBarHeight,
+            padding: EdgeInsets.zero,
+            margin: EdgeInsets.zero,
+            content: SizedBox.shrink(),
+            actions: <Widget>[
+              SizedBox.shrink(),
+            ],
+          ),
+        )
+      ),
+    );
+
+    final Size size = tester.getSize(find.byType(MaterialBanner));
+    expect(size.height, equals(minActionBarHeight));
+  });
+
+   testWidgets('minimumActionBarHeight is respected when presented by ScaffoldMessenger', (WidgetTester tester) async {
+    const Key tapTarget = Key('tap-target');
+    const double minActionBarHeight = 20.0;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showMaterialBanner(const MaterialBanner(
+                  content: SizedBox.shrink(),
+                  padding: EdgeInsets.zero,
+                  margin:  EdgeInsets.zero,
+                  minActionBarHeight: minActionBarHeight,
+                  actions: <Widget>[
+                     SizedBox.shrink()
+                  ],
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pumpAndSettle();
+
+    final Size materialBarSize = tester.getSize(find.byType(MaterialBanner));
+    expect(materialBarSize.height, equals(minActionBarHeight));
+  });
 }
 
 Material _getMaterialFromBanner(WidgetTester tester) {
@@ -1116,4 +1222,8 @@ Material _getMaterialFromText(WidgetTester tester, String text) {
 
 RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
   return tester.element<StatelessElement>(find.descendant(of: find.byType(MaterialBanner), matching: find.text(text))).renderObject! as RenderParagraph;
+}
+
+bool _sizeAlmostEqual(Size a, Size b, {double maxDiff=0.05}) {
+  return (a.width - b.width).abs() <= maxDiff && (a.height - b.height).abs() <= maxDiff;
 }

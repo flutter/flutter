@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -14,12 +15,13 @@ import 'package:flutter_tools/src/desktop_device.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/macos/macos_device.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
-import '../src/fake_process_manager.dart';
+import '../src/context.dart';
 
 void main() {
   group('Basic info', () {
@@ -364,6 +366,33 @@ void main() {
       ),
     );
   });
+
+  testUsingContext('macOS devices print warning if Dart VM not found within timeframe in CI', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FakeMacOSDevice device = FakeMacOSDevice(
+      fileSystem: MemoryFileSystem.test(),
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+      logger: logger,
+    );
+
+    final FakeApplicationPackage package = FakeApplicationPackage();
+
+    FakeAsync().run((FakeAsync fakeAsync) {
+      device.startApp(
+        package,
+        prebuiltApplication: true,
+        debuggingOptions: DebuggingOptions.enabled(
+          BuildInfo.debug,
+          enableImpeller: ImpellerStatus.disabled,
+          dartEntrypointArgs: <String>[],
+          usingCISystem: true,
+        ),
+      );
+      fakeAsync.flushTimers();
+      expect(logger.errorText, contains('Ensure sandboxing is disabled by checking the set CODE_SIGN_ENTITLEMENTS'));
+    });
+  });
 }
 
 FakeDesktopDevice setUpDesktopDevice({
@@ -424,6 +453,7 @@ class FakeDesktopDevice extends DesktopDevice {
   Future<void> buildForDevice({
     String? mainPath,
     BuildInfo? buildInfo,
+    bool usingCISystem = false,
   }) async {
     lastBuiltMainPath = mainPath;
     lastBuildInfo = buildInfo;
@@ -443,4 +473,39 @@ class FakeApplicationPackage extends Fake implements ApplicationPackage { }
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   @override
   String get name => 'Example';
+}
+
+class FakeMacOSDevice extends MacOSDevice {
+  FakeMacOSDevice({
+    required super.processManager,
+    required super.logger,
+    required super.fileSystem,
+    required super.operatingSystemUtils,
+  });
+
+  @override
+  String get name => 'dummy';
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
+
+  @override
+  bool isSupported() => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => true;
+
+  @override
+  Future<void> buildForDevice({
+    String? mainPath,
+    BuildInfo? buildInfo,
+    bool usingCISystem = false,
+  }) async {
+  }
+
+  // Dummy implementation that just returns the build mode name.
+  @override
+  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo) {
+    return buildInfo.mode.cliName;
+  }
 }

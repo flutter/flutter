@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' show Color, lerpDouble;
 
@@ -31,34 +34,14 @@ Color _colorFromHue(
   double secondary,
   double match,
 ) {
-  double red;
-  double green;
-  double blue;
-  if (hue < 60.0) {
-    red = chroma;
-    green = secondary;
-    blue = 0.0;
-  } else if (hue < 120.0) {
-    red = secondary;
-    green = chroma;
-    blue = 0.0;
-  } else if (hue < 180.0) {
-    red = 0.0;
-    green = chroma;
-    blue = secondary;
-  } else if (hue < 240.0) {
-    red = 0.0;
-    green = secondary;
-    blue = chroma;
-  } else if (hue < 300.0) {
-    red = secondary;
-    green = 0.0;
-    blue = chroma;
-  } else {
-    red = chroma;
-    green = 0.0;
-    blue = secondary;
-  }
+  final (double red, double green, double blue) = switch (hue) {
+    <  60.0 => (chroma, secondary, 0.0),
+    < 120.0 => (secondary, chroma, 0.0),
+    < 180.0 => (0.0, chroma, secondary),
+    < 240.0 => (0.0, secondary, chroma),
+    < 300.0 => (secondary, 0.0, chroma),
+    _       => (chroma, 0.0, secondary),
+  };
   return Color.fromARGB((alpha * 0xFF).round(), ((red + match) * 0xFF).round(), ((green + match) * 0xFF).round(), ((blue + match) * 0xFF).round());
 }
 
@@ -415,13 +398,13 @@ class HSLColor {
 
 /// A color that has a small table of related colors called a "swatch".
 ///
-/// The table is indexed by values of type `T`.
+/// The table is accessed by key values of type `T`.
 ///
 /// See also:
 ///
 ///  * [MaterialColor] and [MaterialAccentColor], which define Material Design
 ///    primary and accent color swatches.
-///  * [material.Colors], which defines all of the standard Material Design
+///  * [Colors], which defines all of the standard Material Design
 ///    colors.
 @immutable
 class ColorSwatch<T> extends Color {
@@ -430,14 +413,17 @@ class ColorSwatch<T> extends Color {
   /// The `primary` argument should be the 32 bit ARGB value of one of the
   /// values in the swatch, as would be passed to the [Color.new] constructor
   /// for that same color, and as is exposed by [value]. (This is distinct from
-  /// the specific index of the color in the swatch.)
+  /// the key of any color in the swatch.)
   const ColorSwatch(super.primary, this._swatch);
 
   @protected
   final Map<T, Color> _swatch;
 
   /// Returns an element of the swatch table.
-  Color? operator [](T index) => _swatch[index];
+  Color? operator [](T key) => _swatch[key];
+
+  /// Returns the valid keys for accessing operator[].
+  Iterable<T> get keys => _swatch.keys;
 
   @override
   bool operator ==(Object other) {

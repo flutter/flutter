@@ -38,14 +38,14 @@
   "cutButtonLabel": "قص",
   "copyButtonLabel": "نسخ",
   "pasteButtonLabel": "لصق",
-  "clearButtonLabel": "Clear",
+  "clearButtonLabel": "محو",
   "selectAllButtonLabel": "اختيار الكل",
   "tabSemanticsLabel": "علامة التبويب $tabIndex من $tabCount",
   "modalBarrierDismissLabel": "رفض",
   "searchTextFieldPlaceholderLabel": "بحث",
   "noSpellCheckReplacementsLabel": "لم يتم العثور على بدائل",
   "menuDismissLabel": "إغلاق القائمة",
-  "lookUpButtonLabel": "النظر إلى أعلى",
+  "lookUpButtonLabel": "بحث عام",
   "searchWebButtonLabel": "البحث على الويب",
   "shareButtonLabel": "مشاركة…"
 }

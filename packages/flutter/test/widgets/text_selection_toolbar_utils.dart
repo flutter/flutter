@@ -192,11 +192,11 @@ void expectMaterialToolbarForFullSelection() {
 }
 
 Finder findMaterialOverflowNextButton() {
-  return find.byIcon(Icons.more_vert);
+  return find.byKey(StandardComponentType.moreButton.key);
 }
 
 Finder findMaterialOverflowBackButton() {
-  return find.byIcon(Icons.arrow_back);
+  return find.byKey(StandardComponentType.backButton.key);
 }
 
 Future<void> tapMaterialOverflowNextButton(WidgetTester tester) async {

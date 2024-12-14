@@ -2,13 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
+/// @docImport 'editable_text.dart';
+library;
+
+import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart'
     show SpellCheckResults, SpellCheckService, SuggestionSpan, TextEditingValue;
 
 import 'editable_text.dart' show EditableTextContextMenuBuilder;
-import 'framework.dart' show immutable;
 
 /// Controls how spell check is performed for text input.
 ///
@@ -83,26 +87,24 @@ class SpellCheckConfiguration {
 
   @override
   String toString() {
-    return '''
-  spell check enabled   : $_spellCheckEnabled
-  spell check service   : $spellCheckService
-  misspelled text style : $misspelledTextStyle
-  spell check suggestions toolbar builder: $spellCheckSuggestionsToolbarBuilder
-'''
-        .trim();
+    return '${objectRuntimeType(this, 'SpellCheckConfiguration')}('
+             '${_spellCheckEnabled ? 'enabled' : 'disabled'}, '
+             'service: $spellCheckService, '
+             'text style: $misspelledTextStyle, '
+             'toolbar builder: $spellCheckSuggestionsToolbarBuilder'
+           ')';
   }
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) {
-        return true;
+    if (other.runtimeType != runtimeType) {
+      return false;
     }
-
     return other is SpellCheckConfiguration
-      && other.spellCheckService == spellCheckService
-      && other.misspelledTextStyle == misspelledTextStyle
-      && other.spellCheckSuggestionsToolbarBuilder == spellCheckSuggestionsToolbarBuilder
-      && other._spellCheckEnabled == _spellCheckEnabled;
+        && other.spellCheckService == spellCheckService
+        && other.misspelledTextStyle == misspelledTextStyle
+        && other.spellCheckSuggestionsToolbarBuilder == spellCheckSuggestionsToolbarBuilder
+        && other._spellCheckEnabled == _spellCheckEnabled;
   }
 
   @override
@@ -134,7 +136,8 @@ List<SuggestionSpan> _correctSpellCheckResults(
     final int spanLength = currentSpan.range.end - currentSpan.range.start;
 
     // Try finding SuggestionSpan from resultsText in new text.
-    final RegExp currentSpanTextRegexp = RegExp('\\b$currentSpanText\\b');
+    final String escapedText = RegExp.escape(currentSpanText);
+    final RegExp currentSpanTextRegexp = RegExp('\\b$escapedText\\b');
     final int foundIndex = newText.substring(searchStart).indexOf(currentSpanTextRegexp);
 
     // Check whether word was found exactly where expected or elsewhere in the newText.
@@ -143,7 +146,7 @@ List<SuggestionSpan> _correctSpellCheckResults(
     final bool currentSpanFoundElsewhere = foundIndex >= 0;
 
     if (currentSpanFoundExactly || currentSpanFoundExactlyWithOffset) {
-      // currentSpan was found at the same index in newText and resutsText
+      // currentSpan was found at the same index in newText and resultsText
       // or at the same index with the previously calculated adjustment by
       // the offset value, so apply it to new text by adding it to the list of
       // corrected results.
@@ -156,7 +159,7 @@ List<SuggestionSpan> _correctSpellCheckResults(
       );
 
       // Start search for the next misspelled word at the end of currentSpan.
-      searchStart = currentSpan.range.end + 1 + offset;
+      searchStart = math.min(currentSpan.range.end + 1 + offset, newText.length);
       correctedSpellCheckResults.add(adjustedSpan);
     } else if (currentSpanFoundElsewhere) {
       // Word was pushed forward but not modified.
@@ -169,7 +172,7 @@ List<SuggestionSpan> _correctSpellCheckResults(
 
       // Start search for the next misspelled word at the end of the
       // adjusted currentSpan.
-      searchStart = adjustedSpanEnd + 1;
+      searchStart = math.min(adjustedSpanEnd + 1, newText.length);
       // Adjust offset to reflect the difference between where currentSpan
       // was positioned in resultsText versus in newText.
       offset = adjustedSpanStart - currentSpan.range.start;
@@ -207,7 +210,7 @@ TextSpan buildTextSpanWithSpellCheckSuggestions(
 
   // We will draw the TextSpan tree based on the composing region, if it is
   // available.
-  // TODO(camsim99): The two separate stratgies for building TextSpan trees
+  // TODO(camsim99): The two separate strategies for building TextSpan trees
   // based on the availability of a composing region should be merged:
   // https://github.com/flutter/flutter/issues/124142.
   final bool shouldConsiderComposingRegion = defaultTargetPlatform == TargetPlatform.android;

@@ -7,8 +7,10 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/runner.dart' as runner;
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -18,6 +20,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -28,10 +31,9 @@ import '../../src/fakes.dart';
 const String kCustomBugInstructions = 'These are instructions to report with a custom bug tracker.';
 
 void main() {
-  int? firstExitCode;
-  late MemoryFileSystem fileSystem;
-
-  group('runner', () {
+  group('runner (crash reporting)', () {
+    int? firstExitCode;
+    late MemoryFileSystem fileSystem;
     late FakeAnalytics fakeAnalytics;
 
     setUp(() {
@@ -82,7 +84,7 @@ void main() {
           ));
           return null;
         },
-        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
+        onError: (Object error, StackTrace stack) {
           expect(firstExitCode, isNotNull);
           expect(firstExitCode, isNot(0));
           expect(error.toString(), 'Exception: test exit');
@@ -137,7 +139,7 @@ void main() {
           ));
           return null;
         },
-        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
+        onError: (Object error, StackTrace stack) {
           expect(firstExitCode, isNotNull);
           expect(firstExitCode, isNot(0));
           expect(error.toString(), 'Exception: test exit');
@@ -185,7 +187,7 @@ void main() {
           ));
           return null;
         },
-        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
+        onError: (Object error, StackTrace stack) {
           expect(firstExitCode, isNotNull);
           expect(firstExitCode, isNot(0));
           expect(error.toString(), 'Exception: test exit');
@@ -280,7 +282,7 @@ void main() {
             ));
             return null;
           },
-          onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
+          onError: (Object error, StackTrace stack) {
             expect(firstExitCode, isNotNull);
             expect(firstExitCode, isNot(0));
             expect(error.toString(), 'Exception: test exit');
@@ -325,9 +327,105 @@ void main() {
     });
   });
 
+  group('runner', () {
+    late MemoryFileSystem fs;
+
+    setUp(() {
+      io.setExitFunctionForTests((int exitCode) {});
+
+      fs = MemoryFileSystem.test();
+
+      Cache.disableLocking();
+    });
+
+    tearDown(() {
+      io.restoreExitFunction();
+      Cache.enableLocking();
+    });
+
+    testUsingContext("catches ProcessException calling git because it's not available", () async {
+      final _GitNotFoundFlutterCommand command = _GitNotFoundFlutterCommand();
+
+      await runner.run(
+        <String>[command.name],
+        () => <FlutterCommand>[
+          command,
+        ],
+        // This flutterVersion disables crash reporting.
+        flutterVersion: '[user-branch]/',
+        reportCrashes: false,
+        shutdownHooks: ShutdownHooks(),
+      );
+
+      expect(
+          (globals.logger as BufferLogger).errorText,
+          'Failed to find "git" in the search path.\n'
+          '\n'
+          'An error was encountered when trying to run git.\n'
+          "Please ensure git is installed and available in your system's search path. "
+          'See https://docs.flutter.dev/get-started/install for instructions on installing git for your platform.\n');
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        Artifacts: () => Artifacts.test(),
+        ProcessManager: () =>
+            FakeProcessManager.any()..excludedExecutables.add('git'),
+      },
+    );
+
+    testUsingContext('handles ProcessException calling git when ProcessManager.canRun fails', () async {
+      final _GitNotFoundFlutterCommand command = _GitNotFoundFlutterCommand();
+
+      await runner.run(
+        <String>[command.name],
+        () => <FlutterCommand>[
+          command,
+        ],
+        // This flutterVersion disables crash reporting.
+        flutterVersion: '[user-branch]/',
+        reportCrashes: false,
+        shutdownHooks: ShutdownHooks(),
+      );
+
+      expect(
+          (globals.logger as BufferLogger).errorText,
+          'Failed to find "git" in the search path.\n'
+          '\n'
+          'An error was encountered when trying to run git.\n'
+          "Please ensure git is installed and available in your system's search path. "
+          'See https://docs.flutter.dev/get-started/install for instructions on installing git for your platform.\n');
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        Artifacts: () => Artifacts.test(),
+        ProcessManager: () => _ErrorOnCanRunFakeProcessManager(),
+      },
+    );
+
+    testUsingContext('do not print welcome on bots', () async {
+        await runner.run(
+          <String>['--version', '--machine'],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect((globals.flutterUsage as TestUsage).printedWelcome, false);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        BotDetector: () => const FakeBotDetector(true),
+        Usage: () => TestUsage(),
+      },
+    );
+  });
+
   group('unified_analytics', () {
     late FakeAnalytics fakeAnalytics;
     late MemoryFileSystem fs;
+    late TestUsage testUsage;
 
     setUp(() {
       fs = MemoryFileSystem.test();
@@ -336,6 +434,7 @@ void main() {
         fs: fs,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
+      testUsage = TestUsage();
     });
 
     testUsingContext(
@@ -359,6 +458,85 @@ void main() {
         Analytics: () => fakeAnalytics,
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'runner sends mismatch event to ga3 if user opted in to ga3 but out of ga4 analytics',
+      () async {
+        io.setExitFunctionForTests((int exitCode) {});
+
+        // Begin by opting out of telemetry for package:unified_analytics
+        // and leaving legacy analytics opted in
+        await fakeAnalytics.setTelemetry(false);
+        expect(fakeAnalytics.telemetryEnabled, false);
+        expect(testUsage.enabled, true);
+
+        await runner.run(
+          <String>[],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(
+          testUsage.events,
+          contains(const TestUsageEvent(
+            'ga4_and_ga3_status_mismatch',
+            'opted_out_of_ga4',
+          )),
+        );
+        expect(fakeAnalytics.telemetryEnabled, false);
+        expect(testUsage.enabled, true);
+        expect(fakeAnalytics.sentEvents, isEmpty);
+
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        Usage: () => testUsage,
+      },
+    );
+
+    testUsingContext(
+      'runner does not send mismatch event to ga3 if user opted out of ga3 & ga4 analytics',
+      () async {
+        io.setExitFunctionForTests((int exitCode) {});
+
+        // Begin by opting out of telemetry for package:unified_analytics
+        // and legacy analytics
+        await fakeAnalytics.setTelemetry(false);
+        testUsage.enabled = false;
+        expect(fakeAnalytics.telemetryEnabled, false);
+        expect(testUsage.enabled, false);
+
+        await runner.run(
+          <String>[],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(
+          testUsage.events,
+          isNot(contains(const TestUsageEvent(
+            'ga4_and_ga3_status_mismatch',
+            'opted_out_of_ga4',
+          ))),
+        );
+        expect(fakeAnalytics.telemetryEnabled, false);
+        expect(testUsage.enabled, false);
+        expect(fakeAnalytics.sentEvents, isEmpty);
+
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        Usage: () => testUsage,
       },
     );
 
@@ -464,6 +642,23 @@ class CrashingFlutterCommand extends FlutterCommand {
   }
 }
 
+class _GitNotFoundFlutterCommand extends FlutterCommand {
+  @override
+  String get description => '';
+
+  @override
+  String get name => 'git-not-found';
+
+  @override
+  Future<FlutterCommandResult> runCommand() {
+    throw const io.ProcessException(
+      'git',
+      <String>['log'],
+      'Failed to find "git" in the search path.',
+    );
+  }
+}
+
 class CrashingUsage implements Usage {
   CrashingUsage() : _impl = Usage(
     versionOverride: '[user-branch]',
@@ -562,5 +757,16 @@ class WaitingCrashReporter implements CrashReporter {
   Future<void> informUser(CrashDetails details, File crashFile) {
     _details = details;
     return _future;
+  }
+}
+
+class _ErrorOnCanRunFakeProcessManager extends Fake implements FakeProcessManager {
+  final FakeProcessManager delegate = FakeProcessManager.any();
+  @override
+  bool canRun(dynamic executable, {String? workingDirectory}) {
+    if (executable == 'git') {
+      throw Exception("oh no, we couldn't check for git!");
+    }
+    return delegate.canRun(executable, workingDirectory: workingDirectory);
   }
 }

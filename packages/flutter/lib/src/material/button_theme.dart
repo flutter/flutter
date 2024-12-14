@@ -2,6 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'button.dart';
+/// @docImport 'button_bar.dart';
+/// @docImport 'dropdown.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'elevated_button_theme.dart';
+/// @docImport 'filled_button.dart';
+/// @docImport 'filled_button_theme.dart';
+/// @docImport 'material.dart';
+/// @docImport 'outlined_button.dart';
+/// @docImport 'outlined_button_theme.dart';
+/// @docImport 'text_button.dart';
+/// @docImport 'text_button_theme.dart';
+/// @docImport 'text_theme.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -9,7 +24,6 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'material_button.dart';
-import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart' show MaterialTapTargetSize;
 
@@ -238,19 +252,14 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [getPadding], which is used to calculate padding for the [button]'s
+  ///  * [getPadding], which is used to calculate padding for the button's
   ///    child (typically the button's label).
   EdgeInsetsGeometry get padding {
-    if (_padding != null) {
-      return _padding;
-    }
-    switch (textTheme) {
-      case ButtonTextTheme.normal:
-      case ButtonTextTheme.accent:
-        return const EdgeInsets.symmetric(horizontal: 16.0);
-      case ButtonTextTheme.primary:
-        return const EdgeInsets.symmetric(horizontal: 24.0);
-    }
+    return _padding ?? switch (textTheme) {
+      ButtonTextTheme.normal  => const EdgeInsets.symmetric(horizontal: 16.0),
+      ButtonTextTheme.accent  => const EdgeInsets.symmetric(horizontal: 16.0),
+      ButtonTextTheme.primary => const EdgeInsets.symmetric(horizontal: 24.0),
+    };
   }
   final EdgeInsetsGeometry? _padding;
 
@@ -266,23 +275,15 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [getShape], which is used to calculate the shape of the [button]'s
+  ///  * [getShape], which is used to calculate the shape of the button's
   ///    [Material].
   ShapeBorder get shape {
-    if (_shape != null) {
-      return _shape;
-    }
-    switch (textTheme) {
-      case ButtonTextTheme.normal:
-      case ButtonTextTheme.accent:
-        return const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(2.0)),
-        );
-      case ButtonTextTheme.primary:
-        return const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(4.0)),
-        );
-    }
+    return _shape ?? switch (textTheme) {
+      ButtonTextTheme.normal || ButtonTextTheme.accent =>
+        const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
+      ButtonTextTheme.primary =>
+        const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
+    };
   }
   final ShapeBorder? _shape;
 
@@ -302,8 +303,8 @@ class ButtonThemeData with Diagnosticable {
   /// This property is null by default.
   ///
   /// If the button is in the focused, hovering, or highlighted state, then the
-  /// [focusColor], [hoverColor], or [highlightColor] will take precedence over
-  /// the [buttonColor].
+  /// `focusColor`, `hoverColor`, or `highlightColor` will take precedence over
+  /// the `buttonColor`.
   ///
   /// See also:
   ///
@@ -324,8 +325,8 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// This property is null by default.
   ///
-  /// If the button is in the hovering or highlighted state, then the [hoverColor]
-  /// or [highlightColor] will take precedence over the [focusColor].
+  /// If the button is in the hovering or highlighted state, then the `hoverColor`
+  /// or `highlightColor` will take precedence over the `focusColor`.
   ///
   /// See also:
   ///
@@ -337,8 +338,8 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// This property is null by default.
   ///
-  /// If the button is in the highlighted state, then the [highlightColor] will
-  /// take precedence over the [hoverColor].
+  /// If the button is in the highlighted state, then the `highlightColor` will
+  /// take precedence over the `hoverColor`.
   ///
   /// See also:
   ///
@@ -353,7 +354,7 @@ class ButtonThemeData with Diagnosticable {
   /// See also:
   ///
   ///  * [getHighlightColor], which is used to compute the color of the overlay
-  ///    that appears when the [button] is pressed.
+  ///    that appears when the `button` is pressed.
   final Color? _highlightColor;
 
   /// The color of the ink "splash" overlay that appears when a button is tapped.
@@ -363,7 +364,7 @@ class ButtonThemeData with Diagnosticable {
   /// See also:
   ///
   ///  * [getSplashColor], which is used to compute the color of the ink
-  ///    "splash" overlay that appears when the (enabled) [button] is tapped.
+  ///    "splash" overlay that appears when the (enabled) `button` is tapped.
   final Color? _splashColor;
 
   /// A set of thirteen colors that can be used to derive the button theme's
@@ -394,7 +395,7 @@ class ButtonThemeData with Diagnosticable {
   /// minimum size, internal padding, and shape.
   ///
   /// Despite the name, this property is not the [TextTheme] whose
-  /// [TextTheme.button] is used as the button text's [TextStyle].
+  /// [TextTheme.labelLarge] is used as the button text's [TextStyle].
   ButtonTextTheme getTextTheme(MaterialButton button) => button.textTheme ?? textTheme;
 
   /// The foreground color of the [button]'s text and icon when
@@ -404,8 +405,8 @@ class ButtonThemeData with Diagnosticable {
   /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned
   /// with its opacity set to 0.38.
   ///
-  /// If [MaterialButton.textColor] is a [MaterialStateProperty<Color>], it will be
-  /// used as the `disabledTextColor`. It will be resolved in the [MaterialState.disabled] state.
+  /// If [MaterialButton.textColor] is a [WidgetStateProperty<Color>], it will be
+  /// used as the `disabledTextColor`. It will be resolved in the [WidgetState.disabled] state.
   Color getDisabledTextColor(MaterialButton button) {
     return button.textColor ?? button.disabledTextColor ?? colorScheme!.onSurface.withOpacity(0.38);
   }
@@ -630,21 +631,11 @@ class ButtonThemeData with Diagnosticable {
   /// [getTextTheme] is [ButtonTextTheme.primary], 16.0 on the left and right
   /// otherwise.
   EdgeInsetsGeometry getPadding(MaterialButton button) {
-    if (button.padding != null) {
-      return button.padding!;
-    }
-
-    if (_padding != null) {
-      return _padding;
-    }
-
-    switch (getTextTheme(button)) {
-      case ButtonTextTheme.normal:
-      case ButtonTextTheme.accent:
-        return const EdgeInsets.symmetric(horizontal: 16.0);
-      case ButtonTextTheme.primary:
-        return const EdgeInsets.symmetric(horizontal: 24.0);
-    }
+    return button.padding ?? _padding ?? switch (getTextTheme(button)) {
+      ButtonTextTheme.normal  => const EdgeInsets.symmetric(horizontal: 16.0),
+      ButtonTextTheme.accent  => const EdgeInsets.symmetric(horizontal: 16.0),
+      ButtonTextTheme.primary => const EdgeInsets.symmetric(horizontal: 24.0),
+    };
   }
 
   /// The shape of the [button]'s [Material].

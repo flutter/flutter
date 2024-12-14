@@ -48,7 +48,7 @@ Future<LocalizationsGenerator> generateLocalizations({
   precacheLanguageAndRegionTags();
 
   // Use \r\n if project's pubspec file contains \r\n.
-  final bool useCRLF = fileSystem.file('pubspec.yaml').readAsStringSync().contains('\r\n');
+  final bool useCRLF = projectDir.childFile('pubspec.yaml').readAsStringSync().contains('\r\n');
 
   LocalizationsGenerator generator;
   try {
@@ -692,7 +692,7 @@ class LocalizationsGenerator {
   /// Whether to generate the Dart localization methods with named parameters.
   ///
   /// If this sets to true, the generated Dart localization methods will be:
-  /// ```
+  /// ```dart
   /// String helloWorld({required String name});
   /// ```
   final bool useNamedParameters;

@@ -15,7 +15,8 @@ import 'cache.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
 
-const String _unknownFrameworkVersion = '0.0.0-unknown';
+/// The default version when a version could not be determined.
+const String kUnknownFrameworkVersion = '0.0.0-unknown';
 
 /// A git shortcut for the branch that is being tracked by the current one.
 ///
@@ -228,7 +229,7 @@ abstract class FlutterVersion {
 
   @override
   String toString() {
-    final String versionText = frameworkVersion == _unknownFrameworkVersion ? '' : ' $frameworkVersion';
+    final String versionText = frameworkVersion == kUnknownFrameworkVersion ? '' : ' $frameworkVersion';
     final String flutterText = 'Flutter$versionText • channel $channel • ${repositoryUrl ?? 'unknown source'}';
     final String frameworkText = 'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
     final String engineText = 'Engine • revision $engineRevisionShort';
@@ -359,7 +360,7 @@ abstract class FlutterVersion {
 
   /// Return a short string for the version (e.g. `master/0.0.59-pre.92`, `scroll_refactor/a76bc8e22b`).
   String getVersionString({ bool redactUnknownBranches = false }) {
-    if (frameworkVersion != _unknownFrameworkVersion) {
+    if (frameworkVersion != kUnknownFrameworkVersion) {
       return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkVersion';
     }
     return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkRevisionShort';
@@ -717,11 +718,7 @@ class VersionUpstreamValidator {
   // URLs without ".git" suffix will remain unaffected.
   static final RegExp _patternUrlDotGit = RegExp(r'(.*)(\.git)$');
   static String stripDotGit(String url) {
-    final RegExpMatch? match = _patternUrlDotGit.firstMatch(url);
-    if (match == null) {
-      return url;
-    }
-    return match.group(1)!;
+    return _patternUrlDotGit.firstMatch(url)?.group(1)! ?? url;
   }
 }
 
@@ -1057,7 +1054,7 @@ class GitTagVersion {
 
   String frameworkVersionFor(String revision) {
     if (x == null || y == null || z == null || (hash != null && !revision.startsWith(hash!))) {
-      return _unknownFrameworkVersion;
+      return kUnknownFrameworkVersion;
     }
     if (commits == 0 && gitTag != null) {
       return gitTag!;
@@ -1167,14 +1164,11 @@ class VersionFreshnessValidator {
   /// beta releases happen approximately every month.
   @visibleForTesting
   static Duration versionAgeConsideredUpToDate(String channel) {
-    switch (channel) {
-      case 'stable':
-        return const Duration(days: 365 ~/ 2); // Six months
-      case 'beta':
-        return const Duration(days: 7 * 8); // Eight weeks
-      default:
-        return const Duration(days: 7 * 3); // Three weeks
-    }
+    return switch (channel) {
+      'stable' => const Duration(days: 365 ~/ 2), // Six months
+      'beta'   => const Duration(days: 7 * 8),    // Eight weeks
+      _        => const Duration(days: 7 * 3),    // Three weeks
+    };
   }
 
   /// Execute validations and print warning to [logger] if necessary.

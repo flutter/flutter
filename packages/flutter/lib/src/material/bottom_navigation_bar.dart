@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'color_scheme.dart';
+/// @docImport 'navigation_bar.dart';
+/// @docImport 'scaffold.dart';
+library;
+
 import 'dart:collection' show Queue;
 import 'dart:math' as math;
 
@@ -372,18 +377,18 @@ class BottomNavigationBar extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// items.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.selected].
+  ///  * [WidgetState.selected].
   ///
   /// If null, then the value of [BottomNavigationBarThemeData.mouseCursor] is used. If
-  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
+  /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
   ///
   /// See also:
   ///
-  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor]
-  ///    that is also a [MaterialStateProperty<MouseCursor>].
+  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor]
+  ///    that is also a [WidgetStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
@@ -558,12 +563,10 @@ class _BottomNavigationTile extends StatelessWidget {
       ).evaluate(animation);
     }
 
-    switch (type) {
-      case BottomNavigationBarType.fixed:
-        size = 1;
-      case BottomNavigationBarType.shifting:
-        size = (flex! * 1000.0).round();
-    }
+    size = switch (type) {
+      BottomNavigationBarType.fixed => 1,
+      BottomNavigationBarType.shifting => (flex! * 1000.0).round(),
+    };
 
     Widget result = InkResponse(
       onTap: onTap,
@@ -607,6 +610,7 @@ class _BottomNavigationTile extends StatelessWidget {
 
     result = Semantics(
       selected: selected,
+      button: true,
       container: true,
       child: Stack(
         children: <Widget>[
@@ -653,7 +657,7 @@ class _Tile extends StatelessWidget {
             const SizedBox(width: 8),
             // Flexible lets the overflow property of
             // label to work and IntrinsicWidth gives label a
-            // resonable width preventing extra space before it.
+            // reasonable width preventing extra space before it.
             Flexible(child: IntrinsicWidth(child: label))
           ],
         ),
@@ -786,7 +790,7 @@ class _Label extends StatelessWidget {
     text = Align(
       alignment: Alignment.bottomCenter,
       heightFactor: 1.0,
-      child: Container(child: text),
+      child: text,
     );
 
     if (item.label != null) {
@@ -804,7 +808,7 @@ class _Label extends StatelessWidget {
 
 class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerProviderStateMixin {
   List<AnimationController> _controllers = <AnimationController>[];
-  late List<CurvedAnimation> _animations;
+  List<CurvedAnimation> _animations = <CurvedAnimation>[];
 
   // A queue of color splashes currently being animated.
   final Queue<_Circle> _circles = Queue<_Circle>();
@@ -821,6 +825,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     }
     for (final _Circle circle in _circles) {
       circle.dispose();
+    }
+    for (final CurvedAnimation animation in _animations) {
+      animation.dispose();
     }
     _circles.clear();
 
@@ -858,12 +865,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   // Unselected labels are shown by default for [BottomNavigationBarType.fixed],
   // and hidden by default for [BottomNavigationBarType.shifting].
   bool get _defaultShowUnselected {
-    switch (_effectiveType) {
-      case BottomNavigationBarType.shifting:
-        return false;
-      case BottomNavigationBarType.fixed:
-        return true;
-    }
+    return switch (_effectiveType) {
+      BottomNavigationBarType.shifting => false,
+      BottomNavigationBarType.fixed    => true,
+    };
   }
 
   @override
@@ -887,6 +892,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     for (final _Circle circle in _circles) {
       circle.dispose();
     }
+    for (final CurvedAnimation animation in _animations) {
+      animation.dispose();
+    }
     super.dispose();
   }
 
@@ -900,22 +908,15 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           index: index,
           color: widget.items[index].backgroundColor!,
           vsync: this,
-        )..controller.addStatusListener(
-          (AnimationStatus status) {
-            switch (status) {
-              case AnimationStatus.completed:
-                setState(() {
-                  final _Circle circle = _circles.removeFirst();
-                  _backgroundColor = circle.color;
-                  circle.dispose();
-                });
-              case AnimationStatus.dismissed:
-              case AnimationStatus.forward:
-              case AnimationStatus.reverse:
-                break;
-            }
-          },
-        ),
+        )..controller.addStatusListener((AnimationStatus status) {
+          if (status.isCompleted) {
+            setState(() {
+              final _Circle circle = _circles.removeFirst();
+              _backgroundColor = circle.color;
+              circle.dispose();
+            });
+          }
+        }),
       );
     }
   }
@@ -969,13 +970,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     final ThemeData themeData = Theme.of(context);
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
 
-    final Color themeColor;
-    switch (themeData.brightness) {
-      case Brightness.light:
-        themeColor = themeData.colorScheme.primary;
-      case Brightness.dark:
-        themeColor = themeData.colorScheme.secondary;
-    }
+    final Color themeColor = switch (themeData.brightness) {
+      Brightness.light => themeData.colorScheme.primary,
+      Brightness.dark  => themeData.colorScheme.secondary,
+    };
 
     final TextStyle effectiveSelectedLabelStyle =
       _effectiveTextStyle(
@@ -1138,13 +1136,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       ?? BottomNavigationBarLandscapeLayout.spread;
     final double additionalBottomPadding = MediaQuery.viewPaddingOf(context).bottom;
 
-    Color? backgroundColor;
-    switch (_effectiveType) {
-      case BottomNavigationBarType.fixed:
-        backgroundColor = widget.backgroundColor ?? bottomTheme.backgroundColor;
-      case BottomNavigationBarType.shifting:
-        backgroundColor = _backgroundColor;
-    }
+    final Color? backgroundColor = switch (_effectiveType) {
+      BottomNavigationBarType.fixed    => widget.backgroundColor ?? bottomTheme.backgroundColor,
+      BottomNavigationBarType.shifting => _backgroundColor,
+    };
 
     return Semantics(
       explicitChildNodes: true,
@@ -1261,6 +1256,7 @@ class _Circle {
 
   void dispose() {
     controller.dispose();
+    animation.dispose();
   }
 }
 
@@ -1298,8 +1294,8 @@ class _RadialPainter extends CustomPainter {
     for (int i = 0; i < circles.length; i += 1) {
       if (circles[i] != oldPainter.circles[i]) {
         return true;
-    }
       }
+    }
     return false;
   }
 
@@ -1309,13 +1305,10 @@ class _RadialPainter extends CustomPainter {
       final Paint paint = Paint()..color = circle.color;
       final Rect rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height);
       canvas.clipRect(rect);
-      final double leftFraction;
-      switch (textDirection) {
-        case TextDirection.rtl:
-          leftFraction = 1.0 - circle.horizontalLeadingOffset;
-        case TextDirection.ltr:
-          leftFraction = circle.horizontalLeadingOffset;
-      }
+      final double leftFraction = switch (textDirection) {
+        TextDirection.rtl => 1.0 - circle.horizontalLeadingOffset,
+        TextDirection.ltr => circle.horizontalLeadingOffset,
+      };
       final Offset center = Offset(leftFraction * size.width, size.height / 2.0);
       final Tween<double> radiusTween = Tween<double>(
         begin: 0.0,

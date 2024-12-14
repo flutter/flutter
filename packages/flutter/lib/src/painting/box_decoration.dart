@@ -2,15 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 import 'border_radius.dart';
+import 'borders.dart';
 import 'box_border.dart';
 import 'box_shadow.dart';
 import 'colors.dart';
+import 'debug.dart';
 import 'decoration.dart';
 import 'decoration_image.dart';
 import 'edge_insets.dart';
@@ -243,26 +248,18 @@ class BoxDecoration extends Decoration {
   bool get isComplex => boxShadow != null;
 
   @override
-  BoxDecoration? lerpFrom(Decoration? a, double t) {
-    if (a == null) {
-      return scale(t);
-    }
-    if (a is BoxDecoration) {
-      return BoxDecoration.lerp(a, this, t);
-    }
-    return super.lerpFrom(a, t) as BoxDecoration?;
-  }
+  BoxDecoration? lerpFrom(Decoration? a, double t) => switch (a) {
+    null => scale(t),
+    BoxDecoration() => BoxDecoration.lerp(a, this, t),
+    _ => super.lerpFrom(a, t) as BoxDecoration?
+  };
 
   @override
-  BoxDecoration? lerpTo(Decoration? b, double t) {
-    if (b == null) {
-      return scale(1.0 - t);
-    }
-    if (b is BoxDecoration) {
-      return BoxDecoration.lerp(this, b, t);
-    }
-    return super.lerpTo(b, t) as BoxDecoration?;
-  }
+  BoxDecoration? lerpTo(Decoration? b, double t) => switch (b) {
+    null => scale(1.0 - t),
+    BoxDecoration() => BoxDecoration.lerp(this, b, t),
+    _ => super.lerpTo(b, t) as BoxDecoration?
+  };
 
   /// Linearly interpolate between two box decorations.
   ///
@@ -439,14 +436,80 @@ class _BoxDecorationPainter extends BoxPainter {
     for (final BoxShadow boxShadow in _decoration.boxShadow!) {
       final Paint paint = boxShadow.toPaint();
       final Rect bounds = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
+      assert(() {
+        if (debugDisableShadows && boxShadow.blurStyle == BlurStyle.outer) {
+          canvas.save();
+          canvas.clipRect(bounds);
+        }
+        return true;
+      }());
       _paintBox(canvas, bounds, paint, textDirection);
+      assert(() {
+        if (debugDisableShadows && boxShadow.blurStyle == BlurStyle.outer) {
+          canvas.restore();
+        }
+        return true;
+      }());
     }
   }
 
   void _paintBackgroundColor(Canvas canvas, Rect rect, TextDirection? textDirection) {
     if (_decoration.color != null || _decoration.gradient != null) {
-      _paintBox(canvas, rect, _getBackgroundPaint(rect, textDirection), textDirection);
+      // When border is filled, the rect is reduced to avoid anti-aliasing
+      // rounding error leaking the background color around the clipped shape.
+      final Rect adjustedRect = _adjustedRectOnOutlinedBorder(rect, textDirection);
+      _paintBox(canvas, adjustedRect, _getBackgroundPaint(rect, textDirection), textDirection);
     }
+  }
+
+  double _calculateAdjustedSide(BorderSide side) {
+    if (side.color.alpha == 255 && side.style == BorderStyle.solid) {
+      return side.strokeInset;
+    }
+    return 0;
+  }
+
+  Rect _adjustedRectOnOutlinedBorder(Rect rect, TextDirection? textDirection) {
+    if (_decoration.border == null) {
+      return rect;
+    }
+
+    if (_decoration.border is Border) {
+      final Border border = _decoration.border! as Border;
+
+      final EdgeInsets insets = EdgeInsets.fromLTRB(
+        _calculateAdjustedSide(border.left),
+        _calculateAdjustedSide(border.top),
+        _calculateAdjustedSide(border.right),
+        _calculateAdjustedSide(border.bottom),
+      ) / 2;
+
+      return Rect.fromLTRB(
+        rect.left + insets.left,
+        rect.top + insets.top,
+        rect.right - insets.right,
+        rect.bottom - insets.bottom,
+      );
+    } else if (_decoration.border is BorderDirectional && textDirection != null) {
+      final BorderDirectional border = _decoration.border! as BorderDirectional;
+      final BorderSide leftSide = textDirection == TextDirection.rtl ? border.end : border.start;
+      final BorderSide rightSide = textDirection == TextDirection.rtl ? border.start : border.end;
+
+      final EdgeInsets insets = EdgeInsets.fromLTRB(
+        _calculateAdjustedSide(leftSide),
+        _calculateAdjustedSide(border.top),
+        _calculateAdjustedSide(rightSide),
+        _calculateAdjustedSide(border.bottom),
+      ) / 2;
+
+      return Rect.fromLTRB(
+        rect.left + insets.left,
+        rect.top + insets.top,
+        rect.right - insets.right,
+        rect.bottom - insets.bottom,
+      );
+    }
+    return rect;
   }
 
   DecorationImagePainter? _imagePainter;

@@ -69,7 +69,7 @@ class VersionMigration extends ProjectMigrator {
   final File _resourceFile;
 
   @override
-  void migrate() {
+  Future<void> migrate() async {
     // Skip this migration if the affected files do not exist. This indicates
     // the app has done non-trivial changes to its runner and this migration
     // might not work as expected if applied.

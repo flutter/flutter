@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets('ErrorWidget displays actual error when throwing during build', (WidgetTester tester) async {
@@ -37,7 +38,9 @@ void main() {
     expect(find.byKey(container), findsOneWidget);
   });
 
-  testWidgets('when constructing an ErrorWidget due to a build failure throws an error, fail gracefully', (WidgetTester tester) async {
+  testWidgets('when constructing an ErrorWidget due to a build failure throws an error, fail gracefully',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     final Key container = UniqueKey();
     await tester.pumpWidget(
       Container(

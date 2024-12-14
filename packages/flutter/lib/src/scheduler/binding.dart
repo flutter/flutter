@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/rendering.dart';
+/// @docImport 'package:flutter/services.dart';
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'ticker.dart';
+library;
+
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer' show Flow, Timeline, TimelineTask;
@@ -391,11 +399,12 @@ mixin SchedulerBinding on BindingBase {
   AppLifecycleState? get lifecycleState => _lifecycleState;
   AppLifecycleState? _lifecycleState;
 
-  /// Allows the test framework to reset the lifecycle state back to its
-  /// initial value.
+  /// Allows the test framework to reset the lifecycle state and framesEnabled
+  /// back to their initial values.
   @visibleForTesting
-  void resetLifecycleState() {
+  void resetInternalState() {
     _lifecycleState = null;
+    _framesEnabled = true;
   }
 
   /// Called when the application lifecycle state changes.
@@ -508,14 +517,11 @@ mixin SchedulerBinding on BindingBase {
 
   /// Execute the highest-priority task, if it is of a high enough priority.
   ///
-  /// Returns true if a task was executed and there are other tasks remaining
-  /// (even if they are not high-enough priority).
+  /// Returns false if the scheduler is [locked], or if there are no tasks
+  /// remaining.
   ///
-  /// Returns false if no task was executed, which can occur if there are no
-  /// tasks scheduled, if the scheduler is [locked], or if the highest-priority
-  /// task is of too low a priority given the current [schedulingStrategy].
-  ///
-  /// Also returns false if there are no tasks remaining.
+  /// Returns true otherwise, including when no task is executed due to priority
+  /// being too low.
   @visibleForTesting
   @pragma('vm:notify-debugger-on-exception')
   bool handleEventLoopCallback() {
@@ -552,7 +558,7 @@ mixin SchedulerBinding on BindingBase {
       }
       return _taskQueue.isNotEmpty;
     }
-    return false;
+    return true;
   }
 
   int _nextFrameCallbackId = 0; // positive
@@ -782,7 +788,7 @@ mixin SchedulerBinding on BindingBase {
   ///
   /// In debug mode, if [debugTracePostFrameCallbacks] is set to true, then the
   /// registered callback will show up in the timeline events chart, which can
-  /// be viewed in [DevTools](https://docs.flutter.dev/tools/devtools/overview).
+  /// be viewed in [DevTools](https://docs.flutter.dev/tools/devtools).
   /// In that case, the `debugLabel` argument specifies the name of the callback
   /// as it will appear in the timeline. In profile and release builds,
   /// post-frame are never traced, and the `debugLabel` argument is ignored.
@@ -1024,28 +1030,29 @@ mixin SchedulerBinding on BindingBase {
       debugTimelineTask = TimelineTask()..start('Warm-up frame');
     }
     final bool hadScheduledFrame = _hasScheduledFrame;
-    // We use timers here to ensure that microtasks flush in between.
-    Timer.run(() {
-      assert(_warmUpFrame);
-      handleBeginFrame(null);
-    });
-    Timer.run(() {
-      assert(_warmUpFrame);
-      handleDrawFrame();
-      // We call resetEpoch after this frame so that, in the hot reload case,
-      // the very next frame pretends to have occurred immediately after this
-      // warm-up frame. The warm-up frame's timestamp will typically be far in
-      // the past (the time of the last real frame), so if we didn't reset the
-      // epoch we would see a sudden jump from the old time in the warm-up frame
-      // to the new time in the "real" frame. The biggest problem with this is
-      // that implicit animations end up being triggered at the old time and
-      // then skipping every frame and finishing in the new time.
-      resetEpoch();
-      _warmUpFrame = false;
-      if (hadScheduledFrame) {
-        scheduleFrame();
-      }
-    });
+    PlatformDispatcher.instance.scheduleWarmUpFrame(
+      beginFrame: () {
+        assert(_warmUpFrame);
+        handleBeginFrame(null);
+      },
+      drawFrame: () {
+        assert(_warmUpFrame);
+        handleDrawFrame();
+        // We call resetEpoch after this frame so that, in the hot reload case,
+        // the very next frame pretends to have occurred immediately after this
+        // warm-up frame. The warm-up frame's timestamp will typically be far in
+        // the past (the time of the last real frame), so if we didn't reset the
+        // epoch we would see a sudden jump from the old time in the warm-up frame
+        // to the new time in the "real" frame. The biggest problem with this is
+        // that implicit animations end up being triggered at the old time and
+        // then skipping every frame and finishing in the new time.
+        resetEpoch();
+        _warmUpFrame = false;
+        if (hadScheduledFrame) {
+          scheduleFrame();
+        }
+      },
+    );
 
     // Lock events so touch events etc don't insert themselves until the
     // scheduled frame has finished.
@@ -1316,13 +1323,17 @@ mixin SchedulerBinding on BindingBase {
       final List<FrameCallback> localPostFrameCallbacks =
           List<FrameCallback>.of(_postFrameCallbacks);
       _postFrameCallbacks.clear();
-      Timeline.startSync('POST_FRAME');
+      if (!kReleaseMode) {
+        FlutterTimeline.startSync('POST_FRAME');
+      }
       try {
         for (final FrameCallback callback in localPostFrameCallbacks) {
           _invokeFrameCallback(callback, _currentFrameTimeStamp!);
         }
       } finally {
-        Timeline.finishSync();
+        if (!kReleaseMode) {
+          FlutterTimeline.finishSync();
+        }
       }
     } finally {
       _schedulerPhase = SchedulerPhase.idle;

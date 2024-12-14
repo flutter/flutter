@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'page_storage.dart';
+/// @docImport 'safe_area.dart';
+/// @docImport 'scrollable.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -36,7 +43,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///
 /// The most common use case for this widget is a scrollable view with a
 /// flexible [SliverAppBar] containing a [TabBar] in the header (built by
-/// [headerSliverBuilder], and with a [TabBarView] in the [body], such that the
+/// [headerSliverBuilder]), and with a [TabBarView] in the [body], such that the
 /// scrollable view's contents vary based on which tab is visible.
 ///
 /// ## Motivation
@@ -188,6 +195,7 @@ class NestedScrollView extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.floatHeaderSlivers = false,
     this.clipBehavior = Clip.hardEdge,
+    this.hitTestBehavior = HitTestBehavior.opaque,
     this.restorationId,
     this.scrollBehavior,
   });
@@ -296,6 +304,11 @@ class NestedScrollView extends StatefulWidget {
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
+
+  /// {@macro flutter.widgets.scrollable.hitTestBehavior}
+  ///
+  /// Defaults to [HitTestBehavior.opaque].
+  final HitTestBehavior hitTestBehavior;
 
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
@@ -489,6 +502,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
             handle: _absorberHandle,
             clipBehavior: widget.clipBehavior,
             restorationId: widget.restorationId,
+            hitTestBehavior: widget.hitTestBehavior,
           );
         },
       ),
@@ -506,6 +520,7 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
     required super.slivers,
     required this.handle,
     required super.clipBehavior,
+    super.hitTestBehavior,
     super.dragStartBehavior,
     super.restorationId,
   });
@@ -596,6 +611,15 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     this._onHasScrolledBodyChanged,
     this._floatHeaderSlivers,
   ) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/widgets.dart',
+        className: '$_NestedScrollCoordinator',
+        object: this,
+      );
+    }
     final double initialScrollOffset = _parent?.initialScrollOffset ?? 0.0;
     _outerController = _NestedScrollController(
       this,
@@ -615,6 +639,10 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   late _NestedScrollController _outerController;
   late _NestedScrollController _innerController;
+
+  bool get outOfRange {
+    return (_outerPosition?.outOfRange ?? false) || _innerPositions.any((_NestedScrollPosition position) => position.outOfRange);
+  }
 
   _NestedScrollPosition? get _outerPosition {
     if (!_outerController.hasClients) {
@@ -1065,7 +1093,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
           outerDelta = math.max(outerDelta, potentialOuterDelta);
         }
       }
-      if (outerDelta != 0.0) {
+      if (outerDelta.abs() > precisionErrorTolerance) {
         final double innerDelta = _outerPosition!.applyClampedDragUpdate(
           outerDelta,
         );
@@ -1123,6 +1151,9 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   @mustCallSuper
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _currentDrag?.dispose();
     _currentDrag = null;
     _outerController.dispose();
@@ -1189,8 +1220,7 @@ class _NestedScrollController extends ScrollController {
   }
 
   Iterable<_NestedScrollPosition> get nestedPositions {
-    // TODO(vegorov): use instance method version of castFrom when it is available.
-    return Iterable.castFrom<ScrollPosition, _NestedScrollPosition>(positions);
+    return positions.cast<_NestedScrollPosition>();
   }
 }
 
@@ -1302,8 +1332,8 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       this,
       delta,
     );
-    if (oldPixels == newPixels) {
-      // Delta must have been so small we dropped it during floating point addition.
+    if ((oldPixels - newPixels).abs() < precisionErrorTolerance) {
+      // Delta is so small we can drop it.
       return 0.0;
     }
     // Check for overscroll:
@@ -1396,6 +1426,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     if (simulation == null) {
       return IdleScrollActivity(this);
     }
+
     switch (mode) {
       case _NestedBallisticScrollActivityMode.outer:
         assert(metrics != null);
@@ -1408,7 +1439,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
           metrics,
           simulation,
           context.vsync,
-          activity?.shouldIgnorePointer ?? true,
+          shouldIgnorePointer,
         );
       case _NestedBallisticScrollActivityMode.inner:
         return _NestedInnerBallisticScrollActivity(
@@ -1416,10 +1447,15 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
           this,
           simulation,
           context.vsync,
-          activity?.shouldIgnorePointer ?? true,
+          shouldIgnorePointer,
         );
       case _NestedBallisticScrollActivityMode.independent:
-        return BallisticScrollActivity(this, simulation, context.vsync, activity?.shouldIgnorePointer ?? true);
+        return BallisticScrollActivity(
+          this,
+          simulation,
+          context.vsync,
+          shouldIgnorePointer
+        );
     }
   }
 
@@ -1674,17 +1710,11 @@ class SliverOverlapAbsorberHandle extends ChangeNotifier {
 
   @override
   String toString() {
-    String? extra;
-    switch (_writers) {
-      case 0:
-        extra = ', orphan';
-      case 1:
-        // normal case
-        break;
-      default:
-        extra = ', $_writers WRITERS ASSIGNED';
-        break;
-    }
+    final String? extra = switch (_writers) {
+      0 => ', orphan',
+      1 => null, // normal case
+      _ => ', $_writers WRITERS ASSIGNED',
+    };
     return '${objectRuntimeType(this, 'SliverOverlapAbsorberHandle')}($layoutExtent$extra)';
   }
 }

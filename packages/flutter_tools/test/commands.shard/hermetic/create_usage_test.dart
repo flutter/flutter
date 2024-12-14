@@ -40,7 +40,7 @@ class FakePub extends Fake implements Pub {
     bool shouldSkipThirdPartyGenerator = true,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
-    project.directory.childFile('.packages').createSync();
+    project.directory.childDirectory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     if (offline) {
       calledGetOffline += 1;
     } else {
@@ -87,6 +87,7 @@ void main() {
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin_ffi'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin_shared'),
+          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin_cocoapods'),
         ];
         for (final String templatePath in templatePaths) {
           globals.fs.directory(templatePath).createSync(recursive: true);

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert' show LineSplitter, json, utf8;
+import 'dart:ffi' show Abi;
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -20,7 +21,7 @@ import '../framework/utils.dart';
 /// Must match flutter_driver/lib/src/common.dart.
 ///
 /// Redefined here to avoid taking a dependency on flutter_driver.
-String _testOutputDirectory(String testDirectory) {
+String testOutputDirectory(String testDirectory) {
   return Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '$testDirectory/build';
 }
 
@@ -59,6 +60,29 @@ TaskFunction createUiKitViewScrollPerfTest({bool? enableImpeller}) {
     testDriver: 'test_driver/scroll_perf_test.dart',
     needsFullTimeline: false,
     enableImpeller: enableImpeller,
+    enableMergedPlatformThread: true,
+  ).run;
+}
+
+TaskFunction createUiKitViewScrollPerfAdBannersTest({bool? enableImpeller}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    'test_driver/uikit_view_scroll_perf_ad_banners.dart',
+    'platform_views_scroll_perf_ad_banners',
+    testDriver: 'test_driver/scroll_perf_ad_banners_test.dart',
+    needsFullTimeline: false,
+    enableImpeller: enableImpeller,
+  ).run;
+}
+
+TaskFunction createUiKitViewScrollPerfBottomAdBannerTest({bool? enableImpeller}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    'test_driver/uikit_view_scroll_perf_bottom_ad_banner.dart',
+    'platform_views_scroll_perf_bottom_ad_banner',
+    testDriver: 'test_driver/scroll_perf_bottom_ad_banner_test.dart',
+    needsFullTimeline: false,
+    enableImpeller: enableImpeller,
   ).run;
 }
 
@@ -81,6 +105,7 @@ TaskFunction createAndroidTextureScrollPerfTest({bool? enableImpeller}) {
     testDriver: 'test_driver/scroll_perf_test.dart',
     needsFullTimeline: false,
     enableImpeller: enableImpeller,
+    enableMergedPlatformThread: true,
   ).run;
 }
 
@@ -90,6 +115,7 @@ TaskFunction createAndroidViewScrollPerfTest() {
     'test_driver/android_view_scroll_perf.dart',
     'platform_views_scroll_perf_hybrid_composition',
     testDriver: 'test_driver/scroll_perf_test.dart',
+    enableMergedPlatformThread: true,
   ).run;
 }
 
@@ -327,43 +353,6 @@ TaskFunction createSlidersPerfTest() {
   ).run;
 }
 
-TaskFunction createStackSizeTest() {
-  final String testDirectory =
-      '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
-  const String testTarget = 'test_driver/run_app.dart';
-  const String testDriver = 'test_driver/stack_size_perf_test.dart';
-  return () {
-    return inDirectory<TaskResult>(testDirectory, () async {
-      final Device device = await devices.workingDevice;
-      await device.unlock();
-      final String deviceId = device.deviceId;
-      await flutter('packages', options: <String>['get']);
-
-      await flutter('drive', options: <String>[
-        '--no-android-gradle-daemon',
-        '-v',
-        '--verbose-system-logs',
-        '--profile',
-        '-t', testTarget,
-        '--driver', testDriver,
-        '-d',
-        deviceId,
-      ]);
-      final Map<String, dynamic> data = json.decode(
-        file('${_testOutputDirectory(testDirectory)}/stack_size.json').readAsStringSync(),
-      ) as Map<String, dynamic>;
-
-      final Map<String, dynamic> result = <String, dynamic>{
-        'stack_size_per_nesting_level': data['stack_size'],
-      };
-      return TaskResult.success(
-        result,
-        benchmarkScoreKeys: result.keys.toList(),
-      );
-    });
-  };
-}
-
 TaskFunction createFullscreenTextfieldPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -495,7 +484,7 @@ TaskFunction createsScrollSmoothnessPerfTest() {
         deviceId,
       ]);
       final Map<String, dynamic> data = json.decode(
-        file('${_testOutputDirectory(testDirectory)}/scroll_smoothness_test.json').readAsStringSync(),
+        file('${testOutputDirectory(testDirectory)}/scroll_smoothness_test.json').readAsStringSync(),
       ) as Map<String, dynamic>;
 
       final Map<String, dynamic> result = <String, dynamic>{};
@@ -546,7 +535,7 @@ TaskFunction createFramePolicyIntegrationTest() {
         deviceId,
       ]);
       final Map<String, dynamic> data = json.decode(
-        file('${_testOutputDirectory(testDirectory)}/frame_policy_event_delay.json').readAsStringSync(),
+        file('${testOutputDirectory(testDirectory)}/frame_policy_event_delay.json').readAsStringSync(),
       ) as Map<String, dynamic>;
       final Map<String, dynamic> fullLiveData = data['fullyLive'] as Map<String, dynamic>;
       final Map<String, dynamic> benchmarkLiveData = data['benchmarkLive'] as Map<String, dynamic>;
@@ -650,6 +639,21 @@ TaskFunction createAnimatedAdvancedBlendPerfTest({
     enableImpeller: enableImpeller,
     forceOpenGLES: forceOpenGLES,
     testDriver: 'test_driver/animated_advanced_blend_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
+TaskFunction createRRectBlurPerfTest({
+  bool? enableImpeller,
+  bool? forceOpenGLES,
+}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'rrect_blur_perf',
+    enableImpeller: enableImpeller,
+    forceOpenGLES: forceOpenGLES,
+    testDriver: 'test_driver/rrect_blur_perf_test.dart',
     saveTraceFile: true,
   ).run;
 }
@@ -771,10 +775,11 @@ Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations
 }
 
 /// Opens the file at testDirectory + 'ios/Runner/Info.plist'
-/// and adds the following entry to the application.
-/// <FTLDisablePartialRepaint/>
-/// <true/>
-void _disablePartialRepaint(String testDirectory) {
+/// and adds additional manifest settings.
+void _updateManifestSettings(String testDirectory, {
+  required bool disablePartialRepaint,
+  required bool platformThreadMerged
+}) {
   final String manifestPath = path.join(
       testDirectory, 'ios', 'Runner', 'Info.plist');
   final File file = File(manifestPath);
@@ -786,7 +791,10 @@ void _disablePartialRepaint(String testDirectory) {
   final String xmlStr = file.readAsStringSync();
   final XmlDocument xmlDoc = XmlDocument.parse(xmlStr);
   final List<(String, String)> keyPairs = <(String, String)>[
-    ('FLTDisablePartialRepaint', 'true'),
+    if (disablePartialRepaint)
+      ('FLTDisablePartialRepaint', disablePartialRepaint.toString()),
+    if (platformThreadMerged)
+    ('FLTEnableMergedPlatformUIThread', platformThreadMerged.toString())
   ];
 
   final XmlElement applicationNode =
@@ -815,15 +823,7 @@ Future<void> _resetPlist(String testDirectory) async {
   await exec('git', <String>['checkout', file.path]);
 }
 
-/// Opens the file at testDirectory + 'android/app/src/main/AndroidManifest.xml'
-/// and adds the following entry to the application.
-/// <meta-data
-///   android:name="io.flutter.embedding.android.ImpellerBackend"
-///   android:value="opengles" />
-/// <meta-data
-///   android:name="io.flutter.embedding.android.EnableOpenGLGPUTracing"
-///   android:value="true" />
-void _addOpenGLESToManifest(String testDirectory) {
+void _addMetadataToManifest(String testDirectory, List<(String, String)> keyPairs) {
   final String manifestPath = path.join(
       testDirectory, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
   final File file = File(manifestPath);
@@ -834,11 +834,6 @@ void _addOpenGLESToManifest(String testDirectory) {
 
   final String xmlStr = file.readAsStringSync();
   final XmlDocument xmlDoc = XmlDocument.parse(xmlStr);
-  final List<(String, String)> keyPairs = <(String, String)>[
-    ('io.flutter.embedding.android.ImpellerBackend', 'opengles'),
-    ('io.flutter.embedding.android.EnableOpenGLGPUTracing', 'true')
-  ];
-
   final XmlElement applicationNode =
       xmlDoc.findAllElements('application').first;
 
@@ -859,12 +854,45 @@ void _addOpenGLESToManifest(String testDirectory) {
           XmlAttribute(XmlName('android:value'), value)
         ],
       );
-
       applicationNode.children.add(metaData);
     }
   }
 
   file.writeAsStringSync(xmlDoc.toXmlString(pretty: true, indent: '    '));
+}
+
+void _addMergedPlatformThreadSupportToManifest(String testDirectory) {
+    final List<(String, String)> keyPairs = <(String, String)>[
+    ('io.flutter.embedding.android.EnableMergedPlatformUIThread', 'true'),
+  ];
+  _addMetadataToManifest(testDirectory, keyPairs);
+}
+
+/// Opens the file at testDirectory + 'android/app/src/main/AndroidManifest.xml'
+/// <meta-data
+///   android:name="io.flutter.embedding.android.EnableVulkanGPUTracing"
+///   android:value="true" />
+void _addVulkanGPUTracingToManifest(String testDirectory) {
+  final List<(String, String)> keyPairs = <(String, String)>[
+    ('io.flutter.embedding.android.EnableVulkanGPUTracing', 'true'),
+  ];
+  _addMetadataToManifest(testDirectory, keyPairs);
+}
+
+/// Opens the file at testDirectory + 'android/app/src/main/AndroidManifest.xml'
+/// and adds the following entry to the application.
+/// <meta-data
+///   android:name="io.flutter.embedding.android.ImpellerBackend"
+///   android:value="opengles" />
+/// <meta-data
+///   android:name="io.flutter.embedding.android.EnableOpenGLGPUTracing"
+///   android:value="true" />
+void _addOpenGLESToManifest(String testDirectory) {
+  final List<(String, String)> keyPairs = <(String, String)>[
+    ('io.flutter.embedding.android.ImpellerBackend', 'opengles'),
+    ('io.flutter.embedding.android.EnableOpenGLGPUTracing', 'true'),
+  ];
+  _addMetadataToManifest(testDirectory, keyPairs);
 }
 
 Future<void> _resetManifest(String testDirectory) async {
@@ -953,11 +981,12 @@ class StartupTest {
             '--target=$target',
           ]);
           final String basename = path.basename(testDirectory);
+          final String arch = Abi.current() == Abi.windowsX64 ? 'x64': 'arm64';
           applicationBinaryPath = path.join(
             testDirectory,
             'build',
             'windows',
-            'x64',
+            arch,
             'runner',
             'Profile',
             '$basename.exe'
@@ -984,9 +1013,6 @@ class StartupTest {
             '--verbose',
             '--profile',
             '--trace-startup',
-            // TODO(vashworth): Remove once done debugging https://github.com/flutter/flutter/issues/129836
-            if (device is IosDevice)
-              '--verbose-system-logs',
             '--target=$target',
             '-d',
             device.deviceId,
@@ -999,7 +1025,7 @@ class StartupTest {
         timer.cancel();
         if (result == 0) {
           final Map<String, dynamic> data = json.decode(
-            file('${_testOutputDirectory(testDirectory)}/start_up_info.json').readAsStringSync(),
+            file('${testOutputDirectory(testDirectory)}/start_up_info.json').readAsStringSync(),
           ) as Map<String, dynamic>;
           results.add(data);
         } else {
@@ -1173,6 +1199,8 @@ class PerfTest {
     this.enableImpeller,
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
+    this.enableMergedPlatformThread = false,
+    this.createPlatforms = const <String>[],
   }): _resultFilename = resultFilename;
 
   const PerfTest.e2e(
@@ -1192,6 +1220,8 @@ class PerfTest {
     this.enableImpeller,
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
+    this.enableMergedPlatformThread = false,
+    this.createPlatforms = const <String>[],
   }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename;
 
   /// The directory where the app under test is defined.
@@ -1234,6 +1264,9 @@ class PerfTest {
   /// Whether partial repaint functionality should be disabled (iOS only).
   final bool disablePartialRepaint;
 
+  /// Whether the UI thread should be the platform thread.
+  final bool enableMergedPlatformThread;
+
   /// Number of seconds to time out the test after, allowing debug callbacks to run.
   final int? timeoutSeconds;
 
@@ -1262,6 +1295,10 @@ class PerfTest {
   /// Additional flags for `--dart-define` to control the test
   final String dartDefine;
 
+  /// Additional platforms to create with `flutter create` before running
+  /// the test.
+  final List<String> createPlatforms;
+
   Future<TaskResult> run() {
     return internalRun();
   }
@@ -1272,16 +1309,27 @@ class PerfTest {
   }) {
     return inDirectory<TaskResult>(testDirectory, () async {
       late Device selectedDevice;
-      if (device != null) {
-        selectedDevice = device!;
-      } else {
-        selectedDevice = await devices.workingDevice;
-      }
+      selectedDevice = device ?? await devices.workingDevice;
       await selectedDevice.unlock();
+      await selectedDevice.toggleFixedPerformanceMode(true);
+
       final String deviceId = selectedDevice.deviceId;
       final String? localEngine = localEngineFromEnv;
       final String? localEngineHost = localEngineHostFromEnv;
       final String? localEngineSrcPath = localEngineSrcPathFromEnv;
+
+      if (createPlatforms.isNotEmpty) {
+        // Ensure that the platform-specific manifests are freshly created and
+        // do not contain any settings from previous runs.
+        await exec('git', <String>['clean', '-f', testDirectory]);
+
+        await flutter('create', options: <String>[
+          '--platforms',
+          createPlatforms.join(','),
+          '--no-overwrite',
+          '.'
+        ]);
+      }
 
       bool changedPlist = false;
       bool changedManifest = false;
@@ -1309,14 +1357,23 @@ class PerfTest {
       }
 
       try {
-        if (forceOpenGLES ?? false) {
-          assert(enableImpeller!);
+        if (enableImpeller ?? false) {
           changedManifest = true;
-          _addOpenGLESToManifest(testDirectory);
+          _addVulkanGPUTracingToManifest(testDirectory);
+          if (forceOpenGLES ?? false) {
+            _addOpenGLESToManifest(testDirectory);
+          }
+          if (enableMergedPlatformThread) {
+            _addMergedPlatformThreadSupportToManifest(testDirectory);
+          }
         }
-        if (disablePartialRepaint) {
+        if (disablePartialRepaint || enableMergedPlatformThread) {
           changedPlist = true;
-          _disablePartialRepaint(testDirectory);
+          _updateManifestSettings(
+            testDirectory,
+            disablePartialRepaint: disablePartialRepaint,
+            platformThreadMerged: enableMergedPlatformThread
+          );
         }
 
         final List<String> options = <String>[
@@ -1329,7 +1386,6 @@ class PerfTest {
             '--local-engine-src-path',
             localEngineSrcPath
           ],
-          '--no-dds',
           '--no-android-gradle-daemon',
           '-v',
           '--verbose-system-logs',
@@ -1361,10 +1417,11 @@ class PerfTest {
       } finally {
         await resetManifest();
         await resetPlist();
+        await selectedDevice.toggleFixedPerformanceMode(false);
       }
 
       final Map<String, dynamic> data = json.decode(
-        file('${_testOutputDirectory(testDirectory)}/$resultFilename.json').readAsStringSync(),
+        file('${testOutputDirectory(testDirectory)}/$resultFilename.json').readAsStringSync(),
       ) as Map<String, dynamic>;
 
       if (data['frame_count'] as int < 5) {
@@ -1381,7 +1438,7 @@ class PerfTest {
         case DeviceOperatingSystem.android:
         case DeviceOperatingSystem.androidArm:
         case DeviceOperatingSystem.androidArm64:
-          recordGPU = enableImpeller ?? false;
+          recordGPU = true;
         case DeviceOperatingSystem.fake:
         case DeviceOperatingSystem.fuchsia:
         case DeviceOperatingSystem.linux:
@@ -1397,16 +1454,13 @@ class PerfTest {
         data,
         detailFiles: <String>[
           if (saveTraceFile)
-            '${_testOutputDirectory(testDirectory)}/$traceFilename.json',
+            '${testOutputDirectory(testDirectory)}/$traceFilename.json',
         ],
         benchmarkScoreKeys: benchmarkScoreKeys ?? <String>[
           ..._kCommonScoreKeys,
           'average_vsync_transitions_missed',
           '90th_percentile_vsync_transitions_missed',
           '99th_percentile_vsync_transitions_missed',
-          'average_frame_request_pending_latency',
-          '90th_percentile_frame_request_pending_latency',
-          '99th_percentile_frame_request_pending_latency',
           if (measureCpuGpu && !isAndroid) ...<String>[
             // See https://github.com/flutter/flutter/issues/68888
             if (data['average_cpu_usage'] != null) 'average_cpu_usage',
@@ -1426,10 +1480,16 @@ class PerfTest {
           if (data['120hz_frame_percentage'] != null) '120hz_frame_percentage',
           if (data['illegal_refresh_rate_frame_count'] != null) 'illegal_refresh_rate_frame_count',
           if (recordGPU) ...<String>[
+            // GPU Frame Time.
             if (data['average_gpu_frame_time'] != null) 'average_gpu_frame_time',
             if (data['90th_percentile_gpu_frame_time'] != null) '90th_percentile_gpu_frame_time',
             if (data['99th_percentile_gpu_frame_time'] != null) '99th_percentile_gpu_frame_time',
             if (data['worst_gpu_frame_time'] != null) 'worst_gpu_frame_time',
+            // GPU Memory.
+            if (data['average_gpu_memory_mb'] != null) 'average_gpu_memory_mb',
+            if (data['90th_percentile_gpu_memory_mb'] != null) '90th_percentile_gpu_memory_mb',
+            if (data['99th_percentile_gpu_memory_mb'] != null) '99th_percentile_gpu_memory_mb',
+            if (data['worst_gpu_memory_mb'] != null) 'worst_gpu_memory_mb',
           ]
         ],
       );
@@ -1446,22 +1506,6 @@ const List<String> _kCommonScoreKeys = <String>[
   'worst_frame_rasterizer_time_millis',
   '90th_percentile_frame_rasterizer_time_millis',
   '99th_percentile_frame_rasterizer_time_millis',
-  'average_layer_cache_count',
-  '90th_percentile_layer_cache_count',
-  '99th_percentile_layer_cache_count',
-  'worst_layer_cache_count',
-  'average_layer_cache_memory',
-  '90th_percentile_layer_cache_memory',
-  '99th_percentile_layer_cache_memory',
-  'worst_layer_cache_memory',
-  'average_picture_cache_count',
-  '90th_percentile_picture_cache_count',
-  '99th_percentile_picture_cache_count',
-  'worst_picture_cache_count',
-  'average_picture_cache_memory',
-  '90th_percentile_picture_cache_memory',
-  '99th_percentile_picture_cache_memory',
-  'worst_picture_cache_memory',
   'old_gen_gc_count',
 ];
 
@@ -1763,11 +1807,12 @@ class CompileTest {
         await flutter('build', options: options);
         watch.stop();
         final String basename = path.basename(cwd);
+        final String arch = Abi.current() == Abi.windowsX64 ? 'x64': 'arm64';
         final String exePath = path.join(
           cwd,
           'build',
           'windows',
-          'x64',
+          arch,
           'runner',
           'release',
           '$basename.exe');
@@ -1910,11 +1955,12 @@ class CompileTest {
 
 /// Measure application memory usage.
 class MemoryTest {
-  MemoryTest(this.project, this.test, this.package);
+  MemoryTest(this.project, this.test, this.package, {this.requiresTapToStart = false});
 
   final String project;
   final String test;
   final String package;
+  final bool requiresTapToStart;
 
   /// Completes when the log line specified in the last call to
   /// [prepareForNextMessage] is seen by `adb logcat`.
@@ -2003,6 +2049,38 @@ class MemoryTest {
     await receivedNextMessage;
   }
 
+  /// Taps the application and looks for acknowldgement.
+  ///
+  /// This is used by several tests to ensure scrolling gestures are installed.
+  Future<void> tapNotification() async {
+    // Keep "tapping" the device till it responds with the string we expect,
+    // or throw an error instead of tying up the infrastructure for 30 minutes.
+    prepareForNextMessage('TAPPED');
+    bool tapped = false;
+    int tapCount = 0;
+    await Future.any(<Future<void>>[
+      () async {
+        while (true) {
+          if (tapped) {
+            break;
+          }
+          tapCount += 1;
+          print('tapping device... [$tapCount]');
+          await device!.tap(100, 100);
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+        }
+      }(),
+      () async {
+        print('awaiting "tapped" message... (timeout: 10 seconds)');
+        try {
+          await receivedNextMessage?.timeout(const Duration(seconds: 10));
+        } finally {
+          tapped = true;
+        }
+      }(),
+    ]);
+  }
+
   /// To change the behavior of the test, override this.
   ///
   /// Make sure to call recordStart() and recordEnd() once each in that order.
@@ -2012,10 +2090,11 @@ class MemoryTest {
   Future<void> useMemory() async {
     await launchApp();
     await recordStart();
+    if (requiresTapToStart) {
+      await tapNotification();
+    }
 
     prepareForNextMessage('DONE');
-    print('tapping device...');
-    await device!.tap(100, 100);
     print('awaiting "done" message...');
     await receivedNextMessage;
 
@@ -2059,6 +2138,7 @@ class DevToolsMemoryTest {
 
       await flutter(
         'drive',
+        driveWithDds: true,
         options: <String>[
           '-d', _device.deviceId,
           '--profile',

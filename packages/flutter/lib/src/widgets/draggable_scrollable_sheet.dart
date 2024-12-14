@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
+///
+/// @docImport 'primary_scroll_controller.dart';
+/// @docImport 'scroll_configuration.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'scrollable.dart';
+/// @docImport 'single_child_scroll_view.dart';
+/// @docImport 'viewport.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -494,7 +505,17 @@ class _DraggableSheetExtent {
         _currentSize = currentSize ?? ValueNotifier<double>(initialSize),
         availablePixels = double.infinity,
         hasDragged = hasDragged ?? false,
-        hasChanged = hasChanged ?? false;
+        hasChanged = hasChanged ?? false {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/widgets.dart',
+        className: '$_DraggableSheetExtent',
+        object: this,
+      );
+    }
+  }
 
   VoidCallback? _cancelActivity;
 
@@ -590,6 +611,9 @@ class _DraggableSheetExtent {
   }
 
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _currentSize.dispose();
   }
 
@@ -1026,10 +1050,7 @@ class DraggableScrollableActuator extends StatefulWidget {
   /// otherwise.
   static bool reset(BuildContext context) {
     final _InheritedResetNotifier? notifier = context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
-    if (notifier == null) {
-      return false;
-    }
-    return notifier._sendReset();
+    return notifier?._sendReset() ?? false;
   }
 
   @override
@@ -1051,7 +1072,7 @@ class _DraggableScrollableActuatorState extends State<DraggableScrollableActuato
   }
 }
 
-/// A [ChangeNotifier] to use with [InheritedResetNotifier] to notify
+/// A [ChangeNotifier] to use with [_InheritedResetNotifier] to notify
 /// descendants that they should reset to initial state.
 class _ResetNotifier extends ChangeNotifier {
   _ResetNotifier() {

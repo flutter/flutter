@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets('Restoration Smoke Test', (WidgetTester tester) async {
@@ -976,7 +977,9 @@ void main() {
     expect(findRoute('p1', count: 0), findsOneWidget);
   });
 
-  testWidgets('Helpful assert thrown all routes in onGenerateInitialRoutes are not restorable', (WidgetTester tester) async {
+  testWidgets('Helpful assert thrown all routes in onGenerateInitialRoutes are not restorable',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         restorationScopeId: 'material_app',

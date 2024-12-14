@@ -15,6 +15,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import '../impeller_test_helpers.dart';
+
 void main() {
   testWidgets('SnapshotWidget can rasterize child', (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
@@ -325,7 +327,7 @@ void main() {
 
     await expectLater(find.byKey(repaintBoundaryKey), matchesReferenceImage(imageWhenDisabled));
   },
-  skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+  skip: kIsWeb || impellerEnabled); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   test('SnapshotPainter dispatches memory events', () async {
     await expectLater(

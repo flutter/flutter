@@ -111,6 +111,5 @@ class Placeholder extends StatelessWidget {
     properties.add(DoubleProperty('strokeWidth', strokeWidth, defaultValue: 2.0));
     properties.add(DoubleProperty('fallbackWidth', fallbackWidth, defaultValue: 400.0));
     properties.add(DoubleProperty('fallbackHeight', fallbackHeight, defaultValue: 400.0));
-    properties.add(DiagnosticsProperty<Widget>('child', child, defaultValue: null));
   }
 }

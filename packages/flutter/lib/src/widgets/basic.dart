@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
 
@@ -274,7 +280,7 @@ class Directionality extends _UbiquitousInheritedWidget {
 ///
 /// ```dart
 /// Image.network(
-///   'https://raw.githubusercontent.com/flutter/assets-for-api-docs/master/packages/diagrams/assets/blend_mode_destination.jpeg',
+///   'https://raw.githubusercontent.com/flutter/assets-for-api-docs/main/packages/diagrams/assets/blend_mode_destination.jpeg',
 ///   color: const Color.fromRGBO(255, 255, 255, 0.5),
 ///   colorBlendMode: BlendMode.modulate
 /// )
@@ -390,7 +396,7 @@ class Opacity extends SingleChildRenderObjectWidget {
 ///     ).createShader(bounds);
 ///   },
 ///   child: const Text(
-///     'I’m burning the memories',
+///     "I'm burning the memories",
 ///     style: TextStyle(color: Colors.white),
 ///   ),
 /// )
@@ -559,6 +565,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
     required this.filter,
     super.child,
     this.blendMode = BlendMode.srcOver,
+    this.enabled = true,
   });
 
   /// The image filter to apply to the existing painted content before painting the child.
@@ -573,15 +580,23 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// {@macro flutter.widgets.BackdropFilter.blendMode}
   final BlendMode blendMode;
 
+  /// Whether or not to apply the backdrop filter operation to the child of this
+  /// widget.
+  ///
+  /// Prefer setting enabled to `false` instead of creating a "no-op" filter
+  /// type for performance reasons.
+  final bool enabled;
+
   @override
   RenderBackdropFilter createRenderObject(BuildContext context) {
-    return RenderBackdropFilter(filter: filter, blendMode: blendMode);
+    return RenderBackdropFilter(filter: filter, blendMode: blendMode, enabled: enabled);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderBackdropFilter renderObject) {
     renderObject
       ..filter = filter
+      ..enabled = enabled
       ..blendMode = blendMode;
   }
 }
@@ -2256,10 +2271,7 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
     final MultiChildLayoutParentData parentData = renderObject.parentData! as MultiChildLayoutParentData;
     if (parentData.id != id) {
       parentData.id = id;
-      final RenderObject? targetParent = renderObject.parent;
-      if (targetParent is RenderObject) {
-        targetParent.markNeedsLayout();
-      }
+      renderObject.parent?.markNeedsLayout();
     }
   }
 
@@ -2381,7 +2393,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 ///  * [FittedBox], which sizes and positions its child widget to fit the parent
 ///    according to a given [BoxFit] discipline.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-///  * [Understanding constraints](https://flutter.dev/docs/development/ui/layout/constraints),
+///  * [Understanding constraints](https://docs.flutter.dev/ui/layout/constraints),
 ///    an in-depth article about layout in Flutter.
 class SizedBox extends SingleChildRenderObjectWidget {
   /// Creates a fixed size box. The [width] and [height] parameters can be null
@@ -2433,14 +2445,11 @@ class SizedBox extends SingleChildRenderObjectWidget {
 
   @override
   String toStringShort() {
-    final String type;
-    if (width == double.infinity && height == double.infinity) {
-      type = '${objectRuntimeType(this, 'SizedBox')}.expand';
-    } else if (width == 0.0 && height == 0.0) {
-      type = '${objectRuntimeType(this, 'SizedBox')}.shrink';
-    } else {
-      type = objectRuntimeType(this, 'SizedBox');
-    }
+    final String type = switch ((width, height)) {
+      (double.infinity, double.infinity) => '${objectRuntimeType(this, 'SizedBox')}.expand',
+      (0.0, 0.0) => '${objectRuntimeType(this, 'SizedBox')}.shrink',
+      _ => objectRuntimeType(this, 'SizedBox'),
+    };
     return key == null ? type : '$type-$key';
   }
 
@@ -2813,16 +2822,11 @@ class UnconstrainedBox extends StatelessWidget {
   final Widget? child;
 
   BoxConstraintsTransform _axisToTransform(Axis? constrainedAxis) {
-    if (constrainedAxis != null) {
-      switch (constrainedAxis) {
-        case Axis.horizontal:
-          return ConstraintsTransformBox.heightUnconstrained;
-        case Axis.vertical:
-          return ConstraintsTransformBox.widthUnconstrained;
-      }
-    } else {
-      return ConstraintsTransformBox.unconstrained;
-    }
+    return switch (constrainedAxis) {
+      Axis.horizontal => ConstraintsTransformBox.heightUnconstrained,
+      Axis.vertical   => ConstraintsTransformBox.widthUnconstrained,
+      null            => ConstraintsTransformBox.unconstrained,
+    };
   }
 
   @override
@@ -3399,7 +3403,9 @@ class AspectRatio extends SingleChildRenderObjectWidget {
 ///
 /// This class is useful, for example, when unlimited width is available and
 /// you would like a child that would otherwise attempt to expand infinitely to
-/// instead size itself to a more reasonable width.
+/// instead size itself to a more reasonable width. Additionally, putting a
+/// [Column] inside an [IntrinsicWidth] will allow all [Column] children to be
+/// as wide as the widest child.
 ///
 /// The constraints that this widget passes to its child will adhere to the
 /// parent's constraints, so if the constraints are not large enough to satisfy
@@ -3476,7 +3482,9 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
 ///
 /// This class is useful, for example, when unlimited height is available and
 /// you would like a child that would otherwise attempt to expand infinitely to
-/// instead size itself to a more reasonable height.
+/// instead size itself to a more reasonable height. Additionally, putting a
+/// [Row] inside an [IntrinsicHeight] will allow all [Row] children to be as tall
+/// as the tallest child.
 ///
 /// The constraints that this widget passes to its child will adhere to the
 /// parent's constraints, so if the constraints are not large enough to satisfy
@@ -4263,16 +4271,10 @@ class Positioned extends ParentDataWidget<StackParentData> {
     double? height,
     required Widget child,
   }) {
-    double? left;
-    double? right;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        left = end;
-        right = start;
-      case TextDirection.ltr:
-        left = start;
-        right = end;
-    }
+    final (double? left, double? right) = switch (textDirection) {
+      TextDirection.rtl => (end, start),
+      TextDirection.ltr => (start, end),
+    };
     return Positioned(
       key: key,
       left: left,
@@ -4376,10 +4378,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
     }
 
     if (needsLayout) {
-      final RenderObject? targetParent = renderObject.parent;
-      if (targetParent is RenderObject) {
-        targetParent.markNeedsLayout();
-      }
+      renderObject.parent?.markNeedsLayout();
     }
   }
 
@@ -4605,6 +4604,7 @@ class Flex extends MultiChildRenderObjectWidget {
     this.verticalDirection = VerticalDirection.down,
     this.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
     this.clipBehavior = Clip.none,
+    this.spacing = 0.0,
     super.children,
   }) : assert(!identical(crossAxisAlignment, CrossAxisAlignment.baseline) || textBaseline != null, 'textBaseline is required if you specify the crossAxisAlignment with CrossAxisAlignment.baseline');
   // Cannot use == in the assert above instead of identical because of https://github.com/dart-lang/language/issues/1811.
@@ -4640,6 +4640,13 @@ class Flex extends MultiChildRenderObjectWidget {
   ///
   /// For example, [CrossAxisAlignment.center], the default, centers the
   /// children in the cross axis (e.g., horizontally for a [Column]).
+  ///
+  /// When the cross axis is vertical (as for a [Row]) and the children
+  /// contain text, consider using [CrossAxisAlignment.baseline] instead.
+  /// This typically produces better visual results if the different children
+  /// have text with different font metrics, for example because they differ in
+  /// [TextStyle.fontSize] or other [TextStyle] properties, or because
+  /// they use different fonts due to being written in different scripts.
   final CrossAxisAlignment crossAxisAlignment;
 
   /// Determines the order to lay children out horizontally and how to interpret
@@ -4704,6 +4711,9 @@ class Flex extends MultiChildRenderObjectWidget {
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
+  /// {@macro flutter.rendering.RenderFlex.spacing}
+  final double spacing;
+
   bool get _needTextDirection {
     switch (direction) {
       case Axis.horizontal:
@@ -4745,6 +4755,7 @@ class Flex extends MultiChildRenderObjectWidget {
       verticalDirection: verticalDirection,
       textBaseline: textBaseline,
       clipBehavior: clipBehavior,
+      spacing: spacing,
     );
   }
 
@@ -4758,7 +4769,8 @@ class Flex extends MultiChildRenderObjectWidget {
       ..textDirection = getEffectiveTextDirection(context)
       ..verticalDirection = verticalDirection
       ..textBaseline = textBaseline
-      ..clipBehavior = clipBehavior;
+      ..clipBehavior = clipBehavior
+      ..spacing = spacing;
   }
 
   @override
@@ -4771,6 +4783,8 @@ class Flex extends MultiChildRenderObjectWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: VerticalDirection.down));
     properties.add(EnumProperty<TextBaseline>('textBaseline', textBaseline, defaultValue: null));
+    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.none));
+    properties.add(DoubleProperty('spacing', spacing, defaultValue: 0.0));
   }
 }
 
@@ -4788,6 +4802,14 @@ class Flex extends MultiChildRenderObjectWidget {
 ///
 /// If you only have one child, then consider using [Align] or [Center] to
 /// position the child.
+///
+/// By default, [crossAxisAlignment] is [CrossAxisAlignment.center], which
+/// centers the children in the vertical axis.  If several of the children
+/// contain text, this is likely to make them visually misaligned if
+/// they have different font metrics (for example because they differ in
+/// [TextStyle.fontSize] or other [TextStyle] properties, or because
+/// they use different fonts due to being written in different scripts).
+/// Consider using [CrossAxisAlignment.baseline] instead.
 ///
 /// {@tool snippet}
 ///
@@ -4969,6 +4991,7 @@ class Row extends Flex {
     super.textDirection,
     super.verticalDirection,
     super.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
+    super.spacing,
     super.children,
   }) : super(
     direction: Axis.horizontal,
@@ -5030,8 +5053,8 @@ class Row extends Flex {
 ///     const Text('Through the night, we have one shot to live another day'),
 ///     const Text('We cannot let a stray gunshot give us away'),
 ///     const Text('We will fight up close, seize the moment and stay in it'),
-///     const Text('It’s either that or meet the business end of a bayonet'),
-///     const Text('The code word is ‘Rochambeau,’ dig me?'),
+///     const Text("It's either that or meet the business end of a bayonet"),
+///     const Text("The code word is 'Rochambeau,' dig me?"),
 ///     Text('Rochambeau!', style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0)),
 ///   ],
 /// )
@@ -5160,6 +5183,7 @@ class Column extends Flex {
     super.textDirection,
     super.verticalDirection,
     super.textBaseline,
+    super.spacing,
     super.children,
   }) : super(
     direction: Axis.vertical,
@@ -5199,7 +5223,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   /// The flex factor to use for this child.
   ///
   /// If null or zero, the child is inflexible and determines its own size. If
-  /// non-zero, the amount of space the child's can occupy in the main axis is
+  /// non-zero, the amount of space the child can occupy in the main axis is
   /// determined by dividing the free space (after placing the inflexible
   /// children) according to the flex factors of the flexible children.
   final int flex;
@@ -5230,10 +5254,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
     }
 
     if (needsLayout) {
-      final RenderObject? targetParent = renderObject.parent;
-      if (targetParent is RenderObject) {
-        targetParent.markNeedsLayout();
-      }
+      renderObject.parent?.markNeedsLayout();
     }
   }
 
@@ -5933,8 +5954,12 @@ class RichText extends MultiChildRenderObjectWidget {
 /// various fields on this class in more detail.
 ///
 /// The [image] is not disposed of by this widget. Creators of the widget are
-/// expected to call [Image.dispose] on the [image] once the [RawImage] is no
-/// longer buildable.
+/// expected to call [dart:ui.Image.dispose] on the [image] once the [RawImage]
+/// is no longer buildable.
+///
+/// The `scale` argument specifies the linear scale factor for drawing this
+/// image at its intended size and applies to both the width and the height.
+/// {@macro flutter.painting.imageInfo.scale}
 ///
 /// This widget is rarely used directly. Instead, consider using [Image].
 class RawImage extends LeafRenderObjectWidget {
@@ -5958,15 +5983,15 @@ class RawImage extends LeafRenderObjectWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.invertColors = false,
-    this.filterQuality = FilterQuality.low,
+    this.filterQuality = FilterQuality.medium,
     this.isAntiAlias = false,
   });
 
   /// The image to display.
   ///
   /// Since a [RawImage] is stateless, it does not ever dispose this image.
-  /// Creators of a [RawImage] are expected to call [Image.dispose] on this
-  /// image handle when the [RawImage] will no longer be needed.
+  /// Creators of a [RawImage] are expected to call [dart:ui.Image.dispose] on
+  /// this image handle when the [RawImage] will no longer be needed.
   final ui.Image? image;
 
   /// A string identifying the source of the image.
@@ -5984,9 +6009,11 @@ class RawImage extends LeafRenderObjectWidget {
   /// aspect ratio.
   final double? height;
 
-  /// Specifies the image's scale.
+  /// The linear scale factor for drawing this image at its intended size.
   ///
-  /// Used when determining the best display size for the image.
+  /// The scale factor applies to the width and the height.
+  ///
+  /// {@macro flutter.painting.imageInfo.scale}
   final double scale;
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
@@ -6001,8 +6028,7 @@ class RawImage extends LeafRenderObjectWidget {
 
   /// Used to set the filterQuality of the image.
   ///
-  /// Defaults to [FilterQuality.low] to scale the image, which corresponds to
-  /// bilinear interpolation.
+  /// Defaults to [FilterQuality.medium].
   final FilterQuality filterQuality;
 
   /// Used to combine [color] with this image.
@@ -6682,16 +6708,11 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> listeners = <String>[];
-    if (onEnter != null) {
-      listeners.add('enter');
-    }
-    if (onExit != null) {
-      listeners.add('exit');
-    }
-    if (onHover != null) {
-      listeners.add('hover');
-    }
+    final List<String> listeners = <String>[
+      if (onEnter != null) 'enter',
+      if (onExit != null) 'exit',
+      if (onHover != null) 'hover',
+    ];
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
     properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
@@ -6759,10 +6780,8 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
   ///
   /// The key for the [RepaintBoundary] is derived either from the child's key
   /// (if the child has a non-null key) or from the given `childIndex`.
-  factory RepaintBoundary.wrap(Widget child, int childIndex) {
-    final Key key = child.key != null ? ValueKey<Key>(child.key!) : ValueKey<int>(childIndex);
-    return RepaintBoundary(key: key, child: child);
-  }
+  RepaintBoundary.wrap(Widget child, int childIndex)
+      : super(key: ValueKey<Object>(child.key ?? childIndex), child: child);
 
   /// Wraps each of the given children in [RepaintBoundary]s.
   ///
@@ -7107,7 +7126,9 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool? slider,
     bool? keyboardKey,
     bool? link,
+    Uri? linkUrl,
     bool? header,
+    int? headingLevel,
     bool? textField,
     bool? readOnly,
     bool? focusable,
@@ -7158,6 +7179,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     SetTextHandler? onSetText,
     VoidCallback? onDidGainAccessibilityFocus,
     VoidCallback? onDidLoseAccessibilityFocus,
+    VoidCallback? onFocus,
     Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
   }) : this.fromProperties(
     key: key,
@@ -7177,7 +7199,9 @@ class Semantics extends SingleChildRenderObjectWidget {
       slider: slider,
       keyboardKey: keyboardKey,
       link: link,
+      linkUrl: linkUrl,
       header: header,
+      headingLevel: headingLevel,
       textField: textField,
       readOnly: readOnly,
       focusable: focusable,
@@ -7222,6 +7246,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       onMoveCursorBackwardByCharacter: onMoveCursorBackwardByCharacter,
       onDidGainAccessibilityFocus: onDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: onDidLoseAccessibilityFocus,
+      onFocus: onFocus,
       onDismiss: onDismiss,
       onSetSelection: onSetSelection,
       onSetText: onSetText,
@@ -7553,16 +7578,11 @@ class IndexedSemantics extends SingleChildRenderObjectWidget {
 /// Useful for attaching a key to an existing widget.
 class KeyedSubtree extends StatelessWidget {
   /// Creates a widget that builds its child.
-  const KeyedSubtree({
-    super.key,
-    required this.child,
-  });
+  const KeyedSubtree({super.key, required this.child});
 
   /// Creates a KeyedSubtree for child with a key that's based on the child's existing key or childIndex.
-  factory KeyedSubtree.wrap(Widget child, int childIndex) {
-    final Key key = child.key != null ? ValueKey<Key>(child.key!) : ValueKey<int>(childIndex);
-    return KeyedSubtree(key: key, child: child);
-  }
+  KeyedSubtree.wrap(this.child, int childIndex)
+      : super(key: ValueKey<Object>(child.key ?? childIndex));
 
   /// The widget below this widget in the tree.
   ///
@@ -7576,12 +7596,10 @@ class KeyedSubtree extends StatelessWidget {
       return items;
     }
 
-    final List<Widget> itemsWithUniqueKeys = <Widget>[];
-    int itemIndex = baseIndex;
-    for (final Widget item in items) {
-      itemsWithUniqueKeys.add(KeyedSubtree.wrap(item, itemIndex));
-      itemIndex += 1;
-    }
+    final List<Widget> itemsWithUniqueKeys = <Widget>[
+      for (final (int i, Widget item) in items.indexed)
+        KeyedSubtree.wrap(item, baseIndex + i),
+    ];
 
     assert(!debugItemsHaveDuplicateKeys(itemsWithUniqueKeys));
     return itemsWithUniqueKeys;

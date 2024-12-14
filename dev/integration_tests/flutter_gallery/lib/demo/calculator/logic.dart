@@ -121,10 +121,8 @@ class CalcExpression {
     : this(<ExpressionToken>[], ExpressionState.Start);
 
   CalcExpression.result(FloatToken result)
-    : _list = <ExpressionToken?>[],
-      state = ExpressionState.Result {
-    _list.add(result);
-  }
+    : _list = <ExpressionToken?>[result],
+      state = ExpressionState.Result;
 
   /// The tokens comprising the expression.
   final List<ExpressionToken?> _list;

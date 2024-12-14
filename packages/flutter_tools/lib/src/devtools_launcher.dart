@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import 'artifacts.dart';
 import 'base/bot_detector.dart';
 import 'base/common.dart';
 import 'base/io.dart' as io;
@@ -16,21 +15,22 @@ import 'base/logger.dart';
 import 'convert.dart';
 import 'resident_runner.dart';
 
-/// An implementation of the devtools launcher that uses `pub global activate` to
-/// start a server instance.
+/// An implementation of the devtools launcher that uses `dart devtools` to
+/// start a DevTools server instance.
 class DevtoolsServerLauncher extends DevtoolsLauncher {
   DevtoolsServerLauncher({
     required ProcessManager processManager,
-    required String dartExecutable,
     required Logger logger,
     required BotDetector botDetector,
+    required Artifacts artifacts,
   })  : _processManager = processManager,
-        _dartExecutable = dartExecutable,
         _logger = logger,
-        _botDetector = botDetector;
+        _botDetector = botDetector,
+        _artifacts = artifacts;
 
   final ProcessManager _processManager;
-  final String _dartExecutable;
+  final Artifacts _artifacts;
+  late final String _dartExecutable = _artifacts.getArtifactPath(Artifact.engineDartBinary);
   final Logger _logger;
   final BotDetector _botDetector;
   final Completer<void> _processStartCompleter = Completer<void>();
@@ -42,6 +42,8 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
   static final RegExp _serveDevToolsPattern =
       RegExp(r'Serving DevTools at ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+?)\.?$');
+  static final RegExp _serveDtdPattern =
+      RegExp(r'Serving the Dart Tooling Daemon at (ws:\/\/[a-zA-Z0-9:/=_\-\.\[\]]+?)\.?$');
 
   @override
   Future<void> get processStart => _processStartCompleter.future;
@@ -55,21 +57,28 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         _dartExecutable,
         'devtools',
         '--no-launch-browser',
+        if (printDtdUri) '--print-dtd',
         if (vmServiceUri != null) '--vm-uri=$vmServiceUri',
         ...?additionalArguments,
       ]);
       _processStartCompleter.complete();
-      final Completer<Uri> completer = Completer<Uri>();
+
+      final Completer<Uri> devToolsCompleter = Completer<Uri>();
       _devToolsProcess!.stdout
           .transform(utf8.decoder)
           .transform(const LineSplitter())
           .listen((String line) {
-            final Match? match = _serveDevToolsPattern.firstMatch(line);
-            if (match != null) {
-              final String url = match[1]!;
-              completer.complete(Uri.parse(url));
-            }
-         });
+        final Match? dtdMatch = _serveDtdPattern.firstMatch(line);
+        if (dtdMatch != null) {
+          final String uri = dtdMatch[1]!;
+          dtdUri = Uri.parse(uri);
+        }
+        final Match? devToolsMatch = _serveDevToolsPattern.firstMatch(line);
+        if (devToolsMatch != null) {
+          final String url = devToolsMatch[1]!;
+          devToolsCompleter.complete(Uri.parse(url));
+        }
+      });
       _devToolsProcess!.stderr
           .transform(utf8.decoder)
           .transform(const LineSplitter())
@@ -84,7 +93,11 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         }
       );
 
-      devToolsUrl = await completer.future;
+      // We do not need to wait for a [Completer] holding the DTD URI because
+      // the DTD URI will be output to stdout before the DevTools URI. Awaiting
+      // a [Completer] for the DevTools URI ensures both values will be
+      // populated before returning.
+      devToolsUrl = await devToolsCompleter.future;
     } on Exception catch (e, st) {
       _logger.printError('Failed to launch DevTools: $e', stackTrace: st);
     }

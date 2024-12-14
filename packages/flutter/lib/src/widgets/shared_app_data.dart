@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 
+/// @docImport 'app.dart';
+library;
+
 import 'framework.dart';
 import 'inherited_model.dart';
 

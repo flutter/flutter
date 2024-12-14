@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'framework.dart';
 
 // Examples can assume:
@@ -107,8 +110,7 @@ abstract class InheritedTheme extends InheritedWidget {
         }());
         return false;
       }
-      if (ancestor is InheritedElement && ancestor.widget is InheritedTheme) {
-        final InheritedTheme theme = ancestor.widget as InheritedTheme;
+      if (ancestor case InheritedElement(widget: final InheritedTheme theme)) {
         final Type themeType = theme.runtimeType;
         // Only remember the first theme of any type. This assumes
         // that inherited themes completely shadow ancestors of the

@@ -4,18 +4,24 @@
 
 import 'package:pool/pool.dart';
 
+import '../../artifacts.dart';
 import '../../asset.dart';
+import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
+import '../../dart/package_map.dart';
 import '../../devfs.dart';
+import '../../flutter_manifest.dart';
 import '../build_system.dart';
 import '../depfile.dart';
+import '../exceptions.dart';
+import '../tools/asset_transformer.dart';
+import '../tools/scene_importer.dart';
+import '../tools/shader_compiler.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
-import 'scene_importer.dart';
-import 'shader_compiler.dart';
 
 /// A helper function to copy an asset bundle into an [environment]'s output
 /// directory.
@@ -29,10 +35,9 @@ import 'shader_compiler.dart';
 Future<Depfile> copyAssets(
   Environment environment,
   Directory outputDirectory, {
-  Map<String, DevFSContent>? additionalContent,
+  Map<String, DevFSContent> additionalContent = const <String, DevFSContent>{},
   required TargetPlatform targetPlatform,
-  BuildMode? buildMode,
-  required ShaderTarget shaderTarget,
+  required BuildMode buildMode,
   List<File> additionalInputs = const <File>[],
   String? flavor,
 }) async {
@@ -56,7 +61,7 @@ Future<Depfile> copyAssets(
   ).createBundle();
   final int resultCode = await assetBundle.build(
     manifestPath: pubspecFile.path,
-    packagesPath: environment.projectDir.childFile('.packages').path,
+    packageConfigPath: findPackageConfigFileOrDefault(environment.projectDir).path,
     deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
     targetPlatform: targetPlatform,
     flavor: flavor,
@@ -75,7 +80,7 @@ Future<Depfile> copyAssets(
 
   final IconTreeShaker iconTreeShaker = IconTreeShaker(
     environment,
-    assetBundle.entries[kFontManifestJson] as DevFSStringContent?,
+    assetBundle.entries[kFontManifestJson]?.content as DevFSStringContent?,
     processManager: environment.processManager,
     logger: environment.logger,
     fileSystem: environment.fileSystem,
@@ -94,19 +99,35 @@ Future<Depfile> copyAssets(
     fileSystem: environment.fileSystem,
     artifacts: environment.artifacts,
   );
+  final AssetTransformer assetTransformer = AssetTransformer(
+    processManager: environment.processManager,
+    fileSystem: environment.fileSystem,
+    dartBinaryPath: environment.artifacts.getArtifactPath(Artifact.engineDartBinary),
+    buildMode: buildMode,
+  );
 
-  final Map<String, DevFSContent> assetEntries = <String, DevFSContent>{
+  final Map<String, AssetBundleEntry> assetEntries = <String, AssetBundleEntry>{
     ...assetBundle.entries,
-    ...?additionalContent,
+    ...additionalContent.map((String key, DevFSContent value) {
+      return MapEntry<String, AssetBundleEntry>(
+        key,
+        AssetBundleEntry(
+          value,
+          kind: AssetKind.regular,
+          transformers: const <AssetTransformerEntry>[],
+        ),
+      );
+    }),
     if (skslBundle != null)
-      kSkSLShaderBundlePath: skslBundle,
-  };
-  final Map<String, AssetKind> entryKinds = <String, AssetKind>{
-    ...assetBundle.entryKinds,
+      kSkSLShaderBundlePath: AssetBundleEntry(
+        skslBundle,
+        kind: AssetKind.regular,
+        transformers: const <AssetTransformerEntry>[],
+      ),
   };
 
   await Future.wait<void>(
-    assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+    assetEntries.entries.map<Future<void>>((MapEntry<String, AssetBundleEntry> entry) async {
       final PoolResource resource = await pool.request();
       try {
         // This will result in strange looking files, for example files with `/`
@@ -116,16 +137,28 @@ Future<Depfile> copyAssets(
         // and the native APIs will look for files this way.
         final File file = environment.fileSystem.file(
           environment.fileSystem.path.join(outputDirectory.path, entry.key));
-        final AssetKind assetKind = entryKinds[entry.key] ?? AssetKind.regular;
         outputs.add(file);
         file.parent.createSync(recursive: true);
-        final DevFSContent content = entry.value;
+        final DevFSContent content = entry.value.content;
         if (content is DevFSFileContent && content.file is File) {
           inputs.add(content.file as File);
           bool doCopy = true;
-          switch (assetKind) {
+          switch (entry.value.kind) {
             case AssetKind.regular:
-              break;
+              if (entry.value.transformers.isNotEmpty) {
+                final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
+                  asset: content.file as File,
+                  outputPath: file.path,
+                  workingDirectory: environment.projectDir.path,
+                  transformerEntries: entry.value.transformers,
+                  logger: environment.logger,
+                );
+                doCopy = false;
+                if (failure != null) {
+                  throwToolExit('User-defined transformation of asset "${entry.key}" failed.\n'
+                      '${failure.message}');
+                }
+              }
             case AssetKind.font:
               doCopy = !await iconTreeShaker.subsetFont(
                 input: content.file as File,
@@ -136,8 +169,7 @@ Future<Depfile> copyAssets(
               doCopy = !await shaderCompiler.compileShader(
                 input: content.file as File,
                 outputPath: file.path,
-                target: shaderTarget,
-                json: targetPlatform == TargetPlatform.web_javascript,
+                targetPlatform: targetPlatform,
               );
             case AssetKind.model:
               doCopy = !await sceneImporter.importScene(
@@ -149,7 +181,7 @@ Future<Depfile> copyAssets(
             await (content.file as File).copy(file.path);
           }
         } else {
-          await file.writeAsBytes(await entry.value.contentsAsBytes());
+          await file.writeAsBytes(await entry.value.content.contentsAsBytes());
         }
       } finally {
         resource.release();
@@ -159,9 +191,9 @@ Future<Depfile> copyAssets(
   // Copy deferred components assets only for release or profile builds.
   // The assets are included in assetBundle.entries as a normal asset when
   // building as debug.
-  if (environment.defines[kDeferredComponents] == 'true' && buildMode != null) {
+  if (environment.defines[kDeferredComponents] == 'true') {
     await Future.wait<void>(assetBundle.deferredComponentsEntries.entries.map<Future<void>>(
-      (MapEntry<String, Map<String, DevFSContent>> componentEntries) async {
+      (MapEntry<String, Map<String, AssetBundleEntry>> componentEntries) async {
         final Directory componentOutputDir =
             environment.projectDir
                 .childDirectory('build')
@@ -169,7 +201,7 @@ Future<Depfile> copyAssets(
                 .childDirectory('intermediates')
                 .childDirectory('flutter');
         await Future.wait<void>(
-          componentEntries.value.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+          componentEntries.value.entries.map<Future<void>>((MapEntry<String, AssetBundleEntry> entry) async {
             final PoolResource resource = await pool.request();
             try {
               // This will result in strange looking files, for example files with `/`
@@ -186,7 +218,7 @@ Future<Depfile> copyAssets(
                     environment.fileSystem.path.join(outputDirectory.path, entry.key));
               outputs.add(file);
               file.parent.createSync(recursive: true);
-              final DevFSContent content = entry.value;
+              final DevFSContent content = entry.value.content;
               if (content is DevFSFileContent && content.file is File) {
                 inputs.add(content.file as File);
                 if (!await iconTreeShaker.subsetFont(
@@ -270,14 +302,14 @@ DevFSContent? processSkSLBundle(String? bundlePath, {
     throw Exception('SkSL bundle was invalid');
   }
 
-  final String? parsedPlatform = bundle['platform'] as String?;
-  TargetPlatform? bundleTargetPlatform;
-  if (parsedPlatform != null) {
-    bundleTargetPlatform = getTargetPlatformForName(parsedPlatform);
-  }
-  if (bundleTargetPlatform == null || bundleTargetPlatform != targetPlatform) {
+  final TargetPlatform? bundlePlatform = switch (bundle['platform'] as String?) {
+    final String platform => getTargetPlatformForName(platform),
+    null => null,
+  };
+
+  if (bundlePlatform != targetPlatform) {
     logger.printError(
-      'The SkSL bundle was created for $bundleTargetPlatform, but the current '
+      'The SkSL bundle was created for $bundlePlatform, but the current '
       'platform is $targetPlatform. This may lead to less efficient shader '
       'caching.'
     );
@@ -316,6 +348,11 @@ class CopyAssets extends Target {
 
   @override
   Future<void> build(Environment environment) async {
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
+      throw MissingDefineException(kBuildMode, name);
+    }
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory output = environment
       .buildDir
       .childDirectory('flutter_assets');
@@ -324,7 +361,7 @@ class CopyAssets extends Target {
       environment,
       output,
       targetPlatform: TargetPlatform.android,
-      shaderTarget: ShaderTarget.sksl,
+      buildMode: buildMode,
       flavor: environment.defines[kFlavor],
     );
     environment.depFileService.writeToFile(

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -351,35 +355,18 @@ class Alignment extends AlignmentGeometry {
   Alignment resolve(TextDirection? direction) => this;
 
   static String _stringify(double x, double y) {
-    if (x == -1.0 && y == -1.0) {
-      return 'Alignment.topLeft';
-    }
-    if (x == 0.0 && y == -1.0) {
-      return 'Alignment.topCenter';
-    }
-    if (x == 1.0 && y == -1.0) {
-      return 'Alignment.topRight';
-    }
-    if (x == -1.0 && y == 0.0) {
-      return 'Alignment.centerLeft';
-    }
-    if (x == 0.0 && y == 0.0) {
-      return 'Alignment.center';
-    }
-    if (x == 1.0 && y == 0.0) {
-      return 'Alignment.centerRight';
-    }
-    if (x == -1.0 && y == 1.0) {
-      return 'Alignment.bottomLeft';
-    }
-    if (x == 0.0 && y == 1.0) {
-      return 'Alignment.bottomCenter';
-    }
-    if (x == 1.0 && y == 1.0) {
-      return 'Alignment.bottomRight';
-    }
-    return 'Alignment(${x.toStringAsFixed(1)}, '
-                     '${y.toStringAsFixed(1)})';
+    return switch ((x, y)) {
+      (-1.0, -1.0) => 'Alignment.topLeft',
+      ( 0.0, -1.0) => 'Alignment.topCenter',
+      ( 1.0, -1.0) => 'Alignment.topRight',
+      (-1.0,  0.0) => 'Alignment.centerLeft',
+      ( 0.0,  0.0) => 'Alignment.center',
+      ( 1.0,  0.0) => 'Alignment.centerRight',
+      (-1.0,  1.0) => 'Alignment.bottomLeft',
+      ( 0.0,  1.0) => 'Alignment.bottomCenter',
+      ( 1.0,  1.0) => 'Alignment.bottomRight',
+      _ => 'Alignment(${x.toStringAsFixed(1)}, ${y.toStringAsFixed(1)})',
+    };
   }
 
   @override
@@ -539,44 +526,25 @@ class AlignmentDirectional extends AlignmentGeometry {
   @override
   Alignment resolve(TextDirection? direction) {
     assert(direction != null, 'Cannot resolve $runtimeType without a TextDirection.');
-    switch (direction!) {
-      case TextDirection.rtl:
-        return Alignment(-start, y);
-      case TextDirection.ltr:
-        return Alignment(start, y);
-    }
+    return switch (direction!) {
+      TextDirection.rtl => Alignment(-start, y),
+      TextDirection.ltr => Alignment(start, y),
+    };
   }
 
   static String _stringify(double start, double y) {
-    if (start == -1.0 && y == -1.0) {
-      return 'AlignmentDirectional.topStart';
-    }
-    if (start == 0.0 && y == -1.0) {
-      return 'AlignmentDirectional.topCenter';
-    }
-    if (start == 1.0 && y == -1.0) {
-      return 'AlignmentDirectional.topEnd';
-    }
-    if (start == -1.0 && y == 0.0) {
-      return 'AlignmentDirectional.centerStart';
-    }
-    if (start == 0.0 && y == 0.0) {
-      return 'AlignmentDirectional.center';
-    }
-    if (start == 1.0 && y == 0.0) {
-      return 'AlignmentDirectional.centerEnd';
-    }
-    if (start == -1.0 && y == 1.0) {
-      return 'AlignmentDirectional.bottomStart';
-    }
-    if (start == 0.0 && y == 1.0) {
-      return 'AlignmentDirectional.bottomCenter';
-    }
-    if (start == 1.0 && y == 1.0) {
-      return 'AlignmentDirectional.bottomEnd';
-    }
-    return 'AlignmentDirectional(${start.toStringAsFixed(1)}, '
-                                '${y.toStringAsFixed(1)})';
+    return switch ((start, y)) {
+      (-1.0, -1.0) => 'AlignmentDirectional.topStart',
+      ( 0.0, -1.0) => 'AlignmentDirectional.topCenter',
+      ( 1.0, -1.0) => 'AlignmentDirectional.topEnd',
+      (-1.0,  0.0) => 'AlignmentDirectional.centerStart',
+      ( 0.0,  0.0) => 'AlignmentDirectional.center',
+      ( 1.0,  0.0) => 'AlignmentDirectional.centerEnd',
+      (-1.0,  1.0) => 'AlignmentDirectional.bottomStart',
+      ( 0.0,  1.0) => 'AlignmentDirectional.bottomCenter',
+      ( 1.0,  1.0) => 'AlignmentDirectional.bottomEnd',
+      _ => 'AlignmentDirectional(${start.toStringAsFixed(1)}, ${y.toStringAsFixed(1)})',
+    };
   }
 
   @override
@@ -643,12 +611,10 @@ class _MixedAlignment extends AlignmentGeometry {
   @override
   Alignment resolve(TextDirection? direction) {
     assert(direction != null, 'Cannot resolve $runtimeType without a TextDirection.');
-    switch (direction!) {
-      case TextDirection.rtl:
-        return Alignment(_x - _start, _y);
-      case TextDirection.ltr:
-        return Alignment(_x + _start, _y);
-    }
+    return switch (direction!) {
+      TextDirection.rtl => Alignment(_x - _start, _y),
+      TextDirection.ltr => Alignment(_x + _start, _y),
+    };
   }
 }
 

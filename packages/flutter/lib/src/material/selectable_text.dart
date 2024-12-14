@@ -2,16 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'color_scheme.dart';
+/// @docImport 'scaffold.dart';
+/// @docImport 'selection_area.dart';
+/// @docImport 'text_field.dart';
+library;
+
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'adaptive_text_selection_toolbar.dart';
 import 'desktop_text_selection.dart';
-import 'feedback.dart';
 import 'magnifier.dart';
 import 'text_selection.dart';
 import 'theme.dart';
@@ -60,57 +66,19 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   final _SelectableTextState _state;
 
   @override
-  void onForcePressStart(ForcePressDetails details) {
-    super.onForcePressStart(details);
-    if (delegate.selectionEnabled && shouldShowSelectionToolbar) {
-      editableText.showToolbar();
-    }
-  }
-
-  @override
-  void onForcePressEnd(ForcePressDetails details) {
-    // Not required.
-  }
-
-  @override
-  void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (delegate.selectionEnabled) {
-      renderEditable.selectWordsInRange(
-        from: details.globalPosition - details.offsetFromOrigin,
-        to: details.globalPosition,
-        cause: SelectionChangedCause.longPress,
-      );
-    }
-  }
-
-  @override
   void onSingleTapUp(TapDragUpDetails details) {
-    editableText.hideToolbar();
-    if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-      }
+    if (!delegate.selectionEnabled) {
+      return;
     }
+    super.onSingleTapUp(details);
     _state.widget.onTap?.call();
-  }
-
-  @override
-  void onSingleLongTapStart(LongPressStartDetails details) {
-    if (delegate.selectionEnabled) {
-      renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-      Feedback.forLongPress(_state.context);
-    }
   }
 }
 
 /// A run of selectable text with a single style.
+///
+/// Consider using [SelectionArea] or [SelectableRegion] instead, which enable
+/// selection on a widget subtree, including but not limited to [Text] widgets.
 ///
 /// The [SelectableText] widget displays a string of text with a single style.
 /// The string might break across multiple lines or might all be displayed on
@@ -163,10 +131,20 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 /// To make [SelectableText] react to touch events, use callback [onTap] to achieve
 /// the desired behavior.
 ///
+/// ## Scrolling Considerations
+///
+/// If this [SelectableText] is not a descendant of [Scaffold] and is being used
+/// within a [Scrollable] or nested [Scrollable]s, consider placing a
+/// [ScrollNotificationObserver] above the root [Scrollable] that contains this
+/// [SelectableText] to ensure proper scroll coordination for [SelectableText]
+/// and its components like [TextSelectionOverlay].
+///
 /// See also:
 ///
 ///  * [Text], which is the non selectable version of this widget.
 ///  * [TextField], which is the editable version of this widget.
+///  * [SelectionArea], which enables the selection of multiple [Text] widgets
+///    and of other widgets.
 class SelectableText extends StatefulWidget {
   /// Creates a selectable text widget.
   ///
@@ -455,15 +433,13 @@ class SelectableText extends StatefulWidget {
     );
   }
 
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+  /// The configuration for the magnifier used when the text is selected.
   ///
   /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier]
-  /// on Android, and builds nothing on all other platforms. If it is desired to
-  /// suppress the magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  /// on Android, and builds nothing on all other platforms. To suppress the
+  /// magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
   final TextMagnifierConfiguration? magnifierConfiguration;
 
   @override
@@ -529,6 +505,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         textSpan: widget.textSpan ?? TextSpan(text: widget.data),
     );
     _controller.addListener(_onControllerChanged);
+    _effectiveFocusNode.addListener(_handleFocusChanged);
   }
 
   @override
@@ -542,6 +519,10 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
       );
       _controller.addListener(_onControllerChanged);
     }
+    if (widget.focusNode != oldWidget.focusNode) {
+      (oldWidget.focusNode ?? _focusNode)?.removeListener(_handleFocusChanged);
+      (widget.focusNode ?? _focusNode)?.addListener(_handleFocusChanged);
+    }
     if (_effectiveFocusNode.hasFocus && _controller.selection.isCollapsed) {
       _showSelectionHandles = false;
     } else {
@@ -551,6 +532,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
 
   @override
   void dispose() {
+    _effectiveFocusNode.removeListener(_handleFocusChanged);
     _focusNode?.dispose();
     _controller.dispose();
     super.dispose();
@@ -565,6 +547,20 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
     setState(() {
       _showSelectionHandles = showSelectionHandles;
     });
+  }
+
+  void _handleFocusChanged() {
+    if (!_effectiveFocusNode.hasFocus
+        && SchedulerBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+      // We should only clear the selection when this SelectableText loses
+      // focus while the application is currently running. It is possible
+      // that the application is not currently running, for example on desktop
+      // platforms, clicking on a different window switches the focus to
+      // the new window causing the Flutter application to go inactive. In this
+      // case we want to retain the selection so it remains when we return to
+      // the Flutter application.
+      _controller.value = TextEditingValue(text: _controller.value.text);
+    }
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {

@@ -31,7 +31,7 @@ const String _kFlutterFirstRunMessage = '''
   ║ crash reports to Google.                                                   ║
   ║                                                                            ║
   ║ Read about data we send with crash reports:                                ║
-  ║ https://flutter.dev/docs/reference/crash-reporting                         ║
+  ║ https://flutter.dev/to/crash-reporting                                     ║
   ║                                                                            ║
   ║ See Google's privacy policy:                                               ║
   ║ https://policies.google.com/privacy                                        ║

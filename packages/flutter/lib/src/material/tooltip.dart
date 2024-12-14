@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'app.dart';
+/// @docImport 'floating_action_button.dart';
+/// @docImport 'icon_button.dart';
+/// @docImport 'popup_menu.dart';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -11,7 +17,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'feedback.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'tooltip_theme.dart';
@@ -273,8 +278,8 @@ class Tooltip extends StatefulWidget {
   ///
   /// The tooltip shape defaults to a rounded rectangle with a border radius of
   /// 4.0. Tooltips will also default to an opacity of 90% and with the color
-  /// [Colors.grey]\[700\] if [ThemeData.brightness] is [Brightness.dark], and
-  /// [Colors.white] if it is [Brightness.light].
+  /// [Colors.grey]\[700\] if [ThemeData.brightness] is [Brightness.light], and
+  /// [Colors.white] if it is [Brightness.dark].
   final Decoration? decoration;
 
   /// The style to use for the message of the tooltip.
@@ -309,8 +314,8 @@ class Tooltip extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [exitDuration], which allows configuring the time untill a pointer
-  /// dissapears when hovering.
+  ///  * [exitDuration], which allows configuring the time until a pointer
+  /// disappears when hovering.
   final Duration? showDuration;
 
   /// The length of time that a pointer must have stopped hovering over a
@@ -443,7 +448,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   /// The plain text message for this tooltip.
   ///
-  /// This value will either come from [widget.message] or [widget.richMessage].
+  /// This value will either come from [Tooltip.message] or [Tooltip.richMessage].
   String get _tooltipMessage => widget.message ?? widget.richMessage!.toPlainText();
 
   Timer? _timer;
@@ -454,6 +459,13 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       reverseDuration: _fadeOutDuration,
       vsync: this,
     )..addStatusListener(_handleStatusChanged);
+  }
+  CurvedAnimation? _backingOverlayAnimation;
+  CurvedAnimation get _overlayAnimation {
+    return _backingOverlayAnimation ??= CurvedAnimation(
+      parent: _controller,
+      curve: Curves.fastOutSlowIn,
+    );
   }
 
   LongPressGestureRecognizer? _longPressRecognizer;
@@ -466,21 +478,14 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   // a PointerDown event interacts with some other UI component.
   final Set<int> _activeHoveringPointerDevices = <int>{};
 
-  static bool _isTooltipVisible(AnimationStatus status) {
-    return switch (status) {
-      AnimationStatus.completed || AnimationStatus.forward || AnimationStatus.reverse => true,
-      AnimationStatus.dismissed                                                       => false,
-    };
-  }
-
   AnimationStatus _animationStatus = AnimationStatus.dismissed;
   void _handleStatusChanged(AnimationStatus status) {
     assert(mounted);
-    switch ((_isTooltipVisible(_animationStatus), _isTooltipVisible(status))) {
-      case (true, false):
+    switch ((_animationStatus.isDismissed, status.isDismissed)) {
+      case (false, true):
         Tooltip._openedTooltips.remove(this);
         _overlayController.hide();
-      case (false, true):
+      case (true, false):
         _overlayController.show();
         Tooltip._openedTooltips.add(this);
         SemanticsService.tooltip(_tooltipMessage);
@@ -506,16 +511,12 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       !(_timer?.isActive ?? false) || _controller.status != AnimationStatus.reverse,
       'timer must not be active when the tooltip is fading out',
     );
-    switch (_controller.status) {
-      case AnimationStatus.dismissed when withDelay.inMicroseconds > 0:
-        _timer ??= Timer(withDelay, show);
-      // If the tooltip is already fading in or fully visible, skip the
-      // animation and show the tooltip immediately.
-      case AnimationStatus.dismissed:
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-      case AnimationStatus.completed:
-        show();
+    if (_controller.isDismissed && withDelay.inMicroseconds > 0) {
+      _timer?.cancel();
+      _timer = Timer(withDelay, show);
+    } else {
+      show(); // If the tooltip is already fading in or fully visible, skip the
+              // animation and show the tooltip immediately.
     }
   }
 
@@ -529,21 +530,15 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _timer?.cancel();
     _timer = null;
     // Use _backingController instead of _controller to prevent the lazy getter
-    // from instaniating an AnimationController unnecessarily.
-    switch (_backingController?.status) {
-      case null:
-      case AnimationStatus.reverse:
-      case AnimationStatus.dismissed:
-        break;
+    // from instantiating an AnimationController unnecessarily.
+    if (_backingController?.isForwardOrCompleted ?? false) {
       // Dismiss when the tooltip is fading in: if there's a dismiss delay we'll
       // allow the fade in animation to continue until the delay timer fires.
-      case AnimationStatus.forward:
-      case AnimationStatus.completed:
-        if (withDelay.inMicroseconds > 0) {
-          _timer = Timer(withDelay, _controller.reverse);
-        } else {
-          _controller.reverse();
-        }
+      if (withDelay.inMicroseconds > 0) {
+        _timer = Timer(withDelay, _controller.reverse);
+      } else {
+        _controller.reverse();
+      }
     }
   }
 
@@ -595,7 +590,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       // callback (_handleTapToDismiss) will not be called.
       return;
     }
-    if ((_timer == null && _controller.status == AnimationStatus.dismissed) || event is! PointerDownEvent) {
+    if ((_timer == null && _controller.isDismissed) || event is! PointerDownEvent) {
       return;
     }
     _handleTapToDismiss();
@@ -615,7 +610,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     if (!_visible) {
       return;
     }
-    final bool tooltipCreated = _controller.status == AnimationStatus.dismissed;
+    final bool tooltipCreated = _controller.isDismissed;
     if (tooltipCreated && _enableFeedback) {
       assert(_triggerMode == TooltipTriggerMode.tap);
       Feedback.forTap(context);
@@ -634,7 +629,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     if (!_visible) {
       return;
     }
-    final bool tooltipCreated = _visible && _controller.status == AnimationStatus.dismissed;
+    final bool tooltipCreated = _visible && _controller.isDismissed;
     if (tooltipCreated && _enableFeedback) {
       assert(_triggerMode == TooltipTriggerMode.longPress);
       Feedback.forLongPress(context);
@@ -656,7 +651,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   //    both the delete icon tooltip and the chip tooltip at the same time.
   // 2. Hovered tooltips are dismissed when:
   //    i. [dismissAllToolTips] is called, even these tooltips are still hovered
-  //    ii. a unrecognized PointerDownEvent occured withint the application
+  //    ii. a unrecognized PointerDownEvent occurred within the application
   //    (even these tooltips are still hovered),
   //    iii. The last hovering device leaves the tooltip.
   void _handleMouseEnter(PointerEnterEvent event) {
@@ -665,19 +660,18 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // tooltip is the first to be hit in the widget tree's hit testing order.
     // See also _ExclusiveMouseRegion for the exact behavior.
     _activeHoveringPointerDevices.add(event.device);
-    final List<TooltipState> openedTooltips = Tooltip._openedTooltips.toList();
-    bool otherTooltipsDismissed = false;
-    for (final TooltipState tooltip in openedTooltips) {
+    // Dismiss other open tooltips unless they're kept visible by other mice.
+    // The mouse tracker implementation always dispatches all `onExit` events
+    // before dispatching any `onEnter` events, so `event.device` must have
+    // already been removed from _activeHoveringPointerDevices of the tooltips
+    // that are no longer being hovered over.
+    final List<TooltipState> tooltipsToDismiss = Tooltip._openedTooltips
+      .where((TooltipState tooltip) => tooltip._activeHoveringPointerDevices.isEmpty).toList();
+    for (final TooltipState tooltip in tooltipsToDismiss) {
       assert(tooltip.mounted);
-      final Set<int> hoveringDevices = tooltip._activeHoveringPointerDevices;
-      final bool shouldDismiss = tooltip != this
-                              && (hoveringDevices.length == 1 && hoveringDevices.single == event.device);
-      if (shouldDismiss) {
-        otherTooltipsDismissed = true;
-        tooltip._scheduleDismissTooltip(withDelay: Duration.zero);
-      }
+      tooltip._scheduleDismissTooltip(withDelay: Duration.zero);
     }
-    _scheduleShowTooltip(withDelay: otherTooltipsDismissed ? Duration.zero : _waitDuration);
+    _scheduleShowTooltip(withDelay: tooltipsToDismiss.isNotEmpty ? Duration.zero : _waitDuration);
   }
 
   void _handleMouseExit(PointerExitEvent event) {
@@ -705,15 +699,11 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
     _timer?.cancel();
     _timer = null;
-    switch (_controller.status) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.reverse:
-        _scheduleShowTooltip(withDelay: Duration.zero);
-        return true;
-      case AnimationStatus.forward:
-      case AnimationStatus.completed:
-        return false;
+    if (_controller.isForwardOrCompleted) {
+      return false;
     }
+    _scheduleShowTooltip(withDelay: Duration.zero);
+    return true;
   }
 
   @override
@@ -796,7 +786,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       decoration: widget.decoration ?? tooltipTheme.decoration ?? defaultDecoration,
       textStyle: widget.textStyle ?? tooltipTheme.textStyle ?? defaultTextStyle,
       textAlign: widget.textAlign ?? tooltipTheme.textAlign ?? _defaultTextAlign,
-      animation: CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn),
+      animation:_overlayAnimation,
       target: target,
       verticalOffset: widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset,
       preferBelow: widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow,
@@ -821,6 +811,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _tapRecognizer?.dispose();
     _timer?.cancel();
     _backingController?.dispose();
+    _backingOverlayAnimation?.dispose();
     super.dispose();
   }
 

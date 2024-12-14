@@ -27,7 +27,6 @@ const String kHeavyGridViewRouteName = '/heavy_gridview';
 const String kRasterCacheUseMemory = '/raster_cache_use_memory';
 const String kShaderMaskCacheRouteName = '/shader_mask_cache';
 const String kSimpleScrollRouteName = '/simple_scroll';
-const String kStackSizeRouteName = '/stack_size';
 const String kAnimationWithMicrotasksRouteName = '/animation_with_microtasks';
 const String kAnimatedImageRouteName = '/animated_image';
 const String kOpacityPeepholeRouteName = '/opacity_peephole';
@@ -41,6 +40,7 @@ const String kDrawPointsPageRougeName = '/draw_points';
 const String kDrawVerticesPageRouteName = '/draw_vertices';
 const String kDrawAtlasPageRouteName = '/draw_atlas';
 const String kAnimatedAdvancedBlend = '/animated_advanced_blend';
+const String kRRectBlurRouteName = '/rrect_blur';
 
 const String kOpacityPeepholeOneRectRouteName = '$kOpacityPeepholeRouteName/one_big_rect';
 const String kOpacityPeepholeColumnOfOpacityRouteName = '$kOpacityPeepholeRouteName/column_of_opacity';
@@ -61,5 +61,3 @@ const String kGradientPerfStaticConsistentRouteName = '$kGradientPerfRouteName/s
 const String kScrollableName = '/macrobenchmark_listview';
 const String kOpacityScrollableName = '$kOpacityPeepholeRouteName/listview';
 const String kGradientPerfScrollableName = '$kGradientPerfRouteName/listview';
-
-const String kStackSizeKey = 'stack_size';

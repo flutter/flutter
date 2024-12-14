@@ -11,11 +11,7 @@ void main() {
     const String menuItem = 'Item 1';
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: example.PopupMenuApp(),
-        ),
-      ),
+      const example.PopupMenuApp(),
     );
 
     expect(find.text(menuItem), findsNothing);

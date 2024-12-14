@@ -144,5 +144,7 @@
   "menuDismissLabel": "ປິດເມນູ",
   "lookUpButtonLabel": "ຊອກຫາຂໍ້ມູນ",
   "searchWebButtonLabel": "ຊອກຫາຢູ່ອິນເຕີເນັດ",
-  "shareButtonLabel": "ແບ່ງປັນ..."
+  "shareButtonLabel": "ແບ່ງປັນ",
+  "clearButtonTooltip": "ລຶບລ້າງຂໍ້ຄວາມ",
+  "selectedDateLabel": "ເລືອກໄວ້"
 }

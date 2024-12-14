@@ -31,9 +31,9 @@ void main() {
     expect(defaultCard.shape, const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(12.0)),
     ));
-    expect(defaultCard.color, const Color(0xfffffbfe));
+    expect(defaultCard.color, const Color(0xfff7f2fa));
     expect(defaultCard.shadowColor, const Color(0xff000000));
-    expect(defaultCard.surfaceTintColor, const Color(0xff6750a4));
+    expect(defaultCard.surfaceTintColor, Colors.transparent);
 
     final Material filledCard = getCardMaterial(tester, 1);
     expect(filledCard.clipBehavior, Clip.none);
@@ -41,7 +41,7 @@ void main() {
     expect(filledCard.shape, const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(12.0)),
     ));
-    expect(filledCard.color, const Color(0xffe7e0ec));
+    expect(filledCard.color, const Color(0xffe6e0e9));
     expect(filledCard.shadowColor, const Color(0xff000000));
     expect(filledCard.surfaceTintColor, const Color(0x00000000));
 
@@ -52,8 +52,8 @@ void main() {
       side: BorderSide(color: Color(0xffcac4d0)),
       borderRadius: BorderRadius.all(Radius.circular(12.0)),
     ));
-    expect(outlinedCard.color, const Color(0xfffffbfe));
+    expect(outlinedCard.color, const Color(0xfffef7ff));
     expect(outlinedCard.shadowColor, const Color(0xff000000));
-    expect(outlinedCard.surfaceTintColor, const Color(0xff6750a4));
+    expect(outlinedCard.surfaceTintColor, Colors.transparent);
   });
 }

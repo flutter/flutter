@@ -61,6 +61,11 @@ class StartCommand extends Command<void> {
       allowed: kBaseReleaseChannels,
     );
     argParser.addOption(
+      kFrameworkMirrorOption,
+      help:
+          'Configurable Framework repo mirror remote.',
+    );
+    argParser.addOption(
       kFrameworkUpstreamOption,
       defaultsTo: FrameworkRepository.defaultUpstream,
       help:
@@ -112,14 +117,8 @@ class StartCommand extends Command<void> {
   @override
   String get description => 'Initialize a new Flutter release.';
 
-  @override
-  Future<void> run() async {
-    final ArgResults argumentResults = argResults!;
-    if (!platform.isMacOS && !platform.isLinux) {
-      throw ConductorException(
-        'Error! This tool is only supported on macOS and Linux',
-      );
-    }
+  @visibleForTesting
+  StartContext createContext(ArgResults argumentResults) {
 
     final String frameworkUpstream = getValueFromEnvOrArgs(
       kFrameworkUpstreamOption,
@@ -131,7 +130,12 @@ class StartCommand extends Command<void> {
       argumentResults,
       platform.environment,
     )!;
-    final String frameworkMirror =
+    final String frameworkMirror = getValueFromEnvOrArgs(
+          kFrameworkMirrorOption,
+          argumentResults,
+          platform.environment,
+          allowNull: true,
+        ) ??
         'git@github.com:$githubUsername/flutter.git';
     final String engineUpstream = getValueFromEnvOrArgs(
       kEngineUpstreamOption,
@@ -175,7 +179,7 @@ class StartCommand extends Command<void> {
       versionOverride = Version.fromString(versionOverrideString);
     }
 
-    final StartContext context = StartContext(
+    return StartContext(
       candidateBranch: candidateBranch,
       checkouts: checkouts,
       dartRevision: dartRevision,
@@ -191,7 +195,18 @@ class StartCommand extends Command<void> {
       versionOverride: versionOverride,
       githubUsername: githubUsername,
     );
-    return context.run();
+  }
+
+  @override
+  Future<void> run() async {
+    final ArgResults argumentResults = argResults!;
+    if (!platform.isMacOS && !platform.isLinux) {
+      throw ConductorException(
+        'Error! This tool is only supported on macOS and Linux',
+      );
+    }
+
+    return createContext(argumentResults).run();
   }
 }
 
@@ -218,26 +233,14 @@ class StartContext extends Context {
         engine = EngineRepository(
           checkouts,
           initialRef: 'upstream/$candidateBranch',
-          upstreamRemote: Remote(
-            name: RemoteName.upstream,
-            url: engineUpstream,
-          ),
-          mirrorRemote: Remote(
-            name: RemoteName.mirror,
-            url: engineMirror,
-          ),
+          upstreamRemote: Remote.upstream(engineUpstream),
+          mirrorRemote: Remote.mirror(engineMirror),
         ),
         framework = FrameworkRepository(
           checkouts,
           initialRef: 'upstream/$candidateBranch',
-          upstreamRemote: Remote(
-            name: RemoteName.upstream,
-            url: frameworkUpstream,
-          ),
-          mirrorRemote: Remote(
-            name: RemoteName.mirror,
-            url: frameworkMirror,
-          ),
+          upstreamRemote: Remote.upstream(frameworkUpstream),
+          mirrorRemote: Remote.mirror(frameworkMirror),
         );
 
   final String candidateBranch;
@@ -267,16 +270,14 @@ class StartContext extends Context {
     if (atBranchPoint) {
       return ReleaseType.BETA_INITIAL;
     }
-
-    if (releaseChannel == 'stable') {
-      if (lastVersion.type == VersionType.stable) {
-        return ReleaseType.STABLE_HOTFIX;
-      } else {
-        return ReleaseType.STABLE_INITIAL;
-      }
+    if (releaseChannel != 'stable') {
+      return ReleaseType.BETA_HOTFIX;
     }
 
-    return ReleaseType.BETA_HOTFIX;
+    return switch (lastVersion.type) {
+      VersionType.stable => ReleaseType.STABLE_HOTFIX,
+      VersionType.development || VersionType.gitDescribe || VersionType.latest => ReleaseType.STABLE_INITIAL,
+    };
   }
 
   Future<void> run() async {
@@ -399,23 +400,12 @@ class StartContext extends Context {
 
   /// Determine this release's version number from the [lastVersion] and the [incrementLetter].
   Version calculateNextVersion(Version lastVersion, ReleaseType releaseType) {
-    late final Version nextVersion;
-    switch (releaseType) {
-      case ReleaseType.STABLE_INITIAL:
-        nextVersion = Version(
-          x: lastVersion.x,
-          y: lastVersion.y,
-          z: 0,
-          type: VersionType.stable,
-        );
-      case ReleaseType.STABLE_HOTFIX:
-        nextVersion = Version.increment(lastVersion, 'z');
-      case ReleaseType.BETA_INITIAL:
-        nextVersion = Version.fromCandidateBranch(candidateBranch);
-      case ReleaseType.BETA_HOTFIX:
-        nextVersion = Version.increment(lastVersion, 'n');
-    }
-    return nextVersion;
+    return switch (releaseType) {
+      ReleaseType.STABLE_INITIAL   => Version(x: lastVersion.x, y: lastVersion.y, z: 0, type: VersionType.stable),
+      ReleaseType.STABLE_HOTFIX    => Version.increment(lastVersion, 'z'),
+      ReleaseType.BETA_INITIAL     => Version.fromCandidateBranch(candidateBranch),
+      ReleaseType.BETA_HOTFIX || _ => Version.increment(lastVersion, 'n'),
+    };
   }
 
   /// Ensures the branch point [candidateBranch] and `master` has a version tag.

@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'widget_tester.dart';
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart' show Tooltip;
@@ -23,7 +28,7 @@ typedef SemanticsNodePredicate = bool Function(SemanticsNode node);
 /// Signature for [FinderBase.describeMatch].
 typedef DescribeMatchCallback = String Function(Plurality plurality);
 
-/// The `CandidateType` of finders that search for and filter subtrings,
+/// The `CandidateType` of finders that search for and filter substrings,
 /// within static text rendered by [RenderParagraph]s.
 final class TextRangeContext {
   const TextRangeContext._(this.view, this.renderObject, this.textRange);
@@ -36,7 +41,7 @@ final class TextRangeContext {
   /// The RenderObject that contains the static text.
   final RenderParagraph renderObject;
 
-  /// The [TextRange] of the subtring within [renderObject]'s text.
+  /// The [TextRange] of the substring within [renderObject]'s text.
   final TextRange textRange;
 
   @override
@@ -365,13 +370,20 @@ class CommonFinders {
   ///
   /// ```dart
   /// expect(find.byTooltip('Back'), findsOneWidget);
+  /// expect(find.byTooltip(RegExp('Back.*')), findsNWidgets(2));
   /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byTooltip(String message, { bool skipOffstage = true }) {
+  Finder byTooltip(Pattern message, {bool skipOffstage = true}) {
     return byWidgetPredicate(
-      (Widget widget) => widget is Tooltip && widget.message == message,
+      (Widget widget) {
+        return widget is Tooltip &&
+            (message is RegExp
+                ? ((widget.message != null && message.hasMatch(widget.message!)) ||
+                    (widget.richMessage != null && message.hasMatch(widget.richMessage!.toPlainText())))
+                : ((widget.message ?? widget.richMessage?.toPlainText()) == message));
+      },
       skipOffstage: skipOffstage,
     );
   }
@@ -456,11 +468,77 @@ class CommonFinders {
     return _AncestorWidgetFinder(of, matching, matchLeaves: matchRoot);
   }
 
+  /// Finds a standard "back" button.
+  ///
+  /// A common element on many user interfaces is the "back" button. This is
+  /// the button which takes the user back to the previous page/screen/state.
+  ///
+  /// It is useful in tests to be able to find these buttons, both for tapping
+  /// them or verifying their existence, but because different platforms and
+  /// locales have different icons representing them with different labels and
+  /// tooltips, it's not desirable to have to look them up by these attributes.
+  ///
+  /// This finder uses the [StandardComponentType] enum to look for buttons that
+  /// have the key associated with [StandardComponentType.backButton]. If
+  /// another widget is assigned that key, then it too will be considered an
+  /// "official" back button in the widget tree, allowing this matcher to still
+  /// find it even though it might use a different icon or tooltip.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// expect(find.backButton(), findsOneWidget);
+  /// ```
+  ///
+  /// See also:
+  ///
+  /// * [StandardComponentType], the enum that enumerates components that are
+  ///   both common in user interfaces, but which also can vary slightly in
+  ///   presentation across different platforms, locales, and devices.
+  /// * [BackButton], the Flutter Material widget that represents the back
+  ///   button.
+  Finder backButton() {
+    return byKey(StandardComponentType.backButton.key);
+  }
+
+  /// Finds a standard "close" button.
+  ///
+  /// A common element on many user interfaces is the "close" button. This is
+  /// the button which closes or cancels whatever it is attached to.
+  ///
+  /// It is useful in tests to be able to find these buttons, both for tapping
+  /// them or verifying their existence, but because different platforms and
+  /// locales have different icons representing them with different labels and
+  /// tooltips, it's not desirable to have to look them up by these attributes.
+  ///
+  /// This finder uses the [StandardComponentType] enum to look for buttons that
+  /// have the key associated with [StandardComponentType.closeButton]. If
+  /// another widget is assigned that key, then it too will be considered an
+  /// "official" close button in the widget tree, allowing this matcher to still
+  /// find it even though it might use a different icon or tooltip.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// expect(find.closeButton(), findsOneWidget);
+  /// ```
+  ///
+  /// See also:
+  ///
+  /// * [StandardComponentType], the enum that enumerates components that are
+  ///   both common in user interfaces, but which also can vary slightly in
+  ///   presentation across different platforms, locales, and devices.
+  /// * [CloseButton], the Flutter Material widget that represents a close
+  ///   button.
+  Finder closeButton() {
+    return byKey(StandardComponentType.closeButton.key);
+  }
+
   /// Finds [Semantics] widgets matching the given `label`, either by
   /// [RegExp.hasMatch] or string equality.
   ///
   /// The framework may combine semantics labels in certain scenarios, such as
-  /// when multiple [Text] widgets are in a [MaterialButton] widget. In such a
+  /// when multiple [Text] widgets are in a [TextButton] widget. In such a
   /// case, it may be preferable to match by regular expression. Consumers of
   /// this API __must not__ introduce unsuitable content into the semantics tree
   /// for the purposes of testing; in particular, you should prefer matching by
@@ -477,11 +555,49 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder bySemanticsLabel(Pattern label, { bool skipOffstage = true }) {
+  Finder bySemanticsLabel(Pattern label, {bool skipOffstage = true}) {
+    return _bySemanticsProperty(
+      label,
+      (SemanticsNode? semantics) => semantics?.label,
+      skipOffstage: skipOffstage,
+    );
+  }
+
+  /// Finds [Semantics] widgets matching the given `identifier`, either by
+  /// [RegExp.hasMatch] or string equality.
+  ///
+  /// This allows matching against the identifier of a [Semantics] widget, which
+  /// is a unique identifier for the widget in the semantics tree. This is
+  /// exposed to offer a unified way widget tests and e2e tests can match
+  /// against a [Semantics] widget.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// expect(find.bySemanticsIdentifier('Back'), findsOneWidget);
+  /// ```
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder bySemanticsIdentifier(Pattern identifier, {bool skipOffstage = true}) {
+    return _bySemanticsProperty(
+      identifier,
+      (SemanticsNode? semantics) => semantics?.identifier,
+      skipOffstage: skipOffstage,
+    );
+  }
+
+  Finder _bySemanticsProperty(
+    Pattern pattern,
+    String? Function(SemanticsNode?) propertyGetter,
+    {bool skipOffstage = true}
+  ) {
     if (!SemanticsBinding.instance.semanticsEnabled) {
-      throw StateError('Semantics are not enabled. '
-                       'Make sure to call tester.ensureSemantics() before using '
-                       'this finder, and call dispose on its return value after.');
+      throw StateError(
+        'Semantics are not enabled. '
+        'Make sure to call tester.ensureSemantics() before using '
+        'this finder, and call dispose on its return value after.',
+      );
     }
     return byElementPredicate(
       (Element element) {
@@ -490,19 +606,18 @@ class CommonFinders {
         if (element is! RenderObjectElement) {
           return false;
         }
-        final String? semanticsLabel = element.renderObject.debugSemantics?.label;
-        if (semanticsLabel == null) {
+        final String? propertyValue = propertyGetter(element.renderObject.debugSemantics);
+        if (propertyValue == null) {
           return false;
         }
-        return label is RegExp
-            ? label.hasMatch(semanticsLabel)
-            : label == semanticsLabel;
+        return pattern is RegExp
+            ? pattern.hasMatch(propertyValue)
+            : pattern == propertyValue;
       },
       skipOffstage: skipOffstage,
     );
   }
 }
-
 
 /// Provides lightweight syntax for getting frequently used semantics finders.
 ///
@@ -553,7 +668,7 @@ class CommonSemanticsFinders {
     return _PredicateSemanticsFinder(
       predicate,
       describeMatch,
-      _rootFromView(view),
+      view,
     );
   }
 
@@ -688,15 +803,6 @@ class CommonSemanticsFinders {
     } else {
       return pattern == target;
     }
-  }
-
-  SemanticsNode _rootFromView(FlutterView? view) {
-    view ??= TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView;
-    assert(view != null, 'The given view was not available. Ensure WidgetTester.view is available or pass in a specific view using WidgetTester.viewOf.');
-    final RenderView renderView = TestWidgetsFlutterBinding.instance.renderViews
-      .firstWhere((RenderView r) => r.flutterView == view);
-
-    return renderView.owner!.semanticsOwner!.rootSemanticsNode!;
   }
 }
 
@@ -1065,16 +1171,44 @@ abstract class Finder extends FinderBase<Element> with _LegacyFinderMixin {
 
 /// A base class for creating finders that search the semantics tree.
 abstract class SemanticsFinder extends FinderBase<SemanticsNode> {
-  /// Creates a new [SemanticsFinder] that will search starting at the given
-  /// `root`.
-  SemanticsFinder(this.root);
+  /// Creates a new [SemanticsFinder] that will search within the given [view] or
+  /// within all views if [view] is null.
+  SemanticsFinder(this.view);
 
-  /// The root of the semantics tree that this finder will search.
-  final SemanticsNode root;
+  /// The [FlutterView] whose semantics tree this finder will search.
+  ///
+  /// If null, the finder will search within all views.
+  final FlutterView? view;
+
+  /// Returns the root [SemanticsNode]s of all the semantics trees that this
+  /// finder will search.
+  Iterable<SemanticsNode> get roots {
+    if (view == null) {
+      return _allRoots;
+    }
+    final RenderView renderView = TestWidgetsFlutterBinding.instance.renderViews
+        .firstWhere((RenderView r) => r.flutterView == view);
+    return <SemanticsNode>[
+      renderView.owner!.semanticsOwner!.rootSemanticsNode!
+    ];
+  }
 
   @override
   Iterable<SemanticsNode> get allCandidates {
-    return collectAllSemanticsNodesFrom(root);
+    return roots.expand((SemanticsNode root) => collectAllSemanticsNodesFrom(root));
+  }
+
+  static Iterable<SemanticsNode> get _allRoots {
+    final List<SemanticsNode> roots = <SemanticsNode>[];
+    void collectSemanticsRoots(PipelineOwner owner) {
+      final SemanticsNode? root = owner.semanticsOwner?.rootSemanticsNode;
+      if (root != null) {
+        roots.add(root);
+      }
+      owner.visitChildren(collectSemanticsRoots);
+    }
+    collectSemanticsRoots(TestWidgetsFlutterBinding.instance.rootPipelineOwner);
+    return roots;
   }
 }
 
@@ -1539,7 +1673,7 @@ class _ElementPredicateWidgetFinder extends MatchFinder {
 
 class _PredicateSemanticsFinder extends SemanticsFinder
     with MatchFinderMixin<SemanticsNode> {
-  _PredicateSemanticsFinder(this.predicate, DescribeMatchCallback? describeMatch, super.root)
+  _PredicateSemanticsFinder(this.predicate, DescribeMatchCallback? describeMatch, super.view)
     : _describeMatch = describeMatch;
 
   final SemanticsNodePredicate predicate;

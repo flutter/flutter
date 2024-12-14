@@ -194,6 +194,26 @@ void main() {
     );
   });
 
+  test('equalsIgnoringHashCodes - wrong line', () {
+    TestFailure? failure;
+    try {
+      expect(
+        '1\n2\n3\n4\n5\n6\n7\n8\n9\n10',
+        equalsIgnoringHashCodes('1\n2\n3\n4\n5\n6\na\n8\n9\n10'),
+      );
+    } on TestFailure catch (e) {
+      failure = e;
+    }
+
+    expect(failure, isNotNull);
+    if (failure != null) {
+      final String? message = failure.message;
+      expect(message, contains('Lines 7 differed'));
+      expect(message, contains("'a'"));
+      expect(message, contains("'7'"));
+    }
+  });
+
   test('moreOrLessEquals', () {
     expect(0.0, moreOrLessEquals(1e-11));
     expect(1e-11, moreOrLessEquals(0.0));
@@ -332,6 +352,25 @@ void main() {
     );
   });
 
+  test('isSameColorSwatchAs', () {
+    expect(
+      const ColorSwatch<String>(0xaaaaaaaa,
+          <String, Color>{'foo': Color(0xaaaaaaaa), 'bar': Color(0xbbbbbbbb)}),
+      isSameColorSwatchAs(const ColorSwatch<String>(0xaaaaaaaa,
+          <String, Color>{'foo': Color(0xaaaaaaaa), 'bar': Color(0xbbbbbbbb)})),
+    );
+
+    expect(
+      const ColorSwatch<String>(0xaaaaaaaa,
+          <String, Color>{'foo': Color(0xaaaaaaaa), 'bar': Color(0xbbbbbbbb)}),
+      isNot(isSameColorSwatchAs(const ColorSwatch<String>(
+          0xaaaaaaaa, <String, Color>{
+        'foo': Color(0xaaaaaaaa),
+        'bar': Color(0xcccccccc)
+      }))),
+    );
+  });
+
   test('isSameColorAs', () {
     expect(
       const Color(0x87654321),
@@ -356,6 +395,16 @@ void main() {
     expect(
       const _CustomColor(0xFF123456),
       isSameColorAs(const _CustomColor(0xFF123456, isEqual: false)),
+    );
+
+    expect(
+      const Color(0x00000000),
+      isNot(isSameColorAs(const Color(0x00000002))),
+    );
+
+    expect(
+      const Color(0x00000000),
+      isSameColorAs(const Color(0x00000002), threshold: 0.008),
     );
   });
 
@@ -684,6 +733,8 @@ void main() {
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
         currentValueLength: 10,
         maxValueLength: 15,
+        headingLevel: 0,
+        linkUrl: Uri(path: 'l'),
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -746,6 +797,7 @@ void main() {
          hasDidGainAccessibilityFocusAction: true,
          hasDidLoseAccessibilityFocusAction: true,
          hasDismissAction: true,
+         hasFocusAction: true,
          customActions: <CustomSemanticsAction>[action],
       ));
     });
@@ -970,6 +1022,8 @@ void main() {
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
         currentValueLength: 10,
         maxValueLength: 15,
+        headingLevel: 0,
+        linkUrl: Uri(path: 'l'),
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1033,6 +1087,7 @@ void main() {
           hasDidGainAccessibilityFocusAction: true,
           hasDidLoseAccessibilityFocusAction: true,
           hasDismissAction: true,
+          hasFocusAction: true,
           customActions: <CustomSemanticsAction>[action],
         ),
       );
@@ -1062,6 +1117,8 @@ void main() {
         platformViewId: 105,
         currentValueLength: 10,
         maxValueLength: 15,
+        headingLevel: 0,
+        linkUrl: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1125,6 +1182,7 @@ void main() {
           hasDidGainAccessibilityFocusAction: false,
           hasDidLoseAccessibilityFocusAction: false,
           hasDismissAction: false,
+          hasFocusAction: false,
         ),
       );
     });
@@ -1161,6 +1219,8 @@ void main() {
         platformViewId: 105,
         currentValueLength: 10,
         maxValueLength: 15,
+        headingLevel: 0,
+        linkUrl: null,
       );
       final _FakeSemanticsNode emptyNode = _FakeSemanticsNode(emptyData);
 
@@ -1189,6 +1249,8 @@ void main() {
         currentValueLength: 10,
         maxValueLength: 15,
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
+        headingLevel: 0,
+        linkUrl: Uri(path: 'l'),
       );
       final _FakeSemanticsNode fullNode = _FakeSemanticsNode(fullData);
 
@@ -1279,6 +1341,8 @@ void main() {
         currentValueLength: 10,
         maxValueLength: 15,
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
+        headingLevel: 0,
+        linkUrl: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 

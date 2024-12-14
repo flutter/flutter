@@ -76,9 +76,7 @@ enum FlutterProjectType implements CliEnum {
   static List<FlutterProjectType> get enabledValues {
     return <FlutterProjectType>[
       for (final FlutterProjectType value in values)
-        if (value == FlutterProjectType.packageFfi) ...<FlutterProjectType>[
-          if (featureFlags.isNativeAssetsEnabled) value
-        ] else
+        if (value != FlutterProjectType.packageFfi || featureFlags.isNativeAssetsEnabled)
           value,
     ];
   }
@@ -224,10 +222,7 @@ ${migrateConfig.getOutputFileString()}''';
   /// Finds the fallback revision to use when no base revision is found in the migrate config.
   String getFallbackBaseRevision(Logger logger, FlutterVersion flutterVersion) {
     // Use the .metadata file if it exists.
-    if (versionRevision != null) {
-      return versionRevision!;
-    }
-    return flutterVersion.frameworkRevision;
+    return versionRevision ?? flutterVersion.frameworkRevision;
   }
 }
 

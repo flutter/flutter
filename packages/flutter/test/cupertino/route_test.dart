@@ -351,10 +351,10 @@ void main() {
       const Offset(400, 0),
     );
     // Let the dismissing snapping animation go 60%.
-    await tester.pump(const Duration(milliseconds: 240));
+    await tester.pump(const Duration(milliseconds: 210));
     expect(
       tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(CupertinoPageScaffold))).dx,
-      moreOrLessEquals(798, epsilon: 1),
+      moreOrLessEquals(789, epsilon: 1),
     );
 
     // Use the navigator to push a route instead of tapping the 'push' button.
@@ -374,6 +374,272 @@ void main() {
     expect(
       tester.state<NavigatorState>(find.byType(Navigator)).userGestureInProgress,
       false,
+    );
+  });
+
+  testWidgets('Back swipe less than halfway is interrupted by route pop', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/141268
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return const CupertinoPageScaffold(
+                          child: Center(child: Text('Page 2')),
+                        );
+                      },
+                    ));
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsOneWidget);
+
+    // Start a back gesture and move it less than 50% across the screen.
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 300.0));
+    await gesture.moveBy(const Offset(100.0, 0.0));
+    await tester.pump();
+    expect( // The second route has been dragged to the right.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold))),
+      const Offset(100.0, 0.0),
+    );
+    expect( // The first route is sliding in from the left.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 1'), matching: find.byType(CupertinoPageScaffold))).dx,
+      lessThan(0),
+    );
+
+    // Programmatically pop and observe that Page 2 was popped as if there were
+    // no back gesture.
+    Navigator.pop<void>(scaffoldKey.currentContext!);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getTopLeft(find.ancestor(of: find.text('Page 1'), matching: find.byType(CupertinoPageScaffold))),
+      Offset.zero,
+    );
+    expect(find.text('Page 2'), findsNothing);
+  });
+
+  testWidgets('Back swipe more than halfway is interrupted by route pop', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/141268
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return const CupertinoPageScaffold(
+                          child: Center(child: Text('Page 2')),
+                        );
+                      },
+                    ));
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsOneWidget);
+
+    // Start a back gesture and move it more than 50% across the screen.
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 300.0));
+    await gesture.moveBy(const Offset(500.0, 0.0));
+    await tester.pump();
+    expect( // The second route has been dragged to the right.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold))),
+      const Offset(500.0, 0.0),
+    );
+    expect( // The first route is sliding in from the left.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 1'), matching: find.byType(CupertinoPageScaffold))).dx,
+      lessThan(0),
+    );
+
+    // Programmatically pop and observe that Page 2 was popped as if there were
+    // no back gesture.
+    Navigator.pop<void>(scaffoldKey.currentContext!);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getTopLeft(find.ancestor(of: find.text('Page 1'), matching: find.byType(CupertinoPageScaffold))),
+      Offset.zero,
+    );
+    expect(find.text('Page 2'), findsNothing);
+  });
+
+  testWidgets('Back swipe less than halfway is interrupted by route push', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/141268
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return const CupertinoPageScaffold(
+                          child: Center(child: Text('Page 2')),
+                        );
+                      },
+                    ));
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsOneWidget);
+
+    // Start a back gesture and move it less than 50% across the screen.
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 300.0));
+    await gesture.moveBy(const Offset(100.0, 0.0));
+    await tester.pump();
+    expect( // The second route has been dragged to the right.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold))),
+      const Offset(100.0, 0.0),
+    );
+    expect( // The first route is sliding in from the left.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 1'), matching: find.byType(CupertinoPageScaffold))).dx,
+      lessThan(0),
+    );
+
+    // Programmatically push and observe that Page 3 was pushed as if there were
+    // no back gesture.
+    Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return const CupertinoPageScaffold(
+          child: Center(child: Text('Page 3')),
+        );
+      },
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsNothing);
+    expect(
+      tester.getTopLeft(find.ancestor(of: find.text('Page 3'), matching: find.byType(CupertinoPageScaffold))),
+      Offset.zero,
+    );
+  });
+
+  testWidgets('Back swipe more than halfway is interrupted by route push', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/141268
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return const CupertinoPageScaffold(
+                          child: Center(child: Text('Page 2')),
+                        );
+                      },
+                    ));
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsOneWidget);
+
+    // Start a back gesture and move it more than 50% across the screen.
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 300.0));
+    await gesture.moveBy(const Offset(500.0, 0.0));
+    await tester.pump();
+    expect( // The second route has been dragged to the right.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold))),
+      const Offset(500.0, 0.0),
+    );
+    expect( // The first route is sliding in from the left.
+      tester.getTopLeft(find.ancestor(of: find.text('Page 1'), matching: find.byType(CupertinoPageScaffold))).dx,
+      lessThan(0),
+    );
+
+    // Programmatically push and observe that Page 3 was pushed as if there were
+    // no back gesture.
+    Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return const CupertinoPageScaffold(
+          child: Center(child: Text('Page 3')),
+        );
+      },
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsNothing);
+    expect(
+      tester.getTopLeft(find.ancestor(of: find.text('Page 3'), matching: find.byType(CupertinoPageScaffold))),
+      Offset.zero,
     );
   });
 
@@ -445,10 +711,26 @@ void main() {
     await tester.pump(const Duration(milliseconds: 40));
     expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(7.4, epsilon: 0.1));
 
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(3, epsilon: 0.1));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(0, epsilon: 0.1));
+
+    // Give time to the animation to finish and update its status to
+    // AnimationState.completed, so the reverse curved can be used in the next
+    // step.
+    await tester.pumpAndSettle(const Duration(milliseconds: 1));
 
     // Exit animation
     await tester.tap(find.text('Close'));
     await tester.pump();
+
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(156.3, epsilon: 0.1));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(308.1, epsilon: 0.1));
 
     await tester.pump(const Duration(milliseconds: 40));
     expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(411.03, epsilon: 0.1));
@@ -551,9 +833,26 @@ void main() {
     await tester.pump(const Duration(milliseconds: 40));
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-263.0, epsilon: 1.0));
 
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-265.0, epsilon: 1.0));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-266.0, epsilon: 1.0));
+
+    // Give time to the animation to finish and update its status to
+    // AnimationState.completed, so the reverse curved can be used in the next
+    // step.
+    await tester.pumpAndSettle(const Duration(milliseconds: 1));
+
     // Exit animation
     await tester.tap(find.text('Close'));
     await tester.pump();
+
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-197.0, epsilon: 1.0));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-129.0, epsilon: 1.0));
 
     await tester.pump(const Duration(milliseconds: 40));
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-83.0, epsilon: 1.0));
@@ -568,6 +867,125 @@ void main() {
 
   testWidgets('FullscreenDialog CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testParallax(tester, fromFullscreenDialog: true);
+  });
+
+  group('Interrupted push', () {
+    Future<void> testParallax(WidgetTester tester, {required bool fromFullscreenDialog}) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          onGenerateRoute: (RouteSettings settings) => CupertinoPageRoute<void>(
+            fullscreenDialog: fromFullscreenDialog,
+            settings: settings,
+            builder: (BuildContext context) {
+              return Column(
+                children: <Widget>[
+                  const Placeholder(),
+                  CupertinoButton(
+                    child: const Text('Button'),
+                    onPressed: () {
+                      Navigator.push<void>(context, CupertinoPageRoute<void>(
+                        builder: (BuildContext context) {
+                          return CupertinoButton(
+                            child: const Text('Close'),
+                            onPressed: () {
+                              Navigator.pop<void>(context);
+                            },
+                          );
+                        },
+                      ));
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+
+      // Enter animation.
+      await tester.tap(find.text('Button'));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(0.0, epsilon: 0.1));
+      await tester.pump();
+
+      // The push animation duration is 500ms. We let it run for 400ms before
+      // interrupting and popping it.
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-55.0, epsilon: 1.0));
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-111.0, epsilon: 1.0));
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-161.0, epsilon: 1.0));
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-200.0, epsilon: 1.0));
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-226.0, epsilon: 1.0));
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-242.0, epsilon: 1.0));
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-251.0, epsilon: 1.0));
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-257.0, epsilon: 1.0));
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-261.0, epsilon: 1.0));
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-263.0, epsilon: 1.0));
+
+      // Exit animation
+      await tester.tap(find.text('Close'));
+      await tester.pump();
+
+      // When the push animation is interrupted, the forward curved is used for
+      // the reversed animation to avoid discontinuities.
+
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-261.0, epsilon: 1.0));
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-257.0, epsilon: 1.0));
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-251.0, epsilon: 1.0));
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-242.0, epsilon: 1.0));
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-226.0, epsilon: 1.0));
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-200.0, epsilon: 1.0));
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-161.0, epsilon: 1.0));
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-111.0, epsilon: 1.0));
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-55.0, epsilon: 1.0));
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(0.0, epsilon: 1.0));
+    }
+
+    testWidgets('CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top and gets popped before the end of the animation', (WidgetTester tester) async {
+      await testParallax(tester, fromFullscreenDialog: false);
+    });
+
+    testWidgets('FullscreenDialog CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top and gets popped before the end of the animation', (WidgetTester tester) async {
+      await testParallax(tester, fromFullscreenDialog: true);
+    });
   });
 
   Future<void> testNoParallax(WidgetTester tester, {required bool fromFullscreenDialog}) async{
@@ -677,6 +1095,11 @@ void main() {
     tester.state<NavigatorState>(find.byType(Navigator)).push(route2);
     // The whole transition is 500ms based on CupertinoPageRoute.transitionDuration.
     // Break it up into small chunks.
+    //
+    // The screen width is 800.
+    // The top left corner of the text 1 will go from 0 to -800 / 3 = - 266.67.
+    // The top left corner of the text 2 will go from 800 to 0.
+
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
@@ -694,8 +1117,14 @@ void main() {
 
     // Finish the rest of the animation
     await tester.pump(const Duration(milliseconds: 350));
+    // Give time to the animation to finish and update its status to
+    // AnimationState.completed, so the reverse curved can be used in the next
+    // step.
+    await tester.pumpAndSettle(const Duration(milliseconds: 1));
 
     tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    // The top left corner of the text 1 will go from -800 / 3 = - 266.67 to 0.
+    // The top left corner of the text 2 will go from 0 to 800.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-197, epsilon: 1));
@@ -823,13 +1252,13 @@ void main() {
     );
 
     await tester.pump(const Duration(milliseconds: 50));
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-19, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(744, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-61, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(614, epsilon: 1));
 
     await tester.pump(const Duration(milliseconds: 50));
     // Rate of change is slowing down.
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-4, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(787, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-26, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(721, epsilon: 1));
 
     await tester.pumpAndSettle();
     expect(
@@ -868,7 +1297,7 @@ void main() {
 
     // Didn't drag far enough to snap into dismissing this route.
     // Each 100px distance takes 100ms to snap back.
-    await tester.pump(const Duration(milliseconds: 101));
+    await tester.pump(const Duration(milliseconds: 351));
     // Back to the page covering the whole screen.
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(0));
     expect(navigatorKey.currentState!.userGestureInProgress, false);
@@ -883,7 +1312,7 @@ void main() {
     expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didPop);
 
     // Did go far enough to snap out of this route.
-    await tester.pump(const Duration(milliseconds: 301));
+    await tester.pump(const Duration(milliseconds: 351));
     // Back to the page covering the whole screen.
     expect(find.text('2'), findsNothing);
     // First route covers the whole screen.
@@ -1060,11 +1489,11 @@ void main() {
       final RenderBox box = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
 
       // Animation starts with effectively no shadow
-      expect(box, paintsShadowRect(dx: 795, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 785, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 775, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 765, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 755, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 795, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 785, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 775, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 765, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 755, color: CupertinoColors.transparent));
 
       await tester.pump(const Duration(milliseconds: 100));
 
@@ -1072,8 +1501,8 @@ void main() {
       expect(box, paintsShadowRect(dx: 296, color: const Color(0x03000000)));
       expect(box, paintsShadowRect(dx: 286, color: const Color(0x02000000)));
       expect(box, paintsShadowRect(dx: 276, color: const Color(0x01000000)));
-      expect(box, paintsShadowRect(dx: 266, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 266, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 266, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 266, color: CupertinoColors.transparent));
 
       await tester.pumpAndSettle();
 
@@ -1083,7 +1512,7 @@ void main() {
       expect(box, paintsShadowRect(dx: -10, color: const Color(0x03000000)));
       expect(box, paintsShadowRect(dx: -20, color: const Color(0x02000000)));
       expect(box, paintsShadowRect(dx: -30, color: const Color(0x01000000)));
-      expect(box, paintsShadowRect(dx: -40, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: -40, color: CupertinoColors.transparent));
 
       // Start animation in reverse
       tester.state<NavigatorState>(find.byType(Navigator)).pop();
@@ -1094,16 +1523,16 @@ void main() {
       expect(box, paintsShadowRect(dx: 488, color: const Color(0x03000000)));
       expect(box, paintsShadowRect(dx: 478, color: const Color(0x02000000)));
       expect(box, paintsShadowRect(dx: 468, color: const Color(0x01000000)));
-      expect(box, paintsShadowRect(dx: 458, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 458, color: CupertinoColors.transparent));
 
       await tester.pump(const Duration(milliseconds: 150));
 
       // At the end of the animation, the shadow approaches full transparency
       expect(box, paintsShadowRect(dx: 794, color: const Color(0x01000000)));
-      expect(box, paintsShadowRect(dx: 784, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 774, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 764, color: const Color(0x00000000)));
-      expect(box, paintsShadowRect(dx: 754, color: const Color(0x00000000)));
+      expect(box, paintsShadowRect(dx: 784, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 774, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 764, color: CupertinoColors.transparent));
+      expect(box, paintsShadowRect(dx: 754, color: CupertinoColors.transparent));
     });
 
     testWidgets('when route is fullscreenDialog, it has no visible _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
@@ -1516,7 +1945,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(semantics, isNot(includesNodeWith(
-      actions: <SemanticsAction>[SemanticsAction.tap],
+      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
       label: 'Dismiss',
     )));
     debugDefaultTargetPlatformOverride = null;
@@ -1591,8 +2020,6 @@ void main() {
   });
 
   testWidgets('showCupertinoModalPopup transparent barrier color is transparent', (WidgetTester tester) async {
-    const Color kTransparentColor = Color(0x00000000);
-
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
         child: Builder(builder: (BuildContext context) {
@@ -1601,7 +2028,7 @@ void main() {
               await showCupertinoModalPopup<void>(
                 context: context,
                 builder: (BuildContext context) => const SizedBox(),
-                barrierColor: kTransparentColor,
+                barrierColor: CupertinoColors.transparent,
               );
             },
             child: const Text('tap'),
@@ -2165,6 +2592,300 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)).dx, 390.0);
     });
   });
+
+  testWidgets( 'Fullscreen route does not leak CurveAnimation', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return CupertinoButton(
+              child: const Text('Button'),
+              onPressed: () {
+                Navigator.push<void>(context, CupertinoPageRoute<void>(
+                  fullscreenDialog: true,
+                  builder: (BuildContext context) {
+                    return Column(
+                      children: <Widget>[
+                        const Placeholder(),
+                        CupertinoButton(
+                          child: const Text('Close'),
+                          onPressed: () {
+                            Navigator.pop<void>(context);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ));
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    // Enter animation.
+    await tester.tap(find.text('Button'));
+    await tester.pump();
+
+    await tester.pump(const Duration(milliseconds: 400));
+
+    // Exit animation
+    await tester.tap(find.text('Close'));
+    await tester.pump();
+
+    await tester.pump(const Duration(milliseconds: 400));
+  });
+
+  testWidgets('CupertinoModalPopupRoute does not leak CurveAnimation', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Navigator(
+        onGenerateRoute: (RouteSettings settings) {
+          return PageRouteBuilder<dynamic>(
+            pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+              return GestureDetector(
+                onTap: () async {
+                  await showCupertinoModalPopup<void>(
+                    context: context,
+                    semanticsDismissible: true,
+                    builder: (BuildContext context) => const SizedBox(),
+                  );
+                },
+                child: const Text('tap'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Push the route.
+    await tester.tap(find.text('tap'));
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('CupertinoDialogRoute does not leak CurveAnimation', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Navigator(
+        onGenerateRoute: (RouteSettings settings) {
+          return PageRouteBuilder<dynamic>(
+            pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+              return GestureDetector(
+                onTap: () async {
+                  await showCupertinoDialog<void>(
+                    context: context,
+                    useRootNavigator: false,
+                    builder: (BuildContext context) => const SizedBox(),
+                  );
+                },
+                child: const Text('tap'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.text('tap'));
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('Setting CupertinoDialogRoute.requestFocus to false does not request focus on the dialog', (WidgetTester tester) async {
+    late BuildContext savedContext;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    const String dialogText = 'Dialog Text';
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return CupertinoTextField(focusNode: focusNode);
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    FocusNode? getCupertinoTextFieldFocusNode() {
+      return tester.widget<Focus>(find.descendant(
+        of: find.byType(CupertinoTextField),
+        matching: find.byType(Focus),
+      )).focusNode;
+    }
+
+    // Initially, there is no dialog and the text field has no focus.
+    expect(find.text(dialogText), findsNothing);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, false);
+
+    // Request focus on the text field.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up dialog.
+    final NavigatorState navigator = Navigator.of(savedContext);
+    navigator.push(
+      CupertinoDialogRoute<void>(
+        context: savedContext,
+        builder: (BuildContext context) => const Text(dialogText),
+      ),
+    );
+    await tester.pump();
+
+    // The dialog is showing and the text field has lost focus.
+    expect(find.text(dialogText), findsOneWidget);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, false);
+
+    // Dismiss the dialog.
+    navigator.pop();
+    await tester.pump();
+
+    // The dialog is dismissed and the focus is shifted back to the text field.
+    expect(find.text(dialogText), findsNothing);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up dialog again with requestFocus to false.
+    navigator.push(
+      CupertinoDialogRoute<void>(
+        context: savedContext,
+        requestFocus: false,
+        builder: (BuildContext context) => const Text(dialogText),
+      ),
+    );
+    await tester.pump();
+
+    // The dialog is showing and the text field still has focus.
+    expect(find.text(dialogText), findsOneWidget);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, true);
+  });
+
+  testWidgets('Setting CupertinoModalPopupRoute.requestFocus to false does not request focus on the popup', (WidgetTester tester) async {
+    late BuildContext savedContext;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    const String dialogText = 'Popup Text';
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return CupertinoTextField(focusNode: focusNode);
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    FocusNode? getCupertinoTextFieldFocusNode() {
+      return tester.widget<Focus>(find.descendant(
+        of: find.byType(CupertinoTextField),
+        matching: find.byType(Focus),
+      )).focusNode;
+    }
+
+    // Initially, there is no popup and the text field has no focus.
+    expect(find.text(dialogText), findsNothing);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, false);
+
+    // Request focus on the text field.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up popup.
+    final NavigatorState navigator = Navigator.of(savedContext);
+    navigator.push(
+      CupertinoModalPopupRoute<void>(
+        builder: (BuildContext context) => const Text(dialogText),
+      ),
+    );
+    await tester.pump();
+
+    // The popup is showing and the text field has lost focus.
+    expect(find.text(dialogText), findsOneWidget);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, false);
+
+    // Dismiss the popup.
+    navigator.pop();
+    await tester.pump();
+
+    // The popup is dismissed and the focus is shifted back to the text field.
+    expect(find.text(dialogText), findsNothing);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, true);
+
+    // Bring up popup again with requestFocus to false.
+    navigator.push(
+      CupertinoModalPopupRoute<void>(
+        requestFocus: false,
+        builder: (BuildContext context) => const Text(dialogText),
+      ),
+    );
+    await tester.pump();
+
+    // The popup is showing and the text field still has focus.
+    expect(find.text(dialogText), findsOneWidget);
+    expect(getCupertinoTextFieldFocusNode()?.hasFocus, true);
+  });
+
+  testWidgets('Setting CupertinoPageRoute.requestFocus to false does not request focus on the page', (WidgetTester tester) async {
+    late BuildContext savedContext;
+    const String pageTwoText = 'Page Two';
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return Container();
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // Check page two is not on the screen.
+    expect(find.text(pageTwoText), findsNothing);
+
+    // Navigate to page two with text.
+    final NavigatorState navigator = Navigator.of(savedContext);
+    navigator.push(
+      CupertinoPageRoute<void>(
+        builder: (BuildContext context) {
+          return const Text(pageTwoText);
+        }
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100)); // Advance route transition animation.
+
+    // The page two is showing and the text widget has focus.
+    Element textOnPageTwo = tester.element(find.text(pageTwoText));
+    FocusScopeNode focusScopeNode = FocusScope.of(textOnPageTwo);
+    expect(focusScopeNode.hasFocus, isTrue);
+
+    // Navigate back to page one.
+    navigator.pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100)); // Advance route transition animation.
+
+    // Navigate to page two again with requestFocus set to false.
+    navigator.push(
+      CupertinoPageRoute<void>(
+        requestFocus: false,
+        builder: (BuildContext context) {
+          return const Text(pageTwoText);
+        }
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100)); // Advance route transition animation.
+
+    // The page two is showing and the text widget is not focused.
+    textOnPageTwo = tester.element(find.text(pageTwoText));
+    focusScopeNode = FocusScope.of(textOnPageTwo);
+    expect(focusScopeNode.hasFocus, isFalse);
+  });
 }
 
 class MockNavigatorObserver extends NavigatorObserver {
@@ -2396,21 +3117,14 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
   Widget build(BuildContext context) {
     return CupertinoApp(
       initialRoute: 'home',
-      onGenerateRoute: (RouteSettings settings) {
-        return CupertinoPageRoute<void>(
-          settings: settings,
-          builder: (BuildContext context) {
-            switch (settings.name) {
-              case 'home':
-                return _buildHome(context);
-              case 'sub':
-                return _buildSub(context);
-              default:
-                throw UnimplementedError();
-            }
-          },
-        );
-      },
+      onGenerateRoute: (RouteSettings settings) => CupertinoPageRoute<void>(
+        settings: settings,
+        builder: (BuildContext context) => switch (settings.name) {
+          'home' => _buildHome(context),
+          'sub'  => _buildSub(context),
+          _ => throw UnimplementedError(),
+        },
+      ),
     );
   }
 }

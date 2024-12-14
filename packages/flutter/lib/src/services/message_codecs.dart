@@ -147,10 +147,8 @@ class JSONMethodCodec implements MethodCodec {
     if (decoded is! Map) {
       throw FormatException('Expected method call Map, got $decoded');
     }
-    final Object? method = decoded['method'];
-    final Object? arguments = decoded['args'];
-    if (method is String) {
-      return MethodCall(method, arguments);
+    if (decoded case {'method': final String method}) {
+      return MethodCall(method, decoded['args']);
     }
     throw FormatException('Invalid method call: $decoded');
   }
@@ -557,14 +555,11 @@ class StandardMessageCodec implements MessageCodec<Object?> {
   /// [readValueOfType].
   int readSize(ReadBuffer buffer) {
     final int value = buffer.getUint8();
-    switch (value) {
-      case 254:
-        return buffer.getUint16();
-      case 255:
-        return buffer.getUint32();
-      default:
-        return value;
-    }
+    return switch (value) {
+      254 => buffer.getUint16(),
+      255 => buffer.getUint32(),
+      _ => value,
+    };
   }
 }
 

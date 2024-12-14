@@ -73,11 +73,12 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Focus).last), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
+      hasFocusAction: true,
       isFocusable: true,
     ));
 
@@ -91,12 +92,13 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Focus).last), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isChecked: true,
       isEnabled: true,
       hasTapAction: true,
+      hasFocusAction: true,
       isFocusable: true,
     ));
 
@@ -115,6 +117,7 @@ void main() {
       hasEnabledState: true,
       // isFocusable is delayed by 1 frame.
       isFocusable: true,
+      hasFocusAction: true,
     ));
 
     await tester.pump();
@@ -205,7 +208,7 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemantics(find.byType(Focus)), matchesSemantics(
+    expect(tester.getSemantics(find.byType(Focus).last), matchesSemantics(
       label: 'checkbox',
       textDirection: TextDirection.ltr,
       hasCheckedState: true,
@@ -213,6 +216,7 @@ void main() {
       isChecked: true,
       isEnabled: true,
       hasTapAction: true,
+      hasFocusAction: true,
       isFocusable: true,
     ));
     handle.dispose();
@@ -242,6 +246,7 @@ void main() {
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
+      hasFocusAction: true,
       isFocusable: true,
     ));
     handle.dispose();
@@ -317,7 +322,10 @@ void main() {
         SemanticsFlag.isFocusable,
         SemanticsFlag.isCheckStateMixed,
       ],
-      actions: <SemanticsAction>[SemanticsAction.tap],
+      actions: <SemanticsAction>[
+        SemanticsAction.tap,
+        SemanticsAction.focus,
+      ],
     ), hasLength(1));
 
     await tester.pumpWidget(
@@ -341,7 +349,10 @@ void main() {
         SemanticsFlag.isChecked,
         SemanticsFlag.isFocusable,
       ],
-      actions: <SemanticsAction>[SemanticsAction.tap],
+      actions: <SemanticsAction>[
+        SemanticsAction.tap,
+        SemanticsAction.focus,
+      ],
     ), hasLength(1));
 
     await tester.pumpWidget(
@@ -364,7 +375,10 @@ void main() {
         SemanticsFlag.isEnabled,
         SemanticsFlag.isFocusable,
       ],
-      actions: <SemanticsAction>[SemanticsAction.tap],
+      actions: <SemanticsAction>[
+        SemanticsAction.tap,
+        SemanticsAction.focus,
+      ],
     ), hasLength(1));
 
     semantics.dispose();
@@ -884,6 +898,7 @@ void main() {
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
 
     await tester.pumpWidget(buildApp());
@@ -891,6 +906,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
+        ..circle(color: Colors.orange[500])
         ..path(color: const Color(0xff2196f3))
         ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
@@ -941,6 +957,7 @@ void main() {
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
 
     await tester.pumpWidget(buildApp());
@@ -948,6 +965,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
+        ..circle(color: Colors.orange[500])
         ..path(color: const Color(0xff6750a4))
         ..path(color: theme.colorScheme.onPrimary, style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
@@ -991,7 +1009,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
-    // On web, switches don't respond to the enter key.
+    // On web, checkboxes don't respond to the enter key.
     expect(value, kIsWeb ? isTrue : isFalse);
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
@@ -1121,6 +1139,7 @@ void main() {
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(Checkbox)));
+    addTearDown(gesture.removePointer);
 
     await tester.pump();
 
@@ -1297,6 +1316,7 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
@@ -1404,6 +1424,7 @@ void main() {
     await tester.pumpWidget(buildCheckbox());
     final TestGesture gesture3 = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture3.addPointer();
+    addTearDown(gesture3.removePointer);
     await gesture3.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
@@ -1446,7 +1467,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..circle(color: colors.primary.withOpacity(0.12)),
+      paints..circle(color: colors.primary.withOpacity(0.1)),
       reason: 'Default inactive pressed Checkbox should have overlay color from default fillColor',
     );
 
@@ -1456,7 +1477,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..circle(color: colors.onSurface.withOpacity(0.12)),
+      paints..circle(color: colors.onSurface.withOpacity(0.1)),
       reason: 'Default active pressed Checkbox should have overlay color from default fillColor',
     );
 
@@ -1467,7 +1488,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..circle(color: colors.onSurface.withOpacity(0.12)),
+      paints..circle(color: colors.onSurface.withOpacity(0.1)),
       reason: 'Focused Checkbox should use default focused overlay color',
     );
 
@@ -1475,6 +1496,7 @@ void main() {
     await tester.pumpWidget(buildCheckbox());
     final TestGesture gesture3 = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture3.addPointer();
+    addTearDown(gesture3.removePointer);
     await gesture3.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
@@ -1613,6 +1635,7 @@ void main() {
     // Start hovering
     final TestGesture gesture5 = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture5.addPointer();
+    addTearDown(gesture5.removePointer);
     await gesture5.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
@@ -2025,7 +2048,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
-      paints..circle(color: themeData.colorScheme.error.withOpacity(0.12))..path(color: themeData.colorScheme.error)..path(color: themeData.colorScheme.onError)
+      paints..circle(color: themeData.colorScheme.error.withOpacity(0.1))..path(color: themeData.colorScheme.error)..path(color: themeData.colorScheme.onError)
     );
 
     // Default color
@@ -2041,6 +2064,7 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
@@ -2057,7 +2081,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..circle(color: themeData.colorScheme.error.withOpacity(0.12))
+        ..circle(color: themeData.colorScheme.error.withOpacity(0.1))
         ..path(color: themeData.colorScheme.error)
     );
     await gestureLongPress.up();
@@ -2132,6 +2156,7 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
     expectBorder();
@@ -2209,6 +2234,39 @@ void main() {
       expect(find.byType(CupertinoCheckbox), findsNothing);
     }
   });
+
+  testWidgets('Checkbox.adaptive respects Checkbox.mouseCursor on iOS/macOS', (WidgetTester tester) async {
+    Widget buildApp({ MouseCursor? mouseCursor }) {
+      return MaterialApp(
+        home: Material(
+          child: Checkbox.adaptive(
+            value: true,
+            onChanged: (bool? newValue) { },
+            mouseCursor: mouseCursor,
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoCheckbox)));
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.byType(CupertinoCheckbox)));
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+
+    // Test mouse cursor can be configured.
+    await tester.pumpWidget(buildApp(mouseCursor: SystemMouseCursors.click));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test Checkbox.adaptive can resolve a WidgetStateMouseCursor.
+    await tester.pumpWidget(buildApp(mouseCursor: const _SelectedGrabMouseCursor()));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+
+    await gesture.removePointer();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('Material2 - Checkbox respects fillColor when it is unchecked', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: false);

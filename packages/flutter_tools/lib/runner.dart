@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/intl_standalone.dart' as intl_standalone;
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import 'src/base/async_guard.dart';
@@ -92,7 +93,7 @@ Future<int> run(
 
           // TODO(eliasyishak): Set the telemetry for the unified_analytics
           //  package as well, the above will be removed once we have
-          //  fully transitioned to using the new package
+          //  fully transitioned to using the new package, https://github.com/flutter/flutter/issues/128251
           await globals.analytics.setTelemetry(false);
         }
 
@@ -111,10 +112,21 @@ Future<int> run(
 
           // TODO(eliasyishak): Set the telemetry for the unified_analytics
           //  package as well, the above will be removed once we have
-          //  fully transitioned to using the new package
+          //  fully transitioned to using the new package, https://github.com/flutter/flutter/issues/128251
           await globals.analytics.setTelemetry(true);
         }
 
+        // Send an event to GA3 for any users that are opted into GA3
+        // analytics but have opted out of GA4 (package:unified_analytics)
+        // TODO(eliasyishak): remove once GA3 sunset, https://github.com/flutter/flutter/issues/128251
+        if (!globals.analytics.telemetryEnabled &&
+            globals.flutterUsage.enabled) {
+          UsageEvent(
+            'ga4_and_ga3_status_mismatch',
+            'opted_out_of_ga4',
+            flutterUsage: globals.flutterUsage,
+          ).send();
+        }
 
         await runner.run(args);
 
@@ -133,7 +145,7 @@ Future<int> run(
         firstStackTrace = stackTrace;
         return _handleToolError(error, stackTrace, verbose, args, reportCrashes!, getVersion, shutdownHooks);
       }
-    }, onError: (Object error, StackTrace stackTrace) async { // ignore: deprecated_member_use
+    }, onError: (Object error, StackTrace stackTrace) async {
       // If sending a crash report throws an error into the zone, we don't want
       // to re-try sending the crash report with *that* error. Rather, we want
       // to send the original error that triggered the crash report.
@@ -174,6 +186,16 @@ Future<int> _handleToolError(
     } else {
       return exitWithHooks(error.exitCode, shutdownHooks: shutdownHooks);
     }
+  } else if (error is ProcessException &&
+      _isErrorDueToGitMissing(error, globals.processManager, globals.logger)) {
+    globals.printError('${error.message}\n');
+    globals.printError(
+      'An error was encountered when trying to run git.\n'
+      "Please ensure git is installed and available in your system's search path. "
+      'See https://docs.flutter.dev/get-started/install for instructions on '
+      'installing git for your platform.',
+    );
+    return exitWithHooks(1, shutdownHooks: shutdownHooks);
   } else {
     // We've crashed; emit a log report.
     globals.stdio.stderrWrite('\n');
@@ -190,10 +212,10 @@ Future<int> _handleToolError(
     globals.analytics.send(Event.exception(exception: error.runtimeType.toString()));
     await asyncGuard(() async {
       final CrashReportSender crashReportSender = CrashReportSender(
-        usage: globals.flutterUsage,
         platform: globals.platform,
         logger: globals.logger,
         operatingSystemUtils: globals.os,
+        analytics: globals.analytics,
       );
       await crashReportSender.sendReport(
         error: error,
@@ -289,4 +311,23 @@ Future<File> _createLocalCrashReport(CrashDetails details) async {
   });
 
   return crashFile;
+}
+
+bool _isErrorDueToGitMissing(
+  ProcessException exception,
+  ProcessManager processManager,
+  Logger logger,
+) {
+  if (!exception.message.contains('git')) {
+    return false;
+  }
+
+  try {
+    return !processManager.canRun('git');
+  } on Object catch (error) {
+    logger.printTrace(
+      'Unable to check whether git is runnable: $error\n'
+    );
+    return true;
+  }
 }

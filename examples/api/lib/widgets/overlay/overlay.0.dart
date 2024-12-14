@@ -39,6 +39,24 @@ class _OverlayExampleState extends State<OverlayExample> {
 
     assert(overlayEntry == null);
 
+    Widget builder(BuildContext context) {
+      final (String label, Color? color) = switch (currentPageIndex) {
+        0 => ('Explore page', Colors.red),
+        1 => ('Commute page', Colors.green),
+        2 => ('Saved page', Colors.orange),
+        _ => ('No page selected.', null),
+      };
+      if (color == null) {
+        return Text(label);
+      }
+      return Column(
+        children: <Widget>[
+          Text(label, style: TextStyle(color: color)),
+          Icon(Icons.arrow_downward, color: color),
+        ],
+      );
+    }
+
     overlayEntry = OverlayEntry(
       // Create a new OverlayEntry.
       builder: (BuildContext context) {
@@ -58,57 +76,7 @@ class _OverlayExampleState extends State<OverlayExample> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   const Text('Tap here for'),
-                  Builder(builder: (BuildContext context) {
-                    switch (currentPageIndex) {
-                      case 0:
-                        return const Column(
-                          children: <Widget>[
-                            Text(
-                              'Explore page',
-                              style: TextStyle(
-                                color: Colors.red,
-                              ),
-                            ),
-                            Icon(
-                              Icons.arrow_downward,
-                              color: Colors.red,
-                            ),
-                          ],
-                        );
-                      case 1:
-                        return const Column(
-                          children: <Widget>[
-                            Text(
-                              'Commute page',
-                              style: TextStyle(
-                                color: Colors.green,
-                              ),
-                            ),
-                            Icon(
-                              Icons.arrow_downward,
-                              color: Colors.green,
-                            ),
-                          ],
-                        );
-                      case 2:
-                        return const Column(
-                          children: <Widget>[
-                            Text(
-                              'Saved page',
-                              style: TextStyle(
-                                color: Colors.orange,
-                              ),
-                            ),
-                            Icon(
-                              Icons.arrow_downward,
-                              color: Colors.orange,
-                            ),
-                          ],
-                        );
-                      default:
-                        return const Text('No page selected.');
-                    }
-                  }),
+                  Builder(builder: builder),
                   SizedBox(
                     width: MediaQuery.of(context).size.width / 3,
                     height: 80.0,
@@ -173,71 +141,76 @@ class _OverlayExampleState extends State<OverlayExample> {
           ),
         ],
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            'Use Overlay to highlight a NavigationBar destination',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 20.0),
-          Row(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            spacing: 10.0,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              // This creates a highlight Overlay for
-              // the Explore item.
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    currentPageIndex = 0;
-                  });
-                  createHighlightOverlay(
-                    alignment: AlignmentDirectional.bottomStart,
-                    borderColor: Colors.red,
-                  );
-                },
-                child: const Text('Explore'),
+              Text(
+                'Use Overlay to highlight a NavigationBar destination',
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
-              const SizedBox(width: 20.0),
-              // This creates a highlight Overlay for
-              // the Commute item.
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    currentPageIndex = 1;
-                  });
-                  createHighlightOverlay(
-                    alignment: AlignmentDirectional.bottomCenter,
-                    borderColor: Colors.green,
-                  );
-                },
-                child: const Text('Commute'),
+              Wrap(
+                spacing: 10.0,
+                runSpacing: 10.0,
+                alignment: WrapAlignment.center,
+                runAlignment: WrapAlignment.center,
+                children: <Widget>[
+                  // This creates a highlight Overlay for
+                  // the Explore item.
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        currentPageIndex = 0;
+                      });
+                      createHighlightOverlay(
+                        alignment: AlignmentDirectional.bottomStart,
+                        borderColor: Colors.red,
+                      );
+                    },
+                    child: const Text('Explore'),
+                  ),
+                  // This creates a highlight Overlay for
+                  // the Commute item.
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        currentPageIndex = 1;
+                      });
+                      createHighlightOverlay(
+                        alignment: AlignmentDirectional.bottomCenter,
+                        borderColor: Colors.green,
+                      );
+                    },
+                    child: const Text('Commute'),
+                  ),
+                  // This creates a highlight Overlay for
+                  // the Saved item.
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        currentPageIndex = 2;
+                      });
+                      createHighlightOverlay(
+                        alignment: AlignmentDirectional.bottomEnd,
+                        borderColor: Colors.orange,
+                      );
+                    },
+                    child: const Text('Saved'),
+                  ),
+                ],
               ),
-              const SizedBox(width: 20.0),
-              // This creates a highlight Overlay for
-              // the Saved item.
               ElevatedButton(
                 onPressed: () {
-                  setState(() {
-                    currentPageIndex = 2;
-                  });
-                  createHighlightOverlay(
-                    alignment: AlignmentDirectional.bottomEnd,
-                    borderColor: Colors.orange,
-                  );
+                  removeHighlightOverlay();
                 },
-                child: const Text('Saved'),
+                child: const Text('Remove Overlay'),
               ),
             ],
           ),
-          const SizedBox(height: 10.0),
-          ElevatedButton(
-            onPressed: () {
-              removeHighlightOverlay();
-            },
-            child: const Text('Remove Overlay'),
-          ),
-        ],
+        ),
       ),
     );
   }

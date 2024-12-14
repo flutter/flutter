@@ -85,16 +85,16 @@ void main() {
       .map((DiagnosticsNode node) => node.toString())
       .toList();
 
-    expect(description[0], 'elevation: MaterialStatePropertyAll(3.0)');
-    expect(description[1], 'backgroundColor: MaterialStatePropertyAll(Color(0xfffffff1))');
-    expect(description[2], 'shadowColor: MaterialStatePropertyAll(Color(0xfffffff2))');
-    expect(description[3], 'surfaceTintColor: MaterialStatePropertyAll(Color(0xfffffff3))');
-    expect(description[4], 'overlayColor: MaterialStatePropertyAll(Color(0xfffffff4))');
-    expect(description[5], 'side: MaterialStatePropertyAll(BorderSide(color: Color(0xfffffff5), width: 2.0))');
-    expect(description[6], 'shape: MaterialStatePropertyAll(StadiumBorder(BorderSide(width: 0.0, style: none)))');
-    expect(description[7], 'padding: MaterialStatePropertyAll(EdgeInsets.all(16.0))');
-    expect(description[8], 'textStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 24.0))');
-    expect(description[9], 'hintStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 16.0))');
+    expect(description[0], 'elevation: WidgetStatePropertyAll(3.0)');
+    expect(description[1], 'backgroundColor: WidgetStatePropertyAll(${const Color(0xfffffff1)})');
+    expect(description[2], 'shadowColor: WidgetStatePropertyAll(${const Color(0xfffffff2)})');
+    expect(description[3], 'surfaceTintColor: WidgetStatePropertyAll(${const Color(0xfffffff3)})');
+    expect(description[4], 'overlayColor: WidgetStatePropertyAll(${const Color(0xfffffff4)})');
+    expect(description[5], 'side: WidgetStatePropertyAll(BorderSide(color: ${const Color(0xfffffff5)}, width: 2.0))');
+    expect(description[6], 'shape: WidgetStatePropertyAll(StadiumBorder(BorderSide(width: 0.0, style: none)))');
+    expect(description[7], 'padding: WidgetStatePropertyAll(EdgeInsets.all(16.0))');
+    expect(description[8], 'textStyle: WidgetStatePropertyAll(TextStyle(inherit: true, size: 24.0))');
+    expect(description[9], 'hintStyle: WidgetStatePropertyAll(TextStyle(inherit: true, size: 16.0))');
     expect(description[10], 'constraints: BoxConstraints(350.0<=w<=850.0, 0.0<=h<=Infinity)');
     expect(description[11], 'textCapitalization: TextCapitalization.characters');
   });

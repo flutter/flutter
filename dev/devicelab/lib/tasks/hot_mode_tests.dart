@@ -23,6 +23,7 @@ const String kReplacementLine = 'fontSize: (orientation == Orientation.portrait)
 TaskFunction createHotModeTest({
   String? deviceIdOverride,
   bool checkAppRunningOnLocalDevice = false,
+  List<String>? additionalOptions,
 }) {
   // This file is modified during the test and needs to be restored at the end.
   final File flutterFrameworkSource = file(path.join(
@@ -47,6 +48,7 @@ TaskFunction createHotModeTest({
       '--no-publish-port',
       '--verbose',
       '--uninstall-first',
+      if (additionalOptions != null) ...additionalOptions,
     ];
     int hotReloadCount = 0;
     late Map<String, dynamic> smallReloadData;

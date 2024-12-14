@@ -2,9 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'material.dart';
+/// @docImport 'outlined_button.dart';
+/// @docImport 'text_button.dart';
+/// @docImport 'theme.dart';
+/// @docImport 'theme_data.dart';
+library;
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+
+import 'theme.dart';
 import 'typography.dart';
 
 /// Material design text theme.
@@ -13,8 +22,9 @@ import 'typography.dart';
 /// (e.g., labelLarge, bodySmall). Rather than creating a [TextTheme] directly,
 /// you can obtain an instance as [Typography.black] or [Typography.white].
 ///
-/// To obtain the current text theme, call [Theme.of] with the current
-/// [BuildContext] and read the [ThemeData.textTheme] property.
+/// To obtain the current text theme, call [TextTheme.of] with the current
+/// [BuildContext]. This is equivalent to calling [Theme.of] and reading
+/// the [ThemeData.textTheme] property.
 ///
 /// The names of the TextTheme properties match this table from the
 /// [Material Design spec](https://m3.material.io/styles/typography/tokens).
@@ -25,29 +35,52 @@ import 'typography.dart';
 /// current (2021) version of the specification
 /// ([https://m3.material.io/styles/typography/tokens](https://m3.material.io/styles/typography/tokens)).
 ///
+/// The **2021** spec has fifteen text styles:
+///
+/// | NAME           | SIZE |  HEIGHT |  WEIGHT |  SPACING |             |
+/// |----------------|------|---------|---------|----------|-------------|
+/// | displayLarge   | 57.0 |   64.0  | regular | -0.25    |             |
+/// | displayMedium  | 45.0 |   52.0  | regular |  0.0     |             |
+/// | displaySmall   | 36.0 |   44.0  | regular |  0.0     |             |
+/// | headlineLarge  | 32.0 |   40.0  | regular |  0.0     |             |
+/// | headlineMedium | 28.0 |   36.0  | regular |  0.0     |             |
+/// | headlineSmall  | 24.0 |   32.0  | regular |  0.0     |             |
+/// | titleLarge     | 22.0 |   28.0  | regular |  0.0     |             |
+/// | titleMedium    | 16.0 |   24.0  | medium  |  0.15    |             |
+/// | titleSmall     | 14.0 |   20.0  | medium  |  0.1     |             |
+/// | bodyLarge      | 16.0 |   24.0  | regular |  0.5     |             |
+/// | bodyMedium     | 14.0 |   20.0  | regular |  0.25    |             |
+/// | bodySmall      | 12.0 |   16.0  | regular |  0.4     |             |
+/// | labelLarge     | 14.0 |   20.0  | medium  |  0.1     |             |
+/// | labelMedium    | 12.0 |   16.0  | medium  |  0.5     |             |
+/// | labelSmall     | 11.0 |   16.0  | medium  |  0.5     |             |
+///
+/// ...where "regular" is `FontWeight.w400` and "medium" is `FontWeight.w500`.
+///
 /// The names of the 2018 TextTheme properties match this table from the
 /// [Material Design spec](https://material.io/design/typography/the-type-system.html#type-scale)
-/// with two exceptions: the styles called H1-H6 in the spec are
-/// headline1-headline6 in the API, and body1,body2 are called
-/// bodyText1 and bodyText2.
+/// with a few exceptions: the styles called H1-H6 in the spec are
+/// displayLarge-titleLarge in the API chart, body1,body2 are called
+/// bodyLarge and bodyMedium, caption is now bodySmall, button is labelLarge,
+/// and overline is now labelSmall.
 ///
-/// The 2018 spec has thirteen text styles:
+/// The **2018** spec has thirteen text styles:
 ///
-/// | NAME       | SIZE |  WEIGHT |  SPACING |             |
-/// |------------|------|---------|----------|-------------|
-/// | headline1  | 96.0 | light   | -1.5     |             |
-/// | headline2  | 60.0 | light   | -0.5     |             |
-/// | headline3  | 48.0 | regular |  0.0     |             |
-/// | headline4  | 34.0 | regular |  0.25    |             |
-/// | headline5  | 24.0 | regular |  0.0     |             |
-/// | headline6  | 20.0 | medium  |  0.15    |             |
-/// | subtitle1  | 16.0 | regular |  0.15    |             |
-/// | subtitle2  | 14.0 | medium  |  0.1     |             |
-/// | body1      | 16.0 | regular |  0.5     | (bodyText1) |
-/// | body2      | 14.0 | regular |  0.25    | (bodyText2) |
-/// | button     | 14.0 | medium  |  1.25    |             |
-/// | caption    | 12.0 | regular |  0.4     |             |
-/// | overline   | 10.0 | regular |  1.5     |             |
+/// | NAME           | SIZE |  WEIGHT |  SPACING |             |
+/// |----------------|------|---------|----------|-------------|
+/// | displayLarge   | 96.0 | light   | -1.5     |             |
+/// | displayMedium  | 60.0 | light   | -0.5     |             |
+/// | displaySmall   | 48.0 | regular |  0.0     |             |
+/// | headlineMedium | 34.0 | regular |  0.25    |             |
+/// | headlineSmall  | 24.0 | regular |  0.0     |             |
+/// | titleLarge     | 20.0 | medium  |  0.15    |             |
+/// | titleMedium    | 16.0 | regular |  0.15    |             |
+/// | titleSmall     | 14.0 | medium  |  0.1     |             |
+/// | bodyLarge      | 16.0 | regular |  0.5     |             |
+/// | bodyMedium     | 14.0 | regular |  0.25    |             |
+/// | bodySmall      | 12.0 | regular |  0.4     |             |
+/// | labelLarge     | 14.0 | medium  |  1.25    |             |
+/// | labelSmall     | 10.0 | regular |  1.5     |             |
 ///
 /// ...where "light" is `FontWeight.w300`, "regular" is `FontWeight.w400` and
 /// "medium" is `FontWeight.w500`.
@@ -86,108 +119,22 @@ class TextTheme with Diagnosticable {
   /// other is allowed in this constructor. The 2018 styles are deprecated and
   /// will eventually be removed.
   const TextTheme({
-    TextStyle? displayLarge,
-    TextStyle? displayMedium,
-    TextStyle? displaySmall,
+    this.displayLarge,
+    this.displayMedium,
+    this.displaySmall,
     this.headlineLarge,
-    TextStyle? headlineMedium,
-    TextStyle? headlineSmall,
-    TextStyle? titleLarge,
-    TextStyle? titleMedium,
-    TextStyle? titleSmall,
-    TextStyle? bodyLarge,
-    TextStyle? bodyMedium,
-    TextStyle? bodySmall,
-    TextStyle? labelLarge,
+    this.headlineMedium,
+    this.headlineSmall,
+    this.titleLarge,
+    this.titleMedium,
+    this.titleSmall,
+    this.bodyLarge,
+    this.bodyMedium,
+    this.bodySmall,
+    this.labelLarge,
     this.labelMedium,
-    TextStyle? labelSmall,
-    @Deprecated(
-      'Use displayLarge instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? headline1,
-    @Deprecated(
-      'Use displayMedium instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? headline2,
-    @Deprecated(
-      'Use displaySmall instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? headline3,
-    @Deprecated(
-      'Use headlineMedium instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? headline4,
-    @Deprecated(
-      'Use headlineSmall instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? headline5,
-    @Deprecated(
-      'Use titleLarge instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? headline6,
-    @Deprecated(
-      'Use titleMedium instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? subtitle1,
-    @Deprecated(
-      'Use titleSmall instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? subtitle2,
-    @Deprecated(
-      'Use bodyLarge instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? bodyText1,
-    @Deprecated(
-      'Use bodyMedium instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? bodyText2,
-    @Deprecated(
-      'Use bodySmall instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? caption,
-    @Deprecated(
-      'Use labelLarge instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? button,
-    @Deprecated(
-      'Use labelSmall instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? overline,
-  }) : assert(
-         (displayLarge == null && displayMedium == null && displaySmall == null && headlineMedium == null &&
-             headlineSmall == null && titleLarge == null && titleMedium == null && titleSmall == null &&
-             bodyLarge == null && bodyMedium == null && bodySmall == null && labelLarge == null && labelSmall == null) ||
-         (headline1 == null && headline2 == null && headline3 == null && headline4 == null &&
-             headline5 == null && headline6 == null && subtitle1 == null && subtitle2 == null &&
-             bodyText1 == null && bodyText2 == null && caption == null && button == null && overline == null),
-         'Cannot mix 2018 and 2021 terms in call to TextTheme() constructor.'
-       ),
-       displayLarge = displayLarge ?? headline1,
-       displayMedium = displayMedium ?? headline2,
-       displaySmall = displaySmall ?? headline3,
-       headlineMedium = headlineMedium ?? headline4,
-       headlineSmall = headlineSmall ?? headline5,
-       titleLarge = titleLarge ?? headline6,
-       titleMedium = titleMedium ?? subtitle1,
-       titleSmall = titleSmall ?? subtitle2,
-       bodyLarge = bodyLarge ?? bodyText1,
-       bodyMedium = bodyMedium ?? bodyText2,
-       bodySmall = bodySmall ?? caption,
-       labelLarge = labelLarge ?? button,
-       labelSmall = labelSmall ?? overline;
+    this.labelSmall,
+  });
 
   /// Largest of the display styles.
   ///
@@ -283,103 +230,6 @@ class TextTheme with Diagnosticable {
   /// content body, like captions.
   final TextStyle? labelSmall;
 
-  /// Extremely large text.
-  @Deprecated(
-    'Use displayLarge instead. '
-    'This feature was deprecated after v3.1.0-0.0.pre.',
-  )
-  TextStyle? get headline1 => displayLarge;
-
-  /// Very, very large text.
-  ///
-  /// Used for the date in the dialog shown by [showDatePicker].
-  @Deprecated(
-    'Use displayMedium instead. '
-    'This feature was deprecated after v3.1.0-0.0.pre.',
-  )
-  TextStyle? get headline2 => displayMedium;
-
-  /// Very large text.
-  @Deprecated(
-    'Use displaySmall instead. '
-    'This feature was deprecated after v3.1.0-0.0.pre.',
-  )
-  TextStyle? get headline3 => displaySmall;
-
-  /// Large text.
-  @Deprecated(
-    'Use headlineMedium instead. '
-    'This feature was deprecated after v3.1.0-0.0.pre.',
-  )
-  TextStyle? get headline4 => headlineMedium;
-
-  /// Used for large text in dialogs (e.g., the month and year in the dialog
-  /// shown by [showDatePicker]).
-  @Deprecated(
-    'Use headlineSmall instead. '
-    'This feature was deprecated after v3.1.0-0.0.pre.',
-  )
-  TextStyle? get headline5 => headlineSmall;
-
-  /// Used for the primary text in app bars and dialogs (e.g., [AppBar.title]
-  /// and [AlertDialog.title]).
-  @Deprecated(
-    'Use titleLarge instead. '
-    'This feature was deprecated after v3.1.0-0.0.pre.',
-  )
-  TextStyle? get headline6 => titleLarge;
-
-  /// Used for the primary text in lists (e.g., [ListTile.title]).
-  @Deprecated(
-    'Use titleMedium instead. '
-    'This feature was deprecated after v3.1.0-0.0.pre.',
-  )
-  TextStyle? get subtitle1 => titleMedium;
-
-  /// For medium emphasis text that's a little smaller than [titleMedium].
-  @Deprecated(
-    'Use titleSmall instead. '
-    'This feature was deprecated after v3.1.0-0.0.pre.',
-  )
-  TextStyle? get subtitle2 => titleSmall;
-
-  /// Used for emphasizing text that would otherwise be [bodyMedium].
-  @Deprecated(
-    'Use bodyLarge instead. '
-    'This feature was deprecated after v3.1.0-0.0.pre.',
-  )
-  TextStyle? get bodyText1 => bodyLarge;
-
-  /// The default text style for [Material].
-  @Deprecated(
-    'Use bodyMedium instead. '
-    'This feature was deprecated after v3.1.0-0.0.pre.',
-  )
-  TextStyle? get bodyText2 => bodyMedium;
-
-  /// Used for auxiliary text associated with images.
-  @Deprecated(
-    'Use bodySmall instead. '
-    'This feature was deprecated after v3.1.0-0.0.pre.',
-  )
-  TextStyle? get caption => bodySmall;
-
-  /// Used for text on [ElevatedButton], [TextButton] and [OutlinedButton].
-  @Deprecated(
-    'Use labelLarge instead. '
-    'This feature was deprecated after v3.1.0-0.0.pre.',
-  )
-  TextStyle? get button => labelLarge;
-
-  /// The smallest style.
-  ///
-  /// Typically used for captions or to introduce a (larger) headline.
-  @Deprecated(
-    'Use labelSmall instead. '
-    'This feature was deprecated after v3.1.0-0.0.pre.',
-  )
-  TextStyle? get overline => labelSmall;
-
   /// Creates a copy of this text theme but with the given fields replaced with
   /// the new values.
   ///
@@ -436,97 +286,23 @@ class TextTheme with Diagnosticable {
     TextStyle? labelLarge,
     TextStyle? labelMedium,
     TextStyle? labelSmall,
-    @Deprecated(
-      'Use displayLarge instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? headline1,
-    @Deprecated(
-      'Use displayMedium instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? headline2,
-    @Deprecated(
-      'Use displaySmall instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? headline3,
-    @Deprecated(
-      'Use headlineMedium instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? headline4,
-    @Deprecated(
-      'Use headlineSmall instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? headline5,
-    @Deprecated(
-      'Use titleLarge instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? headline6,
-    @Deprecated(
-      'Use titleMedium instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? subtitle1,
-    @Deprecated(
-      'Use titleSmall instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? subtitle2,
-    @Deprecated(
-      'Use bodyLarge instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? bodyText1,
-    @Deprecated(
-      'Use bodyMedium instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? bodyText2,
-    @Deprecated(
-      'Use bodySmall instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? caption,
-    @Deprecated(
-      'Use labelLarge instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? button,
-    @Deprecated(
-      'Use labelSmall instead. '
-      'This feature was deprecated after v3.1.0-0.0.pre.',
-    )
-    TextStyle? overline,
   }) {
-    assert(
-      (displayLarge == null && displayMedium == null && displaySmall == null && headlineMedium == null &&
-          headlineSmall == null && titleLarge == null && titleMedium == null && titleSmall == null &&
-          bodyLarge == null && bodyMedium == null && bodySmall == null && labelLarge == null && labelSmall == null) ||
-      (headline1 == null && headline2 == null && headline3 == null && headline4 == null &&
-          headline5 == null && headline6 == null && subtitle1 == null && subtitle2 == null &&
-          bodyText1 == null && bodyText2 == null && caption == null && button == null && overline == null),
-      'Cannot mix 2018 and 2021 terms in call to TextTheme() constructor.'
-    );
     return TextTheme(
-      displayLarge: displayLarge ?? headline1 ?? this.displayLarge,
-      displayMedium: displayMedium ?? headline2 ?? this.displayMedium,
-      displaySmall: displaySmall ?? headline3 ?? this.displaySmall,
+      displayLarge: displayLarge ?? this.displayLarge,
+      displayMedium: displayMedium ?? this.displayMedium,
+      displaySmall: displaySmall ?? this.displaySmall,
       headlineLarge: headlineLarge ?? this.headlineLarge,
-      headlineMedium: headlineMedium ?? headline4 ?? this.headlineMedium,
-      headlineSmall: headlineSmall ?? headline5 ?? this.headlineSmall,
-      titleLarge: titleLarge ?? headline6 ?? this.titleLarge,
-      titleMedium: titleMedium ?? subtitle1 ?? this.titleMedium,
-      titleSmall: titleSmall ?? subtitle2 ?? this.titleSmall,
-      bodyLarge: bodyLarge ?? bodyText1 ?? this.bodyLarge,
-      bodyMedium: bodyMedium ?? bodyText2 ?? this.bodyMedium,
-      bodySmall: bodySmall ?? caption ?? this.bodySmall,
-      labelLarge: labelLarge ?? button ?? this.labelLarge,
+      headlineMedium: headlineMedium ?? this.headlineMedium,
+      headlineSmall: headlineSmall ?? this.headlineSmall,
+      titleLarge: titleLarge ?? this.titleLarge,
+      titleMedium: titleMedium ?? this.titleMedium,
+      titleSmall: titleSmall ?? this.titleSmall,
+      bodyLarge: bodyLarge ?? this.bodyLarge,
+      bodyMedium: bodyMedium ?? this.bodyMedium,
+      bodySmall: bodySmall ?? this.bodySmall,
+      labelLarge: labelLarge ?? this.labelLarge,
       labelMedium: labelMedium ?? this.labelMedium,
-      labelSmall: labelSmall ?? overline ?? this.labelSmall,
+      labelSmall: labelSmall ?? this.labelSmall,
     );
   }
 
@@ -820,6 +596,25 @@ class TextTheme with Diagnosticable {
       labelSmall: TextStyle.lerp(a?.labelSmall, b?.labelSmall, t),
     );
   }
+
+  /// The [ThemeData.textTheme] property of the ambient [Theme].
+  ///
+  /// Equivalent to `Theme.of(context).textTheme`.
+  ///
+  /// See also:
+  /// * [TextTheme.primaryOf], which returns the [ThemeData.primaryTextTheme] property of
+  ///   the ambient [Theme] instead.
+  static TextTheme of(BuildContext context) => Theme.of(context).textTheme;
+
+  /// The [ThemeData.primaryTextTheme] property of the ambient [Theme].
+  ///
+  ///
+  /// Equivalent to `Theme.of(context).primaryTextTheme`.
+  ///
+  /// See also:
+  /// * [TextTheme.of], which returns the [ThemeData.textTheme] property of the ambient
+  ///   [Theme] instead.
+  static TextTheme primaryOf(BuildContext context) => Theme.of(context).primaryTextTheme;
 
   @override
   bool operator ==(Object other) {

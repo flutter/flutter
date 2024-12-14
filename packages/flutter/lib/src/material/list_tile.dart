@@ -2,6 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'card.dart';
+/// @docImport 'checkbox.dart';
+/// @docImport 'checkbox_list_tile.dart';
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'drawer.dart';
+/// @docImport 'expansion_tile.dart';
+/// @docImport 'material.dart';
+/// @docImport 'radio.dart';
+/// @docImport 'radio_list_tile.dart';
+/// @docImport 'scaffold.dart';
+/// @docImport 'switch.dart';
+/// @docImport 'switch_list_tile.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -24,6 +38,9 @@ import 'theme_data.dart';
 
 // Examples can assume:
 // int _act = 1;
+
+typedef _Sizes = ({ double titleY, BoxConstraints textConstraints, Size tileSize });
+typedef _PositionChild = void Function(RenderBox child, Offset offset);
 
 /// Defines the title font used for [ListTile] descendants of a [ListTileTheme].
 ///
@@ -85,9 +102,12 @@ enum ListTileTitleAlignment {
   threeLine,
 
   /// The tops of the [ListTile.leading] and [ListTile.trailing] widgets are
-  /// placed 16 units below the top of the [ListTile.title]
-  /// if the titles' overall height is greater than 72, otherwise they're
-  /// centered relative to the [ListTile.title] and [ListTile.subtitle] widgets.
+  /// placed 16 pixels below the top of the [ListTile.title] widget,
+  /// if the [ListTile]'s overall height is greater than 72, otherwise the
+  /// [ListTile.trailing] widget is centered relative to the [ListTile.title] and
+  /// [ListTile.subtitle] widgets, and the [ListTile.leading] widget is 16 pixels
+  /// below the top of [ListTile.title], or center-aligned with [ListTile.title],
+  /// whichever makes the [ListTile.leading] closer to the top edge of [ListTile.title].
   ///
   /// This is the default when [ThemeData.useMaterial3] is false.
   titleHeight,
@@ -103,7 +123,31 @@ enum ListTileTitleAlignment {
   /// The bottoms of the [ListTile.leading] and [ListTile.trailing] widgets are
   /// placed [ListTile.minVerticalPadding] above the bottom of the [ListTile]'s
   /// titles.
-  bottom,
+  bottom;
+
+  // If isLeading is true the y offset is for the leading widget, otherwise it's
+  // for the trailing child.
+  double _yOffsetFor(double childHeight, double tileHeight, _RenderListTile listTile, bool isLeading) {
+    return switch (this) {
+      ListTileTitleAlignment.threeLine => listTile.isThreeLine
+        ? ListTileTitleAlignment.top._yOffsetFor(childHeight, tileHeight, listTile, isLeading)
+        : ListTileTitleAlignment.center._yOffsetFor(childHeight, tileHeight, listTile, isLeading),
+      // This attempts to implement the redlines for the vertical position of the
+      // leading and trailing icons on the spec page:
+      //   https://m2.material.io/components/lists#specs
+      //
+      // For large tiles (> 72dp), both leading and trailing controls should be
+      // a fixed distance from top. As per guidelines this is set to 16dp.
+      ListTileTitleAlignment.titleHeight when tileHeight > 72.0 => 16.0,
+      // For smaller tiles, trailing should always be centered. Leading can be
+      // centered or closer to the top. It should never be further than 16dp
+      // to the top.
+      ListTileTitleAlignment.titleHeight => isLeading ? math.min((tileHeight - childHeight) / 2.0, 16.0) : (tileHeight - childHeight) / 2.0,
+      ListTileTitleAlignment.top => listTile.minVerticalPadding,
+      ListTileTitleAlignment.center => (tileHeight - childHeight) / 2.0,
+      ListTileTitleAlignment.bottom => tileHeight - childHeight - listTile.minVerticalPadding,
+    };
+  }
 }
 
 /// A single fixed-height row that typically contains some text as well as
@@ -193,7 +237,7 @@ enum ListTileTitleAlignment {
 ///
 /// {@tool dartpad}
 /// This sample shows [ListTile]'s [textColor] and [iconColor] can use
-/// [MaterialStateColor] color to change the color of the text and icon
+/// [WidgetStateColor] color to change the color of the text and icon
 /// when the [ListTile] is enabled, selected, or disabled.
 ///
 /// ** See code in examples/api/lib/material/list_tile/list_tile.3.dart **
@@ -321,8 +365,8 @@ enum ListTileTitleAlignment {
 ///    that combine [ListTile] with other controls.
 ///  * Material 3 [ListTile] specifications are referenced from <https://m3.material.io/components/lists/specs>
 ///    and Material 2 [ListTile] specifications are referenced from <https://material.io/design/components/lists.html>
-///  * Cookbook: [Use lists](https://flutter.dev/docs/cookbook/lists/basic-list)
-///  * Cookbook: [Implement swipe to dismiss](https://flutter.dev/docs/cookbook/gestures/dismissible)
+///  * Cookbook: [Use lists](https://docs.flutter.dev/cookbook/lists/basic-list)
+///  * Cookbook: [Implement swipe to dismiss](https://docs.flutter.dev/cookbook/gestures/dismissible)
 class ListTile extends StatelessWidget {
   /// Creates a list tile.
   ///
@@ -364,7 +408,9 @@ class ListTile extends StatelessWidget {
     this.horizontalTitleGap,
     this.minVerticalPadding,
     this.minLeadingWidth,
+    this.minTileHeight,
     this.titleAlignment,
+    this.internalAddSemanticForOnTap = true,
   }) : assert(!isThreeLine || subtitle != null);
 
   /// A widget to display before the title.
@@ -479,8 +525,8 @@ class ListTile extends StatelessWidget {
   /// If this property is null and [selected] is true then [ListTileThemeData.selectedColor]
   /// is used. If that is also null then [ColorScheme.primary] is used.
   ///
-  /// If this color is a [MaterialStateColor] it will be resolved against
-  /// [MaterialState.selected] and [MaterialState.disabled] states.
+  /// If this color is a [WidgetStateColor] it will be resolved against
+  /// [WidgetState.selected] and [WidgetState.disabled] states.
   ///
   /// See also:
   ///
@@ -498,8 +544,8 @@ class ListTile extends StatelessWidget {
   /// If this property is null and [selected] is true then [ListTileThemeData.selectedColor]
   /// is used. If that is also null then [ColorScheme.primary] is used.
   ///
-  /// If this color is a [MaterialStateColor] it will be resolved against
-  /// [MaterialState.selected] and [MaterialState.disabled] states.
+  /// If this color is a [WidgetStateColor] it will be resolved against
+  /// [WidgetState.selected] and [WidgetState.disabled] states.
   ///
   /// See also:
   ///
@@ -575,20 +621,20 @@ class ListTile extends StatelessWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.disabled].
   /// {@endtemplate}
   ///
   /// If null, then the value of [ListTileThemeData.mouseCursor] is used. If
-  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
+  /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
   ///
   /// See also:
   ///
-  ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor]
-  ///    that is also a [MaterialStateProperty<MouseCursor>].
+  ///  * [WidgetStateMouseCursor], which can be used to create a [MouseCursor]
+  ///    that is also a [WidgetStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
   /// If this tile is also [enabled] then icons and text are rendered with the same color.
@@ -669,6 +715,16 @@ class ListTile extends StatelessWidget {
   /// that is also null, then a default value of 40 is used.
   final double? minLeadingWidth;
 
+  /// {@template flutter.material.ListTile.minTileHeight}
+  /// The minimum height allocated for the [ListTile] widget.
+  ///
+  /// If this is null, default tile heights are 56.0, 72.0, and 88.0 for one,
+  /// two, and three lines of text respectively. If `isDense` is true, these
+  /// defaults are changed to 48.0, 64.0, and 76.0. A visual density value or
+  /// a large title will also adjust the default tile heights.
+  /// {@endtemplate}
+  final double? minTileHeight;
+
   /// Defines how [ListTile.leading] and [ListTile.trailing] are
   /// vertically aligned relative to the [ListTile]'s titles
   /// ([ListTile.title] and [ListTile.subtitle]).
@@ -682,6 +738,13 @@ class ListTile extends StatelessWidget {
   /// * [ListTileTheme.of], which returns the nearest [ListTileTheme]'s
   ///   [ListTileThemeData].
   final ListTileTitleAlignment? titleAlignment;
+
+  /// Whether to add button:true to the semantics if onTap is provided.
+  /// This is a temporary flag to help changing the behavior of ListTile onTap semantics.
+  ///
+  // TODO(hangyujin): Remove this flag after fixing related g3 tests and flipping
+  // the default value to true.
+  final bool internalAddSemanticForOnTap;
 
   /// Add a one pixel border in between each tile. If color isn't specified the
   /// [ThemeData.dividerColor] of the context's [Theme] is used.
@@ -855,6 +918,7 @@ class ListTile extends StatelessWidget {
       autofocus: autofocus,
       enableFeedback: enableFeedback ?? tileTheme.enableFeedback ?? true,
       child: Semantics(
+        button: internalAddSemanticForOnTap && (onTap != null || onLongPress != null),
         selected: selected,
         enabled: enabled,
         child: Ink(
@@ -884,6 +948,7 @@ class ListTile extends StatelessWidget {
                   horizontalTitleGap: horizontalTitleGap ?? tileTheme.horizontalTitleGap ?? 16,
                   minVerticalPadding: minVerticalPadding ?? tileTheme.minVerticalPadding ?? defaults.minVerticalPadding!,
                   minLeadingWidth: minLeadingWidth ?? tileTheme.minLeadingWidth ?? defaults.minLeadingWidth!,
+                  minTileHeight: minTileHeight ?? tileTheme.minTileHeight,
                   titleAlignment: effectiveTitleAlignment,
                 ),
               ),
@@ -897,10 +962,6 @@ class ListTile extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Widget>('leading', leading, defaultValue: null));
-    properties.add(DiagnosticsProperty<Widget>('title', title, defaultValue: null));
-    properties.add(DiagnosticsProperty<Widget>('subtitle', subtitle, defaultValue: null));
-    properties.add(DiagnosticsProperty<Widget>('trailing', trailing, defaultValue: null));
     properties.add(FlagProperty('isThreeLine', value: isThreeLine, ifTrue:'THREE_LINE', ifFalse: 'TWO_LINE', showName: true, defaultValue: false));
     properties.add(FlagProperty('dense', value: dense, ifTrue: 'true', ifFalse: 'false', showName: true));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
@@ -982,6 +1043,7 @@ class _ListTile extends SlottedMultiChildRenderObjectWidget<_ListTileSlot, Rende
     required this.horizontalTitleGap,
     required this.minVerticalPadding,
     required this.minLeadingWidth,
+    this.minTileHeight,
     this.subtitleBaselineType,
     required this.titleAlignment,
   });
@@ -999,6 +1061,7 @@ class _ListTile extends SlottedMultiChildRenderObjectWidget<_ListTileSlot, Rende
   final double horizontalTitleGap;
   final double minVerticalPadding;
   final double minLeadingWidth;
+  final double? minTileHeight;
   final ListTileTitleAlignment titleAlignment;
 
   @override
@@ -1006,16 +1069,12 @@ class _ListTile extends SlottedMultiChildRenderObjectWidget<_ListTileSlot, Rende
 
   @override
   Widget? childForSlot(_ListTileSlot slot) {
-    switch (slot) {
-      case _ListTileSlot.leading:
-        return leading;
-      case _ListTileSlot.title:
-        return title;
-      case _ListTileSlot.subtitle:
-        return subtitle;
-      case _ListTileSlot.trailing:
-        return trailing;
-    }
+    return switch (slot) {
+      _ListTileSlot.leading  => leading,
+      _ListTileSlot.title    => title,
+      _ListTileSlot.subtitle => subtitle,
+      _ListTileSlot.trailing => trailing,
+    };
   }
 
   @override
@@ -1030,6 +1089,7 @@ class _ListTile extends SlottedMultiChildRenderObjectWidget<_ListTileSlot, Rende
       horizontalTitleGap: horizontalTitleGap,
       minVerticalPadding: minVerticalPadding,
       minLeadingWidth: minLeadingWidth,
+      minTileHeight: minTileHeight,
       titleAlignment: titleAlignment,
     );
   }
@@ -1045,6 +1105,7 @@ class _ListTile extends SlottedMultiChildRenderObjectWidget<_ListTileSlot, Rende
       ..subtitleBaselineType = subtitleBaselineType
       ..horizontalTitleGap = horizontalTitleGap
       ..minLeadingWidth = minLeadingWidth
+      ..minTileHeight = minTileHeight
       ..minVerticalPadding = minVerticalPadding
       ..titleAlignment = titleAlignment;
   }
@@ -1061,7 +1122,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     required double horizontalTitleGap,
     required double minVerticalPadding,
     required double minLeadingWidth,
-    required ListTileTitleAlignment titleAlignment,
+    double? minTileHeight,
+    required ListTileTitleAlignment titleAlignment
   }) : _isDense = isDense,
        _visualDensity = visualDensity,
        _isThreeLine = isThreeLine,
@@ -1071,21 +1133,23 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
        _horizontalTitleGap = horizontalTitleGap,
        _minVerticalPadding = minVerticalPadding,
        _minLeadingWidth = minLeadingWidth,
+       _minTileHeight = minTileHeight,
        _titleAlignment = titleAlignment;
 
   RenderBox? get leading => childForSlot(_ListTileSlot.leading);
-  RenderBox? get title => childForSlot(_ListTileSlot.title);
+  RenderBox get title => childForSlot(_ListTileSlot.title)!;
   RenderBox? get subtitle => childForSlot(_ListTileSlot.subtitle);
   RenderBox? get trailing => childForSlot(_ListTileSlot.trailing);
 
   // The returned list is ordered for hit testing.
   @override
   Iterable<RenderBox> get children {
+    final RenderBox? title = childForSlot(_ListTileSlot.title);
     return <RenderBox>[
       if (leading != null)
         leading!,
       if (title != null)
-        title!,
+        title,
       if (subtitle != null)
         subtitle!,
       if (trailing != null)
@@ -1187,6 +1251,16 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     markNeedsLayout();
   }
 
+  double? _minTileHeight;
+  double? get minTileHeight => _minTileHeight;
+  set minTileHeight(double? value) {
+    if (_minTileHeight == value) {
+      return;
+    }
+    _minTileHeight = value;
+    markNeedsLayout();
+  }
+
   ListTileTitleAlignment get titleAlignment => _titleAlignment;
   ListTileTitleAlignment _titleAlignment;
   set titleAlignment(ListTileTitleAlignment value) {
@@ -1228,245 +1302,193 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
       + _maxWidth(trailing, height);
   }
 
+  // The target tile height to use if _minTileHeight is not specified.
   double get _defaultTileHeight {
-    final bool hasSubtitle = subtitle != null;
-    final bool isTwoLine = !isThreeLine && hasSubtitle;
-    final bool isOneLine = !isThreeLine && !hasSubtitle;
-
-    final Offset baseDensity = visualDensity.baseSizeAdjustment;
-    if (isOneLine) {
-      return (isDense ? 48.0 : 56.0) + baseDensity.dy;
-    }
-    if (isTwoLine) {
-      return (isDense ? 64.0 : 72.0) + baseDensity.dy;
-    }
-    return (isDense ? 76.0 : 88.0) + baseDensity.dy;
+   final Offset baseDensity = visualDensity.baseSizeAdjustment;
+    return baseDensity.dy + switch ((isThreeLine, subtitle != null)) {
+      (true, _) => isDense ? 76.0 : 88.0,      // 3 lines,
+      (false, true) => isDense ? 64.0 : 72.0,  // 2 lines
+      (false, false) => isDense ? 48.0 : 56.0, // 1 line,
+    };
   }
+
+  double get _targetTileHeight => _minTileHeight ?? _defaultTileHeight;
 
   @override
   double computeMinIntrinsicHeight(double width) {
     return math.max(
-      _defaultTileHeight,
-      title!.getMinIntrinsicHeight(width) + (subtitle?.getMinIntrinsicHeight(width) ?? 0.0),
+      _targetTileHeight,
+      title.getMinIntrinsicHeight(width) + (subtitle?.getMinIntrinsicHeight(width) ?? 0.0),
     );
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return computeMinIntrinsicHeight(width);
+    return getMinIntrinsicHeight(width);
   }
 
   @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
-    assert(title != null);
-    final BoxParentData parentData = title!.parentData! as BoxParentData;
-    return parentData.offset.dy + title!.getDistanceToActualBaseline(baseline)!;
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    final BoxParentData parentData = title.parentData! as BoxParentData;
+    final BaselineOffset offset = BaselineOffset(title.getDistanceToActualBaseline(baseline))
+                                + parentData.offset.dy;
+    return offset.offset;
   }
 
-  static double? _boxBaseline(RenderBox box, TextBaseline baseline) {
-    return box.getDistanceToBaseline(baseline);
-  }
-
-  static Size _layoutBox(RenderBox? box, BoxConstraints constraints) {
-    if (box == null) {
-      return Size.zero;
-    }
-    box.layout(constraints, parentUsesSize: true);
-    return box.size;
-  }
+  BoxConstraints get maxIconHeightConstraint => BoxConstraints(
+    // One-line trailing and leading widget heights do not follow
+    // Material specifications, but this sizing is required to adhere
+    // to accessibility requirements for smallest tappable widget.
+    // Two- and three-line trailing widget heights are constrained
+    // properly according to the Material spec.
+    maxHeight: (isDense ? 48.0 : 56.0) + visualDensity.baseSizeAdjustment.dy,
+  );
 
   static void _positionBox(RenderBox box, Offset offset) {
     final BoxParentData parentData = box.parentData! as BoxParentData;
     parentData.offset = offset;
   }
 
-  @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    assert(debugCannotComputeDryLayout(
-      reason: 'Layout requires baseline metrics, which are only available after a full layout.',
-    ));
-    return Size.zero;
-  }
-
+  // Implements _RenderListTile's layout algorithm. If `positionChild` is not null,
+  // it will be called on each child with that child's layout offset.
+  //
   // All of the dimensions below were taken from the Material Design spec:
   // https://material.io/design/components/lists.html#specs
-  @override
-  void performLayout() {
-    final BoxConstraints constraints = this.constraints;
-    final bool hasLeading = leading != null;
-    final bool hasSubtitle = subtitle != null;
-    final bool hasTrailing = trailing != null;
-    final bool isTwoLine = !isThreeLine && hasSubtitle;
-    final bool isOneLine = !isThreeLine && !hasSubtitle;
-    final Offset densityAdjustment = visualDensity.baseSizeAdjustment;
-
-    final BoxConstraints maxIconHeightConstraint = BoxConstraints(
-      // One-line trailing and leading widget heights do not follow
-      // Material specifications, but this sizing is required to adhere
-      // to accessibility requirements for smallest tappable widget.
-      // Two- and three-line trailing widget heights are constrained
-      // properly according to the Material spec.
-      maxHeight: (isDense ? 48.0 : 56.0) + densityAdjustment.dy,
-    );
+  _Sizes _computeSizes(
+    ChildBaselineGetter getBaseline,
+    ChildLayouter getSize,
+    BoxConstraints constraints, {
+    _PositionChild? positionChild,
+  }) {
     final BoxConstraints looseConstraints = constraints.loosen();
-    final BoxConstraints iconConstraints = looseConstraints.enforce(maxIconHeightConstraint);
-
     final double tileWidth = looseConstraints.maxWidth;
-    final Size leadingSize = _layoutBox(leading, iconConstraints);
-    final Size trailingSize = _layoutBox(trailing, iconConstraints);
+    final BoxConstraints iconConstraints = looseConstraints.enforce(maxIconHeightConstraint);
+    final RenderBox? leading = this.leading;
+    final RenderBox? trailing = this.trailing;
+
+    final Size? leadingSize = leading == null ? null : getSize(leading, iconConstraints);
+    final Size? trailingSize = trailing == null ? null : getSize(trailing, iconConstraints);
+
     assert(
-      tileWidth != leadingSize.width || tileWidth == 0.0,
+      tileWidth != leadingSize?.width || tileWidth == 0.0,
       'Leading widget consumes entire tile width. Please use a sized widget, '
       'or consider replacing ListTile with a custom widget '
       '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)',
     );
     assert(
-      tileWidth != trailingSize.width || tileWidth == 0.0,
+      tileWidth != trailingSize?.width || tileWidth == 0.0,
       'Trailing widget consumes entire tile width. Please use a sized widget, '
       'or consider replacing ListTile with a custom widget '
       '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)',
     );
 
-    final double titleStart = hasLeading
-      ? math.max(_minLeadingWidth, leadingSize.width) + _effectiveHorizontalTitleGap
-      : 0.0;
-    final double adjustedTrailingWidth = hasTrailing
-        ? math.max(trailingSize.width + _effectiveHorizontalTitleGap, 32.0)
-        : 0.0;
+    final double titleStart = leadingSize == null
+      ? 0.0
+      : math.max(_minLeadingWidth, leadingSize.width) + _effectiveHorizontalTitleGap;
+
+    final double adjustedTrailingWidth = trailingSize == null
+      ? 0.0
+      : math.max(trailingSize.width + _effectiveHorizontalTitleGap, 32.0);
+
     final BoxConstraints textConstraints = looseConstraints.tighten(
       width: tileWidth - titleStart - adjustedTrailingWidth,
     );
-    final Size titleSize = _layoutBox(title, textConstraints);
-    final Size subtitleSize = _layoutBox(subtitle, textConstraints);
 
-    double? titleBaseline;
-    double? subtitleBaseline;
-    if (isTwoLine) {
-      titleBaseline = isDense ? 28.0 : 32.0;
-      subtitleBaseline = isDense ? 48.0 : 52.0;
-    } else if (isThreeLine) {
-      titleBaseline = isDense ? 22.0 : 28.0;
-      subtitleBaseline = isDense ? 42.0 : 48.0;
+    final RenderBox? subtitle = this.subtitle;
+    final double titleHeight = getSize(title, textConstraints).height;
+
+    final bool isLTR = switch (textDirection) {
+      TextDirection.ltr => true,
+      TextDirection.rtl => false,
+    };
+
+    final double titleY;
+    final double tileHeight;
+    if (subtitle == null) {
+      tileHeight = math.max(_targetTileHeight, titleHeight + 2.0 * _minVerticalPadding);
+      titleY = (tileHeight - titleHeight) / 2.0;
     } else {
-      assert(isOneLine);
+      final double subtitleHeight = getSize(subtitle, textConstraints).height;
+      final double titleBaseline = getBaseline(title, textConstraints, titleBaselineType) ?? titleHeight;
+      final double subtitleBaseline = getBaseline(subtitle, textConstraints, subtitleBaselineType!) ?? subtitleHeight;
+
+      final double targetTitleY = (isThreeLine ? (isDense ? 22.0 : 28.0) : (isDense ? 28.0 : 32.0)) - titleBaseline;
+      final double targetSubtitleY = (isThreeLine ? (isDense ? 42.0 : 48.0) : (isDense ? 48.0 : 52.0)) + visualDensity.vertical * 2.0 - subtitleBaseline;
+      // Prevent the title and the subtitle from overlapping by moving them away from
+      // each other by the same distance.
+      final double halfOverlap = math.max(targetTitleY + titleHeight - targetSubtitleY, 0) / 2;
+      final double idealTitleY = targetTitleY - halfOverlap;
+      final double idealSubtitleY = targetSubtitleY + halfOverlap;
+      // However if either component can't maintain the minimal padding from the top/bottom edges, the ListTile enters "compat mode".
+      final bool compact = idealTitleY < minVerticalPadding || idealSubtitleY + subtitleHeight + minVerticalPadding > _targetTileHeight;
+
+      // Position subtitle.
+      positionChild?.call(subtitle, Offset(
+        isLTR ? titleStart : adjustedTrailingWidth,
+        compact ? minVerticalPadding + titleHeight : idealSubtitleY,
+      ));
+      tileHeight = compact ? 2 * _minVerticalPadding + titleHeight + subtitleHeight : _targetTileHeight;
+      titleY = compact ? minVerticalPadding : idealTitleY;
     }
 
-    final double defaultTileHeight = _defaultTileHeight;
+    if (positionChild != null) {
+      positionChild(title, Offset(
+        isLTR ? titleStart : adjustedTrailingWidth,
+        titleY,
+      ));
 
-    double tileHeight;
-    double titleY;
-    double? subtitleY;
-    if (!hasSubtitle) {
-      tileHeight = math.max(defaultTileHeight, titleSize.height + 2.0 * _minVerticalPadding);
-      titleY = (tileHeight - titleSize.height) / 2.0;
-    } else {
-      assert(subtitleBaselineType != null);
-      titleY = titleBaseline! - _boxBaseline(title!, titleBaselineType)!;
-      subtitleY = subtitleBaseline! - _boxBaseline(subtitle!, subtitleBaselineType!)! + visualDensity.vertical * 2.0;
-      tileHeight = defaultTileHeight;
-
-      // If the title and subtitle overlap, move the title upwards by half
-      // the overlap and the subtitle down by the same amount, and adjust
-      // tileHeight so that both titles fit.
-      final double titleOverlap = titleY + titleSize.height - subtitleY;
-      if (titleOverlap > 0.0) {
-        titleY -= titleOverlap / 2.0;
-        subtitleY += titleOverlap / 2.0;
+      if (leading != null && leadingSize != null) {
+        positionChild(leading, Offset(
+          isLTR ? 0.0 : tileWidth - leadingSize.width,
+          titleAlignment._yOffsetFor(leadingSize.height, tileHeight, this, true),
+        ));
       }
 
-      // If the title or subtitle overflow tileHeight then punt: title
-      // and subtitle are arranged in a column, tileHeight = column height plus
-      // _minVerticalPadding on top and bottom.
-      if (titleY < _minVerticalPadding ||
-          (subtitleY + subtitleSize.height + _minVerticalPadding) > tileHeight) {
-        tileHeight = titleSize.height + subtitleSize.height + 2.0 * _minVerticalPadding;
-        titleY = _minVerticalPadding;
-        subtitleY = titleSize.height + _minVerticalPadding;
-      }
-    }
-
-    final double leadingY;
-    final double trailingY;
-
-    switch (titleAlignment) {
-      case ListTileTitleAlignment.threeLine: {
-        if (isThreeLine) {
-          leadingY = _minVerticalPadding;
-          trailingY = _minVerticalPadding;
-        } else {
-          leadingY = (tileHeight - leadingSize.height) / 2.0;
-          trailingY = (tileHeight - trailingSize.height) / 2.0;
-        }
-        break;
-      }
-      case ListTileTitleAlignment.titleHeight: {
-        // This attempts to implement the redlines for the vertical position of the
-        // leading and trailing icons on the spec page:
-        //   https://m2.material.io/components/lists#specs
-        // The interpretation for these redlines is as follows:
-        //  - For large tiles (> 72dp), both leading and trailing controls should be
-        //    a fixed distance from top. As per guidelines this is set to 16dp.
-        //  - For smaller tiles, trailing should always be centered. Leading can be
-        //    centered or closer to the top. It should never be further than 16dp
-        //    to the top.
-        if (tileHeight > 72.0) {
-          leadingY = 16.0;
-          trailingY = 16.0;
-        } else {
-          leadingY = math.min((tileHeight - leadingSize.height) / 2.0, 16.0);
-          trailingY = (tileHeight - trailingSize.height) / 2.0;
-        }
-        break;
-      }
-      case ListTileTitleAlignment.top: {
-        leadingY = _minVerticalPadding;
-        trailingY = _minVerticalPadding;
-        break;
-      }
-      case ListTileTitleAlignment.center: {
-        leadingY = (tileHeight - leadingSize.height) / 2.0;
-        trailingY = (tileHeight - trailingSize.height) / 2.0;
-        break;
-      }
-      case ListTileTitleAlignment.bottom: {
-        leadingY = tileHeight - leadingSize.height - _minVerticalPadding;
-        trailingY = tileHeight - trailingSize.height - _minVerticalPadding;
-        break;
+      if (trailing != null && trailingSize != null) {
+        positionChild(trailing, Offset(
+          isLTR ? tileWidth - trailingSize.width : 0.0,
+          titleAlignment._yOffsetFor(trailingSize.height, tileHeight, this, false),
+        ));
       }
     }
 
-    switch (textDirection) {
-      case TextDirection.rtl: {
-        if (hasLeading) {
-          _positionBox(leading!, Offset(tileWidth - leadingSize.width, leadingY));
-        }
-        _positionBox(title!, Offset(adjustedTrailingWidth, titleY));
-        if (hasSubtitle) {
-          _positionBox(subtitle!, Offset(adjustedTrailingWidth, subtitleY!));
-        }
-        if (hasTrailing) {
-          _positionBox(trailing!, Offset(0.0, trailingY));
-        }
-        break;
-      }
-      case TextDirection.ltr: {
-        if (hasLeading) {
-          _positionBox(leading!, Offset(0.0, leadingY));
-        }
-        _positionBox(title!, Offset(titleStart, titleY));
-        if (hasSubtitle) {
-          _positionBox(subtitle!, Offset(titleStart, subtitleY!));
-        }
-        if (hasTrailing) {
-          _positionBox(trailing!, Offset(tileWidth - trailingSize.width, trailingY));
-        }
-        break;
-      }
-    }
+    return (titleY: titleY, textConstraints: textConstraints, tileSize: Size(tileWidth, tileHeight));
+  }
 
-    size = constraints.constrain(Size(tileWidth, tileHeight));
-    assert(size.width == constraints.constrainWidth(tileWidth));
-    assert(size.height == constraints.constrainHeight(tileHeight));
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final _Sizes sizes = _computeSizes(
+      ChildLayoutHelper.getDryBaseline,
+      ChildLayoutHelper.dryLayoutChild,
+      constraints,
+    );
+    final BaselineOffset titleBaseline = BaselineOffset(title.getDryBaseline(sizes.textConstraints, baseline)) + sizes.titleY;
+    return titleBaseline.offset;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.constrain(
+      _computeSizes(
+        ChildLayoutHelper.getDryBaseline,
+        ChildLayoutHelper.dryLayoutChild,
+        constraints,
+      ).tileSize,
+    );
+  }
+
+  @override
+  void performLayout() {
+    final Size tileSize = _computeSizes(
+      ChildLayoutHelper.getBaseline,
+      ChildLayoutHelper.layoutChild,
+      constraints,
+      positionChild: _positionBox,
+    ).tileSize;
+
+    size = constraints.constrain(tileSize);
+    assert(size.width == constraints.constrainWidth(tileSize.width));
+    assert(size.height == constraints.constrainHeight(tileSize.height));
   }
 
   @override
@@ -1525,12 +1547,10 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
 
   @override
   TextStyle? get titleTextStyle {
-    switch (style!) {
-      case ListTileStyle.drawer:
-        return _textTheme.bodyLarge;
-      case ListTileStyle.list:
-        return _textTheme.titleMedium;
-    }
+    return switch (style!) {
+      ListTileStyle.drawer => _textTheme.bodyLarge,
+      ListTileStyle.list   => _textTheme.titleMedium,
+    };
   }
 
   @override
@@ -1545,14 +1565,13 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
 
   @override
   Color? get iconColor {
-    switch (_theme.brightness) {
-      case Brightness.light:
-        // For the sake of backwards compatibility, the default for unselected
-        // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
-        return Colors.black45;
-      case Brightness.dark:
-        return null; // null, Use current icon theme color
-    }
+    return switch (_theme.brightness) {
+      // For the sake of backwards compatibility, the default for unselected
+      // tiles is Colors.black45 rather than colorScheme.onSurface.withAlpha(0x73).
+      Brightness.light => Colors.black45,
+      // null -> use current icon theme color
+      Brightness.dark => null,
+    };
   }
 }
 

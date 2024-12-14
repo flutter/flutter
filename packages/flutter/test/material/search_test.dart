@@ -579,10 +579,50 @@ void main() {
     expect(hintText.style?.fontSize, delegate.searchFieldStyle?.fontSize);
     expect(textField.style?.color, delegate.searchFieldStyle?.color);
     expect(textField.style?.fontSize, delegate.searchFieldStyle?.fontSize);
-
   });
 
-  testWidgets('keyboard show search button by default', (WidgetTester tester) async {
+  testWidgets('Default autocorrect and enableSuggestions value', (WidgetTester tester) async {
+    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    addTearDown(() => delegate.dispose());
+
+    await tester.pumpWidget(TestHomePage(delegate: delegate));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+
+    expect(textField.autocorrect, isTrue);
+    expect(textField.enableSuggestions, isTrue);
+  });
+
+  testWidgets('Custom autocorrect value', (WidgetTester tester) async {
+    final _TestSearchDelegate delegate = _TestSearchDelegate(autocorrect: false);
+    addTearDown(() => delegate.dispose());
+
+    await tester.pumpWidget(TestHomePage(delegate: delegate));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+
+    expect(textField.autocorrect, isFalse);
+  });
+
+  testWidgets('Custom enableSuggestions value', (WidgetTester tester) async {
+    final _TestSearchDelegate delegate = _TestSearchDelegate(enableSuggestions: false);
+    addTearDown(() => delegate.dispose());
+
+    await tester.pumpWidget(TestHomePage(delegate: delegate));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+
+    expect(textField.enableSuggestions, isFalse);
+  });
+
+  testWidgets('keyboard show search button by default',
+      (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
@@ -630,6 +670,8 @@ void main() {
       final bool isDesktop = debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
           debugDefaultTargetPlatformOverride == TargetPlatform.windows ||
           debugDefaultTargetPlatformOverride == TargetPlatform.linux;
+      final bool isCupertino = debugDefaultTargetPlatformOverride == TargetPlatform.iOS ||
+          debugDefaultTargetPlatformOverride == TargetPlatform.macOS;
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
@@ -662,7 +704,10 @@ void main() {
                                   SemanticsFlag.isEnabled,
                                   SemanticsFlag.isFocusable,
                                 ],
-                                actions: <SemanticsAction>[SemanticsAction.tap],
+                                actions: <SemanticsAction>[
+                                  SemanticsAction.tap,
+                                  if (defaultTargetPlatform != TargetPlatform.iOS) SemanticsAction.focus,
+                                ],
                                 tooltip: 'Back',
                                 textDirection: TextDirection.ltr,
                               ),
@@ -670,10 +715,11 @@ void main() {
                                 id: 9,
                                 flags: <SemanticsFlag>[
                                   SemanticsFlag.isTextField,
+                                  SemanticsFlag.hasEnabledState,
+                                  SemanticsFlag.isEnabled,
                                   SemanticsFlag.isFocused,
                                   SemanticsFlag.isHeader,
-                                  if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
-                                    debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
+                                  if (!isCupertino) SemanticsFlag.namesRoute,
                                 ],
                                 actions: <SemanticsAction>[
                                   if (isDesktop)
@@ -681,6 +727,7 @@ void main() {
                                   if (isDesktop)
                                     SemanticsAction.didLoseAccessibilityFocus,
                                   SemanticsAction.tap,
+                                  SemanticsAction.focus,
                                   SemanticsAction.setSelection,
                                   SemanticsAction.setText,
                                   SemanticsAction.paste,
@@ -716,7 +763,10 @@ void main() {
                           SemanticsFlag.isEnabled,
                           SemanticsFlag.isFocusable,
                         ],
-                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        actions: <SemanticsAction>[
+                          SemanticsAction.tap,
+                          if (defaultTargetPlatform != TargetPlatform.iOS) SemanticsAction.focus,
+                        ],
                         label: 'Suggestions',
                         textDirection: TextDirection.ltr,
                       ),
@@ -781,6 +831,8 @@ void main() {
       final bool isDesktop = debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
                              debugDefaultTargetPlatformOverride == TargetPlatform.windows ||
                              debugDefaultTargetPlatformOverride == TargetPlatform.linux;
+      final bool isCupertino = debugDefaultTargetPlatformOverride == TargetPlatform.iOS ||
+          debugDefaultTargetPlatformOverride == TargetPlatform.macOS;
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
@@ -810,7 +862,10 @@ void main() {
                               SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocusable,
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
+                                actions: <SemanticsAction>[
+                                  SemanticsAction.tap,
+                                  if (defaultTargetPlatform != TargetPlatform.iOS) SemanticsAction.focus,
+                                ],
                             tooltip: 'Back',
                             textDirection: TextDirection.ltr,
                           ),
@@ -818,10 +873,11 @@ void main() {
                             id: 11,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
+                              SemanticsFlag.hasEnabledState,
+                              SemanticsFlag.isEnabled,
                               SemanticsFlag.isFocused,
                               SemanticsFlag.isHeader,
-                              if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
-                                debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
+                              if (!isCupertino) SemanticsFlag.namesRoute,
                             ],
                             actions: <SemanticsAction>[
                               if (isDesktop)
@@ -829,6 +885,7 @@ void main() {
                               if (isDesktop)
                                 SemanticsAction.didLoseAccessibilityFocus,
                               SemanticsAction.tap,
+                              SemanticsAction.focus,
                               SemanticsAction.setSelection,
                               SemanticsAction.setText,
                               SemanticsAction.paste,
@@ -852,7 +909,10 @@ void main() {
                           SemanticsFlag.isEnabled,
                           SemanticsFlag.isFocusable,
                         ],
-                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        actions: <SemanticsAction>[
+                          SemanticsAction.tap,
+                          if (defaultTargetPlatform != TargetPlatform.iOS) SemanticsAction.focus,
+                        ],
                         label: 'Suggestions',
                         textDirection: TextDirection.ltr,
                       ),
@@ -1155,6 +1215,63 @@ void main() {
     await tester.pump();
     expect(textField.controller!.text.length, 15);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+
+  testWidgets('showSearch with maintainState on the route', (WidgetTester tester) async {
+    final _MyNavigatorObserver navigationObserver = _MyNavigatorObserver();
+
+    final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
+    addTearDown(delegate.dispose);
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: <NavigatorObserver>[navigationObserver],
+      home: Builder(builder: (BuildContext context) => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          TextButton(
+            onPressed: () async {
+              await showSearch(
+                context: context,
+                delegate: delegate,
+              );
+            },
+            child: const Text('showSearch'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await showSearch(
+                context: context,
+                delegate: delegate,
+                maintainState: true,
+              );
+            },
+            child: const Text('showSearchWithMaintainState'),
+          ),
+        ],
+      )),
+    ));
+
+    expect(navigationObserver.pushCount, 0);
+    expect(navigationObserver.maintainState, false);
+
+    // showSearch normal and back.
+    await tester.tap(find.text('showSearch'));
+    await tester.pumpAndSettle();
+    final Finder backButtonFinder = find.byType(BackButton);
+    expect(backButtonFinder, findsWidgets);
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
+    expect(navigationObserver.pushCount, 1);
+    expect(navigationObserver.maintainState, false);
+
+    // showSearch with maintainState.
+    await tester.tap(find.text('showSearchWithMaintainState'));
+    await tester.pumpAndSettle();
+    expect(backButtonFinder, findsWidgets);
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
+    expect(navigationObserver.pushCount, 2);
+    expect(navigationObserver.maintainState, true);
+  });
 }
 
 class TestHomePage extends StatelessWidget {
@@ -1222,6 +1339,8 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     super.searchFieldStyle,
     String? searchHint,
     super.textInputAction,
+    super.autocorrect,
+    super.enableSuggestions,
   }) : super(
           searchFieldLabel: searchHint,
         );
@@ -1338,6 +1457,7 @@ class _TestEmptySearchDelegate extends SearchDelegate<String> {
 }
 
 class _MyNavigatorObserver extends NavigatorObserver {
+  bool maintainState = false;
   int pushCount = 0;
 
   @override
@@ -1345,6 +1465,9 @@ class _MyNavigatorObserver extends NavigatorObserver {
     // don't count the root route
     if (<String>['nested', '/'].contains(route.settings.name)) {
       return;
+    }
+    if (route is PageRoute) {
+      maintainState = route.maintainState;
     }
     pushCount++;
   }

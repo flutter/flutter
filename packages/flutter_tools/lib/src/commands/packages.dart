@@ -13,6 +13,7 @@ import '../build_system/build_system.dart';
 import '../build_system/targets/localizations.dart';
 import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
+import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
@@ -301,12 +302,14 @@ class PackagesGetCommand extends FlutterCommand {
           usage: globals.flutterUsage,
           analytics: analytics,
           projectDir: rootProject.directory,
+          packageConfigPath: packageConfigPath(),
           generateDartPluginRegistry: true,
         );
 
         await generateLocalizationsSyntheticPackage(
           environment: environment,
           buildSystem: globals.buildSystem,
+          buildTargets: globals.buildTargets,
         );
       } else if (rootProject.directory.childFile('l10n.yaml').existsSync()) {
         final Environment environment = Environment(
@@ -322,6 +325,7 @@ class PackagesGetCommand extends FlutterCommand {
           usage: globals.flutterUsage,
           analytics: analytics,
           projectDir: rootProject.directory,
+          packageConfigPath: packageConfigPath(),
           generateDartPluginRegistry: true,
         );
         final BuildResult result = await globals.buildSystem.build(
@@ -398,14 +402,7 @@ class PackagesGetCommand extends FlutterCommand {
     return findPlugins(rootProject, throwOnError: false);
   })();
 
-  late final String? _androidEmbeddingVersion = (() {
-    final FlutterProject? rootProject = _rootProject;
-    if (rootProject == null) {
-      return null;
-    }
-
-    return rootProject.android.getEmbeddingVersion().toString().split('.').last;
-  })();
+  late final String? _androidEmbeddingVersion = _rootProject?.android.getEmbeddingVersion().toString().split('.').last;
 
   /// The pub packages usage values are incorrect since these are calculated/sent
   /// before pub get completes. This needs to be performed after dependency resolution.
@@ -419,7 +416,7 @@ class PackagesGetCommand extends FlutterCommand {
     int numberPlugins;
     // Do not send plugin analytics if pub has not run before.
     final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync()
-      && rootProject.packageConfigFile.existsSync();
+      && findPackageConfigFile(rootProject.directory) != null;
     if (hasPlugins) {
       // Do not fail pub get if package config files are invalid before pub has
       // had a chance to run.
@@ -448,7 +445,7 @@ class PackagesGetCommand extends FlutterCommand {
     final int numberPlugins;
     // Do not send plugin analytics if pub has not run before.
     final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync()
-      && rootProject.packageConfigFile.existsSync();
+      && findPackageConfigFile(rootProject.directory) != null;
     if (hasPlugins) {
       // Do not fail pub get if package config files are invalid before pub has
       // had a chance to run.

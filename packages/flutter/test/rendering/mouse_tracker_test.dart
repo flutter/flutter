@@ -72,63 +72,81 @@ void main() {
 
   final Matrix4 translate10by20 = Matrix4.translationValues(10, 20, 0);
 
-  test('should detect enter, hover, and exit from Added, Hover, and Removed events', () {
-    final List<PointerEvent> events = <PointerEvent>[];
-    setUpWithOneAnnotation(logEvents: events);
+  for (final ui.PointerDeviceKind pointerDeviceKind in <ui.PointerDeviceKind>[ui.PointerDeviceKind.mouse, ui.PointerDeviceKind.stylus]) {
+    test('should detect enter, hover, and exit from Added, Hover, and Removed events for stylus', () {
+      final List<PointerEvent> events = <PointerEvent>[];
+      setUpWithOneAnnotation(logEvents: events);
 
-    final List<bool> listenerLogs = <bool>[];
-    _mouseTracker.addListener(() {
-      listenerLogs.add(_mouseTracker.mouseIsConnected);
+      final List<bool> listenerLogs = <bool>[];
+      _mouseTracker.addListener(() {
+        listenerLogs.add(_mouseTracker.mouseIsConnected);
+      });
+
+      expect(_mouseTracker.mouseIsConnected, isFalse);
+
+      // Pointer enters the annotation.
+      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+        _pointerData(
+          PointerChange.add,
+          Offset.zero,
+          kind: pointerDeviceKind,
+        ),
+      ]));
+      addTearDown(() => dispatchRemoveDevice());
+
+      expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+        EventMatcher<PointerEnterEvent>(const PointerEnterEvent()),
+      ]));
+      expect(listenerLogs, <bool>[true]);
+      events.clear();
+      listenerLogs.clear();
+
+      // Pointer hovers the annotation.
+      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+        _pointerData(
+          PointerChange.hover,
+          const Offset(1.0, 101.0),
+          kind: pointerDeviceKind,
+        ),
+      ]));
+      expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+        EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(1.0, 101.0))),
+      ]));
+      expect(_mouseTracker.mouseIsConnected, isTrue);
+      expect(listenerLogs, isEmpty);
+      events.clear();
+
+      // Pointer is removed while on the annotation.
+      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+        _pointerData(
+          PointerChange.remove,
+          const Offset(1.0, 101.0),
+          kind: pointerDeviceKind,
+        ),
+      ]));
+      expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+        EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(1.0, 101.0))),
+      ]));
+      expect(listenerLogs, <bool>[false]);
+      events.clear();
+      listenerLogs.clear();
+
+      // Pointer is added on the annotation.
+      RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+        _pointerData(
+          PointerChange.add,
+          const Offset(0.0, 301.0),
+          kind: pointerDeviceKind,
+        ),
+      ]));
+      expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
+        EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 301.0))),
+      ]));
+      expect(listenerLogs, <bool>[true]);
+      events.clear();
+      listenerLogs.clear();
     });
-
-    expect(_mouseTracker.mouseIsConnected, isFalse);
-
-    // Pointer enters the annotation.
-    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.add, Offset.zero),
-    ]));
-    addTearDown(() => dispatchRemoveDevice());
-
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerEnterEvent>(const PointerEnterEvent()),
-    ]));
-    expect(listenerLogs, <bool>[true]);
-    events.clear();
-    listenerLogs.clear();
-
-    // Pointer hovers the annotation.
-    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),
-    ]));
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerHoverEvent>(const PointerHoverEvent(position: Offset(1.0, 101.0))),
-    ]));
-    expect(_mouseTracker.mouseIsConnected, isTrue);
-    expect(listenerLogs, isEmpty);
-    events.clear();
-
-    // Pointer is removed while on the annotation.
-    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.remove, const Offset(1.0, 101.0)),
-    ]));
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerExitEvent>(const PointerExitEvent(position: Offset(1.0, 101.0))),
-    ]));
-    expect(listenerLogs, <bool>[false]);
-    events.clear();
-    listenerLogs.clear();
-
-    // Pointer is added on the annotation.
-    RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.add, const Offset(0.0, 301.0)),
-    ]));
-    expect(events, _equalToEventsOnCriticalFields(<BaseEventMatcher>[
-      EventMatcher<PointerEnterEvent>(const PointerEnterEvent(position: Offset(0.0, 301.0))),
-    ]));
-    expect(listenerLogs, <bool>[true]);
-    events.clear();
-    listenerLogs.clear();
-  });
+  }
 
   // Regression test for https://github.com/flutter/flutter/issues/90838
   test('should not crash if the first event is a Removed event', () {
@@ -623,7 +641,10 @@ class BaseEventMatcher extends Matcher {
   bool matches(dynamic untypedItem, Map<dynamic, dynamic> matchState) {
     final PointerEvent actual = untypedItem as PointerEvent;
     if (!(
-      _matchesField(matchState, 'kind', actual.kind, PointerDeviceKind.mouse) &&
+      (
+        _matchesField(matchState, 'kind', actual.kind, PointerDeviceKind.mouse) ||
+        _matchesField(matchState, 'kind', actual.kind, PointerDeviceKind.stylus)
+      ) &&
       _matchesField(matchState, 'position', actual.position, expected.position) &&
       _matchesField(matchState, 'device', actual.device, expected.device) &&
       _matchesField(matchState, 'localPosition', actual.localPosition, expected.localPosition)

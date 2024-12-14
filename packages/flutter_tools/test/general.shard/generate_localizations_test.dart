@@ -687,7 +687,41 @@ void main() {
   });
 
   group('generateLocalizations', () {
-    // Regression test for https://github.com/flutter/flutter/issues/119593
+    testWithoutContext('works even if CWD does not have a pubspec.yaml', () async {
+      final Directory projectDir = fs.currentDirectory.childDirectory('project')..createSync(recursive: true);
+      final Directory l10nDirectory = projectDir.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleMessageArbFileString);
+      l10nDirectory.childFile(esArbFileName)
+        .writeAsStringSync(singleEsMessageArbFileString);
+      projectDir.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+flutter:
+  generate: true
+''');
+
+      final Logger logger = BufferLogger.test();
+      logger.printError('An error output from a different tool in flutter_tools');
+
+      // Should run without error.
+      await generateLocalizations(
+        fileSystem: fs,
+        options: LocalizationOptions(
+          arbDir: Uri.directory(defaultL10nPathString).path,
+          outputDir: Uri.directory(defaultL10nPathString, windows: false).path,
+          templateArbFile: Uri.file(defaultTemplateArbFileName, windows: false).path,
+          syntheticPackage: false,
+        ),
+        logger: logger,
+        projectDir: projectDir,
+        dependenciesDir: fs.currentDirectory,
+        artifacts: artifacts,
+        processManager: processManager,
+      );
+    });
+
     testWithoutContext('other logs from flutter_tools does not affect gen-l10n', () async {
       _standardFlutterDirectoryL10nSetup(fs);
 
@@ -759,6 +793,8 @@ void main() {
 HEADER
 
 import 'bar.dart';
+
+// ignore_for_file: type=lint
 
 /// The translations for English (`en`).
 class FooEn extends Foo {
@@ -860,6 +896,8 @@ flutter:\r
       expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
 import 'app_localizations.dart';
 
+// ignore_for_file: type=lint
+
 /// The translations for English (`en`).
 class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
@@ -890,6 +928,8 @@ class AppLocalizationsEn extends AppLocalizations {
 HEADER
 
 import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
 
 /// The translations for English (`en`).
 class AppLocalizationsEn extends AppLocalizations {
@@ -1609,6 +1649,28 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         "type": "DateTime",
         "format": "asdf o'clock",
         "isCustomDateFormat": "true"
+      }
+    }
+  }
+}'''
+        });
+        final String content = getGeneratedFileContent(locale: 'en');
+        expect(content, contains(r"DateFormat('asdf o\'clock', localeName)"));
+      });
+
+      testWithoutContext('handle arbitrary formatted date with actual boolean', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "@@locale": "en",
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+    "description": "The first day of spring",
+    "placeholders": {
+      "springStartDate": {
+        "type": "DateTime",
+        "format": "asdf o'clock",
+        "isCustomDateFormat": true
       }
     }
   }
@@ -2488,10 +2550,10 @@ NumberFormat.decimalPatternDigits(
   testWithoutContext('dollar signs are escaped properly when there is a select clause', () {
     const String dollarSignWithSelect = r'''
 {
-  "dollarSignWithSelect": "$nice_bug\nHello Bug! Manifistation #1 {selectPlaceholder, select, case{message} other{messageOther}}"
+  "dollarSignWithSelect": "$nice_bug\nHello Bug! Manifestation #1 {selectPlaceholder, select, case{message} other{messageOther}}"
 }''';
     setupLocalizations(<String, String>{ 'en': dollarSignWithSelect });
-    expect(getGeneratedFileContent(locale: 'en'), contains(r'\$nice_bug\nHello Bug! Manifistation #1 $_temp0'));
+    expect(getGeneratedFileContent(locale: 'en'), contains(r'\$nice_bug\nHello Bug! Manifestation #1 $_temp0'));
   });
 
   testWithoutContext('can generate method with named parameter', () {

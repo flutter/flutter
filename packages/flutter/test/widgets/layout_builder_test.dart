@@ -294,6 +294,108 @@ void main() {
     expect(built, 2);
   });
 
+  testWidgets('LayoutBuilder rebuilds once in the same frame', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/146379.
+    int built = 0;
+    final Widget target = LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Builder(builder: (BuildContext context) {
+          built += 1;
+          MediaQuery.of(context);
+          return const Placeholder();
+        });
+      },
+    );
+    expect(built, 0);
+
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(size: Size(400.0, 300.0)),
+      child: Center(
+        child: SizedBox(
+          width: 400.0,
+          child: target,
+        ),
+      ),
+    ));
+    expect(built, 1);
+
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(size: Size(300.0, 400.0)),
+      child: Center(
+        child: SizedBox(
+          width: 300.0,
+          child: target,
+        ),
+      ),
+    ));
+    expect(built, 2);
+  });
+
+  testWidgets('LayoutBuilder does not dirty the render tree during the idle phase', (WidgetTester tester) async {
+    RenderObject? dirtyRenderObject;
+    void visitSubtree(RenderObject node) {
+      assert(dirtyRenderObject == null);
+      if (node.debugNeedsLayout) {
+        dirtyRenderObject = node;
+        return;
+      }
+      node.visitChildren(visitSubtree);
+    }
+
+    final Widget target = LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) => const Placeholder(),
+    );
+    await tester.pumpWidget(target);
+    final RenderObject renderObject = tester.renderObject(find.byWidget(target));
+    visitSubtree(renderObject);
+    expect(dirtyRenderObject, isNull);
+
+    tester.element(find.byType(Placeholder)).markNeedsBuild();
+    visitSubtree(renderObject);
+    expect(dirtyRenderObject, isNull);
+  });
+
+  testWidgets('LayoutBuilder can change size without rebuild', (WidgetTester tester) async {
+    int built = 0;
+    final Widget target = LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Builder(builder: (BuildContext context) {
+          built += 1;
+          return const Text('A');
+        });
+      },
+    );
+    expect(built, 0);
+
+    await tester.pumpWidget(
+      Center(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: DefaultTextStyle(
+            style: const TextStyle(fontSize: 10),
+            child: target,
+          ),
+        ),
+      )
+    );
+    expect(built, 1);
+    expect(tester.getSize(find.byWidget(target)), const Size(10, 10));
+
+    await tester.pumpWidget(
+      Center(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: DefaultTextStyle(
+            style: const TextStyle(fontSize: 100),
+            child: target,
+          ),
+        ),
+      )
+    );
+    expect(built, 1);
+    expect(tester.getSize(find.byWidget(target)), const Size(100, 100));
+  });
+
   testWidgets('SliverLayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
     int built = 0;
     final Widget target = Directionality(
@@ -747,6 +849,27 @@ void main() {
     expect(buildCount, 2);
     expect(paintCount, 3);
     expect(mostRecentOffset, const Offset(60, 60));
+  });
+
+  testWidgets('LayoutBuilder in a subtree that skips layout does not throw during the initial treewalk', (WidgetTester tester) async {
+    final OverlayEntry overlayEntry1 = OverlayEntry(maintainState: true, builder: (BuildContext context) => LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) => const Placeholder()));
+    // OverlayEntry2 obstructs OverlayEntry1 and forces it to skip layout.
+    final OverlayEntry overlayEntry2 = OverlayEntry(opaque: true, canSizeOverlay: true, builder: (BuildContext context) => Container());
+    addTearDown(() => overlayEntry1..remove()..dispose());
+    addTearDown(() => overlayEntry2..remove()..dispose());
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        // The UnconstrainedBox makes sure the OverlayEntries are not relayout boundaries.
+        child: UnconstrainedBox(child: Overlay(initialEntries: <OverlayEntry>[overlayEntry1, overlayEntry2])),
+      ),
+    );
+
+    WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.rootElement!);
+    await tester.pump();
+    WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.rootElement!);
+    await tester.pump();
+    expect(tester.takeException(), isNull);
   });
 }
 

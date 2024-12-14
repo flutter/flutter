@@ -21,6 +21,7 @@ import '../convert.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
+import '../device_vm_service_discovery_for_attach.dart';
 import '../emulator.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
@@ -73,7 +74,7 @@ class DaemonCommand extends FlutterCommand {
         throwToolExit('Invalid port for `--listen-on-tcp-port`: $error');
       }
 
-      await _DaemonServer(
+      await DaemonServer(
         port: port,
         logger: StdoutLogger(
           terminal: globals.terminal,
@@ -100,12 +101,14 @@ class DaemonCommand extends FlutterCommand {
   }
 }
 
-class _DaemonServer {
-  _DaemonServer({
+@visibleForTesting
+class DaemonServer {
+  DaemonServer({
     this.port,
     required this.logger,
     this.notifyingLogger,
-  });
+    @visibleForTesting Future<ServerSocket> Function(InternetAddress address, int port) bind = ServerSocket.bind,
+  }) : _bind = bind;
 
   final int? port;
 
@@ -115,8 +118,20 @@ class _DaemonServer {
   // Logger that sends the message to the other end of daemon connection.
   final NotifyingLogger? notifyingLogger;
 
+  final Future<ServerSocket> Function(InternetAddress address, int port) _bind;
+
   Future<void> run() async {
-    final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, port!);
+    ServerSocket? serverSocket;
+    try {
+      serverSocket = await _bind(InternetAddress.loopbackIPv4, port!);
+    } on SocketException {
+      logger.printTrace('Bind on $port failed with IPv4, retrying on IPv6');
+    }
+
+    // If binding on IPv4 failed, try binding on IPv6.
+    // Omit try catch here, let the failure fallthrough.
+    serverSocket ??= await _bind(InternetAddress.loopbackIPv6, port!);
+
     logger.printStatus('Daemon server listening on ${serverSocket.port}');
 
     final StreamSubscription<Socket> subscription = serverSocket.listen(
@@ -649,12 +664,10 @@ class AppDomain extends Domain {
     String? projectRootPath,
     String? packagesFilePath,
     String? dillOutputPath,
-    bool ipv6 = false,
-    bool multidexEnabled = false,
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
-    bool enableDevTools = true,
+    required HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
@@ -684,7 +697,6 @@ class AppDomain extends Domain {
         flutterProject: flutterProject,
         target: target,
         debuggingOptions: options,
-        ipv6: ipv6,
         stayResident: true,
         urlTunneller: options.webEnableExposeUrl! ? daemon.daemonDomain.exposeUrl : null,
         machine: machine,
@@ -702,11 +714,10 @@ class AppDomain extends Domain {
         applicationBinary: applicationBinary,
         projectRootPath: projectRootPath,
         dillOutputPath: dillOutputPath,
-        ipv6: ipv6,
-        multidexEnabled: multidexEnabled,
         hostIsIde: true,
         machine: machine,
         analytics: globals.analytics,
+        nativeAssetsBuilder: nativeAssetsBuilder,
       );
     } else {
       runner = ColdRunner(
@@ -714,8 +725,6 @@ class AppDomain extends Domain {
         target: target,
         debuggingOptions: options,
         applicationBinary: applicationBinary,
-        ipv6: ipv6,
-        multidexEnabled: multidexEnabled,
         machine: machine,
       );
     }
@@ -729,7 +738,6 @@ class AppDomain extends Domain {
         return runner.run(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
-          enableDevTools: enableDevTools,
           route: route,
         );
       },
@@ -994,7 +1002,9 @@ class DeviceDomain extends Domain {
     registerHandler('takeScreenshot', takeScreenshot);
     registerHandler('startDartDevelopmentService', startDartDevelopmentService);
     registerHandler('shutdownDartDevelopmentService', shutdownDartDevelopmentService);
-    registerHandler('setExternalDevToolsUriForDartDevelopmentService', setExternalDevToolsUriForDartDevelopmentService);
+    registerHandler('getDiagnostics', getDiagnostics);
+    registerHandler('startVMServiceDiscoveryForAttach', startVMServiceDiscoveryForAttach);
+    registerHandler('stopVMServiceDiscoveryForAttach', stopVMServiceDiscoveryForAttach);
 
     // Use the device manager discovery so that client provided device types
     // are usable via the daemon protocol.
@@ -1046,12 +1056,23 @@ class DeviceDomain extends Domain {
   }
 
   /// Return a list of the current devices, discarding existing cache of devices.
-  Future<List<Map<String, Object?>>> discoverDevices([ Map<String, Object?>? args ]) async {
-    return <Map<String, Object?>>[
+  Future<List<Map<String, Object?>>> discoverDevices(Map<String, Object?> args) async {
+    final int? timeoutInMilliseconds = _getIntArg(args, 'timeoutInMilliseconds');
+    final Duration? timeout = timeoutInMilliseconds != null ? Duration(milliseconds: timeoutInMilliseconds) : null;
+
+    // Calling `discoverDevices()` and `_deviceToMap()` in parallel for better performance.
+    final List<List<Device>> devicesListList = await Future.wait(<Future<List<Device>>>[
       for (final PollingDeviceDiscovery discoverer in _discoverers)
-        for (final Device device in await discoverer.discoverDevices())
-          await _deviceToMap(device),
+        discoverer.discoverDevices(timeout: timeout),
+    ]);
+
+    final List<Device> devices = <Device>[
+      for (final List<Device> devicesList in devicesListList)
+        ...devicesList,
     ];
+    return Future.wait(<Future<Map<String, Object?>>>[
+      for (final Device device in devices) _deviceToMap(device),
+    ]);
   }
 
   /// Enable device events.
@@ -1162,13 +1183,12 @@ class DeviceDomain extends Domain {
       debuggingOptions: DebuggingOptions.fromJson(
         castStringKeyedMap(args['debuggingOptions'])!,
         // We are using prebuilts, build info does not matter here.
-        BuildInfo.debug,
+        BuildInfo.dummy,
       ),
       mainPath: _getStringArg(args, 'mainPath'),
       route: _getStringArg(args, 'route'),
       platformArgs: castStringKeyedMap(args['platformArgs']) ?? const <String, Object>{},
       prebuiltApplication: _getBoolArg(args, 'prebuiltApplication') ?? false,
-      ipv6: _getBoolArg(args, 'ipv6') ?? false,
       userIdentifier: _getStringArg(args, 'userIdentifier'),
     );
     return <String, Object?>{
@@ -1216,23 +1236,33 @@ class DeviceDomain extends Domain {
   }
 
   /// Starts DDS for the device.
-  Future<String?> startDartDevelopmentService(Map<String, Object?> args) async {
+  Future<Map<String, Object?>> startDartDevelopmentService(Map<String, Object?> args) async {
     final String? deviceId = _getStringArg(args, 'deviceId', required: true);
     final bool? disableServiceAuthCodes = _getBoolArg(args, 'disableServiceAuthCodes');
     final String vmServiceUriStr = _getStringArg(args, 'vmServiceUri', required: true)!;
+    final bool enableDevTools = _getBoolArg(args, 'enableDevTools') ?? false;
+    final String? devToolsServerAddressStr = _getStringArg(args, 'devToolsServerAddress');
 
     final Device? device = await daemon.deviceDomain._getDevice(deviceId);
     if (device == null) {
       throw DaemonException("device '$deviceId' not found");
     }
 
+    Uri? devToolsServerAddress;
+    if (devToolsServerAddressStr != null) {
+      devToolsServerAddress = Uri.parse(devToolsServerAddressStr);
+    }
+
     await device.dds.startDartDevelopmentService(
       Uri.parse(vmServiceUriStr),
-      logger: globals.logger,
       disableServiceAuthCodes: disableServiceAuthCodes,
+      enableDevTools: enableDevTools,
+      devToolsServerAddress: devToolsServerAddress,
     );
     unawaited(device.dds.done.whenComplete(() => sendEvent('device.dds.done.$deviceId')));
-    return device.dds.uri?.toString();
+    return <String, Object?>{
+      'ddsUri': device.dds.uri?.toString(),
+    };
   }
 
   /// Starts DDS for the device.
@@ -1244,19 +1274,7 @@ class DeviceDomain extends Domain {
       throw DaemonException("device '$deviceId' not found");
     }
 
-    await device.dds.shutdown();
-  }
-
-  Future<void> setExternalDevToolsUriForDartDevelopmentService(Map<String, Object?> args) async {
-    final String? deviceId = _getStringArg(args, 'deviceId', required: true);
-    final String uri = _getStringArg(args, 'uri', required: true)!;
-
-    final Device? device = await daemon.deviceDomain._getDevice(deviceId);
-    if (device == null) {
-      throw DaemonException("device '$deviceId' not found");
-    }
-
-    device.dds.setExternalDevToolsUri(Uri.parse(uri));
+    device.dds.shutdown();
   }
 
   @override
@@ -1284,6 +1302,56 @@ class DeviceDomain extends Domain {
       }
     }
     return null;
+  }
+
+  /// Gets a list of diagnostic messages pertaining to issues with any connected
+  /// devices.
+  Future<List<String>> getDiagnostics(Map<String, Object?> args) async {
+    // Call `getDiagnostics()` in parallel to improve performance.
+    final List<List<String>> diagnosticsLists = await Future.wait(<Future<List<String>>>[
+      for (final PollingDeviceDiscovery discoverer in _discoverers)
+        discoverer.getDiagnostics(),
+    ]);
+
+    return <String>[
+      for (final List<String> diagnostics in diagnosticsLists)
+        ...diagnostics,
+    ];
+  }
+
+  final Map<String, StreamSubscription<Uri>> _vmServiceDiscoverySubscriptions = <String, StreamSubscription<Uri>>{};
+
+  Future<String> startVMServiceDiscoveryForAttach(Map<String, Object?> args) async {
+    final String? deviceId = _getStringArg(args, 'deviceId', required: true);
+    final String? appId = _getStringArg(args, 'appId');
+    final String? fuchsiaModule = _getStringArg(args, 'fuchsiaModule');
+    final int? filterDevicePort = _getIntArg(args, 'filterDevicePort');
+    final bool? ipv6 = _getBoolArg(args, 'ipv6');
+
+    final Device? device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw DaemonException("device '$deviceId' not found");
+    }
+
+    final String id = '${_id++}';
+
+    final VMServiceDiscoveryForAttach discovery = device.getVMServiceDiscoveryForAttach(
+      appId: appId,
+      fuchsiaModule: fuchsiaModule,
+      filterDevicePort: filterDevicePort,
+      ipv6: ipv6 ?? false,
+      logger: globals.logger
+    );
+    _vmServiceDiscoverySubscriptions[id] = discovery.uris.listen(
+      (Uri uri) => sendEvent('device.VMServiceDiscoveryForAttach.$id', uri.toString()),
+    );
+
+    return id;
+  }
+
+  Future<void> stopVMServiceDiscoveryForAttach(Map<String, Object?> args) async {
+    final String? id = _getStringArg(args, 'id', required: true);
+    await _vmServiceDiscoverySubscriptions.remove(id)?.cancel();
   }
 }
 
@@ -1320,6 +1388,8 @@ Future<Map<String, Object?>> _deviceToMap(Device device) async {
     'ephemeral': device.ephemeral,
     'emulatorId': await device.emulatorId,
     'sdk': await device.sdkNameAndVersion,
+    'isConnected': device.isConnected,
+    'connectionInterface': getNameForDeviceConnectionInterface(device.connectionInterface),
     'capabilities': <String, Object>{
       'hotReload': device.supportsHotReload,
       'hotRestart': device.supportsHotRestart,
@@ -1349,16 +1419,12 @@ Map<String, Object?> _operationResultToMap(OperationResult result) {
 }
 
 Object? _toJsonable(Object? obj) {
-  if (obj is String || obj is int || obj is bool || obj is Map<Object?, Object?> || obj is List<Object?> || obj == null) {
-    return obj;
-  }
-  if (obj is OperationResult) {
-    return _operationResultToMap(obj);
-  }
-  if (obj is ToolExit) {
-    return obj.message;
-  }
-  return '$obj';
+  return switch (obj) {
+    String() || int() || bool() || Map<Object?, Object?>() || List<Object?>() || null => obj,
+    OperationResult() => _operationResultToMap(obj),
+    ToolExit() => obj.message,
+    _ => obj.toString(),
+  };
 }
 
 class NotifyingLogger extends DelegatingLogger {

@@ -5,12 +5,12 @@
 import 'dart:async';
 import 'dart:io' as io; // flutter_ignore: dart_io_import;
 
-import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import '../base/dds.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -18,10 +18,10 @@ import '../base/platform.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
+import '../native_assets.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import '../vmservice.dart';
-
 import 'font_config_manager.dart';
 import 'test_device.dart';
 
@@ -43,7 +43,7 @@ class FlutterTesterTestDevice extends TestDevice {
     required this.icudtlPath,
     required this.compileExpression,
     required this.fontConfigManager,
-    required this.uriConverter,
+    required this.nativeAssetsBuilder,
   })  : assert(!debuggingOptions.startPaused || enableVmService),
         _gotProcessVmServiceUri = enableVmService
             ? Completer<Uri?>() : (Completer<Uri?>()..complete());
@@ -64,8 +64,9 @@ class FlutterTesterTestDevice extends TestDevice {
   final String? icudtlPath;
   final CompileExpression? compileExpression;
   final FontConfigManager fontConfigManager;
-  final UriConverter? uriConverter;
+  final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
 
+  late final DartDevelopmentService _ddsLauncher = DartDevelopmentService(logger: logger);
   final Completer<Uri?> _gotProcessVmServiceUri;
   final Completer<int> _exitCode = Completer<int>();
 
@@ -121,7 +122,7 @@ class FlutterTesterTestDevice extends TestDevice {
       '--non-interactive',
       '--use-test-fonts',
       '--disable-asset-fonts',
-      '--packages=${debuggingOptions.buildInfo.packagesPath}',
+      '--packages=${debuggingOptions.buildInfo.packageConfigPath}',
       if (testAssetDirectory != null)
         '--flutter-assets-dir=$testAssetDirectory',
       if (debuggingOptions.nullAssertions)
@@ -143,8 +144,12 @@ class FlutterTesterTestDevice extends TestDevice {
       'FONTCONFIG_FILE': fontConfigManager.fontConfigFile.path,
       'SERVER_PORT': _server!.port.toString(),
       'APP_NAME': flutterProject?.manifest.appName ?? '',
+      if (debuggingOptions.enableImpeller == ImpellerStatus.enabled)
+        'FLUTTER_TEST_IMPELLER': 'true',
       if (testAssetDirectory != null)
         'UNIT_TEST_ASSETS': testAssetDirectory!,
+      if (platform.isWindows && nativeAssetsBuilder != null && flutterProject != null)
+        'PATH': '${nativeAssetsBuilder!.windowsBuildDirectory(flutterProject!)};${platform.environment['PATH']}',
     };
 
     logger.printTrace('test $id: Starting flutter_tester process with command=$command, environment=$environment');
@@ -168,16 +173,16 @@ class FlutterTesterTestDevice extends TestDevice {
             debuggingOptions.hostVmServicePort == detectedUri.port);
 
         Uri? forwardingUri;
-        DartDevelopmentService? dds;
 
         if (debuggingOptions.enableDds) {
           logger.printTrace('test $id: Starting Dart Development Service');
-          dds = await startDds(
+
+          await _ddsLauncher.startDartDevelopmentServiceFromDebuggingOptions(
             detectedUri,
-            uriConverter: uriConverter,
+            debuggingOptions: debuggingOptions,
           );
-          forwardingUri = dds.uri;
-          logger.printTrace('test $id: Dart Development Service started at ${dds.uri}, forwarding to VM service at ${dds.remoteVmServiceUri}.');
+          forwardingUri = _ddsLauncher.uri;
+          logger.printTrace('test $id: Dart Development Service started at $forwardingUri, forwarding to VM service at $detectedUri.');
         } else {
           forwardingUri = detectedUri;
         }
@@ -199,7 +204,7 @@ class FlutterTesterTestDevice extends TestDevice {
 
         if (debuggingOptions.startPaused && !machine!) {
           logger.printStatus('The Dart VM service is listening on $forwardingUri');
-          await _startDevTools(forwardingUri, dds);
+          await _startDevTools(forwardingUri, _ddsLauncher);
           logger.printStatus('');
           logger.printStatus('The test process has been started. Set any relevant breakpoints and then resume the test in the debugger.');
         }
@@ -246,28 +251,6 @@ class FlutterTesterTestDevice extends TestDevice {
     throw TestDeviceException(_getExitCodeMessage(exitCode), StackTrace.current);
   }
 
-  Uri get _ddsServiceUri {
-    return Uri(
-      scheme: 'http',
-      host: (host!.type == InternetAddressType.IPv6 ?
-        InternetAddress.loopbackIPv6 :
-        InternetAddress.loopbackIPv4
-      ).host,
-      port: debuggingOptions.hostVmServicePort ?? 0,
-    );
-  }
-
-  @visibleForTesting
-  @protected
-  Future<DartDevelopmentService> startDds(Uri uri, {UriConverter? uriConverter}) {
-    return DartDevelopmentService.startDartDevelopmentService(
-      uri,
-      serviceUri: _ddsServiceUri,
-      enableAuthCodes: !debuggingOptions.disableServiceAuthCodes,
-      ipv6: host!.type == InternetAddressType.IPv6,
-      uriConverter: uriConverter,
-    );
-  }
 
   @visibleForTesting
   @protected
@@ -283,6 +266,7 @@ class FlutterTesterTestDevice extends TestDevice {
     );
   }
 
+  // TODO(bkonyi): remove when ready to serve DevTools from DDS.
   Future<void> _startDevTools(Uri forwardingUri, DartDevelopmentService? dds) async {
     _devToolsLauncher = DevtoolsLauncher.instance;
     logger.printTrace('test $id: Serving DevTools...');
@@ -294,10 +278,6 @@ class FlutterTesterTestDevice extends TestDevice {
     }
     await _devToolsLauncher?.ready;
     logger.printTrace('test $id: DevTools is being served at ${devToolsServerAddress.uri}');
-
-    // Notify the DDS instance that there's a DevTools instance available so it can correctly
-    // redirect DevTools related requests.
-    dds?.setExternalDevToolsUri(devToolsServerAddress.uri!);
 
     final Uri devToolsUri = devToolsServerAddress.uri!.replace(
       // Use query instead of queryParameters to avoid unnecessary encoding.
@@ -373,22 +353,15 @@ class FlutterTesterTestDevice extends TestDevice {
 }
 
 String _getExitCodeMessage(int exitCode) {
-  switch (exitCode) {
-    case 1:
-      return 'Shell subprocess cleanly reported an error. Check the logs above for an error message.';
-    case 0:
-      return 'Shell subprocess ended cleanly. Did main() call exit()?';
-    case -0x0f: // ProcessSignal.SIGTERM
-      return 'Shell subprocess crashed with SIGTERM ($exitCode).';
-    case -0x0b: // ProcessSignal.SIGSEGV
-      return 'Shell subprocess crashed with segmentation fault.';
-    case -0x06: // ProcessSignal.SIGABRT
-      return 'Shell subprocess crashed with SIGABRT ($exitCode).';
-    case -0x02: // ProcessSignal.SIGINT
-      return 'Shell subprocess terminated by ^C (SIGINT, $exitCode).';
-    default:
-      return 'Shell subprocess crashed with unexpected exit code $exitCode.';
-  }
+  return switch (exitCode) {
+    1     => 'Shell subprocess cleanly reported an error. Check the logs above for an error message.',
+    0     => 'Shell subprocess ended cleanly. Did main() call exit()?',
+    -0x0f => 'Shell subprocess crashed with SIGTERM ($exitCode).',     // ProcessSignal.SIGTERM
+    -0x0b => 'Shell subprocess crashed with segmentation fault.',      // ProcessSignal.SIGSEGV
+    -0x06 => 'Shell subprocess crashed with SIGABRT ($exitCode).',     // ProcessSignal.SIGABRT
+    -0x02 => 'Shell subprocess terminated by ^C (SIGINT, $exitCode).', // ProcessSignal.SIGINT
+    _     => 'Shell subprocess crashed with unexpected exit code $exitCode.',
+  };
 }
 
 StreamChannel<String> _webSocketToStreamChannel(WebSocket webSocket) {

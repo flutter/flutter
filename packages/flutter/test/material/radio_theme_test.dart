@@ -68,9 +68,9 @@ void main() {
     expect(
       description,
       equalsIgnoringHashCodes(<String>[
-        'mouseCursor: MaterialStatePropertyAll(SystemMouseCursor(click))',
-        'fillColor: MaterialStatePropertyAll(Color(0xfffffff0))',
-        'overlayColor: MaterialStatePropertyAll(Color(0xfffffff1))',
+        'mouseCursor: WidgetStatePropertyAll(SystemMouseCursor(click))',
+        'fillColor: WidgetStatePropertyAll(${const Color(0xfffffff0)})',
+        'overlayColor: WidgetStatePropertyAll(${const Color(0xfffffff1)})',
         'splashRadius: 1.0',
         'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap',
         'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)',

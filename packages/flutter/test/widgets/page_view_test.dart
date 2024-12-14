@@ -1299,4 +1299,176 @@ void main() {
     expect(attach, 1);
     expect(detach, 1);
   });
+
+  group('$PageView handles change of controller', () {
+    final GlobalKey key = GlobalKey();
+
+    Widget createPageView(PageController? controller) {
+      return MaterialApp(
+        home: Scaffold(
+          body: PageView(
+            key: key,
+            controller: controller,
+            children: const <Widget>[
+              Center(child: Text('0')),
+              Center(child: Text('1')),
+              Center(child: Text('2')),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Future<void> testPageViewWithController(PageController controller, WidgetTester tester, bool controls) async  {
+      int currentVisiblePage() {
+        return int.parse(tester.widgetList(find.byType(Text)).whereType<Text>().first.data!);
+      }
+
+      final int initialPageInView = currentVisiblePage();
+
+      for (int i = 0; i < 3; i++) {
+        if (controls) {
+          controller.jumpToPage(i);
+          await tester.pumpAndSettle();
+          expect(currentVisiblePage(), i);
+        } else {
+          expect(()=> controller.jumpToPage(i), throwsAssertionError);
+          expect(currentVisiblePage(), initialPageInView);
+        }
+      }
+    }
+
+    testWidgets('null to value', (WidgetTester tester) async {
+      final PageController controller = PageController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(createPageView(null));
+      await tester.pumpWidget(createPageView(controller));
+      await testPageViewWithController(controller, tester, true);
+    });
+
+    testWidgets('value to value', (WidgetTester tester) async {
+      final PageController controller1 = PageController();
+      addTearDown(controller1.dispose);
+      final PageController controller2 = PageController();
+      addTearDown(controller2.dispose);
+      await tester.pumpWidget(createPageView(controller1));
+      await testPageViewWithController(controller1, tester, true);
+      await tester.pumpWidget(createPageView(controller2));
+      await testPageViewWithController(controller1, tester, false);
+      await testPageViewWithController(controller2, tester, true);
+    });
+
+    testWidgets('value to null', (WidgetTester tester) async {
+      final PageController controller = PageController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(createPageView(controller));
+      await testPageViewWithController(controller, tester, true);
+      await tester.pumpWidget(createPageView(null));
+      await testPageViewWithController(controller, tester, false);
+    });
+
+    testWidgets('null to null', (WidgetTester tester) async {
+      await tester.pumpWidget(createPageView(null));
+      await tester.pumpWidget(createPageView(null));
+    });
+  });
+
+  testWidgets('Get the page value before the content dimension is determined,do not throw an assertion and return null', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/146986.
+    final PageController controller = PageController();
+    late String currentPage;
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            body: PageView(
+              controller: controller,
+              children: <Widget>[
+                Builder(
+                  builder: (BuildContext context) {
+                    currentPage = controller.page == null ? 'null' : 'not empty';
+                    return Center(child: Text(currentPage));
+                  },
+                ),
+              ],
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                setState(() {});
+              },
+            ),
+          );
+        }),
+      ),
+    ));
+    expect(find.text('null'), findsOneWidget);
+    expect(find.text('not empty'), findsNothing);
+    expect(currentPage, 'null');
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+    currentPage = controller.page == null ? 'null' : 'not empty';
+    expect(find.text('not empty'), findsOneWidget);
+    expect(find.text('null'), findsNothing);
+    expect(currentPage, 'not empty');
+  });
+
+  testWidgets('Does not crash when calling jumpToPage before layout', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/86222.
+    final PageController controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Navigator(
+          onDidRemovePage: (Page<Object?> page) {},
+          pages: <Page<void>>[
+            MaterialPage<void>(child: Scaffold(
+              body: PageView(
+                controller: controller,
+                children: const <Widget>[
+                  Scaffold(body: Text('One')),
+                  Scaffold(body: Text('Two')),
+                ],
+              ),
+            )),
+            const MaterialPage<void>(child: Scaffold()),
+          ],
+        ),
+      )
+    ));
+
+    controller.jumpToPage(1);
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('Does not crash when calling animateToPage before layout', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/86222.
+    final PageController controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Navigator(
+          onDidRemovePage: (Page<Object?> page) {},
+          pages: <Page<void>>[
+            MaterialPage<void>(child: Scaffold(
+              body: PageView(
+                controller: controller,
+                children: const <Widget>[
+                  Scaffold(body: Text('One')),
+                  Scaffold(body: Text('Two')),
+                ],
+              ),
+            )),
+            const MaterialPage<void>(child: Scaffold()),
+          ],
+        ),
+      )
+    ));
+
+    controller.animateToPage(1, duration: const Duration(milliseconds: 50), curve: Curves.bounceIn);
+    expect(tester.takeException(), null);
+  });
 }

@@ -72,6 +72,7 @@ void main() {
     expect(themeData.horizontalTitleGap, null);
     expect(themeData.minVerticalPadding, null);
     expect(themeData.minLeadingWidth, null);
+    expect(themeData.minTileHeight, null);
     expect(themeData.enableFeedback, null);
     expect(themeData.mouseCursor, null);
     expect(themeData.visualDensity, null);
@@ -108,6 +109,7 @@ void main() {
       horizontalTitleGap: 200,
       minVerticalPadding: 300,
       minLeadingWidth: 400,
+      minTileHeight: 30,
       enableFeedback: true,
       mouseCursor: MaterialStateMouseCursor.clickable,
       visualDensity: VisualDensity.comfortable,
@@ -125,20 +127,21 @@ void main() {
         'dense: true',
         'shape: StadiumBorder(BorderSide(width: 0.0, style: none))',
         'style: drawer',
-        'selectedColor: Color(0x00000001)',
-        'iconColor: Color(0x00000002)',
-        'textColor: Color(0x00000003)',
-        'titleTextStyle: TextStyle(inherit: true, color: Color(0x00000004))',
-        'subtitleTextStyle: TextStyle(inherit: true, color: Color(0x00000005))',
-        'leadingAndTrailingTextStyle: TextStyle(inherit: true, color: Color(0x00000006))',
+        'selectedColor: ${const Color(0x00000001)}',
+        'iconColor: ${const Color(0x00000002)}',
+        'textColor: ${const Color(0x00000003)}',
+        'titleTextStyle: TextStyle(inherit: true, color: ${const Color(0x00000004)})',
+        'subtitleTextStyle: TextStyle(inherit: true, color: ${const Color(0x00000005)})',
+        'leadingAndTrailingTextStyle: TextStyle(inherit: true, color: ${const Color(0x00000006)})',
         'contentPadding: EdgeInsets.all(100.0)',
-        'tileColor: Color(0x00000007)',
-        'selectedTileColor: Color(0x00000008)',
+        'tileColor: ${const Color(0x00000007)}',
+        'selectedTileColor: ${const Color(0x00000008)}',
         'horizontalTitleGap: 200.0',
         'minVerticalPadding: 300.0',
         'minLeadingWidth: 400.0',
+        'minTileHeight: 30.0',
         'enableFeedback: true',
-        'mouseCursor: MaterialStateMouseCursor(clickable)',
+        'mouseCursor: WidgetStateMouseCursor(clickable)',
         'visualDensity: VisualDensity#00000(h: -1.0, v: -1.0)(horizontal: -1.0, vertical: -1.0)',
         'titleAlignment: ListTileTitleAlignment.top',
       ]),
@@ -916,6 +919,7 @@ void main() {
       horizontalTitleGap: 200,
       minVerticalPadding: 300,
       minLeadingWidth: 400,
+      minTileHeight: 30,
       enableFeedback: true,
       titleAlignment: ListTileTitleAlignment.bottom,
     );
@@ -936,6 +940,7 @@ void main() {
       horizontalTitleGap: 600,
       minVerticalPadding: 700,
       minLeadingWidth: 800,
+      minTileHeight: 80,
       enableFeedback: false,
       titleAlignment: ListTileTitleAlignment.top,
     );
@@ -955,6 +960,7 @@ void main() {
     expect(copy.horizontalTitleGap, 600);
     expect(copy.minVerticalPadding, 700);
     expect(copy.minLeadingWidth, 800);
+    expect(copy.minTileHeight, 80);
     expect(copy.enableFeedback, false);
     expect(copy.titleAlignment, ListTileTitleAlignment.top);
   });
@@ -1015,6 +1021,7 @@ void main() {
             horizontalTitleGap: 200,
             minVerticalPadding: 300,
             minLeadingWidth: 400,
+            minTileHeight: 30,
             enableFeedback: true,
             titleAlignment: ListTileTitleAlignment.bottom,
             mouseCursor: MaterialStateMouseCursor.textable,
@@ -1041,6 +1048,7 @@ void main() {
                   horizontalTitleGap: 600,
                   minVerticalPadding: 700,
                   minLeadingWidth: 800,
+                  minTileHeight: 80,
                   enableFeedback: false,
                   titleAlignment: ListTileTitleAlignment.top,
                   mouseCursor: MaterialStateMouseCursor.clickable,
@@ -1071,6 +1079,7 @@ void main() {
     expect(theme.horizontalTitleGap, 600);
     expect(theme.minVerticalPadding, 700);
     expect(theme.minLeadingWidth, 800);
+    expect(theme.minTileHeight, 80);
     expect(theme.enableFeedback, false);
     expect(theme.titleAlignment, ListTileTitleAlignment.top);
     expect(theme.mouseCursor, MaterialStateMouseCursor.clickable);

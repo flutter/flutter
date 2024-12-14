@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter_driver/flutter_driver.dart';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
@@ -20,7 +23,7 @@ import '../common/error.dart';
 import '../common/find.dart';
 import '../common/handler_factory.dart';
 import '../common/message.dart';
-import '_extension_io.dart' if (dart.library.html) '_extension_web.dart';
+import '_extension_io.dart' if (dart.library.js_interop) '_extension_web.dart';
 
 const String _extensionMethodName = 'driver';
 

@@ -103,21 +103,16 @@ bool _findBGR10Color(
   return foundDeepRed;
 }
 
-bool _findColor(List<Object?> result, List<double> color) {
+bool _findColor(List<dynamic> result, List<double> color) {
   expect(result, isNotNull);
   expect(result.length, 4);
-  final int width = (result[0] as int?)!;
-  final int height = (result[1] as int?)!;
-  final String format = (result[2] as String?)!;
-  if (format == 'MTLPixelFormatBGR10_XR') {
-    return _findBGR10Color((result[3] as Uint8List?)!, width, height, color);
-  } else if (format == 'MTLPixelFormatBGRA10_XR') {
-    return _findBGRA10Color((result[3] as Uint8List?)!, width, height, color);
-  } else if (format == 'MTLPixelFormatRGBA16Float') {
-    return _findRGBAF16Color((result[3] as Uint8List?)!, width, height, color);
-  } else {
-    fail('Unsupported pixel format: $format');
-  }
+  final [int width, int height, String format, Uint8List bytes] = result;
+  return switch (format) {
+    'MTLPixelFormatBGR10_XR'    => _findBGR10Color(bytes, width, height, color),
+    'MTLPixelFormatBGRA10_XR'   => _findBGRA10Color(bytes, width, height, color),
+    'MTLPixelFormatRGBA16Float' => _findRGBAF16Color(bytes, width, height, color),
+    _ => fail('Unsupported pixel format: $format'),
+  };
 }
 
 void main() {
@@ -170,6 +165,15 @@ void main() {
       final List<Object?> result =
           await channel.invokeMethod('test') as List<Object?>;
       expect(_findColor(result, <double>[0.0, 1.0, 0.0]), isTrue);
+    });
+    testWidgets('draw container with wide gamut works', (WidgetTester tester) async {
+      app.run(app.Setup.container);
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      const MethodChannel channel = MethodChannel('flutter/screenshot');
+      final List<Object?> result =
+          await channel.invokeMethod('test') as List<Object?>;
+      expect(_findColor(result, _deepRed), isTrue);
     });
   });
 }

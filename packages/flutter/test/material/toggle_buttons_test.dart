@@ -7,6 +7,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -16,13 +17,12 @@ import '../widgets/semantics_tester.dart';
 const double _defaultBorderWidth = 1.0;
 
 Widget boilerplate({
-  bool? useMaterial3,
+  ThemeData? theme,
   MaterialTapTargetSize? tapTargetSize,
   required Widget child,
 }) {
   return Theme(
-    data: ThemeData(
-      useMaterial3: useMaterial3,
+    data: theme ?? ThemeData(
       materialTapTargetSize: tapTargetSize,
     ),
     child: Directionality(
@@ -1273,12 +1273,12 @@ void main() {
     }
   });
 
-  testWidgets('ToggleButtons text baseline alignment', (WidgetTester tester) async {
-    // The point size of the fonts must be a multiple of 4 until
+  testWidgets('Material2 - ToggleButtons text baseline alignment', (WidgetTester tester) async {
+    // The font size must be a multiple of 4 until
     // https://github.com/flutter/flutter/issues/122066 is resolved.
     await tester.pumpWidget(
       boilerplate(
-        useMaterial3: false,
+        theme: ThemeData(useMaterial3: false),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
@@ -1322,6 +1322,55 @@ void main() {
     expect(firstToggleButtonDy, elevatedButtonDy - 3.0);
     expect(firstToggleButtonDy, textDy - 5.0);
   });
+
+  testWidgets('Material3 - ToggleButtons text baseline alignment', (WidgetTester tester) async {
+    // The point size of the fonts must be a multiple of 4 until
+    // https://github.com/flutter/flutter/issues/122066 is resolved.
+    await tester.pumpWidget(
+      boilerplate(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: <Widget>[
+            ToggleButtons(
+              borderWidth: 5.0,
+              isSelected: const <bool>[false, true],
+              children: const <Widget>[
+                Text('First child', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
+                Text('Second child', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
+              ],
+            ),
+            ElevatedButton(
+              onPressed: null,
+              style: ElevatedButton.styleFrom(textStyle: const TextStyle(
+                fontFamily: 'FlutterTest',
+                fontSize: 20.0,
+              )),
+              child: const Text('Elevated Button'),
+            ),
+            const Text('Text', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 28.0)),
+          ],
+        ),
+      ),
+    );
+
+    // The test font extends 0.25 * fontSize below the baseline.
+    // So the three row elements line up like this:
+    //
+    //  ToggleButton  MaterialButton  Text
+    //  ------------------------------------   baseline
+    //  2.0           5.0             7.0      space below the baseline = 0.25 * fontSize
+    //  ------------------------------------   widget text dy values
+
+    final double firstToggleButtonDy = tester.getBottomLeft(find.text('First child')).dy;
+    final double secondToggleButtonDy = tester.getBottomLeft(find.text('Second child')).dy;
+    final double elevatedButtonDy = tester.getBottomLeft(find.text('Elevated Button')).dy;
+    final double textDy = tester.getBottomLeft(find.text('Text')).dy;
+
+    expect(firstToggleButtonDy, secondToggleButtonDy);
+    expect(firstToggleButtonDy, closeTo(elevatedButtonDy - 1.7, 0.1));
+    expect(firstToggleButtonDy, closeTo(textDy - 9.7, 0.1));
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Directionality test', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1564,10 +1613,10 @@ void main() {
     },
   );
 
-  testWidgets('Tap target size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+  testWidgets('Material2 - Tap target size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
       return boilerplate(
-        useMaterial3: false,
+        theme: ThemeData(useMaterial3: false),
         tapTargetSize: tapTargetSize,
         child: ToggleButtons(
           key: key,
@@ -1589,13 +1638,40 @@ void main() {
 
     final Key key2 = UniqueKey();
     await tester.pumpWidget(buildFrame(MaterialTapTargetSize.shrinkWrap, key2));
-    expect(tester.getSize(find.byKey(key2)), const Size(228.0, 34.0));
+    expect(tester.getSize(find.byKey(key2)), const Size(228.0, 48.0));
   });
 
-  testWidgets('Tap target size is configurable', (WidgetTester tester) async {
+  testWidgets('Material3 - Tap target size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
       return boilerplate(
-        useMaterial3: false,
+        tapTargetSize: tapTargetSize,
+        child: ToggleButtons(
+          key: key,
+          constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+          isSelected: const <bool>[false, true, false],
+          onPressed: (int index) {},
+          children: const <Widget>[
+            Text('First'),
+            Text('Second'),
+            Text('Third'),
+          ],
+        ),
+      );
+    }
+
+    final Key key1 = UniqueKey();
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.padded, key1));
+    expect(tester.getSize(find.byKey(key1)), const Size(232.0, 48.0));
+
+    final Key key2 = UniqueKey();
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.shrinkWrap, key2));
+    expect(tester.getSize(find.byKey(key2)), const Size(232.0, 34.0));
+  });
+
+  testWidgets('Material2 - Tap target size is configurable', (WidgetTester tester) async {
+    Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
+      return boilerplate(
+        theme: ThemeData(useMaterial3: false),
         child: ToggleButtons(
           key: key,
           tapTargetSize: tapTargetSize,
@@ -1618,6 +1694,33 @@ void main() {
     final Key key2 = UniqueKey();
     await tester.pumpWidget(buildFrame(MaterialTapTargetSize.shrinkWrap, key2));
     expect(tester.getSize(find.byKey(key2)), const Size(228.0, 34.0));
+  });
+
+  testWidgets('Material3 - Tap target size is configurable', (WidgetTester tester) async {
+    Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
+      return boilerplate(
+        child: ToggleButtons(
+          key: key,
+          tapTargetSize: tapTargetSize,
+          constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+          isSelected: const <bool>[false, true, false],
+          onPressed: (int index) {},
+          children: const <Widget>[
+            Text('First'),
+            Text('Second'),
+            Text('Third'),
+          ],
+        ),
+      );
+    }
+
+    final Key key1 = UniqueKey();
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.padded, key1));
+    expect(tester.getSize(find.byKey(key1)), const Size(232.0, 48.0));
+
+    final Key key2 = UniqueKey();
+    await tester.pumpWidget(buildFrame(MaterialTapTargetSize.shrinkWrap, key2));
+    expect(tester.getSize(find.byKey(key2)), const Size(232.0, 34.0));
   });
 
   testWidgets('Tap target size is configurable for vertical axis', (WidgetTester tester) async {
@@ -1649,11 +1752,11 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/73725
-  testWidgets('Border radius paint test when there is only one button', (WidgetTester tester) async {
+  testWidgets('Material2 - Border radius paint test when there is only one button', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: false);
     await tester.pumpWidget(
       boilerplate(
-        useMaterial3: false,
+        theme: theme,
         child: RepaintBoundary(
           child: ToggleButtons(
             borderRadius: const BorderRadius.all(Radius.circular(7.0)),
@@ -1690,14 +1793,58 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('toggle_buttons.oneButton.boardsPaint.png'),
+      matchesGoldenFile('m2_toggle_buttons.oneButton.boardsPaint.png'),
     );
   });
 
-  testWidgets('Border radius paint test when Radius.x or Radius.y equal 0.0', (WidgetTester tester) async {
+  testWidgets('Material3 - Border radius paint test when there is only one button', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       boilerplate(
-        useMaterial3: false,
+        child: RepaintBoundary(
+          child: ToggleButtons(
+            borderRadius: const BorderRadius.all(Radius.circular(7.0)),
+            isSelected: const <bool>[true],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First child'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // The only button should be laid out at the center of the screen.
+    expect(tester.getCenter(find.text('First child')), const Offset(400.0, 300.0));
+
+    final List<RenderObject> toggleButtonRenderObject = tester.allRenderObjects.where((RenderObject object) {
+      return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+    }).toSet().toList();
+
+    // The first button paints the left, top and right sides with a path.
+    expect(
+      toggleButtonRenderObject[0],
+      paints
+      // physical model paints
+        ..path()
+      // left side, top and right - enabled.
+        ..path(
+          style: PaintingStyle.stroke,
+          color: theme.colorScheme.onSurface.withOpacity(0.12),
+          strokeWidth: _defaultBorderWidth,
+        ),
+    );
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('m3_toggle_buttons.oneButton.boardsPaint.png'),
+    );
+  });
+
+  testWidgets('Material2 - Border radius paint test when Radius.x or Radius.y equal 0.0', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerplate(
+        theme: ThemeData(useMaterial3: false),
         child: RepaintBoundary(
           child: ToggleButtons(
             borderRadius: const BorderRadius.only(
@@ -1718,7 +1865,34 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('toggle_buttons.oneButton.boardsPaint2.png'),
+      matchesGoldenFile('m2_toggle_buttons.oneButton.boardsPaint2.png'),
+    );
+  });
+
+  testWidgets('Material3 - Border radius paint test when Radius.x or Radius.y equal 0.0', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerplate(
+        child: RepaintBoundary(
+          child: ToggleButtons(
+            borderRadius: const BorderRadius.only(
+              topRight: Radius.elliptical(10, 0),
+              topLeft: Radius.elliptical(0, 10),
+              bottomRight: Radius.elliptical(0, 10),
+              bottomLeft: Radius.elliptical(10, 0),
+            ),
+            isSelected: const <bool>[true],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First child'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('m3_toggle_buttons.oneButton.boardsPaint2.png'),
     );
   });
 
@@ -1749,10 +1923,10 @@ void main() {
 
     expect(description, <String>[
       'Buttons are enabled',
-      'color: MaterialColor(primary value: Color(0xff4caf50))',
-      'disabledColor: MaterialColor(primary value: Color(0xff2196f3))',
-      'selectedBorderColor: MaterialColor(primary value: Color(0xffe91e63))',
-      'disabledBorderColor: MaterialColor(primary value: Color(0xffffeb3b))',
+      'color: MaterialColor(primary value: ${const Color(0xff4caf50)})',
+      'disabledColor: MaterialColor(primary value: ${const Color(0xff2196f3)})',
+      'selectedBorderColor: MaterialColor(primary value: ${const Color(0xffe91e63)})',
+      'disabledBorderColor: MaterialColor(primary value: ${const Color(0xffffeb3b)})',
       'borderRadius: BorderRadius.circular(7.0)',
       'borderWidth: 3.0',
       'direction: Axis.vertical',
@@ -1943,6 +2117,7 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
               rect: const Rect.fromLTRB(0.0, 0.0, 87.0, 48.0),
             ),
@@ -1956,6 +2131,7 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
               rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0)
             ),
@@ -1969,6 +2145,7 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
               rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
             ),
@@ -2014,6 +2191,7 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
             ),
             TestSemantics(
@@ -2027,6 +2205,7 @@ void main() {
               ],
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
+                SemanticsAction.focus,
               ],
             ),
           ],

@@ -144,5 +144,7 @@
   "menuDismissLabel": "Ignora el menú",
   "lookUpButtonLabel": "Mira amunt",
   "searchWebButtonLabel": "Cerca al web",
-  "shareButtonLabel": "Comparteix..."
+  "shareButtonLabel": "Comparteix",
+  "clearButtonTooltip": "Esborra el text",
+  "selectedDateLabel": "Seleccionat"
 }

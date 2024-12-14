@@ -47,7 +47,7 @@ bool _inUnitTest() {
 /// for language declarations other than library, part, or import.
 ///
 /// The specification for the language version tag is defined at:
-/// https://github.com/dart-lang/language/blob/master/accepted/future-releases/language-versioning/feature-specification.md#individual-library-language-version-override
+/// https://github.com/dart-lang/language/blob/main/accepted/2.8/language-versioning/feature-specification.md#individual-library-language-version-override
 LanguageVersion determineLanguageVersion(File file, Package? package, String flutterRoot) {
   int blockCommentDepth = 0;
   // If reading the file fails, default to a null-safe version. The

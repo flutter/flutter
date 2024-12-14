@@ -1,11 +1,10 @@
 {
-  "version": "v0_162",
+  "version": "6_1_0",
 
-  "md.comp.date-input.modal.container.color": "surface",
+  "md.comp.date-input.modal.container.color": "surfaceContainerHigh",
   "md.comp.date-input.modal.container.elevation": "md.sys.elevation.level3",
   "md.comp.date-input.modal.container.height": 512.0,
   "md.comp.date-input.modal.container.shape": "md.sys.shape.corner.extra-large",
-  "md.comp.date-input.modal.container.surface-tint-layer.color": "surfaceTint",
   "md.comp.date-input.modal.container.width": 328.0,
   "md.comp.date-input.modal.header.container.height": 120.0,
   "md.comp.date-input.modal.header.container.width": 328.0,

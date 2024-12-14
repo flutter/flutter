@@ -101,14 +101,11 @@ class CustomDeviceLogReader extends DeviceLogReader {
   /// [logLines] as done.
   @override
   Future<void> dispose() async {
-    final List<Future<void>> futures = <Future<void>>[];
-
-    for (final StreamSubscription<String> subscription in subscriptions) {
-      futures.add(subscription.cancel());
-    }
-
-    futures.add(logLinesController.close());
-
+    final List<Future<void>> futures = <Future<void>>[
+      for (final StreamSubscription<String> subscription in subscriptions)
+        subscription.cancel(),
+      logLinesController.close(),
+    ];
     await Future.wait(futures);
   }
 
@@ -355,7 +352,6 @@ class CustomDeviceAppSession {
     required DebuggingOptions debuggingOptions,
     Map<String, Object?> platformArgs = const <String, Object>{},
     bool prebuiltApplication = false,
-    bool ipv6 = false,
     String? userIdentifier
   }) async {
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
@@ -380,7 +376,7 @@ class CustomDeviceAppSession {
       logReader,
       portForwarder: _device._config.usesPortForwarding ? _device.portForwarder : null,
       logger: _logger,
-      ipv6: ipv6,
+      ipv6: debuggingOptions.ipv6,
     );
 
     // We need to make the discovery listen to the logReader before the logReader
@@ -442,7 +438,7 @@ class CustomDeviceAppSession {
 class CustomDevice extends Device {
   CustomDevice({
     required CustomDeviceConfig config,
-    required Logger logger,
+    required super.logger,
     required ProcessManager processManager,
   }) : _config = config,
        _logger = logger,
@@ -792,7 +788,6 @@ class CustomDevice extends Device {
       debuggingOptions: debuggingOptions,
       platformArgs: platformArgs,
       prebuiltApplication: prebuiltApplication,
-      ipv6: ipv6,
       userIdentifier: userIdentifier,
     );
   }

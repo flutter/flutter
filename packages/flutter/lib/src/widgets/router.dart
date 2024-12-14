@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'scroll_view.dart';
+library;
+
 import 'dart:async';
 import 'dart:collection';
 
@@ -64,10 +71,7 @@ class RouteInformation {
     'This feature was deprecated after v3.8.0-3.0.pre.'
   )
   String get location {
-    if (_location != null) {
-      return _location;
-    }
-    return Uri.decodeComponent(
+    return _location ?? Uri.decodeComponent(
       Uri(
         path: uri.path.isEmpty ? '/' : uri.path,
         queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
@@ -697,8 +701,9 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     // The super.didChangeDependencies may have parsed the route information.
     // This can happen if the didChangeDependencies is triggered by state
     // restoration or first build.
-    if (widget.routeInformationProvider != null && _routeParsePending) {
-      _processRouteInformation(widget.routeInformationProvider!.value, () => widget.routerDelegate.setNewRoutePath);
+    final RouteInformation? currentRouteInformation = _routeInformation.value ?? widget.routeInformationProvider?.value;
+    if (currentRouteInformation != null && _routeParsePending) {
+      _processRouteInformation(currentRouteInformation, () => widget.routerDelegate.setNewRoutePath);
     }
     _routeParsePending = false;
     _maybeNeedToReportRouteInformation();
@@ -1479,15 +1484,15 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
 
   @override
   void routerReportsNewRouteInformation(RouteInformation routeInformation, {RouteInformationReportingType type = RouteInformationReportingType.none}) {
-    final bool replace =
-      type == RouteInformationReportingType.neglect ||
-      (type == RouteInformationReportingType.none &&
-      _equals(_valueInEngine.uri, routeInformation.uri));
     SystemNavigator.selectMultiEntryHistory();
     SystemNavigator.routeInformationUpdated(
       uri: routeInformation.uri,
       state: routeInformation.state,
-      replace: replace,
+      replace: switch (type) {
+        RouteInformationReportingType.neglect => true,
+        RouteInformationReportingType.navigate => false,
+        RouteInformationReportingType.none => _equals(_valueInEngine.uri, routeInformation.uri),
+      },
     );
     _value = routeInformation;
     _valueInEngine = routeInformation;
@@ -1562,10 +1567,7 @@ mixin PopNavigatorRouterDelegateMixin<T> on RouterDelegate<T> {
   @override
   Future<bool> popRoute() {
     final NavigatorState? navigator = navigatorKey?.currentState;
-    if (navigator == null) {
-      return SynchronousFuture<bool>(false);
-    }
-    return navigator.maybePop();
+    return navigator?.maybePop() ?? SynchronousFuture<bool>(false);
   }
 }
 

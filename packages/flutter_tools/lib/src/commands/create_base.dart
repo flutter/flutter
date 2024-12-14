@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
+import 'package:yaml/yaml.dart';
 
 import '../android/android.dart' as android_common;
 import '../android/android_workflow.dart';
@@ -99,14 +100,15 @@ abstract class CreateBase extends FlutterCommand {
       abbr: 'i',
       defaultsTo: 'swift',
       allowed: <String>['objc', 'swift'],
-      help: 'The language to use for iOS-specific code, either Objective-C (legacy) or Swift (recommended).'
+      help: '(deprecated) The language to use for iOS-specific code, either Swift (recommended) or Objective-C (legacy).',
+      hide: !verboseHelp,
     );
     argParser.addOption(
       'android-language',
       abbr: 'a',
       defaultsTo: 'kotlin',
       allowed: <String>['java', 'kotlin'],
-      help: 'The language to use for Android-specific code, either Java (legacy) or Kotlin (recommended).',
+      help: 'The language to use for Android-specific code, either Kotlin (recommended) or Java (legacy).',
     );
     argParser.addFlag(
       'skip-name-checks',
@@ -319,13 +321,45 @@ abstract class CreateBase extends FlutterCommand {
     }
   }
 
-  /// Gets the project name based.
+  /// Gets the project name.
   ///
-  /// Use the current directory path name if the `--project-name` is not specified explicitly.
+  /// If the `--project-name` is not specified explicitly,
+  /// the `name` field from the pubspec.yaml file is used.
+  ///
+  /// If the pubspec.yaml file does not exist,
+  /// the current directory path name is used.
   @protected
   String get projectName {
-    final String projectName =
-        stringArg('project-name') ?? globals.fs.path.basename(projectDirPath);
+    String? projectName = stringArg('project-name');
+
+    if (projectName == null) {
+      final File pubspec = globals.fs
+        .directory(projectDirPath)
+        .childFile('pubspec.yaml');
+
+      if (pubspec.existsSync()) {
+        final String pubspecContents = pubspec.readAsStringSync();
+
+        try {
+          final Object? pubspecYaml = loadYaml(pubspecContents);
+
+          if (pubspecYaml is YamlMap) {
+            final Object? pubspecName = pubspecYaml['name'];
+
+            if (pubspecName is String) {
+              projectName = pubspecName;
+            }
+          }
+        } on YamlException {
+          // If the pubspec is malformed, fallback to using the directory name.
+        }
+      }
+
+      final String projectDirName = globals.fs.path.basename(projectDirPath);
+
+      projectName ??= projectDirName;
+    }
+
     if (!boolArg('skip-name-checks')) {
       final String? error = _validateProjectName(projectName);
       if (error != null) {
@@ -351,6 +385,7 @@ abstract class CreateBase extends FlutterCommand {
     String? kotlinVersion,
     String? gradleVersion,
     bool withPlatformChannelPluginHook = false,
+    bool withSwiftPackageManager = false,
     bool withFfiPluginHook = false,
     bool withFfiPackage = false,
     bool withEmptyMain = false,
@@ -404,6 +439,7 @@ abstract class CreateBase extends FlutterCommand {
       'withFfiPackage': withFfiPackage,
       'withFfiPluginHook': withFfiPluginHook,
       'withPlatformChannelPluginHook': withPlatformChannelPluginHook,
+      'withSwiftPackageManager': withSwiftPackageManager,
       'withPluginHook': withFfiPluginHook || withFfiPackage || withPlatformChannelPluginHook,
       'withEmptyMain': withEmptyMain,
       'androidLanguage': androidLanguage,
@@ -536,6 +572,7 @@ abstract class CreateBase extends FlutterCommand {
         usage: globals.flutterUsage,
         analytics: globals.analytics,
         projectDir: project.directory,
+        packageConfigPath: packageConfigPath(),
         generateDartPluginRegistry: true,
       );
 
@@ -544,6 +581,7 @@ abstract class CreateBase extends FlutterCommand {
       await generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
       );
     }
     final List<SupportedPlatform> platformsForMigrateConfig = <SupportedPlatform>[SupportedPlatform.root];
@@ -666,8 +704,18 @@ abstract class CreateBase extends FlutterCommand {
       'templates',
       'template_manifest.json',
     );
+    final String manifestFileContents;
+    try {
+      manifestFileContents = globals.fs.file(manifestPath).readAsStringSync();
+    } on FileSystemException catch (e) {
+      throwToolExit(
+        'Unable to read the template manifest at path "$manifestPath".\n'
+        'Make sure that your user account has sufficient permissions to read this file.\n'
+        'Exception details: $e',
+      );
+    }
     final Map<String, Object?> manifest = json.decode(
-      globals.fs.file(manifestPath).readAsStringSync(),
+      manifestFileContents,
     ) as Map<String, Object?>;
     return Set<Uri>.from(
       (manifest['files']! as List<Object?>).cast<String>().map<Uri>(
@@ -695,11 +743,11 @@ abstract class CreateBase extends FlutterCommand {
 
 // A valid Dart identifier that can be used for a package, i.e. no
 // capital letters.
-// https://dart.dev/guides/language/language-tour#important-concepts
+// https://dart.dev/language#important-concepts
 final RegExp _identifierRegExp = RegExp('[a-z_][a-z0-9_]*');
 
 // non-contextual dart keywords.
-//' https://dart.dev/guides/language/language-tour#keywords
+// https://dart.dev/language/keywords
 const Set<String> _keywords = <String>{
   'abstract',
   'as',
@@ -810,16 +858,15 @@ String? potentialValidPackageName(String name){
 String? _validateProjectName(String projectName) {
   if (!isValidPackageName(projectName)) {
     final String? potentialValidName = potentialValidPackageName(projectName);
-
-    return <String>[
-      '"$projectName" is not a valid Dart package name.',
-      '\n\n',
-      'The name should be all lowercase, with underscores to separate words, "just_like_this".',
-      'Use only basic Latin letters and Arabic digits: [a-z0-9_].',
-      "Also, make sure the name is a valid Dart identifier—that it doesn't start with digits and isn't a reserved word.\n",
-      'See https://dart.dev/tools/pub/pubspec#name for more information.',
-      if (potentialValidName != null) '\nTry "$potentialValidName" instead.',
-    ].join();
+    return '"$projectName" is not a valid Dart package name.'
+           '${ potentialValidName != null ? ' Try "$potentialValidName" instead.' : '' }\n'
+           '\n'
+           'The name should consist of lowercase words separated by underscores, "like_this". '
+           'Use only basic Latin letters and Arabic digits: [a-z0-9_], and '
+           'ensure the name is a valid Dart identifier '
+           '(i.e. it does not start with a digit and is not a reserved word).\n'
+           '\n'
+           'See https://dart.dev/tools/pub/pubspec#name for more information.';
   }
   if (_packageDependencies.contains(projectName)) {
     return "Invalid project name: '$projectName' - this will conflict with Flutter "

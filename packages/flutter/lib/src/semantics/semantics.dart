@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/rendering.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag, SemanticsUpdate, SemanticsUpdateBuilder, StringAttribute, TextDirection;
 
@@ -446,6 +452,8 @@ class SemanticsData with Diagnosticable {
     required this.platformViewId,
     required this.maxValueLength,
     required this.currentValueLength,
+    required this.headingLevel,
+    required this.linkUrl,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -454,7 +462,9 @@ class SemanticsData with Diagnosticable {
        assert(attributedValue.string == '' || textDirection != null, 'A SemanticsData object with value "${attributedValue.string}" had a null textDirection.'),
        assert(attributedDecreasedValue.string == '' || textDirection != null, 'A SemanticsData object with decreasedValue "${attributedDecreasedValue.string}" had a null textDirection.'),
        assert(attributedIncreasedValue.string == '' || textDirection != null, 'A SemanticsData object with increasedValue "${attributedIncreasedValue.string}" had a null textDirection.'),
-       assert(attributedHint.string == '' || textDirection != null, 'A SemanticsData object with hint "${attributedHint.string}" had a null textDirection.');
+       assert(attributedHint.string == '' || textDirection != null, 'A SemanticsData object with hint "${attributedHint.string}" had a null textDirection.'),
+       assert(headingLevel >= 0 && headingLevel <= 6, 'Heading level must be between 0 and 6'),
+       assert(linkUrl == null || (flags & SemanticsFlag.isLink.index) != 0, 'A SemanticsData object with a linkUrl must have the isLink flag set to true');
 
   /// A bit field of [SemanticsFlag]s that apply to this node.
   final int flags;
@@ -547,6 +557,12 @@ class SemanticsData with Diagnosticable {
   /// The reading direction is given by [textDirection].
   final String tooltip;
 
+  /// Indicates that this subtree represents a heading.
+  ///
+  /// A value of 0 indicates that it is not a heading. The value should be a
+  /// number between 1 and 6, indicating the hierarchical level as a heading.
+  final int headingLevel;
+
   /// The reading direction for the text in [label], [value],
   /// [increasedValue], [decreasedValue], and [hint].
   final TextDirection? textDirection;
@@ -628,6 +644,13 @@ class SemanticsData with Diagnosticable {
   /// This should only be set when [SemanticsFlag.isTextField] is set. This must
   /// be set when [maxValueLength] is set.
   final int? currentValueLength;
+
+  /// The URL that this node links to.
+  ///
+  /// See also:
+  ///
+  /// * [SemanticsFlag.isLink], which indicates that this node is a link.
+  final Uri? linkUrl;
 
   /// The bounding box for this node in its coordinate system.
   final Rect rect;
@@ -719,6 +742,8 @@ class SemanticsData with Diagnosticable {
     properties.add(DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
+    properties.add(IntProperty('headingLevel', headingLevel, defaultValue: 0));
+    properties.add(DiagnosticsProperty<Uri>('linkUrl', linkUrl, defaultValue: null));
   }
 
   @override
@@ -748,6 +773,8 @@ class SemanticsData with Diagnosticable {
         && other.transform == transform
         && other.elevation == elevation
         && other.thickness == thickness
+        && other.headingLevel == headingLevel
+        && other.linkUrl == linkUrl
         && _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds);
   }
 
@@ -778,6 +805,8 @@ class SemanticsData with Diagnosticable {
       transform,
       elevation,
       thickness,
+      headingLevel,
+      linkUrl,
       customSemanticsActionIds == null ? null : Object.hashAll(customSemanticsActionIds!),
     ),
   );
@@ -891,7 +920,9 @@ class SemanticsProperties extends DiagnosticableTree {
     this.toggled,
     this.button,
     this.link,
+    this.linkUrl,
     this.header,
+    this.headingLevel,
     this.textField,
     this.slider,
     this.keyboardKey,
@@ -943,13 +974,16 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onSetText,
     this.onDidGainAccessibilityFocus,
     this.onDidLoseAccessibilityFocus,
+    this.onFocus,
     this.onDismiss,
     this.customSemanticsActions,
   }) : assert(label == null || attributedLabel == null, 'Only one of label or attributedLabel should be provided'),
        assert(value == null || attributedValue == null, 'Only one of value or attributedValue should be provided'),
        assert(increasedValue == null || attributedIncreasedValue == null, 'Only one of increasedValue or attributedIncreasedValue should be provided'),
        assert(decreasedValue == null || attributedDecreasedValue == null, 'Only one of decreasedValue or attributedDecreasedValue should be provided'),
-       assert(hint == null || attributedHint == null, 'Only one of hint or attributedHint should be provided');
+       assert(hint == null || attributedHint == null, 'Only one of hint or attributedHint should be provided'),
+       assert(headingLevel == null || (headingLevel > 0 && headingLevel <= 6), 'Heading level must be between 1 and 6'),
+       assert(linkUrl == null || (link ?? false), 'If linkUrl is set then link must be true');
 
   /// If non-null, indicates that this subtree represents something that can be
   /// in an enabled or disabled state.
@@ -1179,12 +1213,16 @@ class SemanticsProperties extends DiagnosticableTree {
   /// This value is not exposed to the users of the app.
   ///
   /// It's usually used for UI testing with tools that work by querying the
-  /// native accessibility, like UIAutomator, XCUITest, or Appium.
+  /// native accessibility, like UIAutomator, XCUITest, or Appium. It can be
+  /// matched with [CommonFinders.bySemanticsIdentifier].
   ///
   /// On Android, this is used for `AccessibilityNodeInfo.setViewIdResourceName`.
   /// It'll be appear in accessibility hierarchy as `resource-id`.
   ///
   /// On iOS, this will set `UIAccessibilityElement.accessibilityIdentifier`.
+  ///
+  /// On web, this will set a `flt-semantics-identifier` attribute on the DOM element
+  /// that corresponds to the semantics node.
   /// {@endtemplate}
   final String? identifier;
 
@@ -1361,6 +1399,17 @@ class SemanticsProperties extends DiagnosticableTree {
   /// [Directionality] or an explicit [textDirection] should be provided.
   final String? tooltip;
 
+  /// The heading level in the DOM document structure.
+  ///
+  /// This is only applied to web semantics and is ignored on other platforms.
+  ///
+  /// Screen readers will use this value to determine which part of the page
+  /// structure this heading represents. A level 1 heading, indicated
+  /// with aria-level="1", usually indicates the main heading of a page,
+  /// a level 2 heading, defined with aria-level="2" the first subsection,
+  /// a level 3 is a subsection of that, and so on.
+  final int? headingLevel;
+
   /// Provides hint values which override the default hints on supported
   /// platforms.
   ///
@@ -1400,6 +1449,15 @@ class SemanticsProperties extends DiagnosticableTree {
   ///  * [SemanticsConfiguration.addTagForChildren], to which the tags provided
   ///    here will be passed.
   final SemanticsTag? tagForChildren;
+
+  /// The URL that this node links to.
+  ///
+  /// On the web, this is used to set the `href` attribute of the DOM element.
+  ///
+  /// See also:
+  ///
+  /// * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#href
+  final Uri? linkUrl;
 
   /// The handler for [SemanticsAction.tap].
   ///
@@ -1585,7 +1643,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// This handler is invoked when the user wants to replace the current text in
   /// the text field with a new text.
   ///
-  /// Voice access users can trigger this handler by speaking "type <text>" to
+  /// Voice access users can trigger this handler by speaking `type <text>` to
   /// their Android devices.
   final SetTextHandler? onSetText;
 
@@ -1605,6 +1663,8 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
   ///    focus is removed from the node.
+  ///  * [onFocus], which is invoked when the assistive technology requests that
+  ///    the input focus is gained by a widget.
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
   final VoidCallback? onDidGainAccessibilityFocus;
 
@@ -1626,6 +1686,30 @@ class SemanticsProperties extends DiagnosticableTree {
   ///    accessibility focus.
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
   final VoidCallback? onDidLoseAccessibilityFocus;
+
+  /// {@template flutter.semantics.SemanticsProperties.onFocus}
+  /// The handler for [SemanticsAction.focus].
+  ///
+  /// This handler is invoked when the assistive technology requests that the
+  /// focusable widget corresponding to this semantics node gain input focus.
+  /// The [FocusNode] that manages the focus of the widget must gain focus. The
+  /// widget must begin responding to relevant key events. For example:
+  ///
+  /// * Buttons must respond to tap/click events produced via keyboard shortcuts.
+  /// * Text fields must become focused and editable, showing an on-screen
+  ///   keyboard, if necessary.
+  /// * Checkboxes, switches, and radio buttons must become togglable using
+  ///   keyboard shortcuts.
+  ///
+  /// Focus behavior is specific to the platform and to the assistive technology
+  /// used. See the documentation of [SemanticsAction.focus] for more detail.
+  ///
+  /// See also:
+  ///
+  ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
+  ///    accessibility focus.
+  /// {@endtemplate}
+  final VoidCallback? onFocus;
 
   /// The handler for [SemanticsAction.dismiss].
   ///
@@ -1839,7 +1923,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// [isMergedIntoParent].
   ///
   /// An invisible node can be safely dropped from the semantic tree without
-  /// loosing semantic information that is relevant for describing the content
+  /// losing semantic information that is relevant for describing the content
   /// currently shown on screen.
   bool get isInvisible => !isMergedIntoParent && rect.isEmpty;
 
@@ -2209,7 +2293,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
         || _maxValueLength != config._maxValueLength
         || _currentValueLength != config._currentValueLength
         || _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants
-        || _areUserActionsBlocked != config.isBlockingUserActions;
+        || _areUserActionsBlocked != config.isBlockingUserActions
+        || _headingLevel != config._headingLevel
+        || _linkUrl != config._linkUrl;
   }
 
   // TAGS, LABELS, ACTIONS
@@ -2513,7 +2599,18 @@ class SemanticsNode with DiagnosticableTreeMixin {
   int? get currentValueLength => _currentValueLength;
   int? _currentValueLength;
 
-  bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
+  /// The level of the widget as a heading within the structural hierarchy
+  /// of the screen. A value of 1 indicates the highest level of structural
+  /// hierarchy. A value of 2 indicates the next level, and so on.
+  int get headingLevel => _headingLevel;
+  int _headingLevel = _kEmptyConfig._headingLevel;
+
+  /// The URL that this node links to.
+  Uri? get linkUrl => _linkUrl;
+  Uri? _linkUrl = _kEmptyConfig._linkUrl;
+
+  bool _canPerformAction(SemanticsAction action) =>
+      _actions.containsKey(action);
 
   static final SemanticsConfiguration _kEmptyConfig = SemanticsConfiguration();
 
@@ -2571,6 +2668,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _maxValueLength = config._maxValueLength;
     _currentValueLength = config._currentValueLength;
     _areUserActionsBlocked = config.isBlockingUserActions;
+    _headingLevel = config._headingLevel;
+    _linkUrl = config._linkUrl;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     if (mergeAllDescendantsIntoThisNodeValueChanged) {
@@ -2616,8 +2715,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
     int? platformViewId = _platformViewId;
     int? maxValueLength = _maxValueLength;
     int? currentValueLength = _currentValueLength;
+    int headingLevel = _headingLevel;
     final double elevation = _elevation;
     double thickness = _thickness;
+    Uri? linkUrl = _linkUrl;
     final Set<int> customSemanticsActionIds = <int>{};
     for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -2655,6 +2756,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
         platformViewId ??= node._platformViewId;
         maxValueLength ??= node._maxValueLength;
         currentValueLength ??= node._currentValueLength;
+        linkUrl ??= node._linkUrl;
+        headingLevel = _mergeHeadingLevels(
+          sourceLevel: node._headingLevel,
+          targetLevel: headingLevel,
+        );
+
         if (identifier == '') {
           identifier = node._identifier;
         }
@@ -2738,6 +2845,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
       maxValueLength: maxValueLength,
       currentValueLength: currentValueLength,
       customSemanticsActionIds: customSemanticsActionIds.toList()..sort(),
+      headingLevel: headingLevel,
+      linkUrl: linkUrl,
     );
   }
 
@@ -2813,6 +2922,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
+      headingLevel: data.headingLevel,
+      linkUrl: data.linkUrl?.toString() ?? '',
     );
     _dirty = false;
   }
@@ -2959,8 +3070,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
     properties.add(DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
+    properties.add(IntProperty('indexInParent', indexInParent, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
+    properties.add(IntProperty('headingLevel', _headingLevel, defaultValue: 0));
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -2973,8 +3086,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
     String? prefixOtherLines,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
     DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
+    int wrapWidth = 65,
   }) {
-    return toDiagnosticsNode(childOrder: childOrder).toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel);
+    return toDiagnosticsNode(childOrder: childOrder).toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel, wrapWidth: wrapWidth);
   }
 
   @override
@@ -3004,12 +3118,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
       return const <SemanticsNode>[];
     }
 
-    switch (childOrder) {
-      case DebugSemanticsDumpOrder.inverseHitTest:
-        return _children!;
-      case DebugSemanticsDumpOrder.traversalOrder:
-        return _childrenInTraversalOrder();
-    }
+    return switch (childOrder) {
+      DebugSemanticsDumpOrder.inverseHitTest => _children!,
+      DebugSemanticsDumpOrder.traversalOrder => _childrenInTraversalOrder(),
+    };
   }
 }
 
@@ -3405,7 +3517,7 @@ class SemanticsOwner extends ChangeNotifier {
           'and its semantic information is not merged into a visible parent.'
         ),
         ErrorHint(
-          'An invisible SemantiscNode makes the accessibility experience confusing, '
+          'An invisible SemanticsNode makes the accessibility experience confusing, '
           'as it does not provide any visual indication when the user selects it '
           'via accessibility technologies.'
         ),
@@ -3433,10 +3545,10 @@ class SemanticsOwner extends ChangeNotifier {
         assert(node.parent == null || !node.parent!.isPartOfNodeMerging || node.isMergedIntoParent);
         if (node.isPartOfNodeMerging) {
           assert(node.mergeAllDescendantsIntoThisNode || node.parent != null);
-          // if we're merged into our parent, make sure our parent is added to the dirty list
+          // If child node is merged into its parent, make sure the parent is marked as dirty
           if (node.parent != null && node.parent!.isPartOfNodeMerging) {
             node.parent!._markDirty(); // this can add the node to the dirty list
-            node._dirty = false; // We don't want to send update for this node.
+            node._dirty = false; // Do not send update for this node, as it's now part of its parent
           }
         }
       }
@@ -3653,7 +3765,7 @@ class SemanticsConfiguration {
   ///
   /// See also:
   ///
-  ///  * [addAction] to add an action.
+  ///  * [_addAction] to add an action.
   final Map<SemanticsAction, SemanticsActionHandler> _actions = <SemanticsAction, SemanticsActionHandler>{};
 
   int get _effectiveActionsAsBits => isBlockingUserActions ? _actionsAsBits & _kUnblockedUserActions : _actionsAsBits;
@@ -3814,9 +3926,8 @@ class SemanticsConfiguration {
   /// This is a request to increase the value represented by the widget. For
   /// example, this action might be recognized by a slider control.
   ///
-  /// If [this.value] is set, [increasedValue] must also be provided and
-  /// [onIncrease] must ensure that [this.value] will be set to
-  /// [increasedValue].
+  /// If [value] is set, [increasedValue] must also be provided and
+  /// [onIncrease] must ensure that [value] will be set to [increasedValue].
   ///
   /// VoiceOver users on iOS can trigger this action by swiping up with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
@@ -3833,9 +3944,8 @@ class SemanticsConfiguration {
   /// This is a request to decrease the value represented by the widget. For
   /// example, this action might be recognized by a slider control.
   ///
-  /// If [this.value] is set, [decreasedValue] must also be provided and
-  /// [onDecrease] must ensure that [this.value] will be set to
-  /// [decreasedValue].
+  /// If [value] is set, [decreasedValue] must also be provided and
+  /// [onDecrease] must ensure that [value] will be set to [decreasedValue].
   ///
   /// VoiceOver users on iOS can trigger this action by swiping down with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
@@ -4003,7 +4113,7 @@ class SemanticsConfiguration {
   /// This handler is invoked when the user wants to replace the current text in
   /// the text field with a new text.
   ///
-  /// Voice access users can trigger this handler by speaking "type <text>" to
+  /// Voice access users can trigger this handler by speaking `type <text>` to
   /// their Android devices.
   SetTextHandler? get onSetText => _onSetText;
   SetTextHandler? _onSetText;
@@ -4063,6 +4173,14 @@ class SemanticsConfiguration {
   set onDidLoseAccessibilityFocus(VoidCallback? value) {
     _addArgumentlessAction(SemanticsAction.didLoseAccessibilityFocus, value!);
     _onDidLoseAccessibilityFocus = value;
+  }
+
+  /// {@macro flutter.semantics.SemanticsProperties.onFocus}
+  VoidCallback? get onFocus => _onFocus;
+  VoidCallback? _onFocus;
+  set onFocus(VoidCallback? value) {
+    _addArgumentlessAction(SemanticsAction.focus, value!);
+    _onFocus = value;
   }
 
   /// A delegate that decides how to handle [SemanticsConfiguration]s produced
@@ -4671,10 +4789,37 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isLink, value);
   }
 
+  /// The URL that the owning [RenderObject] links to.
+  Uri? get linkUrl => _linkUrl;
+  Uri? _linkUrl;
+
+  set linkUrl(Uri? value) {
+    if (value == _linkUrl) {
+      return;
+    }
+    _linkUrl = value;
+    _hasBeenAnnotated = true;
+  }
+
   /// Whether the owning [RenderObject] is a header (true) or not (false).
   bool get isHeader => _hasFlag(SemanticsFlag.isHeader);
   set isHeader(bool value) {
     _setFlag(SemanticsFlag.isHeader, value);
+  }
+
+  /// Indicates the heading level in the document structure.
+  ///
+  /// This is only used for web semantics, and is ignored on other platforms.
+  int get headingLevel => _headingLevel;
+  int _headingLevel = 0;
+
+  set headingLevel(int value) {
+    assert(value >= 0 && value <= 6);
+    if (value == headingLevel) {
+      return;
+    }
+    _headingLevel = value;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] is a slider (true) or not (false).
@@ -4725,11 +4870,11 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isReadOnly, value);
   }
 
-  /// Whether [this.value] should be obscured.
+  /// Whether [value] should be obscured.
   ///
   /// This option is usually set in combination with [isTextField] to indicate
   /// that the text field contains a password (or other sensitive information).
-  /// Doing so instructs screen readers to not read out [this.value].
+  /// Doing so instructs screen readers to not read out [value].
   bool get isObscured => _hasFlag(SemanticsFlag.isObscured);
   set isObscured(bool value) {
     _setFlag(SemanticsFlag.isObscured, value);
@@ -4757,7 +4902,7 @@ class SemanticsConfiguration {
   }
 
   /// The currently selected text (or the position of the cursor) within
-  /// [this.value] if this node represents a text field.
+  /// [value] if this node represents a text field.
   TextSelection? get textSelection => _textSelection;
   TextSelection? _textSelection;
   set textSelection(TextSelection? value) {
@@ -4940,6 +5085,11 @@ class SemanticsConfiguration {
     _maxValueLength ??= child._maxValueLength;
     _currentValueLength ??= child._currentValueLength;
 
+    _headingLevel = _mergeHeadingLevels(
+      sourceLevel: child._headingLevel,
+      targetLevel: _headingLevel,
+    );
+
     textDirection ??= child.textDirection;
     _sortKey ??= child._sortKey;
     if (_identifier == '') {
@@ -5010,7 +5160,9 @@ class SemanticsConfiguration {
       .._currentValueLength = _currentValueLength
       .._actions.addAll(_actions)
       .._customSemanticsActions.addAll(_customSemanticsActions)
-      ..isBlockingUserActions = isBlockingUserActions;
+      ..isBlockingUserActions = isBlockingUserActions
+      .._headingLevel = _headingLevel
+      .._linkUrl = _linkUrl;
   }
 }
 
@@ -5041,12 +5193,11 @@ AttributedString _concatAttributedString({
     return thisAttributedString;
   }
   if (thisTextDirection != otherTextDirection && otherTextDirection != null) {
-    switch (otherTextDirection) {
-      case TextDirection.rtl:
-        otherAttributedString = AttributedString(Unicode.RLE) + otherAttributedString + AttributedString(Unicode.PDF);
-      case TextDirection.ltr:
-        otherAttributedString = AttributedString(Unicode.LRE) + otherAttributedString + AttributedString(Unicode.PDF);
-    }
+    final AttributedString directionEmbedding = switch (otherTextDirection) {
+      TextDirection.rtl => AttributedString(Unicode.RLE),
+      TextDirection.ltr => AttributedString(Unicode.LRE),
+    };
+    otherAttributedString = directionEmbedding + otherAttributedString + AttributedString(Unicode.PDF);
   }
   if (thisAttributedString.string.isEmpty) {
     return otherAttributedString;
@@ -5175,4 +5326,17 @@ class OrdinalSortKey extends SemanticsSortKey {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('order', order, defaultValue: null));
   }
+}
+
+/// Picks the most accurate heading level when two nodes, with potentially
+/// different heading levels, are merged.
+///
+/// Argument [sourceLevel] is the heading level of the source node that is being
+/// merged into a target node, which has heading level [targetLevel].
+///
+/// If the target node is not a heading, the the source heading level is used.
+/// Otherwise, the target heading level is used irrespective of the source
+/// heading level.
+int _mergeHeadingLevels({required int sourceLevel, required int targetLevel}) {
+  return targetLevel == 0 ? sourceLevel : targetLevel;
 }

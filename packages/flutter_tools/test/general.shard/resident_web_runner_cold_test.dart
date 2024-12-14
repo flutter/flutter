@@ -29,7 +29,7 @@ import '../src/test_build_system.dart';
 void main() {
   late FakeFlutterDevice mockFlutterDevice;
   late FakeWebDevFS mockWebDevFS;
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -38,7 +38,10 @@ void main() {
     mockFlutterDevice = FakeFlutterDevice(mockWebDevice);
     mockFlutterDevice._devFS = mockWebDevFS;
 
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('web', 'index.html')).createSync(recursive: true);
@@ -50,7 +53,6 @@ void main() {
       mockFlutterDevice,
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -81,7 +83,6 @@ void main() {
       mockFlutterDevice,
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -107,7 +108,6 @@ void main() {
       mockFlutterDevice,
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -132,7 +132,6 @@ void main() {
       mockFlutterDevice,
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -162,7 +161,6 @@ void main() {
       mockFlutterDevice,
       flutterProject: project,
       debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),

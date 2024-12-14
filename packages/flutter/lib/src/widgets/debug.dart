@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/rendering.dart';
+/// @docImport 'package:flutter/scheduler.dart';
+///
+/// @docImport 'binding.dart';
+/// @docImport 'widget_inspector.dart';
+library;
+
 import 'dart:collection';
 import 'dart:developer' show Timeline; // to disambiguate reference in dartdocs below
 
@@ -111,7 +119,7 @@ bool debugPrintGlobalKeyedWidgetLifecycle = false;
 /// performance. This data is omitted in profile builds.
 ///
 /// For more information about performance debugging in Flutter, see
-/// <https://flutter.dev/docs/perf/rendering>.
+/// <https://docs.flutter.dev/perf/ui-performance>.
 ///
 /// See also:
 ///

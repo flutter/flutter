@@ -405,13 +405,15 @@ Future<void> _buildValueIndicatorStaticSlider(
 }) async {
   await tester.pumpWidget(
     MaterialApp(
+      debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
       theme: ThemeData(useMaterial3: useMaterial3),
       home: Scaffold(
         body: Builder(
           builder: (BuildContext context) {
             return Center(
-              child: MediaQuery(
-                data: MediaQueryData(textScaleFactor: textScale),
+              child: MediaQuery.withClampedTextScaling(
+                minScaleFactor: textScale,
+                maxScaleFactor: textScale,
                 child: SliderTheme(
                   data: Theme.of(context).sliderTheme.copyWith(
                     showValueIndicator: ShowValueIndicator.always,

@@ -117,7 +117,7 @@ void main() {
     expect(find.text('5'), findsOneWidget);
 
     await tester.pumpWidget(Container());
-    await tester.pumpWidget(buildFrame(textDirection: TextDirection.ltr), const Duration(seconds: 1));
+    await tester.pumpWidget(buildFrame(textDirection: TextDirection.ltr), duration: const Duration(seconds: 1));
     await tester.drag(find.text('2'), const Offset(-280.0, 0.0), touchSlopX: 0.0);
     await tester.pump(const Duration(seconds: 1));
     // screen is 800px wide, and has the following items:
@@ -436,7 +436,7 @@ void main() {
     expect(find.text('5'), findsOneWidget);
 
     await tester.pumpWidget(Container());
-    await tester.pumpWidget(buildFrame(reverse: true, textDirection: TextDirection.rtl), const Duration(seconds: 1));
+    await tester.pumpWidget(buildFrame(reverse: true, textDirection: TextDirection.rtl), duration: const Duration(seconds: 1));
     await tester.drag(find.text('2'), const Offset(-280.0, 0.0), touchSlopX: 0.0);
     await tester.pump(const Duration(seconds: 1));
     // screen is 800px wide, and has the following items:

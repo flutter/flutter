@@ -15,13 +15,20 @@ import '../convert.dart';
 
 /// Adler-32 and MD5 hashes of blocks in files.
 class BlockHashes {
-  BlockHashes({
+  const BlockHashes({
     required this.blockSize,
     required this.totalSize,
     required this.adler32,
     required this.md5,
     required this.fileMd5,
   });
+
+  BlockHashes.fromJson(Map<String, Object?> obj)
+      : blockSize = obj['blockSize']! as int,
+        totalSize = obj['totalSize']! as int,
+        adler32 = Uint32List.view(base64.decode(obj['adler32']! as String).buffer),
+        md5 = (obj['md5']! as List<Object?>).cast<String>(),
+        fileMd5 = obj['fileMd5']! as String;
 
   /// The block size used to generate the hashes.
   final int blockSize;
@@ -45,16 +52,6 @@ class BlockHashes {
     'md5': md5,
     'fileMd5': fileMd5,
   };
-
-  static BlockHashes fromJson(Map<String, Object?> obj) {
-    return BlockHashes(
-      blockSize: obj['blockSize']! as int,
-      totalSize: obj['totalSize']! as int,
-      adler32: Uint32List.view(base64.decode(obj['adler32']! as String).buffer),
-      md5: (obj['md5']! as List<Object?>).cast<String>(),
-      fileMd5: obj['fileMd5']! as String,
-    );
-  }
 }
 
 /// Converts a stream of bytes, into a stream of bytes of fixed chunk size.

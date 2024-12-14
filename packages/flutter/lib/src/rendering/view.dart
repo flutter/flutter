@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/semantics.dart';
+/// @docImport 'package:flutter/widgets.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
+library;
+
 import 'dart:io' show Platform;
 import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder, SemanticsUpdate;
 
@@ -19,14 +24,40 @@ import 'object.dart';
 class ViewConfiguration {
   /// Creates a view configuration.
   ///
-  /// By default, the view has zero [size] and a [devicePixelRatio] of 1.0.
+  /// By default, the view has [logicalConstraints] and [physicalConstraints]
+  /// with all dimensions set to zero (i.e. the view is forced to [Size.zero])
+  /// and a [devicePixelRatio] of 1.0.
+  ///
+  /// [ViewConfiguration.fromView] is a more convenient way for deriving a
+  /// [ViewConfiguration] from a given [ui.FlutterView].
   const ViewConfiguration({
-    this.size = Size.zero,
+    this.physicalConstraints = const BoxConstraints(maxWidth: 0, maxHeight: 0),
+    this.logicalConstraints = const BoxConstraints(maxWidth: 0, maxHeight: 0),
     this.devicePixelRatio = 1.0,
   });
 
-  /// The size of the output surface.
-  final Size size;
+  /// Creates a view configuration for the provided [ui.FlutterView].
+  factory ViewConfiguration.fromView(ui.FlutterView view) {
+    final BoxConstraints physicalConstraints = BoxConstraints.fromViewConstraints(view.physicalConstraints);
+    final double devicePixelRatio = view.devicePixelRatio;
+    return ViewConfiguration(
+      physicalConstraints: physicalConstraints,
+      logicalConstraints: physicalConstraints / devicePixelRatio,
+      devicePixelRatio: devicePixelRatio,
+    );
+  }
+
+  /// The constraints of the output surface in logical pixel.
+  ///
+  /// The constraints are passed to the child of the root render object.
+  final BoxConstraints logicalConstraints;
+
+  /// The constraints of the output surface in physical pixel.
+  ///
+  /// These constraints are enforced in [toPhysicalSize] when translating
+  /// the logical size of the root render object back to physical pixels for
+  /// the [ui.FlutterView.render] method.
+  final BoxConstraints physicalConstraints;
 
   /// The pixel density of the output surface.
   final double devicePixelRatio;
@@ -35,9 +66,36 @@ class ViewConfiguration {
   ///
   /// The matrix translates points from the local coordinate system of the
   /// app (in logical pixels) to the global coordinate system of the
-  /// [FlutterView] (in physical pixels).
+  /// [ui.FlutterView] (in physical pixels).
   Matrix4 toMatrix() {
     return Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
+  }
+
+  /// Returns whether [toMatrix] would return a different value for this
+  /// configuration than it would for the given `oldConfiguration`.
+  bool shouldUpdateMatrix(ViewConfiguration oldConfiguration) {
+    if (oldConfiguration.runtimeType != runtimeType) {
+      // New configuration could have different logic, so we don't know
+      // whether it will need a new transform. Return a conservative result.
+      return true;
+    }
+    // For this class, the only input to toMatrix is the device pixel ratio,
+    // so we return true if they differ and false otherwise.
+    return oldConfiguration.devicePixelRatio != devicePixelRatio;
+  }
+
+  /// Transforms the provided [Size] in logical pixels to physical pixels.
+  ///
+  /// The [ui.FlutterView.render] method accepts only sizes in physical pixels, but
+  /// the framework operates in logical pixels. This method is used to transform
+  /// the logical size calculated for a [RenderView] back to a physical size
+  /// suitable to be passed to [ui.FlutterView.render].
+  ///
+  /// By default, this method just multiplies the provided [Size] with the
+  /// [devicePixelRatio] and constraints the results to the
+  /// [physicalConstraints].
+  Size toPhysicalSize(Size logicalSize) {
+    return physicalConstraints.constrain(logicalSize * devicePixelRatio);
   }
 
   @override
@@ -46,15 +104,16 @@ class ViewConfiguration {
       return false;
     }
     return other is ViewConfiguration
-        && other.size == size
+        && other.logicalConstraints == logicalConstraints
+        && other.physicalConstraints == physicalConstraints
         && other.devicePixelRatio == devicePixelRatio;
   }
 
   @override
-  int get hashCode => Object.hash(size, devicePixelRatio);
+  int get hashCode => Object.hash(logicalConstraints, physicalConstraints, devicePixelRatio);
 
   @override
-  String toString() => '$size at ${debugFormatDouble(devicePixelRatio)}x';
+  String toString() => '$logicalConstraints at ${debugFormatDouble(devicePixelRatio)}x';
 }
 
 /// The root of the render tree.
@@ -62,6 +121,16 @@ class ViewConfiguration {
 /// The view represents the total output surface of the render tree and handles
 /// bootstrapping the rendering pipeline. The view has a unique child
 /// [RenderBox], which is required to fill the entire output surface.
+///
+/// This object must be bootstrapped in a specific order:
+///
+///  1. First, set the [configuration] (either in the constructor or after
+///     construction).
+///  2. Second, [attach] the object to a [PipelineOwner].
+///  3. Third, use [prepareInitialFrame] to bootstrap the layout and paint logic.
+///
+/// After the bootstrapping is complete, the [compositeFrame] method may be used
+/// to obtain the rendered output.
 class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox> {
   /// Creates the root of the render tree.
   ///
@@ -76,8 +145,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     RenderBox? child,
     ViewConfiguration? configuration,
     required ui.FlutterView view,
-  }) : _configuration = configuration,
-       _view = view {
+  }) : _view = view {
+    if (configuration != null) {
+      this.configuration = configuration;
+    }
     this.child = child;
   }
 
@@ -97,6 +168,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// [TestFlutterView.physicalSize] on the appropriate [TestFlutterView]
   /// (typically [WidgetTester.view]) instead of setting a configuration
   /// directly on the [RenderView].
+  ///
+  /// A [configuration] must be set (either directly or by passing one to the
+  /// constructor) before calling [prepareInitialFrame].
   ViewConfiguration get configuration => _configuration!;
   ViewConfiguration? _configuration;
   set configuration(ViewConfiguration value) {
@@ -106,10 +180,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     final ViewConfiguration? oldConfiguration = _configuration;
     _configuration = value;
     if (_rootTransform == null) {
-      // [prepareInitialFrame] has not been called yet, nothing to do for now.
+      // [prepareInitialFrame] has not been called yet, nothing more to do for now.
       return;
     }
-    if (oldConfiguration?.toMatrix() != configuration.toMatrix()) {
+    if (oldConfiguration == null || configuration.shouldUpdateMatrix(oldConfiguration)) {
       replaceRootLayer(_updateMatricesAndCreateNewRootLayer());
     }
     assert(_rootTransform != null);
@@ -117,9 +191,19 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   /// Whether a [configuration] has been set.
+  ///
+  /// This must be true before calling [prepareInitialFrame].
   bool get hasConfiguration => _configuration != null;
 
-  /// The [FlutterView] into which this [RenderView] will render.
+  @override
+  BoxConstraints get constraints {
+    if (!hasConfiguration) {
+      throw StateError('Constraints are not available because RenderView has not been given a configuration yet.');
+    }
+    return configuration.logicalConstraints;
+  }
+
+  /// The [ui.FlutterView] into which this [RenderView] will render.
   ui.FlutterView get flutterView => _view;
   final ui.FlutterView _view;
 
@@ -151,15 +235,23 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   /// Bootstrap the rendering pipeline by preparing the first frame.
   ///
-  /// This should only be called once, and must be called before changing
-  /// [configuration]. It is typically called immediately after calling the
-  /// constructor.
+  /// This should only be called once. It is typically called immediately after
+  /// setting the [configuration] the first time (whether by passing one to the
+  /// constructor, or setting it directly). The [configuration] must have been
+  /// set before calling this method, and the [RenderView] must have been
+  /// attached to a [PipelineOwner] using [attach].
   ///
   /// This does not actually schedule the first frame. Call
-  /// [PipelineOwner.requestVisualUpdate] on [owner] to do that.
+  /// [PipelineOwner.requestVisualUpdate] on the [owner] to do that.
+  ///
+  /// This should be called before using any methods that rely on the [layer]
+  /// being initialized, such as [compositeFrame].
+  ///
+  /// This method calls [scheduleInitialLayout] and [scheduleInitialPaint].
   void prepareInitialFrame() {
-    assert(owner != null);
-    assert(_rootTransform == null);
+    assert(owner != null, 'attach the RenderView to a PipelineOwner before calling prepareInitialFrame');
+    assert(_rootTransform == null, 'prepareInitialFrame must only be called once'); // set by _updateMatricesAndCreateNewRootLayer
+    assert(hasConfiguration, 'set a configuration before calling prepareInitialFrame');
     scheduleInitialLayout();
     scheduleInitialPaint(_updateMatricesAndCreateNewRootLayer());
     assert(_rootTransform != null);
@@ -168,6 +260,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   Matrix4? _rootTransform;
 
   TransformLayer _updateMatricesAndCreateNewRootLayer() {
+    assert(hasConfiguration);
     _rootTransform = configuration.toMatrix();
     final TransformLayer rootLayer = TransformLayer(transform: _rootTransform);
     rootLayer.attach(this);
@@ -188,12 +281,11 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   @override
   void performLayout() {
     assert(_rootTransform != null);
-    _size = configuration.size;
-    assert(_size.isFinite);
-
-    if (child != null) {
-      child!.layout(BoxConstraints.tight(_size));
-    }
+    final bool sizedByChild = !constraints.isTight;
+    child?.layout(constraints, parentUsesSize: sizedByChild);
+    _size = sizedByChild && child != null ? child!.size : constraints.smallest;
+    assert(size.isFinite);
+    assert(constraints.isSatisfiedBy(size));
   }
 
   /// Determines the set of render objects located at the given position.
@@ -207,9 +299,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// coordinate system as that expected by the root [Layer], which will
   /// normally be in physical (device) pixels.
   bool hitTest(HitTestResult result, { required Offset position }) {
-    if (child != null) {
-      child!.hitTest(BoxHitTestResult.wrap(result), position: position);
-    }
+    child?.hitTest(BoxHitTestResult.wrap(result), position: position);
     result.add(HitTestEntry(this));
     return true;
   }
@@ -243,17 +333,25 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// Uploads the composited layer tree to the engine.
   ///
   /// Actually causes the output of the rendering pipeline to appear on screen.
+  ///
+  /// Before calling this method, the [owner] must be set by calling [attach],
+  /// the [configuration] must be set to a non-null value, and the
+  /// [prepareInitialFrame] method must have been called.
   void compositeFrame() {
     if (!kReleaseMode) {
       FlutterTimeline.startSync('COMPOSITING');
     }
     try {
-      final ui.SceneBuilder builder = ui.SceneBuilder();
+      assert(hasConfiguration, 'set the RenderView configuration before calling compositeFrame');
+      assert(_rootTransform != null, 'call prepareInitialFrame before calling compositeFrame');
+      assert(layer != null, 'call prepareInitialFrame before calling compositeFrame');
+      final ui.SceneBuilder builder = RendererBinding.instance.createSceneBuilder();
       final ui.Scene scene = layer!.buildScene(builder);
       if (automaticSystemUiAdjustment) {
         _updateSystemChrome();
       }
-      _view.render(scene);
+      assert(configuration.logicalConstraints.isSatisfiedBy(size));
+      _view.render(scene, size: configuration.toPhysicalSize(size));
       scene.dispose();
       assert(() {
         if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled) {
@@ -268,10 +366,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     }
   }
 
-  /// Sends the provided [SemanticsUpdate] to the [FlutterView] associated with
+  /// Sends the provided [ui.SemanticsUpdate] to the [ui.FlutterView] associated with
   /// this [RenderView].
   ///
-  /// A [SemanticsUpdate] is produced by a [SemanticsOwner] during the
+  /// A [ui.SemanticsUpdate] is produced by a [SemanticsOwner] during the
   /// [EnginePhase.flushSemantics] phase.
   void updateSemantics(ui.SemanticsUpdate update) {
     _view.updateSemantics(update);

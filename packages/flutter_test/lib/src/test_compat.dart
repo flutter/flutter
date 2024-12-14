@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:test_api/backend.dart';
+/// @docImport 'package:test_api/scaffolding.dart';
+library;
+
 import 'dart:async';
 
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -19,7 +23,6 @@ import 'package:test_api/src/backend/suite.dart'; // ignore: implementation_impo
 import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/test.dart'; // ignore: implementation_imports
 
-// ignore: deprecated_member_use
 export 'package:test_api/fake.dart' show Fake;
 
 Declarer? _localDeclarer;
@@ -286,7 +289,7 @@ Future<void> _tearDownForTestFile() async {
 
 /// A reporter that prints each test on its own line.
 ///
-/// This is currently used in place of [CompactReporter] by `lib/test.dart`,
+/// This is currently used in place of `CompactReporter` by `lib/test.dart`,
 /// which can't transitively import `dart:io` but still needs access to a runner
 /// so that test files can be run directly. This means that until issue 6943 is
 /// fixed, this must not import `dart:io`.

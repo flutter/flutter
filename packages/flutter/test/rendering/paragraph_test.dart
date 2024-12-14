@@ -4,7 +4,7 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Paragraph, TextBox;
 
-import 'package:flutter/foundation.dart' show isCanvasKit, kIsWeb;
+import 'package:flutter/foundation.dart' show isSkiaWeb, kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -121,7 +121,7 @@ void main() {
     );
     layout(paragraph);
 
-    final double height5 = paragraph.getFullHeightForCaret(const TextPosition(offset: 5))!;
+    final double height5 = paragraph.getFullHeightForCaret(const TextPosition(offset: 5));
     expect(height5, equals(10.0));
   });
 
@@ -206,7 +206,7 @@ void main() {
     expect(boxes[2], const TextBox.fromLTRBD(0.0, 10.0, 130.0, 20.0, TextDirection.ltr));
     // 'fifth':
     expect(boxes[3], const TextBox.fromLTRBD(0.0, 20.0, 50.0, 30.0, TextDirection.ltr));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/61016
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/61016
 
   test('getBoxesForSelection test with boxHeightStyle and boxWidthStyle set to max', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -374,6 +374,27 @@ void main() {
     layoutAt(3);
     expect(paragraph.size.height, 30.0);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61018
+
+  test('textAlign triggers TextPainter relayout in the paint method', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(text: 'A', style: TextStyle(fontSize: 10.0)),
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.left,
+    );
+
+    Rect getRectForA() => paragraph.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1)).single.toRect();
+
+    layout(paragraph, constraints: const BoxConstraints.tightFor(width: 100.0));
+
+    expect(getRectForA(), const Rect.fromLTWH(0, 0, 10, 10));
+
+    paragraph.textAlign = TextAlign.right;
+    expect(paragraph.debugNeedsLayout, isFalse);
+    expect(paragraph.debugNeedsPaint, isTrue);
+
+    paragraph.paint(MockPaintingContext(), Offset.zero);
+    expect(getRectForA(), const Rect.fromLTWH(90, 0, 10, 10));
+  });
 
   group('didExceedMaxLines', () {
     RenderParagraph createRenderParagraph({
@@ -923,7 +944,7 @@ void main() {
       paragraph.paint(paintingContext, Offset.zero);
       expect(paintingContext.canvas.drawnRect, const Rect.fromLTWH(14.0, 0.0, 56.0, 14.0));
       expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
-      expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
+      expect(paintingContext.canvas.drawnRectPaint!.color, isSameColorAs(selectionColor));
       // Selection highlight is painted before text.
       expect(paintingContext.canvas.drawnItemTypes, <Type>[Rect, ui.Paragraph]);
 
@@ -931,7 +952,7 @@ void main() {
       paragraph.paint(paintingContext, Offset.zero);
       expect(paintingContext.canvas.drawnRect, const Rect.fromLTWH(28.0, 0.0, 28.0, 14.0));
       expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
-      expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
+      expect(paintingContext.canvas.drawnRectPaint!.color, isSameColorAs(selectionColor));
     });
 
 // Regression test for https://github.com/flutter/flutter/issues/126652.
@@ -958,7 +979,7 @@ void main() {
       paragraph.paint(paintingContext, Offset.zero);
       expect(paintingContext.canvas.drawnRect!.isEmpty, false);
       expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
-      expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
+      expect(paintingContext.canvas.drawnRectPaint!.color, isSameColorAs(selectionColor));
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
 
     test('getPositionForOffset works', () async {
@@ -1394,11 +1415,10 @@ void main() {
     );
 
     int semanticsUpdateCount = 0;
-    TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
-      listener: () {
-        ++semanticsUpdateCount;
-      },
-    );
+    final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.ensureSemantics();
+    TestRenderingFlutterBinding.instance.pipelineOwner.semanticsOwner!.addListener(() {
+      ++semanticsUpdateCount;
+    });
 
     layout(paragraph);
 
@@ -1432,6 +1452,8 @@ void main() {
     data = children.single.getSemanticsData();
     expect(data.hasAction(SemanticsAction.longPress), true);
     expect(data.hasAction(SemanticsAction.tap), false);
+
+    semanticsHandle.dispose();
   });
 }
 

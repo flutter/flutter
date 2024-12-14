@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import 'multi_view_testing.dart';
 import 'semantics_tester.dart';
 
 void main() {
@@ -704,7 +706,7 @@ void main() {
 
   testWidgets('debugVerifyInsertPosition', (WidgetTester tester) async {
     final GlobalKey overlayKey = GlobalKey();
-    OverlayEntry base;
+    late OverlayEntry base;
 
     await tester.pumpWidget(
       Directionality(
@@ -712,8 +714,7 @@ void main() {
         child: Overlay(
           key: overlayKey,
           initialEntries: <OverlayEntry>[
-            base = OverlayEntry(
-              builder: (BuildContext context) {
+            base = _buildOverlayEntry((BuildContext context) {
                 return Container();
               },
             ),
@@ -726,16 +727,14 @@ void main() {
 
     try {
       overlay.insert(
-        OverlayEntry(builder: (BuildContext context) {
+        _buildOverlayEntry((BuildContext context) {
           return Container();
         }),
-        above: OverlayEntry(
-          builder: (BuildContext context) {
+        above: _buildOverlayEntry((BuildContext context) {
             return Container();
           },
         ),
-        below: OverlayEntry(
-          builder: (BuildContext context) {
+        below: _buildOverlayEntry((BuildContext context) {
             return Container();
           },
         ),
@@ -745,7 +744,7 @@ void main() {
     }
 
     expect(() => overlay.insert(
-      OverlayEntry(builder: (BuildContext context) {
+      _buildOverlayEntry((BuildContext context) {
         return Container();
       }),
       above: base,
@@ -753,11 +752,10 @@ void main() {
 
     try {
       overlay.insert(
-        OverlayEntry(builder: (BuildContext context) {
+        _buildOverlayEntry((BuildContext context) {
           return Container();
         }),
-        above: OverlayEntry(
-          builder: (BuildContext context) {
+        above: _buildOverlayEntry((BuildContext context) {
             return Container();
           },
         ),
@@ -767,8 +765,7 @@ void main() {
     }
 
     try {
-      overlay.rearrange(<OverlayEntry>[base], above: OverlayEntry(
-        builder: (BuildContext context) {
+      overlay.rearrange(<OverlayEntry>[base], above: _buildOverlayEntry((BuildContext context) {
           return Container();
         },
       ));
@@ -1183,9 +1180,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
-              builder: (BuildContext context) => Positioned(left: 2000, right: 2500, child: Container()),
-            ),
+            _buildOverlayEntry((BuildContext context) => Positioned(left: 2000, right: 2500, child: Container())),
           ],
         ),
       ),
@@ -1201,9 +1196,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Overlay(
             initialEntries: <OverlayEntry>[
-              OverlayEntry(
-                builder: (BuildContext context) => Container(),
-              ),
+              _buildOverlayEntry((BuildContext context) => Container()),
             ],
             clipBehavior: clip,
           ),
@@ -1619,6 +1612,8 @@ void main() {
         return const SizedBox(width: 123, height: 456);
       }
     );
+    addTearDown(() => initialEntry..remove()..dispose());
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1643,6 +1638,7 @@ void main() {
         );
       },
     );
+    addTearDown(nonSizingEntry.dispose);
 
     overlay.insert(nonSizingEntry);
     await tester.pump();
@@ -1659,6 +1655,7 @@ void main() {
         );
       },
     );
+    addTearDown(sizingEntry.dispose);
 
     overlay.insert(sizingEntry);
     await tester.pump();
@@ -1714,6 +1711,7 @@ void main() {
         );
       },
     );
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
@@ -1743,6 +1741,7 @@ void main() {
         return const SizedBox(width: 600, height: 600);
       },
     );
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
@@ -1760,6 +1759,46 @@ void main() {
       errors.first.toString().replaceAll('\n', ' '),
       contains('Overlay was given infinite constraints and cannot be sized by a suitable child.'),
     );
+  });
+
+  testWidgets('Overlay is not visible from sub-views', (WidgetTester tester) async {
+    OverlayState? outsideView;
+    OverlayState? insideView;
+    OverlayState? outsideViewAnchor;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay.wrap(
+          child: Builder(
+            builder: (BuildContext context) {
+              outsideViewAnchor = Overlay.maybeOf(context);
+              return ViewAnchor(
+                view: Builder(
+                  builder: (BuildContext context) {
+                    outsideView = Overlay.maybeOf(context);
+                    return View(
+                      view: FakeView(tester.view),
+                      child: Builder(
+                        builder: (BuildContext context) {
+                          insideView = Overlay.maybeOf(context);
+                          return const SizedBox();
+                        },
+                      ),
+                    );
+                  },
+                ),
+                child: const SizedBox(),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(outsideViewAnchor, isNotNull);
+    expect(outsideView, isNull);
+    expect(insideView, isNull);
   });
 }
 
@@ -1779,3 +1818,6 @@ class StatefulTestState extends State<StatefulTestWidget> {
     return Container();
   }
 }
+
+/// This helper makes leak tracker forgiving the entry is not disposed.
+OverlayEntry _buildOverlayEntry(WidgetBuilder builder) => OverlayEntry(builder: builder);

@@ -42,17 +42,24 @@ void main() {
   group('AssetBundle asset variants (with Unix-style paths)', () {
     late Platform platform;
     late FileSystem fs;
+    late String flutterRoot;
 
     setUp(() {
       platform = FakePlatform();
       fs = MemoryFileSystem.test();
-      Cache.flutterRoot = Cache.defaultFlutterRoot(
+      flutterRoot = Cache.defaultFlutterRoot(
         platform: platform,
         fileSystem: fs,
-        userMessages: UserMessages()
+        userMessages: UserMessages(),
       );
-
-      fs.file('.packages').createSync();
+      fs.directory('.dart_tool').childFile('package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": []
+}
+''');
     });
 
     void createPubspec({
@@ -94,10 +101,11 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         logger: BufferLogger.test(),
         fileSystem: fs,
         platform: platform,
+        flutterRoot: flutterRoot,
       );
 
       await bundle.build(
-        packagesPath: '.packages',
+        packageConfigPath: '.dart_tool/package_config.json',
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
@@ -147,11 +155,12 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       final ManifestAssetBundle bundle = ManifestAssetBundle(
         logger: BufferLogger.test(),
         fileSystem: fs,
+        flutterRoot: flutterRoot,
         platform: platform,
       );
 
       await bundle.build(
-        packagesPath: '.packages',
+        packageConfigPath: '.dart_tool/package_config.json',
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
@@ -203,10 +212,11 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         logger: BufferLogger.test(),
         fileSystem: fs,
         platform: platform,
+        flutterRoot: flutterRoot,
       );
 
       await bundle.build(
-        packagesPath: '.packages',
+        packageConfigPath: '.dart_tool/package_config.json',
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
@@ -248,10 +258,11 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         logger: BufferLogger.test(),
         fileSystem: fs,
         platform: platform,
+        flutterRoot: flutterRoot,
       );
 
       await bundle.build(
-        packagesPath: '.packages',
+        packageConfigPath: '.dart_tool/package_config.json',
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
@@ -274,17 +285,25 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
   group('AssetBundle asset variants (with Windows-style filepaths)', () {
     late final Platform platform;
     late final FileSystem fs;
+    late final String flutterRoot;
 
     setUp(() {
       platform = FakePlatform(operatingSystem: 'windows');
       fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
-      Cache.flutterRoot = Cache.defaultFlutterRoot(
+      flutterRoot = Cache.defaultFlutterRoot(
         platform: platform,
         fileSystem: fs,
         userMessages: UserMessages()
       );
 
-      fs.file('.packages').createSync();
+      fs.directory('.dart_tool').childFile('package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": []
+}
+''');
 
       fs.file('pubspec.yaml').writeAsStringSync(
 '''
@@ -318,10 +337,11 @@ flutter:
         logger: BufferLogger.test(),
         fileSystem: fs,
         platform: platform,
+        flutterRoot: flutterRoot,
       );
 
       await bundle.build(
-        packagesPath: '.packages',
+        packageConfigPath: '.dart_tool/package_config.json',
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 

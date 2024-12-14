@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'animated_switcher.dart';
+/// @docImport 'implicit_animations.dart';
+library;
+
 import 'package:flutter/rendering.dart';
 
 import 'animated_size.dart';
@@ -310,22 +316,17 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
     }
   }
 
-  /// Whether we're in the middle of cross-fading this frame.
-  bool get _isTransitioning => _controller.status == AnimationStatus.forward || _controller.status == AnimationStatus.reverse;
-
   @override
   Widget build(BuildContext context) {
     const Key kFirstChildKey = ValueKey<CrossFadeState>(CrossFadeState.showFirst);
     const Key kSecondChildKey = ValueKey<CrossFadeState>(CrossFadeState.showSecond);
-    final bool transitioningForwards = _controller.status == AnimationStatus.completed ||
-                                       _controller.status == AnimationStatus.forward;
     final Key topKey;
     Widget topChild;
     final Animation<double> topAnimation;
     final Key bottomKey;
     Widget bottomChild;
     final Animation<double> bottomAnimation;
-    if (transitioningForwards) {
+    if (_controller.isForwardOrCompleted) {
       topKey = kSecondChildKey;
       topChild = widget.secondChild;
       topAnimation = _secondAnimation;
@@ -343,7 +344,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
 
     bottomChild = TickerMode(
       key: bottomKey,
-      enabled: _isTransitioning,
+      enabled: _controller.isAnimating,
       child: IgnorePointer(
         child: ExcludeSemantics( // Always exclude the semantics of the widget that's fading out.
           child: ExcludeFocus(

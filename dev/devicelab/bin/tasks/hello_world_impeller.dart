@@ -22,24 +22,25 @@ Future<TaskResult> run() async {
 
   bool isUsingValidationLayers = false;
   bool hasValidationErrors = false;
-  int impellerBackendCount = 0;
+  int invalidBackendCount = 0;
   final Completer<void> didReceiveBackendMessage = Completer<void>();
 
   await inDirectory(appDir, () async {
     await flutter('packages', options: <String>['get']);
-
+    const String validationLayersMessage = 'Using the Impeller rendering backend (Vulkan with Validation Layers)';
     final StreamSubscription<String> adb = device.logcat.listen(
       (String data) {
         if (data.contains('Using the Impeller rendering backend')) {
           // Sometimes more than one of these will be printed out if there is a
           // fallback.
+          if (!data.contains(validationLayersMessage)) {
+            invalidBackendCount += 1;
+          }
           if (!didReceiveBackendMessage.isCompleted) {
             didReceiveBackendMessage.complete();
           }
-          impellerBackendCount += 1;
         }
-        if (data.contains(
-            'Using the Impeller rendering backend (Vulkan with Validation Layers)')) {
+        if (data.contains(validationLayersMessage)) {
           isUsingValidationLayers = true;
         }
         // "ImpellerValidationBreak" comes from the engine:
@@ -54,6 +55,7 @@ Future<TaskResult> run() async {
       'run',
       options: <String>[
         '--enable-impeller',
+        '--enable-vulkan-validation',
         '-d',
         device.deviceId,
       ],
@@ -67,7 +69,7 @@ Future<TaskResult> run() async {
     await adb.cancel();
   });
 
-  if (!isUsingValidationLayers || impellerBackendCount != 1) {
+  if (!isUsingValidationLayers || invalidBackendCount != 0) {
     return TaskResult.failure('Not using Vulkan validation layers.');
   }
   if (hasValidationErrors){

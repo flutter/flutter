@@ -74,13 +74,13 @@ void main() {
     expect(
       start.toString(),
       equals(
-        'FlutterLogoDecoration(textColor: Color(0xffd4f144), style: stacked)',
+        'FlutterLogoDecoration(textColor: ${const Color(0xffd4f144)}, style: stacked)',
       ),
     );
     expect(
       FlutterLogoDecoration.lerp(null, end, 0.5).toString(),
       equals(
-        'FlutterLogoDecoration(textColor: Color(0xff81d4fa), style: stacked, transition -1.0:0.5)',
+        'FlutterLogoDecoration(textColor: ${const Color(0xff81d4fa)}, style: stacked, transition -1.0:0.5)',
       ),
     );
   });

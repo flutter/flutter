@@ -1,11 +1,10 @@
 {
-  "version": "v0_162",
+  "version": "6_1_0",
 
   "md.comp.top-app-bar.medium.container.color": "surface",
   "md.comp.top-app-bar.medium.container.elevation": "md.sys.elevation.level0",
   "md.comp.top-app-bar.medium.container.height": 112.0,
   "md.comp.top-app-bar.medium.container.shape": "md.sys.shape.corner.none",
-  "md.comp.top-app-bar.medium.container.surface-tint-layer.color": "surfaceTint",
   "md.comp.top-app-bar.medium.headline.color": "onSurface",
   "md.comp.top-app-bar.medium.headline.text-style": "headlineSmall",
   "md.comp.top-app-bar.medium.leading-icon.color": "onSurface",

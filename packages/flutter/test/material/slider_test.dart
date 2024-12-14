@@ -48,6 +48,36 @@ class LoggingThumbShape extends SliderComponentShape {
   }
 }
 
+// A value indicator shape to log labelPainter text.
+class LoggingValueIndicatorShape extends SliderComponentShape {
+  LoggingValueIndicatorShape(this.logLabel);
+
+  final List<InlineSpan> logLabel;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
+    return const Size(10.0, 10.0);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset offset, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    logLabel.add(labelPainter.text!);
+  }
+}
+
 class TallSliderTickMarkShape extends SliderTickMarkShape {
   @override
   Size getPreferredSize({required SliderThemeData sliderTheme, required bool isEnabled}) {
@@ -137,7 +167,7 @@ void main() {
 
     expect(value, equals(0.20));
     expect(log.length, 1);
-    expect(log[0], const Offset(212.0, 300.0));
+    expect(log[0], const Offset(213.0, 300.0));
   });
 
   testWidgets('Slider can move when tapped (LTR)', (WidgetTester tester) async {
@@ -387,8 +417,8 @@ void main() {
     );
 
     final List<Offset> expectedLog = <Offset>[
-      const Offset(24.0, 300.0),
-      const Offset(24.0, 300.0),
+      const Offset(26.0, 300.0),
+      const Offset(26.0, 300.0),
       const Offset(400.0, 300.0),
     ];
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
@@ -409,13 +439,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
     expect(log.length, 7);
-    expect(log.last.dx, moreOrLessEquals(344.5, epsilon: 0.1));
+    expect(log.last.dx, moreOrLessEquals(344.8, epsilon: 0.1));
     // Final position.
     await tester.pump(const Duration(milliseconds: 80));
-    expectedLog.add(const Offset(24.0, 300.0));
+    expectedLog.add(const Offset(26.0, 300.0));
     expect(value, equals(0.0));
     expect(log.length, 8);
-    expect(log.last.dx, moreOrLessEquals(24.0, epsilon: 0.1));
+    expect(log.last.dx, moreOrLessEquals(26.0, epsilon: 0.1));
     await gesture.up();
   });
 
@@ -460,7 +490,7 @@ void main() {
     expect(updates, equals(1));
   });
 
-  testWidgets('discrete Slider repaints when dragged', (WidgetTester tester) async {
+  testWidgets('Discrete Slider repaints when dragged', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     final List<Offset> log = <Offset>[];
@@ -496,8 +526,8 @@ void main() {
     );
 
     final List<Offset> expectedLog = <Offset>[
-      const Offset(24.0, 300.0),
-      const Offset(24.0, 300.0),
+      const Offset(26.0, 300.0),
+      const Offset(26.0, 300.0),
       const Offset(400.0, 300.0),
     ];
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
@@ -518,13 +548,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
     expect(log.length, 7);
-    expect(log.last.dx, moreOrLessEquals(344.5, epsilon: 0.1));
+    expect(log.last.dx, moreOrLessEquals(344.8, epsilon: 0.1));
     // Final position.
     await tester.pump(const Duration(milliseconds: 80));
-    expectedLog.add(const Offset(24.0, 300.0));
+    expectedLog.add(const Offset(26.0, 300.0));
     expect(value, equals(0.0));
     expect(log.length, 8);
-    expect(log.last.dx, moreOrLessEquals(24.0, epsilon: 0.1));
+    expect(log.last.dx, moreOrLessEquals(26.0, epsilon: 0.1));
     await gesture.up();
   });
 
@@ -834,7 +864,7 @@ void main() {
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 return MediaQuery(
-                  data: MediaQueryData(textScaleFactor: textScaleFactor),
+                  data: MediaQueryData(textScaler: TextScaler.linear(textScaleFactor)),
                   child: Material(
                     child: Theme(
                       data: Theme.of(context).copyWith(
@@ -971,6 +1001,79 @@ void main() {
     }
   });
 
+  testWidgets('Slider value indicator respects bold text', (WidgetTester tester) async {
+      final Key sliderKey = UniqueKey();
+      double value = 0.0;
+      final List<InlineSpan> log = <InlineSpan>[];
+      final LoggingValueIndicatorShape loggingValueIndicatorShape = LoggingValueIndicatorShape(log);
+
+      Widget buildSlider({ bool boldText = false }) {
+        return MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return MediaQuery(
+                  data: MediaQueryData(boldText: boldText),
+                  child: Material(
+                    child: Theme(
+                      data: Theme.of(context).copyWith(
+                        sliderTheme: Theme.of(context).sliderTheme.copyWith(
+                          showValueIndicator: ShowValueIndicator.always,
+                          valueIndicatorShape: loggingValueIndicatorShape,
+                        ),
+                      ),
+                      child: Center(
+                        child: OverflowBox(
+                          maxWidth: double.infinity,
+                          maxHeight: double.infinity,
+                          child: Slider(
+                            key: sliderKey,
+                            max: 100.0,
+                            divisions: 4,
+                            label: '${value.round()}',
+                            value: value,
+                            onChanged: (double newValue) {
+                              setState(() {
+                                value = newValue;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      }
+      // Normal text
+      await tester.pumpWidget(buildSlider());
+      Offset center = tester.getCenter(find.byType(Slider));
+      TestGesture gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      expect(log.last.toPlainText(), '50');
+      expect(log.last.style!.fontWeight, FontWeight.w500);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Bold text
+      await tester.pumpWidget(buildSlider(boldText: true));
+      center = tester.getCenter(find.byType(Slider));
+      gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+
+      expect(log.last.toPlainText(), '50');
+      expect(log.last.style!.fontWeight, FontWeight.w700);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+  });
+
   testWidgets('Tick marks are skipped when they are too dense', (WidgetTester tester) async {
     Widget buildSlider({
       required int divisions,
@@ -1072,7 +1175,7 @@ void main() {
           ..circle(x: 400.0, y: 24.0, radius: 1.0)
           ..circle(x: 587.0, y: 24.0, radius: 1.0)
           ..circle(x: 774.0, y: 24.0, radius: 1.0)
-          ..circle(x: 24.0, y: 24.0, radius: 10.0),
+          ..circle(x: 26.0, y: 24.0, radius: 10.0),
       );
 
       gesture = await tester.startGesture(center);
@@ -1083,13 +1186,13 @@ void main() {
       expect(
         material,
         paints
-          ..circle(x: 111.20703125, y: 24.0, radius: 5.687664985656738)
+          ..circle(x: 112.7431640625, y: 24.0, radius: 5.687664985656738)
           ..circle(x: 26.0, y: 24.0, radius: 1.0)
           ..circle(x: 213.0, y: 24.0, radius: 1.0)
           ..circle(x: 400.0, y: 24.0, radius: 1.0)
           ..circle(x: 587.0, y: 24.0, radius: 1.0)
           ..circle(x: 774.0, y: 24.0, radius: 1.0)
-          ..circle(x: 111.20703125, y: 24.0, radius: 10.0),
+          ..circle(x: 112.7431640625, y: 24.0, radius: 10.0),
       );
 
       // Reparenting in the middle of an animation should do nothing.
@@ -1103,13 +1206,13 @@ void main() {
       expect(
         material,
         paints
-          ..circle(x: 190.0135726928711, y: 24.0, radius: 12.0)
+          ..circle(x: 191.130521774292, y: 24.0, radius: 12.0)
           ..circle(x: 26.0, y: 24.0, radius: 1.0)
           ..circle(x: 213.0, y: 24.0, radius: 1.0)
           ..circle(x: 400.0, y: 24.0, radius: 1.0)
           ..circle(x: 587.0, y: 24.0, radius: 1.0)
           ..circle(x: 774.0, y: 24.0, radius: 1.0)
-          ..circle(x: 190.0135726928711, y: 24.0, radius: 10.0),
+          ..circle(x: 191.130521774292, y: 24.0, radius: 10.0),
       );
       // Wait for animations to finish.
       await tester.pumpAndSettle();
@@ -1189,6 +1292,7 @@ void main() {
                             SemanticsFlag.isSlider,
                           ],
                           actions: <SemanticsAction>[
+                            SemanticsAction.focus,
                             SemanticsAction.increase,
                             SemanticsAction.decrease,
                           ],
@@ -1247,6 +1351,7 @@ void main() {
                             SemanticsFlag.isFocusable,
                             SemanticsFlag.isSlider,
                           ],
+                          actions: <SemanticsAction>[SemanticsAction.focus],
                           value: '50%',
                           increasedValue: '55%',
                           decreasedValue: '45%',
@@ -1349,7 +1454,10 @@ void main() {
                         TestSemantics(
                           id: 4,
                           flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                          actions: <SemanticsAction>[
+                            if (defaultTargetPlatform != TargetPlatform.iOS) SemanticsAction.focus,
+                            SemanticsAction.increase, SemanticsAction.decrease,
+                          ],
                           value: '50%',
                           increasedValue: '60%',
                           decreasedValue: '40%',
@@ -1462,6 +1570,7 @@ void main() {
                             SemanticsFlag.isSlider,
                           ],
                           actions: <SemanticsAction>[
+                            SemanticsAction.focus,
                             SemanticsAction.increase,
                             SemanticsAction.decrease,
                             SemanticsAction.didGainAccessibilityFocus,
@@ -1522,6 +1631,7 @@ void main() {
                             SemanticsFlag.isSlider,
                           ],
                           actions: <SemanticsAction>[
+                            SemanticsAction.focus,
                             SemanticsAction.didGainAccessibilityFocus,
                           ],
                           value: '50%',
@@ -1626,7 +1736,7 @@ void main() {
                         TestSemantics(
                           id: 4,
                           flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                          actions: <SemanticsAction>[SemanticsAction.focus, SemanticsAction.increase, SemanticsAction.decrease],
                           value: '40',
                           increasedValue: '60',
                           decreasedValue: '20',
@@ -1686,7 +1796,7 @@ void main() {
                         TestSemantics(
                           id: 4,
                           flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable, SemanticsFlag.isSlider],
-                          actions: <SemanticsAction>[SemanticsAction.increase, SemanticsAction.decrease],
+                          actions: <SemanticsAction>[SemanticsAction.focus, SemanticsAction.increase, SemanticsAction.decrease],
                           value: '40',
                           increasedValue: '60',
                           decreasedValue: '20',
@@ -1707,11 +1817,11 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Slider is focusable and has correct focus color', (WidgetTester tester) async {
+  testWidgets('Material3 - Slider is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
     addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     double value = 0.5;
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -1743,7 +1853,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
+      paints..circle(color: theme.colorScheme.primary.withOpacity(0.1)),
     );
 
     // Check that the overlay does not show when unfocused and disabled.
@@ -1752,7 +1862,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.1))),
     );
   });
 
@@ -1941,10 +2051,10 @@ void main() {
     );
   });
 
-  testWidgets('Slider is draggable and has correct dragged color', (WidgetTester tester) async {
+  testWidgets('Material3 - Slider is draggable and has correct dragged color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final Key sliderKey = UniqueKey();
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
@@ -1978,7 +2088,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.1))),
     );
 
     // Start dragging.
@@ -1992,7 +2102,7 @@ void main() {
     // Slider has overlay when enabled and dragged.
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
+      paints..circle(color: theme.colorScheme.primary.withOpacity(0.1)),
     );
 
     await drag.up();
@@ -2002,7 +2112,7 @@ void main() {
     expect(focusNode.hasFocus, false);
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.1))),
     );
 
     // Slider has overlay when enabled, dragged and focused.
@@ -2012,7 +2122,7 @@ void main() {
     expect(focusNode.hasFocus, true);
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
+      paints..circle(color: theme.colorScheme.primary.withOpacity(0.1)),
     );
   });
 
@@ -2530,6 +2640,7 @@ void main() {
                           SemanticsFlag.isSlider,
                         ],
                         actions: <SemanticsAction>[
+                          SemanticsAction.focus,
                           SemanticsAction.increase,
                           SemanticsAction.decrease,
                           SemanticsAction.didGainAccessibilityFocus,
@@ -3025,9 +3136,9 @@ void main() {
       'max: 100.0',
       'divisions: 10',
       'label: "Set a value"',
-      'activeColor: MaterialColor(primary value: Color(0xff2196f3))',
-      'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
-      'secondaryActiveColor: MaterialColor(primary value: Color(0xff607d8b))',
+      'activeColor: MaterialColor(primary value: ${const Color(0xff2196f3)})',
+      'inactiveColor: MaterialColor(primary value: ${const Color(0xff9e9e9e)})',
+      'secondaryActiveColor: MaterialColor(primary value: ${const Color(0xff607d8b)})',
     ]);
   });
 
@@ -3138,11 +3249,11 @@ void main() {
     expect(
       renderObject,
       paints
-        // active track RRect
-        ..rrect(rrect: RRect.fromLTRBAndCorners(-14.0, 2.0, 5.0, 8.0, topLeft: const Radius.circular(3.0), bottomLeft: const Radius.circular(3.0)))
-        // inactive track RRect
-        ..rrect(rrect: RRect.fromLTRBAndCorners(5.0, 3.0, 24.0, 7.0, topRight: const Radius.circular(2.0), bottomRight: const Radius.circular(2.0)))
-        // thumb
+        // Inactive track RRect.
+        ..rrect(rrect: RRect.fromLTRBR(3.0, 3.0, 24.0, 7.0, const Radius.circular(2.0)))
+        // Active track RRect.
+        ..rrect(rrect: RRect.fromLTRBR(-14.0, 2.0, 7.0, 8.0, const Radius.circular(3.0)))
+        // Thumb.
         ..circle(x: 5.0, y: 5.0, radius: 10.0, ),
     );
   });
@@ -3174,7 +3285,7 @@ void main() {
     await tester.pumpAndSettle(); // Finish the animation.
 
     late RRect activeTrackRRect;
-    expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
+    expect(renderObject, paints..rrect()..something((Symbol method, List<dynamic> arguments) {
       if (method != #drawRRect) {
         return false;
       }
@@ -3182,10 +3293,18 @@ void main() {
       return true;
     }));
 
+    const double padding = 4.0;
     // The thumb should at one-third(5 / 15) of the Slider.
     // The right of the active track shape is the position of the thumb.
     // 24.0 is the default margin, (800.0 - 24.0 - 24.0) is the slider's width.
-    expect(nearEqual(activeTrackRRect.right, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
+    expect(
+      nearEqual(
+        activeTrackRRect.right,
+        (800.0 - 24.0 - 24.0  + (padding / 2)) * (5 / 15) + 24.0 + padding / 2,
+        0.01,
+      ),
+      true,
+    );
   });
 
   testWidgets('Slider paints thumbColor', (WidgetTester tester) async {
@@ -3859,14 +3978,15 @@ void main() {
       );
     });
 
-    testWidgets('Slider is focusable and has correct focus color', (WidgetTester tester) async {
+    testWidgets('Material2 - Slider is focusable and has correct focus color', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
       addTearDown(focusNode.dispose);
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-      final ThemeData theme = ThemeData();
+      final ThemeData theme = ThemeData(useMaterial3: false);
       double value = 0.5;
       Widget buildApp({bool enabled = true}) {
         return MaterialApp(
+          theme: theme,
           home: Material(
             child: Center(
               child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -3907,16 +4027,17 @@ void main() {
       );
     });
 
-    testWidgets('Slider is draggable and has correct dragged color', (WidgetTester tester) async {
+    testWidgets('Material2 - Slider is draggable and has correct dragged color', (WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       double value = 0.5;
-      final ThemeData theme = ThemeData();
+      final ThemeData theme = ThemeData(useMaterial3: false);
       final Key sliderKey = UniqueKey();
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
       Widget buildApp({bool enabled = true}) {
         return MaterialApp(
+          theme: theme,
           home: Material(
             child: Center(
               child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -4251,4 +4372,230 @@ void main() {
       );
     });
   });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/143524.
+  testWidgets('Discrete Slider.onChanged is called only once', (WidgetTester tester) async {
+    int onChangeCallbackCount = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Slider(
+              max: 5,
+              divisions: 5,
+              value: 0,
+              onChanged: (double newValue) {
+                onChangeCallbackCount++;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(tester.getTopLeft(find.byType(Slider)));
+    await tester.pump(kLongPressTimeout);
+    await gesture.moveBy(const Offset(160.0, 0.0));
+    await gesture.moveBy(const Offset(1.0, 0.0));
+    await gesture.moveBy(const Offset(1.0, 0.0));
+    expect(onChangeCallbackCount, 1);
+  });
+
+  testWidgets('Skip drawing ValueIndicator shape when label painter text is null', (WidgetTester tester) async {
+    double sliderValue = 10;
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, void Function(void Function()) setState) {
+              return Material(
+                child: Slider(
+                  value: sliderValue,
+                  max: 100,
+                  label: sliderValue > 50 ? null : sliderValue.toString(),
+                  divisions: 10,
+                  onChanged: (double value) {
+                    setState(() {
+                      sliderValue = value;
+                    });
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+
+      // Calculate a specific position on the Slider.
+      final Rect sliderRect = tester.getRect(find.byType(Slider));
+      final Offset tapPositionLeft = Offset(sliderRect.left + sliderRect.width * 0.25, sliderRect.center.dy);
+      final Offset tapPositionRight = Offset(sliderRect.left + sliderRect.width * 0.75, sliderRect.center.dy);
+
+      // Tap on the 25% position of the Slider.
+      await tester.tapAt(tapPositionLeft);
+      await tester.pumpAndSettle();
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 2));
+
+      // Tap on the 75% position of the Slider.
+      await tester.tapAt(tapPositionRight);
+      await tester.pumpAndSettle();
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
+  });
+
+  testWidgets('Slider value indicator is shown when using arrow keys', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final ThemeData theme = ThemeData();
+    double startValue = 0.0;
+    double currentValue = 0.5;
+    double endValue = 0.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Slider(
+                value: currentValue,
+                divisions: 5,
+                label: currentValue.toStringAsFixed(1),
+                onChangeStart: (double newValue) {
+                  setState(() {
+                    startValue = newValue;
+                  });
+                },
+                onChanged: (double newValue) {
+                  setState(() {
+                    currentValue = newValue;
+                  });
+                },
+                onChangeEnd: (double newValue) {
+                  setState(() {
+                    endValue = newValue;
+                  });
+                },
+                autofocus: true,
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+
+    // Slider shows value indicator initially on focus.
+    await tester.pumpAndSettle();
+    RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints..scale()..path(color: theme.colorScheme.primary),
+    );
+
+    // Right arrow (increase)
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(startValue, 0.6);
+    expect(currentValue.toStringAsFixed(1), '0.8');
+    expect(endValue.toStringAsFixed(1), '0.8');
+
+    // Value indicator is visible.
+    valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints..scale()..path(color: theme.colorScheme.primary),
+    );
+
+    // Left arrow (decrease)
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(startValue, 0.8);
+    expect(currentValue.toStringAsFixed(1), '0.6');
+    expect(endValue.toStringAsFixed(1), '0.6');
+
+    // Value indicator is still visible.
+    valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints..scale()..path(color: theme.colorScheme.primary),
+    );
+
+    // Up arrow (increase)
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    expect(startValue, 0.6);
+    expect(currentValue.toStringAsFixed(1), '0.8');
+    expect(endValue.toStringAsFixed(1), '0.8');
+
+    // Value indicator is still visible.
+    valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints..scale()..path(color: theme.colorScheme.primary),
+    );
+
+    // Down arrow (decrease)
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(startValue, 0.8);
+    expect(currentValue.toStringAsFixed(1), '0.6');
+    expect(endValue.toStringAsFixed(1), '0.6');
+
+    // Value indicator is still visible.
+    valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints..scale()..path(color: theme.colorScheme.primary),
+    );
+  }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('Value indicator label is shown when focused', (WidgetTester tester) async {
+    double value = 0.5;
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    Widget buildApp() {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Slider(
+                value: value,
+                focusNode: focusNode,
+                divisions: 5,
+                label: value.toStringAsFixed(1),
+                onChanged:
+                  (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  }
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+
+    // Slider does not show value indicator without focus.
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, false);
+    RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      isNot(paints..path(color: const Color(0xff000000))..paragraph()),
+    );
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+
+    // Slider shows value indicator when focused.
+    valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints..path(color: const Color(0xff000000))..paragraph(),
+    );
+  }, variant: TargetPlatformVariant.desktop());
 }

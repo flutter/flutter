@@ -16,4 +16,11 @@ void main() {
 
     expect(find.text('apple'), findsOneWidget);
   });
+
+  testWidgets('auto complete has one h1 tag', (WidgetTester tester) async {
+    await pumpsUseCase(tester, AutoCompleteUseCase());
+    final Finder findHeadingLevelOnes = find.bySemanticsLabel(RegExp('AutoComplete Demo'));
+    await tester.pumpAndSettle();
+    expect(findHeadingLevelOnes, findsOne);
+  });
 }

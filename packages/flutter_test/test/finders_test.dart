@@ -299,6 +299,147 @@ void main() {
       expect(find.bySemanticsLabel('Foo'), findsOneWidget);
       semanticsHandle.dispose();
     });
+
+    testWidgets('Throws StateError if semantics are not enabled (bySemanticsIdentifier)', (WidgetTester tester) async {
+      expect(
+        () => find.bySemanticsIdentifier('Add'),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains('Semantics are not enabled'),
+          ),
+        ),
+      );
+    }, semanticsEnabled: false);
+
+    testWidgets('finds Semantically labeled widgets by identifier', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(
+        Semantics(
+          identifier: 'Add',
+          button: true,
+          child: const TextButton(
+            onPressed: null,
+            child: Text('+'),
+          ),
+        ),
+      ));
+      expect(find.bySemanticsIdentifier('Add'), findsOneWidget);
+      semanticsHandle.dispose();
+    });
+
+    testWidgets('finds Semantically labeled widgets by identifier RegExp', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+      // list of elements with a prefixed identifier
+      await tester.pumpWidget(_boilerplate(
+        Row(children: <Widget>[
+          Semantics(
+            identifier: 'item-1',
+            child: const Text('Item 1'),
+          ),
+          Semantics(
+            identifier: 'item-2',
+            child: const Text('Item 2'),
+          ),
+        ]),
+      ));
+      expect(find.bySemanticsIdentifier('item'), findsNothing);
+      expect(find.bySemanticsIdentifier(RegExp(r'^item-')), findsNWidgets(2));
+      semanticsHandle.dispose();
+    });
+  });
+
+  group('byTooltip', () {
+    testWidgets('finds widgets by tooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          message: 'Tooltip Message',
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip('Tooltip Message'), findsOneWidget);
+    });
+
+    testWidgets('finds widgets with tooltip by RegExp', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          message: 'Tooltip Message',
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip('Tooltip'), findsNothing);
+      expect(find.byTooltip(RegExp(r'^Tooltip')), findsOneWidget);
+    });
+
+    testWidgets('finds widgets by rich text tooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          richMessage: TextSpan(
+            children: <InlineSpan>[
+            TextSpan(text: 'Tooltip '),
+            TextSpan(text: 'Message'),
+          ]),
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip('Tooltip Message'), findsOneWidget);
+    });
+
+    testWidgets('finds widgets with rich text tooltip by RegExp', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          richMessage: TextSpan(
+            children: <InlineSpan>[
+            TextSpan(text: 'Tooltip '),
+            TextSpan(text: 'Message'),
+          ]),
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip('Tooltip M'), findsNothing);
+      expect(find.byTooltip(RegExp(r'^Tooltip M')), findsOneWidget);
+    });
+
+    testWidgets('finds empty string with tooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          message: '',
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip(''), findsOneWidget);
+
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          richMessage: TextSpan(
+            children: <InlineSpan>[
+            TextSpan(text: ''),
+          ]),
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip(''), findsOneWidget);
+
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          message: '',
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip(RegExp(r'^$')), findsOneWidget);
+
+      await tester.pumpWidget(_boilerplate(
+        const Tooltip(
+          richMessage: TextSpan(
+            children: <InlineSpan>[
+            TextSpan(text: ''),
+          ]),
+          child: Text('+'),
+        ),
+      ));
+      expect(find.byTooltip(RegExp(r'^$')), findsOneWidget);
+    });
   });
 
   group('hitTestable', () {
@@ -678,11 +819,11 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: _deepWidgetTree(
-            depth: 1000,
+            depth: 500,
             child: Row(
               children: <Widget>[
                 _deepWidgetTree(
-                  depth: 1000,
+                  depth: 500,
                   child: const Column(children: fooBarTexts),
                 ),
               ],
@@ -1356,9 +1497,16 @@ void main() {
 Widget _boilerplate(Widget child) {
   return Directionality(
     textDirection: TextDirection.ltr,
-    child: child,
+    child: Navigator(
+      onGenerateRoute: (RouteSettings settings) {
+        return MaterialPageRoute<void>(
+          builder: (BuildContext context) => child,
+        );
+      },
+    ),
   );
 }
+
 
 class SimpleCustomSemanticsWidget extends LeafRenderObjectWidget {
   const SimpleCustomSemanticsWidget(this.label, {super.key});

@@ -9,8 +9,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import 'feedback_tester.dart';
 
 Widget wrap({Widget? child}) {
   return MediaQuery(
@@ -393,6 +393,7 @@ void main() {
           groupValue: 2,
           onChanged: (int? i) {},
           title: const Text('Title'),
+          internalAddSemanticForOnTap: true,
         ),
       ),
     );
@@ -405,13 +406,14 @@ void main() {
             TestSemantics(
               id: 1,
               flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
                 SemanticsFlag.hasCheckedState,
                 SemanticsFlag.hasEnabledState,
                 SemanticsFlag.isEnabled,
                 SemanticsFlag.isInMutuallyExclusiveGroup,
                 SemanticsFlag.isFocusable,
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               label: 'Title',
               textDirection: TextDirection.ltr,
             ),
@@ -429,6 +431,7 @@ void main() {
           groupValue: 2,
           onChanged: (int? i) {},
           title: const Text('Title'),
+          internalAddSemanticForOnTap: true,
         ),
       ),
     );
@@ -441,6 +444,7 @@ void main() {
             TestSemantics(
               id: 1,
               flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
                 SemanticsFlag.hasCheckedState,
                 SemanticsFlag.isChecked,
                 SemanticsFlag.hasEnabledState,
@@ -448,7 +452,7 @@ void main() {
                 SemanticsFlag.isInMutuallyExclusiveGroup,
                 SemanticsFlag.isFocusable,
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               label: 'Title',
               textDirection: TextDirection.ltr,
             ),
@@ -466,6 +470,7 @@ void main() {
           groupValue: 2,
           onChanged: null,
           title: Text('Title'),
+          internalAddSemanticForOnTap: true,
         ),
       ),
     );
@@ -483,6 +488,7 @@ void main() {
                 SemanticsFlag.isInMutuallyExclusiveGroup,
                 SemanticsFlag.isFocusable,
               ],
+              actions: <SemanticsAction>[SemanticsAction.focus],
               label: 'Title',
               textDirection: TextDirection.ltr,
             ),
@@ -501,6 +507,7 @@ void main() {
           groupValue: 2,
           onChanged: null,
           title: Text('Title'),
+          internalAddSemanticForOnTap: true,
         ),
       ),
     );
@@ -1260,6 +1267,43 @@ void main() {
     expect(tester.getSize(find.byType(Radio<bool>)), const Size(48.0, 48.0));
   });
 
+  testWidgets('RadioListTile.control widget should not request focus on traversal', (WidgetTester tester) async {
+    final GlobalKey firstChildKey = GlobalKey();
+    final GlobalKey secondChildKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              RadioListTile<bool>(
+                value: true,
+                groupValue: true,
+                onChanged: (bool? value) {},
+                title: Text('Hey', key: firstChildKey),
+              ),
+              RadioListTile<bool>(
+                value: true,
+                groupValue: true,
+                onChanged: (bool? value) {},
+                title: Text('There', key: secondChildKey),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    Focus.of(firstChildKey.currentContext!).requestFocus();
+    await tester.pump();
+    expect(Focus.of(firstChildKey.currentContext!).hasPrimaryFocus, isTrue);
+    Focus.of(firstChildKey.currentContext!).nextFocus();
+    await tester.pump();
+    expect(Focus.of(firstChildKey.currentContext!).hasPrimaryFocus, isFalse);
+    expect(Focus.of(secondChildKey.currentContext!).hasPrimaryFocus, isTrue);
+  });
+
   testWidgets('RadioListTile.adaptive shows the correct radio platform widget', (WidgetTester tester) async {
     Widget buildApp(TargetPlatform platform) {
       return MaterialApp(
@@ -1508,5 +1552,40 @@ void main() {
           ..circle(color:const Color(0x61000000)),
       );
     });
+  });
+
+  testWidgets('RadioListTile uses ListTileTheme controlAffinity', (WidgetTester tester) async {
+    Widget buildListTile(ListTileControlAffinity controlAffinity) {
+      return MaterialApp(
+        home: Material(
+          child: ListTileTheme(
+            data: ListTileThemeData(
+              controlAffinity: controlAffinity,
+            ),
+            child: RadioListTile<double>(
+              value: 0.5,
+              groupValue: 1.0,
+              title: const Text('RadioListTile'),
+              onChanged: (double? value) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildListTile(ListTileControlAffinity.leading));
+    final Finder leading = find.text('RadioListTile');
+    final Offset offsetLeading = tester.getTopLeft(leading);
+    expect(offsetLeading, const Offset(72.0, 16.0));
+
+    await tester.pumpWidget(buildListTile(ListTileControlAffinity.trailing));
+    final Finder trailing = find.text('RadioListTile');
+    final Offset offsetTrailing = tester.getTopLeft(trailing);
+    expect(offsetTrailing, const Offset(16.0, 16.0));
+
+    await tester.pumpWidget(buildListTile(ListTileControlAffinity.platform));
+    final Finder platform = find.text('RadioListTile');
+    final Offset offsetPlatform = tester.getTopLeft(platform);
+    expect(offsetPlatform, const Offset(72.0, 16.0));
   });
 }

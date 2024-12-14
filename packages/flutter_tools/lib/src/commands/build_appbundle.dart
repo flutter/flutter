@@ -42,7 +42,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
     addEnableExperimentation(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
-    addMultidexOption();
     addIgnoreDeprecationOption();
     argParser.addMultiOption('target-platform',
       defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
@@ -70,6 +69,9 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
   @override
   final String name = 'appbundle';
+
+  @override
+  List<String> get aliases => const <String>['aab'];
 
   @override
   DeprecationBehavior get deprecationBehavior => boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
@@ -135,17 +137,15 @@ class BuildAppBundleCommand extends BuildSubCommand {
     if (globals.androidSdk == null) {
       exitWithNoSdkMessage();
     }
-
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(await getBuildInfo(),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
-      multidexEnabled: boolArg('multidex'),
     );
     // Do all setup verification that doesn't involve loading units. Checks that
     // require generated loading units are done after gen_snapshot in assemble.
     final List<DeferredComponent>? deferredComponents = FlutterProject.current().manifest.deferredComponents;
     if (deferredComponents != null && boolArg('deferred-components') && boolArg('validate-deferred-components') && !boolArg('debug')) {
       final DeferredComponentsPrebuildValidator validator = DeferredComponentsPrebuildValidator(
-        FlutterProject.current().directory,
+        project.directory,
         globals.logger,
         globals.platform,
         title: 'Deferred components prebuild validation',
@@ -159,7 +159,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       // Delete intermediates libs dir for components to resolve mismatching
       // abis supported by base and dynamic feature modules.
       for (final DeferredComponent component in deferredComponents) {
-        final Directory deferredLibsIntermediate = FlutterProject.current().directory
+        final Directory deferredLibsIntermediate = project.directory
           .childDirectory('build')
           .childDirectory(component.name)
           .childDirectory('intermediates')
@@ -176,7 +176,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     displayNullSafetyMode(androidBuildInfo.buildInfo);
     globals.terminal.usesTerminalUi = true;
     await androidBuilder?.buildAab(
-      project: FlutterProject.current(),
+      project: project,
       target: targetFile,
       androidBuildInfo: androidBuildInfo,
       validateDeferredComponents: boolArg('validate-deferred-components'),

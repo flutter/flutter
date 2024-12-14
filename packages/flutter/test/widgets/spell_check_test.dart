@@ -353,4 +353,89 @@ void main() {
 
     expect(textSpanTree, equals(expectedTextSpanTree));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+
+  testWidgets(
+    'buildTextSpanWithSpellCheckSuggestions does not throw when text contains regex reserved characters',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/136032.
+      const String text = 'Hello, *ãresaa';
+      const String resultsText = 'Hello, *ãresa';
+      const TextEditingValue value = TextEditingValue(text: text);
+      const bool composingRegionOutOfRange = false;
+      const SpellCheckResults spellCheckResults = SpellCheckResults(
+        resultsText,
+        <SuggestionSpan>[
+          SuggestionSpan(TextRange(start: 7, end: 12), <String>['*rangesa']),
+        ],
+      );
+
+      const TextSpan expectedTextSpanTree = TextSpan(children: <TextSpan>[
+        TextSpan(text: 'Hello, *ãresaa'),
+      ]);
+      final TextSpan textSpanTree = buildTextSpanWithSpellCheckSuggestions(
+        value,
+        composingRegionOutOfRange,
+        null,
+        misspelledTextStyle,
+        spellCheckResults,
+      );
+
+      expect(tester.takeException(), null);
+      expect(textSpanTree, equals(expectedTextSpanTree));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
+  );
+
+  testWidgets(
+    'buildTextSpanWithSpellCheckSuggestions does not throw when text is being deleted',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/152272.
+      const String text = 'Lorem ipsum dolor ';
+      const String resultsText = 'Lorem ipsum dolor sit ';
+      const TextEditingValue value = TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      );
+      const bool composingRegionOutOfRange = false;
+      const SpellCheckResults spellCheckResults = SpellCheckResults(
+        resultsText,
+        <SuggestionSpan>[
+          SuggestionSpan(
+            TextRange(start: 0, end: 5),
+            <String>['suggestion1', 'suggestion2'],
+          ),
+          SuggestionSpan(
+            TextRange(start: 6, end: 11),
+            <String>['suggestion1', 'suggestion2'],
+          ),
+          SuggestionSpan(
+            TextRange(start: 12, end: 17),
+            <String>['suggestion1', 'suggestion2'],
+          ),
+          SuggestionSpan(
+            TextRange(start: 18, end: 21),
+            <String>['suggestion1', 'suggestion2'],
+          ),
+        ],
+      );
+
+      final TextSpan expectedTextSpanTree = TextSpan(children: <TextSpan>[
+        TextSpan(text: 'Lorem', style: misspelledTextStyle),
+        const TextSpan(text: ' '),
+        TextSpan(text: 'ipsum', style: misspelledTextStyle),
+        const TextSpan(text: ' '),
+        TextSpan(text: 'dolor', style: misspelledTextStyle),
+        const TextSpan(text: ' '),
+      ]);
+      final TextSpan textSpanTree = buildTextSpanWithSpellCheckSuggestions(
+        value,
+        composingRegionOutOfRange,
+        null,
+        misspelledTextStyle,
+        spellCheckResults,
+      );
+
+      expect(tester.takeException(), null);
+      expect(textSpanTree, equals(expectedTextSpanTree));
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
+  );
 }

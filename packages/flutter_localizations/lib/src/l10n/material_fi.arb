@@ -144,5 +144,7 @@
   "menuDismissLabel": "Hylkää valikko",
   "lookUpButtonLabel": "Hae",
   "searchWebButtonLabel": "Hae verkosta",
-  "shareButtonLabel": "Jaa…"
+  "shareButtonLabel": "Jaa",
+  "clearButtonTooltip": "Tyhjennä teksti",
+  "selectedDateLabel": "Valittu"
 }

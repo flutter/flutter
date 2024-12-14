@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -25,14 +24,12 @@ import '../../src/test_flutter_command_runner.dart';
 void main() {
   Cache.disableLocking();
 
-  group('Usage', () {
+  group('analytics', () {
     late Directory tempDir;
-    late TestUsage testUsage;
     late FakeAnalytics fakeAnalytics;
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
-      testUsage = TestUsage();
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: MemoryFileSystem.test(),
         fakeFlutterVersion: FakeFlutterVersion(),
@@ -46,9 +43,8 @@ void main() {
     testUsingContext('indicate the default target platforms', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
-      final BuildAppBundleCommand command = await runBuildAppBundleCommand(projectPath);
 
-      expect((await command.usageValues).commandBuildAppBundleTargetPlatform, 'android-arm,android-arm64,android-x64');
+      await runBuildAppBundleCommand(projectPath);
 
       expect(
         fakeAnalytics.sentEvents,
@@ -64,27 +60,66 @@ void main() {
       Analytics: () => fakeAnalytics,
     });
 
+    testUsingContext('alias aab', () async {
+      final BuildAppBundleCommand command =
+          BuildAppBundleCommand(logger: BufferLogger.test());
+      expect(command.aliases, contains('aab'));
+    });
+
     testUsingContext('build type', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
 
-      final BuildAppBundleCommand commandDefault = await runBuildAppBundleCommand(projectPath);
-      expect((await commandDefault.usageValues).commandBuildAppBundleBuildMode, 'release');
+      await runBuildAppBundleCommand(projectPath);
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(Event.commandUsageValues(
+          workflow: 'appbundle',
+          commandHasTerminal: false,
+          buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+          buildAppBundleBuildMode: 'release',
+        )),
+      );
 
-      final BuildAppBundleCommand commandInRelease = await runBuildAppBundleCommand(projectPath,
-          arguments: <String>['--release']);
-      expect((await commandInRelease.usageValues).commandBuildAppBundleBuildMode, 'release');
+      fakeAnalytics.sentEvents.clear();
+      await runBuildAppBundleCommand(projectPath, arguments: <String>['--release']);
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(Event.commandUsageValues(
+          workflow: 'appbundle',
+          commandHasTerminal: false,
+          buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+          buildAppBundleBuildMode: 'release',
+        )),
+      );
 
-      final BuildAppBundleCommand commandInDebug = await runBuildAppBundleCommand(projectPath,
-          arguments: <String>['--debug']);
-      expect((await commandInDebug.usageValues).commandBuildAppBundleBuildMode, 'debug');
+      fakeAnalytics.sentEvents.clear();
+      await runBuildAppBundleCommand(projectPath, arguments: <String>['--debug']);
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(Event.commandUsageValues(
+          workflow: 'appbundle',
+          commandHasTerminal: false,
+          buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+          buildAppBundleBuildMode: 'debug',
+        )),
+      );
 
-      final BuildAppBundleCommand commandInProfile = await runBuildAppBundleCommand(projectPath,
-          arguments: <String>['--profile']);
-      expect((await commandInProfile.usageValues).commandBuildAppBundleBuildMode, 'profile');
+      fakeAnalytics.sentEvents.clear();
+      await runBuildAppBundleCommand(projectPath, arguments: <String>['--profile']);
 
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(Event.commandUsageValues(
+          workflow: 'appbundle',
+          commandHasTerminal: false,
+          buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
+          buildAppBundleBuildMode: 'profile',
+        )),
+      );
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
+      Analytics: () => fakeAnalytics,
     });
 
     testUsingContext('logs success', () async {
@@ -93,27 +128,38 @@ void main() {
 
       await runBuildAppBundleCommand(projectPath);
 
-      expect(testUsage.events, contains(
-        const TestUsageEvent('tool-command-result', 'appbundle', label: 'success'),
-      ));
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.flutterCommandResult(
+            commandPath: 'create',
+            result: 'success',
+            commandHasTerminal: false,
+            maxRss: globals.processInfo.maxRss,
+          ),
+        ),
+      );
     },
     overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
-      Usage: () => testUsage,
+      Analytics: () => fakeAnalytics,
     });
   });
 
   group('Gradle', () {
     late Directory tempDir;
     late FakeProcessManager processManager;
-    late FakeAndroidSdk fakeAndroidSdk;
-    late TestUsage testUsage;
+    late FakeAndroidSdk androidSdk;
+    late FakeAnalytics analytics;
 
     setUp(() {
-      testUsage = TestUsage();
+      analytics = getInitializedFakeAnalyticsInstance(
+        fs: MemoryFileSystem.test(),
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       processManager = FakeProcessManager.any();
-      fakeAndroidSdk = FakeAndroidSdk(globals.fs.directory('irrelevant'));
+      androidSdk = FakeAndroidSdk(globals.fs.directory('irrelevant'));
     });
 
     tearDown(() {
@@ -170,20 +216,18 @@ void main() {
         ),
       );
 
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'build',
-          'gradle',
+      expect(analytics.sentEvents, contains(
+        Event.flutterBuildInfo(
           label: 'app-not-using-android-x',
-          parameters: CustomDimensions(),
+          buildType: 'gradle',
         ),
       ));
     },
     overrides: <Type, Generator>{
-      AndroidSdk: () => fakeAndroidSdk,
+      AndroidSdk: () => androidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
-      Usage: () => testUsage,
+      Analytics: () => analytics,
     });
 
     testUsingContext('reports when the app is using AndroidX', () async {
@@ -210,20 +254,18 @@ void main() {
         )
       );
 
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'build',
-          'gradle',
+      expect(analytics.sentEvents, contains(
+        Event.flutterBuildInfo(
           label: 'app-using-android-x',
-          parameters: CustomDimensions(),
+          buildType: 'gradle',
         ),
       ));
     },
     overrides: <Type, Generator>{
-      AndroidSdk: () => fakeAndroidSdk,
+      AndroidSdk: () => androidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
-      Usage: () => testUsage,
+      Analytics: () => analytics,
     });
   });
 }

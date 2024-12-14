@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class NavigationBarUseCase extends UseCase {
-
   @override
   String get name => 'NavigationBar';
 
@@ -28,12 +27,14 @@ class MainWidget extends StatefulWidget {
 class MainWidgetState extends State<MainWidget> {
   int currentPageIndex = 0;
 
+  String pageTitle = getUseCaseName(NavigationBarUseCase());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('NavigationBar'),
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
       ),
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {

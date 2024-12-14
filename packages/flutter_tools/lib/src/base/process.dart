@@ -25,12 +25,10 @@ typedef ShutdownHook = FutureOr<void> Function();
 // for more details.
 
 abstract class ShutdownHooks {
-  factory ShutdownHooks() => _DefaultShutdownHooks();
+  factory ShutdownHooks() = _DefaultShutdownHooks;
 
   /// Registers a [ShutdownHook] to be executed before the VM exits.
-  void addShutdownHook(
-    ShutdownHook shutdownHook
-  );
+  void addShutdownHook(ShutdownHook shutdownHook);
 
   @visibleForTesting
   List<ShutdownHook> get registeredHooks;
@@ -71,13 +69,10 @@ class _DefaultShutdownHooks implements ShutdownHooks {
     );
     _shutdownHooksRunning = true;
     try {
-      final List<Future<dynamic>> futures = <Future<dynamic>>[];
-      for (final ShutdownHook shutdownHook in registeredHooks) {
-        final FutureOr<dynamic> result = shutdownHook();
-        if (result is Future<dynamic>) {
-          futures.add(result);
-        }
-      }
+      final List<Future<dynamic>> futures = <Future<dynamic>>[
+        for (final ShutdownHook shutdownHook in registeredHooks)
+          if (shutdownHook() case final Future<dynamic> result) result,
+      ];
       await Future.wait<dynamic>(futures);
     } finally {
       _shutdownHooksRunning = false;
@@ -139,10 +134,7 @@ abstract class ProcessUtils {
   factory ProcessUtils({
     required ProcessManager processManager,
     required Logger logger,
-  }) => _DefaultProcessUtils(
-    processManager: processManager,
-    logger: logger,
-  );
+  }) = _DefaultProcessUtils;
 
   /// Spawns a child process to run the command [cmd].
   ///
@@ -252,31 +244,102 @@ abstract class ProcessUtils {
   /// ```
   ///
   /// However it did not catch a [SocketException] on Linux.
+  ///
+  /// As part of making sure errors are caught, this function will call [flush]
+  /// on [stdin] to ensure that [line] is written to the pipe before this
+  /// function returns. This means completion will be blocked if the kernel
+  /// buffer of the pipe is full.
   static Future<void> writelnToStdinGuarded({
     required IOSink stdin,
     required String line,
     required void Function(Object, StackTrace) onError,
   }) async {
+    await _writeToStdinGuarded(
+      stdin: stdin,
+      content: line,
+      onError: onError,
+      isLine: true,
+    );
+  }
+
+  /// Please see [writelnToStdinGuarded].
+  ///
+  /// This calls `stdin.write` instead of `stdin.writeln`.
+  static Future<void> writeToStdinGuarded({
+    required IOSink stdin,
+    required String content,
+    required void Function(Object, StackTrace) onError,
+  }) async {
+    await _writeToStdinGuarded(
+      stdin: stdin,
+      content: content,
+      onError: onError,
+      isLine: false,
+    );
+  }
+
+  static Future<void> writelnToStdinUnsafe({
+    required IOSink stdin,
+    required String line,
+  }) async {
+    await _writeToStdinUnsafe(
+      stdin: stdin,
+      content: line,
+      isLine: true,
+    );
+  }
+
+  static Future<void> writeToStdinUnsafe({
+    required IOSink stdin,
+    required String content,
+  }) async {
+    await _writeToStdinUnsafe(
+      stdin: stdin,
+      content: content,
+      isLine: false,
+    );
+  }
+
+  static Future<void> _writeToStdinGuarded({
+    required IOSink stdin,
+    required String content,
+    required void Function(Object, StackTrace) onError,
+    required bool isLine,
+  }) async {
+    try {
+      await _writeToStdinUnsafe(stdin: stdin, content: content, isLine: isLine);
+    } on Exception catch (error, stackTrace) {
+      onError(error, stackTrace);
+    }
+  }
+
+  static Future<void> _writeToStdinUnsafe({
+    required IOSink stdin,
+    required String content,
+    required bool isLine,
+  }) {
     final Completer<void> completer = Completer<void>();
 
-    void writeFlushAndComplete() {
-      stdin.writeln(line);
-      stdin.flush().whenComplete(() {
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-      });
+    void handleError(Object error, StackTrace stackTrace) {
+      completer.completeError(error, stackTrace);
     }
 
-    runZonedGuarded(
-      writeFlushAndComplete,
-      (Object error, StackTrace stackTrace) {
-        onError(error, stackTrace);
-        if (!completer.isCompleted) {
+    void writeFlushAndComplete() {
+      if (isLine) {
+        stdin.writeln(content);
+      } else {
+        stdin.write(content);
+      }
+      stdin.flush().then(
+        (_) {
           completer.complete();
-        }
-      },
-    );
+        },
+        onError: handleError,
+      );
+    }
+
+    runZonedGuarded(writeFlushAndComplete, handleError);
+
     return completer.future;
   }
 }
@@ -623,7 +686,9 @@ Future<int> exitWithHooks(int code, {required ShutdownHooks shutdownHooks}) asyn
       messenger.shouldDisplayLicenseTerms();
 
   // Prints the welcome message if needed for legacy analytics.
-  globals.flutterUsage.printWelcome();
+  if (!(await globals.isRunningOnBot)) {
+    globals.flutterUsage.printWelcome();
+  }
 
   // Ensure that the consent message has been displayed for unified analytics
   if (globals.analytics.shouldShowMessage) {

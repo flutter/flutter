@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -49,6 +52,11 @@ class SuggestionSpan {
 
   @override
   int get hashCode => Object.hash(range.start, range.end, Object.hashAll(suggestions));
+
+  @override
+  String toString() {
+    return 'SuggestionSpan(range: $range, suggestions: $suggestions)';
+  }
 }
 
 /// A data structure grouping together the [SuggestionSpan]s and related text of
@@ -82,6 +90,11 @@ class SpellCheckResults {
 
   @override
   int get hashCode => Object.hash(spellCheckedText, Object.hashAll(suggestionSpans));
+
+  @override
+  String toString() {
+    return 'SpellCheckResults(spellCheckText: $spellCheckedText, suggestionSpans: $suggestionSpans)';
+  }
 }
 
 /// Determines how spell check results are received for text input.
@@ -90,6 +103,10 @@ abstract class SpellCheckService {
   ///
   /// Returns a [Future] that resolves with a [List] of [SuggestionSpan]s for
   /// all misspelled words in the given [String] for the given [Locale].
+  ///
+  /// A return value that resolves to null indicates that fetching the spell
+  /// check suggestions was unsuccessful. If fetching the suggestions succeeded
+  /// but none were found, the [Future] should resolve to an empty list.
   Future<List<SuggestionSpan>?> fetchSpellCheckSuggestions(
     Locale locale, String text
   );
@@ -180,20 +197,13 @@ class DefaultSpellCheckService implements SpellCheckService {
       return null;
     }
 
-    List<SuggestionSpan> suggestionSpans = <SuggestionSpan>[];
-
-    for (final dynamic result in rawResults) {
-      final Map<String, dynamic> resultMap =
-        Map<String,dynamic>.from(result as Map<dynamic, dynamic>);
-      suggestionSpans.add(
+    List<SuggestionSpan> suggestionSpans = <SuggestionSpan>[
+      for (final Map<dynamic, dynamic> resultMap in rawResults.cast<Map<dynamic, dynamic>>())
         SuggestionSpan(
-          TextRange(
-            start: resultMap['startIndex'] as int,
-            end: resultMap['endIndex'] as int),
-          (resultMap['suggestions'] as List<dynamic>).cast<String>(),
-        )
-      );
-    }
+          TextRange(start: resultMap['startIndex'] as int, end: resultMap['endIndex'] as int),
+          (resultMap['suggestions'] as List<Object?>).cast<String>(),
+        ),
+    ];
 
     if (lastSavedResults != null) {
       // Merge current and previous spell check results if between requests,

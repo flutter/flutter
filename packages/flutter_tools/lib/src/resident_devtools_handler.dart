@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(bkonyi): remove this file when ready to serve DevTools from DDS.
+//
+// See https://github.com/flutter/flutter/issues/150044
+
 import 'dart:async';
 
 import 'package:browser_launcher/browser_launcher.dart';
@@ -23,6 +27,19 @@ ResidentDevtoolsHandler createDefaultHandler(DevtoolsLauncher? launcher, Residen
 abstract class ResidentDevtoolsHandler {
   /// The current devtools server, or null if one is not running.
   DevToolsServerAddress? get activeDevToolsServer;
+
+  /// The Dart Tooling Daemon (DTD) URI for the DTD instance being hosted by
+  /// DevTools server.
+  ///
+  /// This will be null if the DevTools server is not served through Flutter
+  /// tools (e.g. if it is served from an IDE).
+  Uri? get dtdUri;
+
+  /// Whether to print the Dart Tooling Daemon URI.
+  ///
+  /// This will always return false when there is not a DTD instance being
+  /// served from the DevTools server.
+  bool get printDtdUri;
 
   /// Whether it's ok to announce the [activeDevToolsServer].
   ///
@@ -64,6 +81,12 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   }
 
   @override
+  Uri? get dtdUri => _devToolsLauncher?.dtdUri;
+
+  @override
+  bool get printDtdUri => _devToolsLauncher?.printDtdUri ?? false;
+
+  @override
   bool get readyToAnnounce => _readyToAnnounce;
   bool _readyToAnnounce = false;
 
@@ -89,18 +112,6 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     if (_devToolsLauncher.activeDevToolsServer == null || _shutdown) {
       assert(!_readyToAnnounce);
       return;
-    }
-
-    final Uri? devToolsUrl = _devToolsLauncher.devToolsUrl;
-    if (devToolsUrl != null) {
-      for (final FlutterDevice? device in flutterDevices) {
-        if (device == null) {
-          continue;
-        }
-        // Notify the DDS instances that there's a DevTools instance available so they can correctly
-        // redirect DevTools related requests.
-        device.device?.dds.setExternalDevToolsUri(devToolsUrl);
-      }
     }
 
     Future<void> callServiceExtensions() async {
@@ -195,10 +206,12 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
         },
       );
     } on Exception catch (e) {
-      _logger.printError(
-        'Failed to set DevTools server address: $e. Deep links to'
-        ' DevTools will not show in Flutter errors.',
-      );
+      if (!_shutdown) {
+        _logger.printError(
+          'Failed to set DevTools server address: $e. Deep links to'
+          ' DevTools will not show in Flutter errors.',
+        );
+      }
     }
   }
 
@@ -247,11 +260,13 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
         },
       );
     } on Exception catch (e) {
-      _logger.printError(e.toString());
-      _logger.printError(
-        'Failed to set vm service URI: $e. Deep links to DevTools'
-        ' will not show in Flutter errors.',
-      );
+      if (!_shutdown) {
+        _logger.printError(e.toString());
+        _logger.printError(
+          'Failed to set vm service URI: $e. Deep links to DevTools'
+          ' will not show in Flutter errors.',
+        );
+      }
     }
   }
 
@@ -289,10 +304,10 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 
   @override
   Future<void> shutdown() async {
-    if (_devToolsLauncher == null || _shutdown || !_served) {
+    _shutdown = true;
+    if (_devToolsLauncher == null || !_served) {
       return;
     }
-    _shutdown = true;
     _readyToAnnounce = false;
     await _devToolsLauncher.close();
   }
@@ -337,6 +352,12 @@ class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
     wasShutdown = true;
     return;
   }
+
+  @override
+  Uri? get dtdUri => null;
+
+  @override
+  bool get printDtdUri => false;
 }
 
 /// Convert a [URI] with query parameters into a display format instead

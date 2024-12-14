@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'basic.dart';
+library;
+
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
@@ -140,6 +147,16 @@ class KeySet<T extends KeyboardKey> {
     sortedHashes.sort();
     return Object.hashAll(sortedHashes);
   }
+}
+
+/// Determines how the state of a lock key is used to accept a shortcut.
+enum LockState {
+  /// The lock key state is not used to determine [SingleActivator.accepts] result.
+  ignored,
+  /// The lock key must be locked to trigger the shortcut.
+  locked,
+  /// The lock key must be unlocked to trigger the shortcut.
+  unlocked,
 }
 
 /// An interface to define the keyboard key combination to trigger a shortcut.
@@ -422,7 +439,7 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   /// In the following example, the shortcut `Control + C` increases the
   /// counter:
   ///
-  /// ** See code in examples/api/lib/widgets/shortcuts/single_activator.single_activator.0.dart **
+  /// ** See code in examples/api/lib/widgets/shortcuts/single_activator.0.dart **
   /// {@end-tool}
   const SingleActivator(
     this.trigger, {
@@ -430,6 +447,7 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
     this.shift = false,
     this.alt = false,
     this.meta = false,
+    this.numLock = LockState.ignored,
     this.includeRepeats = true,
   }) : // The enumerated check with `identical` is cumbersome but the only way
        // since const constructors can not call functions such as `==` or
@@ -505,6 +523,19 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   ///  * [LogicalKeyboardKey.metaLeft], [LogicalKeyboardKey.metaRight].
   final bool meta;
 
+  /// Whether the NumLock key state should be checked for [trigger] to activate
+  /// the shortcut.
+  ///
+  /// It defaults to [LockState.ignored], meaning the NumLock state is ignored
+  /// when the event is received in order to activate the shortcut.
+  /// If it's [LockState.locked], then the NumLock key must be locked.
+  /// If it's [LockState.unlocked], then the NumLock key must be unlocked.
+  ///
+  /// See also:
+  ///
+  ///  * [LogicalKeyboardKey.numLock].
+  final LockState numLock;
+
   /// Whether this activator accepts repeat events of the [trigger] key.
   ///
   /// If [includeRepeats] is true, the activator is checked on all
@@ -525,11 +556,20 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
         && meta == pressed.intersection(_metaSynonyms).isNotEmpty;
   }
 
+  bool _shouldAcceptNumLock(HardwareKeyboard state) {
+    return switch (numLock) {
+      LockState.ignored => true,
+      LockState.locked => state.lockModesEnabled.contains(KeyboardLockMode.numLock),
+      LockState.unlocked => !state.lockModesEnabled.contains(KeyboardLockMode.numLock),
+    };
+  }
+
   @override
   bool accepts(KeyEvent event, HardwareKeyboard state) {
     return (event is KeyDownEvent || (includeRepeats && event is KeyRepeatEvent))
         && triggers.contains(event.logicalKey)
-        && _shouldAcceptModifiers(state.logicalKeysPressed);
+        && _shouldAcceptModifiers(state.logicalKeysPressed)
+        && _shouldAcceptNumLock(state);
   }
 
   @override
@@ -589,7 +629,7 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
 ///
 /// {@tool dartpad}
 /// In the following example, when a key combination results in a question mark,
-/// the counter is increased:
+/// the [SnackBar] gets shown:
 ///
 /// ** See code in examples/api/lib/widgets/shortcuts/character_activator.0.dart **
 /// {@end-tool}
@@ -862,22 +902,17 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   /// [Action] must be enabled.
   @protected
   KeyEventResult handleKeypress(BuildContext context, KeyEvent event) {
-    final Intent? matchedIntent = _find(event, HardwareKeyboard.instance);
-    if (matchedIntent != null) {
-      final BuildContext? primaryContext = primaryFocus?.context;
-      if (primaryContext != null) {
-        final Action<Intent>? action = Actions.maybeFind<Intent>(
-          primaryContext,
-          intent: matchedIntent,
-        );
-        if (action != null) {
-          final (bool enabled, Object? invokeResult) = Actions.of(primaryContext).invokeActionIfEnabled(
-            action, matchedIntent, primaryContext,
-          );
-          if (enabled) {
-            return action.toKeyEventResult(matchedIntent, invokeResult);
-          }
-        }
+    // Marking some variables as "late" ensures that they aren't evaluated unless needed.
+    late final Intent? intent = _find(event, HardwareKeyboard.instance);
+    late final BuildContext? context = primaryFocus?.context;
+    late final Action<Intent>? action = Actions.maybeFind<Intent>(context!, intent: intent);
+
+    if (intent != null && context != null && action != null) {
+      final (bool enabled, Object? invokeResult) =
+          Actions.of(context).invokeActionIfEnabled(action, intent, context);
+
+      if (enabled) {
+        return action.toKeyEventResult(intent, invokeResult);
       }
     }
     return modal ? KeyEventResult.skipRemainingHandlers : KeyEventResult.ignored;
@@ -907,8 +942,8 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
 /// deletion intent may be to delete a character in a text input, or to delete
 /// a file in a file menu.
 ///
-/// See the article on [Using Actions and
-/// Shortcuts](https://docs.flutter.dev/development/ui/advanced/actions_and_shortcuts)
+/// See the article on
+/// [Using Actions and Shortcuts](https://flutter.dev/to/actions-shortcuts)
 /// for a detailed explanation.
 ///
 /// {@tool dartpad}
@@ -964,6 +999,7 @@ class Shortcuts extends StatefulWidget {
     required Map<ShortcutActivator, Intent> shortcuts,
     required this.child,
     this.debugLabel,
+    this.includeSemantics = true,
   }) : _shortcuts = shortcuts,
        manager = null;
 
@@ -979,6 +1015,7 @@ class Shortcuts extends StatefulWidget {
     required ShortcutManager this.manager,
     required this.child,
     this.debugLabel,
+    this.includeSemantics = true,
   }) : _shortcuts = const <ShortcutActivator, Intent>{};
 
   /// The [ShortcutManager] that will manage the mapping between key
@@ -1013,6 +1050,9 @@ class Shortcuts extends StatefulWidget {
   /// This allows simplifying the diagnostic output to avoid cluttering it
   /// unnecessarily with large default shortcut maps.
   final String? debugLabel;
+
+  /// {@macro flutter.widgets.Focus.includeSemantics}
+  final bool includeSemantics;
 
   @override
   State<Shortcuts> createState() => _ShortcutsState();
@@ -1071,6 +1111,7 @@ class _ShortcutsState extends State<Shortcuts> {
       debugLabel: '$Shortcuts',
       canRequestFocus: false,
       onKeyEvent: _handleOnKeyEvent,
+      includeSemantics: widget.includeSemantics,
       child: widget.child,
     );
   }
@@ -1105,8 +1146,8 @@ class _ShortcutsState extends State<Shortcuts> {
 /// a descendant of this widget handles the key, then the key event will not
 /// reach this widget for handling.
 ///
-/// See the article on [Using Actions and
-/// Shortcuts](https://docs.flutter.dev/development/ui/advanced/actions_and_shortcuts)
+/// See the article on
+/// [Using Actions and Shortcuts](https://flutter.dev/to/actions-shortcuts)
 /// for a detailed explanation.
 ///
 /// See also:
@@ -1373,8 +1414,7 @@ class ShortcutRegistry with ChangeNotifier {
   // registry.
   void _disposeEntry(ShortcutRegistryEntry entry) {
     assert(_debugCheckEntryIsValid(entry));
-    final Map<ShortcutActivator, Intent>? removedShortcut = _registeredShortcuts.remove(entry);
-    if (removedShortcut != null) {
+    if (_registeredShortcuts.remove(entry) != null) {
       _notifyListenersNextFrame();
     }
   }

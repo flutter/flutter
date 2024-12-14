@@ -338,14 +338,10 @@ void main() {
   testWidgets('SliverFixedExtentList handles underflow when its children changes', (WidgetTester tester) async {
     final List<String> items = <String>['1', '2', '3', '4', '5', '6'];
     final List<String> initializedChild = <String>[];
-    List<Widget> children = <Widget>[];
-    for (final String item in items) {
-      children.add(
-          StateInitSpy(
-            item, () => initializedChild.add(item), key: ValueKey<String>(item),
-          ),
-      );
-    }
+    List<Widget> children = <Widget>[
+      for (final String item in items)
+        StateInitSpy(item, () => initializedChild.add(item), key: ValueKey<String>(item)),
+    ];
     final ScrollController controller = ScrollController(initialScrollOffset: 5400);
     addTearDown(controller.dispose);
 

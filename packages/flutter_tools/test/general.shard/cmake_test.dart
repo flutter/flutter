@@ -49,7 +49,12 @@ void main() {
   testWithoutContext('generates config', () async {
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
-    const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, treeShakeIcons: false);
+    const BuildInfo buildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
+    );
     final Map<String, String> environment = <String, String>{};
 
     writeGeneratedCmakeConfig(
@@ -90,7 +95,12 @@ void main() {
 
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
-    const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, treeShakeIcons: false);
+    const BuildInfo buildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
+    );
 
     final Map<String, String> environment = <String, String>{
       'TEST': r'hello\world',
@@ -137,7 +147,12 @@ void main() {
 
     final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final CmakeBasedProject cmakeProject = _FakeProject.fromFlutter(project);
-    const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, treeShakeIcons: false);
+    const BuildInfo buildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
+    );
     final Map<String, String> environment = <String, String>{};
 
     writeGeneratedCmakeConfig(
@@ -171,6 +186,7 @@ void main() {
       null,
       buildName: '1.2.3',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -205,6 +221,7 @@ void main() {
       null,
       buildNumber: '4',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -240,6 +257,7 @@ void main() {
       buildName: '1.2.3',
       buildNumber: '4',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -278,6 +296,7 @@ void main() {
       null,
       buildName: '1.2.3',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -316,6 +335,7 @@ void main() {
       null,
       buildNumber: '5',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -355,6 +375,7 @@ void main() {
       buildName: '1.2.3',
       buildNumber: '4',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -389,6 +410,7 @@ void main() {
       null,
       buildName: 'hello.world',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -426,6 +448,7 @@ void main() {
       buildName: '1.2.3',
       buildNumber: 'foo_bar',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -463,6 +486,7 @@ void main() {
       buildName: '1.2.3',
       buildNumber: 'hello',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -500,6 +524,7 @@ void main() {
       buildName: '1.2.3',
       buildNumber: '4.5',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -537,6 +562,7 @@ void main() {
       buildName: '1.2.3',
       buildNumber: 'hello',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 
@@ -578,6 +604,7 @@ void main() {
       buildName: '1.2.3',
       buildNumber: '4.5',
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
     final Map<String, String> environment = <String, String>{};
 

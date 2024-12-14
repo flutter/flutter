@@ -32,7 +32,6 @@ body:
         - camera
         - cross_file
         - css_colors
-        - dynamic_layouts
         - espresso
         - extension_google_sign_in_as_googleapis_auth
         - file_selector
@@ -50,6 +49,7 @@ body:
         - google_sign_in
         - image_picker
         - in_app_purchase
+        - interactive_media_ads
         - ios_platform_images
         - local_auth
         - metrics_center
@@ -57,7 +57,6 @@ body:
         - palette_generator
         - path_provider
         - pigeon
-        - platform
         - plugin_platform_interface
         - pointer_interceptor
         - process
@@ -113,7 +112,7 @@ body:
         Note: Please do not upload screenshots of text. Instead, use code blocks
         or the above mentioned ways to upload this.
       value: |
-        <details open><summary>pubspec.lock</summary>
+        <details><summary>pubspec.lock</summary>
 
         ```lock
         [Paste file content here]

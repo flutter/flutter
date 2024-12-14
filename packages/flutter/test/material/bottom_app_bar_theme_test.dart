@@ -29,7 +29,6 @@ void main() {
     });
 
     testWidgets('Material2 - BAB color - Widget', (WidgetTester tester) async {
-      const Color themeColor = Colors.white10;
       const Color babThemeColor = Colors.black87;
       const Color babColor = Colors.pink;
       const BottomAppBarTheme theme = BottomAppBarTheme(color: babThemeColor);
@@ -38,7 +37,6 @@ void main() {
         theme: ThemeData(
           useMaterial3: false,
           bottomAppBarTheme: theme,
-          bottomAppBarColor: themeColor
         ),
         home: const Scaffold(body: BottomAppBar(color: babColor)),
       ));
@@ -48,7 +46,6 @@ void main() {
     });
 
     testWidgets('Material2 - BAB color - BabTheme', (WidgetTester tester) async {
-      const Color themeColor = Colors.white10;
       const Color babThemeColor = Colors.black87;
       const BottomAppBarTheme theme = BottomAppBarTheme(color: babThemeColor);
 
@@ -56,7 +53,6 @@ void main() {
         theme: ThemeData(
           useMaterial3: false,
           bottomAppBarTheme: theme,
-          bottomAppBarColor: themeColor
         ),
         home: const Scaffold(body: BottomAppBar()),
       ));
@@ -69,7 +65,7 @@ void main() {
       const Color themeColor = Colors.white10;
 
       await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(useMaterial3: false, bottomAppBarColor: themeColor),
+        theme: ThemeData(useMaterial3: false, bottomAppBarTheme: const BottomAppBarTheme(color: themeColor)),
         home: const Scaffold(body: BottomAppBar()),
       ));
 
@@ -130,7 +126,6 @@ void main() {
     });
 
     testWidgets('Material3 - BAB color - Widget', (WidgetTester tester) async {
-      const Color themeColor = Colors.white10;
       const Color babThemeColor = Colors.black87;
       const Color babColor = Colors.pink;
       const BottomAppBarTheme theme = BottomAppBarTheme(color: babThemeColor);
@@ -139,7 +134,6 @@ void main() {
         theme: ThemeData(
           useMaterial3: true,
           bottomAppBarTheme: theme,
-          bottomAppBarColor: themeColor
         ),
         home: const Scaffold(body: BottomAppBar(color: babColor, surfaceTintColor: Colors.transparent)),
       ));
@@ -149,7 +143,6 @@ void main() {
     });
 
     testWidgets('Material3 - BAB color - BabTheme', (WidgetTester tester) async {
-      const Color themeColor = Colors.white10;
       const Color babThemeColor = Colors.black87;
       const BottomAppBarTheme theme = BottomAppBarTheme(color: babThemeColor);
 
@@ -157,7 +150,6 @@ void main() {
         theme: ThemeData(
           useMaterial3: true,
           bottomAppBarTheme: theme,
-          bottomAppBarColor: themeColor
         ),
         home: const Scaffold(body: BottomAppBar(surfaceTintColor: Colors.transparent)),
       ));
@@ -175,7 +167,7 @@ void main() {
 
       final PhysicalShape widget = _getBabRenderObject(tester);
 
-      expect(widget.color, theme.colorScheme.surface);
+      expect(widget.color, theme.colorScheme.surfaceContainer);
       expect(widget.elevation, equals(3.0));
     });
 
@@ -204,7 +196,6 @@ void main() {
 
     testWidgets('Material3 - BAB surfaceTintColor - Widget', (WidgetTester tester) async {
       const Color color = Colors.white10; // base color that the surface tint will be applied to
-      const Color themeSurfaceTintColor = Colors.white10;
       const Color babThemeSurfaceTintColor = Colors.black87;
       const Color babSurfaceTintColor = Colors.pink;
       const BottomAppBarTheme theme = BottomAppBarTheme(
@@ -214,7 +205,6 @@ void main() {
         theme: ThemeData(
           useMaterial3: true,
           bottomAppBarTheme: theme,
-          bottomAppBarColor: themeSurfaceTintColor
         ),
         home: const Scaffold(
           body: BottomAppBar(color: color, surfaceTintColor: babSurfaceTintColor)
@@ -227,7 +217,6 @@ void main() {
 
     testWidgets('Material3 - BAB surfaceTintColor - BabTheme', (WidgetTester tester) async {
       const Color color = Colors.blue; // base color that the surface tint will be applied to
-      const Color themeColor = Colors.white10;
       const Color babThemeColor = Colors.black87;
       const BottomAppBarTheme theme = BottomAppBarTheme(
         surfaceTintColor: babThemeColor
@@ -237,7 +226,6 @@ void main() {
         theme: ThemeData(
           useMaterial3: true,
           bottomAppBarTheme: theme,
-          bottomAppBarColor: themeColor
         ),
         home: const Scaffold(body: BottomAppBar(color: color)),
       ));

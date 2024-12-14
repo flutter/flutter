@@ -6,9 +6,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+
   testWidgets('Default PageTransitionsTheme platform', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: Text('home')));
     final PageTransitionsTheme theme = Theme.of(tester.element(find.text('home'))).pageTransitionsTheme;
@@ -132,6 +135,86 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(findOpenUpwardsPageTransition(), findsOneWidget);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('PageTransitionsTheme override builds a CupertinoPageTransition on android', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+        ),
+      ),
+      '/b': (BuildContext context) => const Text('page b'),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+            },
+          ),
+        ),
+        routes: routes,
+      ),
+    );
+
+    expect(Theme.of(tester.element(find.text('push'))).platform, debugDefaultTargetPlatformOverride);
+    expect(find.byType(CupertinoPageTransition), findsOneWidget);
+
+    await tester.tap(find.text('push'));
+    await tester.pumpAndSettle();
+    expect(find.text('page b'), findsOneWidget);
+    expect(find.byType(CupertinoPageTransition), findsOneWidget);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('CupertinoPageTransition on android does not block gestures on backswipe', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+        ),
+      ),
+      '/b': (BuildContext context) => const Text('page b'),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+            },
+          ),
+        ),
+        routes: routes,
+      ),
+    );
+
+    expect(Theme.of(tester.element(find.text('push'))).platform, debugDefaultTargetPlatformOverride);
+    expect(find.byType(CupertinoPageTransition), findsOneWidget);
+
+    await tester.tap(find.text('push'));
+    await tester.pumpAndSettle();
+    expect(find.text('page b'), findsOneWidget);
+    expect(find.byType(CupertinoPageTransition), findsOneWidget);
+
+    await tester.pumpAndSettle(const Duration(minutes: 1));
+
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 100.0));
+    await gesture.moveBy(const Offset(400.0, 0.0));
+    await gesture.up();
+    await tester.pump();
+
+    await tester.pumpAndSettle(const Duration(minutes: 1));
+
+    expect(find.text('push'), findsOneWidget);
+    await tester.tap(find.text('push'));
+    await tester.pumpAndSettle();
+    expect(find.text('page b'), findsOneWidget);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('PageTransitionsTheme override builds a _FadeUpwardsTransition', (WidgetTester tester) async {
@@ -350,4 +433,304 @@ void main() {
     await tester.pumpAndSettle();
     expect(builtCount, 1);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('predictive back gestures pop the route on all platforms regardless of whether their transition handles predictive back', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+        ),
+      ),
+      '/b': (BuildContext context) => const Text('page b'),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        routes: routes,
+      ),
+    );
+
+    expect(find.text('push'), findsOneWidget);
+    expect(find.text('page b'), findsNothing);
+
+    await tester.tap(find.text('push'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('push'), findsNothing);
+    expect(find.text('page b'), findsOneWidget);
+
+    // Start a system pop gesture.
+    final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
+      const MethodCall(
+        'startBackGesture',
+        <String, dynamic>{
+          'touchOffset': <double>[5.0, 300.0],
+          'progress': 0.0,
+          'swipeEdge': 0, // left
+        },
+      ),
+    );
+    await binding.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/backgesture',
+      startMessage,
+      (ByteData? _) {},
+    );
+    await tester.pump();
+
+    expect(find.text('push'), findsNothing);
+    expect(find.text('page b'), findsOneWidget);
+
+    // Drag the system back gesture far enough to commit.
+    final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
+      const MethodCall(
+        'updateBackGestureProgress',
+        <String, dynamic>{
+          'x': 100.0,
+          'y': 300.0,
+          'progress': 0.35,
+          'swipeEdge': 0, // left
+        },
+      ),
+    );
+    await binding.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/backgesture',
+      updateMessage,
+      (ByteData? _) {},
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('push'), findsNothing);
+    expect(find.text('page b'), findsOneWidget);
+
+    // Commit the system back gesture.
+    final ByteData commitMessage = const StandardMethodCodec().encodeMethodCall(
+      const MethodCall(
+        'commitBackGesture',
+      ),
+    );
+    await binding.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/backgesture',
+      commitMessage,
+      (ByteData? _) {},
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('push'), findsOneWidget);
+    expect(find.text('page b'), findsNothing);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('ZoomPageTransitionsBuilder uses theme color during transition effects', (WidgetTester tester) async {
+    // Color that is being tested for presence.
+    const Color themeTestSurfaceColor = Color.fromARGB(255, 195, 255, 0);
+
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Home Page'),
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/scaffolded');
+                  },
+                  child: const Text('Route with scaffold!'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/not-scaffolded');
+                  },
+                  child: const Text('Route with NO scaffold!'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      '/scaffolded': (BuildContext context) => Material(
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Scaffolded Page'),
+          ),
+          body: Center(
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Back to home route...'),
+            ),
+          ),
+        ),
+      ),
+      '/not-scaffolded': (BuildContext context) => Material(
+        child: Center(
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Back to home route...'),
+          ),
+        ),
+      ),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, surface: themeTestSurfaceColor),
+          pageTransitionsTheme: PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              // Force all platforms to use ZoomPageTransitionsBuilder to test each one.
+              for (final TargetPlatform platform in TargetPlatform.values) platform: const ZoomPageTransitionsBuilder(),
+            },
+          ),
+        ),
+        routes: routes,
+      ),
+    );
+
+    // Go to scaffolded page.
+    await tester.tap(find.text('Route with scaffold!'));
+
+    // Pump till animation is half-way through.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 75));
+
+    // Verify that the render box is painting the right color for scaffolded pages.
+    final RenderBox scaffoldedRenderBox = tester.firstRenderObject<RenderBox>(find.byType(MaterialApp));
+    // Expect the color to be at exactly 12.2% opacity at this time.
+    expect(scaffoldedRenderBox, paints..rect(color: themeTestSurfaceColor.withOpacity(0.122)));
+
+    await tester.pumpAndSettle();
+
+    // Go back home and then go to non-scaffolded page.
+    await tester.tap(find.text('Back to home route...'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Route with NO scaffold!'));
+
+    // Pump till animation is half-way through.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 125));
+
+    // Verify that the render box is painting the right color for non-scaffolded pages.
+    final RenderBox nonScaffoldedRenderBox = tester.firstRenderObject<RenderBox>(find.byType(MaterialApp));
+    // Expect the color to be at exactly 59.6% opacity at this time.
+    expect(nonScaffoldedRenderBox, paints..rect(color: themeTestSurfaceColor.withOpacity(0.596)));
+
+    await tester.pumpAndSettle();
+
+    // Verify that the transition successfully completed.
+    expect(find.text('Back to home route...'), findsOneWidget);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('ZoomPageTransitionsBuilder uses developer-provided color during transition effects if provided', (WidgetTester tester) async {
+    // Color that is being tested for presence.
+    const Color testSurfaceColor = Colors.red;
+
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Home Page'),
+          ),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/scaffolded');
+                  },
+                  child: const Text('Route with scaffold!'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/not-scaffolded');
+                  },
+                  child: const Text('Route with NO scaffold!'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      '/scaffolded': (BuildContext context) => Material(
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Scaffolded Page'),
+          ),
+          body: Center(
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Back to home route...'),
+            ),
+          ),
+        ),
+      ),
+      '/not-scaffolded': (BuildContext context) => Material(
+        child: Center(
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Back to home route...'),
+          ),
+        ),
+      ),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, surface: Colors.blue),
+          pageTransitionsTheme: PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              // Force all platforms to use ZoomPageTransitionsBuilder to test each one.
+              for (final TargetPlatform platform in TargetPlatform.values) platform: const ZoomPageTransitionsBuilder(backgroundColor: testSurfaceColor),
+            },
+          ),
+        ),
+        routes: routes,
+      ),
+    );
+
+    // Go to scaffolded page.
+    await tester.tap(find.text('Route with scaffold!'));
+
+    // Pump till animation is half-way through.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 75));
+
+    // Verify that the render box is painting the right color for scaffolded pages.
+    final RenderBox scaffoldedRenderBox = tester.firstRenderObject<RenderBox>(find.byType(MaterialApp));
+    // Expect the color to be at exactly 12.2% opacity at this time.
+    expect(scaffoldedRenderBox, paints..rect(color: testSurfaceColor.withOpacity(0.122)));
+
+    await tester.pumpAndSettle();
+
+    // Go back home and then go to non-scaffolded page.
+    await tester.tap(find.text('Back to home route...'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Route with NO scaffold!'));
+
+    // Pump till animation is half-way through.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 125));
+
+    // Verify that the render box is painting the right color for non-scaffolded pages.
+    final RenderBox nonScaffoldedRenderBox = tester.firstRenderObject<RenderBox>(find.byType(MaterialApp));
+    // Expect the color to be at exactly 59.6% opacity at this time.
+    expect(nonScaffoldedRenderBox, paints..rect(color: testSurfaceColor.withOpacity(0.596)));
+
+    await tester.pumpAndSettle();
+
+    // Verify that the transition successfully completed.
+    expect(find.text('Back to home route...'), findsOneWidget);
+  }, variant: TargetPlatformVariant.all());
 }

@@ -22,6 +22,7 @@ void main() {
   group('RawImage', () {
     testWidgets('properties', (WidgetTester tester) async {
       final ui.Image image1 = (await tester.runAsync<ui.Image>(() => createTestImage()))!;
+      addTearDown(image1.dispose);
 
       await tester.pumpWidget(
         Directionality(
@@ -46,10 +47,11 @@ void main() {
       expect(renderObject.centerSlice, null);
       expect(renderObject.matchTextDirection, false);
       expect(renderObject.invertColors, false);
-      expect(renderObject.filterQuality, FilterQuality.low);
+      expect(renderObject.filterQuality, FilterQuality.medium);
       expect(renderObject.isAntiAlias, false);
 
       final ui.Image image2 = (await tester.runAsync<ui.Image>(() => createTestImage(width: 2, height: 2)))!;
+      addTearDown(image2.dispose);
       const String debugImageLabel = 'debugImageLabel';
       const double width = 1;
       const double height = 1;
@@ -713,7 +715,7 @@ void main() {
       renderColoredBox.paint(mockContext, Offset.zero);
 
       expect(mockCanvas.rects.single, const Rect.fromLTWH(0, 0, 800, 600));
-      expect(mockCanvas.paints.single.color, colorToPaint);
+      expect(mockCanvas.paints.single.color, isSameColorAs(colorToPaint));
       expect(mockContext.children, isEmpty);
       expect(mockContext.offsets, isEmpty);
     });
@@ -729,7 +731,7 @@ void main() {
       renderColoredBox.paint(mockContext, Offset.zero);
 
       expect(mockCanvas.rects.single, const Rect.fromLTWH(0, 0, 800, 600));
-      expect(mockCanvas.paints.single.color, colorToPaint);
+      expect(mockCanvas.paints.single.color, isSameColorAs(colorToPaint));
       expect(mockContext.children.single, renderSizedBox);
       expect(mockContext.offsets.single, Offset.zero);
     });
@@ -742,12 +744,13 @@ void main() {
       expect(properties.properties.first.value, colorToPaint);
     });
   });
+
   testWidgets('Inconsequential golden test', (WidgetTester tester) async {
     // The test validates the Flutter Gold integration. Any changes to the
     // golden file can be approved at any time.
     await tester.pumpWidget(RepaintBoundary(
       child: Container(
-        color: const Color(0xABCDABCD),
+        color: const Color(0xFF161145),
       ),
     ));
 
@@ -855,6 +858,7 @@ void main() {
         matchesSemantics(
           label: 'button',
           hasTapAction: true,
+          hasFocusAction: true,
           isButton: true,
           isFocusable: true,
           hasEnabledState: true,

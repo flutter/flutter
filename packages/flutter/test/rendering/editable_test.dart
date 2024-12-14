@@ -201,52 +201,6 @@ void main() {
     expect(leaderLayers.single.offset, endpoint + paintOffset, reason: 'offset should respect paintOffset');
   });
 
-  test('editable intrinsics', () {
-    final TextSelectionDelegate delegate = _FakeEditableTextState();
-    final RenderEditable editable = RenderEditable(
-      text: const TextSpan(
-        style: TextStyle(height: 1.0, fontSize: 10.0),
-        text: '12345',
-      ),
-      startHandleLayerLink: LayerLink(),
-      endHandleLayerLink: LayerLink(),
-      textDirection: TextDirection.ltr,
-      locale: const Locale('ja', 'JP'),
-      offset: ViewportOffset.zero(),
-      textSelectionDelegate: delegate,
-    );
-    expect(editable.getMinIntrinsicWidth(double.infinity), 50.0);
-    // The width includes the width of the cursor (1.0).
-    expect(editable.getMaxIntrinsicWidth(double.infinity), 52.0);
-    expect(editable.getMinIntrinsicHeight(double.infinity), 10.0);
-    expect(editable.getMaxIntrinsicHeight(double.infinity), 10.0);
-
-    expect(
-      editable.toStringDeep(minLevel: DiagnosticLevel.info),
-      equalsIgnoringHashCodes(
-        'RenderEditable#00000 NEEDS-LAYOUT NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE DETACHED\n'
-        ' │ parentData: MISSING\n'
-        ' │ constraints: MISSING\n'
-        ' │ size: MISSING\n'
-        ' │ cursorColor: null\n'
-        ' │ showCursor: ValueNotifier<bool>#00000(false)\n'
-        ' │ maxLines: 1\n'
-        ' │ minLines: null\n'
-        ' │ selectionColor: null\n'
-        ' │ locale: ja_JP\n'
-        ' │ selection: null\n'
-        ' │ offset: _FixedViewportOffset#00000(offset: 0.0)\n'
-        ' ╘═╦══ text ═══\n'
-        '   ║ TextSpan:\n'
-        '   ║   inherit: true\n'
-        '   ║   size: 10.0\n'
-        '   ║   height: 1.0x\n'
-        '   ║   "12345"\n'
-        '   ╚═══════════\n',
-      ),
-    );
-  });
-
   // Test that clipping will be used even when the text fits within the visible
   // region if the start position of the text is offset (e.g. during scrolling
   // animation).
@@ -564,6 +518,61 @@ void main() {
         ..paragraph(),
     );
     expect(editable, paintsExactlyCountTimes(#drawRect, 1));
+  });
+
+  test('does not paint the caret when selection is null or invalid', () async {
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
+    final ValueNotifier<bool> showCursor = ValueNotifier<bool>(true);
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      paintCursorAboveText: true,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      showCursor: showCursor,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      text: const TextSpan(
+        text: 'test',
+        style: TextStyle(height: 1.0, fontSize: 10.0),
+      ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      selection: const TextSelection.collapsed(
+        offset: 2,
+        affinity: TextAffinity.upstream,
+      ),
+    );
+
+    layout(editable);
+
+    expect(
+      editable,
+      paints
+        ..paragraph()
+        // Red collapsed cursor is painted, not a selection box.
+        ..rect(color: Colors.red[500]),
+    );
+
+    // Let the RenderEditable paint again. Setting the selection to null should
+    // prevent the caret from being painted.
+    editable.selection = null;
+    // Still paints the paragraph.
+    expect(editable, paints..paragraph());
+    // No longer paints the caret.
+    expect(editable, isNot(paints..rect(color: Colors.red[500])));
+
+    // Reset.
+    editable.selection = const TextSelection.collapsed(offset: 0);
+    expect(editable, paints..paragraph());
+    expect(editable, paints..rect(color: Colors.red[500]));
+
+    // Invalid cursor position.
+    editable.selection = const TextSelection.collapsed(offset: -1);
+    // Still paints the paragraph.
+    expect(editable, paints..paragraph());
+    // No longer paints the caret.
+    expect(editable, isNot(paints..rect(color: Colors.red[500])));
   });
 
   test('selects correct place with offsets', () {
@@ -1062,11 +1071,11 @@ void main() {
       pumpFrame(phase: EnginePhase.paint);
       expect(currentPainter.paintCount, 1);
 
-      editable.foregroundPainter = (currentPainter = _TestRenderEditablePainter()..repaint = false);
+      editable.foregroundPainter = currentPainter = _TestRenderEditablePainter()..repaint = false;
       pumpFrame(phase: EnginePhase.paint);
       expect(currentPainter.paintCount, 0);
 
-      editable.foregroundPainter = (currentPainter = _TestRenderEditablePainter()..repaint = true);
+      editable.foregroundPainter = currentPainter = _TestRenderEditablePainter()..repaint = true;
       pumpFrame(phase: EnginePhase.paint);
       expect(currentPainter.paintCount, 1);
     });
@@ -1081,11 +1090,11 @@ void main() {
       pumpFrame(phase: EnginePhase.paint);
       expect(currentPainter.paintCount, 1);
 
-      editable.painter = (currentPainter = _TestRenderEditablePainter()..repaint = false);
+      editable.painter = currentPainter = _TestRenderEditablePainter()..repaint = false;
       pumpFrame(phase: EnginePhase.paint);
       expect(currentPainter.paintCount, 0);
 
-      editable.painter = (currentPainter = _TestRenderEditablePainter()..repaint = true);
+      editable.painter = currentPainter = _TestRenderEditablePainter()..repaint = true;
       pumpFrame(phase: EnginePhase.paint);
       expect(currentPainter.paintCount, 1);
     });

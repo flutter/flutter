@@ -454,7 +454,11 @@ Future<String> eval(
   return output.toString().trimRight();
 }
 
-List<String> _flutterCommandArgs(String command, List<String> options) {
+List<String> _flutterCommandArgs(
+  String command,
+  List<String> options, {
+  bool driveWithDds = false,
+}) {
   // Commands support the --device-timeout flag.
   final Set<String> supportedDeviceTimeoutCommands = <String>{
     'attach',
@@ -469,6 +473,7 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
   final String? localEngineHost = localEngineHostFromEnv;
   final String? localEngineSrcPath = localEngineSrcPathFromEnv;
   final String? localWebSdk = localWebSdkFromEnv;
+  final bool pubOrPackagesCommand = command.startsWith('packages') || command.startsWith('pub');
   return <String>[
     command,
     if (deviceOperatingSystem == DeviceOperatingSystem.ios && supportedDeviceTimeoutCommands.contains(command))
@@ -476,6 +481,10 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
         '--device-timeout',
         '5',
       ],
+
+    // DDS should generally be disabled for flutter drive in CI.
+    // See https://github.com/flutter/flutter/issues/152684.
+    if (command == 'drive' && !driveWithDds) '--no-dds',
 
     if (command == 'drive' && hostAgent.dumpDirectory != null) ...<String>[
       '--screenshot',
@@ -489,7 +498,9 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
     // Use CI flag when running devicelab tests, except for `packages`/`pub` commands.
     // `packages`/`pub` commands effectively runs the `pub` tool, which does not have
     // the same allowed args.
-    if (!command.startsWith('packages') && !command.startsWith('pub')) '--ci',
+    if (!pubOrPackagesCommand) '--ci',
+    if (!pubOrPackagesCommand && hostAgent.dumpDirectory != null)
+      '--debug-logs-dir=${hostAgent.dumpDirectory!.path}'
   ];
 }
 
@@ -498,10 +509,15 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
 Future<int> flutter(String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
+  bool driveWithDds = false,  // `flutter drive` tests should generally have dds disabled.
+                              // The exception is tests that also exercise DevTools, such as
+                              // DevToolsMemoryTest in perf_tests.dart.
   Map<String, String>? environment,
   String? workingDirectory,
 }) async {
-  final List<String> args = _flutterCommandArgs(command, options);
+  final List<String> args = _flutterCommandArgs(
+    command, options, driveWithDds: driveWithDds,
+  );
   final int exitCode = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
     canFail: canFail, environment: environment, workingDirectory: workingDirectory);
 
@@ -626,7 +642,7 @@ String get dartBin =>
 String get pubBin =>
     path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'pub');
 
-Future<int> dart(List<String> args) => exec(dartBin, <String>['--disable-dart-dev', ...args]);
+Future<int> dart(List<String> args) => exec(dartBin, args);
 
 /// Returns a future that completes with a path suitable for JAVA_HOME
 /// or with null, if Java cannot be found.
@@ -701,22 +717,6 @@ T requireConfigProperty<T>(Map<String, dynamic> map, String propertyName) {
 String jsonEncode(dynamic data) {
   final String jsonValue = const JsonEncoder.withIndent('  ').convert(data);
   return '$jsonValue\n';
-}
-
-Future<void> getNewGallery(String revision, Directory galleryDir) async {
-  section('Get New Flutter Gallery!');
-
-  if (exists(galleryDir)) {
-    galleryDir.deleteSync(recursive: true);
-  }
-
-  await inDirectory<void>(galleryDir.parent, () async {
-    await exec('git', <String>['clone', 'https://github.com/flutter/gallery.git']);
-  });
-
-  await inDirectory<void>(galleryDir, () async {
-    await exec('git', <String>['checkout', revision]);
-  });
 }
 
 /// Splits [from] into lines and selects those that contain [pattern].

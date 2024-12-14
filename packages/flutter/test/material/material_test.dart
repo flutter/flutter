@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+import '../widgets/multi_view_testing.dart';
 import '../widgets/test_border.dart' show TestBorder;
 
 class NotifyMaterial extends StatelessWidget {
@@ -113,11 +114,11 @@ void main() {
 
     expect(description, <String>[
       'type: canvas',
-      'color: Color(0xffffffff)',
-      'shadowColor: Color(0xffff0000)',
-      'surfaceTintColor: Color(0xff0000ff)',
+      'color: ${const Color(0xffffffff)}',
+      'shadowColor: ${const Color(0xffff0000)}',
+      'surfaceTintColor: ${const Color(0xff0000ff)}',
       'textStyle.inherit: true',
-      'textStyle.color: Color(0xff00ff00)',
+      'textStyle.color: ${const Color(0xff00ff00)}',
       'borderRadius: BorderRadiusDirectional.circular(10.0)',
     ]);
   });
@@ -391,7 +392,7 @@ void main() {
       final RenderPhysicalShape tintModel = getModel(tester);
 
       // Final color should be the base with a tint of 0.14 opacity or 0xff192c33
-      expect(tintModel.color, equals(const Color(0xff192c33)));
+      expect(tintModel.color, isSameColorAs(const Color(0xff192c33)));
     });
 
   }); // Surface Tint Overlay group
@@ -451,7 +452,7 @@ void main() {
         );
         await tester.pumpAndSettle(); // wait for the elevation animation to finish
         final RenderPhysicalShape model = getModel(tester);
-        expect(model.color, equals(test.color));
+        expect(model.color, isSameColorAs(test.color));
       }
     });
 
@@ -512,8 +513,8 @@ void main() {
       );
 
       final RenderPhysicalShape model = getModel(tester);
-      expect(model.color, equals(surfaceColorWithOverlay));
-      expect(model.color, isNot(equals(surfaceColor)));
+      expect(model.color, isSameColorAs(surfaceColorWithOverlay));
+      expect(model.color, isNot(isSameColorAs(surfaceColor)));
     });
 
     testWidgets('Expected overlay color can be computed using colorWithOverlay', (WidgetTester tester) async {
@@ -1240,6 +1241,43 @@ void main() {
         ),
       );
     });
+  });
+
+  testWidgets('Material is not visible from sub-views', (WidgetTester tester) async {
+    MaterialInkController? outsideView;
+    MaterialInkController? insideView;
+    MaterialInkController? outsideViewAnchor;
+
+    await tester.pumpWidget(
+      Material(
+        child: Builder(
+          builder: (BuildContext context) {
+            outsideViewAnchor = Material.maybeOf(context);
+            return ViewAnchor(
+              view: Builder(
+                builder: (BuildContext context) {
+                  outsideView = Material.maybeOf(context);
+                  return View(
+                    view: FakeView(tester.view),
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        insideView = Material.maybeOf(context);
+                        return const SizedBox();
+                      },
+                    ),
+                  );
+                },
+              ),
+              child: const SizedBox(),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(outsideViewAnchor, isNotNull);
+    expect(outsideView, isNull);
+    expect(insideView, isNull);
   });
 }
 

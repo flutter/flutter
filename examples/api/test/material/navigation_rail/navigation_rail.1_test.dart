@@ -100,7 +100,7 @@ void main() {
       const example.NavigationRailExampleApp(),
     );
 
-    // Test badge wthout label.
+    // Test badge without label.
     final Badge notificationBadge = tester.firstWidget(find.ancestor(
       of: find.byIcon(Icons.bookmark_border),
       matching: find.byType(Badge),

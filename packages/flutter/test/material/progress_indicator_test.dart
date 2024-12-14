@@ -228,6 +228,27 @@ void main() {
   });
 
   testWidgets('LinearProgressIndicator with colors', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox(
+            width: 200.0,
+            child: LinearProgressIndicator(
+              value: 0.25,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Defaults.
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 4.0), color: theme.colorScheme.secondaryContainer)
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 4.0), color: theme.colorScheme.primary),
+    );
+
     // With valueColor & color provided
     await tester.pumpWidget(
       Theme(
@@ -1085,6 +1106,34 @@ void main() {
   );
 
   testWidgets(
+    'Adaptive CircularProgressIndicator displays CupertinoActivityIndicator in iOS/macOS',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(),
+          home: const Scaffold(
+            body: Material(
+              child: CircularProgressIndicator.adaptive(
+                value: 0.5,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
+      final double actualProgress = tester.widget<CupertinoActivityIndicator>(
+        find.byType(CupertinoActivityIndicator),
+      ).progress;
+      expect(actualProgress, 0.5);
+   },
+   variant: const TargetPlatformVariant(<TargetPlatform> {
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
+
+  testWidgets(
     'Adaptive CircularProgressIndicator can use backgroundColor to change tick color for iOS',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1196,24 +1245,24 @@ void main() {
         matching: find.byType(Material),
       ),
     );
-    Container container = tester.widget(
+    Padding padding = tester.widget(
       find.descendant(
         of: find.byType(RefreshProgressIndicator),
-        matching: find.byType(Container),
-      ),
+        matching: find.byType(Padding),
+      ).first,
     );
-    Padding padding = tester.widget(
+    Padding innerPadding = tester.widget(
       find.descendant(
         of: find.descendant(
           of: find.byType(RefreshProgressIndicator),
           matching: find.byType(Material),
         ),
         matching: find.byType(Padding),
-      ),
+      ).last,
     );
     expect(material.elevation, 2.0);
-    expect(container.margin, const EdgeInsets.all(4.0));
-    expect(padding.padding, const EdgeInsets.all(12.0));
+    expect(padding.padding, const EdgeInsets.all(4.0));
+    expect(innerPadding.padding, const EdgeInsets.all(12.0));
 
     // With values provided.
     const double testElevation = 1.0;
@@ -1232,24 +1281,24 @@ void main() {
         matching: find.byType(Material),
       ),
     );
-    container = tester.widget(
+    padding = tester.widget(
       find.descendant(
         of: find.byType(RefreshProgressIndicator),
-        matching: find.byType(Container),
-      ),
+        matching: find.byType(Padding),
+      ).first,
     );
-    padding = tester.widget(
+    innerPadding = tester.widget(
       find.descendant(
         of: find.descendant(
           of: find.byType(RefreshProgressIndicator),
           matching: find.byType(Material),
         ),
         matching: find.byType(Padding),
-      ),
+      ).last,
     );
     expect(material.elevation, testElevation);
-    expect(container.margin, testIndicatorMargin);
-    expect(padding.padding, testIndicatorPadding);
+    expect(padding.padding, testIndicatorMargin);
+    expect(innerPadding.padding, testIndicatorPadding);
   });
 }
 
@@ -1270,7 +1319,7 @@ class _RefreshProgressIndicatorGoldenState extends State<_RefreshProgressIndicat
         setState(() {});
       })
     ..addStatusListener((AnimationStatus status) {
-        if (status == AnimationStatus.completed) {
+        if (status.isCompleted) {
           indeterminate = true;
         }
       });

@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'drawer.dart';
+/// @docImport 'material.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -87,8 +92,8 @@ class _AccountDetails extends StatefulWidget {
 }
 
 class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProviderStateMixin {
-  late Animation<double> _animation;
-  late AnimationController _controller;
+  late final CurvedAnimation _animation;
+  late final AnimationController _controller;
   @override
   void initState () {
     super.initState();
@@ -110,6 +115,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
   @override
   void dispose() {
     _controller.dispose();
+    _animation.dispose();
     super.dispose();
   }
 
@@ -253,32 +259,26 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
   bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
 
   Offset _offsetForIcon(Size size, Size iconSize) {
-    switch (textDirection) {
-      case TextDirection.ltr:
-        return Offset(size.width - iconSize.width, size.height - iconSize.height);
-      case TextDirection.rtl:
-        return Offset(0.0, size.height - iconSize.height);
-    }
+    return switch (textDirection) {
+      TextDirection.ltr => Offset(size.width - iconSize.width, size.height - iconSize.height),
+      TextDirection.rtl => Offset(0.0, size.height - iconSize.height),
+    };
   }
 
   Offset _offsetForBottomLine(Size size, Size iconSize, Size bottomLineSize) {
     final double y = size.height - 0.5 * iconSize.height - 0.5 * bottomLineSize.height;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        return Offset(0.0, y);
-      case TextDirection.rtl:
-        return Offset(size.width - bottomLineSize.width, y);
-    }
+    return switch (textDirection) {
+      TextDirection.ltr => Offset(0.0, y),
+      TextDirection.rtl => Offset(size.width - bottomLineSize.width, y),
+    };
   }
 
   Offset _offsetForName(Size size, Size nameSize, Offset bottomLineOffset) {
     final double y = bottomLineOffset.dy - nameSize.height;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        return Offset(0.0, y);
-      case TextDirection.rtl:
-        return Offset(size.width - nameSize.width, y);
-    }
+    return switch (textDirection) {
+      TextDirection.ltr => Offset(0.0, y),
+      TextDirection.rtl => Offset(size.width - nameSize.width, y),
+    };
   }
 }
 

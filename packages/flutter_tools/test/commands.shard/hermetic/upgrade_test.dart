@@ -46,7 +46,7 @@ void main() {
     const String upstreamHeadRevision = 'deadbeef';
     final Completer<void> reEntryCompleter = Completer<void>();
 
-    Future<void> reEnterTool() async {
+    Future<void> reEnterTool(List<String> command) async {
       await runner.run(<String>['upgrade', '--continue', '--no-version-check']);
       reEntryCompleter.complete();
     }
@@ -128,7 +128,7 @@ void main() {
   testUsingContext('can push people from master to beta', () async {
     final Completer<void> reEntryCompleter = Completer<void>();
 
-    Future<void> reEnterTool() async {
+    Future<void> reEnterTool(List<String> args) async {
       await runner.run(<String>['upgrade', '--continue', '--no-version-check']);
       reEntryCompleter.complete();
     }
@@ -190,7 +190,7 @@ void main() {
       'for normal use as it more likely to contain serious regressions.\n'
       '\n'
       'For information on contributing to Flutter, see our contributing guide:\n'
-      '    https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md\n'
+      '    https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md\n'
       '\n'
       'For the most up to date stable version of flutter, consider using the "beta" channel '
       'instead. The Flutter "beta" channel enjoys all the same automated testing as the '
@@ -207,7 +207,7 @@ void main() {
   testUsingContext('do not push people from beta to anything else', () async {
     final Completer<void> reEntryCompleter = Completer<void>();
 
-    Future<void> reEnterTool() async {
+    Future<void> reEnterTool(List<String> command) async {
       await runner.run(<String>['upgrade', '--continue', '--no-version-check']);
       reEntryCompleter.complete();
     }

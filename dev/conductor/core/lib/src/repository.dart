@@ -23,25 +23,11 @@ enum RemoteName {
 }
 
 class Remote {
-  const Remote({
-    required RemoteName name,
-    required this.url,
-  })  : _name = name,
-        assert(url != '');
+  const Remote({required RemoteName name, required this.url})
+      : _name = name, assert(url != '');
 
-  factory Remote.mirror(String url) {
-    return Remote(
-      name: RemoteName.mirror,
-      url: url,
-    );
-  }
-
-  factory Remote.upstream(String url) {
-    return Remote(
-      name: RemoteName.upstream,
-      url: url,
-    );
-  }
+  const Remote.mirror(String url) : this(name: RemoteName.mirror, url: url);
+  const Remote.upstream(String url) : this(name: RemoteName.upstream, url: url);
 
   final RemoteName _name;
 
@@ -197,15 +183,11 @@ abstract class Repository {
       workingDirectory: (await checkoutDirectory).path,
     );
 
-    final List<String> remoteBranches = <String>[];
-    for (final String line in output.split('\n')) {
-      final RegExpMatch? match = _lsRemotePattern.firstMatch(line);
-      if (match != null) {
-        remoteBranches.add(match.group(1)!);
-      }
-    }
-
-    return remoteBranches;
+    return <String>[
+      for (final String line in output.split('\n'))
+        if (_lsRemotePattern.firstMatch(line) case final RegExpMatch match)
+          match.group(1)!,
+    ];
   }
 
   /// Ensure the repository is cloned to disk and initialized with proper state.
@@ -276,14 +258,21 @@ abstract class Repository {
     );
   }
 
-  /// Verify the repository's git checkout is clean.
-  Future<bool> gitCheckoutClean() async {
-    final String output = await git.getOutput(
+  /// Get the working tree status.
+  ///
+  /// Calls `git status --porcelain` which should output in a stable format
+  /// across git versions.
+  Future<String> gitStatus() async {
+    return git.getOutput(
       <String>['status', '--porcelain'],
       'check that the git checkout is clean',
       workingDirectory: (await checkoutDirectory).path,
     );
-    return output == '';
+  }
+
+  /// Verify the repository's git checkout is clean.
+  Future<bool> gitCheckoutClean() async {
+    return (await gitStatus()).isEmpty;
   }
 
   /// Return the revision for the branch point between two refs.
@@ -391,7 +380,7 @@ abstract class Repository {
 
   /// Determines if one ref is an ancestor for another.
   Future<bool> isAncestor(String possibleAncestor, String possibleDescendant) async {
-    final int exitcode = await git.run(
+    final io.ProcessResult result = await git.run(
       <String>[
         'merge-base',
         '--is-ancestor',
@@ -402,18 +391,18 @@ abstract class Repository {
       allowNonZeroExitCode: true,
       workingDirectory: (await checkoutDirectory).path,
     );
-    return exitcode == 0;
+    return result.exitCode == 0;
   }
 
   /// Determines if a given commit has a tag.
   Future<bool> isCommitTagged(String commit) async {
-    final int exitcode = await git.run(
+    final io.ProcessResult result = await git.run(
       <String>['describe', '--exact-match', '--tags', commit],
       'verify $commit is already tagged',
       allowNonZeroExitCode: true,
       workingDirectory: (await checkoutDirectory).path,
     );
-    return exitcode == 0;
+    return result.exitCode == 0;
   }
 
   /// Resets repository HEAD to [ref].
@@ -491,16 +480,27 @@ abstract class Repository {
       }
       authorArg = '--author="$author"';
     }
-    await git.run(
-      <String>[
-        'commit',
-        '--message',
-        message,
-        if (authorArg != null) authorArg,
-      ],
+    final List<String> commitCmd = <String>[
+      'commit',
+      '--message',
+      message,
+      if (authorArg != null) authorArg,
+    ];
+    stdio.printTrace('Executing git $commitCmd...');
+    final io.ProcessResult commitResult = await git.run(
+      commitCmd,
       'commit changes',
       workingDirectory: (await checkoutDirectory).path,
     );
+    final String stdout = commitResult.stdout as String;
+    if (stdout.isNotEmpty) {
+      stdio.printTrace(stdout);
+    }
+    final String stderr = commitResult.stderr as String;
+    if (stderr.isNotEmpty) {
+      stdio.printTrace(stderr);
+    }
+
     return reverseParse('HEAD');
   }
 
@@ -538,8 +538,7 @@ class FrameworkRepository extends Repository {
   FrameworkRepository(
     this.checkouts, {
     super.name = 'framework',
-    super.upstreamRemote = const Remote(
-        name: RemoteName.upstream, url: FrameworkRepository.defaultUpstream),
+    super.upstreamRemote = const Remote.upstream(FrameworkRepository.defaultUpstream),
     super.localUpstream,
     super.previousCheckoutLocation,
     String super.initialRef = FrameworkRepository.defaultBranch,
@@ -571,10 +570,7 @@ class FrameworkRepository extends Repository {
     return FrameworkRepository(
       checkouts,
       name: name,
-      upstreamRemote: Remote(
-        name: RemoteName.upstream,
-        url: 'file://$upstreamPath/',
-      ),
+      upstreamRemote: Remote.upstream('file://$upstreamPath/'),
       previousCheckoutLocation: previousCheckoutLocation,
       initialRef: initialRef,
     );
@@ -599,9 +595,7 @@ class FrameworkRepository extends Repository {
     return FrameworkRepository(
       checkouts,
       name: cloneName,
-      upstreamRemote: Remote(
-          name: RemoteName.upstream,
-          url: 'file://${(await checkoutDirectory).path}/'),
+      upstreamRemote: Remote.upstream('file://${(await checkoutDirectory).path}/'),
     );
   }
 
@@ -627,10 +621,29 @@ class FrameworkRepository extends Repository {
 
   Future<io.ProcessResult> runFlutter(List<String> args) async {
     await _ensureToolReady();
-    return processManager.run(<String>[
-      fileSystem.path.join((await checkoutDirectory).path, 'bin', 'flutter'),
-      ...args,
-    ]);
+    final String workingDirectory = (await checkoutDirectory).path;
+    return processManager.run(
+      <String>[
+        fileSystem.path.join(workingDirectory, 'bin', 'flutter'),
+        ...args,
+      ],
+      workingDirectory: workingDirectory,
+    );
+  }
+
+  Future<void> streamDart(
+    List<String> args, {
+    String? workingDirectory,
+  }) async {
+    final String repoWorkingDirectory = (await checkoutDirectory).path;
+
+    await _streamProcess(
+      <String>[
+        fileSystem.path.join(repoWorkingDirectory, 'bin', 'dart'),
+        ...args,
+      ],
+      workingDirectory: workingDirectory ?? repoWorkingDirectory,
+    );
   }
 
   Future<io.Process> streamFlutter(
@@ -638,11 +651,28 @@ class FrameworkRepository extends Repository {
     void Function(String)? stdoutCallback,
     void Function(String)? stderrCallback,
   }) async {
-    await _ensureToolReady();
-    final io.Process process = await processManager.start(<String>[
-      fileSystem.path.join((await checkoutDirectory).path, 'bin', 'flutter'),
-      ...args,
-    ]);
+    final String workingDirectory = (await checkoutDirectory).path;
+
+    return _streamProcess(
+      <String>[
+        fileSystem.path.join(workingDirectory, 'bin', 'flutter'),
+        ...args,
+      ],
+      workingDirectory: workingDirectory,
+    );
+  }
+
+  Future<io.Process> _streamProcess(
+    List<String> cmd, {
+    void Function(String)? stdoutCallback,
+    void Function(String)? stderrCallback,
+    String? workingDirectory,
+  }) async {
+    stdio.printTrace('Executing $cmd...');
+    final io.Process process = await processManager.start(
+      cmd,
+      workingDirectory: workingDirectory,
+    );
     process
         .stdout
         .transform(utf8.decoder)
@@ -653,6 +683,15 @@ class FrameworkRepository extends Repository {
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen(stderrCallback ?? stdio.printError);
+    final int exitCode = await process.exitCode;
+    if (exitCode != 0) {
+      throw io.ProcessException(
+        cmd.first,
+        cmd.sublist(1),
+        'Process failed',
+        exitCode,
+      );
+    }
     return process;
   }
 
@@ -755,10 +794,7 @@ class HostFrameworkRepository extends FrameworkRepository {
   }) : super(
           checkouts,
           name: name,
-          upstreamRemote: Remote(
-            name: RemoteName.upstream,
-            url: 'file://$upstreamPath/',
-          ),
+          upstreamRemote: Remote.upstream('file://$upstreamPath/'),
           localUpstream: false,
         ) {
     _checkoutDirectory = checkouts.fileSystem.directory(upstreamPath);
@@ -813,8 +849,7 @@ class EngineRepository extends Repository {
     this.checkouts, {
     super.name = 'engine',
     String super.initialRef = EngineRepository.defaultBranch,
-    super.upstreamRemote = const Remote(
-        name: RemoteName.upstream, url: EngineRepository.defaultUpstream),
+    super.upstreamRemote = const Remote.upstream(EngineRepository.defaultUpstream),
     super.localUpstream,
     super.previousCheckoutLocation,
     super.mirrorRemote,
@@ -865,9 +900,7 @@ class EngineRepository extends Repository {
     return EngineRepository(
       checkouts,
       name: cloneName,
-      upstreamRemote: Remote(
-          name: RemoteName.upstream,
-          url: 'file://${(await checkoutDirectory).path}/'),
+      upstreamRemote: Remote.upstream('file://${(await checkoutDirectory).path}/'),
     );
   }
 }

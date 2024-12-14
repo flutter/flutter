@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -10,6 +13,41 @@ import 'box.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
 import 'object.dart';
+
+typedef _NextChild = RenderBox? Function(RenderBox child);
+typedef _PositionChild = void Function(Offset offset, RenderBox child);
+typedef _GetChildSize = Size Function(RenderBox child);
+// A 2D vector that uses a [RenderWrap]'s main axis and cross axis as its first and second coordinate axes.
+// It represents the same vector as (double mainAxisExtent, double crossAxisExtent).
+extension type const _AxisSize._(Size _size) {
+  _AxisSize({ required double mainAxisExtent, required double crossAxisExtent }) : this._(Size(mainAxisExtent, crossAxisExtent));
+  _AxisSize.fromSize({ required Size size, required Axis direction }) : this._(_convert(size, direction));
+
+  static const _AxisSize empty = _AxisSize._(Size.zero);
+
+  static Size _convert(Size size, Axis direction) {
+    return switch (direction) {
+      Axis.horizontal => size,
+      Axis.vertical => size.flipped,
+    };
+  }
+  double get mainAxisExtent => _size.width;
+  double get crossAxisExtent => _size.height;
+
+  Size toSize(Axis direction) => _convert(_size, direction);
+
+  _AxisSize applyConstraints(BoxConstraints constraints, Axis direction) {
+    final BoxConstraints effectiveConstraints = switch (direction) {
+      Axis.horizontal => constraints,
+      Axis.vertical => constraints.flipped,
+    };
+    return _AxisSize._(effectiveConstraints.constrain(_size));
+  }
+
+  _AxisSize get flipped => _AxisSize._(_size.flipped);
+  _AxisSize operator +(_AxisSize other) => _AxisSize._(Size(_size.width + other._size.width, math.max(_size.height, other._size.height)));
+  _AxisSize operator -(_AxisSize other) => _AxisSize._(Size(_size.width - other._size.width, _size.height - other._size.height));
+}
 
 /// How [Wrap] should align objects.
 ///
@@ -46,7 +84,22 @@ enum WrapAlignment {
 
   /// Place the free space evenly between the objects as well as before and
   /// after the first and last objects.
-  spaceEvenly,
+  spaceEvenly;
+
+  (double leadingSpace, double betweenSpace) _distributeSpace(double freeSpace, double itemSpacing, int itemCount, bool flipped) {
+    assert(itemCount > 0);
+    return switch (this) {
+      WrapAlignment.start =>  (flipped ? freeSpace : 0.0,       itemSpacing),
+
+      WrapAlignment.end =>    WrapAlignment.start._distributeSpace(freeSpace, itemSpacing, itemCount, !flipped),
+      WrapAlignment.spaceBetween when itemCount < 2 => WrapAlignment.start._distributeSpace(freeSpace, itemSpacing, itemCount, flipped),
+
+      WrapAlignment.center => (freeSpace / 2.0, itemSpacing),
+      WrapAlignment.spaceBetween => (0,                           freeSpace / (itemCount - 1) + itemSpacing),
+      WrapAlignment.spaceAround =>  (freeSpace / itemCount / 2,   freeSpace / itemCount + itemSpacing),
+      WrapAlignment.spaceEvenly =>  (freeSpace / (itemCount + 1), freeSpace / (itemCount + 1) + itemSpacing),
+    };
+  }
 }
 
 /// Who [Wrap] should align children within a run in the cross axis.
@@ -73,23 +126,48 @@ enum WrapCrossAlignment {
 
   /// Place the children as close to the middle of the run in the cross axis as
   /// possible.
-  center,
+  center;
 
   // TODO(ianh): baseline.
+
+  WrapCrossAlignment get _flipped => switch (this) {
+    WrapCrossAlignment.start => WrapCrossAlignment.end,
+    WrapCrossAlignment.end => WrapCrossAlignment.start,
+    WrapCrossAlignment.center => WrapCrossAlignment.center,
+  };
+
+  double get _alignment => switch (this) {
+    WrapCrossAlignment.start => 0,
+    WrapCrossAlignment.end => 1,
+    WrapCrossAlignment.center => 0.5,
+  };
 }
 
 class _RunMetrics {
-  _RunMetrics(this.mainAxisExtent, this.crossAxisExtent, this.childCount);
+  _RunMetrics(this.leadingChild, this.axisSize);
 
-  final double mainAxisExtent;
-  final double crossAxisExtent;
-  final int childCount;
+  _AxisSize axisSize;
+  int childCount = 1;
+  RenderBox leadingChild;
+
+  // Look ahead, creates a new run if incorporating the child would exceed the allowed line width.
+  _RunMetrics? tryAddingNewChild(RenderBox child, _AxisSize childSize, bool flipMainAxis, double spacing, double maxMainExtent) {
+    final bool needsNewRun = axisSize.mainAxisExtent + childSize.mainAxisExtent + spacing - maxMainExtent > precisionErrorTolerance;
+    if (needsNewRun) {
+      return _RunMetrics(child, childSize);
+    } else {
+      axisSize += childSize + _AxisSize(mainAxisExtent: spacing, crossAxisExtent: 0.0);
+      childCount += 1;
+      if (flipMainAxis) {
+        leadingChild = child;
+      }
+      return null;
+    }
+  }
 }
 
 /// Parent data for use with [RenderWrap].
-class WrapParentData extends ContainerBoxParentData<RenderBox> {
-  int _runIndex = 0;
-}
+class WrapParentData extends ContainerBoxParentData<RenderBox> { }
 
 /// Displays its children in multiple horizontal or vertical runs.
 ///
@@ -396,7 +474,7 @@ class RenderWrap extends RenderBox
         }
         return width;
       case Axis.vertical:
-        return computeDryLayout(BoxConstraints(maxHeight: height)).width;
+        return getDryLayout(BoxConstraints(maxHeight: height)).width;
     }
   }
 
@@ -412,7 +490,7 @@ class RenderWrap extends RenderBox
         }
         return width;
       case Axis.vertical:
-        return computeDryLayout(BoxConstraints(maxHeight: height)).width;
+        return getDryLayout(BoxConstraints(maxHeight: height)).width;
     }
   }
 
@@ -420,7 +498,7 @@ class RenderWrap extends RenderBox
   double computeMinIntrinsicHeight(double width) {
     switch (direction) {
       case Axis.horizontal:
-        return computeDryLayout(BoxConstraints(maxWidth: width)).height;
+        return getDryLayout(BoxConstraints(maxWidth: width)).height;
       case Axis.vertical:
         double height = 0.0;
         RenderBox? child = firstChild;
@@ -436,7 +514,7 @@ class RenderWrap extends RenderBox
   double computeMaxIntrinsicHeight(double width) {
     switch (direction) {
       case Axis.horizontal:
-        return computeDryLayout(BoxConstraints(maxWidth: width)).height;
+        return getDryLayout(BoxConstraints(maxWidth: width)).height;
       case Axis.vertical:
         double height = 0.0;
         RenderBox? child = firstChild;
@@ -454,45 +532,62 @@ class RenderWrap extends RenderBox
   }
 
   double _getMainAxisExtent(Size childSize) {
-    switch (direction) {
-      case Axis.horizontal:
-        return childSize.width;
-      case Axis.vertical:
-        return childSize.height;
-    }
+    return switch (direction) {
+      Axis.horizontal => childSize.width,
+      Axis.vertical   => childSize.height,
+    };
   }
 
   double _getCrossAxisExtent(Size childSize) {
-    switch (direction) {
-      case Axis.horizontal:
-        return childSize.height;
-      case Axis.vertical:
-        return childSize.width;
-    }
+    return switch (direction) {
+      Axis.horizontal => childSize.height,
+      Axis.vertical   => childSize.width,
+    };
   }
 
   Offset _getOffset(double mainAxisOffset, double crossAxisOffset) {
-    switch (direction) {
-      case Axis.horizontal:
-        return Offset(mainAxisOffset, crossAxisOffset);
-      case Axis.vertical:
-        return Offset(crossAxisOffset, mainAxisOffset);
-    }
+    return switch (direction) {
+      Axis.horizontal => Offset(mainAxisOffset, crossAxisOffset),
+      Axis.vertical   => Offset(crossAxisOffset, mainAxisOffset),
+    };
   }
 
-  double _getChildCrossAxisOffset(bool flipCrossAxis, double runCrossAxisExtent, double childCrossAxisExtent) {
-    final double freeSpace = runCrossAxisExtent - childCrossAxisExtent;
-    switch (crossAxisAlignment) {
-      case WrapCrossAlignment.start:
-        return flipCrossAxis ? freeSpace : 0.0;
-      case WrapCrossAlignment.end:
-        return flipCrossAxis ? 0.0 : freeSpace;
-      case WrapCrossAlignment.center:
-        return freeSpace / 2.0;
-    }
+  (bool flipHorizontal, bool flipVertical) get _areAxesFlipped {
+    final bool flipHorizontal = switch (textDirection ?? TextDirection.ltr) {
+      TextDirection.ltr => false,
+      TextDirection.rtl => true,
+    };
+    final bool flipVertical = switch (verticalDirection) {
+      VerticalDirection.down => false,
+      VerticalDirection.up => true,
+    };
+    return switch (direction) {
+      Axis.horizontal => (flipHorizontal, flipVertical),
+      Axis.vertical => (flipVertical, flipHorizontal),
+    };
   }
 
-  bool _hasVisualOverflow = false;
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    if (firstChild == null) {
+      return null;
+    }
+    final BoxConstraints childConstraints = switch (direction) {
+      Axis.horizontal => BoxConstraints(maxWidth: constraints.maxWidth),
+      Axis.vertical => BoxConstraints(maxHeight: constraints.maxHeight),
+    };
+
+    final (_AxisSize childrenAxisSize, List<_RunMetrics> runMetrics) = _computeRuns(constraints, ChildLayoutHelper.dryLayoutChild);
+    final _AxisSize containerAxisSize = childrenAxisSize.applyConstraints(constraints, direction);
+
+    BaselineOffset baselineOffset = BaselineOffset.noBaseline;
+    void findHighestBaseline(Offset offset, RenderBox child) {
+      baselineOffset = baselineOffset.minOf(BaselineOffset(child.getDryBaseline(childConstraints, baseline)) + offset.dy);
+    }
+    Size getChildSize(RenderBox child) => child.getDryLayout(childConstraints);
+    _positionChildren(runMetrics, childrenAxisSize, containerAxisSize, findHighestBaseline, getChildSize);
+    return baselineOffset.offset;
+  }
 
   @override
   @protected
@@ -501,16 +596,10 @@ class RenderWrap extends RenderBox
   }
 
   Size _computeDryLayout(BoxConstraints constraints, [ChildLayouter layoutChild = ChildLayoutHelper.dryLayoutChild]) {
-    final BoxConstraints childConstraints;
-    double mainAxisLimit = 0.0;
-    switch (direction) {
-      case Axis.horizontal:
-        childConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
-        mainAxisLimit = constraints.maxWidth;
-      case Axis.vertical:
-        childConstraints = BoxConstraints(maxHeight: constraints.maxHeight);
-        mainAxisLimit = constraints.maxHeight;
-    }
+    final (BoxConstraints childConstraints, double mainAxisLimit) = switch (direction) {
+      Axis.horizontal => (BoxConstraints(maxWidth: constraints.maxWidth), constraints.maxWidth),
+      Axis.vertical => (BoxConstraints(maxHeight: constraints.maxHeight), constraints.maxHeight),
+    };
 
     double mainAxisExtent = 0.0;
     double crossAxisExtent = 0.0;
@@ -541,192 +630,103 @@ class RenderWrap extends RenderBox
     crossAxisExtent += runCrossAxisExtent;
     mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
 
-    switch (direction) {
-      case Axis.horizontal:
-        return constraints.constrain(Size(mainAxisExtent, crossAxisExtent));
-      case Axis.vertical:
-        return constraints.constrain(Size(crossAxisExtent, mainAxisExtent));
-    }
+    return constraints.constrain(switch (direction) {
+      Axis.horizontal => Size(mainAxisExtent, crossAxisExtent),
+      Axis.vertical   => Size(crossAxisExtent, mainAxisExtent),
+    });
   }
+
+  static Size _getChildSize(RenderBox child) => child.size;
+  static void _setChildPosition(Offset offset, RenderBox child) {
+    (child.parentData! as WrapParentData).offset = offset;
+  }
+
+  bool _hasVisualOverflow = false;
 
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     assert(_debugHasNecessaryDirections);
-    _hasVisualOverflow = false;
-    RenderBox? child = firstChild;
-    if (child == null) {
+    if (firstChild == null) {
       size = constraints.smallest;
+      _hasVisualOverflow = false;
       return;
     }
-    final BoxConstraints childConstraints;
-    double mainAxisLimit = 0.0;
-    bool flipMainAxis = false;
-    bool flipCrossAxis = false;
-    switch (direction) {
-      case Axis.horizontal:
-        childConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
-        mainAxisLimit = constraints.maxWidth;
-        if (textDirection == TextDirection.rtl) {
-          flipMainAxis = true;
-        }
-        if (verticalDirection == VerticalDirection.up) {
-          flipCrossAxis = true;
-        }
-      case Axis.vertical:
-        childConstraints = BoxConstraints(maxHeight: constraints.maxHeight);
-        mainAxisLimit = constraints.maxHeight;
-        if (verticalDirection == VerticalDirection.up) {
-          flipMainAxis = true;
-        }
-        if (textDirection == TextDirection.rtl) {
-          flipCrossAxis = true;
-        }
-    }
+
+    final (_AxisSize childrenAxisSize, List<_RunMetrics> runMetrics) = _computeRuns(constraints, ChildLayoutHelper.layoutChild);
+    final _AxisSize containerAxisSize = childrenAxisSize.applyConstraints(constraints, direction);
+    size = containerAxisSize.toSize(direction);
+    final _AxisSize freeAxisSize = containerAxisSize - childrenAxisSize;
+    _hasVisualOverflow = freeAxisSize.mainAxisExtent < 0.0 || freeAxisSize.crossAxisExtent < 0.0;
+    _positionChildren(runMetrics, freeAxisSize, containerAxisSize, _setChildPosition, _getChildSize);
+  }
+
+  (_AxisSize childrenSize, List<_RunMetrics> runMetrics) _computeRuns(BoxConstraints constraints, ChildLayouter layoutChild) {
+    assert(firstChild != null);
+    final (BoxConstraints childConstraints, double mainAxisLimit) = switch (direction) {
+      Axis.horizontal => (BoxConstraints(maxWidth: constraints.maxWidth), constraints.maxWidth),
+      Axis.vertical => (BoxConstraints(maxHeight: constraints.maxHeight), constraints.maxHeight),
+    };
+
+    final (bool flipMainAxis, _) = _areAxesFlipped;
     final double spacing = this.spacing;
-    final double runSpacing = this.runSpacing;
     final List<_RunMetrics> runMetrics = <_RunMetrics>[];
-    double mainAxisExtent = 0.0;
-    double crossAxisExtent = 0.0;
-    double runMainAxisExtent = 0.0;
-    double runCrossAxisExtent = 0.0;
-    int childCount = 0;
-    while (child != null) {
-      child.layout(childConstraints, parentUsesSize: true);
-      final double childMainAxisExtent = _getMainAxisExtent(child.size);
-      final double childCrossAxisExtent = _getCrossAxisExtent(child.size);
-      if (childCount > 0 && runMainAxisExtent + spacing + childMainAxisExtent > mainAxisLimit) {
-        mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
-        crossAxisExtent += runCrossAxisExtent;
-        if (runMetrics.isNotEmpty) {
-          crossAxisExtent += runSpacing;
-        }
-        runMetrics.add(_RunMetrics(runMainAxisExtent, runCrossAxisExtent, childCount));
-        runMainAxisExtent = 0.0;
-        runCrossAxisExtent = 0.0;
-        childCount = 0;
+
+    _RunMetrics? currentRun;
+    _AxisSize childrenAxisSize = _AxisSize.empty;
+    for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
+      final _AxisSize childSize = _AxisSize.fromSize(size: layoutChild(child, childConstraints), direction: direction);
+      final _RunMetrics? newRun = currentRun == null
+        ? _RunMetrics(child, childSize)
+        : currentRun.tryAddingNewChild(child, childSize, flipMainAxis, spacing, mainAxisLimit);
+      if (newRun != null) {
+        runMetrics.add(newRun);
+        childrenAxisSize += currentRun?.axisSize.flipped ?? _AxisSize.empty;
+        currentRun = newRun;
       }
-      runMainAxisExtent += childMainAxisExtent;
-      if (childCount > 0) {
-        runMainAxisExtent += spacing;
-      }
-      runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
-      childCount += 1;
-      final WrapParentData childParentData = child.parentData! as WrapParentData;
-      childParentData._runIndex = runMetrics.length;
-      child = childParentData.nextSibling;
     }
-    if (childCount > 0) {
-      mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
-      crossAxisExtent += runCrossAxisExtent;
-      if (runMetrics.isNotEmpty) {
-        crossAxisExtent += runSpacing;
+    assert(runMetrics.isNotEmpty);
+    final double totalRunSpacing = runSpacing * (runMetrics.length - 1);
+    childrenAxisSize += _AxisSize(mainAxisExtent: totalRunSpacing, crossAxisExtent: 0.0) + currentRun!.axisSize.flipped;
+    return (childrenAxisSize.flipped, runMetrics);
+  }
+
+  void _positionChildren(List<_RunMetrics> runMetrics, _AxisSize freeAxisSize, _AxisSize containerAxisSize, _PositionChild positionChild, _GetChildSize getChildSize) {
+    assert(runMetrics.isNotEmpty);
+
+    final double spacing = this.spacing;
+
+    final double crossAxisFreeSpace = math.max(0.0, freeAxisSize.crossAxisExtent);
+
+    final (bool flipMainAxis, bool flipCrossAxis) = _areAxesFlipped;
+    final WrapCrossAlignment effectiveCrossAlignment = flipCrossAxis ? crossAxisAlignment._flipped : crossAxisAlignment;
+    final (double runLeadingSpace, double runBetweenSpace) = runAlignment._distributeSpace(
+      crossAxisFreeSpace,
+      runSpacing,
+      runMetrics.length,
+      flipCrossAxis,
+    );
+    final _NextChild nextChild = flipMainAxis ? childBefore : childAfter;
+
+    double runCrossAxisOffset = runLeadingSpace;
+    final Iterable<_RunMetrics> runs = flipCrossAxis ? runMetrics.reversed : runMetrics;
+    for (final _RunMetrics run in runs) {
+      final double runCrossAxisExtent = run.axisSize.crossAxisExtent;
+      final int childCount = run.childCount;
+
+      final double mainAxisFreeSpace = math.max(0.0, containerAxisSize.mainAxisExtent - run.axisSize.mainAxisExtent);
+      final (double childLeadingSpace, double childBetweenSpace) = alignment._distributeSpace(mainAxisFreeSpace, spacing, childCount, flipMainAxis);
+
+      double childMainAxisOffset = childLeadingSpace;
+
+      int remainingChildCount = run.childCount;
+      for (RenderBox? child = run.leadingChild; child != null && remainingChildCount > 0; child = nextChild(child), remainingChildCount -= 1) {
+        final _AxisSize(mainAxisExtent: double childMainAxisExtent, crossAxisExtent: double childCrossAxisExtent) = _AxisSize.fromSize(size: getChildSize(child), direction: direction);
+        final double childCrossAxisOffset = effectiveCrossAlignment._alignment * (runCrossAxisExtent - childCrossAxisExtent);
+        positionChild(_getOffset(childMainAxisOffset, runCrossAxisOffset + childCrossAxisOffset), child);
+        childMainAxisOffset += childMainAxisExtent + childBetweenSpace;
       }
-      runMetrics.add(_RunMetrics(runMainAxisExtent, runCrossAxisExtent, childCount));
-    }
-
-    final int runCount = runMetrics.length;
-    assert(runCount > 0);
-
-    double containerMainAxisExtent = 0.0;
-    double containerCrossAxisExtent = 0.0;
-
-    switch (direction) {
-      case Axis.horizontal:
-        size = constraints.constrain(Size(mainAxisExtent, crossAxisExtent));
-        containerMainAxisExtent = size.width;
-        containerCrossAxisExtent = size.height;
-      case Axis.vertical:
-        size = constraints.constrain(Size(crossAxisExtent, mainAxisExtent));
-        containerMainAxisExtent = size.height;
-        containerCrossAxisExtent = size.width;
-    }
-
-    _hasVisualOverflow = containerMainAxisExtent < mainAxisExtent || containerCrossAxisExtent < crossAxisExtent;
-
-    final double crossAxisFreeSpace = math.max(0.0, containerCrossAxisExtent - crossAxisExtent);
-    double runLeadingSpace = 0.0;
-    double runBetweenSpace = 0.0;
-    switch (runAlignment) {
-      case WrapAlignment.start:
-        break;
-      case WrapAlignment.end:
-        runLeadingSpace = crossAxisFreeSpace;
-      case WrapAlignment.center:
-        runLeadingSpace = crossAxisFreeSpace / 2.0;
-      case WrapAlignment.spaceBetween:
-        runBetweenSpace = runCount > 1 ? crossAxisFreeSpace / (runCount - 1) : 0.0;
-      case WrapAlignment.spaceAround:
-        runBetweenSpace = crossAxisFreeSpace / runCount;
-        runLeadingSpace = runBetweenSpace / 2.0;
-      case WrapAlignment.spaceEvenly:
-        runBetweenSpace = crossAxisFreeSpace / (runCount + 1);
-        runLeadingSpace = runBetweenSpace;
-    }
-
-    runBetweenSpace += runSpacing;
-    double crossAxisOffset = flipCrossAxis ? containerCrossAxisExtent - runLeadingSpace : runLeadingSpace;
-
-    child = firstChild;
-    for (int i = 0; i < runCount; ++i) {
-      final _RunMetrics metrics = runMetrics[i];
-      final double runMainAxisExtent = metrics.mainAxisExtent;
-      final double runCrossAxisExtent = metrics.crossAxisExtent;
-      final int childCount = metrics.childCount;
-
-      final double mainAxisFreeSpace = math.max(0.0, containerMainAxisExtent - runMainAxisExtent);
-      double childLeadingSpace = 0.0;
-      double childBetweenSpace = 0.0;
-
-      switch (alignment) {
-        case WrapAlignment.start:
-          break;
-        case WrapAlignment.end:
-          childLeadingSpace = mainAxisFreeSpace;
-        case WrapAlignment.center:
-          childLeadingSpace = mainAxisFreeSpace / 2.0;
-        case WrapAlignment.spaceBetween:
-          childBetweenSpace = childCount > 1 ? mainAxisFreeSpace / (childCount - 1) : 0.0;
-        case WrapAlignment.spaceAround:
-          childBetweenSpace = mainAxisFreeSpace / childCount;
-          childLeadingSpace = childBetweenSpace / 2.0;
-        case WrapAlignment.spaceEvenly:
-          childBetweenSpace = mainAxisFreeSpace / (childCount + 1);
-          childLeadingSpace = childBetweenSpace;
-      }
-
-      childBetweenSpace += spacing;
-      double childMainPosition = flipMainAxis ? containerMainAxisExtent - childLeadingSpace : childLeadingSpace;
-
-      if (flipCrossAxis) {
-        crossAxisOffset -= runCrossAxisExtent;
-      }
-
-      while (child != null) {
-        final WrapParentData childParentData = child.parentData! as WrapParentData;
-        if (childParentData._runIndex != i) {
-          break;
-        }
-        final double childMainAxisExtent = _getMainAxisExtent(child.size);
-        final double childCrossAxisExtent = _getCrossAxisExtent(child.size);
-        final double childCrossAxisOffset = _getChildCrossAxisOffset(flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
-        if (flipMainAxis) {
-          childMainPosition -= childMainAxisExtent;
-        }
-        childParentData.offset = _getOffset(childMainPosition, crossAxisOffset + childCrossAxisOffset);
-        if (flipMainAxis) {
-          childMainPosition -= childBetweenSpace;
-        } else {
-          childMainPosition += childMainAxisExtent + childBetweenSpace;
-        }
-        child = childParentData.nextSibling;
-      }
-
-      if (flipCrossAxis) {
-        crossAxisOffset -= runBetweenSpace;
-      } else {
-        crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
-      }
+      runCrossAxisOffset += runCrossAxisExtent + runBetweenSpace;
     }
   }
 

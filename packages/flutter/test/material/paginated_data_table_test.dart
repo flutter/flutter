@@ -537,10 +537,9 @@ void main() {
 
   testWidgets('PaginatedDataTable with large text', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: MediaQuery(
-        data: const MediaQueryData(
-          textScaleFactor: 20.0,
-        ),
+      home: MediaQuery.withClampedTextScaling(
+        minScaleFactor: 20.0,
+        maxScaleFactor: 20.0,
         child: PaginatedDataTable(
           header: const Text('HEADER'),
           source: source,

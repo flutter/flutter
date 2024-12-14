@@ -38,7 +38,7 @@ void main() {
     expect(_getRawMaterialButton(tester).elevation, 6);
     expect(_getRawMaterialButton(tester).highlightElevation, 6);
     expect(_getRawMaterialButton(tester).shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))));
-    expect(_getRawMaterialButton(tester).splashColor, colorScheme.onPrimaryContainer.withOpacity(0.12));
+    expect(_getRawMaterialButton(tester).splashColor, colorScheme.onPrimaryContainer.withOpacity(0.1));
     expect(_getRawMaterialButton(tester).constraints, const BoxConstraints.tightFor(width: 56.0, height: 56.0));
     expect(_getIconSize(tester).width, 24.0);
     expect(_getIconSize(tester).height, 24.0);
@@ -402,11 +402,11 @@ void main() {
       .toList();
 
     expect(description, <String>[
-      'foregroundColor: Color(0xfeedfeed)',
-      'backgroundColor: Color(0xcafecafe)',
-      'focusColor: Color(0xfeedfee1)',
-      'hoverColor: Color(0xfeedfee2)',
-      'splashColor: Color(0xfeedfee3)',
+      'foregroundColor: ${const Color(0xfeedfeed)}',
+      'backgroundColor: ${const Color(0xcafecafe)}',
+      'focusColor: ${const Color(0xfeedfee1)}',
+      'hoverColor: ${const Color(0xfeedfee2)}',
+      'splashColor: ${const Color(0xfeedfee3)}',
       'elevation: 23.0',
       'focusElevation: 9.0',
       'hoverElevation: 10.0',
@@ -422,7 +422,7 @@ void main() {
       'extendedIconLabelSpacing: 12.0',
       'extendedPadding: EdgeInsetsDirectional(7.0, 0.0, 8.0, 0.0)',
       'extendedTextStyle: TextStyle(inherit: true, letterSpacing: 2.0)',
-      'mouseCursor: MaterialStateMouseCursor(clickable)',
+      'mouseCursor: WidgetStateMouseCursor(clickable)',
     ]);
   });
 

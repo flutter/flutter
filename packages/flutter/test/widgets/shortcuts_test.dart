@@ -8,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import 'semantics_tester.dart';
+
 void main() {
   group(LogicalKeySet, () {
     test('LogicalKeySet passes parameters correctly.', () {
@@ -353,7 +355,6 @@ void main() {
       invoked = 0;
 
       expect(HardwareKeyboard.instance.logicalKeysPressed, isEmpty);
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('handles repeated events', (WidgetTester tester) async {
@@ -380,7 +381,6 @@ void main() {
       invoked = 0;
 
       expect(HardwareKeyboard.instance.logicalKeysPressed, isEmpty);
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('rejects repeated events if requested', (WidgetTester tester) async {
@@ -408,7 +408,6 @@ void main() {
       invoked = 0;
 
       expect(HardwareKeyboard.instance.logicalKeysPressed, isEmpty);
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('handles Shift-Ctrl-C', (WidgetTester tester) async {
@@ -477,7 +476,7 @@ void main() {
 
       const SingleActivator singleActivator = SingleActivator(LogicalKeyboardKey.keyA, control: true);
 
-     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
       expect(ShortcutActivator.isActivatedBy(singleActivator, events.last), isTrue);
       await tester.sendKeyRepeatEvent(LogicalKeyboardKey.keyA);
@@ -498,6 +497,111 @@ void main() {
       expect(ShortcutActivator.isActivatedBy(noRepeatSingleActivator, events.last), isFalse);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
       expect(ShortcutActivator.isActivatedBy(noRepeatSingleActivator, events.last), isFalse);
+    });
+
+    testWidgets('numLock works as expected when set to LockState.locked', (WidgetTester tester) async {
+      // Collect some key events to use for testing.
+      final List<KeyEvent> events = <KeyEvent>[];
+      await tester.pumpWidget(
+        Focus(
+          autofocus: true,
+          onKeyEvent: (FocusNode node, KeyEvent event) {
+            events.add(event);
+            return KeyEventResult.ignored;
+          },
+          child: const SizedBox(),
+        ),
+      );
+
+      const SingleActivator singleActivator = SingleActivator(LogicalKeyboardKey.numpad4, numLock: LockState.locked);
+
+      // Lock NumLock.
+      await tester.sendKeyEvent(LogicalKeyboardKey.numLock);
+      expect(HardwareKeyboard.instance.lockModesEnabled.contains(KeyboardLockMode.numLock), isTrue);
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.numpad4);
+      expect(ShortcutActivator.isActivatedBy(singleActivator, events.last), isTrue);
+
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.numpad4);
+
+      // Unlock NumLock.
+      await tester.sendKeyEvent(LogicalKeyboardKey.numLock);
+      expect(HardwareKeyboard.instance.lockModesEnabled.contains(KeyboardLockMode.numLock), isFalse);
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.numpad4);
+      expect(ShortcutActivator.isActivatedBy(singleActivator, events.last), isFalse);
+
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.numpad4);
+    });
+
+    testWidgets('numLock works as expected when set to LockState.unlocked', (WidgetTester tester) async {
+      // Collect some key events to use for testing.
+      final List<KeyEvent> events = <KeyEvent>[];
+      await tester.pumpWidget(
+        Focus(
+          autofocus: true,
+          onKeyEvent: (FocusNode node, KeyEvent event) {
+            events.add(event);
+            return KeyEventResult.ignored;
+          },
+          child: const SizedBox(),
+        ),
+      );
+
+      const SingleActivator singleActivator = SingleActivator(LogicalKeyboardKey.numpad4, numLock: LockState.unlocked);
+
+      // Lock NumLock.
+      await tester.sendKeyEvent(LogicalKeyboardKey.numLock);
+      expect(HardwareKeyboard.instance.lockModesEnabled.contains(KeyboardLockMode.numLock), isTrue);
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.numpad4);
+      expect(ShortcutActivator.isActivatedBy(singleActivator, events.last), isFalse);
+
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.numpad4);
+
+      // Unlock NumLock.
+      await tester.sendKeyEvent(LogicalKeyboardKey.numLock);
+      expect(HardwareKeyboard.instance.lockModesEnabled.contains(KeyboardLockMode.numLock), isFalse);
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.numpad4);
+      expect(ShortcutActivator.isActivatedBy(singleActivator, events.last), isTrue);
+
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.numpad4);
+    });
+
+    testWidgets('numLock works as expected when set to LockState.ignored', (WidgetTester tester) async {
+      // Collect some key events to use for testing.
+      final List<KeyEvent> events = <KeyEvent>[];
+      await tester.pumpWidget(
+        Focus(
+          autofocus: true,
+          onKeyEvent: (FocusNode node, KeyEvent event) {
+            events.add(event);
+            return KeyEventResult.ignored;
+          },
+          child: const SizedBox(),
+        ),
+      );
+
+      const SingleActivator singleActivator = SingleActivator(LogicalKeyboardKey.numpad4);
+
+      // Lock NumLock.
+      await tester.sendKeyEvent(LogicalKeyboardKey.numLock);
+      expect(HardwareKeyboard.instance.lockModesEnabled.contains(KeyboardLockMode.numLock), isTrue);
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.numpad4);
+      expect(ShortcutActivator.isActivatedBy(singleActivator, events.last), isTrue);
+
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.numpad4);
+
+      // Unlock NumLock.
+      await tester.sendKeyEvent(LogicalKeyboardKey.numLock);
+      expect(HardwareKeyboard.instance.lockModesEnabled.contains(KeyboardLockMode.numLock), isFalse);
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.numpad4);
+      expect(ShortcutActivator.isActivatedBy(singleActivator, events.last), isTrue);
+
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.numpad4);
     });
 
     group('diagnostics.', () {
@@ -1153,6 +1257,51 @@ void main() {
       expect(invoked, 1);
       invoked = 0;
     });
+
+    testWidgets('Shortcuts does not insert a semantics node when includeSemantics is false', (WidgetTester tester) async {
+      final SemanticsTester semanticsTester = SemanticsTester(tester);
+      addTearDown(semanticsTester.dispose);
+
+      // By default, includeSemantics is true.
+      await tester.pumpWidget(
+        const Shortcuts(
+          shortcuts: <LogicalKeySet, Intent>{},
+          child: SizedBox(),
+        ),
+      );
+
+      expect(
+        semanticsTester,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(id: 1),
+            ],
+          ),
+          ignoreRect: true,
+          ignoreTransform: true,
+        ),
+      );
+
+      await tester.pumpWidget(
+        const Shortcuts(
+          includeSemantics: false,
+          shortcuts: <LogicalKeySet, Intent>{},
+          child: SizedBox(),
+        ),
+      );
+
+      expect(
+        semanticsTester,
+        hasSemantics(
+          TestSemantics.root(),
+          ignoreRect: true,
+          ignoreTransform: true,
+        ),
+      );
+
+      semanticsTester.dispose();
+    });
   });
 
   group('CharacterActivator', () {
@@ -1172,7 +1321,6 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, 1);
       invoked = 0;
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('handles repeated events', (WidgetTester tester) async {
@@ -1193,7 +1341,6 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, 2);
       invoked = 0;
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('rejects repeated events if requested', (WidgetTester tester) async {
@@ -1214,7 +1361,6 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, 1);
       invoked = 0;
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('handles Alt, Ctrl and Meta', (WidgetTester tester) async {
@@ -1261,7 +1407,6 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
       expect(invoked, 1);
       invoked = 0;
-      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('isActivatedBy works as expected', (WidgetTester tester) async {
@@ -1619,6 +1764,7 @@ void main() {
 
     testWidgets("doesn't override text field shortcuts", (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -1973,7 +2119,7 @@ class TestAction extends CallbackAction<Intent> {
 /// An activator that accepts down events that has [key] as the logical key.
 ///
 /// This class is used only to tests. It is intentionally designed poorly by
-/// returning null in [triggers], and checks [key] in [acceptsEvent].
+/// returning null in [triggers], and checks [key] in [accepts].
 class DumbLogicalActivator extends ShortcutActivator {
   const DumbLogicalActivator(this.key);
 

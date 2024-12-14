@@ -61,7 +61,7 @@ void main() {
       RenderDecoratedBox actualBox = tester.renderObject(find.byType(DecoratedBox));
       BoxDecoration actualDecoration = actualBox.decoration as BoxDecoration;
 
-      expect(actualDecoration.color, const Color(0xFFFFFFFF));
+      expect(actualDecoration.color, isSameColorAs(const Color(0xFFFFFFFF)));
       expect(actualDecoration.boxShadow![0].blurRadius, 10.0);
       expect(actualDecoration.boxShadow![0].spreadRadius, 4.0);
       expect(actualDecoration.boxShadow![0].color, const Color(0x66000000));
@@ -72,7 +72,7 @@ void main() {
       actualBox = tester.renderObject(find.byType(DecoratedBox));
       actualDecoration = actualBox.decoration as BoxDecoration;
 
-      expect(actualDecoration.color, const Color(0xFF7F7F7F));
+      expect(actualDecoration.color,  isSameColorAs(const Color(0xFF7F7F7F)));
       expect(actualDecoration.border, isA<Border>());
       final Border border = actualDecoration.border! as Border;
       expect(border.left.width, 2.5);
@@ -96,11 +96,13 @@ void main() {
     });
 
     testWidgets('animations work with curves test', (WidgetTester tester) async {
-      final Animation<Decoration> curvedDecorationAnimation =
-        decorationTween.animate(CurvedAnimation(
+      final CurvedAnimation curvedAnimation = CurvedAnimation(
         parent: controller,
         curve: Curves.easeOut,
-      ));
+      );
+      addTearDown(curvedAnimation.dispose);
+      final Animation<Decoration> curvedDecorationAnimation =
+        decorationTween.animate(curvedAnimation);
 
       final DecoratedBoxTransition transitionUnderTest = DecoratedBoxTransition(
         decoration: curvedDecorationAnimation,
@@ -116,10 +118,10 @@ void main() {
       RenderDecoratedBox actualBox = tester.renderObject(find.byType(DecoratedBox));
       BoxDecoration actualDecoration = actualBox.decoration as BoxDecoration;
 
-      expect(actualDecoration.color, const Color(0xFFFFFFFF));
+      expect(actualDecoration.color, isSameColorAs(const Color(0xFFFFFFFF)));
       expect(actualDecoration.boxShadow![0].blurRadius, 10.0);
       expect(actualDecoration.boxShadow![0].spreadRadius, 4.0);
-      expect(actualDecoration.boxShadow![0].color, const Color(0x66000000));
+      expect(actualDecoration.boxShadow![0].color, isSameColorAs(const Color(0x66000000)));
 
       controller.value = 0.5;
 
@@ -129,12 +131,12 @@ void main() {
 
       // Same as the test above but the values should be much closer to the
       // tween's end values given the easeOut curve.
-      expect(actualDecoration.color, const Color(0xFF505050));
+      expect(actualDecoration.color, isSameColorAs(const Color(0xFF505050)));
       expect(actualDecoration.border, isA<Border>());
       final Border border = actualDecoration.border! as Border;
       expect(border.left.width, moreOrLessEquals(1.9, epsilon: 0.1));
       expect(border.left.style, BorderStyle.solid);
-      expect(border.left.color, const Color(0xFF151515));
+      expect(border.left.color, isSameColorAs(const Color(0xFF151515)));
       expect(actualDecoration.borderRadius!.resolve(TextDirection.ltr).topLeft.x, moreOrLessEquals(6.8, epsilon: 0.1));
       expect(actualDecoration.shape, BoxShape.rectangle);
       expect(actualDecoration.boxShadow![0].blurRadius, moreOrLessEquals(3.1, epsilon: 0.1));

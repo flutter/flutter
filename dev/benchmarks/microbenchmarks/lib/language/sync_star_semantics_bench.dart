@@ -9,7 +9,7 @@ import '../common.dart';
 const int _kNumIterations = 1000;
 const int _kNumWarmUp = 100;
 
-void main() {
+Future<void> execute() async {
   final List<String> words = 'Lorem Ipsum is simply dummy text of the printing and'
     " typesetting industry. Lorem Ipsum has been the industry's"
     ' standard dummy text ever since the 1500s, when an unknown'
@@ -91,11 +91,7 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoSyncStar(List<Inlin
       workingText += info.text;
       workingLabel ??= '';
       final String? infoSemanticsLabel = info.semanticsLabel;
-      if (infoSemanticsLabel != null) {
-        workingLabel += infoSemanticsLabel;
-      } else {
-        workingLabel += info.text;
-      }
+      workingLabel += infoSemanticsLabel ?? info.text;
     }
   }
   assert(workingLabel != null);
@@ -115,13 +111,16 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoList(List<InlineSpa
       workingText += info.text;
       workingLabel ??= '';
       final String? infoSemanticsLabel = info.semanticsLabel;
-      if (infoSemanticsLabel != null) {
-        workingLabel += infoSemanticsLabel;
-      } else {
-        workingLabel += info.text;
-      }
+      workingLabel += infoSemanticsLabel ?? info.text;
     }
   }
   assert(workingLabel != null);
   return result;
+}
+
+//
+//  Note that the benchmark is normally run by benchmark_collection.dart.
+//
+Future<void> main() async {
+  return execute();
 }

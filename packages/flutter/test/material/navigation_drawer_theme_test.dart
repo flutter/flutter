@@ -53,15 +53,15 @@ void main() {
     expect(description, equalsIgnoringHashCodes(
       <String>[
         'tileHeight: 50.0',
-        'backgroundColor: Color(0x00000099)',
+        'backgroundColor: ${const Color(0x00000099)}',
         'elevation: 5.0',
-        'shadowColor: Color(0x00000098)',
-        'surfaceTintColor: Color(0x00000097)',
-        'indicatorColor: Color(0x00000096)',
+        'shadowColor: ${const Color(0x00000098)}',
+        'surfaceTintColor: ${const Color(0x00000097)}',
+        'indicatorColor: ${const Color(0x00000096)}',
         'indicatorShape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
         'indicatorSize: Size(10.0, 10.0)',
-        'labelTextStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 7.0))',
-        'iconTheme: MaterialStatePropertyAll(IconThemeData#00000(color: Color(0x00000095)))'
+        'labelTextStyle: WidgetStatePropertyAll(TextStyle(inherit: true, size: 7.0))',
+        'iconTheme: WidgetStatePropertyAll(IconThemeData#00000(color: ${const Color(0x00000095)}))'
       ],
     ));
   });

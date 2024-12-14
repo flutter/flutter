@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'checkbox_list_tile.dart';
+/// @docImport 'list_tile.dart';
+/// @docImport 'material.dart';
+/// @docImport 'radio.dart';
+/// @docImport 'slider.dart';
+/// @docImport 'switch.dart';
+library;
+
 import 'package:flutter/cupertino.dart';
 
 import 'checkbox_theme.dart';
@@ -12,7 +20,6 @@ import 'debug.dart';
 import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
-import 'toggleable.dart';
 
 // Examples can assume:
 // bool _throwShotAway = false;
@@ -36,7 +43,7 @@ enum _CheckboxType { material, adaptive }
 ///
 /// {@tool dartpad}
 /// This example shows how you can override the default theme of
-/// a [Checkbox] with a [MaterialStateProperty].
+/// a [Checkbox] with a [WidgetStateProperty].
 /// In this example, the checkbox's color will be `Colors.blue` when the [Checkbox]
 /// is being pressed, hovered, or focused. Otherwise, the checkbox's color will
 /// be `Colors.red`.
@@ -108,7 +115,7 @@ class Checkbox extends StatefulWidget {
   /// design [Checkbox].
   ///
   /// If a [CupertinoCheckbox] is created, the following parameters are ignored:
-  /// [mouseCursor], [fillColor], [hoverColor], [overlayColor], [splashRadius],
+  /// [fillColor], [hoverColor], [overlayColor], [splashRadius],
   /// [materialTapTargetSize], [visualDensity], [isError]. However, [shape] and
   /// [side] will still affect the [CupertinoCheckbox] and should be handled if
   /// native fidelity is important.
@@ -177,56 +184,55 @@ class Checkbox extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
   /// {@endtemplate}
   ///
-  /// When [value] is null and [tristate] is true, [MaterialState.selected] is
+  /// When [value] is null and [tristate] is true, [WidgetState.selected] is
   /// included as a state.
   ///
   /// If null, then the value of [CheckboxThemeData.mouseCursor] is used. If
-  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
+  /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
   ///
   /// See also:
   ///
-  ///  * [MaterialStateMouseCursor], a [MouseCursor] that implements
-  ///    `MaterialStateProperty` which is used in APIs that need to accept
-  ///    either a [MouseCursor] or a [MaterialStateProperty<MouseCursor>].
+  ///  * [WidgetStateMouseCursor], a [MouseCursor] that implements
+  ///    [WidgetStateProperty] which is used in APIs that need to accept
+  ///    either a [MouseCursor] or a [WidgetStateProperty].
   final MouseCursor? mouseCursor;
 
   /// The color to use when this checkbox is checked.
   ///
   /// Defaults to [ColorScheme.secondary].
   ///
-  /// If [fillColor] returns a non-null color in the [MaterialState.selected]
+  /// If [fillColor] returns a non-null color in the [WidgetState.selected]
   /// state, it will be used instead of this color.
   final Color? activeColor;
 
   /// {@template flutter.material.checkbox.fillColor}
-  /// The color that fills the checkbox, in all [MaterialState]s.
+  /// The color that fills the checkbox, in all [WidgetState]s.
   ///
   /// Resolves in the following states:
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
   ///
   /// {@tool snippet}
-  /// This example resolves the [fillColor] based on the current [MaterialState]
+  /// This example resolves the [fillColor] based on the current [WidgetState]
   /// of the [Checkbox], providing a different [Color] when it is
-  /// [MaterialState.disabled].
+  /// [WidgetState.disabled].
   ///
   /// ```dart
   /// Checkbox(
   ///   value: true,
   ///   onChanged: (_){},
-  ///   fillColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
-  ///     if (states.contains(MaterialState.disabled)) {
+  ///   fillColor: MaterialStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+  ///     if (states.contains(WidgetState.disabled)) {
   ///       return Colors.orange.withOpacity(.32);
   ///     }
   ///     return Colors.orange;
@@ -294,7 +300,7 @@ class Checkbox extends StatefulWidget {
 
   /// The color for the checkbox's [Material] when it has the input focus.
   ///
-  /// If [overlayColor] returns a non-null color in the [MaterialState.focused]
+  /// If [overlayColor] returns a non-null color in the [WidgetState.focused]
   /// state, it will be used instead.
   ///
   /// If null, then the value of [CheckboxThemeData.overlayColor] is used in the
@@ -305,7 +311,7 @@ class Checkbox extends StatefulWidget {
   /// {@template flutter.material.checkbox.hoverColor}
   /// The color for the checkbox's [Material] when a pointer is hovering over it.
   ///
-  /// If [overlayColor] returns a non-null color in the [MaterialState.hovered]
+  /// If [overlayColor] returns a non-null color in the [WidgetState.hovered]
   /// state, it will be used instead.
   /// {@endtemplate}
   ///
@@ -318,10 +324,10 @@ class Checkbox extends StatefulWidget {
   /// The color for the checkbox's [Material].
   ///
   /// Resolves in the following states:
-  ///  * [MaterialState.pressed].
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
+  ///  * [WidgetState.pressed].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
   /// {@endtemplate}
   ///
   /// If null, then the value of [activeColor] with alpha
@@ -359,19 +365,19 @@ class Checkbox extends StatefulWidget {
   /// {@template flutter.material.checkbox.side}
   /// The color and width of the checkbox's border.
   ///
-  /// This property can be a [MaterialStateBorderSide] that can
+  /// This property can be a [WidgetStateBorderSide] that can
   /// specify different border color and widths depending on the
   /// checkbox's state.
   ///
   /// Resolves in the following states:
-  ///  * [MaterialState.pressed].
-  ///  * [MaterialState.selected].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.disabled].
-  ///  * [MaterialState.error].
+  ///  * [WidgetState.pressed].
+  ///  * [WidgetState.selected].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
+  ///  * [WidgetState.error].
   ///
-  /// If this property is not a [MaterialStateBorderSide] and it is
+  /// If this property is not a [WidgetStateBorderSide] and it is
   /// non-null, then it is only rendered when the checkbox's value is
   /// false. The difference in interpretation is for backwards
   /// compatibility.
@@ -393,9 +399,9 @@ class Checkbox extends StatefulWidget {
   final bool isError;
 
   /// {@template flutter.material.checkbox.semanticLabel}
-  /// The semantic label for the checkobox that will be announced by screen readers.
+  /// The semantic label for the checkbox that will be announced by screen readers.
   ///
-  /// This is announced in accessibility modes (e.g TalkBack/VoiceOver).
+  /// This is announced by assistive technologies (e.g TalkBack/VoiceOver).
   ///
   /// This label does not show in the UI.
   /// {@endtemplate}
@@ -444,6 +450,9 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
   @override
   bool? get value => widget.value;
 
+  @override
+  Duration? get reactionAnimationDuration => kRadialReactionDuration;
+
   MaterialStateProperty<Color?> get _widgetFillColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
@@ -486,6 +495,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
               value: value,
               tristate: tristate,
               onChanged: onChanged,
+              mouseCursor: widget.mouseCursor,
               activeColor: widget.activeColor,
               checkColor: widget.checkColor,
               focusColor: widget.focusColor,
@@ -493,6 +503,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
               autofocus: widget.autofocus,
               side: widget.side,
               shape: widget.shape,
+              semanticLabel: widget.semanticLabel,
             );
         }
     }
@@ -508,13 +519,10 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     final VisualDensity effectiveVisualDensity = widget.visualDensity
       ?? checkboxTheme.visualDensity
       ?? defaults.visualDensity!;
-    Size size;
-    switch (effectiveMaterialTapTargetSize) {
-      case MaterialTapTargetSize.padded:
-        size = const Size(kMinInteractiveDimension, kMinInteractiveDimension);
-      case MaterialTapTargetSize.shrinkWrap:
-        size = const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0);
-    }
+    Size size = switch (effectiveMaterialTapTargetSize) {
+      MaterialTapTargetSize.padded     => const Size(kMinInteractiveDimension,       kMinInteractiveDimension),
+      MaterialTapTargetSize.shrinkWrap => const Size(kMinInteractiveDimension - 8.0, kMinInteractiveDimension - 8.0),
+    };
     size += effectiveVisualDensity.baseSizeAdjustment;
 
     final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
@@ -768,10 +776,10 @@ class _CheckboxPainter extends ToggleablePainter {
 
     final Paint strokePaint = _createStrokePaint();
     final Offset origin = size / 2.0 - const Size.square(_kEdgeSize) / 2.0 as Offset;
-    final AnimationStatus status = position.status;
-    final double tNormalized = status == AnimationStatus.forward || status == AnimationStatus.completed
-      ? position.value
-      : 1.0 - position.value;
+    final double tNormalized = switch (position.status) {
+      AnimationStatus.forward || AnimationStatus.completed => position.value,
+      AnimationStatus.reverse || AnimationStatus.dismissed => 1.0 - position.value,
+    };
 
     // Four cases: false to null, false to true, null to false, true to false
     if (previousValue == false || value == false) {
@@ -978,35 +986,35 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.error)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.error.withOpacity(0.12);
+          return _colors.error.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.error.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.error.withOpacity(0.12);
+          return _colors.error.withOpacity(0.1);
         }
       }
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.onSurface.withOpacity(0.12);
+          return _colors.onSurface.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.primary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.primary.withOpacity(0.12);
+          return _colors.primary.withOpacity(0.1);
         }
         return Colors.transparent;
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.primary.withOpacity(0.12);
+        return _colors.primary.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSurface.withOpacity(0.12);
+        return _colors.onSurface.withOpacity(0.1);
       }
       return Colors.transparent;
     });

@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'choice_chip.dart';
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'input_chip.dart';
+/// @docImport 'material.dart';
+/// @docImport 'outlined_button.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
@@ -81,9 +90,10 @@ enum _ChipVariant { flat, elevated }
 class ActionChip extends StatelessWidget implements ChipAttributes, TappableChipAttributes, DisabledChipAttributes {
   /// Create a chip that acts like a button.
   ///
-  /// The [label], [onPressed], [autofocus], and [clipBehavior] arguments must
-  /// not be null. The [pressElevation] and [elevation] must be null or
-  /// non-negative. Typically, [pressElevation] is greater than [elevation].
+  /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
+  /// When [onPressed] is null, the [ActionChip] will be disabled. The [pressElevation]
+  /// and [elevation] must be null or non-negative. Typically, [pressElevation]
+  /// is greater than [elevation].
   const ActionChip({
     super.key,
     this.avatar,
@@ -108,15 +118,18 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.shadowColor,
     this.surfaceTintColor,
     this.iconTheme,
+    this.avatarBoxConstraints,
+    this.chipAnimationStyle,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.flat;
 
   /// Create an elevated chip that acts like a button.
   ///
-  /// The [label], [onPressed], [autofocus], and [clipBehavior] arguments must
-  /// not be null. The [pressElevation] and [elevation] must be null or
-  /// non-negative. Typically, [pressElevation] is greater than [elevation].
+  /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
+  /// When [onPressed] is null, the [ActionChip] will be disabled. The [pressElevation]
+  /// and [elevation] must be null or non-negative. Typically, [pressElevation]
+  /// is greater than [elevation].
   const ActionChip.elevated({
     super.key,
     this.avatar,
@@ -141,6 +154,8 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.shadowColor,
     this.surfaceTintColor,
     this.iconTheme,
+    this.avatarBoxConstraints,
+    this.chipAnimationStyle,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.elevated;
@@ -189,6 +204,10 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   final Color? surfaceTintColor;
   @override
   final IconThemeData? iconTheme;
+  @override
+  final BoxConstraints? avatarBoxConstraints;
+  @override
+  final ChipAnimationStyle? chipAnimationStyle;
 
   @override
   bool get isEnabled => onPressed != null;
@@ -226,6 +245,8 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
       iconTheme: iconTheme,
+      avatarBoxConstraints: avatarBoxConstraints,
+      chipAnimationStyle: chipAnimationStyle,
     );
   }
 }
@@ -259,7 +280,11 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
   double? get pressElevation => 1.0;
 
   @override
-  TextStyle? get labelStyle => _textTheme.labelLarge;
+  TextStyle? get labelStyle => _textTheme.labelLarge?.copyWith(
+    color: isEnabled
+      ? _colors.onSurface
+      : _colors.onSurface,
+  );
 
   @override
   MaterialStateProperty<Color?>? get color =>
@@ -269,7 +294,9 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
           ? null
           : _colors.onSurface.withOpacity(0.12);
       }
-      return null;
+      return _chipVariant == _ChipVariant.flat
+        ? null
+        : _colors.surfaceContainerLow;
     });
 
   @override
@@ -278,7 +305,7 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
     : _colors.shadow;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   Color? get checkmarkColor => null;
@@ -289,7 +316,7 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
   @override
   BorderSide? get side => _chipVariant == _ChipVariant.flat
     ? isEnabled
-        ? BorderSide(color: _colors.outline)
+        ? BorderSide(color: _colors.outlineVariant)
         : BorderSide(color: _colors.onSurface.withOpacity(0.12))
     : const BorderSide(color: Colors.transparent);
 
@@ -304,16 +331,24 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
   @override
   EdgeInsetsGeometry? get padding => const EdgeInsets.all(8.0);
 
-  /// The chip at text scale 1 starts with 8px on each side and as text scaling
-  /// gets closer to 2 the label padding is linearly interpolated from 8px to 4px.
-  /// Once the widget has a text scaling of 2 or higher than the label padding
-  /// remains 4px.
+  /// The label padding of the chip scales with the font size specified in the
+  /// [labelStyle], and the system font size settings that scale font sizes
+  /// globally.
+  ///
+  /// The chip at effective font size 14.0 starts with 8px on each side and as
+  /// the font size scales up to closer to 28.0, the label padding is linearly
+  /// interpolated from 8px to 4px. Once the label has a font size of 2 or
+  /// higher, label padding remains 4px.
   @override
-  EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
-    const EdgeInsets.symmetric(horizontal: 8.0),
-    const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.textScalerOf(context).textScaleFactor - 1.0, 0.0, 1.0),
-  )!;
+  EdgeInsetsGeometry? get labelPadding {
+    final double fontSize = labelStyle?.fontSize ?? 14.0;
+    final double fontSizeRatio = MediaQuery.textScalerOf(context).scale(fontSize) / 14.0;
+    return EdgeInsets.lerp(
+      const EdgeInsets.symmetric(horizontal: 8.0),
+      const EdgeInsets.symmetric(horizontal: 4.0),
+      clampDouble(fontSizeRatio - 1.0, 0.0, 1.0),
+    )!;
+  }
 }
 
 // END GENERATED TOKEN PROPERTIES - ActionChip

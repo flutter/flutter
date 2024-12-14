@@ -301,7 +301,7 @@ void main() {
         'Expected contrast ratio of at least 4.5 but found 1.17 for a font '
         'size of 14.0.\n'
         'The computed colors was:\n'
-        'light - Color(0xfffafafa), dark - Color(0xffffeb3b)\n'
+        'light - ${const Color(0xfffafafa)}, dark - ${const Color(0xffffeb3b)}\n'
          'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
       );
       handle.dispose();
@@ -330,10 +330,10 @@ void main() {
         result.reason,
         'SemanticsNode#4(Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), '
         'label: "this is a test", textDirection: ltr):\n'
-        'Expected contrast ratio of at least 4.5 but found 1.19 for a font '
+        'Expected contrast ratio of at least 4.5 but found 1.16 for a font '
         'size of 14.0.\n'
         'The computed colors was:\n'
-        'light - Color(0xfffffbfe), dark - Color(0xffffeb3b)\n'
+        'light - ${const Color(0xfffef7ff)}, dark - ${const Color(0xffffeb3b)}\n'
          'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
       );
       handle.dispose();

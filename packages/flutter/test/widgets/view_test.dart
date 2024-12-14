@@ -6,7 +6,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'multi_view_testing.dart';
 
@@ -77,9 +79,9 @@ void main() {
     PipelineOwner? outsideParent;
     PipelineOwner? insideParent;
 
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: Builder(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      Builder(
         builder: (BuildContext context) {
           outsideView = View.maybeOf(context);
           outsideParent = View.pipelineOwnerOf(context);
@@ -114,9 +116,9 @@ void main() {
   });
 
   testWidgets('cannot have multiple views with same FlutterView', (WidgetTester tester) async {
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: ViewCollection(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      ViewCollection(
         views: <Widget>[
           View(
             view: tester.view,
@@ -224,9 +226,9 @@ void main() {
   });
 
   testWidgets('visitChildren of ViewCollection visits all children', (WidgetTester tester) async {
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: ViewCollection(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      ViewCollection(
         views: <Widget>[
           View(
             view: tester.view,
@@ -250,9 +252,9 @@ void main() {
     });
     expect(children, hasLength(3));
 
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: ViewCollection(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      ViewCollection(
         views: <Widget>[
           View(
             view: tester.view,
@@ -271,9 +273,9 @@ void main() {
   group('renderObject getter', () {
     testWidgets('ancestors of view see RenderView as renderObject', (WidgetTester tester) async {
       late BuildContext builderContext;
-      await pumpWidgetWithoutViewWrapper(
-        tester: tester,
-        widget: Builder(
+      await tester.pumpWidget(
+        wrapWithView: false,
+        Builder(
           builder: (BuildContext context) {
             builderContext = context;
             return View(
@@ -293,9 +295,9 @@ void main() {
 
     testWidgets('ancestors of ViewCollection get null for renderObject', (WidgetTester tester) async {
       late BuildContext builderContext;
-      await pumpWidgetWithoutViewWrapper(
-        tester: tester,
-        widget: Builder(
+      await tester.pumpWidget(
+        wrapWithView: false,
+        Builder(
           builder: (BuildContext context) {
             builderContext = context;
             return ViewCollection(
@@ -344,10 +346,12 @@ void main() {
     });
   });
 
-  testWidgets('correctly switches between view configurations', (WidgetTester tester) async {
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: View(
+  testWidgets('correctly switches between view configurations',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // Leaking by design as contains deprecated items.
+  (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapWithView: false,
+      View(
         view: tester.view,
         deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner: tester.binding.pipelineOwner,
         deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView: tester.binding.renderView,
@@ -359,9 +363,9 @@ void main() {
     expect(renderView.owner, same(tester.binding.pipelineOwner));
     expect(tester.renderObject(find.byType(SizedBox)).owner, same(tester.binding.pipelineOwner));
 
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: View(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      View(
         view: tester.view,
         child: const SizedBox(),
       ),
@@ -371,9 +375,9 @@ void main() {
     expect(renderView.owner, isNot(same(tester.binding.pipelineOwner)));
     expect(tester.renderObject(find.byType(SizedBox)).owner, isNot(same(tester.binding.pipelineOwner)));
 
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: View(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      View(
         view: tester.view,
         deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner: tester.binding.pipelineOwner,
         deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView: tester.binding.renderView,
@@ -449,12 +453,240 @@ void main() {
     });
     expect(children, isNot(contains(rawViewOwner)));
   });
-}
 
-Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {
-  tester.binding.attachRootWidget(widget);
-  tester.binding.scheduleFrame();
-  return tester.binding.pump();
+  testWidgets('RenderView does not use size of child if constraints are tight', (WidgetTester tester) async {
+    const Size physicalSize = Size(300, 600);
+    final Size logicalSize = physicalSize / tester.view.devicePixelRatio;
+    tester.view.physicalConstraints = ViewConstraints.tight(physicalSize);
+    await tester.pumpWidget(const Placeholder());
+
+    final RenderView renderView = tester.renderObject<RenderView>(find.byType(View));
+    expect(renderView.constraints, BoxConstraints.tight(logicalSize));
+    expect(renderView.size, logicalSize);
+
+    final RenderBox child = renderView.child!;
+    expect(child.constraints, BoxConstraints.tight(logicalSize));
+    expect(child.debugCanParentUseSize, isFalse);
+    expect(child.size, logicalSize);
+  });
+
+  testWidgets('RenderView sizes itself to child if constraints allow it (unconstrained)', (WidgetTester tester) async {
+    const Size size = Size(300, 600);
+    tester.view.physicalConstraints = const ViewConstraints(); // unconstrained
+    await tester.pumpWidget(SizedBox.fromSize(size: size));
+
+    final RenderView renderView = tester.renderObject<RenderView>(find.byType(View));
+    expect(renderView.constraints, const BoxConstraints());
+    expect(renderView.size, size);
+
+    final RenderBox child = renderView.child!;
+    expect(child.constraints, const BoxConstraints());
+    expect(child.debugCanParentUseSize, isTrue);
+    expect(child.size, size);
+  });
+
+  testWidgets('RenderView sizes itself to child if constraints allow it (constrained)', (WidgetTester tester) async {
+    const Size size = Size(30, 60);
+    const ViewConstraints viewConstraints = ViewConstraints(maxWidth: 333, maxHeight: 666);
+    final BoxConstraints boxConstraints = BoxConstraints.fromViewConstraints(viewConstraints / tester.view.devicePixelRatio);
+    tester.view.physicalConstraints = viewConstraints;
+    await tester.pumpWidget(SizedBox.fromSize(size: size));
+
+    final RenderView renderView = tester.renderObject<RenderView>(find.byType(View));
+    expect(renderView.constraints, boxConstraints);
+    expect(renderView.size, size);
+
+    final RenderBox child = renderView.child!;
+    expect(child.constraints, boxConstraints);
+    expect(child.debugCanParentUseSize, isTrue);
+    expect(child.size, size);
+  });
+
+  testWidgets('RenderView respects constraints when child wants to be bigger than allowed', (WidgetTester tester) async {
+    const Size size = Size(3000, 6000);
+    const ViewConstraints viewConstraints = ViewConstraints(maxWidth: 300, maxHeight: 600);
+    tester.view.physicalConstraints = viewConstraints;
+    await tester.pumpWidget(SizedBox.fromSize(size: size));
+
+    final RenderView renderView = tester.renderObject<RenderView>(find.byType(View));
+    expect(renderView.size, const Size(100, 200)); // viewConstraints.biggest / devicePixelRatio
+
+    final RenderBox child = renderView.child!;
+    expect(child.debugCanParentUseSize, isTrue);
+    expect(child.size, const Size(100, 200));
+  });
+
+  testWidgets('ViewFocusEvents cause unfocusing and refocusing', (WidgetTester tester) async {
+    late FlutterView view;
+    late FocusNode focusNode;
+    await tester.pumpWidget(
+      Focus(
+        child: Builder(
+          builder: (BuildContext context) {
+            view = View.of(context);
+            focusNode = Focus.of(context);
+            return Container();
+          },
+        ),
+      ),
+    );
+
+    final ViewFocusEvent unfocusEvent = ViewFocusEvent(
+      viewId: view.viewId,
+      state: ViewFocusState.unfocused,
+      direction: ViewFocusDirection.forward,
+    );
+
+    final ViewFocusEvent focusEvent = ViewFocusEvent(
+      viewId: view.viewId,
+      state: ViewFocusState.focused,
+      direction: ViewFocusDirection.backward,
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(FocusManager.instance.rootScope.hasPrimaryFocus, isFalse);
+
+    ServicesBinding.instance.platformDispatcher.onViewFocusChange?.call(unfocusEvent);
+    await tester.pump();
+
+    expect(focusNode.hasPrimaryFocus, isFalse);
+    expect(FocusManager.instance.rootScope.hasPrimaryFocus, isTrue);
+
+    ServicesBinding.instance.platformDispatcher.onViewFocusChange?.call(focusEvent);
+    await tester.pump();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(FocusManager.instance.rootScope.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('View notifies engine that a view should have focus when a widget focus change occurs.', (WidgetTester tester) async {
+    final FocusNode nodeA = FocusNode(debugLabel: 'a');
+    addTearDown(nodeA.dispose);
+
+    FlutterView? view;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: Column(
+          children: <Widget>[
+            Focus(focusNode: nodeA, child: const Text('a')),
+            Builder(builder: (BuildContext context) {
+              view = View.of(context);
+              return const SizedBox.shrink();
+            }),
+          ],
+        ),
+      ),
+    );
+    int notifyCount = 0;
+    void handleFocusChange() {
+      notifyCount++;
+    }
+    tester.binding.focusManager.addListener(handleFocusChange);
+    addTearDown(() => tester.binding.focusManager.removeListener(handleFocusChange));
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+
+    nodeA.requestFocus();
+    await tester.pump();
+    final List<ViewFocusEvent> events = tester.binding.platformDispatcher.testFocusEvents;
+    expect(events.length, equals(1));
+    expect(events.last.viewId, equals(view?.viewId));
+    expect(events.last.direction, equals(ViewFocusDirection.forward));
+    expect(events.last.state, equals(ViewFocusState.focused));
+    expect(nodeA.hasPrimaryFocus, isTrue);
+    expect(notifyCount, equals(1));
+    notifyCount = 0;
+  });
+
+  testWidgets('Switching focus between views yields the correct events.', (WidgetTester tester) async {
+    final FocusNode nodeA = FocusNode(debugLabel: 'a');
+    addTearDown(nodeA.dispose);
+
+    FlutterView? view;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: Column(
+          children: <Widget>[
+            Focus(focusNode: nodeA, child: const Text('a')),
+            Builder(builder: (BuildContext context) {
+              view = View.of(context);
+              return const SizedBox.shrink();
+            }),
+          ],
+        ),
+      ),
+    );
+    int notifyCount = 0;
+    void handleFocusChange() {
+      notifyCount++;
+    }
+    tester.binding.focusManager.addListener(handleFocusChange);
+    addTearDown(() => tester.binding.focusManager.removeListener(handleFocusChange));
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+
+    // Focus and make sure engine is notified.
+    nodeA.requestFocus();
+    await tester.pump();
+    List<ViewFocusEvent> events = tester.binding.platformDispatcher.testFocusEvents;
+    expect(events.length, equals(1));
+    expect(events.last.viewId, equals(view?.viewId));
+    expect(events.last.direction, equals(ViewFocusDirection.forward));
+    expect(events.last.state, equals(ViewFocusState.focused));
+    expect(nodeA.hasPrimaryFocus, isTrue);
+    expect(notifyCount, equals(1));
+    notifyCount = 0;
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+
+    // Unfocus all views.
+    tester.binding.platformDispatcher.onViewFocusChange?.call(
+      ViewFocusEvent(
+        viewId: view!.viewId,
+        state: ViewFocusState.unfocused,
+        direction: ViewFocusDirection.forward,
+      ),
+    );
+    await tester.pump();
+    expect(nodeA.hasFocus, isFalse);
+    expect(tester.binding.platformDispatcher.testFocusEvents, isEmpty);
+    expect(notifyCount, equals(1));
+    notifyCount = 0;
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+
+    // Focus another view.
+    tester.binding.platformDispatcher.onViewFocusChange?.call(
+      const ViewFocusEvent(
+        viewId: 100,
+        state: ViewFocusState.focused,
+        direction: ViewFocusDirection.forward,
+      ),
+    );
+
+    // Focusing another view should unfocus this node without notifying the
+    // engine to unfocus.
+    await tester.pump();
+    expect(nodeA.hasFocus, isFalse);
+    expect(tester.binding.platformDispatcher.testFocusEvents, isEmpty);
+    expect(notifyCount, equals(0));
+    notifyCount = 0;
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+
+    // Re-focusing the node should notify the engine that this view is focused.
+    nodeA.requestFocus();
+    await tester.pump();
+    expect(nodeA.hasPrimaryFocus, isTrue);
+    events = tester.binding.platformDispatcher.testFocusEvents;
+    expect(events.length, equals(1));
+    expect(events.last.viewId, equals(view?.viewId));
+    expect(events.last.direction, equals(ViewFocusDirection.forward));
+    expect(events.last.state, equals(ViewFocusState.focused));
+    expect(notifyCount, equals(1));
+    notifyCount = 0;
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+  });
 }
 
 class SpyRenderWidget extends SizedBox {

@@ -173,7 +173,7 @@ void main() {
       expect(tester.state<_DidChangeDependencySpyState>(find.byType(DidChangeDependencySpy)).didChangeDependenciesCount, 3);
     });
 
-    testWidgets('causes didChangeDependencies to be called on move even if dependency was non-existant', (WidgetTester tester) async {
+    testWidgets('causes didChangeDependencies to be called on move even if dependency was non-existent', (WidgetTester tester) async {
       MyInheritedWidget? inheritedWidget;
       final Key globalKey = GlobalKey();
 

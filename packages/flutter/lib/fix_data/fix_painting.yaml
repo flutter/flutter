@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # For details regarding the *Flutter Fix* feature, see
-# https://flutter.dev/docs/development/tools/flutter-fix
+# https://flutter.dev/to/flutter-fix
 
 # Please add new fixes to the top of the file, separated by one blank line
 # from other fixes. In a comment, include a link to the PR where the change
@@ -117,4 +117,36 @@ transforms:
       - kind: 'rename'
         newName: 'fromViewPadding'
 
+  - title: "Rename from 'opacity' to 'a'"
+    date: 2024-09-10
+    element:
+      uris: [ 'painting.dart' ]
+      method: 'opacity'
+      inClass: 'Color'
+    changes:
+      - kind: 'rename'
+        newName: 'a'
+
+  - title: "Rename 'withOpacity'"
+    date: 2024-09-10
+    element:
+      uris: [ 'painting.dart' ]
+      method: 'withOpacity'
+      inClass: 'Color'
+    changes:
+      - kind: 'rename'
+        newName: 'withValues'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addParameter'
+        index: 0
+        name: 'alpha'
+        style: optional_named
+        argumentValue:
+          expression: '{% opacity %}'
+          requiredIf: "opacity != ''"
+    variables:
+      opacity:
+        kind: 'fragment'
+        value: 'arguments[0]'
 # Before adding a new fix: read instructions at the top of this file.

@@ -8,7 +8,7 @@
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",
   "todayLabel": "ਅੱਜ",
-  "alertDialogLabel": "ਸੁਚੇਤਨਾ",
+  "alertDialogLabel": "ਅਲਰਟ",
   "timerPickerHourLabelOne": "ਘੰਟਾ",
   "timerPickerHourLabelOther": "ਘੰਟੇ",
   "timerPickerMinuteLabelOne": "ਮਿੰ.",
@@ -27,5 +27,5 @@
   "lookUpButtonLabel": "ਖੋਜੋ",
   "searchWebButtonLabel": "ਵੈੱਬ 'ਤੇ ਖੋਜੋ",
   "shareButtonLabel": "ਸਾਂਝਾ ਕਰੋ...",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "ਕਲੀਅਰ ਕਰੋ"
 }

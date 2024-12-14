@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'dart:async';
 import 'dart:ui';
 
@@ -37,7 +41,7 @@ enum DeviceOrientation {
   /// clockwise from its boot orientation.
   portraitUp,
 
-  /// The orientation that is 90 degrees clockwise from [portraitUp].
+  /// The orientation that is 90 degrees counterclockwise from [portraitUp].
   ///
   /// If the device shows its boot logo in landscape, then the boot logo is
   /// shown in [landscapeLeft].
@@ -46,7 +50,7 @@ enum DeviceOrientation {
   /// The orientation that is 180 degrees from [portraitUp].
   portraitDown,
 
-  /// The orientation that is 90 degrees counterclockwise from [portraitUp].
+  /// The orientation that is 90 degrees clockwise from [portraitUp].
   landscapeRight,
 }
 
@@ -88,12 +92,21 @@ enum SystemUiOverlay {
 /// These modes mimic Android-specific display setups.
 ///
 /// Used by [SystemChrome.setEnabledSystemUIMode].
+///
+/// Flutter apps use [SystemUiMode.edgeToEdge] by default and setting any
+/// of the other [SystemUiMode]s will NOT work unless you perform the migration
+/// detailed in
+/// https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge.
 enum SystemUiMode {
   /// Fullscreen display with status and navigation bars presentable by tapping
   /// anywhere on the display.
   ///
-  /// Available starting at SDK 16 or Android J. Earlier versions of Android
-  /// will not be affected by this setting.
+  /// Available starting at Android SDK 4.1 (API 16). Earlier versions of Android
+  /// will not be affected by this setting. However, if your app targets Android
+  /// SDK 15 (API 35) or later (Flutter does this by default), then you must
+  /// migrate using the instructions in
+  /// https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge
+  /// to use this mode.
   ///
   /// For applications running on iOS, the status bar and home indicator will be
   /// hidden for a similar fullscreen experience.
@@ -110,8 +123,12 @@ enum SystemUiMode {
   /// Fullscreen display with status and navigation bars presentable through a
   /// swipe gesture at the edges of the display.
   ///
-  /// Available starting at SDK 19 or Android K. Earlier versions of Android
-  /// will not be affected by this setting.
+  /// Available starting at Android SDK 4.4 (API 19). Earlier versions of
+  /// Android will not be affected by this setting. However, if your app targets
+  /// Android SDK 15 (API 35) or later (Flutter does this by default), then you
+  /// must migrate using the instructions in
+  /// https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge
+  /// to use this mode.
   ///
   /// For applications running on iOS, the status bar and home indicator will be
   /// hidden for a similar fullscreen experience.
@@ -129,8 +146,12 @@ enum SystemUiMode {
   /// Fullscreen display with status and navigation bars presentable through a
   /// swipe gesture at the edges of the display.
   ///
-  /// Available starting at SDK 19 or Android K. Earlier versions of Android
-  /// will not be affected by this setting.
+  /// Available starting at Android SDK 4.4 (API 19). Earlier versions of
+  /// Android will not be affected by this setting. However, if your app targets
+  /// Android SDK 15 (API 35) or later (Flutter does this by default), then you
+  /// must migrate using the instructions in
+  /// https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge
+  /// to use this mode.
   ///
   /// For applications running on iOS, the status bar and home indicator will be
   /// hidden for a similar fullscreen experience.
@@ -147,8 +168,12 @@ enum SystemUiMode {
   /// Fullscreen display with status and navigation elements rendered over the
   /// application.
   ///
-  /// Available starting at SDK 29 or Android 10. Earlier versions of Android
+  /// Available starting at Android SDK 10 (API 29). Earlier versions of Android
   /// will not be affected by this setting.
+  ///
+  /// If your app targets Android SDK 15 (API 35) or later (Flutter does this by
+  /// default), then this mode is used by default on Android. This mode is also
+  /// used by default on iOS.
   ///
   /// For applications running on iOS, the status bar and home indicator will be
   /// visible.
@@ -177,6 +202,11 @@ enum SystemUiMode {
   ///
   /// Omitting both overlays will result in the same configuration as
   /// [SystemUiMode.leanBack].
+  ///
+  /// If your app targets Android SDK 15 (API 35) or later, then you must
+  /// migrate using the instructions in
+  /// https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge
+  /// to use this mode.
   manual,
 }
 
@@ -184,7 +214,7 @@ enum SystemUiMode {
 ///
 /// Used by [AppBar.systemOverlayStyle] for declaratively setting the style of
 /// the system overlays, and by [SystemChrome.setSystemUIOverlayStyle] for
-/// imperatively setting the style of the systeme overlays.
+/// imperatively setting the style of the system overlays.
 @immutable
 class SystemUiOverlayStyle {
   /// Creates a new [SystemUiOverlayStyle].
@@ -498,6 +528,12 @@ abstract final class SystemChrome {
   /// is true, the application is not fullscreen. See
   /// [SystemChrome.setSystemUIChangeCallback] to respond to these changes in a
   /// fullscreen application.
+  ///
+  /// If your app targets Android SDK 15 (API 35) or later (Flutter does this by
+  /// default), then your Flutter app uses [SystemUiMode.edgeToEdge] by default
+  /// on Android and setting any of the other [SystemUiMode]s will NOT work
+  /// unless you perform the migration detailed in
+  /// https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge.
   static Future<void> setEnabledSystemUIMode(SystemUiMode mode, { List<SystemUiOverlay>? overlays }) async {
     if (mode != SystemUiMode.manual) {
       await SystemChannels.platform.invokeMethod<void>(
@@ -635,6 +671,17 @@ abstract final class SystemChrome {
       }
       _pendingStyle = null;
     });
+  }
+
+  /// Called by the binding during a transition to a new app lifecycle state.
+  static void handleAppLifecycleStateChanged(AppLifecycleState state) {
+    // When the app is detached, clear the record of the style sent to the host
+    // so that it will be sent again when the app is reattached.
+    if (state == AppLifecycleState.detached) {
+      scheduleMicrotask(() {
+        _latestStyle = null;
+      });
+    }
   }
 
   static SystemUiOverlayStyle? _pendingStyle;

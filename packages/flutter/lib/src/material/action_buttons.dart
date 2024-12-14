@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/services.dart';
+///
+/// @docImport 'app_bar.dart';
+/// @docImport 'drawer.dart';
+/// @docImport 'material.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -14,40 +21,20 @@ import 'material_localizations.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
-abstract class _ActionButton extends StatelessWidget {
+abstract class _ActionButton extends IconButton {
   /// Creates a Material Design icon button.
   const _ActionButton({
     super.key,
-    this.color,
-    required this.icon,
-    required this.onPressed,
-    this.style,
+    super.color,
+    super.style,
+    super.onPressed,
+    required super.icon,
+    this.standardComponent,
   });
 
-  /// The icon to display inside the button.
-  final Widget icon;
-
-  /// The callback that is called when the button is tapped
-  /// or otherwise activated.
-  ///
-  /// If this is set to null, the button will do a default action
-  /// when it is tapped or activated.
-  final VoidCallback? onPressed;
-
-  /// The color to use for the icon.
-  ///
-  /// Defaults to the [IconThemeData.color] specified in the ambient [IconTheme],
-  /// which usually matches the ambient [Theme]'s [ThemeData.iconTheme].
-  final Color? color;
-
-  /// Customizes this icon button's appearance.
-  ///
-  /// The [style] is only used for Material 3 [IconButton]s. If [ThemeData.useMaterial3]
-  /// is set to true, [style] is preferred for icon button customization, and any
-  /// parameters defined in [style] will override the same parameters in [IconButton].
-  ///
-  /// Null by default.
-  final ButtonStyle? style;
+  /// An enum value to use to identify this button as a type of
+  /// [StandardComponentType].
+  final StandardComponentType? standardComponent;
 
   /// This returns the appropriate tooltip text for this action button.
   String _getTooltip(BuildContext context);
@@ -60,6 +47,7 @@ abstract class _ActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     return IconButton(
+      key: standardComponent?.key,
       icon: icon,
       style: style,
       color: color,
@@ -179,7 +167,7 @@ class BackButtonIcon extends StatelessWidget {
 /// will override [color] for states where [ButtonStyle.foregroundColor] resolves to non-null.
 ///
 /// When deciding to display a [BackButton], consider using
-/// `ModalRoute.of(context)?.canPop` to check whether the current route can be
+/// `ModalRoute.canPopOf(context)` to check whether the current route can be
 /// popped. If that value is false (e.g., because the current route is the
 /// initial route), the [BackButton] will not have any effect when pressed,
 /// which could frustrate the user.
@@ -205,7 +193,10 @@ class BackButton extends _ActionButton {
     super.color,
     super.style,
     super.onPressed,
-  }) : super(icon: const BackButtonIcon());
+  }) : super(
+    icon: const BackButtonIcon(),
+    standardComponent: StandardComponentType.backButton,
+  );
 
   @override
   void _onPressedCallback(BuildContext context) => Navigator.maybePop(context);
@@ -274,7 +265,10 @@ class CloseButtonIcon extends StatelessWidget {
 class CloseButton extends _ActionButton {
   /// Creates a Material Design close icon button.
   const CloseButton({ super.key, super.color, super.onPressed, super.style })
-      : super(icon: const CloseButtonIcon());
+      : super(
+          icon: const CloseButtonIcon(),
+          standardComponent: StandardComponentType.closeButton,
+        );
 
   @override
   void _onPressedCallback(BuildContext context) => Navigator.maybePop(context);
@@ -337,9 +331,13 @@ class DrawerButton extends _ActionButton {
   /// Creates a Material Design drawer icon button.
   const DrawerButton({
     super.key,
+    super.color,
     super.style,
     super.onPressed,
-  }) : super(icon: const DrawerButtonIcon());
+  }) : super(
+        icon: const DrawerButtonIcon(),
+        standardComponent: StandardComponentType.drawerButton,
+      );
 
   @override
   void _onPressedCallback(BuildContext context) => Scaffold.of(context).openDrawer();
@@ -402,6 +400,7 @@ class EndDrawerButton extends _ActionButton {
   /// Creates a Material Design end drawer icon button.
   const EndDrawerButton({
     super.key,
+    super.color,
     super.style,
     super.onPressed,
   }) : super(icon: const EndDrawerButtonIcon());

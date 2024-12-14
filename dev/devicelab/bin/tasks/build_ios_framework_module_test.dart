@@ -87,8 +87,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
   const String outputDirectoryName = 'flutter-frameworks';
 
   await inDirectory(projectDir, () async {
-    final StringBuffer outputError = StringBuffer();
-    await evalFlutter(
+    await flutter(
       'build',
       options: <String>[
         'ios-framework',
@@ -97,11 +96,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
         '--obfuscate',
         '--split-debug-info=symbols',
       ],
-      stderr: outputError,
     );
-    if (!outputError.toString().contains('Bitcode support has been deprecated.')) {
-      throw TaskResult.failure('Missing bitcode deprecation warning');
-    }
   });
 
   final String outputPath = path.join(projectDir.path, outputDirectoryName);
@@ -156,7 +151,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
 
   section('Check debug build has no Dart AOT');
 
-  final String aotSymbols = await _dylibSymbols(debugAppFrameworkPath);
+  final String aotSymbols = await dumpSymbolTable(debugAppFrameworkPath);
 
   if (aotSymbols.contains('architecture') ||
       aotSymbols.contains('_kDartVmSnapshot')) {
@@ -177,7 +172,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
 
     await _checkDylib(appFrameworkPath);
 
-    final String aotSymbols = await _dylibSymbols(appFrameworkPath);
+    final String aotSymbols = await dumpSymbolTable(appFrameworkPath);
 
     if (!aotSymbols.contains('_kDartVmSnapshot')) {
       throw TaskResult.failure('$mode App.framework missing Dart AOT');
@@ -193,15 +188,25 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'vm_snapshot_data',
     ));
 
+    final String dsymPath = path.join(
+        outputPath,
+        mode,
+        'App.xcframework',
+        'ios-arm64',
+        'dSYMs'
+    );
+    checkDirectoryExists(dsymPath);
+
     final String appFrameworkDsymPath = path.join(
-      outputPath,
-      mode,
-      'App.xcframework',
-      'ios-arm64',
-      'dSYMs',
-      'App.framework.dSYM'
+        dsymPath,
+        'App.framework.dSYM'
     );
     checkDirectoryExists(appFrameworkDsymPath);
+
+    if (Directory(dsymPath).listSync().whereType<Directory>().length != 1) {
+      throw TaskResult.failure('App.framework/dSYMs should ONLY contain App.xcframework.dSYM');
+    }
+
     await _checkDsym(path.join(
       appFrameworkDsymPath,
       'Contents',
@@ -278,7 +283,6 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       throw TaskResult.failure('$pluginFrameworkPath does not link on Flutter');
     }
 
-    // TODO(jmagman): Remove ios-arm64_armv7 checks when CI is updated to Xcode 14.
     final String transitiveDependencyFrameworkPath = path.join(
       outputPath,
       mode,
@@ -288,23 +292,11 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'Reachability',
     );
 
-    final String armv7TransitiveDependencyFrameworkPath = path.join(
-      outputPath,
-      mode,
-      'Reachability.xcframework',
-      'ios-arm64_armv7',
-      'Reachability.framework',
-      'Reachability',
-    );
-
-    final bool transitiveDependencyExists = exists(File(transitiveDependencyFrameworkPath));
-    final bool armv7TransitiveDependencyExists = exists(File(armv7TransitiveDependencyFrameworkPath));
-    if (!transitiveDependencyExists && !armv7TransitiveDependencyExists) {
+    if (!exists(File(transitiveDependencyFrameworkPath))) {
       throw TaskResult.failure('Expected debug Flutter engine artifact binary to exist');
     }
 
-    if ((transitiveDependencyExists && await _linksOnFlutter(transitiveDependencyFrameworkPath)) ||
-        (armv7TransitiveDependencyExists && await _linksOnFlutter(armv7TransitiveDependencyFrameworkPath))) {
+    if (await _linksOnFlutter(transitiveDependencyFrameworkPath)) {
       throw TaskResult.failure(
           'Transitive dependency $transitiveDependencyFrameworkPath unexpectedly links on Flutter');
     }
@@ -580,7 +572,7 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
 
   section('Check debug build has no Dart AOT');
 
-  final String aotSymbols = await _dylibSymbols(debugAppFrameworkPath);
+  final String aotSymbols = await dumpSymbolTable(debugAppFrameworkPath);
 
   if (aotSymbols.contains('architecture') ||
       aotSymbols.contains('_kDartVmSnapshot')) {
@@ -601,7 +593,7 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
 
     await _checkDylib(appFrameworkPath);
 
-    final String aotSymbols = await _dylibSymbols(appFrameworkPath);
+    final String aotSymbols = await dumpSymbolTable(appFrameworkPath);
 
     if (!aotSymbols.contains('_kDartVmSnapshot')) {
       throw TaskResult.failure('$mode App.framework missing Dart AOT');
@@ -823,6 +815,41 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
     'GeneratedPluginRegistrant.swift',
   ));
 
+  section('Validate embed FlutterMacOS.framework with CocoaPods');
+
+  final File podspec = File(path.join(
+    cocoapodsOutputPath,
+    'Debug',
+    'FlutterMacOS.podspec',
+  ));
+
+  podspec.writeAsStringSync(
+    podspec.readAsStringSync().replaceFirst('null.null.0', '0.0.0'),
+  );
+
+  final Directory macosDirectory = Directory(path.join(projectDir.path, 'macos'));
+  final File podfile = File(path.join(macosDirectory.path, 'Podfile'));
+  final String currentPodfile = podfile.readAsStringSync();
+
+  // Temporarily test Add-to-App Cocoapods podspec for framework
+  podfile.writeAsStringSync('''
+target 'Runner' do
+  # Comment the next line if you don't want to use dynamic frameworks
+  use_frameworks!
+
+  pod 'FlutterMacOS', :podspec => '${podspec.path}'
+end
+''');
+  await inDirectory(macosDirectory, () async {
+    await eval('pod', <String>['install']);
+  });
+
+  // Change podfile back to original
+  podfile.writeAsStringSync(currentPodfile);
+  await inDirectory(macosDirectory, () async {
+    await eval('pod', <String>['install']);
+  });
+
   section('Build frameworks without plugins');
   await _testBuildFrameworksWithoutPlugins(projectDir, platform: 'macos');
 }
@@ -920,15 +947,6 @@ Future<void> _checkStatic(String pathToLibrary) async {
   if (!binaryFileType.contains('current ar archive random library')) {
     throw TaskResult.failure('$pathToLibrary is not a static library, found: $binaryFileType');
   }
-}
-
-Future<String> _dylibSymbols(String pathToDylib) {
-  return eval('nm', <String>[
-    '-g',
-    pathToDylib,
-    '-arch',
-    'arm64',
-  ]);
 }
 
 Future<bool> _linksOnFlutter(String pathToBinary) async {

@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/semantics.dart';
+///
+/// @docImport 'refresh_indicator.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
@@ -191,13 +196,10 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
         return;
       }
 
-      final double left;
-      switch (textDirection) {
-        case TextDirection.rtl:
-          left = size.width - width - x;
-        case TextDirection.ltr:
-          left = x;
-      }
+      final double left = switch (textDirection) {
+        TextDirection.rtl => size.width - width - x,
+        TextDirection.ltr => x,
+      };
 
       final Rect rect = Offset(left, 0.0) & Size(width, size.height);
       if (indicatorBorderRadius != BorderRadius.zero) {
@@ -569,11 +571,11 @@ class CircularProgressIndicator extends ProgressIndicator {
   }) : _indicatorType = _ActivityIndicatorType.material;
 
   /// Creates an adaptive progress indicator that is a
-  /// [CupertinoActivityIndicator] in iOS and [CircularProgressIndicator] in
-  /// material theme/non-iOS.
+  /// [CupertinoActivityIndicator] in [TargetPlatform.iOS] & [TargetPlatform.macOS] and [CircularProgressIndicator] in
+  /// material theme/non-Apple platforms.
   ///
   /// The [value], [valueColor], [strokeWidth], [semanticsLabel], and
-  /// [semanticsValue] will be ignored in iOS.
+  /// [semanticsValue] will be ignored in iOS & macOS.
   ///
   /// {@macro flutter.material.ProgressIndicator.ProgressIndicator}
   const CircularProgressIndicator.adaptive({
@@ -705,7 +707,18 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
 
   Widget _buildCupertinoIndicator(BuildContext context) {
     final Color? tickColor = widget.backgroundColor;
-    return CupertinoActivityIndicator(key: widget.key, color: tickColor);
+    final double? value = widget.value;
+    if (value == null) {
+      return CupertinoActivityIndicator(
+        key: widget.key,
+        color: tickColor
+      );
+    }
+    return CupertinoActivityIndicator.partiallyRevealed(
+      key: widget.key,
+      color: tickColor,
+      progress: value
+    );
   }
 
   Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
@@ -716,7 +729,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
 
     return widget._buildSemanticsWrapper(
       context: context,
-      child: Container(
+      child: ConstrainedBox(
         constraints: const BoxConstraints(
           minWidth: _kMinCircularProgressIndicatorSize,
           minHeight: _kMinCircularProgressIndicatorSize,
@@ -987,32 +1000,33 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
 
     return widget._buildSemanticsWrapper(
       context: context,
-      child: Container(
-        width: _indicatorSize,
-        height: _indicatorSize,
-        margin: widget.indicatorMargin,
-        child: Material(
-          type: MaterialType.circle,
-          color: backgroundColor,
-          elevation: widget.elevation,
-          child: Padding(
-            padding: widget.indicatorPadding,
-            child: Opacity(
-              opacity: opacity,
-              child: Transform.rotate(
-                angle: rotation,
-                child: CustomPaint(
-                  painter: _RefreshProgressIndicatorPainter(
-                    valueColor: valueColor,
-                    value: null, // Draw the indeterminate progress indicator.
-                    headValue: headValue,
-                    tailValue: tailValue,
-                    offsetValue: offsetValue,
-                    rotationValue: rotationValue,
-                    strokeWidth: widget.strokeWidth,
-                    strokeAlign: widget.strokeAlign,
-                    arrowheadScale: arrowheadScale,
-                    strokeCap: widget.strokeCap,
+      child: Padding(
+        padding: widget.indicatorMargin,
+        child: SizedBox.fromSize(
+          size: const Size.square(_indicatorSize),
+          child: Material(
+            type: MaterialType.circle,
+            color: backgroundColor,
+            elevation: widget.elevation,
+            child: Padding(
+              padding: widget.indicatorPadding,
+              child: Opacity(
+                opacity: opacity,
+                child: Transform.rotate(
+                  angle: rotation,
+                  child: CustomPaint(
+                    painter: _RefreshProgressIndicatorPainter(
+                      valueColor: valueColor,
+                      value: null, // Draw the indeterminate progress indicator.
+                      headValue: headValue,
+                      tailValue: tailValue,
+                      offsetValue: offsetValue,
+                      rotationValue: rotationValue,
+                      strokeWidth: widget.strokeWidth,
+                      strokeAlign: widget.strokeAlign,
+                      arrowheadScale: arrowheadScale,
+                      strokeCap: widget.strokeCap,
+                    ),
                   ),
                 ),
               ),
@@ -1066,6 +1080,9 @@ class _CircularProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
 
   @override
   Color get color => _colors.primary;
+
+  @override
+  Color get circularTrackColor => _colors.secondaryContainer;
 }
 
 class _LinearProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
@@ -1078,7 +1095,7 @@ class _LinearProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
   Color get color => _colors.primary;
 
   @override
-  Color get linearTrackColor => _colors.surfaceVariant;
+  Color get linearTrackColor => _colors.secondaryContainer;
 
   @override
   double get linearMinHeight => 4.0;

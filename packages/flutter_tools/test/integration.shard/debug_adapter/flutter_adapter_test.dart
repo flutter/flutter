@@ -74,7 +74,7 @@ void main() {
       );
     });
 
-    testWithoutContext('logs to client when sendLogsToClient=true', () async {
+    testWithoutContext('logs stdout to client when sendLogsToClient=true', () async {
       final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
 
@@ -104,6 +104,35 @@ void main() {
           startsWith('==> [Flutter] [{"id":1,"method":"app.stop"'),
           startsWith('<== [Flutter] [{"id":1,"result":true}]'),
         ]),
+      );
+    });
+
+    testWithoutContext('logs stderr to client when sendLogsToClient=true', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
+      // Capture all log events.
+      final Future<List<Event>> logEventsFuture = dap.client.events('dart.log').toList();
+
+      // Launch the app and wait for it to terminate (because of the error).
+      await Future.wait(<Future<void>>[
+        dap.client.event('terminated'),
+        dap.client.start(
+          launch: () => dap.client.launch(
+            cwd: project.dir.path,
+            noDebug: true,
+            toolArgs: <String>['--not-a-valid-flag'],
+            sendLogsToClient: true,
+          ),
+        ),
+      ], eagerError: true);
+
+      // Ensure logs contain the expected error message.
+      final List<Event> logEvents = await logEventsFuture;
+      final List<String> logMessages = logEvents.map((Event l) => (l.body! as Map<String, Object?>)['message']! as String).toList();
+      expect(
+        logMessages,
+        contains(startsWith('<== [Flutter] [stderr] Could not find an option named "not-a-valid-flag"')),
       );
     });
 
@@ -464,8 +493,11 @@ The relevant error-causing widget was:
       // Launch the app and wait for it to stop at an exception.
       late int originalThreadId, newThreadId;
       await Future.wait(<Future<void>>[
-        // Capture the thread ID of the stopped thread.
-        dap.client.stoppedEvents.first.then((StoppedEventBody event) => originalThreadId = event.threadId!),
+        // Capture the thread ID of thread when it stops on the exception
+        // (ignoring the stop on entry that occurs during thread start).
+        dap.client.stoppedEvents
+          .where((StoppedEventBody event) => event.reason == 'exception').first
+          .then((StoppedEventBody event) => originalThreadId = event.threadId!),
         dap.client.start(
           exceptionPauseMode: 'All', // Ensure we stop on all exceptions
           launch: () => dap.client.launch(
@@ -478,8 +510,11 @@ The relevant error-causing widget was:
       // Hot restart, ensuring it completes and capturing the ID of the new thread
       // to pause.
       await Future.wait(<Future<void>>[
-        // Capture the thread ID of the newly stopped thread.
-        dap.client.stoppedEvents.first.then((StoppedEventBody event) => newThreadId = event.threadId!),
+        // Capture the thread ID of the next stop on exception (ignoring any
+        // stop on exit/entry that occurs during thread start/exit).
+        dap.client.stoppedEvents
+            .where((StoppedEventBody event) => event.reason == 'exception').first
+            .then((StoppedEventBody event) => newThreadId = event.threadId!),
         dap.client.hotRestart(),
       ], eagerError: true);
 
@@ -577,6 +612,46 @@ The relevant error-causing widget was:
       ], eagerError: true);
 
       await dap.client.terminate();
+    });
+
+    group('can step', () {
+      test('into SDK sources mapped to local files when debugSdkLibraries=true', () async {
+        final BasicProject project = BasicProject();
+        await project.setUpIn(tempDir);
+
+        final String breakpointFilePath = globals.fs.path.join(project.dir.path, 'lib', 'main.dart');
+        final int breakpointLine = project.topLevelFunctionBreakpointLine;
+        final String expectedPrintLibraryPath = globals.fs.path.join('pkg', 'sky_engine', 'lib', 'core', 'print.dart');
+
+        // Launch the app and wait for it to print "topLevelFunction".
+        await Future.wait(<Future<void>>[
+          dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+          dap.client.start(
+            launch: () => dap.client.launch(
+              cwd: project.dir.path,
+              debugSdkLibraries: true,
+              toolArgs: <String>['-d', 'flutter-tester'],
+            ),
+          ),
+        ], eagerError: true);
+
+        // Add a breakpoint to the `print()` line and hit it.
+        unawaited(dap.client.setBreakpoint(breakpointFilePath, breakpointLine));
+        int stoppedThreadId = (await dap.client.stoppedEvents.firstWhere((StoppedEventBody e) => e.reason == 'breakpoint')).threadId!;
+
+        // Step into `print()` and wait for the next stop.
+        unawaited(dap.client.stepIn(stoppedThreadId));
+        stoppedThreadId = (await dap.client.stoppedEvents.first).threadId!;
+
+        // Fetch the top stack frame and ensure it's been mapped to a local file
+        // correctly.
+        final StackFrame topFrame = (await dap.client.getValidStack(stoppedThreadId, startFrame: 0, numFrames: 1)).stackFrames.single;
+        expect(topFrame.source!.name, 'dart:core/print.dart');
+        // We should have a resolved path ending with the path to the print library.
+        expect(topFrame.source!.path, endsWith(expectedPrintLibraryPath));
+
+        await dap.client.terminate();
+      });
     });
   });
 
@@ -691,7 +766,6 @@ The relevant error-causing widget was:
         // Trigger the detach.
         dap.client.terminate(),
       ]);
-
     });
   });
 }

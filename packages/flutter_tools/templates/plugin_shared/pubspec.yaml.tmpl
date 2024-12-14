@@ -13,17 +13,18 @@ dependencies:
 {{#web}}
   flutter_web_plugins:
     sdk: flutter
+  web: ^0.5.1
 {{/web}}
   plugin_platform_interface: ^2.0.2
 
 dev_dependencies:
 {{#withFfi}}
-  ffi: ^2.1.0
-  ffigen: ^9.0.1
+  ffi: ^2.1.3
+  ffigen: ^13.0.0
 {{/withFfi}}
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^5.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -49,7 +50,7 @@ flutter:
     # This FFI plugin project was generated without specifying any
     # platforms with the `--platform` argument. If you see the `some_platform` map below, remove it and
     # then add platforms following the instruction here:
-    # https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
+    # https://flutter.dev/to/pubspec-plugin-platforms
     # -------------------
       some_platform:
         ffiPlugin: true
@@ -83,7 +84,7 @@ flutter:
     # This plugin project was generated without specifying any
     # platforms with the `--platform` argument. If you see the `some_platform` map below, remove it and
     # then add platforms following the instruction here:
-    # https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
+    # https://flutter.dev/to/pubspec-plugin-platforms
     # -------------------
       some_platform:
         pluginClass: somePluginClass
@@ -123,10 +124,10 @@ flutter:
   #   - images/a_dot_ham.jpeg
   #
   # For details regarding assets in packages, see
-  # https://flutter.dev/assets-and-images/#from-packages
+  # https://flutter.dev/to/asset-from-package
   #
   # An image asset can refer to one or more resolution-specific "variants", see
-  # https://flutter.dev/assets-and-images/#resolution-aware
+  # https://flutter.dev/to/resolution-aware-images
 
   # To add custom fonts to your plugin package, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
@@ -146,4 +147,4 @@ flutter:
   #         weight: 700
   #
   # For details regarding fonts in packages, see
-  # https://flutter.dev/custom-fonts/#from-packages
+  # https://flutter.dev/to/font-from-package

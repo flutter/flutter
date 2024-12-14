@@ -52,7 +52,7 @@ void main() {
     final Platform platform = FakePlatform();
     final BufferLogger logger = BufferLogger.test();
     final List<FlutterCommand> commands = <FlutterCommand>[
-      BuildWindowsCommand(logger: BufferLogger.test()),
+      BuildWindowsCommand(logger: BufferLogger.test(), operatingSystemUtils: FakeOperatingSystemUtils()),
       BuildLinuxCommand(logger: BufferLogger.test(), operatingSystemUtils: FakeOperatingSystemUtils()),
       BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false),
       BuildWebCommand(fileSystem: fileSystem, logger: BufferLogger.test(), verboseHelp: false),
@@ -104,6 +104,7 @@ void main() {
       '',
       nullSafetyMode: NullSafetyMode.unsound,
       treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
     );
 
     final BufferLogger logger = BufferLogger.test();

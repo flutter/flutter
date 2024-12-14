@@ -85,14 +85,10 @@ Future<void> testWithNewIOSSimulator(
   final String? iosKey = decodeResult.keys
       .where((String key) => key.contains('iphoneos'))
       .firstOrNull;
-  final Object? iosDetails = decodeResult[iosKey];
-  String? runtimeBuildForSelectedXcode;
-  if (iosDetails != null && iosDetails is Map<String, Object?>) {
-    final Object? preferredBuild = iosDetails['preferredBuild'];
-    if (preferredBuild is String) {
-      runtimeBuildForSelectedXcode = preferredBuild;
-    }
-  }
+  final String? runtimeBuildForSelectedXcode = switch (decodeResult[iosKey]) {
+    {'preferredBuild': final String build} => build,
+    _ => null,
+  };
 
   String? iOSSimRuntime;
 
@@ -191,6 +187,13 @@ Future<bool> runXcodeTests({
     codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
     provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
   }
+  File? disabledSandboxEntitlementFile;
+  if (platformDirectory.endsWith('macos')) {
+    disabledSandboxEntitlementFile = _createDisabledSandboxEntitlementFile(
+      platformDirectory,
+      configuration,
+    );
+  }
   final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_xcresult.').path;
   final String resultBundlePath = path.join(resultBundleTemp, 'result');
   final int testResultExit = await exec(
@@ -214,6 +217,8 @@ Future<bool> runXcodeTests({
         'CODE_SIGN_STYLE=$codeSignStyle',
       if (provisioningProfile != null)
         'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
+      if (disabledSandboxEntitlementFile != null)
+        'CODE_SIGN_ENTITLEMENTS=${disabledSandboxEntitlementFile.path}',
     ],
     workingDirectory: platformDirectory,
     canFail: true,
@@ -246,4 +251,70 @@ Future<bool> runXcodeTests({
     return false;
   }
   return true;
+}
+
+/// Finds and copies macOS entitlements file. In the copy, disables sandboxing.
+/// If entitlements file is not found, returns null.
+///
+/// As of macOS 14, testing a macOS sandbox app may prompt the user to grant
+/// access to the app. To workaround this in CI, we create and use a entitlements
+/// file with sandboxing disabled. See
+/// https://developer.apple.com/documentation/security/app_sandbox/accessing_files_from_the_macos_app_sandbox.
+File? _createDisabledSandboxEntitlementFile(
+  String platformDirectory,
+  String configuration,
+) {
+  String entitlementDefaultFileName;
+  if (configuration == 'Release') {
+    entitlementDefaultFileName = 'Release';
+  } else {
+    entitlementDefaultFileName = 'DebugProfile';
+  }
+
+  final String entitlementFilePath = path.join(
+    platformDirectory,
+    'Runner',
+    '$entitlementDefaultFileName.entitlements',
+  );
+  final File entitlementFile = File(entitlementFilePath);
+
+  if (!entitlementFile.existsSync()) {
+    print('Unable to find entitlements file at ${entitlementFile.path}');
+    return null;
+  }
+
+  final String originalEntitlementFileContents =
+      entitlementFile.readAsStringSync();
+  final String tempEntitlementPath = Directory.systemTemp
+      .createTempSync('flutter_disable_sandbox_entitlement.')
+      .path;
+  final File disabledSandboxEntitlementFile = File(path.join(
+    tempEntitlementPath,
+    '${entitlementDefaultFileName}WithDisabledSandboxing.entitlements',
+  ));
+  disabledSandboxEntitlementFile.createSync(recursive: true);
+  disabledSandboxEntitlementFile.writeAsStringSync(
+    originalEntitlementFileContents.replaceAll(
+      RegExp(r'<key>com\.apple\.security\.app-sandbox<\/key>[\S\s]*?<true\/>'),
+      '''
+<key>com.apple.security.app-sandbox</key>
+	<false/>''',
+    ),
+  );
+
+  return disabledSandboxEntitlementFile;
+}
+
+/// Returns global (external) symbol table entries, delimited by new lines.
+Future<String> dumpSymbolTable(String filePath) {
+  return eval(
+    'nm',
+    <String>[
+      '--extern-only',
+      '--just-symbol-name',
+      filePath,
+      '-arch',
+      'arm64',
+    ],
+  );
 }

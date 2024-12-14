@@ -2,22 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import 'utils/leaking_classes.dart';
+import 'utils/memory_leak_tests.dart';
 
-late final String _test1TrackingOnNoLeaks;
-late final String _test2TrackingOffLeaks;
-late final String _test3TrackingOnLeaks;
-late final String _test4TrackingOnWithCreationStackTrace;
-late final String _test5TrackingOnWithDisposalStackTrace;
-late final String _test6TrackingOnNoLeaks;
-late final String _test7TrackingOnNoLeaks;
-late final String _test8TrackingOnNotDisposed;
+class _TestExecution {
+  _TestExecution(
+      {required this.settings, required this.settingName, required this.test});
 
+<<<<<<< HEAD
 void main() {
   LeakTesting.enable();
   LeakTesting.collectedLeaksReporter = (Leaks leaks) => verifyLeaks(leaks);
@@ -76,127 +71,55 @@ void main() {
   testWidgets(_test6TrackingOnNoLeaks = 'test6, tracking-on, no leaks', (_) async {
     LeakTrackedClass().dispose();
   });
+=======
+  final String settingName;
+  final LeakTesting settings;
+  final LeakTestCase test;
+>>>>>>> 8495dee1fd4aacbe9de707e7581203232f591b2f
 
-  testWidgets(_test7TrackingOnNoLeaks = 'test7, tracking-on, tear down, no leaks', (_) async {
-    final LeakTrackedClass myClass = LeakTrackedClass();
-    addTearDown(myClass.dispose);
-  });
-
-  testWidgets(_test8TrackingOnNotDisposed = 'test8, tracking-on, not disposed leak', (_) async {
-    expect(LeakTracking.isStarted, true);
-    expect(LeakTracking.phase.name, _test8TrackingOnNotDisposed);
-    expect(LeakTracking.phase.ignoreLeaks, false);
-    LeakTrackedClass();
-  });
+  String get name => '${test.name}, $settingName';
 }
 
-int _leakReporterInvocationCount = 0;
+final List<_TestExecution> _testExecutions = <_TestExecution>[];
 
-void verifyLeaks(Leaks leaks) {
-  _leakReporterInvocationCount += 1;
-  expect(_leakReporterInvocationCount, 1);
+void main() {
+  LeakTesting.collectedLeaksReporter = _verifyLeaks;
+  LeakTesting.enable();
 
-  try {
-    expect(leaks, isLeakFree);
-  } on TestFailure catch (e) {
-    expect(e.message, contains('https://github.com/dart-lang/leak_tracker'));
-
-    expect(e.message, isNot(contains(_test1TrackingOnNoLeaks)));
-    expect(e.message, isNot(contains(_test2TrackingOffLeaks)));
-    expect(e.message, contains('test: $_test3TrackingOnLeaks'));
-    expect(e.message, contains('test: $_test4TrackingOnWithCreationStackTrace'));
-    expect(e.message, contains('test: $_test5TrackingOnWithDisposalStackTrace'));
-    expect(e.message, isNot(contains(_test6TrackingOnNoLeaks)));
-    expect(e.message, isNot(contains(_test7TrackingOnNoLeaks)));
-    expect(e.message, contains('test: $_test8TrackingOnNotDisposed'));
-  }
-
-  _verifyLeaks(
-    leaks,
-    _test3TrackingOnLeaks,
-    notDisposed: 1,
-    notGCed: 1,
-    expectedContextKeys: <LeakType, List<String>>{
-      LeakType.notGCed: <String>[],
-      LeakType.notDisposed: <String>[],
-    },
-  );
-  _verifyLeaks(
-    leaks,
-    _test4TrackingOnWithCreationStackTrace,
-    notDisposed: 1,
-    notGCed: 1,
-    expectedContextKeys: <LeakType, List<String>>{
-      LeakType.notGCed: <String>['start'],
-      LeakType.notDisposed: <String>['start'],
-    },
-  );
-  _verifyLeaks(
-    leaks,
-    _test5TrackingOnWithDisposalStackTrace,
-    notDisposed: 1,
-    notGCed: 1,
-    expectedContextKeys: <LeakType, List<String>>{
-      LeakType.notGCed: <String>['disposal'],
-      LeakType.notDisposed: <String>[],
-    },
-  );
-  _verifyLeaks(
-    leaks,
-    _test8TrackingOnNotDisposed,
-    notDisposed: 1,
-    expectedContextKeys: <LeakType, List<String>>{},
-  );
-}
-
-/// Verifies [allLeaks] contain expected number of leaks for the test [testDescription].
-///
-/// [notDisposed] and [notGCed] set number for expected leaks by leak type.
-/// The method will fail if the leaks context does not contain [expectedContextKeys].
-void _verifyLeaks(
-  Leaks allLeaks,
-  String testDescription, {
-  int notDisposed = 0,
-  int notGCed = 0,
-  Map<LeakType, List<String>> expectedContextKeys = const <LeakType, List<String>>{},
-}) {
-  final Leaks testLeaks = Leaks(
-    allLeaks.byType.map(
-      (LeakType key, List<LeakReport> value) =>
-          MapEntry<LeakType, List<LeakReport>>(key, value.where((LeakReport leak) => leak.phase == testDescription).toList()),
-    ),
+  LeakTesting.settings = LeakTesting.settings
+      .withTrackedAll()
+      .withTracked(allNotDisposed: true, experimentalAllNotGCed: true)
+      .withIgnored(
+    createdByTestHelpers: true,
+    testHelperExceptions: <RegExp>[
+      RegExp(RegExp.escape(memoryLeakTestsFilePath()))
+    ],
   );
 
-  for (final LeakType type in expectedContextKeys.keys) {
-    final List<LeakReport> leaks = testLeaks.byType[type]!;
-    final List<String> expectedKeys = expectedContextKeys[type]!..sort();
-    for (final LeakReport leak in leaks) {
-      final List<String> actualKeys = leak.context?.keys.toList() ?? <String>[];
-      expect(actualKeys..sort(), equals(expectedKeys), reason: '$testDescription, $type');
+  for (final LeakTestCase test in memoryLeakTests) {
+    for (final MapEntry<String,
+            LeakTesting Function(LeakTesting settings)> settingsCase
+        in leakTestingSettingsCases.entries) {
+      final LeakTesting settings = settingsCase.value(LeakTesting.settings);
+      if (settings.leakDiagnosticConfig.collectRetainingPathForNotGCed) {
+        // Retaining path requires vm to be started, so skipping.
+        continue;
+      }
+      final _TestExecution execution = _TestExecution(
+          settingName: settingsCase.key, test: test, settings: settings);
+      _testExecutions.add(execution);
+      testWidgets(execution.name, experimentalLeakTesting: settings,
+          (WidgetTester tester) async {
+        await test.body((Widget widget, [Duration? duration]) => tester.pumpWidget(widget, duration: duration), tester.runAsync);
+      });
     }
   }
-
-  _verifyLeakList(
-    testLeaks.notDisposed,
-    notDisposed,
-    testDescription,
-  );
-  _verifyLeakList(
-    testLeaks.notGCed,
-    notGCed,
-    testDescription,
-  );
 }
 
-void _verifyLeakList(
-  List<LeakReport> list,
-  int expectedCount,
-  String testDescription,
-) {
-  expect(list.length, expectedCount, reason: testDescription);
-
-  for (final LeakReport leak in list) {
-    expect(leak.trackedClass, contains(LeakTrackedClass.library));
-    expect(leak.trackedClass, contains('$LeakTrackedClass'));
+void _verifyLeaks(Leaks leaks) {
+  for (final _TestExecution execution in _testExecutions) {
+    final Leaks testLeaks = leaks.byPhase[execution.name] ?? Leaks.empty();
+    execution.test.verifyLeaks(testLeaks, execution.settings,
+        testDescription: execution.name);
   }
 }

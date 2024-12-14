@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'package:meta/meta.dart';
 
 import 'basic_types.dart';
@@ -673,16 +676,12 @@ class FlutterErrorDetails with Diagnosticable {
     if (exception is num) {
       properties.add(ErrorDescription('The number $exception was $verb.'));
     } else {
-      final DiagnosticsNode errorName;
-      if (exception is AssertionError) {
-        errorName = ErrorDescription('assertion');
-      } else if (exception is String) {
-        errorName = ErrorDescription('message');
-      } else if (exception is Error || exception is Exception) {
-        errorName = ErrorDescription('${exception.runtimeType}');
-      } else {
-        errorName = ErrorDescription('${exception.runtimeType} object');
-      }
+      final DiagnosticsNode errorName = ErrorDescription(switch (exception) {
+        AssertionError()       => 'assertion',
+        String()               => 'message',
+        Error() || Exception() => '${exception.runtimeType}',
+        _                      => '${exception.runtimeType} object',
+      });
       properties.add(ErrorDescription('The following $errorName was $verb:'));
       if (diagnosticable != null) {
         diagnosticable.debugFillProperties(properties);
@@ -758,7 +757,7 @@ class FlutterErrorDetails with Diagnosticable {
 ///
 /// See also:
 ///
-///  * <https://flutter.dev/docs/testing/errors>, more information about error
+///  * <https://docs.flutter.dev/testing/errors>, more information about error
 ///    handling in Flutter.
 class FlutterError extends Error with DiagnosticableTreeMixin implements AssertionError {
   /// Create an error message from a string.
@@ -925,7 +924,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///
   /// See also:
   ///
-  ///  * <https://flutter.dev/docs/testing/errors>, more information about error
+  ///  * <https://docs.flutter.dev/testing/errors>, more information about error
   ///    handling in Flutter.
   static FlutterExceptionHandler? onError = presentError;
 

@@ -18,7 +18,6 @@ import '../exceptions.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
-import 'shader_compiler.dart';
 
 /// Copy the macOS framework to the correct copy dir by invoking 'rsync'.
 ///
@@ -52,15 +51,17 @@ abstract class UnpackMacOS extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'unpack_macos');
     }
+
+    // Copy Flutter framework.
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String basePath = environment.artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
-
     final ProcessResult result = environment.processManager.runSync(<String>[
       'rsync',
       '-av',
       '--delete',
       '--filter',
       '- .DS_Store/',
+      '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
       basePath,
       environment.outputDir.path,
     ]);
@@ -82,10 +83,16 @@ abstract class UnpackMacOS extends Target {
     if (!frameworkBinary.existsSync()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
+
     await _thinFramework(environment, frameworkBinaryPath);
   }
 
-  static const List<String> _copyDenylist = <String>['entitlements.txt', 'without_entitlements.txt'];
+  /// Files that should not be copied to build output directory if found during framework copy step.
+  static const List<String> _copyDenylist = <String>[
+    'entitlements.txt',
+    'without_entitlements.txt',
+    'unsigned_binaries.txt',
+  ];
 
   void _removeDenylistedFiles(Directory directory) {
     for (final FileSystemEntity entity in directory.listSync(recursive: true)) {
@@ -156,10 +163,51 @@ class ReleaseUnpackMacOS extends UnpackMacOS {
   String get name => 'release_unpack_macos';
 
   @override
-  List<Source> get inputs => <Source>[
-    ...super.inputs,
-    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.release),
+  List<Source> get outputs => super.outputs + const <Source>[
+    Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework.dSYM/Contents/Resources/DWARF/FlutterMacOS'),
   ];
+
+  @override
+  List<Source> get inputs => super.inputs + const <Source>[
+    Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.release),
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    await super.build(environment);
+
+    // Copy Flutter framework dSYM (debug symbol) bundle, if present.
+    final String? buildModeEnvironment = environment.defines[kBuildMode];
+    if (buildModeEnvironment == null) {
+      throw MissingDefineException(kBuildMode, 'unpack_macos');
+    }
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
+    final Directory frameworkDsym = environment.fileSystem.directory(
+      environment.artifacts.getArtifactPath(
+        Artifact.flutterMacOSFrameworkDsym,
+        platform: TargetPlatform.darwin,
+        mode: buildMode,
+      )
+    );
+    if (frameworkDsym.existsSync()) {
+      final ProcessResult result = await environment.processManager.run(<String>[
+        'rsync',
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+        frameworkDsym.path,
+        environment.outputDir.path,
+      ]);
+      if (result.exitCode != 0) {
+        throw Exception(
+          'Failed to copy framework dSYM (exit ${result.exitCode}:\n'
+          '${result.stdout}\n---\n${result.stderr}',
+        );
+      }
+    }
+  }
 }
 
 /// Unpack the profile prebuilt engine framework.
@@ -172,7 +220,7 @@ class ProfileUnpackMacOS extends UnpackMacOS {
   @override
   List<Source> get inputs => <Source>[
     ...super.inputs,
-    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.profile),
+    const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.profile),
   ];
 }
 
@@ -186,7 +234,7 @@ class DebugUnpackMacOS extends UnpackMacOS {
   @override
   List<Source> get inputs => <Source>[
     ...super.inputs,
-    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
+    const Source.artifact(Artifact.flutterMacOSXcframework, mode: BuildMode.debug),
   ];
 }
 
@@ -439,7 +487,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       environment,
       assetDirectory,
       targetPlatform: TargetPlatform.darwin,
-      shaderTarget: ShaderTarget.sksl,
+      buildMode: buildMode,
       flavor: environment.defines[kFlavor],
     );
     environment.depFileService.writeToFile(
@@ -455,22 +503,22 @@ abstract class MacOSBundleFlutterAssets extends Target {
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
-	<key>CFBundleExecutable</key>
-	<string>App</string>
-	<key>CFBundleIdentifier</key>
-	<string>io.flutter.flutter.app</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundleName</key>
-	<string>App</string>
-	<key>CFBundlePackageType</key>
-	<string>FMWK</string>
-	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
-	<key>CFBundleVersion</key>
-	<string>1.0</string>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>en</string>
+  <key>CFBundleExecutable</key>
+  <string>App</string>
+  <key>CFBundleIdentifier</key>
+  <string>io.flutter.flutter.app</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundleName</key>
+  <string>App</string>
+  <key>CFBundlePackageType</key>
+  <string>FMWK</string>
+  <key>CFBundleShortVersionString</key>
+  <string>1.0</string>
+  <key>CFBundleVersion</key>
+  <string>1.0</string>
 </dict>
 </plist>
 

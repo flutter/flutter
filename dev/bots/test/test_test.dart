@@ -9,7 +9,8 @@ import 'package:file/memory.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
-import '../test.dart';
+import '../suite_runners/run_flutter_packages_tests.dart';
+import '../utils.dart';
 import 'common.dart';
 
 /// Fails a test if the exit code of `result` is not the expected value. This
@@ -82,7 +83,7 @@ void main() {
     });
   });
 
-  group('flutter/pacakges version', () {
+  group('flutter/packages version', () {
     final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
     final fs.File packagesVersionFile = memoryFileSystem.file(path.join('bin','internal','flutter_packages.version'));
     const String kSampleHash = '592b5b27431689336fa4c721a099eedf787aeb56';
@@ -92,13 +93,13 @@ void main() {
 
     test('commit hash', () async {
       packagesVersionFile.writeAsStringSync(kSampleHash);
-      final String actualHash = await getFlutterPackagesVersion(fileSystem: memoryFileSystem, packagesVersionFile: packagesVersionFile.path);
+      final String actualHash = await getFlutterPackagesVersion(flutterRoot: flutterRoot, fileSystem: memoryFileSystem, packagesVersionFile: packagesVersionFile.path);
       expect(actualHash, kSampleHash);
     });
 
     test('commit hash with newlines', () async {
       packagesVersionFile.writeAsStringSync('\n$kSampleHash\n');
-      final String actualHash = await getFlutterPackagesVersion(fileSystem: memoryFileSystem, packagesVersionFile: packagesVersionFile.path);
+      final String actualHash = await getFlutterPackagesVersion(flutterRoot: flutterRoot, fileSystem: memoryFileSystem, packagesVersionFile: packagesVersionFile.path);
       expect(actualHash, kSampleHash);
     });
   });
@@ -128,13 +129,13 @@ void main() {
         <String, String>{'SHARD': kTestHarnessShardName, 'SUBSHARD': '1_3'},
       );
       expectExitCode(result, 0);
-      expect(result.stdout, contains('Selecting subshard 1 of 3 (tests 1-3 of 8)'));
+      expect(result.stdout, contains('Selecting subshard 1 of 3 (tests 1-3 of 9)'));
 
       result = await runScript(
         <String, String>{'SHARD': kTestHarnessShardName, 'SUBSHARD': '3_3'},
       );
       expectExitCode(result, 0);
-      expect(result.stdout, contains('Selecting subshard 3 of 3 (tests 7-8 of 8)'));
+      expect(result.stdout, contains('Selecting subshard 3 of 3 (tests 7-9 of 9)'));
     });
 
     test('exits with code 1 when SUBSHARD index greater than total', () async {

@@ -269,21 +269,21 @@ void main() {
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
-    expect(description[0], 'backgroundColor: Color(0x00000099)');
+    expect(description[0], 'backgroundColor: ${const Color(0x00000099)}');
     expect(description[1], 'elevation: 5.0');
     expect(description[2], 'unselectedLabelTextStyle: TextStyle(inherit: true, size: 7.0)');
     expect(description[3], 'selectedLabelTextStyle: TextStyle(inherit: true, size: 9.0)');
 
     // Ignore instance address for IconThemeData.
     expect(description[4].contains('unselectedIconTheme: IconThemeData'), isTrue);
-    expect(description[4].contains('(color: Color(0x00000097))'), isTrue);
+    expect(description[4].contains('(color: ${const Color(0x00000097)})'), isTrue);
     expect(description[5].contains('selectedIconTheme: IconThemeData'), isTrue);
-    expect(description[5].contains('(color: Color(0x00000098))'), isTrue);
+    expect(description[5].contains('(color: ${const Color(0x00000098)})'), isTrue);
 
     expect(description[6], 'groupAlignment: 1.0');
     expect(description[7], 'labelType: NavigationRailLabelType.selected');
     expect(description[8], 'useIndicator: true');
-    expect(description[9], 'indicatorColor: Color(0x00000096)');
+    expect(description[9], 'indicatorColor: ${const Color(0x00000096)}');
     expect(description[10], 'indicatorShape: CircleBorder(BorderSide(width: 0.0, style: none))');
   });
 }

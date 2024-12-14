@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'scroll_view.dart';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -319,19 +322,6 @@ class KeepAliveNotification extends Notification {
 /// consider using [AutomaticKeepAliveClientMixin], which uses a
 /// [KeepAliveHandle] internally.
 class KeepAliveHandle extends ChangeNotifier {
-  /// Trigger the listeners to indicate that the widget
-  /// no longer needs to be kept alive.
-  ///
-  /// This method does not call [dispose]. When the handle is not needed
-  /// anymore, it must be [dispose]d regardless of whether notifying listeners.
-  @Deprecated(
-    'Use dispose instead. '
-    'This feature was deprecated after v3.3.0-0.0.pre.',
-  )
-  void release() {
-    notifyListeners();
-  }
-
   @override
   void dispose() {
     notifyListeners();
@@ -366,7 +356,6 @@ mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
   }
 
   void _releaseKeepAlive() {
-    // Dispose and release do not imply each other.
     _keepAliveHandle!.dispose();
     _keepAliveHandle = null;
   }
@@ -414,6 +403,10 @@ mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
   Widget build(BuildContext context) {
     if (wantKeepAlive && _keepAliveHandle == null) {
       _ensureKeepAlive();
+      // Whenever wantKeepAlive's value changes (or might change), the
+      // subclass should call [updateKeepAlive].
+      // That will ensure that the keepalive is disabled (or enabled)
+      // without requiring a rebuild.
     }
     return const _NullWidget();
   }
