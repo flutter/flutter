@@ -291,6 +291,9 @@ abstract interface class ChipAttributes {
   ///
   /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
   MouseCursor? get mouseCursor;
+
+  /// the color of the splash shown when the chip is pressed.
+  Color? get splashColor;
 }
 
 /// An interface for Material Design chips that can be deleted.
@@ -614,9 +617,6 @@ abstract interface class TappableChipAttributes {
   /// Tooltip string to be used for the body area (where the label and avatar
   /// are) of the chip.
   String? get tooltip;
-
-  /// the color of the splash shown when the chip is pressed.
-  Color? get splashColor;
 }
 
 /// A helper class that overrides the default chip animation parameters.
@@ -721,6 +721,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.deleteIconBoxConstraints,
     this.chipAnimationStyle,
     this.mouseCursor,
+    this.splashColor,
   }) : assert(elevation == null || elevation >= 0.0);
 
   @override
@@ -775,6 +776,8 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final ChipAnimationStyle? chipAnimationStyle;
   @override
   final MouseCursor? mouseCursor;
+  @override
+  final Color? splashColor;
 
   @override
   Widget build(BuildContext context) {
@@ -807,6 +810,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       deleteIconBoxConstraints: deleteIconBoxConstraints,
       chipAnimationStyle: chipAnimationStyle,
       mouseCursor: mouseCursor,
+      splashColor: splashColor,
     );
   }
 }

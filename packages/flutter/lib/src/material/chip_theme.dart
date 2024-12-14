@@ -359,7 +359,8 @@ class ChipThemeData with Diagnosticable {
   /// Overrides the default for [TappableChipAttributes.splashColor],
   /// the color of the splash shown when the chip is pressed.
   ///
-  /// This property applies to all chip types.
+  /// This property applies to [ActionChip], [Chip], [ChoiceChip],
+  /// [FilterChip], [InputChip], [RawChip].
   final Color? splashColor;
 
   /// Overrides the default for [ChipAttributes.labelPadding],
