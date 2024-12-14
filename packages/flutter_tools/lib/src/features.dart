@@ -211,12 +211,15 @@ const Feature explicitPackageDependencies = Feature(
     '* https://flutter.dev/to/flutter-plugins-configuration.\n'
     '* https://flutter.dev/to/flutter-gen-deprecation.',
   master: FeatureChannelSetting(
+    enabledByDefault: true,
     available: true,
   ),
   beta: FeatureChannelSetting(
+    enabledByDefault: true,
     available: true,
   ),
   stable: FeatureChannelSetting(
+    enabledByDefault: true,
     available: true,
   ),
 );
