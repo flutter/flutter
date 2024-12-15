@@ -321,10 +321,6 @@ FlutterEngineResult FlutterEngineSendPlatformMessage(
     // Sends a null response.
     send_response(engine, message->channel, message->response_handle, nullptr,
                   0);
-  } else if (strcmp(message->channel, "test/standard-event") == 0) {
-    // Send a message so the shell can check the events sent.
-    send_message(engine, "test/events", message->message,
-                 message->message_size);
   } else if (strcmp(message->channel, "test/failure") == 0) {
     // Generates an internal error.
     return kInternalInconsistency;
