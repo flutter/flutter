@@ -1052,17 +1052,7 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
       includeSemantics: false,
       canRequestFocus: false,
       onFocusChange: _handleFocusChange,
-      child: useRootOverlay
-          ? OverlayPortal.targetsRootOverlay(
-              controller: _overlayController,
-              overlayChildBuilder: _buildOverlay,
-              child: child,
-            )
-          : OverlayPortal(
-              controller: _overlayController,
-              overlayChildBuilder: _buildOverlay,
-              child: child,
-            ),
+      child: child,
     );
   }
 
