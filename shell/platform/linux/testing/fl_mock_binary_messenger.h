@@ -33,6 +33,18 @@ typedef FlMethodResponse* (*FlMockBinaryMessengerMethodChannelHandler)(
     FlValue* args,
     gpointer user_data);
 
+typedef void (*FlMockBinaryMessengerEventChannelHandler)(
+    FlMockBinaryMessenger* messenger,
+    FlValue* event,
+    gpointer user_data);
+
+typedef void (*FlMockBinaryMessengerEventChannelErrorHandler)(
+    FlMockBinaryMessenger* messenger,
+    const gchar* code,
+    const gchar* message,
+    FlValue* details,
+    gpointer user_data);
+
 typedef void (*FlMockBinaryMessengerCallback)(FlMockBinaryMessenger* messenger,
                                               GBytes* response,
                                               gpointer user_data);
@@ -100,6 +112,28 @@ void fl_mock_binary_messenger_set_json_method_channel(
     FlMockBinaryMessenger* self,
     const gchar* channel,
     FlMockBinaryMessengerMethodChannelHandler handler,
+    gpointer user_data);
+
+void fl_mock_binary_messenger_set_event_channel(
+    FlMockBinaryMessenger* self,
+    const gchar* channel,
+    FlMethodCodec* codec,
+    FlMockBinaryMessengerEventChannelHandler handler,
+    FlMockBinaryMessengerEventChannelErrorHandler error_handler,
+    gpointer user_data);
+
+void fl_mock_binary_messenger_set_standard_event_channel(
+    FlMockBinaryMessenger* self,
+    const gchar* channel,
+    FlMockBinaryMessengerEventChannelHandler handler,
+    FlMockBinaryMessengerEventChannelErrorHandler error_handler,
+    gpointer user_data);
+
+void fl_mock_binary_messenger_set_json_event_channel(
+    FlMockBinaryMessenger* self,
+    const gchar* channel,
+    FlMockBinaryMessengerEventChannelHandler handler,
+    FlMockBinaryMessengerEventChannelErrorHandler error_handler,
     gpointer user_data);
 
 void fl_mock_binary_messenger_set_error_channel(FlMockBinaryMessenger* self,
