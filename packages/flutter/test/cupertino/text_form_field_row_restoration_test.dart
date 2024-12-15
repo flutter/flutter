@@ -52,7 +52,7 @@ void main() {
                   return Material(
                     child: CupertinoTextFormFieldRow(
                       key: formState,
-                      autovalidateMode: AutoValidateMode.onUserInteraction,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       restorationId: 'text_form_field',
                       initialValue: 'foo',
                       validator: errorText,
@@ -96,7 +96,7 @@ void main() {
     String? errorText(String? value) => '$value/error';
     late GlobalKey<FormFieldState<String>> formState;
 
-    Widget builder(AutoValidateMode mode) {
+    Widget builder(AutovalidateMode mode) {
       return CupertinoApp(
         restorationScopeId: 'app',
         home: MediaQuery(
@@ -125,11 +125,11 @@ void main() {
     }
 
     // Start off not autovalidating.
-    await tester.pumpWidget(builder(AutoValidateMode.disabled));
+    await tester.pumpWidget(builder(AutovalidateMode.disabled));
 
     Future<void> checkErrorText(String testValue) async {
       formState.currentState!.reset();
-      await tester.pumpWidget(builder(AutoValidateMode.disabled));
+      await tester.pumpWidget(builder(AutovalidateMode.disabled));
       await tester.enterText(find.byType(CupertinoTextFormFieldRow), testValue);
       await tester.pump();
 
@@ -152,7 +152,7 @@ void main() {
 
       // Try again with autovalidation. Should validate immediately.
       formState.currentState!.reset();
-      await tester.pumpWidget(builder(AutoValidateMode.always));
+      await tester.pumpWidget(builder(AutovalidateMode.always));
       await tester.enterText(find.byType(CupertinoTextFormFieldRow), testValue);
       await tester.pump();
 

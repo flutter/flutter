@@ -165,7 +165,7 @@ class TextFormField extends FormField<String> {
     InputCounterWidgetBuilder? buildCounter,
     ScrollPhysics? scrollPhysics,
     Iterable<String>? autofillHints,
-    AutoValidateMode? autovalidateMode,
+    AutovalidateMode? autovalidateMode,
     ScrollController? scrollController,
     super.restorationId,
     bool enableIMEPersonalizedLearning = true,
@@ -206,7 +206,7 @@ class TextFormField extends FormField<String> {
        super(
          initialValue: controller != null ? controller.text : (initialValue ?? ''),
          enabled: enabled ?? decoration?.enabled ?? true,
-         autovalidateMode: autovalidateMode ?? AutoValidateMode.disabled,
+         autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
          builder: (FormFieldState<String> field) {
            final _TextFormFieldState state = field as _TextFormFieldState;
            final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())

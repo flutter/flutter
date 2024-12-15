@@ -18,7 +18,7 @@ Finder _iconRichText(Key iconKey) {
 
 Widget buildFormFrame({
   Key? buttonKey,
-  AutoValidateMode autovalidateMode = AutoValidateMode.disabled,
+  AutovalidateMode autovalidateMode = AutovalidateMode.disabled,
   int elevation = 8,
   String? value = 'two',
   ValueChanged<String?>? onChanged,
@@ -466,7 +466,7 @@ void main() {
                   validateCalled++;
                   return currentValue == null ? 'Must select value' : null;
                 },
-                autovalidateMode: AutoValidateMode.always,
+                autovalidateMode: AutovalidateMode.always,
               ),
             ),
           );
@@ -1091,7 +1091,7 @@ void main() {
         home: Material(
           child: Center(
             child: DropdownButtonFormField<String>(
-              autovalidateMode: AutoValidateMode.always,
+              autovalidateMode: AutovalidateMode.always,
               items: menuItems.map((String value) {
                 return DropdownMenuItem<String>(
                   value: value,

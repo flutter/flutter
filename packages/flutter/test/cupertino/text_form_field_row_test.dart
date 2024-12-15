@@ -205,7 +205,7 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoTextFormFieldRow(
-            autovalidateMode: AutoValidateMode.always,
+            autovalidateMode: AutovalidateMode.always,
             validator: (String? value) {
               validateCalled++;
               return null;
@@ -229,7 +229,7 @@ void main() {
         home: Center(
           child: CupertinoTextFormFieldRow(
             enabled: true,
-            autovalidateMode: AutoValidateMode.always,
+            autovalidateMode: AutovalidateMode.always,
             validator: (String? value) {
               validateCalled += 1;
               return null;
@@ -399,7 +399,7 @@ void main() {
       CupertinoApp(
         home: CupertinoPageScaffold(
           child: CupertinoTextFormFieldRow(
-            autovalidateMode: AutoValidateMode.onUserInteraction,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             validator: (String? value) {
               validateCalled++;
               return null;
@@ -421,7 +421,7 @@ void main() {
         home: Center(
           child: CupertinoTextFormFieldRow(
             initialValue: 'Value',
-            autovalidateMode: AutoValidateMode.always,
+            autovalidateMode: AutovalidateMode.always,
             validator: (String? value) => 'Error',
           ),
         ),
@@ -443,7 +443,7 @@ void main() {
         home: Center(
           child: CupertinoTextFormFieldRow(
             controller: controller,
-            autovalidateMode: AutoValidateMode.onUserInteraction,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             validator: (String? value) => 'Error',
           ),
         ),

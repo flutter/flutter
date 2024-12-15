@@ -72,8 +72,8 @@ class Form extends StatefulWidget {
     )
     this.onWillPop,
     this.onChanged,
-    AutoValidateMode? autovalidateMode,
-  }) : autovalidateMode = autovalidateMode ?? AutoValidateMode.disabled,
+    AutovalidateMode? autovalidateMode,
+  }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled,
        assert(onPopInvokedWithResult == null || onPopInvoked == null, 'onPopInvoked is deprecated; use onPopInvokedWithResult'),
        assert(((onPopInvokedWithResult ?? onPopInvoked ?? canPop) == null) || onWillPop == null, 'onWillPop is deprecated; use canPop and/or onPopInvokedWithResult.');
 
@@ -209,7 +209,7 @@ class Form extends StatefulWidget {
   /// text.
   ///
   /// {@macro flutter.widgets.FormField.autovalidateMode}
-  final AutoValidateMode autovalidateMode;
+  final AutovalidateMode autovalidateMode;
 
   void _callPopInvoked(bool didPop, Object? result) {
     if (onPopInvokedWithResult != null) {
@@ -261,14 +261,14 @@ class FormState extends State<Form> {
   @override
   Widget build(BuildContext context) {
     switch (widget.autovalidateMode) {
-      case AutoValidateMode.always:
+      case AutovalidateMode.always:
         _validate();
-      case AutoValidateMode.onUserInteraction:
+      case AutovalidateMode.onUserInteraction:
         if (_hasInteractedByUser) {
           _validate();
         }
-      case AutoValidateMode.onUnfocus:
-      case AutoValidateMode.disabled:
+      case AutovalidateMode.onUnfocus:
+      case AutovalidateMode.disabled:
         break;
     }
 
@@ -351,7 +351,7 @@ class FormState extends State<Form> {
   bool _validate([Set<FormFieldState<Object?>>? invalidFields]) {
     bool hasError = false;
     String errorMessage = '';
-    final bool validateOnFocusChange = widget.autovalidateMode == AutoValidateMode.onUnfocus;
+    final bool validateOnFocusChange = widget.autovalidateMode == AutovalidateMode.onUnfocus;
 
     for (final FormFieldState<dynamic> field in _fields) {
       final bool hasFocus = field._focusNode.hasFocus;
@@ -455,9 +455,9 @@ class FormField<T> extends StatefulWidget {
     this.validator,
     this.initialValue,
     this.enabled = true,
-    AutoValidateMode? autovalidateMode,
+    AutovalidateMode? autovalidateMode,
     this.restorationId,
-  }) : autovalidateMode = autovalidateMode ?? AutoValidateMode.disabled;
+  }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
   /// An optional method to call with the final value when the form is saved via
   /// [FormState.save].
@@ -530,7 +530,7 @@ class FormField<T> extends StatefulWidget {
   ///
   /// Defaults to [AutovalidateMode.disabled].
   /// {@endtemplate}
-  final AutoValidateMode autovalidateMode;
+  final AutovalidateMode autovalidateMode;
 
   /// Restoration ID to save and restore the state of the form field.
   ///
@@ -701,16 +701,16 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
     switch (Form.maybeOf(context)?.widget.autovalidateMode) {
-      case AutoValidateMode.always:
+      case AutovalidateMode.always:
         WidgetsBinding.instance.addPostFrameCallback((_) {
           // If the form is already validated, don't validate again.
           if (widget.enabled && !hasError && !isValid) {
             validate();
           }
         });
-      case AutoValidateMode.onUnfocus:
-      case AutoValidateMode.onUserInteraction:
-      case AutoValidateMode.disabled:
+      case AutovalidateMode.onUnfocus:
+      case AutovalidateMode.onUserInteraction:
+      case AutovalidateMode.disabled:
       case null:
         break;
     }
@@ -729,22 +729,22 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   Widget build(BuildContext context) {
     if (widget.enabled) {
       switch (widget.autovalidateMode) {
-        case AutoValidateMode.always:
+        case AutovalidateMode.always:
           _validate();
-        case AutoValidateMode.onUserInteraction:
+        case AutovalidateMode.onUserInteraction:
           if (_hasInteractedByUser.value) {
             _validate();
           }
-        case AutoValidateMode.onUnfocus:
-        case AutoValidateMode.disabled:
+        case AutovalidateMode.onUnfocus:
+        case AutovalidateMode.disabled:
           break;
       }
     }
 
     Form.maybeOf(context)?._register(this);
 
-    if (Form.maybeOf(context)?.widget.autovalidateMode == AutoValidateMode.onUnfocus && widget.autovalidateMode != AutoValidateMode.always ||
-        widget.autovalidateMode == AutoValidateMode.onUnfocus) {
+    if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.onUnfocus && widget.autovalidateMode != AutovalidateMode.always ||
+        widget.autovalidateMode == AutovalidateMode.onUnfocus) {
       return Focus(
         canRequestFocus: false,
         skipTraversal: true,
@@ -765,7 +765,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 }
 
 /// Used to configure the auto validation of [FormField] and [Form] widgets.
-enum AutoValidateMode {
+enum AutovalidateMode {
   /// No auto validation will occur.
   disabled,
 

@@ -89,7 +89,7 @@ void main() {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String? errorText(String? value) => '${value ?? ''}/error';
 
-    Widget builder(AutoValidateMode autovalidateMode) {
+    Widget builder(AutovalidateMode autovalidateMode) {
       return MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(),
@@ -112,11 +112,11 @@ void main() {
     }
 
     // Start off not autovalidating.
-    await tester.pumpWidget(builder(AutoValidateMode.disabled));
+    await tester.pumpWidget(builder(AutovalidateMode.disabled));
 
     Future<void> checkErrorText(String testValue) async {
       formKey.currentState!.reset();
-      await tester.pumpWidget(builder(AutoValidateMode.disabled));
+      await tester.pumpWidget(builder(AutovalidateMode.disabled));
       await tester.enterText(find.byType(TextFormField), testValue);
       await tester.pump();
 
@@ -128,7 +128,7 @@ void main() {
 
       // Try again with autovalidation. Should validate immediately.
       formKey.currentState!.reset();
-      await tester.pumpWidget(builder(AutoValidateMode.always));
+      await tester.pumpWidget(builder(AutovalidateMode.always));
       await tester.enterText(find.byType(TextFormField), testValue);
       await tester.pump();
 
@@ -207,13 +207,13 @@ void main() {
                         key: fieldKey1,
                         initialValue: validString,
                         validator: validator,
-                        autovalidateMode: AutoValidateMode.always,
+                        autovalidateMode: AutovalidateMode.always,
                       ),
                       TextFormField(
                         key: fieldKey2,
                         initialValue: validString,
                         validator: validator,
-                        autovalidateMode: AutoValidateMode.always,
+                        autovalidateMode: AutovalidateMode.always,
                       ),
                     ],
                   ),
@@ -254,13 +254,13 @@ void main() {
                           key: fieldKey1,
                           initialValue: validString,
                           validator: validator,
-                          autovalidateMode: AutoValidateMode.disabled,
+                          autovalidateMode: AutovalidateMode.disabled,
                         ),
                         TextFormField(
                           key: fieldKey2,
                           initialValue: '',
                           validator: validator,
-                          autovalidateMode: AutoValidateMode.disabled,
+                          autovalidateMode: AutovalidateMode.disabled,
                         ),
                       ],
                     ),
@@ -307,19 +307,19 @@ void main() {
                           key: validFieldsKey,
                           initialValue: validString,
                           validator: validator,
-                          autovalidateMode: AutoValidateMode.disabled,
+                          autovalidateMode: AutovalidateMode.disabled,
                         ),
                         TextFormField(
                           key: invalidFieldsKey,
                           initialValue: invalidString,
                           validator: validator,
-                          autovalidateMode: AutoValidateMode.disabled,
+                          autovalidateMode: AutovalidateMode.disabled,
                         ),
                         TextFormField(
                           key: invalidFieldsKey,
                           initialValue: invalidString,
                           validator: validator,
-                          autovalidateMode: AutoValidateMode.disabled,
+                          autovalidateMode: AutovalidateMode.disabled,
                         ),
                       ],
                     ),
@@ -363,12 +363,12 @@ void main() {
                         TextFormField(
                           initialValue: validString,
                           validator: validator,
-                          autovalidateMode: AutoValidateMode.disabled,
+                          autovalidateMode: AutovalidateMode.disabled,
                         ),
                         TextFormField(
                           initialValue: '',
                           validator: validator,
-                          autovalidateMode: AutoValidateMode.disabled,
+                          autovalidateMode: AutovalidateMode.disabled,
                         ),
                       ],
                     ),
@@ -411,7 +411,7 @@ void main() {
               child: Material(
                 child: Form(
                   key: formKey,
-                  autovalidateMode: AutoValidateMode.always,
+                  autovalidateMode: AutovalidateMode.always,
                   child: ListView(
                     children: <Widget>[
                       TextFormField(
@@ -762,7 +762,7 @@ void main() {
               child: Material(
                 child: FormField<String>(
                   initialValue: 'foo',
-                  autovalidateMode: AutoValidateMode.onUserInteraction,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   builder: (FormFieldState<String> state) {
                     formFieldState = state;
                     return Container();
@@ -798,7 +798,7 @@ void main() {
               child: Material(
                 child: FormField<String>(
                   initialValue: 'foo',
-                  autovalidateMode: AutoValidateMode.always,
+                  autovalidateMode: AutovalidateMode.always,
                   builder: (FormFieldState<String> state) {
                     formFieldState = state;
                     return Container();
@@ -827,7 +827,7 @@ void main() {
           child: Center(
             child: Material(
               child: Form(
-                autovalidateMode: AutoValidateMode.onUserInteraction,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: Column(
                   children: <Widget>[
                     TextFormField(
@@ -880,7 +880,7 @@ void main() {
           child: Center(
             child: Material(
               child: Form(
-                autovalidateMode: AutoValidateMode.always,
+                autovalidateMode: AutovalidateMode.always,
                 child: TextFormField(
                   validator: errorText,
                 ),
@@ -914,7 +914,7 @@ void main() {
             child: Center(
               child: Form(
                 key: formState,
-                autovalidateMode: AutoValidateMode.onUserInteraction,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: Material(
                   child: TextFormField(
                     initialValue: 'foo',
@@ -1071,7 +1071,7 @@ void main() {
   testWidgets('forceErrorText forces an error state when first init', (WidgetTester tester) async {
     const String forceErrorText = 'Forcing error.';
 
-    Widget builder(AutoValidateMode autovalidateMode) {
+    Widget builder(AutovalidateMode autovalidateMode) {
       return MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(),
@@ -1092,7 +1092,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(builder(AutoValidateMode.disabled));
+    await tester.pumpWidget(builder(AutovalidateMode.disabled));
     expect(find.text(forceErrorText), findsOne);
   });
 
@@ -1136,7 +1136,7 @@ void main() {
   testWidgets('forceErrorText forces an error state only after setting it to a non-null value', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     const String errorText = 'Forcing Error Text';
-    Widget builder(AutoValidateMode autovalidateMode, String? forceErrorText) {
+    Widget builder(AutovalidateMode autovalidateMode, String? forceErrorText) {
       return MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(),
@@ -1157,11 +1157,11 @@ void main() {
         ),
       );
     }
-    await tester.pumpWidget(builder(AutoValidateMode.disabled, null));
+    await tester.pumpWidget(builder(AutovalidateMode.disabled, null));
     final bool isValid = formKey.currentState!.validate();
     expect(isValid, true);
     expect(find.text(errorText), findsNothing);
-    await tester.pumpWidget(builder(AutoValidateMode.disabled, errorText));
+    await tester.pumpWidget(builder(AutovalidateMode.disabled, errorText));
     expect(find.text(errorText), findsOne);
   });
 
@@ -1171,7 +1171,7 @@ void main() {
     const String validatorErrorText = 'this error should not appear as we override it with forceErrorText';
     bool didCallValidator = false;
 
-    Widget builder(AutoValidateMode autovalidateMode) {
+    Widget builder(AutovalidateMode autovalidateMode) {
       return MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(),
@@ -1198,7 +1198,7 @@ void main() {
     }
 
     // Start off not autovalidating.
-    await tester.pumpWidget(builder(AutoValidateMode.disabled));
+    await tester.pumpWidget(builder(AutovalidateMode.disabled));
     expect(find.text(forceErrorText), findsOne);
     expect(find.text(validatorErrorText), findsNothing);
 
@@ -1216,7 +1216,7 @@ void main() {
     expect(find.text(validatorErrorText), findsNothing);
 
     // Try again with autovalidation. Should validate immediately.
-    await tester.pumpWidget(builder(AutoValidateMode.always));
+    await tester.pumpWidget(builder(AutovalidateMode.always));
 
     expect(didCallValidator, isFalse);
     expect(find.text(forceErrorText), findsOne);
@@ -1303,7 +1303,7 @@ void main() {
             child: Center(
               child: Form(
                 key: formKey,
-                autovalidateMode: AutoValidateMode.onUnfocus,
+                autovalidateMode: AutovalidateMode.onUnfocus,
                 child: Material(
                   child: Column(
                     children: <Widget>[
@@ -1369,17 +1369,17 @@ void main() {
             child: Center(
               child: Form(
                 key: formKey,
-                autovalidateMode: AutoValidateMode.onUnfocus,
+                autovalidateMode: AutovalidateMode.onUnfocus,
                 child: Material(
                   child: Column(
                     children: <Widget>[
                       TextFormField(
-                        autovalidateMode: AutoValidateMode.always,
+                        autovalidateMode: AutovalidateMode.always,
                         initialValue: 'foo',
                         validator: errorText,
                       ),
                       TextFormField(
-                        autovalidateMode: AutoValidateMode.disabled,
+                        autovalidateMode: AutovalidateMode.disabled,
                         initialValue: 'bar',
                         validator: errorText,
                       ),
@@ -1474,7 +1474,7 @@ void main() {
         theme: ThemeData(),
         home: Center(
           child: Form(
-            autovalidateMode: AutoValidateMode.always,
+            autovalidateMode: AutovalidateMode.always,
             child: Material(
               child: Column(
                 children: <Widget>[
@@ -1516,7 +1516,7 @@ void main() {
         home: Center(
           child: Form(
             key: formKey,
-            autovalidateMode: AutoValidateMode.onUnfocus,
+            autovalidateMode: AutovalidateMode.onUnfocus,
             child: Material(
               child: Column(
                 children: <Widget>[
