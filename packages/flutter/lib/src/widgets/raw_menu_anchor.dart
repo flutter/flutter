@@ -1022,25 +1022,27 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
       ),
     );
 
-    if (widget.hasExternalFocusScope) {
-      return useRootOverlay
-          ? OverlayPortal.targetsRootOverlay(
-              controller: _overlayController,
-              overlayChildBuilder: _buildOverlay,
-              child: child,
-            )
-          : OverlayPortal(
-              controller: _overlayController,
-              overlayChildBuilder: _buildOverlay,
-              child: child,
-            );
-    }
-
-    if (_isRootAnchor) {
+    if (!widget.hasExternalFocusScope && _isRootAnchor) {
       child = Actions(
         actions: _isOpen ? _rootOverlayAnchorActions : <Type, Action<Intent>>{},
         child: child,
       );
+    }
+
+    child = useRootOverlay
+        ? OverlayPortal.targetsRootOverlay(
+            controller: _overlayController,
+            overlayChildBuilder: _buildOverlay,
+            child: child,
+          )
+        : OverlayPortal(
+            controller: _overlayController,
+            overlayChildBuilder: _buildOverlay,
+            child: child,
+          );
+
+    if (widget.hasExternalFocusScope) {
+      return child;
     }
 
     // Focus is only used to monitor focus changes, so it's not necessary to
