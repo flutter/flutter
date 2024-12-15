@@ -83,6 +83,19 @@ void main() {
     );
   }
 
+  List<RenderObject> findAncestorRenderTheaters(RenderObject child) {
+    final List<RenderObject> results = <RenderObject>[];
+    RenderObject? node = child;
+    while (node != null) {
+      if (node.runtimeType.toString() == '_RenderTheater') {
+        results.add(node);
+      }
+      final RenderObject? parent = node.parent;
+      node = parent is RenderObject? parent : null;
+    }
+    return results;
+  }
+
   testWidgets("[Overlays] MenuController.isOpen is true when a menu's overlay is shown", (WidgetTester tester) async {
     await tester.pumpWidget(
       App(
@@ -182,48 +195,49 @@ void main() {
   });
 
   testWidgets('[Overlays] MenuController.closeChildren closes submenu children', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
 
-    await tester.pumpWidget(
-      App(
-        RawMenuAnchor(
-          controller: controller,
-          menuChildren: <Widget>[
-            Text(Tag.a.text),
-            RawMenuAnchor(
-              childFocusNode: focusNode,
-              menuChildren: <Widget>[ Text(Tag.b.a.text) ],
-              child: AnchorButton(Tag.b, focusNode: focusNode),
-            ),
-          ],
-          child: const AnchorButton(Tag.anchor),
+      await tester.pumpWidget(
+        App(
+          RawMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[
+              Text(Tag.a.text),
+              RawMenuAnchor(
+                childFocusNode: focusNode,
+                menuChildren: <Widget>[ Text(Tag.b.a.text) ],
+                child: AnchorButton(Tag.b, focusNode: focusNode),
+              ),
+            ],
+            child: const AnchorButton(Tag.anchor),
+          ),
         ),
-      ),
-    );
+      );
 
-    await tester.tap(find.text(Tag.anchor.text));
-    await tester.pump();
+      await tester.tap(find.text(Tag.anchor.text));
+      await tester.pump();
 
-    await tester.tap(find.text(Tag.b.text));
-    await tester.pump();
+      await tester.tap(find.text(Tag.b.text));
+      await tester.pump();
 
-    focusNode.requestFocus();
-    await tester.pump();
+      focusNode.requestFocus();
+      await tester.pump();
 
-    expect(find.text(Tag.b.text), findsOneWidget);
-    expect(find.text(Tag.b.a.text), findsOneWidget);
+      expect(find.text(Tag.b.text), findsOneWidget);
+      expect(find.text(Tag.b.a.text), findsOneWidget);
 
-    controller.closeChildren();
-    await tester.pump();
+      controller.closeChildren();
+      await tester.pump();
 
-    expect(controller.isOpen, isTrue);
-    expect(find.text(Tag.b.text), findsOneWidget);
-    expect(find.text(Tag.b.a.text), findsNothing);
+      expect(controller.isOpen, isTrue);
+      expect(find.text(Tag.b.text), findsOneWidget);
+      expect(find.text(Tag.b.a.text), findsNothing);
 
-    // Focus should stay on the anchor button.
-    expect(FocusManager.instance.primaryFocus, focusNode);
-  });
+      // Focus should stay on the anchor button.
+      expect(FocusManager.instance.primaryFocus, focusNode);
+    },
+  );
 
   testWidgets('[Overlays] Can only have one open child anchor', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -422,7 +436,7 @@ void main() {
       ),
     );
 
-    // Open the nested anchor.
+    // Open the nested anchor
     nestedController.open();
     await tester.pump();
 
@@ -431,7 +445,7 @@ void main() {
     expect(find.text(Tag.b.text), findsOneWidget);
     expect(find.text(Tag.b.a.text), findsOneWidget);
 
-    // Close the root menu panel.
+    // Close the root menu panel
     controller.close();
     await tester.pump();
 
@@ -463,7 +477,7 @@ void main() {
       ),
     );
 
-    // Open the nested anchor.
+    // Open the nested anchor
     controllerB.open();
     await tester.pump();
 
@@ -472,7 +486,7 @@ void main() {
     expect(find.text(Tag.b.text), findsOneWidget);
     expect(find.text(Tag.b.a.text), findsOneWidget);
 
-    // Close the root menu panel.
+    // Close the root menu panel
     controller.closeChildren();
     await tester.pump();
 
@@ -525,6 +539,7 @@ void main() {
     expect(find.text(Tag.b.a.text), findsOneWidget);
   });
 
+  // This test could be merged with the next one.
   testWidgets('MenuController notifies dependents on open and close', (WidgetTester tester) async {
     final MenuController controller = MenuController();
     final MenuController nestedController = MenuController();
@@ -703,6 +718,46 @@ void main() {
     expect(controller.isOpen, false);
   });
 
+  testWidgets('[Overlays] RawMenuAnchorOverlayPosition.anchorRect applies transformations', (WidgetTester tester) async {
+    RawMenuAnchorOverlayPosition? builderPosition;
+    final GlobalKey anchorKey = GlobalKey();
+    await tester.pumpWidget(
+      App(
+        Transform(
+          transform: Matrix4.translationValues(-50, 50, 0)..scale(1.2),
+          child: RawMenuAnchor.overlayBuilder(
+            controller: controller,
+            overlayBuilder: (
+              BuildContext context,
+              List<Widget> menuChildren,
+              RawMenuAnchorOverlayPosition position,
+            ) {
+              builderPosition = position;
+              return Positioned.fromRect(
+                rect: position.anchorRect,
+                child: Container(
+                  color: const Color(0xFF0000FF),
+                ),
+              );
+            },
+            menuChildren: <Widget>[
+              Text(Tag.b.a.text),
+            ],
+            child: AnchorButton(Tag.b, key: anchorKey),
+          ),
+        ),
+      ),
+    );
+
+    controller.open();
+    await tester.pump();
+
+    expect(
+      tester.getRect(find.byType(AnchorButton)),
+      equals(builderPosition?.anchorRect)
+    );
+  });
+
   testWidgets('[Default] Previous focus is restored on menu close', (WidgetTester tester) async {
     final FocusNode externalFocus = FocusNode();
     final FocusNode aaaFocusNode = FocusNode();
@@ -855,7 +910,7 @@ void main() {
     expect(FocusManager.instance.primaryFocus, aFocusNode);
     expect(find.text(Tag.b.a.text), findsOneWidget);
 
-    // Test panel child can close siblings with escape key.
+    // Test panel child can close siblings with escape key
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pump();
 
@@ -870,7 +925,7 @@ void main() {
 
     expect(FocusManager.instance.primaryFocus, baaFocusNode);
 
-    // Test ancestors menus are closed with escape key.
+    // Test ancestors menus are closed with escape key
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pump();
 
@@ -940,16 +995,13 @@ void main() {
     await tester.pump();
 
     expect(
-      invokedIntents,
-      equals(
-        const <Intent>[
+        invokedIntents,
+        equals(const <Intent>[
           DirectionalFocusIntent(TraversalDirection.up),
           NextFocusIntent(),
           PreviousFocusIntent(),
           DismissIntent()
-        ],
-      ),
-    );
+        ]));
   });
 
   testWidgets('[OverlayBuilder] Focus traversal shortcuts are not bound to actions', (WidgetTester tester) async {
@@ -1086,51 +1138,52 @@ void main() {
   );
 
   testWidgets('Actions that wrap RawMenuAnchor are invoked by both anchor and overlay', (WidgetTester tester) async {
-    final FocusNode anchorFocusNode = FocusNode();
-    final FocusNode aFocusNode = FocusNode();
-    addTearDown(anchorFocusNode.dispose);
-    addTearDown(aFocusNode.dispose);
-    bool invokedAnchor = false;
-    bool invokedOverlay = false;
+      final FocusNode anchorFocusNode = FocusNode();
+      final FocusNode aFocusNode = FocusNode();
+      addTearDown(anchorFocusNode.dispose);
+      addTearDown(aFocusNode.dispose);
+      bool invokedAnchor = false;
+      bool invokedOverlay = false;
 
-    await tester.pumpWidget(
-      App(
-        Actions(
-          actions: <Type, Action<Intent>>{
-            VoidCallbackIntent: CallbackAction<VoidCallbackIntent>(
-              onInvoke: (VoidCallbackIntent intent) {
-                intent.callback();
-                return null;
-              },
+      await tester.pumpWidget(
+        App(
+          Actions(
+            actions: <Type, Action<Intent>>{
+              VoidCallbackIntent: CallbackAction<VoidCallbackIntent>(
+                onInvoke: (VoidCallbackIntent intent) {
+                  intent.callback();
+                  return null;
+                },
+              ),
+            },
+            child: RawMenuAnchor(
+              childFocusNode: anchorFocusNode,
+              menuChildren: <Widget>[
+                Button.tag(Tag.a, focusNode: aFocusNode),
+              ],
+              child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
             ),
-          },
-          child: RawMenuAnchor(
-            childFocusNode: anchorFocusNode,
-            menuChildren: <Widget>[
-              Button.tag(Tag.a, focusNode: aFocusNode),
-            ],
-            child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
           ),
         ),
-      ),
-    );
+      );
 
-    await tester.tap(find.text(Tag.anchor.text));
-    await tester.pump();
+      await tester.tap(find.text(Tag.anchor.text));
+      await tester.pump();
 
-    Actions.invoke(anchorFocusNode.context!, VoidCallbackIntent(() {
-      invokedAnchor = true;
-    }));
-    Actions.invoke(aFocusNode.context!, VoidCallbackIntent(() {
-      invokedOverlay = true;
-    }));
+      Actions.invoke(anchorFocusNode.context!, VoidCallbackIntent(() {
+        invokedAnchor = true;
+      }));
+      Actions.invoke(aFocusNode.context!, VoidCallbackIntent(() {
+        invokedOverlay = true;
+      }));
 
-    await tester.pump();
+      await tester.pump();
 
-    // DismissIntent should not close the menu.
-    expect(invokedAnchor, isTrue);
-    expect(invokedOverlay, isTrue);
-  });
+      // DismissIntent should not close the menu.
+      expect(invokedAnchor, isTrue);
+      expect(invokedOverlay, isTrue);
+    },
+  );
 
   testWidgets('DismissMenuAction closes menus', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -1271,46 +1324,6 @@ void main() {
     final ui.Rect contentRect = tester.getRect(find.byKey(Tag.a.key));
 
     expect(contentRect, anchorCorner & const Size(200, 200));
-  });
-
-  testWidgets('[OverlayBuilder] RawMenuAnchorOverlayPosition.anchorRect respects ancestor transformations', (WidgetTester tester) async {
-    RawMenuAnchorOverlayPosition? builderPosition;
-    final GlobalKey anchorKey = GlobalKey();
-    await tester.pumpWidget(
-      App(
-        Transform(
-          transform: Matrix4.translationValues(-50, 50, 0)..scale(1.2),
-          child: RawMenuAnchor.overlayBuilder(
-            controller: controller,
-            overlayBuilder: (
-              BuildContext context,
-              List<Widget> menuChildren,
-              RawMenuAnchorOverlayPosition position,
-            ) {
-              builderPosition = position;
-              return Positioned.fromRect(
-                rect: position.anchorRect,
-                child: Container(
-                  color: const Color(0xFF0000FF),
-                ),
-              );
-            },
-            menuChildren: <Widget>[
-              Text(Tag.b.a.text),
-            ],
-            child: AnchorButton(Tag.b, key: anchorKey),
-          ),
-        ),
-      ),
-    );
-
-    controller.open();
-    await tester.pump();
-
-    expect(
-      tester.getRect(find.byType(AnchorButton)),
-      equals(builderPosition?.anchorRect)
-    );
   });
 
   testWidgets('[OverlayBuilder] TapRegion group ID is passed to overlay', (WidgetTester tester) async {
@@ -1716,7 +1729,7 @@ void main() {
 
     expect(focusedMenu, equals(Tag.anchor.focusNode));
 
-    // Test from adjacent menu item sibling.
+    // Test from adjacent menu item sibling
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
 
@@ -1742,7 +1755,7 @@ void main() {
     expect(focusedMenu, equals(Tag.a.focusNode));
     expect(find.text(Tag.a.text).hitTestable(), findsOneWidget);
 
-    // Test from nested overlay.
+    // Test from nested overlay
     await tester.ensureVisible(find.text(Tag.d.text));
     await tester.tap(find.text(Tag.d.text));
     await tester.pump();
@@ -1819,7 +1832,7 @@ void main() {
     expect(focusedMenu, Tag.a.focusNode);
     expect(find.text(Tag.d.text).hitTestable(), findsNothing);
 
-    // Test from menu item sibling.
+    // Test from menu item sibling
     await tester.sendKeyEvent(LogicalKeyboardKey.end);
 
     expect(focusedMenu, equals(Tag.d.focusNode));
@@ -1850,7 +1863,7 @@ void main() {
     expect(find.text(Tag.b.a.text), findsOneWidget);
     expect(focusedMenu, equals(Tag.b.a.focusNode));
 
-    // Test from nested overlay.
+    // Test from nested overlay
     await tester.sendKeyEvent(LogicalKeyboardKey.end);
 
     expect(focusedMenu, equals(Tag.b.c.focusNode));
@@ -2088,7 +2101,7 @@ void main() {
 
     listenForFocusChanges();
 
-    // Move into submenu.
+    // Move into submenu
     focusNode.requestFocus();
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
@@ -2164,7 +2177,7 @@ void main() {
 
     listenForFocusChanges();
 
-    // Move into submenu.
+    // Move into submenu
     focusNode.requestFocus();
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
@@ -2268,7 +2281,7 @@ void main() {
     await tester.tap(find.text(Tag.anchor.text));
     await tester.pump();
 
-    // Arrow down moves to first item.
+    // Arrow down moves to first item
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     expect(focusedMenu, equals(Tag.a.focusNode));
 
@@ -2285,17 +2298,17 @@ void main() {
     await tester.pump();
     expect(focusedMenu, equals(Tag.b.focusNode));
 
-    // Move to the first submenu.
+    // Move to the first submenu
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     expect(focusedMenu, equals(Tag.c.focusNode));
 
-    // Arrow left should do nothing since no menu is open.
+    // Arrow left should do nothing since no menu is open
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
 
     expect(focusedMenu, equals(Tag.c.focusNode));
 
-    // Arrow right should open the submenu and focus the first item.
+    // Arrow right should open the submenu and focus the first item
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
 
@@ -2331,7 +2344,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     expect(focusedMenu, equals(Tag.b.focusNode));
 
-    // Cycle back up.
+    // Cycle back up
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     expect(focusedMenu, equals(Tag.a.focusNode));
 
@@ -2428,7 +2441,7 @@ void main() {
     await tester.tap(find.text(Tag.anchor.text));
     await tester.pump();
 
-    // Arrow down moves to first item.
+    // Arrow down moves to first item
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     expect(focusedMenu, equals(Tag.a.focusNode));
 
@@ -2448,13 +2461,13 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     expect(focusedMenu, equals(Tag.c.focusNode));
 
-    // Arrow right should do nothing since no menu is open.
+    // Arrow right should do nothing since no menu is open
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
 
     expect(focusedMenu, equals(Tag.c.focusNode));
 
-    // Arrow left should open the submenu and focus the first item.
+    // Arrow left should open the submenu and focus the first item
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
 
@@ -2561,16 +2574,16 @@ void main() {
     await tester.pump();
     expect(focusedMenu, equals(Tag.b.focusNode));
 
-    // Tab on an unopened anchor should move focus to next widget.
+    // Tab on an unopened anchor should move focus to next widget
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     expect(focusedMenu, equals(Tag.c.focusNode));
 
-    // Move focus back to the anchor.
+    // Move focus back to the anchor
     focusNode.requestFocus();
     await tester.pump();
     expect(focusedMenu, equals(Tag.b.focusNode));
 
-    // Shift+Tab on unopened anchor should move focus to previous widget.
+    // Shift+Tab on unopened anchor should move focus to previous widget
     await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
@@ -2633,7 +2646,7 @@ void main() {
 
     listenForFocusChanges();
 
-    // Open overlay and focus first menu item.
+    // Open overlay and focus first menu item
     focusNode.requestFocus();
     await tester.pump();
 
@@ -2651,7 +2664,7 @@ void main() {
 
     expect(focusedMenu, equals(Tag.b.focusNode));
 
-    // Open and move focus to nested menu.
+    // Open and move focus to nested menu
     await tester.tap(find.text(Tag.b.text));
     await tester.pump();
     focusNode.requestFocus();
@@ -2727,11 +2740,11 @@ void main() {
     expect(focusedMenu, equals(Tag.b.focusNode));
     expect(find.text(Tag.b.a.text), findsOneWidget);
 
-    // Tab moves focus to the next root anchor sibling.
+    // Tab moves focus to the next root anchor sibling
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
 
-    // Menu should be closed.
+    // Menu should be closed
     expect(focusedMenu, equals(Tag.c.focusNode));
     expect(find.text(Tag.b.a.text), findsNothing);
 
@@ -2742,21 +2755,21 @@ void main() {
     expect(focusedMenu, equals(Tag.b.focusNode));
     expect(find.text(Tag.b.a.text), findsOneWidget);
 
-    // Move focus to the previous root anchor sibling.
+    // Move focus to the previous root anchor sibling
     await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
     await tester.pump();
 
-    // Menu should be closed.
+    // Menu should be closed
     expect(focusedMenu, equals(Tag.a.focusNode));
     expect(find.text(Tag.b.a.text), findsNothing);
 
     // Next, test that a nested anchor is closed when tabbing away from it.
     // This test also checks that the presence of a focus node does not
-    // affect the menu.
+    // affect the menu
 
-    // Open nested menu and focus first anchor.
+    // Open nested menu and focus first anchor
     bFocusNode.requestFocus();
     await tester.tap(find.text(Tag.b.text));
     await tester.pump();
@@ -2768,7 +2781,7 @@ void main() {
     expect(focusedMenu, equals(Tag.b.b.focusNode));
     expect(find.text(Tag.b.b.a.text), findsOneWidget);
 
-    // Tab moves focus to the next anchor sibling.
+    // Tab moves focus to the next anchor sibling
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
 
@@ -2785,7 +2798,7 @@ void main() {
     expect(focusedMenu, equals(Tag.b.b.focusNode));
     expect(find.text(Tag.b.b.a.text), findsOneWidget);
 
-    // Shift+Tab moves focus to the previous root anchor sibling.
+    // Shift+Tab moves focus to the previous root anchor sibling
     await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
@@ -2824,29 +2837,12 @@ void main() {
 
     expect(
       findMenuPanelDescendent<Container>(tester).decoration,
-      const BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(6.0)),
-        color: ui.Color.fromARGB(255, 253, 253, 253),
-        border: Border.fromBorderSide(
-            BorderSide(
-              color: ui.Color.fromARGB(255, 255, 255, 255),
-              width: 0.5,
-            ),
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: ui.Color.fromARGB(30, 0, 0, 0),
-            offset: Offset(0, 2),
-            blurRadius: 6.0,
-          ),
-          BoxShadow(
-            color: ui.Color.fromARGB(12, 0, 0, 0),
-            offset: Offset(0, 6),
-            spreadRadius: 8,
-            blurRadius: 12.0,
-          ),
-        ]
-      ),
+      RawMenuAnchor.defaultLightOverlayDecoration,
+    );
+
+    await expectLater(
+      find.byType(App),
+      matchesGoldenFile('rawMenuAnchor.surfaceDecoration.light.png'),
     );
   });
 
@@ -2872,28 +2868,12 @@ void main() {
 
     expect(
       findMenuPanelDescendent<Container>(tester).decoration,
-      const BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(6.0)),
-        color: ui.Color.fromARGB(255, 32, 33, 36),
-        border: Border.fromBorderSide(
-          BorderSide(
-            color: ui.Color.fromARGB(200, 0, 0, 0),
-            width: 0.5
-          ),
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: ui.Color.fromARGB(45, 0, 0, 0),
-            offset: Offset(0, 1),
-            blurRadius: 4.0,
-          ),
-          BoxShadow(
-            color: ui.Color.fromARGB(65, 0, 0, 0),
-            offset: Offset(0, 4),
-            blurRadius: 12.0,
-          ),
-        ]
-      ),
+      RawMenuAnchor.defaultDarkOverlayDecoration,
+    );
+
+    await expectLater(
+      find.byType(App),
+      matchesGoldenFile('rawMenuAnchor.surfaceDecoration.dark.png'),
     );
   });
 
@@ -2919,6 +2899,11 @@ void main() {
     expect(
       findMenuPanelDescendent<Container>(tester).decoration,
       decoration,
+    );
+
+    await expectLater(
+      find.byType(App),
+      matchesGoldenFile('rawMenuAnchor.customDecoration.png'),
     );
   });
 
@@ -3110,27 +3095,27 @@ void main() {
 
     await tester.pumpWidget(
       App(
-        RawMenuAnchor(
-          menuChildren: <Widget>[
-            Button.text('Menu Item'),
-          ],
-          builder: (BuildContext context, MenuController controller, Widget? child) {
-            isOpen = controller.isOpen;
-            return Button(
-              Text(isOpen ? 'close' : 'open'),
-              onPressed: () {
-                if (controller.isOpen) {
-                  controller.close();
-                } else {
-                  controller.open();
-                }
+         RawMenuAnchor(
+              menuChildren: <Widget>[
+                Button.text('Menu Item'),
+              ],
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                isOpen = controller.isOpen;
+                return Button(
+                  Text(isOpen ? 'close' : 'open'),
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                );
               },
-            );
-          },
-          onOpen: () => openCount++,
-          onClose: () => closeCount++,
-        ),
-      ),
+              onOpen: () => openCount++,
+              onClose: () => closeCount++,
+            ),
+          ),
     );
 
     expect(find.text('open'), findsOneWidget);
@@ -3155,27 +3140,14 @@ void main() {
     expect(closeCount, 1);
   });
 
-  // Copied from [MenuAnchor] tests. Also tested by "Menu is positioned within
-  // the root overlay.", so this test (or the other) may be redundant.
+  // Copied from [MenuAnchor] tests.
   //
   // Regression test for https://github.com/flutter/flutter/issues/155034.
-  testWidgets('Content is shown in the root overlay', (WidgetTester tester) async {
+  testWidgets('Content is shown in the root overlay when useRootOverlay is true', (WidgetTester tester) async {
     final MenuController controller = MenuController();
     final UniqueKey overlayKey = UniqueKey();
-    final UniqueKey menuItemKey = UniqueKey();
-
-    List<RenderObject> ancestorRenderTheaters(RenderObject child) {
-      final List<RenderObject> results = <RenderObject>[];
-      RenderObject? node = child;
-      while (node != null) {
-        if (node.runtimeType.toString() == '_RenderTheater') {
-          results.add(node);
-        }
-        final RenderObject? parent = node.parent;
-        node = parent is RenderObject? parent : null;
-      }
-      return results;
-    }
+    final Finder a = find.text(Tag.a.text);
+    final Finder aa = find.text(Tag.a.a.text);
 
     late final OverlayEntry overlayEntry;
     addTearDown((){
@@ -3183,20 +3155,20 @@ void main() {
       overlayEntry.dispose();
     });
 
-    Widget boilerplate() {
-      return App(
+    await tester.pumpWidget(
+      App(
         Overlay(
           key: overlayKey,
           initialEntries: <OverlayEntry>[
             overlayEntry = OverlayEntry(builder: (BuildContext context) {
               return Center(
                 child: RawMenuAnchor(
+                  useRootOverlay: true,
                   controller: controller,
                   menuChildren: <Widget>[
-                    Button(
-                      const Text('Item 1'),
-                      key: menuItemKey,
-                      onPressed: () {},
+                    RawMenuAnchor(
+                      menuChildren: <Widget>[Button.tag(Tag.a.a)],
+                      child: const AnchorButton(Tag.a),
                     ),
                   ],
                 ),
@@ -3204,16 +3176,20 @@ void main() {
             }),
           ],
         ),
-      );
-    }
+      )
+    );
 
-    await tester.pumpWidget(boilerplate());
-    expect(find.byKey(menuItemKey), findsNothing);
+
+    expect(a, findsNothing);
 
     // Open the menu.
     controller.open();
     await tester.pump();
-    expect(find.byKey(menuItemKey), findsOne);
+    await tester.tap(a);
+    await tester.pump();
+
+    expect(a, findsOne);
+    expect(aa, findsOne);
 
     // Expect two overlays: the root overlay created by WidgetsApp and the
     // overlay created by the boilerplate code.
@@ -3223,12 +3199,83 @@ void main() {
     final Overlay nonRootOverlay = tester.widget(find.byKey(overlayKey));
     final Overlay rootOverlay = overlays.firstWhere((Overlay overlay) => overlay != nonRootOverlay);
 
+    final RenderObject menuTheater = findAncestorRenderTheaters(tester.renderObject(a)).first;
+    final RenderObject submenuTheater = findAncestorRenderTheaters(tester.renderObject(aa)).first;
+
     // Check that the ancestor _RenderTheater for the menu item is the one
     // from the root overlay.
     expect(
-      ancestorRenderTheaters(tester.renderObject(find.byKey(menuItemKey))).single,
+      menuTheater,
       tester.renderObject(find.byWidget(rootOverlay)),
     );
+    expect(menuTheater, submenuTheater);
+  });
+
+  testWidgets('Content is shown in the nearest ancestor overlay when useRootOverlay is false', (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    final UniqueKey overlayKey = UniqueKey();
+    final Finder a = find.text(Tag.a.text);
+    final Finder aa = find.text(Tag.a.a.text);
+
+    late final OverlayEntry overlayEntry;
+    addTearDown((){
+      overlayEntry.remove();
+      overlayEntry.dispose();
+    });
+
+    await tester.pumpWidget(
+      App(
+        Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            overlayEntry = OverlayEntry(builder: (BuildContext context) {
+              return Center(
+                child: RawMenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    // Nested menus should be rendered in the same overlay as
+                    // their parent, so useRootOverlay should have no effect.
+                    RawMenuAnchor(
+                      useRootOverlay: true,
+                      menuChildren: <Widget>[Button.tag(Tag.a.a)],
+                      child: const AnchorButton(Tag.a),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
+      )
+    );
+
+
+    expect(a, findsNothing);
+
+    // Open the menu.
+    controller.open();
+    await tester.pump();
+    await tester.tap(a);
+    await tester.pump();
+
+    expect(a, findsOne);
+    expect(aa, findsOne);
+
+    // Expect two overlays: the root overlay created by WidgetsApp and the
+    // overlay created by the boilerplate code.
+    expect(find.byType(Overlay), findsNWidgets(2));
+
+    final Overlay nonRootOverlay = tester.widget(find.byKey(overlayKey));
+    final RenderObject menuTheater = findAncestorRenderTheaters(tester.renderObject(a)).first;
+    final RenderObject submenuTheater = findAncestorRenderTheaters(tester.renderObject(aa)).first;
+
+    // Check that the ancestor _RenderTheater for the menu item is the one
+    // from the root overlay.
+    expect(
+      menuTheater,
+      tester.renderObject(find.byWidget(nonRootOverlay)),
+    );
+    expect(menuTheater, submenuTheater);
   });
 
   group('[Default] Layout', () {
@@ -3292,7 +3339,7 @@ void main() {
           alignment.resolve(TextDirection.ltr).withinRect(anchorRect),
           overlay.center,
           reason: 'Anchor alignment: $alignment \n'
-                  'Menu rect: $overlay \n',
+              'Menu rect: $overlay \n',
         );
       }
     });
@@ -4293,14 +4340,14 @@ void main() {
 
       await tester.pumpWidget(
         App(
-          // Overlaps the bottom of the anchor by 4px.
+          // Overlaps the bottom of the anchor by 4px
           RawMenuAnchor(
             surfaceDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
             alignmentOffset: const Offset(0, -4),
             alignment: AlignmentDirectional.bottomEnd,
             menuAlignment: AlignmentDirectional.topStart,
             menuChildren: <Widget>[
-              // Overlaps the top of the anchor by 4px.
+              // Overlaps the top of the anchor by 4px
               RawMenuAnchor(
                 surfaceDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
                 alignmentOffset: const Offset(0, 4),
@@ -4530,7 +4577,7 @@ void main() {
 
       expect(collectOverlays().first, control.shift(const Offset(33, 45)));
 
-      // Should not be affected by text direction.
+      // Should not be affected by text direction
       await tester.pumpWidget(buildApp(TextDirection.rtl));
 
       expect(collectOverlays().first, control.shift(const Offset(33, 45)));
@@ -4569,7 +4616,7 @@ void main() {
       controller.open();
       await tester.pump();
 
-      // Get position with alignmentOffset.
+      // Get position with alignmentOffset
       final ui.Rect control = collectOverlays().first;
 
       controller.open(position: Offset.zero);
@@ -4607,7 +4654,7 @@ void main() {
       controller.open();
       await tester.pump();
 
-      // Get position with alignmentOffset.
+      // Get position with alignmentOffset
       final ui.Rect control = collectOverlays().first;
 
       controller.open(position: Offset.zero);
@@ -4647,7 +4694,7 @@ void main() {
       controller.open();
       await tester.pump();
 
-      // Get position with alignmentOffset.
+      // Get position with alignmentOffset
       final ui.Rect control = collectOverlays().first;
 
       controller.open(position: const Offset(100, 100));
@@ -4695,7 +4742,7 @@ void main() {
         equals(const Offset(700, 500) & const Size(100, 100)),
       );
 
-      // Overflow right and bottom by 50 pixels.
+      // Overflow right and bottom by 50 pixels
       controller.open(position: const Offset(750, 550));
       await tester.pump();
 
@@ -5019,7 +5066,7 @@ void main() {
         find.byKey(ValueKey<String>(Tag.a.text)),
       );
 
-      // Menu should not overflow the screen.
+      // Menu should not overflow the screen
       expect(menuTopLeft, equals(anchorTopRight));
 
       controller.close();
@@ -5059,7 +5106,7 @@ void main() {
       //    - anchor position affected
       //
       // Padding inside App DOES NOT affect the overlay position but
-      // DOES affect the anchor position.
+      // DOES affect the anchor position
       await changeSurfaceSize(tester, const Size(400, 400));
 
       Widget buildApp({
@@ -5123,10 +5170,10 @@ void main() {
 
       expect(paddedAnchor, equals(anchor.shift(const Offset(31 + 64, 7 + 50))));
 
-      // Hits padding on top/left.
+      // Hits padding on top/left
       expect(firstPadded, equals(first.shift(const Offset(31, 7))));
 
-      // Hits padding on top/right.
+      // Hits padding on top/right
       expect(secondPadded, equals(second.shift(const Offset(-43, 7))));
     });
 
@@ -5138,7 +5185,7 @@ void main() {
       //    - anchor position affected
       //
       // Padding inside App DOES NOT affect the overlay position but
-      // DOES affect the anchor position.
+      // DOES affect the anchor position
 
       // First, collect measurements without padding.
       Widget buildApp({
@@ -5357,7 +5404,7 @@ void main() {
               color: const Color(0xFF004CFF),
               child: Stack(
                 children: <Widget>[
-                  // Pink box for visualizing the display feature.
+                  // Pink box for visualizing the display feature
                   Positioned.fromRect(
                     rect: const Rect.fromLTRB(390, 0, 410, 600),
                     child: const ColoredBox(color: Color(0xF7FF2190)),
@@ -5424,17 +5471,98 @@ void main() {
       expect( tester.getSize(find.byKey(Tag.a.key)), equals(const Size(75, 150)));
     });
 
-    testWidgets('Menu is positioned within the root overlay.', (WidgetTester tester) async {
-      // Overlay entries leak if they are not disposed.
+    testWidgets('Menu is positioned in the root overlay when useRootOverlay is true', (WidgetTester tester) async {
+      // The menu should not overflow the bottom of the root overlay, so the
+      // menu should be placed below the anchor button.
       final OverlayEntry entry = OverlayEntry(
         builder: (BuildContext context) {
-          return RawMenuAnchor(
-            menuChildren: <Widget>[Button.tag(Tag.a)],
-            child: const AnchorButton(Tag.anchor),
+          return const Positioned(
+            bottom: 0,
+            child: RawMenuAnchor(
+              useRootOverlay: true,
+              surfaceDecoration: BoxDecoration(color: Color(0xFF0000FF)),
+              menuChildren: <Widget>[
+                RawMenuAnchor(
+                  menuAlignment: AlignmentDirectional.topStart,
+                  alignment: AlignmentDirectional.bottomStart,
+                  menuChildren: <Widget>[SizedBox.square(dimension: 100)],
+                  child: AnchorButton(Tag.a),
+                )
+              ],
+              child: AnchorButton(Tag.anchor),
+            ),
           );
         },
       );
 
+      // Overlay entries leak if they are not disposed.
+      addTearDown(() {
+        entry.remove();
+        entry.dispose();
+      });
+
+      await tester.pumpWidget(
+        App(
+          Stack(
+            children: <Widget>[
+              Positioned(
+                left: 200,
+                top: 200,
+                height: 200,
+                width: 200,
+                child: ColoredBox(
+                  color: const Color(0xFFFF0000),
+                  child: Overlay(
+                    initialEntries: <OverlayEntry>[ entry ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text(Tag.anchor.text));
+      await tester.pump();
+      await tester.tap(find.text(Tag.a.text));
+      await tester.pump();
+
+      final [ui.Rect menu, ui.Rect subMenu] = collectOverlays();
+      final Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+      final Rect subAnchor = tester.getRect(find.widgetWithText(Button, Tag.a.text));
+
+      expect(menu.topLeft, equals(anchor.bottomLeft));
+      expect(subMenu.topLeft, equals(subAnchor.bottomLeft));
+    });
+
+    testWidgets('Menu is positioned within the closest ancestor overlay when useRootOverlay is false', (WidgetTester tester) async {
+      // The menu should overflow the bottom of the nearest ancestor overlay, so
+      // the menu should be placed above the anchor button.
+      final OverlayEntry entry = OverlayEntry(
+        builder: (BuildContext context) {
+          return const Positioned(
+            bottom: 0,
+            child: RawMenuAnchor(
+              surfaceDecoration: BoxDecoration(color: Color(0xFF0000FF)),
+              menuChildren: <Widget>[
+                // Nested menus should be placed in the same overlay as their
+                // parent menu, so this menu should be placed in the nearest
+                // overlay instead of the root overlay.
+                RawMenuAnchor(
+                  useRootOverlay: true,
+                  menuAlignment: AlignmentDirectional.topStart,
+                  alignment: AlignmentDirectional.bottomStart,
+                  menuChildren: <Widget>[SizedBox.square(dimension: 100)],
+                  child: AnchorButton(Tag.a),
+                )
+              ],
+              child: AnchorButton(Tag.anchor),
+            ),
+          );
+        },
+      );
+
+      // Overlay entries leak if they are not disposed.
       addTearDown(() {
         entry.remove();
         entry.dispose();
@@ -5460,11 +5588,15 @@ void main() {
 
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
+      await tester.tap(find.text(Tag.a.text));
+      await tester.pump();
 
-      final Rect menu = collectOverlays().first;
+      final [ui.Rect menu, ui.Rect subMenu] = collectOverlays();
       final Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+      final Rect subAnchor = tester.getRect(find.widgetWithText(Button, Tag.a.text));
 
-      expect(menu.topLeft, equals(anchor.bottomLeft));
+      expect(menu.bottomLeft, equals(anchor.topLeft));
+      expect(subMenu.bottomLeft, equals(subAnchor.topLeft));
     });
   });
 }
@@ -5522,7 +5654,7 @@ class NestedTag extends Tag {
     if (level == 0 || _prefix == null) {
       return _name;
     }
-    return '${_prefix.text}.$_name';
+    return '${_prefix!.text}.$_name';
   }
 
   @override

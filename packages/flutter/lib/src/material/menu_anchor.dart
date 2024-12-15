@@ -164,6 +164,7 @@ class MenuAnchor extends StatefulWidget {
     this.onOpen,
     this.onClose,
     this.crossAxisUnconstrained = true,
+    this.useRootOverlay = false,
     required this.menuChildren,
     this.builder,
     this.child,
@@ -278,6 +279,11 @@ class MenuAnchor extends StatefulWidget {
   /// be constrained in both main axis and cross axis, such as a [DropdownMenu].
   final bool crossAxisUnconstrained;
 
+  /// {@macro flutter.widgets.RawMenuAnchor.useRootOverlay}
+  ///
+  /// Defaults to false.
+  final bool useRootOverlay;
+
   /// A list of children containing the menu items that are the contents of the
   /// menu surrounded by this [MenuAnchor].
   ///
@@ -373,6 +379,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     final Widget child = _MenuAnchorScope(
       state: this,
       child: RawMenuAnchor.overlayBuilder(
+        useRootOverlay: widget.useRootOverlay,
         menuChildren: widget.menuChildren,
         onOpen: widget.onOpen,
         onClose: widget.onClose,
@@ -1463,6 +1470,7 @@ class SubmenuButton extends StatefulWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.submenuIcon,
+    this.useRootOverlay = false,
     required this.menuChildren,
     required this.child,
   });
@@ -1541,6 +1549,11 @@ class SubmenuButton extends StatefulWidget {
 
   /// An optional icon to display after the [child].
   final Widget? trailingIcon;
+
+  /// {@macro flutter.widgets.RawMenuAnchor.useRootOverlay}
+  ///
+  /// Defaults to false.
+  final bool useRootOverlay;
 
   /// The list of widgets that appear in the menu when it is opened.
   ///
@@ -1790,6 +1803,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         onClose: _onClose,
         onOpen: _onOpen,
         style: widget.menuStyle,
+        useRootOverlay: widget.useRootOverlay,
         builder: (BuildContext context, MenuController controller, Widget? child) {
           // Since we don't want to use the theme style or default style from the
           // TextButton, we merge the styles, merging them in the right order when

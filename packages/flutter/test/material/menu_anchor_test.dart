@@ -61,6 +61,19 @@ void main() {
     return find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MenuPanel');
   }
 
+  List<RenderObject> ancestorRenderTheaters(RenderObject child) {
+    final List<RenderObject> results = <RenderObject>[];
+    RenderObject? node = child;
+    while (node != null) {
+      if (node.runtimeType.toString() == '_RenderTheater') {
+        results.add(node);
+      }
+      final RenderObject? parent = node.parent;
+      node = parent is RenderObject ? parent : null;
+    }
+    return results;
+  }
+
   Finder findMenuBarItemLabels() {
     return find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MenuItemLabel');
   }
@@ -4686,6 +4699,132 @@ void main() {
     // Test disabled button.
     await tester.pumpWidget(buildButton(enabled: false));
     expect(iconStyle(tester, Icons.add).color, disabledIconColor);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/155034.
+  testWidgets('Content is shown in the root overlay when useRootOverlay is true', (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    final UniqueKey overlayKey = UniqueKey();
+    final UniqueKey menuItemKey = UniqueKey();
+
+    late final OverlayEntry overlayEntry;
+    addTearDown((){
+      overlayEntry.remove();
+      overlayEntry.dispose();
+    });
+
+    Widget boilerplate() {
+      return MaterialApp(
+        home: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            overlayEntry = OverlayEntry(
+              builder: (BuildContext context) {
+                return Scaffold(
+                  body: Center(
+                    child: MenuAnchor(
+                      useRootOverlay: true,
+                      controller: controller,
+                      menuChildren: <Widget>[
+                        MenuItemButton(
+                          key: menuItemKey,
+                          onPressed: () {},
+                          child: const Text('Item 1'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+            ),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(boilerplate());
+    expect(find.byKey(menuItemKey), findsNothing);
+
+    // Open the menu.
+    controller.open();
+    await tester.pump();
+    expect(find.byKey(menuItemKey), findsOne);
+
+    // Expect two overlays: the root overlay created by MaterialApp and the
+    // overlay created by the boilerplate code.
+    expect(find.byType(Overlay), findsNWidgets(2));
+
+    final Iterable<Overlay> overlays = tester.widgetList<Overlay>(find.byType(Overlay));
+    final Overlay nonRootOverlay = tester.widget(find.byKey(overlayKey));
+    final Overlay rootOverlay = overlays.firstWhere((Overlay overlay) => overlay != nonRootOverlay);
+
+    // Check that the ancestor _RenderTheater for the menu item is the one
+    // from the root overlay.
+    expect(
+      ancestorRenderTheaters(tester.renderObject(find.byKey(menuItemKey))).single,
+      tester.renderObject(find.byWidget(rootOverlay)),
+    );
+  });
+
+  testWidgets('Content is shown in the nearest ancestor overlay when useRootOverlay is false', (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    final UniqueKey overlayKey = UniqueKey();
+    final UniqueKey menuItemKey = UniqueKey();
+
+    late final OverlayEntry overlayEntry;
+    addTearDown((){
+      overlayEntry.remove();
+      overlayEntry.dispose();
+    });
+
+    Widget boilerplate() {
+      return MaterialApp(
+        home: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            overlayEntry = OverlayEntry(
+              builder: (BuildContext context) {
+                return Scaffold(
+                  body: Center(
+                    child: MenuAnchor(
+                      controller: controller,
+                      menuChildren: <Widget>[
+                        MenuItemButton(
+                          key: menuItemKey,
+                          onPressed: () {},
+                          child: const Text('Item 1'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+            ),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(boilerplate());
+    expect(find.byKey(menuItemKey), findsNothing);
+
+    // Open the menu.
+    controller.open();
+    await tester.pump();
+    expect(find.byKey(menuItemKey), findsOne);
+
+    // Expect two overlays: the root overlay created by MaterialApp and the
+    // overlay created by the boilerplate code.
+    expect(find.byType(Overlay), findsNWidgets(2));
+
+    final Overlay nonRootOverlay = tester.widget(find.byKey(overlayKey));
+
+    // Check that the ancestor _RenderTheater for the menu item is the one
+    // from the root overlay.
+    expect(
+      ancestorRenderTheaters(tester.renderObject(find.byKey(menuItemKey))).first,
+      tester.renderObject(find.byWidget(nonRootOverlay)),
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/156572.
