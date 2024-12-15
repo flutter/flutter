@@ -594,6 +594,89 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
+  testWidgets('Implicitly animated widgets inherit the default AnimationStyle', (WidgetTester tester) async {
+    (Curve?, Duration?) curveAndDuration() {
+      final ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> state = tester.state(
+        find.byWidgetPredicate((Widget widget) => widget is ImplicitlyAnimatedWidget),
+      );
+      if (state.animation case CurvedAnimation(
+        :final Curve curve,
+        parent: AnimationController(:final Duration? duration),
+      )) {
+        return (curve, duration);
+      }
+      return (null, null);
+    }
+    late StateSetter setState;
+    Widget widget = AnimatedContainer();
+
+    await tester.pumpWidget(
+      DefaultAnimationStyle(
+        style: AnimationStyle(
+          duration: Durations.short1,
+          curve: Curves.easeInQuad,
+        ),
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter stateSetter) {
+            setState = stateSetter;
+            return widget;
+          },
+        ),
+      ),
+    );
+    var (Curve? curve, Duration? duration) = curveAndDuration();
+    expect(curve, Curves.easeInQuad);
+    expect(duration, Durations.short1);
+
+    // Duration and Curve objects passed to the widget override the inherited values.
+    setState(() {
+      widget = AnimatedContainer(
+        color: Colors.red,
+        curve: Curves.easeInCubic,
+      );
+    });
+    await tester.pump();
+    (curve, duration) = curveAndDuration();
+    expect(curve, Curves.easeInCubic);
+    expect(duration, Durations.short1);
+
+    setState(() {
+      widget = AnimatedPadding(
+        padding: const EdgeInsets.all(8.0),
+        duration: Durations.short2,
+      );
+    });
+    await tester.pump();
+    (curve, duration) = curveAndDuration();
+    expect(curve, Curves.easeInQuad);
+    expect(duration, Durations.short2);
+
+    await tester.pumpWidget(
+      DefaultAnimationStyle(
+        style: AnimationStyle(
+          duration: Durations.short3,
+          curve: Curves.easeInQuint,
+        ),
+        child: widget,
+      ),
+    );
+    (curve, duration) = curveAndDuration();
+    expect(curve, Curves.easeInQuint);
+    expect(duration, Durations.short2);
+
+    // Static objects from DefaultAnimationStyle
+    // are used when no curve/duration values are specified.
+    await tester.pumpWidget(
+      DefaultAnimationStyle(
+        style: AnimationStyle(),
+        child: AnimatedContainer(),
+      ),
+    );
+    (curve, duration) = curveAndDuration();
+    expect(curve, DefaultAnimationStyle.fallbackCurve);
+    expect(duration, DefaultAnimationStyle.fallbackDuration);
+  });
+
   testWidgets('Ensure CurvedAnimations are disposed on widget change',
       (WidgetTester tester) async {
     final GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>> key =
