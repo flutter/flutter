@@ -3055,7 +3055,7 @@ void main() {
       onHover: onHover,
       onLongPress: onLongPress,
     ),
-    ({bool enabled = true}) =>IconButton.filled(
+    ({bool enabled = true}) => IconButton.filled(
       icon: const Icon(Icons.favorite),
       onPressed: enabled ? (){} : null,
       onHover: onHover,
