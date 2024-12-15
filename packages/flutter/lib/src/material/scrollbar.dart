@@ -30,8 +30,8 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// Dynamically changes to a [CupertinoScrollbar], an iOS style scrollbar, by
 /// default on the iOS platform.
 ///
-/// The color of the Scrollbar thumb will change when [MaterialState.dragged],
-/// or [MaterialState.hovered] on desktop and web platforms. These stateful
+/// The color of the Scrollbar thumb will change when [WidgetState.dragged],
+/// or [WidgetState.hovered] on desktop and web platforms. These stateful
 /// color choices can be changed using [ScrollbarThemeData.thumbColor].
 ///
 /// {@tool dartpad}
@@ -55,11 +55,11 @@ const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 /// {@end-tool}
 ///
 /// A scrollbar track can be added using [trackVisibility]. This can also be
-/// drawn when triggered by a hover event, or based on any [MaterialState] by
+/// drawn when triggered by a hover event, or based on any [WidgetState] by
 /// using [ScrollbarThemeData.trackVisibility].
 ///
 /// The [thickness] of the track and scrollbar thumb can be changed dynamically
-/// in response to [MaterialState]s using [ScrollbarThemeData.thickness].
+/// in response to [WidgetState]s using [ScrollbarThemeData.thickness].
 ///
 /// See also:
 ///

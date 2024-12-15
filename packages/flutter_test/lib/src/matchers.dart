@@ -5,6 +5,7 @@
 /// @docImport '_goldens_io.dart';
 library;
 
+import 'dart:convert' show LineSplitter;
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -220,11 +221,29 @@ const Matcher isInCard = _IsInCard();
 ///  * [isInCard], the opposite.
 const Matcher isNotInCard = _IsNotInCard();
 
+/// Default threshold for [isSameColorAs] and [isSameColorSwatchAs].
+const double colorEpsilon = 0.004;
+
+/// Asserts that the object represents the same color swatch as [color] when
+/// used to paint.
+///
+/// Specifically this matcher checks the object is of type [ColorSwatch] and its
+/// color components fall below the delta specified by [threshold].
+///
+/// Note: This doesn't recurse into the swatches [Color] type, instead treating
+/// them as [Color]s.
+Matcher isSameColorSwatchAs<T>(ColorSwatch<T> color,
+    {double threshold = colorEpsilon}) {
+  return _ColorSwatchMatcher<T>(color, threshold);
+}
+
 /// Asserts that the object represents the same color as [color] when used to paint.
 ///
-/// Specifically this matcher checks the object is of type [Color] and its [Color.value]
-/// equals to that of the given [color].
-Matcher isSameColorAs(Color color) => _ColorMatcher(targetColor: color);
+/// Specifically this matcher checks the object is of type [Color] and its color
+/// components fall below the delta specified by [threshold].
+Matcher isSameColorAs(Color color, {double threshold = colorEpsilon}) {
+  return _ColorMatcher(color, threshold);
+}
 
 /// Asserts that an object's toString() is a plausible one-line description.
 ///
@@ -1196,19 +1215,24 @@ class _HasOneLineDescription extends Matcher {
 }
 
 class _EqualsIgnoringHashCodes extends Matcher {
-  _EqualsIgnoringHashCodes(Object v) : _value = _normalize(v);
+  _EqualsIgnoringHashCodes(Object v)
+      : _value = _normalize(v),
+        _stringValue = v is String ? _normalizeString(v) : null;
 
-  final Object _value;
+  final Iterable<String> _value;
+  final String? _stringValue;
 
-  static final Object _mismatchedValueKey = Object();
+  static final Object _lineNumberValueKey = Object();
+  static final Object _expectedLineValueKey = Object();
+  static final Object _seenLineValueKey = Object();
 
   static String _normalizeString(String value) {
     return value.replaceAll(RegExp(r'#[\da-fA-F]{5}'), '#00000');
   }
 
-  static Object _normalize(Object value, {bool expected = true}) {
+  static Iterable<String> _normalize(Object value, {bool expected = true}) {
     if (value is String) {
-      return _normalizeString(value);
+      return LineSplitter.split(value).map<String>((dynamic item) => _normalizeString(item.toString()));
     }
     if (value is Iterable<String>) {
       return value.map<String>((dynamic item) => _normalizeString(item.toString()));
@@ -1220,20 +1244,33 @@ class _EqualsIgnoringHashCodes extends Matcher {
 
   @override
   bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
-    final Object normalized = _normalize(object as Object, expected: false);
-    if (!equals(_value).matches(normalized, matchState)) {
-      matchState[_mismatchedValueKey] = normalized;
-      return false;
+    final Iterable<String> normalized = _normalize(object as Object, expected: false);
+    final Iterator<String> expectedIt = _value.iterator;
+    final Iterator<String> seenIt = normalized.iterator;
+
+    int lineNumber = 1;
+
+    bool hasExpected = expectedIt.moveNext();
+    bool hasSeen = seenIt.moveNext();
+    while (hasExpected && hasSeen) {
+      if (!equals(expectedIt.current).matches(seenIt.current, matchState)) {
+        matchState[_lineNumberValueKey] = lineNumber;
+        matchState[_expectedLineValueKey] = expectedIt.current;
+        matchState[_seenLineValueKey] = seenIt.current;
+        return false;
+      }
+
+      lineNumber += 1;
+      hasExpected = expectedIt.moveNext();
+      hasSeen = seenIt.moveNext();
     }
-    return true;
+
+    return !hasExpected && !hasSeen;
   }
 
   @override
   Description describe(Description description) {
-    if (_value is String) {
-      return description.add('normalized value matches $_value');
-    }
-    return description.add('normalized value matches\n').addDescriptionOf(_value);
+    return description.add('normalized value matches\n').addDescriptionOf(_stringValue ?? _value);
   }
 
   @override
@@ -1243,16 +1280,17 @@ class _EqualsIgnoringHashCodes extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    if (matchState.containsKey(_mismatchedValueKey)) {
-      final Object actualValue = matchState[_mismatchedValueKey] as Object;
-      // Leading whitespace is added so that lines in the multiline
-      // description returned by addDescriptionOf are all indented equally
-      // which makes the output easier to read for this case.
-      return mismatchDescription
-          .add('was expected to be normalized value\n')
-          .addDescriptionOf(_value)
+    if (matchState.containsKey(_lineNumberValueKey) &&
+        matchState.containsKey(_expectedLineValueKey) &&
+        matchState.containsKey(_seenLineValueKey)) {
+      final int lineNumber = matchState[_lineNumberValueKey] as int;
+      if (lineNumber > 1) {
+        mismatchDescription = mismatchDescription
+          .add('Lines $lineNumber differed, expected: \n')
+          .addDescriptionOf(matchState[_expectedLineValueKey])
           .add('\nbut got\n')
-          .addDescriptionOf(actualValue);
+          .addDescriptionOf(matchState[_seenLineValueKey]);
+      }
     }
     return mismatchDescription;
   }
@@ -2116,23 +2154,59 @@ class _CoversSameAreaAs extends Matcher {
     description.add('covers expected area and only expected area');
 }
 
-class _ColorMatcher extends Matcher {
-  const _ColorMatcher({
-    required this.targetColor,
-  });
+class _ColorSwatchMatcher<T> extends Matcher {
+  _ColorSwatchMatcher(this._target, this._threshold);
 
-  final Color targetColor;
+  final ColorSwatch<T> _target;
+  final double _threshold;
 
   @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    if (item is Color) {
-      return item == targetColor || item.value == targetColor.value;
-    }
-    return false;
+  Description describe(Description description) {
+    return description.add('matches color swatch "$_target" with threshold "$_threshold".');
   }
 
   @override
-  Description describe(Description description) => description.add('matches color $targetColor');
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    if (item is ColorSwatch) {
+      final _ColorMatcher matcher = _ColorMatcher(_target, _threshold);
+      if (!matcher.matches(item, matchState)) {
+        return false;
+      }
+
+      for (final T key in _target.keys) {
+        final _ColorMatcher matcher = _ColorMatcher(_target[key]!, _threshold);
+        if (!matcher.matches(item[key], matchState)) {
+          return false;
+        }
+      }
+
+      return item.keys.length == _target.keys.length;
+    } else {
+      return false;
+    }
+  }
+}
+
+class _ColorMatcher extends Matcher {
+  _ColorMatcher(this._target, this._threshold);
+
+  final ui.Color _target;
+  final double _threshold;
+
+  @override
+  Description describe(Description description) {
+    return description.add('matches color "$_target" with threshold "$_threshold".');
+  }
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    return item is ui.Color &&
+        item.colorSpace == _target.colorSpace &&
+        (item.a - _target.a).abs() <= _threshold &&
+        (item.r - _target.r).abs() <= _threshold &&
+        (item.g - _target.g).abs() <= _threshold &&
+        (item.b - _target.b).abs() <= _threshold;
+  }
 }
 
 int _countDifferentPixels(Uint8List imageA, Uint8List imageB) {
@@ -2266,10 +2340,6 @@ class _MatchesSemanticsData extends Matcher {
     required bool? isExpanded,
     // Actions
     required bool? hasTapAction,
-    // TODO(gspencergoog): Once this has landed, and customer tests have been
-    // updated, remove the ignore below.
-    // https://github.com/flutter/flutter/issues/149842
-    // ignore: avoid_unused_constructor_parameters
     required bool? hasFocusAction,
     required bool? hasLongPressAction,
     required bool? hasScrollLeftAction,
@@ -2329,9 +2399,7 @@ class _MatchesSemanticsData extends Matcher {
         },
         actions = <SemanticsAction, bool>{
           if (hasTapAction != null) SemanticsAction.tap: hasTapAction,
-          // TODO(gspencergoog): Once this has landed, and customer tests have
-          // been updated, add a line here that adds handling for
-          // hasFocusAction. https://github.com/flutter/flutter/issues/149842
+          if (hasFocusAction != null) SemanticsAction.focus: hasFocusAction,
           if (hasLongPressAction != null) SemanticsAction.longPress: hasLongPressAction,
           if (hasScrollLeftAction != null) SemanticsAction.scrollLeft: hasScrollLeftAction,
           if (hasScrollRightAction != null) SemanticsAction.scrollRight: hasScrollRightAction,
@@ -2429,19 +2497,12 @@ class _MatchesSemanticsData extends Matcher {
     if (tooltip != null) {
       description.add(' with tooltip: $tooltip');
     }
-    // TODO(gspencergoog): Remove filter once customer tests have been updated
-    // with the proper actions information for focus.
-    // https://github.com/flutter/flutter/issues/149842
-    final Map<ui.SemanticsAction, bool> nonFocusActions =
-      Map<ui.SemanticsAction, bool>.fromEntries(actions.entries.where(
-        (MapEntry<ui.SemanticsAction, bool> e) => e.key != SemanticsAction.focus
-      ));
-    if (nonFocusActions.isNotEmpty) {
-      final List<SemanticsAction> expectedActions = nonFocusActions.entries
+    if (actions.isNotEmpty) {
+      final List<SemanticsAction> expectedActions = actions.entries
         .where((MapEntry<ui.SemanticsAction, bool> e) => e.value)
         .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
         .toList();
-      final List<SemanticsAction> notExpectedActions = nonFocusActions.entries
+      final List<SemanticsAction> notExpectedActions = actions.entries
         .where((MapEntry<ui.SemanticsAction, bool> e) => !e.value)
         .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
         .toList();
@@ -2620,17 +2681,10 @@ class _MatchesSemanticsData extends Matcher {
     if (maxValueLength != null && maxValueLength != data.maxValueLength) {
       return failWithDescription(matchState, 'maxValueLength was: ${data.maxValueLength}');
     }
-    // TODO(gspencergoog): Remove filter once customer tests have been updated
-    // with the proper actions information for focus.
-    // https://github.com/flutter/flutter/issues/149842
-    final Map<ui.SemanticsAction, bool> nonFocusActions =
-      Map<ui.SemanticsAction, bool>.fromEntries(actions.entries.where(
-        (MapEntry<ui.SemanticsAction, bool> e) => e.key != SemanticsAction.focus
-      ));
-    if (nonFocusActions.isNotEmpty) {
+    if (actions.isNotEmpty) {
       final List<SemanticsAction> unexpectedActions = <SemanticsAction>[];
       final List<SemanticsAction> missingActions = <SemanticsAction>[];
-      for (final MapEntry<ui.SemanticsAction, bool> actionEntry in nonFocusActions.entries) {
+      for (final MapEntry<ui.SemanticsAction, bool> actionEntry in actions.entries) {
         final ui.SemanticsAction action = actionEntry.key;
         final bool actionExpected = actionEntry.value;
         final bool actionPresent = (action.index & data.actions) == action.index;

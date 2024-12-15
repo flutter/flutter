@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'context_menu_controller.dart';
+/// @docImport 'form.dart';
+/// @docImport 'restoration.dart';
+/// @docImport 'restoration_properties.dart';
+/// @docImport 'selectable_region.dart';
+/// @docImport 'text_selection_toolbar_layout_delegate.dart';
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui hide TextStyle;
@@ -1606,10 +1618,10 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final bool cursorOpacityAnimates;
 
-  ///{@macro flutter.rendering.RenderEditable.cursorOffset}
+  /// {@macro flutter.rendering.RenderEditable.cursorOffset}
   final Offset? cursorOffset;
 
-  ///{@macro flutter.rendering.RenderEditable.paintCursorAboveText}
+  /// {@macro flutter.rendering.RenderEditable.paintCursorAboveText}
   final bool paintCursorAboveText;
 
   /// Controls how tall the selection highlight boxes are computed to be.
@@ -1630,12 +1642,14 @@ class EditableText extends StatefulWidget {
   final Brightness keyboardAppearance;
 
   /// {@template flutter.widgets.editableText.scrollPadding}
-  /// Configures padding to edges surrounding a [Scrollable] when the Textfield scrolls into view.
+  /// Configures the padding for the edges surrounding a [Scrollable] when the
+  /// text field scrolls into view.
   ///
-  /// When this widget receives focus and is not completely visible (for example scrolled partially
-  /// off the screen or overlapped by the keyboard)
-  /// then it will attempt to make itself visible by scrolling a surrounding [Scrollable], if one is present.
-  /// This value controls how far from the edges of a [Scrollable] the TextField will be positioned after the scroll.
+  /// When this widget receives focus and is not completely visible (for example
+  /// scrolled partially off the screen or overlapped by the keyboard), then it
+  /// will attempt to make itself visible by scrolling a surrounding
+  /// [Scrollable], if one is present. This value controls how far from the
+  /// edges of a [Scrollable] the TextField will be positioned after the scroll.
   ///
   /// Defaults to EdgeInsets.all(20.0).
   /// {@endtemplate}
@@ -1888,10 +1902,10 @@ class EditableText extends StatefulWidget {
   /// The [TextSelectionToolbarLayoutDelegate] class may be particularly useful
   /// in honoring the preferred anchor positions.
   ///
-  /// For backwards compatibility, when [selectionControls] is set to an object
-  /// that does not mix in [TextSelectionHandleControls], [contextMenuBuilder]
-  /// is ignored and the [TextSelectionControls.buildToolbar] method is used
-  /// instead.
+  /// For backwards compatibility, when [EditableText.selectionControls] is set
+  /// to an object that does not mix in [TextSelectionHandleControls],
+  /// [contextMenuBuilder] is ignored and the
+  /// [TextSelectionControls.buildToolbar] method is used instead.
   ///
   /// {@tool dartpad}
   /// This example shows how to customize the menu, in this case by keeping the
@@ -2214,7 +2228,7 @@ class EditableText extends StatefulWidget {
   }
 }
 
-/// State for a [EditableText].
+/// State for an [EditableText].
 class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, TextSelectionDelegate, TextInputClient implements AutofillClient {
   Timer? _cursorTimer;
   AnimationController get _cursorBlinkOpacityController {
@@ -2722,7 +2736,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   static SpellCheckConfiguration _inferSpellCheckConfiguration(SpellCheckConfiguration? configuration) {
     final SpellCheckService? spellCheckService = configuration?.spellCheckService;
     final bool spellCheckAutomaticallyDisabled = configuration == null || configuration == const SpellCheckConfiguration.disabled();
-    final bool spellCheckServiceIsConfigured = spellCheckService != null || spellCheckService == null && WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
+    final bool spellCheckServiceIsConfigured = spellCheckService != null || WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
     if (spellCheckAutomaticallyDisabled || !spellCheckServiceIsConfigured) {
       // Only enable spell check if a non-disabled configuration is provided
       // and if that configuration does not specify a spell check service,
@@ -3961,9 +3975,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       case SelectionChangedCause.toolbar:
         requestKeyboard();
       case SelectionChangedCause.keyboard:
-        if (_hasFocus) {
-          requestKeyboard();
-        }
     }
     if (widget.selectionControls == null && widget.contextMenuBuilder == null) {
       _selectionOverlay?.dispose();
@@ -4361,11 +4372,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   TextSelection? _adjustedSelectionWhenFocused() {
     TextSelection? selection;
-    final bool shouldSelectAll = widget.selectionEnabled && kIsWeb
-        && !_isMultiline && !_nextFocusChangeIsInternal;
+    final bool isDesktop = switch (defaultTargetPlatform) {
+      TargetPlatform.android || TargetPlatform.iOS || TargetPlatform.fuchsia => false,
+      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => true,
+    };
+    final bool shouldSelectAll = widget.selectionEnabled
+        && (kIsWeb || isDesktop)
+        && !_isMultiline
+        && !_nextFocusChangeIsInternal;
     if (shouldSelectAll) {
-      // On native web, single line <input> tags select all when receiving
-      // focus.
+      // On native web and desktop platforms, single line <input> tags
+      // select all when receiving focus.
       selection = TextSelection(
         baseOffset: 0,
         extentOffset: _value.text.length,
@@ -5084,7 +5101,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
 
-  /// The default behavior used if [onTapOutside] is null.
+  /// The default behavior used if [EditableText.onTapOutside] is null.
   ///
   /// The `event` argument is the [PointerDownEvent] that caused the notification.
   void _defaultOnTapOutside(PointerDownEvent event) {
@@ -5736,7 +5753,7 @@ class _ScribblePlaceholder extends WidgetSpan {
 /// See also:
 ///
 ///  * [String.runes], which deals with code points like this class.
-///  * [String.characters], which deals with graphemes.
+///  * [Characters], which deals with graphemes.
 ///  * [CharacterBoundary], which is a [TextBoundary] like this class, but whose
 ///    boundaries are graphemes instead of code points.
 class _CodePointBoundary extends TextBoundary {

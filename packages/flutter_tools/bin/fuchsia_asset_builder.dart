@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
+import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 
@@ -44,7 +45,7 @@ Future<void> writeAssetFile(libfs.File outputFile, AssetBundleEntry asset) async
 
 Future<void> run(List<String> args) async {
   final ArgParser parser = ArgParser()
-    ..addOption(_kOptionPackages, help: 'The .packages file')
+    ..addOption(_kOptionPackages, help: 'The .dart_tool/package_config file')
     ..addOption(_kOptionAsset,
         help: 'The directory where to put temporary files')
     ..addOption(_kOptionManifest, help: 'The manifest file')
@@ -63,7 +64,8 @@ Future<void> run(List<String> args) async {
   final AssetBundle? assets = await buildAssets(
     manifestPath: argResults[_kOptionManifest] as String? ?? defaultManifestPath,
     assetDirPath: assetDir,
-    packagesPath: argResults[_kOptionPackages] as String?,
+    packageConfigPath: argResults[_kOptionPackages] as String? ??
+        findPackageConfigFileOrDefault(globals.fs.currentDirectory).path,
     targetPlatform: TargetPlatform.fuchsia_arm64 // This is not arch specific.
   );
 

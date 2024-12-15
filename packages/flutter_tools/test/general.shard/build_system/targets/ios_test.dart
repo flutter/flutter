@@ -20,7 +20,10 @@ import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 
-final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
+final Platform macPlatform = FakePlatform(
+  operatingSystem: 'macos',
+  environment: <String, String>{},
+);
 
 const List<String> _kSharedConfig = <String>[
   '-dynamiclib',
@@ -193,7 +196,10 @@ void main() {
       .createSync();
     // Project info
     fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello');
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
     // Plist file
     fileSystem.file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
       .createSync(recursive: true);
@@ -268,7 +274,10 @@ void main() {
       .createSync();
     // Project info
     fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello\nflutter:\n  shaders:\n    - shader.glsl');
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
     // Plist file
     fileSystem.file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
       .createSync(recursive: true);
@@ -338,7 +347,10 @@ void main() {
 
     // Project info
     fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello');
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
     // Plist file
     fileSystem.file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
       .createSync(recursive: true);
@@ -715,7 +727,7 @@ void main() {
         fileSystem: fileSystem,
         outputDir: outputDir,
         defines: <String, String>{
-          kIosArchs: 'arm64 armv7',
+          kIosArchs: 'arm64 x86_64',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
         },
       );
@@ -732,7 +744,7 @@ void main() {
           binary.path,
           '-verify_arch',
           'arm64',
-          'armv7',
+          'x86_64',
         ], exitCode: 1),
       ]);
 
@@ -741,7 +753,10 @@ void main() {
         throwsA(isException.having(
           (Exception exception) => exception.toString(),
           'description',
-          contains('does not contain arm64 armv7. Running lipo -info:\nArchitectures in the fat file:'),
+          contains(
+            'does not contain architectures "arm64 x86_64".\n\n'
+            'lipo -info:\nArchitectures in the fat file:',
+          ),
         )),
       );
     });
@@ -757,7 +772,7 @@ void main() {
         fileSystem: fileSystem,
         outputDir: outputDir,
         defines: <String, String>{
-          kIosArchs: 'arm64 armv7',
+          kIosArchs: 'arm64 x86_64',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
         },
       );
@@ -774,7 +789,7 @@ void main() {
           binary.path,
           '-verify_arch',
           'arm64',
-          'armv7',
+          'x86_64',
         ]),
         FakeCommand(command: <String>[
           'lipo',
@@ -783,7 +798,7 @@ void main() {
           '-extract',
           'arm64',
           '-extract',
-          'armv7',
+          'x86_64',
           binary.path,
         ], exitCode: 1,
         stderr: 'lipo error'),
@@ -794,7 +809,12 @@ void main() {
         throwsA(isException.having(
           (Exception exception) => exception.toString(),
           'description',
-          contains('Failed to extract arm64 armv7 for output/Flutter.framework/Flutter.\nlipo error\nRunning lipo -info:\nArchitectures in the fat file:'),
+          contains(
+            'Failed to extract architectures "arm64 x86_64" for output/Flutter.framework/Flutter.\n\n'
+            'stderr:\n'
+            'lipo error\n\n'
+            'lipo -info:\nArchitectures in the fat file:',
+          ),
         )),
       );
     });
@@ -840,7 +860,7 @@ void main() {
         fileSystem: fileSystem,
         outputDir: outputDir,
         defines: <String, String>{
-          kIosArchs: 'arm64 armv7',
+          kIosArchs: 'arm64 x86_64',
           kSdkRoot: 'path/to/iPhoneOS.sdk',
         },
       );
@@ -857,7 +877,7 @@ void main() {
           binary.path,
           '-verify_arch',
           'arm64',
-          'armv7',
+          'x86_64',
         ]),
         FakeCommand(command: <String>[
           'lipo',
@@ -866,7 +886,7 @@ void main() {
           '-extract',
           'arm64',
           '-extract',
-          'armv7',
+          'x86_64',
           binary.path,
         ]),
         xattrCommand,

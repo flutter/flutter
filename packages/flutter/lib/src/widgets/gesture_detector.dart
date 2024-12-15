@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'container.dart';
+/// @docImport 'scrollable.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -1695,12 +1701,8 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
       return null;
     }
     return (DragUpdateDetails details) {
-      if (horizontalHandler != null) {
-        horizontalHandler(details);
-      }
-      if (panHandler != null) {
-        panHandler(details);
-      }
+      horizontalHandler?.call(details);
+      panHandler?.call(details);
     };
   }
 
@@ -1730,12 +1732,8 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
       return null;
     }
     return (DragUpdateDetails details) {
-      if (verticalHandler != null) {
-        verticalHandler(details);
-      }
-      if (panHandler != null) {
-        panHandler(details);
-      }
+      verticalHandler?.call(details);
+      panHandler?.call(details);
     };
   }
 }

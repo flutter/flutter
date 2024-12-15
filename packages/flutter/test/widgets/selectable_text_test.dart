@@ -1475,6 +1475,59 @@ void main() {
     expect(topLeft.dx, equals(399.0));
   });
 
+  testWidgets('Tapping outside SelectableText clears the selection', (WidgetTester tester) async {
+    Future<void> setAppLifecycleState(AppLifecycleState state) async {
+      final ByteData? message = const StringCodec().encodeMessage(state.toString());
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    }
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                SelectableText('first selectable text'),
+                SelectableText('second selectable text'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    // Setting the app lifecycle state to AppLifecycleState.resumed to simulate
+    // an applications default running mode, i.e. the application window is focused.
+    await setAppLifecycleState(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+
+    // First tap on the first SelectableText sets the cursor.
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    await tester.pumpAndSettle();
+
+    final EditableText editableTextWidgetFirst = tester.widget(find.byType(EditableText).first);
+    final TextEditingController controllerA = editableTextWidgetFirst.controller;
+    final EditableText editableTextWidgetSecond = tester.widget(find.byType(EditableText).last);
+    final TextEditingController controllerB = editableTextWidgetSecond.controller;
+
+    expect(controllerA.selection, const TextSelection.collapsed(offset: 5));
+    expect(controllerB.selection, TextRange.empty);
+
+    // Tapping on the second SelectableText sets the cursor on it, and clears the selection from
+    // the first SelectableText.
+    final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText).last);
+    await tester.tapAt(selectableTextStart);
+    await tester.pumpAndSettle();
+    expect(controllerA.selection, TextRange.empty);
+    expect(controllerB.selection, const TextSelection.collapsed(offset: 0));
+
+    // Setting the app lifecycle state to AppLifecycleState.inactive to simulate
+    // a lose of window focus. Selection should remain the same.
+    await setAppLifecycleState(AppLifecycleState.inactive);
+    await tester.pumpAndSettle();
+    expect(controllerA.selection, TextRange.empty);
+    expect(controllerB.selection, const TextSelection.collapsed(offset: 0));
+  });
+
   testWidgets('Selectable text is skipped during focus traversal', (WidgetTester tester) async {
     final FocusNode firstFieldFocus = FocusNode();
     addTearDown(firstFieldFocus.dispose);
@@ -2900,7 +2953,7 @@ void main() {
       // But don't trigger the toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
   testWidgets(
@@ -2933,10 +2986,11 @@ void main() {
       // But don't trigger the toolbar.
       expect(find.byType(TextButton), findsNothing);
     },
+    variant: TargetPlatformVariant.all(excluding: const <TargetPlatform>{ TargetPlatform.iOS })
   );
 
   testWidgets(
-    'two slow taps do not trigger a word selection',
+    'two slow taps do not trigger a word selection on iOS',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -2967,7 +3021,42 @@ void main() {
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'two slow taps do not trigger a word selection',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Material(
+            child: Center(
+              child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
+            ),
+          ),
+        ),
+      );
+
+      final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+
+      await tester.tapAt(selectableTextStart + const Offset(50.0, 5.0));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.tapAt(selectableTextStart + const Offset(50.0, 5.0));
+      await tester.pump();
+
+      final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+      final TextEditingController controller = editableTextWidget.controller;
+
+      // Plain collapsed selection.
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 4, affinity: TextAffinity.upstream),
+      );
+
+      // No toolbar.
+      expect(find.byType(CupertinoButton), findsNothing);
+    },
+    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }),
   );
 
   testWidgets(
@@ -2997,9 +3086,11 @@ void main() {
       final TextEditingController controller = editableTextWidget.controller;
 
       // First tap moved the cursor.
+      // On iOS, this moves the cursor to the closest word edge.
+      // On macOS, this moves the cursor to the tapped position.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 12, affinity: TextAffinity.upstream),
+        TextSelection.collapsed(offset: defaultTargetPlatform == TargetPlatform.iOS ? 12 : 11, affinity: TextAffinity.upstream),
       );
       await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
       await tester.pump();
@@ -3012,7 +3103,7 @@ void main() {
 
       expectCupertinoSelectionToolbar();
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
   testWidgets(
@@ -3150,7 +3241,7 @@ void main() {
       // The toolbar is still showing.
       expectCupertinoSelectionToolbar();
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
   testWidgets(
@@ -3183,7 +3274,7 @@ void main() {
         const TextSelection(baseOffset: 13, extentOffset: 23),
       );
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
   testWidgets(
@@ -3230,7 +3321,51 @@ void main() {
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'tap after a double tap select is not affected (macOS)',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Material(
+            child: Center(
+              child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
+            ),
+          ),
+        ),
+      );
+
+      final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+
+      await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
+      await tester.pump(const Duration(milliseconds: 50));
+
+      final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+      final TextEditingController controller = editableTextWidget.controller;
+
+      // First tap moved the cursor.
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 11, affinity: TextAffinity.upstream),
+      );
+      await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
+      await tester.pump(const Duration(milliseconds: 500));
+
+      await tester.tapAt(selectableTextStart + const Offset(100.0, 5.0));
+      await tester.pump();
+
+      // Collapse selection.
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 7),
+      );
+
+      // No toolbar.
+      expect(find.byType(CupertinoButton), findsNothing);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
   );
 
   testWidgets(
@@ -3265,7 +3400,7 @@ void main() {
 
       expectCupertinoSelectionToolbar();
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
   testWidgets(
@@ -3458,7 +3593,7 @@ void main() {
   );
 
   testWidgets(
-    'long press tap cannot initiate a double tap',
+    'long press tap cannot initiate a double tap on macOS',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -3487,16 +3622,56 @@ void main() {
       final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
       final TextEditingController controller = editableTextWidget.controller;
 
-      // We ended up moving the cursor to the edge of the same word and dismissed
-      // the toolbar.
+      // Move the cursor to the tapped position.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
+        const TextSelection.collapsed(offset: 4, affinity: TextAffinity.upstream),
       );
 
       expect(find.byType(CupertinoButton), findsNothing);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+  );
+
+  testWidgets(
+    'long press tap cannot initiate a double tap on iOS',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Material(
+            child: Center(
+              child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
+            ),
+          ),
+        ),
+      );
+
+      final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+
+      await tester.longPressAt(selectableTextStart + const Offset(50.0, 5.0));
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // Hide the toolbar so it doesn't interfere with taps on the text.
+      final EditableTextState editableTextState =
+          tester.state<EditableTextState>(find.byType(EditableText));
+      editableTextState.hideToolbar();
+      await tester.pumpAndSettle();
+
+      await tester.tapAt(selectableTextStart + const Offset(50.0, 5.0));
+      await tester.pump();
+
+      final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+      final TextEditingController controller = editableTextWidget.controller;
+
+      // Move the cursor to the edge of the same word and toggle the toolbar.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+
+      expect(find.byType(CupertinoButton), findsNWidgets(4));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
   testWidgets(
@@ -4029,7 +4204,7 @@ void main() {
     expect(startHandleAfter.opacity.value, 0.0);
     expect(endHandleAfter.opacity.value, 1.0);
   },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.android }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
   );
 
   testWidgets(
@@ -4098,10 +4273,10 @@ void main() {
       final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
       final TextEditingController controller = editableTextWidget.controller;
 
-      // First tap moved the cursor to the beginning of the second word.
+      // First tap moves the cursor to the tapped position.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 12, affinity: TextAffinity.upstream),
+        const TextSelection.collapsed(offset: 11, affinity: TextAffinity.upstream),
       );
       await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 500));
@@ -4154,7 +4329,7 @@ void main() {
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 12, affinity: TextAffinity.upstream),
+        TextSelection.collapsed(offset: defaultTargetPlatform == TargetPlatform.iOS ? 12 : 11, affinity: TextAffinity.upstream),
       );
       await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
       await tester.pump();
@@ -4166,7 +4341,7 @@ void main() {
       );
 
       expectCupertinoSelectionToolbar();
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
   testWidgets(
@@ -4191,7 +4366,7 @@ void main() {
 
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
+        TextSelection.collapsed(offset: defaultTargetPlatform == TargetPlatform.iOS ? 7 : 4, affinity: TextAffinity.upstream),
       );
       await tester.tapAt(selectableTextStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
@@ -4205,13 +4380,17 @@ void main() {
       await tester.pumpAndSettle(kDoubleTapTimeout);
       await tester.tapAt(selectableTextStart + const Offset(10.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
-      // First tap moved the cursor.
+
+      // First tap moved the cursor and toggled the toolbar.
+      expect(find.byType(CupertinoButton), findsNothing);
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 7, affinity: TextAffinity.upstream),
+        defaultTargetPlatform == TargetPlatform.iOS ? const TextSelection(baseOffset: 0, extentOffset: 7) : const TextSelection.collapsed(offset: 1, affinity: TextAffinity.upstream),
       );
       await tester.tapAt(selectableTextStart + const Offset(10.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
+      // Second tap toggled the toolbar, and on macOS also selects the word at the tapped position.
+      // On iOS the selection remains the same.
       expect(
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
@@ -4230,7 +4409,7 @@ void main() {
       // First tap moved the cursor.
       expect(
         controller.selection,
-        const TextSelection.collapsed(offset: 12, affinity: TextAffinity.upstream),
+        TextSelection.collapsed(offset: defaultTargetPlatform == TargetPlatform.iOS ? 12 : 11, affinity: TextAffinity.upstream),
       );
       await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
@@ -4240,7 +4419,7 @@ void main() {
       );
       expectCupertinoSelectionToolbar();
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
   testWidgets('force press does not select a word on (android)', (WidgetTester tester) async {
@@ -4410,7 +4589,7 @@ void main() {
     expect(description, <String>[
       'data: something',
       'semanticsLabel: something else',
-      'style: TextStyle(inherit: true, color: Color(0xff00ff00))',
+      'style: TextStyle(inherit: true, color: ${const Color(0xff00ff00)})',
       'autofocus: true',
       'showCursor: true',
       'minLines: 2',
@@ -4421,7 +4600,7 @@ void main() {
       'cursorWidth: 1.0',
       'cursorHeight: 1.0',
       'cursorRadius: Radius.circular(0.0)',
-      'cursorColor: Color(0xff00ff00)',
+      'cursorColor: ${const Color(0xff00ff00)}',
       'selection disabled',
       'scrollPhysics: ClampingScrollPhysics',
     ]);
@@ -5318,7 +5497,7 @@ void main() {
     expect(selection, isNotNull);
     expect(selection!.baseOffset, 0);
     expect(selection!.extentOffset, 1);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS,  TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
   testWidgets('double tapping a space selects the previous word on mobile', (WidgetTester tester) async {
     TextSelection? selection;

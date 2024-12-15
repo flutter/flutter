@@ -1182,7 +1182,7 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   @override
   Future<void> tryjobInit() async => tryInitCalls += 1;
   @override
-  Future<bool> tryjobAdd(String testName, File goldenFile) async => true;
+  Future<String?> tryjobAdd(String testName, File goldenFile) async => null;
 
   Map<String, List<int>> imageBytesValues = <String, List<int>>{};
   @override

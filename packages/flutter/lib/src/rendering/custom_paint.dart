@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
@@ -903,6 +906,9 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.link != null) {
       config.isLink = properties.link!;
+    }
+    if (properties.linkUrl != null) {
+      config.linkUrl = properties.linkUrl;
     }
     if (properties.textField != null) {
       config.isTextField = properties.textField!;

@@ -27,6 +27,7 @@ if (flutterVersionName == null) {
 }
 
 android {
+    namespace = "com.example.tracing_tests"
     compileSdk flutter.compileSdkVersion
 
     compileOptions {

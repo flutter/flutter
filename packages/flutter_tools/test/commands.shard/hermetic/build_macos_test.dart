@@ -20,7 +20,6 @@ import 'package:flutter_tools/src/commands/build_macos.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -66,7 +65,6 @@ final Platform notMacosPlatform = FakePlatform(
 
 void main() {
   late MemoryFileSystem fileSystem;
-  late TestUsage usage;
   late FakeProcessManager fakeProcessManager;
   late ProcessUtils processUtils;
   late BufferLogger logger;
@@ -82,7 +80,6 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     artifacts = Artifacts.test(fileSystem: fileSystem);
     logger = BufferLogger.test();
-    usage = TestUsage();
     fakeProcessManager = FakeProcessManager.empty();
     processUtils = ProcessUtils(
       logger: logger,
@@ -98,7 +95,7 @@ void main() {
   // Sets up the minimal mock project files necessary to look like a Flutter project.
   void createCoreMockProjectFiles() {
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
+    fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
@@ -657,7 +654,6 @@ STDERR STUFF
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
-    Usage: () => usage,
     Analytics: () => fakeAnalytics,
   });
   testUsingContext('Performs code size analysis and sends analytics from arm64 host', () async {
@@ -682,9 +678,6 @@ STDERR STUFF
 
     expect(testLogger.statusText, contains('A summary of your macOS bundle analysis can be found at'));
     expect(testLogger.statusText, contains('dart devtools --appSizeBase='));
-    expect(usage.events, contains(
-      const TestUsageEvent('code-size-analysis', 'macos'),
-    ));
     expect(fakeAnalytics.sentEvents, contains(Event.codeSizeAnalysis(platform: 'macos')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -711,7 +704,6 @@ STDERR STUFF
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
-    Usage: () => usage,
     Analytics: () => fakeAnalytics,
   });
 

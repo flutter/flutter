@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/semantics.dart';
+/// @docImport 'package:flutter/widgets.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
+library;
+
 import 'dart:io' show Platform;
 import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder, SemanticsUpdate;
 
@@ -24,14 +29,14 @@ class ViewConfiguration {
   /// and a [devicePixelRatio] of 1.0.
   ///
   /// [ViewConfiguration.fromView] is a more convenient way for deriving a
-  /// [ViewConfiguration] from a given [FlutterView].
+  /// [ViewConfiguration] from a given [ui.FlutterView].
   const ViewConfiguration({
     this.physicalConstraints = const BoxConstraints(maxWidth: 0, maxHeight: 0),
     this.logicalConstraints = const BoxConstraints(maxWidth: 0, maxHeight: 0),
     this.devicePixelRatio = 1.0,
   });
 
-  /// Creates a view configuration for the provided [FlutterView].
+  /// Creates a view configuration for the provided [ui.FlutterView].
   factory ViewConfiguration.fromView(ui.FlutterView view) {
     final BoxConstraints physicalConstraints = BoxConstraints.fromViewConstraints(view.physicalConstraints);
     final double devicePixelRatio = view.devicePixelRatio;
@@ -51,7 +56,7 @@ class ViewConfiguration {
   ///
   /// These constraints are enforced in [toPhysicalSize] when translating
   /// the logical size of the root render object back to physical pixels for
-  /// the [FlutterView.render] method.
+  /// the [ui.FlutterView.render] method.
   final BoxConstraints physicalConstraints;
 
   /// The pixel density of the output surface.
@@ -61,7 +66,7 @@ class ViewConfiguration {
   ///
   /// The matrix translates points from the local coordinate system of the
   /// app (in logical pixels) to the global coordinate system of the
-  /// [FlutterView] (in physical pixels).
+  /// [ui.FlutterView] (in physical pixels).
   Matrix4 toMatrix() {
     return Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
   }
@@ -81,10 +86,10 @@ class ViewConfiguration {
 
   /// Transforms the provided [Size] in logical pixels to physical pixels.
   ///
-  /// The [FlutterView.render] method accepts only sizes in physical pixels, but
+  /// The [ui.FlutterView.render] method accepts only sizes in physical pixels, but
   /// the framework operates in logical pixels. This method is used to transform
   /// the logical size calculated for a [RenderView] back to a physical size
-  /// suitable to be passed to [FlutterView.render].
+  /// suitable to be passed to [ui.FlutterView.render].
   ///
   /// By default, this method just multiplies the provided [Size] with the
   /// [devicePixelRatio] and constraints the results to the
@@ -198,7 +203,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     return configuration.logicalConstraints;
   }
 
-  /// The [FlutterView] into which this [RenderView] will render.
+  /// The [ui.FlutterView] into which this [RenderView] will render.
   ui.FlutterView get flutterView => _view;
   final ui.FlutterView _view;
 
@@ -277,9 +282,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void performLayout() {
     assert(_rootTransform != null);
     final bool sizedByChild = !constraints.isTight;
-    if (child != null) {
-      child!.layout(constraints, parentUsesSize: sizedByChild);
-    }
+    child?.layout(constraints, parentUsesSize: sizedByChild);
     _size = sizedByChild && child != null ? child!.size : constraints.smallest;
     assert(size.isFinite);
     assert(constraints.isSatisfiedBy(size));
@@ -296,9 +299,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// coordinate system as that expected by the root [Layer], which will
   /// normally be in physical (device) pixels.
   bool hitTest(HitTestResult result, { required Offset position }) {
-    if (child != null) {
-      child!.hitTest(BoxHitTestResult.wrap(result), position: position);
-    }
+    child?.hitTest(BoxHitTestResult.wrap(result), position: position);
     result.add(HitTestEntry(this));
     return true;
   }
@@ -365,10 +366,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     }
   }
 
-  /// Sends the provided [SemanticsUpdate] to the [FlutterView] associated with
+  /// Sends the provided [ui.SemanticsUpdate] to the [ui.FlutterView] associated with
   /// this [RenderView].
   ///
-  /// A [SemanticsUpdate] is produced by a [SemanticsOwner] during the
+  /// A [ui.SemanticsUpdate] is produced by a [SemanticsOwner] during the
   /// [EnginePhase.flushSemantics] phase.
   void updateSemantics(ui.SemanticsUpdate update) {
     _view.updateSemantics(update);

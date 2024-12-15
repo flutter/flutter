@@ -99,7 +99,6 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     required DebuggingOptions debuggingOptions,
     Map<String, Object?> platformArgs = const <String, Object>{},
     bool prebuiltApplication = false,
-    bool ipv6 = false,
     String? userIdentifier,
   }) async {
     // Only attaching to a running app launched from Xcode is supported.

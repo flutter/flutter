@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -212,19 +215,19 @@ enum MainAxisAlignment {
   /// after the first and last child.
   spaceEvenly;
 
-  (double leadingSpace, double betweenSpace) _distributeSpace(double freeSpace, int itemCount, bool flipped) {
+  (double leadingSpace, double betweenSpace) _distributeSpace(double freeSpace, int itemCount, bool flipped, double spacing) {
     assert(itemCount >= 0);
     return switch (this) {
-      MainAxisAlignment.start => flipped ? (freeSpace, 0.0) : (0.0, 0.0),
+      MainAxisAlignment.start => flipped ? (freeSpace, spacing) : (0.0, spacing),
 
-      MainAxisAlignment.end =>                             MainAxisAlignment.start._distributeSpace(freeSpace, itemCount, !flipped),
-      MainAxisAlignment.spaceBetween when itemCount < 2 => MainAxisAlignment.start._distributeSpace(freeSpace, itemCount, flipped),
-      MainAxisAlignment.spaceAround when itemCount == 0 => MainAxisAlignment.start._distributeSpace(freeSpace, itemCount, flipped),
+      MainAxisAlignment.end =>                             MainAxisAlignment.start._distributeSpace(freeSpace, itemCount, !flipped, spacing),
+      MainAxisAlignment.spaceBetween when itemCount < 2 => MainAxisAlignment.start._distributeSpace(freeSpace, itemCount, flipped, spacing),
+      MainAxisAlignment.spaceAround when itemCount == 0 => MainAxisAlignment.start._distributeSpace(freeSpace, itemCount, flipped, spacing),
 
-      MainAxisAlignment.center =>       (freeSpace / 2.0,             0.0),
-      MainAxisAlignment.spaceBetween => (0.0,                         freeSpace / (itemCount - 1)),
-      MainAxisAlignment.spaceAround =>  (freeSpace / itemCount / 2,   freeSpace / itemCount),
-      MainAxisAlignment.spaceEvenly =>  (freeSpace / (itemCount + 1), freeSpace / (itemCount + 1)),
+      MainAxisAlignment.center =>       (freeSpace / 2.0,             spacing),
+      MainAxisAlignment.spaceBetween => (0.0,                         freeSpace / (itemCount - 1) + spacing),
+      MainAxisAlignment.spaceAround =>  (freeSpace / itemCount / 2,   freeSpace / itemCount + spacing),
+      MainAxisAlignment.spaceEvenly =>  (freeSpace / (itemCount + 1), freeSpace / (itemCount + 1) + spacing),
     };
   }
 }
@@ -387,6 +390,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline? textBaseline,
     Clip clipBehavior = Clip.none,
+    double spacing = 0.0,
   }) : _direction = direction,
        _mainAxisAlignment = mainAxisAlignment,
        _mainAxisSize = mainAxisSize,
@@ -394,7 +398,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
        _textDirection = textDirection,
        _verticalDirection = verticalDirection,
        _textBaseline = textBaseline,
-       _clipBehavior = clipBehavior {
+       _clipBehavior = clipBehavior,
+       _spacing = spacing,
+       assert(spacing >= 0.0) {
     addAll(children);
   }
 
@@ -585,6 +591,69 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
+  /// {@template flutter.rendering.RenderFlex.spacing}
+  /// How much space to place between children in the main axis.
+  ///
+  /// The spacing is only applied between children in the main axis.
+  ///
+  /// If the [spacing] is 10.0 and the [mainAxisAlignment] is
+  /// [MainAxisAlignment.start], then the first child will be placed at the start
+  /// of the main axis, and the second child will be placed 10.0 pixels after
+  /// the first child in the main axis, and so on. The [spacing] is not applied
+  /// before the first child or after the last child.
+  ///
+  /// If the [spacing] is 10.0 and the [mainAxisAlignment] is [MainAxisAlignment.end],
+  /// then the last child will be placed at the end of the main axis, and the
+  /// second-to-last child will be placed 10.0 pixels before the last child in
+  /// the main axis, and so on. The [spacing] is not applied before the first
+  /// child or after the last child.
+  ///
+  /// If the [spacing] is 10.0 and the [mainAxisAlignment] is [MainAxisAlignment.center],
+  /// then the children will be placed in the center of the main axis with 10.0
+  /// pixels of space between the children. The [spacing] is not applied before the first
+  /// child or after the last child.
+  ///
+  /// If the [spacing] is 10.0 and the [mainAxisAlignment] is [MainAxisAlignment.spaceBetween],
+  /// then there will be a minimum of 10.0 pixels of space between each child in the
+  /// main axis. If the free space is 100.0 pixels between the two children,
+  /// then the minimum space between the children will be 10.0 pixels and the
+  /// remaining 90.0 pixels will be the free space between the children. The
+  /// [spacing] is not applied before the first child or after the last child.
+  ///
+  /// If the [spacing] is 10.0 and the [mainAxisAlignment] is [MainAxisAlignment.spaceAround],
+  /// then there will be a minimum of 10.0 pixels of space between each child in the
+  /// main axis, and the remaining free space will be placed between the children as
+  /// well as before the first child and after the last child. The [spacing] is
+  /// not applied before the first child or after the last child.
+  ///
+  /// If the [spacing] is 10.0 and the [mainAxisAlignment] is [MainAxisAlignment.spaceEvenly],
+  /// then there will be a minimum of 10.0 pixels of space between each child in the
+  /// main axis, and the remaining free space will be evenly placed between the
+  /// children as well as before the first child and after the last child. The
+  /// [spacing] is not applied before the first child or after the last child.
+  ///
+  /// When the [spacing] is non-zero, the layout size will be larger than
+  /// the sum of the children's layout sizes in the main axis.
+  ///
+  /// When the total children's layout sizes and total spacing between the
+  /// children is greater than the maximum constraints in the main axis, then
+  /// the children will overflow. For example, if there are two children and the
+  /// maximum constraint is 100.0 pixels, the children's layout sizes are 50.0
+  /// pixels each, and the spacing is 10.0 pixels, then the children will
+  /// overflow by 10.0 pixels.
+  ///
+  /// Defaults to 0.0.
+  /// {@endtemplate}
+  double get spacing => _spacing;
+  double _spacing;
+  set spacing (double value) {
+    if (_spacing == value) {
+      return;
+    }
+    _spacing = value;
+    markNeedsLayout();
+  }
+
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! FlexParentData) {
@@ -594,15 +663,15 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
   double _getIntrinsicSize({
     required Axis sizingDirection,
-    required double extent, // the extent in the direction that isn't the sizing direction
-    required _ChildSizingFunction childSize, // a method to find the size in the sizing direction
+    required double extent, // The extent in the direction that isn't the sizing direction.
+    required _ChildSizingFunction childSize, // A method to find the size in the sizing direction.
   }) {
     if (_direction == sizingDirection) {
       // INTRINSIC MAIN SIZE
       // Intrinsic main size is the smallest size the flex container can take
       // while maintaining the min/max-content contributions of its flex items.
       double totalFlex = 0.0;
-      double inflexibleSpace = 0.0;
+      double inflexibleSpace = spacing * (childCount - 1);
       double maxFlexFractionSoFar = 0.0;
       for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
         final int flex = _getFlex(child);
@@ -822,7 +891,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       case Axis.vertical:
         final double freeSpace = math.max(0.0, sizes.mainAxisFreeSpace);
         final bool flipMainAxis = _flipMainAxis;
-        final (double leadingSpaceY, double spaceBetween) = mainAxisAlignment._distributeSpace(freeSpace, childCount, flipMainAxis);
+        final (double leadingSpaceY, double spaceBetween) = mainAxisAlignment._distributeSpace(freeSpace, childCount, flipMainAxis, spacing);
         double y = flipMainAxis
           ? leadingSpaceY + (childCount - 1) * spaceBetween + (sizes.axisSize.mainAxisExtent - sizes.mainAxisFreeSpace)
           : leadingSpaceY;
@@ -975,7 +1044,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     int totalFlex = 0;
     RenderBox? firstFlexChild;
     _AscentDescent accumulatedAscentDescent = _AscentDescent.none;
-    _AxisSize accumulatedSize = _AxisSize.empty;
+    // Initially, accumulatedSize is the sum of the spaces between children in the main axis.
+    _AxisSize accumulatedSize = _AxisSize._(Size(spacing * (childCount - 1), 0.0));
     for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
       final int flex;
       if (canFlex && (flex = _getFlex(child)) > 0) {
@@ -1061,7 +1131,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     final double remainingSpace = math.max(0.0, sizes.mainAxisFreeSpace);
     final bool flipMainAxis = _flipMainAxis;
     final bool flipCrossAxis = _flipCrossAxis;
-    final (double leadingSpace, double betweenSpace) = mainAxisAlignment._distributeSpace(remainingSpace, childCount, flipMainAxis);
+    final (double leadingSpace, double betweenSpace) = mainAxisAlignment._distributeSpace(remainingSpace, childCount, flipMainAxis, spacing);
     final (_NextChild nextChild, RenderBox? topLeftChild) = flipMainAxis ? (childBefore, lastChild) : (childAfter, firstChild);
     final double? baselineOffset = sizes.baselineOffset;
     assert(baselineOffset == null || (crossAxisAlignment == CrossAxisAlignment.baseline && direction == Axis.horizontal));
@@ -1189,5 +1259,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: null));
     properties.add(EnumProperty<TextBaseline>('textBaseline', textBaseline, defaultValue: null));
+    properties.add(DoubleProperty('spacing', spacing, defaultValue: null));
   }
 }

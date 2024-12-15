@@ -606,7 +606,7 @@ class PlatformMenu extends PlatformMenuItem with DiagnosticableTreeMixin {
       previousItem = item;
       return false;
     });
-    if (result.isNotEmpty && result.last[_kIsDividerKey] == true) {
+    if (result.lastOrNull case {_kIsDividerKey: true}) {
       result.removeLast();
     }
     return <String, Object?>{

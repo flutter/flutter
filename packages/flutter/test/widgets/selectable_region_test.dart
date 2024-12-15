@@ -16,8 +16,8 @@ import 'semantics_tester.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
-  final Offset localOffset = paragraph.getOffsetForCaret(TextPosition(offset: offset), caret);
-  return paragraph.localToGlobal(localOffset);
+  final Offset localOffset = paragraph.getOffsetForCaret(TextPosition(offset: offset), caret) + Offset(0.0, paragraph.preferredLineHeight);
+  return paragraph.localToGlobal(localOffset) + const Offset(kIsWeb ? 1.0 : 0.0, -2.0);
 }
 
 Offset globalize(Offset point, RenderBox box) {
@@ -1261,6 +1261,123 @@ void main() {
       skip: !kIsWeb, // [intended] This test verifies web behavior.
     );
 
+    testWidgets('RenderParagraph should invalidate cachedRect on window size change', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/155143.
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      addTearDown(tester.view.reset);
+      const String testString = 'How are you doing today? Good, and you?';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: const Center(
+              child: Text(testString),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.textContaining('How are you'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, testString.length));
+      await tester.pumpAndSettle();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 2, extentOffset: testString.length));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Change the size of the window.
+      tester.view.physicalSize = const Size(800.0, 400.0);
+      await tester.pumpAndSettle();
+
+      // Start a new drag.
+      await gesture.down(textOffsetToPosition(paragraph, 0));
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle(kDoubleTapTimeout);
+      expect(paragraph.selections.isEmpty, isFalse);
+      expect(paragraph.selections[0], const TextSelection.collapsed(offset: 0));
+
+      await gesture.down(textOffsetToPosition(paragraph, 2));
+      await tester.pumpAndSettle();
+
+      // Select to the end.
+      await gesture.moveTo(textOffsetToPosition(paragraph, testString.length));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 2, extentOffset: testString.length));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    }, variant: TargetPlatformVariant.all(),
+       skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+    );
+
+    testWidgets('RenderParagraph should invalidate cached bounding boxes', (WidgetTester tester) async {
+      final UniqueKey outerText = UniqueKey();
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: Scaffold(
+              body: Center(
+                child: Text(
+                  'How are you doing today? Good, and you?',
+                  key: outerText,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
+      final SelectableRegionState state =
+          tester.state<SelectableRegionState>(find.byType(SelectableRegion));
+
+      // Double click to select word at position.
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 27), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      await gesture.down(textOffsetToPosition(paragraph, 27));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Should select "Good".
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 25, extentOffset: 29));
+
+      // Change the size of the window.
+      tester.view.physicalSize = const Size(800.0, 400.0);
+      await tester.pumpAndSettle();
+      state.clearSelection();
+      await tester.pumpAndSettle(kDoubleTapTimeout);
+      expect(paragraph.selections.isEmpty, isTrue);
+
+      // Double click at the same position.
+      await gesture.down(textOffsetToPosition(paragraph, 27));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      await gesture.down(textOffsetToPosition(paragraph, 27));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Should select "Good" again.
+      expect(paragraph.selections.isEmpty, isFalse);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 25, extentOffset: 29));
+    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+
     testWidgets('mouse can select single text on desktop platforms', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
@@ -1971,6 +2088,103 @@ void main() {
       await gesture.up();
     });
 
+    testWidgets('mouse shift + click holds the selection start in place and moves the end', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: const Column(
+              children: <Widget>[
+                Text('How are you?'),
+                Text('Good, and you?'),
+                Text('Fine, thank you.'),
+              ],
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 9), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(paragraph1.selections[0], const TextSelection.collapsed(offset: 9));
+
+      final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await gesture.down(textOffsetToPosition(paragraph2, 5));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 9, extentOffset: 12));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 5));
+
+      final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
+      await gesture.down(textOffsetToPosition(paragraph3, 13));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 9, extentOffset: 12));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+      expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 13));
+
+      await gesture.down(textOffsetToPosition(paragraph1, 4));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 9, extentOffset: 4));
+      expect(paragraph2.selections.isEmpty, isTrue);
+      expect(paragraph3.selections.isEmpty, isTrue);
+
+      await gesture.down(textOffsetToPosition(paragraph1, 0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 9, extentOffset: 0));
+      expect(paragraph2.selections.isEmpty, isTrue);
+      expect(paragraph3.selections.isEmpty, isTrue);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    }, variant: TargetPlatformVariant.desktop());
+
+    testWidgets('mouse shift + click collapses the selection when it has not been initialized', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: const Column(
+              children: <Widget>[
+                Text('How are you?'),
+                Text('Good, and you?'),
+                Text('Fine, thank you.'),
+              ],
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+      final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
+      final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 9), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(paragraph1.selections[0], const TextSelection.collapsed(offset: 9));
+      expect(paragraph2.selections.isEmpty, isTrue);
+      expect(paragraph3.selections.isEmpty, isTrue);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    }, variant: TargetPlatformVariant.desktop());
+
     testWidgets('collapsing selection should clear selection of all other selectables', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
@@ -2353,6 +2567,82 @@ void main() {
         expect(paragraph.selections.isEmpty, false);
         expect(paragraph.selections[0], const TextSelection.collapsed(offset: 1));
         expect(find.byKey(toolbarKey), findsNothing);
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
+      skip: kIsWeb, // [intended] Web uses its native context menu.
+    );
+
+    testWidgets(
+      'right-click mouse on an active selection does not clear the selection in other selectables on Apple platforms',
+      (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/150268.
+        Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
+        final UniqueKey toolbarKey = UniqueKey();
+        final FocusNode focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              focusNode: focusNode,
+              selectionControls: materialTextSelectionHandleControls,
+              contextMenuBuilder: (
+                BuildContext context,
+                SelectableRegionState selectableRegionState,
+              ) {
+                buttonTypes = selectableRegionState.contextMenuButtonItems
+                  .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
+                  .toSet();
+                return SizedBox.shrink(key: toolbarKey);
+              },
+              child: const Column(
+                children: <Widget>[
+                  Text('How are you?'),
+                  Text('Good, and you?'),
+                  Text('Fine, thank you.'),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        expect(buttonTypes.isEmpty, true);
+        expect(find.byKey(toolbarKey), findsNothing);
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+        final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
+        final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
+        final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse);
+        final TestGesture secondaryMouseButtonGesture = await tester.createGesture(kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+        addTearDown(secondaryMouseButtonGesture.removePointer);
+        addTearDown(gesture.removePointer);
+        await tester.pump();
+        await gesture.moveTo(textOffsetToPosition(paragraph3, 5));
+        await tester.pump();
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(paragraph.selections, isNotEmpty);
+        expect(paragraph2.selections, isNotEmpty);
+        expect(paragraph3.selections, isNotEmpty);
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 2, extentOffset: 12));
+        expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+        expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 5));
+
+        // Right-clicking on the active selection should retain the selection.
+        await secondaryMouseButtonGesture.down(textOffsetToPosition(paragraph2, 7));
+        await tester.pump();
+        await secondaryMouseButtonGesture.up();
+        await tester.pumpAndSettle();
+        expect(paragraph.selections, isNotEmpty);
+        expect(paragraph2.selections, isNotEmpty);
+        expect(paragraph3.selections, isNotEmpty);
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 2, extentOffset: 12));
+        expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+        expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 5));
+
+        expect(buttonTypes, contains(ContextMenuButtonType.copy));
+        expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsOneWidget);
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
       skip: kIsWeb, // [intended] Web uses its native context menu.
@@ -3170,12 +3460,8 @@ void main() {
       );
       final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
 
-      // Adjust `textOffsetToPosition` result because it returns the wrong vertical position (wrong line).
-      // TODO(bleroux): Remove when https://github.com/flutter/flutter/issues/133637 is fixed.
-      final Offset gestureOffset = textOffsetToPosition(paragraph, 125).translate(0, 10);
-
       // Right click to select word at position.
-      final TestGesture gesture = await tester.startGesture(gestureOffset, kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 125), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
       addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.up();
@@ -3220,12 +3506,8 @@ void main() {
       );
       final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
 
-      // Adjust `textOffsetToPosition` result because it returns the wrong vertical position (wrong line).
-      // TODO(bleroux): Remove when https://github.com/flutter/flutter/issues/133637 is fixed.
-      final Offset gestureOffset = textOffsetToPosition(paragraph, 125).translate(0, 10);
-
       // Right click to select word at position.
-      final TestGesture gesture = await tester.startGesture(gestureOffset, kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 125), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
       addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.up();
@@ -4523,6 +4805,64 @@ void main() {
     variant: TargetPlatformVariant.all(),
     skip: kIsWeb, // [intended] Web uses its native context menu.
   );
+
+  testWidgets('can clear selection through SelectableRegionState', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: focusNode,
+          selectionControls: materialTextSelectionControls,
+          child: const Column(
+            children: <Widget>[
+              Text('How are you?'),
+              Text('Good, and you?'),
+              Text('Fine, thank you.'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final SelectableRegionState state =
+        tester.state<SelectableRegionState>(find.byType(SelectableRegion));
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    await gesture.down(textOffsetToPosition(paragraph1, 2));
+    await tester.pumpAndSettle();
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+
+    await gesture.moveTo(textOffsetToPosition(paragraph1, 4));
+    await tester.pump();
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
+
+    final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
+    await gesture.moveTo(textOffsetToPosition(paragraph2, 5));
+    // Should select the rest of paragraph 1.
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 12));
+    expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
+
+    final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
+    await gesture.moveTo(textOffsetToPosition(paragraph3, 6));
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 12));
+    expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+    expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 11));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Clear selection programatically.
+    state.clearSelection();
+    expect(paragraph1.selections, isEmpty);
+    expect(paragraph2.selections, isEmpty);
+    expect(paragraph3.selections, isEmpty);
+  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
   testWidgets('Text processing actions are added to the toolbar', (WidgetTester tester) async {
     final MockProcessTextHandler mockProcessTextHandler = MockProcessTextHandler();

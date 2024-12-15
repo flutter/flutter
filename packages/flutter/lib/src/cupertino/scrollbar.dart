@@ -84,6 +84,7 @@ class CupertinoScrollbar extends RawScrollbar {
     this.radiusWhileDragging = defaultRadiusWhileDragging,
     ScrollNotificationPredicate? notificationPredicate,
     super.scrollbarOrientation,
+    super.mainAxisMargin = _kScrollbarMainAxisMargin,
   }) : assert(thickness < double.infinity),
        assert(thicknessWhileDragging < double.infinity),
        super(
@@ -156,7 +157,7 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
       ..color = CupertinoDynamicColor.resolve(_kScrollbarColor, context)
       ..textDirection = Directionality.of(context)
       ..thickness = _thickness
-      ..mainAxisMargin = _kScrollbarMainAxisMargin
+      ..mainAxisMargin = widget.mainAxisMargin
       ..crossAxisMargin = _kScrollbarCrossAxisMargin
       ..radius = _radius
       ..padding = MediaQuery.paddingOf(context)
@@ -208,6 +209,14 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
     };
     if (axisPosition != _pressStartAxisPosition && axisVelocity.abs() < 10) {
       HapticFeedback.mediumImpact();
+    }
+  }
+
+  @override
+  void handleTrackTapDown(TapDownDetails details) {
+    // On iOS, tapping the track does not page towards the position of the tap.
+    if (ScrollConfiguration.of(context).getPlatform(context) != TargetPlatform.iOS) {
+      super.handleTrackTapDown(details);
     }
   }
 

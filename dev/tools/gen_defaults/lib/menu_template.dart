@@ -122,6 +122,11 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   // No default fixedSize
 
   @override
+  MaterialStateProperty<double>? get iconSize {
+    return const MaterialStatePropertyAll<double>(${getToken("md.comp.list.list-item.leading-icon.size")});
+  }
+
+  @override
   MaterialStateProperty<Size>? get maximumSize {
     return ButtonStyleButton.allOrNull<Size>(Size.infinite);
   }

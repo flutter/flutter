@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'page_storage.dart';
+/// @docImport 'safe_area.dart';
+/// @docImport 'scrollable.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -36,7 +43,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///
 /// The most common use case for this widget is a scrollable view with a
 /// flexible [SliverAppBar] containing a [TabBar] in the header (built by
-/// [headerSliverBuilder], and with a [TabBarView] in the [body], such that the
+/// [headerSliverBuilder]), and with a [TabBarView] in the [body], such that the
 /// scrollable view's contents vary based on which tab is visible.
 ///
 /// ## Motivation

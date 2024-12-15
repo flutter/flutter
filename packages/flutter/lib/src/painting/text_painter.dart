@@ -219,6 +219,7 @@ class WordBoundary extends TextBoundary {
     };
   }
 
+  static final RegExp _regExpSpaceSeparatorOrPunctuaion = RegExp(r'[\p{Space_Separator}\p{Punctuation}]', unicode: true);
   bool _skipSpacesAndPunctuations(int offset, bool forward) {
     // Use code point since some punctuations are supplementary characters.
     // "inner" here refers to the code unit that's before the break in the
@@ -235,7 +236,7 @@ class WordBoundary extends TextBoundary {
     final bool hardBreakRulesApply = innerCodePoint == null || outerCodeUnit == null
     // WB3a & WB3b: always break before and after newlines.
                                   || _isNewline(innerCodePoint) || _isNewline(outerCodeUnit);
-    return hardBreakRulesApply || !RegExp(r'[\p{Space_Separator}\p{Punctuation}]', unicode: true).hasMatch(String.fromCharCode(innerCodePoint));
+    return hardBreakRulesApply || !_regExpSpaceSeparatorOrPunctuaion.hasMatch(String.fromCharCode(innerCodePoint));
   }
 
   /// Returns a [TextBoundary] suitable for handling keyboard navigation
@@ -332,6 +333,7 @@ class _TextLayout {
     };
   }
 
+  static final RegExp _regExpSpaceSeparators = RegExp(r'\p{Space_Separator}', unicode: true);
   /// The line caret metrics representing the end of text location.
   ///
   /// This is usually used when the caret is placed at the end of the text
@@ -356,15 +358,20 @@ class _TextLayout {
     // Luckily they have the same bidi embedding level as the paragraph as per
     // https://unicode.org/reports/tr9/#L1, so we can anchor the caret to the
     // last logical trailing space.
-    final bool hasTrailingSpaces = switch (rawString.codeUnitAt(rawString.length - 1)) {
-      0x9 ||        // horizontal tab
-      0x3000 ||     // ideographic space
-      0x20 => true, // space
-      _ => false,
+    // Whitespace character definitions refer to Java/ICU, not Unicode-Zs.
+    // https://github.com/unicode-org/icu/blob/23d9628f88a2d0127c564ad98297061c36d3ce77/icu4c/source/common/unicode/uchar.h#L3388-L3425
+    final String lastCodeUnit = rawString[rawString.length - 1];
+    final bool hasTrailingSpaces = switch (lastCodeUnit.codeUnitAt(0)) {
+      0x0009 => true,   // horizontal tab
+      0x00A0 ||         // no-break space
+      0x2007 ||         // figure space
+      0x202F => false,  // narrow no-break space
+      _ => _regExpSpaceSeparators.hasMatch(lastCodeUnit),
     };
 
     final double baseline = lineMetrics.baseline;
     final double dx;
+    final double height;
     late final ui.GlyphInfo? lastGlyph = _paragraph.getGlyphInfoAt(rawString.length - 1);
     // TODO(LongCatIsLooong): handle the case where maxLine is set to non-null
     // and the last line ends with trailing whitespaces.
@@ -375,13 +382,15 @@ class _TextLayout {
         TextDirection.ltr => glyphBounds.right,
         TextDirection.rtl => glyphBounds.left,
       };
+      height = glyphBounds.height;
     } else {
       dx = switch (writingDirection) {
         TextDirection.ltr => lineMetrics.left + lineMetrics.width,
         TextDirection.rtl => lineMetrics.left,
       };
+      height = lineMetrics.height;
     }
-    return _LineCaretMetrics(offset: Offset(dx, baseline), writingDirection: writingDirection);
+    return _LineCaretMetrics(offset: Offset(dx, baseline), writingDirection: writingDirection, height: height);
   }
 
   double _contentWidthFor(double minWidth, double maxWidth, TextWidthBasis widthBasis) {
@@ -495,8 +504,8 @@ class _TextPainterLayoutCacheWithOffset {
 /// The _CaretMetrics for carets located in a non-empty paragraph. Such carets
 /// are anchored to the trailing edge or the leading edge of a glyph, or a
 /// ligature component.
-final class _LineCaretMetrics {
-  const _LineCaretMetrics({required this.offset, required this.writingDirection});
+class _LineCaretMetrics {
+  const _LineCaretMetrics({required this.offset, required this.writingDirection, required this.height});
   /// The offset from the top left corner of the paragraph to the caret's top
   /// start location.
   final Offset offset;
@@ -506,10 +515,13 @@ final class _LineCaretMetrics {
   /// right of [offset].
   final TextDirection writingDirection;
 
+  /// The recommended height of the caret.
+  final double height;
+
   _LineCaretMetrics shift(Offset offset) {
     return offset == Offset.zero
       ? this
-      : _LineCaretMetrics(offset: offset + this.offset, writingDirection: writingDirection);
+      : _LineCaretMetrics(offset: offset + this.offset, writingDirection: writingDirection, height: height);
   }
 }
 
@@ -1361,6 +1373,16 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   double getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
+    // The if condition is derived from
+    // https://github.com/google/skia/blob/0086a17e0d4cc676cf88cae671ba5ee967eb7241/modules/skparagraph/src/TextLine.cpp#L1244-L1246
+    // which is set here:
+    // https://github.com/flutter/engine/blob/a821b8790c9fd0e095013cd5bd1f20273bc1ee47/third_party/txt/src/skia/paragraph_builder_skia.cc#L134
+    if (strutStyle == null || strutStyle == StrutStyle.disabled || strutStyle?.fontSize == 0.0) {
+      final double? heightFromCaretMetrics = _computeCaretMetrics(position)?.height;
+      if (heightFromCaretMetrics != null) {
+        return heightFromCaretMetrics;
+      }
+    }
     final TextBox textBox = _getOrCreateLayoutTemplate().getBoxesForRange(0, 1, boxHeightStyle: ui.BoxHeightStyle.strut).single;
     return textBox.toRect().height;
   }
@@ -1444,7 +1466,8 @@ class TextPainter {
 
     if (glyphInfo == null) {
       // If the glyph isn't laid out, then the position points to a character
-      // that is not laid out. Use the EOT caret.
+      // that is not laid out (the part of text is invisible due to maxLines or
+      // infinite paragraph x offset). Use the EOT caret.
       // TODO(LongCatIsLooong): assert when an invalid position is given.
       final ui.Paragraph template = _getOrCreateLayoutTemplate();
       assert(template.numberOfLines == 1);
@@ -1481,6 +1504,7 @@ class TextPainter {
       metrics = _LineCaretMetrics(
         offset: Offset(anchorToLeft ? box.left : box.right, box.top),
         writingDirection: box.direction,
+        height: box.bottom - box.top,
       );
     } else {
       // Fall back to glyphInfo. This should only happen when using the HTML renderer.
@@ -1493,6 +1517,7 @@ class TextPainter {
       metrics = _LineCaretMetrics(
         offset: Offset(dx, graphemeBounds.top),
         writingDirection: glyphInfo.writingDirection,
+        height: graphemeBounds.height,
       );
     }
 

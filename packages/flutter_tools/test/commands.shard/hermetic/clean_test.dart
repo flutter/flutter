@@ -75,7 +75,13 @@ void main() {
 
         expect(projectUnderTest.flutterPluginsFile, isNot(exists));
         expect(projectUnderTest.flutterPluginsDependenciesFile, isNot(exists));
-        expect(projectUnderTest.packagesFile, isNot(exists));
+        expect(
+          projectUnderTest
+            .directory
+            .childDirectory('.dart_tool')
+            .childFile('package_config.json'),
+          isNot(exists),
+        );
 
         expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
           CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', false),
@@ -231,7 +237,7 @@ FlutterProject setupProjectUnderTest(Directory currentDirectory, bool setupXcode
     projectUnderTest.macos.hostAppRoot.childDirectory('Runner.xcworkspace').createSync(recursive: true);
   }
   projectUnderTest.dartTool.createSync(recursive: true);
-  projectUnderTest.packagesFile.createSync(recursive: true);
+  projectUnderTest.directory.childDirectory('.dart_tool').childFile('package_config.jon').createSync(recursive: true);
   projectUnderTest.android.ephemeralDirectory.createSync(recursive: true);
 
   projectUnderTest.ios.ephemeralDirectory.createSync(recursive: true);

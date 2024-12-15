@@ -4091,6 +4091,34 @@ void main() {
 
     focusNode.dispose();
   });
+
+  testWidgets('Switch.padding is respected', (WidgetTester tester) async {
+    Widget buildSwitch({ EdgeInsets? padding }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: Switch(
+              padding: padding,
+              value: true,
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitch());
+
+    expect(tester.getSize(find.byType(Switch)), const Size(60.0, 48.0));
+
+    await tester.pumpWidget(buildSwitch(padding: EdgeInsets.zero));
+
+    expect(tester.getSize(find.byType(Switch)), const Size(52.0, 48.0));
+
+    await tester.pumpWidget(buildSwitch(padding: const EdgeInsets.all(4.0)));
+
+    expect(tester.getSize(find.byType(Switch)), const Size(60.0, 56.0));
+  });
 }
 
 class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {

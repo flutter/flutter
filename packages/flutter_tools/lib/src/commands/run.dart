@@ -235,19 +235,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   bool get useWasm => boolArg(FlutterOptions.kWebWasmFlag);
 
-  bool get useLocalCanvasKit {
-    // If we have specified not to use CDN, use local CanvasKit
-    if (!boolArg(FlutterOptions.kWebResourcesCdnFlag)) {
-      return true;
-    }
-
-    // If we are using a locally built web sdk, we should use local CanvasKit
-    if (stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null) {
-      return true;
-    }
-    return false;
-  }
-
   WebRendererMode get webRenderer => WebRendererMode.fromCliOption(
     stringArg(FlutterOptions.kWebRendererFlag),
     useWasm: useWasm
@@ -287,7 +274,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webHeaders: webHeaders,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
-        webUseLocalCanvaskit: useLocalCanvasKit,
         enableImpeller: enableImpeller,
         enableVulkanValidation: enableVulkanValidation,
         uninstallFirst: uninstallFirst,
@@ -339,7 +325,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webHeaders: webHeaders,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
-        webUseLocalCanvaskit: useLocalCanvasKit,
         vmserviceOutFile: stringArg('vmservice-out-file'),
         fastStart: argParser.options.containsKey('fast-start')
           && boolArg('fast-start')
@@ -354,6 +339,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableEmbedderApi: enableEmbedderApi,
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
+        enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
+        ipv6: boolArg(FlutterCommand.ipv6Flag),
+        printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
       );
     }
   }
@@ -667,6 +655,10 @@ class RunCommand extends RunCommandBase {
       throwToolExit('--wasm is only supported on the web platform');
     }
 
+    if (webRenderer.isDeprecated) {
+      globals.logger.printWarning(webRenderer.deprecationWarning);
+    }
+
     if (webRenderer == WebRendererMode.skwasm && !useWasm) {
       throwToolExit('Skwasm renderer requires --wasm');
     }
@@ -702,7 +694,6 @@ class RunCommand extends RunCommandBase {
         projectRootPath: stringArg('project-root'),
         dillOutputPath: stringArg('output-dill'),
         stayResident: stayResident,
-        ipv6: ipv6 ?? false,
         analytics: globals.analytics,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
         nativeAssetsBuilder: _nativeAssetsBuilder,
@@ -712,7 +703,6 @@ class RunCommand extends RunCommandBase {
         flutterDevices.single,
         target: targetFile,
         flutterProject: flutterProject,
-        ipv6: ipv6,
         debuggingOptions: await createDebuggingOptions(webMode),
         stayResident: stayResident,
         fileSystem: globals.fs,
@@ -731,7 +721,6 @@ class RunCommand extends RunCommandBase {
       applicationBinary: applicationBinaryPath == null
           ? null
           : globals.fs.file(applicationBinaryPath),
-      ipv6: ipv6 ?? false,
       stayResident: stayResident,
     );
   }
@@ -776,9 +765,7 @@ class RunCommand extends RunCommandBase {
           projectRootPath: stringArg('project-root'),
           packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
           dillOutputPath: stringArg('output-dill'),
-          ipv6: ipv6 ?? false,
           userIdentifier: userIdentifier,
-          enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
           nativeAssetsBuilder: _nativeAssetsBuilder,
         );
       } on Exception catch (error) {
@@ -866,7 +853,6 @@ class RunCommand extends RunCommandBase {
     try {
       final int? result = await runner.run(
         appStartedCompleter: appStartedTimeRecorder,
-        enableDevTools: stayResident && boolArg(FlutterCommand.kEnableDevTools),
         route: route,
       );
       handler?.stop();
@@ -874,7 +860,8 @@ class RunCommand extends RunCommandBase {
         throwToolExit(null, exitCode: result);
       }
     } on RPCError catch (error) {
-      if (error.code == RPCErrorCodes.kServiceDisappeared) {
+      if (error.code == RPCErrorCodes.kServiceDisappeared ||
+          error.message.contains('Service connection disposed')) {
         throwToolExit('Lost connection to device.');
       }
       rethrow;

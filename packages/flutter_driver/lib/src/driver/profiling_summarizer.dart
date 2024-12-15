@@ -33,7 +33,7 @@ enum ProfileType {
   Memory,
 }
 
-/// Summarizes [TimelineEvents]s corresponding to [kProfilingEvents] category.
+/// Summarizes [TimelineEvent]s corresponding to [kProfilingEvents] category.
 ///
 /// A sample event (some fields have been omitted for brevity):
 /// ```json

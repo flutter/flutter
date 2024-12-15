@@ -1,5 +1,5 @@
 {
-  "version": "v4_1_0",
+  "version": "6_1_0",
 
   "md.comp.menu.container.color": "surfaceContainer",
   "md.comp.menu.container.elevation": "md.sys.elevation.level2",
@@ -7,9 +7,5 @@
   "md.comp.menu.container.shape": "md.sys.shape.corner.extra-small",
   "md.comp.menu.focus.indicator.color": "secondary",
   "md.comp.menu.focus.indicator.outline.offset": "md.sys.state.focus-indicator.inner-offset",
-  "md.comp.menu.focus.indicator.thickness": "md.sys.state.focus-indicator.thickness",
-  "md.comp.menu.list-item.selected.container.color": "secondaryContainer",
-  "md.comp.menu.list-item.selected.label-text.color": "onSecondaryContainer",
-  "md.comp.menu.list-item.selected.with-leading-icon.trailing-icon.color": "onSecondaryContainer",
-  "md.comp.menu.menu-list-item-with-leading-icon-icon-color": "onSecondaryContainer"
+  "md.comp.menu.focus.indicator.thickness": "md.sys.state.focus-indicator.thickness"
 }

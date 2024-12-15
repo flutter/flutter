@@ -3,11 +3,17 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/flutter_platform.dart';
+import 'package:test/fake.dart';
 import 'package:test_core/backend.dart';
 
 import '../src/common.dart';
@@ -63,6 +69,34 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
+    testUsingContext('an exception from the app not starting bubbles up to the test runner', () async {
+      final _UnstartableDevice testDevice = _UnstartableDevice();
+      final FlutterPlatform flutterPlatform = FlutterPlatform(
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        shellPath: '/',
+        enableVmService: false,
+        integrationTestDevice: testDevice,
+        flutterProject: _FakeFlutterProject(),
+        host: InternetAddress.anyIPv4,
+        updateGoldens: false,
+      );
+
+      await expectLater(
+        () => flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform).stream.drain<void>(),
+        // we intercept the actual exception and throw a string for the test runner to catch
+        throwsA(isA<String>().having(
+          (String msg) => msg,
+          'string',
+          'Unable to start the app on the device.',
+        )),
+      );
+      expect((globals.logger as BufferLogger).traceText, contains('test 0: error caught during test;'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      ApplicationPackageFactory: () => _FakeApplicationPackageFactory(),
+    });
+
     testUsingContext('installHook creates a FlutterPlatform', () {
       expect(() => installHook(
         shellPath: 'abc',
@@ -102,7 +136,6 @@ void main() {
         platformPluginRegistration: (FlutterPlatform platform) {
           capturedPlatform = platform;
         },
-        uriConverter: (String input) => '$input/test',
       );
 
       expect(identical(capturedPlatform, flutterPlatform), equals(true));
@@ -119,7 +152,84 @@ void main() {
       expect(flutterPlatform.updateGoldens, equals(true));
       expect(flutterPlatform.testAssetDirectory, '/build/test');
       expect(flutterPlatform.icudtlPath, equals('ghi'));
-      expect(flutterPlatform.uriConverter?.call('hello'), 'hello/test');
+    });
+  });
+
+  group('generateTestBootstrap', () {
+    group('writes a "const packageConfigLocation" string', () {
+      test('with null packageConfigUri', () {
+        final String contents = generateTestBootstrap(
+          testUrl:
+              Uri.parse('file:///Users/me/some_package/test/some_test.dart'),
+          host: InternetAddress('127.0.0.1', type: InternetAddressType.IPv4),
+        );
+        // IMPORTANT: DO NOT RENAME, REMOVE, OR MODIFY THE
+        // 'const packageConfigLocation' VARIABLE.
+        // Dash tooling like Dart DevTools performs an evaluation on this variable
+        // at runtime to get the package config location for Flutter test targets.
+        expect(contents, contains("const packageConfigLocation = 'null';"));
+      });
+
+      test('with non-null packageConfigUri', () {
+        final String contents = generateTestBootstrap(
+          testUrl:
+              Uri.parse('file:///Users/me/some_package/test/some_test.dart'),
+          host: InternetAddress('127.0.0.1', type: InternetAddressType.IPv4),
+          packageConfigUri: Uri.parse(
+              'file:///Users/me/some_package/.dart_tool/package_config.json'),
+        );
+        // IMPORTANT: DO NOT RENAME, REMOVE, OR MODIFY THE
+        // 'const packageConfigLocation' VARIABLE.
+        // Dash tooling like Dart DevTools performs an evaluation on this variable
+        // at runtime to get the package config location for Flutter test targets.
+        expect(
+          contents,
+          contains(
+            "const packageConfigLocation = 'file:///Users/me/some_package/.dart_tool/package_config.json';",
+          ),
+        );
+      });
     });
   });
 }
+
+class _UnstartableDevice extends Fake implements Device {
+  @override
+  Future<void> dispose() => Future<void>.value();
+
+  @override
+  Future<TargetPlatform> get targetPlatform => Future<TargetPlatform>.value(TargetPlatform.android);
+
+  @override
+  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
+    return true;
+  }
+
+  @override
+  Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async => true;
+
+  @override
+  Future<LaunchResult> startApp(covariant ApplicationPackage? package, {String? mainPath, String? route, required DebuggingOptions debuggingOptions, Map<String, Object?> platformArgs = const <String, Object>{}, bool prebuiltApplication = false, String? userIdentifier}) async {
+    return LaunchResult.failed();
+  }
+}
+
+class _FakeFlutterProject extends Fake implements FlutterProject {
+  @override
+  FlutterManifest get manifest => FlutterManifest.empty(logger: BufferLogger.test());
+}
+
+class _FakeApplicationPackageFactory implements ApplicationPackageFactory {
+  TargetPlatform? platformRequested;
+  File? applicationBinaryRequested;
+  ApplicationPackage applicationPackage = _FakeApplicationPackage();
+
+  @override
+  Future<ApplicationPackage?> getPackageForPlatform(TargetPlatform platform, {BuildInfo? buildInfo, File? applicationBinary}) async {
+    platformRequested = platform;
+    applicationBinaryRequested = applicationBinary;
+    return applicationPackage;
+  }
+}
+
+class _FakeApplicationPackage extends Fake implements ApplicationPackage {}

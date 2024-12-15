@@ -31,8 +31,8 @@ void main() {
           artifacts.getArtifactPath(Artifact.engineDartBinary),
           'run',
           'my_copy_transformer',
-          '--input=/.tmp_rand0/asset.txt-transformOutput0.txt',
-          '--output=/.tmp_rand0/asset.txt-transformOutput1.txt',
+          '--input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt',
+          '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
           '-f',
           '--my_option',
           'my_option_value',
@@ -95,8 +95,8 @@ void main() {
           dartBinaryPath,
           'run',
           'my_copy_transformer',
-          '--input=/.tmp_rand0/asset.txt-transformOutput0.txt',
-          '--output=/.tmp_rand0/asset.txt-transformOutput1.txt',
+          '--input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt',
+          '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
         ],
         onRun: (List<String> args) {
           final ArgResults parsedArgs = (ArgParser()
@@ -136,10 +136,9 @@ void main() {
     expect(failure, isNotNull);
     expect(failure!.message,
 '''
-User-defined transformation of asset "asset.txt" failed.
 Transformer process terminated with non-zero exit code: 1
 Transformer package: my_copy_transformer
-Full command: $dartBinaryPath run my_copy_transformer --input=/.tmp_rand0/asset.txt-transformOutput0.txt --output=/.tmp_rand0/asset.txt-transformOutput1.txt
+Full command: $dartBinaryPath run my_copy_transformer --input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt --output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt
 stdout:
 Beginning transformation
 stderr:
@@ -162,8 +161,8 @@ Something went wrong''');
           dartBinaryPath,
           'run',
           'my_transformer',
-          '--input=/.tmp_rand0/asset.txt-transformOutput0.txt',
-          '--output=/.tmp_rand0/asset.txt-transformOutput1.txt',
+          '--input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt',
+          '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
         ],
         onRun: (_) {
           // Do nothing.
@@ -196,11 +195,10 @@ Something went wrong''');
     expect(failure, isNotNull);
     expect(failure!.message,
 '''
-User-defined transformation of asset "asset.txt" failed.
 Asset transformer my_transformer did not produce an output file.
-Input file provided to transformer: "/.tmp_rand0/asset.txt-transformOutput0.txt"
-Expected output file at: "/.tmp_rand0/asset.txt-transformOutput1.txt"
-Full command: $dartBinaryPath run my_transformer --input=/.tmp_rand0/asset.txt-transformOutput0.txt --output=/.tmp_rand0/asset.txt-transformOutput1.txt
+Input file provided to transformer: "/.tmp_rand0/rand0/asset.txt-transformOutput0.txt"
+Expected output file at: "/.tmp_rand0/rand0/asset.txt-transformOutput1.txt"
+Full command: $dartBinaryPath run my_transformer --input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt --output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt
 stdout:
 
 stderr:
@@ -225,8 +223,8 @@ Transformation failed, but I forgot to exit with a non-zero code.'''
           dartBinaryPath,
           'run',
           'my_lowercase_transformer',
-          '--input=/.tmp_rand0/asset.txt-transformOutput0.txt',
-          '--output=/.tmp_rand0/asset.txt-transformOutput1.txt',
+          '--input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt',
+          '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
         ],
         onRun: (List<String> args) {
           final ArgResults parsedArgs = (ArgParser()
@@ -245,8 +243,8 @@ Transformation failed, but I forgot to exit with a non-zero code.'''
           dartBinaryPath,
           'run',
           'my_distance_from_ascii_a_transformer',
-          '--input=/.tmp_rand0/asset.txt-transformOutput1.txt',
-          '--output=/.tmp_rand0/asset.txt-transformOutput2.txt',
+          '--input=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
+          '--output=/.tmp_rand0/rand0/asset.txt-transformOutput2.txt',
         ],
         onRun: (List<String> args) {
           final ArgResults parsedArgs = (ArgParser()
@@ -314,8 +312,8 @@ Transformation failed, but I forgot to exit with a non-zero code.'''
           dartBinaryPath,
           'run',
           'my_lowercase_transformer',
-          '--input=/.tmp_rand0/asset.txt-transformOutput0.txt',
-          '--output=/.tmp_rand0/asset.txt-transformOutput1.txt',
+          '--input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt',
+          '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
         ],
         onRun: (List<String> args) {
           final ArgResults parsedArgs = (ArgParser()
@@ -334,8 +332,8 @@ Transformation failed, but I forgot to exit with a non-zero code.'''
           dartBinaryPath,
           'run',
           'my_distance_from_ascii_a_transformer',
-          '--input=/.tmp_rand0/asset.txt-transformOutput1.txt',
-          '--output=/.tmp_rand0/asset.txt-transformOutput2.txt',
+          '--input=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
+          '--output=/.tmp_rand0/rand0/asset.txt-transformOutput2.txt',
         ],
         onRun: (List<String> args) {
           // Do nothing.
@@ -374,11 +372,10 @@ Transformation failed, but I forgot to exit with a non-zero code.'''
     expect(failure, isNotNull);
     expect(failure!.message,
 '''
-User-defined transformation of asset "asset.txt" failed.
 Asset transformer my_distance_from_ascii_a_transformer did not produce an output file.
-Input file provided to transformer: "/.tmp_rand0/asset.txt-transformOutput1.txt"
-Expected output file at: "/.tmp_rand0/asset.txt-transformOutput2.txt"
-Full command: Artifact.engineDartBinary run my_distance_from_ascii_a_transformer --input=/.tmp_rand0/asset.txt-transformOutput1.txt --output=/.tmp_rand0/asset.txt-transformOutput2.txt
+Input file provided to transformer: "/.tmp_rand0/rand0/asset.txt-transformOutput1.txt"
+Expected output file at: "/.tmp_rand0/rand0/asset.txt-transformOutput2.txt"
+Full command: Artifact.engineDartBinary run my_distance_from_ascii_a_transformer --input=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt --output=/.tmp_rand0/rand0/asset.txt-transformOutput2.txt
 stdout:
 
 stderr:

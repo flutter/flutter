@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.oldstyleFigures].
+/// Flutter code sample for [FontFeature.oldstyleFigures].
 
 void main() => runApp(const ExampleApp());
 

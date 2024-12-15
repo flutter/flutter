@@ -5258,33 +5258,23 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ),
         ),
       );
-      final Finder columnWidgetFinder = find.byType(Column);
-      expect(columnWidgetFinder, findsOneWidget);
-      final Element columnWidgetElement = columnWidgetFinder
-        .evaluate()
-        .first;
-      final DiagnosticsNode node = columnWidgetElement.toDiagnosticsNode();
-      final InspectorSerializationDelegate delegate =
-        InspectorSerializationDelegate(
-          service: service,
-          includeProperties: true,
-          addAdditionalPropertiesCallback:
-            (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
-              final Map<String, Object> additionalJson = <String, Object>{};
-              final Object? value = node.value;
-              if (value is Element) {
-                final RenderObject? renderObject = value.renderObject;
-                if (renderObject != null) {
-                  additionalJson['renderObject'] =
-                      renderObject.toDiagnosticsNode().toJsonMap(
-                        delegate.copyWith(subtreeDepth: 0),
-                      );
-                }
-              }
-              additionalJson['callbackExecuted'] = true;
-              return additionalJson;
-            },
-        );
+
+      final Finder columnFinder = find.byType(Column);
+      expect(columnFinder, findsOneWidget);
+
+      final DiagnosticsNode node = columnFinder.evaluate().first.toDiagnosticsNode();
+      final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(
+        service: service,
+        includeProperties: true,
+        addAdditionalPropertiesCallback:
+          (DiagnosticsNode node, InspectorSerializationDelegate delegate) => <String, Object>{
+            if (node.value case Element(:final RenderObject renderObject))
+              'renderObject': renderObject.toDiagnosticsNode().toJsonMap(
+                  delegate.copyWith(subtreeDepth: 0),
+                ),
+            'callbackExecuted': true,
+          },
+      );
       final Map<String, Object?> json = node.toJsonMap(delegate);
       expect(json['callbackExecuted'], true);
       expect(json.containsKey('renderObject'), true);

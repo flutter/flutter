@@ -7,7 +7,6 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
-import '../../reporting/reporting.dart';
 import '../../xcode_project.dart';
 
 // Xcode 11.4 requires linked and embedded frameworks to contain all targeted architectures before build phases are run.
@@ -17,14 +16,11 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
   RemoveFrameworkLinkAndEmbeddingMigration(
     IosProject project,
     super.logger,
-    Usage usage,
     Analytics analytics,
   ) : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-        _usage = usage,
         _analytics = analytics;
 
   final File _xcodeProjectInfoFile;
-  final Usage _usage;
   final Analytics _analytics;
 
   @override
@@ -95,7 +91,6 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
 
     if (line.contains('/* App.framework ') || line.contains('/* Flutter.framework ')) {
       // Print scary message.
-      UsageEvent('ios-migration', 'remove-frameworks', label: 'failure', flutterUsage: _usage).send();
       _analytics.send(Event.appleUsageEvent(
         workflow: 'ios-migration',
         parameter: 'remove-frameworks',

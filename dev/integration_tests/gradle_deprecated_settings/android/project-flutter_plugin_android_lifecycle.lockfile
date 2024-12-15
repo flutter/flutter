@@ -64,6 +64,7 @@ com.android.tools:sdk-common:27.1.3=lintClassPath
 com.android.tools:sdklib:27.1.3=lintClassPath
 com.android:signflinger:4.1.3=lintClassPath
 com.android:zipflinger:4.1.3=lintClassPath
+com.getkeepsafe.relinker:relinker:1.4.5=debugAndroidTestCompileClasspath,debugAndroidTestRuntimeClasspath,debugCompileClasspath,debugRuntimeClasspath,debugUnitTestCompileClasspath,debugUnitTestRuntimeClasspath,profileCompileClasspath,profileRuntimeClasspath,profileUnitTestCompileClasspath,profileUnitTestRuntimeClasspath,releaseCompileClasspath,releaseRuntimeClasspath,releaseUnitTestCompileClasspath,releaseUnitTestRuntimeClasspath
 com.google.code.findbugs:jsr305:3.0.2=lintClassPath
 com.google.code.gson:gson:2.8.5=lintClassPath
 com.google.errorprone:error_prone_annotations:2.3.2=lintClassPath

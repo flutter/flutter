@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'app.dart';
+/// @docImport 'floating_action_button.dart';
+/// @docImport 'icon_button.dart';
+/// @docImport 'popup_menu.dart';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -442,7 +448,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   /// The plain text message for this tooltip.
   ///
-  /// This value will either come from [widget.message] or [widget.richMessage].
+  /// This value will either come from [Tooltip.message] or [Tooltip.richMessage].
   String get _tooltipMessage => widget.message ?? widget.richMessage!.toPlainText();
 
   Timer? _timer;

@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'ink_well.dart';
+/// @docImport 'material.dart';
+/// @docImport 'menu_button_theme.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -34,9 +39,9 @@ import 'theme_data.dart';
 ///
 /// All of the [MenuStyle] properties are null by default.
 ///
-/// Many of the [MenuStyle] properties are [MaterialStateProperty] objects which
+/// Many of the [MenuStyle] properties are [WidgetStateProperty] objects which
 /// resolve to different values depending on the menu's state. For example the
-/// [Color] properties are defined with `MaterialStateProperty<Color>` and can
+/// [Color] properties are defined with `WidgetStateProperty<Color>` and can
 /// resolve to different colors depending on if the menu is pressed, hovered,
 /// focused, disabled, etc.
 ///
@@ -48,9 +53,9 @@ import 'theme_data.dart';
 /// ```dart
 /// SubmenuButton(
 ///   menuStyle: MenuStyle(
-///     backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-///       (Set<MaterialState> states) {
-///         if (states.contains(MaterialState.focused)) {
+///     backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+///       (Set<WidgetState> states) {
+///         if (states.contains(WidgetState.focused)) {
 ///           return Theme.of(context).colorScheme.primary.withOpacity(0.5);
 ///         }
 ///         return null; // Use the component's default.
@@ -69,7 +74,7 @@ import 'theme_data.dart';
 /// ```dart
 /// const SubmenuButton(
 ///   menuStyle: MenuStyle(
-///     backgroundColor: MaterialStatePropertyAll<Color>(Colors.green),
+///     backgroundColor: WidgetStatePropertyAll<Color>(Colors.green),
 ///   ),
 ///   menuChildren: <Widget>[ /* ... */ ],
 ///   child: Text('Let me play among the stars'),
@@ -83,7 +88,7 @@ import 'theme_data.dart';
 /// MaterialApp(
 ///   theme: ThemeData(
 ///     menuTheme: const MenuThemeData(
-///       style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.red)),
+///       style: MenuStyle(backgroundColor: WidgetStatePropertyAll<Color>(Colors.red)),
 ///     ),
 ///   ),
 ///   home: const MyAppHome(),

@@ -77,7 +77,9 @@ class DeferredComponentModule {
     apply plugin: "com.android.dynamic-feature"
 
     android {
-        compileSdk 34
+        namespace = "com.example.''' + name + r'''
+"
+        compileSdk 35
 
         sourceSets {
             applicationVariants.all { variant ->
@@ -88,7 +90,7 @@ class DeferredComponentModule {
 
         defaultConfig {
             minSdkVersion 21
-            targetSdkVersion 33
+            targetSdkVersion 35
             versionCode flutterVersionCode.toInteger()
             versionName flutterVersionName
         }
@@ -105,8 +107,7 @@ class DeferredComponentModule {
 
     writeFile(fileSystem.path.join(dir.path, 'android', name, 'src', 'main', 'AndroidManifest.xml'), '''
     <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:dist="http://schemas.android.com/apk/distribution"
-        package="com.example.$name">
+        xmlns:dist="http://schemas.android.com/apk/distribution">
 
         <dist:module
             dist:instant="false"

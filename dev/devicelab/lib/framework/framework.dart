@@ -66,6 +66,12 @@ Future<TaskResult> task(TaskFunction task, { ProcessManager? processManager }) a
 
 class _TaskRunner {
   _TaskRunner(this.task, this.processManager) {
+    final String successResponse = json.encode(
+      const <String, String>{
+        'result': 'success',
+      },
+    );
+
     registerExtension('ext.cocoonRunTask',
         (String method, Map<String, String> parameters) async {
       final Duration? taskTimeout = parameters.containsKey('timeoutInMinutes')
@@ -82,11 +88,25 @@ class _TaskRunner {
         localEngine: localEngine,
         localEngineHost: localEngineHost,
       );
+      const Duration taskResultReceivedTimeout = Duration(seconds: 30);
+      _taskResultReceivedTimeout = Timer(
+        taskResultReceivedTimeout,
+        () {
+          logger.severe('Task runner did not acknowledge task results in $taskResultReceivedTimeout.');
+          _closeKeepAlivePort();
+          exitCode = 1;
+        }
+      );
       return ServiceExtensionResponse.result(json.encode(result.toJson()));
     });
     registerExtension('ext.cocoonRunnerReady',
         (String method, Map<String, String> parameters) async {
-      return ServiceExtensionResponse.result('"ready"');
+      return ServiceExtensionResponse.result(successResponse);
+    });
+    registerExtension('ext.cocoonTaskResultReceived',
+        (String method, Map<String, String> parameters) async {
+      _closeKeepAlivePort();
+      return ServiceExtensionResponse.result(successResponse);
     });
   }
 
@@ -104,6 +124,7 @@ class _TaskRunner {
   // TODO(ianh): workaround for https://github.com/dart-lang/sdk/issues/23797
   RawReceivePort? _keepAlivePort;
   Timer? _startTaskTimeout;
+  Timer? _taskResultReceivedTimeout;
   bool _taskStarted = false;
 
   final Completer<TaskResult> _completer = Completer<TaskResult>();
@@ -210,7 +231,6 @@ class _TaskRunner {
     } finally {
       await checkForRebootRequired();
       await forceQuitRunningProcesses();
-      _closeKeepAlivePort();
     }
   }
 
@@ -269,6 +289,7 @@ class _TaskRunner {
   /// Disables the keepalive port, allowing the VM to exit.
   void _closeKeepAlivePort() {
     _startTaskTimeout?.cancel();
+    _taskResultReceivedTimeout?.cancel();
     _keepAlivePort?.close();
   }
 

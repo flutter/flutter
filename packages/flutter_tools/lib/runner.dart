@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/intl_standalone.dart' as intl_standalone;
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import 'src/base/async_guard.dart';
@@ -185,6 +186,16 @@ Future<int> _handleToolError(
     } else {
       return exitWithHooks(error.exitCode, shutdownHooks: shutdownHooks);
     }
+  } else if (error is ProcessException &&
+      _isErrorDueToGitMissing(error, globals.processManager, globals.logger)) {
+    globals.printError('${error.message}\n');
+    globals.printError(
+      'An error was encountered when trying to run git.\n'
+      "Please ensure git is installed and available in your system's search path. "
+      'See https://docs.flutter.dev/get-started/install for instructions on '
+      'installing git for your platform.',
+    );
+    return exitWithHooks(1, shutdownHooks: shutdownHooks);
   } else {
     // We've crashed; emit a log report.
     globals.stdio.stderrWrite('\n');
@@ -300,4 +311,23 @@ Future<File> _createLocalCrashReport(CrashDetails details) async {
   });
 
   return crashFile;
+}
+
+bool _isErrorDueToGitMissing(
+  ProcessException exception,
+  ProcessManager processManager,
+  Logger logger,
+) {
+  if (!exception.message.contains('git')) {
+    return false;
+  }
+
+  try {
+    return !processManager.canRun('git');
+  } on Object catch (error) {
+    logger.printTrace(
+      'Unable to check whether git is runnable: $error\n'
+    );
+    return true;
+  }
 }

@@ -2,12 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'gesture_detector.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import 'editable_text.dart';
 import 'framework.dart';
+import 'routes.dart';
 
 // Enable if you want verbose logging about tap region changes.
 const bool _kDebugTapRegion = false;
@@ -322,6 +330,9 @@ class _DummyTapRecognizer extends GestureArenaMember {
 /// regions in the group will act as one.
 ///
 /// If there is no [TapRegionSurface] ancestor, [TapRegion] will do nothing.
+///
+/// [TapRegion] is aware of the [Route]s in the [Navigator], so that [onTapOutside]
+/// isn't called after the user navigates to a different page.
 class TapRegion extends SingleChildRenderObjectWidget {
   /// Creates a const [TapRegion].
   ///
@@ -396,12 +407,14 @@ class TapRegion extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
+    final bool isCurrent = ModalRoute.isCurrentOf(context) ?? true;
+
     return RenderTapRegion(
       registry: TapRegionRegistry.maybeOf(context),
       enabled: enabled,
       consumeOutsideTaps: consumeOutsideTaps,
       behavior: behavior,
-      onTapOutside: onTapOutside,
+      onTapOutside: isCurrent ? onTapOutside : null,
       onTapInside: onTapInside,
       groupId: groupId,
       debugLabel: debugLabel,
@@ -410,12 +423,14 @@ class TapRegion extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, covariant RenderTapRegion renderObject) {
+    final bool isCurrent = ModalRoute.isCurrentOf(context) ?? true;
+
     renderObject
       ..registry = TapRegionRegistry.maybeOf(context)
       ..enabled = enabled
       ..behavior = behavior
       ..groupId = groupId
-      ..onTapOutside = onTapOutside
+      ..onTapOutside = isCurrent ? onTapOutside : null
       ..onTapInside = onTapInside;
     if (!kReleaseMode) {
       renderObject.debugLabel = debugLabel;

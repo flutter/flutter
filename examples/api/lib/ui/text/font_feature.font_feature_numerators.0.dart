@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.numerators].
+/// Flutter code sample for [FontFeature.numerators].
 
 void main() => runApp(const ExampleApp());
 

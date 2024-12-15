@@ -191,6 +191,7 @@ void main() {
         Analytics: () => fakeAnalytics,
       });
 
+      // TODO(bkonyi): remove when ready to serve DevTools from DDS.
       group('${FlutterGlobalOptions.kPrintDtd} flag', () {
         testUsingContext('sets DevtoolsLauncher.printDtdUri to false when not present', () async {
           final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
@@ -212,9 +213,9 @@ void main() {
       testUsingContext("Doesn't crash on invalid .packages file", () async {
         final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
         fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.packages')
-          ..createSync()
-          ..writeAsStringSync('Not a valid package');
+        fileSystem.directory('.dart_tool').childFile('package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('Not a valid package config');
 
         await runner.run(<String>['dummy']);
 

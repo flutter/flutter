@@ -11,6 +11,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../widgets/clipboard_utils.dart';
@@ -602,7 +603,7 @@ void main() {
       expect(defaultDialogMaterial.elevation, datePickerDefaultDialogTheme.elevation);
 
       // Test that it honors ThemeData.dialogTheme settings
-      const DialogTheme customDialogTheme = DialogTheme(
+      const DialogThemeData customDialogTheme = DialogThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(40.0)),
         ),
@@ -1316,6 +1317,35 @@ void main() {
         expect(find.text('2017'), findsNothing);
       });
     });
+
+    testWidgets('Calendar dialog contents are visible - textScaler 0.88, 1.0, 2.0',
+      (WidgetTester tester) async {
+        addTearDown(tester.view.reset);
+        tester.view.physicalSize = const Size(400, 800);
+        tester.view.devicePixelRatio = 1.0;
+        final List<double> scales = <double>[0.88, 1.0, 2.0];
+
+        for (final double scale in scales) {
+          await tester.pumpWidget(
+            MaterialApp(
+              home: MediaQuery(
+                data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+                child: Material(
+                  child: DatePickerDialog(
+                    firstDate: DateTime(2001),
+                    lastDate: DateTime(2031, DateTime.december, 31),
+                    initialDate: DateTime(2016, DateTime.january, 15),
+                    initialEntryMode: DatePickerEntryMode.calendarOnly,
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          await expectLater(find.byType(Dialog), matchesGoldenFile('date_picker.calendar.contents.visible.$scale.png'));
+        }
+    });
   });
 
   group('Input mode', () {
@@ -1621,6 +1651,7 @@ void main() {
           isFocused: true,
           value: '01/15/2016',
           hasTapAction: true,
+          hasFocusAction: true,
           hasSetTextAction: true,
           hasSetSelectionAction: true,
           hasCopyAction: true,
@@ -1651,6 +1682,23 @@ void main() {
         ));
       });
       semantics.dispose();
+    });
+
+    // Regression test for https://github.com/flutter/flutter/pull/152705
+    testWidgets('datepicker dialog semantics node not focusable', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Material(
+          child: DatePickerDialog(
+            initialDate: initialDate,
+            firstDate: firstDate,
+            lastDate: lastDate,
+          ),
+        ),
+      ));
+
+      final SemanticsNode node = tester.semantics.find(find.byType(DatePickerDialog));
+      final SemanticsData semanticsData = node.getSemanticsData();
+      expect(semanticsData.hasFlag(SemanticsFlag.isFocusable), false);
     });
   });
 

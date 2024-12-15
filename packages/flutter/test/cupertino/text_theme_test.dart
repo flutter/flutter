@@ -29,6 +29,12 @@ void main() {
     expect(theme.actionTextStyle.letterSpacing, -0.41);
     expect(theme.actionTextStyle.fontWeight, null);
 
+    // ActionSmallTextStyle 15 -0.23 (aka "Subheadline/Regular")
+    expect(theme.actionSmallTextStyle.fontSize, 15);
+    expect(theme.actionSmallTextStyle.fontFamily, 'CupertinoSystemText');
+    expect(theme.actionSmallTextStyle.letterSpacing, -0.23);
+    expect(theme.actionSmallTextStyle.fontWeight, null);
+
     // TextStyle 17 -0.41
     expect(theme.tabLabelTextStyle.fontSize, 10);
     expect(theme.tabLabelTextStyle.fontFamily, 'CupertinoSystemText');

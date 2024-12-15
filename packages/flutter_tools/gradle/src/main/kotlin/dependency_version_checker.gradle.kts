@@ -125,12 +125,8 @@ class DependencyVersionChecker {
             kgpVersion = getKGPVersion(project)
             if (kgpVersion != null) {
                 checkKGPVersion(kgpVersion, project)
-            } else {
-                project.logger.error(
-                    "Warning: unable to detect project KGP version. Skipping " +
-                        "version checking. \nThis may be because you have applied KGP after the Flutter Gradle Plugin."
-                )
             }
+            // KGP is not required, so don't log any warning if we can't find the version.
         }
 
         // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.invocation/-gradle/index.html#-837060600%2FFunctions%2F-1793262594

@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dialog.dart';
+/// @docImport 'ink_well.dart';
+/// @docImport 'list_tile.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'card_theme.dart';
@@ -210,8 +215,8 @@ class Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CardTheme cardTheme = CardTheme.of(context);
-    final CardTheme defaults;
+    final CardThemeData cardTheme = CardTheme.of(context);
+    final CardThemeData defaults;
     if (Theme.of(context).useMaterial3) {
       defaults = switch (_variant) {
         _CardVariant.elevated => _CardDefaultsM3(context),
@@ -246,7 +251,7 @@ class Card extends StatelessWidget {
 }
 
 // Hand coded defaults based on Material Design 2.
-class _CardDefaultsM2 extends CardTheme {
+class _CardDefaultsM2 extends CardThemeData {
   const _CardDefaultsM2(this.context)
     : super(
         clipBehavior: Clip.none,
@@ -273,7 +278,7 @@ class _CardDefaultsM2 extends CardTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-class _CardDefaultsM3 extends CardTheme {
+class _CardDefaultsM3 extends CardThemeData {
   _CardDefaultsM3(this.context)
     : super(
         clipBehavior: Clip.none,
@@ -306,7 +311,7 @@ class _CardDefaultsM3 extends CardTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-class _FilledCardDefaultsM3 extends CardTheme {
+class _FilledCardDefaultsM3 extends CardThemeData {
   _FilledCardDefaultsM3(this.context)
     : super(
         clipBehavior: Clip.none,
@@ -339,7 +344,7 @@ class _FilledCardDefaultsM3 extends CardTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-class _OutlinedCardDefaultsM3 extends CardTheme {
+class _OutlinedCardDefaultsM3 extends CardThemeData {
   _OutlinedCardDefaultsM3(this.context)
     : super(
         clipBehavior: Clip.none,

@@ -62,7 +62,6 @@ class AnalysisServer {
     );
     final List<String> command = <String>[
       _fileSystem.path.join(sdkPath, 'bin', 'dart'),
-      '--disable-dart-dev',
       snapshot,
       '--disable-server-feature-completion',
       '--disable-server-feature-search',

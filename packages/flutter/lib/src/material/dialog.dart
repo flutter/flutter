@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/semantics.dart';
+/// @docImport 'package:flutter/services.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'dart:ui' show clampDouble, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
@@ -86,6 +94,9 @@ class Dialog extends StatelessWidget {
   /// This sets the [Material.color] on this [Dialog]'s [Material].
   ///
   /// If `null`, [ColorScheme.surfaceContainerHigh] is used in Material 3.
+  /// Otherwise, defaults to [ThemeData.dialogBackgroundColor].
+  ///
+  /// If [Dialog.fullscreen] is used, defaults to [ColorScheme.surface].
   /// {@endtemplate}
   final Color? backgroundColor;
 
@@ -97,7 +108,7 @@ class Dialog extends StatelessWidget {
   /// and a surface tint overlay on the background color if [surfaceTintColor] is
   /// non null.
   ///
-  /// If null then [DialogTheme.elevation] is used, and if that is null then
+  /// If null then [DialogThemeData.elevation] is used, and if that is null then
   /// the elevation will match the Material Design specification for Dialogs.
   ///
   /// See also:
@@ -186,7 +197,7 @@ class Dialog extends StatelessWidget {
   /// See the enum [Clip] for details of all possible options and their common
   /// use cases.
   ///
-  /// If null, then [DialogTheme.clipBehavior] is used. If that is also null,
+  /// If null, then [DialogThemeData.clipBehavior] is used. If that is also null,
   /// defaults to [Clip.none].
   /// {@endtemplate}
   final Clip? clipBehavior;
@@ -203,7 +214,7 @@ class Dialog extends StatelessWidget {
   /// {@template flutter.material.dialog.alignment}
   /// How to align the [Dialog].
   ///
-  /// If null, then [DialogTheme.alignment] is used. If that is also null, the
+  /// If null, then [DialogThemeData.alignment] is used. If that is also null, the
   /// default is [Alignment.center].
   /// {@endtemplate}
   final AlignmentGeometry? alignment;
@@ -219,10 +230,10 @@ class Dialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final DialogTheme dialogTheme = DialogTheme.of(context);
+    final DialogThemeData dialogTheme = DialogTheme.of(context);
     final EdgeInsets effectivePadding = MediaQuery.viewInsetsOf(context)
       + (insetPadding ?? dialogTheme.insetPadding ?? _defaultInsetPadding);
-    final DialogTheme defaults = theme.useMaterial3
+    final DialogThemeData defaults = theme.useMaterial3
       ? (_fullscreen ? _DialogFullscreenDefaultsM3(context) : _DialogDefaultsM3(context))
       : _DialogDefaultsM2(context);
 
@@ -239,7 +250,7 @@ class Dialog extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 280.0),
           child: Material(
-            color: backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor,
+            color: backgroundColor ?? dialogTheme.backgroundColor ?? defaults.backgroundColor,
             elevation: elevation ?? dialogTheme.elevation ?? defaults.elevation!,
             shadowColor: shadowColor ?? dialogTheme.shadowColor ?? defaults.shadowColor,
             surfaceTintColor: surfaceTintColor ?? dialogTheme.surfaceTintColor ?? defaults.surfaceTintColor,
@@ -453,7 +464,7 @@ class AlertDialog extends StatelessWidget {
     Color? surfaceTintColor,
     String? semanticLabel,
     EdgeInsets insetPadding,
-    Clip clipBehavior,
+    Clip? clipBehavior,
     ShapeBorder? shape,
     AlignmentGeometry? alignment,
     bool scrollable,
@@ -470,7 +481,7 @@ class AlertDialog extends StatelessWidget {
 
   /// Color for the [Icon] in the [icon] of this [AlertDialog].
   ///
-  /// If null, [DialogTheme.iconColor] is used. If that is null, defaults to
+  /// If null, [DialogThemeData.iconColor] is used. If that is null, defaults to
   /// color scheme's [ColorScheme.secondary] if [ThemeData.useMaterial3] is
   /// true, black otherwise.
   final Color? iconColor;
@@ -508,7 +519,7 @@ class AlertDialog extends StatelessWidget {
 
   /// Style for the text in the [title] of this [AlertDialog].
   ///
-  /// If null, [DialogTheme.titleTextStyle] is used. If that's null, defaults to
+  /// If null, [DialogThemeData.titleTextStyle] is used. If that's null, defaults to
   /// [TextTheme.headlineSmall] of [ThemeData.textTheme] if
   /// [ThemeData.useMaterial3] is true, [TextTheme.titleLarge] otherwise.
   final TextStyle? titleTextStyle;
@@ -543,7 +554,7 @@ class AlertDialog extends StatelessWidget {
 
   /// Style for the text in the [content] of this [AlertDialog].
   ///
-  /// If null, [DialogTheme.contentTextStyle] is used. If that's null, defaults
+  /// If null, [DialogThemeData.contentTextStyle] is used. If that's null, defaults
   /// to [TextTheme.bodyMedium] of [ThemeData.textTheme] if
   /// [ThemeData.useMaterial3] is true, [TextTheme.titleMedium] otherwise.
   final TextStyle? contentTextStyle;
@@ -709,8 +720,8 @@ class AlertDialog extends StatelessWidget {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
 
-    final DialogTheme dialogTheme = DialogTheme.of(context);
-    final DialogTheme defaults = theme.useMaterial3 ? _DialogDefaultsM3(context) : _DialogDefaultsM2(context);
+    final DialogThemeData dialogTheme = DialogTheme.of(context);
+    final DialogThemeData defaults = theme.useMaterial3 ? _DialogDefaultsM3(context) : _DialogDefaultsM2(context);
 
     String? label = semanticLabel;
     switch (theme.platform) {
@@ -812,6 +823,7 @@ class AlertDialog extends StatelessWidget {
           style: contentTextStyle ?? dialogTheme.contentTextStyle ?? defaults.contentTextStyle!,
           child: Semantics(
             container: true,
+            explicitChildNodes: true,
             child: content,
           ),
         ),
@@ -1143,7 +1155,7 @@ class SimpleDialog extends StatelessWidget {
 
   /// Style for the text in the [title] of this [SimpleDialog].
   ///
-  /// If null, [DialogTheme.titleTextStyle] is used. If that's null, defaults to
+  /// If null, [DialogThemeData.titleTextStyle] is used. If that's null, defaults to
   /// [TextTheme.titleLarge] of [ThemeData.textTheme].
   final TextStyle? titleTextStyle;
 
@@ -1330,7 +1342,7 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///
 /// The `barrierColor` argument is used to specify the color of the modal
 /// barrier that darkens everything below the dialog. If `null` the `barrierColor`
-/// field from `DialogTheme` is used. If that is `null` the default color
+/// field from `DialogThemeData` is used. If that is `null` the default color
 /// `Colors.black54` is used.
 ///
 /// The `useSafeArea` argument is used to indicate if the dialog should only
@@ -1431,7 +1443,10 @@ Future<T?> showDialog<T>({
   return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(DialogRoute<T>(
     context: context,
     builder: builder,
-    barrierColor: barrierColor ?? Theme.of(context).dialogTheme.barrierColor ?? Colors.black54,
+    barrierColor: barrierColor
+      ?? DialogTheme.of(context).barrierColor
+      ?? Theme.of(context).dialogTheme.barrierColor
+      ?? Colors.black54,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,
     useSafeArea: useSafeArea,
@@ -1568,6 +1583,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     String? barrierLabel,
     bool useSafeArea = true,
     super.settings,
+    super.requestFocus,
     super.anchorPoint,
     super.traversalEdgeBehavior,
   }) : super(
@@ -1620,7 +1636,7 @@ double _scalePadding(double textScaleFactor) {
 }
 
 // Hand coded defaults based on Material Design 2.
-class _DialogDefaultsM2 extends DialogTheme {
+class _DialogDefaultsM2 extends DialogThemeData {
   _DialogDefaultsM2(this.context)
     : _textTheme = Theme.of(context).textTheme,
       _iconTheme = Theme.of(context).iconTheme,
@@ -1661,7 +1677,7 @@ class _DialogDefaultsM2 extends DialogTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-class _DialogDefaultsM3 extends DialogTheme {
+class _DialogDefaultsM3 extends DialogThemeData {
   _DialogDefaultsM3(this.context)
     : super(
         alignment: Alignment.center,
@@ -1705,7 +1721,7 @@ class _DialogDefaultsM3 extends DialogTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-class _DialogFullscreenDefaultsM3 extends DialogTheme {
+class _DialogFullscreenDefaultsM3 extends DialogThemeData {
   const _DialogFullscreenDefaultsM3(this.context): super(clipBehavior: Clip.none);
 
   final BuildContext context;

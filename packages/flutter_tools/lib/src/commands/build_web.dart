@@ -65,6 +65,12 @@ class BuildWebCommand extends BuildSubCommand {
       defaultsTo: '${WebCompilerConfig.kDefaultOptimizationLevel}',
       allowed: const <String>['0', '1', '2', '3', '4'],
     );
+    argParser.addFlag(
+      'source-maps',
+      help: 'Generate a sourcemap file. These can be used by browsers '
+            'to view and debug the original source code of a compiled and minified Dart '
+            'application.'
+    );
 
     //
     // JavaScript compilation options
@@ -74,12 +80,6 @@ class BuildWebCommand extends BuildSubCommand {
       negatable: false,
       help: 'Disable dynamic generation of code in the generated output. '
             'This is necessary to satisfy CSP restrictions (see http://www.w3.org/TR/CSP/).'
-    );
-    argParser.addFlag(
-      'source-maps',
-      help: 'Generate a sourcemap file. These can be used by browsers '
-            'to view and debug the original source code of a compiled and minified Dart '
-            'application.'
     );
     argParser.addOption('dart2js-optimization',
       help: 'Sets the optimization level used for Dart compilation to JavaScript. '
@@ -149,6 +149,9 @@ class BuildWebCommand extends BuildSubCommand {
     final bool sourceMaps = boolArg('source-maps');
 
     final List<WebCompilerConfig> compilerConfigs;
+    if (webRenderer != null && webRenderer.isDeprecated) {
+      globals.logger.printWarning(webRenderer.deprecationWarning);
+    }
     if (boolArg(FlutterOptions.kWebWasmFlag)) {
       if (webRenderer != null) {
         throwToolExit('"--${FlutterOptions.kWebRendererFlag}" cannot be combined with "--${FlutterOptions.kWebWasmFlag}"');

@@ -24,48 +24,68 @@ void main() {
     ]);
   });
 
-  test('verify FlutterMacOS.xcframework artifact', () {
-    final String flutterRoot = getFlutterRoot();
+  for (final String buildMode in <String>['Debug', 'Release']) {
+    test('verify $buildMode FlutterMacOS.xcframework artifact', () {
+      final String flutterRoot = getFlutterRoot();
 
-    final Directory xcframeworkArtifact = fileSystem.directory(
-      fileSystem.path.join(
-        flutterRoot,
-        'bin',
-        'cache',
-        'artifacts',
-        'engine',
-        'darwin-x64',
-        'FlutterMacOS.xcframework',
-      ),
-    );
+      final String artifactDir = (buildMode == 'Debug') ? 'darwin-x64' : 'darwin-x64-release';
+      final Directory xcframeworkArtifact = fileSystem.directory(
+        fileSystem.path.join(
+          flutterRoot,
+          'bin',
+          'cache',
+          'artifacts',
+          'engine',
+          artifactDir,
+          'FlutterMacOS.xcframework',
+        ),
+      );
 
-    final Directory tempDir = createResolvedTempDirectorySync('macos_content_validation.');
+      final Directory tempDir = createResolvedTempDirectorySync('macos_content_validation.');
 
-    // Pre-cache macOS engine FlutterMacOS.xcframework artifacts.
-    final ProcessResult result = processManager.runSync(
-      <String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'precache',
-        '--macos',
-      ],
-      workingDirectory: tempDir.path,
-    );
+      // Pre-cache macOS engine FlutterMacOS.xcframework artifacts.
+      final ProcessResult result = processManager.runSync(
+        <String>[
+          flutterBin,
+          ...getLocalEngineArguments(),
+          'precache',
+          '--macos',
+        ],
+        workingDirectory: tempDir.path,
+      );
 
-    expect(result, const ProcessResultMatcher());
-    expect(xcframeworkArtifact.existsSync(), isTrue);
+      expect(result, const ProcessResultMatcher());
+      expect(xcframeworkArtifact.existsSync(), isTrue);
 
-    final Directory frameworkArtifact = fileSystem.directory(
-      fileSystem.path.joinAll(<String>[
-        xcframeworkArtifact.path,
-        'macos-arm64_x86_64',
-        'FlutterMacOS.framework',
-      ]),
-    );
-    // Check read/write permissions are set correctly in the framework engine artifact.
-    final String artifactStat = frameworkArtifact.statSync().mode.toRadixString(8);
-    expect(artifactStat, '40755');
-  });
+      final Directory frameworkArtifact = fileSystem.directory(
+        fileSystem.path.joinAll(<String>[
+          xcframeworkArtifact.path,
+          'macos-arm64_x86_64',
+          'FlutterMacOS.framework',
+        ]),
+      );
+      // Check read/write permissions are set correctly in the framework engine artifact.
+      final String artifactStat = frameworkArtifact.statSync().mode.toRadixString(8);
+      expect(artifactStat, '40755');
+
+      if (buildMode == 'Release') {
+        final Directory dsymArtifact = fileSystem.directory(
+          fileSystem.path.joinAll(<String>[
+            xcframeworkArtifact.path,
+            'macos-arm64_x86_64',
+            'dSYMs',
+            'FlutterMacOS.framework.dSYM',
+          ]),
+        );
+        // Verify dSYM is present.
+        expect(dsymArtifact.existsSync(), isTrue);
+
+        // Check read/write permissions are set correctly in the framework engine artifact.
+        final String artifactStat = dsymArtifact.statSync().mode.toRadixString(8);
+        expect(artifactStat, '40755');
+      }
+    });
+  }
 
   for (final String buildMode in <String>['Debug', 'Release']) {
     final String buildModeLower = buildMode.toLowerCase();
@@ -129,6 +149,9 @@ void main() {
         'App.framework',
       ));
 
+      final File frameworkDsymBinary =
+        buildPath.childFile('FlutterMacOS.framework.dSYM/Contents/Resources/DWARF/FlutterMacOS');
+
       final File libBinary = outputAppFramework.childFile('App');
       final File libDsymBinary =
         buildPath.childFile('App.framework.dSYM/Contents/Resources/DWARF/App');
@@ -138,10 +161,17 @@ void main() {
       final List<String> libSymbols = AppleTestUtils.getExportedSymbols(libBinary.path);
 
       if (buildMode == 'Debug') {
+        // Framework dSYM is not copied for debug builds.
+        expect(frameworkDsymBinary.existsSync(), isFalse);
+
         // dSYM is not created for a debug build.
         expect(libDsymBinary.existsSync(), isFalse);
         expect(libSymbols, isEmpty);
       } else {
+        // Check framework dSYM file copied.
+        _checkFatBinary(frameworkDsymBinary, buildModeLower, 'dSYM companion file');
+
+        // Check extracted dSYM file.
         _checkFatBinary(libDsymBinary, buildModeLower, 'dSYM companion file');
         expect(libSymbols, equals(AppleTestUtils.requiredSymbols));
         final List<String> dSymSymbols =

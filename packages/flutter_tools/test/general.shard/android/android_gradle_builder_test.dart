@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -44,7 +43,6 @@ const String minimalV2EmbeddingManifest = r'''
 void main() {
   group('gradle build', () {
     late BufferLogger logger;
-    late TestUsage testUsage;
     late FakeAnalytics fakeAnalytics;
     late MemoryFileSystem fileSystem;
     late FakeProcessManager processManager;
@@ -52,7 +50,6 @@ void main() {
     setUp(() {
       processManager = FakeProcessManager.empty();
       logger = BufferLogger.test();
-      testUsage = TestUsage();
       fileSystem = MemoryFileSystem.test();
       Cache.flutterRoot = '';
 
@@ -69,7 +66,6 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -149,16 +145,6 @@ void main() {
 
       expect(handlerCalled, isTrue);
 
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'build',
-          'gradle',
-          label: 'gradle-random-event-label-failure',
-          parameters: CustomDimensions(),
-        ),
-      ));
-      expect(testUsage.events, hasLength(2));
-
       expect(
         fakeAnalytics.sentEvents,
         containsAll(<Event>[
@@ -187,7 +173,6 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -262,7 +247,6 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -355,15 +339,6 @@ void main() {
       expect(logger.statusText, contains('Retrying Gradle Build: #2, wait time: 200ms'));
 
       expect(testFnCalled, equals(maxRetries + 1));
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'build',
-          'gradle',
-          label: 'gradle-random-event-label-failure',
-          parameters: CustomDimensions(),
-        ),
-      ));
-      expect(testUsage.events, hasLength(4));
 
       expect(fakeAnalytics.sentEvents, hasLength(7));
       expect(fakeAnalytics.sentEvents, contains(
@@ -383,7 +358,6 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -463,16 +437,6 @@ void main() {
 
       expect(handlerCalled, isTrue);
 
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'build',
-          'gradle',
-          label: 'gradle-random-event-label-failure',
-          parameters: CustomDimensions(),
-        ),
-      ));
-      expect(testUsage.events, hasLength(2));
-
       expect(fakeAnalytics.sentEvents, hasLength(3));
       expect(fakeAnalytics.sentEvents, contains(
         Event.flutterBuildInfo(
@@ -492,7 +456,6 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -564,7 +527,6 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -654,14 +616,14 @@ void main() {
           ),
         ],
       );
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'build',
-          'gradle',
-          label: 'gradle-random-event-label-success',
-          parameters: CustomDimensions(),
+
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.flutterBuildInfo(
+              label: 'gradle-random-event-label-success', buildType: 'gradle'),
         ),
-      ));
+      );
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
@@ -674,7 +636,6 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(
@@ -766,12 +727,10 @@ void main() {
         localGradleErrors: <GradleHandledError>[],
       );
 
-      expect(testUsage.events, contains(
-        const TestUsageEvent(
-          'code-size-analysis',
-          'apk',
-        ),
-      ));
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(Event.codeSizeAnalysis(platform: 'apk')),
+      );
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
     });
@@ -783,7 +742,6 @@ void main() {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -848,6 +806,85 @@ void main() {
         logger.statusText,
         contains('Built build/app/outputs/flutter-apk/app-release.apk (0.0MB)'),
       );
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
+
+    testUsingContext('prints deprecation warning when building for x86', () async {
+      // See https://github.com/flutter/flutter/issues/157543 for details.
+      final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        analytics: fakeAnalytics,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
+      );
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'gradlew',
+          '-q',
+          '-Ptarget-platform=android-x86',
+          '-Ptarget=lib/main.dart',
+          '-Pbase-application-name=android.app.Application',
+          '-Pdart-obfuscation=false',
+          '-Ptrack-widget-creation=false',
+          '-Ptree-shake-icons=false',
+          'assembleRelease',
+        ],
+      ));
+      fileSystem.directory('android')
+        .childFile('build.gradle')
+        .createSync(recursive: true);
+
+      fileSystem.directory('android')
+        .childFile('gradle.properties')
+        .createSync(recursive: true);
+
+      fileSystem.directory('android')
+        .childDirectory('app')
+        .childFile('build.gradle')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+
+      fileSystem.directory('build')
+        .childDirectory('app')
+        .childDirectory('outputs')
+        .childDirectory('flutter-apk')
+        .childFile('app-release.apk')
+        .createSync(recursive: true);
+
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      project.android.appManifestFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+      await builder.buildGradleApp(
+        project: project,
+        androidBuildInfo: const AndroidBuildInfo(
+          BuildInfo(
+            BuildMode.release,
+            null,
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+          ),
+          targetArchs: <AndroidArch>[AndroidArch.x86],
+        ),
+        target: 'lib/main.dart',
+        isBuildingBundle: false,
+        configOnly: false,
+        localGradleErrors: const <GradleHandledError>[],
+      );
+
+      expect(
+        logger.statusText,
+        contains('Built build/app/outputs/flutter-apk/app-release.apk (0.0MB)'),
+      );
+      expect(logger.warningText, contains(androidX86DeprecationWarning));
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
@@ -922,7 +959,6 @@ android {
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -968,7 +1004,6 @@ BuildVariant: paidProfile
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -1002,7 +1037,6 @@ Gradle Crashed
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -1043,7 +1077,6 @@ Gradle Crashed
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -1127,7 +1160,6 @@ Gradle Crashed
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -1194,7 +1226,6 @@ Gradle Crashed
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -1262,7 +1293,6 @@ Gradle Crashed
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(localEngine: 'out/android_arm', localEngineHost: 'out/host_release'),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -1348,7 +1378,6 @@ Gradle Crashed
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(localEngine: 'out/android_arm64', localEngineHost: 'out/host_release'),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -1434,7 +1463,6 @@ Gradle Crashed
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(localEngine: 'out/android_x86', localEngineHost: 'out/host_release'),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -1520,7 +1548,6 @@ Gradle Crashed
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(localEngine: 'out/android_x64', localEngineHost: 'out/host_release'),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -1607,7 +1634,6 @@ Gradle Crashed
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.test(),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -1674,7 +1700,6 @@ Gradle Crashed
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(localEngine: 'out/android_arm', localEngineHost: 'out/host_release'),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -1771,7 +1796,6 @@ Gradle Crashed
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(localEngine: 'out/android_arm64', localEngineHost: 'out/host_release'),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -1867,7 +1891,6 @@ Gradle Crashed
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(localEngine: 'out/android_x86', localEngineHost: 'out/host_release'),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
@@ -1963,7 +1986,6 @@ Gradle Crashed
         processManager: processManager,
         fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(localEngine: 'out/android_x64', localEngineHost: 'out/host_release'),
-        usage: testUsage,
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),

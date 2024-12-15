@@ -3,11 +3,7 @@ def flutterPluginVersion = "managed"
 apply plugin: "com.android.application"
 
 android {
-    // Conditional for compatibility with AGP <4.2.
-    if (project.android.hasProperty("namespace")) {
-        namespace = "{{androidIdentifier}}.host"
-    }
-
+    namespace = "{{androidIdentifier}}.host"
     compileSdk = {{compileSdkVersion}}
 
     compileOptions {

@@ -2,6 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/services.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'bottom_app_bar.dart';
+/// @docImport 'bottom_navigation_bar.dart';
+/// @docImport 'bottom_sheet_theme.dart';
+/// @docImport 'drawer_theme.dart';
+/// @docImport 'icon_button.dart';
+/// @docImport 'tab_controller.dart';
+/// @docImport 'tabs.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
@@ -2980,13 +2993,15 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           child: SafeArea(
             top: false,
             child: IntrinsicHeight(
-              child: Container(
-                alignment: widget.persistentFooterAlignment,
+              child: Padding(
                 padding: const EdgeInsets.all(8),
-                child: OverflowBar(
-                  spacing: 8,
-                  overflowAlignment: OverflowBarAlignment.end,
-                  children: widget.persistentFooterButtons!,
+                child: Align(
+                  alignment: widget.persistentFooterAlignment,
+                  child: OverflowBar(
+                    spacing: 8,
+                    overflowAlignment: OverflowBarAlignment.end,
+                    children: widget.persistentFooterButtons!,
+                  ),
                 ),
               ),
             ),

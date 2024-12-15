@@ -1,5 +1,5 @@
 {
-  "version": "v4_1_0",
+  "version": "6_1_0",
 
   "md.comp.date-picker.docked.container.color": "surfaceContainerHigh",
   "md.comp.date-picker.docked.container.elevation": "md.sys.elevation.level3",
@@ -30,7 +30,7 @@
   "md.comp.date-picker.docked.date.unselected.focus.state-layer.color": "onSurfaceVariant",
   "md.comp.date-picker.docked.date.unselected.hover.state-layer.color": "onSurfaceVariant",
   "md.comp.date-picker.docked.date.unselected.label-text.color": "onSurface",
-  "md.comp.date-picker.docked.date.unselected.outside-month.label-text.color": "onSurfaceVariant",
+  "md.comp.date-picker.docked.date.unselected.outside-month.label-text.color": "outlineVariant",
   "md.comp.date-picker.docked.date.unselected.pressed.state-layer.color": "onSurfaceVariant",
   "md.comp.date-picker.docked.header.height": 64.0,
   "md.comp.date-picker.docked.menu-button.container.height": 40.0,

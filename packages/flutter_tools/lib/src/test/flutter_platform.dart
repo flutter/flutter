@@ -6,15 +6,16 @@
 
 import 'dart:async';
 
-import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 
+import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../build_info.dart';
 import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
@@ -69,8 +70,8 @@ FlutterPlatform installHook({
   Device? integrationTestDevice,
   String? integrationTestUserIdentifier,
   TestTimeRecorder? testTimeRecorder,
-  UriConverter? uriConverter,
   TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+  BuildInfo? buildInfo,
 }) {
   assert(enableVmService || enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
 
@@ -100,8 +101,8 @@ FlutterPlatform installHook({
     integrationTestDevice: integrationTestDevice,
     integrationTestUserIdentifier: integrationTestUserIdentifier,
     testTimeRecorder: testTimeRecorder,
-    uriConverter: uriConverter,
     nativeAssetsBuilder: nativeAssetsBuilder,
+    buildInfo: buildInfo,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -120,6 +121,9 @@ FlutterPlatform installHook({
 /// configuration files as outlined in the [flutter_test] library. By default,
 /// the test file will be launched directly.
 ///
+/// The [packageConfigUri] argument specifies the package config location for
+/// the test file being launched. This is expected to be a file URI.
+///
 /// The [updateGoldens] argument will set the [autoUpdateGoldens] global
 /// variable in the [flutter_test] package before invoking the test.
 ///
@@ -132,6 +136,7 @@ String generateTestBootstrap({
   required Uri testUrl,
   required InternetAddress host,
   File? testConfigFile,
+  Uri? packageConfigUri,
   bool updateGoldens = false,
   String languageVersionHeader = '',
   bool nullSafety = false,
@@ -174,6 +179,15 @@ import '$testUrl' as test;
 import '${Uri.file(testConfigFile.path)}' as test_config;
 ''');
   }
+
+  // IMPORTANT: DO NOT RENAME, REMOVE, OR MODIFY THE
+  // 'const packageConfigLocation' VARIABLE.
+  // Dash tooling like Dart DevTools performs an evaluation on this variable at
+  // runtime to get the package config location for Flutter test targets.
+  buffer.write('''
+
+const packageConfigLocation = '$packageConfigUri';
+''');
   buffer.write('''
 
 /// Returns a serialized test suite.
@@ -293,8 +307,8 @@ class FlutterPlatform extends PlatformPlugin {
     this.integrationTestDevice,
     this.integrationTestUserIdentifier,
     this.testTimeRecorder,
-    this.uriConverter,
     this.nativeAssetsBuilder,
+    this.buildInfo,
   });
 
   final String shellPath;
@@ -312,9 +326,7 @@ class FlutterPlatform extends PlatformPlugin {
   final String? icudtlPath;
   final TestTimeRecorder? testTimeRecorder;
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
-
-  // This can be used by internal projects that require custom logic for converting package: URIs to local paths.
-  final UriConverter? uriConverter;
+  final BuildInfo? buildInfo;
 
   /// The device to run the test on for Integration Tests.
   ///
@@ -444,8 +456,17 @@ class FlutterPlatform extends PlatformPlugin {
       icudtlPath: icudtlPath,
       compileExpression: _compileExpressionService,
       fontConfigManager: _fontConfigManager,
-      uriConverter: uriConverter,
+      nativeAssetsBuilder: nativeAssetsBuilder,
     );
+  }
+
+  void _handleStartedDevice(Uri? uri, int testCount) {
+    if (uri != null) {
+      globals.printTrace('test $testCount: VM Service uri is available at $uri');
+    } else {
+      globals.printTrace('test $testCount: VM Service uri is not available');
+    }
+    watcher?.handleStartedDevice(uri);
   }
 
   Future<_AsyncError?> _startTest(
@@ -519,7 +540,16 @@ class FlutterPlatform extends PlatformPlugin {
       globals.printTrace('test $ourTestCount: starting test device');
       final TestDevice testDevice = _createTestDevice(ourTestCount);
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Run);
-      final Future<StreamChannel<String>> remoteChannelFuture = testDevice.start(mainDart!);
+      final Completer<StreamChannel<String>> remoteChannelCompleter = Completer<StreamChannel<String>>();
+      unawaited(asyncGuard(
+        () async {
+          final StreamChannel<String> channel = await testDevice.start(mainDart!);
+          remoteChannelCompleter.complete(channel);
+        },
+        onError: (Object err, StackTrace stackTrace) {
+          remoteChannelCompleter.completeError(err, stackTrace);
+        },
+      ));
       finalizers.add(() async {
         globals.printTrace('test $ourTestCount: ensuring test device is terminated.');
         await testDevice.kill();
@@ -534,15 +564,21 @@ class FlutterPlatform extends PlatformPlugin {
       await Future.any<void>(<Future<void>>[
         testDevice.finished,
         () async {
-          final Uri? processVmServiceUri = await testDevice.vmServiceUri;
-          if (processVmServiceUri != null) {
-            globals.printTrace('test $ourTestCount: VM Service uri is available at $processVmServiceUri');
-          } else {
-            globals.printTrace('test $ourTestCount: VM Service uri is not available');
-          }
-          watcher?.handleStartedDevice(processVmServiceUri);
+          final [Object? first, Object? _] = await Future.wait<Object?>(
+            <Future<Object?>>[
+              // This future may depend on [_handleStartedDevice] having been called
+              remoteChannelCompleter.future,
+              testDevice.vmServiceUri.then<void>((Uri? processVmServiceUri) {
+                _handleStartedDevice(processVmServiceUri, ourTestCount);
+              }),
+            ],
+            // If [remoteChannelCompleter.future] errors, we may never get the
+            // VM service URI, so erroring eagerly is necessary to avoid a
+            // deadlock.
+            eagerError: true,
+          );
+          final StreamChannel<String> remoteChannel = first! as StreamChannel<String>;
 
-          final StreamChannel<String> remoteChannel = await remoteChannelFuture;
           globals.printTrace('test $ourTestCount: connected to test device, now awaiting test result');
 
           await _pipeHarnessToRemote(
@@ -641,6 +677,8 @@ class FlutterPlatform extends PlatformPlugin {
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl), globals.logger),
+      // This MUST be a file URI.
+      packageConfigUri: buildInfo != null ? globals.fs.path.toUri(buildInfo!.packageConfigPath) : null,
       host: host!,
       updateGoldens: updateGoldens!,
       flutterTestDep: packageConfig['flutter_test'] != null,

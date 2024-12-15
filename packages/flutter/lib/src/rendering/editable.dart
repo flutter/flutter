@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+library;
+
 import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, LineMetrics, TextBox;
@@ -1278,7 +1281,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   /// Collected during [describeSemanticsConfiguration], used by
-  /// [assembleSemanticsNode] and [_combineSemanticsInfo].
+  /// [assembleSemanticsNode].
   List<InlineSpanSemanticsInformation>? _semanticsInfo;
 
   // Caches [SemanticsNode]s created during [assembleSemanticsNode] so they
@@ -1453,10 +1456,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
           ..textDirection = initialDirection
           ..attributedLabel = AttributedString(info.semanticsLabel ?? info.text, attributes: info.stringAttributes);
         switch (info.recognizer) {
-          case TapGestureRecognizer(onTap: final VoidCallback? onTap):
-          case DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? onTap):
-            if (onTap != null) {
-              configuration.onTap = onTap;
+          case TapGestureRecognizer(onTap: final VoidCallback? handler):
+          case DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? handler):
+            if (handler != null) {
+              configuration.onTap = handler;
               configuration.isLink = true;
             }
           case LongPressGestureRecognizer(onLongPress: final GestureLongPressCallback? onLongPress):

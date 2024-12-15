@@ -272,7 +272,7 @@ class IOSDevice extends Device {
     required IOSCoreDeviceControl coreDeviceControl,
     required XcodeDebug xcodeDebug,
     required IProxy iProxy,
-    required Logger logger,
+    required super.logger,
   })
     : _sdkVersion = sdkVersion,
       _iosDeploy = iosDeploy,
@@ -470,7 +470,6 @@ class IOSDevice extends Device {
     required DebuggingOptions debuggingOptions,
     Map<String, Object?> platformArgs = const <String, Object?>{},
     bool prebuiltApplication = false,
-    bool ipv6 = false,
     String? userIdentifier,
     @visibleForTesting Duration? discoveryTimeout,
     @visibleForTesting ShutdownHooks? shutdownHooks,
@@ -500,7 +499,6 @@ class IOSDevice extends Device {
           buildResult,
           analytics: globals.analytics,
           fileSystem: globals.fs,
-          flutterUsage: globals.flutterUsage,
           logger: globals.logger,
           platform: SupportedPlatform.ios,
           project: package.project.parent,
@@ -525,7 +523,6 @@ class IOSDevice extends Device {
       EnvironmentType.physical,
       route,
       platformArgs,
-      ipv6: ipv6,
       interfaceType: connectionInterface,
       isCoreDevice: isCoreDevice,
     );
@@ -542,7 +539,6 @@ class IOSDevice extends Device {
           bundle: bundle,
           debuggingOptions: debuggingOptions,
           launchArguments: launchArguments,
-          ipv6: ipv6,
           uninstallFirst: debuggingOptions.uninstallFirst,
         );
       }
@@ -620,7 +616,6 @@ class IOSDevice extends Device {
         localUri = await _discoverDartVMForCoreDevice(
           debuggingOptions: debuggingOptions,
           packageId: packageId,
-          ipv6: ipv6,
           vmServiceDiscovery: vmServiceDiscovery,
         );
       } else if (isWirelesslyConnected) {
@@ -652,7 +647,7 @@ class IOSDevice extends Device {
         localUri = await MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
           packageId,
           this,
-          usesIpv6: ipv6,
+          usesIpv6: debuggingOptions.ipv6,
           deviceVmservicePort: serviceURL.port,
           useDeviceIPAsHost: true,
         );
@@ -674,7 +669,6 @@ class IOSDevice extends Device {
             bundle: bundle,
             debuggingOptions: debuggingOptions,
             launchArguments: launchArguments,
-            ipv6: ipv6,
             uninstallFirst: false,
             skipInstall: true,
           );
@@ -729,7 +723,6 @@ class IOSDevice extends Device {
   /// Wireless devices require using the device IP as the host.
   Future<Uri?> _discoverDartVMForCoreDevice({
     required String packageId,
-    required bool ipv6,
     required DebuggingOptions debuggingOptions,
     ProtocolDiscovery? vmServiceDiscovery,
   }) async {
@@ -776,7 +769,7 @@ class IOSDevice extends Device {
     final Future<Uri?> vmUrlFromMDns = MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
       packageId,
       this,
-      usesIpv6: ipv6,
+      usesIpv6: debuggingOptions.ipv6,
       useDeviceIPAsHost: isWirelesslyConnected,
     );
 
@@ -815,7 +808,6 @@ class IOSDevice extends Device {
     required Directory bundle,
     required DebuggingOptions debuggingOptions,
     required List<String> launchArguments,
-    required bool ipv6,
     required bool uninstallFirst,
     bool skipInstall = false,
   }) {
@@ -846,7 +838,7 @@ class IOSDevice extends Device {
       portForwarder: isWirelesslyConnected ? null : portForwarder,
       hostPort: debuggingOptions.hostVmServicePort,
       devicePort: debuggingOptions.deviceVmServicePort,
-      ipv6: ipv6,
+      ipv6: debuggingOptions.ipv6,
       logger: _logger,
     );
   }

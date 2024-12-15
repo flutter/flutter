@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'menu_anchor.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -285,16 +289,16 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
   /// {@endtemplate}
   ///
   /// If null, then the value of [PopupMenuThemeData.mouseCursor] is used. If
-  /// that is also null, then [MaterialStateMouseCursor.clickable] is used.
+  /// that is also null, then [WidgetStateMouseCursor.clickable] is used.
   final MouseCursor? mouseCursor;
 
   /// The widget below this widget in the tree.
@@ -371,15 +375,22 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
     if (!widget.enabled && !theme.useMaterial3) {
       style = style.copyWith(color: theme.disabledColor);
     }
+    final EdgeInsetsGeometry padding = widget.padding
+      ?? (theme.useMaterial3 ? _PopupMenuDefaultsM3.menuItemPadding : _PopupMenuDefaultsM2.menuItemPadding);
 
     Widget item = AnimatedDefaultTextStyle(
       style: style,
       duration: kThemeChangeDuration,
-      child: Container(
-        alignment: AlignmentDirectional.centerStart,
+      child: ConstrainedBox(
         constraints: BoxConstraints(minHeight: widget.height),
-        padding: widget.padding ?? (theme.useMaterial3 ? _PopupMenuDefaultsM3.menuItemPadding : _PopupMenuDefaultsM2.menuItemPadding),
-        child: buildChild(),
+        child: Padding(
+          key: const Key('menu item padding'),
+          padding: padding,
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: buildChild(),
+          ),
+        ),
       ),
     );
 
@@ -855,6 +866,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.constraints,
     required this.clipBehavior,
     super.settings,
+    super.requestFocus,
     this.popUpAnimationStyle,
   }) : itemSizes = List<Size?>.filled(items.length, null),
        // Menus always cycle focus through their items irrespective of the
@@ -1019,6 +1031,9 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// The `clipBehavior` argument is used to clip the shape of the menu. Defaults to
 /// [Clip.none].
 ///
+/// The `requestFocus` argument specifies whether the menu should request focus
+/// when it appears. If it is null, [Navigator.requestFocus] is used instead.
+///
 /// See also:
 ///
 ///  * [PopupMenuItem], a popup menu entry for a single value.
@@ -1045,6 +1060,7 @@ Future<T?> showMenu<T>({
   Clip clipBehavior = Clip.none,
   RouteSettings? routeSettings,
   AnimationStyle? popUpAnimationStyle,
+  bool? requestFocus,
 }) {
   assert(items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1080,6 +1096,7 @@ Future<T?> showMenu<T>({
     clipBehavior: clipBehavior,
     settings: routeSettings,
     popUpAnimationStyle: popUpAnimationStyle,
+    requestFocus: requestFocus,
   ));
 }
 
@@ -1196,6 +1213,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.padding = const EdgeInsets.all(8.0),
     this.menuPadding,
     this.child,
+    this.borderRadius,
     this.splashRadius,
     this.icon,
     this.iconSize,
@@ -1212,6 +1230,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.popUpAnimationStyle,
     this.routeSettings,
     this.style,
+    this.requestFocus,
   }) : assert(
          !(child != null && icon != null),
          'You can only pass [child] or [icon], not both.',
@@ -1291,6 +1310,11 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// If provided, [child] is the widget used for this button
   /// and the button will utilize an [InkWell] for taps.
   final Widget? child;
+
+  /// The border radius for the [InkWell] that wraps the [child].
+  ///
+  /// Defaults to null, which indicates no border radius should be applied.
+  final BorderRadius? borderRadius;
 
   /// If provided, the [icon] is used for this button
   /// and the button will behave like an [IconButton].
@@ -1428,6 +1452,11 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// Null by default.
   final ButtonStyle? style;
 
+  /// Whether to request focus when the menu appears.
+  ///
+  /// If null, [Navigator.requestFocus] will be used instead.
+  final bool? requestFocus;
+
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1491,6 +1520,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         useRootNavigator: widget.useRootNavigator,
         popUpAnimationStyle: widget.popUpAnimationStyle,
         routeSettings: widget.routeSettings,
+        requestFocus: widget.requestFocus,
       )
       .then<void>((T? newValue) {
         if (!mounted) {
@@ -1527,6 +1557,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       return Tooltip(
         message: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
         child: InkWell(
+          borderRadius: widget.borderRadius,
           onTap: widget.enabled ? showButtonMenu : null,
           canRequestFocus: _canRequestFocus,
           radius: widget.splashRadius,
@@ -1537,6 +1568,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     }
 
     return IconButton(
+      key: StandardComponentType.moreButton.key,
       icon: widget.icon ?? Icon(Icons.adaptive.more),
       padding: widget.padding,
       splashRadius: widget.splashRadius,

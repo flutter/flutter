@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.ordinalForms].
+/// Flutter code sample for [FontFeature.ordinalForms].
 
 void main() => runApp(const ExampleApp());
 

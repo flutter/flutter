@@ -406,11 +406,24 @@ class _ShapeDecorationPainter extends BoxPainter {
   void _paintInterior(Canvas canvas, Rect rect, TextDirection? textDirection) {
     if (_interiorPaint != null) {
       if (_decoration.shape.preferPaintInterior) {
-        _decoration.shape.paintInterior(canvas, rect, _interiorPaint!, textDirection: textDirection);
+        // When border is filled, the rect is reduced to avoid anti-aliasing
+        // rounding error leaking the background color around the clipped shape.
+        final Rect adjustedRect = _adjustedRectOnOutlinedBorder(rect);
+        _decoration.shape.paintInterior(canvas, adjustedRect, _interiorPaint!, textDirection: textDirection);
       } else {
         canvas.drawPath(_outerPath, _interiorPaint!);
       }
     }
+  }
+
+  Rect _adjustedRectOnOutlinedBorder(Rect rect) {
+    if (_decoration.shape is OutlinedBorder && _decoration.color != null) {
+      final BorderSide side = (_decoration.shape as OutlinedBorder).side;
+      if (side.color.alpha == 255 && side.style == BorderStyle.solid) {
+        return rect.deflate(side.strokeInset / 2);
+      }
+    }
+    return rect;
   }
 
   DecorationImagePainter? _imagePainter;

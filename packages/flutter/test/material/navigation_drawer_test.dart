@@ -112,9 +112,11 @@ void main() {
 
     scaffoldKey.currentState!.openDrawer();
     await tester.pump(const Duration(seconds: 1)); // animation done
-    final Container destinationColor = tester.firstWidget<Container>(
+    final ColoredBox destinationColor = tester.firstWidget<ColoredBox>(
       find.descendant(
-          of: find.byType(NavigationDrawerDestination), matching: find.byType(Container)),
+        of: find.byType(NavigationDrawerDestination),
+        matching: find.byType(ColoredBox),
+      ),
     );
 
     expect(destinationColor.color, equals(color));

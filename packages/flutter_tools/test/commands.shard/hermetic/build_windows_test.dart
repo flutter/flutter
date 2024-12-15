@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/windows/build_windows.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:test/fake.dart';
@@ -47,7 +46,6 @@ final Platform notWindowsPlatform = FakePlatform(
 void main() {
   late MemoryFileSystem fileSystem;
   late ProcessManager processManager;
-  late TestUsage usage;
   late FakeAnalytics fakeAnalytics;
 
   setUpAll(() {
@@ -58,7 +56,6 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = flutterRoot;
-    usage = TestUsage();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: FakeFlutterVersion(),
@@ -68,7 +65,7 @@ void main() {
   // Creates the mock files necessary to look like a Flutter project.
   void setUpMockCoreProjectFiles() {
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
@@ -997,9 +994,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
     expect(testLogger.statusText, contains('A summary of your Windows bundle analysis can be found at'));
     expect(testLogger.statusText, contains('dart devtools --appSizeBase='));
-    expect(usage.events, contains(
-        const TestUsageEvent('code-size-analysis', 'windows'),
-    ));
     expect(fakeAnalytics.sentEvents, contains(
       Event.codeSizeAnalysis(platform: 'windows')
     ));
@@ -1009,7 +1003,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     ProcessManager: () => processManager,
     Platform: () => windowsPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: windowsPlatform),
-    Usage: () => usage,
     Analytics: () => fakeAnalytics,
   });
 

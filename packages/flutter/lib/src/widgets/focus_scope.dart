@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/semantics.dart';
+///
+/// @docImport 'actions.dart';
+/// @docImport 'container.dart';
+/// @docImport 'editable_text.dart';
+/// @docImport 'focus_traversal.dart';
+/// @docImport 'overlay.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
@@ -433,20 +444,15 @@ class Focus extends StatefulWidget {
   /// * [of], which is similar to this function, but will throw an exception if
   ///   it doesn't find a [Focus] node, instead of returning null.
   static FocusNode? maybeOf(BuildContext context, { bool scopeOk = false, bool createDependency = true }) {
-    final _FocusInheritedScope? scope;
-    if (createDependency) {
-      scope = context.dependOnInheritedWidgetOfExactType<_FocusInheritedScope>();
-    } else {
-      scope = context.getInheritedWidgetOfExactType<_FocusInheritedScope>();
-    }
-    final FocusNode? node = scope?.notifier;
-    if (node == null) {
-      return null;
-    }
-    if (!scopeOk && node is FocusScopeNode) {
-      return null;
-    }
-    return node;
+    final _FocusInheritedScope? scope = createDependency
+        ? context.dependOnInheritedWidgetOfExactType<_FocusInheritedScope>()
+        : context.getInheritedWidgetOfExactType<_FocusInheritedScope>();
+
+    return switch (scope?.notifier) {
+      null => null,
+      FocusScopeNode() when !scopeOk => null,
+      final FocusNode node => node,
+    };
   }
 
   /// Returns true if the nearest enclosing [Focus] widget's node is focused.

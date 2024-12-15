@@ -68,7 +68,6 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final WindowsDevice windowsDevice = setUpWindowsDevice(fileSystem: fileSystem);
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
     fileSystem.directory('windows').createSync();
     fileSystem.file(fileSystem.path.join('windows', 'CMakeLists.txt')).createSync();
     final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
@@ -80,7 +79,6 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final WindowsDevice windowsDevice = setUpWindowsDevice(fileSystem: fileSystem);
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
     final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
     expect(windowsDevice.isSupportedForProject(flutterProject), false);
@@ -90,7 +88,6 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final WindowsDevice windowsDevice = setUpWindowsDevice(fileSystem: fileSystem);
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
     fileSystem.directory('windows').createSync();
     final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 

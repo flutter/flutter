@@ -26,8 +26,6 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      globals.fs.file('.packages')
-        .writeAsStringSync('\n');
       globals.fs.file(globals.fs.path.join('build', 'app.dill'))
         ..createSync(recursive: true)
         ..writeAsStringSync('ABC');
@@ -58,7 +56,7 @@ void main() {
         globals.fs
             .file(globals.fs.path.join('lib', 'main.dart'))
             .createSync(recursive: true);
-        final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner();
+        final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner();
         final HotRunner residentRunner = HotRunner(
           <FlutterDevice>[
             flutterDevice,
@@ -84,7 +82,6 @@ void main() {
         expect(buildRunner.buildInvocations, 0);
         expect(buildRunner.buildDryRunInvocations, 0);
         expect(buildRunner.linkInvocations, 0);
-        expect(buildRunner.linkDryRunInvocations, 0);
         expect(buildRunner.hasPackageConfigInvocations, 0);
         expect(buildRunner.packagesWithNativeAssetsInvocations, 0);
 

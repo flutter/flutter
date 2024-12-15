@@ -70,6 +70,13 @@ enum _CupertinoListTileType { base, notched }
 /// behavior it should not be used for example to toggle the [CupertinoSwitch]
 /// in the trailing widget.
 ///
+/// {@tool dartpad}
+/// This example uses a [ListView] to demonstrate different configurations of
+/// [CupertinoListTile]s.
+///
+/// ** See code in examples/api/lib/cupertino/list_tile/cupertino_list_tile.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoListSection], an iOS-style list that is a typical container for

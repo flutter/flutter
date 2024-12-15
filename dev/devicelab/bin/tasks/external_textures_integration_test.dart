@@ -8,5 +8,5 @@ import 'package:flutter_devicelab/tasks/integration_tests.dart';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
-  await task(createExternalTexturesFrameRateIntegrationTest(extraOptions: <String>['--no-enable-impeller']));
+  await task(createExternalTexturesFrameRateIntegrationTest());
 }

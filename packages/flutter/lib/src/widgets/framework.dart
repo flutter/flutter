@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'package:flutter/animation.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/widgets.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
+library;
+
 import 'dart:async';
 import 'dart:collection';
 
@@ -47,20 +55,20 @@ export 'package:flutter/rendering.dart' show RenderBox, RenderObject, debugDumpL
 // Future<Directory> getApplicationDocumentsDirectory() async => Directory('');
 // late AnimationController animation;
 
-// An annotation used by test_analysis package to verify patterns are followed
-// that allow for tree-shaking of both fields and their initializers. This
-// annotation has no impact on code by itself, but indicates the following pattern
-// should be followed for a given field:
-//
-// ```dart
-// class Foo {
-//   final bar = kDebugMode ? Object() : null;
-// }
-// ```
 class _DebugOnly {
   const _DebugOnly();
 }
 
+/// An annotation used by test_analysis package to verify patterns are followed
+/// that allow for tree-shaking of both fields and their initializers. This
+/// annotation has no impact on code by itself, but indicates the following pattern
+/// should be followed for a given field:
+///
+/// ```dart
+/// class Bar {
+///   final Object? bar = kDebugMode ? Object() : null;
+/// }
+/// ```
 const _DebugOnly _debugOnly = _DebugOnly();
 
 // KEYS
@@ -179,17 +187,10 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// The current state is null if (1) there is no widget in the tree that
   /// matches this global key, (2) that widget is not a [StatefulWidget], or the
   /// associated [State] object is not a subtype of `T`.
-  T? get currentState {
-    final Element? element = _currentElement;
-    if (element is StatefulElement) {
-      final StatefulElement statefulElement = element;
-      final State state = statefulElement.state;
-      if (state is T) {
-        return state;
-      }
-    }
-    return null;
-  }
+  T? get currentState => switch (_currentElement) {
+    StatefulElement(:final T state) => state,
+    _ => null,
+  };
 }
 
 /// A global key with a debugging label.
@@ -2645,8 +2646,8 @@ final class BuildScope {
   ///
   /// This is necessary to preserve the sort order defined by [Element._sort].
   ///
-  /// This field is set to null when [buildScope] is not actively rebuilding
-  /// the widget tree.
+  /// This field is set to null when [BuildOwner.buildScope] is not actively
+  /// rebuilding the widget tree.
   bool? _dirtyElementsNeedsResorting;
   final List<Element> _dirtyElements = <Element>[];
 
@@ -2903,15 +2904,14 @@ class BuildOwner {
                   'The dirty list for the current build scope is: ${buildScope._dirtyElements}',
         );
       }
-      // When reactivating an inactivate Element, _scheduleBuildFor should only be
-      // called within _flushDirtyElements.
       if (!_debugBuilding && element._inDirtyList) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('BuildOwner.scheduleBuildFor() called inappropriately.'),
           ErrorHint(
-            'The BuildOwner.scheduleBuildFor() method should only be called while the '
-            'buildScope() method is actively rebuilding the widget tree.',
+            'The BuildOwner.scheduleBuildFor() method called on an Element '
+            'that is already in the dirty list.',
           ),
+          element.describeElement('the dirty Element was'),
         ]);
       }
       return true;
@@ -4030,7 +4030,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(slots == null || newWidgets.length == slots.length);
 
     Element? replaceWithNullIfForgotten(Element child) {
-      return forgottenChildren != null && forgottenChildren.contains(child) ? null : child;
+      return (forgottenChildren?.contains(child) ?? false) ? null : child;
     }
 
     Object? slotFor(int newChildIndex, Element? previousChild) {
@@ -4209,14 +4209,26 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// method, as in `super.mount(parent, newSlot)`.
   @mustCallSuper
   void mount(Element? parent, Object? newSlot) {
-    assert(_lifecycleState == _ElementLifecycle.initial);
-    assert(_parent == null);
-    assert(parent == null || parent._lifecycleState == _ElementLifecycle.active);
-    assert(slot == null);
+    assert(
+      _lifecycleState == _ElementLifecycle.initial,
+      'This element is no longer in its initial state (${_lifecycleState.name})',
+    );
+    assert(
+      _parent == null,
+      "This element already has a parent ($_parent) and it shouldn't have one yet.",
+    );
+    assert(
+      parent == null || parent._lifecycleState == _ElementLifecycle.active,
+      'Parent ($parent) should be null or in the active state (${parent._lifecycleState.name})',
+    );
+    assert(
+      slot == null,
+      "This element already has a slot ($slot) and it shouldn't",
+    );
     _parent = parent;
     _slot = newSlot;
     _lifecycleState = _ElementLifecycle.active;
-    _depth = _parent != null ? _parent!.depth + 1 : 1;
+    _depth = 1 + (_parent?.depth ?? 0);
     if (parent != null) {
       // Only assign ownership if the parent is non-null. If parent is null
       // (the root node), the owner should have already been assigned.
@@ -4595,7 +4607,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void activate() {
     assert(_lifecycleState == _ElementLifecycle.inactive);
     assert(owner != null);
-    final bool hadDependencies = (_dependencies != null && _dependencies!.isNotEmpty) || _hadUnsatisfiedDependencies;
+    final bool hadDependencies = (_dependencies?.isNotEmpty ?? false) || _hadUnsatisfiedDependencies;
     _lifecycleState = _ElementLifecycle.active;
     // We unregistered our dependencies in deactivate, but never cleared the list.
     // Since we're going to be reused, let's clear our list now.
@@ -4630,7 +4642,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void deactivate() {
     assert(_lifecycleState == _ElementLifecycle.active);
     assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
-    if (_dependencies != null && _dependencies!.isNotEmpty) {
+    if (_dependencies?.isNotEmpty ?? false) {
       for (final InheritedElement dependency in _dependencies!) {
         dependency.removeDependent(this);
       }
@@ -4890,8 +4902,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   /// Returns `true` if [dependOnInheritedElement] was previously called with [ancestor].
   @protected
-  bool doesDependOnInheritedElement(InheritedElement ancestor) =>
-      _dependencies != null && _dependencies!.contains(ancestor);
+  bool doesDependOnInheritedElement(InheritedElement ancestor) {
+    return _dependencies?.contains(ancestor) ?? false;
+  }
 
   @override
   InheritedWidget dependOnInheritedElement(InheritedElement ancestor, { Object? aspect }) {
@@ -4904,7 +4917,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({Object? aspect}) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedElements == null ? null : _inheritedElements![T];
+    final InheritedElement? ancestor = _inheritedElements?[T];
     if (ancestor != null) {
       return dependOnInheritedElement(ancestor, aspect: aspect) as T;
     }
@@ -4920,8 +4933,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   InheritedElement? getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
     assert(_debugCheckStateIsActiveForAncestorLookup());
-    final InheritedElement? ancestor = _inheritedElements == null ? null : _inheritedElements![T];
-    return ancestor;
+    return _inheritedElements?[T];
   }
 
   /// Called in [Element.mount] and [Element.activate] to register this element in
@@ -5125,8 +5137,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Returns true if the element has been marked as needing rebuilding.
   ///
   /// The flag is true when the element is first created and after
-  /// [markNeedsBuild] has been called. The flag is reset to false in the
-  /// [performRebuild] implementation.
+  /// [markNeedsBuild] has been called. The flag is typically reset to false in
+  /// the [performRebuild] implementation, but certain elements (that of the
+  /// [LayoutBuilder] widget, for example) may choose to override [markNeedsBuild]
+  /// such that it does not set the [dirty] flag to `true` when called.
   bool get dirty => _dirty;
   bool _dirty = true;
 
