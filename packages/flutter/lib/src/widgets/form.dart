@@ -764,8 +764,13 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 }
 
+@Deprecated('Use AutoValidateMode instead. Will be removed in a future release.')
 /// Used to configure the auto validation of [FormField] and [Form] widgets.
-enum AutovalidateMode {
+/// @deprecated Use [AutoValidateMode] instead.
+typedef AutovalidateMode = AutoValidateMode;
+
+/// Used to configure the auto validation of [FormField] and [Form] widgets.
+enum AutoValidateMode {
   /// No auto validation will occur.
   disabled,
 
