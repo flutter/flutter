@@ -96,56 +96,6 @@ struct _FlutterTaskRunner {
 
 namespace {
 
-// Send a response from the engine.
-static void send_response(
-    FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    const std::string& channel,
-    const FlutterPlatformMessageResponseHandle* response_handle,
-    const uint8_t* message,
-    size_t message_size) {
-  if (response_handle == nullptr) {
-    return;
-  }
-
-  FlutterTask task;
-  task.runner = new _FlutterTaskRunner(1234, channel, response_handle, message,
-                                       message_size);
-  task.task = task.runner->task;
-  engine->platform_post_task_callback(task, 0, engine->user_data);
-}
-
-// Send a message from the engine.
-static void send_message(FLUTTER_API_SYMBOL(FlutterEngine) engine,
-                         const std::string& channel,
-                         const uint8_t* message,
-                         size_t message_size) {
-  FlutterTask task;
-  task.runner =
-      new _FlutterTaskRunner(1234, channel, nullptr, message, message_size);
-  task.task = task.runner->task;
-  engine->platform_post_task_callback(task, 0, engine->user_data);
-}
-
-static void invoke_method(FLUTTER_API_SYMBOL(FlutterEngine) engine,
-                          const std::string& channel,
-                          const gchar* name,
-                          FlValue* args) {
-  g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
-  g_autoptr(GError) error = nullptr;
-  g_autoptr(GBytes) message = fl_method_codec_encode_method_call(
-      FL_METHOD_CODEC(codec), name, args, &error);
-  EXPECT_NE(message, nullptr);
-  EXPECT_EQ(error, nullptr);
-
-  FlutterTask task;
-  task.runner = new _FlutterTaskRunner(
-      1234, channel, nullptr,
-      static_cast<const uint8_t*>(g_bytes_get_data(message, nullptr)),
-      g_bytes_get_size(message));
-  task.task = task.runner->task;
-  engine->platform_post_task_callback(task, 0, engine->user_data);
-}
-
 FlutterEngineResult FlutterEngineCreateAOTData(
     const FlutterEngineAOTDataSource* source,
     FlutterEngineAOTData* data_out) {
@@ -247,117 +197,6 @@ FlutterEngineResult FlutterEngineSendPlatformMessage(
     const FlutterPlatformMessage* message) {
   EXPECT_TRUE(engine->running);
 
-  if (strcmp(message->channel, "test/echo") == 0) {
-    // Responds with the same message received.
-    send_response(engine, message->channel, message->response_handle,
-                  message->message, message->message_size);
-  } else if (strcmp(message->channel, "test/send-message") == 0) {
-    // Triggers the engine to send a message.
-    send_response(engine, message->channel, message->response_handle, nullptr,
-                  0);
-    send_message(engine, "test/messages", message->message,
-                 message->message_size);
-  } else if (strcmp(message->channel, "test/standard-method") == 0) {
-    g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
-    g_autoptr(GBytes) m = g_bytes_new(message->message, message->message_size);
-    g_autofree gchar* name = nullptr;
-    g_autoptr(FlValue) args = nullptr;
-    g_autoptr(GError) error = nullptr;
-    EXPECT_TRUE(fl_method_codec_decode_method_call(FL_METHOD_CODEC(codec), m,
-                                                   &name, &args, &error));
-    EXPECT_EQ(error, nullptr);
-
-    g_autoptr(GBytes) response = nullptr;
-    if (strcmp(name, "Echo") == 0) {
-      // Returns args as a success result.
-      response = fl_method_codec_encode_success_envelope(FL_METHOD_CODEC(codec),
-                                                         args, &error);
-      EXPECT_EQ(error, nullptr);
-    } else if (strcmp(name, "Error") == 0) {
-      // Returns an error result.
-      const gchar* code = nullptr;
-      const gchar* message = nullptr;
-      FlValue* details = nullptr;
-      if (fl_value_get_length(args) >= 2) {
-        FlValue* code_value = fl_value_get_list_value(args, 0);
-        EXPECT_EQ(fl_value_get_type(code_value), FL_VALUE_TYPE_STRING);
-        code = fl_value_get_string(code_value);
-        FlValue* message_value = fl_value_get_list_value(args, 1);
-        message = fl_value_get_type(message_value) == FL_VALUE_TYPE_STRING
-                      ? fl_value_get_string(message_value)
-                      : nullptr;
-      }
-      if (fl_value_get_length(args) >= 3) {
-        details = fl_value_get_list_value(args, 2);
-      }
-      response = fl_method_codec_encode_error_envelope(
-          FL_METHOD_CODEC(codec), code, message, details, &error);
-      EXPECT_EQ(error, nullptr);
-    } else if (strcmp(name, "InvokeMethod") == 0) {
-      // Gets the engine to call the shell.
-      if (fl_value_get_length(args) == 3) {
-        FlValue* channel_value = fl_value_get_list_value(args, 0);
-        EXPECT_EQ(fl_value_get_type(channel_value), FL_VALUE_TYPE_STRING);
-        const gchar* channel = fl_value_get_string(channel_value);
-        FlValue* name_value = fl_value_get_list_value(args, 1);
-        EXPECT_EQ(fl_value_get_type(name_value), FL_VALUE_TYPE_STRING);
-        const gchar* name = fl_value_get_string(name_value);
-        FlValue* method_args = fl_value_get_list_value(args, 2);
-        invoke_method(engine, channel, name, method_args);
-      }
-      response = fl_method_codec_encode_success_envelope(FL_METHOD_CODEC(codec),
-                                                         nullptr, &error);
-      EXPECT_EQ(error, nullptr);
-    } else {
-      // Returns "not implemented".
-      response = g_bytes_new(nullptr, 0);
-    }
-
-    send_response(
-        engine, message->channel, message->response_handle,
-        static_cast<const uint8_t*>(g_bytes_get_data(response, nullptr)),
-        g_bytes_get_size(response));
-  } else if (strcmp(message->channel, "test/nullptr-response") == 0) {
-    // Sends a null response.
-    send_response(engine, message->channel, message->response_handle, nullptr,
-                  0);
-  } else if (strcmp(message->channel, "test/failure") == 0) {
-    // Generates an internal error.
-    return kInternalInconsistency;
-  } else if (strcmp(message->channel, "test/key-event-handled") == 0 ||
-             strcmp(message->channel, "test/key-event-not-handled") == 0) {
-    bool value = strcmp(message->channel, "test/key-event-handled") == 0;
-    g_autoptr(FlJsonMessageCodec) codec = fl_json_message_codec_new();
-    g_autoptr(FlValue) handledValue = fl_value_new_map();
-    fl_value_set_string_take(handledValue, "handled", fl_value_new_bool(value));
-    g_autoptr(GBytes) response = fl_message_codec_encode_message(
-        FL_MESSAGE_CODEC(codec), handledValue, nullptr);
-    send_response(
-        engine, message->channel, message->response_handle,
-        static_cast<const uint8_t*>(g_bytes_get_data(response, nullptr)),
-        g_bytes_get_size(response));
-  } else if (strcmp(message->channel, "test/key-event-delayed") == 0) {
-    static std::unique_ptr<const FlutterPlatformMessageResponseHandle>
-        delayed_response_handle = nullptr;
-    g_autoptr(FlJsonMessageCodec) codec = fl_json_message_codec_new();
-    g_autoptr(FlValue) handledValue = fl_value_new_map();
-    fl_value_set_string_take(handledValue, "handled", fl_value_new_bool(true));
-    g_autoptr(GBytes) response = fl_message_codec_encode_message(
-        FL_MESSAGE_CODEC(codec), handledValue, nullptr);
-    if (delayed_response_handle == nullptr) {
-      delayed_response_handle.reset(message->response_handle);
-    } else {
-      send_response(
-          engine, message->channel, message->response_handle,
-          static_cast<const uint8_t*>(g_bytes_get_data(response, nullptr)),
-          g_bytes_get_size(response));
-      send_response(
-          engine, message->channel, delayed_response_handle.release(),
-          static_cast<const uint8_t*>(g_bytes_get_data(response, nullptr)),
-          g_bytes_get_size(response));
-    }
-  }
-
   return kSuccess;
 }
 
@@ -400,11 +239,6 @@ FlutterEngineResult FlutterEngineSendPlatformMessageResponse(
   EXPECT_NE(handle, nullptr);
 
   EXPECT_TRUE(engine->running);
-
-  // Send a message so the shell can check the responses received.
-  if (handle->channel != "test/responses") {
-    send_message(engine, "test/responses", data, data_length);
-  }
 
   EXPECT_FALSE(handle->released);
 
