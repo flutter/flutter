@@ -3162,8 +3162,6 @@ void main() {
     await tester.longPressAt(iconButtonOutlinedOffset);
     await tester.pumpAndSettle();
     expect(onLongPressed, false);
-
-    await gesture.removePointer();
   });
 
   testWidgets('Material2 - IconButton variants hovered & onLongPressed', (WidgetTester tester) async {
@@ -3295,8 +3293,6 @@ void main() {
     await tester.longPressAt(iconButtonOutlinedOffset);
     await tester.pumpAndSettle();
     expect(onLongPressed, false);
-
-    await gesture.removePointer();
   });
 }
 
