@@ -395,7 +395,7 @@ class ModuleTest {
         // Shouldn't be missing since we already checked it exists above.
         final ArchiveFile? noticesFile = apk.findFile('assets/flutter_assets/NOTICES.Z');
 
-        final Uint8List? licenseData = noticesFile?.content as Uint8List;
+        final Uint8List? licenseData = noticesFile?.content as Uint8List?;
         if (licenseData == null) {
           return TaskResult.failure('Invalid license file.');
         }
