@@ -65,7 +65,8 @@ class PluginEventChannel<T> {
     'Replace calls to the "controller" setter with calls to the "setController" method. '
     'This feature was deprecated after v1.23.0-7.0.pre.'
   )
-  set controller(StreamController<T> controller) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set controller(StreamController<T> controller) {
     setController(controller);
   }
 

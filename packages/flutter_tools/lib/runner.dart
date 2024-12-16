@@ -120,8 +120,9 @@ Future<int> run(
         // We already hit some error, so don't return success. The error path
         // (which should be in progress) is responsible for calling _exit().
         return 1;
-      } catch (error, stackTrace) { // ignore: avoid_catches_without_on_clauses
         // This catches all exceptions to send to crash logging, etc.
+        // ignore: avoid_catches_without_on_clauses
+      } catch (error, stackTrace) {
         firstError = error;
         firstStackTrace = stackTrace;
         return _handleToolError(error, stackTrace, verbose, args, reportCrashes!, getVersion, shutdownHooks);
@@ -229,7 +230,8 @@ Future<int> _handleToolError(
 
       return exitWithHooks(1, shutdownHooks: shutdownHooks);
     // This catch catches all exceptions to ensure the message below is printed.
-    } catch (error, st) { // ignore: avoid_catches_without_on_clauses
+    // ignore: avoid_catches_without_on_clauses
+    } catch (error, st) {
       globals.stdio.stderrWrite(
         'Unable to generate crash report due to secondary error: $error\n$st\n'
         '${globals.userMessages.flutterToolBugInstructions}\n',
