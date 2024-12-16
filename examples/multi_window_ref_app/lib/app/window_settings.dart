@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class ValueNotifier<T> extends ChangeNotifier {
-  ValueNotifier({required T value}) : _value = value;
+class SettingsValueNotifier<T> extends ChangeNotifier {
+  SettingsValueNotifier({required T value}) : _value = value;
 
   T _value;
   T get value => _value;
@@ -17,31 +17,31 @@ class WindowSettings {
       Size popupSize = const Size(200, 300),
       Rect anchorRect = const Rect.fromLTWH(0, 0, 1000, 1000),
       bool anchorToWindow = true})
-      : _regularSize = ValueNotifier(value: regularSize),
-        _popupSize = ValueNotifier(value: popupSize),
-        _anchorRect = ValueNotifier(value: anchorRect),
-        _anchorToWindow = ValueNotifier(value: anchorToWindow);
+      : _regularSize = SettingsValueNotifier(value: regularSize),
+        _popupSize = SettingsValueNotifier(value: popupSize),
+        _anchorRect = SettingsValueNotifier(value: anchorRect),
+        _anchorToWindow = SettingsValueNotifier(value: anchorToWindow);
 
-  final ValueNotifier<Size> _regularSize;
-  ValueNotifier<Size> get regularSizeNotifier => _regularSize;
+  final SettingsValueNotifier<Size> _regularSize;
+  SettingsValueNotifier<Size> get regularSizeNotifier => _regularSize;
   set regularSize(Size value) {
     _regularSize.value = value;
   }
 
-  final ValueNotifier<Size> _popupSize;
-  ValueNotifier<Size> get popupSizeNotifier => _popupSize;
+  final SettingsValueNotifier<Size> _popupSize;
+  SettingsValueNotifier<Size> get popupSizeNotifier => _popupSize;
   set popupSize(Size value) {
     _popupSize.value = value;
   }
 
-  final ValueNotifier<Rect> _anchorRect;
-  ValueNotifier<Rect> get anchorRectNotifier => _anchorRect;
+  final SettingsValueNotifier<Rect> _anchorRect;
+  SettingsValueNotifier<Rect> get anchorRectNotifier => _anchorRect;
   set anchorRect(Rect value) {
     _anchorRect.value = value;
   }
 
-  final ValueNotifier<bool> _anchorToWindow;
-  ValueNotifier<bool> get anchorToWindowNotifier => _anchorToWindow;
+  final SettingsValueNotifier<bool> _anchorToWindow;
+  SettingsValueNotifier<bool> get anchorToWindowNotifier => _anchorToWindow;
   set anchorToWindow(bool value) {
     _anchorToWindow.value = value;
   }

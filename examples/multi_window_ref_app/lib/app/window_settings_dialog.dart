@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:multi_window_ref_app/app/window_settings.dart';
+import 'window_settings.dart';
 
 Future<void> windowSettingsDialog(
     BuildContext context, WindowSettings settings) async {
@@ -15,8 +15,14 @@ Future<void> windowSettingsDialog(
           ),
           content: SingleChildScrollView(
               child: ListBody(children: [
-            _RegularWindowSettingsTile(settings: settings),
-            _PopupWindowSettingsTile(settings: settings),
+            _WindowSettingsTile(
+                title: "Regular",
+                size: settings.regularSizeNotifier,
+                onChange: (Size size) => settings.regularSize = size),
+            _WindowSettingsTile(
+                title: "Popup",
+                size: settings.popupSizeNotifier,
+                onChange: (Size size) => settings.popupSize = size),
             const Divider(),
             _AnchorSettingsTile(settings: settings),
           ])),
@@ -35,30 +41,31 @@ Future<void> windowSettingsDialog(
       });
 }
 
-class _RegularWindowSettingsTile extends StatelessWidget {
-  const _RegularWindowSettingsTile({required this.settings});
+class _WindowSettingsTile extends StatelessWidget {
+  const _WindowSettingsTile(
+      {required this.title, required this.size, required this.onChange});
 
-  final WindowSettings settings;
+  final String title;
+  final SettingsValueNotifier<Size> size;
+  final void Function(Size) onChange;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: const Text('Regular'),
+      title: Text(title),
       subtitle: ListenableBuilder(
-          listenable: settings.regularSizeNotifier,
+          listenable: size,
           builder: (BuildContext ctx, Widget? _) {
             return Row(
               children: [
                 Expanded(
                   child: TextFormField(
-                    initialValue:
-                        settings.regularSizeNotifier.value.width.toString(),
+                    initialValue: size.value.width.toString(),
                     decoration: const InputDecoration(
                       labelText: 'Initial width',
                     ),
-                    onChanged: (String value) => settings.regularSize = Size(
-                        double.tryParse(value) ?? 0,
-                        settings.regularSizeNotifier.value.height),
+                    onChanged: (String value) => onChange(
+                        Size(double.tryParse(value) ?? 0, size.value.height)),
                   ),
                 ),
                 const SizedBox(
@@ -66,65 +73,17 @@ class _RegularWindowSettingsTile extends StatelessWidget {
                 ),
                 Expanded(
                   child: TextFormField(
-                    initialValue:
-                        settings.regularSizeNotifier.value.height.toString(),
+                    initialValue: size.value.height.toString(),
                     decoration: const InputDecoration(
                       labelText: 'Initial height',
                     ),
-                    onChanged: (String value) => settings.regularSize = Size(
-                        settings.regularSizeNotifier.value.width,
-                        double.tryParse(value) ?? 0),
+                    onChanged: (String value) => onChange(
+                        Size(size.value.width, double.tryParse(value) ?? 0)),
                   ),
                 ),
               ],
             );
           }),
-    );
-  }
-}
-
-class _PopupWindowSettingsTile extends StatelessWidget {
-  const _PopupWindowSettingsTile({required this.settings});
-
-  final WindowSettings settings;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: const Text('Popup'),
-      subtitle: ListenableBuilder(
-          listenable: settings.popupSizeNotifier,
-          builder: (BuildContext context, Widget? _) => Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      initialValue:
-                          settings.popupSizeNotifier.value.width.toString(),
-                      decoration: const InputDecoration(
-                        labelText: 'Initial width',
-                      ),
-                      onChanged: (String value) => settings.popupSize = Size(
-                          double.tryParse(value) ?? 0,
-                          settings.popupSizeNotifier.value.height),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 20,
-                  ),
-                  Expanded(
-                    child: TextFormField(
-                      initialValue:
-                          settings.popupSizeNotifier.value.height.toString(),
-                      decoration: const InputDecoration(
-                        labelText: 'Initial height',
-                      ),
-                      onChanged: (String value) => settings.popupSize = Size(
-                          settings.popupSizeNotifier.value.width,
-                          double.tryParse(value) ?? 0),
-                    ),
-                  ),
-                ],
-              )),
     );
   }
 }
