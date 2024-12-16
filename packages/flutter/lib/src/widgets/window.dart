@@ -342,8 +342,7 @@ class _GenericWindowState extends State<_GenericWindow> {
         widget.controller!.size = metadata.size;
       }
 
-      final _WindowingAppContext? windowingAppContext =
-          _WindowingAppContext.of(context);
+      final _WindowingAppContext? windowingAppContext = _WindowingAppContext.of(context);
       assert(windowingAppContext != null);
       _listener = _WindowListener(
           viewId: metadata.view.viewId,
@@ -397,16 +396,14 @@ class _GenericWindowState extends State<_GenericWindow> {
     return FutureBuilder<WindowCreationResult>(
         key: widget.key,
         future: _future,
-        builder: (BuildContext context,
-            AsyncSnapshot<WindowCreationResult> metadata) {
+        builder: (BuildContext context, AsyncSnapshot<WindowCreationResult> metadata) {
           if (!metadata.hasData) {
             return const ViewCollection(views: <Widget>[]);
           }
 
           return View(
               view: metadata.data!.view,
-              child: WindowContext(
-                  viewId: metadata.data!.view.viewId, child: widget.child));
+              child: WindowContext(view: metadata.data!.view, child: widget.child));
         });
   }
 }
@@ -484,6 +481,18 @@ class PopupWindow extends StatelessWidget {
   /// The content rendered into this window.
   final Widget child;
 
+  Rect _clampRectToSize(BuildContext context, Rect anchorRect) {
+    final double dpr = MediaQuery.of(context).devicePixelRatio;
+    final WindowContext windowContext = WindowContext.of(context)!;
+    final Size size = windowContext.view.physicalSize / dpr;
+
+    final double left = anchorRect.left.clamp(0, size.width);
+    final double top = anchorRect.top.clamp(0, size.height);
+    final double right = anchorRect.right.clamp(0, size.width);
+    final double bottom = anchorRect.bottom.clamp(0, size.height);
+    return Rect.fromLTRB(left, top, right, bottom);
+  }
+
   @override
   Widget build(BuildContext context) {
     final WindowContext? windowContext = WindowContext.of(context);
@@ -496,7 +505,7 @@ class PopupWindow extends StatelessWidget {
         createFuture: () => createPopup(
             parentViewId: windowContext!.viewId,
             size: _preferredSize,
-            anchorRect: _anchorRect,
+            anchorRect: _anchorRect == null ? null : _clampRectToSize(context, _anchorRect),
             positioner: _positioner),
         controller: controller,
         child: child);
@@ -506,12 +515,15 @@ class PopupWindow extends StatelessWidget {
 /// Provides descendents with access to the [Window] in which they are rendered
 class WindowContext extends InheritedWidget {
   /// [window] the [Window]
-  const WindowContext({super.key, required this.viewId, required super.child});
+  const WindowContext({super.key, required this.view, required super.child});
+
+  /// The view backing this window.
+  final FlutterView view;
 
   /// The id of the current window.
-  final int viewId;
+  int get viewId => view.viewId;
 
-    /// Returns the [WindowContext] if any
+  /// Returns the [WindowContext] if any
   static WindowContext? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<WindowContext>();
   }
@@ -526,10 +538,7 @@ class WindowContext extends InheritedWidget {
 class WindowCreationResult {
   /// Creates a new window.
   WindowCreationResult(
-      {required this.view,
-      required this.archetype,
-      required this.size,
-      this.parent});
+      {required this.view, required this.archetype, required this.size, this.parent});
 
   /// The view associated with the window.
   final FlutterView view;
@@ -563,8 +572,7 @@ Future<WindowCreationResult> createPopup(
     Rect? anchorRect,
     required WindowPositioner positioner}) {
   int constraintAdjustmentBitmask = 0;
-  for (final WindowPositionerConstraintAdjustment adjustment
-      in positioner.constraintAdjustment) {
+  for (final WindowPositionerConstraintAdjustment adjustment in positioner.constraintAdjustment) {
     constraintAdjustmentBitmask |= 1 << adjustment.index;
   }
 
@@ -582,29 +590,22 @@ Future<WindowCreationResult> createPopup(
           : null,
       'positionerParentAnchor': positioner.parentAnchor.index,
       'positionerChildAnchor': positioner.childAnchor.index,
-      'positionerOffset': <int>[
-        positioner.offset.dx.toInt(),
-        positioner.offset.dy.toInt()
-      ],
+      'positionerOffset': <int>[positioner.offset.dx.toInt(), positioner.offset.dy.toInt()],
       'positionerConstraintAdjustment': constraintAdjustmentBitmask
     }) as Map<Object?, Object?>;
   });
 }
 
 Future<WindowCreationResult> _createWindow(
-    {required Future<Map<Object?, Object?>> Function(MethodChannel channel)
-        viewBuilder}) async {
+    {required Future<Map<Object?, Object?>> Function(MethodChannel channel) viewBuilder}) async {
   WidgetsFlutterBinding.ensureInitialized();
-  final Map<Object?, Object?> creationData =
-      await viewBuilder(SystemChannels.windowing);
+  final Map<Object?, Object?> creationData = await viewBuilder(SystemChannels.windowing);
   final int viewId = creationData['viewId']! as int;
-  final WindowArchetype archetype =
-      WindowArchetype.values[creationData['archetype']! as int];
+  final WindowArchetype archetype = WindowArchetype.values[creationData['archetype']! as int];
   final List<Object?> size = creationData['size']! as List<Object?>;
   final int? parentViewId = creationData['parentViewId'] as int?;
 
-  final FlutterView flView =
-      WidgetsBinding.instance.platformDispatcher.views.firstWhere(
+  final FlutterView flView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
     (FlutterView view) => view.viewId == viewId,
     orElse: () {
       throw Exception('No matching view found for viewId: $viewId');
@@ -639,10 +640,7 @@ class _WindowChangeProperties {
 }
 
 class _WindowListener {
-  _WindowListener(
-      {required this.viewId,
-      required this.onChanged,
-      required this.onDestroyed});
+  _WindowListener({required this.viewId, required this.onChanged, required this.onDestroyed});
 
   int viewId;
   void Function(_WindowChangeProperties) onChanged;
@@ -673,8 +671,7 @@ class _WindowingAppState extends State<WindowingApp> {
   }
 
   Future<void> _methodCallHandler(MethodCall call) async {
-    final Map<Object?, Object?> arguments =
-        call.arguments as Map<Object?, Object?>;
+    final Map<Object?, Object?> arguments = call.arguments as Map<Object?, Object?>;
 
     switch (call.method) {
       case 'onWindowCreated':
@@ -696,12 +693,10 @@ class _WindowingAppState extends State<WindowingApp> {
         Size? size;
         if (arguments['size'] != null) {
           final List<Object?> sizeRaw = arguments['size']! as List<Object?>;
-          size = Size(
-              (sizeRaw[0]! as int).toDouble(), (sizeRaw[1]! as int).toDouble());
+          size = Size((sizeRaw[0]! as int).toDouble(), (sizeRaw[1]! as int).toDouble());
         }
 
-        final _WindowChangeProperties properties =
-            _WindowChangeProperties(size: size);
+        final _WindowChangeProperties properties = _WindowChangeProperties(size: size);
         for (final _WindowListener listener in _listeners) {
           if (listener.viewId == viewId) {
             listener.onChanged(properties);
@@ -727,14 +722,12 @@ class _WindowingAppState extends State<WindowingApp> {
 
   @override
   Widget build(BuildContext context) {
-    return _WindowingAppContext(
-        windowingApp: this, child: ViewCollection(views: widget.children));
+    return _WindowingAppContext(windowingApp: this, child: ViewCollection(views: widget.children));
   }
 }
 
 class _WindowingAppContext extends InheritedWidget {
-  const _WindowingAppContext(
-      {super.key, required super.child, required this.windowingApp});
+  const _WindowingAppContext({super.key, required super.child, required this.windowingApp});
 
   final _WindowingAppState windowingApp;
 
