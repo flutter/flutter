@@ -76,7 +76,7 @@ void main() {
       ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
 
     final File apk = fileSystem.file('test.apk')
-      ..writeAsBytesSync(ZipEncoder().encode(archive));
+      ..writeAsBytesSync(ZipEncoder().encode(archive)!);
     final File aotSizeJson = fileSystem.file('test.json')
       ..createSync()
       ..writeAsStringSync(aotSizeOutput);
@@ -160,7 +160,7 @@ void main() {
       ..addFile(ArchiveFile('lib/arm64-v8a/libflutter.so', 50, List<int>.filled(50, 0)));
 
     final File apk = fileSystem.file('test.apk')
-      ..writeAsBytesSync(ZipEncoder().encode(archive));
+      ..writeAsBytesSync(ZipEncoder().encode(archive)!);
     final File aotSizeJson = fileSystem.file('test.json')
       ..writeAsStringSync(aotSizeOutput);
     final File precompilerTrace = fileSystem.file('trace.json')
@@ -250,7 +250,7 @@ void main() {
             ),
         throwsToolExit());
 
-    final File apk = fileSystem.file('test.apk')..writeAsBytesSync(ZipEncoder().encode(Archive()));
+    final File apk = fileSystem.file('test.apk')..writeAsBytesSync(ZipEncoder().encode(Archive())!);
     await expectLater(
         () => sizeAnalyzer.analyzeZipSizeAndAotSnapshot(
               zipFile: apk,

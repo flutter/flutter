@@ -27,11 +27,7 @@ void main() {
 
   OperatingSystemUtils createOSUtils(Platform platform) {
     return OperatingSystemUtils(
-      fileSystem: MemoryFileSystem.test(
-        style: platform.isWindows ?
-          FileSystemStyle.windows :
-          FileSystemStyle.posix,
-      ),
+      fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: platform,
       processManager: fakeProcessManager,
@@ -571,7 +567,7 @@ void main() {
       // on POSIX systems we use the `unzip` binary, which will fail to extract
       // files with paths outside the target directory
       final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
-      final MemoryFileSystem fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final MemoryFileSystem fs = MemoryFileSystem.test();
       final File fakeZipFile = fs.file('archive.zip');
       final Directory targetDirectory = fs.directory('output')..createSync(recursive: true);
       const String content = 'hello, world!';
@@ -579,7 +575,7 @@ void main() {
         // This file would be extracted outside of the target extraction dir
         ArchiveFile(r'..\..\..\Target File.txt', content.length, content.codeUnits),
       );
-      final List<int> zipData = ZipEncoder().encode(archive);
+      final List<int> zipData = ZipEncoder().encode(archive)!;
       fakeZipFile.writeAsBytesSync(zipData);
       expect(
         () => utils.unzip(fakeZipFile, targetDirectory),

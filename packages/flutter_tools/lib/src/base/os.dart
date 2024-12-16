@@ -536,7 +536,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
     final Archive archive = TarDecoder().decodeBytes(
-      const GZipDecoder().decodeBytes(gzippedTarFile.readAsBytesSync()),
+      GZipDecoder().decodeBytes(gzippedTarFile.readAsBytesSync()),
     );
     _unpackArchive(archive, targetDirectory);
   }
