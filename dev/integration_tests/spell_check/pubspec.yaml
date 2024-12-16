@@ -30,6 +30,14 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # TODO(matanlurey): Move to dev_dependencies (https://github.com/flutter/flutter/issues/160379).
+  #
+  # As part of https://github.com/flutter/flutter/issues/160257, integration_test as a dev_dependency
+  # will be removed in release mode, but some of our tests and CI tasks are written in a way where they
+  # expect integration_test to never be removed.
+  integration_test:
+    sdk: flutter
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: 1.0.8
@@ -42,10 +50,6 @@ dependencies:
 
 dev_dependencies:
   flutter_test:
-    sdk: flutter
-
-  # Used to run the integration tests in this app:
-  integration_test:
     sdk: flutter
 
 # For information on the generic Dart part of this file, see the
