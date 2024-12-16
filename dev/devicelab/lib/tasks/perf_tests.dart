@@ -1663,8 +1663,12 @@ class CompileSwiftUITest {
       'hello_world_swiftui',
       '-sdk',
       'iphoneos',
-      '-allowProvisioningUpdates',
+      '-configuration',
+      'Release',
       'CODE_SIGNING_ALLOWED=NO',
+      'CODE_SIGNING_REQUIRED=NO',
+      'CODE_SIGN_IDENTITY=-',
+      'EXPANDED_CODE_SIGN_IDENTITY=-',
       '-archivePath',
       '$testDirectory/hello_world_swiftui',
       'archive'
@@ -1677,7 +1681,12 @@ class CompileSwiftUITest {
     watch.stop();
 
     print("ls");
-    Process.run('ls', []);
+    Process.run('ls', []).then((ProcessResult results) {
+      print(results.stdout);
+      if (results.exitCode != 0) {
+        print(results.stderr);
+      }
+    });;
 
     final String path = '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
     final Directory appBundle =  dir(path);
