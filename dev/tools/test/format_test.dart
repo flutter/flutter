@@ -91,4 +91,23 @@ void main() {
       fixture.gitRemove();
     }
   });
+
+  test('Prints error if dart formatter fails', () {
+    final TestFileFixture fixture = TestFileFixture(<FileContentPair>[], flutterRoot);
+    final io.File dartFile = io.File('${flutterRoot.path}/format_test2.dart');
+    dartFile.writeAsStringSync('P\n');
+    fixture.files.add(dartFile);
+
+    try {
+      fixture.gitAdd();
+      final io.ProcessResult result = io.Process.runSync(
+        formatterPath, <String>['--check', 'dart', '--fix'],
+        workingDirectory: flutterRoot.path,
+      );
+      expect(result.stdout, contains('format_test2.dart produced the following error'));
+      expect(result.exitCode, isNot(0));
+    } finally {
+      fixture.gitRemove();
+    }
+  });
 }

@@ -160,11 +160,15 @@ class DartFormatChecker {
     );
 
     Iterable<WorkerJob> incorrect;
+    final List<WorkerJob> errorJobs = <WorkerJob>[];
     if (!fix) {
       final Stream<WorkerJob> completedJobs = dartFmt.startWorkers(jobs);
       final List<WorkerJob> diffJobs = <WorkerJob>[];
       await for (final WorkerJob completedJob in completedJobs) {
-        if (completedJob.result.exitCode == 1) {
+        if (completedJob.result.exitCode != 0 && (completedJob.result.stderr.isNotEmpty || completedJob.result.exitCode != 1)) {
+          // The formatter had a problem formatting the file.
+          errorJobs.add(completedJob);
+        } else if (completedJob.result.exitCode == 1) {
           diffJobs.add(
             WorkerJob(
               <String>[
@@ -190,7 +194,15 @@ class DartFormatChecker {
       incorrect = completedDiffs.where((WorkerJob job) => job.result.exitCode != 0);
     } else {
       final List<WorkerJob> completedJobs = await dartFmt.runToCompletion(jobs);
-      incorrect = completedJobs.where((WorkerJob job) => job.result.exitCode == 1);
+      final List<WorkerJob> incorrectJobs = incorrect = [];
+      for (final WorkerJob job in completedJobs) {
+        if (job.result.exitCode != 0 && (job.result.stderr.isNotEmpty || job.result.exitCode != 1)) {
+          // The formatter had a problem formatting the file.
+          errorJobs.add(job);
+        } else if (job.result.exitCode == 1) {
+          incorrectJobs.add(job);
+        }
+      }
     }
 
     _clearOutput();
@@ -220,10 +232,26 @@ class DartFormatChecker {
         stdout.writeln('DONE');
         stdout.writeln();
       }
+      _printErrorJobs(errorJobs);
+    } else if (errorJobs.isNotEmpty) {
+      _printErrorJobs(errorJobs);
     } else {
       stdout.writeln('All dart files formatted correctly.');
     }
-    return incorrect.length;
+    return fix ? errorJobs.length : (incorrect.length + errorJobs.length);
+  }
+
+  void _printErrorJobs(List<WorkerJob> errorJobs) {
+    if (errorJobs.isNotEmpty) {
+      final bool plural = errorJobs.length > 1;
+      stderr.writeln('The formatter failed to run on ${errorJobs.length} Dart file${plural ? 's' : ''}.');
+      stdout.writeln();
+      for (final WorkerJob job in errorJobs) {
+        stdout.writeln('--> ${job.command.last} produced the following error:');
+        stdout.write(job.result.stderr);
+        stdout.writeln();
+      }
+    }
   }
 }
 
