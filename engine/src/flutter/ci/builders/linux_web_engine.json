@@ -17,6 +17,7 @@
       "gn": [
         "--web",
         "--runtime-mode=release",
+        "--no-rbe",
         "--no-goma"
       ],
       "ninja": {
