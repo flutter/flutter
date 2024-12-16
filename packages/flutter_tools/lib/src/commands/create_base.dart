@@ -250,8 +250,8 @@ mixin CreateBase on FlutterCommand {
 
     final FileSystemEntityType type = globals.fs.typeSync(projectDirPath);
 
+    // ignore: exhaustive_cases, https://github.com/dart-lang/linter/issues/3017
     switch (type) {
-      // ignore: exhaustive_cases, https://github.com/dart-lang/linter/issues/3017
       case FileSystemEntityType.file:
         // Do not overwrite files.
         throwToolExit("Invalid project name: '$projectDirPath' - file exists.", exitCode: 2);

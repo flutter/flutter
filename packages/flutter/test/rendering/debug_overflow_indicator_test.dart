@@ -22,9 +22,8 @@ void main() {
     expect(exception, isFlutterError);
     // ignore: avoid_dynamic_calls
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
-    // ignore: avoid_dynamic_calls
     expect(
-      exception.diagnostics.first.toString(),
+      exception.diagnostics.first.toString(), // ignore: avoid_dynamic_calls
       startsWith('A RenderConstraintsTransformBox overflowed by '),
     );
     expect(find.byType(UnconstrainedBox), paints..rect());

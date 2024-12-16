@@ -188,8 +188,8 @@ TaskFunction createHotModeTest({
 
     return TaskResult.success(
       <String, dynamic>{
-        // ignore: avoid_dynamic_calls
         'hotReloadInitialDevFSSyncMilliseconds':
+            // ignore: avoid_dynamic_calls
             smallReloadData['hotReloadInitialDevFSSyncMilliseconds'][0],
         // ignore: avoid_dynamic_calls
         'hotRestartMillisecondsToFrame': smallReloadData['hotRestartMillisecondsToFrame'][0],
@@ -197,49 +197,57 @@ TaskFunction createHotModeTest({
         'hotReloadMillisecondsToFrame': smallReloadData['hotReloadMillisecondsToFrame'][0],
         // ignore: avoid_dynamic_calls
         'hotReloadDevFSSyncMilliseconds': smallReloadData['hotReloadDevFSSyncMilliseconds'][0],
-        // ignore: avoid_dynamic_calls
         'hotReloadFlutterReassembleMilliseconds':
+            // ignore: avoid_dynamic_calls
             smallReloadData['hotReloadFlutterReassembleMilliseconds'][0],
         // ignore: avoid_dynamic_calls
         'hotReloadVMReloadMilliseconds': smallReloadData['hotReloadVMReloadMilliseconds'][0],
-        // ignore: avoid_dynamic_calls
         'hotReloadMillisecondsToFrameAfterChange':
+            // ignore: avoid_dynamic_calls
             smallReloadData['hotReloadMillisecondsToFrame'][1],
-        // ignore: avoid_dynamic_calls
         'hotReloadDevFSSyncMillisecondsAfterChange':
+            // ignore: avoid_dynamic_calls
             smallReloadData['hotReloadDevFSSyncMilliseconds'][1],
-        // ignore: avoid_dynamic_calls
         'hotReloadFlutterReassembleMillisecondsAfterChange':
+            // ignore: avoid_dynamic_calls
             smallReloadData['hotReloadFlutterReassembleMilliseconds'][1],
-        // ignore: avoid_dynamic_calls
         'hotReloadVMReloadMillisecondsAfterChange':
+            // ignore: avoid_dynamic_calls
             smallReloadData['hotReloadVMReloadMilliseconds'][1],
-        // ignore: avoid_dynamic_calls
         'hotReloadInitialDevFSSyncAfterRelaunchMilliseconds':
+            // ignore: avoid_dynamic_calls
             freshRestartReloadsData['hotReloadInitialDevFSSyncMilliseconds'][0],
-        // ignore: avoid_dynamic_calls
+
         'hotReloadMillisecondsToFrameAfterMediumChange':
+            // ignore: avoid_dynamic_calls
             mediumReloadData['hotReloadMillisecondsToFrame'][1],
-        // ignore: avoid_dynamic_calls
+
         'hotReloadDevFSSyncMillisecondsAfterMediumChange':
+            // ignore: avoid_dynamic_calls
             mediumReloadData['hotReloadDevFSSyncMilliseconds'][1],
-        // ignore: avoid_dynamic_calls
+
         'hotReloadFlutterReassembleMillisecondsAfterMediumChange':
+            // ignore: avoid_dynamic_calls
             mediumReloadData['hotReloadFlutterReassembleMilliseconds'][1],
-        // ignore: avoid_dynamic_calls
+
         'hotReloadVMReloadMillisecondsAfterMediumChange':
+            // ignore: avoid_dynamic_calls
             mediumReloadData['hotReloadVMReloadMilliseconds'][1],
-        // ignore: avoid_dynamic_calls
+
         'hotReloadMillisecondsToFrameAfterLargeChange':
+            // ignore: avoid_dynamic_calls
             largeReloadData['hotReloadMillisecondsToFrame'][1],
-        // ignore: avoid_dynamic_calls
+
         'hotReloadDevFSSyncMillisecondsAfterLargeChange':
+            // ignore: avoid_dynamic_calls
             largeReloadData['hotReloadDevFSSyncMilliseconds'][1],
-        // ignore: avoid_dynamic_calls
+
         'hotReloadFlutterReassembleMillisecondsAfterLargeChange':
+            // ignore: avoid_dynamic_calls
             largeReloadData['hotReloadFlutterReassembleMilliseconds'][1],
-        // ignore: avoid_dynamic_calls
+
         'hotReloadVMReloadMillisecondsAfterLargeChange':
+            // ignore: avoid_dynamic_calls
             largeReloadData['hotReloadVMReloadMilliseconds'][1],
       },
       benchmarkScoreKeys: <String>[

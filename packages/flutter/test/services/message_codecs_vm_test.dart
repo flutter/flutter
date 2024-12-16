@@ -21,8 +21,9 @@ void main() {
     });
     test('should encode and decode list with a big number', () {
       final List<dynamic> message = <dynamic>[
+        // ignore: avoid_js_rounded_ints, since we check for round-tripping, the actual value doesn't matter!
         -7000000000000000007,
-      ]; // ignore: avoid_js_rounded_ints, since we check for round-tripping, the actual value doesn't matter!
+      ];
       checkEncodeDecode<dynamic>(json, message);
     });
   });

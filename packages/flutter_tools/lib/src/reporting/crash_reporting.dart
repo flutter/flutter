@@ -203,8 +203,8 @@ class CrashReportSender {
 
       // Catch all exceptions to print the message that makes clear that the
       // crash logger crashed.
-    } catch (sendError, sendStackTrace) {
       // ignore: avoid_catches_without_on_clauses
+    } catch (sendError, sendStackTrace) {
       if (sendError is SocketException ||
           sendError is HttpException ||
           sendError is http.ClientException) {

@@ -545,8 +545,8 @@ void main() {
       ),
     );
 
-    // ignore: avoid_dynamic_calls
     expect(
+      // ignore: avoid_dynamic_calls
       _getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester).labelStyle,
       labelStyle,
     );

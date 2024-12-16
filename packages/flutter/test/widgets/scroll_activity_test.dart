@@ -178,8 +178,8 @@ void main() {
       ),
     );
     final TestGesture touchGesture = await tester.createGesture(
-      kind: PointerDeviceKind.touch,
-    ); // ignore: avoid_redundant_argument_values
+      kind: PointerDeviceKind.touch, // ignore: avoid_redundant_argument_values
+    );
     // Try mouse hovering while scrolling by touch
     await touchGesture.down(tester.getCenter(find.byType(ListView)));
     await tester.pump();

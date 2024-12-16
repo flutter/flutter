@@ -186,9 +186,9 @@ void main() {
       const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 963.25),
     );
     expect(
-      EdgeInsetsDirectional.only(),
-      EdgeInsetsDirectional.only(),
-    ); // ignore: prefer_const_constructors
+      EdgeInsetsDirectional.only(), // ignore: prefer_const_constructors
+      EdgeInsetsDirectional.only(), // ignore: prefer_const_constructors
+    );
     expect(
       const EdgeInsetsDirectional.only(top: 1.0),
       isNot(const EdgeInsetsDirectional.only(bottom: 1.0)),

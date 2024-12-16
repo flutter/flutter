@@ -227,9 +227,8 @@ class BasicMessageChannel<T> {
     final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
     return shouldProfilePlatformChannels
         ? _profiledBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
-          // ignore: no_runtimetype_tostring
           result,
-          runtimeType.toString(),
+          runtimeType.toString(), // ignore: no_runtimetype_tostring
           codec.runtimeType.toString(),
         )
         : result;
@@ -323,9 +322,8 @@ class MethodChannel {
     final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
     return shouldProfilePlatformChannels
         ? _profiledBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
-          // ignore: no_runtimetype_tostring
           result,
-          runtimeType.toString(),
+          runtimeType.toString(), // ignore: no_runtimetype_tostring
           codec.runtimeType.toString(),
         )
         : result;

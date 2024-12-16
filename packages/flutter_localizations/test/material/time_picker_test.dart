@@ -747,8 +747,8 @@ void main() {
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
       primaryLabels.map<String>(
+        // ignore: avoid_dynamic_calls
         (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
       ),
       labels12To11,
@@ -757,8 +757,8 @@ void main() {
     // ignore: avoid_dynamic_calls
     final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
       selectedLabels.map<String>(
+        // ignore: avoid_dynamic_calls
         (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
       ),
       labels12To11,
@@ -777,8 +777,8 @@ void main() {
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
       primaryLabels.map<String>(
+        // ignore: avoid_dynamic_calls
         (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
       ),
       labels12To11,
@@ -787,8 +787,8 @@ void main() {
     // ignore: avoid_dynamic_calls
     final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
       selectedLabels.map<String>(
+        // ignore: avoid_dynamic_calls
         (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
       ),
       labels12To11,
@@ -807,8 +807,8 @@ void main() {
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
       primaryLabels.map<String>(
+        // ignore: avoid_dynamic_calls
         (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
       ),
       labels00To23TwoDigit,
@@ -817,8 +817,8 @@ void main() {
     // ignore: avoid_dynamic_calls
     final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
       selectedLabels.map<String>(
+        // ignore: avoid_dynamic_calls
         (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
       ),
       labels00To23TwoDigit,
@@ -837,8 +837,8 @@ void main() {
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
       primaryLabels.map<String>(
+        // ignore: avoid_dynamic_calls
         (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
       ),
       labels00To22TwoDigit,
@@ -847,8 +847,8 @@ void main() {
     // ignore: avoid_dynamic_calls
     final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
       selectedLabels.map<String>(
+        // ignore: avoid_dynamic_calls
         (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
       ),
       labels00To22TwoDigit,
