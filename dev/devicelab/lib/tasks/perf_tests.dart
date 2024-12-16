@@ -1649,12 +1649,10 @@ class CompileSwiftUITest {
   final bool reportPackageContentSizes;
 
   Future<TaskResult> run() async {
-    print(testDirectory);
     await Process.run('xcodebuild', <String>[
       'clean',
       '-allTargets'
     ]);
-    print('cleaned');
     final Stopwatch watch = Stopwatch();
     int releaseSizeInBytes = 0;
     watch.start();
@@ -1674,9 +1672,8 @@ class CompileSwiftUITest {
         print(results.stderr);
       }
     });
-    print('archived');
-
     watch.stop();
+
     final String path = '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
     final Directory appBundle =  dir(path);
     try {
@@ -1688,6 +1685,8 @@ class CompileSwiftUITest {
     } catch (e) {
       print('Error calculating size: $e at $path');
     }
+
+    Process.run('ls', []);
 
     final Map<String, dynamic> metrics = <String, dynamic>{};
     metrics.addAll(<String, dynamic>{
