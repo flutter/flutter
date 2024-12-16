@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -408,13 +407,16 @@ void main() {
           shutdownHooks: ShutdownHooks(),
         );
 
-        expect((globals.flutterUsage as TestUsage).printedWelcome, false);
+        expect(
+          (globals.logger as BufferLogger).traceText,
+          isNot(contains('Showed analytics consent message.')),
+        );
       },
       overrides: <Type, Generator>{
+        Logger: () => BufferLogger.test(),
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
         BotDetector: () => const FakeBotDetector(true),
-        Usage: () => TestUsage(),
       },
     );
   });
@@ -422,7 +424,6 @@ void main() {
   group('unified_analytics', () {
     late FakeAnalytics fakeAnalytics;
     late MemoryFileSystem fs;
-    late TestUsage testUsage;
 
     setUp(() {
       fs = MemoryFileSystem.test();
@@ -431,7 +432,6 @@ void main() {
         fs: fs,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
-      testUsage = TestUsage();
     });
 
     testUsingContext(
