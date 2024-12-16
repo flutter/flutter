@@ -909,9 +909,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         // Column numbers are more stable than line numbers.
         expect(column, equals(28));
       },
-      skip:
-          !WidgetInspectorService.instance
-              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      // [intended] Test requires --track-widget-creation flag.
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
     );
 
     testWidgets(
@@ -994,9 +993,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final double exitButtonXAfterMovingLeft = tester.getCenter(exitButton).dx;
         expect(exitButtonXAfterMovingLeft, equals(initialExitButtonX));
       },
-      skip:
-          !WidgetInspectorService.instance
-              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      // [intended] Test requires --track-widget-creation flag.
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
     );
 
     testWidgets('test transformDebugCreator will re-order if after stack trace', (
@@ -1137,8 +1135,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(nodes[3].name, 'dummy2');
         expect(nodes[4].runtimeType, DiagnosticsStackTrace);
       },
+      // [intended] Test requires --no-track-widget-creation flag.
       skip: WidgetInspectorService.instance.isWidgetCreationTracked(),
-    ); // [intended] Test requires --no-track-widget-creation flag.
+    );
 
     testWidgets(
       'test transformDebugCreator will add DevToolsDeepLinkProperty for overflow errors',
@@ -1178,8 +1177,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(nodes[4].runtimeType, ErrorSpacer);
         expect(nodes[5].runtimeType, StringProperty);
       },
+      // [intended] Test requires --track-widget-creation flag.
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
-    ); // [intended] Test requires --track-widget-creation flag.
+    );
 
     testWidgets(
       'test transformDebugCreator will not add DevToolsDeepLinkProperty for non-overflow errors',
@@ -1216,8 +1216,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(nodes[2].runtimeType, ErrorSpacer);
         expect(nodes[3].runtimeType, StringProperty);
       },
+      // [intended] Test requires --track-widget-creation flag.
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
-    ); // [intended] Test requires --track-widget-creation flag.
+    );
 
     testWidgets(
       'test transformDebugCreator will not add DevToolsDeepLinkProperty if devtoolsServerAddress is unavailable',
@@ -1254,8 +1255,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(nodes[2].runtimeType, ErrorSpacer);
         expect(nodes[3].runtimeType, StringProperty);
       },
+      // [intended] Test requires --track-widget-creation flag.
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
-    ); // [intended] Test requires --track-widget-creation flag.
+    );
 
     // TODO(CoderDake): Clean up pubRootDirectory tests https://github.com/flutter/flutter/issues/107186
     group('pubRootDirectory', () {
@@ -2793,8 +2795,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             expect(columnA, equals(columnB));
           });
         },
+        // [intended] Test requires --track-widget-creation flag.
         skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
-      ); // [intended] Test requires --track-widget-creation flag.
+      );
     });
 
     group('InspectorSelection', () {
@@ -3323,9 +3326,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           },
         );
       },
-      skip:
-          !WidgetInspectorService.instance
-              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      // [intended] Test requires --track-widget-creation flag.
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
     );
 
     group(
@@ -3451,9 +3453,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           );
         });
       },
-      skip:
-          !WidgetInspectorService.instance
-              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      // [intended] Test requires --track-widget-creation flag.
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
     );
 
     Map<Object, Object?> removeLastEvent(List<Map<Object, Object?>> events) {
@@ -3681,9 +3682,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           );
         });
       },
-      skip:
-          !WidgetInspectorService.instance
-              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      // [intended] Test requires --track-widget-creation flag.
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
     );
 
     group(
@@ -3833,9 +3833,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           );
         });
       },
-      skip:
-          !WidgetInspectorService.instance
-              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      // [intended] Test requires --track-widget-creation flag.
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
     );
 
     testWidgets(
@@ -3860,9 +3859,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
         await tester.pumpWidget(widget);
       },
-      skip:
-          !WidgetInspectorService.instance
-              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      // [intended] Test requires --track-widget-creation flag.
+      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
     );
 
     testWidgets(
@@ -3909,8 +3907,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(names, contains('Directionality'));
         expect(names, contains('ClockText'));
       },
+      // [intended] Test requires --track-widget-creation flag.
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
-    ); // [intended] Test requires --track-widget-creation flag.
+    );
 
     testWidgets(
       'ext.flutter.inspector.trackRebuildDirtyWidgets',
@@ -4132,8 +4131,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         // Verify that rebuild events are not fired once the extension is disabled.
         expect(rebuildEvents, isEmpty);
       },
+      // [intended] Test requires --track-widget-creation flag.
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
-    ); // [intended] Test requires --track-widget-creation flag.
+    );
 
     testWidgets(
       'ext.flutter.inspector.trackRepaintWidgets',
@@ -4262,8 +4262,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         // Verify that repaint events are not fired once the extension is disabled.
         expect(repaintEvents, isEmpty);
       },
+      // [intended] Test requires --track-widget-creation flag.
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
-    ); // [intended] Test requires --track-widget-creation flag.
+    );
 
     testWidgets('ext.flutter.inspector.show', (WidgetTester tester) async {
       final Iterable<Map<Object, Object?>> extensionChangedEvents = service
@@ -4766,8 +4767,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           matchesGoldenFile('inspector.sizedBox_debugPaint_margin.png'),
         );
       },
+      // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/143616
       skip: impellerEnabled,
-    ); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/143616
+    );
 
     group('layout explorer', () {
       const String group = 'test-group';
@@ -5549,8 +5551,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         visitChildren(detailedChildren);
         expect(appBars.single, isNot(contains('children')));
       },
+      // [intended] Test requires --track-widget-creation flag.
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
-    ); // [intended] Test requires --track-widget-creation flag.
+    );
 
     testWidgets('InspectorSerializationDelegate addAdditionalPropertiesCallback', (
       WidgetTester tester,
@@ -5635,8 +5638,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(debugIsLocalCreationLocation(paddingElement), isFalse);
         expect(debugIsLocalCreationLocation(paddingElement.widget), isFalse);
       },
+      // [intended] Test requires --track-widget-creation flag.
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
-    ); // [intended] Test requires --track-widget-creation flag.
+    );
 
     testWidgets(
       'debugIsWidgetLocalCreation test',
@@ -5662,8 +5666,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final Element paddingElement = paddingFinder.evaluate().first;
         expect(debugIsWidgetLocalCreation(paddingElement.widget), isFalse);
       },
+      // [intended] Test requires --track-widget-creation flag.
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
-    ); // [intended] Test requires --track-widget-creation flag.
+    );
 
     testWidgets(
       'debugIsWidgetLocalCreation false test',
@@ -5683,8 +5688,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final Element element = key.currentContext! as Element;
         expect(debugIsWidgetLocalCreation(element.widget), isFalse);
       },
+      // [intended] Test requires --no-track-widget-creation flag.
       skip: WidgetInspectorService.instance.isWidgetCreationTracked(),
-    ); // [intended] Test requires --no-track-widget-creation flag.
+    );
 
     test('devToolsInspectorUri test', () {
       activeDevToolsServerAddress = 'http://127.0.0.1:9100';
