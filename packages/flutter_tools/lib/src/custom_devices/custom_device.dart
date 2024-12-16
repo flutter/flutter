@@ -328,6 +328,8 @@ class CustomDeviceAppSession {
         if (debuggingOptions.verboseSystemLogs)
           'verbose-logging=true',
       ],
+      if (debuggingOptions.enableMultiWindow)
+        'enable-multi-window=true',
     ];
   }
 
