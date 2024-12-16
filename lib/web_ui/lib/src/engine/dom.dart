@@ -169,6 +169,12 @@ extension DomWindowExtension on DomWindow {
   /// The Trusted Types API (when available).
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/Trusted_Types_API
   external DomTrustedTypePolicyFactory? get trustedTypes;
+
+  @JS('createImageBitmap')
+  external JSPromise<JSAny?> _createImageBitmap(DomImageData source);
+  Future<DomImageBitmap> createImageBitmap(DomImageData source) {
+    return js_util.promiseToFuture<DomImageBitmap>(_createImageBitmap(source));
+  }
 }
 
 typedef DomRequestAnimationFrameCallback = void Function(JSNumber highResTime);
