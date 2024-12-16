@@ -409,8 +409,11 @@ needs to be wrapped.
   });
 
   testWithoutContext('getSizeAsMB', () async {
-    // ignore: avoid_redundant_argument_values
-    expect(getSizeAsPlatformMB(10 * 1000 * 1000, platform: FakePlatform(operatingSystem: 'linux')), '10.0MB');
+    expect(
+      // ignore: avoid_redundant_argument_values
+      getSizeAsPlatformMB(10 * 1000 * 1000, platform: FakePlatform(operatingSystem: 'linux')),
+      '10.0MB',
+    );
     expect(getSizeAsPlatformMB(10 * 1000 * 1000, platform: FakePlatform(operatingSystem: 'macos')), '10.0MB');
     expect(getSizeAsPlatformMB(10 * 1000 * 1000, platform: FakePlatform(operatingSystem: 'windows')), '9.5MB');
     expect(getSizeAsPlatformMB(10 * 1000 * 1000, platform: FakePlatform(operatingSystem: 'android')), '10.0MB');
