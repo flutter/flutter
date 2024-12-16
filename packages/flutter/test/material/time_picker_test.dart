@@ -115,17 +115,12 @@ void main() {
     final List<String> labels00To22 = List<String>.generate(12, (int index) {
       return (index * 2).toString().padLeft(2, '0');
     });
-    final CustomPaint dialPaint = tester.widget(findDialPaint);
-    final dynamic dialPainter = dialPaint.painter;
-    // ignore: avoid_dynamic_calls
-    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
-    // ignore: avoid_dynamic_calls
-    expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To22);
 
-    // ignore: avoid_dynamic_calls
-    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
-    // ignore: avoid_dynamic_calls
-    expect(selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To22);
+    final List<TappableLabel> primary, selected;
+    (:primary, :selected) = TappableLabel.labels(tester.widget(findDialPaint));
+    expect(primary.map<String?>((TappableLabel tp) => tp.textSpan?.text), labels00To22);
+
+    expect(selected.map<String?>((TappableLabel tp) => tp.textSpan?.text), labels00To22);
   });
 
   testWidgets('Material3 - Dialog size - dial mode', (WidgetTester tester) async {
@@ -216,21 +211,14 @@ void main() {
     });
     final List<bool> inner0To23 = List<bool>.generate(24, (int index) => index >= 12);
 
-    final CustomPaint dialPaint = tester.widget(findDialPaint);
-    final dynamic dialPainter = dialPaint.painter;
-    // ignore: avoid_dynamic_calls
-    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
-    // ignore: avoid_dynamic_calls
-    expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To23);
-    // ignore: avoid_dynamic_calls
-    expect(primaryLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
+    final List<TappableLabel> primary, selected;
+    (:primary, :selected) = TappableLabel.labels(tester.widget(findDialPaint));
 
-    // ignore: avoid_dynamic_calls
-    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
-    // ignore: avoid_dynamic_calls
-    expect(selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To23);
-    // ignore: avoid_dynamic_calls
-    expect(selectedLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
+    expect(primary.map<String?>((TappableLabel tp) => tp.textSpan?.text), labels00To23);
+    expect(primary.map<bool>((TappableLabel tp) => tp.inner), inner0To23);
+
+    expect(selected.map<String?>((TappableLabel tp) => tp.textSpan?.text), labels00To23);
+    expect(selected.map<bool>((TappableLabel tp) => tp.inner), inner0To23);
   });
 
   testWidgets('Material3 - Dial background uses correct default color', (WidgetTester tester) async {
@@ -576,17 +564,11 @@ void main() {
         await mediaQueryBoilerplate(tester, materialType: materialType);
         const List<String> labels12To11 = <String>['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
 
-        final CustomPaint dialPaint = tester.widget(findDialPaint);
-        final dynamic dialPainter = dialPaint.painter;
-        // ignore: avoid_dynamic_calls
-        final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
-        // ignore: avoid_dynamic_calls
-        expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11);
+        final List<TappableLabel> primary, selected;
+        (:primary, :selected) = TappableLabel.labels(tester.widget(findDialPaint));
 
-        // ignore: avoid_dynamic_calls
-        final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
-        // ignore: avoid_dynamic_calls
-        expect(selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11);
+        expect(primary.map<String?>((TappableLabel tp) => tp.textSpan?.text), labels12To11);
+        expect(selected.map<String?>((TappableLabel tp) => tp.textSpan?.text), labels12To11);
       });
 
       testWidgets('when change orientation, should reflect in render objects', (WidgetTester tester) async {
