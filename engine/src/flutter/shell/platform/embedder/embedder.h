@@ -327,9 +327,10 @@ typedef enum {
 ///     occupying the lowest memory address.
 ///
 ///   - all other formats are called packed formats, and the component order
-///     as specified in the format name refers to the order in the native type.
-///     for example, for kFlutterSoftwarePixelFormatRGB565, the R component
-///     uses the 5 least significant bits of the uint16_t pixel value.
+///     as specified in the format name refers to the order from most
+///     significant to least significant bits in the native type. for example,
+///     for kFlutterSoftwarePixelFormatRGB565, R occupies the 5 most significant
+///     bits, G the middle 6 bits, and B the 5 least significant bits.
 ///
 /// Each pixel format in this list is documented with an example on how to get
 /// the color components from the pixel.
@@ -342,33 +343,46 @@ typedef enum {
 ///   can get the p for a RGBA8888 formatted buffer like this:
 ///   const uint8_t *p = ((const uint8_t*) allocation) + row_bytes*y + x*4;
 typedef enum {
-  /// pixel with 8 bit grayscale value.
+  /// Pixel with 8 bit grayscale value.
   /// The grayscale value is the luma value calculated from r, g, b
   /// according to BT.709. (gray = r*0.2126 + g*0.7152 + b*0.0722)
   kFlutterSoftwarePixelFormatGray8,
 
-  /// pixel with 5 bits red, 6 bits green, 5 bits blue, in 16-bit word.
-  ///   r = p & 0x3F; g = (p>>5) & 0x3F; b = p>>11;
+  /// Pixel with 5 bits red, 6 bits green, 5 bits blue, in 16-bit word.
+  ///   r = (p >> 11) & 0x1F;
+  ///   g = (p >> 5) & 0x3F;
+  ///   b = p & 0x1F;
   kFlutterSoftwarePixelFormatRGB565,
 
-  /// pixel with 4 bits for alpha, red, green, blue; in 16-bit word.
-  ///   r = p & 0xF;  g = (p>>4) & 0xF;  b = (p>>8) & 0xF;   a = p>>12;
+  /// Pixel with 4 bits each for alpha, red, green, blue; in 16-bit word.
+  ///   r = (p >> 8) & 0xF;
+  ///   g = (p >> 4) & 0xF;
+  ///   b = p & 0xF;
+  ///   a = (p >> 12) & 0xF;
   kFlutterSoftwarePixelFormatRGBA4444,
 
-  /// pixel with 8 bits for red, green, blue, alpha.
-  ///   r = p[0]; g = p[1]; b = p[2]; a = p[3];
+  /// Pixel with 8 bits each for red, green, blue, alpha.
+  ///   r = p[0];
+  ///   g = p[1];
+  ///   b = p[2];
+  ///   a = p[3];
   kFlutterSoftwarePixelFormatRGBA8888,
 
-  /// pixel with 8 bits for red, green and blue and 8 unused bits.
-  ///   r = p[0]; g = p[1]; b = p[2];
+  /// Pixel with 8 bits each for red, green and blue and 8 unused bits.
+  ///   r = p[0];
+  ///   g = p[1];
+  ///   b = p[2];
   kFlutterSoftwarePixelFormatRGBX8888,
 
-  /// pixel with 8 bits for blue, green, red and alpha.
-  ///   r = p[2]; g = p[1]; b = p[0]; a = p[3];
+  /// Pixel with 8 bits each for blue, green, red and alpha.
+  ///   r = p[2];
+  ///   g = p[1];
+  ///   b = p[0];
+  ///   a = p[3];
   kFlutterSoftwarePixelFormatBGRA8888,
 
-  /// either kFlutterSoftwarePixelFormatBGRA8888 or
-  /// kFlutterSoftwarePixelFormatRGBA8888 depending on CPU endianess and OS
+  /// Either kFlutterSoftwarePixelFormatBGRA8888 or
+  /// kFlutterSoftwarePixelFormatRGBA8888 depending on CPU endianess and OS.
   kFlutterSoftwarePixelFormatNative32,
 } FlutterSoftwarePixelFormat;
 
