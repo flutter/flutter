@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/run.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -33,11 +34,20 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
+import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 import 'utils.dart';
 
 void main() {
+  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
+  // See https://github.com/flutter/flutter/issues/160257 for details.
+  FeatureFlags enableExplicitPackageDependencies() {
+    return TestFeatureFlags(
+      isExplicitPackageDependenciesEnabled: true,
+    );
+  }
+
   group('Flutter Command', () {
     late FakeCache cache;
     late TestUsage usage;
@@ -638,6 +648,7 @@ void main() {
       Usage: () => usage,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
+      FeatureFlags: enableExplicitPackageDependencies,
     });
 
     testUsingContext('use packagesPath to generate BuildInfo', () async {
@@ -1410,6 +1421,11 @@ class FakePub extends Fake implements Pub {
     bool shouldSkipThirdPartyGenerator = true,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async { }
+
+  @override
+  Future<Map<String, Object?>> deps(FlutterProject project) {
+    return FakePubWithPrimedDeps().deps(project);
+  }
 }
 
 class _TestDeviceManager extends DeviceManager {

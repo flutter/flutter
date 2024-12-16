@@ -7,6 +7,7 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1473,6 +1474,160 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1));
       expect(find.byKey(containerKey), findsNothing);
     });
+
+    testWidgets('Routes can use simulation and ignore durations', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+
+      await tester.pumpWidget(MaterialApp(
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push<void>(
+                    _SimulationRoute(
+                      simulationBuilder: ({required double current, required bool forward}) {
+                        // This simulation takes 1.0 second to transit.
+                        return GravitySimulation(
+                          0, // Acceleration
+                          0.0, // Start position
+                          1.0, // End distance
+                          1.0); // Init velocity
+                      },
+                      // Set an extremely long duration so that the route must ignore these
+                      // durations to proceed.
+                      transitionDuration: const Duration(days: 1),
+                      reverseTransitionDuration: const Duration(days: 1),
+                      pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+                        return Container(
+                          key: containerKey,
+                          color: Colors.green,
+                        );
+                      },
+                      transitionBuilder: (BuildContext context, Animation<double> animation, Widget child) {
+                        return child;
+                      }
+                    ),
+                  );
+                },
+                child: const Text('Open page'),
+              );
+            },
+          );
+        },
+      ));
+
+      // Open the new route.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(find.text('Open page'), findsNothing);
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      await tester.pumpAndSettle();
+
+      // Pop the new route.
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump();
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      // Container should be present halfway through the transition.
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      // Container should be present at the very end of the transition.
+      await tester.pump(const Duration(milliseconds: 490));
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      // Container have transitioned out after 500ms.
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.byKey(containerKey), findsNothing);
+    });
+
+    testWidgets('Routes can use simulation value', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+
+      await tester.pumpWidget(MaterialApp(
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push<void>(
+                    _SimulationRoute(
+                      simulationBuilder: ({required double current, required bool forward}) {
+                        return _ConstantVelocitySimulation(forward: forward, speed: 1.0); // Init velocity
+                      },
+                      transitionDuration: const Duration(days: 1),
+                      reverseTransitionDuration: const Duration(days: 1),
+                      pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+                        return Container(
+                          key: containerKey,
+                          color: Colors.green,
+                        );
+                      },
+                      transitionBuilder: (BuildContext context, Animation<double> animation, Widget child) {
+                        return FractionalTranslation(
+                          translation: Tween<Offset>(begin: const Offset(0.0, 1.0), end: Offset.zero)
+                            .evaluate(animation),
+                          child: child, // child is the value returned by pageBuilder
+                        );
+                      }
+                    ),
+                  );
+                },
+                child: const Text('Open page'),
+              );
+            },
+          );
+        },
+      ));
+
+      // Open the new route.
+      await tester.tap(find.byType(ElevatedButton));
+      // Must pump two frames for the animation to take effect. The first pump
+      // starts the animation, the 2nd pump makes the wiget appear.
+      await tester.pump();
+      await tester.pump();
+      expect(find.byKey(containerKey), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(containerKey)), const Offset(0, 600));
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.byKey(containerKey), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(containerKey)), const Offset(0, 300));
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.byKey(containerKey), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(containerKey)), Offset.zero);
+
+      await tester.pumpAndSettle();
+
+      // Pop the new route.
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump();
+      await tester.pump();
+      expect(find.byKey(containerKey), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(containerKey)), Offset.zero);
+
+      // Container should be present halfway through the transition.
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.byKey(containerKey), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(containerKey)), const Offset(0, 300));
+
+      // Container should be present at the very end of the transition.
+      await tester.pump(const Duration(milliseconds: 490));
+      expect(find.byKey(containerKey), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(containerKey)), const Offset(0, 594));
+
+      // Container have transitioned out after 500ms.
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.byKey(containerKey), findsNothing);
+    });
   });
 
   group('ModalRoute', () {
@@ -2629,5 +2784,60 @@ class _RestorableDialogTestWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+typedef _SimulationBuilder = Simulation Function({ required double current, required bool forward });
+typedef _TransitionBuilder = Widget Function(BuildContext context, Animation<double> animation, Widget child);
+
+// A route that is driven by a simulation.
+class _SimulationRoute extends PageRouteBuilder<void> {
+  _SimulationRoute({
+    required this.simulationBuilder,
+    required this.transitionBuilder,
+    required super.pageBuilder,
+    super.transitionDuration = const Duration(milliseconds: 300),
+    super.reverseTransitionDuration = const Duration(milliseconds: 300),
+  });
+
+  final _SimulationBuilder simulationBuilder;
+  final _TransitionBuilder transitionBuilder;
+
+  @override
+  Simulation createSimulation({ required bool forward }) {
+    return simulationBuilder(current: controller!.value, forward: forward);
+  }
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    return transitionBuilder(context, animation, child);
+  }
+}
+
+// A simulation that progresses at a constant speed.
+//
+// If `forward` is true, the simulation goes from 0 to 1, otherwise from 1 to 0.
+class _ConstantVelocitySimulation extends Simulation {
+  _ConstantVelocitySimulation({
+    required this.forward,
+    required this.speed,
+  }) : _start = forward ? 0.0 : 1.0;
+
+  final bool forward;
+  final double speed;
+  final double _start;
+
+  @override
+  double x(double time) {
+    return _start + time * dx(time);
+  }
+
+  @override
+  double dx(double time) => forward ? speed : -speed;
+
+  @override
+  bool isDone(double time) {
+    final double nowX = x(time);
+    return nowX > 1.0 || nowX < 0;
   }
 }
