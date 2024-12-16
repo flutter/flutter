@@ -56,31 +56,6 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
     return nullptr;
   }
 
-  // TODO(147533): AHB swapchains on emulators are not functional.
-  auto& context_vk = ContextVK::Cast(*context);
-  const auto emulator = context_vk.GetDriverInfo()->IsEmulator();
-  const auto should_disable_sc =
-      context_vk.GetShouldDisableSurfaceControlSwapchain();
-
-  // Try AHB swapchains first.
-  if (!emulator && AHBSwapchainVK::IsAvailableOnPlatform() &&
-      !android::ShadowRealm::ShouldDisableAHB() && !should_disable_sc) {
-    auto ahb_swapchain = std::shared_ptr<AHBSwapchainVK>(new AHBSwapchainVK(
-        context,             //
-        window.GetHandle(),  //
-        surface,             //
-        window.GetSize(),    //
-        enable_msaa          //
-        ));
-
-    if (ahb_swapchain->IsValid()) {
-      return ahb_swapchain;
-    } else {
-      VALIDATION_LOG
-          << "Could not create AHB swapchain. Falling back to KHR variant.";
-    }
-  }
-
   // Fallback to KHR swapchains if AHB swapchains aren't available.
   return Create(context, std::move(surface), window.GetSize(), enable_msaa);
 }
