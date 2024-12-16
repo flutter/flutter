@@ -114,7 +114,7 @@ void main() {
     final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
-    await commandRunner.run(<String>['get', targetDirectory.path]);
+    await commandRunner.run(<String>['get', '--directory=${targetDirectory.path}']);
     final FlutterProject rootProject = FlutterProject.fromDirectory(targetDirectory);
     final File packageConfigFile = rootProject.dartTool.childFile('package_config.json');
     expect(packageConfigFile.existsSync(), true);
@@ -138,13 +138,41 @@ void main() {
     FileSystem: () => fileSystem,
   });
 
-    testUsingContext("pub get doesn't treat -v as directory", () async {
+  testUsingContext("pub get doesn't treat -v as directory", () async {
     fileSystem.currentDirectory.childDirectory('target').createSync();
     fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
     final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
     pub.expectedArguments = <String>['get', '-v', '--example', '--directory', '.'];
     await commandRunner.run(<String>['get', '-v']);
+  }, overrides: <Type, Generator>{
+    Pub: () => pub,
+    ProcessManager: () => FakeProcessManager.any(),
+    FileSystem: () => fileSystem,
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/144898
+  // Regression test for https://github.com/flutter/flutter/issues/160145
+  testUsingContext("pub add doesn't treat dependency syntax as directory", () async {
+    fileSystem.currentDirectory.childDirectory('target').createSync();
+    fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
+    fileSystem.currentDirectory.childDirectory('example').createSync(recursive: true);
+    fileSystem.currentDirectory.childDirectory('android').childFile('AndroidManifest.xml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+    final PackagesGetCommand command = PackagesGetCommand('add', '', PubContext.pubAdd);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(command);
+    const List<String> availableSyntax = <String>[
+      'foo:{"path":"../foo"}',
+      'foo:{"hosted":"my-pub.dev"}',
+      'foo:{"sdk":"flutter"}',
+      'foo:{"git":"https://github.com/foo/foo"}',
+    ];
+    for (final String syntax in availableSyntax) {
+      pub.expectedArguments = <String>['add', syntax, '--example', '--directory', '.'];
+      await commandRunner.run(<String>['add', syntax]);
+    }
   }, overrides: <Type, Generator>{
     Pub: () => pub,
     ProcessManager: () => FakeProcessManager.any(),
@@ -179,7 +207,7 @@ void main() {
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
     try {
-      await commandRunner.run(<String>['get', 'missing_dir']);
+      await commandRunner.run(<String>['get', '--directory=missing_dir']);
       fail('expected an exception');
     } on Exception catch (e) {
       expect(e.toString(), contains('Expected to find project root in missing_dir'));
