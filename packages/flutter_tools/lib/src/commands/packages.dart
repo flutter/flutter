@@ -234,7 +234,7 @@ class PackagesGetCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    List<String> rest = argResults!.rest;
+    final List<String> rest = argResults!.rest;
     bool isHelp = false;
     bool example = true;
     bool exampleWasParsed = false;
@@ -254,30 +254,12 @@ class PackagesGetCommand extends FlutterCommand {
     FlutterProject? rootProject;
 
     if (!isHelp) {
-      if (name == 'get' &&
-          directoryOption == null &&
-          rest.length == 1 &&
-          // Anything that looks like an argument should not be interpreted as
-          // a directory.
-          !rest.single.startsWith('-')) {
-        globals.printWarning('''
-  Using a naked argument for directory is deprecated and will stop working in a future Flutter release.
-  (${rest.single})
-
-  Use --directory instead.''');
-        target = findProjectRoot(globals.fs, rest.single);
-        if (target == null) {
-          throwToolExit('Expected to find project root in ${rest.single}.');
-        }
-        rest = <String>[];
-      } else {
-        target = findProjectRoot(globals.fs, directoryOption);
-        if (target == null) {
-          if (directoryOption == null) {
-            throwToolExit('Expected to find project root in current working directory.');
-          } else {
-            throwToolExit('Expected to find project root in $directoryOption.');
-          }
+      target = findProjectRoot(globals.fs, directoryOption);
+      if (target == null) {
+        if (directoryOption == null) {
+          throwToolExit('Expected to find project root in current working directory.');
+        } else {
+          throwToolExit('Expected to find project root in $directoryOption.');
         }
       }
 
