@@ -27,7 +27,8 @@ void main() {
     expect(await stream.single, equals(42));
 
     bool ranAction = false;
-    final Future<int> completeResult = future.whenComplete(() { // ignore: void_checks, https://github.com/dart-lang/linter/issues/1675
+    // ignore: void_checks, https://github.com/dart-lang/linter/issues/1675
+    final Future<int> completeResult = future.whenComplete(() {
       ranAction = true;
       // verify that whenComplete does NOT propagate its return value:
       return Future<int>.value(31);

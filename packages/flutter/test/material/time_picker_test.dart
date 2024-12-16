@@ -124,8 +124,11 @@ void main() {
 
     // ignore: avoid_dynamic_calls
     final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
-    // ignore: avoid_dynamic_calls
-    expect(selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To22);
+    expect(
+      // ignore: avoid_dynamic_calls
+      selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String),
+      labels00To22,
+    );
   });
 
   testWidgets('Material3 - Dialog size - dial mode', (WidgetTester tester) async {
@@ -227,8 +230,11 @@ void main() {
 
     // ignore: avoid_dynamic_calls
     final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
-    // ignore: avoid_dynamic_calls
-    expect(selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To23);
+    expect(
+      // ignore: avoid_dynamic_calls
+      selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String),
+      labels00To23,
+    );
     // ignore: avoid_dynamic_calls
     expect(selectedLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
   });
@@ -580,13 +586,19 @@ void main() {
         final dynamic dialPainter = dialPaint.painter;
         // ignore: avoid_dynamic_calls
         final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
-        // ignore: avoid_dynamic_calls
-        expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11);
+        expect(
+          // ignore: avoid_dynamic_calls
+          primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String),
+          labels12To11,
+        );
 
         // ignore: avoid_dynamic_calls
         final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
-        // ignore: avoid_dynamic_calls
-        expect(selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11);
+        expect(
+          // ignore: avoid_dynamic_calls
+          selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String),
+          labels12To11,
+        );
       });
 
       testWidgets('when change orientation, should reflect in render objects', (WidgetTester tester) async {

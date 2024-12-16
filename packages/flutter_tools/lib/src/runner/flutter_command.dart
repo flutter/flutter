@@ -538,7 +538,8 @@ abstract class FlutterCommand extends Command<void> {
       }
       ddsEnabled = !boolArg('disable-dds');
       // TODO(ianh): enable the following code once google3 is migrated away from --disable-dds (and add test to flutter_command_test.dart)
-      if (false) { // ignore: dead_code, literal_only_boolean_expressions
+      // ignore: dead_code, literal_only_boolean_expressions
+      if (false) {
         if (ddsEnabled) {
           globals.printWarning('${globals.logger.terminal
               .warningMark} The "--no-disable-dds" argument is deprecated and redundant, and should be omitted.');
