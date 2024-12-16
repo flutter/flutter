@@ -194,7 +194,7 @@ class DartFormatChecker {
       incorrect = completedDiffs.where((WorkerJob job) => job.result.exitCode != 0);
     } else {
       final List<WorkerJob> completedJobs = await dartFmt.runToCompletion(jobs);
-      final List<WorkerJob> incorrectJobs = incorrect = [];
+      final List<WorkerJob> incorrectJobs = incorrect = <WorkerJob>[];
       for (final WorkerJob job in completedJobs) {
         if (job.result.exitCode != 0 && (job.result.stderr.isNotEmpty || job.result.exitCode != 1)) {
           // The formatter had a problem formatting the file.

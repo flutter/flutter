@@ -100,10 +100,9 @@ void main() {
 
     try {
       fixture.gitAdd();
-      final io.ProcessResult result = io.Process.runSync(
-        formatterPath, <String>['--check', 'dart', '--fix'],
-        workingDirectory: flutterRoot.path,
-      );
+      final io.ProcessResult result = io.Process.runSync(formatterPath, <String>[
+        '--fix',
+      ], workingDirectory: flutterRoot.path);
       expect(result.stdout, contains('format_test2.dart produced the following error'));
       expect(result.exitCode, isNot(0));
     } finally {
