@@ -284,8 +284,8 @@ TaskFunction createHelloWorldCompileTest() {
   return CompileTest('${flutterDirectory.path}/examples/hello_world', reportPackageContentSizes: true).run;
 }
 
-TaskFunction createSwiftUIImitationTest() {
-  return CompileSwiftUIImitationTest('${flutterDirectory.path}/examples/hello_world_swiftui', reportPackageContentSizes: true).run;
+TaskFunction createSwiftUICompileTest() {
+  return CompileSwiftUICompileTest('${flutterDirectory.path}/examples/hello_world_swiftui', reportPackageContentSizes: true).run;
 }
 
 
@@ -1642,8 +1642,8 @@ class WebCompileTest {
 
 /// Measures how long it takes to compile a Flutter app and how big the compiled
 /// code is.
-class CompileSwiftUIImitationTest {
-  const CompileSwiftUIImitationTest(this.testDirectory, { this.reportPackageContentSizes = false });
+class CompileSwiftUICompileTest {
+  const CompileSwiftUICompileTest(this.testDirectory, { this.reportPackageContentSizes = false });
 
   final String testDirectory;
   final bool reportPackageContentSizes;
@@ -1691,10 +1691,10 @@ class CompileSwiftUIImitationTest {
     } catch (e) {
       print('Error calculating size: $e at $path');
     }
-    final Map<String, dynamic> test = await CompileTest('${flutterDirectory.path}/examples/hello_world_flutter', reportPackageContentSizes: true)._compileApp(deleteGradleCache: false);
+    // final Map<String, dynamic> test = await CompileTest('${flutterDirectory.path}/examples/hello_world_flutter', reportPackageContentSizes: true)._compileApp(deleteGradleCache: false);
 
     final Map<String, dynamic> metrics = <String, dynamic>{};
-    metrics.addAll(test);
+    // metrics.addAll(test);
     metrics.addAll(<String, dynamic>{
       'release_swiftui_compile_millis': watch.elapsedMilliseconds,
       'release_swiftui_size_bytes': releaseSizeInBytes,
