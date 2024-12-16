@@ -114,7 +114,7 @@ void main() {
     final PackagesGetCommand command = PackagesGetCommand('get', '', PubContext.pubGet);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
-    await commandRunner.run(<String>['get', targetDirectory.path]);
+    await commandRunner.run(<String>['get', '--directory=${targetDirectory.path}']);
     final FlutterProject rootProject = FlutterProject.fromDirectory(targetDirectory);
     final File packageConfigFile = rootProject.dartTool.childFile('package_config.json');
     expect(packageConfigFile.existsSync(), true);
@@ -207,7 +207,7 @@ void main() {
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
     try {
-      await commandRunner.run(<String>['get', 'missing_dir']);
+      await commandRunner.run(<String>['get', '--directory=missing_dir']);
       fail('expected an exception');
     } on Exception catch (e) {
       expect(e.toString(), contains('Expected to find project root in missing_dir'));
