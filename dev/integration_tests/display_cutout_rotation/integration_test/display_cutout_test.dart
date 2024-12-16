@@ -14,9 +14,7 @@ void main() {
     // "com.android.internal.display.cutout.emulation.tall".
     testWidgets('cutout should be on top in portrait mode', (tester) async {
       // Force rotation
-      SystemChrome.setPreferredOrientations(<DeviceOrientation>[
-        DeviceOrientation.portraitUp,
-      ]);
+      await moreReliableSetOrentations(tester, [DeviceOrientation.portraitUp]);
       // Load app widget.
       await tester.pumpWidget(const MyApp());
       await tester.pumpAndSettle();
@@ -41,11 +39,7 @@ void main() {
     testWidgets('cutout should be on left in landscape left', (tester) async {
       // Load app widget.
       await tester.pumpWidget(const MyApp());
-      await tester.pumpAndSettle(const Duration(milliseconds: 5000));
-      SystemChrome.setPreferredOrientations(<DeviceOrientation>[
-        DeviceOrientation.landscapeLeft,
-      ]);
-      await tester.pumpAndSettle(const Duration(milliseconds: 5000));
+      await moreReliableSetOrentations(tester, [DeviceOrientation.landscapeLeft]);
       BuildContext context = tester.element(find.byType(Text));
       // Verify that app code thinks there is a left cutout.
       List<DisplayFeature> displayFeatures = getCutouts(tester, context);
@@ -58,7 +52,7 @@ void main() {
       );
       expect(
         displayFeatures[0].bounds.left,
-        0, //closeTo(max(0, View.of(context).viewInsets.left), .1), todo remove
+        0,
         reason:
             'cutout should start at the left, does the test device have a '
             'camera cutout or window inset?',
@@ -66,10 +60,7 @@ void main() {
     });
 
     testWidgets('cutout handles rotation', (tester) async {
-      await tester.pumpAndSettle(const Duration(milliseconds: 5000));
-      SystemChrome.setPreferredOrientations(<DeviceOrientation>[
-        DeviceOrientation.portraitUp,
-      ]);
+      await moreReliableSetOrentations(tester, [DeviceOrientation.portraitUp]);
       const widgetUnderTest = MyApp();
       // Load app widget.
       await tester.pumpWidget(widgetUnderTest);
@@ -89,11 +80,8 @@ void main() {
             'cutout should start at the top, does the test device have a '
             'camera cutout or window inset?',
       );
-      SystemChrome.setPreferredOrientations(<DeviceOrientation>[
-        DeviceOrientation.landscapeLeft,
-      ]);
+      await moreReliableSetOrentations(tester, [DeviceOrientation.landscapeLeft]);
       await tester.pumpWidget(widgetUnderTest);
-      await tester.pumpAndSettle(const Duration(milliseconds: 5000));
 
       // Requery for display features after rotation.
       context = tester.element(find.byType(Text));
@@ -117,6 +105,14 @@ void main() {
       SystemChrome.setPreferredOrientations([]);
     });
   });
+}
+
+// Rotations have an async communication to engine which then has an async
+// communication to the android operating system.
+Future<void> moreReliableSetOrentations(WidgetTester tester, List<DeviceOrientation> orientations) async {
+  await tester.pumpAndSettle(const Duration(milliseconds: 5000));
+  SystemChrome.setPreferredOrientations(orientations);
+  await tester.pumpAndSettle(const Duration(milliseconds: 5000));
 }
 
 List<DisplayFeature> getCutouts(WidgetTester tester, BuildContext context) {
