@@ -10,13 +10,17 @@ void main() {
     final Future<int> future = SynchronousFuture<int>(42);
 
     int? result;
-    future.then<void>((int value) { result = value; });
+    future.then<void>((int value) {
+      result = value;
+    });
 
     expect(result, equals(42));
     result = null;
 
     final Future<int> futureWithTimeout = future.timeout(const Duration(milliseconds: 1));
-    futureWithTimeout.then<void>((int value) { result = value; });
+    futureWithTimeout.then<void>((int value) {
+      result = value;
+    });
     expect(result, isNull);
     await futureWithTimeout;
     expect(result, equals(42));
@@ -27,7 +31,8 @@ void main() {
     expect(await stream.single, equals(42));
 
     bool ranAction = false;
-    final Future<int> completeResult = future.whenComplete(() { // ignore: void_checks, https://github.com/dart-lang/linter/issues/1675
+    final Future<int> completeResult = future.whenComplete(() {
+      // ignore: void_checks, https://github.com/dart-lang/linter/issues/1675
       ranAction = true;
       // verify that whenComplete does NOT propagate its return value:
       return Future<int>.value(31);
