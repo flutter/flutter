@@ -1,4 +1,4 @@
-**Flutter GPU** is a low level graphics API that ships as a package in the Flutter SDK. Flutter GPU enables you to build arbitrary renderers from stratch using just Dart and GLSL. No native platform code required.
+**Flutter GPU** is a low level graphics API that ships as a package in the Flutter SDK. Flutter GPU enables you to build arbitrary renderers from scratch using just Dart and GLSL. No native platform code required.
 
 > [!Warning]
 > - Flutter GPU is in an early preview state and does not guarantee API stability.
