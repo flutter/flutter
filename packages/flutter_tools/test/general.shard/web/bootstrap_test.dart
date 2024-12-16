@@ -154,7 +154,7 @@ void main() {
   });
 
   test('generateMainModule sets rootDirectories', () {
-    final String root = 'http://localhost:12345';
+    const String root = 'http://localhost:12345';
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
       nullAssertions: false,
