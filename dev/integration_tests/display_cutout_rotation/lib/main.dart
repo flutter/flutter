@@ -24,7 +24,8 @@ class _MyAppState extends State<MyApp> {
     displayFeatures.retainWhere(
         (DisplayFeature feature) => feature.type == DisplayFeatureType.cutout);
     String text;
-    // TODO remove complexisty of the app evaluating features.
+    // None of this complexity is required for the test but it helps when
+    // visually debugging or watching a video of a remote device.
     if (displayFeatures.isEmpty) {
       text = 'CutoutNone';
     } else if (displayFeatures.length > 1) {
@@ -39,6 +40,7 @@ class _MyAppState extends State<MyApp> {
         text = 'CutoutNeither';
       }
     }
+    // Tests assume there is some text element displayed.
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Text('Cutout status: $text', key: Key(text)),

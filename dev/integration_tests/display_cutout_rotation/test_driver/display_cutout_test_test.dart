@@ -56,13 +56,14 @@ Future<void> main() async {
     'enable',
     'com.android.internal.display.cutout.emulation.tall',
   ]);
-  // TODO Await future.delay
-  Process.runSync('sleep', <String>['1']);
+  await Future.delayed(const Duration(milliseconds: 1000));
   print('Starting test.');
   final FlutterDriver driver = await FlutterDriver.connect();
   final String data = await driver.requestData(
     null,
-    timeout: const Duration(minutes: 1), // TODO verify this timeout is reasonable.
+    timeout: const Duration(
+      minutes: 1,
+    ),
   );
   await driver.close();
   print('Test finished. Reverting Adb changes...');
