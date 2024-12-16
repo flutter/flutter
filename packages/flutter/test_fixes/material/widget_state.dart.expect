@@ -32,42 +32,6 @@ void main() {
 
   final WidgetStateProperty<Color> backgroundColor = WidgetStateColor.resolveWith(getColor);
 
-  class _MouseCursor extends WidgetStateMouseCursor {
-    const _MouseCursor(this.resolveCallback);
-
-    final WidgetPropertyResolver<MouseCursor?> resolveCallback;
-
-    @override
-    MouseCursor resolve(Set<WidgetState> states) => resolveCallback(states) ?? MouseCursor.uncontrolled;
-  }
-
-  WidgetStateBorderSide? get side {
-    return WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)) {
-        if (states.contains(WidgetState.selected)) {
-          return const BorderSide(width: 2.0);
-        }
-        return BorderSide(width: 1.0);
-      }
-      if (states.contains(WidgetState.selected)) {
-        return const BorderSide(width: 1.5);
-      }
-      return BorderSide(width: 0.5);
-    });
-  }
-
-  class SelectedBorder extends RoundedRectangleBorder implements WidgetStateOutlinedBorder {
-    const SelectedBorder();
-
-    @override
-    OutlinedBorder? resolve(Set<WidgetState> states) {
-      if (states.contains(WidgetState.selected)) {
-        return const RoundedRectangleBorder();
-      }
-      return null;
-    }
-  }
-
   TextStyle floatingLabelStyle = WidgetStateTextStyle.resolveWith(
     (Set<WidgetState> states) {
       final Color color =
@@ -90,26 +54,61 @@ void main() {
 
   final WidgetStatesController statesController =
     WidgetStatesController(<WidgetState>{if (widget.selected) WidgetState.selected});
+}
 
-  class _MyWidget extends StatefulWidget {
-    const _MyWidget({
-      required this.controller,
-      required this.evaluator,
-      required this.materialState,
+class _MouseCursor extends WidgetStateMouseCursor {
+  const _MouseCursor(this.resolveCallback);
+
+  final WidgetPropertyResolver<MouseCursor?> resolveCallback;
+
+  @override
+  MouseCursor resolve(Set<WidgetState> states) => resolveCallback(states) ?? MouseCursor.uncontrolled;
+}
+
+class SelectedBorder extends RoundedRectangleBorder implements WidgetStateOutlinedBorder {
+  const SelectedBorder();
+
+  @override
+  OutlinedBorder? resolve(Set<WidgetState> states) {
+    if (states.contains(WidgetState.selected)) {
+      return const RoundedRectangleBorder();
+    }
+    return null;
+  }
+}
+
+class _MyWidget extends StatefulWidget {
+  const _MyWidget({
+    required this.controller,
+    required this.evaluator,
+    required this.materialState,
+  });
+
+  final bool Function(_MyWidgetState state) evaluator;
+
+  /// Stream passed down to the child [_InnerWidget] to begin the process.
+  /// This plays the role of an actual user interaction in the wild, but allows
+  /// us to engage the system without mocking pointers/hovers etc.
+  final StreamController<bool> controller;
+
+  /// The value we're watching in the given test.
+  final WidgetState materialState;
+
+  WidgetStateBorderSide? get side {
+    return WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        if (states.contains(WidgetState.selected)) {
+          return const BorderSide(width: 2.0);
+        }
+        return BorderSide(width: 1.0);
+      }
+      if (states.contains(WidgetState.selected)) {
+        return const BorderSide(width: 1.5);
+      }
+      return BorderSide(width: 0.5);
     });
-
-    final bool Function(_MyWidgetState state) evaluator;
-
-    /// Stream passed down to the child [_InnerWidget] to begin the process.
-    /// This plays the role of an actual user interaction in the wild, but allows
-    /// us to engage the system without mocking pointers/hovers etc.
-    final StreamController<bool> controller;
-
-    /// The value we're watching in the given test.
-    final WidgetState materialState;
-
-    @override
-    State createState() => _MyWidgetState();
   }
 
+  @override
+  State createState() => _MyWidgetState();
 }
