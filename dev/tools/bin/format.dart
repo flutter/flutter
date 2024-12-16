@@ -165,7 +165,7 @@ class DartFormatChecker {
       final Stream<WorkerJob> completedJobs = dartFmt.startWorkers(jobs);
       final List<WorkerJob> diffJobs = <WorkerJob>[];
       await for (final WorkerJob completedJob in completedJobs) {
-        if (completedJob.result.exitCode != 0 && (completedJob.result.stderr.isNotEmpty || completedJob.result.exitCode != 1)) {
+        if (completedJob.result.exitCode != 0 && completedJob.result.exitCode != 1) {
           // The formatter had a problem formatting the file.
           errorJobs.add(completedJob);
         } else if (completedJob.result.exitCode == 1) {
@@ -196,7 +196,7 @@ class DartFormatChecker {
       final List<WorkerJob> completedJobs = await dartFmt.runToCompletion(jobs);
       final List<WorkerJob> incorrectJobs = incorrect = <WorkerJob>[];
       for (final WorkerJob job in completedJobs) {
-        if (job.result.exitCode != 0 && (job.result.stderr.isNotEmpty || job.result.exitCode != 1)) {
+        if (job.result.exitCode != 0 && job.result.exitCode != 1) {
           // The formatter had a problem formatting the file.
           errorJobs.add(job);
         } else if (job.result.exitCode == 1) {
