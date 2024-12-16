@@ -1654,6 +1654,7 @@ class CompileSwiftUITest {
       'clean',
       '-allTargets'
     ]);
+    print('cleaned');
     final Stopwatch watch = Stopwatch();
     int releaseSizeInBytes = 0;
     watch.start();
@@ -1664,64 +1665,29 @@ class CompileSwiftUITest {
       'hello_world_swiftui',
       '-sdk',
       'iphoneos',
-      'build',
-      '-allowProvisioningUpdates',
-      'CODE_SIGNING_ALLOWED=NO'
-    ]).then((ProcessResult results) {
-      print(results.stdout);
-      if (results.exitCode != 0) {
-        print(results.stderr);
-      }
-    });
-    print('ran build');
-    await Process.run(workingDirectory: testDirectory ,'xcodebuild', <String>[
-      '-scheme',
-      'hello_world_swiftui',
-      '-target',
-      'hello_world_swiftui',
-      '-sdk',
-      'iphoneos',
       '-archivePath',
-      'hello_world_swiftuiArchive',
-      'archive',
-      '-allowProvisioningUpdates',
-      'CODE_SIGNING_ALLOWED=NO'
+      '$testDirectory/hello_world_swiftui',
+      'archive'
     ]).then((ProcessResult results) {
       print(results.stdout);
       if (results.exitCode != 0) {
         print(results.stderr);
       }
     });
-    print('archive');
-    await Process.run(workingDirectory: testDirectory ,'xcodebuild', <String>[
-      '-exportArchive',
-      '-archivePath',
-      'hello_world_swiftuiArchive.xcarchive',
-      '-exportOptionsPlist',
-      'exportOptions.plist',
-      '-exportPath',
-      'hello_world_swiftuiIPA',
-      '-allowProvisioningUpdates',
-      'CODE_SIGNING_ALLOWED=NO',
-      'CODE_SIGNING_REQUIRED=NO',
-      'CODE_SIGN_IDENTITY=-',
-      'EXPANDED_CODE_SIGN_IDENTITY=-',
-    ]).then((ProcessResult results) {
-      print(results.stdout);
-      if (results.exitCode != 0) {
-        print(results.stderr);
-      }
-    });
-    print('exported ipa');
+    print('archived');
 
     watch.stop();
-    print('$testDirectory/build/Release-iphoneos/hello_world_swiftui.app');
-
-    final File appBundle =  file('$testDirectory/hello_world_swiftuiIPA/hello_world_swiftui.ipa');
-
-
-    print('grabbed app bundle');
-    releaseSizeInBytes = appBundle.lengthSync();
+    final String path = '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
+    final Directory appBundle =  dir(path);
+    try {
+      for (final FileSystemEntity entity in appBundle.listSync(recursive: true)) {
+        if (entity is File) {
+          releaseSizeInBytes += entity.lengthSync();
+        }
+      }
+    } catch (e) {
+      print('Error calculating size: $e at $path');
+    }
 
     final Map<String, dynamic> metrics = <String, dynamic>{};
     metrics.addAll(<String, dynamic>{
@@ -2139,7 +2105,7 @@ class MemoryTest {
     await receivedNextMessage;
   }
 
-  /// Taps the application and looks for acknowledgement.
+  /// Taps the application and looks for acknowldgement.
   ///
   /// This is used by several tests to ensure scrolling gestures are installed.
   Future<void> tapNotification() async {
