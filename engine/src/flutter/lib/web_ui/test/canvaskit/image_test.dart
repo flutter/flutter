@@ -7,12 +7,11 @@ import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine/canvaskit/image.dart';
-import 'package:ui/src/engine/image_decoder.dart';
-import 'package:ui/src/engine/util.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import 'common.dart';
+import 'test_data.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -130,6 +129,31 @@ void testMain() {
     codec.dispose();
 
     expect(activeImages.length, 0);
+  });
+
+  test('CkImage does not close image source too early', () async {
+    final ImageSource imageSource = ImageBitmapImageSource(
+      await domWindow.createImageBitmap(createBlankDomImageData(4, 4)),
+    );
+
+    final SkImage skImage1 = canvasKit.MakeAnimatedImageFromEncoded(k4x4PngImage)!.makeImageAtCurrentFrame();
+    final CkImage image1 = CkImage(skImage1, imageSource: imageSource);
+
+    final SkImage skImage2 = canvasKit.MakeAnimatedImageFromEncoded(k4x4PngImage)!.makeImageAtCurrentFrame();
+    final CkImage image2 = CkImage(skImage2, imageSource: imageSource);
+
+    final CkImage image3 = image1.clone();
+
+    expect(imageSource.debugIsClosed, isFalse);
+
+    image1.dispose();
+    expect(imageSource.debugIsClosed, isFalse);
+
+    image2.dispose();
+    expect(imageSource.debugIsClosed, isFalse);
+
+    image3.dispose();
+    expect(imageSource.debugIsClosed, isTrue);
   });
 }
 

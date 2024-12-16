@@ -7,6 +7,7 @@ import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
@@ -403,11 +404,13 @@ class CkImage implements ui.Image, StackTraceDebugger {
   CkImage(SkImage skImage, {this.imageSource}) {
     box = CountedRef<CkImage, SkImage>(skImage, this, 'SkImage');
     _init();
+    imageSource?.refCount++;
   }
 
   CkImage.cloneOf(this.box, {this.imageSource}) {
     _init();
     box.ref(this);
+    imageSource?.refCount++;
   }
 
   void _init() {
@@ -454,6 +457,8 @@ class CkImage implements ui.Image, StackTraceDebugger {
     ui.Image.onDispose?.call(this);
     _disposed = true;
     box.unref(this);
+
+    imageSource?.refCount--;
     imageSource?.close();
   }
 
@@ -645,7 +650,26 @@ sealed class ImageSource {
   DomCanvasImageSource get canvasImageSource;
   int get width;
   int get height;
-  void close();
+
+  /// The number of references to this image source.
+  ///
+  /// Calling [close] is a no-op if [refCount] is greater than 0.
+  ///
+  /// Only when [refCount] is 0 will the [close] method actually close the
+  /// image source.
+  int refCount = 0;
+
+  @visibleForTesting
+  bool debugIsClosed = false;
+
+  void close() {
+    if (refCount == 0) {
+      _doClose();
+      debugIsClosed = true;
+    }
+  }
+
+  void _doClose();
 }
 
 class VideoFrameImageSource extends ImageSource {
@@ -654,7 +678,7 @@ class VideoFrameImageSource extends ImageSource {
   final VideoFrame videoFrame;
 
   @override
-  void close() {
+  void _doClose() {
     // Do nothing. Skia will close the VideoFrame when the SkImage is disposed.
   }
 
@@ -674,7 +698,7 @@ class ImageElementImageSource extends ImageSource {
   final DomHTMLImageElement imageElement;
 
   @override
-  void close() {
+  void _doClose() {
     // There's no way to immediately close the <img> element. Just let the
     // browser garbage collect it.
   }
@@ -695,7 +719,7 @@ class ImageBitmapImageSource extends ImageSource {
   final DomImageBitmap imageBitmap;
 
   @override
-  void close() {
+  void _doClose() {
     imageBitmap.close();
   }
 
