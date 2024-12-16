@@ -1674,6 +1674,9 @@ class CompileSwiftUITest {
     });
     watch.stop();
 
+    print("ls");
+    Process.run('ls', []);
+
     final String path = '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
     final Directory appBundle =  dir(path);
     try {
@@ -1686,7 +1689,8 @@ class CompileSwiftUITest {
       print('Error calculating size: $e at $path');
     }
 
-    Process.run('ls', []);
+
+
 
     final Map<String, dynamic> metrics = <String, dynamic>{};
     metrics.addAll(<String, dynamic>{
