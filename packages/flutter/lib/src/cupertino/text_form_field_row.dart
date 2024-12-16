@@ -357,7 +357,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
     super.didChange(value);
 
     if (value != null && _effectiveController.text != value) {
-      _effectiveController.text = value;
+      _effectiveController.value = TextEditingValue(text: value);
     }
   }
 
@@ -365,7 +365,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
   void reset() {
     // Set the controller value before calling super.reset() to let
     // _handleControllerChanged suppress the change.
-    _effectiveController.text = widget.initialValue!;
+    _effectiveController.value = TextEditingValue(text: widget.initialValue ?? '');
     super.reset();
     _cupertinoTextFormFieldRow.onChanged?.call(_effectiveController.text);
   }

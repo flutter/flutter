@@ -45,6 +45,9 @@ void main() {
         extentOffset: delegate.query.length,
       ),
     );
+
+    delegate.query = '';
+    expect(textField.controller!.selection, TextSelection.collapsed(offset: 0));
   });
 
   testWidgets('Can open and close search', (WidgetTester tester) async {
