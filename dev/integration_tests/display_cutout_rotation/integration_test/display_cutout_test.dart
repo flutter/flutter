@@ -17,7 +17,6 @@ void main() {
       await moreReliableSetOrentations(tester, [DeviceOrientation.portraitUp]);
       // Load app widget.
       await tester.pumpWidget(const MyApp());
-      await tester.pumpAndSettle();
       BuildContext context = tester.element(find.byType(Text));
       List<DisplayFeature> displayFeatures = getCutouts(tester, context);
       // Test is expecting one cutout setup in the test harness.
@@ -37,9 +36,11 @@ void main() {
     });
 
     testWidgets('cutout should be on left in landscape left', (tester) async {
+      await moreReliableSetOrentations(tester, [
+        DeviceOrientation.landscapeLeft,
+      ]);
       // Load app widget.
       await tester.pumpWidget(const MyApp());
-      await moreReliableSetOrentations(tester, [DeviceOrientation.landscapeLeft]);
       BuildContext context = tester.element(find.byType(Text));
       // Verify that app code thinks there is a left cutout.
       List<DisplayFeature> displayFeatures = getCutouts(tester, context);
@@ -80,7 +81,9 @@ void main() {
             'cutout should start at the top, does the test device have a '
             'camera cutout or window inset?',
       );
-      await moreReliableSetOrentations(tester, [DeviceOrientation.landscapeLeft]);
+      await moreReliableSetOrentations(tester, [
+        DeviceOrientation.landscapeLeft,
+      ]);
       await tester.pumpWidget(widgetUnderTest);
 
       // Requery for display features after rotation.
@@ -103,16 +106,21 @@ void main() {
       // After each test reset to device perfered orientations to avoid
       // test pollution.
       SystemChrome.setPreferredOrientations([]);
+      // Give time for the change to take effect.
+      Future.delayed(const Duration(milliseconds: 500));
     });
   });
 }
 
 // Rotations have an async communication to engine which then has an async
 // communication to the android operating system.
-Future<void> moreReliableSetOrentations(WidgetTester tester, List<DeviceOrientation> orientations) async {
-  await tester.pumpAndSettle(const Duration(milliseconds: 5000));
+Future<void> moreReliableSetOrentations(
+  WidgetTester tester,
+  List<DeviceOrientation> orientations,
+) async {
   SystemChrome.setPreferredOrientations(orientations);
-  await tester.pumpAndSettle(const Duration(milliseconds: 5000));
+  // Manual testing had test flakes at 200ms.
+  await tester.pumpAndSettle(const Duration(milliseconds: 500));
 }
 
 List<DisplayFeature> getCutouts(WidgetTester tester, BuildContext context) {
