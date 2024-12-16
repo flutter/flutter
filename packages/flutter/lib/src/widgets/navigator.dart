@@ -3036,6 +3036,7 @@ class _RouteEntry extends RouteTransitionRecord {
     this.route, {
       required _RouteLifecycle initialState,
       required this.pageBased,
+      this.overlaysOnTop = false,
       this.restorationInformation,
     }) : assert(!pageBased || route.settings is Page),
          assert(
@@ -3061,6 +3062,7 @@ class _RouteEntry extends RouteTransitionRecord {
   final Route<dynamic> route;
   final _RestorationInformation? restorationInformation;
   final bool pageBased;
+  final bool overlaysOnTop;
 
   /// The limit this route entry will attempt to pop in the case of route being
   /// remove as a result of a page update.
@@ -4477,7 +4479,16 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       _disposeRouteEntry(entry, graceful: true);
     }
     if (rearrangeOverlay) {
-      overlay?.rearrange(_allRouteOverlayEntries);
+      _RouteEntry? onTop;
+      for (final _RouteEntry entry in _history) {
+        if (entry.overlaysOnTop) {
+          onTop = entry;
+        }
+      }
+      overlay?.rearrange(
+        _allRouteOverlayEntries,
+        below: onTop?.route.overlayEntries.last,
+      );
     }
     if (bucket != null) {
       _serializableHistory.update(_history);
@@ -4898,8 +4909,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///  * [restorablePush], which pushes a route that can be restored during
   ///    state restoration.
   @optionalTypeArgs
-  Future<T?> push<T extends Object?>(Route<T> route) {
-    _pushEntry(_RouteEntry(route, pageBased: false, initialState: _RouteLifecycle.push));
+  Future<T?> push<T extends Object?>(Route<T> route, {bool overlaysOnTop = false}) {
+    _pushEntry(_RouteEntry(route, pageBased: false, initialState: _RouteLifecycle.push, overlaysOnTop: overlaysOnTop));
     return route.popped;
   }
 

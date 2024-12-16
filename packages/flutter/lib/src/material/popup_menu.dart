@@ -1116,27 +1116,30 @@ Future<T?> showMenu<T>({
 
   final List<GlobalKey> menuItemKeys = List<GlobalKey>.generate(items.length, (int index) => GlobalKey());
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
-  return navigator.push(_PopupMenuRoute<T>(
-    position: position,
-    positionBuilder: positionBuilder,
-    items: items,
-    itemKeys: menuItemKeys,
-    initialValue: initialValue,
-    elevation: elevation,
-    shadowColor: shadowColor,
-    surfaceTintColor: surfaceTintColor,
-    semanticLabel: semanticLabel,
-    barrierLabel: MaterialLocalizations.of(context).menuDismissLabel,
-    shape: shape,
-    menuPadding: menuPadding,
-    color: color,
-    capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
-    constraints: constraints,
-    clipBehavior: clipBehavior,
-    settings: routeSettings,
-    popUpAnimationStyle: popUpAnimationStyle,
-    requestFocus: requestFocus,
-  ));
+  return navigator.push(
+    _PopupMenuRoute<T>(
+      position: position,
+      positionBuilder: positionBuilder,
+      items: items,
+      itemKeys: menuItemKeys,
+      initialValue: initialValue,
+      elevation: elevation,
+      shadowColor: shadowColor,
+      surfaceTintColor: surfaceTintColor,
+      semanticLabel: semanticLabel,
+      barrierLabel: MaterialLocalizations.of(context).menuDismissLabel,
+      shape: shape,
+      menuPadding: menuPadding,
+      color: color,
+      capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
+      constraints: constraints,
+      clipBehavior: clipBehavior,
+      settings: routeSettings,
+      popUpAnimationStyle: popUpAnimationStyle,
+      requestFocus: requestFocus,
+    ),
+    overlaysOnTop: true,
+  );
 }
 
 /// Signature for the callback invoked when a menu item is selected. The
