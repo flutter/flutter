@@ -27,6 +27,12 @@ INTERNAL NOTE
 
 ## Flutter 3.27 Changes
 
+### [3.27.1](https://github.com/flutter/flutter/releases/tag/3.27.1)
+
+- [flutter/160041](https://github.com/flutter/flutter/issues/160041) - [Impeller][Android] Disables Impeller on older Android devices.
+- [flutter/160206](https://github.com/flutter/flutter/issues/160206) - [Impeller][Android] Disables Android HardwareBuffer based swapchains on all devices.
+- [flutter/160208](https://github.com/flutter/flutter/issues/160208) - [iOS] Fixes an issue on iOS preventing the ability to tap web view links in some plugins.
+
 ### [3.27.0](https://github.com/flutter/flutter/releases/tag/3.27.0)
 Initial stable release.
 
