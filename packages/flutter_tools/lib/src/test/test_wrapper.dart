@@ -5,7 +5,9 @@
 import 'dart:async';
 
 import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
-import 'package:test_core/src/platform.dart' as hack show registerPlatformPlugin; // ignore: implementation_imports
+import 'package:test_core/src/platform.dart' // ignore: implementation_imports
+    as hack
+    show registerPlatformPlugin;
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 
 export 'package:test_api/backend.dart' show Runtime;
