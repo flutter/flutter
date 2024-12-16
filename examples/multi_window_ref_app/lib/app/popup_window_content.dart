@@ -28,52 +28,56 @@ class PopupWindowContent extends StatelessWidget {
             controller: controller),
         child: Scaffold(
             backgroundColor: Colors.transparent,
-            body: SingleChildScrollView(
-                child: Center(
-                    child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.secondary,
-                  ],
-                  stops: const [0.0, 1.0],
-                ),
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12.0),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Popup',
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.copyWith(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
+            body: SizedBox.expand(
+                child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Theme.of(context).colorScheme.primary,
+                          Theme.of(context).colorScheme.secondary,
+                        ],
+                        stops: const [0.0, 1.0],
                       ),
-                      const SizedBox(height: 20.0),
-                      ElevatedButton(
-                          onPressed: () {
-                            windowManagerModel.add(KeyedWindowController(
-                                parent: controller,
-                                controller: PopupWindowController()));
-                          },
-                          child: const Text('Another popup')),
-                      const SizedBox(height: 16.0),
-                      WindowControllerText(controller: controller)
-                    ],
-                  ),
-                ),
-              ),
-            )))));
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: SingleChildScrollView(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12.0),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Popup',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
+                                    ),
+                              ),
+                              const SizedBox(height: 20.0),
+                              ElevatedButton(
+                                  onPressed: () {
+                                    windowManagerModel.add(
+                                        KeyedWindowController(
+                                            parent: controller,
+                                            controller:
+                                                PopupWindowController()));
+                                  },
+                                  child: const Text('Another popup')),
+                              const SizedBox(height: 16.0),
+                              WindowControllerText(controller: controller)
+                            ],
+                          ),
+                        ),
+                      ),
+                    )))));
   }
 }
