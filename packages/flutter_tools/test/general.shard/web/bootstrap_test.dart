@@ -133,7 +133,7 @@ void main() {
   });
 
   test('generateMainModule sets rootDirectories', () {
-    String root = 'http://localhost:12345';
+    final String root = 'http://localhost:12345';
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
       nullAssertions: false,
