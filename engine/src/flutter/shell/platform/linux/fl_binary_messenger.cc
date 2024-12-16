@@ -155,21 +155,9 @@ static gboolean fl_binary_messenger_platform_message_cb(
     GBytes* message,
     const FlutterPlatformMessageResponseHandle* response_handle,
     void* user_data) {
-  FlBinaryMessengerImpl* self = FL_BINARY_MESSENGER_IMPL(user_data);
-
-  PlatformMessageHandler* handler = static_cast<PlatformMessageHandler*>(
-      g_hash_table_lookup(self->platform_message_handlers, channel));
-  if (handler == nullptr) {
-    return FALSE;
-  }
-
-  g_autoptr(FlBinaryMessengerResponseHandleImpl) handle =
-      fl_binary_messenger_response_handle_impl_new(self, response_handle);
-  handler->message_handler(FL_BINARY_MESSENGER(self), channel, message,
-                           FL_BINARY_MESSENGER_RESPONSE_HANDLE(handle),
-                           handler->message_handler_data);
-
-  return TRUE;
+  FlBinaryMessenger* self = FL_BINARY_MESSENGER(user_data);
+  return fl_binary_messenger_handle_message(self, channel, message,
+                                            response_handle);
 }
 
 static void fl_binary_messenger_impl_dispose(GObject* object) {
@@ -485,6 +473,28 @@ G_MODULE_EXPORT void fl_binary_messenger_set_warns_on_channel_overflow(
 
   return FL_BINARY_MESSENGER_GET_IFACE(self)->set_warns_on_channel_overflow(
       self, channel, warns);
+}
+
+gboolean fl_binary_messenger_handle_message(
+    FlBinaryMessenger* messenger,
+    const gchar* channel,
+    GBytes* message,
+    const FlutterPlatformMessageResponseHandle* response_handle) {
+  FlBinaryMessengerImpl* self = FL_BINARY_MESSENGER_IMPL(messenger);
+
+  PlatformMessageHandler* handler = static_cast<PlatformMessageHandler*>(
+      g_hash_table_lookup(self->platform_message_handlers, channel));
+  if (handler == nullptr) {
+    return FALSE;
+  }
+
+  g_autoptr(FlBinaryMessengerResponseHandleImpl) handle =
+      fl_binary_messenger_response_handle_impl_new(self, response_handle);
+  handler->message_handler(FL_BINARY_MESSENGER(self), channel, message,
+                           FL_BINARY_MESSENGER_RESPONSE_HANDLE(handle),
+                           handler->message_handler_data);
+
+  return TRUE;
 }
 
 void fl_binary_messenger_shutdown(FlBinaryMessenger* self) {

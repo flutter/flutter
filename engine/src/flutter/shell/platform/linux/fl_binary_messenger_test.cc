@@ -13,419 +13,369 @@
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_method_channel.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
-#include "flutter/shell/platform/linux/testing/fl_test.h"
-#include "flutter/shell/platform/linux/testing/mock_renderer.h"
 
-G_DECLARE_FINAL_TYPE(FlFakeBinaryMessengerResponseHandle,
-                     fl_fake_binary_messenger_response_handle,
-                     FL,
-                     FAKE_BINARY_MESSENGER_RESPONSE_HANDLE,
-                     FlBinaryMessengerResponseHandle)
-
-struct _FlFakeBinaryMessengerResponseHandle {
-  FlBinaryMessengerResponseHandle parent_instance;
-};
-
-G_DEFINE_TYPE(FlFakeBinaryMessengerResponseHandle,
-              fl_fake_binary_messenger_response_handle,
-              fl_binary_messenger_response_handle_get_type());
-
-static void fl_fake_binary_messenger_response_handle_class_init(
-    FlFakeBinaryMessengerResponseHandleClass* klass) {}
-
-static void fl_fake_binary_messenger_response_handle_init(
-    FlFakeBinaryMessengerResponseHandle* self) {}
-
-FlFakeBinaryMessengerResponseHandle*
-fl_fake_binary_messenger_response_handle_new() {
-  return FL_FAKE_BINARY_MESSENGER_RESPONSE_HANDLE(
-      g_object_new(fl_fake_binary_messenger_response_handle_get_type(), NULL));
-}
-
-G_DECLARE_FINAL_TYPE(FlFakeBinaryMessenger,
-                     fl_fake_binary_messenger,
-                     FL,
-                     FAKE_BINARY_MESSENGER,
-                     GObject)
-
-struct _FlFakeBinaryMessenger {
-  GObject parent_instance;
-
-  GMainLoop* loop;
-  GAsyncReadyCallback send_callback;
-  gpointer send_callback_user_data;
-  FlBinaryMessengerMessageHandler message_handler;
-  gpointer message_handler_user_data;
-};
-
-static void fl_fake_binary_messenger_iface_init(
-    FlBinaryMessengerInterface* iface);
-
-G_DEFINE_TYPE_WITH_CODE(
-    FlFakeBinaryMessenger,
-    fl_fake_binary_messenger,
-    G_TYPE_OBJECT,
-    G_IMPLEMENT_INTERFACE(fl_binary_messenger_get_type(),
-                          fl_fake_binary_messenger_iface_init))
-
-static void fl_fake_binary_messenger_class_init(
-    FlFakeBinaryMessengerClass* klass) {}
-
-static gboolean send_message_cb(gpointer user_data) {
-  FlFakeBinaryMessenger* self = FL_FAKE_BINARY_MESSENGER(user_data);
-
-  const char* text = "Marco!";
-  g_autoptr(GBytes) message = g_bytes_new(text, strlen(text));
-  self->message_handler(FL_BINARY_MESSENGER(self), "CHANNEL", message,
-                        FL_BINARY_MESSENGER_RESPONSE_HANDLE(
-                            fl_fake_binary_messenger_response_handle_new()),
-                        self->message_handler_user_data);
-
-  return FALSE;
-}
-
-static void set_message_handler_on_channel(
-    FlBinaryMessenger* messenger,
-    const gchar* channel,
-    FlBinaryMessengerMessageHandler handler,
-    gpointer user_data,
-    GDestroyNotify destroy_notify) {
-  FlFakeBinaryMessenger* self = FL_FAKE_BINARY_MESSENGER(messenger);
-
-  EXPECT_STREQ(channel, "CHANNEL");
-
-  // Send message.
-  self->message_handler = handler;
-  self->message_handler_user_data = user_data;
-  g_idle_add(send_message_cb, messenger);
-}
-
-static gboolean send_response(FlBinaryMessenger* messenger,
-                              FlBinaryMessengerResponseHandle* response_handle,
-                              GBytes* response,
-                              GError** error) {
-  FlFakeBinaryMessenger* self = FL_FAKE_BINARY_MESSENGER(messenger);
-
-  EXPECT_TRUE(FL_IS_FAKE_BINARY_MESSENGER_RESPONSE_HANDLE(response_handle));
-
-  g_autofree gchar* text =
-      g_strndup(static_cast<const gchar*>(g_bytes_get_data(response, nullptr)),
-                g_bytes_get_size(response));
-  EXPECT_STREQ(text, "Polo!");
-
-  g_main_loop_quit(self->loop);
-
-  return TRUE;
-}
-
-static gboolean send_ready_cb(gpointer user_data) {
-  FlFakeBinaryMessenger* self = FL_FAKE_BINARY_MESSENGER(user_data);
-
-  self->send_callback(G_OBJECT(self), NULL, self->send_callback_user_data);
-
-  return FALSE;
-}
-
-static void send_on_channel(FlBinaryMessenger* messenger,
-                            const gchar* channel,
-                            GBytes* message,
-                            GCancellable* cancellable,
-                            GAsyncReadyCallback callback,
-                            gpointer user_data) {
-  FlFakeBinaryMessenger* self = FL_FAKE_BINARY_MESSENGER(messenger);
-
-  EXPECT_STREQ(channel, "CHANNEL");
-  g_autofree gchar* text =
-      g_strndup(static_cast<const gchar*>(g_bytes_get_data(message, nullptr)),
-                g_bytes_get_size(message));
-  EXPECT_STREQ(text, "Marco!");
-
-  // Send response.
-  self->send_callback = callback;
-  self->send_callback_user_data = user_data;
-  g_idle_add(send_ready_cb, messenger);
-}
-
-static GBytes* send_on_channel_finish(FlBinaryMessenger* messenger,
-                                      GAsyncResult* result,
-                                      GError** error) {
-  const char* text = "Polo!";
-  return g_bytes_new(text, strlen(text));
-}
-
-static void resize_channel(FlBinaryMessenger* messenger,
-                           const gchar* channel,
-                           int64_t new_size) {
-  // Fake implementation. Do nothing.
-}
-
-static void set_warns_on_channel_overflow(FlBinaryMessenger* messenger,
-                                          const gchar* channel,
-                                          bool warns) {
-  // Fake implementation. Do nothing.
-}
-
-static void fl_fake_binary_messenger_iface_init(
-    FlBinaryMessengerInterface* iface) {
-  iface->set_message_handler_on_channel = set_message_handler_on_channel;
-  iface->send_response = send_response;
-  iface->send_on_channel = send_on_channel;
-  iface->send_on_channel_finish = send_on_channel_finish;
-  iface->resize_channel = resize_channel;
-  iface->set_warns_on_channel_overflow = set_warns_on_channel_overflow;
-}
-
-static void fl_fake_binary_messenger_init(FlFakeBinaryMessenger* self) {}
-
-static FlBinaryMessenger* fl_fake_binary_messenger_new(GMainLoop* loop) {
-  FlFakeBinaryMessenger* self = FL_FAKE_BINARY_MESSENGER(
-      g_object_new(fl_fake_binary_messenger_get_type(), NULL));
-  self->loop = loop;
-  return FL_BINARY_MESSENGER(self);
-}
-
-// Called when the message response is received in the FakeMessengerSend test.
-static void fake_response_cb(GObject* object,
-                             GAsyncResult* result,
-                             gpointer user_data) {
-  g_autoptr(GError) error = nullptr;
-  g_autoptr(GBytes) message = fl_binary_messenger_send_on_channel_finish(
-      FL_BINARY_MESSENGER(object), result, &error);
-  EXPECT_NE(message, nullptr);
-  EXPECT_EQ(error, nullptr);
-
-  g_autofree gchar* text =
-      g_strndup(static_cast<const gchar*>(g_bytes_get_data(message, nullptr)),
-                g_bytes_get_size(message));
-  EXPECT_STREQ(text, "Polo!");
-
-  g_main_loop_quit(static_cast<GMainLoop*>(user_data));
-}
-
-// Checks can make a fake messenger and send a message.
-TEST(FlBinaryMessengerTest, FakeMessengerSend) {
+// Checks can send a message.
+TEST(FlBinaryMessengerTest, Send) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
-  g_autoptr(FlBinaryMessenger) messenger = fl_fake_binary_messenger_new(loop);
-  EXPECT_TRUE(FL_IS_FAKE_BINARY_MESSENGER(messenger));
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
 
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+
+  FlutterDataCallback response_callback;
+  void* response_callback_user_data;
+  embedder_api->PlatformMessageCreateResponseHandle = MOCK_ENGINE_PROC(
+      PlatformMessageCreateResponseHandle,
+      ([&response_callback, &response_callback_user_data](
+           auto engine, FlutterDataCallback data_callback, void* user_data,
+           FlutterPlatformMessageResponseHandle** response_out) {
+        response_callback = data_callback;
+        response_callback_user_data = user_data;
+        return kSuccess;
+      }));
+  embedder_api->SendPlatformMessage = MOCK_ENGINE_PROC(
+      SendPlatformMessage,
+      ([&response_callback, &response_callback_user_data](
+           auto engine, const FlutterPlatformMessage* message) {
+        EXPECT_STREQ(message->channel, "test");
+        g_autofree gchar* text =
+            g_strndup(reinterpret_cast<const gchar*>(message->message),
+                      message->message_size);
+        EXPECT_STREQ(text, "Marco!");
+
+        const gchar* response = "Polo!";
+        response_callback(reinterpret_cast<const uint8_t*>(response),
+                          strlen(response), response_callback_user_data);
+
+        return kSuccess;
+      }));
+
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   const char* text = "Marco!";
   g_autoptr(GBytes) message = g_bytes_new(text, strlen(text));
-  fl_binary_messenger_send_on_channel(messenger, "CHANNEL", message, nullptr,
-                                      fake_response_cb, loop);
+  fl_binary_messenger_send_on_channel(
+      messenger, "test", message, nullptr,
+      [](GObject* object, GAsyncResult* result, gpointer user_data) {
+        g_autoptr(GError) error = nullptr;
+        g_autoptr(GBytes) message = fl_binary_messenger_send_on_channel_finish(
+            FL_BINARY_MESSENGER(object), result, &error);
+        EXPECT_NE(message, nullptr);
+        EXPECT_EQ(error, nullptr);
 
-  // Blocks here until fake_response_cb is called.
-  g_main_loop_run(loop);
-}
+        g_autofree gchar* text = g_strndup(
+            static_cast<const gchar*>(g_bytes_get_data(message, nullptr)),
+            g_bytes_get_size(message));
+        EXPECT_STREQ(text, "Polo!");
 
-// Called when a message is received in the FakeMessengerReceive test.
-static void fake_message_cb(FlBinaryMessenger* messenger,
-                            const gchar* channel,
-                            GBytes* message,
-                            FlBinaryMessengerResponseHandle* response_handle,
-                            gpointer user_data) {
-  EXPECT_STREQ(channel, "CHANNEL");
+        g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+      },
+      loop);
 
-  EXPECT_NE(message, nullptr);
-  g_autofree gchar* text =
-      g_strndup(static_cast<const gchar*>(g_bytes_get_data(message, nullptr)),
-                g_bytes_get_size(message));
-  EXPECT_STREQ(text, "Marco!");
-
-  const char* response_text = "Polo!";
-  g_autoptr(GBytes) response =
-      g_bytes_new(response_text, strlen(response_text));
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_binary_messenger_send_response(messenger, response_handle,
-                                                response, &error));
-  EXPECT_EQ(error, nullptr);
-}
-
-// Checks can make a fake messenger and receive a message.
-TEST(FlBinaryMessengerTest, FakeMessengerReceive) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlBinaryMessenger) messenger = fl_fake_binary_messenger_new(loop);
-  EXPECT_TRUE(FL_IS_FAKE_BINARY_MESSENGER(messenger));
-
-  fl_binary_messenger_set_message_handler_on_channel(
-      messenger, "CHANNEL", fake_message_cb, nullptr, nullptr);
-
-  // Blocks here until response is received in fake messenger.
   g_main_loop_run(loop);
 }
 
 // Checks sending nullptr for a message works.
-TEST(FlBinaryMessengerTest, SendNullptrMessage) {
-  g_autoptr(FlEngine) engine = make_mock_engine();
+TEST(FlBinaryMessengerTest, SendNullptr) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+
+  bool called = false;
+  embedder_api->SendPlatformMessage = MOCK_ENGINE_PROC(
+      SendPlatformMessage,
+      ([&called](auto engine, const FlutterPlatformMessage* message) {
+        called = true;
+
+        EXPECT_STREQ(message->channel, "test");
+        // Note we don't check message->message as it could be nullptr or a
+        // pointer to an buffer - either way it wouldn't be accessed.
+        EXPECT_EQ(message->message_size, static_cast<size_t>(0));
+
+        return kSuccess;
+      }));
+
   g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
-  fl_binary_messenger_send_on_channel(messenger, "test/echo", nullptr, nullptr,
+  fl_binary_messenger_send_on_channel(messenger, "test", nullptr, nullptr,
                                       nullptr, nullptr);
+  EXPECT_TRUE(called);
 }
 
 // Checks sending a zero length message works.
-TEST(FlBinaryMessengerTest, SendEmptyMessage) {
-  g_autoptr(FlEngine) engine = make_mock_engine();
+TEST(FlBinaryMessengerTest, SendEmpty) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+
+  bool called = false;
+  embedder_api->SendPlatformMessage = MOCK_ENGINE_PROC(
+      SendPlatformMessage,
+      ([&called](auto engine, const FlutterPlatformMessage* message) {
+        called = true;
+
+        EXPECT_STREQ(message->channel, "test");
+        EXPECT_EQ(message->message_size, static_cast<size_t>(0));
+
+        return kSuccess;
+      }));
   g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   g_autoptr(GBytes) message = g_bytes_new(nullptr, 0);
-  fl_binary_messenger_send_on_channel(messenger, "test/echo", message, nullptr,
+  fl_binary_messenger_send_on_channel(messenger, "test", message, nullptr,
                                       nullptr, nullptr);
-}
-
-// Called when the message response is received in the SendMessage test.
-static void echo_response_cb(GObject* object,
-                             GAsyncResult* result,
-                             gpointer user_data) {
-  g_autoptr(GError) error = nullptr;
-  g_autoptr(GBytes) message = fl_binary_messenger_send_on_channel_finish(
-      FL_BINARY_MESSENGER(object), result, &error);
-  EXPECT_NE(message, nullptr);
-  EXPECT_EQ(error, nullptr);
-
-  g_autofree gchar* text =
-      g_strndup(static_cast<const gchar*>(g_bytes_get_data(message, nullptr)),
-                g_bytes_get_size(message));
-  EXPECT_STREQ(text, "Hello World!");
-
-  g_main_loop_quit(static_cast<GMainLoop*>(user_data));
-}
-
-// Checks sending a message works.
-TEST(FlBinaryMessengerTest, SendMessage) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlEngine) engine = make_mock_engine();
-  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
-  const char* text = "Hello World!";
-  g_autoptr(GBytes) message = g_bytes_new(text, strlen(text));
-  fl_binary_messenger_send_on_channel(messenger, "test/echo", message, nullptr,
-                                      echo_response_cb, loop);
-
-  // Blocks here until echo_response_cb is called.
-  g_main_loop_run(loop);
-}
-
-// Called when the message response is received in the NullptrResponse test.
-static void nullptr_response_cb(GObject* object,
-                                GAsyncResult* result,
-                                gpointer user_data) {
-  g_autoptr(GError) error = nullptr;
-  g_autoptr(GBytes) message = fl_binary_messenger_send_on_channel_finish(
-      FL_BINARY_MESSENGER(object), result, &error);
-  EXPECT_NE(message, nullptr);
-  EXPECT_EQ(error, nullptr);
-
-  EXPECT_EQ(g_bytes_get_size(message), static_cast<gsize>(0));
-
-  g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+  EXPECT_TRUE(called);
 }
 
 // Checks the engine returning a nullptr message work.
 TEST(FlBinaryMessengerTest, NullptrResponse) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
-  g_autoptr(FlEngine) engine = make_mock_engine();
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+
+  FlutterDataCallback response_callback;
+  void* response_callback_user_data;
+  embedder_api->PlatformMessageCreateResponseHandle = MOCK_ENGINE_PROC(
+      PlatformMessageCreateResponseHandle,
+      ([&response_callback, &response_callback_user_data](
+           auto engine, FlutterDataCallback data_callback, void* user_data,
+           FlutterPlatformMessageResponseHandle** response_out) {
+        response_callback = data_callback;
+        response_callback_user_data = user_data;
+        return kSuccess;
+      }));
+  embedder_api->SendPlatformMessage = MOCK_ENGINE_PROC(
+      SendPlatformMessage,
+      ([&response_callback, &response_callback_user_data](
+           auto engine, const FlutterPlatformMessage* message) {
+        EXPECT_STREQ(message->channel, "test");
+        g_autofree gchar* text =
+            g_strndup(reinterpret_cast<const gchar*>(message->message),
+                      message->message_size);
+        EXPECT_STREQ(text, "Hello World!");
+
+        response_callback(nullptr, 0, response_callback_user_data);
+
+        return kSuccess;
+      }));
+
   g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   const char* text = "Hello World!";
   g_autoptr(GBytes) message = g_bytes_new(text, strlen(text));
-  fl_binary_messenger_send_on_channel(messenger, "test/nullptr-response",
-                                      message, nullptr, nullptr_response_cb,
-                                      loop);
+  fl_binary_messenger_send_on_channel(
+      messenger, "test", message, nullptr,
+      [](GObject* object, GAsyncResult* result, gpointer user_data) {
+        g_autoptr(GError) error = nullptr;
+        g_autoptr(GBytes) message = fl_binary_messenger_send_on_channel_finish(
+            FL_BINARY_MESSENGER(object), result, &error);
+        EXPECT_NE(message, nullptr);
+        EXPECT_EQ(error, nullptr);
 
-  // Blocks here until nullptr_response_cb is called.
+        EXPECT_EQ(g_bytes_get_size(message), static_cast<gsize>(0));
+
+        g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+      },
+      loop);
+
   g_main_loop_run(loop);
-}
-
-// Called when the message response is received in the SendFailure test.
-static void failure_response_cb(GObject* object,
-                                GAsyncResult* result,
-                                gpointer user_data) {
-  g_autoptr(GError) error = nullptr;
-  g_autoptr(GBytes) message = fl_binary_messenger_send_on_channel_finish(
-      FL_BINARY_MESSENGER(object), result, &error);
-  EXPECT_EQ(message, nullptr);
-  EXPECT_NE(error, nullptr);
-
-  g_main_loop_quit(static_cast<GMainLoop*>(user_data));
 }
 
 // Checks the engine reporting a send failure is handled.
 TEST(FlBinaryMessengerTest, SendFailure) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
-  g_autoptr(FlEngine) engine = make_mock_engine();
-  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
-  fl_binary_messenger_send_on_channel(messenger, "test/failure", nullptr,
-                                      nullptr, failure_response_cb, loop);
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
 
-  // Blocks here until failure_response_cb is called.
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+
+  embedder_api->SendPlatformMessage =
+      MOCK_ENGINE_PROC(SendPlatformMessage,
+                       ([](auto engine, const FlutterPlatformMessage* message) {
+                         EXPECT_STREQ(message->channel, "test");
+                         return kInternalInconsistency;
+                       }));
+
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
+  fl_binary_messenger_send_on_channel(
+      messenger, "test", nullptr, nullptr,
+      [](GObject* object, GAsyncResult* result, gpointer user_data) {
+        g_autoptr(GError) error = nullptr;
+        g_autoptr(GBytes) message = fl_binary_messenger_send_on_channel_finish(
+            FL_BINARY_MESSENGER(object), result, &error);
+        EXPECT_EQ(message, nullptr);
+        EXPECT_NE(error, nullptr);
+        EXPECT_STREQ(error->message, "Failed to send platform messages");
+
+        g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+      },
+      loop);
+
   g_main_loop_run(loop);
 }
 
-// Called when a message is received from the engine in the ReceiveMessage test.
-static void message_cb(FlBinaryMessenger* messenger,
-                       const gchar* channel,
-                       GBytes* message,
-                       FlBinaryMessengerResponseHandle* response_handle,
-                       gpointer user_data) {
-  EXPECT_NE(message, nullptr);
-  g_autofree gchar* text =
-      g_strndup(static_cast<const gchar*>(g_bytes_get_data(message, nullptr)),
-                g_bytes_get_size(message));
-  EXPECT_STREQ(text, "Marco!");
+// Checks can receive a message.
+TEST(FlBinaryMessengerTest, Receive) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
 
-  const char* response_text = "Polo!";
-  g_autoptr(GBytes) response =
-      g_bytes_new(response_text, strlen(response_text));
   g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_binary_messenger_send_response(messenger, response_handle,
-                                                response, &error));
+  EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
+
+  bool called = false;
+  embedder_api->SendPlatformMessageResponse = MOCK_ENGINE_PROC(
+      SendPlatformMessageResponse,
+      ([&called](auto engine,
+                 const FlutterPlatformMessageResponseHandle* handle,
+                 const uint8_t* data, size_t data_length) {
+        called = true;
+
+        int fake_handle = *reinterpret_cast<const int*>(handle);
+        EXPECT_EQ(fake_handle, 42);
+
+        g_autofree gchar* text =
+            g_strndup(reinterpret_cast<const gchar*>(data), data_length);
+        EXPECT_STREQ(text, "Polo!");
+
+        return kSuccess;
+      }));
+
+  FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(engine);
+
+  // Listen for message.
+  fl_binary_messenger_set_message_handler_on_channel(
+      messenger, "test",
+      [](FlBinaryMessenger* messenger, const gchar* channel, GBytes* message,
+         FlBinaryMessengerResponseHandle* response_handle, gpointer user_data) {
+        g_autofree gchar* text = g_strndup(
+            static_cast<const gchar*>(g_bytes_get_data(message, nullptr)),
+            g_bytes_get_size(message));
+        EXPECT_STREQ(text, "Marco!");
+
+        const char* response_text = "Polo!";
+        g_autoptr(GBytes) response =
+            g_bytes_new(response_text, strlen(response_text));
+        g_autoptr(GError) error = nullptr;
+        EXPECT_TRUE(fl_binary_messenger_send_response(
+            messenger, response_handle, response, &error));
+        EXPECT_EQ(error, nullptr);
+      },
+      nullptr, nullptr);
+
+  // Send message from engine.
+  const char* message_text = "Marco!";
+  g_autoptr(GBytes) message = g_bytes_new(message_text, strlen(message_text));
+  int fake_handle = 42;
+  fl_binary_messenger_handle_message(
+      messenger, "test", message,
+      reinterpret_cast<const FlutterPlatformMessageResponseHandle*>(
+          &fake_handle));
+
+  EXPECT_TRUE(called);
 }
 
-// Called when a the test engine notifies us what response we sent in the
-// ReceiveMessage test.
-static void response_cb(FlBinaryMessenger* messenger,
-                        const gchar* channel,
-                        GBytes* message,
-                        FlBinaryMessengerResponseHandle* response_handle,
-                        gpointer user_data) {
-  EXPECT_NE(message, nullptr);
-  g_autofree gchar* text =
-      g_strndup(static_cast<const gchar*>(g_bytes_get_data(message, nullptr)),
-                g_bytes_get_size(message));
-  EXPECT_STREQ(text, "Polo!");
-
-  fl_binary_messenger_send_response(messenger, response_handle, nullptr,
-                                    nullptr);
-
-  g_main_loop_quit(static_cast<GMainLoop*>(user_data));
-}
-
-// Checks the shell able to receive and respond to messages from the engine.
-TEST(FlBinaryMessengerTest, ReceiveMessage) {
+// Checks receieved messages can be responded to on a thread.
+TEST(FlBinaryMessengerTest, ReceiveRespondThread) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
 
-  g_autoptr(FlEngine) engine = make_mock_engine();
-  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
 
-  // Listen for messages from the engine.
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+
+  embedder_api->SendPlatformMessageResponse = MOCK_ENGINE_PROC(
+      SendPlatformMessageResponse,
+      ([&loop](auto engine, const FlutterPlatformMessageResponseHandle* handle,
+               const uint8_t* data, size_t data_length) {
+        int fake_handle = *reinterpret_cast<const int*>(handle);
+        EXPECT_EQ(fake_handle, 42);
+
+        g_autofree gchar* text =
+            g_strndup(reinterpret_cast<const gchar*>(data), data_length);
+        EXPECT_STREQ(text, "Polo!");
+
+        g_main_loop_quit(loop);
+
+        return kSuccess;
+      }));
+
+  FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(engine);
+
+  // Listen for message.
   fl_binary_messenger_set_message_handler_on_channel(
-      messenger, "test/messages", message_cb, nullptr, nullptr);
+      messenger, "test",
+      [](FlBinaryMessenger* messenger, const gchar* channel, GBytes* message,
+         FlBinaryMessengerResponseHandle* response_handle, gpointer user_data) {
+        g_autofree gchar* text = g_strndup(
+            static_cast<const gchar*>(g_bytes_get_data(message, nullptr)),
+            g_bytes_get_size(message));
+        EXPECT_STREQ(text, "Marco!");
 
-  // Listen for response from the engine.
-  fl_binary_messenger_set_message_handler_on_channel(
-      messenger, "test/responses", response_cb, loop, nullptr);
+        // Respond on a thread.
+        typedef struct {
+          FlBinaryMessenger* messenger;
+          FlBinaryMessengerResponseHandle* response_handle;
+        } ThreadData;
+        ThreadData* data = g_new0(ThreadData, 1);
+        data->messenger =
+            static_cast<FlBinaryMessenger*>(g_object_ref(messenger));
+        data->response_handle = static_cast<FlBinaryMessengerResponseHandle*>(
+            g_object_ref(response_handle));
+        g_autoptr(GThread) thread = g_thread_new(
+            nullptr,
+            [](gpointer user_data) {
+              g_autofree ThreadData* data = static_cast<ThreadData*>(user_data);
+              g_autoptr(FlBinaryMessenger) messenger = data->messenger;
+              g_autoptr(FlBinaryMessengerResponseHandle) response_handle =
+                  data->response_handle;
 
-  // Trigger the engine to send a message.
-  const char* text = "Marco!";
-  g_autoptr(GBytes) message = g_bytes_new(text, strlen(text));
-  fl_binary_messenger_send_on_channel(messenger, "test/send-message", message,
-                                      nullptr, nullptr, nullptr);
+              const char* response_text = "Polo!";
+              g_autoptr(GBytes) response =
+                  g_bytes_new(response_text, strlen(response_text));
+              g_autoptr(GError) error = nullptr;
+              EXPECT_TRUE(fl_binary_messenger_send_response(
+                  data->messenger, data->response_handle, response, &error));
+              EXPECT_EQ(error, nullptr);
 
-  // Blocks here until response_cb is called.
+              return static_cast<gpointer>(nullptr);
+            },
+            data);
+      },
+      nullptr, nullptr);
+
+  // Send message from engine.
+  const char* message_text = "Marco!";
+  g_autoptr(GBytes) message = g_bytes_new(message_text, strlen(message_text));
+  int fake_handle = 42;
+  fl_binary_messenger_handle_message(
+      messenger, "test", message,
+      reinterpret_cast<const FlutterPlatformMessageResponseHandle*>(
+          &fake_handle));
+
   g_main_loop_run(loop);
 }
 
@@ -434,7 +384,8 @@ TEST(FlBinaryMessengerTest, ReceiveMessage) {
 
 // Checks if the 'resize' command is sent and is well-formed.
 TEST(FlBinaryMessengerTest, ResizeChannel) {
-  g_autoptr(FlEngine) engine = make_mock_engine();
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
   FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
 
   bool called = false;
@@ -481,7 +432,8 @@ TEST(FlBinaryMessengerTest, ResizeChannel) {
 
 // Checks if the 'overflow' command is sent and is well-formed.
 TEST(FlBinaryMessengerTest, WarnsOnOverflowChannel) {
-  g_autoptr(FlEngine) engine = make_mock_engine();
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
   FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
 
   bool called = false;
@@ -526,26 +478,21 @@ TEST(FlBinaryMessengerTest, WarnsOnOverflowChannel) {
   EXPECT_TRUE(called);
 }
 
-static gboolean quit_main_loop_cb(gpointer user_data) {
-  g_main_loop_quit(static_cast<GMainLoop*>(user_data));
-  return FALSE;
-}
-
 // Checks if error returned when invoking a command on the control channel
 // are handled.
 TEST(FlBinaryMessengerTest, ControlChannelErrorResponse) {
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-  g_autoptr(FlEngine) engine = make_mock_engine();
-  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
 
   g_autoptr(GError) error = nullptr;
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
 
-  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
-
+  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
   bool called = false;
-
   FlutterEngineSendPlatformMessageFnPtr old_handler =
       embedder_api->SendPlatformMessage;
   embedder_api->SendPlatformMessage = MOCK_ENGINE_PROC(
@@ -561,7 +508,12 @@ TEST(FlBinaryMessengerTest, ControlChannelErrorResponse) {
 
         // Register a callback to quit the main loop when binary messenger work
         // ends.
-        g_idle_add(quit_main_loop_cb, loop);
+        g_idle_add(
+            [](gpointer user_data) {
+              g_main_loop_quit(static_cast<GMainLoop*>(user_data));
+              return FALSE;
+            },
+            loop);
 
         // Simulates an internal error.
         return kInvalidArguments;
@@ -572,102 +524,32 @@ TEST(FlBinaryMessengerTest, ControlChannelErrorResponse) {
 
   EXPECT_TRUE(called);
 
-  // Blocks here until quit_main_loop_cb is called.
   g_main_loop_run(loop);
 }
 
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)
 
-struct RespondsOnBackgroundThreadInfo {
-  FlBinaryMessenger* messenger;
-  FlBinaryMessengerResponseHandle* response_handle;
-  GMainLoop* loop;
-};
-
-static gboolean cleanup_responds_on_background_thread_info(gpointer user_data) {
-  RespondsOnBackgroundThreadInfo* info =
-      static_cast<RespondsOnBackgroundThreadInfo*>(user_data);
-  GMainLoop* loop = info->loop;
-
-  g_object_unref(info->messenger);
-  g_object_unref(info->response_handle);
-  free(info);
-
-  g_main_loop_quit(static_cast<GMainLoop*>(loop));
-
-  return G_SOURCE_REMOVE;
-}
-
-static void* response_from_thread_main(void* user_data) {
-  RespondsOnBackgroundThreadInfo* info =
-      static_cast<RespondsOnBackgroundThreadInfo*>(user_data);
-
-  fl_binary_messenger_send_response(info->messenger, info->response_handle,
-                                    nullptr, nullptr);
-
-  g_idle_add(cleanup_responds_on_background_thread_info, info);
-
-  return nullptr;
-}
-
-static void response_from_thread_cb(
-    FlBinaryMessenger* messenger,
-    const gchar* channel,
-    GBytes* message,
-    FlBinaryMessengerResponseHandle* response_handle,
-    gpointer user_data) {
-  EXPECT_NE(message, nullptr);
-  pthread_t thread;
-  RespondsOnBackgroundThreadInfo* info =
-      static_cast<RespondsOnBackgroundThreadInfo*>(
-          malloc(sizeof(RespondsOnBackgroundThreadInfo)));
-  info->messenger = FL_BINARY_MESSENGER(g_object_ref(messenger));
-  info->response_handle =
-      FL_BINARY_MESSENGER_RESPONSE_HANDLE(g_object_ref(response_handle));
-  info->loop = static_cast<GMainLoop*>(user_data);
-  EXPECT_EQ(0,
-            pthread_create(&thread, nullptr, &response_from_thread_main, info));
-}
-
-TEST(FlBinaryMessengerTest, RespondOnBackgroundThread) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlEngine) engine = make_mock_engine();
-  g_autoptr(FlBinaryMessenger) messenger = fl_binary_messenger_new(engine);
-
-  // Listen for messages from the engine.
-  fl_binary_messenger_set_message_handler_on_channel(
-      messenger, "test/messages", message_cb, nullptr, nullptr);
-
-  // Listen for response from the engine.
-  fl_binary_messenger_set_message_handler_on_channel(
-      messenger, "test/responses", response_from_thread_cb, loop, nullptr);
-
-  // Trigger the engine to send a message.
-  const char* text = "Marco!";
-  g_autoptr(GBytes) message = g_bytes_new(text, strlen(text));
-  fl_binary_messenger_send_on_channel(messenger, "test/send-message", message,
-                                      nullptr, nullptr, nullptr);
-
-  // Blocks here until response_cb is called.
-  g_main_loop_run(loop);
-}
-
-static void kill_handler_notify_cb(gpointer was_called) {
-  *static_cast<gboolean*>(was_called) = TRUE;
-}
-
 TEST(FlBinaryMessengerTest, DeletingEngineClearsHandlers) {
-  FlEngine* engine = make_mock_engine();
-  FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(engine);
-  gboolean was_killed = FALSE;
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
 
-  // Listen for messages from the engine.
-  fl_binary_messenger_set_message_handler_on_channel(messenger, "test/messages",
-                                                     message_cb, &was_killed,
-                                                     kill_handler_notify_cb);
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+
+  FlBinaryMessenger* messenger = fl_engine_get_binary_messenger(engine);
+
+  // Add handler to check the destroy_notify is called.
+  gboolean destroy_notify_called = FALSE;
+  fl_binary_messenger_set_message_handler_on_channel(
+      messenger, "test",
+      [](FlBinaryMessenger* messenger, const gchar* channel, GBytes* message,
+         FlBinaryMessengerResponseHandle* response_handle,
+         gpointer user_data) {},
+      &destroy_notify_called,
+      [](gpointer user_data) { *static_cast<gboolean*>(user_data) = TRUE; });
 
   g_clear_object(&engine);
 
-  ASSERT_TRUE(was_killed);
+  ASSERT_TRUE(destroy_notify_called);
 }
