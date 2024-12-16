@@ -1664,6 +1664,7 @@ class CompileSwiftUITest {
       '-sdk',
       'iphoneos',
       '-allowProvisioningUpdates',
+      'CODE_SIGNING_ALLOWED=NO',
       '-archivePath',
       '$testDirectory/hello_world_swiftui',
       'archive'
