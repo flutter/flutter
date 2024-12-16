@@ -18,7 +18,7 @@ void main() {
     // "com.android.internal.display.cutout.emulation.tall".
     testWidgets('cutout should be on top in portrait mode', (tester) async {
       // Force rotation
-      await moreReliableSetOrentations(tester, [DeviceOrientation.portraitUp]);
+      await moreReliableSetOrentations(tester, DeviceOrientation.portraitUp);
       // Load app widget.
       await tester.pumpWidget(const MyApp());
       BuildContext context = tester.element(find.byType(Text));
@@ -40,9 +40,7 @@ void main() {
     });
 
     testWidgets('cutout should be on left in landscape left', (tester) async {
-      await moreReliableSetOrentations(tester, [
-        DeviceOrientation.landscapeLeft,
-      ]);
+      await moreReliableSetOrentations(tester, DeviceOrientation.landscapeLeft);
       // Load app widget.
       await tester.pumpWidget(const MyApp());
       BuildContext context = tester.element(find.byType(Text));
@@ -65,7 +63,7 @@ void main() {
     });
 
     testWidgets('cutout handles rotation', (tester) async {
-      await moreReliableSetOrentations(tester, [DeviceOrientation.portraitUp]);
+      await moreReliableSetOrentations(tester, DeviceOrientation.portraitUp);
       const widgetUnderTest = MyApp();
       // Load app widget.
       await tester.pumpWidget(widgetUnderTest);
@@ -85,9 +83,7 @@ void main() {
             'cutout should start at the top, does the test device have a '
             'camera cutout or window inset?',
       );
-      await moreReliableSetOrentations(tester, [
-        DeviceOrientation.landscapeLeft,
-      ]);
+      await moreReliableSetOrentations(tester, DeviceOrientation.landscapeLeft);
       await tester.pumpWidget(widgetUnderTest);
 
       // Requery for display features after rotation.
@@ -110,21 +106,39 @@ void main() {
       // After each test reset to device perfered orientations to avoid
       // test pollution.
       SystemChrome.setPreferredOrientations([]);
-      // Give time for the change to take effect.
-      Future.delayed(const Duration(milliseconds: 500));
     });
   });
 }
 
-// Rotations have an async communication to engine which then has an async
-// communication to the android operating system.
+/*
+ * Force rotation then poll to ensure rotation has happened.
+ *
+ * Rotations have an async communication to engine which then has an async
+ * communication to the android operating system.
+ */
 Future<void> moreReliableSetOrentations(
   WidgetTester tester,
-  List<DeviceOrientation> orientations,
+  DeviceOrientation orientation,
 ) async {
-  SystemChrome.setPreferredOrientations(orientations);
-  // Manual testing had test flakes at 200ms.
-  await tester.pumpAndSettle(const Duration(milliseconds: 500));
+  SystemChrome.setPreferredOrientations([orientation]);
+  Orientation expectedOrientation;
+  switch (orientation) {
+    case DeviceOrientation.portraitUp:
+    case DeviceOrientation.portraitDown:
+      expectedOrientation = Orientation.portrait;
+      break;
+    case DeviceOrientation.landscapeRight:
+    case DeviceOrientation.landscapeLeft:
+      expectedOrientation = Orientation.landscape;
+      break;
+  }
+  do {
+    BuildContext context = tester.element(find.byType(Text));
+    if (expectedOrientation == MediaQuery.of(context).orientation) {
+      break;
+    }
+    await tester.pumpAndSettle();
+  } while (true);
 }
 
 List<DisplayFeature> getCutouts(WidgetTester tester, BuildContext context) {
