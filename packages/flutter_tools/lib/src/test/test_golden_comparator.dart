@@ -5,50 +5,74 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../convert.dart';
-import '../web/compile.dart';
 import 'test_compiler.dart';
 import 'test_config.dart';
 
-/// Helper class to start golden file comparison in a separate process.
+/// Runs a [GoldenFileComparator] (that may depend on `dart:ui`) in a `flutter_tester`.
 ///
-/// The golden file comparator is configured using flutter_test_config.dart and that
-/// file can contain arbitrary Dart code that depends on dart:ui. Thus it has to
-/// be executed in a `flutter_tester` environment. This helper class generates a
-/// Dart file configured with flutter_test_config.dart to perform the comparison
-/// of golden files.
-class TestGoldenComparator {
+/// The [`goldenFileComparator`](https://api.flutter.dev/flutter/flutter_test/goldenFileComparator.html)
+/// is configured using [`flutter_test_config.dart`](https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html)
+/// and that file often contains arbitrary Dart code that depends on [`dart:ui`](https://api.flutter.dev/flutter/dart-ui/dart-ui-library.html).
+///
+/// This proxying comparator creates a minimal application that runs on a
+/// `flutter_tester` instance, runs a golden comparison, and then returns the
+/// results through [compareGoldens].
+///
+/// ## Example
+///
+/// ```dart
+/// final comparator = TestGoldenComparator(
+///   flutterTesterBinPath: '/path/to/flutter_tester',
+///   logger: ...,
+///   fileSystem: ...,
+///   processManager: ...,
+/// )
+///
+/// final result = await comparator.compare(testUri, bytes, goldenKey);
+/// ```
+final class TestGoldenComparator {
   /// Creates a [TestGoldenComparator] instance.
-  TestGoldenComparator(this.shellPath, this.compilerFactory, {
+  TestGoldenComparator({
+    required String flutterTesterBinPath,
+    required TestCompiler Function() compilerFactory,
     required Logger logger,
     required FileSystem fileSystem,
     required ProcessManager processManager,
-    required this.webRenderer,
-  }) : tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform.'),
+    Map<String, String> environment = const <String, String>{},
+  }) : _tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform.'),
+       _flutterTesterBinPath = flutterTesterBinPath,
+       _compilerFactory = compilerFactory,
        _logger = logger,
        _fileSystem = fileSystem,
-       _processManager = processManager;
+       _processManager = processManager,
+       _environment = environment;
 
-  final String? shellPath;
-  final Directory tempDir;
-  final TestCompiler Function() compilerFactory;
+  final String _flutterTesterBinPath;
+  final Directory _tempDir;
   final Logger _logger;
   final FileSystem _fileSystem;
   final ProcessManager _processManager;
-  final WebRendererMode webRenderer;
+  final Map<String, String> _environment;
 
-  TestCompiler? _compiler;
+  final TestCompiler Function() _compilerFactory;
+  late final TestCompiler _compiler = _compilerFactory();
+
   TestGoldenComparatorProcess? _previousComparator;
   Uri? _previousTestUri;
 
+  /// Closes the comparator.
+  ///
+  /// Any operation in process is terminated and the comparator can no longer be used.
   Future<void> close() async {
-    tempDir.deleteSync(recursive: true);
-    await _compiler?.dispose();
+    _tempDir.deleteSync(recursive: true);
+    await _compiler.dispose();
     await _previousComparator?.close();
   }
 
@@ -73,33 +97,46 @@ class TestGoldenComparator {
 
   Future<Process?> _startProcess(String testBootstrap) async {
     // Prepare the Dart file that will talk to us and start the test.
-    final File listenerFile = (await tempDir.createTemp('listener')).childFile('listener.dart');
+    final File listenerFile = (await _tempDir.createTemp('listener')).childFile('listener.dart');
     await listenerFile.writeAsString(testBootstrap);
 
-    // Lazily create the compiler
-    _compiler = _compiler ?? compilerFactory();
-    final String? output = await _compiler!.compile(listenerFile.uri);
+    final String? output = await _compiler.compile(listenerFile.uri);
     if (output == null) {
       return null;
     }
     final List<String> command = <String>[
-      shellPath!,
+      _flutterTesterBinPath,
       '--disable-vm-service',
       '--non-interactive',
       '--packages=${_fileSystem.path.join('.dart_tool', 'package_config.json')}',
       output,
     ];
 
-    final Map<String, String> environment = <String, String>{
-      // Chrome is the only supported browser currently.
-      'FLUTTER_TEST_BROWSER': 'chrome',
-      'FLUTTER_WEB_RENDERER': webRenderer.name,
-    };
-    return _processManager.start(command, environment: environment);
+    return _processManager.start(command, environment: _environment);
   }
 
-  Future<String?> compareGoldens(Uri testUri, Uint8List bytes, Uri goldenKey, bool? updateGoldens) async {
-    final File imageFile = await (await tempDir.createTemp('image')).childFile('image').writeAsBytes(bytes);
+  /// Compares the golden file designated by [goldenKey], relative to [testUri], to the provide [bytes].
+  Future<TestGoldenComparison> compare(Uri testUri, Uint8List bytes, Uri goldenKey) async {
+    final String? result = await _compareGoldens(testUri, bytes, goldenKey, false);
+    return switch (result) {
+      null => const TestGoldenComparisonDone(matched: true),
+      'does not match' => const TestGoldenComparisonDone(matched: false),
+      final String error => TestGoldenComparisonError(error: error),
+    };
+  }
+
+  /// Updates the golden file designated by [goldenKey], relative to [testUri], to the provide [bytes].
+  Future<TestGoldenUpdate> update(Uri testUri, Uint8List bytes, Uri goldenKey) async {
+    final String? result = await _compareGoldens(testUri, bytes, goldenKey, true);
+    return switch (result) {
+      null => const TestGoldenUpdateDone(),
+      final String error => TestGoldenUpdateError(error: error),
+    };
+  }
+
+  @useResult
+  Future<String?> _compareGoldens(Uri testUri, Uint8List bytes, Uri goldenKey, bool? updateGoldens) async {
+    final File imageFile = await (await _tempDir.createTemp('image')).childFile('image').writeAsBytes(bytes);
     final TestGoldenComparatorProcess? process = await _processForTestFile(testUri);
     if (process == null) {
       return 'process was null';
@@ -109,6 +146,105 @@ class TestGoldenComparator {
 
     final Map<String, dynamic> result = await process.getResponse();
     return (result['success'] as bool) ? null : ((result['message'] as String?) ?? 'does not match');
+  }
+}
+
+/// The result of [TestGoldenComparator.compare].
+///
+/// See also:
+///
+///   * [TestGoldenComparisonDone]
+///   * [TestGoldenComparisonError]
+@immutable
+sealed class TestGoldenComparison {}
+
+/// A successful comparison that resulted in [matched].
+final class TestGoldenComparisonDone implements TestGoldenComparison {
+  const TestGoldenComparisonDone({required this.matched});
+
+  /// Whether the bytes matched the file specified.
+  ///
+  /// A value of `true` is a match, and `false` is a "did not match".
+  final bool matched;
+
+  @override
+  bool operator ==(Object other) {
+    return other is TestGoldenComparisonDone && matched == other.matched;
+  }
+
+  @override
+  int get hashCode => matched.hashCode;
+
+  @override
+  String toString() {
+    return 'TestGoldenComparisonDone(matched: $matched)';
+  }
+}
+
+/// A failed comparison that could not be completed for a reason in [error].
+final class TestGoldenComparisonError implements TestGoldenComparison {
+  const TestGoldenComparisonError({required this.error});
+
+  /// Why the comparison failed, which should be surfaced to the user as an error.
+  final String error;
+
+  @override
+  bool operator ==(Object other) {
+    return other is TestGoldenComparisonError && error == other.error;
+  }
+
+  @override
+  int get hashCode => error.hashCode;
+
+  @override
+  String toString() {
+    return 'TestGoldenComparisonError(error: $error)';
+  }
+}
+
+/// The result of [TestGoldenComparator.update].
+///
+/// See also:
+///
+///   * [TestGoldenUpdateDone]
+///   * [TestGoldenUpdateError]
+@immutable
+sealed class TestGoldenUpdate {}
+
+/// A successful update.
+final class TestGoldenUpdateDone implements TestGoldenUpdate {
+  const TestGoldenUpdateDone();
+
+  @override
+  bool operator ==(Object other) => other is TestGoldenUpdateDone;
+
+  @override
+  int get hashCode => (TestGoldenUpdateDone).hashCode;
+
+  @override
+  String toString() {
+    return 'TestGoldenUpdateDone()';
+  }
+}
+
+/// A failed update that could not be completed for a reason in [error].
+final class TestGoldenUpdateError implements TestGoldenUpdate {
+  const TestGoldenUpdateError({required this.error});
+
+  /// Why the comparison failed, which should be surfaced to the user as an error.
+  final String error;
+
+  @override
+  bool operator ==(Object other) {
+    return other is TestGoldenUpdateError && error == other.error;
+  }
+
+  @override
+  int get hashCode => error.hashCode;
+
+  @override
+  String toString() {
+    return 'TestGoldenUpdateError(error: $error)';
   }
 }
 

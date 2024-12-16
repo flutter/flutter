@@ -133,7 +133,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     BuildInfo? buildInfo,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
-    final String shellPath = globals.artifacts!.getArtifactPath(Artifact.flutterTester);
+    final String flutterTesterBinPath = globals.artifacts!.getArtifactPath(Artifact.flutterTester);
 
     // Compute the command-line arguments for package:test.
     final List<String> testArgs = <String>[
@@ -203,7 +203,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
           return FlutterWebPlatform.start(
             flutterProject.directory.path,
             updateGoldens: updateGoldens,
-            shellPath: shellPath,
+            flutterTesterBinPath: flutterTesterBinPath,
             flutterProject: flutterProject,
             pauseAfterLoad: debuggingOptions.startPaused,
             nullAssertions: debuggingOptions.nullAssertions,
@@ -241,7 +241,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
 
     final loader.FlutterPlatform platform = loader.installHook(
       testWrapper: testWrapper,
-      shellPath: shellPath,
+      shellPath: flutterTesterBinPath,
       debuggingOptions: debuggingOptions,
       watcher: watcher,
       enableVmService: enableVmService,
