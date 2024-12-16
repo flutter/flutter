@@ -9,7 +9,6 @@ import 'package:process/process.dart';
 
 import '../convert.dart';
 import '../globals.dart' as globals;
-import '../reporting/first_run.dart';
 import 'io.dart';
 import 'logger.dart';
 
@@ -677,56 +676,12 @@ class _DefaultProcessUtils implements ProcessUtils {
 }
 
 Future<int> exitWithHooks(int code, {required ShutdownHooks shutdownHooks}) async {
-  // Need to get the boolean returned from `messenger.shouldDisplayLicenseTerms()`
-  // before invoking the print welcome method because the print welcome method
-  // will set `messenger.shouldDisplayLicenseTerms()` to false
-  final FirstRunMessenger messenger =
-      FirstRunMessenger(persistentToolState: globals.persistentToolState!);
-  final bool legacyAnalyticsMessageShown =
-      messenger.shouldDisplayLicenseTerms();
-
-  // Prints the welcome message if needed for legacy analytics.
-  if (!(await globals.isRunningOnBot)) {
-    globals.flutterUsage.printWelcome();
-  }
-
-  // Ensure that the consent message has been displayed for unified analytics
   if (globals.analytics.shouldShowMessage) {
     globals.logger.printStatus(globals.analytics.getConsentMessage);
-    if (!globals.flutterUsage.enabled) {
-      globals.printStatus(
-          'Please note that analytics reporting was already disabled, '
-          'and will continue to be disabled.\n');
-    }
-
-    // Because the legacy analytics may have also sent a message,
-    // the conditional below will print additional messaging informing
-    // users that the two consent messages they are receiving is not a
-    // bug
-    if (legacyAnalyticsMessageShown) {
-      globals.logger
-          .printStatus('You have received two consent messages because '
-              'the flutter tool is migrating to a new analytics system. '
-              'Disabling analytics collection will disable both the legacy '
-              'and new analytics collection systems. '
-              'You can disable analytics reporting by running `flutter --disable-analytics`\n');
-    }
-
-    // Invoking this will onboard the flutter tool onto
-    // the package on the developer's machine and will
-    // allow for events to be sent to Google Analytics
-    // on subsequent runs of the flutter tool (ie. no events
-    // will be sent on the first run to allow developers to
-    // opt out of collection)
     globals.analytics.clientShowedMessage();
-  }
 
-  // Send any last analytics calls that are in progress without overly delaying
-  // the tool's exit (we wait a maximum of 250ms).
-  if (globals.flutterUsage.enabled) {
-    final Stopwatch stopwatch = Stopwatch()..start();
-    await globals.flutterUsage.ensureAnalyticsSent();
-    globals.printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
+    // This trace is searched for in tests.
+    globals.logger.printTrace('Showed analytics consent message.');
   }
 
   // Run shutdown hooks before flushing logs
@@ -734,10 +689,6 @@ Future<int> exitWithHooks(int code, {required ShutdownHooks shutdownHooks}) asyn
 
   final Completer<void> completer = Completer<void>();
 
-  // Allow any pending analytics events to send and close the http connection
-  //
-  // By default, we will wait 250 ms before canceling any pending events, we
-  // can change the [delayDuration] in the close method if it needs to be changed
   await globals.analytics.close();
 
   // Give the task / timer queue one cycle through before we hard exit.

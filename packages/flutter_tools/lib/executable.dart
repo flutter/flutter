@@ -169,7 +169,7 @@ List<FlutterCommand> generateCommands({
         platform: globals.platform,
       ),
     ],
-    suppressAnalytics: globals.flutterUsage.suppressAnalytics,
+    suppressAnalytics: !globals.analytics.okToSend,
   ),
   AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
   AttachCommand(

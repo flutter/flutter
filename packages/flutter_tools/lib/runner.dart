@@ -23,7 +23,6 @@ import 'src/doctor.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
-import 'src/reporting/reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 
@@ -95,18 +94,6 @@ Future<int> run(
             );
           }
           globals.printStatus('Analytics reporting enabled.');
-        }
-
-        // Send an event to GA3 for any users that are opted into GA3
-        // analytics but have opted out of GA4 (package:unified_analytics)
-        // TODO(eliasyishak): remove once GA3 sunset, https://github.com/flutter/flutter/issues/128251
-        if (!globals.analytics.telemetryEnabled &&
-            globals.flutterUsage.enabled) {
-          UsageEvent(
-            'ga4_and_ga3_status_mismatch',
-            'opted_out_of_ga4',
-            flutterUsage: globals.flutterUsage,
-          ).send();
         }
 
         await runner.run(args);
@@ -188,8 +175,6 @@ Future<int> _handleToolError(
       return exitWithHooks(1, shutdownHooks: shutdownHooks);
     }
 
-    // Report to both [Usage] and [CrashReportSender].
-    globals.flutterUsage.sendException(error);
     globals.analytics.send(Event.exception(exception: error.runtimeType.toString()));
     await asyncGuard(() async {
       final CrashReportSender crashReportSender = CrashReportSender(
