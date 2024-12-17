@@ -135,7 +135,7 @@ class DartFormatChecker {
         ...types,
       ], processRunner);
     }
-    return output.split('\n').where((String line) => line.isNotEmpty).toList();
+    return output.split('\n').where((String line) => line.isNotEmpty && !line.startsWith('engine')).toList();
   }
 
   Future<int> _checkFormat({
