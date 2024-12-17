@@ -4830,6 +4830,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final String base64Screenshot = (await base64ScreenshotFuture)! as String;
         final ui.Codec codec = await ui.instantiateImageCodec(base64.decode(base64Screenshot));
         final ui.FrameInfo frame = await codec.getNextFrame();
+        codec.dispose();
         return frame.image;
       }))!;
       addTearDown(screenshotImage.dispose);

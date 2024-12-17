@@ -246,7 +246,9 @@ Future<ui.Image> _loadImage() async {
   final ui.ImageDescriptor descriptor =
       await ui.ImageDescriptor.encoded(buffer);
   final ui.Codec codec = await descriptor.instantiateCodec();
-  return (await codec.getNextFrame()).image;
+  final ui.Image image = (await codec.getNextFrame()).image;
+  codec.dispose();
+  return image;
 }
 
 class MyHomePage extends StatefulWidget {
