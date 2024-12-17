@@ -920,16 +920,19 @@ TEST(FlKeyboardManagerTest, SynthesizeModifiersIfNeeded) {
 
 TEST(FlKeyboardManagerTest, GetPressedState) {
   ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
-  KeyboardTester tester;
-  tester.respondToTextInputWith(true);
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  g_autoptr(FlMockViewDelegate) view = fl_mock_view_delegate_new();
+  g_autoptr(FlKeyboardManager) manager =
+      fl_keyboard_manager_new(engine, FL_KEYBOARD_VIEW_DELEGATE(view));
 
   // Dispatch a key event.
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  fl_keyboard_manager_handle_event(tester.manager(), event);
+  fl_keyboard_manager_handle_event(manager, event);
 
-  GHashTable* pressedState =
-      fl_keyboard_manager_get_pressed_state(tester.manager());
+  GHashTable* pressedState = fl_keyboard_manager_get_pressed_state(manager);
   EXPECT_EQ(g_hash_table_size(pressedState), 1u);
 
   gpointer physical_key =
