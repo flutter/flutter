@@ -696,6 +696,7 @@ class _SelectableAnimatedBuilderState extends State<_SelectableAnimatedBuilder>
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
   _NavigationDrawerDefaultsM3(this.context)
     : super(
@@ -749,5 +750,6 @@ class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
     });
   }
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - NavigationDrawer

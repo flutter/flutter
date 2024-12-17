@@ -58,6 +58,13 @@ abstract class TokenTemplate {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
+''';
+
+  // TODO(goderbauer): Update the script to output auto-formatted code and remove
+  //  "dart format off/on" from headerComment and footerComment.
+  static const String footerComment = '''
+// dart format on
 ''';
 
   static const String endGeneratedComment = '''
@@ -95,6 +102,7 @@ abstract class TokenTemplate {
     buffer.write(beginComment);
     buffer.write(headerComment);
     buffer.write(generate());
+    buffer.write(footerComment);
     buffer.write(endComment);
     buffer.write(contentAfterBlock);
     File(fileName).writeAsStringSync(buffer.toString());

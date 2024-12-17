@@ -787,6 +787,7 @@ class _DrawerDefaultsM2 extends DrawerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _DrawerDefaultsM3 extends DrawerThemeData {
   _DrawerDefaultsM3(this.context)
       : super(
@@ -824,5 +825,6 @@ class _DrawerDefaultsM3 extends DrawerThemeData {
     ).resolve(direction),
   );
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Drawer

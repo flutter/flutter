@@ -2492,6 +2492,7 @@ class _TabsDefaultsM2 extends TabBarThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _TabsPrimaryDefaultsM3 extends TabBarThemeData {
   _TabsPrimaryDefaultsM3(this.context, this.isScrollable)
     : super(indicatorSize: TabBarIndicatorSize.label);
@@ -2639,5 +2640,6 @@ class _TabsSecondaryDefaultsM3 extends TabBarThemeData {
 
   static double indicatorWeight = 2.0;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Tabs

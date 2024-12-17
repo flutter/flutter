@@ -1395,6 +1395,7 @@ class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   _NavigationBarDefaultsM3(this.context)
     : super(
@@ -1453,5 +1454,6 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   @override
   EdgeInsetsGeometry? get labelPadding => const EdgeInsets.only(top: 4);
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - NavigationBar

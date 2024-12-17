@@ -3412,6 +3412,7 @@ class _TimePickerDefaultsM2 extends _TimePickerDefaults {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _TimePickerDefaultsM3 extends _TimePickerDefaults {
   _TimePickerDefaultsM3(this.context, { this.entryMode = TimePickerEntryMode.dial });
 
@@ -3748,5 +3749,6 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
     return MaterialStatePropertyAll<TextStyle?>(_textTheme.displayLarge);
   }
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - TimePicker

@@ -1408,6 +1408,7 @@ class _LinearProgressIndicatorDefaultsM3Year2023 extends ProgressIndicatorThemeD
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _CircularProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
   _CircularProgressIndicatorDefaultsM3(this.context, { required this.indeterminate });
 
@@ -1467,5 +1468,6 @@ class _LinearProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
   @override
   double? get trackGap => 4.0;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - ProgressIndicator

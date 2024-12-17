@@ -278,6 +278,7 @@ class _CardDefaultsM2 extends CardThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _CardDefaultsM3 extends CardThemeData {
   _CardDefaultsM3(this.context)
     : super(
@@ -301,6 +302,7 @@ class _CardDefaultsM3 extends CardThemeData {
   @override
   ShapeBorder? get shape =>const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)));
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Card
 
@@ -311,6 +313,7 @@ class _CardDefaultsM3 extends CardThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _FilledCardDefaultsM3 extends CardThemeData {
   _FilledCardDefaultsM3(this.context)
     : super(
@@ -334,6 +337,7 @@ class _FilledCardDefaultsM3 extends CardThemeData {
   @override
   ShapeBorder? get shape =>const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)));
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - FilledCard
 
@@ -344,6 +348,7 @@ class _FilledCardDefaultsM3 extends CardThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _OutlinedCardDefaultsM3 extends CardThemeData {
   _OutlinedCardDefaultsM3(this.context)
     : super(
@@ -370,5 +375,6 @@ class _OutlinedCardDefaultsM3 extends CardThemeData {
       side: BorderSide(color: _colors.outlineVariant)
     );
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - OutlinedCard

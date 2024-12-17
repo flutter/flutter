@@ -4762,6 +4762,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
    _InputDecoratorDefaultsM3(this.context)
     : super();
@@ -4931,5 +4932,6 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
     return textStyle.copyWith(color: _colors.error);
   });
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - InputDecorator
