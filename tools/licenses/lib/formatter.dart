@@ -38,7 +38,8 @@ bool _stripIndentation(List<String> lines) {
   } else {
     prefix = leadingDecorations.matchAsPrefix(lines.first)?.group(0);
   }
-  if (prefix != null && lines.skip(1).every((String line) => line.startsWith(prefix!) || prefix.startsWith(line))) {
+  if (prefix != null &&
+      lines.skip(1).every((String line) => line.startsWith(prefix!) || prefix.startsWith(line))) {
     final int prefixLength = prefix.length;
     for (int index = 0; index < lines.length; index += 1) {
       final String line = lines[index];
@@ -168,7 +169,8 @@ String stripAsciiArt(String input) {
   for (final List<String> image in asciiArtImages) {
     assert(image.isNotEmpty);
     // Look for the image starting on each line.
-    search: for (int index = 0; index < lines.length - image.length; index += 1) {
+    search:
+    for (int index = 0; index < lines.length - image.length; index += 1) {
       final int x = lines[index].indexOf(image[0]);
       if (x >= 0) {
         int width = image[0].length;
@@ -186,7 +188,8 @@ String stripAsciiArt(String input) {
           final String text = lines[index + imageLine];
           assert(text.length > x);
           if (text.length >= x + width) {
-            lines[index + imageLine] = text.substring(0, x) + text.substring(x + width, text.length);
+            lines[index + imageLine] =
+                text.substring(0, x) + text.substring(x + width, text.length);
           } else {
             lines[index + imageLine] = text.substring(0, x);
           }
