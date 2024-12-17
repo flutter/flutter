@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'localizations/gen_l10n.dart' as gen_l10n;
+library;
+
 import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
@@ -425,24 +428,19 @@ class FlutterManifest {
     return results;
   }
 
-  /// Whether a synthetic flutter_gen package should be generated.
-  ///
-  /// This can be provided to the [Pub] interface to inject a new entry
-  /// into the package_config.json file which points to `.dart_tool/flutter_gen`.
-  ///
-  /// This allows generated source code to be imported using a package
-  /// alias.
-  late final bool generateSyntheticPackage = _computeGenerateSyntheticPackage();
-  bool _computeGenerateSyntheticPackage() {
-    if (!_flutterDescriptor.containsKey('generate')) {
-      return false;
-    }
-    final Object? value = _flutterDescriptor['generate'];
-    if (value is! bool) {
-      return false;
-    }
-    return value;
-  }
+  /// Whether localization Dart files should be generated.
+  /// 
+  /// **NOTE**: This method was previously called `generateSyntheticPackage`,
+  /// which was incorrect; the presence of `generate: true` in `pubspec.yaml`
+  /// does _not_ imply a synthetic package (and never did); additional
+  /// introspection is required to determine whether a synthetic package is
+  /// required.
+  /// 
+  /// See also:
+  /// 
+  ///   * [Deprecate and remove synthethic `package:flutter_gen`](https://github.com/flutter/flutter/issues/102983)
+  ///   * [gen_l10n.generateLocalizations]
+  late final bool generateLocalizations = _flutterDescriptor['generate'] == true;
 
   String? get defaultFlavor => _flutterDescriptor['default-flavor'] as String?;
 
