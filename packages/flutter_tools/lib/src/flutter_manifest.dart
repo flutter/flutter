@@ -429,15 +429,15 @@ class FlutterManifest {
   }
 
   /// Whether localization Dart files should be generated.
-  /// 
+  ///
   /// **NOTE**: This method was previously called `generateSyntheticPackage`,
   /// which was incorrect; the presence of `generate: true` in `pubspec.yaml`
   /// does _not_ imply a synthetic package (and never did); additional
   /// introspection is required to determine whether a synthetic package is
   /// required.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///   * [Deprecate and remove synthethic `package:flutter_gen`](https://github.com/flutter/flutter/issues/102983)
   ///   * [gen_l10n.generateLocalizations]
   late final bool generateLocalizations = _flutterDescriptor['generate'] == true;

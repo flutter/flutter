@@ -12,10 +12,10 @@ import '../build_system/build_targets.dart';
 import '../features.dart';
 
 /// Generates the `package:flutter_gen` synthetic package.
-/// 
+///
 /// If the package has been configured *not* to use synthetic packages, this
 /// method is a NO-OP and returns `false`.
-/// 
+///
 /// Returns `true` if the package was generated, or `false` it was not.
 Future<bool> generateLocalizationsSyntheticPackage({
   required Environment environment,
