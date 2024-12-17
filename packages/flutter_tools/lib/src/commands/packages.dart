@@ -266,46 +266,28 @@ class PackagesGetCommand extends FlutterCommand {
       rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
       _rootProject = rootProject;
 
-      if (rootProject.manifest.generateSyntheticPackage) {
-        final Environment environment = Environment(
-          artifacts: globals.artifacts!,
-          logger: globals.logger,
-          cacheDir: globals.cache.getRoot(),
-          engineVersion: globals.flutterVersion.engineRevision,
-          fileSystem: globals.fs,
-          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-          outputDir: globals.fs.directory(getBuildDirectory()),
-          processManager: globals.processManager,
-          platform: globals.platform,
-          usage: globals.flutterUsage,
-          analytics: analytics,
-          projectDir: rootProject.directory,
-          packageConfigPath: packageConfigPath(),
-          generateDartPluginRegistry: true,
-        );
-
-        await generateLocalizationsSyntheticPackage(
-          environment: environment,
-          buildSystem: globals.buildSystem,
-          buildTargets: globals.buildTargets,
-        );
-      } else if (rootProject.directory.childFile('l10n.yaml').existsSync()) {
-        final Environment environment = Environment(
-          artifacts: globals.artifacts!,
-          logger: globals.logger,
-          cacheDir: globals.cache.getRoot(),
-          engineVersion: globals.flutterVersion.engineRevision,
-          fileSystem: globals.fs,
-          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-          outputDir: globals.fs.directory(getBuildDirectory()),
-          processManager: globals.processManager,
-          platform: globals.platform,
-          usage: globals.flutterUsage,
-          analytics: analytics,
-          projectDir: rootProject.directory,
-          packageConfigPath: packageConfigPath(),
-          generateDartPluginRegistry: true,
-        );
+      final Environment environment = Environment(
+        artifacts: globals.artifacts!,
+        logger: globals.logger,
+        cacheDir: globals.cache.getRoot(),
+        engineVersion: globals.flutterVersion.engineRevision,
+        fileSystem: globals.fs,
+        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+        outputDir: globals.fs.directory(getBuildDirectory()),
+        processManager: globals.processManager,
+        platform: globals.platform,
+        usage: globals.flutterUsage,
+        analytics: analytics,
+        projectDir: rootProject.directory,
+        packageConfigPath: packageConfigPath(),
+        generateDartPluginRegistry: true,
+      );
+      if (rootProject.manifest.generateLocalizations && !await generateLocalizationsSyntheticPackage(
+        environment: environment,
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
+      )) {
+        // If localizations were enabled, but we are not using synthetic packages.
         final BuildResult result = await globals.buildSystem.build(
           const GenerateLocalizationsTarget(),
           environment,
