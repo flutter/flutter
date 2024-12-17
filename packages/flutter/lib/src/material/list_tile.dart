@@ -1573,6 +1573,7 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _LisTileDefaultsM3 extends ListTileThemeData {
   _LisTileDefaultsM3(this.context)
     : super(
@@ -1605,5 +1606,6 @@ class _LisTileDefaultsM3 extends ListTileThemeData {
   @override
   Color? get iconColor => _colors.onSurfaceVariant;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - LisTile

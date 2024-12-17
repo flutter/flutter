@@ -750,6 +750,7 @@ class Typography with Diagnosticable {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 abstract final class _M3Typography {
   static const TextTheme englishLike = TextTheme(
     displayLarge: TextStyle(debugLabel: 'englishLike displayLarge 2021', inherit: false, fontSize: 57.0, fontWeight: FontWeight.w400, letterSpacing: -0.25, height: 1.12, textBaseline: TextBaseline.alphabetic, leadingDistribution: TextLeadingDistribution.even),
@@ -805,5 +806,6 @@ abstract final class _M3Typography {
     bodySmall: TextStyle(debugLabel: 'tall bodySmall 2021', inherit: false, fontSize: 12.0, fontWeight: FontWeight.w400, letterSpacing: 0.4, height: 1.33, textBaseline: TextBaseline.alphabetic, leadingDistribution: TextLeadingDistribution.even),
   );
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Typography

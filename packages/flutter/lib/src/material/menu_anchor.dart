@@ -3786,6 +3786,7 @@ bool get _platformSupportsAccelerators {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _MenuBarDefaultsM3 extends MenuStyle {
   _MenuBarDefaultsM3(this.context)
     : super(
@@ -4040,5 +4041,6 @@ class _MenuDefaultsM3 extends MenuStyle {
   @override
   VisualDensity get visualDensity => Theme.of(context).visualDensity;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Menu

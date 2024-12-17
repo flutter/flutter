@@ -2424,6 +2424,7 @@ bool _hitIsOnDeleteIcon({
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _ChipDefaultsM3 extends ChipThemeData {
   _ChipDefaultsM3(this.context, this.isEnabled)
     : super(
@@ -2496,5 +2497,6 @@ class _ChipDefaultsM3 extends ChipThemeData {
     )!;
   }
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Chip

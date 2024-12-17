@@ -2602,6 +2602,7 @@ class VisualDensity with Diagnosticable {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 const ColorScheme _colorSchemeLightM3 = ColorScheme(
   brightness: Brightness.light,
   primary: Color(0xFF6750A4),
@@ -2709,5 +2710,6 @@ const ColorScheme _colorSchemeDarkM3 = ColorScheme(
   // The surfaceTint color is set to the same color as the primary.
   surfaceTint: Color(0xFFD0BCFF),
 );
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - ColorScheme

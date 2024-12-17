@@ -937,6 +937,7 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _SnackbarDefaultsM3 extends SnackBarThemeData {
     _SnackbarDefaultsM3(this.context);
 
@@ -996,5 +997,6 @@ class _SnackbarDefaultsM3 extends SnackBarThemeData {
   @override
   double get actionOverflowThreshold => 0.25;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Snackbar

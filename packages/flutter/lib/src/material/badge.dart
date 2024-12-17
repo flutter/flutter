@@ -448,6 +448,7 @@ class _RenderIntrinsicHorizontalStadium extends RenderProxyBox {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _BadgeDefaultsM3 extends BadgeThemeData {
   _BadgeDefaultsM3(this.context) : super(
     smallSize: 6.0,
@@ -469,5 +470,6 @@ class _BadgeDefaultsM3 extends BadgeThemeData {
   @override
   TextStyle? get textStyle => Theme.of(context).textTheme.labelSmall;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Badge

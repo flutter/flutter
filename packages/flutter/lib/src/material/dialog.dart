@@ -1680,6 +1680,7 @@ class _DialogDefaultsM2 extends DialogThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _DialogDefaultsM3 extends DialogThemeData {
   _DialogDefaultsM3(this.context)
     : super(
@@ -1714,6 +1715,7 @@ class _DialogDefaultsM3 extends DialogThemeData {
   @override
   EdgeInsetsGeometry? get actionsPadding => const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0);
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Dialog
 
@@ -1724,6 +1726,7 @@ class _DialogDefaultsM3 extends DialogThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _DialogFullscreenDefaultsM3 extends DialogThemeData {
   const _DialogFullscreenDefaultsM3(this.context): super(clipBehavior: Clip.none);
 
@@ -1732,5 +1735,6 @@ class _DialogFullscreenDefaultsM3 extends DialogThemeData {
   @override
   Color? get backgroundColor => Theme.of(context).colorScheme.surface;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - DialogFullscreen

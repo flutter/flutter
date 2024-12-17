@@ -2168,6 +2168,7 @@ class _SliderDefaultsM3Year2023 extends SliderThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _SliderDefaultsM3 extends SliderThemeData {
   _SliderDefaultsM3(this.context)
     : super(trackHeight: 16.0);
@@ -2271,5 +2272,6 @@ class _SliderDefaultsM3 extends SliderThemeData {
   @override
   double? get trackGap => 6.0;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Slider

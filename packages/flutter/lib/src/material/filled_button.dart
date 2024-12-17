@@ -603,6 +603,7 @@ class _FilledButtonWithIconChild extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _FilledButtonDefaultsM3 extends ButtonStyle {
   _FilledButtonDefaultsM3(this.context)
    : super(
@@ -738,6 +739,7 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
   @override
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - FilledButton
 
@@ -748,6 +750,7 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
   _FilledTonalButtonDefaultsM3(this.context)
    : super(
@@ -883,5 +886,6 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
   @override
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - FilledTonalButton

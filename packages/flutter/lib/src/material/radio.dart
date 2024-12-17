@@ -641,6 +641,7 @@ class _RadioDefaultsM2 extends RadioThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _RadioDefaultsM3 extends RadioThemeData {
   _RadioDefaultsM3(this.context);
 
@@ -716,5 +717,6 @@ class _RadioDefaultsM3 extends RadioThemeData {
   @override
   VisualDensity get visualDensity => _theme.visualDensity;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Radio<T>

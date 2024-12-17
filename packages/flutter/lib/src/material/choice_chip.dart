@@ -269,6 +269,7 @@ class ChoiceChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _ChoiceChipDefaultsM3 extends ChipThemeData {
   _ChoiceChipDefaultsM3(
     this.context,
@@ -388,5 +389,6 @@ class _ChoiceChipDefaultsM3 extends ChipThemeData {
     )!;
   }
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - ChoiceChip

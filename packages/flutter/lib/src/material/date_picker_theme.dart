@@ -902,6 +902,7 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _DatePickerDefaultsM3 extends DatePickerThemeData {
   _DatePickerDefaultsM3(this.context)
     : super(
@@ -1108,5 +1109,6 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
   @override
   TextStyle? get rangePickerHeaderHelpStyle => _textTheme.titleSmall;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - DatePicker

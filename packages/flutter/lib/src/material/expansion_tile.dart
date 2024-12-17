@@ -949,6 +949,7 @@ class _ExpansionTileDefaultsM2 extends ExpansionTileThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _ExpansionTileDefaultsM3 extends ExpansionTileThemeData {
   _ExpansionTileDefaultsM3(this.context);
 
@@ -968,5 +969,6 @@ class _ExpansionTileDefaultsM3 extends ExpansionTileThemeData {
   @override
   Color? get collapsedIconColor => _colors.onSurfaceVariant;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - ExpansionTile

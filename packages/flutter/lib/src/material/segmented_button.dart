@@ -1065,6 +1065,7 @@ class _RenderSegmentedButton<T> extends RenderBox with
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
   _SegmentedButtonDefaultsM3(this.context);
   final BuildContext context;
@@ -1170,5 +1171,6 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
     );
   }
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - SegmentedButton

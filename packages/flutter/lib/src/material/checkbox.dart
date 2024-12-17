@@ -901,6 +901,7 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _CheckboxDefaultsM3 extends CheckboxThemeData {
   _CheckboxDefaultsM3(BuildContext context)
     : _theme = Theme.of(context),
@@ -1028,5 +1029,6 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
     borderRadius: BorderRadius.all(Radius.circular(2.0)),
   );
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Checkbox

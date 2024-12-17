@@ -507,6 +507,7 @@ class _BannerDefaultsM2 extends MaterialBannerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _BannerDefaultsM3 extends MaterialBannerThemeData {
   _BannerDefaultsM3(this.context)
     : super(elevation: 1.0);
@@ -527,5 +528,6 @@ class _BannerDefaultsM3 extends MaterialBannerThemeData {
   @override
   TextStyle? get contentTextStyle => _textTheme.bodyMedium;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Banner

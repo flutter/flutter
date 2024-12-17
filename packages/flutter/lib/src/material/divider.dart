@@ -334,6 +334,7 @@ class _DividerDefaultsM2 extends DividerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _DividerDefaultsM3 extends DividerThemeData {
   const _DividerDefaultsM3(this.context) : super(
     space: 16,
@@ -346,5 +347,6 @@ class _DividerDefaultsM3 extends DividerThemeData {
 
   @override Color? get color => Theme.of(context).colorScheme.outlineVariant;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Divider

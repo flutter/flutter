@@ -58,8 +58,10 @@ void main() {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 static final String tokenFoo = 'Foobar';
 static final String tokenBar = 'Barfoo';
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Test
 ''');
@@ -87,8 +89,10 @@ static final String tokenBar = 'Barfoo';
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 static final String tokenFoo = 'Foobar';
 static final String tokenBar = 'Barfoo';
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Test
 ''');
@@ -110,8 +114,10 @@ static final String tokenBar = 'Barfoo';
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 static final String tokenFoo = 'foo';
 static final String tokenBar = 'bar';
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Test
 ''');
@@ -150,8 +156,10 @@ static final String tokenBar = 'bar';
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 static final String tokenFoo = 'foo';
 static final String tokenBar = 'bar';
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Block 1
 ''');
@@ -174,8 +182,10 @@ static final String tokenBar = 'bar';
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 static final String tokenFoo = 'foo';
 static final String tokenBar = 'bar';
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Block 1
 
@@ -186,8 +196,10 @@ static final String tokenBar = 'bar';
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 static final String tokenFoo = 'bar';
 static final String tokenBar = 'foo';
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Block 2
 ''');
@@ -210,8 +222,10 @@ static final String tokenBar = 'foo';
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 static final String tokenFoo = 'FOO';
 static final String tokenBar = 'BAR';
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Block 1
 
@@ -222,8 +236,10 @@ static final String tokenBar = 'BAR';
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 static final String tokenFoo = 'bar';
 static final String tokenBar = 'foo';
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Block 2
 ''');
