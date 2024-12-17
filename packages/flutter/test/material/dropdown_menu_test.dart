@@ -2128,6 +2128,50 @@ void main() {
     },
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/160196.
+  testWidgets(
+    'ListenableBuilder does not create infinite build loop with DropdownMenu',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      final FocusNode focusNode = FocusNode();
+      addTearDown(controller.dispose);
+      addTearDown(focusNode.dispose);
+
+      int buildCount = 0;
+      final Widget listenableBuilder = ListenableBuilder(
+        listenable: controller,
+        builder: (BuildContext context, Widget? child) {
+          buildCount += 1;
+          if (buildCount > 10) {
+            throw StateError('too many builds!');
+          }
+
+          return DropdownMenu<int>(
+            key: const Key('key'),
+            enableFilter: true,
+            controller: controller,
+            focusNode: focusNode,
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              for (final int i in <int>[1, 2, 3])
+                DropdownMenuEntry<int>(value: i, label: 'Item number $i'),
+            ],
+          );
+        },
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Center(child: listenableBuilder),
+        ),
+      ));
+      expect(tester.takeException(), isNull);
+
+      focusNode.requestFocus();
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('The default text input field should not be focused on mobile platforms '
       'when it is tapped', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
