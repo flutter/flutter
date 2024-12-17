@@ -30,7 +30,10 @@ abstract final class ElevationOverlay {
   /// just return [color] unmodified.
   static Color applySurfaceTint(Color color, Color? surfaceTint, double elevation) {
     if (surfaceTint != null && surfaceTint != Colors.transparent) {
-      return Color.alphaBlend(surfaceTint.withOpacity(_surfaceTintOpacityForElevation(elevation)), color);
+      return Color.alphaBlend(
+        surfaceTint.withOpacity(_surfaceTintOpacityForElevation(elevation)),
+        color,
+      );
     }
     return color;
   }

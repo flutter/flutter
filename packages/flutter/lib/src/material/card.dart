@@ -220,7 +220,7 @@ class Card extends StatelessWidget {
     if (Theme.of(context).useMaterial3) {
       defaults = switch (_variant) {
         _CardVariant.elevated => _CardDefaultsM3(context),
-        _CardVariant.filled   => _FilledCardDefaultsM3(context),
+        _CardVariant.filled => _FilledCardDefaultsM3(context),
         _CardVariant.outlined => _OutlinedCardDefaultsM3(context),
       };
     } else {
@@ -235,15 +235,13 @@ class Card extends StatelessWidget {
           type: MaterialType.card,
           color: color ?? cardTheme.color ?? defaults.color,
           shadowColor: shadowColor ?? cardTheme.shadowColor ?? defaults.shadowColor,
-          surfaceTintColor: surfaceTintColor ?? cardTheme.surfaceTintColor ?? defaults.surfaceTintColor,
+          surfaceTintColor:
+              surfaceTintColor ?? cardTheme.surfaceTintColor ?? defaults.surfaceTintColor,
           elevation: elevation ?? cardTheme.elevation ?? defaults.elevation!,
           shape: shape ?? cardTheme.shape ?? defaults.shape,
           borderOnForeground: borderOnForeground,
           clipBehavior: clipBehavior ?? cardTheme.clipBehavior ?? defaults.clipBehavior!,
-          child: Semantics(
-            explicitChildNodes: !semanticContainer,
-            child: child,
-          ),
+          child: Semantics(explicitChildNodes: !semanticContainer, child: child),
         ),
       ),
     );
@@ -257,10 +255,8 @@ class _CardDefaultsM2 extends CardThemeData {
         clipBehavior: Clip.none,
         elevation: 1.0,
         margin: const EdgeInsets.all(4.0),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(4.0)),
-        )
-    );
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
+      );
 
   final BuildContext context;
 
