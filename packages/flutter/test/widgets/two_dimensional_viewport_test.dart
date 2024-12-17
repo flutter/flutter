@@ -2894,7 +2894,8 @@ class _TestVicinity extends ChildVicinity {
   const _TestVicinity({required super.xIndex, required super.yIndex});
 }
 
-class _TestBaseDelegate extends TwoDimensionalChildDelegate { //ignore: unused_element
+//ignore: unused_element
+class _TestBaseDelegate extends TwoDimensionalChildDelegate {
   // Would fail analysis without covariant
   @override
   Widget? build(BuildContext context, _TestVicinity vicinity) => null;
@@ -2904,7 +2905,8 @@ class _TestBaseDelegate extends TwoDimensionalChildDelegate { //ignore: unused_e
 
 }
 
-class _TestBuilderDelegate extends TwoDimensionalChildBuilderDelegate { //ignore: unused_element
+//ignore: unused_element
+class _TestBuilderDelegate extends TwoDimensionalChildBuilderDelegate {
   _TestBuilderDelegate({required super.builder});
   // Would fail analysis without covariant
   @override
@@ -2913,7 +2915,8 @@ class _TestBuilderDelegate extends TwoDimensionalChildBuilderDelegate { //ignore
   }
 }
 
-class _TestListDelegate extends TwoDimensionalChildListDelegate { //ignore: unused_element
+//ignore: unused_element
+class _TestListDelegate extends TwoDimensionalChildListDelegate {
   _TestListDelegate({required super.children});
   // Would fail analysis without covariant
   @override
@@ -2969,7 +2972,8 @@ Future<void> restoreScrollAndVerify(WidgetTester tester) async {
 // Validates covariant through analysis.
 mixin _SomeDelegateMixin on TwoDimensionalChildDelegate {}
 
-class _SomeRenderTwoDimensionalViewport extends RenderTwoDimensionalViewport { // ignore: unused_element
+// ignore: unused_element
+class _SomeRenderTwoDimensionalViewport extends RenderTwoDimensionalViewport {
   _SomeRenderTwoDimensionalViewport({
     required super.horizontalOffset,
     required super.horizontalAxisDirection,

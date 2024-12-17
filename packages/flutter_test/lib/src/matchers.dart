@@ -1375,8 +1375,10 @@ class _HasGoodToStringDeep extends Matcher {
     const String prefixLineOne = 'PREFIX_LINE_ONE____';
     const String prefixOtherLines = 'PREFIX_OTHER_LINES_';
     final List<String> prefixIssues = <String>[];
-    // ignore: avoid_dynamic_calls
-    String descriptionWithPrefixes = object.toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines) as String;
+    String descriptionWithPrefixes =
+        // ignore: avoid_dynamic_calls
+        object.toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines)
+            as String;
     if (descriptionWithPrefixes.endsWith('\n')) {
       // Trim off trailing \n as the remaining calculations assume
       // the description does not end with a trailing \n.

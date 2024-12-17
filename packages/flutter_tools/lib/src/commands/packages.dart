@@ -234,7 +234,7 @@ class PackagesGetCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    List<String> rest = argResults!.rest;
+    final List<String> rest = argResults!.rest;
     bool isHelp = false;
     bool example = true;
     bool exampleWasParsed = false;
@@ -254,80 +254,40 @@ class PackagesGetCommand extends FlutterCommand {
     FlutterProject? rootProject;
 
     if (!isHelp) {
-      if (directoryOption == null &&
-          rest.length == 1 &&
-          // Anything that looks like an argument should not be interpreted as
-          // a directory.
-          !rest.single.startsWith('-') &&
-          ((rest.single.contains('/') || rest.single.contains(r'\')) ||
-            name == 'get')) {
-        // For historical reasons, if there is one argument to the command and it contains
-        // a multiple-component path (i.e. contains a slash) then we use that to determine
-        // to which project we're applying the command.
-        target = findProjectRoot(globals.fs, rest.single);
-
-        globals.printWarning('''
-  Using a naked argument for directory is deprecated and will stop working in a future Flutter release.
-
-  Use --directory instead.''');
-        if (target == null) {
-          throwToolExit('Expected to find project root in ${rest.single}.');
-        }
-        rest = <String>[];
-      } else {
-        target = findProjectRoot(globals.fs, directoryOption);
-        if (target == null) {
-          if (directoryOption == null) {
-            throwToolExit('Expected to find project root in current working directory.');
-          } else {
-            throwToolExit('Expected to find project root in $directoryOption.');
-          }
+      target = findProjectRoot(globals.fs, directoryOption);
+      if (target == null) {
+        if (directoryOption == null) {
+          throwToolExit('Expected to find project root in current working directory.');
+        } else {
+          throwToolExit('Expected to find project root in $directoryOption.');
         }
       }
 
       rootProject = FlutterProject.fromDirectory(globals.fs.directory(target));
       _rootProject = rootProject;
 
-      if (rootProject.manifest.generateSyntheticPackage) {
-        final Environment environment = Environment(
-          artifacts: globals.artifacts!,
-          logger: globals.logger,
-          cacheDir: globals.cache.getRoot(),
-          engineVersion: globals.flutterVersion.engineRevision,
-          fileSystem: globals.fs,
-          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-          outputDir: globals.fs.directory(getBuildDirectory()),
-          processManager: globals.processManager,
-          platform: globals.platform,
-          usage: globals.flutterUsage,
-          analytics: analytics,
-          projectDir: rootProject.directory,
-          packageConfigPath: packageConfigPath(),
-          generateDartPluginRegistry: true,
-        );
-
-        await generateLocalizationsSyntheticPackage(
-          environment: environment,
-          buildSystem: globals.buildSystem,
-          buildTargets: globals.buildTargets,
-        );
-      } else if (rootProject.directory.childFile('l10n.yaml').existsSync()) {
-        final Environment environment = Environment(
-          artifacts: globals.artifacts!,
-          logger: globals.logger,
-          cacheDir: globals.cache.getRoot(),
-          engineVersion: globals.flutterVersion.engineRevision,
-          fileSystem: globals.fs,
-          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-          outputDir: globals.fs.directory(getBuildDirectory()),
-          processManager: globals.processManager,
-          platform: globals.platform,
-          usage: globals.flutterUsage,
-          analytics: analytics,
-          projectDir: rootProject.directory,
-          packageConfigPath: packageConfigPath(),
-          generateDartPluginRegistry: true,
-        );
+      final Environment environment = Environment(
+        artifacts: globals.artifacts!,
+        logger: globals.logger,
+        cacheDir: globals.cache.getRoot(),
+        engineVersion: globals.flutterVersion.engineRevision,
+        fileSystem: globals.fs,
+        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+        outputDir: globals.fs.directory(getBuildDirectory()),
+        processManager: globals.processManager,
+        platform: globals.platform,
+        usage: globals.flutterUsage,
+        analytics: analytics,
+        projectDir: rootProject.directory,
+        packageConfigPath: packageConfigPath(),
+        generateDartPluginRegistry: true,
+      );
+      if (rootProject.manifest.generateLocalizations && !await generateLocalizationsSyntheticPackage(
+        environment: environment,
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
+      )) {
+        // If localizations were enabled, but we are not using synthetic packages.
         final BuildResult result = await globals.buildSystem.build(
           const GenerateLocalizationsTarget(),
           environment,

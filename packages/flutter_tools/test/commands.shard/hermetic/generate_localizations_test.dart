@@ -10,12 +10,14 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/localizations.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/generate_localizations.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 
 import '../../integration.shard/test_data/basic_project.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -23,6 +25,14 @@ void main() {
   late BufferLogger logger;
   late Artifacts artifacts;
   late FakeProcessManager processManager;
+
+  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
+  // See https://github.com/flutter/flutter/issues/160257 for details.
+  FeatureFlags enableExplicitPackageDependencies() {
+    return TestFeatureFlags(
+      isExplicitPackageDependenciesEnabled: true,
+    );
+  }
 
   setUpAll(() {
     Cache.disableLocking();
@@ -104,7 +114,7 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('not using synthetic packages (due to --no-implicit-pubspec-resolution)', () async {
+  testUsingContext('not using synthetic packages (due to --explicit-package-dependencies)', () async {
     final Directory l10nDirectory = fileSystem.directory(
       fileSystem.path.join('lib', 'l10n'),
     );
@@ -130,7 +140,6 @@ flutter:
       processManager: processManager,
     );
     await createTestCommandRunner(command).run(<String>[
-      '--no-implicit-pubspec-resolution',
       'gen-l10n',
     ]);
 
@@ -142,6 +151,7 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: enableExplicitPackageDependencies,
   });
 
   testUsingContext('throws error when arguments are invalid', () async {
@@ -399,8 +409,8 @@ format: true
         command: <String>[
           'Artifact.engineDartBinary',
           'format',
-          '/.dart_tool/flutter_gen/gen_l10n/app_localizations_en.dart',
-          '/.dart_tool/flutter_gen/gen_l10n/app_localizations.dart',
+          '/lib/l10n/app_localizations_en.dart',
+          '/lib/l10n/app_localizations.dart',
         ]
       )
     );
@@ -413,11 +423,13 @@ format: true
     );
     await buildTarget.build(environment);
 
-    final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('.dart_tool', 'flutter_gen', 'gen_l10n'));
+    final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('lib', 'l10n'));
     expect(outputDirectory.existsSync(), true);
     expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
     expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
     expect(processManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: enableExplicitPackageDependencies,
   });
 
   testUsingContext('nullable-getter defaults to true', () async {

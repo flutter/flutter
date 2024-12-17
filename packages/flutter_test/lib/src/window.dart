@@ -259,7 +259,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   Locale get locale => _localeTestValue ?? _platformDispatcher.locale;
   Locale? _localeTestValue;
   /// Hides the real locale and reports the given [localeTestValue] instead.
-  set localeTestValue(Locale localeTestValue) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set localeTestValue(Locale localeTestValue) {
     _localeTestValue = localeTestValue;
     onLocaleChanged?.call();
   }
@@ -274,7 +275,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   List<Locale> get locales => _localesTestValue ?? _platformDispatcher.locales;
   List<Locale>? _localesTestValue;
   /// Hides the real locales and reports the given [localesTestValue] instead.
-  set localesTestValue(List<Locale> localesTestValue) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set localesTestValue(List<Locale> localesTestValue) {
     _localesTestValue = localesTestValue;
     onLocaleChanged?.call();
   }
@@ -296,7 +298,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   String get initialLifecycleState => _initialLifecycleStateTestValue;
   String _initialLifecycleStateTestValue = '';
   /// Sets a faked initialLifecycleState for testing.
-  set initialLifecycleStateTestValue(String state) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set initialLifecycleStateTestValue(String state) {
     _initialLifecycleStateTestValue = state;
   }
 
@@ -310,7 +313,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   double? _textScaleFactorTestValue;
   /// Hides the real text scale factor and reports the given
   /// [textScaleFactorTestValue] instead.
-  set textScaleFactorTestValue(double textScaleFactorTestValue) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set textScaleFactorTestValue(double textScaleFactorTestValue) {
     _textScaleFactorTestValue = textScaleFactorTestValue;
     onTextScaleFactorChanged?.call();
   }
@@ -333,7 +337,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
   /// Hides the real platform brightness and reports the given
   /// [platformBrightnessTestValue] instead.
-  set platformBrightnessTestValue(Brightness platformBrightnessTestValue) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set platformBrightnessTestValue(Brightness platformBrightnessTestValue) {
     _platformBrightnessTestValue = platformBrightnessTestValue;
     onPlatformBrightnessChanged?.call();
   }
@@ -350,7 +355,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   bool? _alwaysUse24HourFormatTestValue;
   /// Hides the real clock format and reports the given
   /// [alwaysUse24HourFormatTestValue] instead.
-  set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) {
     _alwaysUse24HourFormatTestValue = alwaysUse24HourFormatTestValue;
   }
 
@@ -370,7 +376,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   @override
   bool get nativeSpellCheckServiceDefined => _nativeSpellCheckServiceDefinedTestValue ?? _platformDispatcher.nativeSpellCheckServiceDefined;
   bool? _nativeSpellCheckServiceDefinedTestValue;
-  set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) {
     _nativeSpellCheckServiceDefinedTestValue = nativeSpellCheckServiceDefinedTestValue;
   }
 
@@ -383,7 +390,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   @override
   bool get supportsShowingSystemContextMenu => _supportsShowingSystemContextMenu ?? _platformDispatcher.supportsShowingSystemContextMenu;
   bool? _supportsShowingSystemContextMenu;
-  set supportsShowingSystemContextMenu(bool value) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set supportsShowingSystemContextMenu(bool value) {
     _supportsShowingSystemContextMenu = value;
   }
 
@@ -397,7 +405,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   bool? _brieflyShowPasswordTestValue;
   /// Hides the real [brieflyShowPassword] and reports the given
   /// `brieflyShowPasswordTestValue` instead.
-  set brieflyShowPasswordTestValue(bool brieflyShowPasswordTestValue) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set brieflyShowPasswordTestValue(bool brieflyShowPasswordTestValue) {
     _brieflyShowPasswordTestValue = brieflyShowPasswordTestValue;
   }
 
@@ -439,7 +448,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   String? _defaultRouteNameTestValue;
   /// Hides the real default route name and reports the given
   /// [defaultRouteNameTestValue] instead.
-  set defaultRouteNameTestValue(String defaultRouteNameTestValue) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set defaultRouteNameTestValue(String defaultRouteNameTestValue) {
     _defaultRouteNameTestValue = defaultRouteNameTestValue;
   }
 
@@ -459,7 +469,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   bool? _semanticsEnabledTestValue;
   /// Hides the real semantics enabled and reports the given
   /// [semanticsEnabledTestValue] instead.
-  set semanticsEnabledTestValue(bool semanticsEnabledTestValue) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set semanticsEnabledTestValue(bool semanticsEnabledTestValue) {
     _semanticsEnabledTestValue = semanticsEnabledTestValue;
     onSemanticsEnabledChanged?.call();
   }
@@ -493,7 +504,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   ///
   /// Consider using [FakeAccessibilityFeatures] to provide specific
   /// values for the various accessibility features under test.
-  set accessibilityFeaturesTestValue(AccessibilityFeatures accessibilityFeaturesTestValue) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set accessibilityFeaturesTestValue(AccessibilityFeatures accessibilityFeaturesTestValue) {
     _accessibilityFeaturesTestValue = accessibilityFeaturesTestValue;
     onAccessibilityFeaturesChanged?.call();
   }
@@ -1298,7 +1310,8 @@ class TestWindow implements SingletonFlutterWindow {
     'Deprecated to prepare for the upcoming multi-window support. '
     'This feature was deprecated after v3.9.0-0.1.pre.'
   )
-  set devicePixelRatioTestValue(double devicePixelRatio) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set devicePixelRatioTestValue(double devicePixelRatio) {
     _view.devicePixelRatio = devicePixelRatio;
   }
 
@@ -1327,7 +1340,8 @@ class TestWindow implements SingletonFlutterWindow {
     'Deprecated to prepare for the upcoming multi-window support. '
     'This feature was deprecated after v3.9.0-0.1.pre.'
   )
-  set physicalSizeTestValue (Size physicalSizeTestValue) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set physicalSizeTestValue (Size physicalSizeTestValue) {
     _view.physicalSize = physicalSizeTestValue;
   }
 
@@ -1358,7 +1372,8 @@ class TestWindow implements SingletonFlutterWindow {
     'Deprecated to prepare for the upcoming multi-window support. '
     'This feature was deprecated after v3.9.0-0.1.pre.'
   )
-  set viewInsetsTestValue(ViewPadding value) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set viewInsetsTestValue(ViewPadding value) {
     _view.viewInsets = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
   }
 
@@ -1389,7 +1404,8 @@ class TestWindow implements SingletonFlutterWindow {
     'Deprecated to prepare for the upcoming multi-window support. '
     'This feature was deprecated after v3.9.0-0.1.pre.'
   )
-  set viewPaddingTestValue(ViewPadding value) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set viewPaddingTestValue(ViewPadding value) {
     _view.viewPadding = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
   }
 
@@ -1419,7 +1435,8 @@ class TestWindow implements SingletonFlutterWindow {
     'Deprecated to prepare for the upcoming multi-window support. '
     'This feature was deprecated after v3.9.0-0.1.pre.'
   )
-  set paddingTestValue(ViewPadding value) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set paddingTestValue(ViewPadding value) {
     _view.padding = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
   }
 
@@ -1446,7 +1463,8 @@ class TestWindow implements SingletonFlutterWindow {
     'Deprecated to prepare for the upcoming multi-window support. '
     'This feature was deprecated after v3.9.0-0.1.pre.'
   )
-  set gestureSettingsTestValue(GestureSettings gestureSettingsTestValue) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set gestureSettingsTestValue(GestureSettings gestureSettingsTestValue) {
     _view.gestureSettings = gestureSettingsTestValue;
   }
 
@@ -1473,7 +1491,8 @@ class TestWindow implements SingletonFlutterWindow {
     'Deprecated to prepare for the upcoming multi-window support. '
     'This feature was deprecated after v3.9.0-0.1.pre.'
   )
-  set displayFeaturesTestValue(List<DisplayFeature> displayFeaturesTestValue) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set displayFeaturesTestValue(List<DisplayFeature> displayFeaturesTestValue) {
     _view.displayFeatures = displayFeaturesTestValue;
   }
 
@@ -1503,7 +1522,8 @@ class TestWindow implements SingletonFlutterWindow {
     'Deprecated to prepare for the upcoming multi-window support. '
     'This feature was deprecated after v3.9.0-0.1.pre.'
   )
-  set systemGestureInsetsTestValue(ViewPadding value) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set systemGestureInsetsTestValue(ViewPadding value) {
     _view.systemGestureInsets = value is FakeViewPadding ? value : FakeViewPadding._wrap(value);
   }
 
@@ -1644,7 +1664,8 @@ class TestWindow implements SingletonFlutterWindow {
     'Deprecated to prepare for the upcoming multi-window support. '
     'This feature was deprecated after v3.9.0-0.1.pre.'
   )
-  set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set nativeSpellCheckServiceDefinedTestValue(bool nativeSpellCheckServiceDefinedTestValue) {
     platformDispatcher.nativeSpellCheckServiceDefinedTestValue = nativeSpellCheckServiceDefinedTestValue;
   }
 

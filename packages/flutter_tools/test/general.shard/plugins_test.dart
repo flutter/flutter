@@ -81,6 +81,23 @@ class _PluginPlatformInfo {
 }
 
 void main() {
+  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
+  // See https://github.com/flutter/flutter/issues/160257 for details.
+  FeatureFlags enableExplicitPackageDependencies() {
+    return TestFeatureFlags(
+      isExplicitPackageDependenciesEnabled: true,
+    );
+  }
+
+  // TODO(matanlurey): Remove after `explicit-package-dependencies` is removed.
+  // See https://github.com/flutter/flutter/issues/48918 for details.
+  FeatureFlags disableExplicitPackageDependencies() {
+    return TestFeatureFlags(
+      // ignore: avoid_redundant_argument_values
+      isExplicitPackageDependenciesEnabled: false,
+    );
+  }
+
   group('plugins', () {
     late FileSystem fs;
     late FakeFlutterProject flutterProject;
@@ -406,24 +423,25 @@ dependencies:
       testUsingContext('Refreshing the plugin list is a no-op when the plugins list stays empty', () async {
         await refreshPluginsList(flutterProject);
 
-        expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('Refreshing the plugin list deletes the plugin file when there were plugins but no longer are', () async {
         flutterProject.flutterPluginsFile.createSync();
-        flutterProject.flutterPluginsDependenciesFile.createSync();
 
         await refreshPluginsList(flutterProject);
 
-        expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('Refreshing the plugin list creates a sorted plugin directory when there are plugins', () async {
@@ -438,16 +456,18 @@ dependencies:
 
         await refreshPluginsList(flutterProject);
 
-        expect(flutterProject.flutterPluginsFile.existsSync(), true);
+        expect(flutterProject.flutterPluginsFile.existsSync(), false, reason: 'No longer emitted');
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
 
-        final String pluginsFileContents = flutterProject.flutterPluginsFile.readAsStringSync();
+        final String pluginsFileContents = flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
         expect(pluginsFileContents.indexOf('plugin_a'), lessThan(pluginsFileContents.indexOf('plugin_b')));
         expect(pluginsFileContents.indexOf('plugin_b'), lessThan(pluginsFileContents.indexOf('plugin_c')));
         expect(pluginsFileContents.indexOf('plugin_c'), lessThan(pluginsFileContents.indexOf('plugin_d')));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('Opting in to explicit-package-dependencies omits .flutter-plugins', () async {
@@ -463,11 +483,9 @@ dependencies:
         expect(flutterProject.flutterPluginsFile, isNot(exists));
         expect(flutterProject.flutterPluginsDependenciesFile, exists);
       }, overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(
-          isExplicitPackageDependenciesEnabled: true,
-        ),
         FileSystem: () => fs,
         ProcessManager: FakeProcessManager.empty,
+        FeatureFlags: enableExplicitPackageDependencies,
         Pub: FakePubWithPrimedDeps.new,
       });
 
@@ -582,6 +600,7 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
         FlutterVersion: () => flutterVersion,
+        FeatureFlags: disableExplicitPackageDependencies,
       });
 
       testUsingContext(
@@ -656,6 +675,8 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
         FlutterVersion: () => flutterVersion,
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext(
@@ -704,6 +725,8 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
         FlutterVersion: () => flutterVersion,
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext(
@@ -749,6 +772,8 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
         FlutterVersion: () => flutterVersion,
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext(
@@ -797,6 +822,8 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
         FlutterVersion: () => flutterVersion,
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('Changes to the plugin list invalidates the Cocoapod lockfiles', () async {
@@ -814,6 +841,8 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
         FlutterVersion: () => flutterVersion,
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('No changes to the plugin list does not invalidate the Cocoapod lockfiles', () async {
@@ -837,6 +866,8 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => systemClock,
         FlutterVersion: () => flutterVersion,
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
     });
 
@@ -863,6 +894,8 @@ dependencies:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       // Issue: https://github.com/flutter/flutter/issues/47803
@@ -888,6 +921,8 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('new embedding app uses a plugin that supports v1 and v2 embedding', () async {
@@ -910,6 +945,8 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('Modules use new embedding', () async {
@@ -929,6 +966,8 @@ dependencies:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('Module using new plugin shows no warnings', () async {
@@ -950,6 +989,8 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('Module using plugin with v1 and v2 support shows no warning', () async {
@@ -971,6 +1012,8 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('App using plugin with v1 and v2 support shows no warning', () async {
@@ -992,6 +1035,8 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('Does not throw when AndroidManifest.xml is not found', () async {
@@ -1001,6 +1046,8 @@ dependencies:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       group('Build time plugin injection', () {
@@ -1039,6 +1086,8 @@ dependencies:
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: enableExplicitPackageDependencies,
+          Pub: FakePubWithPrimedDeps.new,
         });
 
         testUsingContext('user-selected implementation overrides inline implementation on web', () async {
@@ -1093,6 +1142,8 @@ dependencies:
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: enableExplicitPackageDependencies,
+          Pub: FakePubWithPrimedDeps.new,
         });
       });
 
@@ -1118,6 +1169,8 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('Injecting creates generated iOS registrant, but does not include Dart-only plugins', () async {
@@ -1145,6 +1198,8 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('Injecting creates generated macos registrant, but does not include Dart-only plugins', () async {
@@ -1172,6 +1227,8 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext("pluginClass: none doesn't trigger registrant entry on macOS", () async {
@@ -1201,6 +1258,8 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('Invalid yaml does not crash plugin lookup.', () async {
@@ -1223,6 +1282,8 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('Injecting creates generated Linux registrant', () async {
@@ -1239,6 +1300,8 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('user-selected implementation overrides inline implementation', () async {
@@ -1287,6 +1350,8 @@ dependencies:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('user-selected implementation overrides default implementation', () async {
@@ -1345,6 +1410,8 @@ dependencies:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('Injecting creates generated Linux registrant, but does not include Dart-only plugins', () async {
@@ -1368,6 +1435,8 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext("pluginClass: none doesn't trigger registrant entry on Linux", () async {
@@ -1392,6 +1461,8 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('Injecting creates generated Linux plugin Cmake file', () async {
@@ -1410,6 +1481,8 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('Generated Linux plugin files sorts by plugin name', () async {
@@ -1433,6 +1506,8 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('Injecting creates generated Windows registrant', () async {
@@ -1449,6 +1524,8 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('Injecting creates generated Windows registrant, but does not include Dart-only plugins', () async {
@@ -1471,6 +1548,8 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext("pluginClass: none doesn't trigger registrant entry on Windows", () async {
@@ -1495,6 +1574,8 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('Generated Windows plugin files sorts by plugin name', () async {
@@ -1518,6 +1599,8 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('Generated plugin CMake files always use posix-style paths', () async {
@@ -1537,6 +1620,8 @@ flutter:
       }, overrides: <Type, Generator>{
         FileSystem: () => fsWindows,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('injectPlugins will validate if all plugins in the project are part of the passed allowedPlugins', () async {
@@ -1560,6 +1645,8 @@ The Flutter Preview device does not support the following plugins from your pubs
       }, overrides: <Type, Generator>{
         FileSystem: () => fsWindows,
         ProcessManager: () => FakeProcessManager.empty(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('iOS and macOS project setup up Darwin Dependency Management', () async {
@@ -1577,6 +1664,8 @@ The Flutter Preview device does not support the following plugins from your pubs
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
 
       testUsingContext('non-iOS or macOS project does not setup up Darwin Dependency Management', () async {
@@ -1589,6 +1678,8 @@ The Flutter Preview device does not support the following plugins from your pubs
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: enableExplicitPackageDependencies,
+        Pub: FakePubWithPrimedDeps.new,
       });
     });
 

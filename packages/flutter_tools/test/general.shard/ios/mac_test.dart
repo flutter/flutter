@@ -12,7 +12,9 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
@@ -24,10 +26,17 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
 
 void main() {
   late BufferLogger logger;
+
+  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
+  // See https://github.com/flutter/flutter/issues/160257 for details.
+  FeatureFlags enableExplicitPackageDependencies() {
+    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
+  }
 
   setUp(() {
     logger = BufferLogger.test();
@@ -665,6 +674,8 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       ));
     }, overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
+      FeatureFlags: enableExplicitPackageDependencies,
+      Pub: FakePubWithPrimedDeps.new,
     });
   });
 

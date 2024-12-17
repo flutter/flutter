@@ -2461,7 +2461,8 @@ class RenderTransform extends RenderProxyBox {
   /// There is no getter for [transform], because [Matrix4] is mutable, and
   /// mutations outside of the control of the render object could not reliably
   /// be reflected in the rendering.
-  set transform(Matrix4 value) { // ignore: avoid_setters_without_getters
+  // ignore: avoid_setters_without_getters
+  set transform(Matrix4 value) {
     if (_transform == value) {
       return;
     }

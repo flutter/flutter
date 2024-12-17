@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -34,6 +35,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_pub_deps.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 import '../src/testbed.dart';
@@ -48,6 +50,14 @@ void main() {
   late ResidentRunner residentRunner;
   late FakeDevice device;
   FakeVmServiceHost? fakeVmServiceHost;
+
+  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
+  // See https://github.com/flutter/flutter/issues/160257 for details.
+  FeatureFlags enableExplicitPackageDependencies() {
+    return TestFeatureFlags(
+      isExplicitPackageDependenciesEnabled: true,
+    );
+  }
 
   setUp(() {
     testbed = Testbed(setup: () {
@@ -1132,6 +1142,9 @@ void main() {
 
     expect(testLogger.errorText, isEmpty);
     expect(testLogger.statusText, isEmpty);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   }));
 
   testUsingContext('generated main uses correct target', () => testbed.run(() async {
@@ -1206,6 +1219,9 @@ flutter:
     expect(generatedMain.existsSync(), isTrue);
     expect(testLogger.errorText, isEmpty);
     expect(testLogger.statusText, isEmpty);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   }));
 
   testUsingContext('ResidentRunner can run source generation - generation fails', () => testbed.run(() async {

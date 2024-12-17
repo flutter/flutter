@@ -21,6 +21,21 @@ import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 
 void main() {
+  // TODO(matanlurey): Remove after support for flutter_gen is removed.
+  // See https://github.com/flutter/flutter/issues/102983 for details.
+  FeatureFlags disableExplicitPackageDependencies() {
+    // ignore: avoid_redundant_argument_values
+    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: false);
+  }
+
+  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
+  // See https://github.com/flutter/flutter/issues/160257 for details.
+  FeatureFlags enableExplicitPackageDependencies() {
+    return TestFeatureFlags(
+      isExplicitPackageDependenciesEnabled: true,
+    );
+  }
+
   testUsingContext('calls buildSystem.build with blank l10n.yaml file', () async {
     // Project directory setup for gen_l10n logic
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
@@ -68,6 +83,8 @@ void main() {
       ),
     );
     await completer.future;
+  }, overrides: <Type, Generator>{
+    FeatureFlags: disableExplicitPackageDependencies,
   });
 
   testUsingContext('calls buildSystem.build with l10n.yaml synthetic-package: true', () async {
@@ -118,6 +135,8 @@ void main() {
       ),
     );
     await completer.future;
+  }, overrides: <Type, Generator>{
+    FeatureFlags: disableExplicitPackageDependencies,
   });
 
   testUsingContext('calls buildSystem.build with l10n.yaml synthetic-package: null', () async {
@@ -166,6 +185,8 @@ void main() {
       ),
     );
     await completer.future;
+  }, overrides: <Type, Generator>{
+    FeatureFlags: disableExplicitPackageDependencies,
   });
 
   testUsingContext('does not call buildSystem.build when l10n.yaml is not present', () async {
@@ -305,6 +326,8 @@ void main() {
       mockBufferLogger.warningText,
       contains('https://flutter.dev/to/flutter-gen-deprecation'),
     );
+  }, overrides: <Type, Generator>{
+    FeatureFlags: disableExplicitPackageDependencies,
   });
 
   testUsingContext('synthetic-package: true (explicit) logs a deprecation warning', () async {
@@ -340,6 +363,8 @@ void main() {
       mockBufferLogger.warningText,
       contains('https://flutter.dev/to/flutter-gen-deprecation'),
     );
+  }, overrides: <Type, Generator>{
+    FeatureFlags: disableExplicitPackageDependencies,
   });
 
   testUsingContext('synthetic-package: false has no deprecation warning', () async {
@@ -375,6 +400,42 @@ void main() {
       mockBufferLogger.warningText,
       isNot(contains('https://flutter.dev/to/flutter-gen-deprecation')),
     );
+  });
+
+  testUsingContext('synthetic-package omitted with explicit-package-dependencies is a NOP', () async {
+    // Project directory setup for gen_l10n logic
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+
+    // Add generate:true to pubspec.yaml.
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    final String content = pubspecFile.readAsStringSync().replaceFirst(
+      '\nflutter:\n',
+      '\nflutter:\n  generate: true\n',
+    );
+    pubspecFile.writeAsStringSync(content);
+
+    final BufferLogger mockBufferLogger = BufferLogger.test();
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      fileSystem: fileSystem,
+      logger: mockBufferLogger,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.empty(),
+    );
+    final TestBuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true));
+
+    await generateLocalizationsSyntheticPackage(
+      environment: environment,
+      buildSystem: buildSystem,
+      buildTargets: const NoOpBuildTargets(),
+    );
+
+    expect(
+      mockBufferLogger.warningText,
+      isNot(contains('https://flutter.dev/to/flutter-gen-deprecation')),
+    );
+  }, overrides: <Type, Generator> {
+    FeatureFlags: enableExplicitPackageDependencies,
   });
 
   testUsingContext('synthetic-package: true with explicit-packages-resolution is an error', () async {
