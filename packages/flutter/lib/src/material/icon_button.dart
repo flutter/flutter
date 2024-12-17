@@ -489,9 +489,9 @@ class IconButton extends StatelessWidget {
   /// The callback that is called when the button is hovered.
   final ValueChanged<bool>? onHover;
 
-  /// The callback that is called when the button is long-presses.
+  /// The callback that is called when the button is long-pressed.
   ///
-  /// If onPressed is set to null, the onLongPress will be disabled.
+  /// If onPressed is set to null, the onLongPress callback is not called.
   final VoidCallback? onLongPress;
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
