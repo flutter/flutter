@@ -500,6 +500,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     widget.focusNode?.removeListener(_updateOptionsViewVisibility);
     _internalFocusNode?.dispose();
     _highlightedOptionIndex.dispose();
+    _fieldBoxConstraints.dispose();
     super.dispose();
   }
 
