@@ -45,6 +45,10 @@ void main() {
           hostVmServicePort: 1234,
         ),
         enableVmService: false,
+        buildInfo: BuildInfo.debug,
+        fileSystem: fileSystem,
+        processManager: FakeProcessManager.empty(),
+        logger: BufferLogger.test(),
       );
       flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform);
 
@@ -61,6 +65,10 @@ void main() {
         shellPath: '/',
         precompiledDillPath: 'example.dill',
         enableVmService: false,
+        buildInfo: BuildInfo.debug,
+        fileSystem: fileSystem,
+        processManager: FakeProcessManager.empty(),
+        logger: BufferLogger.test(),
       );
       flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform);
 
@@ -80,6 +88,10 @@ void main() {
         flutterProject: _FakeFlutterProject(),
         host: InternetAddress.anyIPv4,
         updateGoldens: false,
+        buildInfo: BuildInfo.debug,
+        fileSystem: fileSystem,
+        processManager: FakeProcessManager.empty(),
+        logger: BufferLogger.test(),
       );
 
       await expectLater(
@@ -111,6 +123,10 @@ void main() {
         host: InternetAddress.anyIPv4,
         updateGoldens: false,
         shutdownHooks: shutdownHooks,
+        buildInfo: BuildInfo.debug,
+        fileSystem: fileSystem,
+        processManager: FakeProcessManager.empty(),
+        logger: BufferLogger.test(),
       );
 
       await expectLater(
@@ -134,6 +150,10 @@ void main() {
           BuildInfo.debug,
           startPaused: true,
         ),
+        buildInfo: BuildInfo.debug,
+        fileSystem: fileSystem,
+        processManager: FakeProcessManager.empty(),
+        logger: BufferLogger.test(),
       ), throwsAssertionError);
 
       expect(() => installHook(
@@ -143,6 +163,10 @@ void main() {
           startPaused: true,
           hostVmServicePort: 123,
         ),
+        buildInfo: BuildInfo.debug,
+        fileSystem: fileSystem,
+        processManager: FakeProcessManager.empty(),
+        logger: BufferLogger.test(),
       ), throwsAssertionError);
 
       FlutterPlatform? capturedPlatform;
@@ -166,6 +190,10 @@ void main() {
         platformPluginRegistration: (FlutterPlatform platform) {
           capturedPlatform = platform;
         },
+        buildInfo: BuildInfo.debug,
+        fileSystem: fileSystem,
+        processManager: FakeProcessManager.empty(),
+        logger: BufferLogger.test(),
       );
 
       expect(identical(capturedPlatform, flutterPlatform), equals(true));
