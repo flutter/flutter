@@ -529,7 +529,11 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         );
       }
     }
-    return TextEditingValue.empty;
+
+    return switch (_localTextEditingController?.value) {
+      TextEditingValue.empty => TextEditingValue.empty,
+      _ => const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
+    };
   }
 
   @override
