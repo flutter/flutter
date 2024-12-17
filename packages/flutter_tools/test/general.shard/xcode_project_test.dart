@@ -122,7 +122,7 @@ void main() {
 
     group('usesSwiftPackageManager', () {
       testUsingContext(
-        'is true if feature on',
+        'is true if the feature is on',
         () async {
           final MemoryFileSystem fs = MemoryFileSystem.test();
           final Directory projectDirectory = fs.directory('path');
