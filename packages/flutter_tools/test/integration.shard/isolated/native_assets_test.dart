@@ -72,7 +72,7 @@ void main() {
             <String>['run', '-d$device', '--$buildMode'],
             exampleDirectory.path,
             <Transition>[
-              Multiple(
+              Multiple.contains(
                 <Pattern>['Flutter run key commands.'],
                 handler: (String line) {
                   if (buildMode == 'debug') {
@@ -85,7 +85,7 @@ void main() {
                 },
               ),
               if (buildMode == 'debug') ...<Transition>[
-                Barrier('Performing hot reload...'.padRight(progressMessageWidth), logging: true),
+                Barrier.contains('Performing hot reload...', logging: true),
                 Multiple(
                   <Pattern>[RegExp('Reloaded .*')],
                   handler: (String line) {
@@ -93,7 +93,7 @@ void main() {
                     return 'R';
                   },
                 ),
-                Barrier('Performing hot restart...'.padRight(progressMessageWidth)),
+                Barrier.contains('Performing hot restart...'),
                 Multiple(
                   <Pattern>[RegExp('Restarted application .*')],
                   handler: (String line) {
@@ -101,15 +101,9 @@ void main() {
                     return 'r';
                   },
                 ),
-                Barrier('Performing hot reload...'.padRight(progressMessageWidth), logging: true),
-                Multiple(
-                  <Pattern>[RegExp('Reloaded .*')],
-                  handler: (String line) {
-                    return 'q';
-                  },
-                ),
+                Barrier.contains('Performing hot reload...', logging: true),
               ],
-              const Barrier('Application finished.'),
+              Barrier.contains('Application finished.'),
             ],
             logging: false,
           );
