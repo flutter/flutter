@@ -271,17 +271,17 @@ void main() {
       includePaths: <String>['packages/flutter/lib'],
     ), shouldHaveErrors: true);
     final String lines = <String>[
-      '║ packages/flutter/lib/stopwatch.dart:18: Stopwatch()',
-      '║ packages/flutter/lib/stopwatch.dart:19: Stopwatch()',
-      '║ packages/flutter/lib/stopwatch.dart:24: StopwatchAtHome()',
-      '║ packages/flutter/lib/stopwatch.dart:27: StopwatchAtHome.new',
-      '║ packages/flutter/lib/stopwatch.dart:30: StopwatchAtHome.create',
-      '║ packages/flutter/lib/stopwatch.dart:36: externallib.MyStopwatch.create()',
-      '║ packages/flutter/lib/stopwatch.dart:40: externallib.MyStopwatch.new',
-      '║ packages/flutter/lib/stopwatch.dart:45: externallib.stopwatch',
-      '║ packages/flutter/lib/stopwatch.dart:46: externallib.createMyStopwatch()',
-      '║ packages/flutter/lib/stopwatch.dart:47: externallib.createStopwatch()',
-      '║ packages/flutter/lib/stopwatch.dart:48: externallib.createMyStopwatch'
+      '║ packages/flutter/lib/stopwatch.dart:20: Stopwatch()',
+      '║ packages/flutter/lib/stopwatch.dart:22: Stopwatch()',
+      '║ packages/flutter/lib/stopwatch.dart:28: StopwatchAtHome()',
+      '║ packages/flutter/lib/stopwatch.dart:33: StopwatchAtHome.new',
+      '║ packages/flutter/lib/stopwatch.dart:37: StopwatchAtHome.create',
+      '║ packages/flutter/lib/stopwatch.dart:44: externallib.MyStopwatch.create()',
+      '║ packages/flutter/lib/stopwatch.dart:49: externallib.MyStopwatch.new',
+      '║ packages/flutter/lib/stopwatch.dart:55: externallib.stopwatch',
+      '║ packages/flutter/lib/stopwatch.dart:57: externallib.createMyStopwatch()',
+      '║ packages/flutter/lib/stopwatch.dart:59: externallib.createStopwatch()',
+      '║ packages/flutter/lib/stopwatch.dart:61: externallib.createMyStopwatch'
     ]
       .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
       .join('\n');
