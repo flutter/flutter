@@ -1762,7 +1762,7 @@ class EditableText extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [ScribbleClient], which can be mixed into an arbirtrary widget to
+  ///   * [ScribbleClient], which can be mixed into an arbitrary widget to
   ///     provide iOS Scribble functionality.
   ///   * [Scribe], which can be used to interact with Android Scribe directly.
   final bool stylusHandwritingEnabled;
@@ -1832,6 +1832,10 @@ class EditableText extends StatefulWidget {
   /// * Android autofill: Go to Settings -> System -> Languages & input ->
   ///   Autofill service. Enable the autofill service of your choice, and make
   ///   sure there are available credentials associated with your app.
+  ///
+  /// Specifying [InputDecoration.hintText] may also help autofill services
+  /// (like Samsung Pass) determine the expected content type of an input field,
+  /// although this is typically not required when autofillHints are present.
   ///
   /// #### I called `TextInput.finishAutofillContext` but the autofill save
   /// prompt isn't showing
@@ -4681,6 +4685,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     if (_selectionOverlay == null) {
+      return false;
+    }
+    if (_selectionOverlay!.toolbarIsVisible) {
       return false;
     }
     _liveTextInputStatus?.update();

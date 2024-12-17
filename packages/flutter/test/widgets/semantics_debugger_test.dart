@@ -61,6 +61,26 @@ void main() {
     expect(true, isTrue); // expect that we reach here without crashing
   });
 
+  testWidgets('SemanticsDebugger draw persistent color based on structure', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SemanticsDebugger(
+          child: Stack(
+            children: <Widget>[
+              Semantics(
+                container: true,
+                child: Semantics(container: true),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(SemanticsDebugger), paints..rect()..rect(color: const Color(0xFFF866FF)));
+  });
+
   testWidgets('SemanticsDebugger reparents subtree', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
@@ -521,8 +541,11 @@ void main() {
       ),
     );
 
-    // ignore: avoid_dynamic_calls
-    expect(_getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester).labelStyle, labelStyle);
+    expect(
+      // ignore: avoid_dynamic_calls
+      _getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester).labelStyle,
+      labelStyle,
+    );
   });
 
   testWidgets('SemanticsDebugger label for rtl.', (WidgetTester tester) async {

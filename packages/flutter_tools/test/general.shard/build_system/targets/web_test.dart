@@ -11,6 +11,8 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
@@ -19,6 +21,8 @@ import 'package:flutter_tools/src/web_template.dart';
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
+import '../../../src/fake_pub_deps.dart';
+import '../../../src/fakes.dart';
 import '../../../src/testbed.dart';
 
 const List<String> _kDart2jsLinuxArgs = <String>[
@@ -41,6 +45,15 @@ void main() {
   late Testbed testbed;
   late Environment environment;
   late FakeProcessManager processManager;
+
+  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
+  // See https://github.com/flutter/flutter/issues/160257 for details.
+  FeatureFlags enableExplicitPackageDependencies() {
+    return TestFeatureFlags(
+      isExplicitPackageDependenciesEnabled: true,
+    );
+  }
+
   final Platform linux = FakePlatform(
     environment: <String, String>{},
   );
@@ -112,6 +125,8 @@ void main() {
     expect(generated, contains('entrypoint.main as _'));
   }, overrides: <Type, Generator>{
     TemplateRenderer: () => const MustacheTemplateRenderer(),
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   }));
 
   test('version.json is created after release build', () => testbed.run(() async {
@@ -266,6 +281,8 @@ void main() {
     expect(generated, contains("import 'file:///other/lib/main.dart' as entrypoint;"));
   }, overrides: <Type, Generator>{
     TemplateRenderer: () => const MustacheTemplateRenderer(),
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   }));
 
   test('WebEntrypointTarget generates a plugin registrant for a file outside of main', () => testbed.run(() async {
@@ -283,6 +300,8 @@ void main() {
     expect(generated, contains("import 'web_plugin_registrant.dart' as pluginRegistrant;"));
   }, overrides: <Type, Generator>{
     TemplateRenderer: () => const MustacheTemplateRenderer(),
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   }));
 
 
@@ -310,6 +329,8 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => windows,
     TemplateRenderer: () => const MustacheTemplateRenderer(),
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   }));
 
   test('WebEntrypointTarget generates an entrypoint without plugins and init platform', () => testbed.run(() async {
@@ -334,6 +355,8 @@ void main() {
     expect(generated, contains('entrypoint.main as _'));
   }, overrides: <Type, Generator>{
     TemplateRenderer: () => const MustacheTemplateRenderer(),
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   }));
 
   test('WebEntrypointTarget generates an entrypoint with a language version', () => testbed.run(() async {
@@ -349,6 +372,8 @@ void main() {
     expect(generated, contains('// @dart=2.8'));
   }, overrides: <Type, Generator>{
     TemplateRenderer: () => const MustacheTemplateRenderer(),
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   }));
 
   test('WebEntrypointTarget generates an entrypoint with a language version from a package config', () => testbed.run(() async {
@@ -366,6 +391,8 @@ void main() {
     expect(generated, contains('// @dart=2.7'));
   }, overrides: <Type, Generator>{
     TemplateRenderer: () => const MustacheTemplateRenderer(),
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   }));
 
   test('WebEntrypointTarget generates an entrypoint without plugins and without init platform', () => testbed.run(() async {
@@ -390,6 +417,8 @@ void main() {
     expect(generated, contains('entrypoint.main as _'));
   }, overrides: <Type, Generator>{
     TemplateRenderer: () => const MustacheTemplateRenderer(),
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   }));
 
   test('Dart2JSTarget calls dart2js with expected args with csp', () => testbed.run(() async {
@@ -401,6 +430,7 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-source-maps',
         '-o',
@@ -416,6 +446,7 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-minify',
         '--no-source-maps',
@@ -446,6 +477,7 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-source-maps',
         '-o',
@@ -461,6 +493,7 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-minify',
         '--no-source-maps',
@@ -490,6 +523,7 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-source-maps',
         '-o',
@@ -506,6 +540,7 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-minify',
         '--no-source-maps',
@@ -533,6 +568,7 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-source-maps',
         '-o',
@@ -548,6 +584,7 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-minify',
         '--no-source-maps',
@@ -575,6 +612,7 @@ void main() {
         '-Ddart.vm.product=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-source-maps',
         '-o',
@@ -590,6 +628,7 @@ void main() {
         '-Ddart.vm.product=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-source-maps',
         '-O4',
@@ -617,6 +656,7 @@ void main() {
         '-Ddart.vm.product=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--native-null-assertions',
         '--no-source-maps',
@@ -633,6 +673,7 @@ void main() {
         '-Ddart.vm.product=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--native-null-assertions',
         '--no-source-maps',
@@ -661,6 +702,7 @@ void main() {
         '-Ddart.vm.product=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-source-maps',
         '-o',
@@ -676,6 +718,7 @@ void main() {
         '-Ddart.vm.product=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-source-maps',
         '-O3',
@@ -703,6 +746,7 @@ void main() {
         '-Ddart.vm.product=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-source-maps',
         '-o',
@@ -721,6 +765,7 @@ void main() {
         '-Ddart.vm.product=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-source-maps',
         '-O4',
@@ -757,6 +802,7 @@ void main() {
         '-DBAZ=qux',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-source-maps',
         '-o',
@@ -774,6 +820,7 @@ void main() {
         '-DBAZ=qux',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-source-maps',
         '-O4',
@@ -801,6 +848,7 @@ void main() {
         '-Ddart.vm.product=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -815,6 +863,7 @@ void main() {
         '-Ddart.vm.product=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '-O4',
         '-o',
@@ -842,6 +891,7 @@ void main() {
         '-DBAZ=qux',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-source-maps',
         '-o',
@@ -859,6 +909,7 @@ void main() {
         '-DBAZ=qux',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-minify',
         '--no-source-maps',
@@ -888,6 +939,7 @@ void main() {
         '-DBAZ=qux',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-source-maps',
         '--enable-asserts',
@@ -905,6 +957,7 @@ void main() {
         '-DBAZ=qux',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-minify',
         '--no-source-maps',
@@ -935,6 +988,7 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-source-maps',
         '-o',
@@ -950,6 +1004,7 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-minify',
         '--no-source-maps',
@@ -980,6 +1035,7 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-source-maps',
         '-o',
@@ -995,6 +1051,7 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFLUTTER_WEB_AUTO_DETECT=false',
         '-DFLUTTER_WEB_USE_SKIA=true',
+        '-DFLUTTER_WEB_USE_SKWASM=false',
         '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
         '--no-minify',
         '--no-source-maps',
@@ -1051,6 +1108,7 @@ void main() {
                     if (renderer == WebRendererMode.canvaskit) ...<String>[
                       '-DFLUTTER_WEB_AUTO_DETECT=false',
                       '-DFLUTTER_WEB_USE_SKIA=true',
+                      '-DFLUTTER_WEB_USE_SKWASM=false',
                     ],
                     '-DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/abcdefghijklmnopqrstuvwxyz/',
                     '--extra-compiler-option=--depfile=${depFile.absolute.path}',

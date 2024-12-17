@@ -2713,7 +2713,7 @@ final class BuildScope {
   }
 
   bool _debugAssertElementInScope(Element element, Element debugBuildRoot) {
-    final bool isInScope = element._debugIsDescsendantOf(debugBuildRoot)
+    final bool isInScope = element._debugIsDescendantOf(debugBuildRoot)
                         || !element.debugIsActive;
     if (isInScope) {
       return true;
@@ -3674,7 +3674,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     });
   }
 
-  bool _debugIsDescsendantOf(Element target) {
+  bool _debugIsDescendantOf(Element target) {
     Element? element = this;
     while (element != null && element.depth > target.depth) {
       element = element._parent;
@@ -5172,7 +5172,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       if (owner!._debugBuilding) {
         assert(owner!._debugCurrentBuildTarget != null);
         assert(owner!._debugStateLocked);
-        if (_debugIsDescsendantOf(owner!._debugCurrentBuildTarget!)) {
+        if (_debugIsDescendantOf(owner!._debugCurrentBuildTarget!)) {
           return true;
         }
         final List<DiagnosticsNode> information = <DiagnosticsNode>[
@@ -5382,18 +5382,13 @@ class _ElementDiagnosticableTreeNode extends DiagnosticableTreeNode {
   final bool stateful;
 
   @override
-  Map<String, Object?> toJsonMap(
-    DiagnosticsSerializationDelegate delegate, {
-    bool fullDetails = true,
-  }) {
-    final Map<String, Object?> json = super.toJsonMap(delegate, fullDetails: fullDetails,);
+  Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object?> json = super.toJsonMap(delegate);
     final Element element = value as Element;
     if (!element.debugIsDefunct) {
       json['widgetRuntimeType'] = element.widget.runtimeType.toString();
     }
-    if (fullDetails) {
-      json['stateful'] = stateful;
-    }
+    json['stateful'] = stateful;
     return json;
   }
 }
@@ -6639,7 +6634,8 @@ abstract class RenderObjectElement extends Element {
   }
 
   @override
-  void performRebuild() { // ignore: must_call_super, _performRebuild calls super.
+  // ignore: must_call_super, _performRebuild calls super.
+  void performRebuild() {
     _performRebuild(); // calls widget.updateRenderObject()
   }
 

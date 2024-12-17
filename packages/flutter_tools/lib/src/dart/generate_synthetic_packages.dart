@@ -49,11 +49,11 @@ Future<void> generateLocalizationsSyntheticPackage({
     // Generate gen_l10n synthetic package only if synthetic-package: true or
     // synthetic-package is null.
     final bool? isSyntheticL10nPackage = value as bool?;
-    if (isSyntheticL10nPackage == false) {
+    if (isSyntheticL10nPackage == false || isSyntheticL10nPackage == null && featureFlags.isExplicitPackageDependenciesEnabled) {
       return;
     }
   } else if (featureFlags.isExplicitPackageDependenciesEnabled) {
-    // synthetic-packages: true was not set and it is no longer the defualt.
+    // synthetic-packages: true was not set and it is no longer the default.
     return;
   }
 

@@ -30,6 +30,23 @@ import '../../src/test_flutter_command_runner.dart';
 void main() {
   late FakeStdio mockStdio;
 
+  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
+  // See https://github.com/flutter/flutter/issues/160257 for details.
+  FeatureFlags enableExplicitPackageDependencies() {
+    return TestFeatureFlags(
+      isExplicitPackageDependenciesEnabled: true,
+    );
+  }
+
+  // TODO(matanlurey): Remove after `flutter_gen` is removed.
+  // See https://github.com/flutter/flutter/issues/102983 for details.
+  FeatureFlags disableExplicitPackageDependencies() {
+    return TestFeatureFlags(
+      // ignore: avoid_redundant_argument_values
+      isExplicitPackageDependenciesEnabled: false,
+    );
+  }
+
   setUp(() {
     mockStdio = FakeStdio()..stdout.terminalColumns = 80;
 
@@ -328,13 +345,14 @@ flutter:
         botDetector: globals.botDetector,
         platform: globals.platform,
       ),
+      FeatureFlags: disableExplicitPackageDependencies,
     });
 
     testUsingContext('get fetches packages for a workspace', () async {
       tempDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: workspace
 environment:
-  sdk: ^3.5.0-0
+  sdk: ^3.7.0-0
 workspace:
   - flutter_project
 ''');
@@ -593,7 +611,7 @@ workspace:
       await runCommandIn(projectPath, 'get');
 
       expectDependenciesResolved(projectPath);
-      expectModulePluginInjected(projectPath, includeLegacyPluginsList: true);
+      expectModulePluginInjected(projectPath, includeLegacyPluginsList: false);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
@@ -605,6 +623,7 @@ workspace:
         platform: globals.platform,
         stdio: mockStdio,
       ),
+      FeatureFlags: enableExplicitPackageDependencies,
     });
 
     testUsingContext('get fetches packages and injects plugin in plugin project', () async {
@@ -623,7 +642,7 @@ workspace:
       await runCommandIn(exampleProjectPath, 'get');
 
       expectDependenciesResolved(exampleProjectPath);
-      expectPluginInjected(exampleProjectPath, includeLegacyPluginsList: true);
+      expectPluginInjected(exampleProjectPath, includeLegacyPluginsList: false);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
@@ -635,6 +654,7 @@ workspace:
         platform: globals.platform,
         stdio: mockStdio,
       ),
+      FeatureFlags: enableExplicitPackageDependencies,
     });
 
     testUsingContext('get explicit-packages-resolution omits ".flutter-plugins"', () async {

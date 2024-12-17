@@ -16,12 +16,14 @@ import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_web.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -37,6 +39,16 @@ void main() {
   late BufferLogger logger;
   late ProcessManager processManager;
   late Artifacts artifacts;
+
+  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
+  // See https://github.com/flutter/flutter/issues/160257 for details.
+  FeatureFlags enableExplicitPackageDependencies() {
+    return TestFeatureFlags(
+      isExplicitPackageDependenciesEnabled: true,
+      // Assumed to be true below.
+      isWebEnabled: true,
+    );
+  }
 
   setUpAll(() {
     Cache.flutterRoot = '';
@@ -371,7 +383,7 @@ void main() {
           'build',
           'web',
           '--no-pub',
-          '--web-renderer=${webRenderer.name}',
+          ...webRenderer.toCliDartDefines,
         ]);
       } on ToolExit catch (error) {
         expect(error, isA<ToolExit>());
@@ -384,6 +396,8 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Logger: () => logger,
+      FeatureFlags: enableExplicitPackageDependencies,
+      Pub: FakePubWithPrimedDeps.new,
     });
   }
   /// Do test all the deprecated WebRendererModes
@@ -402,12 +416,6 @@ void main() {
       expect(command.usage, contains(option));
     }
 
-    void expectHidden(String option) {
-      expect(command.argParser.options.keys, contains(option));
-      expect(command.argParser.options[option]!.hide, isTrue);
-      expect(command.usage, isNot(contains(option)));
-    }
-
     expectVisible('pwa-strategy');
     expectVisible('web-resources-cdn');
     expectVisible('optimization-level');
@@ -419,8 +427,6 @@ void main() {
     expectVisible('wasm');
     expectVisible('strip-wasm');
     expectVisible('base-href');
-
-    expectHidden('web-renderer');
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,

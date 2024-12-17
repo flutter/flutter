@@ -2079,7 +2079,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (_hasError) MaterialState.error,
   };
 
-
   InputBorder _getDefaultBorder(ThemeData themeData, InputDecorationTheme defaults) {
     final InputBorder border =  MaterialStateProperty.resolveAs(decoration.border, materialState)
       ?? const UnderlineInputBorder();

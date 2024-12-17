@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
+import 'package:yaml_edit/yaml_edit.dart';
 
 import '../src/convert.dart';
 import 'android/android_builder.dart';
@@ -17,6 +18,7 @@ import 'base/utils.dart';
 import 'base/version.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
+import 'dart/package_map.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
@@ -93,7 +95,7 @@ class FlutterProjectFactory {
 /// cached.
 class FlutterProject {
   @visibleForTesting
-  FlutterProject(this.directory, this.manifest, this._exampleManifest);
+  FlutterProject(this.directory, this._manifest, this._exampleManifest);
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -130,7 +132,8 @@ class FlutterProject {
   Directory get buildDirectory => directory.childDirectory('build');
 
   /// The manifest of this project.
-  final FlutterManifest manifest;
+  FlutterManifest get manifest => _manifest;
+  late FlutterManifest _manifest;
 
   /// The manifest of the example sub-project of this project.
   final FlutterManifest _exampleManifest;
@@ -226,8 +229,14 @@ class FlutterProject {
   /// The `.gitignore` file of this project.
   File get gitignoreFile => directory.childFile('.gitignore');
 
+  File get packageConfig => findPackageConfigFileOrDefault(directory);
+
   /// The `.dart-tool` directory of this project.
   Directory get dartTool => directory.childDirectory('.dart_tool');
+
+  /// The location of the generated scaffolding project for hosting widget
+  /// previews from this project.
+  Directory get widgetPreviewScaffold => dartTool.childDirectory('widget_preview_scaffold');
 
   /// The directory containing the generated code for this project.
   Directory get generated => directory
@@ -247,6 +256,12 @@ class FlutterProject {
     _exampleDirectory(directory),
     _exampleManifest,
     FlutterManifest.empty(logger: globals.logger),
+  );
+
+  /// The generated scaffolding project for hosting widget previews from this
+  /// project.
+  late final FlutterProject widgetPreviewScaffoldProject = FlutterProject.fromDirectory(
+    widgetPreviewScaffold,
   );
 
   /// True if this project is a Flutter module project.
@@ -308,6 +323,16 @@ class FlutterProject {
       throwToolExit('Please correct the pubspec.yaml file at $path');
     }
     return manifest;
+  }
+
+  /// Replaces the content of [pubspecFile] with the contents of [updated] and
+  /// sets [manifest] to the [updated] manifest.
+  void replacePubspec(FlutterManifest updated) {
+    final YamlMap updatedPubspecContents = updated.toYaml();
+    final YamlEditor editor = YamlEditor('');
+    editor.update(const <String>[], updatedPubspecContents);
+    pubspecFile.writeAsStringSync(editor.toString());
+    _manifest = updated;
   }
 
   /// Reapplies template files and regenerates project files and plugin
@@ -865,7 +890,7 @@ $javaGradleCompatUrl
     }
     for (final XmlElement metaData in document.findAllElements('meta-data')) {
       final String? name = metaData.getAttribute('android:name');
-      // External code checks for this string to indentify flutter android apps.
+      // External code checks for this string to identify flutter android apps.
       // See cl/667760684 as an example.
       if (name == 'flutterEmbedding') {
         final String? embeddingVersionString = metaData.getAttribute('android:value');

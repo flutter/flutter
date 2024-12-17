@@ -12,6 +12,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
@@ -72,12 +73,20 @@ dynamic getRenderChip(WidgetTester tester) {
   return element.renderObject;
 }
 
-// ignore: avoid_dynamic_calls
-double getSelectProgress(WidgetTester tester) => getRenderChip(tester)?.checkmarkAnimation?.value as double;
-// ignore: avoid_dynamic_calls
-double getAvatarDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.avatarDrawerAnimation?.value as double;
-// ignore: avoid_dynamic_calls
-double getDeleteDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.deleteDrawerAnimation?.value as double;
+double getSelectProgress(WidgetTester tester) {
+  // ignore: avoid_dynamic_calls
+  return getRenderChip(tester)?.checkmarkAnimation?.value as double;
+}
+
+double getAvatarDrawerProgress(WidgetTester tester) {
+  // ignore: avoid_dynamic_calls
+  return getRenderChip(tester)?.avatarDrawerAnimation?.value as double;
+}
+
+double getDeleteDrawerProgress(WidgetTester tester) {
+  // ignore: avoid_dynamic_calls
+  return getRenderChip(tester)?.deleteDrawerAnimation?.value as double;
+}
 
 /// Adds the basic requirements for a Chip.
 Widget wrapForChip({
@@ -6081,6 +6090,61 @@ void main() {
       getMaterialBox(tester),
       isNot(paints..rrect(color: hoverColor)..rect(color: themeDataHoverColor)),
     );
+  });
+
+  testWidgets('Chip mouse cursor behavior', (WidgetTester tester) async {
+    const SystemMouseCursor customCursor = SystemMouseCursors.grab;
+
+    await tester.pumpWidget(wrapForChip(
+      child: const Center(
+        child: Chip(
+          mouseCursor: customCursor,
+          label: Text('Chip'),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+   );
+
+    final Offset chip = tester.getCenter(find.text('Chip'));
+    await gesture.moveTo(chip);
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      customCursor,
+    );
+  });
+
+  testWidgets('Mouse cursor resolves in disabled states', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    await tester.pumpWidget(
+      wrapForChip(
+        child: const Center(
+          child: Chip(
+            mouseCursor: WidgetStateMouseCursor.fromMap(
+              <WidgetStatesConstraint, MouseCursor>{
+                WidgetState.disabled: SystemMouseCursors.forbidden,
+              },
+            ),
+            label: Text('Chip'),
+          ),
+        ),
+      ),
+    );
+    // Unfocused case.
+    final TestGesture gesture1 = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    addTearDown(gesture1.removePointer);
+    await gesture1.addPointer(location: tester.getCenter(find.text('Chip')));
+    await tester.pump();
+    await gesture1.moveTo(tester.getCenter(find.text('Chip')));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
   });
 }
 
