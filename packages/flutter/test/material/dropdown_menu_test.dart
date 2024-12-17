@@ -2142,7 +2142,7 @@ void main() {
         listenable: controller,
         builder: (BuildContext context, Widget? child) {
           buildCount += 1;
-          if (buildCount > 10) {
+          if (buildCount > 2) {
             throw StateError('too many builds!');
           }
 
