@@ -138,7 +138,7 @@ abstract class Pub {
   /// skipped if the package config file has a "generator" other than "pub".
   /// Defaults to true.
   ///
-  /// [outputMode] determines how verbose the output from `pub get` will be.
+  /// [outputMode] determines how detailed the output from `pub get` will be.
   /// If [PubOutputMode.all] is used, `pub get` will print its typical output
   /// which includes information about all changed dependencies. If
   /// [PubOutputMode.summaryOnly] is used, only summary information will be printed.
@@ -156,6 +156,13 @@ abstract class Pub {
     bool shouldSkipThirdPartyGenerator = true,
     PubOutputMode outputMode = PubOutputMode.all,
   });
+
+  /// Runs, parses, and returns `pub deps --json` for [project].
+  ///
+  /// While it is guaranteed that, if successful, that the result are a valid
+  /// JSON object, the exact contents returned are _not_ validated, and are left
+  /// as a responsibility of the caller.
+  Future<Map<String, Object?>> deps(FlutterProject project);
 
   /// Runs pub in 'batch' mode.
   ///
@@ -346,12 +353,9 @@ class _DefaultPub implements Pub {
     }
 
     final String command = upgrade ? 'upgrade' : 'get';
-    final bool verbose = _logger.isVerbose;
     final List<String> args = <String>[
       if (_logger.supportsColor)
         '--color',
-      if (verbose)
-        '--verbose',
       '--directory',
       _fileSystem.path.relative(directory),
       ...<String>[
@@ -371,6 +375,48 @@ class _DefaultPub implements Pub {
       outputMode: outputMode,
     );
     await _updateVersionAndPackageConfig(project);
+  }
+
+  @override
+  Future<Map<String, Object?>> deps(FlutterProject project) async {
+    final List<String> pubCommand = <String>[
+      ..._pubCommand,
+      'deps',
+      '--json',
+    ];
+
+    final RunResult runResult = await _processUtils.run(
+      pubCommand,
+      workingDirectory: project.directory.path,
+    );
+
+    Never fail([String? reason]) {
+      final String stdout = runResult.stdout;
+      if (stdout.isNotEmpty) {
+        _logger.printTrace(stdout);
+      }
+      final String stderr = runResult.stderr;
+      throw StateError(
+        '${pubCommand.join(' ')} ${reason != null ? 'had unexpected output: $reason' : 'failed'}'
+        '${stderr.isNotEmpty ? '\n$stderr' : ''}',
+      );
+    }
+
+    // Guard against dart pub deps crashing.
+    if (runResult.exitCode != 0) {
+      fail();
+    }
+
+    // Guard against dart pub deps having explicitly invalid output.
+    try {
+      final Object? result = json.decode(runResult.stdout);
+      if (result is! Map<String, Object?>) {
+        fail('Not a JSON object');
+      }
+      return result;
+    } on FormatException catch (e) {
+      fail('$e');
+    }
   }
 
   /// Runs pub with [arguments] and [ProcessStartMode.inheritStdio] mode.
@@ -752,10 +798,21 @@ class _DefaultPub implements Pub {
         _fileSystem,
       ));
 
-    if (!project.manifest.generateSyntheticPackage) {
+    // TODO(matanlurey): Remove this once flutter_gen is removed.
+    //
+    // This is actually incorrect logic; the presence of a `generate: true`
+    // does *NOT* mean that we need to add `flutter_gen` to the package config,
+    // and never did, but the name of the manifest field was labeled and
+    // described incorrectly.
+    //
+    // Tracking removal: https://github.com/flutter/flutter/issues/102983.
+    if (!project.manifest.generateLocalizations) {
       return;
     }
 
+    // TODO(matanlurey): Remove this once flutter_gen is removed.
+    //
+    // See https://github.com/dart-lang/pub/issues/4471.
     if (!_fileSystem.path.equals(packageConfigFile.parent.parent.path, project.directory.path)) {
       throwToolExit('`generate: true` is not supported within workspaces.');
     }

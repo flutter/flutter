@@ -24,12 +24,6 @@ void main() {
   });
 
   test('error logged when plugin Android compileSdk version higher than project', () async {
-    final String flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
-
     // Create dummy plugin
     processManager.runSync(<String>[
       flutterBin,
@@ -54,7 +48,7 @@ void main() {
 
     final Directory pluginExampleAppDir = pluginAppDir.childDirectory('example');
 
-    final File projectGradleFile = pluginExampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
+    final File projectGradleFile = pluginExampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle.kts');
     expect(projectGradleFile, exists);
 
     final String projectBuildGradle = projectGradleFile.readAsStringSync();

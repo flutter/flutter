@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['flutter-test-driver'])
+library;
+
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/web/compile.dart';
 
 import '../integration.shard/test_data/hot_reload_project.dart';
 import '../integration.shard/test_driver.dart';
@@ -45,11 +49,11 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
 
   testWithoutContext('$testName: hot restart works without error', () async {
     flutter.stdout.listen(printOnFailure);
-    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose']);
     await flutter.hotRestart();
   });
 
-  testWithoutContext('$testName: newly added code executes during hot restart', () async {
+  testWithoutContext('$testName: newly added code executes during hot restart - html (legacy)', () async {
     final Completer<void> completer = Completer<void>();
     final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
       printOnFailure(line);
@@ -57,7 +61,10 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
         completer.complete();
       }
     });
-    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>[
+      '--verbose',
+      ...WebRendererMode.html.toCliDartDefines,
+    ]);
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();
@@ -75,7 +82,7 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
         completer.complete();
       }
     });
-    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=canvaskit']);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose']);
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();

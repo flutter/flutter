@@ -130,7 +130,7 @@ class FlutterDeviceManager extends DeviceManager {
       featureFlags: featureFlags,
       processManager: processManager,
       logger: logger,
-      config: customDevicesConfig
+      config: customDevicesConfig,
     ),
   ];
 

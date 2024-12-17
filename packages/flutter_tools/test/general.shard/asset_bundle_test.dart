@@ -774,6 +774,7 @@ flutter:
             impellerc,
             '--sksl',
             '--runtime-stage-gles',
+            '--runtime-stage-gles3',
             '--runtime-stage-vulkan',
             '--iplr',
             '--sl=$outputPath',

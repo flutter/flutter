@@ -124,11 +124,9 @@ Future<void> buildLinux(
       'A summary of your Linux bundle analysis can be found at: ${outputFile.path}',
     );
 
-    // DevTools expects a file path relative to the .flutter-devtools/ dir.
-    final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
     logger.printStatus(
       '\nTo analyze your app size in Dart DevTools, run the following command:\n'
-      'dart devtools --appSizeBase=$relativeAppSizePath'
+      'dart devtools --appSizeBase=${outputFile.path}'
     );
   }
 }

@@ -24,6 +24,21 @@ void main() {
   });
 
   group('Serialization', () {
+    // These are always included.
+    const List<String> defaultDiagnosticKeys = <String>[
+      'description',
+    ];
+    // These are only included when fullDetails = false.
+    const List<String> essentialDiagnosticKeys = <String>[
+      'shouldIndent',
+    ];
+    // These are only included with fullDetails = true.
+    const List<String> detailedDiagnosticKeys = <String>[
+      'type',
+      'hasChildren',
+      'allowWrap',
+    ];
+
     final TestTree testTree = TestTree(
       properties: <DiagnosticsNode>[
         StringProperty('stringProperty1', 'value1', quoted: false),
@@ -70,6 +85,57 @@ void main() {
       final Map<String, Object?> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate());
       expect(result.containsKey('properties'), isFalse);
       expect(result.containsKey('children'), isFalse);
+
+      for (final String keyName in defaultDiagnosticKeys) {
+        expect(
+          result.containsKey(keyName),
+          isTrue,
+          reason: '$keyName is included.',
+        );
+      }
+      for (final String keyName in detailedDiagnosticKeys) {
+        expect(
+          result.containsKey(keyName),
+          isTrue,
+          reason: '$keyName is included.',
+        );
+      }
+    });
+
+    test('iterative implementation (without full details)', () {
+      final Map<String, Object?> result = testTree
+        .toDiagnosticsNode()
+          .toJsonMapIterative(const DiagnosticsSerializationDelegate()
+        );
+      expect(result.containsKey('properties'), isFalse);
+      expect(result.containsKey('children'), isFalse);
+      for (final String keyName in defaultDiagnosticKeys) {
+        expect(
+          result.containsKey(keyName),
+          isTrue,
+          reason: '$keyName is included.',
+        );
+      }
+      for (final String keyName in essentialDiagnosticKeys) {
+        expect(
+          result.containsKey(keyName),
+          isTrue,
+          reason: '$keyName is included.',
+        );
+      }
+      for (final String keyName in detailedDiagnosticKeys) {
+        expect(
+          result.containsKey(keyName),
+          isFalse,
+          reason: '$keyName is  not included.',
+        );
+      }
+
+      // The truncated value should not be included if it is false.
+      expect(
+        result['truncated'] == null || result['truncated'] == true,
+        isTrue,
+      );
     });
 
     test('subtreeDepth 1', () {
@@ -279,7 +345,10 @@ class TestDiagnosticsSerializationDelegate implements DiagnosticsSerializationDe
   final NodeDelegator? nodeDelegator;
 
   @override
-  Map<String, Object> additionalNodeProperties(DiagnosticsNode node) {
+  Map<String, Object> additionalNodeProperties(
+    DiagnosticsNode node, {
+    bool fullDetails = true,
+  }) {
     return additionalNodePropertiesMap;
   }
 

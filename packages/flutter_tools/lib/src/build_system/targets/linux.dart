@@ -15,6 +15,7 @@ import 'assets.dart';
 import 'common.dart';
 import 'desktop.dart';
 import 'icon_tree_shaker.dart';
+import 'native_assets.dart';
 
 /// The only files/subdirectories we care out.
 const List<String> _kLinuxArtifacts = <String>[
@@ -99,6 +100,7 @@ abstract class BundleLinuxAssets extends Target {
   @override
   List<Target> get dependencies => <Target>[
     const KernelSnapshot(),
+    const InstallCodeAssets(),
     UnpackLinux(targetPlatform),
   ];
 
@@ -140,6 +142,8 @@ abstract class BundleLinuxAssets extends Target {
       buildMode: buildMode,
       additionalContent: <String, DevFSContent>{
         'version.json': DevFSStringContent(versionInfo),
+        'NativeAssetsManifest.json':
+            DevFSFileContent(environment.buildDir.childFile('native_assets.json')),
       },
     );
     environment.depFileService.writeToFile(

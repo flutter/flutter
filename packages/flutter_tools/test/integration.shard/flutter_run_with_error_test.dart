@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['flutter-test-driver'])
+library;
+
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -31,12 +34,6 @@ void main() {
   });
 
   testWithoutContext('flutter run in non-machine mode reports an early error in an application', () async {
-    final String flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
-
     final StringBuffer stdout = StringBuffer();
 
     final Process process = await processManager.start(<String>[

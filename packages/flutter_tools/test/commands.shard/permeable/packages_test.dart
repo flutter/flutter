@@ -2,13 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=1000"
-@Tags(<String>['no-shuffle'])
-library;
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -22,6 +15,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:yaml/yaml.dart';
@@ -36,11 +30,34 @@ import '../../src/test_flutter_command_runner.dart';
 void main() {
   late FakeStdio mockStdio;
 
+  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
+  // See https://github.com/flutter/flutter/issues/160257 for details.
+  FeatureFlags enableExplicitPackageDependencies() {
+    return TestFeatureFlags(
+      isExplicitPackageDependenciesEnabled: true,
+    );
+  }
+
+  // TODO(matanlurey): Remove after `flutter_gen` is removed.
+  // See https://github.com/flutter/flutter/issues/102983 for details.
+  FeatureFlags disableExplicitPackageDependencies() {
+    return TestFeatureFlags(
+      // ignore: avoid_redundant_argument_values
+      isExplicitPackageDependenciesEnabled: false,
+    );
+  }
+
   setUp(() {
     mockStdio = FakeStdio()..stdout.terminalColumns = 80;
+
+    // Some tests below override this with a blank root, always reset it.
+    Cache.flutterRoot = null;
   });
 
-  Cache.disableLocking();
+  setUpAll(() {
+    Cache.disableLocking();
+  });
+
   group('packages get/upgrade', () {
     late Directory tempDir;
     late FakeAnalytics fakeAnalytics;
@@ -73,10 +90,11 @@ void main() {
       return projectPath;
     }
 
-    Future<PackagesCommand> runCommandIn(String projectPath, String verb, { List<String>? args }) async {
+    Future<PackagesCommand> runCommandIn(String projectPath, String verb, { List<String>? args, List<String>? globalArgs }) async {
       final PackagesCommand command = PackagesCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
+        ...?globalArgs,
         'packages',
         verb,
         ...?args,
@@ -137,15 +155,21 @@ void main() {
       '.android/Flutter/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
     ];
 
-    const List<String> pluginWitnesses = <String>[
-      '.flutter-plugins',
-      'ios/Podfile',
-    ];
+    List<String> pluginWitnesses({required bool includeLegacyPluginsList}) {
+      return <String>[
+        if (includeLegacyPluginsList) '.flutter-plugins',
+        '.flutter-plugins-dependencies',
+        'ios/Podfile',
+      ];
+    }
 
-    const List<String> modulePluginWitnesses = <String>[
-      '.flutter-plugins',
-      '.ios/Podfile',
-    ];
+    List<String> modulePluginWitnesses({required bool includeLegacyPluginsList}) {
+      return <String>[
+        if (includeLegacyPluginsList) '.flutter-plugins',
+        '.flutter-plugins-dependencies',
+        '.ios/Podfile',
+      ];
+    }
 
     const Map<String, String> pluginContentWitnesses = <String, String>{
       'ios/Flutter/Debug.xcconfig': '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
@@ -167,7 +191,10 @@ void main() {
       for (final String registrant in modulePluginRegistrants) {
         expectExists(projectPath, registrant);
       }
-      for (final String witness in pluginWitnesses) {
+      for (final String witness in pluginWitnesses(includeLegacyPluginsList: true)) {
+        expectNotExists(projectPath, witness);
+      }
+      for (final String witness in modulePluginWitnesses(includeLegacyPluginsList: true)) {
         expectNotExists(projectPath, witness);
       }
       modulePluginContentWitnesses.forEach((String witness, String content) {
@@ -175,23 +202,26 @@ void main() {
       });
     }
 
-    void expectPluginInjected(String projectPath) {
+    void expectPluginInjected(String projectPath, {required bool includeLegacyPluginsList}) {
       for (final String registrant in pluginRegistrants) {
         expectExists(projectPath, registrant);
       }
-      for (final String witness in pluginWitnesses) {
+      for (final String witness in pluginWitnesses(includeLegacyPluginsList: includeLegacyPluginsList)) {
         expectExists(projectPath, witness);
+      }
+      if (!includeLegacyPluginsList) {
+        expectNotExists(projectPath, '.flutter-plugins');
       }
       pluginContentWitnesses.forEach((String witness, String content) {
         expectContains(projectPath, witness, content);
       });
     }
 
-    void expectModulePluginInjected(String projectPath) {
+    void expectModulePluginInjected(String projectPath, {required bool includeLegacyPluginsList}) {
       for (final String registrant in modulePluginRegistrants) {
         expectExists(projectPath, registrant);
       }
-      for (final String witness in modulePluginWitnesses) {
+      for (final String witness in modulePluginWitnesses(includeLegacyPluginsList: includeLegacyPluginsList)) {
         expectExists(projectPath, witness);
       }
       modulePluginContentWitnesses.forEach((String witness, String content) {
@@ -203,7 +233,7 @@ void main() {
       final Iterable<String> allFiles = <List<String>>[
         pubOutput,
         modulePluginRegistrants,
-        pluginWitnesses,
+        pluginWitnesses(includeLegacyPluginsList: true),
       ].expand<String>((List<String> list) => list);
       for (final String path in allFiles) {
         final File file = globals.fs.file(globals.fs.path.join(projectPath, path));
@@ -315,13 +345,14 @@ flutter:
         botDetector: globals.botDetector,
         platform: globals.platform,
       ),
+      FeatureFlags: disableExplicitPackageDependencies,
     });
 
     testUsingContext('get fetches packages for a workspace', () async {
       tempDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: workspace
 environment:
-  sdk: ^3.5.0-0
+  sdk: ^3.7.0-0
 workspace:
   - flutter_project
 ''');
@@ -389,6 +420,14 @@ workspace:
         .childFile('app_en.arb')
         ..createSync(recursive: true)
         ..writeAsStringSync('{ "hello": "Hello world!" }');
+      String pubspecFileContent = projectDir.childFile('pubspec.yaml').readAsStringSync();
+      pubspecFileContent = pubspecFileContent.replaceFirst(RegExp(r'\nflutter\:'), '''
+flutter:
+  generate: true
+''');
+      projectDir
+        .childFile('pubspec.yaml')
+        .writeAsStringSync(pubspecFileContent);
       projectDir
         .childFile('l10n.yaml')
         .writeAsStringSync('synthetic-package: false');
@@ -580,7 +619,7 @@ workspace:
       await runCommandIn(projectPath, 'get');
 
       expectDependenciesResolved(projectPath);
-      expectModulePluginInjected(projectPath);
+      expectModulePluginInjected(projectPath, includeLegacyPluginsList: false);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
@@ -592,6 +631,7 @@ workspace:
         platform: globals.platform,
         stdio: mockStdio,
       ),
+      FeatureFlags: enableExplicitPackageDependencies,
     });
 
     testUsingContext('get fetches packages and injects plugin in plugin project', () async {
@@ -610,8 +650,40 @@ workspace:
       await runCommandIn(exampleProjectPath, 'get');
 
       expectDependenciesResolved(exampleProjectPath);
-      expectPluginInjected(exampleProjectPath);
+      expectPluginInjected(exampleProjectPath, includeLegacyPluginsList: false);
     }, overrides: <Type, Generator>{
+      Stdio: () => mockStdio,
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        usage: globals.flutterUsage,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
+      FeatureFlags: enableExplicitPackageDependencies,
+    });
+
+    testUsingContext('get explicit-packages-resolution omits ".flutter-plugins"', () async {
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>['--template=plugin', '--no-pub', '--platforms=ios,android'],
+      );
+      final String exampleProjectPath = globals.fs.path.join(projectPath, 'example');
+      removeGeneratedFiles(projectPath);
+      removeGeneratedFiles(exampleProjectPath);
+
+      // Running flutter packages get also resolves the dependencies in the example/ project.
+      await runCommandIn(projectPath, 'get');
+
+      expectDependenciesResolved(projectPath);
+      expectDependenciesResolved(exampleProjectPath);
+      expectPluginInjected(exampleProjectPath, includeLegacyPluginsList: false);
+    }, overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(
+        isExplicitPackageDependenciesEnabled: true,
+      ),
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
         fileSystem: globals.fs,

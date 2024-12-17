@@ -377,6 +377,44 @@ void main() {
     root.buildScene(ui.SceneBuilder()).dispose();
     expect(calledBack, true);
   });
+
+  test('Change isRepaintBoundary after both markNeedsCompositedLayerUpdate and markNeedsPaint', () {
+    List<FlutterErrorDetails?>? caughtErrors;
+    TestRenderingFlutterBinding.instance.onErrors = () {
+      caughtErrors = TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails().toList();
+    };
+    final TestRenderObject object = TestRenderObject(allowPaintBounds: true);
+    object.isRepaintBoundary = true;
+    object.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
+    object.layout(const BoxConstraints.tightForFinite());
+    PaintingContext.repaintCompositedChild(object, debugAlsoPaintedParent: true);
+
+    object.markNeedsCompositedLayerUpdate();
+    object.markNeedsPaint();
+    object.isRepaintBoundary = false;
+    object.markNeedsCompositingBitsUpdate();
+    TestRenderingFlutterBinding.instance.pumpCompleteFrame();
+    expect(caughtErrors, isNull);
+  });
+
+  test('ContainerParentDataMixin asserts parentData type', () {
+    final TestRenderObject renderObject = TestRenderObjectWithoutSetupParentData();
+    final TestRenderObject child = TestRenderObject();
+    expect(
+      () => renderObject.add(child),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError error) => error.toString(),
+          'description',
+          contains(
+            'A child of TestRenderObjectWithoutSetupParentData has parentData of type ParentData, '
+            'which does not conform to TestRenderObjectParentData. Class using ContainerRenderObjectMixin '
+            'should override setupParentData() to set parentData to type TestRenderObjectParentData.'
+          ),
+        ),
+      ),
+    );
+  });
 }
 
 
@@ -482,6 +520,16 @@ class TestRenderObject extends RenderObject with ContainerRenderObjectMixin<Test
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
     describeSemanticsConfigurationCallCount++;
+  }
+}
+
+class TestRenderObjectWithoutSetupParentData extends TestRenderObject {
+  @override
+  void setupParentData(RenderObject child) {
+    // Use a mismatched parent data type.
+    if (child.parentData is! ParentData) {
+      child.parentData = ParentData();
+    }
   }
 }
 

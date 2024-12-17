@@ -124,6 +124,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       help: 'Print the address of the Dart Tooling Daemon, if one is hosted by the Flutter CLI.',
       hide: !verboseHelp,
     );
+
     if (verboseHelp) {
       argParser.addSeparator('Local build selection options (not normally required):');
     }

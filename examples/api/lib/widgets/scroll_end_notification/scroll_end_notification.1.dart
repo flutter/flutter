@@ -53,7 +53,7 @@ class _SliverAutoScrollExampleState extends State<SliverAutoScrollExample> {
 
   // After an interactive scroll ends, if the alignedItem is partially visible
   // at the top or bottom of the viewport, then auto-scroll so that it's
-  // completely visible. To accomodate mouse-wheel scrolls and other small
+  // completely visible. To accommodate mouse-wheel scrolls and other small
   // adjustments, scrolls that change the scroll offset by less than
   // the alignedItem's extent don't trigger an auto-scroll.
   void maybeAutoScrollAlignedItem(RenderSliver alignedItem) {

@@ -822,24 +822,20 @@ class _FABDefaultsM3 extends FloatingActionButtonThemeData {
   @override Color? get hoverColor => _colors.onPrimaryContainer.withOpacity(0.08);
 
   @override
-  ShapeBorder? get shape {
-    return switch (type) {
-      _FloatingActionButtonType.regular  => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
-      _FloatingActionButtonType.small    => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
-      _FloatingActionButtonType.large    => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0))),
-      _FloatingActionButtonType.extended => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
-    };
-  }
+  ShapeBorder? get shape => switch (type) {
+    _FloatingActionButtonType.regular  => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
+    _FloatingActionButtonType.small    => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
+    _FloatingActionButtonType.large    => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0))),
+    _FloatingActionButtonType.extended => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
+  };
 
   @override
-  double? get iconSize {
-    return switch (type) {
-      _FloatingActionButtonType.regular  => 24.0,
-      _FloatingActionButtonType.small    => 24.0,
-      _FloatingActionButtonType.large    => 36.0,
-      _FloatingActionButtonType.extended => 24.0,
-    };
-  }
+  double? get iconSize => switch (type) {
+    _FloatingActionButtonType.regular  => 24.0,
+    _FloatingActionButtonType.small    => 24.0,
+    _FloatingActionButtonType.large    => 36.0,
+    _FloatingActionButtonType.extended => 24.0,
+  };
 
   @override EdgeInsetsGeometry? get extendedPadding => EdgeInsetsDirectional.only(start: hasChild && _isExtended ? 16.0 : 20.0, end: 20.0);
   @override TextStyle? get extendedTextStyle => _textTheme.labelLarge;

@@ -42,6 +42,7 @@ class DataColumn {
   /// Creates the configuration for a column of a [DataTable].
   const DataColumn({
     required this.label,
+    this.columnWidth,
     this.tooltip,
     this.numeric = false,
     this.onSort,
@@ -66,6 +67,22 @@ class DataColumn {
   ///
   /// The label should not include the sort indicator.
   final Widget label;
+
+  /// How the horizontal extents of this column of the table should be determined.
+  ///
+  /// The [FixedColumnWidth] class can be used to specify a specific width in
+  /// pixels. This is the cheapest way to size a table's columns.
+  ///
+  /// The layout performance of the table depends critically on which column
+  /// sizing algorithms are used here. In particular, [IntrinsicColumnWidth] is
+  /// quite expensive because it needs to measure each cell in the column to
+  /// determine the intrinsic size of the column.
+  ///
+  /// If this property is `null`, the table applies a default behavior:
+  /// - If the table has exactly one column identified as the only text column
+  ///   (i.e., all the rest are numeric), that column uses `IntrinsicColumnWidth(flex: 1.0)`.
+  /// - All other columns use `IntrinsicColumnWidth()`.
+  final TableColumnWidth? columnWidth;
 
   /// The column heading's tooltip.
   ///
@@ -1122,11 +1139,14 @@ class DataTable extends StatelessWidget {
         start: paddingStart,
         end: paddingEnd,
       );
-      if (dataColumnIndex == _onlyTextColumn) {
+      if (column.columnWidth != null) {
+        tableColumns[displayColumnIndex] = column.columnWidth!;
+      } else if (dataColumnIndex == _onlyTextColumn) {
         tableColumns[displayColumnIndex] = const IntrinsicColumnWidth(flex: 1.0);
       } else {
         tableColumns[displayColumnIndex] = const IntrinsicColumnWidth();
       }
+
       final Set<MaterialState> headerStates = <MaterialState>{
         if (column.onSort == null)
           MaterialState.disabled,

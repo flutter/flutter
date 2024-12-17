@@ -67,18 +67,16 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
   final Set<TestScenario> values = Set<TestScenario>.from(TestScenario.values);
 
   late TestScenario currentValue;
-  bool get resample {
-    return switch (currentValue) {
-      TestScenario.resampleOn90Hz  || TestScenario.resampleOn59Hz  => true,
-      TestScenario.resampleOff90Hz || TestScenario.resampleOff59Hz => false,
-    };
-  }
-  double get frequency {
-    return switch (currentValue) {
-      TestScenario.resampleOn90Hz || TestScenario.resampleOff90Hz => 90.0,
-      TestScenario.resampleOn59Hz || TestScenario.resampleOff59Hz => 59.0,
-    };
-  }
+
+  bool get resample => switch (currentValue) {
+    TestScenario.resampleOn90Hz  || TestScenario.resampleOn59Hz  => true,
+    TestScenario.resampleOff90Hz || TestScenario.resampleOff59Hz => false,
+  };
+
+  double get frequency => switch (currentValue) {
+    TestScenario.resampleOn90Hz || TestScenario.resampleOff90Hz => 90.0,
+    TestScenario.resampleOn59Hz || TestScenario.resampleOff59Hz => 59.0,
+  };
 
   Map<String, dynamic>? result;
 

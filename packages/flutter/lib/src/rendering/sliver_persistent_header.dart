@@ -162,7 +162,13 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   }
 
   bool _needsUpdateChild = true;
+
+  /// The most recent `shrinkOffset` passed to [updateChild].
+  double get lastShrinkOffset => _lastShrinkOffset;
   double _lastShrinkOffset = 0.0;
+
+  /// The most recent `overlapsContent` passed to [updateChild].
+  bool get lastOverlapsContent => _lastOverlapsContent;
   bool _lastOverlapsContent = false;
 
   /// Defines the parameters used to execute an [AsyncCallback] when a

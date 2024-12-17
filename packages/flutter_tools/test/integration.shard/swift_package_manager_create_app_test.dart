@@ -10,12 +10,6 @@ import 'swift_package_manager_utils.dart';
 import 'test_utils.dart';
 
 void main() {
-  final String flutterBin = fileSystem.path.join(
-    getFlutterRoot(),
-    'bin',
-    'flutter',
-  );
-
   final List<String> platforms = <String>['ios', 'macos'];
   for (final String platformName in platforms) {
     final List<String> iosLanguages = <String>[

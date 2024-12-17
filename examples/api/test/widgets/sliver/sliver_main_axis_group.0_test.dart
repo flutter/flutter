@@ -19,7 +19,16 @@ void main() {
 
     final RenderSliverPersistentHeader renderAppBar = tester.renderObject<RenderSliverPersistentHeader>(find.byType(SliverAppBar));
     final RenderSliverList renderSliverList = tester.renderObject<RenderSliverList>(find.byType(SliverList));
-    final RenderSliverToBoxAdapter renderSliverAdapter = tester.renderObject<RenderSliverToBoxAdapter>(find.byType(SliverToBoxAdapter));
+    final RenderSliverToBoxAdapter renderSliverAdapter = tester.renderObject<RenderSliverToBoxAdapter>(
+      find.descendant(
+        of: find.byType(SliverMainAxisGroup),
+        matching: find.byType(
+          SliverToBoxAdapter,
+          skipOffstage: false,
+        ),
+        skipOffstage: false,
+      ),
+    );
 
     // renderAppBar, renderSliverList, and renderSliverAdapter1 are part of the same sliver group.
     expect(renderAppBar.geometry!.scrollExtent, equals(70.0));

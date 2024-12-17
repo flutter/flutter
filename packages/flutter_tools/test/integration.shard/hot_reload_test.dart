@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['flutter-test-driver'])
+library;
+
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -69,11 +72,21 @@ void main() {
 
   testWithoutContext('newly added code executes during hot reload', () async {
     final StringBuffer stdout = StringBuffer();
-    final StreamSubscription<String> subscription = flutter.stdout.listen(stdout.writeln);
+    final Completer<void> completer = Completer<void>();
+    final StreamSubscription<String> subscription = flutter.stdout.listen((String e) {
+      stdout.writeln(e);
+      // If hot reload properly executes newly added code, the 'RELOAD WORKED' message should
+      // be printed before 'TICK 2'. If we don't wait for some signal that the build method
+      // has executed after the reload, this test can encounter a race.
+      if (e.contains('((((TICK 2))))')) {
+        completer.complete();
+      }
+    });
     await flutter.run();
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotReload();
+      await completer.future;
       expect(stdout.toString(), contains('(((((RELOAD WORKED)))))'));
     } finally {
       await subscription.cancel();

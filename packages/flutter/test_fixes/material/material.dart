@@ -306,4 +306,12 @@ void main() {
 
   final PlatformMenuBar platformMenuBar = PlatformMenuBar(menus: <PlatformMenuItem>[], body: const SizedBox());
   final Widget bodyValue = platformMenuBar.body;
+
+  // Changes made in https://github.com/flutter/flutter/pull/154972
+  final InputBorder outlineBorder = MaterialStateOutlineInputBorder.resolveWith(
+    (states) => const OutlineInputBorder(),
+  );
+  final InputBorder underlineBorder = MaterialStateUnderlineInputBorder.resolveWith(
+    (states) => const UnderlineInputBorder(),
+  );
 }

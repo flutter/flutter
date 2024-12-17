@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -34,6 +35,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_pub_deps.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 import '../src/testbed.dart';
@@ -48,6 +50,14 @@ void main() {
   late ResidentRunner residentRunner;
   late FakeDevice device;
   FakeVmServiceHost? fakeVmServiceHost;
+
+  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
+  // See https://github.com/flutter/flutter/issues/160257 for details.
+  FeatureFlags enableExplicitPackageDependencies() {
+    return TestFeatureFlags(
+      isExplicitPackageDependenciesEnabled: true,
+    );
+  }
 
   setUp(() {
     testbed = Testbed(setup: () {
@@ -94,6 +104,12 @@ void main() {
     expect((await connectionInfo).baseUri, 'foo://bar');
     expect(futureAppStart.isCompleted, true);
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
+  }));
+
+  testUsingContext('ResidentRunner reports whether detach() was used', () => testbed.run(() async {
+    expect(residentRunner.stopAppDuringCleanup, true);
+    await residentRunner.detach();
+    expect(residentRunner.stopAppDuringCleanup, false);
   }));
 
   testUsingContext('ResidentRunner suppresses errors for the initial compilation', () => testbed.run(() async {
@@ -682,10 +698,6 @@ void main() {
   testUsingContext('ResidentRunner reports hot reload time details', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
-      FakeVmServiceRequest(
-        method: 'getVM',
-        jsonResponse: fakeVM.toJson(),
-      ),
       listViews,
       listViews,
       FakeVmServiceRequest(
@@ -1130,6 +1142,9 @@ void main() {
 
     expect(testLogger.errorText, isEmpty);
     expect(testLogger.statusText, isEmpty);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   }));
 
   testUsingContext('generated main uses correct target', () => testbed.run(() async {
@@ -1204,6 +1219,9 @@ flutter:
     expect(generatedMain.existsSync(), isTrue);
     expect(testLogger.errorText, isEmpty);
     expect(testLogger.statusText, isEmpty);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: enableExplicitPackageDependencies,
+    Pub: FakePubWithPrimedDeps.new,
   }));
 
   testUsingContext('ResidentRunner can run source generation - generation fails', () => testbed.run(() async {
@@ -1306,6 +1324,7 @@ flutter:
           commandHelp.M,
           commandHelp.g,
           commandHelp.hWithDetails,
+          commandHelp.d,
           commandHelp.c,
           commandHelp.q,
           '',
@@ -1335,6 +1354,7 @@ flutter:
           commandHelp.r,
           commandHelp.R,
           commandHelp.hWithoutDetails,
+          commandHelp.d,
           commandHelp.c,
           commandHelp.q,
           '',
@@ -1929,43 +1949,6 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('FlutterDevice does not throw when unable to initiate log reader due to VM service disconnection', () async {
-    fakeVmServiceHost = FakeVmServiceHost(
-      requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-          method: 'getVM',
-          error: FakeRPCError(
-            code: RPCErrorCodes.kServerError,
-            error: 'Service connection disposed',
-          ),
-        ),
-      ],
-    );
-    final TestFlutterDevice flutterDevice = TestFlutterDevice(device);
-    flutterDevice.vmService = fakeVmServiceHost!.vmService;
-    await flutterDevice.tryInitLogReader();
-
-    final BufferLogger logger = globals.logger as BufferLogger;
-    expect(
-      logger.traceText,
-      contains(
-        'VmService.getVm call failed: getVM: (-32000) '
-        'Service connection disposed\n',
-      ),
-    );
-    // We should not print a warning since the device does not have a connected
-    // adb log reader.
-    // TODO(andrewkolos): This test is a bit fragile, and is something that
-    //  should be corrected in a follow-up PR (see
-    //  https://github.com/flutter/flutter/issues/155795).
-    expect(logger.errorText, isEmpty);
-  }, overrides: <Type, Generator>{
-    Logger: () => BufferLogger.test(),
-    Artifacts: () => Artifacts.test(),
-    FileSystem: () => MemoryFileSystem.test(),
-    ProcessManager: () => FakeProcessManager.any(),
-  });
-
   testUsingContext('Uses existing DDS URI from exception field', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice device = FakeDevice()
@@ -2057,65 +2040,6 @@ flutter:
       FlutterProject? flutterProject,
       PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
       io.CompressionOptions? compression,
-      Device? device,
-      required Logger logger,
-    }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
-  }));
-
-  testUsingContext('Failed DDS start outputs error message', () => testbed.run(() async {
-    // See https://github.com/flutter/flutter/issues/72385 for context.
-    final FakeDevice device = FakeDevice()
-      ..dds = DartDevelopmentService(logger: testLogger);
-    ddsLauncherCallback = ({
-        required Uri remoteVmServiceUri,
-        Uri? serviceUri,
-        bool enableAuthCodes = true,
-        bool serveDevTools = false,
-        Uri? devToolsServerAddress,
-        bool enableServicePortFallback = false,
-        List<String> cachedUserTags = const <String>[],
-        String? dartExecutable,
-        String? google3WorkspaceRoot,
-      }) {
-      expect(remoteVmServiceUri, Uri(scheme: 'foo', host: 'bar'));
-      expect(enableAuthCodes, isTrue);
-      expect(serviceUri, Uri(scheme: 'http', host: '127.0.0.1', port: 0));
-      expect(cachedUserTags, isEmpty);
-      throw FakeDartDevelopmentServiceException(message: 'No URI');
-    };
-    final TestFlutterDevice flutterDevice = TestFlutterDevice(
-      device,
-      vmServiceUris: Stream<Uri>.value(testUri),
-    );
-    bool caught = false;
-    final Completer<void>done = Completer<void>();
-    runZonedGuarded(() {
-      flutterDevice.connect(
-        allowExistingDdsInstance: true,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, enableDevTools: false),
-      ).then((_) => done.complete());
-    }, (Object e, StackTrace st) {
-      expect(e, isA<StateError>());
-      expect((e as StateError).message, contains('No URI'));
-      expect(testLogger.errorText, contains(
-        'DDS has failed to start and there is not an existing DDS instance',
-      ));
-      done.complete();
-      caught = true;
-    });
-    await done.future;
-    if (!caught) {
-      fail('Expected a StateError to be thrown.');
-    }
-  }, overrides: <Type, Generator>{
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      GetSkSLMethod? getSkSLMethod,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
       Device? device,
       required Logger logger,
     }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,

@@ -14,7 +14,7 @@ task clean(type: Delete) {
 
 const String _lazyCleanTaskDeclaration = '''
 tasks.register("clean", Delete) {
-    delete rootProject.buildDir
+    delete rootProject.layout.buildDirectory
 }
 ''';
 

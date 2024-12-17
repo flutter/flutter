@@ -10,13 +10,26 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/features.dart';
 
 import '../../../src/context.dart'; // legacy
+import '../../../src/fake_pub_deps.dart';
 import '../../../src/fakes.dart';
 import '../../../src/test_build_system.dart';
 import '../../../src/test_flutter_command_runner.dart'; // legacy
 
 void main() {
+  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
+  // See https://github.com/flutter/flutter/issues/160257 for details.
+  FeatureFlags enableExplicitPackageDependencies() {
+    return TestFeatureFlags(
+      isExplicitPackageDependenciesEnabled: true,
+      // Assumed to be true below.
+      isWebEnabled: true,
+    );
+  }
+
   setUpAll(() {
     Cache.flutterRoot = '';
     Cache.disableLocking();
@@ -75,6 +88,8 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       BuildSystem: () => buildSystem,
+      FeatureFlags: enableExplicitPackageDependencies,
+      Pub: FakePubWithPrimedDeps.new,
     });
 
     testUsingContext('noop - .gitignore does not reference generated_plugin_registrant.dart - untouched', () async {
@@ -99,6 +114,8 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       BuildSystem: () => buildSystem,
+      FeatureFlags: enableExplicitPackageDependencies,
+      Pub: FakePubWithPrimedDeps.new,
     });
 
     testUsingContext('.gitignore references generated_plugin_registrant - cleans it up', () async {
@@ -123,6 +140,8 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       BuildSystem: () => buildSystem,
+      FeatureFlags: enableExplicitPackageDependencies,
+      Pub: FakePubWithPrimedDeps.new,
     });
 
     testUsingContext('generated_plugin_registrant.dart exists - gets deleted', () async {
@@ -146,6 +165,8 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       BuildSystem: () => buildSystem,
+      FeatureFlags: enableExplicitPackageDependencies,
+      Pub: FakePubWithPrimedDeps.new,
     });
 
     testUsingContext('scrubs generated_plugin_registrant file and cleans .gitignore', () async {
@@ -172,6 +193,8 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       BuildSystem: () => buildSystem,
+      FeatureFlags: enableExplicitPackageDependencies,
+      Pub: FakePubWithPrimedDeps.new,
     });
   });
 }
@@ -205,8 +228,8 @@ void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
     fileSystem.path.join('lib', 'main.dart'),
     fileSystem.path.join('packages', 'flutter_tools', 'lib', 'src', 'build_system', 'targets', 'web.dart'),
     fileSystem.path.join('bin', 'cache', 'flutter_web_sdk'),
-    fileSystem.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
     fileSystem.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
+    fileSystem.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dartaotruntime'),
     fileSystem.path.join('bin', 'cache', 'dart-sdk '),
   ];
   for (final String dependency in dependencies) {

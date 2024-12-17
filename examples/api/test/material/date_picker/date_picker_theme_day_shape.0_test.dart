@@ -14,6 +14,15 @@ void main() {
     const Color todayForegroundColor = Colors.black;
     const BorderSide todayBorder = BorderSide(width: 2);
 
+    ShapeDecoration? findDayDecoration(WidgetTester tester, String day) {
+      return tester.widget<Ink>(
+        find.ancestor(
+          of: find.text(day),
+          matching: find.byType(Ink)
+        ),
+      ).decoration as ShapeDecoration?;
+    }
+
     await tester.pumpWidget(
       const example.DatePickerApp(),
     );
@@ -21,21 +30,13 @@ void main() {
     await tester.tap(find.text('Open Date Picker'));
     await tester.pumpAndSettle();
 
-    ShapeDecoration dayShapeDecoration = tester.widget<DecoratedBox>(find.ancestor(
-      of: find.text('15'),
-      matching: find.byType(DecoratedBox),
-    )).decoration as ShapeDecoration;
-
     // Test the current day shape decoration.
+    ShapeDecoration dayShapeDecoration = findDayDecoration(tester, '15')!;
     expect(dayShapeDecoration.color, todayBackgroundColor);
     expect(dayShapeDecoration.shape, dayShape.copyWith(side: todayBorder.copyWith(color: todayForegroundColor)));
 
-    dayShapeDecoration = tester.widget<DecoratedBox>(find.ancestor(
-      of: find.text('20'),
-      matching: find.byType(DecoratedBox),
-    )).decoration as ShapeDecoration;
-
     // Test the selected day shape decoration.
+    dayShapeDecoration = findDayDecoration(tester, '20')!;
     expect(dayShapeDecoration.color, theme.colorScheme.primary);
     expect(dayShapeDecoration.shape, dayShape);
 
@@ -43,12 +44,8 @@ void main() {
     await tester.tap(find.text('15'));
     await tester.pumpAndSettle();
 
-    dayShapeDecoration = tester.widget<DecoratedBox>(find.ancestor(
-      of: find.text('15'),
-      matching: find.byType(DecoratedBox),
-    )).decoration as ShapeDecoration;
-
     // Test the selected day shape decoration.
+    dayShapeDecoration = findDayDecoration(tester, '15')!;
     expect(dayShapeDecoration.color, todayBackgroundColor);
     expect(dayShapeDecoration.shape, dayShape.copyWith(side: todayBorder.copyWith(color: todayForegroundColor)));
   });

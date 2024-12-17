@@ -667,7 +667,6 @@ class AppDomain extends Domain {
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
-    required HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
@@ -717,7 +716,6 @@ class AppDomain extends Domain {
         hostIsIde: true,
         machine: machine,
         analytics: globals.analytics,
-        nativeAssetsBuilder: nativeAssetsBuilder,
       );
     } else {
       runner = ColdRunner(
@@ -902,7 +900,7 @@ class AppDomain extends Domain {
     if (app == null) {
       throw DaemonException("app '$appId' not found");
     }
-    final FlutterDevice device = app.runner!.flutterDevices.first;
+    final FlutterDevice device = app.runner.flutterDevices.first;
     final List<FlutterView> views = await device.vmService!.getFlutterViews();
     final Map<String, Object?>? result = await device
       .vmService!
@@ -1550,20 +1548,24 @@ class NotifyingLogger extends DelegatingLogger {
 
 /// A running application, started by this daemon.
 class AppInstance {
-  AppInstance(this.id, { this.runner, this.logToStdout = false, required AppRunLogger logger })
-    : _logger = logger;
+  AppInstance(
+    this.id, {
+    required this.runner,
+    this.logToStdout = false,
+    required AppRunLogger logger,
+  }) : _logger = logger;
 
   final String id;
-  final ResidentRunner? runner;
+  final ResidentRunner runner;
   final bool logToStdout;
   final AppRunLogger _logger;
 
   Future<OperationResult> restart({ bool fullRestart = false, bool pause = false, String? reason }) {
-    return runner!.restart(fullRestart: fullRestart, pause: pause, reason: reason);
+    return runner.restart(fullRestart: fullRestart, pause: pause, reason: reason);
   }
 
-  Future<void> stop() => runner!.exit();
-  Future<void> detach() => runner!.detach();
+  Future<void> stop() => runner.exit();
+  Future<void> detach() => runner.detach();
 
   void closeLogger() {
     _logger.close();

@@ -2042,7 +2042,7 @@ class MemoryTest {
     await receivedNextMessage;
   }
 
-  /// Taps the application and looks for acknowldgement.
+  /// Taps the application and looks for acknowledgement.
   ///
   /// This is used by several tests to ensure scrolling gestures are installed.
   Future<void> tapNotification() async {

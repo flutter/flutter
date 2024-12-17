@@ -79,7 +79,10 @@ class WebEntrypointTarget extends Target {
     final String importedEntrypoint = packageConfig.toPackageUri(importUri)?.toString()
       ?? importUri.toString();
 
-    await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: environment.buildDir);
+    await injectBuildTimePluginFilesForWebPlatform(
+      flutterProject,
+      destination: environment.buildDir,
+    );
     // The below works because `injectBuildTimePluginFiles` is configured to write
     // the web_plugin_registrant.dart file alongside the generated main.dart
     const String generatedImport = 'web_plugin_registrant.dart';
@@ -95,8 +98,6 @@ class WebEntrypointTarget extends Target {
 
 abstract class Dart2WebTarget extends Target {
   const Dart2WebTarget();
-
-  Source get compilerSnapshot;
 
   WebCompilerConfig get compilerConfig;
 
@@ -126,7 +127,6 @@ abstract class Dart2WebTarget extends Target {
   @override
   List<Source> get inputs => <Source>[
     const Source.hostArtifact(HostArtifact.flutterWebSdk),
-    compilerSnapshot,
     const Source.artifact(Artifact.engineDartBinary),
     const Source.pattern('{BUILD_DIR}/main.dart'),
     const Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config_subset'),
@@ -152,9 +152,6 @@ class Dart2JSTarget extends Dart2WebTarget {
   String get name => 'dart2js';
 
   @override
-  Source get compilerSnapshot => const Source.artifact(Artifact.dart2jsSnapshot);
-
-  @override
   List<String> get depfiles => const <String>[
     'dart2js.d',
   ];
@@ -170,7 +167,8 @@ class Dart2JSTarget extends Dart2WebTarget {
     final String platformBinariesPath = artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path;
     final List<String> sharedCommandOptions = <String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
-      artifacts.getArtifactPath(Artifact.dart2jsSnapshot, platform: TargetPlatform.web_javascript),
+      'compile',
+      'js',
       '--platform-binaries=$platformBinariesPath',
       '--invoker=flutter_tool',
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
@@ -360,9 +358,6 @@ class Dart2WasmTarget extends Dart2WebTarget {
       compilationArgs,
     );
   }
-
-  @override
-  Source get compilerSnapshot => const Source.artifact(Artifact.dart2wasmSnapshot);
 
   @override
   String get name => 'dart2wasm';

@@ -18,7 +18,6 @@ void main() {
 
   late Directory tempDir;
   final FileSystem fs = LocalFileSystemBlockingSetCurrentDirectory();
-  final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
   final File previewBin = fs
           .directory(getFlutterRoot())
           .childDirectory('bin')

@@ -198,7 +198,7 @@ void main() {
       const Rect.fromLTRB(0.0, 0.0, 200.0, 600.0),
     );
 
-    final List<RenderSliverList> renderSlivers = tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
+    final List<RenderSliverList> renderSlivers = tester.renderObjectList<RenderSliverList>(find.byType(SliverList, skipOffstage: false)).toList();
     final RenderSliverList first = renderSlivers[0];
     final RenderSliverList second = renderSlivers[1];
 
@@ -268,7 +268,7 @@ void main() {
       const Rect.fromLTRB(100.0, 0.0, 300.0, 600.0),
     );
 
-    final List<RenderSliverList> renderSlivers = tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
+    final List<RenderSliverList> renderSlivers = tester.renderObjectList<RenderSliverList>(find.byType(SliverList, skipOffstage: false)).toList();
     final RenderSliverList first = renderSlivers[0];
     final RenderSliverList second = renderSlivers[1];
 
@@ -598,7 +598,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // At a scroll offset of 630, a normal scrolling header should be out of view.
-    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader, skipOffstage: false)) as RenderSliverPersistentHeader;
     expect(renderHeader.constraints.scrollOffset, equals(630));
     expect(renderHeader.geometry!.layoutExtent, equals(0.0));
   });
@@ -797,6 +797,78 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.byKey(key)), Offset.zero);
   });
+
+  testWidgets('SliverMainAxisGroup scrolls to the correct position when focusing on a text field within a header', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    final FocusNode textFieldFocus = FocusNode();
+    addTearDown(textFieldFocus.dispose);
+    final FocusNode textFieldFocus2 = FocusNode();
+    addTearDown(textFieldFocus2.dispose);
+    const ValueKey<int> firstTextFieldKey = ValueKey<int>(1);
+
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        controller: controller,
+        slivers: <Widget>[
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _SliverTitleDelegate(
+              child: Container(
+                color: Colors.red,
+                height: 60.0,
+              ),
+              height: 60.0,
+            ),
+          ),
+          SliverToBoxAdapter(
+              child: Material(
+            child: TextField(
+              key: firstTextFieldKey,
+              focusNode: textFieldFocus,
+            ),
+          )),
+          SliverToBoxAdapter(
+            child: Container(
+              color: Colors.green,
+              height: 500,
+            ),
+          ),
+          SliverToBoxAdapter(
+              child: Material(
+            child: TextField(
+              focusNode: textFieldFocus2,
+            ),
+          )),
+        ],
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
+
+    textFieldFocus2.requestFocus();
+    await tester.pumpAndSettle();
+
+    textFieldFocus.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.byKey(firstTextFieldKey)), const Offset(0, 60));
+  });
+
+  testWidgets('SliverMainAxisGroup offstage child', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        viewportHeight: 300,
+        slivers: <Widget>[
+          const SliverToBoxAdapter(child: SizedBox(height: 300)),
+          const SliverToBoxAdapter(child: SizedBox(height: 100, child: Text('1'))),
+        ]
+      )
+    );
+    expect(find.text('1'), findsNothing);
+    expect(find.text('1', skipOffstage: false), findsOneWidget);
+  });
 }
 
 Widget _buildSliverList({
@@ -874,4 +946,27 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(TestDelegate oldDelegate) => true;
+}
+
+class _SliverTitleDelegate extends SliverPersistentHeaderDelegate {
+  _SliverTitleDelegate({
+    required this.height,
+    required this.child,
+  });
+  final double height;
+  final Widget child;
+
+  @override
+  double get minExtent => height;
+  @override
+  double get maxExtent => height;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return child;
+  }
+
+  @override
+  bool shouldRebuild(_SliverTitleDelegate oldDelegate) => true;
 }

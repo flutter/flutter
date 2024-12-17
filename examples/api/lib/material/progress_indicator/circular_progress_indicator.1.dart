@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [CircularProgressIndicator].
 
-void main() => runApp(const ProgressIndicatorApp());
+void main() => runApp(const ProgressIndicatorExampleApp());
 
-class ProgressIndicatorApp extends StatelessWidget {
-  const ProgressIndicatorApp({super.key});
+class ProgressIndicatorExampleApp extends StatelessWidget {
+  const ProgressIndicatorExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -57,18 +57,17 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> wit
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
+          spacing: 16.0,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
               'Circular progress indicator',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: 30),
             CircularProgressIndicator(
               value: controller.value,
               semanticsLabel: 'Circular progress indicator',
             ),
-            const SizedBox(height: 10),
             Row(
               children: <Widget>[
                 Expanded(

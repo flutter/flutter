@@ -69,11 +69,8 @@ void main() {
 
   testWidgets('Default text selection color', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
     final OverlayEntry overlayEntry = OverlayEntry(
       builder: (BuildContext context) => SelectableRegion(
-        focusNode: focusNode,
         selectionControls: emptyTextSelectionControls,
         child: Align(
           key: key,

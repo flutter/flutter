@@ -198,6 +198,11 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
 
   final ShutdownHooks shutdownHooks;
 
+  // Indicates that `dispose()` has been invoked or some shutdown hook has executed,
+  // resulting in the underlying temporary directory being cleaned up.
+  bool get disposed => _disposed;
+  bool _disposed = false;
+
   Future<void> dispose() async {
     _tryToDeleteTemp();
     for (final MapEntry<ProcessSignal, Object> signalToken in _signalTokens.entries) {
@@ -210,6 +215,7 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   final List<ProcessSignal> _fatalSignals;
 
   void _tryToDeleteTemp() {
+    _disposed = true;
     try {
       if (_systemTemp?.existsSync() ?? false) {
         _systemTemp?.deleteSync(recursive: true);

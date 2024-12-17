@@ -30,6 +30,7 @@ class MyHome extends StatefulWidget {
   State<MyHome> createState() => _MyHomeState();
 }
 
+@pragma('vm:entry-point')
 class _MyHomeState extends State<MyHome> with RestorationMixin {
   final RestorableInt _lastCount = RestorableInt(0);
   late RestorableRouteFuture<int> _counterRoute;

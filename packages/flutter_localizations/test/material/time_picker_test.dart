@@ -524,16 +524,20 @@ void main() {
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
-      primaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
+      primaryLabels.map<String>(
+        // ignore: avoid_dynamic_calls
+        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
+      ),
       labels12To11,
     );
 
     // ignore: avoid_dynamic_calls
     final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
-      selectedLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
+      selectedLabels.map<String>(
+        // ignore: avoid_dynamic_calls
+        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
+      ),
       labels12To11,
     );
   });
@@ -546,16 +550,20 @@ void main() {
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
-      primaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
+      primaryLabels.map<String>(
+        // ignore: avoid_dynamic_calls
+        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
+      ),
       labels12To11,
     );
 
     // ignore: avoid_dynamic_calls
     final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
-      selectedLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
+      selectedLabels.map<String>(
+        // ignore: avoid_dynamic_calls
+        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
+      ),
       labels12To11,
     );
   });
@@ -568,16 +576,20 @@ void main() {
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
-      primaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
+      primaryLabels.map<String>(
+        // ignore: avoid_dynamic_calls
+        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
+      ),
       labels00To23TwoDigit,
     );
 
     // ignore: avoid_dynamic_calls
     final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
-      selectedLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
+      selectedLabels.map<String>(
+        // ignore: avoid_dynamic_calls
+        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
+      ),
       labels00To23TwoDigit,
     );
   });
@@ -590,18 +602,54 @@ void main() {
     // ignore: avoid_dynamic_calls
     final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
-      primaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
+      primaryLabels.map<String>(
+        // ignore: avoid_dynamic_calls
+        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
+      ),
       labels00To22TwoDigit,
     );
 
     // ignore: avoid_dynamic_calls
     final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
-      // ignore: avoid_dynamic_calls
-      selectedLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
+      selectedLabels.map<String>(
+        // ignore: avoid_dynamic_calls
+        (dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!,
+      ),
       labels00To22TwoDigit,
     );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/156565
+  testWidgets('AM/PM buttons should be aligned to LTR in Hindi language - Portrait', (WidgetTester tester) async {
+    const Locale locale = Locale('hi', 'HI');
+
+    final Offset centerPortrait = await startPicker(tester, (TimeOfDay? time) {}, locale: locale, useMaterial3: false, orientation: Orientation.portrait);
+
+    final Finder amButtonPortrait = find.text('AM');
+    final Finder pmButtonPortrait = find.text('PM') ;
+
+    final Offset amButtonPositionPortrait = tester.getCenter(amButtonPortrait);
+    final Offset pmButtonPositionPortrait = tester.getCenter(pmButtonPortrait);
+
+    expect(amButtonPositionPortrait.dx, greaterThan(centerPortrait.dx));
+    expect(pmButtonPositionPortrait.dx, greaterThan(centerPortrait.dx));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/156565
+  testWidgets('AM/PM buttons should be aligned to LTR in Hindi language - Landscape', (WidgetTester tester) async {
+    const Locale locale = Locale('hi', 'HI');
+
+    final Offset centerLandscape = await startPicker(tester, (TimeOfDay? time) {}, locale: locale, useMaterial3: false, orientation: Orientation.landscape);
+
+    final Finder amButtonLandscape = find.text('AM');
+    final Finder pmButtonLandscape = find.text('PM');
+
+    final Offset amButtonPositionLandscape = tester.getCenter(amButtonLandscape);
+    final Offset pmButtonPositionLandscape = tester.getCenter(pmButtonLandscape);
+
+    expect(amButtonPositionLandscape.dy, greaterThan(centerLandscape.dy));
+    expect(pmButtonPositionLandscape.dy, greaterThan(centerLandscape.dy));
   });
 }
 
@@ -611,12 +659,14 @@ class _TimePickerLauncher extends StatelessWidget {
     required this.locale,
     this.entryMode = TimePickerEntryMode.dial,
     this.useMaterial3,
+    this.orientation,
   });
 
   final ValueChanged<TimeOfDay?>? onChanged;
   final Locale locale;
   final TimePickerEntryMode entryMode;
   final bool? useMaterial3;
+  final Orientation? orientation;
 
   @override
   Widget build(BuildContext context) {
@@ -635,6 +685,7 @@ class _TimePickerLauncher extends StatelessWidget {
                   onChanged?.call(await showTimePicker(
                     context: context,
                     initialEntryMode: entryMode,
+                    orientation: orientation,
                     initialTime: const TimeOfDay(hour: 7, minute: 0),
                   ));
                 },
@@ -652,12 +703,14 @@ Future<Offset> startPicker(
   ValueChanged<TimeOfDay?> onChanged, {
     Locale locale = const Locale('en', 'US'),
     bool? useMaterial3,
+    Orientation? orientation,
 }) async {
   await tester.pumpWidget(
     _TimePickerLauncher(
       onChanged: onChanged,
       locale: locale,
       useMaterial3: useMaterial3,
+      orientation: orientation,
     ),
   );
   await tester.tap(find.text('X'));

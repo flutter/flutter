@@ -235,7 +235,7 @@ void main() {
     });
   });
 
-  testWidgets('Material3: Theme shadowColor', (WidgetTester tester) async {
+  testWidgets('Material3 - OutlinedButton repsects Theme shadowColor', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     const Color shadowColor = Color(0xff000001);
     const Color overriddenColor = Color(0xff000002);
@@ -306,7 +306,7 @@ void main() {
     expect(material.shadowColor, shadowColor);
   });
 
-  testWidgets('Material2: Theme shadowColor', (WidgetTester tester) async {
+  testWidgets('Material2 - OutlinedButton repsects Theme shadowColor', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     const Color shadowColor = Color(0xff000001);
     const Color overriddenColor = Color(0xff000002);
@@ -374,5 +374,41 @@ void main() {
     await tester.pumpAndSettle(); // theme animation
     material = tester.widget<Material>(buttonMaterialFinder);
     expect(material.shadowColor, shadowColor);
+  });
+
+  testWidgets('OutlinedButton.icon alignment respects OutlinedButtonTheme ButtonStyle.iconAlignment', (WidgetTester tester) async {
+    Widget buildButton({ IconAlignment? iconAlignment }) {
+      return MaterialApp(
+        theme: ThemeData(
+          outlinedButtonTheme: OutlinedButtonThemeData(
+            style: ButtonStyle(iconAlignment: iconAlignment),
+          ),
+        ),
+        home: Scaffold(
+          body: Center(
+            child: OutlinedButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.add),
+              label: const Text('button'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildButton());
+
+    final Offset buttonTopLeft = tester.getTopLeft(find.byType(Material).last);
+    final Offset iconTopLeft = tester.getTopLeft(find.byIcon(Icons.add));
+
+    expect(buttonTopLeft.dx, iconTopLeft.dx - 16.0);
+
+    await tester.pumpWidget(buildButton(iconAlignment: IconAlignment.end));
+    await tester.pumpAndSettle();
+
+    final Offset buttonTopRight = tester.getTopRight(find.byType(Material).last);
+    final Offset iconTopRight = tester.getTopRight(find.byIcon(Icons.add));
+
+    expect(buttonTopRight.dx, iconTopRight.dx + 24.0);
   });
 }

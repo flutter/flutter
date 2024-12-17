@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -25,22 +26,98 @@ void main() {
       ),
     );
 
-    expect(semantics,includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollUp]));
+    expect(semantics,includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset]));
 
     await flingUp(tester);
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown]));
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown, SemanticsAction.scrollToOffset]));
 
     await flingDown(tester, repetitions: 2);
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollUp]));
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset]));
 
     await flingUp(tester, repetitions: 5);
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollDown]));
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollDown, SemanticsAction.scrollToOffset]));
 
     await flingDown(tester);
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown]));
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown, SemanticsAction.scrollToOffset]));
 
     semantics.dispose();
   });
+
+  testWidgets('Vertical scrollable responds to scrollToOffset', (WidgetTester tester) async {
+    semantics = SemanticsTester(tester);
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          controller: controller,
+          children: List<Widget>.generate(60, (int i) => Text('$i')),
+        ),
+      ),
+    );
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final int scrollableId = semantics.nodesWith(actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset]).single.id;
+
+    assert(controller.offset == 0);
+    semanticsOwner.performAction(scrollableId, SemanticsAction.scrollToOffset, Float64List.fromList(<double>[123.0, 456.0]));
+    expect(controller.offset, 456.0);
+    controller.dispose();
+    semantics.dispose();
+  });
+
+  testWidgets('Horizontal scrollable responds to scrollToOffset', (WidgetTester tester) async {
+    semantics = SemanticsTester(tester);
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          controller: controller,
+          scrollDirection: Axis.horizontal,
+          children: List<Widget>.generate(60, (int i) => Text('$i')),
+        ),
+      ),
+    );
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final int scrollableId = semantics.nodesWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollToOffset]).single.id;
+
+    assert(controller.offset == 0);
+    semanticsOwner.performAction(scrollableId, SemanticsAction.scrollToOffset, Float64List.fromList(<double>[123.0, 456.0]));
+    expect(controller.offset, 123.0);
+    controller.dispose();
+    semantics.dispose();
+  });
+
+  testWidgets('Unscrollable scrollable does not respond to scrollToOffset', (WidgetTester tester) async {
+    semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          children: List<Widget>.generate(3, (int i) => Text('$i')),
+        ),
+      ),
+    );
+    expect(semantics.nodesWith(actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset]), isEmpty);
+    semantics.dispose();
+  });
+
+  testWidgets('scrollToOffset respects implicit scrolling configuration', (WidgetTester tester) async {
+    semantics = SemanticsTester(tester);
+    final ScrollPhysics physics = _NoImplicitScrollingScrollPhysics();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          physics: physics,
+          children: List<Widget>.generate(60, (int i) => Text('$i')),
+        ),
+      ),
+    );
+    expect(semantics.nodesWith(actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset]), isEmpty);
+    semantics.dispose();
+  });
+
 
   testWidgets('showOnScreen works in scrollable', (WidgetTester tester) async {
     semantics = SemanticsTester(tester); // enables semantics tree generation
@@ -227,6 +304,7 @@ void main() {
       scrollExtentMax: 520.0,
       actions: <SemanticsAction>[
         SemanticsAction.scrollUp,
+        SemanticsAction.scrollToOffset,
       ],
     ));
 
@@ -239,6 +317,7 @@ void main() {
       actions: <SemanticsAction>[
         SemanticsAction.scrollUp,
         SemanticsAction.scrollDown,
+        SemanticsAction.scrollToOffset,
       ],
     ));
 
@@ -250,6 +329,7 @@ void main() {
       scrollExtentMax: 520.0,
       actions: <SemanticsAction>[
         SemanticsAction.scrollDown,
+        SemanticsAction.scrollToOffset,
       ],
     ));
 
@@ -276,6 +356,7 @@ void main() {
       scrollExtentMax: double.infinity,
       actions: <SemanticsAction>[
         SemanticsAction.scrollUp,
+        SemanticsAction.scrollToOffset,
       ],
     ));
 
@@ -288,6 +369,7 @@ void main() {
       actions: <SemanticsAction>[
         SemanticsAction.scrollUp,
         SemanticsAction.scrollDown,
+        SemanticsAction.scrollToOffset,
       ],
     ));
 
@@ -300,6 +382,7 @@ void main() {
       actions: <SemanticsAction>[
         SemanticsAction.scrollUp,
         SemanticsAction.scrollDown,
+        SemanticsAction.scrollToOffset,
       ],
     ));
 
@@ -354,7 +437,7 @@ void main() {
               flags: <SemanticsFlag>[
                 SemanticsFlag.hasImplicitScrolling,
               ],
-              actions: <SemanticsAction>[SemanticsAction.scrollUp],
+              actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset],
               children: <TestSemantics>[
                 TestSemantics(
                   label: r'item 0',
@@ -614,7 +697,7 @@ void main() {
       ),
     );
 
-    final SemanticsNode rootScrollNode = semantics.nodesWith(actions: <SemanticsAction>[SemanticsAction.scrollUp]).single;
+    final SemanticsNode rootScrollNode = semantics.nodesWith(actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset]).single;
     final SemanticsNode innerListPane = semantics.nodesWith(ancestor: rootScrollNode, scrollExtentMax: 0).single;
     final SemanticsNode outerListPane = innerListPane.parent!;
     final List<SemanticsNode> hiddenNodes = semantics.nodesWith(flags: <SemanticsFlag>[SemanticsFlag.isHidden]).toList();
@@ -663,4 +746,12 @@ Rect nodeGlobalRect(SemanticsNode node) {
     }
   }
   return MatrixUtils.transformRect(globalTransform, node.rect);
+}
+
+class _NoImplicitScrollingScrollPhysics extends ScrollPhysics {
+  @override
+  bool get allowImplicitScrolling => false;
+
+  @override
+  ScrollPhysics applyTo(ScrollPhysics? ancestor) => this;
 }

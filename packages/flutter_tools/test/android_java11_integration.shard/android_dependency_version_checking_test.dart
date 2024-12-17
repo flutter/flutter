@@ -30,7 +30,7 @@ void main() {
   testUsingContext(
       'AGP version out of "warn" support band but in "error" band builds '
           'successfully and prints warning', () async {
-    final VersionTuple versionTuple = VersionTuple(agpVersion: '7.0.0', gradleVersion: '7.5', kotlinVersion: '1.7.10', compileSdkVersion: '34');
+    final VersionTuple versionTuple = VersionTuple(agpVersion: '7.3.0', gradleVersion: '7.5', kotlinVersion: '1.7.10', compileSdkVersion: '34');
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
         versions: versionTuple,
         tempDir: tempDir
@@ -43,7 +43,7 @@ void main() {
       'Gradle version out of "warn" support band but in "error" band builds '
           'successfully and prints warning', () async {
     // Create a new flutter project.
-    final VersionTuple versionTuple = VersionTuple(agpVersion: '7.0.0', gradleVersion: '7.0.2', kotlinVersion: '1.7.10', compileSdkVersion: '34');
+    final VersionTuple versionTuple = VersionTuple(agpVersion: '7.3.0', gradleVersion: '7.4.1', kotlinVersion: '1.7.10', compileSdkVersion: '34');
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
         versions: versionTuple,
         tempDir: tempDir
@@ -55,7 +55,7 @@ void main() {
   testUsingContext(
       'Kotlin version out of "warn" support band but in "error" band builds '
           'successfully and prints warning', () async {
-    final VersionTuple versionTuple = VersionTuple(agpVersion: '7.4.0', gradleVersion: '7.5', kotlinVersion: '1.7.0', compileSdkVersion: '34');
+    final VersionTuple versionTuple = VersionTuple(agpVersion: '7.4.0', gradleVersion: '7.5', kotlinVersion: '1.8.0', compileSdkVersion: '34');
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
         versions: versionTuple,
         tempDir: tempDir

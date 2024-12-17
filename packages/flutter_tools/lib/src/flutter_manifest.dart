@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'localizations/gen_l10n.dart' as gen_l10n;
+library;
+
 import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
@@ -62,6 +65,71 @@ class FlutterManifest {
     }
 
     return pubspec;
+  }
+
+  /// Creates a copy of the current manifest with some subset of properties
+  /// modified.
+  FlutterManifest copyWith({
+    required Logger logger,
+    List<AssetsEntry>? assets,
+    List<Font>? fonts,
+    List<Uri>? shaders,
+    List<Uri>? models,
+    List<DeferredComponent>? deferredComponents,
+  }) {
+    final FlutterManifest copy = FlutterManifest._(logger: _logger);
+    copy._descriptor = <String, Object?>{..._descriptor};
+    copy._flutterDescriptor = <String, Object?>{..._flutterDescriptor};
+
+    if (assets != null && assets.isNotEmpty) {
+      copy._flutterDescriptor['assets'] = YamlList.wrap(
+        <Object?>[
+          for (final AssetsEntry asset in assets)
+            asset.descriptor,
+        ],
+      );
+    }
+
+    if (fonts != null && fonts.isNotEmpty) {
+      copy._flutterDescriptor['fonts'] = YamlList.wrap(
+          <Map<String, Object?>>[
+            for (final Font font in fonts)
+              font.descriptor,
+        ],
+      );
+    }
+
+    if (shaders != null && shaders.isNotEmpty) {
+      copy._flutterDescriptor['shaders'] = YamlList.wrap(
+        shaders.map(
+          (Uri uri) => uri.toString(),
+        ).toList(),
+      );
+    }
+
+    if (models != null && models.isNotEmpty) {
+      copy._flutterDescriptor['models'] = YamlList.wrap(
+        models.map(
+          (Uri uri) => uri.toString(),
+        ).toList(),
+      );
+    }
+
+    if (deferredComponents != null && deferredComponents.isNotEmpty) {
+      copy._flutterDescriptor['deferred-components'] = YamlList.wrap(
+        deferredComponents.map(
+          (DeferredComponent dc) => dc.descriptor,
+        ).toList()
+      );
+    }
+
+    copy._descriptor['flutter'] = YamlMap.wrap(copy._flutterDescriptor);
+
+    if (!_validate(YamlMap.wrap(copy._descriptor), logger)) {
+      throw StateError('Generated invalid pubspec.yaml.');
+    }
+
+    return copy;
   }
 
   final Logger _logger;
@@ -360,26 +428,25 @@ class FlutterManifest {
     return results;
   }
 
-  /// Whether a synthetic flutter_gen package should be generated.
+  /// Whether localization Dart files should be generated.
   ///
-  /// This can be provided to the [Pub] interface to inject a new entry
-  /// into the package_config.json file which points to `.dart_tool/flutter_gen`.
+  /// **NOTE**: This method was previously called `generateSyntheticPackage`,
+  /// which was incorrect; the presence of `generate: true` in `pubspec.yaml`
+  /// does _not_ imply a synthetic package (and never did); additional
+  /// introspection is required to determine whether a synthetic package is
+  /// required.
   ///
-  /// This allows generated source code to be imported using a package
-  /// alias.
-  late final bool generateSyntheticPackage = _computeGenerateSyntheticPackage();
-  bool _computeGenerateSyntheticPackage() {
-    if (!_flutterDescriptor.containsKey('generate')) {
-      return false;
-    }
-    final Object? value = _flutterDescriptor['generate'];
-    if (value is! bool) {
-      return false;
-    }
-    return value;
-  }
+  /// See also:
+  ///
+  ///   * [Deprecate and remove synthethic `package:flutter_gen`](https://github.com/flutter/flutter/issues/102983)
+  ///   * [gen_l10n.generateLocalizations]
+  late final bool generateLocalizations = _flutterDescriptor['generate'] == true;
 
   String? get defaultFlavor => _flutterDescriptor['default-flavor'] as String?;
+
+  YamlMap toYaml() {
+    return YamlMap.wrap(_descriptor);
+  }
 }
 
 class Font {
@@ -712,6 +779,21 @@ class AssetsEntry {
   final Set<String> flavors;
   final List<AssetTransformerEntry> transformers;
 
+  Object? get descriptor {
+    if (transformers.isEmpty && flavors.isEmpty) {
+      return uri.toString();
+    }
+    return <String, Object?> {
+      _pathKey: uri.toString(),
+      if (flavors.isNotEmpty)
+        _flavorKey: flavors.toList(),
+      if (transformers.isNotEmpty)
+        _transformersKey: transformers.map(
+          (AssetTransformerEntry e) => e.descriptor,
+        ).toList(),
+    };
+  }
+
   static const String _pathKey = 'path';
   static const String _flavorKey = 'flavors';
   static const String _transformersKey = 'transformers';
@@ -857,6 +939,17 @@ final class AssetTransformerEntry {
 
   final String package;
   final List<String>? args;
+
+  Map<String, Object?> get descriptor {
+    return <String, Object?>{
+      _kPackage: package,
+      if (args != null)
+        _kArgs: args,
+    };
+  }
+
+  static const String _kPackage = 'package';
+  static const String _kArgs = 'args';
 
   static (AssetTransformerEntry? entry, List<String> errors) tryParse(Object? yaml) {
     if (yaml == null) {

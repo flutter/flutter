@@ -4,6 +4,7 @@
 
 import 'dart:io' hide Platform;
 
+import 'package:collection/collection.dart';
 import 'package:file/file.dart' as fs;
 import 'package:file/memory.dart';
 import 'package:path/path.dart' as path;
@@ -153,5 +154,70 @@ void main() {
       expectExitCode(result, 255);
       expect(result.stdout, contains('Invalid subshard name'));
     });
+
+    test('--dry-run prints every test that would run', () async {
+      final ProcessResult result = await runScript(
+        <String, String> {},
+        <String>['--dry-run'],
+      );
+      expectExitCode(result, 0);
+      expect(result.stdout, contains('|> bin/flutter'));
+    }, testOn: 'posix');
+  });
+
+  test('selectTestsForSubShard distributes tests amongst subshards correctly', () async {
+    List<int> makeTests(int count) => List<int>.generate(count, (int index) => index);
+
+    void testSubsharding(int testCount, int subshardCount) {
+      String failureReason(String reason) {
+        return 'Subsharding test failed for testCount=$testCount, subshardCount=$subshardCount.\n'
+          '$reason';
+      }
+
+      final List<int> tests = makeTests(testCount);
+      final List<List<int>> subshards = List<List<int>>.generate(subshardCount, (int index) {
+        final int subShardIndex = index + 1;
+        final (int start, int end) = selectTestsForSubShard(
+          testCount: tests.length,
+          subShardIndex: subShardIndex,
+          subShardCount: subshardCount,
+        );
+        return tests.sublist(start, end);
+      });
+
+      final List<int> testedTests = subshards.flattened.toList();
+      final Set<int> deduped = Set<int>.from(subshards.flattened);
+      expect(
+        testedTests,
+        hasLength(deduped.length),
+        reason: failureReason('Subshards may have had duplicate tests.'),
+      );
+      expect(
+        testedTests,
+        unorderedEquals(tests),
+        reason: failureReason('One or more tests were not assigned to a subshard.'),
+      );
+
+      final int minimumTestsPerShard = (testCount / subshardCount).floor();
+      for (int i = 0; i < subshards.length; i++) {
+        final int extraTestsInThisShard = subshards[i].length - minimumTestsPerShard;
+        expect(
+          extraTestsInThisShard,
+          isNonNegative,
+          reason: failureReason(
+              'Subsharding uneven. Subshard ${i + 1} had too few tests: ${subshards[i].length}'),
+        );
+        expect(
+          extraTestsInThisShard,
+          lessThanOrEqualTo(1),
+          reason: failureReason(
+              'Subsharding uneven. Subshard ${i + 1} had too many tests: ${subshards[i].length}'),
+        );
+      }
+    }
+
+    testSubsharding(9, 3);
+    testSubsharding(25, 8);
+    testSubsharding(30, 15);
   });
 }

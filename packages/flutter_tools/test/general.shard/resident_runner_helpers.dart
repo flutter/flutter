@@ -146,6 +146,9 @@ class FakeDartDevelopmentService extends Fake with DartDevelopmentServiceLocalOp
 
   @override
   Uri? get uri => null;
+
+  @override
+  void shutdown() {}
 }
 
 class FakeDartDevelopmentServiceException implements DartDevelopmentServiceException {
@@ -226,9 +229,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> stopEchoingDeviceLog() async { }
-
-  @override
-  Future<void> tryInitLogReader() async { }
 
   @override
   Future<Uri> setupDevFS(String fsName, Directory rootDirectory) async {

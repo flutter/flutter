@@ -463,6 +463,9 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
   /// Determines whether the given [Selectable] was created by this
   /// [RenderParagraph].
+  ///
+  /// The [RenderParagraph] splits its text into multiple [Selectable]s,
+  /// delimited by [PlaceholderSpan]s or [WidgetSpan]s.
   bool selectableBelongsToParagraph(Selectable selectable) {
     if (_lastSelectableFragments == null) {
       return false;
@@ -1391,19 +1394,29 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
       selectionRects.add(textBox.toRect());
     }
+    final bool selectionCollapsed = selectionStart == selectionEnd;
+    final (
+      TextSelectionHandleType startSelectionHandleType,
+      TextSelectionHandleType endSelectionHandleType,
+    ) = switch ((selectionCollapsed, flipHandles)) {
+      // Always prefer collapsed handle when selection is collapsed.
+      (true, _) => (TextSelectionHandleType.collapsed, TextSelectionHandleType.collapsed),
+      (false, true) => (TextSelectionHandleType.right, TextSelectionHandleType.left),
+      (false, false) => (TextSelectionHandleType.left, TextSelectionHandleType.right),
+    };
     return SelectionGeometry(
       startSelectionPoint: SelectionPoint(
         localPosition: startOffsetInParagraphCoordinates,
         lineHeight: paragraph._textPainter.preferredLineHeight,
-        handleType: flipHandles ? TextSelectionHandleType.right : TextSelectionHandleType.left
+        handleType: startSelectionHandleType,
       ),
       endSelectionPoint: SelectionPoint(
         localPosition: endOffsetInParagraphCoordinates,
         lineHeight: paragraph._textPainter.preferredLineHeight,
-        handleType: flipHandles ? TextSelectionHandleType.left : TextSelectionHandleType.right,
+        handleType: endSelectionHandleType,
       ),
       selectionRects: selectionRects,
-      status: _textSelectionStart!.offset == _textSelectionEnd!.offset
+      status: selectionCollapsed
         ? SelectionStatus.collapsed
         : SelectionStatus.uncollapsed,
       hasContent: true,
@@ -1480,6 +1493,17 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     final int end = math.max(_textSelectionStart!.offset, _textSelectionEnd!.offset);
     return SelectedContent(
       plainText: fullText.substring(start, end),
+    );
+  }
+
+  @override
+  SelectedContentRange? getSelection() {
+    if (_textSelectionStart == null || _textSelectionEnd == null) {
+      return null;
+    }
+    return SelectedContentRange(
+      startOffset: _textSelectionStart!.offset,
+      endOffset: _textSelectionEnd!.offset,
     );
   }
 
@@ -3043,6 +3067,9 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     _cachedRect = null;
     _cachedBoundingBoxes = null;
   }
+
+  @override
+  int get contentLength => range.end - range.start;
 
   @override
   Size get size {

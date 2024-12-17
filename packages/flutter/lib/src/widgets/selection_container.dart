@@ -183,6 +183,12 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
   }
 
   @override
+  SelectedContentRange? getSelection() {
+    assert(!widget._disabled);
+    return widget.delegate!.getSelection();
+  }
+
+  @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
     assert(!widget._disabled);
     return widget.delegate!.dispatchSelectionEvent(event);
@@ -201,6 +207,9 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
     assert(!widget._disabled);
     return context.findRenderObject()!.getTransformTo(ancestor);
   }
+
+  @override
+  int get contentLength => widget.delegate!.contentLength;
 
   @override
   Size get size => (context.findRenderObject()! as RenderBox).size;

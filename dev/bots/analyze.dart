@@ -14,6 +14,7 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:collection/equality.dart';
 import 'package:crypto/crypto.dart';
+import 'package:dart_style/dart_style.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
@@ -22,6 +23,7 @@ import 'custom_rules/analyze.dart';
 import 'custom_rules/avoid_future_catcherror.dart';
 import 'custom_rules/no_double_clamp.dart';
 import 'custom_rules/no_stop_watches.dart';
+import 'custom_rules/protect_public_state_subtypes.dart';
 import 'custom_rules/render_box_intrinsics.dart';
 import 'run_command.dart';
 import 'utils.dart';
@@ -180,7 +182,12 @@ Future<void> run(List<String> arguments) async {
     // Only run the private lints when the code is free of type errors. The
     // lints are easier to write when they can assume, for example, there is no
     // inheritance cycles.
-    final List<AnalyzeRule> rules = <AnalyzeRule>[noDoubleClamp, noStopwatches, renderBoxIntrinsicCalculation];
+    final List<AnalyzeRule> rules = <AnalyzeRule>[
+      noDoubleClamp,
+      noStopwatches,
+      renderBoxIntrinsicCalculation,
+      protectPublicStateSubtypes,
+    ];
     final String ruleNames = rules.map((AnalyzeRule rule) => '\n * $rule').join();
     printProgress('Analyzing code in the framework with the following rules:$ruleNames');
     await analyzeWithRules(flutterRoot, rules,
@@ -1036,6 +1043,8 @@ Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
   }
 }
 
+final DartFormatter _formatter = DartFormatter(languageVersion: DartFormatter.latestLanguageVersion);
+
 Future<void> verifyInternationalizations(String workingDirectory, String dartExecutable) async {
   final EvalResult materialGenResult = await _evalCommand(
     dartExecutable,
@@ -1061,24 +1070,30 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
   final String expectedMaterialResult = await File(materialLocalizationsFile).readAsString();
   final String expectedCupertinoResult = await File(cupertinoLocalizationsFile).readAsString();
 
-  if (materialGenResult.stdout.trim() != expectedMaterialResult.trim()) {
+  // Normalize both with the Dart formatter.
+  final String formattedMaterialGenResult = _formatter.format(materialGenResult.stdout.trim());
+  final String formattedExpectedMaterialResult = _formatter.format(expectedMaterialResult.trim());
+
+  if (formattedMaterialGenResult != formattedExpectedMaterialResult) {
     foundError(<String>[
       '<<<<<<< $materialLocalizationsFile',
-      expectedMaterialResult.trim(),
+      formattedExpectedMaterialResult,
       '=======',
-      materialGenResult.stdout.trim(),
+      formattedMaterialGenResult,
       '>>>>>>> gen_localizations',
       'The contents of $materialLocalizationsFile are different from that produced by gen_localizations.',
       '',
       'Did you forget to run gen_localizations.dart after updating a .arb file?',
     ]);
   }
-  if (cupertinoGenResult.stdout.trim() != expectedCupertinoResult.trim()) {
+  final String formattedCupertinoGenResult = _formatter.format(cupertinoGenResult.stdout.trim());
+  final String formattedExpectedCupertinoResult = _formatter.format(expectedCupertinoResult.trim());
+  if (formattedCupertinoGenResult != formattedExpectedCupertinoResult) {
     foundError(<String>[
       '<<<<<<< $cupertinoLocalizationsFile',
-      expectedCupertinoResult.trim(),
+      formattedExpectedCupertinoResult,
       '=======',
-      cupertinoGenResult.stdout.trim(),
+      formattedCupertinoGenResult,
       '>>>>>>> gen_localizations',
       'The contents of $cupertinoLocalizationsFile are different from that produced by gen_localizations.',
       '',
@@ -1866,6 +1881,7 @@ Future<List<File>> _gitFiles(String workingDirectory, {bool runSilently = true})
   assert(filenames.last.isEmpty); // git ls-files gives a trailing blank 0x00
   filenames.removeLast();
   return filenames
+      .where((String filename) => !filename.startsWith('engine/'))
       .map<File>((String filename) => File(path.join(workingDirectory, filename)))
       .toList();
 }
@@ -2120,7 +2136,8 @@ Future<void> lintKotlinFiles(String workingDirectory) async {
         'To reproduce this lint locally:\n'
         '1. Identify the CIPD version tag used to resolve this particular version of ktlint (check the dependencies section of this shard in the ci.yaml). \n'
         '2. Download that version from https://chrome-infra-packages.appspot.com/p/flutter/ktlint/linux-amd64/+/<version_tag>\n'
-        '3. From the repository root, run `<path_to_ktlint>/ktlint --editorconfig=$editorConfigRelativePath --baseline=$baselineRelativePath`';
+        '3. From the repository root, run `<path_to_ktlint>/ktlint --editorconfig=$editorConfigRelativePath --baseline=$baselineRelativePath`\n'
+        'Alternatively, if you use Android Studio, follow the docs at docs/platforms/android/Kotlin-android-studio-formatting.md to enable auto formatting.';
     foundError(<String>[errorMessage]);
   }
 }
@@ -2238,6 +2255,8 @@ const Set<String> kExecutableAllowlist = <String>{
 
   'dev/tools/gen_keycodes/bin/gen_keycodes',
   'dev/tools/repackage_gradle_wrapper.sh',
+  'dev/tools/bin/engine_hash.sh',
+  'dev/tools/format.sh',
 
   'packages/flutter_tools/bin/macos_assemble.sh',
   'packages/flutter_tools/bin/tool_backend.sh',

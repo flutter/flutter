@@ -2488,7 +2488,7 @@ void main() {
     expect(tabBarBox.size.height, 48.0);
 
     // Ease in sine (accelerating).
-    double accelerateIntepolation(double fraction) {
+    double accelerateInterpolation(double fraction) {
       return 1.0 - math.cos((fraction * math.pi) / 2.0);
     }
 
@@ -2499,8 +2499,8 @@ void main() {
     }) {
       const double indicatorWeight = 3.0;
       final double tabChangeProgress =  (controller.index - controller.animation!.value).abs();
-      final double leftFraction = accelerateIntepolation(tabChangeProgress);
-      final double rightFraction = accelerateIntepolation(tabChangeProgress);
+      final double leftFraction = accelerateInterpolation(tabChangeProgress);
+      final double rightFraction = accelerateInterpolation(tabChangeProgress);
 
       final RRect rrect = RRect.fromLTRBAndCorners(
         lerpDouble(rect.left, targetRect.left, leftFraction)!,
@@ -3615,6 +3615,7 @@ void main() {
                         id: 4,
                         actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                         flags: <SemanticsFlag>[
+                          SemanticsFlag.hasSelectedState,
                           SemanticsFlag.isSelected,
                           SemanticsFlag.isFocusable,
                         ],
@@ -3624,7 +3625,10 @@ void main() {
                       ),
                       TestSemantics(
                         id: 5,
-                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.hasSelectedState,
+                          SemanticsFlag.isFocusable,
+                        ],
                         actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                         label: 'TAB #1\nTab 2 of 2',
                         rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
@@ -3672,8 +3676,8 @@ void main() {
     const String tab0title = 'This is a very wide tab #0\nTab 1 of 20';
     const String tab10title = 'This is a very wide tab #10\nTab 11 of 20';
 
-    const List<SemanticsFlag> hiddenFlags = <SemanticsFlag>[SemanticsFlag.isHidden, SemanticsFlag.isFocusable];
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
+    const List<SemanticsFlag> hiddenFlags = <SemanticsFlag>[SemanticsFlag.isHidden, SemanticsFlag.isFocusable, SemanticsFlag.hasSelectedState];
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollToOffset]));
     expect(semantics, includesNodeWith(label: tab0title));
     expect(semantics, includesNodeWith(label: tab10title, flags: hiddenFlags));
 
@@ -3681,18 +3685,18 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(semantics, includesNodeWith(label: tab0title, flags: hiddenFlags));
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight]));
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight, SemanticsAction.scrollToOffset]));
     expect(semantics, includesNodeWith(label: tab10title));
 
     controller.index = 19;
     await tester.pumpAndSettle();
 
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollRight]));
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollRight, SemanticsAction.scrollToOffset]));
 
     controller.index = 0;
     await tester.pumpAndSettle();
 
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollToOffset]));
     expect(semantics, includesNodeWith(label: tab0title));
     expect(semantics, includesNodeWith(label: tab10title, flags: hiddenFlags));
 
@@ -3881,6 +3885,7 @@ void main() {
                       TestSemantics(
                         id: 4,
                         flags: <SemanticsFlag>[
+                          SemanticsFlag.hasSelectedState,
                           SemanticsFlag.isSelected,
                           SemanticsFlag.isFocusable,
                         ],
@@ -3891,7 +3896,10 @@ void main() {
                       ),
                       TestSemantics(
                         id: 5,
-                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.hasSelectedState,
+                          SemanticsFlag.isFocusable,
+                        ],
                         actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                         label: 'Semantics override 1\nTab 2 of 2',
                         rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
@@ -5670,14 +5678,21 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               label: 'TAB1\nTab 1 of 2',
-              flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.isSelected],
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isFocusable,
+                SemanticsFlag.isSelected,
+                SemanticsFlag.hasSelectedState,
+              ],
               id: 2,
               rect: TestSemantics.fullScreen,
               actions: 1 | SemanticsAction.focus.index,
             ),
             TestSemantics(
               label: 'TAB2\nTab 2 of 2',
-              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isFocusable,
+                SemanticsFlag.hasSelectedState,
+              ],
               id: 3,
               rect: TestSemantics.fullScreen,
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
@@ -7298,7 +7313,7 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/150316.
-  testWidgets('Scrollable TabBar wuth transparent divider expands to full width', (WidgetTester tester) async {
+  testWidgets('Scrollable TabBar with transparent divider expands to full width', (WidgetTester tester) async {
     Widget buildTabBar({ Color? dividerColor, TabAlignment? tabAlignment }) {
       return boilerplate(
         child: Center(
@@ -7409,7 +7424,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Ease in sine (accelerating).
-    double accelerateIntepolation(double fraction) {
+    double accelerateInterpolation(double fraction) {
       return 1.0 - math.cos((fraction * math.pi) / 2.0);
     }
 
@@ -7420,8 +7435,8 @@ void main() {
     }) {
       const double indicatorWeight = 3.0;
       final double tabChangeProgress =  (controller.index - controller.animation!.value).abs();
-      final double leftFraction = accelerateIntepolation(tabChangeProgress);
-      final double rightFraction = accelerateIntepolation(tabChangeProgress);
+      final double leftFraction = accelerateInterpolation(tabChangeProgress);
+      final double rightFraction = accelerateInterpolation(tabChangeProgress);
 
       final RRect rrect = RRect.fromLTRBAndCorners(
         lerpDouble(rect.left, targetRect.left, leftFraction)!,
@@ -7448,5 +7463,57 @@ void main() {
     rect = const Rect.fromLTRB(115.0, 0.0, 165.0, 48.0);
     targetRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
     expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/155518.
+  testWidgets('Tabs icon respects ambient icon theme', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      iconTheme: const IconThemeData(
+        color: Color(0xffff0000),
+        size: 38.0,
+      ),
+    );
+    const IconData selectedIcon = Icons.ac_unit;
+    const IconData unselectedIcon = Icons.access_alarm;
+    await tester.pumpWidget(boilerplate(
+      theme: theme,
+      child: const DefaultTabController(
+        length: 2,
+        child: TabBar(
+          tabs: <Widget>[
+            Tab(
+              icon: Icon(selectedIcon),
+              text: 'Tab 1',
+            ),
+            Tab(
+              icon: Icon(unselectedIcon),
+              text: 'Tab 2',
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    TextStyle iconStyle(WidgetTester tester, IconData icon) {
+      final RichText iconRichText = tester.widget<RichText>(
+        find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+      );
+      return iconRichText.text.style!;
+    }
+
+    // The iconTheme color isn't applied to the selected icon.
+    expect(iconStyle(tester, selectedIcon).color, equals(theme.colorScheme.primary));
+    // The iconTheme color is applied to the unselected icon.
+    expect(iconStyle(tester, unselectedIcon).color, equals(theme.iconTheme.color));
+
+    // Both selected and unselected icons should have the iconTheme size.
+    expect(
+      tester.getSize(find.byIcon(selectedIcon)),
+      Size(theme.iconTheme.size!, theme.iconTheme.size!),
+    );
+    expect(
+      tester.getSize(find.byIcon(unselectedIcon)),
+      Size(theme.iconTheme.size!, theme.iconTheme.size!),
+    );
   });
 }

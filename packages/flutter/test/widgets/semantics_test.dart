@@ -524,7 +524,8 @@ void main() {
       ..remove(SemanticsAction.moveCursorForwardByWord)
       ..remove(SemanticsAction.moveCursorBackwardByWord)
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
-      ..remove(SemanticsAction.showOnScreen); // showOnScreen is not user-exposed
+      ..remove(SemanticsAction.showOnScreen) // showOnScreen is not user-exposed
+      ..remove(SemanticsAction.scrollToOffset); // scrollToOffset is not user-exposed
 
     const int expectedId = 1;
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -569,6 +570,7 @@ void main() {
         case SemanticsAction.scrollLeft:
         case SemanticsAction.scrollRight:
         case SemanticsAction.scrollUp:
+        case SemanticsAction.scrollToOffset:
         case SemanticsAction.showOnScreen:
         case SemanticsAction.tap:
         case SemanticsAction.focus:
@@ -1819,7 +1821,7 @@ void main() {
     }
   });
 
-  testWidgets('parent heading level takes precendence when it absorbs a child', (WidgetTester tester) async {
+  testWidgets('parent heading level takes precedence when it absorbs a child', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     Future<SemanticsConfiguration> pumpHeading(int? level) async {

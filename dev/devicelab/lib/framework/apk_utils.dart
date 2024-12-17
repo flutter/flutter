@@ -9,8 +9,6 @@ import 'package:path/path.dart' as path;
 import 'task_result.dart';
 import 'utils.dart';
 
-final String platformLineSep = Platform.isWindows ? '\r\n' : '\n';
-
 final List<String> flutterAssets = <String>[
   'assets/flutter_assets/AssetManifest.json',
   'assets/flutter_assets/NOTICES.Z',
@@ -194,6 +192,17 @@ class ApkExtractor {
     _extracted = true;
   }
 
+  /// Returns true if APK contains classes from library with given [libraryName].
+  Future<bool> containsLibrary(String libraryName) async {
+    await _extractDex();
+    for (final String className in _classes) {
+      if (className.startsWith(libraryName)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /// Returns true if the APK contains a given class.
   Future<bool> containsClass(String className) async {
     await _extractDex();
@@ -218,6 +227,14 @@ Future<String> getAndroidManifest(String apk) async {
     ],
     workingDirectory: _androidHome,
   );
+}
+
+/// Checks that the [apk] includes any classes from a particularly library with
+/// given [libraryName] in the [apk] and returns true if so, false otherwise.
+Future<bool> checkApkContainsMethodsFromLibrary(File apk, String libraryName) async {
+  final ApkExtractor extractor = ApkExtractor(apk);
+  final bool apkContainsMethodsFromLibrary = await extractor.containsLibrary(libraryName);
+  return apkContainsMethodsFromLibrary;
 }
 
 /// Checks that the classes are contained in the APK, throws otherwise.
@@ -256,18 +273,17 @@ class FlutterProject {
   String get rootPath => path.join(parent.path, name);
   String get androidPath => path.join(rootPath, 'android');
   String get iosPath => path.join(rootPath, 'ios');
+  File get appBuildFile => getAndroidBuildFile(path.join(androidPath, 'app'));
 
   Future<void> addCustomBuildType(String name, {required String initWith}) async {
-    final File buildScript = File(
-      path.join(androidPath, 'app', 'build.gradle'),
-    );
+    final File buildScript = appBuildFile;
 
     buildScript.openWrite(mode: FileMode.append).write('''
 
 android {
     buildTypes {
-        $name {
-            initWith $initWith
+        create("$name") {
+            initWith(getByName("$initWith"))
         }
     }
 }
@@ -275,27 +291,26 @@ android {
   }
 
   /// Adds a plugin to the pubspec.
-  /// In pubspec, each dependency is expressed as key, value pair joined by a colon `:`.
-  /// such as `plugin_a`:`^0.0.1` or `plugin_a`:`\npath: /some/path`.
-  void addPlugin(String plugin, { String value = '' }) {
-    final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
-    String content = pubspec.readAsStringSync();
-    content = content.replaceFirst(
-      '${platformLineSep}dependencies:$platformLineSep',
-      '${platformLineSep}dependencies:$platformLineSep  $plugin: $value$platformLineSep',
-    );
-    pubspec.writeAsStringSync(content, flush: true);
+  ///
+  /// If a particular version of the [plugin] is desired, it should be included
+  /// in the name as it would be in the  `flutter pub add` command, e.g.
+  /// `google_maps_flutter:^2.2.1`.
+  ///
+  /// Include all other desired options for running `flutter pub add` to
+  /// [options], e.g. `<String>['--path', 'path/to/plugin']`.
+  Future<void> addPlugin(String plugin, {List<String> options = const <String>[]}) async {
+    await inDirectory(Directory(rootPath), () async {
+      await flutter('pub', options: <String>['add', plugin, ...options]);
+    });
   }
 
   Future<void> setMinSdkVersion(int sdkVersion) async {
-    final File buildScript = File(
-      path.join(androidPath, 'app', 'build.gradle'),
-    );
+    final File buildScript = appBuildFile;
 
     buildScript.openWrite(mode: FileMode.append).write('''
 android {
     defaultConfig {
-        minSdkVersion $sdkVersion
+        minSdk = $sdkVersion
     }
 }
     ''');
@@ -308,22 +323,20 @@ android {
   }
 
   Future<void> addProductFlavors(Iterable<String> flavors) async {
-    final File buildScript = File(
-      path.join(androidPath, 'app', 'build.gradle'),
-    );
+    final File buildScript = appBuildFile;
 
     final String flavorConfig = flavors.map((String name) {
       return '''
-$name {
-    applicationIdSuffix ".$name"
-    versionNameSuffix "-$name"
+create("$name") {
+    applicationIdSuffix = ".$name"
+    versionNameSuffix = "-$name"
 }
       ''';
     }).join('\n');
 
     buildScript.openWrite(mode: FileMode.append).write('''
 android {
-    flavorDimensions "mode"
+    flavorDimensions.add("mode")
     productFlavors {
         $flavorConfig
     }
@@ -332,9 +345,7 @@ android {
   }
 
   Future<void> introduceError() async {
-    final File buildScript = File(
-      path.join(androidPath, 'app', 'build.gradle'),
-    );
+    final File buildScript = appBuildFile;
     await buildScript.writeAsString((await buildScript.readAsString()).replaceAll('buildTypes', 'builTypes'));
   }
 
@@ -343,7 +354,7 @@ android {
       path.join(parent.path, 'hello', 'pubspec.yaml')
     );
     final String contents = pubspec.readAsStringSync();
-    final String newContents = contents.replaceFirst('${platformLineSep}flutter:$platformLineSep', '''
+    final String newContents = contents.replaceFirst('${Platform.lineTerminator}flutter:${Platform.lineTerminator}', '''
 
 flutter:
   assets:
@@ -376,9 +387,9 @@ class FlutterPluginProject {
   final Directory parent;
   final String name;
 
-  static Future<FlutterPluginProject> create(Directory directory, String name) async {
+  static Future<FlutterPluginProject> create(Directory directory, String name, {List<String> options = const <String>['--platforms=ios,android']}) async {
     await inDirectory(directory, () async {
-      await flutter('create', options: <String>['--template=plugin', '--platforms=ios,android', name]);
+      await flutter('create', options: <String>['--template=plugin', ...options, name]);
     });
     return FlutterPluginProject(directory, name);
   }
@@ -476,4 +487,15 @@ String? validateSnapshotDependency(FlutterProject project, String expectedTarget
   final String contentSnapshot = snapshotBlob.readAsStringSync();
   return contentSnapshot.contains('$expectedTarget ')
     ? null : 'Dependency file should have $expectedTarget as target. Instead found $contentSnapshot';
+}
+
+File getAndroidBuildFile(String androidAppPath, {bool settings = false}) {
+  final File groovyFile = File(path.join(androidAppPath, settings ? 'settings.gradle' : 'build.gradle'));
+  final File kotlinFile = File(path.join(androidAppPath, settings ? 'settings.gradle.kts' : 'build.gradle.kts'));
+
+  if (groovyFile.existsSync()) {
+    return groovyFile;
+  }
+
+  return kotlinFile;
 }

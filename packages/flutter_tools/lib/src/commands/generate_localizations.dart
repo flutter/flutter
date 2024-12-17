@@ -8,6 +8,7 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../features.dart';
 import '../localizations/gen_l10n.dart';
 import '../localizations/localizations_utils.dart';
 import '../runner/flutter_command.dart';
@@ -146,6 +147,8 @@ class GenerateLocalizationsCommand extends FlutterCommand {
             'generated as a synthetic package or at a specified directory in '
             'the Flutter project.\n'
             '\n'
+            'DEPRECATED: https://flutter.dev/to/flutter-gen-deprecation.\n'
+            '\n'
             'This flag is set to true by default.\n'
             '\n'
             'When synthetic-package is set to false, it will generate the '
@@ -246,6 +249,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
         file: _fileSystem.file('l10n.yaml'),
         logger: _logger,
         defaultArbDir: defaultArbDir,
+        defaultSyntheticPackage: !featureFlags.isExplicitPackageDependenciesEnabled,
       );
       _logger.printStatus(
         'Because l10n.yaml exists, the options defined there will be used '

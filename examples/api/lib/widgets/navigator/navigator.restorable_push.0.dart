@@ -13,8 +13,12 @@ class RestorablePushExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: RestorablePushExample(),
+    return const RootRestorationScope(
+      restorationId: 'app',
+      child: MaterialApp(
+        restorationScopeId: 'app',
+        home: RestorablePushExample(),
+      ),
     );
   }
 }
@@ -26,6 +30,7 @@ class RestorablePushExample extends StatefulWidget {
   State<RestorablePushExample> createState() => _RestorablePushExampleState();
 }
 
+@pragma('vm:entry-point')
 class _RestorablePushExampleState extends State<RestorablePushExample> {
   @pragma('vm:entry-point')
   static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {

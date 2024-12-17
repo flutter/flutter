@@ -136,7 +136,7 @@ final class NaiveLocalFileComparator extends GoldenFileComparator {
 // late NativeDriver nativeDriver;
 
 /// Asserts that a [NativeScreenshot], [Future<NativeScreenshot>], or
-/// [List<int>] matches the golden image file indentified by [key], with an
+/// [List<int>] matches the golden image file identified by [key], with an
 /// optional [version] number].
 ///
 /// The [key] may be either a [Uri] or a [String] representation of a URL.
@@ -151,7 +151,7 @@ final class NaiveLocalFileComparator extends GoldenFileComparator {
 /// ## Golden File Testing
 ///
 /// The term __golden file__ refers to a master image that is considered the
-/// true renmdering of a given widget, state, application, or other visual
+/// true rendering of a given widget, state, application, or other visual
 /// representation you have chosen to capture.
 ///
 /// The master golden image files are tested against can be created or updated

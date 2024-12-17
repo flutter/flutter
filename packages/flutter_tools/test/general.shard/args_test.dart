@@ -232,7 +232,6 @@ void verifyOptions(String? command, Iterable<Option> options) {
     const List<String> deprecatedOptions = <String>[
       FlutterOptions.kNullSafety,
       FlutterOptions.kNullAssertions,
-      FlutterOptions.kWebRendererFlag,
     ];
     final bool isOptionDeprecated = deprecatedOptions.contains(option.name);
     if (!isOptionDeprecated) {

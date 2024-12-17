@@ -38,6 +38,7 @@ void main() {
         },
         dependencies: <String>[],
         isDirectDependency: true,
+        isDevDependency: false,
       ),
     ], renderer);
 

@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -539,6 +540,7 @@ void main() {
           coreDeviceControl: FakeIOSCoreDeviceControl(),
           xcodeDebug: FakeXcodeDebug(),
           analytics: const NoOpAnalytics(),
+          shutdownHooks: FakeShutdownHooks(),
         );
       });
 
@@ -551,6 +553,35 @@ void main() {
         expect(await xcdevice.getAvailableIOSDevices(), isEmpty);
         expect(await xcdevice.getDiagnostics(), isEmpty);
       });
+    });
+
+    testWithoutContext('shutdown hooks disposes xcdevice observers', () async {
+      final ShutdownHooks shutdownHooks = ShutdownHooks();
+
+      final XCDevice xcdevice = XCDevice(
+        processManager: FakeProcessManager.any(),
+        logger: logger,
+        xcode: Xcode.test(processManager: FakeProcessManager.any()),
+        platform: FakePlatform(operatingSystem: 'macos'),
+        artifacts: Artifacts.test(),
+        cache: Cache.test(processManager: FakeProcessManager.any()),
+        iproxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+        fileSystem: MemoryFileSystem.test(),
+        coreDeviceControl: FakeIOSCoreDeviceControl(),
+        xcodeDebug: FakeXcodeDebug(),
+        analytics: const NoOpAnalytics(),
+        shutdownHooks: shutdownHooks,
+      );
+
+      expect(shutdownHooks.registeredHooks, hasLength(1));
+      final Completer<void> doneCompleter = Completer<void>();
+      xcdevice.observedDeviceEvents()!.listen(null, onDone: () {
+        doneCompleter.complete();
+      });
+      await doneCompleter.future;
+      xcdevice.dispose();
+      expect(logger.traceText, contains('xcdevice observe --usb exited with code 0'));
+      expect(logger.traceText, contains('xcdevice observe --wifi exited with code 0'));
     });
 
     group('xcdevice', () {
@@ -580,6 +611,7 @@ void main() {
           coreDeviceControl: coreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
           analytics: fakeAnalytics,
+          shutdownHooks: FakeShutdownHooks(),
         );
       });
 
@@ -1687,6 +1719,11 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 }
 
 class FakeXcodeDebug extends Fake implements XcodeDebug {}
+
+class FakeShutdownHooks extends Fake implements ShutdownHooks {
+  @override
+  void addShutdownHook(ShutdownHook shutdownHook) {}
+}
 
 class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
 

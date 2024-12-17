@@ -96,8 +96,9 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/pull/122227
 
     final ImmediateMultiDragGestureRecognizer recognizer1 = ImmediateMultiDragGestureRecognizer();
-    // ignore: avoid_redundant_argument_values
-    final ImmediateMultiDragGestureRecognizer recognizer2 = ImmediateMultiDragGestureRecognizer(allowedButtonsFilter: null);
+    final ImmediateMultiDragGestureRecognizer recognizer2 = ImmediateMultiDragGestureRecognizer(
+      allowedButtonsFilter: null, // ignore: avoid_redundant_argument_values
+    );
 
     // We want to test _allowedButtonsFilter, which is called in this method.
     const PointerDownEvent allowedPointer = PointerDownEvent(timeStamp: Duration(days: 10));

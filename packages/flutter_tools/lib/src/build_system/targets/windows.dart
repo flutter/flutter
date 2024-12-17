@@ -5,6 +5,7 @@
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
+import '../../devfs.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -12,6 +13,7 @@ import 'assets.dart';
 import 'common.dart';
 import 'desktop.dart';
 import 'icon_tree_shaker.dart';
+import 'native_assets.dart';
 
 /// The only files/subdirectories we care about.
 const List<String> _kWindowsArtifacts = <String>[
@@ -105,6 +107,7 @@ abstract class BundleWindowsAssets extends Target {
   @override
   List<Target> get dependencies => <Target>[
     const KernelSnapshot(),
+    const InstallCodeAssets(),
     UnpackWindows(targetPlatform),
   ];
 
@@ -143,6 +146,10 @@ abstract class BundleWindowsAssets extends Target {
       outputDirectory,
       targetPlatform: targetPlatform,
       buildMode: buildMode,
+      additionalContent: <String, DevFSContent>{
+        'NativeAssetsManifest.json':
+            DevFSFileContent(environment.buildDir.childFile('native_assets.json')),
+      },
     );
     environment.depFileService.writeToFile(
       depfile,

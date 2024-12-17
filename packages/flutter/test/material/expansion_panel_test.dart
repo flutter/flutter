@@ -1271,6 +1271,7 @@ void main() {
     expect(tester.getSemantics(find.byKey(expandedKey)), matchesSemantics(
       label: 'Expanded',
       isButton: true,
+      isEnabled: true,
       isFocusable: true,
       hasEnabledState: true,
       hasTapAction: true,
@@ -1281,6 +1282,7 @@ void main() {
       label: 'Collapsed',
       isButton: true,
       isFocusable: true,
+      isEnabled: true,
       hasEnabledState: true,
       hasTapAction: true,
       hasFocusAction: true,
@@ -2019,19 +2021,17 @@ void main() {
         widget is InkWell && widget.onTap != null)
     );
 
-    final InkWell inkWell = tester.widget<InkWell>(inkWellFinder);
+    final InkWell inkWell = tester.widget<InkWell>(inkWellFinder.first);
     expect(inkWell.splashColor, expectedSplashColor);
     expect(inkWell.highlightColor, expectedHighlightColor);
   });
 
-  testWidgets('ExpandIcon.disabledColor uses expandIconColor color when canTapOnHeader is true', (WidgetTester tester) async {
-    const Color expandIconColor = Color(0xff0000ff);
+  testWidgets('ExpandIcon ignores pointer/tap events when canTapOnHeader is true', (WidgetTester tester) async {
 
     Widget buildWidget({ bool canTapOnHeader = false }) {
       return MaterialApp(
         home: SingleChildScrollView(
           child: ExpansionPanelList(
-            expandIconColor: expandIconColor,
             children: <ExpansionPanel>[
               ExpansionPanel(
                 canTapOnHeader: canTapOnHeader,
@@ -2048,16 +2048,18 @@ void main() {
 
     await tester.pumpWidget(buildWidget());
 
-    await tester.tap(find.text('Panel'));
-    await tester.pumpAndSettle();
+    final Finder ignorePointerFinder = find.descendant(
+      of: find.byType(ExpansionPanelList),
+      matching: find.byType(IgnorePointer),
+    ).first;
 
-    ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon));
-    expect(expandIcon.disabledColor, isNull);
+    final IgnorePointer ignorePointerFalse = tester.widget(ignorePointerFinder);
+    expect(ignorePointerFalse.ignoring, isFalse);
 
     await tester.pumpWidget(buildWidget(canTapOnHeader: true));
     await tester.pumpAndSettle();
 
-    expandIcon = tester.widget(find.byType(ExpandIcon));
-    expect(expandIcon.disabledColor, expandIconColor);
+    final IgnorePointer ignorePointerTrue = tester.widget(ignorePointerFinder);
+    expect(ignorePointerTrue.ignoring, isTrue);
   });
 }

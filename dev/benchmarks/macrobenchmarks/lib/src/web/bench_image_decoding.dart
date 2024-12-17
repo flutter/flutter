@@ -18,10 +18,6 @@ import 'recorder.dart';
 // WASM codecs execute on the main thread and block the UI, leading to jank,
 // but the browser's WebCodecs API is asynchronous running on a separate thread
 // and does not jank. However, the benchmark result may be the same.
-//
-// This benchmark does not support the HTML renderer because the HTML renderer
-// cannot decode image frames (it always returns 1 dummy frame, even for
-// animated images).
 class BenchImageDecoding extends RawRecorder {
   BenchImageDecoding() : super(
     name: benchmarkName,

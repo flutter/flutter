@@ -413,6 +413,26 @@ void main() {
     expect(find.byType(DependentWidget), paints..rect(color: color7));
   });
 
+  testWidgets('CupertinoDynamicColor toARGB32() is the same as value', (WidgetTester tester) async {
+    late CupertinoDynamicColor color;
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          brightness: Brightness.dark,
+          primaryColor: dynamicColor,
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            color = CupertinoTheme.of(context).primaryColor as CupertinoDynamicColor;
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+
+    expect(color.value, color.toARGB32());
+  });
+
   testWidgets('CupertinoDynamicColor used in a CupertinoTheme', (WidgetTester tester) async {
     late CupertinoDynamicColor color;
     await tester.pumpWidget(

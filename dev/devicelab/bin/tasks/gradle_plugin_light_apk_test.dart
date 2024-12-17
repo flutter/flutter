@@ -210,8 +210,7 @@ Future<void> main() async {
         });
 
         section('Configure');
-        project.addPlugin('plugin_under_test',
-            value: '$platformLineSep    path: ${pluginDir.path}');
+        await project.addPlugin('plugin_under_test', options: <String>['--path', pluginDir.path]);
         await project.addCustomBuildType('local', initWith: 'debug');
         await project.getPackages();
 
@@ -229,7 +228,7 @@ Future<void> main() async {
         section('gradlew assembleLocal (plugin with custom build type)');
         await project.addCustomBuildType('local', initWith: 'debug');
         section('Add plugin');
-        project.addPlugin('path_provider');
+        await project.addPlugin('path_provider');
         await project.getPackages();
 
         await project.runGradleTask('assembleLocal');

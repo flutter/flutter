@@ -36,8 +36,8 @@ const int kDefaultTotalSampleCount = _kDefaultWarmUpSampleCount + _kDefaultMeasu
 
 /// A benchmark metric that includes frame-related computations prior to
 /// submitting layer and picture operations to the underlying renderer, such as
-/// HTML and CanvasKit. During this phase we compute transforms, clips, and
-/// other information needed for rendering.
+/// CanvasKit. During this phase we compute transforms, clips, and other
+/// information needed for rendering.
 const String kProfilePrerollFrame = 'preroll_frame';
 
 /// A benchmark metric that includes submitting layer and picture information
