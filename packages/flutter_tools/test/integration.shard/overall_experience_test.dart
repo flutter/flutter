@@ -48,7 +48,7 @@ void main() {
             existsDuringTest = fileSystem.file(pidFile).existsSync();
             return 'q';
           }),
-          const Barrier('Application finished.'),
+          Barrier('Application finished.'),
         ],
       );
       expect(existsDuringTest, isNot(isNull));
@@ -102,7 +102,7 @@ void main() {
           Multiple(<Pattern>[RegExp(r'^Restarted application in .+m?s.$'), 'called main', 'called paint'], handler: (String line) {
             return 'q';
           }),
-          const Barrier('Application finished.'),
+          Barrier('Application finished.'),
         ],
         logging: false, // we ignore leading log lines to avoid making this test sensitive to e.g. the help message text
       );
@@ -173,7 +173,7 @@ void main() {
           Multiple(<Pattern>['ready', 'called paint'], handler: (String line) {
             return 'q';
           }),
-          const Barrier('Application finished.'),
+          Barrier('Application finished.'),
         ],
         logging: false, // we ignore leading log lines to avoid making this test sensitive to e.g. the help message text
       );
@@ -307,7 +307,7 @@ void main() {
         Barrier(finalLine, handler: (String line) {
           return 'q';
         }),
-        const Barrier('Application finished.'),
+        Barrier('Application finished.'),
       ],
     );
     expect(result.exitCode, 0);
