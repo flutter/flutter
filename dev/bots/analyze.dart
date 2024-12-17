@@ -14,7 +14,6 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:collection/equality.dart';
 import 'package:crypto/crypto.dart';
-import 'package:dart_style/dart_style.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
@@ -1049,8 +1048,6 @@ Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
   }
 }
 
-final DartFormatter _formatter = DartFormatter(languageVersion: DartFormatter.latestLanguageVersion);
-
 Future<void> verifyInternationalizations(String workingDirectory, String dartExecutable) async {
   final EvalResult materialGenResult = await _evalCommand(
     dartExecutable,
@@ -1076,30 +1073,24 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
   final String expectedMaterialResult = await File(materialLocalizationsFile).readAsString();
   final String expectedCupertinoResult = await File(cupertinoLocalizationsFile).readAsString();
 
-  // Normalize both with the Dart formatter.
-  final String formattedMaterialGenResult = _formatter.format(materialGenResult.stdout.trim());
-  final String formattedExpectedMaterialResult = _formatter.format(expectedMaterialResult.trim());
-
-  if (formattedMaterialGenResult != formattedExpectedMaterialResult) {
+  if (materialGenResult.stdout.trim() != expectedMaterialResult.trim()) {
     foundError(<String>[
       '<<<<<<< $materialLocalizationsFile',
-      formattedExpectedMaterialResult,
+      expectedMaterialResult.trim(),
       '=======',
-      formattedMaterialGenResult,
+      materialGenResult.stdout.trim(),
       '>>>>>>> gen_localizations',
       'The contents of $materialLocalizationsFile are different from that produced by gen_localizations.',
       '',
       'Did you forget to run gen_localizations.dart after updating a .arb file?',
     ]);
   }
-  final String formattedCupertinoGenResult = _formatter.format(cupertinoGenResult.stdout.trim());
-  final String formattedExpectedCupertinoResult = _formatter.format(expectedCupertinoResult.trim());
-  if (formattedCupertinoGenResult != formattedExpectedCupertinoResult) {
+  if (cupertinoGenResult.stdout.trim() != expectedCupertinoResult.trim()) {
     foundError(<String>[
       '<<<<<<< $cupertinoLocalizationsFile',
-      formattedExpectedCupertinoResult,
+      expectedCupertinoResult.trim(),
       '=======',
-      formattedCupertinoGenResult,
+      cupertinoGenResult.stdout.trim(),
       '>>>>>>> gen_localizations',
       'The contents of $cupertinoLocalizationsFile are different from that produced by gen_localizations.',
       '',
