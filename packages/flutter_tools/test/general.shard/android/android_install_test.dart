@@ -82,7 +82,7 @@ void main() {
       processManager: processManager,
     );
 
-    expect(await androidDevice.installApp(androidApk), false);
+    expect(await androidDevice.installApp(androidApk), isFalse);
     expect(processManager, hasNoRemainingExpectations);
   });
 
@@ -97,7 +97,7 @@ void main() {
     final AndroidDevice androidDevice = setUpAndroidDevice(
     );
 
-    expect(await androidDevice.installApp(androidApk), false);
+    expect(await androidDevice.installApp(androidApk), isFalse);
   });
 
   testWithoutContext('Can install app on API level 16 or greater', () async {
@@ -108,10 +108,6 @@ void main() {
         command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
         stdout: '[ro.build.version.sdk]: [16]',
       ),
-      const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'app'],
-        stdout: '\n'
-      ),
       kInstallCommand,
       kStoreShaCommand,
     ]);
@@ -126,7 +122,7 @@ void main() {
       processManager: processManager,
     );
 
-    expect(await androidDevice.installApp(androidApk, userIdentifier: '10'), true);
+    expect(await androidDevice.installApp(androidApk, userIdentifier: '10'), isTrue);
     expect(processManager, hasNoRemainingExpectations);
   });
 
@@ -137,10 +133,6 @@ void main() {
       const FakeCommand(
         command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
       ),
-      const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'app'],
-        stdout: '\n'
-      ),
       kInstallCommand,
       kStoreShaCommand,
     ]);
@@ -155,7 +147,7 @@ void main() {
       processManager: processManager,
     );
 
-    expect(await androidDevice.installApp(androidApk, userIdentifier: '10'), true);
+    expect(await androidDevice.installApp(androidApk, userIdentifier: '10'), isTrue);
     expect(processManager, hasNoRemainingExpectations);
   });
 
@@ -167,11 +159,6 @@ void main() {
         command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
       ),
       // This command is run before the user is checked and is allowed to fail.
-      const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', 'jane', 'app'],
-        stderr: 'Blah blah',
-        exitCode: 1,
-      ),
       const FakeCommand(
         command: <String>[
           'adb',
@@ -199,12 +186,12 @@ void main() {
       processManager: processManager,
     );
 
-    expect(await androidDevice.installApp(androidApk, userIdentifier: 'jane'), false);
+    expect(await androidDevice.installApp(androidApk, userIdentifier: 'jane'), isFalse);
     expect(logger.errorText, contains('Error: User "jane" not found. Run "adb shell pm list users" to see list of available identifiers.'));
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('Will skip install if the correct version is up to date', () async {
+  testWithoutContext('Will continue install if the correct version is up to date', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       kAdbVersionCommand,
       kAdbStartServerCommand,
@@ -212,12 +199,9 @@ void main() {
         command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
         stdout: '[ro.build.version.sdk]: [16]',
       ),
+      kInstallCommand,
       const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'app'],
-        stdout: 'package:app\n'
-      ),
-      const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'shell', 'cat', '/data/local/tmp/sky.app.sha1'],
+        command: <String>['adb', '-s', '1234', 'shell', 'echo', '-n', 'example_sha', '>', '/data/local/tmp/sky.app.sha1'],
         stdout: 'example_sha',
       ),
     ]);
@@ -233,7 +217,7 @@ void main() {
       processManager: processManager,
     );
 
-    expect(await androidDevice.installApp(androidApk, userIdentifier: '10'), true);
+    expect(await androidDevice.installApp(androidApk, userIdentifier: '10'), isTrue);
     expect(processManager, hasNoRemainingExpectations);
   });
 
@@ -246,17 +230,13 @@ void main() {
         stdout: '[ro.build.version.sdk]: [16]',
       ),
       const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'app'],
-          stdout: 'package:app\n'
-      ),
-      const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'shell', 'cat', '/data/local/tmp/sky.app.sha1'],
-        stdout: 'different_example_sha',
-      ),
-      const FakeCommand(
         command: <String>['adb', '-s', '1234', 'install', '-t', '-r', '--user', '10', 'app-debug.apk'],
         exitCode: 1,
         stderr: '[INSTALL_FAILED_INSUFFICIENT_STORAGE]',
+      ),
+      const FakeCommand(
+        command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'app'],
+        stdout: 'package:app\n'
       ),
       const FakeCommand(command: <String>['adb', '-s', '1234', 'uninstall', '--user', '10', 'app']),
       kInstallCommand,
@@ -274,7 +254,7 @@ void main() {
       processManager: processManager,
     );
 
-    expect(await androidDevice.installApp(androidApk, userIdentifier: '10'), true);
+    expect(await androidDevice.installApp(androidApk, userIdentifier: '10'), isTrue);
     expect(processManager, hasNoRemainingExpectations);
   });
 
@@ -285,10 +265,6 @@ void main() {
       const FakeCommand(
         command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
         stdout: '[ro.build.version.sdk]: [16]',
-      ),
-      const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', '--user', '10', 'app'],
-          stdout: '\n'
       ),
       const FakeCommand(
         command: <String>['adb', '-s', '1234', 'install', '-t', '-r', '--user', '10', 'app-debug.apk'],
@@ -307,7 +283,7 @@ void main() {
       processManager: processManager,
     );
 
-    expect(await androidDevice.installApp(androidApk, userIdentifier: '10'), false);
+    expect(await androidDevice.installApp(androidApk, userIdentifier: '10'), isFalse);
     expect(processManager, hasNoRemainingExpectations);
   });
 }
