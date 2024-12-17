@@ -426,6 +426,10 @@ void main() {
           );
       }
 
+      // Add an extra pump to account for any potential frame delays introduced
+      // by the post frame callback in the _RawAutocompleteOptions
+      // implementation.
+      await tester.pump();
       setState(() {
         alignment = Alignment.topCenter;
       });
@@ -1020,6 +1024,10 @@ void main() {
     final Offset fieldOffset = tester.getTopLeft(find.byKey(fieldKey));
     final Size fieldSize = tester.getSize(find.byKey(fieldKey));
     expect(optionsTopLeft.dy, fieldOffset.dy + fieldSize.height);
+
+    // Add an extra pump to account for any potential frame delays introduced by
+    // the post frame callback in the _RawAutocompleteOptions implementation.
+    await tester.pump();
 
     // Move the field (similar to as if the keyboard opened). The options move
     // to follow the field.
@@ -1790,6 +1798,9 @@ void main() {
     final RenderBox optionsBox = tester.renderObject(find.byKey(optionsKey));
     expect(optionsBox.size.width, 100.0);
 
+    // Add an extra pump to account for any potential frame delays introduced by
+    // the post frame callback in the _RawAutocompleteOptions implementation.
+    await tester.pump();
     setState(() {
       width = 200.0;
     });
@@ -1858,6 +1869,9 @@ void main() {
     expect(fieldBox.size.width, 100.0);
     expect(optionsBox.size.width, 100.0);
 
+    // Add an extra pump to account for any potential frame delays introduced by
+    // the post frame callback in the _RawAutocompleteOptions implementation.
+    await tester.pump();
     setState(() {
       width = 200.0;
     });

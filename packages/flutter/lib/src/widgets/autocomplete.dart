@@ -19,9 +19,11 @@ import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
+import 'layout_builder.dart';
 import 'overlay.dart';
 import 'shortcuts.dart';
 import 'tap_region.dart';
+import 'value_listenable_builder.dart';
 
 // Examples can assume:
 // late BuildContext context;
@@ -308,6 +310,10 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
 class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> {
   final GlobalKey _fieldKey = GlobalKey();
   final LayerLink _optionsLayerLink = LayerLink();
+
+  /// The box constraints that the field was last built with.
+  final ValueNotifier<BoxConstraints?> _fieldBoxConstraints = ValueNotifier<BoxConstraints?>(null);
+
   final OverlayPortalController _optionsViewController = OverlayPortalController(debugLabel: '_RawAutocompleteState');
 
   TextEditingController? _internalTextEditingController;
@@ -438,16 +444,22 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   }
 
   Widget _buildOptionsView(BuildContext context) {
-    return _RawAutocompleteOptions(
-      fieldKey: _fieldKey,
-      optionsLayerLink: _optionsLayerLink,
-      optionsViewOpenDirection: widget.optionsViewOpenDirection,
-      overlayContext: context,
-      textDirection: Directionality.maybeOf(context),
-      highlightIndexNotifier: _highlightedOptionIndex,
-      builder: (BuildContext context) {
-        return widget.optionsViewBuilder(context, _select, _options);
-      },
+    return ValueListenableBuilder<BoxConstraints?>(
+      valueListenable: _fieldBoxConstraints,
+      builder: (BuildContext context, BoxConstraints? constraints, Widget? child) {
+        return _RawAutocompleteOptions(
+          fieldKey: _fieldKey,
+          optionsLayerLink: _optionsLayerLink,
+          optionsViewOpenDirection: widget.optionsViewOpenDirection,
+          overlayContext: context,
+          textDirection: Directionality.maybeOf(context),
+          highlightIndexNotifier: _highlightedOptionIndex,
+          fieldConstraints: _fieldBoxConstraints.value!,
+          builder: (BuildContext context) {
+            return widget.optionsViewBuilder(context, _select, _options);
+          },
+        );
+      }
     );
   }
 
@@ -495,22 +507,30 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   Widget build(BuildContext context) {
     final Widget fieldView = widget.fieldViewBuilder?.call(context, _textEditingController, _focusNode, _onFieldSubmitted)
                           ?? const SizedBox.shrink();
-    return OverlayPortal.targetsRootOverlay(
-      key: _fieldKey,
-      controller: _optionsViewController,
-      overlayChildBuilder: _buildOptionsView,
-      child: TextFieldTapRegion(
-        child: Shortcuts(
-          shortcuts: _shortcuts,
-          child: Actions(
-            actions: _actionMap,
-            child: CompositedTransformTarget(
-              link: _optionsLayerLink,
-              child: fieldView,
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        // TODO(victorsanni): Also track the width of the field box so that the
+        // options view maintains the same width as the field if its width
+        // changes but its constraints remain unchanged.
+        _fieldBoxConstraints.value = constraints;
+        return OverlayPortal.targetsRootOverlay(
+          key: _fieldKey,
+          controller: _optionsViewController,
+          overlayChildBuilder: _buildOptionsView,
+          child: TextFieldTapRegion(
+            child: Shortcuts(
+              shortcuts: _shortcuts,
+              child: Actions(
+                actions: _actionMap,
+                child: CompositedTransformTarget(
+                  link: _optionsLayerLink,
+                  child: fieldView,
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      }
     );
   }
 }
@@ -524,6 +544,7 @@ class _RawAutocompleteOptions extends StatefulWidget {
     required this.textDirection,
     required this.highlightIndexNotifier,
     required this.builder,
+    required this.fieldConstraints,
   });
 
   final WidgetBuilder builder;
@@ -534,6 +555,7 @@ class _RawAutocompleteOptions extends StatefulWidget {
   final BuildContext overlayContext;
   final TextDirection? textDirection;
   final ValueNotifier<int> highlightIndexNotifier;
+  final BoxConstraints fieldConstraints;
 
   @override
   State<_RawAutocompleteOptions> createState() => _RawAutocompleteOptionsState();
@@ -602,6 +624,7 @@ class _RawAutocompleteOptionsState extends State<_RawAutocompleteOptions> {
           fieldOffset: fieldOffset,
           optionsViewOpenDirection: widget.optionsViewOpenDirection,
           textDirection: Directionality.of(context),
+          fieldConstraints: widget.fieldConstraints,
         ),
         child: TextFieldTapRegion(
           child: AutocompleteHighlightedOption(
@@ -625,6 +648,7 @@ class _RawAutocompleteOptionsLayoutDelegate extends SingleChildLayoutDelegate {
     required this.fieldOffset,
     required this.optionsViewOpenDirection,
     required this.textDirection,
+    required this.fieldConstraints,
   }) : assert(layerLink.leaderSize != null);
 
   /// Links the options in [RawAutocomplete.optionsViewBuilder] to the field in
@@ -639,6 +663,9 @@ class _RawAutocompleteOptionsLayoutDelegate extends SingleChildLayoutDelegate {
 
   /// The [TextDirection] of this part of the widget tree.
   final TextDirection textDirection;
+
+  /// The [BoxConstraints] for the field in [RawAutocomplete.fieldViewBuilder].
+  final BoxConstraints fieldConstraints;
 
   // A big enough height for about one item in the default
   // Autocomplete.optionsViewBuilder. The assumption is that the user likely
@@ -695,7 +722,8 @@ class _RawAutocompleteOptionsLayoutDelegate extends SingleChildLayoutDelegate {
     return layerLink != oldDelegate.layerLink
         || fieldOffset != oldDelegate.fieldOffset
         || optionsViewOpenDirection != oldDelegate.optionsViewOpenDirection
-        || textDirection != oldDelegate.textDirection;
+        || textDirection != oldDelegate.textDirection
+        || fieldConstraints != oldDelegate.fieldConstraints;
   }
 }
 
