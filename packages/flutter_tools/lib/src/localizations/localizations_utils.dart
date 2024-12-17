@@ -8,8 +8,8 @@ import 'package:yaml/yaml.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../features.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
 import 'gen_l10n_types.dart';
 import 'language_subtag_registry.dart';
 
@@ -521,8 +521,8 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
     // If provided explicitly, use the explicit value.
     syntheticPackage = command.boolArg('synthetic-package');
   } else {
-    // Otherwise, inherit from whatever the default of --implicit-pubspec-resolution is.
-    syntheticPackage = command.globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution);
+    // Otherwise, inherit from whatever the reverse of flutter config --explicit-package-dependencies.
+    syntheticPackage = !featureFlags.isExplicitPackageDependenciesEnabled;
   }
   return LocalizationOptions(
     arbDir: command.stringArg('arb-dir') ?? defaultArbDir,
