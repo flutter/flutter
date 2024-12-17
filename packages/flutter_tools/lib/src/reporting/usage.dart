@@ -146,7 +146,7 @@ class _DefaultUsage implements Usage {
     if ( // To support testing, only allow other signals to suppress analytics
     // when analytics are not being shunted to a file.
     !usingLogFile &&
-        (// Ignore local user branches.
+        ( // Ignore local user branches.
         version.startsWith('[user-branch]') ||
             // Many CI systems don't do a full git checkout.
                 version

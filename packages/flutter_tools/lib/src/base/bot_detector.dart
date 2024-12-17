@@ -25,7 +25,7 @@ class BotDetector {
   final PersistentToolState _persistentToolState;
 
   Future<bool> get isRunningOnBot async {
-    if (// Explicitly stated to not be a bot.
+    if ( // Explicitly stated to not be a bot.
     _platform.environment['BOT'] == 'false'
         // Set by the IDEs to the IDE name, so a strong signal that this is not a bot.
         ||
