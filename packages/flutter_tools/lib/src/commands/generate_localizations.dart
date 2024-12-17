@@ -8,10 +8,10 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../features.dart';
 import '../localizations/gen_l10n.dart';
 import '../localizations/localizations_utils.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
 
 /// A command to generate localizations source files for a Flutter project.
 ///
@@ -249,7 +249,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
         file: _fileSystem.file('l10n.yaml'),
         logger: _logger,
         defaultArbDir: defaultArbDir,
-        defaultSyntheticPackage: globalResults!.flag(FlutterGlobalOptions.kImplicitPubspecResolution),
+        defaultSyntheticPackage: !featureFlags.isExplicitPackageDependenciesEnabled,
       );
       _logger.printStatus(
         'Because l10n.yaml exists, the options defined there will be used '
