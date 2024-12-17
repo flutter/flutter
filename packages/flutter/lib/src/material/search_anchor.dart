@@ -1640,6 +1640,7 @@ class _SearchBarState extends State<SearchBar> {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _SearchBarDefaultsM3 extends SearchBarThemeData {
   _SearchBarDefaultsM3(this.context);
 
@@ -1703,6 +1704,7 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
   @override
   TextCapitalization get textCapitalization => TextCapitalization.none;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - SearchBar
 
@@ -1713,6 +1715,7 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _SearchViewDefaultsM3 extends SearchViewThemeData {
   _SearchViewDefaultsM3(this.context, {required this.isFullScreen});
 
@@ -1757,5 +1760,6 @@ class _SearchViewDefaultsM3 extends SearchViewThemeData {
   @override
   Color? get dividerColor => _colors.outline;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - SearchView

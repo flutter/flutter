@@ -304,6 +304,7 @@ class _BottomAppBarDefaultsM2 extends BottomAppBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
   _BottomAppBarDefaultsM3(this.context)
     : super(
@@ -324,5 +325,6 @@ class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
   @override
   Color? get shadowColor => Colors.transparent;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - BottomAppBar

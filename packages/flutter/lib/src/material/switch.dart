@@ -2066,6 +2066,7 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _SwitchDefaultsM3 extends SwitchThemeData {
   _SwitchDefaultsM3(this.context);
 
@@ -2285,5 +2286,6 @@ class _SwitchConfigM3 with _SwitchConfig {
   @override
   Size get switchMinSize => const Size(kMinInteractiveDimension, kMinInteractiveDimension - 8.0);
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - Switch

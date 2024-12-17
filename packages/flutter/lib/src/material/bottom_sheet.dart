@@ -1398,6 +1398,7 @@ class _BottomSheetGestureDetector extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
   _BottomSheetDefaultsM3(this.context)
     : super(
@@ -1428,5 +1429,6 @@ class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
   @override
   BoxConstraints? get constraints => const BoxConstraints(maxWidth: 640.0);
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - BottomSheet

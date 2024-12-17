@@ -302,6 +302,7 @@ class FilterChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _FilterChipDefaultsM3 extends ChipThemeData {
   _FilterChipDefaultsM3(
     this.context,
@@ -421,5 +422,6 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
     )!;
   }
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - FilterChip

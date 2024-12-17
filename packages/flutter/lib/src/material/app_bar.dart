@@ -2406,6 +2406,7 @@ class _AppBarDefaultsM2 extends AppBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _AppBarDefaultsM3 extends AppBarTheme {
   _AppBarDefaultsM3(this.context)
     : super(
@@ -2503,5 +2504,6 @@ class _LargeScrollUnderFlexibleConfig with _ScrollUnderFlexibleConfig {
   @override
   EdgeInsetsGeometry get expandedTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 28);
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - AppBar

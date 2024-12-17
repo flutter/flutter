@@ -781,6 +781,7 @@ class _FABDefaultsM2 extends FloatingActionButtonThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _FABDefaultsM3 extends FloatingActionButtonThemeData {
   _FABDefaultsM3(this.context, this.type, this.hasChild)
     : super(
@@ -840,5 +841,6 @@ class _FABDefaultsM3 extends FloatingActionButtonThemeData {
   @override EdgeInsetsGeometry? get extendedPadding => EdgeInsetsDirectional.only(start: hasChild && _isExtended ? 16.0 : 20.0, end: 20.0);
   @override TextStyle? get extendedTextStyle => _textTheme.labelLarge;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - FAB

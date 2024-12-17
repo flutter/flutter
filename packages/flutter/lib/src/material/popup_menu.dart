@@ -1684,6 +1684,7 @@ class _PopupMenuDefaultsM2 extends PopupMenuThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _PopupMenuDefaultsM3 extends PopupMenuThemeData {
   _PopupMenuDefaultsM3(this.context)
     : super(elevation: 3.0);
@@ -1724,5 +1725,6 @@ class _PopupMenuDefaultsM3 extends PopupMenuThemeData {
   // TODO(tahatesser): This is taken from https://m3.material.io/components/menus/specs
   // Update this when the token is available.
   static EdgeInsets menuItemPadding  = const EdgeInsets.symmetric(horizontal: 12.0);
-}
+}// dart format on
+
 // END GENERATED TOKEN PROPERTIES - PopupMenu
