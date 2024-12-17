@@ -89,11 +89,6 @@ void main() {
       );
       processManager.addCommand(
         const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', 'FlutterApp'],
-        ),
-      );
-      processManager.addCommand(
-        const FakeCommand(
           command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-debug.apk'],
         ),
       );
@@ -195,20 +190,13 @@ void main() {
     processManager.addCommand(kAdbVersionCommand);
     processManager.addCommand(kStartServer);
     processManager.addCommand(
-      const FakeCommand(command: <String>['adb', '-s', '1234', 'shell', 'getprop']),
-    );
-    processManager.addCommand(
       const FakeCommand(
         command: <String>[
           'adb',
           '-s',
           '1234',
           'shell',
-          'am',
-          'force-stop',
-          '--user',
-          '10',
-          'FlutterApp',
+          'getprop',
         ],
       ),
     );
@@ -219,9 +207,8 @@ void main() {
           '-s',
           '1234',
           'shell',
-          'pm',
-          'list',
-          'packages',
+          'am',
+          'force-stop',
           '--user',
           '10',
           'FlutterApp',
