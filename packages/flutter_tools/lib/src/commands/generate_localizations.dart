@@ -12,7 +12,6 @@ import '../features.dart';
 import '../localizations/gen_l10n.dart';
 import '../localizations/localizations_utils.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
 
 /// A command to generate localizations source files for a Flutter project.
 ///
