@@ -352,6 +352,9 @@ typedef enum {
   ///   r = (p >> 11) & 0x1F;
   ///   g = (p >> 5) & 0x3F;
   ///   b = p & 0x1F;
+  ///
+  /// On most (== little-endian) systems, this is equivalent to wayland format
+  /// RGB565 (WL_DRM_FORMAT_RGB565, WL_SHM_FORMAT_RGB565).
   kFlutterSoftwarePixelFormatRGB565,
 
   /// Pixel with 4 bits each for alpha, red, green, blue; in 16-bit word.
@@ -359,6 +362,9 @@ typedef enum {
   ///   g = (p >> 4) & 0xF;
   ///   b = p & 0xF;
   ///   a = (p >> 12) & 0xF;
+  ///
+  /// On most (== little-endian) systems, this is equivalent to wayland format
+  /// RGBA4444 (WL_DRM_FORMAT_RGBA4444, WL_SHM_FORMAT_RGBA4444).
   kFlutterSoftwarePixelFormatRGBA4444,
 
   /// Pixel with 8 bits each for red, green, blue, alpha.
@@ -366,12 +372,18 @@ typedef enum {
   ///   g = p[1];
   ///   b = p[2];
   ///   a = p[3];
+  ///
+  /// This is equivalent to wayland format ABGR8888 (WL_DRM_FORMAT_ABGR8888,
+  /// WL_SHM_FORMAT_ABGR8888).
   kFlutterSoftwarePixelFormatRGBA8888,
 
   /// Pixel with 8 bits each for red, green and blue and 8 unused bits.
   ///   r = p[0];
   ///   g = p[1];
   ///   b = p[2];
+  ///
+  /// This is equivalent to wayland format XBGR8888 (WL_DRM_FORMAT_XBGR8888,
+  /// WL_SHM_FORMAT_XBGR8888).
   kFlutterSoftwarePixelFormatRGBX8888,
 
   /// Pixel with 8 bits each for blue, green, red and alpha.
@@ -379,6 +391,9 @@ typedef enum {
   ///   g = p[1];
   ///   b = p[0];
   ///   a = p[3];
+  ///
+  /// This is equivalent to wayland format ARGB8888 (WL_DRM_FORMAT_ARGB8888,
+  /// WL_SHM_FORMAT_ARGB8888).
   kFlutterSoftwarePixelFormatBGRA8888,
 
   /// Either kFlutterSoftwarePixelFormatBGRA8888 or
@@ -1741,7 +1756,8 @@ typedef struct {
   /// store.
   VoidCallback destruction_callback;
   /// The pixel format that the engine should use to render into the allocation.
-  /// In most cases, kR
+  ///
+  /// On Linux, kFlutterSoftwarePixelFormatBGRA8888 is most commonly used.
   FlutterSoftwarePixelFormat pixel_format;
 } FlutterSoftwareBackingStore2;
 
@@ -2011,6 +2027,14 @@ typedef struct {
   /// The callback should return true if the operation was successful.
   FlutterLayersPresentCallback present_layers_callback;
   /// Avoid caching backing stores provided by this compositor.
+  ///
+  /// The engine has an internal backing store cache. Instead of
+  /// creating & destroying backing stores for every frame, created
+  /// backing stores are automatically reused for subsequent frames.
+  ///
+  /// If you wish to change this behavior and destroy backing stores after
+  /// they've been used once, and create new backing stores for every frame,
+  /// you can set this bool to true.
   bool avoid_backing_store_cache;
   /// Callback invoked by the engine to composite the contents of each layer
   /// onto the specified view.
