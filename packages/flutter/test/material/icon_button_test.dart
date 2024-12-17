@@ -3046,7 +3046,7 @@ void main() {
     }
 
     // IconButton
-    await tester.pumpWidget(build(onLongPress: onLongPress, onHover: onHover));
+    await tester.pumpWidget(buildAllVariants(onLongPress: onLongPress, onHover: onHover));
 
     final Finder iconButton = find.widgetWithIcon(IconButton, Icons.favorite);
     final Offset iconButtonOffset = tester.getCenter(iconButton);
@@ -3054,29 +3054,29 @@ void main() {
     await gesture.addPointer();
 
     await gesture.moveTo(iconButtonOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onHovered, true);
 
     await tester.longPressAt(iconButtonOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onLongPressed, true);
 
     onHovered = false;
     onLongPressed = false;
 
-    await tester.pumpWidget(build(enabled: false, onLongPress: onLongPress, onHover: onHover));
+    await tester.pumpWidget(buildAllVariants(enabled: false, onLongPress: onLongPress, onHover: onHover));
     await gesture.moveTo(iconButtonOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onHovered, false);
 
     await tester.longPressAt(iconButtonOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onLongPressed, false);
 
     await gesture.removePointer();
 
     // IconButton.filled
-    await tester.pumpWidget(build(onLongPress: onLongPress, onHover: onHover));
+    await tester.pumpWidget(buildAllVariants(onLongPress: onLongPress, onHover: onHover));
 
     final Finder iconButtonFilled = find.widgetWithIcon(IconButton, Icons.add);
     final Offset iconButtonFilledOffset = tester.getCenter(iconButtonFilled);
@@ -3084,29 +3084,29 @@ void main() {
     await iconButtonFilledGesture.addPointer();
 
     await iconButtonFilledGesture.moveTo(iconButtonFilledOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onHovered, true);
 
     await tester.longPressAt(iconButtonFilledOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onLongPressed, true);
 
     onHovered = false;
     onLongPressed = false;
 
-    await tester.pumpWidget(build(enabled: false, onLongPress: onLongPress, onHover: onHover));
+    await tester.pumpWidget(buildAllVariants(enabled: false, onLongPress: onLongPress, onHover: onHover));
     await iconButtonFilledGesture.moveTo(iconButtonFilledOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onHovered, false);
 
     await tester.longPressAt(iconButtonFilledOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onLongPressed, false);
 
     await gesture.removePointer();
 
     // IconButton.filledTonal
-    await tester.pumpWidget(build(onLongPress: onLongPress, onHover: onHover));
+    await tester.pumpWidget(buildAllVariants(onLongPress: onLongPress, onHover: onHover));
 
     final Finder iconButtonFilledTonal = find.widgetWithIcon(IconButton, Icons.add);
     final Offset iconButtonFilledTonalOffset = tester.getCenter(iconButtonFilledTonal);
@@ -3114,29 +3114,29 @@ void main() {
     await iconButtonFilledTonalGesture.addPointer();
 
     await iconButtonFilledTonalGesture.moveTo(iconButtonFilledTonalOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onHovered, true);
 
     await tester.longPressAt(iconButtonFilledTonalOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onLongPressed, true);
 
     onHovered = false;
     onLongPressed = false;
 
-    await tester.pumpWidget(build(enabled: false, onLongPress: onLongPress, onHover: onHover));
+    await tester.pumpWidget(buildAllVariants(enabled: false, onLongPress: onLongPress, onHover: onHover));
     await iconButtonFilledTonalGesture.moveTo(iconButtonFilledTonalOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onHovered, false);
 
     await tester.longPressAt(iconButtonFilledTonalOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onLongPressed, false);
 
     await gesture.removePointer();
 
     // IconButton.outlined
-    await tester.pumpWidget(build(onLongPress: onLongPress, onHover: onHover));
+    await tester.pumpWidget(buildAllVariants(onLongPress: onLongPress, onHover: onHover));
 
     final Finder iconButtonOutlined = find.widgetWithIcon(IconButton, Icons.add);
     final Offset iconButtonOutlinedOffset = tester.getCenter(iconButtonOutlined);
@@ -3144,23 +3144,23 @@ void main() {
     await iconButtonOutlinedGesture.addPointer();
 
     await iconButtonOutlinedGesture.moveTo(iconButtonOutlinedOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onHovered, true);
 
     await tester.longPressAt(iconButtonOutlinedOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onLongPressed, true);
 
     onHovered = false;
     onLongPressed = false;
 
-    await tester.pumpWidget(build(enabled: false, onLongPress: onLongPress, onHover: onHover));
+    await tester.pumpWidget(buildAllVariants(enabled: false, onLongPress: onLongPress, onHover: onHover));
     await iconButtonOutlinedGesture.moveTo(iconButtonOutlinedOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onHovered, false);
 
     await tester.longPressAt(iconButtonOutlinedOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onLongPressed, false);
   });
 
@@ -3177,7 +3177,7 @@ void main() {
     }
 
     // IconButton
-    await tester.pumpWidget(build(onLongPress: onLongPress, onHover: onHover, useMaterial3: false));
+    await tester.pumpWidget(buildAllVariants(onLongPress: onLongPress, onHover: onHover, useMaterial3: false));
 
     final Finder iconButton = find.widgetWithIcon(IconButton, Icons.favorite);
     final Offset iconButtonOffset = tester.getCenter(iconButton);
@@ -3185,29 +3185,29 @@ void main() {
     await gesture.addPointer();
 
     await gesture.moveTo(iconButtonOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onHovered, true);
 
     await tester.longPressAt(iconButtonOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onLongPressed, true);
 
     onHovered = false;
     onLongPressed = false;
 
-    await tester.pumpWidget(build(enabled: false, onLongPress: onLongPress, onHover: onHover, useMaterial3: false));
+    await tester.pumpWidget(buildAllVariants(enabled: false, onLongPress: onLongPress, onHover: onHover, useMaterial3: false));
     await gesture.moveTo(iconButtonOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onHovered, false);
 
     await tester.longPressAt(iconButtonOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onLongPressed, false);
 
     await gesture.removePointer();
 
     // IconButton.filled
-    await tester.pumpWidget(build(onLongPress: onLongPress, onHover: onHover, useMaterial3: false));
+    await tester.pumpWidget(buildAllVariants(onLongPress: onLongPress, onHover: onHover, useMaterial3: false));
 
     final Finder iconButtonFilled = find.widgetWithIcon(IconButton, Icons.add);
     final Offset iconButtonFilledOffset = tester.getCenter(iconButtonFilled);
@@ -3215,29 +3215,29 @@ void main() {
     await iconButtonFilledGesture.addPointer();
 
     await iconButtonFilledGesture.moveTo(iconButtonFilledOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onHovered, true);
 
     await tester.longPressAt(iconButtonFilledOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onLongPressed, true);
 
     onHovered = false;
     onLongPressed = false;
 
-    await tester.pumpWidget(build(enabled: false, onLongPress: onLongPress, onHover: onHover, useMaterial3: false));
+    await tester.pumpWidget(buildAllVariants(enabled: false, onLongPress: onLongPress, onHover: onHover, useMaterial3: false));
     await iconButtonFilledGesture.moveTo(iconButtonFilledOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onHovered, false);
 
     await tester.longPressAt(iconButtonFilledOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onLongPressed, false);
 
     await gesture.removePointer();
 
     // IconButton.filledTonal
-    await tester.pumpWidget(build(onLongPress: onLongPress, onHover: onHover, useMaterial3: false));
+    await tester.pumpWidget(buildAllVariants(onLongPress: onLongPress, onHover: onHover, useMaterial3: false));
 
     final Finder iconButtonFilledTonal = find.widgetWithIcon(IconButton, Icons.add);
     final Offset iconButtonFilledTonalOffset = tester.getCenter(iconButtonFilledTonal);
@@ -3245,29 +3245,29 @@ void main() {
     await iconButtonFilledTonalGesture.addPointer();
 
     await iconButtonFilledTonalGesture.moveTo(iconButtonFilledTonalOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onHovered, true);
 
     await tester.longPressAt(iconButtonFilledTonalOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onLongPressed, true);
 
     onHovered = false;
     onLongPressed = false;
 
-    await tester.pumpWidget(build(enabled: false, onLongPress: onLongPress, onHover: onHover, useMaterial3: false));
+    await tester.pumpWidget(buildAllVariants(enabled: false, onLongPress: onLongPress, onHover: onHover, useMaterial3: false));
     await iconButtonFilledTonalGesture.moveTo(iconButtonFilledTonalOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onHovered, false);
 
     await tester.longPressAt(iconButtonFilledTonalOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onLongPressed, false);
 
     await gesture.removePointer();
 
     // IconButton.outlined
-    await tester.pumpWidget(build(onLongPress: onLongPress, onHover: onHover, useMaterial3: false));
+    await tester.pumpWidget(buildAllVariants(onLongPress: onLongPress, onHover: onHover, useMaterial3: false));
 
     final Finder iconButtonOutlined = find.widgetWithIcon(IconButton, Icons.add);
     final Offset iconButtonOutlinedOffset = tester.getCenter(iconButtonOutlined);
@@ -3275,28 +3275,28 @@ void main() {
     await iconButtonOutlinedGesture.addPointer();
 
     await iconButtonOutlinedGesture.moveTo(iconButtonOutlinedOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onHovered, true);
 
     await tester.longPressAt(iconButtonOutlinedOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onLongPressed, true);
 
     onHovered = false;
     onLongPressed = false;
 
-    await tester.pumpWidget(build(enabled: false, onLongPress: onLongPress, onHover: onHover, useMaterial3: false));
+    await tester.pumpWidget(buildAllVariants(enabled: false, onLongPress: onLongPress, onHover: onHover, useMaterial3: false));
     await iconButtonOutlinedGesture.moveTo(iconButtonOutlinedOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onHovered, false);
 
     await tester.longPressAt(iconButtonOutlinedOffset);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(onLongPressed, false);
   });
 }
 
-Widget build({bool enabled = true, bool useMaterial3 = true, void Function(bool)? onHover, VoidCallback? onLongPress}) {
+Widget buildAllVariants({bool enabled = true, bool useMaterial3 = true, void Function(bool)? onHover, VoidCallback? onLongPress}) {
   return MaterialApp(
     theme: ThemeData(
       useMaterial3: useMaterial3
