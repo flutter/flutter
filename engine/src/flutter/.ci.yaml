@@ -416,36 +416,6 @@ targets:
     properties:
       config_name: linux_unopt
 
-  - name: Linux Web Framework tests
-    recipe: engine/web_engine_framework
-    enabled_branches:
-      - main
-    properties:
-      add_recipes_cq: "true"
-      cores: "32"
-      gclient_variables: >-
-        {"download_emsdk": true}
-      dependencies: >-
-        [
-          {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
-          {"dependency": "curl", "version": "version:7.64.0"}
-        ]
-      no_goma: "true"
-      drone_dimensions: >
-        ["device_type=none", "os=Linux"]
-      shard: web_tests
-      subshards: >-
-              ["0", "1", "2", "3", "4", "5", "6", "7_last"]
-    timeout: 120
-    runIf:
-      - DEPS
-      - .ci.yaml
-      - lib/web_ui/**
-      - web_sdk/**
-      - tools/**
-      - ci/**
-      - flutter_frontend_server/**
-
   - name: Linux mac_android_aot_engine
     recipe: engine_v2/engine_v2
     timeout: 240
