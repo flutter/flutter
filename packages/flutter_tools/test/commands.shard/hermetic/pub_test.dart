@@ -8,12 +8,15 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
 
 import '../../src/context.dart';
+import '../../src/fake_pub_deps.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 const String minimalV2EmbeddingManifest = r'''
@@ -30,6 +33,15 @@ const String minimalV2EmbeddingManifest = r'''
 void main() {
   late FileSystem fileSystem;
   late FakePub pub;
+
+  // TODO(matanlurey): Remove after `flutter_gen` is removed.
+  // See https://github.com/flutter/flutter/issues/102983 for details.
+  FeatureFlags disableExplicitPackageDependencies() {
+    return TestFeatureFlags(
+      // ignore: avoid_redundant_argument_values
+      isExplicitPackageDependenciesEnabled: false,
+    );
+  }
 
   setUp(() {
     Cache.disableLocking();
@@ -262,6 +274,7 @@ void main() {
     Pub: () => pub,
     ProcessManager: () => FakeProcessManager.any(),
     FileSystem: () => fileSystem,
+    FeatureFlags: disableExplicitPackageDependencies,
   });
 }
 
@@ -291,5 +304,10 @@ class FakePub extends Fake implements Pub {
         ..createSync(recursive: true)
         ..writeAsStringSync('{"configVersion":2,"packages":[]}');
       }
+  }
+
+  @override
+  Future<Map<String, Object?>> deps(FlutterProject project) {
+    return FakePubWithPrimedDeps().deps(project);
   }
 }

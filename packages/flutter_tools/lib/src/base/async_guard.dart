@@ -114,7 +114,8 @@ Future<T> asyncGuard<T>(
       }
     // This catches all exceptions so that they can be propagated to the
     // caller-supplied error handling or the completer.
-    } catch (e, s) { // ignore: avoid_catches_without_on_clauses, forwards to Future
+    // ignore: avoid_catches_without_on_clauses, forwards to Future
+    } catch (e, s) {
       handleError(e, s);
     }
   }, onError: (Object e, StackTrace s) {

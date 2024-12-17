@@ -11,7 +11,13 @@ import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../features.dart';
 
-Future<void> generateLocalizationsSyntheticPackage({
+/// Generates the `package:flutter_gen` synthetic package.
+///
+/// If the package has been configured *not* to use synthetic packages, this
+/// method is a NO-OP and returns `false`.
+///
+/// Returns `true` if the package was generated, or `false` it was not.
+Future<bool> generateLocalizationsSyntheticPackage({
   required Environment environment,
   required BuildSystem buildSystem,
   required BuildTargets buildTargets,
@@ -25,7 +31,7 @@ Future<void> generateLocalizationsSyntheticPackage({
   // root project directory, check to see if a synthetic package should
   // be generated for gen_l10n.
   if (!l10nYamlFile.existsSync()) {
-    return;
+    return false;
   }
 
   final YamlNode yamlNode = loadYamlNode(l10nYamlFile.readAsStringSync());
@@ -50,11 +56,11 @@ Future<void> generateLocalizationsSyntheticPackage({
     // synthetic-package is null.
     final bool? isSyntheticL10nPackage = value as bool?;
     if (isSyntheticL10nPackage == false || isSyntheticL10nPackage == null && featureFlags.isExplicitPackageDependenciesEnabled) {
-      return;
+      return false;
     }
   } else if (featureFlags.isExplicitPackageDependenciesEnabled) {
     // synthetic-packages: true was not set and it is no longer the default.
-    return;
+    return false;
   }
 
   if (featureFlags.isExplicitPackageDependenciesEnabled) {
@@ -88,4 +94,6 @@ Future<void> generateLocalizationsSyntheticPackage({
       '${result.exceptions.values.map<Object?>((ExceptionMeasurement e) => e.exception).join('\n\n')}',
     );
   }
+
+  return true;
 }
