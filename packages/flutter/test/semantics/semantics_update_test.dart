@@ -82,7 +82,8 @@ void main() {
 
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
-  }, skip: true); // https://github.com/flutter/flutter/issues/97894
+    // https://github.com/flutter/flutter/issues/97894
+  }, skip: true);
 
   testWidgets('Semantics update receives attributed text', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
@@ -162,7 +163,8 @@ void main() {
 
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
-  }, skip: true); // https://github.com/flutter/flutter/issues/97894
+    // https://github.com/flutter/flutter/issues/97894
+  }, skip: true);
 }
 
 class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {

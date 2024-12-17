@@ -145,7 +145,8 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('m2_bottom_app_bar.custom_shape.2.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
+    // https://github.com/flutter/flutter/issues/44572
+  }, skip: isBrowser);
 
   testWidgets('Material3 - Custom shape', (WidgetTester tester) async {
     final Key key = UniqueKey();
@@ -189,7 +190,8 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('m3_bottom_app_bar.custom_shape.2.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
+    // https://github.com/flutter/flutter/issues/44572
+  }, skip: isBrowser);
 
   testWidgets('Custom Padding', (WidgetTester tester) async {
     const EdgeInsets customPadding = EdgeInsets.all(10);

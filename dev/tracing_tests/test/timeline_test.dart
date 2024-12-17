@@ -154,6 +154,6 @@ void main() {
     expect(args['painter'], startsWith('_PlaceholderPainter#'));
     debugProfilePaintsEnabled = false;
     debugEnhancePaintTimelineArguments = false;
-
-  }, skip: isBrowser); // [intended] uses dart:isolate and io.
+    // [intended] uses dart:isolate and io.
+  }, skip: isBrowser);
 }

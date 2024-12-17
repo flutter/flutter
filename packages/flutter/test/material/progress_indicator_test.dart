@@ -753,7 +753,8 @@ void main() {
       animationSheet.collate(20),
       matchesGoldenFile('m2_material.refresh_progress_indicator.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+    // https://github.com/flutter/flutter/issues/56001
+  }, skip: isBrowser);
 
   testWidgets('Material3 - RefreshProgressIndicator uses expected animation', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
@@ -770,7 +771,8 @@ void main() {
       animationSheet.collate(20),
       matchesGoldenFile('m3_material.refresh_progress_indicator.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+    // https://github.com/flutter/flutter/issues/56001
+  }, skip: isBrowser);
 
   testWidgets('Determinate CircularProgressIndicator stops the animator', (WidgetTester tester) async {
     double? progressValue;
@@ -1058,7 +1060,8 @@ void main() {
       animationSheet.collate(20),
       matchesGoldenFile('m2_material.circular_progress_indicator.indeterminate.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+    // https://github.com/flutter/flutter/issues/56001
+  }, skip: isBrowser);
 
   testWidgets('Material3 - Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
@@ -1081,7 +1084,8 @@ void main() {
       animationSheet.collate(20),
       matchesGoldenFile('m3_material.circular_progress_indicator.indeterminate.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+    // https://github.com/flutter/flutter/issues/56001
+  }, skip: isBrowser);
 
   testWidgets(
     'Adaptive CircularProgressIndicator displays CupertinoActivityIndicator in iOS',

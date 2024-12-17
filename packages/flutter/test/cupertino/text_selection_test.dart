@@ -249,7 +249,8 @@ void main() {
       expect(findOverflowBackButton(), findsNothing);
       expect(findOverflowNextButton(), findsNothing);
     },
-      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
+    // [intended] We do not use Flutter-rendered context menu on the Web.
+      skip: isBrowser,
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
 
@@ -357,7 +358,8 @@ void main() {
       expect(findOverflowBackButton(), findsNothing);
       expect(findOverflowNextButton(), findsOneWidget);
     },
-      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
+    // [intended] We do not use Flutter-rendered context menu on the Web.
+      skip: isBrowser,
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
 
@@ -503,7 +505,8 @@ void main() {
       expect(findOverflowBackButton(), findsNothing);
       expect(findOverflowNextButton(), findsOneWidget);
     },
-      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
+    // [intended] We do not use Flutter-rendered context menu on the Web.
+      skip: isBrowser,
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
 
@@ -615,7 +618,8 @@ void main() {
       expect(findOverflowBackButton(), findsNothing);
       expect(findOverflowNextButton(), findsOneWidget);
     },
-      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
+    // [intended] We do not use Flutter-rendered context menu on the Web.
+      skip: isBrowser,
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
 
@@ -683,7 +687,8 @@ void main() {
         // 7.0 + 44.0 + 8.0 - 8.0 = _kToolbarArrowSize + text_button_height + _kToolbarContentDistance - padding
         expect(selectionOffset.dy + 7.0 + 44.0 + 8.0 - 8.0, equals(textFieldOffset.dy));
       },
-      skip: isBrowser, // [intended] the selection menu isn't required by web
+      // [intended] the selection menu isn't required by web
+      skip: isBrowser,
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
   });
@@ -764,7 +769,8 @@ void main() {
     expect(handles.first.size.height, 60.5);
     expect(handles.last.size.height, 35.5);
   },
-    skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
+  // [intended] We do not use Flutter-rendered context menu on the Web.
+    skip: isBrowser,
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
@@ -848,7 +854,8 @@ void main() {
     expect(handles.first.size.height, 110.5);
     expect(handles.last.size.height, 110.5);
   },
-    skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
+  // [intended] We do not use Flutter-rendered context menu on the Web.
+    skip: isBrowser,
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
@@ -929,7 +936,8 @@ void main() {
     expect(handles.first.size.height, 60.5);
     expect(handles.last.size.height, 45.5);
   },
-    skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
+  // [intended] We do not use Flutter-rendered context menu on the Web.
+    skip: isBrowser,
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
@@ -1016,7 +1024,8 @@ void main() {
     expect(handles.first.size.height, 50.5);
     expect(handles.last.size.height, 50.5); // This is 60.5 with the previous frame.
   },
-    skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
+  // [intended] We do not use Flutter-rendered context menu on the Web.
+    skip: isBrowser,
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 }

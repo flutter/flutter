@@ -125,7 +125,8 @@ void main() {
       // The handle height after scaling is  30.5 * 5 = 152.5
       expect(handleHeightAfterScaling, equals(const Offset(0.0, 152.5)));
     },
-    skip: isBrowser, // [intended]
+    // [intended]
+    skip: isBrowser,
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
   );
 
@@ -158,7 +159,8 @@ void main() {
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
   },
-    skip: kIsWeb, // [intended]
+  // [intended]
+    skip: kIsWeb,
   );
 
   testWidgets('builds a custom context menu if provided', (WidgetTester tester) async {
@@ -199,7 +201,8 @@ void main() {
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
     expect(find.byKey(key), findsOneWidget);
   },
-    skip: kIsWeb, // [intended]
+  // [intended]
+    skip: kIsWeb,
   );
 
   testWidgets('Text processing actions are added to the toolbar', (WidgetTester tester) async {
@@ -247,7 +250,8 @@ void main() {
     expect(find.text(fakeAction2Label), areTextActionsSupported ? findsOneWidget : findsNothing);
   },
     variant: TargetPlatformVariant.all(),
-    skip: kIsWeb, // [intended]
+    // [intended]
+    skip: kIsWeb,
   );
 
   testWidgets('onSelectionChange is called when the selection changes', (WidgetTester tester) async {
@@ -340,6 +344,7 @@ void main() {
     expect(find.text('Copy'), findsOneWidget);
   },
     variant: TargetPlatformVariant.all(),
-    skip: kIsWeb, // [intended]
+    // [intended]
+    skip: kIsWeb,
   );
 }

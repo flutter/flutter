@@ -539,7 +539,8 @@ void main() {
 
     // Entering route should be snapshotted.
     expect(isTransitioningWithSnapshotting(tester, page1), isTrue);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
+    // [intended] rasterization is not used on the web.
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb);
 
   testWidgets('ZoomPageTransitionsBuilder.allowSnapshotting can disable route snapshotting', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -572,7 +573,8 @@ void main() {
 
     // Entering route should not be snapshotted.
     expect(isTransitioningWithSnapshotting(tester, page1), isFalse);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
+    // [intended] rasterization is not used on the web.
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb);
 
   testWidgets('Setting PageRoute.allowSnapshotting to false overrides ZoomPageTransitionsBuilder.allowSnapshotting = true', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -597,7 +599,8 @@ void main() {
     expect(isTransitioningWithSnapshotting(tester, page2), isFalse);
 
     await tester.pumpAndSettle();
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
+    // [intended] rasterization is not used on the web.
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb);
 
   testWidgets('_ZoomPageTransition only causes child widget built once', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/58345

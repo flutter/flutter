@@ -284,7 +284,8 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 200));
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
-  }, skip: isBrowser); // [intended] We do not use Flutter-rendered context menu on the Web.
+    // [intended] We do not use Flutter-rendered context menu on the Web.
+  }, skip: isBrowser);
 
   testWidgets('onTap is called upon tap', (WidgetTester tester) async {
     int tapCount = 0;

@@ -164,7 +164,8 @@ void main() {
     );
 
     await gesture.up();
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+    // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb);
 
   testWidgets('The InkWell widget renders an ink ripple', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);

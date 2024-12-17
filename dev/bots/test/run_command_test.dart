@@ -39,7 +39,8 @@ void main() {
       print = oldPrint;
       resetErrorStatus();
     }
-  }, skip: !io.Platform.isLinux); // [intended] See comments above.
+    // [intended] See comments above.
+  }, skip: !io.Platform.isLinux);
 
   test('long output on runCommand failure', () async {
     final List<Object?> log = <String>[];
@@ -61,5 +62,6 @@ void main() {
       print = oldPrint;
       resetErrorStatus();
     }
-  }, skip: !io.Platform.isLinux); // [intended] See comments above.
+    // [intended] See comments above.
+  }, skip: !io.Platform.isLinux);
 }

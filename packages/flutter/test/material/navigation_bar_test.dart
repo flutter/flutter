@@ -899,7 +899,8 @@ void main() {
           color: const Color(0x0a000000),
         )
     );
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+    // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb);
 
   testWidgets('Material3 - Navigation indicator ripple golden test', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/117420.

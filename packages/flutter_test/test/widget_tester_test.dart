@@ -76,7 +76,8 @@ void main() {
     testWidgets('should be skipped', (WidgetTester tester) async {
       expect(false, true);
     });
-  }, skip: true); // [intended] API testing
+    // [intended] API testing
+  }, skip: true);
 
   group('pumping', () {
     testWidgets('pumping', (WidgetTester tester) async {

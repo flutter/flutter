@@ -919,7 +919,8 @@ void main() {
 
     // The width of the SegmentedButton must be less than the width of the parent widget.
     expect(segmentedButtonWidth, lessThan(screenWidth));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
+    // https://github.com/flutter/flutter/issues/145527
+  }, skip: kIsWeb && !isCanvasKit);
 
   testWidgets('SegmentedButton.styleFrom overlayColor overrides default overlay color', (WidgetTester tester) async {
     const Color overlayColor = Color(0xffff0000);
@@ -1130,7 +1131,8 @@ void main() {
           p2: const Offset(166.8000030517578, tapTargetSize - 4.0),
         ),
     );
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+    // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb);
 
   testWidgets('SegmentedButton vertical aligned children', (WidgetTester tester) async {
     await tester.pumpWidget(

@@ -565,7 +565,8 @@ void main() {
       tester.getTopLeft(find.text('Licenses')),
       const Offset(16.0 + safeareaPadding, 14.0 + safeareaPadding),
     );
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+    // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb);
 
   testWidgets('LicensePage returns early if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();

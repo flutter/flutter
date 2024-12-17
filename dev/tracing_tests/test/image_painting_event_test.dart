@@ -76,7 +76,8 @@ void main() {
       jsonEncode(event.extensionData!.data),
       contains('"test.png":{"source":"test.png","displaySize":{"width":600.0,"height":300.0},"imageSize":{"width":300.0,"height":300.0},"displaySizeInBytes":960000,"decodedSizeInBytes":480000}'),
     );
-  }, skip: isBrowser); // [intended] uses dart:isolate and io.
+    // [intended] uses dart:isolate and io.
+  }, skip: isBrowser);
 
   test('Image painting events - deduplicates across frames', () async {
     final Completer<Event> completer = Completer<Event>();
@@ -108,7 +109,8 @@ void main() {
       jsonEncode(event.extensionData!.data),
       contains('"test.png":{"source":"test.png","displaySize":{"width":900.0,"height":900.0},"imageSize":{"width":300.0,"height":300.0},"displaySizeInBytes":4320000,"decodedSizeInBytes":480000}'),
     );
-  }, skip: isBrowser); // [intended] uses dart:isolate and io.
+    // [intended] uses dart:isolate and io.
+  }, skip: isBrowser);
 }
 
 class TestCanvas implements Canvas {

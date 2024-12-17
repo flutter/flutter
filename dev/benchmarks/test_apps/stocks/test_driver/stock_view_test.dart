@@ -40,7 +40,8 @@ void main() {
 
       expect(symbol, 'AAPL');
     },
-    skip: 'Needs to be fixed on Fuchsia.', // https://github.com/flutter/flutter/issues/87069
-    timeout: Timeout.none);
+    // https://github.com/flutter/flutter/issues/87069
+    skip: 'Needs to be fixed on Fuchsia.',
+    timeout: Timeout.none,);
   });
 }

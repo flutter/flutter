@@ -200,7 +200,8 @@ void main() {
     expect(await compute(testDebugName, null, debugLabel: 'debug_name'),
         'debug_name');
     expect(await compute(testReturnNull, null), null);
-  }, skip: kIsWeb); // [intended] isn't supported on the web.
+     // [intended] isn't supported on the web.
+  }, skip: kIsWeb);
 
   group('compute() closes all ports', () {
     test('with valid message', () async {
@@ -217,5 +218,6 @@ void main() {
       await expectFileSuccessfullyCompletes(
           '_compute_caller_invalid_message.dart');
     });
-  }, skip: kIsWeb); // [intended] isn't supported on the web.
+    // [intended] isn't supported on the web.
+  }, skip: kIsWeb);
 }

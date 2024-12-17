@@ -36,7 +36,8 @@ void main() {
       await pumpToolbar(<String>['hello', 'yellow', 'yell', 'yeller']);
     }, throwsAssertionError);
   },
-    skip: kIsWeb, // [intended]
+  // [intended]
+    skip: kIsWeb,
   );
 
   test('buildSuggestionButtons only considers the first three suggestions', () {

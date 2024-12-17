@@ -1368,7 +1368,8 @@ void main() {
         )
         ..restore(),
       );
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
+      // https://github.com/flutter/flutter/issues/55317
+    }, skip: isBrowser);
 
     testWidgets('rounded OutlineInputBorder with zero padding just wraps the label', (WidgetTester tester) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/82321
@@ -1454,7 +1455,8 @@ void main() {
         )
         ..restore(),
       );
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
+      // https://github.com/flutter/flutter/issues/55317
+    }, skip: isBrowser);
 
     testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular border', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/78855.
@@ -1511,7 +1513,8 @@ void main() {
         )
         ..restore(),
       );
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
+      // https://github.com/flutter/flutter/issues/55317
+    }, skip: isBrowser);
 
     testWidgets('InputDecorator OutlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/15742
@@ -2531,7 +2534,8 @@ void main() {
           return true;
         }),
       );
-    }, skip: isBrowser);  // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
+      // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
+    }, skip: isBrowser);
 
     testWidgets('InputDecorator floating label Y coordinate', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/54028
@@ -13196,7 +13200,8 @@ void main() {
         )
         ..restore(),
       );
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
+      // https://github.com/flutter/flutter/issues/55317
+    }, skip: isBrowser);
 
     testWidgets('rounded OutlineInputBorder with zero padding just wraps the label', (WidgetTester tester) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/82321
@@ -13288,7 +13293,8 @@ void main() {
         )
         ..restore(),
       );
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
+      // https://github.com/flutter/flutter/issues/55317
+    }, skip: isBrowser);
 
   testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular border', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/78855
@@ -13352,7 +13358,8 @@ void main() {
         )
         ..restore(),
       );
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
+      // https://github.com/flutter/flutter/issues/55317
+    }, skip: isBrowser);
 
     testWidgets('uses alphabetic baseline for CJK layout', (WidgetTester tester) async {
       await tester.binding.setLocale('zh', 'CN');
@@ -13513,7 +13520,8 @@ void main() {
           return true;
         }),
       );
-    }, skip: isBrowser);  // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
+      // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
+    }, skip: isBrowser);
 
     testWidgets('textAlignVertical can be updated', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/56933

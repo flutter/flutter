@@ -350,7 +350,8 @@ void main() {
     await expectLater(tester, meetsGuideline(textContrastGuideline));
     focusNode.dispose();
   },
-    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
+  // https://github.com/flutter/flutter/issues/44115
+    skip: isBrowser,
   );
 
   testWidgets('ElevatedButton default overlayColor and elevation resolve pressed state', (WidgetTester tester) async {

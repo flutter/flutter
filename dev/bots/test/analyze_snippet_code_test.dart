@@ -79,7 +79,8 @@ void main() {
       '', // because we end with a newline, split gives us an extra blank line
     ]);
     expect(process.exitCode, 1);
-  }, skip: true); // TODO(scheglov): Restore after landing Dart SDK changes, https://github.com/flutter/flutter/issues/154413
+    // TODO(scheglov): Restore after landing Dart SDK changes, https://github.com/flutter/flutter/issues/154413
+  }, skip: true);
 
   test('Analyzes dart:ui code', () {
     final ProcessResult process = Process.runSync(
@@ -105,5 +106,6 @@ void main() {
       '', // because we end with a newline, split gives us an extra blank line
     ]);
     expect(process.exitCode, 1);
-  }, skip: true); // TODO(scheglov): Restore after landing Dart SDK changes, https://github.com/flutter/flutter/issues/154413
+    // TODO(scheglov): Restore after landing Dart SDK changes, https://github.com/flutter/flutter/issues/154413
+  }, skip: true);
 }

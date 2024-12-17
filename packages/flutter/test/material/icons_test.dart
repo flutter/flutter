@@ -81,7 +81,8 @@ void main() {
     ));
 
     await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample.png'));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+    // https://github.com/flutter/flutter/issues/39998
+  }, skip: isBrowser);
 
   // Regression test for https://github.com/flutter/flutter/issues/95886
   testWidgets('Another sample of icons look as expected', (WidgetTester tester) async {
@@ -102,7 +103,8 @@ void main() {
     ));
 
     await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample2.png'));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+    // https://github.com/flutter/flutter/issues/39998
+  }, skip: isBrowser);
 
   testWidgets('Another sample of icons look as expected', (WidgetTester tester) async {
     await _loadIconFont();
@@ -122,7 +124,8 @@ void main() {
     ));
 
     await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample3.png'));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+    // https://github.com/flutter/flutter/issues/39998
+  }, skip: isBrowser);
 
   // Regression test for https://github.com/flutter/flutter/issues/103202.
   testWidgets('Another sample of icons look as expected', (WidgetTester tester) async {
@@ -143,7 +146,8 @@ void main() {
     ));
 
     await expectLater(find.byType(Wrap), matchesGoldenFile('test.icons.sample4.png'));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+    // https://github.com/flutter/flutter/issues/39998
+  }, skip: isBrowser);
 }
 
 // Loads the cached material icon font.

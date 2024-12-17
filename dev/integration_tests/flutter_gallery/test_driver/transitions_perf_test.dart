@@ -193,7 +193,8 @@ void main([List<String> args = const <String>[]]) {
       final int id = await driver.getSemanticsId(find.bySemanticsLabel('Material'));
       expect(id, greaterThan(-1));
     },
-        skip: !withSemantics, // [intended] test only makes sense when semantics are turned on.
+    // [intended] test only makes sense when semantics are turned on.
+        skip: !withSemantics,
         timeout: Timeout.none,
     );
 

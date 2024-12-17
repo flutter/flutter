@@ -1371,7 +1371,8 @@ void main() {
       imageCache.clear();
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
-      skip: kIsWeb, // [intended] frameworkHandlesBack not used on web.
+      // [intended] frameworkHandlesBack not used on web.
+      skip: kIsWeb,
     );
   });
 }

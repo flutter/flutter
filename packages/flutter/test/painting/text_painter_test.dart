@@ -371,7 +371,8 @@ void main() {
     test('TextPainter caret Devanagari test, full strength', () {
       // Regression test for https://github.com/flutter/flutter/issues/118403
       checkCaretOffsetsLtr('प्राप्त वर्णन प्रव्रुति');
-    }, skip: true); // https://github.com/flutter/flutter/issues/122478
+      // https://github.com/flutter/flutter/issues/122478
+    }, skip: true);
 
     test('TextPainter caret emoji test LTR: letters next to emoji, as separate TextBoxes', () {
       // Regression test for https://github.com/flutter/flutter/issues/122477
@@ -1053,7 +1054,8 @@ void main() {
     expect(painter.minIntrinsicWidth, 90.0);
     expect(painter.maxIntrinsicWidth, 180.0);
     painter.dispose();
-  }, skip: true); // https://github.com/flutter/flutter/issues/13512
+    // https://github.com/flutter/flutter/issues/13512
+  }, skip: true);
 
   test('TextPainter widget span', () {
     final TextPainter painter = TextPainter()

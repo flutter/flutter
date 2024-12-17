@@ -38,7 +38,8 @@ void main() {
     expect(field[_TestEnum.c], isTrue);
     expect(field[_TestEnum.d], isTrue);
     expect(field[_TestEnum.e], isTrue);
-  }, skip: isBrowser); // [intended] BitField is not supported when compiled to Javascript.
+    // [intended] BitField is not supported when compiled to Javascript.
+  }, skip: isBrowser);
 
   test('BitField.filed control test', () {
     final BitField<_TestEnum> field1 = BitField<_TestEnum>.filled(8, true);
@@ -48,5 +49,6 @@ void main() {
     final BitField<_TestEnum> field2 = BitField<_TestEnum>.filled(8, false);
 
     expect(field2[_TestEnum.d], isFalse);
-  }, skip: isBrowser); // [intended] BitField is not supported when compiled to Javascript.
+    // [intended] BitField is not supported when compiled to Javascript.
+  }, skip: isBrowser);
 }

@@ -296,7 +296,8 @@ void main() {
       }
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
-      skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+      // [intended] only applies to platforms where we supply the context menu.
+      skip: isContextMenuProvidedByPlatform,
     );
 
   testWidgets('Search Web shows up on iOS only', (WidgetTester tester) async {
@@ -346,7 +347,8 @@ void main() {
     }
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
-    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: isContextMenuProvidedByPlatform,
   );
 
   testWidgets('Share shows up on iOS and Android', (WidgetTester tester) async {
@@ -392,7 +394,8 @@ void main() {
     expect(lastShare, 'Test');
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
-    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: isContextMenuProvidedByPlatform,
   );
 
   testWidgets('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
@@ -468,7 +471,8 @@ void main() {
     expect(find.byType(CupertinoButton), findsNothing);
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }),
-    skip: kIsWeb, // [intended] the web handles this on its own.
+    // [intended] the web handles this on its own.
+    skip: kIsWeb,
   );
 
   testWidgets('can get text selection color initially on desktop', (WidgetTester tester) async {
@@ -828,7 +832,8 @@ void main() {
       );
     },
     // TODO(mdebbar): Strut styles support.
-    skip: isBrowser, // https://github.com/flutter/flutter/issues/32243
+    // https://github.com/flutter/flutter/issues/32243
+    skip: isBrowser,
   );
 
   testWidgets(
@@ -858,7 +863,8 @@ void main() {
       );
     },
     // TODO(mdebbar): Strut styles support.
-    skip: isBrowser, // https://github.com/flutter/flutter/issues/32243
+    // https://github.com/flutter/flutter/issues/32243
+    skip: isBrowser,
   );
 
   testWidgets(
@@ -1926,7 +1932,8 @@ void main() {
     expect(text.style!.fontSize, 15);
     expect(text.style!.letterSpacing, -0.15);
     expect(text.style!.fontWeight, FontWeight.w400);
-  }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
+    // [intended] only applies to platforms where we supply the context menu.
+  }, skip: isContextMenuProvidedByPlatform);
 
   testWidgets('text field toolbar options correctly changes options on Apple Platforms', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
@@ -1976,7 +1983,8 @@ void main() {
     expect(find.text('Select All'), findsNothing);
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
-    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: isContextMenuProvidedByPlatform,
   );
 
   testWidgets('text field toolbar options correctly changes options on non-Apple platforms', (WidgetTester tester) async {
@@ -2032,7 +2040,8 @@ void main() {
     expect(find.text('Select All'), findsNothing);
   },
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
-    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: isContextMenuProvidedByPlatform,
   );
 
   testWidgets('Read only text field', (WidgetTester tester) async {
@@ -2071,7 +2080,8 @@ void main() {
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Cut'), findsNothing);
-  }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
+    // [intended] only applies to platforms where we supply the context menu.
+  }, skip: isContextMenuProvidedByPlatform);
 
   testWidgets('copy paste', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -2125,7 +2135,8 @@ void main() {
 
     final Element placeholder2Element = tester.element(find.text('field 2'));
     expect(Visibility.of(placeholder2Element), false);
-  }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
+    // [intended] only applies to platforms where we supply the context menu.
+  }, skip: isContextMenuProvidedByPlatform);
 
   testWidgets(
     'tap moves cursor to the edge of the word it tapped on',
@@ -3151,7 +3162,8 @@ void main() {
     expect(find.text('Select All'), findsOneWidget);
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Cut'), findsNothing);
-  }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
+    // [intended] only applies to platforms where we supply the context menu.
+  }, skip: isContextMenuProvidedByPlatform);
 
   testWidgets(
     'long press selects the word at the long press position and shows toolbar on non-Apple platforms',
@@ -3823,7 +3835,8 @@ void main() {
         expect(controller.selection.extentOffset, 20);
       },
       variant: TargetPlatformVariant.mobile(),
-      skip: true, // https://github.com/flutter/flutter/issues/123415
+      // https://github.com/flutter/flutter/issues/123415
+      skip: true,
     );
 
     testWidgets(
@@ -6645,7 +6658,8 @@ void main() {
       textFieldTopLeft = tester.getTopLeft(find.byType(CupertinoTextField));
       expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
     },
-    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: isContextMenuProvidedByPlatform,
   );
 
   testWidgets('text field respects keyboardAppearance from theme', (WidgetTester tester) async {
@@ -7458,7 +7472,8 @@ void main() {
       // The toolbar is hidden.
       expect(find.text('Paste'), findsNothing);
     }, variant: TargetPlatformVariant.desktop());
-  }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
+    // [intended] only applies to platforms where we supply the context menu.
+  }, skip: isContextMenuProvidedByPlatform);
 
   group('textAlignVertical position', () {
     group('simple case', () {
@@ -8263,7 +8278,8 @@ void main() {
     );
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
-    skip: kIsWeb, // [intended] the web has its own Select All.
+    // [intended] the web has its own Select All.
+    skip: kIsWeb,
   );
 
   testWidgets('text selection style 2', (WidgetTester tester) async {
@@ -8317,7 +8333,8 @@ void main() {
     );
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
-    skip: kIsWeb, // [intended] the web has its own Select All.
+    // [intended] the web has its own Select All.
+    skip: kIsWeb,
   );
 
   testWidgets('textSelectionControls is passed to EditableText', (WidgetTester tester) async {
@@ -9341,7 +9358,8 @@ void main() {
     }
   },
     variant: TargetPlatformVariant.all(),
-    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: isContextMenuProvidedByPlatform,
   );
 
   group('Right click focus', () {
@@ -9533,7 +9551,8 @@ void main() {
 
       expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsOneWidget);
     },
-      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+    // [intended] on web the browser handles the context menu.
+      skip: kIsWeb,
     );
 
     testWidgets('contextMenuBuilder is used in place of the default text selection toolbar', (WidgetTester tester) async {
@@ -9571,7 +9590,8 @@ void main() {
 
       expect(find.byKey(key), findsOneWidget);
     },
-      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+    // [intended] on web the browser handles the context menu.
+      skip: kIsWeb,
     );
   });
 
@@ -10055,7 +10075,8 @@ void main() {
       expect(focusNode.hasPrimaryFocus, isTrue);
     },
       variant: TargetPlatformVariant.all(),
-      skip: kIsWeb, // [intended] The toolbar isn't rendered by Flutter on the web, it's rendered by the browser.
+      // [intended] The toolbar isn't rendered by Flutter on the web, it's rendered by the browser.
+      skip: kIsWeb,
     );
 
     testWidgets("Tapping on border doesn't lose focus",
@@ -10281,7 +10302,8 @@ void main() {
     );
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
-    skip: kIsWeb, // [intended]
+    // [intended]
+    skip: kIsWeb,
   );
 
   testWidgets('text selection toolbar is hidden on tap down on desktop platforms', (WidgetTester tester) async {
@@ -10326,7 +10348,8 @@ void main() {
 
     expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
   },
-    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+  // [intended] only applies to platforms where we supply the context menu.
+    skip: isContextMenuProvidedByPlatform,
     variant: TargetPlatformVariant.all(excluding: TargetPlatformVariant.mobile().values),
   );
 

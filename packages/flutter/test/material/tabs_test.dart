@@ -7218,7 +7218,8 @@ void main() {
 
     labelSize = tester.getSize(find.text('Tab 1'));
     expect(labelSize, equals(const Size(140.5, 40.0)));
-  }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/87543
+    // https://github.com/flutter/flutter/issues/87543
+  }, skip: isBrowser && !isSkiaWeb);
 
   // This is a regression test for https://github.com/flutter/flutter/issues/150000.
   testWidgets('Scrollable TabBar does not jitter in the middle position', (WidgetTester tester) async {

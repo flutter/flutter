@@ -2357,7 +2357,8 @@ void main() {
 
     await tester.restoreFrom(restorationData);
     expect(find.byType(CupertinoActionSheet), findsOneWidget);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+    // https://github.com/flutter/flutter/issues/33615
+  }, skip: isBrowser);
 
   group('showCupertinoDialog avoids overlapping display features', () {
     testWidgets('positioning with anchorPoint', (WidgetTester tester) async {

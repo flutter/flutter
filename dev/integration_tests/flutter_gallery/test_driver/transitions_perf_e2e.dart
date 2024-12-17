@@ -30,6 +30,7 @@ void main([List<String> args = const <String>[]]) {
       await tester.pumpAndSettle();
       final int id = tester.getSemantics(find.bySemanticsLabel('Material')).id;
       expect(id, greaterThan(-1));
+      // [intended] test only makes sense when semantics are turned on.
     }, skip: !withSemantics);
 
     testWidgets(

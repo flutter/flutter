@@ -69,7 +69,8 @@ void main() {
     }
   },
     variant: TargetPlatformVariant.all(),
-    skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
+    // [intended] see https://github.com/flutter/flutter/issues/108382
+    skip: isBrowser,
   );
 
   testWidgets('Can build children directly as well', (WidgetTester tester) async {
@@ -92,7 +93,8 @@ void main() {
 
     expect(find.byKey(key), findsOneWidget);
   },
-    skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
+  // [intended] see https://github.com/flutter/flutter/issues/108382
+    skip: isBrowser,
   );
 
   testWidgets('Can build from EditableTextState', (WidgetTester tester) async {
@@ -154,7 +156,8 @@ void main() {
         expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsOneWidget);
     }
   },
-    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  // [intended] on web the browser handles the context menu.
+    skip: kIsWeb,
     variant: TargetPlatformVariant.all(),
   );
 
@@ -232,7 +235,8 @@ void main() {
         expect(findLiveTextButton(), findsOneWidget);
     }
   },
-    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  // [intended] on web the browser handles the context menu.
+    skip: kIsWeb,
     variant: TargetPlatformVariant.all(),
   );
 

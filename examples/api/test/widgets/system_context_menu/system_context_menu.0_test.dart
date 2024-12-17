@@ -45,7 +45,8 @@ void main() {
         expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
         expect(find.byType(SystemContextMenu), findsNothing);
     }
-  }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+    // [intended]
+  }, variant: TargetPlatformVariant.all(), skip: kIsWeb);
 
   testWidgets('does not show the system context menu when not supported', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -63,5 +64,6 @@ void main() {
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
     expect(find.byType(SystemContextMenu), findsNothing);
-  }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+    // [intended]
+  }, variant: TargetPlatformVariant.all(), skip: kIsWeb);
 }

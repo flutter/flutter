@@ -277,7 +277,8 @@ void main() {
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
     expect(tester.getRect(expandedTitle).height, 43.0);
     verifyTextNotClipped(expandedTitle, tester);
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+    // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb);
 
   testWidgets('SliverAppBar.large expanded title has upper limit on text scaling', (WidgetTester tester) async {
     const String title = 'Large AppBar';
@@ -316,7 +317,8 @@ void main() {
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
     expect(tester.getRect(expandedTitle).height, closeTo(48.0, 0.1));
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+     // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb);
 
   testWidgets('SliverAppBar.medium expanded title position is adjusted with textScaleFactor', (WidgetTester tester) async {
     const String title = 'Medium AppBar';
@@ -358,7 +360,8 @@ void main() {
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
     expect(tester.getBottomLeft(expandedTitle).dy, 107.0);
     verifyTextNotClipped(expandedTitle, tester);
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+    // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb);
 
   testWidgets('SliverAppBar.large expanded title position is adjusted with textScaleFactor', (WidgetTester tester) async {
     const String title = 'Large AppBar';

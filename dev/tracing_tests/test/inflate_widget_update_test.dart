@@ -35,7 +35,8 @@ void main() {
     expect(buildCount, 0);
 
     debugProfileBuildsEnabled = false;
-  }, skip: isBrowser); // [intended] uses dart:isolate and io.
+    // [intended] uses dart:isolate and io.
+  }, skip: isBrowser);
 }
 
 class TestRoot extends StatefulWidget {

@@ -354,7 +354,8 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(Text).first).size.width, greaterThan(800.0));
     expect(tester.renderObject<RenderBox>(find.byType(Row).first).size.width, greaterThan(800.0));
     expect(tester.takeException(), isNull); // column overflows table, but text doesn't overflow cell
-  }, skip: true); // https://github.com/flutter/flutter/issues/13512
+    // https://github.com/flutter/flutter/issues/13512
+  }, skip: true);
 
   testWidgets('DataTable overflow test', (WidgetTester tester) async {
     await tester.pumpWidget(

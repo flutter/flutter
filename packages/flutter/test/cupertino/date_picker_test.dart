@@ -1660,7 +1660,8 @@ void main() {
           matchesGoldenFile('date_picker_test.datetime.drag.png'),
         );
       }
-    }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
+      // https://github.com/flutter/flutter/issues/143616
+    }, skip: impellerEnabled);
 
     testWidgets('DatePicker displays the date in correct order', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1805,7 +1806,8 @@ void main() {
         matchesGoldenFile('timer_picker_test.datetime.drag.png'),
       );
     }
-  }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
+    // https://github.com/flutter/flutter/issues/143616
+  }, skip: impellerEnabled);
 
   testWidgets('TimerPicker only changes hour label after scrolling stops', (WidgetTester tester) async {
     Duration? duration;
@@ -2508,7 +2510,8 @@ void main() {
 
     expect(testWidth, equals(largestWidth));
     expect(widths.indexOf(largestWidth), equals(1));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+    // https://github.com/flutter/flutter/issues/39998
+  }, skip: isBrowser);
 }
 
 Widget _buildPicker({
