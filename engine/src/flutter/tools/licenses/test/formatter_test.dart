@@ -18,9 +18,15 @@ void main() {
   });
   test('Indenting blocks', () {
     expect(reformat('  a\nb\n  c'), 'a\nb\n  c'); // strips leading indents
-    expect(reformat('  a\n b\n  c'), 'a\nb\nc'); // strips common one-space indent, then strips stray one-space indents
+    expect(
+      reformat('  a\n b\n  c'),
+      'a\nb\nc',
+    ); // strips common one-space indent, then strips stray one-space indents
     expect(reformat('  a\n  b\n  c'), 'a\nb\nc'); // strips common two-space indent
-    expect(reformat('  a\n   b\n  c'), 'a\nb\nc'); // strips common two-space indent, then strips stray one-space indent
+    expect(
+      reformat('  a\n   b\n  c'),
+      'a\nb\nc',
+    ); // strips common two-space indent, then strips stray one-space indent
     expect(reformat('  a\n    b\n  c'), 'a\n  b\nc'); // streps common two-space indent
     expect(reformat('  a\n     b\n  c'), 'a\n   b\nc'); // streps common two-space indent
   });
@@ -46,42 +52,45 @@ void main() {
     expect(reformat('  a\n  a\n     b\nc'), 'a\na\n   b\nc');
   });
   test('Specific cases', () {
-    expect(reformat('         Apache\n      Version\n   Bla bla\n\nBla bla bla'), 'Apache\nVersion\nBla bla\n\nBla bla bla');
     expect(
-      reformat(
-        '/* Copyright (c) IBM Corporation, 2000-2012.  All rights reserved.    */\n'
-        '/*                                                                    */\n'
-        '/* This software is made available under the terms of the             */\n'
-        '/* ICU License -- ICU 1.8.1 and later.                                */\n'
-      ),
-      'Copyright (c) IBM Corporation, 2000-2012.  All rights reserved.\n'
-      '\n'
-      'This software is made available under the terms of the\n'
-      'ICU License -- ICU 1.8.1 and later.'
+      reformat('         Apache\n      Version\n   Bla bla\n\nBla bla bla'),
+      'Apache\nVersion\nBla bla\n\nBla bla bla',
     );
     expect(
       reformat(
         '/* Copyright (c) IBM Corporation, 2000-2012.  All rights reserved.    */\n'
         '/*                                                                    */\n'
         '/* This software is made available under the terms of the             */\n'
-        '/* ICU License -- ICU 1.8.1 and later.                                */'
+        '/* ICU License -- ICU 1.8.1 and later.                                */\n',
       ),
       'Copyright (c) IBM Corporation, 2000-2012.  All rights reserved.\n'
       '\n'
       'This software is made available under the terms of the\n'
-      'ICU License -- ICU 1.8.1 and later.'
+      'ICU License -- ICU 1.8.1 and later.',
     );
     expect(
       reformat(
         '/* Copyright (c) IBM Corporation, 2000-2012.  All rights reserved.    */\n'
         '/*                                                                    */\n'
         '/* This software is made available under the terms of the             */\n'
-        '/* ICU License -- ICU 1.8.1 and later.'
+        '/* ICU License -- ICU 1.8.1 and later.                                */',
       ),
       'Copyright (c) IBM Corporation, 2000-2012.  All rights reserved.\n'
       '\n'
       'This software is made available under the terms of the\n'
-      'ICU License -- ICU 1.8.1 and later.'
+      'ICU License -- ICU 1.8.1 and later.',
+    );
+    expect(
+      reformat(
+        '/* Copyright (c) IBM Corporation, 2000-2012.  All rights reserved.    */\n'
+        '/*                                                                    */\n'
+        '/* This software is made available under the terms of the             */\n'
+        '/* ICU License -- ICU 1.8.1 and later.',
+      ),
+      'Copyright (c) IBM Corporation, 2000-2012.  All rights reserved.\n'
+      '\n'
+      'This software is made available under the terms of the\n'
+      'ICU License -- ICU 1.8.1 and later.',
     );
   });
 }
