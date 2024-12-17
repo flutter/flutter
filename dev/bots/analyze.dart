@@ -1218,7 +1218,8 @@ final RegExp _flowControlStatementWithoutSpace = RegExp(r'(^|[ \t])(if|switch|fo
 
 Future<void> verifySpacesAfterFlowControlStatements(String workingDirectory, { int minimumMatches = 4000 }) async {
   const Set<String> extensions = <String>{
-    '.dart',
+    // .dart omitted from this list because the Dart auto formatter ensures
+    // spaces after flow control statements.
     '.java',
     '.js',
     '.kt',

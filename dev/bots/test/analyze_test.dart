@@ -129,24 +129,6 @@ void main() {
     );
   });
 
-  test('analyze.dart - verifySpacesAfterFlowControlStatements', () async {
-    final String result = await capture(() => verifySpacesAfterFlowControlStatements(testRootPath, minimumMatches: 2), shouldHaveErrors: true);
-    final String lines = <String>[
-        '║ test/analyze-test-input/root/packages/foo/spaces_after_flow.dart:11: no space after flow control statement',
-        '║ test/analyze-test-input/root/packages/foo/spaces_after_flow.dart:18: no space after flow control statement',
-        '║ test/analyze-test-input/root/packages/foo/spaces_after_flow.dart:25: no space after flow control statement',
-        '║ test/analyze-test-input/root/packages/foo/spaces_after_flow.dart:29: no space after flow control statement',
-        '║ test/analyze-test-input/root/packages/foo/spaces_after_flow.dart:35: no space after flow control statement',
-      ]
-      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
-      .join('\n');
-    expect(result,
-      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
-      '$lines\n'
-      '╚═══════════════════════════════════════════════════════════════════════════════\n'
-    );
-  });
-
   test('analyze.dart - verifyRepositoryLinks', () async {
     final String result = await capture(() => verifyRepositoryLinks(testRootPath), shouldHaveErrors: true);
     const String bannedBranch = 'master';
