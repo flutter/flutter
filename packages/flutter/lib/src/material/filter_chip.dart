@@ -247,11 +247,12 @@ class FilterChip extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ChipThemeData? defaults = Theme.of(context).useMaterial3
-      ? _FilterChipDefaultsM3(context, isEnabled, selected, _chipVariant)
-      : null;
-    final Widget? resolvedDeleteIcon = deleteIcon
-      ?? (Theme.of(context).useMaterial3 ? const Icon(Icons.clear, size: 18) : null);
+    final ChipThemeData? defaults =
+        Theme.of(context).useMaterial3
+            ? _FilterChipDefaultsM3(context, isEnabled, selected, _chipVariant)
+            : null;
+    final Widget? resolvedDeleteIcon =
+        deleteIcon ?? (Theme.of(context).useMaterial3 ? const Icon(Icons.clear, size: 18) : null);
     return RawChip(
       defaultProperties: defaults,
       avatar: avatar,
@@ -303,12 +304,8 @@ class FilterChip extends StatelessWidget
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 class _FilterChipDefaultsM3 extends ChipThemeData {
-  _FilterChipDefaultsM3(
-    this.context,
-    this.isEnabled,
-    this.isSelected,
-    this._chipVariant,
-  ) : super(
+  _FilterChipDefaultsM3(this.context, this.isEnabled, this.isSelected, this._chipVariant)
+    : super(
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         showCheckmark: true,
       );
@@ -321,81 +318,83 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  double? get elevation => _chipVariant == _ChipVariant.flat
-    ? 0.0
-    : isEnabled ? 1.0 : 0.0;
+  double? get elevation =>
+      _chipVariant == _ChipVariant.flat
+          ? 0.0
+          : isEnabled
+          ? 1.0
+          : 0.0;
 
   @override
   double? get pressElevation => 1.0;
 
   @override
   TextStyle? get labelStyle => _textTheme.labelLarge?.copyWith(
-    color: isEnabled
-      ? isSelected
-        ? _colors.onSecondaryContainer
-        : _colors.onSurfaceVariant
-      : _colors.onSurface,
+    color:
+        isEnabled
+            ? isSelected
+                ? _colors.onSecondaryContainer
+                : _colors.onSurfaceVariant
+            : _colors.onSurface,
   );
 
   @override
   MaterialStateProperty<Color?>? get color =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
-        return _chipVariant == _ChipVariant.flat
-          ? _colors.onSurface.withOpacity(0.12)
-          : _colors.onSurface.withOpacity(0.12);
-      }
-      if (states.contains(MaterialState.disabled)) {
-        return _chipVariant == _ChipVariant.flat
-          ? null
-          : _colors.onSurface.withOpacity(0.12);
-      }
-      if (states.contains(MaterialState.selected)) {
-        return _chipVariant == _ChipVariant.flat
-          ? _colors.secondaryContainer
-          : _colors.secondaryContainer;
-      }
-      return _chipVariant == _ChipVariant.flat
-        ? null
-        : _colors.surfaceContainerLow;
-    });
+      MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
+          return _chipVariant == _ChipVariant.flat
+              ? _colors.onSurface.withOpacity(0.12)
+              : _colors.onSurface.withOpacity(0.12);
+        }
+        if (states.contains(MaterialState.disabled)) {
+          return _chipVariant == _ChipVariant.flat ? null : _colors.onSurface.withOpacity(0.12);
+        }
+        if (states.contains(MaterialState.selected)) {
+          return _chipVariant == _ChipVariant.flat
+              ? _colors.secondaryContainer
+              : _colors.secondaryContainer;
+        }
+        return _chipVariant == _ChipVariant.flat ? null : _colors.surfaceContainerLow;
+      });
 
   @override
-  Color? get shadowColor => _chipVariant == _ChipVariant.flat
-    ? Colors.transparent
-    : _colors.shadow;
+  Color? get shadowColor => _chipVariant == _ChipVariant.flat ? Colors.transparent : _colors.shadow;
 
   @override
   Color? get surfaceTintColor => Colors.transparent;
 
   @override
-  Color? get checkmarkColor => isEnabled
-    ? isSelected
-      ? _colors.onSecondaryContainer
-      : _colors.primary
-    : _colors.onSurface;
+  Color? get checkmarkColor =>
+      isEnabled
+          ? isSelected
+              ? _colors.onSecondaryContainer
+              : _colors.primary
+          : _colors.onSurface;
 
   @override
-  Color? get deleteIconColor => isEnabled
-    ? isSelected
-      ? _colors.onSecondaryContainer
-      : _colors.onSurfaceVariant
-    : _colors.onSurface;
+  Color? get deleteIconColor =>
+      isEnabled
+          ? isSelected
+              ? _colors.onSecondaryContainer
+              : _colors.onSurfaceVariant
+          : _colors.onSurface;
 
   @override
-  BorderSide? get side => _chipVariant == _ChipVariant.flat && !isSelected
-    ? isEnabled
-      ? BorderSide(color: _colors.outlineVariant)
-      : BorderSide(color: _colors.onSurface.withOpacity(0.12))
-    : const BorderSide(color: Colors.transparent);
+  BorderSide? get side =>
+      _chipVariant == _ChipVariant.flat && !isSelected
+          ? isEnabled
+              ? BorderSide(color: _colors.outlineVariant)
+              : BorderSide(color: _colors.onSurface.withOpacity(0.12))
+          : const BorderSide(color: Colors.transparent);
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
-    color: isEnabled
-      ? isSelected
-        ? _colors.onSecondaryContainer
-        : _colors.primary
-      : _colors.onSurface,
+    color:
+        isEnabled
+            ? isSelected
+                ? _colors.onSecondaryContainer
+                : _colors.primary
+            : _colors.onSurface,
     size: 18.0,
   );
 
