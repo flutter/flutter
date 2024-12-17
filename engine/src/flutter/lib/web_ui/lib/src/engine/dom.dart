@@ -990,6 +990,22 @@ extension DomHTMLImageElementExtension on DomHTMLImageElement {
   external set _height(JSNumber? value);
   set height(double? value) => _height = value?.toJS;
 
+  @JS('crossOrigin')
+  external JSString? get _crossOrigin;
+  String? get crossOrigin => _crossOrigin?.toDart;
+
+  @JS('crossOrigin')
+  external set _crossOrigin(JSString? value);
+  set crossOrigin(String? value) => _crossOrigin = value?.toJS;
+
+  @JS('decoding')
+  external JSString? get _decoding;
+  String? get decoding => _decoding?.toDart;
+
+  @JS('decoding')
+  external set _decoding(JSString? value);
+  set decoding(String? value) => _decoding = value?.toJS;
+
   @JS('decode')
   external JSPromise<JSAny?> _decode();
   Future<Object?> decode() => js_util.promiseToFuture<Object?>(_decode());

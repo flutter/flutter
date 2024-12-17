@@ -43,8 +43,13 @@ abstract class HtmlImageElementCodec implements ui.Codec {
     // builders to create UI.
     chunkCallback?.call(0, 100);
     imgElement = createDomHTMLImageElement();
-    imgElement!.src = src;
-    setJsProperty<String>(imgElement!, 'decoding', 'async');
+    if (renderer is! HtmlRenderer) {
+      imgElement!.crossOrigin = 'anonymous';
+    }
+    imgElement!
+      ..decoding = 'async'
+      ..src = src;
+
 
     // Ignoring the returned future on purpose because we're communicating
     // through the `completer`.
@@ -91,7 +96,7 @@ abstract class HtmlImageElementCodec implements ui.Codec {
 }
 
 abstract class HtmlBlobCodec extends HtmlImageElementCodec {
-  HtmlBlobCodec(this.blob)
+  HtmlBlobCodec(this.blob, {super.chunkCallback})
       : super(
           domWindow.URL.createObjectURL(blob),
           debugSource: 'encoded image bytes',

@@ -161,7 +161,7 @@ ui.Image createCkImageFromImageElement(
 }
 
 class CkImageElementCodec extends HtmlImageElementCodec {
-  CkImageElementCodec(super.src);
+  CkImageElementCodec(super.src, {super.chunkCallback});
 
   @override
   ui.Image createImageFromHTMLImageElement(
@@ -170,7 +170,7 @@ class CkImageElementCodec extends HtmlImageElementCodec {
 }
 
 class CkImageBlobCodec extends HtmlBlobCodec {
-  CkImageBlobCodec(super.blob);
+  CkImageBlobCodec(super.blob, {super.chunkCallback});
 
   @override
   ui.Image createImageFromHTMLImageElement(
@@ -326,7 +326,7 @@ const String _kNetworkImageMessage = 'Failed to load network image.';
 /// requesting from URI.
 Future<ui.Codec> skiaInstantiateWebImageCodec(
     String url, ui_web.ImageCodecChunkCallback? chunkCallback) async {
-  final CkImageElementCodec imageElementCodec = CkImageElementCodec(url);
+  final CkImageElementCodec imageElementCodec = CkImageElementCodec(url, chunkCallback: chunkCallback);
   try {
     await imageElementCodec.decode();
     return imageElementCodec;
@@ -339,7 +339,7 @@ Future<ui.Codec> skiaInstantiateWebImageCodec(
           data: list, contentType: imageType.mimeType, debugSource: url);
     } else {
       final DomBlob blob = createDomBlob(<ByteBuffer>[list.buffer]);
-      final CkImageBlobCodec codec = CkImageBlobCodec(blob);
+      final CkImageBlobCodec codec = CkImageBlobCodec(blob, chunkCallback: chunkCallback);
 
       try {
         await codec.decode();

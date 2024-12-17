@@ -253,6 +253,19 @@ Future<void> testMain() async {
       }
     });
 
+    test('crossOrigin requests cause an error', () async {
+      final String otherOrigin =
+          domWindow.location.origin.replaceAll('localhost', '127.0.0.1');
+      bool gotError = false;
+      try {
+        final ui.Codec _ = await renderer.instantiateImageCodecFromUrl(
+            Uri.parse('$otherOrigin/test_images/1x1.png'));
+      } catch (e) {
+        gotError = true;
+      }
+      expect(gotError, isTrue, reason: 'Should have got CORS error');
+    });
+
     _testCkAnimatedImage();
 
     test('isAvif', () {

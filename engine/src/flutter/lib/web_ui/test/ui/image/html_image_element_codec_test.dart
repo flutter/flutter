@@ -7,12 +7,15 @@ import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
+import 'package:ui/src/engine/canvaskit/image.dart';
+import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/html/image.dart';
 import 'package:ui/src/engine/html_image_element_codec.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../common/test_initialization.dart';
+import '../../ui/utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -60,16 +63,20 @@ Future<void> testMain() async {
       expect(image.height, height);
     });
     test('loads sample image', () async {
-      final HtmlImageElementCodec codec =
-          HtmlRendererImageCodec('sample_image1.png');
+      final HtmlImageElementCodec codec = createImageElementCodec('sample_image1.png');
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
+
+      expect(codec.imgElement, isNotNull);
+      expect(codec.imgElement!.src, contains('sample_image1.png'));
+      expect(codec.imgElement!.crossOrigin, isHtml ? isNull : 'anonymous');
+      expect(codec.imgElement!.decoding, 'async');
+
       expect(frameInfo.image, isNotNull);
       expect(frameInfo.image.width, 100);
       expect(frameInfo.image.toString(), '[100×100]');
     });
     test('dispose image image', () async {
-      final HtmlImageElementCodec codec =
-          HtmlRendererImageCodec('sample_image1.png');
+      final HtmlImageElementCodec codec = createImageElementCodec('sample_image1.png');
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
       expect(frameInfo.image, isNotNull);
       expect(frameInfo.image.debugDisposed, isFalse);
@@ -78,7 +85,7 @@ Future<void> testMain() async {
     });
     test('provides image loading progress', () async {
       final StringBuffer buffer = StringBuffer();
-      final HtmlImageElementCodec codec = HtmlRendererImageCodec(
+      final HtmlImageElementCodec codec = createImageElementCodec(
           'sample_image1.png', chunkCallback: (int loaded, int total) {
         buffer.write('$loaded/$total,');
       });
@@ -89,7 +96,7 @@ Future<void> testMain() async {
     /// Regression test for Firefox
     /// https://github.com/flutter/flutter/issues/66412
     test('Returns nonzero natural width/height', () async {
-      final HtmlImageElementCodec codec = HtmlRendererImageCodec(
+      final HtmlImageElementCodec codec = createImageElementCodec(
           'data:image/svg+xml;base64,PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9I'
           'jAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dG'
           'l0bGU+QWJzdHJhY3QgaWNvbjwvdGl0bGU+PHBhdGggZD0iTTEyIDBjOS42MDEgMCAx'
@@ -103,7 +110,7 @@ Future<void> testMain() async {
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
       expect(frameInfo.image.width, isNot(0));
     });
-  });
+  }, skip: isSkwasm);
 
   group('ImageCodecUrl', () {
     test('loads sample image from web', () async {
@@ -111,6 +118,12 @@ Future<void> testMain() async {
       final HtmlImageElementCodec codec =
           await ui_web.createImageCodecFromUrl(uri) as HtmlImageElementCodec;
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
+
+      expect(codec.imgElement, isNotNull);
+      expect(codec.imgElement!.src, contains('sample_image1.png'));
+      expect(codec.imgElement!.crossOrigin, isHtml ? isNull : 'anonymous');
+      expect(codec.imgElement!.decoding, 'async');
+
       expect(frameInfo.image, isNotNull);
       expect(frameInfo.image.width, 100);
     });
@@ -124,5 +137,14 @@ Future<void> testMain() async {
       await codec.getNextFrame();
       expect(buffer.toString(), '0/100,100/100,');
     });
-  });
+  }, skip: isSkwasm);
+}
+
+HtmlImageElementCodec createImageElementCodec(
+  String src, {
+  ui_web.ImageCodecChunkCallback? chunkCallback,
+}) {
+  return isHtml
+      ? HtmlRendererImageCodec(src, chunkCallback: chunkCallback)
+      : CkImageElementCodec(src, chunkCallback: chunkCallback);
 }
