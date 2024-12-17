@@ -961,12 +961,12 @@ final class AssetTransformerEntry {
       return (null, <String>['Expected entry to be a map. Found ${yaml.runtimeType} instead']);
     }
 
-    final Object? package = yaml['package'];
+    final Object? package = yaml[_kPackage];
     if (package is! String || package.isEmpty) {
-      return (null, <String>['Expected "package" to be a String. Found ${package.runtimeType} instead.']);
+      return (null, <String>['Expected "$_kPackage" to be a String. Found ${package.runtimeType} instead.']);
     }
 
-    final (List<String>? args, List<String> argsErrors) = _parseArgsSection(yaml['args']);
+    final (List<String>? args, List<String> argsErrors) = _parseArgsSection(yaml[_kArgs]);
     if (argsErrors.isNotEmpty) {
       return (null, argsErrors.map((String e) => 'In args section of transformer using package "$package": $e').toList());
     }
@@ -984,7 +984,7 @@ final class AssetTransformerEntry {
     if (yaml == null) {
       return (null, <String>[]);
     }
-    return _parseList(yaml, 'args', 'String');
+    return _parseList(yaml, _kArgs, 'String');
   }
 
   @override
@@ -1025,6 +1025,6 @@ final class AssetTransformerEntry {
 
   @override
   String toString() {
-    return 'AssetTransformerEntry(package: $package, args: $args)';
+    return 'AssetTransformerEntry($_kPackage: $package, $_kArgs: $args)';
   }
 }
