@@ -1,0 +1,20 @@
+{
+"clangd.path": "${workspaceFolder}/buildtools/mac-arm64/clang/bin/clangd",
+"clangd.arguments": [
+  "--compile-commands-dir=${workspaceFolder}/../out/host_debug_unopt_arm64"
+],
+"clang-format.executable": "${workspaceRoot}/buildtools/mac-arm64/clang/bin/clang-format",
+
+  // "clangd.path": "flutter/buildtools/mac-arm64/clang/bin/clangd",
+    // "clangd.arguments": [
+    //   "--compile-commands-dir=out/host_debug_unopt_arm64"
+    // ],
+    // "clang-format.executable": "flutter/buildtools/mac-arm64/clang/bin/clang-format",  
+
+    "search.followSymlinks": true,
+    "search.quickOpen.includeHistory": true,
+    "search.quickOpen.includeSymbols": false,
+    "search.useIgnoreFiles": false,
+
+    "editor.tabSize": 2,    
+}
