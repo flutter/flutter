@@ -1881,6 +1881,7 @@ Future<List<File>> _gitFiles(String workingDirectory, {bool runSilently = true})
   assert(filenames.last.isEmpty); // git ls-files gives a trailing blank 0x00
   filenames.removeLast();
   return filenames
+      .where((String filename) => !filename.startsWith('engine/'))
       .map<File>((String filename) => File(path.join(workingDirectory, filename)))
       .toList();
 }
