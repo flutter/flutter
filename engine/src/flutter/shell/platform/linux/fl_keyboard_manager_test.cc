@@ -9,6 +9,7 @@
 
 #include "flutter/shell/platform/embedder/test_utils/key_codes.g.h"
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
+#include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_method_codec_private.h"
 #include "flutter/shell/platform/linux/key_mapping.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
@@ -525,21 +526,37 @@ class KeyboardTester {
 // unresolved pending events.
 TEST(FlKeyboardManagerTest, DisposeWithUnresolvedPends) {
   ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
-  KeyboardTester tester;
-  std::vector<CallRecord> call_records;
 
-  // Record calls so that they aren't responded.
-  tester.recordEmbedderCallsTo(call_records);
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  g_autoptr(FlMockViewDelegate) view = fl_mock_view_delegate_new();
+  g_autoptr(FlKeyboardManager) manager =
+      fl_keyboard_manager_new(engine, FL_KEYBOARD_VIEW_DELEGATE(view));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+
+  // Don't handle first event.
+  fl_keyboard_manager_set_send_key_event_handler(
+      manager,
+      [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
+         void* callback_user_data, gpointer user_data) {},
+      nullptr);
   g_autoptr(FlKeyEvent) event1 = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  fl_keyboard_manager_handle_event(tester.manager(), event1);
+  fl_keyboard_manager_handle_event(manager, event1);
 
-  tester.respondToEmbedderCallsWith(true);
+  // Handle second event.
+  fl_keyboard_manager_set_send_key_event_handler(
+      manager,
+      [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
+         void* callback_user_data,
+         gpointer user_data) { callback(true, callback_user_data); },
+      nullptr);
   g_autoptr(FlKeyEvent) event2 = fl_key_event_new(
       0, FALSE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  fl_keyboard_manager_handle_event(tester.manager(), event2);
-
-  tester.flushChannelMessages();
+  fl_keyboard_manager_handle_event(manager, event2);
 
   // Passes if the cleanup does not crash.
 }
