@@ -649,7 +649,9 @@ Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 20
 }
 
 final RegExp _findDeprecationPattern = RegExp(r'@[Dd]eprecated');
-final RegExp _deprecationStartPattern = RegExp(r'^(?<indent> *)@Deprecated\($'); // flutter_ignore: deprecation_syntax (see analyze.dart)
+final RegExp _deprecationStartPattern = RegExp(
+  r'^(?<indent> *)@Deprecated\($' // flutter_ignore: deprecation_syntax (see analyze.dart)
+); 
 final RegExp _deprecationMessagePattern = RegExp(r"^ *'(?<message>.+) '$");
 final RegExp _deprecationVersionPattern = RegExp(r"^ *'This feature was deprecated after v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?<build>-\d+\.\d+\.pre)?\.',?$");
 final RegExp _deprecationEndPattern = RegExp(r'^ *\)$');

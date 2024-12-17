@@ -4,7 +4,8 @@
 
 import 'package:flutter/scheduler.dart';
 
-@Deprecated('scheduler_tester is not compatible with dart:async') // flutter_ignore: deprecation_syntax (see analyze.dart)
+// flutter_ignore: deprecation_syntax (see analyze.dart)
+@Deprecated('scheduler_tester is not compatible with dart:async')
 class Future { } // so that people can't import us and dart:async
 
 void tick(Duration duration) {
