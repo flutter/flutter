@@ -420,6 +420,14 @@ workspace:
         .childFile('app_en.arb')
         ..createSync(recursive: true)
         ..writeAsStringSync('{ "hello": "Hello world!" }');
+      String pubspecFileContent = projectDir.childFile('pubspec.yaml').readAsStringSync();
+      pubspecFileContent = pubspecFileContent.replaceFirst(RegExp(r'\nflutter\:'), '''
+flutter:
+  generate: true
+''');
+      projectDir
+        .childFile('pubspec.yaml')
+        .writeAsStringSync(pubspecFileContent);
       projectDir
         .childFile('l10n.yaml')
         .writeAsStringSync('synthetic-package: false');
