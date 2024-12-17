@@ -14,8 +14,16 @@ class RegExp implements core.RegExp {
     bool unicode = false,
     bool dotAll = false,
     this.expectNoMatch = false,
-  }) : _pattern = core.RegExp(source, multiLine: multiLine, caseSensitive: caseSensitive, unicode: unicode, dotAll: dotAll),
-       source = _stripFrameNumber(StackTrace.current.toString().split('\n').skip(1).take(1).single) {
+  }) : _pattern = core.RegExp(
+         source,
+         multiLine: multiLine,
+         caseSensitive: caseSensitive,
+         unicode: unicode,
+         dotAll: dotAll,
+       ),
+       source = _stripFrameNumber(
+         StackTrace.current.toString().split('\n').skip(1).take(1).single,
+       ) {
     _allPatterns.add(this);
   }
 
@@ -43,28 +51,36 @@ class RegExp implements core.RegExp {
     stderr.writeln('Top ten patterns:');
     patterns.sort((RegExp a, RegExp b) => b._stopwatch.elapsed.compareTo(a._stopwatch.elapsed));
     for (final RegExp pattern in patterns.take(10)) {
-      stderr.writeln('${pattern._stopwatch.elapsedMicroseconds.toString().padLeft(10)}μs tests -- /${pattern.pattern}/ (${pattern.testCount} tests, ${pattern.matchCount} matches, ${pattern.source})');
+      stderr.writeln(
+        '${pattern._stopwatch.elapsedMicroseconds.toString().padLeft(10)}μs tests -- /${pattern.pattern}/ (${pattern.testCount} tests, ${pattern.matchCount} matches, ${pattern.source})',
+      );
     }
     stderr.writeln();
     stderr.writeln('Unmatched patterns:');
     patterns.sort((RegExp a, RegExp b) => a.pattern.compareTo(b.pattern));
     for (final RegExp pattern in patterns) {
       if (pattern.matchCount == 0 && !pattern.expectNoMatch && pattern.testCount > 0) {
-        stderr.writeln('/${pattern.pattern}/ (${pattern.testCount} tests, ${pattern.matchCount} matches, ${pattern.source})');
+        stderr.writeln(
+          '/${pattern.pattern}/ (${pattern.testCount} tests, ${pattern.matchCount} matches, ${pattern.source})',
+        );
       }
     }
     stderr.writeln();
     stderr.writeln('Unexpectedly matched patterns:');
     for (final RegExp pattern in patterns) {
       if (pattern.matchCount > 0 && pattern.expectNoMatch) {
-        stderr.writeln('/${pattern.pattern}/ (${pattern.testCount} tests, ${pattern.matchCount} matches, ${pattern.source})');
+        stderr.writeln(
+          '/${pattern.pattern}/ (${pattern.testCount} tests, ${pattern.matchCount} matches, ${pattern.source})',
+        );
       }
     }
     stderr.writeln();
     stderr.writeln('Unused patterns:');
     for (final RegExp pattern in patterns) {
       if (pattern.testCount == 0) {
-        stderr.writeln('/${pattern.pattern}/ (${pattern.testCount} tests, ${pattern.matchCount} matches, ${pattern.source})');
+        stderr.writeln(
+          '/${pattern.pattern}/ (${pattern.testCount} tests, ${pattern.matchCount} matches, ${pattern.source})',
+        );
       }
     }
   }

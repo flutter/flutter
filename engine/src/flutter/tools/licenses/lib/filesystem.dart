@@ -26,9 +26,17 @@ enum FileType {
 
 typedef Reader = List<int> Function();
 
-class BytesOf extends Key { BytesOf(super.value); }
-class UTF8Of extends Key { UTF8Of(super.value); }
-class Latin1Of extends Key { Latin1Of(super.value); }
+class BytesOf extends Key {
+  BytesOf(super.value);
+}
+
+class UTF8Of extends Key {
+  UTF8Of(super.value);
+}
+
+class Latin1Of extends Key {
+  Latin1Of(super.value);
+}
 
 bool matchesSignature(List<int> bytes, List<int> signature) {
   if (bytes.length < signature.length) {
@@ -66,71 +74,136 @@ const String kMultiLicenseFileHeader = 'Notices for files contained in';
 
 bool isMultiLicenseNotice(Reader reader) {
   final List<int> bytes = reader();
-  return ascii.decode(bytes.take(kMultiLicenseFileHeader.length).toList(), allowInvalid: true) == kMultiLicenseFileHeader;
+  return ascii.decode(bytes.take(kMultiLicenseFileHeader.length).toList(), allowInvalid: true) ==
+      kMultiLicenseFileHeader;
 }
 
 FileType identifyFile(String name, Reader reader) {
   List<int>? bytes;
-  if ((path.split(name).reversed.take(6).toList().reversed.join('/') == 'third_party/icu/source/extra/uconv/README') || // This specific ICU README isn't in UTF-8.
-      (path.split(name).reversed.take(6).toList().reversed.join('/') == 'third_party/icu/source/samples/uresb/sr.txt') || // This specific sample contains non-UTF-8 data (unlike other sr.txt files).
-      (path.split(name).reversed.take(2).toList().reversed.join('/') == 'builds/detect.mk') || // This specific freetype sample contains non-UTF-8 data (unlike other .mk files).
+  if ((path.split(name).reversed.take(6).toList().reversed.join('/') ==
+          'third_party/icu/source/extra/uconv/README') || // This specific ICU README isn't in UTF-8.
+      (path.split(name).reversed.take(6).toList().reversed.join('/') ==
+          'third_party/icu/source/samples/uresb/sr.txt') || // This specific sample contains non-UTF-8 data (unlike other sr.txt files).
+      (path.split(name).reversed.take(2).toList().reversed.join('/') ==
+          'builds/detect.mk') || // This specific freetype sample contains non-UTF-8 data (unlike other .mk files).
       (path.split(name).reversed.take(3).toList().reversed.join('/') == 'third_party/cares/cares.rc')) {
     return FileType.latin1Text;
   }
-  if (path.split(name).reversed.take(6).toList().reversed.join('/') == 'dart/runtime/tests/vm/dart/bad_snapshot') { // Not any particular format
+  if (path.split(name).reversed.take(6).toList().reversed.join('/') ==
+      'dart/runtime/tests/vm/dart/bad_snapshot') {
+    // Not any particular format
     return FileType.binary;
   }
-  if (path.split(name).reversed.take(9).toList().reversed.join('/') == 'fuchsia/sdk/linux/dart/zircon/lib/src/fakes/handle_disposition.dart' || // has bogus but benign "authors" reference, reported to jamesr@
-      path.split(name).reversed.take(6).toList().reversed.join('/') == 'third_party/angle/src/common/fuchsia_egl/fuchsia_egl.c' || // has bogus but benign "authors" reference, reported to author and legal team
-      path.split(name).reversed.take(6).toList().reversed.join('/') == 'third_party/angle/src/common/fuchsia_egl/fuchsia_egl.h' || // has bogus but benign "authors" reference, reported to author and legal team
-      path.split(name).reversed.take(6).toList().reversed.join('/') == 'third_party/angle/src/common/fuchsia_egl/fuchsia_egl_backend.h') { // has bogus but benign "authors" reference, reported to author and legal team
+  if (path.split(name).reversed.take(9).toList().reversed.join('/') ==
+          'fuchsia/sdk/linux/dart/zircon/lib/src/fakes/handle_disposition.dart' || // has bogus but benign "authors" reference, reported to jamesr@
+      path.split(name).reversed.take(6).toList().reversed.join('/') ==
+          'third_party/angle/src/common/fuchsia_egl/fuchsia_egl.c' || // has bogus but benign "authors" reference, reported to author and legal team
+      path.split(name).reversed.take(6).toList().reversed.join('/') ==
+          'third_party/angle/src/common/fuchsia_egl/fuchsia_egl.h' || // has bogus but benign "authors" reference, reported to author and legal team
+      path.split(name).reversed.take(6).toList().reversed.join('/') ==
+          'third_party/angle/src/common/fuchsia_egl/fuchsia_egl_backend.h') {
+    // has bogus but benign "authors" reference, reported to author and legal team
     return FileType.binary;
   }
-  if (path.split(name).reversed.take(6).toList().reversed.join('/') == 'flutter/third_party/brotli/c/common/dictionary.bin.br') { // Brotli-compressed Brotli dictionary
+  if (path.split(name).reversed.take(6).toList().reversed.join('/') ==
+      'flutter/third_party/brotli/c/common/dictionary.bin.br') {
+    // Brotli-compressed Brotli dictionary
     return FileType.binary;
   }
   final String base = path.basename(name);
   if (base.startsWith('._')) {
     bytes ??= reader();
-    if (matchesSignature(bytes, <int>[0x00, 0x05, 0x16, 0x07, 0x00, 0x02, 0x00, 0x00, 0x4d, 0x61, 0x63, 0x20, 0x4f, 0x53, 0x20, 0x58])) {
+    if (matchesSignature(bytes, <int>[
+      0x00,
+      0x05,
+      0x16,
+      0x07,
+      0x00,
+      0x02,
+      0x00,
+      0x00,
+      0x4d,
+      0x61,
+      0x63,
+      0x20,
+      0x4f,
+      0x53,
+      0x20,
+      0x58,
+    ])) {
       return FileType.notPartOfBuild;
     } // The ._* files in Mac OS X archives that gives icons and stuff
   }
   if (path.split(name).contains('cairo')) {
     bytes ??= reader();
     // "Copyright <latin1 copyright symbol> "
-    if (hasSubsequence(bytes, <int>[0x43, 0x6f, 0x70, 0x79, 0x72, 0x69, 0x67, 0x68, 0x74, 0x20, 0xA9, 0x20], kMaxSize)) {
+    if (hasSubsequence(bytes, <int>[
+      0x43,
+      0x6f,
+      0x70,
+      0x79,
+      0x72,
+      0x69,
+      0x67,
+      0x68,
+      0x74,
+      0x20,
+      0xA9,
+      0x20,
+    ], kMaxSize)) {
       return FileType.latin1Text;
     }
   }
   switch (base) {
     // Build files
-    case 'DEPS': return FileType.text;
-    case 'MANIFEST': return FileType.text;
+    case 'DEPS':
+      return FileType.text;
+    case 'MANIFEST':
+      return FileType.text;
     // Licenses
-    case 'COPYING': return FileType.text;
-    case 'LICENSE': return FileType.text;
-    case 'NOTICE.txt': return isMultiLicenseNotice(reader) ? FileType.binary : FileType.text;
-    case 'NOTICE': return FileType.text;
+    case 'COPYING':
+      return FileType.text;
+    case 'LICENSE':
+      return FileType.text;
+    case 'NOTICE.txt':
+      return isMultiLicenseNotice(reader) ? FileType.binary : FileType.text;
+    case 'NOTICE':
+      return FileType.text;
     // Documentation
-    case 'Changes': return FileType.text;
-    case 'change.log': return FileType.text;
-    case 'ChangeLog': return FileType.text;
-    case 'CHANGES.0': return FileType.latin1Text;
-    case 'README': return FileType.text;
-    case 'TODO': return FileType.text;
-    case 'NEWS': return FileType.text;
-    case 'README.chromium': return FileType.text;
-    case 'README.flutter': return FileType.text;
-    case 'README.tests': return FileType.text;
-    case 'OWNERS': return FileType.text;
-    case 'AUTHORS': return FileType.text;
+    case 'Changes':
+      return FileType.text;
+    case 'change.log':
+      return FileType.text;
+    case 'ChangeLog':
+      return FileType.text;
+    case 'CHANGES.0':
+      return FileType.latin1Text;
+    case 'README':
+      return FileType.text;
+    case 'TODO':
+      return FileType.text;
+    case 'NEWS':
+      return FileType.text;
+    case 'README.chromium':
+      return FileType.text;
+    case 'README.flutter':
+      return FileType.text;
+    case 'README.tests':
+      return FileType.text;
+    case 'OWNERS':
+      return FileType.text;
+    case 'AUTHORS':
+      return FileType.text;
     // Signatures (found in .jar files typically)
-    case 'CERT.RSA': return FileType.binary;
-    case 'ECLIPSE_.RSA': return FileType.binary;
+    case 'CERT.RSA':
+      return FileType.binary;
+    case 'ECLIPSE_.RSA':
+      return FileType.binary;
     // Binary data files
-    case 'tzdata': return FileType.binary;
-    case 'compressed_atrace_data.txt': return FileType.binary;
+    case 'tzdata':
+      return FileType.binary;
+    case 'compressed_atrace_data.txt':
+      return FileType.binary;
     // Source files that don't use UTF-8
     case 'Messages_de_DE.properties': // has a few non-ASCII characters they forgot to escape (from gnu-libstdc++)
     case 'mmx_blendtmp.h': // author name in comment contains latin1 (mesa)
@@ -154,101 +227,192 @@ FileType identifyFile(String name, Reader reader) {
   }
   switch (path.extension(name)) {
     // C/C++ code
-    case '.h': return FileType.text;
-    case '.c': return FileType.text;
-    case '.cc': return FileType.text;
-    case '.cpp': return FileType.text;
-    case '.inc': return FileType.text;
+    case '.h':
+      return FileType.text;
+    case '.c':
+      return FileType.text;
+    case '.cc':
+      return FileType.text;
+    case '.cpp':
+      return FileType.text;
+    case '.inc':
+      return FileType.text;
     // Go code
-    case '.go': return FileType.text;
+    case '.go':
+      return FileType.text;
     // ObjectiveC code
-    case '.m': return FileType.text;
+    case '.m':
+      return FileType.text;
     // Assembler
-    case '.asm': return FileType.text;
+    case '.asm':
+      return FileType.text;
     // Shell
-    case '.sh': return FileType.notPartOfBuild;
-    case '.bat': return FileType.notPartOfBuild;
+    case '.sh':
+      return FileType.notPartOfBuild;
+    case '.bat':
+      return FileType.notPartOfBuild;
     // Build files
-    case '.ac': return FileType.notPartOfBuild;
-    case '.am': return FileType.notPartOfBuild;
-    case '.gn': return FileType.notPartOfBuild;
-    case '.gni': return FileType.notPartOfBuild;
-    case '.gyp': return FileType.notPartOfBuild;
-    case '.gypi': return FileType.notPartOfBuild;
+    case '.ac':
+      return FileType.notPartOfBuild;
+    case '.am':
+      return FileType.notPartOfBuild;
+    case '.gn':
+      return FileType.notPartOfBuild;
+    case '.gni':
+      return FileType.notPartOfBuild;
+    case '.gyp':
+      return FileType.notPartOfBuild;
+    case '.gypi':
+      return FileType.notPartOfBuild;
     // Java code
-    case '.java': return FileType.text;
-    case '.jar': return FileType.zip; // Java package
-    case '.class': return FileType.binary; // compiled Java bytecode (usually found inside .jar archives)
-    case '.dex': return FileType.binary; // Dalvik Executable (usually found inside .jar archives)
+    case '.java':
+      return FileType.text;
+    case '.jar':
+      return FileType.zip; // Java package
+    case '.class':
+      return FileType.binary; // compiled Java bytecode (usually found inside .jar archives)
+    case '.dex':
+      return FileType.binary; // Dalvik Executable (usually found inside .jar archives)
     // Dart code
-    case '.dart': return FileType.text;
-    case '.dill': return FileType.binary; // Compiled Dart code
+    case '.dart':
+      return FileType.text;
+    case '.dill':
+      return FileType.binary; // Compiled Dart code
     // LLVM bitcode
-    case '.bc': return FileType.binary;
+    case '.bc':
+      return FileType.binary;
     // Python code
     case '.py':
       bytes ??= reader();
       // # -*- coding: Latin-1 -*-
-      if (matchesSignature(bytes, <int>[0x23, 0x20, 0x2d, 0x2a, 0x2d, 0x20, 0x63, 0x6f, 0x64,
-                                        0x69, 0x6e, 0x67, 0x3a, 0x20, 0x4c, 0x61, 0x74, 0x69,
-                                        0x6e, 0x2d, 0x31, 0x20, 0x2d, 0x2a, 0x2d])) {
+      if (matchesSignature(bytes, <int>[
+        0x23,
+        0x20,
+        0x2d,
+        0x2a,
+        0x2d,
+        0x20,
+        0x63,
+        0x6f,
+        0x64,
+        0x69,
+        0x6e,
+        0x67,
+        0x3a,
+        0x20,
+        0x4c,
+        0x61,
+        0x74,
+        0x69,
+        0x6e,
+        0x2d,
+        0x31,
+        0x20,
+        0x2d,
+        0x2a,
+        0x2d,
+      ])) {
         return FileType.latin1Text;
       }
       return FileType.text;
-    case '.pyc': return FileType.binary; // compiled Python bytecode
+    case '.pyc':
+      return FileType.binary; // compiled Python bytecode
     // Machine code
-    case '.so': return FileType.binary; // ELF shared object
-    case '.xpt': return FileType.binary; // XPCOM Type Library
+    case '.so':
+      return FileType.binary; // ELF shared object
+    case '.xpt':
+      return FileType.binary; // XPCOM Type Library
     // Graphics code
-    case '.glsl': return FileType.text;
-    case '.spvasm': return FileType.text;
+    case '.glsl':
+      return FileType.text;
+    case '.spvasm':
+      return FileType.text;
     // Documentation
-    case '.md': return FileType.text;
-    case '.txt': return FileType.text;
-    case '.html': return FileType.text;
+    case '.md':
+      return FileType.text;
+    case '.txt':
+      return FileType.text;
+    case '.html':
+      return FileType.text;
     // Fonts
-    case '.ttf': return FileType.binary; // TrueType Font
+    case '.ttf':
+      return FileType.binary; // TrueType Font
     case '.ttcf': // (mac)
-    case '.ttc': return FileType.binary; // TrueType Collection (windows)
-    case '.woff': return FileType.binary; // Web Open Font Format
-    case '.otf': return FileType.binary; // OpenType Font
+    case '.ttc':
+      return FileType.binary; // TrueType Collection (windows)
+    case '.woff':
+      return FileType.binary; // Web Open Font Format
+    case '.otf':
+      return FileType.binary; // OpenType Font
     // Graphics formats
-    case '.gif': return FileType.binary; // GIF
-    case '.png': return FileType.binary; // PNG
-    case '.tga': return FileType.binary; // Truevision TGA (TARGA)
-    case '.dng': return FileType.binary; // Digial Negative (Adobe RAW format)
+    case '.gif':
+      return FileType.binary; // GIF
+    case '.png':
+      return FileType.binary; // PNG
+    case '.tga':
+      return FileType.binary; // Truevision TGA (TARGA)
+    case '.dng':
+      return FileType.binary; // Digial Negative (Adobe RAW format)
     case '.jpg':
-    case '.jpeg': return FileType.binary; // JPEG
-    case '.ico': return FileType.binary; // Windows icon format
-    case '.icns': return FileType.binary; // macOS icon format
-    case '.bmp': return FileType.binary; // Windows bitmap format
-    case '.wbmp': return FileType.binary; // Wireless bitmap format
-    case '.webp': return FileType.binary; // WEBP
-    case '.pdf': return FileType.binary; // PDF
-    case '.emf': return FileType.binary; // Windows enhanced metafile format
-    case '.skp': return FileType.binary; // Skia picture format
-    case '.mskp': return FileType.binary; // Skia picture format
-    case '.spv': return FileType.binary; // SPIR-V
+    case '.jpeg':
+      return FileType.binary; // JPEG
+    case '.ico':
+      return FileType.binary; // Windows icon format
+    case '.icns':
+      return FileType.binary; // macOS icon format
+    case '.bmp':
+      return FileType.binary; // Windows bitmap format
+    case '.wbmp':
+      return FileType.binary; // Wireless bitmap format
+    case '.webp':
+      return FileType.binary; // WEBP
+    case '.pdf':
+      return FileType.binary; // PDF
+    case '.emf':
+      return FileType.binary; // Windows enhanced metafile format
+    case '.skp':
+      return FileType.binary; // Skia picture format
+    case '.mskp':
+      return FileType.binary; // Skia picture format
+    case '.spv':
+      return FileType.binary; // SPIR-V
     // Videos
-    case '.ogg': return FileType.binary; // Ogg media
-    case '.mp4': return FileType.binary; // MPEG media
-    case '.ts': return FileType.binary; // MPEG2 transport stream
+    case '.ogg':
+      return FileType.binary; // Ogg media
+    case '.mp4':
+      return FileType.binary; // MPEG media
+    case '.ts':
+      return FileType.binary; // MPEG2 transport stream
     // Other binary files
-    case '.raw': return FileType.binary; // raw audio or graphical data
-    case '.bin': return FileType.binary; // some sort of binary data
-    case '.rsc': return FileType.binary; // some sort of resource data
-    case '.arsc': return FileType.binary; // Android compiled resources
-    case '.apk': return FileType.zip; // Android Package
-    case '.crx': return FileType.binary; // Chrome extension
-    case '.keystore': return FileType.binary;
-    case '.icc': return FileType.binary; // Color profile
-    case '.swp': return FileType.binary; // Vim swap file
-    case '.bfbs': return FileType.binary; // Flatbuffers Binary Schema
+    case '.raw':
+      return FileType.binary; // raw audio or graphical data
+    case '.bin':
+      return FileType.binary; // some sort of binary data
+    case '.rsc':
+      return FileType.binary; // some sort of resource data
+    case '.arsc':
+      return FileType.binary; // Android compiled resources
+    case '.apk':
+      return FileType.zip; // Android Package
+    case '.crx':
+      return FileType.binary; // Chrome extension
+    case '.keystore':
+      return FileType.binary;
+    case '.icc':
+      return FileType.binary; // Color profile
+    case '.swp':
+      return FileType.binary; // Vim swap file
+    case '.bfbs':
+      return FileType.binary; // Flatbuffers Binary Schema
     // Archives
-    case '.zip': return FileType.zip; // ZIP
-    case '.tar': return FileType.tar; // Tar
-    case '.gz': return FileType.gz; // GZip
-    case '.bzip2': return FileType.bzip2; // BZip2
+    case '.zip':
+      return FileType.zip; // ZIP
+    case '.tar':
+      return FileType.tar; // Tar
+    case '.gz':
+      return FileType.gz; // GZip
+    case '.bzip2':
+      return FileType.bzip2; // BZip2
     // Image file types from the Fuchsia SDK.
     case '.blk':
     case '.vboot':
@@ -340,7 +504,24 @@ FileType identifyFile(String name, Reader reader) {
   if (matchesSignature(bytes, <int>[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0a])) {
     return FileType.binary;
   } // PNG
-  if (matchesSignature(bytes, <int>[0x58, 0x50, 0x43, 0x4f, 0x4d, 0x0a, 0x54, 0x79, 0x70, 0x65, 0x4c, 0x69, 0x62, 0x0d, 0x0a, 0x1a])) {
+  if (matchesSignature(bytes, <int>[
+    0x58,
+    0x50,
+    0x43,
+    0x4f,
+    0x4d,
+    0x0a,
+    0x54,
+    0x79,
+    0x70,
+    0x65,
+    0x4c,
+    0x69,
+    0x62,
+    0x0d,
+    0x0a,
+    0x1a,
+  ])) {
     return FileType.binary;
   } // XPCOM Type Library
   if (matchesSignature(bytes, <int>[0x23, 0x21])) {
@@ -355,7 +536,6 @@ String _normalize(String fileContents) {
   fileContents = fileContents.replaceAll('\t', ' ' * 4);
   return fileContents;
 }
-
 
 // INTERFACE
 
@@ -423,7 +603,7 @@ abstract class Directory extends IoNode {
 }
 
 // interface
-abstract class Link extends IoNode { }
+abstract class Link extends IoNode {}
 
 mixin ZipFile on File implements Directory {
   ArchiveDirectory? _root;
@@ -462,7 +642,8 @@ mixin GZipFile on File implements Directory {
   Iterable<IoNode> get walk sync* {
     try {
       final String innerName = path.basenameWithoutExtension(fullName);
-      _data ??= InMemoryFile.parse('$fullName!$innerName', a.GZipDecoder().decodeBytes(readBytes()!))!;
+      _data ??=
+          InMemoryFile.parse('$fullName!$innerName', a.GZipDecoder().decodeBytes(readBytes()!))!;
       if (_data != null) {
         yield _data!;
       }
@@ -480,7 +661,8 @@ mixin BZip2File on File implements Directory {
   Iterable<IoNode> get walk sync* {
     try {
       final String innerName = path.basenameWithoutExtension(fullName);
-      _data ??= InMemoryFile.parse('$fullName!$innerName', a.BZip2Decoder().decodeBytes(readBytes()!))!;
+      _data ??=
+          InMemoryFile.parse('$fullName!$innerName', a.BZip2Decoder().decodeBytes(readBytes()!))!;
       if (_data != null) {
         yield _data!;
       }
@@ -490,7 +672,6 @@ mixin BZip2File on File implements Directory {
     }
   }
 }
-
 
 // FILESYSTEM IMPLEMENTATIoN
 
@@ -527,14 +708,22 @@ class FileSystemDirectory extends IoNode implements Directory {
         final io.File fileEntity = entity as io.File;
         if (fileEntity.lengthSync() > 0) {
           switch (identifyFile(fileEntity.path, () => _readBytes(fileEntity))) {
-            case FileType.binary: yield FileSystemFile(fileEntity);
-            case FileType.zip: yield FileSystemZipFile(fileEntity);
-            case FileType.tar: yield FileSystemTarFile(fileEntity);
-            case FileType.gz: yield FileSystemGZipFile(fileEntity);
-            case FileType.bzip2: yield FileSystemBZip2File(fileEntity);
-            case FileType.text: yield FileSystemUTF8TextFile(fileEntity);
-            case FileType.latin1Text: yield FileSystemLatin1TextFile(fileEntity);
-            case FileType.notPartOfBuild: break; // ignore this file
+            case FileType.binary:
+              yield FileSystemFile(fileEntity);
+            case FileType.zip:
+              yield FileSystemZipFile(fileEntity);
+            case FileType.tar:
+              yield FileSystemTarFile(fileEntity);
+            case FileType.gz:
+              yield FileSystemGZipFile(fileEntity);
+            case FileType.bzip2:
+              yield FileSystemBZip2File(fileEntity);
+            case FileType.text:
+              yield FileSystemUTF8TextFile(fileEntity);
+            case FileType.latin1Text:
+              yield FileSystemLatin1TextFile(fileEntity);
+            case FileType.notPartOfBuild:
+              break; // ignore this file
           }
         }
       }
@@ -595,7 +784,6 @@ class FileSystemBZip2File extends FileSystemFile with BZip2File {
   FileSystemBZip2File(super.file);
 }
 
-
 // ARCHIVES
 
 class ArchiveDirectory extends IoNode implements Directory {
@@ -613,22 +801,32 @@ class ArchiveDirectory extends IoNode implements Directory {
   void _add(a.ArchiveFile entry, List<String> remainingPath) {
     if (remainingPath.length > 1) {
       final String subdirectoryName = remainingPath.removeAt(0);
-      _subdirectories.putIfAbsent(
-        subdirectoryName,
-        () => ArchiveDirectory('$fullName/$subdirectoryName', subdirectoryName)
-      )._add(entry, remainingPath);
+      _subdirectories
+          .putIfAbsent(
+            subdirectoryName,
+            () => ArchiveDirectory('$fullName/$subdirectoryName', subdirectoryName),
+          )
+          ._add(entry, remainingPath);
     } else {
       if (entry.size > 0) {
         final String entryFullName = '$fullName/${path.basename(entry.name)}';
         switch (identifyFile(entry.name, () => entry.content as List<int>)) {
-          case FileType.binary: _files.add(ArchiveFile(entryFullName, entry));
-          case FileType.zip: _files.add(ArchiveZipFile(entryFullName, entry));
-          case FileType.tar: _files.add(ArchiveTarFile(entryFullName, entry));
-          case FileType.gz: _files.add(ArchiveGZipFile(entryFullName, entry));
-          case FileType.bzip2: _files.add(ArchiveBZip2File(entryFullName, entry));
-          case FileType.text: _files.add(ArchiveUTF8TextFile(entryFullName, entry));
-          case FileType.latin1Text: _files.add(ArchiveLatin1TextFile(entryFullName, entry));
-          case FileType.notPartOfBuild: break; // ignore this file
+          case FileType.binary:
+            _files.add(ArchiveFile(entryFullName, entry));
+          case FileType.zip:
+            _files.add(ArchiveZipFile(entryFullName, entry));
+          case FileType.tar:
+            _files.add(ArchiveTarFile(entryFullName, entry));
+          case FileType.gz:
+            _files.add(ArchiveGZipFile(entryFullName, entry));
+          case FileType.bzip2:
+            _files.add(ArchiveBZip2File(entryFullName, entry));
+          case FileType.text:
+            _files.add(ArchiveUTF8TextFile(entryFullName, entry));
+          case FileType.latin1Text:
+            _files.add(ArchiveLatin1TextFile(entryFullName, entry));
+          case FileType.notPartOfBuild:
+            break; // ignore this file
         }
       }
     }
@@ -692,7 +890,6 @@ class ArchiveBZip2File extends ArchiveFile with BZip2File {
   ArchiveBZip2File(super.fullName, super.file);
 }
 
-
 // IN-MEMORY FILES (e.g. contents of GZipped files)
 
 class InMemoryFile extends IoNode implements File {
@@ -703,14 +900,22 @@ class InMemoryFile extends IoNode implements File {
       return null;
     }
     switch (identifyFile(fullName, () => bytes)) {
-      case FileType.binary: return InMemoryFile(fullName, bytes);
-      case FileType.zip: return InMemoryZipFile(fullName, bytes);
-      case FileType.tar: return InMemoryTarFile(fullName, bytes);
-      case FileType.gz: return InMemoryGZipFile(fullName, bytes);
-      case FileType.bzip2: return InMemoryBZip2File(fullName, bytes);
-      case FileType.text: return InMemoryUTF8TextFile(fullName, bytes);
-      case FileType.latin1Text: return InMemoryLatin1TextFile(fullName, bytes);
-      case FileType.notPartOfBuild: break; // ignore this file
+      case FileType.binary:
+        return InMemoryFile(fullName, bytes);
+      case FileType.zip:
+        return InMemoryZipFile(fullName, bytes);
+      case FileType.tar:
+        return InMemoryTarFile(fullName, bytes);
+      case FileType.gz:
+        return InMemoryGZipFile(fullName, bytes);
+      case FileType.bzip2:
+        return InMemoryBZip2File(fullName, bytes);
+      case FileType.text:
+        return InMemoryUTF8TextFile(fullName, bytes);
+      case FileType.latin1Text:
+        return InMemoryLatin1TextFile(fullName, bytes);
+      case FileType.notPartOfBuild:
+        break; // ignore this file
     }
     assert(false);
     return null;
