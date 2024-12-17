@@ -1830,8 +1830,10 @@ class DebugConnectionInfo {
 /// Returns the next platform value for the switcher.
 ///
 /// These values must match what is available in
-/// `packages/flutter/lib/src/foundation/binding.dart`.
+/// `packages/flutter/lib/src/foundation/platform.dart`.
 String nextPlatform(String currentPlatform) {
+  // The following lines are read by a script, which expects a certain format.
+  // dart format off
   const List<String> platforms = <String>[
     'android',
     'iOS',
@@ -1840,6 +1842,7 @@ String nextPlatform(String currentPlatform) {
     'linux',
     'fuchsia',
   ];
+  // dart format on
   final int index = platforms.indexOf(currentPlatform);
   assert(index >= 0, 'unknown platform "$currentPlatform"');
   return platforms[(index + 1) % platforms.length];
