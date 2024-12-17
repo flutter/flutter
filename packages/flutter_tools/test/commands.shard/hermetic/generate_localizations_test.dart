@@ -114,7 +114,7 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('not using synthetic packages (due to --no-implicit-pubspec-resolution)', () async {
+  testUsingContext('not using synthetic packages (due to --explicit-package-dependencies)', () async {
     final Directory l10nDirectory = fileSystem.directory(
       fileSystem.path.join('lib', 'l10n'),
     );
@@ -140,7 +140,6 @@ flutter:
       processManager: processManager,
     );
     await createTestCommandRunner(command).run(<String>[
-      '--no-implicit-pubspec-resolution',
       'gen-l10n',
     ]);
 
@@ -152,6 +151,7 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: enableExplicitPackageDependencies,
   });
 
   testUsingContext('throws error when arguments are invalid', () async {

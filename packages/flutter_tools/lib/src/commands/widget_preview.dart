@@ -247,11 +247,9 @@ class WidgetPreviewStartCommand extends FlutterCommand
       outputMode: PubOutputMode.summaryOnly,
     );
 
-    if (rootProject.manifest.generateSyntheticPackage) {
-      maybeAddFlutterGenToPackageConfig(
-        rootProject: rootProject,
-      );
-    }
+    maybeAddFlutterGenToPackageConfig(
+      rootProject: rootProject,
+    );
   }
 
   /// Manually adds an entry for package:flutter_gen to the preview scaffold's
@@ -264,10 +262,19 @@ class WidgetPreviewStartCommand extends FlutterCommand
   /// isn't actually flutter_gen, which pub doesn't really like, and using the
   /// actual package name will break applications which import
   /// package:flutter_gen.
+  @visibleForTesting
   void maybeAddFlutterGenToPackageConfig({
     required FlutterProject rootProject,
   }) {
-    if (!rootProject.manifest.generateSyntheticPackage) {
+    // TODO(matanlurey): Remove this once flutter_gen is removed.
+    //
+    // This is actually incorrect logic; the presence of a `generate: true`
+    // does *NOT* mean that we need to add `flutter_gen` to the package config,
+    // and never did, but the name of the manifest field was labeled and
+    // described incorrectly.
+    //
+    // Tracking removal: https://github.com/flutter/flutter/issues/102983.
+    if (!rootProject.manifest.generateLocalizations) {
       return;
     }
     final FlutterProject widgetPreviewScaffoldProject =
