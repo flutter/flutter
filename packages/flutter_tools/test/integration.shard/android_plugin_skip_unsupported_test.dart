@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 
 import '../src/common.dart';
@@ -104,7 +105,7 @@ void main() {
     expect(buildApkResult.stderr.toString(),
         isNot(contains('Please fix your settings.gradle')));
     expect(buildApkResult, const ProcessResultMatcher());
-  });
+  }, skip: Platform.isWindows); // https://github.com/flutter/flutter/issues/157640
 
   test(
       'skip plugin with android folder if it does not support the Android platform',
@@ -137,7 +138,7 @@ void main() {
             'flakes.',
       );
     }
-  });
+  }, skip: Platform.isWindows); // https://github.com/flutter/flutter/issues/157640
 
   // TODO(54566): Remove test when issue is resolved.
   /// Test project with a `settings.gradle` (PluginEach) that apps were created
@@ -152,7 +153,7 @@ void main() {
     expect(buildApkResult.stderr.toString(),
         isNot(contains('Please fix your settings.gradle')));
     expect(buildApkResult, const ProcessResultMatcher());
-  });
+  }, skip: Platform.isWindows); // https://github.com/flutter/flutter/issues/157640
 
   // TODO(54566): Remove test when issue is resolved.
   /// Test project with a `settings.gradle` (PluginEach) that apps were created
@@ -168,7 +169,7 @@ void main() {
     expect(buildApkResult.stderr.toString(),
         isNot(contains('Please fix your settings.gradle')));
     expect(buildApkResult, const ProcessResultMatcher());
-  });
+  }, skip: Platform.isWindows); // https://github.com/flutter/flutter/issues/157640
 
   // TODO(54566): Remove test when issue is resolved.
   /// Test project with a `settings.gradle` (PluginEach) that apps were created
@@ -188,7 +189,7 @@ void main() {
       const ProcessResultMatcher(
           stderrPattern: 'Please fix your settings.gradle'),
     );
-  });
+  }, skip: Platform.isWindows); // https://github.com/flutter/flutter/issues/157640
 }
 
 const String pubspecWithPluginPath = r'''

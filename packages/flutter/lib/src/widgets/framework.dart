@@ -6634,7 +6634,8 @@ abstract class RenderObjectElement extends Element {
   }
 
   @override
-  void performRebuild() { // ignore: must_call_super, _performRebuild calls super.
+  // ignore: must_call_super, _performRebuild calls super.
+  void performRebuild() {
     _performRebuild(); // calls widget.updateRenderObject()
   }
 

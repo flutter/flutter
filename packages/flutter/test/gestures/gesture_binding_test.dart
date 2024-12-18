@@ -433,7 +433,10 @@ void main() {
   test('PointerEventConverter processes view IDs', () {
     const int startID = 987654;
     const List<ui.PointerData> data = <ui.PointerData>[
-      ui.PointerData(viewId: startID + 0, change: ui.PointerChange.cancel), // ignore: avoid_redundant_argument_values
+      ui.PointerData(
+        viewId: startID + 0,
+        change: ui.PointerChange.cancel, // ignore: avoid_redundant_argument_values
+      ),
       ui.PointerData(viewId: startID + 1, change: ui.PointerChange.add),
       ui.PointerData(viewId: startID + 2, change: ui.PointerChange.remove),
       ui.PointerData(viewId: startID + 3, change: ui.PointerChange.hover),

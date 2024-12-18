@@ -30,6 +30,7 @@ class RestorablePushExample extends StatefulWidget {
   State<RestorablePushExample> createState() => _RestorablePushExampleState();
 }
 
+@pragma('vm:entry-point')
 class _RestorablePushExampleState extends State<RestorablePushExample> {
   @pragma('vm:entry-point')
   static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {

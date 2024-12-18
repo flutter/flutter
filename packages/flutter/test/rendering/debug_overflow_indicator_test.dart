@@ -35,8 +35,10 @@ void main() {
     expect(exception, isFlutterError);
     // ignore: avoid_dynamic_calls
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
-    // ignore: avoid_dynamic_calls
-    expect(exception.diagnostics.first.toString(), startsWith('A RenderConstraintsTransformBox overflowed by '));
+    expect(
+      exception.diagnostics.first.toString(), // ignore: avoid_dynamic_calls
+      startsWith('A RenderConstraintsTransformBox overflowed by '),
+    );
     expect(find.byType(UnconstrainedBox), paints..rect());
 
     await tester.pumpWidget(
