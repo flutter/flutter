@@ -15,7 +15,6 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_method_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
-#include "flutter/shell/platform/linux/testing/fl_test.h"
 #include "flutter/shell/platform/linux/testing/mock_keymap.h"
 #include "flutter/testing/testing.h"
 
@@ -71,7 +70,6 @@ typedef std::function<void(AsyncKeyCallback callback)> ChannelCallHandler;
 typedef std::function<void(const FlutterKeyEvent* event,
                            AsyncKeyCallback callback)>
     EmbedderCallHandler;
-typedef std::function<void(FlKeyEvent*)> RedispatchHandler;
 
 // A type that can record all kinds of effects that the keyboard handler
 // triggers.
@@ -138,19 +136,6 @@ G_DECLARE_FINAL_TYPE(FlMockKeyBinaryMessenger,
                      GObject)
 
 G_END_DECLS
-
-MATCHER_P(MethodSuccessResponse, result, "") {
-  g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
-  g_autoptr(FlMethodResponse) response =
-      fl_method_codec_decode_response(FL_METHOD_CODEC(codec), arg, nullptr);
-  fl_method_response_get_result(response, nullptr);
-  if (fl_value_equal(fl_method_response_get_result(response, nullptr),
-                     result)) {
-    return true;
-  }
-  *result_listener << ::testing::PrintToString(response);
-  return false;
-}
 
 /***** FlMockKeyBinaryMessenger *****/
 /* Mock a binary messenger that only processes messages from the embedding on
