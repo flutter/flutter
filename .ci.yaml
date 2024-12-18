@@ -807,7 +807,8 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - bin/internal/engine.version
+      - engine/**
+      - DEPS
       - .ci.yaml
 
   - name: Linux gradle_desugar_classes_test
@@ -1156,7 +1157,8 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - bin/internal/engine.version
+      - engine/**
+      - DEPS
       - .ci.yaml
 
   - name: Linux tool_integration_tests_1_6
@@ -2606,7 +2608,8 @@ targets:
     # presubmit during engine rolls. This test is the *only* automated e2e
     # test for external textures for the engine, it should never break.
     runIf:
-      - bin/internal/engine.version
+      - engine/**
+      - DEPS
       - .ci.yaml
     properties:
       tags: >
@@ -2621,7 +2624,8 @@ targets:
     # presubmit during engine rolls. This test is the *only* automated e2e
     # test for external textures for the engine, it should never break.
     runIf:
-      - bin/internal/engine.version
+      - engine/**
+      - DEPS
       - .ci.yaml
     properties:
       tags: >
