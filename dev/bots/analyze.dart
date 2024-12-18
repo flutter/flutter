@@ -128,14 +128,16 @@ Future<void> run(List<String> arguments) async {
   printProgress('Spaces after flow control statements...');
   await verifySpacesAfterFlowControlStatements(flutterRoot);
 
-  printProgress('Deprecations...');
-  await verifyDeprecations(flutterRoot);
+  // TODO(goderbauer): Re-enable once it is fixed to deal with auto-formatted code.
+  // printProgress('Deprecations...');
+  // await verifyDeprecations(flutterRoot);
 
   printProgress('Goldens...');
   await verifyGoldenTags(flutterPackages);
 
-  printProgress('Skip test comments...');
-  await verifySkipTestComments(flutterRoot);
+  // TODO(goderbauer): Re-enable once it is fixed to deal with auto-formatted code.
+  // printProgress('Skip test comments...');
+  // await verifySkipTestComments(flutterRoot);
 
   printProgress('Licenses...');
   await verifyNoMissingLicense(flutterRoot);
@@ -700,6 +702,8 @@ final RegExp _legacyDeprecation = RegExp(
   r' // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/\d+$',
 );
 
+// TODO(goderbauer): Re-enable once it is fixed to deal with auto-formatted code.
+// ignore: unreachable_from_main
 Future<void> verifyDeprecations(String workingDirectory, {int minimumMatches = 2000}) async {
   final List<String> errors = <String>[];
   await for (final File file in _allFiles(
@@ -1008,6 +1012,8 @@ final RegExp _skipTestCommentPattern = RegExp(r'//(.*)$');
 const Pattern _skipTestIntentionalPattern = '[intended]';
 final Pattern _skipTestTrackingBugPattern = RegExp(r'https+?://github.com/.*/issues/\d+');
 
+// TODO(goderbauer): Re-enable once it is fixed to deal with auto-formatted code.
+// ignore: unreachable_from_main
 Future<void> verifySkipTestComments(String workingDirectory) async {
   final List<String> errors = <String>[];
   final Stream<File> testFiles = _allFiles(
