@@ -127,9 +127,6 @@ class FlutterTesterDevice extends Device {
   }) async => false;
 
   @override
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
-
-  @override
   bool isSupported() => true;
 
   @override

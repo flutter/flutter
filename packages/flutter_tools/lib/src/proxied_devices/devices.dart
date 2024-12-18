@@ -244,9 +244,6 @@ class ProxiedDevice extends Device {
   }) => throw UnimplementedError();
 
   @override
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app) => throw UnimplementedError();
-
-  @override
   Future<bool> installApp(
     ApplicationPackage app, {
     String? userIdentifier,

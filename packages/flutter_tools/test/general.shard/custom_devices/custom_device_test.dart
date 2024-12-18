@@ -134,7 +134,6 @@ void main() {
       expect(await device.targetPlatform, TargetPlatform.linux_arm64);
       expect(await device.installApp(linuxApp), true);
       expect(await device.uninstallApp(linuxApp), true);
-      expect(await device.isLatestBuildInstalled(linuxApp), false);
       expect(await device.isAppInstalled(linuxApp), false);
       expect(await device.stopApp(linuxApp), false);
       expect(await device.stopApp(null), false);

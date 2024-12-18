@@ -696,11 +696,6 @@ class CustomDevice extends Device {
   }
 
   @override
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async {
-    return false;
-  }
-
-  @override
   Future<bool> get isLocalEmulator async => false;
 
   @override

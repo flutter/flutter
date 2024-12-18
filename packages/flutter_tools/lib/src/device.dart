@@ -669,9 +669,6 @@ abstract class Device {
     String? userIdentifier,
   });
 
-  /// Check if the latest build of the [app] is already installed.
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app);
-
   /// Install an app package on the current device.
   ///
   /// Specify [userIdentifier] to install for a particular user (Android only).
