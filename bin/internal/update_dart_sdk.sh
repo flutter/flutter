@@ -19,16 +19,41 @@ FLUTTER_ROOT="$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"
 DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 DART_SDK_PATH_OLD="$DART_SDK_PATH.old"
 ENGINE_STAMP="$FLUTTER_ROOT/bin/cache/engine-dart-sdk.stamp"
-ENGINE_REALM=$(cat "$FLUTTER_ROOT/bin/internal/engine.realm" | tr -d '[:space:]')
+ENGINE_REALM=""
 OS="$(uname -s)"
 
-ENGINE_VERSION=""
-if [ -f "$FLUTTER_ROOT/bin/internal/engine.version" ]; then
-  ENGINE_VERSION=$(cat "$FLUTTER_ROOT/bin/internal/engine.version")
+# Test for fusion repository
+if [ -f "$FLUTTER_ROOT/DEPS" ] && [ -f "$FLUTTER_ROOT/engine/src/.gn" ]; then
+  BRANCH=$(git -C "$FLUTTER_ROOT" rev-parse --abbrev-ref HEAD)
+  # In a fusion repository; the engine.version comes from the git hashes.
+  if [ -z "${LUCI_CONTEXT}" ]; then
+    ENGINE_VERSION=$(git -C "$FLUTTER_ROOT" merge-base HEAD upstream/master)
+  else
+    ENGINE_VERSION=$(git -C "$FLUTTER_ROOT" rev-parse HEAD)
+  fi
+
+  if [[ "$BRANCH" != "stable" && "$BRANCH" != "beta" ]]; then
+    # Write the engine version out so downstream tools know what to look for.
+    echo $ENGINE_VERSION > "$FLUTTER_ROOT/bin/internal/engine.version"
+
+    # The realm on CI is passed in.
+    if [ -n "${FLUTTER_REALM}" ]; then
+      echo $FLUTTER_REALM > "$FLUTTER_ROOT/bin/internal/engine.realm"
+      ENGINE_REALM="$FLUTTER_REALM"
+    else
+      if [ -f "$FLUTTER_ROOT/bin/internal/engine.realm" ]; then
+        ENGINE_REALM=$(cat "$FLUTTER_ROOT/bin/internal/engine.realm" | tr -d '[:space:]')
+      fi
+    fi
+  else
+    # Release branch - these files will exist
+    ENGINE_VERSION=$(cat "$FLUTTER_ROOT/bin/internal/engine.version")
+    ENGINE_REALM=$(cat "$FLUTTER_ROOT/bin/internal/engine.realm" | tr -d '[:space:]')
+  fi
 else
-  # Calculate the engine hash from tracked git files.
-  # The array takes the first part of the sha1sum string.
-  ENGINE_VERSION=($(git ls-tree HEAD -r engine DEPS | sha1sum))
+  # Non-fusion repository - these files will exist
+  ENGINE_VERSION=$(cat "$FLUTTER_ROOT/bin/internal/engine.version")
+  ENGINE_REALM=$(cat "$FLUTTER_ROOT/bin/internal/engine.realm" | tr -d '[:space:]')
 fi
 
 if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; then
