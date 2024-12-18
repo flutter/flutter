@@ -802,6 +802,7 @@ targets:
   - name: Linux fuchsia_precache
     recipe: flutter/flutter_drone
     timeout: 60
+    presubmit: false
     properties:
       shard: fuchsia_precache
       tags: >
