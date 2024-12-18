@@ -73,7 +73,8 @@ void main() {
       expect(endEdge.globalPosition, const Offset(100.0, 100.0));
 
       await gesture.up();
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102410.
+      // https://github.com/flutter/flutter/issues/102410
+    }, skip: kIsWeb);
 
     testWidgets('mouse double click sends select-word event', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
@@ -346,7 +347,8 @@ void main() {
       expect(pageController.page, 1.0);
     },
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+      // https://github.com/flutter/flutter/issues/125582
+      skip: kIsWeb
     );
 
     testWidgets('Vertical PageView beats SelectionArea child touch drag gestures', (WidgetTester tester) async {
@@ -418,7 +420,8 @@ void main() {
       expect(pageController.page, 1.0);
     },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+      // https://github.com/flutter/flutter/issues/125582
+      skip: kIsWeb,
     );
 
     testWidgets('mouse single-click selection collapses the selection', (WidgetTester tester) async {
@@ -445,7 +448,8 @@ void main() {
       expect((renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent).type, SelectionEventType.startEdgeUpdate);
       expect(renderSelectionSpy.events[1], isA<SelectionEdgeUpdateEvent>());
       expect((renderSelectionSpy.events[1] as SelectionEdgeUpdateEvent).type, SelectionEventType.endEdgeUpdate);
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102410.
+      // https://github.com/flutter/flutter/issues/102410
+    }, skip: kIsWeb);
 
     testWidgets('touch long press sends select-word event', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
@@ -829,7 +833,8 @@ void main() {
       await gesture.up();
     },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      skip: kIsWeb,
     );
 
     testWidgets('touch can select multiple widgets on double tap drag on mobile platforms', (WidgetTester tester) async {
@@ -877,7 +882,8 @@ void main() {
       await gesture.up();
     },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      skip: kIsWeb,
     );
 
     testWidgets('touch can select multiple widgets on double tap drag and return to origin word on mobile platforms', (WidgetTester tester) async {
@@ -937,7 +943,8 @@ void main() {
       await gesture.up();
     },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      skip: kIsWeb,
     );
 
     testWidgets('touch can reverse selection across multiple widgets on double tap drag on mobile platforms', (WidgetTester tester) async {
@@ -984,7 +991,8 @@ void main() {
       await gesture.up();
     },
       variant: TargetPlatformVariant.mobile(),
-      skip: kIsWeb, // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      skip: kIsWeb,
     );
 
     testWidgets('touch cannot triple tap or triple tap drag on Android and iOS', (WidgetTester tester) async {
@@ -1089,7 +1097,8 @@ void main() {
       expect(paragraph.selections[0], defaultTargetPlatform == TargetPlatform.iOS ? const TextSelection(baseOffset: 0, extentOffset: 5) : const TextSelection.collapsed(offset: 2));
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
-      skip: kIsWeb, // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      skip: kIsWeb,
     );
 
     testWidgets('touch cannot select word-by-word on double tap drag when on Android web', (WidgetTester tester) async {
@@ -1138,7 +1147,8 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
     },
-      skip: !kIsWeb, // [intended] This test verifies web behavior.
+    // [intended] This test verifies web behavior.
+      skip: !kIsWeb,
     );
 
     testWidgets('touch can double tap + drag on iOS web', (WidgetTester tester) async {
@@ -1222,7 +1232,8 @@ void main() {
       await tester.pumpAndSettle();
     },
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-      skip: !kIsWeb, // [intended] This test verifies web behavior.
+      // [intended] This test verifies web behavior.
+      skip: !kIsWeb,
     );
 
     testWidgets('RenderParagraph should invalidate cachedRect on window size change', (WidgetTester tester) async {
@@ -1274,7 +1285,8 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
     }, variant: TargetPlatformVariant.all(),
-       skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+    // https://github.com/flutter/flutter/issues/125582.
+       skip: kIsWeb,
     );
 
     testWidgets('RenderParagraph should invalidate cached bounding boxes', (WidgetTester tester) async {
@@ -1334,7 +1346,8 @@ void main() {
       // Should select "Good" again.
       expect(paragraph.selections.isEmpty, isFalse);
       expect(paragraph.selections[0], const TextSelection(baseOffset: 25, extentOffset: 29));
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+      // https://github.com/flutter/flutter/issues/125582
+    }, skip: kIsWeb);
 
     testWidgets('mouse can select single text on desktop platforms', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1580,7 +1593,8 @@ void main() {
       await tester.pump();
       expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 11));
       await gesture.up();
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+      // https://github.com/flutter/flutter/issues/125582
+    }, skip: kIsWeb);
 
     testWidgets('mouse can select multiple widgets on double click drag', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1625,7 +1639,8 @@ void main() {
       expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 11));
 
       await gesture.up();
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+      // https://github.com/flutter/flutter/issues/125582
+    }, skip: kIsWeb);
 
     testWidgets('mouse can select multiple widgets on double click drag and return to origin word', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1682,7 +1697,8 @@ void main() {
       expect(paragraph3.selections.isEmpty, isTrue);
 
       await gesture.up();
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+      // https://github.com/flutter/flutter/issues/125582
+    }, skip: kIsWeb);
 
     testWidgets('mouse can reverse selection across multiple widgets on double click drag', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1726,7 +1742,8 @@ void main() {
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 12, extentOffset: 4));
 
       await gesture.up();
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+      // https://github.com/flutter/flutter/issues/125582
+    }, skip: kIsWeb);
 
     testWidgets('mouse can select paragraph-by-paragraph on triple click drag', (WidgetTester tester) async {
       const String longText = 'Hello world this is some long piece of text '
@@ -1803,7 +1820,8 @@ void main() {
       await tester.pump();
       expect(paragraph.selections[0], const TextSelection(baseOffset: 257, extentOffset: 0));
       await gesture.up();
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+      // https://github.com/flutter/flutter/issues/125582
+    }, skip: kIsWeb);
 
     testWidgets('mouse can select multiple widgets on triple click drag when selecting inside a WidgetSpan', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1855,7 +1873,8 @@ void main() {
       expect(paragraphE.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
 
       await gesture.up();
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+      // https://github.com/flutter/flutter/issues/125582
+    }, skip: kIsWeb);
 
     testWidgets('mouse can select multiple widgets on triple click drag', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1917,7 +1936,8 @@ void main() {
       expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 47));
 
       await gesture.up();
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+      // https://github.com/flutter/flutter/issues/125582
+    }, skip: kIsWeb);
 
     testWidgets('mouse can select multiple widgets on triple click drag and return to origin paragraph', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1989,7 +2009,8 @@ void main() {
       expect(paragraph3.selections.isEmpty, true);
 
       await gesture.up();
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+      // https://github.com/flutter/flutter/issues/125582
+    }, skip: kIsWeb);
 
     testWidgets('mouse can reverse selection across multiple widgets on triple click drag', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -2038,7 +2059,8 @@ void main() {
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 43, extentOffset: 0));
 
       await gesture.up();
-    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+      // https://github.com/flutter/flutter/issues/125582
+    }, skip: kIsWeb);
 
     testWidgets('mouse can select multiple widgets', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -2378,7 +2400,8 @@ void main() {
         expect(find.byKey(toolbarKey), findsOneWidget);
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
-      skip: kIsWeb, // [intended] Web uses its native context menu.
+      // [intended] Web uses its native context menu.
+      skip: kIsWeb,
     );
 
     testWidgets(
@@ -2451,7 +2474,8 @@ void main() {
         expect(find.byKey(toolbarKey), findsNothing);
       },
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-      skip: kIsWeb, // [intended] Web uses its native context menu.
+      // [intended] Web uses its native context menu.
+      skip: kIsWeb,
     );
 
     testWidgets(
@@ -2531,7 +2555,8 @@ void main() {
         expect(find.byKey(toolbarKey), findsNothing);
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
-      skip: kIsWeb, // [intended] Web uses its native context menu.
+      // [intended] Web uses its native context menu.
+      skip: kIsWeb,
     );
 
     testWidgets(
@@ -2604,7 +2629,8 @@ void main() {
         expect(find.byKey(toolbarKey), findsOneWidget);
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
-      skip: kIsWeb, // [intended] Web uses its native context menu.
+      // [intended] Web uses its native context menu.
+      skip: kIsWeb,
     );
 
     testWidgets(
@@ -2708,7 +2734,8 @@ void main() {
         expect(find.byKey(toolbarKey), findsNothing);
       },
       variant: TargetPlatformVariant.only(TargetPlatform.macOS),
-      skip: kIsWeb, // [intended] Web uses its native context menu.
+      // [intended] Web uses its native context menu.
+      skip: kIsWeb,
     );
 
     testWidgets(
@@ -2828,7 +2855,8 @@ void main() {
         expect(find.byKey(toolbarKey), findsNothing);
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.windows }),
-      skip: kIsWeb, // [intended] Web uses its native context menu.
+      // [intended] Web uses its native context menu.
+      skip: kIsWeb,
     );
 
     testWidgets(
@@ -2956,7 +2984,8 @@ void main() {
         expect(find.byKey(toolbarKey), findsNothing);
       },
       variant: TargetPlatformVariant.only(TargetPlatform.linux),
-      skip: kIsWeb, // [intended] Web uses its native context menu.
+      // [intended] Web uses its native context menu.
+      skip: kIsWeb,
     );
 
     testWidgets('can copy a selection made with the mouse', (WidgetTester tester) async {
@@ -3046,7 +3075,8 @@ void main() {
         expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 12));
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }),
-      skip: kIsWeb, // [intended] the web handles this on its own.
+      // [intended] the web handles this on its own.
+      skip: kIsWeb,
     );
 
     testWidgets(
@@ -3103,7 +3133,8 @@ void main() {
         expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 12));
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
-      skip: kIsWeb, // [intended] the web handles this on its own.
+      // [intended] the web handles this on its own.
+      skip: kIsWeb,
     );
 
     testWidgets('select all', (WidgetTester tester) async {
@@ -3175,7 +3206,8 @@ void main() {
       expect(clipboardData['text'], 'w are you?Good, and you?Fine');
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+      // https://github.com/flutter/flutter/issues/61020
+      skip: isBrowser,
     );
 
     testWidgets(
@@ -3219,7 +3251,8 @@ void main() {
       expect(clipboardData['text'], 'How are you?Good, and you?Fine,');
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+      // https://github.com/flutter/flutter/issues/61020
+      skip: isBrowser,
     );
 
     testWidgets(
@@ -3267,7 +3300,8 @@ void main() {
       expect(tester.takeException(), isNull);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+      // https://github.com/flutter/flutter/issues/61020
+      skip: isBrowser,
     );
 
     testWidgets(
@@ -3312,7 +3346,8 @@ void main() {
       expect(innerParagraph.selections[0], const TextSelection(baseOffset: 6, extentOffset: 9));
     },
       variant: TargetPlatformVariant.only(TargetPlatform.macOS),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+      // https://github.com/flutter/flutter/issues/61020
+      skip: isBrowser,
     );
 
     testWidgets(
@@ -3357,7 +3392,8 @@ void main() {
       expect(tester.takeException(), isNull);
     },
       variant: TargetPlatformVariant.only(TargetPlatform.macOS),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+      // https://github.com/flutter/flutter/issues/61020
+      skip: isBrowser,
     );
 
     testWidgets(
@@ -3401,7 +3437,8 @@ void main() {
       expect(paragraph.selections[0], const TextSelection(baseOffset: 124, extentOffset: 129));
     },
       variant: TargetPlatformVariant.only(TargetPlatform.macOS),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+      // https://github.com/flutter/flutter/issues/61020
+      skip: isBrowser,
     );
 
     testWidgets(
@@ -3444,7 +3481,8 @@ void main() {
       expect(paragraph.selections[0], const TextSelection(baseOffset: 124, extentOffset: 129));
     },
       variant: TargetPlatformVariant.only(TargetPlatform.macOS),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+      // https://github.com/flutter/flutter/issues/61020
+      skip: isBrowser,
     );
 
     testWidgets(
@@ -3484,7 +3522,8 @@ void main() {
         expect(clipboardData['text'], 'w are you?Fine');
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+      // https://github.com/flutter/flutter/issues/61020
+      skip: isBrowser,
     );
 
     testWidgets(
@@ -3524,7 +3563,8 @@ void main() {
         expect(clipboardData['text'], 'w are you?Fine');
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+      // https://github.com/flutter/flutter/issues/61020
+      skip: isBrowser,
     );
 
     testWidgets('mouse can select across bidi text', (WidgetTester tester) async {
@@ -3566,7 +3606,8 @@ void main() {
       expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
 
       await gesture.up();
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+      // https://github.com/flutter/flutter/issues/61020
+    }, skip: isBrowser);
 
     testWidgets('long press and drag touch moves selection word by word', (WidgetTester tester) async {
 
@@ -3822,7 +3863,8 @@ void main() {
       expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 16));
       expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 12));
-    }, skip: kIsWeb); // [intended] Web uses its native context menu.
+      // [intended] Web uses its native context menu.
+    }, skip: kIsWeb);
 
     testWidgets('can copy from toolbar', (WidgetTester tester) async {
 
@@ -3862,7 +3904,8 @@ void main() {
 
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
       expect(clipboardData['text'], 'thank');
-    }, skip: kIsWeb); // [intended] Web uses its native context menu.
+      // [intended] Web uses its native context menu.
+    }, skip: kIsWeb);
 
     testWidgets('can use keyboard to granularly extend selection - character', (WidgetTester tester) async {
 
@@ -4412,7 +4455,8 @@ void main() {
     );
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
-    skip: kIsWeb, // [intended] Web uses its native context menu.
+    // [intended] Web uses its native context menu.
+    skip: kIsWeb,
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/121053.
@@ -4486,7 +4530,8 @@ void main() {
         break;    }
   },
     variant: TargetPlatformVariant.mobile(),
-    skip: kIsWeb, // [intended] Web uses its native context menu.
+    // [intended] Web uses its native context menu.
+    skip: kIsWeb,
   );
 
   testWidgets('the handles do not disappear when clicking `Select all` item in mobile platforms', (WidgetTester tester) async {
@@ -4550,7 +4595,8 @@ void main() {
     }
   },
     variant: TargetPlatformVariant.mobile(),
-    skip: kIsWeb, // [intended] Web uses its native context menu.
+    // [intended] Web uses its native context menu.
+    skip: kIsWeb,
   );
 
   testWidgets('Selection behavior when clicking the `Share` button on Android', (WidgetTester tester) async {
@@ -4607,7 +4653,8 @@ void main() {
     expect(regionState.selectionOverlay?.startHandleLayerLink, isNull);
     expect(regionState.selectionOverlay?.endHandleLayerLink, isNull);
   },
-    skip: kIsWeb, // [intended] Web uses its native context menu.
+  // [intended] Web uses its native context menu.
+    skip: kIsWeb,
   );
 
   testWidgets('builds the correct button items', (WidgetTester tester) async {
@@ -4665,7 +4712,8 @@ void main() {
     }
   },
     variant: TargetPlatformVariant.all(),
-    skip: kIsWeb, // [intended] Web uses its native context menu.
+    // [intended] Web uses its native context menu.
+    skip: kIsWeb,
   );
 
   testWidgets('can clear selection through SelectableRegionState', (WidgetTester tester) async {
@@ -4721,7 +4769,8 @@ void main() {
     expect(paragraph1.selections, isEmpty);
     expect(paragraph2.selections, isEmpty);
     expect(paragraph3.selections, isEmpty);
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
+    // https://github.com/flutter/flutter/issues/125582
+  }, skip: kIsWeb);
 
   testWidgets('Text processing actions are added to the toolbar', (WidgetTester tester) async {
     final MockProcessTextHandler mockProcessTextHandler = MockProcessTextHandler();
@@ -4771,7 +4820,8 @@ void main() {
     expect(buttonLabels.contains(fakeAction2Label), areTextActionsSupported);
   },
     variant: TargetPlatformVariant.all(),
-    skip: kIsWeb, // [intended] Web uses its native context menu.
+    // [intended] Web uses its native context menu.
+    skip: kIsWeb,
   );
 
   testWidgets('SelectionListener onSelectionChanged is accurate with WidgetSpans', (WidgetTester tester) async {
@@ -5341,7 +5391,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Copy'), findsNothing);
     },
-      skip: !kIsWeb, // [intended]
+    // [intended]
+      skip: !kIsWeb,
     );
   });
 

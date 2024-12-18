@@ -40,7 +40,8 @@ void main() {
         const Offset(799, 599): const Color(0x00000000), // the background
       },
     );
-  }, skip: !canCaptureImage || impellerEnabled); // [intended] Test relies on captureImage, which is not supported on web currently.
+    // [intended] Test relies on captureImage, which is not supported on web currently.
+  }, skip: !canCaptureImage || impellerEnabled);
 
   testWidgets('Default text color', (WidgetTester tester) async {
     await tester.pumpWidget(const ColoredBox(
@@ -65,7 +66,8 @@ void main() {
         const Offset(799, 599): const Color(0xFFABCDEF), // the background
       },
     );
-  }, skip: !canCaptureImage || impellerEnabled); // [intended] Test relies on captureImage, which is not supported on web currently.
+    // [intended] Test relies on captureImage, which is not supported on web currently.
+  }, skip: !canCaptureImage || impellerEnabled);
 
   testWidgets('Default text selection color', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
@@ -117,7 +119,8 @@ void main() {
         const Offset(799, 599): const Color(0xFFFFFFFF), // the background
       },
     );
-  }, skip: !canCaptureImage || impellerEnabled); // [intended] Test relies on captureImage, which is not supported on web currently.
+    // [intended] Test relies on captureImage, which is not supported on web currently.
+  }, skip: !canCaptureImage || impellerEnabled);
 }
 
 Color _getPixel(ByteData bytes, int x, int y, int width) {

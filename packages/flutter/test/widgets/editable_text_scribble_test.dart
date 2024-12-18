@@ -106,7 +106,8 @@ void main() {
     log.clear();
 
     // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
-  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
+    // [intended]
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('Selection changes during Scribble interaction should have the scribble cause', (WidgetTester tester) async {
     controller.text = 'Lorem ipsum dolor sit amet';
@@ -183,7 +184,8 @@ void main() {
 
     // On web, we should rely on the browser's implementation of Scribble, so the selection changed cause
     // will never be SelectionChangedCause.scribble.
-  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
+    // [intended]
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('Declares itself for Scribble interaction if the bounds overlap the scribble rect and the widget is touchable', (WidgetTester tester) async {
     controller.text = 'Lorem ipsum dolor sit amet';
@@ -276,7 +278,8 @@ void main() {
 
     // On web, we should rely on the browser's implementation of Scribble, so the engine will
     // never request the scribble elements.
-  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
+    // [intended]
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('single line Scribble fields can show a horizontal placeholder', (WidgetTester tester) async {
     controller.text = 'Lorem ipsum dolor sit amet';
@@ -350,7 +353,8 @@ void main() {
 
     // On web, we should rely on the browser's implementation of Scribble, so the framework
     // will not handle placeholders.
-  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
+    // [intended]
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('multiline Scribble fields can show a vertical placeholder', (WidgetTester tester) async {
     controller.text = 'Lorem ipsum dolor sit amet';
@@ -427,7 +431,8 @@ void main() {
 
     // On web, we should rely on the browser's implementation of Scribble, so the framework
     // will not handle placeholders.
-  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
+    // [intended]
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('selection rects are sent when they change', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
@@ -567,7 +572,8 @@ void main() {
     log.clear();
 
     // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
-  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
+    // [intended]
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('selection rects are not sent if stylusHandwritingEnabled is false', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
@@ -606,7 +612,8 @@ void main() {
     expect(log.where((MethodCall m) => m.method == 'TextInput.setSelectionRects').length, 0);
 
     // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
-  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
+    // [intended]
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('selection rects sent even when character corners are outside of paintBounds', (WidgetTester tester) async {
     final List<List<SelectionRect>> log = <List<SelectionRect>>[];
@@ -682,7 +689,8 @@ void main() {
     log.clear();
 
     // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
-  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
+    // [intended]
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   // Regression test for https://github.com/flutter/flutter/issues/159259.
   testWidgets('showToolbar does nothing and returns false when already shown during Scribble selection', (WidgetTester tester) async {
@@ -738,6 +746,7 @@ void main() {
     await tester.testTextInput.finishScribbleInteraction();
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
-    skip: kIsWeb, // [intended]
+    // [intended]
+    skip: kIsWeb,
   );
 }

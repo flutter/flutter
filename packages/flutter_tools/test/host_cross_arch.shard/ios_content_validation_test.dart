@@ -278,7 +278,8 @@ void main() {
           expect(xcodeBackendResult.exitCode, 0);
           expect(outputFlutterFrameworkBinary.existsSync(), isTrue);
           expect(outputAppFrameworkBinary.existsSync(), isTrue);
-        }, skip: !platform.isMacOS || buildMode != BuildMode.release); // [intended] only makes sense on macos.
+          // [intended] only makes sense on macos.
+        }, skip: !platform.isMacOS || buildMode != BuildMode.release);
 
         testWithoutContext('validate obfuscation', () {
           // HelloPlugin class is present in project.
@@ -507,7 +508,8 @@ void main() {
       final String statString = flutterFrameworkDir.statSync().mode.toRadixString(8);
       expect(statString, '40755');
     });
-  }, skip: !platform.isMacOS, // [intended] only makes sense for macos platform.
+    // [intended] only makes sense for macos platform.
+  }, skip: !platform.isMacOS,
      timeout: const Timeout(Duration(minutes: 10))
   );
 }

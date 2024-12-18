@@ -1671,7 +1671,8 @@ void main() {
         });
       });
     },
-    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    // [intended] on web these keys are handled by the browser.
+    skip: kIsWeb,
   );
 
   group('macOS shortcuts', () {
@@ -1840,7 +1841,8 @@ void main() {
         affinity: TextAffinity.upstream,
       ));
     }, variant: macOSOnly);
-  }, skip: kIsWeb); // [intended] on web these keys are handled by the browser.
+    // [intended] on web these keys are handled by the browser.
+  }, skip: kIsWeb);
 
   group('Web does not accept', () {
     final TargetPlatformVariant allExceptApple = TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS });
@@ -2152,8 +2154,8 @@ void main() {
       expect(controller.selection, const TextSelection.collapsed(offset: 0));
       expect(controller.text, testText);
     }, variant: appleOnly);
-
-  }, skip: !kIsWeb);// [intended] specific tests target web.
+    // [intended] specific tests target web.
+  }, skip: !kIsWeb);
 
   group('Web does accept', () {
     final TargetPlatformVariant macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
@@ -2906,5 +2908,6 @@ void main() {
             expect(scrollController.offset, newOffset);
           }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
     });
-  }, skip: !kIsWeb); // [intended] specific tests target web.
+    // [intended] specific tests target web.
+  }, skip: !kIsWeb);
 }

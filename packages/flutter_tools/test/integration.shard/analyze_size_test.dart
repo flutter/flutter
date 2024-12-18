@@ -83,7 +83,8 @@ void main() {
     expect(commandArguments.contains('--appSizeBase=$outputFilePath'), isTrue);
     expect(codeSizeDir.existsSync(), true);
     tempDir.deleteSync(recursive: true);
-  }, skip: !platform.isMacOS); // [intended] iOS can only be built on macos.
+    // [intended] iOS can only be built on macos.
+  }, skip: !platform.isMacOS);
 
   testWithoutContext('--analyze-size flag produces expected output on hello_world for macOS', () async {
     final String workingDirectory = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
@@ -134,7 +135,8 @@ void main() {
     expect(commandArguments.contains('--appSizeBase=$outputFilePath'), isTrue);
     expect(codeSizeDir.existsSync(), true);
     tempDir.deleteSync(recursive: true);
-  }, skip: !platform.isMacOS); // [intended] this is a macos only test.
+    // [intended] this is a macos only test.
+  }, skip: !platform.isMacOS);
 
   testWithoutContext('--analyze-size is only supported in release mode', () async {
     final ProcessResult result = await processManager.run(<String>[

@@ -195,7 +195,8 @@ void main() {
     greenLoader.dispose();
     redLoader.dispose();
     imageCache.clear();
-  }, skip: kIsWeb); // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
+    // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
+  }, skip: kIsWeb);
 
   testWidgets('ImageDecoration.lerp 2', (WidgetTester tester) async {
     final MemoryImage cmyk = MemoryImage(Uint8List.fromList(<int>[
@@ -420,7 +421,8 @@ void main() {
     cmykLoader.dispose();
     wrgbLoader.dispose();
     imageCache.clear();
-  }, skip: kIsWeb); // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
+    // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
+  }, skip: kIsWeb);
 
   testWidgets('ImageDecoration.lerp with colored background', (WidgetTester tester) async {
     final MemoryImage cmyk = MemoryImage(Uint8List.fromList(<int>[
@@ -590,7 +592,8 @@ void main() {
     cmykLoader.dispose();
     wrgbLoader.dispose();
     imageCache.clear();
-  }, skip: kIsWeb); // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
+    // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
+  }, skip: kIsWeb);
 }
 
 class _ImageLoader {

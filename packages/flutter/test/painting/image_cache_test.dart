@@ -566,7 +566,8 @@ void main() {
 
     imageInfo.dispose();
     expect(testImage.debugGetOpenHandleStackTraces()!.length, 0);
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
+    // https://github.com/flutter/flutter/issues/87442
+  }, skip: kIsWeb);
 
   test('Image is obtained and disposed of properly for cache when listener is still active', () async {
     const int key = 1;
@@ -605,7 +606,8 @@ void main() {
     expect(testImage.debugGetOpenHandleStackTraces()!.length, 1);
     imageInfo.dispose();
     expect(testImage.debugGetOpenHandleStackTraces()!.length, 0);
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
+    // https://github.com/flutter/flutter/issues/87442
+  }, skip: kIsWeb);
 
   test('clear does not leave pending images stuck', () async {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);

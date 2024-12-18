@@ -30,6 +30,7 @@ void main() {
     expect(exec.exitCode, 64);
     expect(exec.stderr, contains('Could not find a command named "!"'));
   },
-  skip: !Platform.isWindows, // [intended] relies on Windows's cmd.exe
+  // [intended] relies on Windows's cmd.exe
+  skip: !Platform.isWindows,
   );
 }

@@ -149,7 +149,8 @@ void main() {
       }
     },
       variant: KeySimulatorTransitModeVariant.rawKeyData(),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/61021
+      // https://github.com/flutter/flutter/issues/61021
+      skip: isBrowser,
     );
 
     testWidgets('keysPressed is correct when modifier is released before key', (WidgetTester tester) async {
@@ -203,7 +204,8 @@ void main() {
       }
     },
       variant: KeySimulatorTransitModeVariant.rawKeyData(),
-      skip: isBrowser, // https://github.com/flutter/flutter/issues/76741
+      // https://github.com/flutter/flutter/issues/76741
+      skip: isBrowser,
     );
 
     testWidgets('keysPressed modifiers are synchronized with key events on macOS', (WidgetTester tester) async {
@@ -230,7 +232,8 @@ void main() {
       );
     },
       variant: KeySimulatorTransitModeVariant.rawKeyData(),
-      skip: isBrowser, // [intended] This is a macOS-specific test.
+      // [intended] This is a macOS-specific test.
+      skip: isBrowser,
     );
 
     testWidgets('keysPressed modifiers are synchronized with key events on iOS', (WidgetTester tester) async {
@@ -257,7 +260,8 @@ void main() {
       );
     },
       variant: KeySimulatorTransitModeVariant.rawKeyData(),
-      skip: isBrowser, // [intended] This is a iOS-specific test.
+      // [intended] This is a iOS-specific test.
+      skip: isBrowser,
     );
 
     testWidgets('keysPressed modifiers are synchronized with key events on Windows', (WidgetTester tester) async {
@@ -284,7 +288,8 @@ void main() {
       );
     },
       variant: KeySimulatorTransitModeVariant.rawKeyData(),
-      skip: isBrowser, // [intended] This is a Windows-specific test.
+      // [intended] This is a Windows-specific test.
+      skip: isBrowser,
     );
 
     testWidgets('keysPressed modifiers are synchronized with key events on android', (WidgetTester tester) async {
@@ -311,7 +316,8 @@ void main() {
       );
     },
       variant: KeySimulatorTransitModeVariant.rawKeyData(),
-      skip: isBrowser, // [intended] This is an Android-specific test.
+      // [intended] This is an Android-specific test.
+      skip: isBrowser,
     );
 
     testWidgets('keysPressed modifiers are synchronized with key events on fuchsia', (WidgetTester tester) async {
@@ -338,7 +344,8 @@ void main() {
       );
     },
       variant: KeySimulatorTransitModeVariant.rawKeyData(),
-      skip: isBrowser, // [intended] This is a Fuchsia-specific test.
+      // [intended] This is a Fuchsia-specific test.
+      skip: isBrowser,
     );
 
     testWidgets('keysPressed modifiers are synchronized with key events on Linux GLFW', (WidgetTester tester) async {
@@ -371,7 +378,8 @@ void main() {
       );
     },
       variant: KeySimulatorTransitModeVariant.rawKeyData(),
-      skip: isBrowser, // [intended] This is a GLFW-specific test.
+      // [intended] This is a GLFW-specific test.
+      skip: isBrowser,
     );
 
     Future<void> simulateGTKKeyEvent(bool keyDown, int scancode, int keycode, int modifiers) async {
@@ -423,7 +431,8 @@ void main() {
       );
     },
       variant: KeySimulatorTransitModeVariant.rawKeyData(),
-      skip: isBrowser, // [intended] This is a GTK-specific test.
+      // [intended] This is a GTK-specific test.
+      skip: isBrowser,
     );
 
     // Regression test for https://github.com/flutter/flutter/issues/114591 .
@@ -443,7 +452,8 @@ void main() {
       );
     },
       variant: KeySimulatorTransitModeVariant.rawKeyData(),
-      skip: isBrowser, // [intended] This is a GTK-specific test.
+      // [intended] This is a GTK-specific test.
+      skip: isBrowser,
     );
 
     // Regression test for https://github.com/flutter/flutter/issues/114591 .
@@ -479,7 +489,8 @@ void main() {
       );
     },
       variant: KeySimulatorTransitModeVariant.rawKeyData(),
-      skip: !isBrowser, // [intended] This is a Browser-specific test.
+      // [intended] This is a Browser-specific test.
+      skip: !isBrowser,
     );
 
     testWidgets('keysPressed modifiers are synchronized with key events on web', (WidgetTester tester) async {
@@ -607,7 +618,8 @@ void main() {
       );
     },
       variant: KeySimulatorTransitModeVariant.rawKeyData(),
-      skip: isBrowser, // [intended] This is a Android-specific test.
+      // [intended] This is a Android-specific test.
+      skip: isBrowser,
     );
 
     testWidgets('sided modifiers without a side set return all sides on macOS', (WidgetTester tester) async {
@@ -645,7 +657,8 @@ void main() {
           },
         ),
       );
-    }, skip: isBrowser); // [intended] This is a macOS-specific test.
+      // [intended] This is a macOS-specific test.
+    }, skip: isBrowser);
 
     testWidgets('sided modifiers without a side set return all sides on iOS', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -682,7 +695,8 @@ void main() {
           },
         ),
       );
-    }, skip: isBrowser); // [intended] This is an iOS-specific test.
+      // [intended] This is an iOS-specific test.
+    }, skip: isBrowser);
 
     testWidgets('repeat events', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -725,7 +739,8 @@ void main() {
       expect(receivedEvent.repeat, false);
 
       RawKeyboard.instance.keyEventHandler = null;
-    }, skip: isBrowser); // [intended] This is a Windows-specific test.
+      // [intended] This is a Windows-specific test.
+    }, skip: isBrowser);
 
     testWidgets('sided modifiers without a side set return all sides on Windows', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -760,7 +775,8 @@ void main() {
           },
         ),
       );
-    }, skip: isBrowser); // [intended] This is a Windows-specific test.
+      // [intended] This is a Windows-specific test.
+    }, skip: isBrowser);
 
     testWidgets('sided modifiers without a side set return all sides on Linux GLFW', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -798,7 +814,8 @@ void main() {
           },
         ),
       );
-    }, skip: isBrowser); // [intended] This is a GLFW-specific test.
+      // [intended] This is a GLFW-specific test.
+    }, skip: isBrowser);
 
     testWidgets('sided modifiers without a side set return left sides on web', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
@@ -895,7 +912,8 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.capsLock));
       expect(data.logicalKey, equals(LogicalKeyboardKey.capsLock));
       expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.capsLock));
-    }, skip: isBrowser); // [intended] This is an iOS-specific group.
+      // [intended] This is an iOS-specific group.
+    }, skip: isBrowser);
 
     testWidgets('Allows inconsistent modifier for Android', (WidgetTester _) async {
       // Use `testWidgets` for clean-ups.
@@ -926,7 +944,8 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.capsLock));
       expect(data.logicalKey, equals(LogicalKeyboardKey.capsLock));
       expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.capsLock));
-    }, skip: isBrowser); // [intended] This is an Android-specific group.
+      // [intended] This is an Android-specific group.
+    }, skip: isBrowser);
 
     testWidgets('Allows inconsistent modifier for Web - Alt graph', (WidgetTester _) async {
       // Regression test for https://github.com/flutter/flutter/issues/113836
@@ -955,7 +974,8 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.altRight));
       expect(data.logicalKey, equals(LogicalKeyboardKey.altGraph));
       expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.altGraph));
-    }, skip: !isBrowser); // [intended] This is a Browser-specific test.
+      // [intended] This is a Browser-specific test.
+    }, skip: !isBrowser);
 
     testWidgets('Allows inconsistent modifier for Web - Alt right', (WidgetTester _) async {
       // Regression test for https://github.com/flutter/flutter/issues/113836
@@ -984,7 +1004,8 @@ void main() {
       expect(data.physicalKey, equals(PhysicalKeyboardKey.altRight));
       expect(data.logicalKey, equals(LogicalKeyboardKey.altRight));
       expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.altRight));
-    }, skip: !isBrowser); // [intended] This is a Browser-specific test.
+      // [intended] This is a Browser-specific test.
+    }, skip: !isBrowser);
 
     testWidgets('Dispatch events to all handlers', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
@@ -1419,7 +1440,8 @@ void main() {
         'repeatCount': 42,
       }).data, isNot(equals(const RawKeyEventDataAndroid())));
     });
-  }, skip: isBrowser); // [intended] This is an Android-specific group.
+    // [intended] This is an Android-specific group.
+  }, skip: isBrowser);
 
   group('RawKeyEventDataFuchsia', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
@@ -1573,7 +1595,8 @@ void main() {
         'modifiers': 0x10,
       }).data, isNot(equals(const RawKeyEventDataFuchsia())));
     });
-  }, skip: isBrowser); // [intended] This is a Fuchsia-specific group.
+    // [intended] This is a Fuchsia-specific group.
+  }, skip: isBrowser);
 
   group('RawKeyEventDataMacOs', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
@@ -1801,7 +1824,8 @@ void main() {
         'modifiers': 0x10,
       }).data, isNot(equals(const RawKeyEventDataMacOs())));
     });
-  }, skip: isBrowser); // [intended] This is a macOS-specific group.
+    // [intended] This is a macOS-specific group.
+  }, skip: isBrowser);
 
   group('RawKeyEventDataIos', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
@@ -1986,7 +2010,8 @@ void main() {
         'modifiers': 0x10,
       }).data, isNot(equals(const RawKeyEventDataIos())));
     });
-  }, skip: isBrowser); // [intended] This is an iOS-specific group.
+    // [intended] This is an iOS-specific group.
+  }, skip: isBrowser);
 
   group('RawKeyEventDataWindows', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
@@ -2227,7 +2252,8 @@ void main() {
         'modifiers': 0x20,
       }).data, isNot(equals(const RawKeyEventDataWindows())));
     });
-  }, skip: isBrowser); // [intended] This is a Windows-specific group.
+    // [intended] This is a Windows-specific group.
+  }, skip: isBrowser);
 
   group('RawKeyEventDataLinux-GLFW', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
@@ -2452,7 +2478,8 @@ void main() {
         keyHelper: KeyHelper('glfw'), isDown: true)),
       ));
     });
-  }, skip: isBrowser); // [intended] This is a GLFW-specific group.
+    // [intended] This is a GLFW-specific group.
+  }, skip: isBrowser);
 
   group('RawKeyEventDataLinux-GTK', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
@@ -2709,7 +2736,8 @@ void main() {
         keyHelper: KeyHelper('gtk'), isDown: true)),
       ));
     });
-  }, skip: isBrowser); // [intended] This is a GTK-specific group.
+    // [intended] This is a GTK-specific group.
+  }, skip: isBrowser);
 
   group('RawKeyEventDataWeb', () {
     const Map<int, ModifierKey> modifierTests = <int, ModifierKey>{

@@ -111,7 +111,8 @@ void main() {
 
     editable.strutStyle = const StrutStyle(fontSize: 100, forceStrutHeight: true);
     expect(editable.getMaxIntrinsicHeight(double.infinity), 100);
-  }, skip: kIsWeb && !isSkiaWeb); // [intended] strut support for HTML renderer https://github.com/flutter/flutter/issues/32243.
+    // [intended] strut support for HTML renderer https://github.com/flutter/flutter/issues/32243
+  }, skip: kIsWeb && !isSkiaWeb);
 }
 
 class _FakeEditableTextState with TextSelectionDelegate {

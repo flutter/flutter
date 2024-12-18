@@ -1833,7 +1833,8 @@ void main() {
     await tester.tapAt(position, buttons: kSecondaryMouseButton, kind: PointerDeviceKind.mouse);
     await tester.pump();
     expect(find.byType(Placeholder), findsOneWidget);
-  }, skip: kIsWeb); // [intended] On web, we use native context menus for text fields.
+    // [intended] On web, we use native context menus for text fields.
+  }, skip: kIsWeb);
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGestureDetectorBuilderDelegate {

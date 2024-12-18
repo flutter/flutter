@@ -55,7 +55,8 @@ void main() {
 
     expect(imageCache.statusForKey(provider).untracked, true);
     expect(imageCache.pendingImageCount, 0);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56314
+    // https://github.com/flutter/flutter/issues/56314
+  }, skip: isBrowser);
 
   test('ImageProvider can evict images', () async {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);

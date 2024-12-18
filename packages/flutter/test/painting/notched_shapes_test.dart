@@ -101,7 +101,8 @@ void main() {
           sampleSize: 100,
         ),
       );
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
+      // https://github.com/flutter/flutter/issues/44572
+    }, skip: isBrowser);
 
     test('AutomaticNotchedShape - no guest', () {
       expect(

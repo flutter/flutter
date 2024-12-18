@@ -55,7 +55,8 @@ void main() {
     BuildMode.release,
   ]) {
     testUsingContext('build with assets $buildMode',
-        skip: const LocalPlatform().isWindows, // [intended] Backslashes in commands, but we will never run these commands on Windows.
+    // [intended] Backslashes in commands, but we will never run these commands on Windows.
+        skip: const LocalPlatform().isWindows,
         overrides: <Type, Generator>{
           FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
           ProcessManager: () => FakeProcessManager.empty(),

@@ -53,7 +53,8 @@ Future<void> main() async {
     expect(output, contains(RegExp(r'Expanding downloaded archive with (.*)...')));
     expect(output, isNot(contains('Use the -Force parameter' /* Luke */)));
   },
-  skip: !platform.isWindows); // [intended] Only Windows uses the batch entrypoint
+  // [intended] Only Windows uses the batch entrypoint
+  skip: !platform.isWindows);
 }
 
 Future<String> runDartBatch() async {

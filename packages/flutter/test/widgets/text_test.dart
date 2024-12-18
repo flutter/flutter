@@ -912,7 +912,8 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
+    // https://github.com/flutter/flutter/issues/62945
+  }, skip: isBrowser);
 
   testWidgets('TapGesture recognizers contribute link semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1032,7 +1033,8 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
+    // https://github.com/flutter/flutter/issues/62945
+  }, skip: isBrowser);
 
   testWidgets('inline widgets semantic nodes scale', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1115,7 +1117,8 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
+    // https://github.com/flutter/flutter/issues/62945
+  }, skip: isBrowser);
 
   testWidgets('receives fontFamilyFallback and package from root ThemeData', (WidgetTester tester) async {
     const String fontFamily = 'fontFamily';
@@ -1171,7 +1174,8 @@ void main() {
       find.byType(Text),
       paints..clipRect(rect: const Rect.fromLTWH(0, 0, 50, 50)),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87878
+    // https://github.com/flutter/flutter/issues/87878
+  }, skip: isBrowser);
 
   testWidgets('Overflow is clipping correctly - short text with overflow: ellipsis', (WidgetTester tester) async {
     await _pumpTextWidget(
@@ -1261,7 +1265,8 @@ void main() {
     final Size textSizeLongestLine = tester.getSize(find.byType(Text));
     expect(textSizeLongestLine.width, equals(630.0));
     expect(textSizeLongestLine.height, equals(fontHeight * 2));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44020
+    // https://github.com/flutter/flutter/issues/44020
+  }, skip: isBrowser);
 
   testWidgets('textWidthBasis with textAlign still obeys parent alignment', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1311,7 +1316,8 @@ void main() {
     expect(tester.getSize(find.text('RIGHT ALIGNED, PARENT')).width, lessThan(width));
     expect(tester.getSize(find.text('LEFT ALIGNED, LONGEST LINE')).width, lessThan(width));
     expect(tester.getSize(find.text('RIGHT ALIGNED, LONGEST LINE')).width, equals(width));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44020
+    // https://github.com/flutter/flutter/issues/44020
+  }, skip: isBrowser);
 
   testWidgets(
     'textWidthBasis.longestLine confines the width of the paragraph '
@@ -1350,7 +1356,8 @@ void main() {
         return true;
       }));
     },
-    skip: isBrowser, // https://github.com/flutter/flutter/issues/44020
+    // https://github.com/flutter/flutter/issues/44020
+    skip: isBrowser,
   );
 
   testWidgets('Paragraph.getBoxesForRange returns nothing when selection range is zero length', (WidgetTester tester) async {
@@ -1410,7 +1417,8 @@ void main() {
       ],
     )));
     semantics.dispose();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
+    // https://github.com/flutter/flutter/issues/87877
+  }, skip: isBrowser);
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 2', (WidgetTester tester) async {
@@ -1464,7 +1472,8 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
+    // https://github.com/flutter/flutter/issues/87877
+  }, skip: isBrowser);
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 3', (WidgetTester tester) async {
@@ -1530,7 +1539,8 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
+    // https://github.com/flutter/flutter/issues/87877
+  }, skip: isBrowser);
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 4', (WidgetTester tester) async {
@@ -1604,7 +1614,8 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
+    // https://github.com/flutter/flutter/issues/87877
+  }, skip: isBrowser);
 
   testWidgets('RenderParagraph intrinsic width', (WidgetTester tester) async {
     await tester.pumpWidget(

@@ -4554,7 +4554,8 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   },
     variant:  const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS}),
-    skip: isBrowser, // [intended] only non-web supports move a11y focus back to last item.
+    // [intended] only non-web supports move a11y focus back to last item.
+    skip: isBrowser,
   );
 
   group('RouteSettings.toString', () {
@@ -4604,7 +4605,8 @@ void main() {
       expect(lastFrameworkHandlesBack, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
-      skip: isBrowser, // [intended] only non-web Android supports predictive back.
+      // [intended] only non-web Android supports predictive back.
+      skip: isBrowser,
     );
 
     testWidgets('navigating around a single Navigator with .pop', (WidgetTester tester) async {
@@ -4681,7 +4683,8 @@ void main() {
       expect(lastFrameworkHandlesBack, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
-      skip: isBrowser, // [intended] only non-web Android supports predictive back.
+      // [intended] only non-web Android supports predictive back.
+      skip: isBrowser,
     );
 
     testWidgets('navigating around a single Navigator with system back', (WidgetTester tester) async {
@@ -4758,7 +4761,8 @@ void main() {
       expect(lastFrameworkHandlesBack, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
-      skip: isBrowser, // [intended] only non-web Android supports predictive back.
+      // [intended] only non-web Android supports predictive back.
+      skip: isBrowser,
     );
 
     testWidgets('a single Navigator with a PopScope that defaults to enabled', (WidgetTester tester) async {
@@ -4798,7 +4802,8 @@ void main() {
       expect(lastFrameworkHandlesBack, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
-      skip: isBrowser, // [intended] only non-web Android supports predictive back.
+      // [intended] only non-web Android supports predictive back.
+      skip: isBrowser,
     );
 
     testWidgets('a single Navigator with a PopScope that defaults to disabled', (WidgetTester tester) async {
@@ -4838,7 +4843,8 @@ void main() {
       expect(lastFrameworkHandlesBack, isTrue);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
-      skip: isBrowser, // [intended] only non-web Android supports predictive back.
+      // [intended] only non-web Android supports predictive back.
+      skip: isBrowser,
     );
 
     // Test both system back gestures and Navigator.pop.
@@ -4939,7 +4945,8 @@ void main() {
         expect(lastFrameworkHandlesBack, isFalse);
       },
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
-        skip: isBrowser, // [intended] only non-web Android supports predictive back.
+        // [intended] only non-web Android supports predictive back.
+        skip: isBrowser,
       );
     }
 
@@ -5066,7 +5073,8 @@ void main() {
       expect(lastFrameworkHandlesBack, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
-      skip: isBrowser, // [intended] only non-web Android supports predictive back.
+      // [intended] only non-web Android supports predictive back.
+      skip: isBrowser,
     );
 
     group('Navigator page API', () {
@@ -5185,7 +5193,8 @@ void main() {
         expect(lastFrameworkHandlesBack, isFalse);
       },
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
-        skip: isBrowser, // [intended] only non-web Android supports predictive back.
+        // [intended] only non-web Android supports predictive back.
+        skip: isBrowser,
       );
 
       testWidgets('starting with existing route history', (WidgetTester tester) async {
@@ -5276,7 +5285,8 @@ void main() {
         expect(lastFrameworkHandlesBack, isFalse);
       },
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
-        skip: isBrowser, // [intended] only non-web Android supports predictive back.
+        // [intended] only non-web Android supports predictive back.
+        skip: isBrowser,
       );
 
       testWidgets('popping a page with canPop true still calls onPopInvoked', (WidgetTester tester) async {
@@ -5410,7 +5420,8 @@ void main() {
         expect(onPopInvokedCallCount, equals(2));
       },
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
-        skip: isBrowser, // [intended] only non-web Android supports predictive back.
+        // [intended] only non-web Android supports predictive back.
+        skip: isBrowser,
       );
 
       testWidgets('canPop and onPopInvoked', (WidgetTester tester) async {

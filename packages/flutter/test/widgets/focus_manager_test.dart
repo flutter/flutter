@@ -382,7 +382,8 @@ void main() {
         await setAppLifecycleState(AppLifecycleState.resumed);
         expect(focusNode.hasPrimaryFocus, isTrue);
       },
-      skip: kIsWeb, // [intended]
+      // [intended]
+      skip: kIsWeb,
       variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android, TargetPlatform.iOS}),
     );
 

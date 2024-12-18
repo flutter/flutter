@@ -48,5 +48,6 @@ void main() {
       previewBin,
       exists,
     );
-  }, skip: !const LocalPlatform().isWindows); // [intended] Flutter Preview only supported on Windows currently
+    // [intended] Flutter Preview only supported on Windows currently
+  }, skip: !const LocalPlatform().isWindows);
 }

@@ -122,7 +122,8 @@ void main() {
       expect(fileVersion, equals('1.2.3.4'));
       expect(productVersion, equals('1.2.3+4'));
     });
-  }, skip: !io.Platform.isWindows); // [intended] Windows integration build.
+    // [intended] Windows integration build.
+  }, skip: !io.Platform.isWindows);
 }
 
 String _getFileVersion(File file) {

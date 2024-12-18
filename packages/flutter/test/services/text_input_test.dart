@@ -1033,7 +1033,8 @@ void main() {
         // input control receives TextInputType.none with isMultiline flag
         MethodCall('TextInput.setClient', <dynamic>[1, noneIsMultilineTrueJson]),
       ]);
-    }, skip: !kIsWeb); // https://github.com/flutter/flutter/issues/125875
+      // https://github.com/flutter/flutter/issues/125875
+    }, skip: !kIsWeb);
 
     test('notifies changes to the attached client', () async {
       final FakeTextInputControl control = FakeTextInputControl();

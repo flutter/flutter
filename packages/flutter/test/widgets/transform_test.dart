@@ -538,7 +538,8 @@ void main() {
         await expectLater(find.byType(RepaintBoundary).first, matchesReferenceImage(imageWithCompositing));
       }
     },
-    skip: isBrowser, // due to https://github.com/flutter/flutter/issues/49857
+    // due to https://github.com/flutter/flutter/issues/49857
+    skip: isBrowser,
   );
 
   List<double> extractMatrix(ui.ImageFilter? filter) {

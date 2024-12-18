@@ -190,7 +190,8 @@ void main() {
       await tester.pump();
       expect(invokedLiveTextInputSuccessfully, isTrue);
     },
-    skip: kIsWeb, // [intended]
+    // [intended]
+    skip: kIsWeb,
   );
 
   group('Check the passed groupId value', () {
@@ -461,7 +462,8 @@ void main() {
     expect(caretXPosition, lessThan(previousCaretXPosition));
 
     expect(state.currentTextEditingValue.text, equals('گیگ '));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/78550.
+    // https://github.com/flutter/flutter/issues/78550
+  }, skip: isBrowser);
 
   testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -2011,7 +2013,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Paste'), findsOneWidget);
     },
-      skip: !kIsWeb, // [intended]
+    // [intended]
+      skip: !kIsWeb,
     );
   });
 
@@ -2096,7 +2099,8 @@ void main() {
 
     // On web, we don't show the Flutter toolbar and instead rely on the browser
     // toolbar. Until we change that, this test should remain skipped.
-  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android })); // [intended]
+    // [intended]
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
 
   testWidgets('Paste is shown only when there is something to paste', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -2186,7 +2190,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(copySelectionRange, localController.selection);
     expect(find.text('Copy'), findsNothing);
-  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows })); // [intended]
+    // [intended]
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets('Copy selection collapses selection and hides the toolbar on Android and Fuchsia', (WidgetTester tester) async {
     final TextEditingController localController = TextEditingController(text: 'Hello world');
@@ -2228,7 +2233,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(localController.selection, TextSelection.collapsed(offset: copySelectionRange.extentOffset));
     expect(find.text('Copy'), findsNothing);
-  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia })); // [intended]
+    // [intended]
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }));
 
   testWidgets('can show the toolbar after clearing all text', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/35998.
@@ -3101,7 +3107,8 @@ void main() {
 
     // On web, we don't show the Flutter toolbar and instead rely on the browser
     // toolbar. Until we change that, this test should remain skipped.
-  }, skip: kIsWeb); // [intended]
+    // [intended]
+  }, skip: kIsWeb);
 
   // The variants to test in the focus handling test.
   final ValueVariant<TextInputAction> focusVariants = ValueVariant<
@@ -5716,7 +5723,8 @@ void main() {
 
     // On web, we don't show the Flutter toolbar and instead rely on the browser
     // toolbar. Until we change that, this test should remain skipped.
-  }, skip: kIsWeb); // [intended]
+    // [intended]
+  }, skip: kIsWeb);
 
   testWidgets('text selection handle visibility', (WidgetTester tester) async {
     // Text with two separate words to select.
@@ -5887,7 +5895,8 @@ void main() {
 
     // On web, we don't show the Flutter toolbar and instead rely on the browser
     // toolbar. Until we change that, this test should remain skipped.
-  }, skip: kIsWeb); // [intended]
+    // [intended]
+  }, skip: kIsWeb);
 
   testWidgets('text selection handle visibility RTL', (WidgetTester tester) async {
     // Text with two separate words to select.
@@ -5948,7 +5957,8 @@ void main() {
 
     // On web, we don't show the Flutter toolbar and instead rely on the browser
     // toolbar. Until we change that, this test should remain skipped.
-  }, skip: kIsWeb); // [intended]
+    // [intended]
+  }, skip: kIsWeb);
 
   const String testText = 'Now is the time for\n' // 20
       'all good people\n'                         // 20 + 16 => 36
@@ -6965,7 +6975,8 @@ void main() {
     debugKeyEventSimulatorTransitModeOverride = null;
 
     // On web, using keyboard for selection is handled by the browser.
-  }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+    // [intended]
+  }, variant: TargetPlatformVariant.all(), skip: kIsWeb);
 
   testWidgets('keyboard text selection works (ui.KeyData then RawKeyEvent)', (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
@@ -6975,7 +6986,8 @@ void main() {
     debugKeyEventSimulatorTransitModeOverride = null;
 
     // On web, using keyboard for selection is handled by the browser.
-  }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+    // [intended]
+  }, variant: TargetPlatformVariant.all(), skip: kIsWeb);
 
   testWidgets(
     'keyboard shortcuts respect read-only',
@@ -7152,7 +7164,8 @@ void main() {
       expect(controller.text, equals(testText), reason: 'on $platform');
     },
     // On web, using keyboard for selection is handled by the browser.
-    skip: kIsWeb, // [intended]
+    // [intended]
+    skip: kIsWeb,
     variant: TargetPlatformVariant.all(),
   );
 
@@ -7298,7 +7311,8 @@ void main() {
     }
     expect(controller.text, equals(testText), reason: 'on $platform');
   },
-    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+  // [intended] on web these keys are handled by the browser.
+    skip: kIsWeb,
     variant: TargetPlatformVariant.all(),
   );
 
@@ -7454,7 +7468,8 @@ void main() {
         );
     }
   },
-    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+  // [intended] on web these keys are handled by the browser.
+    skip: kIsWeb,
     variant: TargetPlatformVariant.all(),
   );
 
@@ -7612,7 +7627,8 @@ void main() {
         );
     }
   },
-    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+  // [intended] on web these keys are handled by the browser.
+    skip: kIsWeb,
     variant: TargetPlatformVariant.all(),
   );
 
@@ -7806,7 +7822,8 @@ void main() {
         );
     }
   },
-    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+  // [intended] on web these keys are handled by the browser.
+    skip: kIsWeb,
     variant: TargetPlatformVariant.all(),
   );
 
@@ -7917,7 +7934,8 @@ void main() {
       )),
     );
   },
-    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+  // [intended] on web these keys are handled by the browser.
+    skip: kIsWeb,
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows })
   );
 
@@ -7978,7 +7996,8 @@ void main() {
     );
     expect(scrollable.controller!.offset, 0.0);
   },
-    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+  // [intended] on web these keys are handled by the browser.
+    skip: kIsWeb,
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS })
   );
 
@@ -8163,7 +8182,8 @@ void main() {
         );
     }
   },
-    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+  // [intended] on web these keys are handled by the browser.
+    skip: kIsWeb,
     variant: TargetPlatformVariant.all(),
   );
 
@@ -8350,7 +8370,8 @@ void main() {
         );
     }
   },
-    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+  // [intended] on web these keys are handled by the browser.
+    skip: kIsWeb,
     variant: TargetPlatformVariant.all(),
   );
 
@@ -8454,7 +8475,8 @@ void main() {
       ),
     );
   },
-    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+  // [intended] on web these keys are handled by the browser.
+    skip: kIsWeb,
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS })
   );
 
@@ -8519,7 +8541,8 @@ void main() {
       equals(const TextSelection.collapsed(offset: 0)),
     );
   },
-    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+  // [intended] on web these keys are handled by the browser.
+    skip: kIsWeb,
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows })
   );
 
@@ -8606,7 +8629,8 @@ void main() {
       )),
     );
   },
-    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+  // [intended] on web these keys are handled by the browser.
+    skip: kIsWeb,
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows })
   );
 
@@ -8702,7 +8726,8 @@ void main() {
     );
     expect(scrollController.position.pixels, 0.0);
   },
-    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+  // [intended] on web these keys are handled by the browser.
+    skip: kIsWeb,
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
@@ -8780,7 +8805,8 @@ void main() {
     expect(controller.value.selection.isCollapsed, isTrue);
     expect(controller.value.selection.baseOffset, 0);
   },
-    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+  // [intended] on web these keys are handled by the browser.
+    skip: kIsWeb,
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
@@ -8952,7 +8978,8 @@ void main() {
   },
       // On web, we don't show the Flutter toolbar and instead rely on the browser
       // toolbar. Until we change that, this test should remain skipped.
-      skip: kIsWeb, // [intended]
+      // [intended]
+      skip: kIsWeb,
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS })
   );
 
@@ -9084,7 +9111,8 @@ void main() {
     expect(state.selectionOverlay!.toolbarIsVisible, false);
     // On web, we don't show the Flutter toolbar and instead rely on the browser
     // toolbar. Until we change that, this test should remain skipped.
-  }, skip: kIsWeb); // [intended]
+    // [intended]
+  }, skip: kIsWeb);
 
   testWidgets('bringIntoView brings the caret into view when in a viewport', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/55547.
@@ -11369,7 +11397,8 @@ void main() {
     }
 
     // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb); // [intended]
+    // [intended]
+  }, skip: kIsWeb);
 
   testWidgets('navigating by word', (WidgetTester tester) async {
     controller.text = 'word word word';
@@ -11506,7 +11535,8 @@ void main() {
     expect(controller.selection.extentOffset, 9);
 
     // On web, using keyboard for selection is handled by the browser.
-  }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+    // [intended]
+  }, variant: TargetPlatformVariant.all(), skip: kIsWeb);
 
   testWidgets('navigating multiline text', (WidgetTester tester) async {
     controller.text = 'word word word\nword word\nword'; // 15 + 10 + 4;
@@ -11664,7 +11694,8 @@ void main() {
     expect(controller.selection.baseOffset, 15);
     expect(controller.selection.extentOffset, 24);
     // On web, using keyboard for selection is handled by the browser.
-  }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+    // [intended]
+  }, variant: TargetPlatformVariant.all(), skip: kIsWeb);
 
   testWidgets("Mac's expand by line behavior on multiple lines", (WidgetTester tester) async {
     controller.text = 'word word word\nword word\nword'; // 15 + 10 + 4;
@@ -11763,7 +11794,8 @@ void main() {
     expect(controller.selection.extentOffset, 29);
   },
     // On web, using keyboard for selection is handled by the browser.
-    skip: kIsWeb, // [intended]
+    // [intended]
+    skip: kIsWeb,
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS })
   );
 
@@ -11996,7 +12028,8 @@ void main() {
     );
   },
     // On web, using keyboard for selection is handled by the browser.
-    skip: kIsWeb, // [intended]
+    // [intended]
+    skip: kIsWeb,
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS })
   );
 
@@ -12083,7 +12116,8 @@ void main() {
 
   },
       // On web, using keyboard for selection is handled by the browser.
-      skip: kIsWeb, // [intended]
+      // [intended]
+      skip: kIsWeb,
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS })
   );
 
@@ -12131,7 +12165,8 @@ void main() {
     expect(myIntentWasCalled, isTrue);
 
     // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb); // [intended]
+    // [intended]
+  }, skip: kIsWeb);
 
   testWidgets('can change tap outside behavior by overriding actions', (WidgetTester tester) async {
     bool myIntentWasCalled = false;
@@ -12286,7 +12321,8 @@ void main() {
 
     expect(fadeTransition.toString(), contains('DISPOSED'));
     // On web, using keyboard for selection is handled by the browser.
-  }, skip: kIsWeb); // [intended]
+    // [intended]
+  }, skip: kIsWeb);
 
   testWidgets('EditableText does not leak animation controllers', (WidgetTester tester) async {
     controller.text = 'A';
@@ -12863,7 +12899,8 @@ void main() {
       expect(controller.value, TextEditingValue.empty);
 
     // On web, these keyboard shortcuts are handled by the browser.
-    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+    // [intended]
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb);
 
     testWidgets('Should have no effect on an empty and focused field', (WidgetTester tester) async {
       await tester.pumpWidget(boilerplate());
@@ -12886,7 +12923,8 @@ void main() {
       expect(controller.value, emptyTextCollapsed);
 
     // On web, these keyboard shortcuts are handled by the browser.
-    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+    // [intended]
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb);
 
     testWidgets('Can undo/redo a single insertion', (WidgetTester tester) async {
       await tester.pumpWidget(boilerplate());
@@ -12924,7 +12962,8 @@ void main() {
       expect(controller.value, textACollapsedAtEnd);
 
     // On web, these keyboard shortcuts are handled by the browser.
-    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+    // [intended]
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb);
 
     testWidgets('Can undo/redo multiple insertions', (WidgetTester tester) async {
       await tester.pumpWidget(boilerplate());
@@ -12963,7 +13002,8 @@ void main() {
       expect(controller.value, textABCollapsedAtEnd);
 
     // On web, these keyboard shortcuts are handled by the browser.
-    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+    // [intended]
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb);
 
     // Regression test for https://github.com/flutter/flutter/issues/120794.
     // This is only reproducible on Android platform because it is the only
@@ -13019,7 +13059,8 @@ void main() {
       expect(controller.value, emptyComposingOnAndroid(composingStep1));
 
     // On web, these keyboard shortcuts are handled by the browser.
-    }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended]
+    // [intended]
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb);
 
     // Regression test for https://github.com/flutter/flutter/issues/120194.
     testWidgets('Cursor does not jump after undo', (WidgetTester tester) async {
@@ -13044,7 +13085,8 @@ void main() {
       expect(controller.value, isDesktop() ? textASelected : textACollapsedAtEnd);
 
     // On web, these keyboard shortcuts are handled by the browser.
-    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+    // [intended]
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb);
 
     testWidgets('Initial value is recorded when an undo is received just after getting the focus', (WidgetTester tester) async {
       // Initialize the controller with a non empty text.
@@ -13069,7 +13111,8 @@ void main() {
       expect(controller.value, isDesktop() ? textASelected : textACollapsedAtEnd);
 
     // On web, these keyboard shortcuts are handled by the browser.
-    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+    // [intended]
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb);
 
     testWidgets('Can make changes in the middle of the history', (WidgetTester tester) async {
       await tester.pumpWidget(boilerplate());
@@ -13121,7 +13164,8 @@ void main() {
       expect(controller.value, textABCollapsedAtEnd);
 
     // On web, these keyboard shortcuts are handled by the browser.
-    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+    // [intended]
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb);
 
     testWidgets('inside EditableText, duplicate changes', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -13250,7 +13294,8 @@ void main() {
         ),
       );
     // On web, these keyboard shortcuts are handled by the browser.
-    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+    // [intended]
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb);
 
     testWidgets('inside EditableText, autofocus', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -13322,7 +13367,8 @@ void main() {
           selection: TextSelection.collapsed(offset: 1),
         ),
       );
-    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+      // [intended]
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb);
 
     testWidgets('does not save composing changes (except Android)', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -13481,7 +13527,8 @@ void main() {
       );
 
     // On web, these keyboard shortcuts are handled by the browser.
-    }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.android }), skip: kIsWeb); // [intended]
+    // [intended]
+    }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.android }), skip: kIsWeb);
 
     testWidgets('does save composing changes on Android', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -13705,7 +13752,8 @@ void main() {
       );
 
     // On web, these keyboard shortcuts are handled by the browser.
-    }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended]
+    // [intended]
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb);
 
     testWidgets('saves right up to composing change even when throttled', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -13908,7 +13956,8 @@ void main() {
       );
 
     // On web, these keyboard shortcuts are handled by the browser.
-    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+    // [intended]
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb);
   });
 
   testWidgets('pasting with the keyboard collapses the selection and places it after the pasted content', (WidgetTester tester) async {
@@ -14045,7 +14094,8 @@ void main() {
       expect(find.text('Paste'), findsOneWidget);
       return tester.tap(find.text('Paste'));
     });
-  }, skip: kIsWeb); // [intended]
+    // [intended]
+  }, skip: kIsWeb);
 
   // Regression test for https://github.com/flutter/flutter/issues/98322.
   testWidgets('EditableText consumes ActivateIntent and ButtonActivateIntent', (WidgetTester tester) async {
@@ -14137,7 +14187,8 @@ void main() {
 
     expect(tester.takeException(), null);
   // On web, the text selection toolbar paste button is handled by the browser.
-  }, skip: kIsWeb); // [intended]
+  // [intended]
+  }, skip: kIsWeb);
 
   // Regression test for https://github.com/flutter/flutter/issues/100585.
   testWidgets('can cut and remove field', (WidgetTester tester) async {
@@ -14188,7 +14239,8 @@ void main() {
 
     expect(tester.takeException(), null);
   // On web, the text selection toolbar cut button is handled by the browser.
-  }, skip: kIsWeb); // [intended]
+  // [intended]
+  }, skip: kIsWeb);
 
   group('Mac document shortcuts', () {
     testWidgets('ctrl-A/E', (WidgetTester tester) async {
@@ -14268,7 +14320,8 @@ void main() {
         reason: 'on $platform',
       );
     },
-      skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    // [intended] on web these keys are handled by the browser.
+      skip: kIsWeb,
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
     );
 
@@ -14334,7 +14387,8 @@ void main() {
       expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, 0);
     },
-      skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    // [intended] on web these keys are handled by the browser.
+      skip: kIsWeb,
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
     );
 
@@ -14400,7 +14454,8 @@ void main() {
       expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, 0);
     },
-      skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    // [intended] on web these keys are handled by the browser.
+      skip: kIsWeb,
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
     );
 
@@ -14508,7 +14563,8 @@ void main() {
         expect(controller.selection.baseOffset, controller.text.length);
         expect(controller.text.substring(55, 72), 'of their countr.y');
       },
-        skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+      // [intended] on web these keys are handled by the browser.
+        skip: kIsWeb,
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
       );
 
@@ -14589,7 +14645,8 @@ void main() {
         expect(controller.selection.baseOffset, 10);
         expect(controller.text, '👨‍👩‍👦😆');
       },
-        skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+      // [intended] on web these keys are handled by the browser.
+        skip: kIsWeb,
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
       );
     });
@@ -14698,7 +14755,8 @@ void main() {
 
     expect(find.byKey(key), findsOneWidget);
   },
-    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  // [intended] on web the browser handles the context menu.
+    skip: kIsWeb,
   );
 
   testWidgets('contextMenuBuilder can be updated to display a new menu', (WidgetTester tester) async {
@@ -14767,7 +14825,8 @@ void main() {
     expect(find.byKey(keyOne), findsNothing);
     expect(find.byKey(keyTwo), findsOneWidget);
   },
-    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  // [intended] on web the browser handles the context menu.
+    skip: kIsWeb,
   );
 
   testWidgets('selectionControls can be updated', (WidgetTester tester) async {
@@ -14840,7 +14899,8 @@ void main() {
     expect(materialHandleFinder, findsNothing);
     expect(cupertinoHandleFinder, findsNWidgets(2));
   },
-    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  // [intended] on web the browser handles the context menu.
+    skip: kIsWeb,
   );
 
   testWidgets('onSelectionHandleTapped can be updated', (WidgetTester tester) async {
@@ -14902,7 +14962,8 @@ void main() {
     await tester.pump();
     expect(tapCount, equals(1));
   },
-    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  // [intended] on web the browser handles the context menu.
+    skip: kIsWeb,
   );
 
   testWidgets('dragStartBehavior can be updated', (WidgetTester tester) async {
@@ -14969,7 +15030,8 @@ void main() {
     expect(handleOverlayFinder, findsOneWidget);
     checkDragStartBehavior(DragStartBehavior.start);
   },
-    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  // [intended] on web the browser handles the context menu.
+    skip: kIsWeb,
   );
 
   testWidgets('magnifierConfiguration can be updated to display a new magnifier', (WidgetTester tester) async {
@@ -15045,7 +15107,8 @@ void main() {
 
     checkMagnifierKey(keyTwo);
   },
-    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  // [intended] on web the browser handles the context menu.
+    skip: kIsWeb,
   );
 
   group('Spell check', () {
@@ -15517,7 +15580,8 @@ void main() {
       expect(button.enabled, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
-      skip: kIsWeb, // [intended]
+      // [intended]
+      skip: kIsWeb,
     );
 
     testWidgets('cupertino spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
@@ -15755,7 +15819,8 @@ void main() {
       );
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
-      skip: kIsWeb, // [intended]
+      // [intended]
+      skip: kIsWeb,
     );
 
     testWidgets('tapping on a misspelled word hides the handles', (WidgetTester tester) async {
@@ -15816,7 +15881,8 @@ void main() {
       expect(state.selectionOverlay!.handlesAreVisible, isTrue);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
-      skip: kIsWeb, // [intended]
+      // [intended]
+      skip: kIsWeb,
     );
   });
 
@@ -16357,7 +16423,8 @@ void main() {
         ),
       );
     },
-      skip: !kIsWeb, // [intended]
+    // [intended]
+      skip: !kIsWeb,
     );
 
     // Regression test for https://github.com/flutter/flutter/issues/156078.
@@ -16554,7 +16621,8 @@ void main() {
     await tester.pump();
     expect(state.textEditingValue.text, '');
   },
-    skip: kIsWeb, // [intended]
+  // [intended]
+    skip: kIsWeb,
   );
 
   testWidgets('when manually placing the cursor in the middle of a code point', (WidgetTester tester) async {
@@ -16638,7 +16706,8 @@ void main() {
       const TextSelection.collapsed(offset: 6),
     );
   },
-    skip: kIsWeb, // [intended]
+  // [intended]
+    skip: kIsWeb,
   );
 
   testWidgets('when inserting a malformed string', (WidgetTester tester) async {
@@ -16700,7 +16769,8 @@ void main() {
       const TextSelection.collapsed(offset: 6),
     );
   },
-    skip: kIsWeb, // [intended]
+  // [intended]
+    skip: kIsWeb,
   );
 
   testWidgets('when inserting a malformed string that is a sequence of dangling high surrogates', (WidgetTester tester) async {
@@ -16760,7 +16830,8 @@ void main() {
       const TextSelection.collapsed(offset: 5),
     );
   },
-    skip: kIsWeb, // [intended]
+  // [intended]
+    skip: kIsWeb,
   );
 
   testWidgets('when inserting a malformed string that is a sequence of dangling low surrogates', (WidgetTester tester) async {
@@ -16820,7 +16891,8 @@ void main() {
       const TextSelection.collapsed(offset: 5),
     );
   },
-    skip: kIsWeb, // [intended]
+  // [intended]
+    skip: kIsWeb,
   );
 
   group('hasStrings', () {
@@ -17006,7 +17078,8 @@ void main() {
       const TextPosition(offset: 12),
     );
   },
-    skip: kIsWeb, // [intended]
+  // [intended]
+    skip: kIsWeb,
   );
 
   testWidgets('selectPositionAt is correct when EditableText is scaled', (WidgetTester tester) async {
@@ -17054,7 +17127,8 @@ void main() {
       const TextSelection(baseOffset: 12, extentOffset: 17),
     );
   },
-    skip: kIsWeb, // [intended]
+  // [intended]
+    skip: kIsWeb,
   );
 
   testWidgets('selectWordsInRange is correct when EditableText is scaled', (WidgetTester tester) async {
@@ -17102,7 +17176,8 @@ void main() {
       const TextSelection(baseOffset: 12, extentOffset: 17),
     );
   },
-    skip: kIsWeb, // [intended]
+  // [intended]
+    skip: kIsWeb,
   );
 
   testWidgets('selectWordEdge is correct when EditableText is scaled', (WidgetTester tester) async {
@@ -17255,7 +17330,8 @@ void main() {
     expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
-    skip: kIsWeb, // [intended]
+    // [intended]
+    skip: kIsWeb,
   );
 }
 

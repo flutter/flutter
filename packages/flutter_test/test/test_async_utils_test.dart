@@ -59,7 +59,8 @@ void main() {
     }
     expect(await f1, isNull);
     expect(f2, isNull);
-  }, skip: kIsWeb); // [intended] depends on platform-specific stack traces.
+    // [intended] depends on platform-specific stack traces.
+  }, skip: kIsWeb);
 
   test('TestAsyncUtils - two classes, all callers in superclass', () async {
     final TestAPI testAPI = TestAPISubclass();
@@ -81,7 +82,8 @@ void main() {
     }
     expect(await f1, isNull);
     expect(f2, isNull);
-  }, skip: kIsWeb); // [intended] depends on platform-specific stack traces.
+    // [intended] depends on platform-specific stack traces.
+  }, skip: kIsWeb);
 
   test('TestAsyncUtils - two classes, mixed callers', () async {
     final TestAPISubclass testAPI = TestAPISubclass();
@@ -103,7 +105,8 @@ void main() {
     }
     expect(await f1, isNull);
     expect(f2, isNull);
-  }, skip: kIsWeb); // [intended] depends on platform-specific stack traces.
+    // [intended] depends on platform-specific stack traces.
+  }, skip: kIsWeb);
 
   test('TestAsyncUtils - expect() catches pending async work', () async {
     final TestAPI testAPI = TestAPISubclass();
@@ -125,7 +128,8 @@ void main() {
       matcher.expect(lines.length, greaterThan(7));
     }
     expect(await f1, isNull);
-  }, skip: kIsWeb); // [intended] depends on platform-specific stack traces.
+    // [intended] depends on platform-specific stack traces.
+  }, skip: kIsWeb);
 
   testWidgets('TestAsyncUtils - expect() catches pending async work', (WidgetTester tester) async {
     Future<Object?>? f1, f2;
@@ -167,7 +171,8 @@ void main() {
     }
     await f1;
     await f2;
-  }, skip: kIsWeb); // [intended] depends on platform-specific stack traces.
+    // [intended] depends on platform-specific stack traces.
+  }, skip: kIsWeb);
 
   testWidgets('TestAsyncUtils - expect() catches pending async work', (WidgetTester tester) async {
     Future<Object?>? f1;
@@ -192,7 +197,8 @@ void main() {
       matcher.expect(information[3].level, DiagnosticLevel.info);
     }
     await f1;
-  }, skip: kIsWeb); // [intended] depends on platform-specific stack traces.
+    // [intended] depends on platform-specific stack traces.
+  }, skip: kIsWeb);
 
   testWidgets('TestAsyncUtils - expect() catches pending async work', (WidgetTester tester) async {
     Future<Object?>? f1;
@@ -217,7 +223,8 @@ void main() {
       matcher.expect(information[3].level, DiagnosticLevel.info);
     }
     await f1;
-  }, skip: kIsWeb); // [intended] depends on platform-specific stack traces.
+    // [intended] depends on platform-specific stack traces.
+  }, skip: kIsWeb);
 
   testWidgets('TestAsyncUtils - guard body can throw', (WidgetTester tester) async {
     try {
@@ -245,7 +252,8 @@ void main() {
     }
     expect(await f1, isNull);
     expect(f2, isNull);
-  }, skip: !kIsWeb); // [intended] depends on platform-specific stack traces.
+    // [intended] depends on platform-specific stack traces.
+  }, skip: !kIsWeb);
 
   // see also dev/manual_tests/test_data which contains tests run by the flutter_tools tests for 'flutter test'
 }

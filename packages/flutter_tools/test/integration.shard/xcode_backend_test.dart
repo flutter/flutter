@@ -47,12 +47,14 @@ void main() {
     );
     expect(result.stderr, startsWith('error: Your Xcode project is incompatible with this version of Flutter.'));
     expect(result.exitCode, isNot(0));
-  }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
+    // [intended] requires macos toolchain.
+  }, skip: !io.Platform.isMacOS);
 
   test('Xcode backend fails for on unsupported configuration combinations', () async {
     await expectXcodeBackendFails(unknownConfiguration);
     await expectXcodeBackendFails(unknownFlutterBuildMode);
-  }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
+    // [intended] requires macos toolchain.
+  }, skip: !io.Platform.isMacOS);
 
   test('Xcode backend warns archiving a non-release build.', () async {
     final ProcessResult result = await Process.run(
@@ -65,7 +67,8 @@ void main() {
     );
     expect(result.stdout, contains('warning: Flutter archive not built in Release mode.'));
     expect(result.exitCode, isNot(0));
-  }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
+    // [intended] requires macos toolchain.
+  }, skip: !io.Platform.isMacOS);
 
   group('vmService Bonjour service keys', () {
     late Directory buildDirectory;
@@ -208,5 +211,6 @@ void main() {
       expect(infoPlist.readAsStringSync().contains('NSLocalNetworkUsageDescription'), isFalse);
       expect(result, const ProcessResultMatcher());
     });
-  }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
+    // [intended] requires macos toolchain.
+  }, skip: !io.Platform.isMacOS);
 }

@@ -126,7 +126,8 @@ void main() {
         expect(state.lastIntent, isA<DeleteToLineBreakIntent>(), reason: '$activator');
       }
     }, variant: iOS);
-  }, skip: kIsWeb); // [intended] specific tests target non-web.
+    // [intended] specific tests target non-web.
+  }, skip: kIsWeb);
 
   group('macOS does not accept shortcuts if focus under EditableText', () {
     final TargetPlatformVariant macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
@@ -485,7 +486,8 @@ void main() {
       await tester.pump();
       expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
     }, variant: macOSOnly);
-  }, skip: kIsWeb); // [intended] specific tests target non-web.
+    // [intended] specific tests target non-web.
+  }, skip: kIsWeb);
 
   group('Linux numpad shortcuts', () {
     testWidgets('are triggered when numlock is locked', (WidgetTester tester) async {
@@ -696,7 +698,8 @@ void main() {
       expect(controller.selection.end, 6);
     },
       variant: TargetPlatformVariant.only(TargetPlatform.linux),
-      skip: kIsWeb, // [intended] Non-web test.
+      // [intended] Non-web test.
+      skip: kIsWeb,
     );
 
     testWidgets('do not update the editable text content when triggered on web', (WidgetTester tester) async {
@@ -734,7 +737,8 @@ void main() {
       expect(controller.selection.end, 7);
     },
       variant: TargetPlatformVariant.only(TargetPlatform.linux),
-      skip: !kIsWeb, // [intended] Web only.
+      // [intended] Web only.
+      skip: !kIsWeb,
     );
   });
 }

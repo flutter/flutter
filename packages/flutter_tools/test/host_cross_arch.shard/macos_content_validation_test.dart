@@ -254,7 +254,8 @@ void main() {
         ...getLocalEngineArguments(),
         'clean',
       ], workingDirectory: workingDirectory);
-    }, skip: !platform.isMacOS); // [intended] only makes sense for macos platform.
+      // [intended] only makes sense for macos platform.
+    }, skip: !platform.isMacOS);
   }
 }
 

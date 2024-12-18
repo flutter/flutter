@@ -794,7 +794,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(frameworkHandlesBacks, hasLength(finalCallsLength));
     },
-      skip: kIsWeb, // [intended] predictive back is only native Android.
+    // [intended] predictive back is only native Android.
+      skip: kIsWeb,
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })
     );
   });
