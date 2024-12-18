@@ -390,14 +390,6 @@ class KeyboardTester {
 
   FlKeyboardManager* manager() { return manager_; }
 
-  // Block until all GdkMainLoop messages are processed, which is basically
-  // used only for channel messages.
-  void flushChannelMessages() {
-    GMainLoop* loop = g_main_loop_new(nullptr, 0);
-    g_idle_add(_flushChannelMessagesCb, loop);
-    g_main_loop_run(loop);
-  }
-
   // Dispatch each of the given events, expect their results to be false
   // (unhandled), and clear the event array.
   //
@@ -514,13 +506,21 @@ class KeyboardTester {
   bool during_redispatch_ = false;
   const MockLayoutData* layout_data_;
   EmbedderCallHandler embedder_handler_;
-
-  static gboolean _flushChannelMessagesCb(gpointer data) {
-    g_autoptr(GMainLoop) loop = reinterpret_cast<GMainLoop*>(data);
-    g_main_loop_quit(loop);
-    return FALSE;
-  }
 };
+
+// Block until all GdkMainLoop messages are processed, which is basically used
+// only for channel messages.
+static void flush_channel_messages() {
+  GMainLoop* loop = g_main_loop_new(nullptr, 0);
+  g_idle_add(
+      [](gpointer data) {
+        g_autoptr(GMainLoop) loop = reinterpret_cast<GMainLoop*>(data);
+        g_main_loop_quit(loop);
+        return FALSE;
+      },
+      loop);
+  g_main_loop_run(loop);
+}
 
 // Make sure that the keyboard can be disposed without crashes when there are
 // unresolved pending events.
@@ -578,7 +578,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   g_autoptr(FlKeyEvent) event1 = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
   handler_handled = fl_keyboard_manager_handle_event(tester.manager(), event1);
-  tester.flushChannelMessages();
+  flush_channel_messages();
   EXPECT_EQ(handler_handled, true);
   EXPECT_EQ(redispatched->len, 0u);
   EXPECT_EQ(call_records.size(), 1u);
@@ -586,7 +586,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
                    kLogicalKeyA, "a", false);
 
   call_records[0].callback(true);
-  tester.flushChannelMessages();
+  flush_channel_messages();
   EXPECT_EQ(redispatched->len, 0u);
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(tester.manager()));
   call_records.clear();
@@ -595,7 +595,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   g_autoptr(FlKeyEvent) event2 = fl_key_event_new(
       0, FALSE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
   handler_handled = fl_keyboard_manager_handle_event(tester.manager(), event2);
-  tester.flushChannelMessages();
+  flush_channel_messages();
   EXPECT_EQ(handler_handled, true);
   EXPECT_EQ(redispatched->len, 0u);
   EXPECT_EQ(call_records.size(), 1u);
@@ -606,7 +606,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   g_autoptr(FlKeyEvent) event3 = fl_key_event_new(
       0, TRUE, kKeyCodeKeyB, GDK_KEY_b, static_cast<GdkModifierType>(0), 0);
   handler_handled = fl_keyboard_manager_handle_event(tester.manager(), event3);
-  tester.flushChannelMessages();
+  flush_channel_messages();
   EXPECT_EQ(handler_handled, true);
   EXPECT_EQ(redispatched->len, 0u);
   EXPECT_EQ(call_records.size(), 2u);
@@ -620,7 +620,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
       fl_key_event_get_keyval(FL_KEY_EVENT(g_ptr_array_index(redispatched, 0))),
       0x62u);
   call_records[0].callback(false);
-  tester.flushChannelMessages();
+  flush_channel_messages();
   EXPECT_EQ(redispatched->len, 2u);
   EXPECT_EQ(
       fl_key_event_get_keyval(FL_KEY_EVENT(g_ptr_array_index(redispatched, 1))),
@@ -631,7 +631,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
 
   // Resolve redispatches
   EXPECT_EQ(tester.redispatchEventsAndClear(redispatched), 2);
-  tester.flushChannelMessages();
+  flush_channel_messages();
   EXPECT_EQ(call_records.size(), 0u);
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(tester.manager()));
 
@@ -640,7 +640,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   g_autoptr(FlKeyEvent) event4 = fl_key_event_new(
       0, FALSE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
   handler_handled = fl_keyboard_manager_handle_event(tester.manager(), event4);
-  tester.flushChannelMessages();
+  flush_channel_messages();
   EXPECT_EQ(handler_handled, true);
   EXPECT_EQ(redispatched->len, 0u);
   EXPECT_EQ(call_records.size(), 1u);
@@ -665,7 +665,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
   g_autoptr(FlKeyEvent) event1 = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
   handler_handled = fl_keyboard_manager_handle_event(tester.manager(), event1);
-  tester.flushChannelMessages();
+  flush_channel_messages();
   EXPECT_EQ(handler_handled, true);
   EXPECT_EQ(call_records.size(), 1u);
   EXPECT_KEY_EVENT(call_records[0], kFlutterKeyEventTypeDown, kPhysicalKeyA,
@@ -681,7 +681,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
   g_autoptr(FlKeyEvent) event2 = fl_key_event_new(
       0, FALSE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
   handler_handled = fl_keyboard_manager_handle_event(tester.manager(), event2);
-  tester.flushChannelMessages();
+  flush_channel_messages();
   EXPECT_EQ(handler_handled, true);
   EXPECT_EQ(call_records.size(), 1u);
   EXPECT_KEY_EVENT(call_records[0], kFlutterKeyEventTypeUp, kPhysicalKeyA,
@@ -725,7 +725,7 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
 
   call_records[0].callback(true);
   call_records[1].callback(false);
-  tester.flushChannelMessages();
+  flush_channel_messages();
   EXPECT_EQ(redispatched->len, 0u);
 
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(tester.manager()));
@@ -749,7 +749,7 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
   call_records.clear();
 
   // Resolve redispatch
-  tester.flushChannelMessages();
+  flush_channel_messages();
   EXPECT_EQ(redispatched->len, 1u);
   EXPECT_EQ(tester.redispatchEventsAndClear(redispatched), 1);
   EXPECT_EQ(call_records.size(), 0u);
@@ -770,7 +770,7 @@ TEST(FlKeyboardManagerTest, TextInputHandlerReturnsFalse) {
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
   handler_handled = fl_keyboard_manager_handle_event(tester.manager(), event);
-  tester.flushChannelMessages();
+  flush_channel_messages();
   EXPECT_EQ(handler_handled, true);
   // The event was redispatched because no one handles it.
   EXPECT_EQ(redispatched->len, 1u);
@@ -794,7 +794,7 @@ TEST(FlKeyboardManagerTest, TextInputHandlerReturnsTrue) {
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
   handler_handled = fl_keyboard_manager_handle_event(tester.manager(), event);
-  tester.flushChannelMessages();
+  flush_channel_messages();
   EXPECT_EQ(handler_handled, true);
   // The event was not redispatched because handler handles it.
   EXPECT_EQ(redispatched->len, 0u);
