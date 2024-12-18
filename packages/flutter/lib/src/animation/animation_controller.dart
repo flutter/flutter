@@ -1100,11 +1100,11 @@ typedef LerpCallback<T> = T? Function(T a, T b, double t);
 
 /// A [ValueListenable] whose [value] updates each frame
 /// over the specified [duration] to create a continuous visual transition.
-class ValueAnimation<T> extends Animator<T, ValueAnimation<T>> {
+class ValueAnimationBase<T> extends Animator<T, ValueAnimationBase<T>> {
   /// Creates a [ValueListenable] that smoothly animates between values.
   ///
   /// {@macro flutter.animation.ValueAnimation.value_setter}
-  ValueAnimation.lerpWith({
+  ValueAnimationBase.lerpWith({
     required super.vsync,
     required T initialValue,
     required this.duration,

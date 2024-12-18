@@ -126,10 +126,11 @@ class AnimationStyle with Diagnosticable {
   }
 }
 
-/// An animation that interfaces with an [AnimationProvider].
+/// An animation that can delegate its configuration to an [AnimationStyle].
 ///
-/// Typically, this interface is used to allow animations to inherit
-/// fallback [Duration] and [Curve] values from the ambient [DefaultAnimationStyle].
+/// Typically, this class interfaces with an [AnimationProvider],
+/// allowing animations to inherit fallback [Duration] and [Curve] values
+/// from the ambient [DefaultAnimationStyle].
 abstract interface class StyledAnimation<T> implements Animation<T> {
   /// Called when the associated [AnimationProvider] is updated
   /// with a new [AnimationStyle].
