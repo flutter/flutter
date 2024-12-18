@@ -716,43 +716,79 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
 
 TEST(FlKeyboardManagerTest, TextInputHandlerReturnsFalse) {
   ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
-  KeyboardTester tester;
-  g_autoptr(GPtrArray) redispatched =
-      g_ptr_array_new_with_free_func(g_object_unref);
-  tester.recordRedispatchedEventsTo(redispatched);
-  tester.respondToTextInputWith(false);
+
+  g_autoptr(FlMockKeyBinaryMessenger) messenger =
+      fl_mock_key_binary_messenger_new();
+  fl_mock_key_binary_messenger_set_callback_handler(
+      messenger, [](const AsyncKeyCallback& callback) { callback(false); });
+  g_autoptr(FlEngine) engine =
+      FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
+                             FL_BINARY_MESSENGER(messenger), nullptr));
+  g_autoptr(FlMockViewDelegate) view = fl_mock_view_delegate_new();
+  g_autoptr(FlKeyboardManager) manager =
+      fl_keyboard_manager_new(engine, FL_KEYBOARD_VIEW_DELEGATE(view));
 
   // Dispatch a key event.
+  fl_mock_view_set_text_filter_result(view, FALSE);
+  gboolean redispatched = FALSE;
+  fl_keyboard_manager_set_redispatch_handler(
+      manager,
+      [](FlKeyEvent* event, gpointer user_data) {
+        gboolean* redispatched = static_cast<gboolean*>(user_data);
+        *redispatched = TRUE;
+      },
+      &redispatched);
+  fl_keyboard_manager_set_send_key_event_handler(
+      manager,
+      [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
+         void* callback_user_data,
+         gpointer user_data) { callback(false, callback_user_data); },
+      nullptr);
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  EXPECT_TRUE(fl_keyboard_manager_handle_event(tester.manager(), event));
+  EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event));
   flush_channel_messages();
   // The event was redispatched because no one handles it.
-  EXPECT_EQ(redispatched->len, 1u);
-
-  // Resolve redispatched event.
-  EXPECT_EQ(redispatch_events_and_clear(tester.manager(), redispatched), 1);
-
-  EXPECT_TRUE(fl_keyboard_manager_is_state_clear(tester.manager()));
+  EXPECT_TRUE(redispatched);
 }
 
 TEST(FlKeyboardManagerTest, TextInputHandlerReturnsTrue) {
   ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
-  KeyboardTester tester;
-  g_autoptr(GPtrArray) redispatched =
-      g_ptr_array_new_with_free_func(g_object_unref);
-  tester.recordRedispatchedEventsTo(redispatched);
-  tester.respondToTextInputWith(true);
+
+  g_autoptr(FlMockKeyBinaryMessenger) messenger =
+      fl_mock_key_binary_messenger_new();
+  fl_mock_key_binary_messenger_set_callback_handler(
+      messenger, [](const AsyncKeyCallback& callback) { callback(false); });
+
+  g_autoptr(FlEngine) engine =
+      FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
+                             FL_BINARY_MESSENGER(messenger), nullptr));
+  g_autoptr(FlMockViewDelegate) view = fl_mock_view_delegate_new();
+  g_autoptr(FlKeyboardManager) manager =
+      fl_keyboard_manager_new(engine, FL_KEYBOARD_VIEW_DELEGATE(view));
 
   // Dispatch a key event.
+  fl_mock_view_set_text_filter_result(view, TRUE);
+  gboolean redispatched = FALSE;
+  fl_keyboard_manager_set_redispatch_handler(
+      manager,
+      [](FlKeyEvent* event, gpointer user_data) {
+        gboolean* redispatched = static_cast<gboolean*>(user_data);
+        *redispatched = TRUE;
+      },
+      &redispatched);
+  fl_keyboard_manager_set_send_key_event_handler(
+      manager,
+      [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
+         void* callback_user_data,
+         gpointer user_data) { callback(false, callback_user_data); },
+      nullptr);
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  EXPECT_TRUE(fl_keyboard_manager_handle_event(tester.manager(), event));
+  EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event));
   flush_channel_messages();
   // The event was not redispatched because handler handles it.
-  EXPECT_EQ(redispatched->len, 0u);
-
-  EXPECT_TRUE(fl_keyboard_manager_is_state_clear(tester.manager()));
+  EXPECT_FALSE(redispatched);
 }
 
 TEST(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
