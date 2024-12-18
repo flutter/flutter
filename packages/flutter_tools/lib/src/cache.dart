@@ -469,9 +469,6 @@ class Cache {
       'cache',
       'engine-dart-sdk.stamp',
     );
-    _logger.printBox(path);
-    _logger.printError('@');
-    _logger.printError(path);
     final File engineStampFile = _fileSystem.file(path);
     _engineRevision = engineStampFile.existsSync()
         ? engineStampFile.readAsStringSync().trim()
