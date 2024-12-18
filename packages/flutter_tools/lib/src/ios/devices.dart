@@ -574,6 +574,10 @@ class IOSDevice extends Device {
         // user to allow local network permissions.
         if (isWirelesslyConnected) {
           _logger.printError(
+            '\nYour debugging device seems wirelessly connected. '
+            'Consider plugging it in and trying again.',
+          );
+          _logger.printError(
             '\nClick "Allow" to the prompt asking if you would like to find and connect devices on your local network. '
             'This is required for wireless debugging. If you selected "Don\'t Allow", '
             'you can turn it on in Settings > Your App Name > Local Network. '
