@@ -212,7 +212,7 @@ class TabController extends ChangeNotifier {
       _indexIsChangingCount += 1;
       notifyListeners(); // Because the value of indexIsChanging may have changed.
       _animationController!
-        .animateTo(_index.toDouble(), duration: duration, curve: curve!)
+        .animateTo(_index.toDouble(), duration: duration, curve: curve)
         .whenCompleteOrCancel(() {
           if (_animationController != null) { // don't notify if we've been disposed
             _indexIsChangingCount -= 1;

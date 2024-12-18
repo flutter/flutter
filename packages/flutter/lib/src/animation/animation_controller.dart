@@ -15,6 +15,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
 import 'animation.dart';
+import 'animation_style.dart';
 import 'curves.dart';
 import 'listener_helpers.dart';
 
@@ -162,7 +163,7 @@ with AnimationEagerListenerMixin, AnimationLocalListenersMixin, AnimationLocalSt
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
   /// {@endtemplate}
-  TickerFuture animateTo(AnimationType target, {AnimationType? from, Duration? duration, Curve curve});
+  TickerFuture animateTo(AnimationType target, {Duration? duration, Curve? curve});
 
   /// Animate from one value to another, in a "backward direction".
   ///
@@ -170,7 +171,7 @@ with AnimationEagerListenerMixin, AnimationLocalListenersMixin, AnimationLocalSt
   /// in progress and [AnimationStatus.dismissed] when it ends.
   ///
   /// {@macro flutter.animation.Animator.ticker_canceled}
-  TickerFuture animateBack(AnimationType target, {AnimationType? from, Duration? duration, Curve curve});
+  TickerFuture animateBack(AnimationType target, {Duration? duration, Curve? curve});
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
@@ -409,7 +410,9 @@ class AnimationController extends Animator<double, AnimationController> {
   AnimationController({
     required super.vsync,
     double? value,
+    this.curve,
     this.duration,
+    this.reverseCurve,
     this.reverseDuration,
     this.lowerBound = 0.0,
     this.upperBound = 1.0,
@@ -439,7 +442,9 @@ class AnimationController extends Animator<double, AnimationController> {
   AnimationController.unbounded({
     required super.vsync,
     double value = 0.0,
+    this.curve,
     this.duration,
+    this.reverseCurve,
     this.reverseDuration,
     super.animationBehavior = AnimationBehavior.preserve,
     super.debugLabel,
@@ -447,6 +452,23 @@ class AnimationController extends Animator<double, AnimationController> {
        upperBound = double.infinity {
     _internalSetValue(value);
   }
+
+  /// Creates a controller that can defer its configuration to an ancestor [DefaultAnimationStyle].
+  /// [StyledAnimation]
+  // TODO(nate-thegrate): see if we can get this class to implement StyledAnimation
+  // instead of adding a constructor.
+  factory AnimationController.styled({
+    required AnimationProvider vsync,
+    double? value,
+    Curve? curve,
+    Duration? duration,
+    Curve? reverseCurve,
+    Duration? reverseDuration,
+    String? debugLabel,
+    double lowerBound,
+    double upperBound,
+    AnimationBehavior animationBehavior,
+  }) = _StyledController;
 
   /// The value at which this animation is deemed to be dismissed.
   final double lowerBound;
@@ -470,6 +492,18 @@ class AnimationController extends Animator<double, AnimationController> {
   /// The value of [duration] is used if [reverseDuration] is not specified or
   /// set to null.
   Duration? reverseDuration;
+
+  /// The curve to use for [animateTo].
+  ///
+  /// Defaults to `null`. Calling [animateTo] with a non-null `curve` argument
+  /// will update this value.
+  Curve? curve;
+
+  /// The curve to use for [animateBack].
+  ///
+  /// Defaults to `null`. Calling [animateTo] with a non-null `curve` argument
+  /// will update this value.
+  Curve? reverseCurve;
 
   /// Recreates the [Ticker] with the new [TickerProvider].
   void resync(TickerProvider vsync) {
@@ -684,12 +718,7 @@ class AnimationController extends Animator<double, AnimationController> {
   /// animation, then this won't animate, and the returned [TickerFuture] will
   /// be already complete.
   @override
-  TickerFuture animateTo(
-    double target, {
-    double? from,
-    Duration? duration,
-    Curve curve = Curves.linear,
-  }) {
+  TickerFuture animateTo(double target, {Duration? duration, Curve? curve}) {
     assert(() {
       if (this.duration == null && duration == null) {
         throw FlutterError(
@@ -703,8 +732,8 @@ class AnimationController extends Animator<double, AnimationController> {
     }());
     assert(debugCheckNotDisposed('animateTo'));
     _direction = _AnimationDirection.forward;
-    if (from != null) {
-      value = from;
+    if (curve != null) {
+      this.curve = curve;
     }
     return _animateToInternal(target, duration: duration, curve: curve);
   }
@@ -724,12 +753,7 @@ class AnimationController extends Animator<double, AnimationController> {
   /// animation, then this won't animate, and the returned [TickerFuture] will
   /// be already complete.
   @override
-  TickerFuture animateBack(
-    double target, {
-    double? from,
-    Duration? duration,
-    Curve curve = Curves.linear,
-  }) {
+  TickerFuture animateBack(double target, {Duration? duration, Curve? curve}) {
     assert(() {
       if (this.duration == null && reverseDuration == null && duration == null) {
         throw FlutterError(
@@ -743,13 +767,13 @@ class AnimationController extends Animator<double, AnimationController> {
     }());
     assert(debugCheckNotDisposed('animateBack'));
     _direction = _AnimationDirection.reverse;
-    if (from != null) {
-      value = from;
+    if (curve != null) {
+      this.curve = curve;
     }
     return _animateToInternal(target, duration: duration, curve: curve);
   }
 
-  TickerFuture _animateToInternal(double target, { Duration? duration, Curve curve = Curves.linear }) {
+  TickerFuture _animateToInternal(double target, {Duration? duration, Curve? curve}) {
     // Ideally, the framework would be able to handle zero duration animations;
     // however, the common pattern of an eternally repeating animation might
     // cause an endless loop if it weren't delayed for at least one frame.
@@ -787,7 +811,9 @@ class AnimationController extends Animator<double, AnimationController> {
     }
     assert(simulationDuration > Duration.zero);
     assert(!isAnimating);
-    return _startSimulation(_InterpolationSimulation(_value, target, simulationDuration, curve, scale));
+    return _startSimulation(
+      _InterpolationSimulation(_value, target, simulationDuration, curve ?? Curves.linear, scale),
+    );
   }
 
   /// Starts running this animation in the forward direction, and
@@ -1001,6 +1027,78 @@ class AnimationController extends Animator<double, AnimationController> {
   }
 }
 
+class _StyledController extends AnimationController implements StyledAnimation<double> {
+  _StyledController({
+    required AnimationProvider vsync,
+    super.value,
+    super.curve,
+    super.duration,
+    super.reverseCurve,
+    super.reverseDuration,
+    super.debugLabel,
+    super.lowerBound,
+    super.upperBound,
+    super.animationBehavior,
+  }) : _configuredDuration = duration,
+       _configuredReverseDuration = reverseDuration,
+       super(vsync: vsync) {
+    vsync.registerAnimation(this);
+  }
+
+  Duration? _configuredDuration;
+  @override
+  set duration(Duration? value) {
+    _configuredDuration = value;
+    super.duration = value;
+  }
+
+  Duration? _configuredReverseDuration;
+  @override
+  set reverseDuration(Duration? value) {
+    _configuredReverseDuration = value;
+    super.reverseDuration = value;
+  }
+
+  @override
+  Curve? get curve => super.curve ?? _style.curve;
+
+  @override
+  Curve? get reverseCurve => super.reverseCurve ?? super.curve ?? _style.reverseCurve;
+
+  late AnimationStyle _style;
+
+  @override
+  void updateStyle(AnimationStyle newStyle) {
+    _style = newStyle;
+    late final Duration? newDuration = newStyle.duration;
+    late final Duration? newReverseDuration = newStyle.reverseDuration;
+    if (_configuredDuration == null && newDuration != null) {
+      super.duration = newDuration;
+    }
+    if (_configuredReverseDuration == null && newReverseDuration != null) {
+      super.duration = newReverseDuration;
+    }
+  }
+
+  @override
+  TickerFuture animateTo(double target, {Duration? duration, Curve? curve}) {
+    return super.animateTo(
+      target,
+      duration: duration ?? _configuredDuration ?? _style.duration,
+      curve: curve ?? this.curve ?? _style.curve ?? Curves.linear,
+    );
+  }
+
+  @override
+  TickerFuture animateBack(double target, {Duration? duration, Curve? curve}) {
+    return super.animateBack(
+      target,
+      duration: duration ?? _configuredReverseDuration ?? _style.reverseDuration,
+      curve: curve ?? reverseCurve ?? _style.reverseCurve ?? Curves.linear,
+    );
+  }
+}
+
 class _InterpolationSimulation extends Simulation {
   _InterpolationSimulation(this._begin, this._end, Duration duration, this._curve, double scale)
     : assert(duration.inMicroseconds > 0),
@@ -1092,7 +1190,7 @@ class _RepeatingSimulation extends Simulation {
 }
 
 /// Function signature for linear interpolation.
-/// 
+///
 /// This signature is designed to match existing "lerp" functions;
 /// for example, [Color.lerp] can qualify as a `LerpCallback<Color>`
 /// or `LerpCallback<Color?>`.
@@ -1216,7 +1314,7 @@ class ValueAnimationBase<T> extends Animator<T, ValueAnimationBase<T>> {
   }
 
   /// Immediately set a new value.
-  /// 
+  ///
   /// {@macro flutter.animation.Animator.ticker_canceled}
   void jumpTo(T target) {
     stop();
