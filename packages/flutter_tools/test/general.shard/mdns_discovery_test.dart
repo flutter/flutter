@@ -637,8 +637,9 @@ void main() {
             ),
           );
         },
+        // [intended] This tool exit message only works for macOS
         skip: !globals.platform.isMacOS,
-      ); // [intended] This tool exit message only works for macOS
+      );
 
       testWithoutContext('Correctly builds VM Service URI with hostVmservicePort == 0', () async {
         final MDnsClient client = FakeMDnsClient(

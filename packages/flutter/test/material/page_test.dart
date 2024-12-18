@@ -294,8 +294,8 @@ void main() {
       await expectLater(find.byKey(key), matchesGoldenFile('m2_zoom_page_transition.big.png'));
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
-    skip: kIsWeb,
-  ); // [intended] rasterization is not used on the web.
+    skip: kIsWeb, // [intended] rasterization is not used on the web.
+  );
 
   testWidgets(
     'Material3 - test page transition (_ZoomPageTransition) with rasterization re-rasterizes when view insets change',
@@ -339,8 +339,8 @@ void main() {
       await expectLater(find.byKey(key), matchesGoldenFile('m3_zoom_page_transition.big.png'));
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
-    skip: kIsWeb,
-  ); // [intended] rasterization is not used on the web.
+    skip: kIsWeb, // [intended] rasterization is not used on the web.
+  );
 
   testWidgets(
     'test page transition (_ZoomPageTransition) with rasterization disables snapshotting for enter route',
@@ -424,9 +424,8 @@ void main() {
       expect(isSnapshotted(page1Finder), isFalse);
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
-    skip: kIsWeb,
-  ); // [intended] rasterization is not used on the web.
-
+    skip: kIsWeb, // [intended] rasterization is not used on the web.
+  );
   testWidgets(
     'test fullscreen dialog transition',
     (WidgetTester tester) async {

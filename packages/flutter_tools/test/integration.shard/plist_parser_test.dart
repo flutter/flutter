@@ -119,8 +119,8 @@ void main() {
       expect(logger.statusText, isEmpty);
       expect(logger.errorText, isEmpty);
     },
-    skip: !platform.isMacOS,
-  ); // [intended] requires macos tool chain.
+    skip: !platform.isMacOS, // [intended] requires macos tool chain.
+  );
 
   testWithoutContext(
     'PlistParser.getValueFromFile<String> returns null for a non-existent key within a plist',
@@ -132,8 +132,8 @@ void main() {
       expect(logger.statusText, isEmpty);
       expect(logger.errorText, isEmpty);
     },
-    skip: !platform.isMacOS,
-  ); // [intended] requires macos tool chain.
+    skip: !platform.isMacOS, // [intended] requires macos tool chain.
+  );
 
   testWithoutContext(
     'PlistParser.getValueFromFile<String> returns null for a malformed plist file',
@@ -155,8 +155,8 @@ void main() {
         '  Command: /usr/bin/plutil -convert xml1 -o - ${file.absolute.path}\n',
       );
     },
-    skip: !platform.isMacOS,
-  ); // [intended] requires macos tool chain.
+    skip: !platform.isMacOS, // [intended] requires macos tool chain.
+  );
 
   testWithoutContext(
     'PlistParser.getValueFromFile<String> throws when /usr/bin/plutil is not found',
@@ -170,8 +170,8 @@ void main() {
       expect(logger.statusText, isEmpty);
       expect(logger.errorText, isEmpty);
     },
-    skip: platform.isMacOS,
-  ); // [intended] requires absence of macos tool chain.
+    skip: platform.isMacOS, // [intended] requires absence of macos tool chain.
+  );
 
   testWithoutContext('PlistParser.replaceKey can replace a key', () async {
     file.writeAsBytesSync(base64.decode(base64PlistXml));
@@ -340,8 +340,8 @@ void main() {
       expect(projectFileAsJson, contains('"PRODUCT_NAME":"Flutter Gallery"'));
       expect(logger.errorText, isEmpty);
     },
-    skip: !platform.isMacOS,
-  ); // [intended] requires macos tool chain.
+    skip: !platform.isMacOS, // [intended] requires macos tool chain.
+  );
 
   testWithoutContext('PlistParser.plistJsonContent returns null when errors', () async {
     final BufferLogger logger = BufferLogger(

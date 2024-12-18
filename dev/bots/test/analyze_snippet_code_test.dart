@@ -80,8 +80,9 @@ void main() {
       ]);
       expect(process.exitCode, 1);
     },
+    // TODO(scheglov): Restore after landing Dart SDK changes, https://github.com/flutter/flutter/issues/154413
     skip: true,
-  ); // TODO(scheglov): Restore after landing Dart SDK changes, https://github.com/flutter/flutter/issues/154413
+  );
 
   test(
     'Analyzes dart:ui code',
@@ -109,6 +110,7 @@ void main() {
       ]);
       expect(process.exitCode, 1);
     },
+    // TODO(scheglov): Restore after landing Dart SDK changes, https://github.com/flutter/flutter/issues/154413
     skip: true,
-  ); // TODO(scheglov): Restore after landing Dart SDK changes, https://github.com/flutter/flutter/issues/154413
+  );
 }

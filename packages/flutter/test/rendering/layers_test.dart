@@ -540,8 +540,9 @@ void main() {
       // layer.
       parent.buildScene(SceneBuilder());
     },
+    // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
     skip: isBrowser && !isSkiaWeb,
-  ); // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
+  );
 
   test(
     'ContainerLayer.toImageSync can render interior layer',
@@ -562,8 +563,9 @@ void main() {
       // layer.
       parent.buildScene(SceneBuilder());
     },
+    // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
     skip: isBrowser && !isSkiaWeb,
-  ); // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
+  );
 
   test('PictureLayer does not let you call dispose unless refcount is 0', () {
     PictureLayer layer = PictureLayer(Rect.zero);

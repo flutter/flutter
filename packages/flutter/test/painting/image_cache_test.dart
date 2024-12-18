@@ -795,8 +795,8 @@ void main() {
       imageInfo.dispose();
       expect(testImage.debugGetOpenHandleStackTraces()!.length, 0);
     },
-    skip: kIsWeb,
-  ); // https://github.com/flutter/flutter/issues/87442
+    skip: kIsWeb, // https://github.com/flutter/flutter/issues/87442
+  );
 
   test('clear does not leave pending images stuck', () async {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);

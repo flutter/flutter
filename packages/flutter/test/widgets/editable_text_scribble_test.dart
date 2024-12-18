@@ -122,9 +122,9 @@ void main() {
 
       // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
     },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
-  ); // [intended]
+  );
 
   testWidgets(
     'Selection changes during Scribble interaction should have the scribble cause',
@@ -215,9 +215,9 @@ void main() {
       // On web, we should rely on the browser's implementation of Scribble, so the selection changed cause
       // will never be SelectionChangedCause.scribble.
     },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
-  ); // [intended]
+  );
 
   testWidgets(
     'Declares itself for Scribble interaction if the bounds overlap the scribble rect and the widget is touchable',
@@ -329,9 +329,9 @@ void main() {
       // On web, we should rely on the browser's implementation of Scribble, so the engine will
       // never request the scribble elements.
     },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
-  ); // [intended]
+  );
 
   testWidgets(
     'single line Scribble fields can show a horizontal placeholder',
@@ -412,9 +412,9 @@ void main() {
       // On web, we should rely on the browser's implementation of Scribble, so the framework
       // will not handle placeholders.
     },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
-  ); // [intended]
+  );
 
   testWidgets(
     'multiline Scribble fields can show a vertical placeholder',
@@ -498,9 +498,9 @@ void main() {
       // On web, we should rely on the browser's implementation of Scribble, so the framework
       // will not handle placeholders.
     },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
-  ); // [intended]
+  );
 
   testWidgets(
     'selection rects are sent when they change',
@@ -656,9 +656,9 @@ void main() {
 
       // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
     },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
-  ); // [intended]
+  );
 
   testWidgets(
     'selection rects are not sent if stylusHandwritingEnabled is false',
@@ -702,9 +702,9 @@ void main() {
 
       // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
     },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
-  ); // [intended]
+  );
 
   testWidgets(
     'selection rects sent even when character corners are outside of paintBounds',
@@ -796,9 +796,9 @@ void main() {
 
       // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
     },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
-  ); // [intended]
+  );
 
   // Regression test for https://github.com/flutter/flutter/issues/159259.
   testWidgets(

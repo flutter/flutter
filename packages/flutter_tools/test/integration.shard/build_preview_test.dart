@@ -48,6 +48,7 @@ void main() {
       expect(result, const ProcessResultMatcher());
       expect(previewBin, exists);
     },
+    // [intended] Flutter Preview only supported on Windows currently
     skip: !const LocalPlatform().isWindows,
-  ); // [intended] Flutter Preview only supported on Windows currently
+  );
 }

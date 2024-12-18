@@ -658,8 +658,8 @@ void main() {
       expect(isTransitioningWithSnapshotting(tester, page1), isTrue);
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
-    skip: kIsWeb,
-  ); // [intended] rasterization is not used on the web.
+    skip: kIsWeb, // [intended] rasterization is not used on the web.
+  );
 
   testWidgets(
     'ZoomPageTransitionsBuilder.allowSnapshotting can disable route snapshotting',
@@ -694,8 +694,8 @@ void main() {
       expect(isTransitioningWithSnapshotting(tester, page1), isFalse);
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
-    skip: kIsWeb,
-  ); // [intended] rasterization is not used on the web.
+    skip: kIsWeb, // [intended] rasterization is not used on the web.
+  );
 
   testWidgets(
     'Setting PageRoute.allowSnapshotting to false overrides ZoomPageTransitionsBuilder.allowSnapshotting = true',
@@ -721,8 +721,8 @@ void main() {
       await tester.pumpAndSettle();
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
-    skip: kIsWeb,
-  ); // [intended] rasterization is not used on the web.
+    skip: kIsWeb, // [intended] rasterization is not used on the web.
+  );
 
   testWidgets(
     '_ZoomPageTransition only causes child widget built once',

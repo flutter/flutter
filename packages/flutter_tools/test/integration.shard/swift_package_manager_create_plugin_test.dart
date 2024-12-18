@@ -93,8 +93,9 @@ void main() {
             ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
           }
         },
+        // [intended] Swift Package Manager only works on macos.
         skip: !platform.isMacOS,
-      ); // [intended] Swift Package Manager only works on macos.
+      );
 
       test(
         'Create $platformName $iosLanguage plugin with Swift Package Manager enabled',
@@ -173,8 +174,9 @@ void main() {
             ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
           }
         },
+        // [intended] Swift Package Manager only works on macos.
         skip: !platform.isMacOS,
-      ); // [intended] Swift Package Manager only works on macos.
+      );
     }
   }
 }

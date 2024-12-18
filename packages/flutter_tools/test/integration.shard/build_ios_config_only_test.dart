@@ -76,6 +76,6 @@ void main() {
       // Do not run "pod install" when nothing changes.
       expect(secondRunStdout, isNot(contains('pod install')));
     },
-    skip: !platform.isMacOS,
-  ); // [intended] iOS builds only work on macos.
+    skip: !platform.isMacOS, // [intended] iOS builds only work on macos.
+  );
 }

@@ -150,8 +150,9 @@ void main() {
 
       expect(findOverflowBackButton(), overflowBackPaintPattern());
     },
+    // Path.combine is not implemented in the HTML backend https://github.com/flutter/flutter/issues/44572
     skip: kIsWeb,
-  ); // Path.combine is not implemented in the HTML backend https://github.com/flutter/flutter/issues/44572
+  );
 
   testWidgets('paginates children if they overflow', (WidgetTester tester) async {
     late StateSetter setState;
@@ -475,8 +476,9 @@ void main() {
                 : _kToolbarTextColor.color.value,
           );
         },
+        // [intended] We do not use Flutter-rendered context menu on the Web.
         skip: kIsWeb,
-      ); // [intended] We do not use Flutter-rendered context menu on the Web.
+      );
     }
   }
 

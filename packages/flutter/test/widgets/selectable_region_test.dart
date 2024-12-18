@@ -907,8 +907,8 @@ void main() {
         await gesture.up();
       },
       variant: TargetPlatformVariant.mobile(),
-      skip:
-          kIsWeb, // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      skip: kIsWeb,
     );
 
     testWidgets(
@@ -964,8 +964,8 @@ void main() {
         await gesture.up();
       },
       variant: TargetPlatformVariant.mobile(),
-      skip:
-          kIsWeb, // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      skip: kIsWeb,
     );
 
     testWidgets(
@@ -1033,8 +1033,8 @@ void main() {
         await gesture.up();
       },
       variant: TargetPlatformVariant.mobile(),
-      skip:
-          kIsWeb, // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      skip: kIsWeb,
     );
 
     testWidgets(
@@ -1089,8 +1089,8 @@ void main() {
         await gesture.up();
       },
       variant: TargetPlatformVariant.mobile(),
-      skip:
-          kIsWeb, // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      skip: kIsWeb,
     );
 
     testWidgets(
@@ -1211,8 +1211,8 @@ void main() {
         TargetPlatform.android,
         TargetPlatform.iOS,
       }),
-      skip:
-          kIsWeb, // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      // [intended] Web does not support double tap + drag gestures on all of the tested platforms.
+      skip: kIsWeb,
     );
 
     testWidgets(
@@ -1862,8 +1862,9 @@ void main() {
 
         await gesture.up();
       },
+      // https://github.com/flutter/flutter/issues/125582.
       skip: kIsWeb,
-    ); // https://github.com/flutter/flutter/issues/125582.
+    );
 
     testWidgets('mouse can reverse selection across multiple widgets on double click drag', (
       WidgetTester tester,
@@ -2074,8 +2075,8 @@ void main() {
 
         await gesture.up();
       },
-      skip: kIsWeb,
-    ); // https://github.com/flutter/flutter/issues/125582.
+      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+    );
 
     testWidgets('mouse can select multiple widgets on triple click drag', (
       WidgetTester tester,
@@ -2250,8 +2251,8 @@ void main() {
 
         await gesture.up();
       },
-      skip: kIsWeb,
-    ); // https://github.com/flutter/flutter/issues/125582.
+      skip: kIsWeb, // https://github.com/flutter/flutter/issues/125582.
+    );
 
     testWidgets('mouse can reverse selection across multiple widgets on triple click drag', (
       WidgetTester tester,

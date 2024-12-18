@@ -111,8 +111,9 @@ void main() {
       final Element element = tester.element(find.byType(CupertinoDatePicker));
       expect(element.dirty, isTrue);
     },
+    // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
     skip: isBrowser,
-  ); // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
+  );
 
   testWidgets(
     'CupertinoDatePicker reset cache upon system fonts change - date mode',
@@ -141,8 +142,9 @@ void main() {
       final Element element = tester.element(find.byType(CupertinoDatePicker));
       expect(element.dirty, isTrue);
     },
+    // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
     skip: isBrowser,
-  ); // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
+  );
 
   testWidgets(
     'CupertinoDatePicker reset cache upon system fonts change - time mode',
@@ -174,8 +176,9 @@ void main() {
       final Element element = tester.element(find.byType(CupertinoTimerPicker));
       expect(element.dirty, isTrue);
     },
+    // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
     skip: isBrowser,
-  ); // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
+  );
 
   testWidgets('RangeSlider relayout upon system fonts changes more than once', (
     WidgetTester tester,

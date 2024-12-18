@@ -4397,8 +4397,8 @@ void main() {
           ),
         );
       },
-      skip: kIsWeb && !isSkiaWeb,
-    ); // https://github.com/flutter/flutter/issues/99933
+      skip: kIsWeb && !isSkiaWeb, // https://github.com/flutter/flutter/issues/99933
+    );
 
     testWidgets(
       'Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=3.0',
@@ -4468,8 +4468,8 @@ void main() {
           ),
         );
       },
-      skip: kIsWeb && !isSkiaWeb,
-    ); // https://github.com/flutter/flutter/issues/99933
+      skip: kIsWeb && !isSkiaWeb, // https://github.com/flutter/flutter/issues/99933
+    );
 
     testWidgets(
       'Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=0.75',
@@ -4539,8 +4539,8 @@ void main() {
           ),
         );
       },
-      skip: kIsWeb && !isSkiaWeb,
-    ); // https://github.com/flutter/flutter/issues/99933
+      skip: kIsWeb && !isSkiaWeb, // https://github.com/flutter/flutter/issues/99933
+    );
 
     testWidgets(
       'Destination spacing is correct - [labelType]=selected, [textScaleFactor]=1.0 (default)',
