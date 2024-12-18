@@ -541,8 +541,11 @@ void main() {
       ),
     );
 
-    // ignore: avoid_dynamic_calls
-    expect(_getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester).labelStyle, labelStyle);
+    expect(
+      // ignore: avoid_dynamic_calls
+      _getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester).labelStyle,
+      labelStyle,
+    );
   });
 
   testWidgets('SemanticsDebugger label for rtl.', (WidgetTester tester) async {

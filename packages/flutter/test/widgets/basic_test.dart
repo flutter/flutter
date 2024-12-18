@@ -617,11 +617,13 @@ void main() {
           // the UnconstrainedBox overflows.
           final dynamic exception = tester.takeException();
           expect(exception, isFlutterError, reason: 'for clip = $clip');
-          // ignore: avoid_dynamic_calls
-          expect(exception.diagnostics.first.level, DiagnosticLevel.summary, reason: 'for clip = $clip');
           expect(
-            // ignore: avoid_dynamic_calls
-            exception.diagnostics.first.toString(),
+            exception.diagnostics.first.level, // ignore: avoid_dynamic_calls
+            DiagnosticLevel.summary,
+            reason: 'for clip = $clip',
+          );
+          expect(
+            exception.diagnostics.first.toString(), // ignore: avoid_dynamic_calls
             startsWith('A RenderConstraintsTransformBox overflowed'),
             reason: 'for clip = $clip',
           );

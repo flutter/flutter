@@ -101,7 +101,7 @@ flutter:
       logger: logger,
     )!;
 
-    expect(flutterManifest.generateSyntheticPackage, true);
+    expect(flutterManifest.generateLocalizations, true);
   });
 
   testWithoutContext('FlutterManifest can parse invalid generate key', () async {
@@ -118,7 +118,7 @@ flutter:
       logger: logger,
     )!;
 
-    expect(flutterManifest.generateSyntheticPackage, false);
+    expect(flutterManifest.generateLocalizations, false);
   });
 
   testWithoutContext('FlutterManifest knows if generate is disabled', () async {
@@ -135,7 +135,7 @@ flutter:
       logger: logger,
     )!;
 
-    expect(flutterManifest.generateSyntheticPackage, false);
+    expect(flutterManifest.generateLocalizations, false);
   });
 
   testWithoutContext('FlutterManifest has one font family with one asset', () async {

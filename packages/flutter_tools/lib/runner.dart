@@ -23,7 +23,6 @@ import 'src/doctor.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
-import 'src/reporting/reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 
@@ -97,18 +96,6 @@ Future<int> run(
           globals.printStatus('Analytics reporting enabled.');
         }
 
-        // Send an event to GA3 for any users that are opted into GA3
-        // analytics but have opted out of GA4 (package:unified_analytics)
-        // TODO(eliasyishak): remove once GA3 sunset, https://github.com/flutter/flutter/issues/128251
-        if (!globals.analytics.telemetryEnabled &&
-            globals.flutterUsage.enabled) {
-          UsageEvent(
-            'ga4_and_ga3_status_mismatch',
-            'opted_out_of_ga4',
-            flutterUsage: globals.flutterUsage,
-          ).send();
-        }
-
         await runner.run(args);
 
         // Triggering [runZoned]'s error callback does not necessarily mean that
@@ -120,8 +107,9 @@ Future<int> run(
         // We already hit some error, so don't return success. The error path
         // (which should be in progress) is responsible for calling _exit().
         return 1;
-      } catch (error, stackTrace) { // ignore: avoid_catches_without_on_clauses
         // This catches all exceptions to send to crash logging, etc.
+        // ignore: avoid_catches_without_on_clauses
+      } catch (error, stackTrace) {
         firstError = error;
         firstStackTrace = stackTrace;
         return _handleToolError(error, stackTrace, verbose, args, reportCrashes!, getVersion, shutdownHooks);
@@ -188,8 +176,6 @@ Future<int> _handleToolError(
       return exitWithHooks(1, shutdownHooks: shutdownHooks);
     }
 
-    // Report to both [Usage] and [CrashReportSender].
-    globals.flutterUsage.sendException(error);
     globals.analytics.send(Event.exception(exception: error.runtimeType.toString()));
     await asyncGuard(() async {
       final CrashReportSender crashReportSender = CrashReportSender(
@@ -229,7 +215,8 @@ Future<int> _handleToolError(
 
       return exitWithHooks(1, shutdownHooks: shutdownHooks);
     // This catch catches all exceptions to ensure the message below is printed.
-    } catch (error, st) { // ignore: avoid_catches_without_on_clauses
+    // ignore: avoid_catches_without_on_clauses
+    } catch (error, st) {
       globals.stdio.stderrWrite(
         'Unable to generate crash report due to secondary error: $error\n$st\n'
         '${globals.userMessages.flutterToolBugInstructions}\n',
