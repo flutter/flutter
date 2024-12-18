@@ -5,70 +5,27 @@
 
 # ---------------------------------- NOTE ---------------------------------- #
 #
-# We must keep the logic in this file consistent with the logic in the
-# `engine_hash.dart` script in the same directory to ensure that Flutter
-# continues to work across all platforms!
+# This file will appear unused within the monorepo. It is used internally
+# (in google3) as part of the roll process, and care should be put before 
+# making changes.
+#
+# See cl/688973229.
 #
 # -------------------------------------------------------------------------- #
 
-# TODO(codefu): Add a test that this always outputs the same hash as
-# `engine_hash.dart` when the repositories are merged
+# Test for fusion repository
+if [ -f "$FLUTTER_ROOT/DEPS" ] && [ -f "$FLUTTER_ROOT/engine/src/.gn" ]; then
+    BRANCH=$(git -C "$FLUTTER_ROOT" rev-parse --abbrev-ref HEAD)
 
-STRATEGY=head
-
-HELP=$(
-    cat <<EOF
-Calculate the hash signature for the Flutter Engine\n
-\t-s|--strategy\t<head,mergeBase>\n
-\t\tthead:      hash from git HEAD\n
-\t\tmergeBase: hash from the merge-base of HEAD and upstream/master\n
-EOF
-)
-
-function print_help() {
-    if [ "${1:-0}" -eq 0 ]; then
-        echo -e $HELP
-        exit 0
+    # In a fusion repository; the engine.version comes from the git hashes.
+    if [ -z "${LUCI_CONTEXT}" ]; then
+      ENGINE_VERSION=$(git -C "$FLUTTER_ROOT" merge-base HEAD upstream/master)
     else
-        echo >&2 -e $HELP
-        exit $1
+      ENGINE_VERSION=$(git -C "$FLUTTER_ROOT" rev-parse HEAD)
     fi
-}
-
-while [[ "$#" -gt 0 ]]; do
-    case $1 in
-    -s | --strategy)
-        STRATEGY="$2"
-        shift # past argument
-        shift # past value
-        ;;
-    -h | --help)
-        print_help
-        ;;
-    -* | --*)
-        echo >&2 -e "Unknown option $1\n"
-        print_help 1
-        ;;
-    esac
-done
-
-BASE=HEAD
-case $STRATEGY in
-head) ;;
-mergeBase)
-    BASE=$(git merge-base upstream/master HEAD)
-    ;;
-*)
-    echo >&2 -e "Unknown strategy $1\n"
-    print_help 1
-    ;;
-esac
-
-LSTREE=$(git ls-tree -r $BASE engine DEPS)
-if [ ${#LSTREE} -eq 0 ]; then
-    echo >&2 Error calculating engine hash: Not in a monorepo
-    exit 1
 else
-    HASH=$(echo "$LSTREE" | sha1sum | head -c 40)
-    echo $HASH
+    # Non-fusion repository - these files will exist
+    ENGINE_VERSION=$(cat "$FLUTTER_ROOT/bin/internal/engine.version")
 fi
+
+echo $ENGINE_VERSION
