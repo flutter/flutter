@@ -905,6 +905,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
          'A bottomMode was provided without a corresponding bottom.',
        ),
        onSearchActiveChanged = null,
+       searchField = null,
        _searchable = false;
 
   /// Create a navigation bar for scrolling lists with [bottom] set to a
@@ -933,6 +934,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.stretch = false,
     this.bottomMode = NavigationBarBottomMode.automatic,
     this.onSearchActiveChanged,
+    this.searchField = const CupertinoSearchTextField(),
   }) : assert(
          automaticallyImplyTitle || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
@@ -1070,6 +1072,11 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// True if the [CupertinoSliverNavigationBar.search] constructor is used.
   final bool _searchable;
 
+  /// The search field used in [CupertinoSliverNavigationBar.search].
+  ///
+  /// Defaults to a [CupertinoSearchTextField].
+  final Widget? searchField;
+
   @override
   State<CupertinoSliverNavigationBar> createState() => _CupertinoSliverNavigationBarState();
 }
@@ -1080,8 +1087,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
 class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigationBar> with TickerProviderStateMixin {
   late _NavigationBarStaticComponentsKeys keys;
   ScrollableState? _scrollableState;
-  final GlobalKey searchKey = GlobalKey();
-  PreferredSizeWidget? defaultSearchField;
+  PreferredSizeWidget? preferredSizeSearchField;
   late AnimationController _animationController;
   late AnimationController _fadeController;
   late Animation<double> persistentHeightAnimation;
@@ -1112,7 +1118,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     );
     largeTitleHeightAnimation = largeTitleHeightTween.animate(_animationController);
     if (widget._searchable) {
-      defaultSearchField = _NavigationBarSearchField(searchKey: searchKey);
+      preferredSizeSearchField = _NavigationBarSearchField(searchField: widget.searchField!);
     }
   }
 
@@ -1136,7 +1142,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
 
   double _getBottomHeight() {
     if (widget._searchable) {
-      return defaultSearchField!.preferredSize.height;
+      return preferredSizeSearchField!.preferredSize.height;
     }
     else if (widget.bottom != null) {
       return widget.bottom!.preferredSize.height;
@@ -1197,7 +1203,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       searchableBottom = expanded
         ? GestureDetector(
             behavior: HitTestBehavior.translucent,
-            child: defaultSearchField,
+            child: preferredSizeSearchField,
             onTap: () {
               setState(() {
                 if (widget.onSearchActiveChanged != null) {
@@ -1213,7 +1219,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(8.0, 0.0, 0.0, 0.0),
-                  child: searchKey.currentWidget,
+                  child: widget.searchField,
                 ),
               ),
               Center(
@@ -1237,7 +1243,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       keys: keys,
       route: ModalRoute.of(context),
       userLeading: widget.leading != null
-        ? Visibility(visible: expanded, maintainState: true, child: widget.leading!)
+        ? Visibility(visible: expanded, child: widget.leading!)
         : null,
       automaticallyImplyLeading: widget.automaticallyImplyLeading,
       automaticallyImplyTitle: widget.automaticallyImplyTitle,
@@ -3105,11 +3111,11 @@ Widget _navBarHeroFlightShuttleBuilder(
 }
 
 class _NavigationBarSearchField extends StatelessWidget implements PreferredSizeWidget {
-  const _NavigationBarSearchField({required this.searchKey});
+  const _NavigationBarSearchField({required this.searchField});
 
   static const double padding = 8.0;
   static const double searchFieldHeight = 35.0;
-  final GlobalKey searchKey;
+  final Widget searchField;
 
   @override
   Widget build(BuildContext context) {
@@ -3118,7 +3124,7 @@ class _NavigationBarSearchField extends StatelessWidget implements PreferredSize
         padding: const EdgeInsets.symmetric(horizontal: padding, vertical: padding),
         child: SizedBox(
           height: searchFieldHeight,
-          child: CupertinoSearchTextField(key: searchKey),
+          child: searchField,
         ),
       ),
     );

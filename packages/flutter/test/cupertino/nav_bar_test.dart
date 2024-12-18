@@ -2463,6 +2463,9 @@ void main() {
                   largeTitle: const Text('Large title'),
                   middle: const Text('middle'),
                   bottomMode: NavigationBarBottomMode.always,
+                  searchField: CupertinoSearchTextField(
+                    placeholder: isFocused ? 'Enter search text' : 'Search',
+                  ),
                 ),
                 SliverFillRemaining(
                   child: Container(
@@ -2479,19 +2482,18 @@ void main() {
     // Initially, all widgets are visible.
     expect(find.text('Large title'), findsOneWidget);
     expect(find.text('middle'), findsOneWidget);
-    final Finder searchFieldFinder = find.byType(CupertinoSearchTextField);
-    expect(searchFieldFinder, findsOneWidget);
+    expect(find.widgetWithText(CupertinoSearchTextField, 'Search'), findsOneWidget);
     expect(find.byWidgetPredicate((Widget widget) {
       return widget is Container && widget.color == unfocusedColor;
     }), findsOneWidget);
 
     // Tap the search field.
-    await tester.tap(searchFieldFinder, warnIfMissed: false);
+    await tester.tap(find.widgetWithText(CupertinoSearchTextField, 'Search'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     // Search field and 'Cancel' button should be visible.
     expect(isFocused, true);
-    expect(searchFieldFinder, findsOneWidget);
+    expect(find.widgetWithText(CupertinoSearchTextField, 'Enter search text'), findsOneWidget);
     expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
     expect(find.byWidgetPredicate((Widget widget) {
       return widget is Container && widget.color == focusedColor;

@@ -108,6 +108,9 @@ class _NextPageState extends State<NextPage> {
             middle: const Text('Contacts Group'),
             largeTitle: const Text('Family'),
             bottomMode: widget.bottomMode,
+            searchField: CupertinoSearchTextField(
+              placeholder: isFocused ? 'Enter search text' : 'Search',
+            ),
             onSearchActiveChanged: (bool value) {
               setState(() {
                 isFocused = value;
