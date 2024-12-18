@@ -96,18 +96,18 @@ void main() {
 
   testWidgets('ExpansionTileThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    ExpansionTileThemeData(
-      backgroundColor: const Color(0xff000000),
-      collapsedBackgroundColor: const Color(0xff6f83fc),
-      tilePadding: const EdgeInsets.all(20.0),
+    const ExpansionTileThemeData(
+      backgroundColor: Color(0xff000000),
+      collapsedBackgroundColor: Color(0xff6f83fc),
+      tilePadding: EdgeInsets.all(20.0),
       expandedAlignment: Alignment.bottomCenter,
-      childrenPadding: const EdgeInsets.all(10.0),
-      iconColor: const Color(0xffa7c61c),
-      collapsedIconColor: const Color(0xffdd0b1f),
-      textColor: const Color(0xffffffff),
-      collapsedTextColor: const Color(0xff522bab),
-      shape: const Border(),
-      collapsedShape: const Border(),
+      childrenPadding: EdgeInsets.all(10.0),
+      iconColor: Color(0xffa7c61c),
+      collapsedIconColor: Color(0xffdd0b1f),
+      textColor: Color(0xffffffff),
+      collapsedTextColor: Color(0xff522bab),
+      shape: Border(),
+      collapsedShape: Border(),
       clipBehavior: Clip.antiAlias,
       expansionAnimationStyle: AnimationStyle(curve: Curves.easeInOut),
     ).debugFillProperties(builder);
@@ -370,7 +370,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Override the animation duration.
-    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(duration: const Duration(milliseconds: 800))));
+    await tester.pumpWidget(buildExpansionTile(animationStyle: const AnimationStyle(duration: Duration(milliseconds: 800))));
     await tester.pumpAndSettle();
 
     // Test the overridden animation duration.
@@ -393,7 +393,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Override the animation curve.
-    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(curve: Easing.emphasizedDecelerate)));
+    await tester.pumpWidget(buildExpansionTile(animationStyle: const AnimationStyle(curve: Easing.emphasizedDecelerate)));
     await tester.pumpAndSettle();
 
     // Test the overridden animation curve.

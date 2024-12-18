@@ -59,7 +59,7 @@ sealed class DefaultAnimationStyle implements Widget {
             ? context.dependOnInheritedWidgetOfExactType()
             : context.getInheritedWidgetOfExactType();
 
-    return inherited?.notifier?.value ?? AnimationStyle();
+    return inherited?.notifier?.value ?? const AnimationStyle();
   }
 
   /// Returns a [ValueListenable] object from the nearest ancestor
@@ -83,7 +83,7 @@ class _FallbackAnimationStyleListenable implements ValueListenable<AnimationStyl
   void removeListener(VoidCallback listener) {}
 
   @override
-  AnimationStyle get value => AnimationStyle();
+  AnimationStyle get value => const AnimationStyle();
 }
 
 class _InheritedAnimationStyle extends InheritedNotifier<ValueListenable<AnimationStyle>>

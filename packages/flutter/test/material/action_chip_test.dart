@@ -500,7 +500,7 @@ void main() {
 
   testWidgets('ActionChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
     final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
-      enableAnimation: AnimationStyle(duration: Durations.extralong4),
+      enableAnimation: const AnimationStyle(duration: Durations.extralong4),
       selectAnimation: AnimationStyle.noAnimation,
     );
 
@@ -518,7 +518,7 @@ void main() {
 
   testWidgets('Elevated ActionChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
     final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
-      enableAnimation: AnimationStyle(duration: Durations.extralong4),
+      enableAnimation: const AnimationStyle(duration: Durations.extralong4),
       selectAnimation: AnimationStyle.noAnimation,
     );
 

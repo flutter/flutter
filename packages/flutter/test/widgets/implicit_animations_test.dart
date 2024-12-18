@@ -612,7 +612,7 @@ void main() {
 
     await tester.pumpWidget(
       DefaultAnimationStyle(
-        style: AnimationStyle(
+        style: const AnimationStyle(
           duration: Durations.short1,
           curve: Curves.easeInQuad,
         ),
@@ -653,7 +653,7 @@ void main() {
 
     await tester.pumpWidget(
       DefaultAnimationStyle(
-        style: AnimationStyle(
+        style: const AnimationStyle(
           duration: Durations.short3,
           curve: Curves.easeInQuint,
         ),
@@ -668,7 +668,7 @@ void main() {
     // are used when no curve/duration values are specified.
     await tester.pumpWidget(
       DefaultAnimationStyle(
-        style: AnimationStyle(),
+        style: const AnimationStyle(),
         child: AnimatedContainer(),
       ),
     );

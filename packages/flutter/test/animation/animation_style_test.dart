@@ -8,16 +8,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('copyWith, ==, hashCode basics', () {
-    expect(AnimationStyle(), AnimationStyle().copyWith());
-    expect(AnimationStyle().hashCode, AnimationStyle().copyWith().hashCode);
+    expect(const AnimationStyle(), const AnimationStyle().copyWith());
+    expect(const AnimationStyle().hashCode, const AnimationStyle().copyWith().hashCode);
   });
 
   testWidgets('AnimationStyle.copyWith() overrides all properties', (WidgetTester tester) async {
-    final AnimationStyle original = AnimationStyle(
+    const AnimationStyle original = AnimationStyle(
       curve: Curves.ease,
-      duration: const Duration(seconds: 1),
+      duration: Duration(seconds: 1),
       reverseCurve: Curves.ease,
-      reverseDuration: const Duration(seconds: 1),
+      reverseDuration: Duration(seconds: 1),
     );
     final AnimationStyle copy = original.copyWith(
       curve: Curves.linear,
@@ -32,15 +32,15 @@ void main() {
   });
 
   testWidgets('AnimationStyle.merge() fills in null properties', (WidgetTester tester) async {
-    final AnimationStyle original = AnimationStyle(
+    const AnimationStyle original = AnimationStyle(
       curve: Curves.ease,
-      duration: const Duration(seconds: 1),
+      duration: Duration(seconds: 1),
       reverseCurve: Curves.ease,
-      reverseDuration: const Duration(seconds: 1),
+      reverseDuration: Duration(seconds: 1),
     );
-    final AnimationStyle other = AnimationStyle(
+    const AnimationStyle other = AnimationStyle(
       curve: Curves.linear,
-      duration: const Duration(seconds: 2),
+      duration: Duration(seconds: 2),
     );
     final AnimationStyle merged = original.merge(other);
     expect(merged.curve, Curves.linear);
@@ -51,22 +51,22 @@ void main() {
 
   test('AnimationStyle.lerp identical a,b', () {
     expect(AnimationStyle.lerp(null, null, 0), null);
-    final AnimationStyle data = AnimationStyle();
+    const AnimationStyle data = AnimationStyle();
     expect(identical(AnimationStyle.lerp(data, data, 0.5), data), true);
   });
 
   testWidgets('AnimationStyle.lerp control test', (WidgetTester tester) async {
-    final AnimationStyle a = AnimationStyle(
+    const AnimationStyle a = AnimationStyle(
       curve: Curves.ease,
-      duration: const Duration(seconds: 1),
+      duration: Duration(seconds: 1),
       reverseCurve: Curves.ease,
-      reverseDuration: const Duration(seconds: 1),
+      reverseDuration: Duration(seconds: 1),
     );
-    final AnimationStyle b = AnimationStyle(
+    const AnimationStyle b = AnimationStyle(
       curve: Curves.linear,
-      duration: const Duration(seconds: 2),
+      duration: Duration(seconds: 2),
       reverseCurve: Curves.linear,
-      reverseDuration: const Duration(seconds: 2),
+      reverseDuration: Duration(seconds: 2),
     );
 
     expect(AnimationStyle.lerp(a, b, 0), a);
@@ -77,7 +77,7 @@ void main() {
   testWidgets('default AnimationStyle debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-    AnimationStyle().debugFillProperties(builder);
+    const AnimationStyle().debugFillProperties(builder);
 
     final List<String> description = builder.properties
       .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
@@ -89,11 +89,11 @@ void main() {
   testWidgets('AnimationStyle implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-    AnimationStyle(
+    const AnimationStyle(
       curve: Curves.easeInOut,
-      duration: const Duration(seconds: 1),
+      duration: Duration(seconds: 1),
       reverseCurve: Curves.bounceInOut,
-      reverseDuration: const Duration(seconds: 2),
+      reverseDuration: Duration(seconds: 2),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties

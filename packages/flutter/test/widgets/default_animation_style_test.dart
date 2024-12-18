@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('DefaultAnimationStyle notifier value matches widget', (WidgetTester tester) async {
     late StateSetter setState;
-    AnimationStyle style = AnimationStyle();
+    AnimationStyle style = const AnimationStyle();
     const Widget child = SizedBox.shrink(key: Key('key'));
 
     await tester.pumpWidget(StatefulBuilder(
@@ -25,17 +25,17 @@ void main() {
     expect(styleNotifier.value, style);
 
     setState(() {
-      style = AnimationStyle(curve: Curves.ease);
+      style = const AnimationStyle(curve: Curves.ease);
     });
     await tester.pump();
     expect(styleNotifier.value, style);
 
     setState(() {
-      style = AnimationStyle(
+      style = const AnimationStyle(
         curve: Curves.bounceIn,
         duration: Durations.extralong4,
-        reverseCurve: const SawTooth(2),
-        reverseDuration: const Duration(days: DateTime.thursday),
+        reverseCurve: SawTooth(2),
+        reverseDuration: Duration(days: DateTime.thursday),
       );
     });
     await tester.pump();

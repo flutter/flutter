@@ -1132,7 +1132,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Override the animation duration.
-    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(duration: const Duration(milliseconds: 800))));
+    await tester.pumpWidget(buildExpansionTile(animationStyle: const AnimationStyle(duration: Duration(milliseconds: 800))));
     await tester.pumpAndSettle();
 
     // Test the overridden animation duration.
@@ -1155,7 +1155,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Override the animation curve.
-    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(
+    await tester.pumpWidget(buildExpansionTile(animationStyle: const AnimationStyle(
       curve: Easing.emphasizedDecelerate,
       reverseCurve: Easing.emphasizedAccelerate,
     )));
