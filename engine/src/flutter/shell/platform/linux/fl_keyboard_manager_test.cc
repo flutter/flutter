@@ -323,7 +323,10 @@ class KeyboardTester {
         messenger_, [](const AsyncKeyCallback& callback) { callback(false); });
 
     view_ = fl_mock_view_delegate_new();
-    respondToEmbedderCallsWith(false);
+    embedder_handler_ = [](const FlutterKeyEvent* event,
+                           const AsyncKeyCallback& callback) {
+      callback(false);
+    };
     respondToTextInputWith(false);
     setLayout(kLayoutUs);
 
@@ -375,13 +378,6 @@ class KeyboardTester {
   }
 
   FlKeyboardManager* manager() { return manager_; }
-
-  void respondToEmbedderCallsWith(bool response) {
-    embedder_handler_ = [response](const FlutterKeyEvent* event,
-                                   const AsyncKeyCallback& callback) {
-      callback(response);
-    };
-  }
 
   void recordEmbedderCallsTo(std::vector<CallRecord>& storage) {
     embedder_handler_ = [&storage](const FlutterKeyEvent* event,
