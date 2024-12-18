@@ -8,6 +8,7 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart' show TickerProvider;
 
+import 'curves.dart';
 import 'tween.dart';
 
 /// Used to override the default parameters of an animation.
@@ -52,6 +53,14 @@ class AnimationStyle with Diagnosticable {
 
   /// When specified, the reverse animation will use this duration.
   final Duration? reverseDuration;
+
+  /// Widgets that interface with [DefaultAnimationStyle] can
+  /// use this value if a [Duration] is not present in the current scope.
+  static const Duration fallbackDuration = Duration(milliseconds: 300);
+
+  /// Widgets that interface with [DefaultAnimationStyle] can
+  /// use this value if a [Curve] is not present in the current scope.
+  static const Curve fallbackCurve = Curves.linear;
 
   /// Creates a new [AnimationStyle] based on the current selection, with the
   /// provided parameters overridden.

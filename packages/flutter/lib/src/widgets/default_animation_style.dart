@@ -40,14 +40,6 @@ sealed class DefaultAnimationStyle implements Widget {
     required Widget child,
   }) = _InheritedAnimationStyle;
 
-  /// Widgets that interface with [DefaultAnimationStyle] can
-  /// use this value if a [Duration] is not present in the current scope.
-  static const Duration fallbackDuration = Duration(milliseconds: 300);
-
-  /// Widgets that interface with [DefaultAnimationStyle] can
-  /// use this value if a [Curve] is not present in the current scope.
-  static const Curve fallbackCurve = Curves.linear;
-
   /// Returns the [AnimationStyle] corresponding to the nearest ancestor
   /// [DefaultAnimationStyle] widget.
   ///

@@ -673,8 +673,8 @@ void main() {
       ),
     );
     (curve, duration) = curveAndDuration();
-    expect(curve, DefaultAnimationStyle.fallbackCurve);
-    expect(duration, DefaultAnimationStyle.fallbackDuration);
+    expect(curve, AnimationStyle.fallbackCurve);
+    expect(duration, AnimationStyle.fallbackDuration);
   });
 
   testWidgets('Ensure CurvedAnimations are disposed on widget change',

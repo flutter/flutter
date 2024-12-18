@@ -21,7 +21,6 @@ import 'package:vector_math/vector_math_64.dart';
 import 'basic.dart';
 import 'container.dart';
 import 'debug.dart';
-import 'default_animation_style.dart';
 import 'framework.dart';
 import 'text.dart';
 import 'ticker_provider.dart';
@@ -360,34 +359,23 @@ typedef TweenVisitor<T extends Object> = Tween<T>? Function(Tween<T>? tween, T t
 abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin<T> {
   /// The animation controller driving this widget's implicit animations.
   @protected
-  AnimationController get controller => _controller;
-  late final AnimationController _controller = AnimationController(
-    duration: widget.duration,
+  late final AnimationController controller = AnimationController(
     debugLabel: kDebugMode ? widget.toStringShort() : null,
     vsync: this,
   );
 
   /// The animation driving this widget's implicit animations.
-  Animation<double> get animation => _animation;
-  late CurvedAnimation _animation = _createCurve();
-
-  late ValueListenable<AnimationStyle> _styleNotifier = DefaultAnimationStyle.getNotifier(context);
-  void _updateCurveAndDuration() {
-    late final AnimationStyle defaultStyle = _styleNotifier.value;
-    _animation.curve = widget.curve ?? defaultStyle.curve ?? DefaultAnimationStyle.fallbackCurve;
-    _controller.duration = widget.duration ?? defaultStyle.duration ?? DefaultAnimationStyle.fallbackDuration;
-  }
+  Animation<double> get animation => controller;
 
   @protected
   @override
   void initState() {
     super.initState();
-    _controller.addStatusListener((AnimationStatus status) {
+    controller.addStatusListener((AnimationStatus status) {
       if (status.isCompleted) {
         widget.onEnd?.call();
       }
     });
-    _styleNotifier.addListener(_updateCurveAndDuration..call());
     _constructTweens();
     didUpdateTweens();
   }
@@ -396,59 +384,22 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   @override
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.curve != oldWidget.curve) {
-      _animation.dispose();
-      _animation = _createCurve();
-    }
-    _updateCurveAndDuration();
     if (_constructTweens()) {
       forEachTween((Tween<dynamic>? tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
-        _updateTween(tween, targetValue);
-        return tween;
+        return tween
+          ?..begin = tween.evaluate(controller)
+          ..end = targetValue;
       });
-      _controller
-        ..value = 0.0
-        ..forward();
+      controller.animateTo(1.0, from: 0.0, duration: widget.duration, curve: widget.curve);
       didUpdateTweens();
     }
   }
 
   @protected
   @override
-  void activate() {
-    super.activate();
-    final ValueListenable<AnimationStyle> newNotifier = DefaultAnimationStyle.getNotifier(context);
-    if (newNotifier == _styleNotifier) {
-      return;
-    }
-    _styleNotifier.removeListener(_updateCurveAndDuration);
-    _styleNotifier = newNotifier..addListener(_updateCurveAndDuration..call());
-  }
-
-  CurvedAnimation _createCurve() {
-    return CurvedAnimation(parent: _controller, curve: widget.curve ?? Curves.linear);
-  }
-
-  @protected
-  @override
   void dispose() {
-    _styleNotifier.removeListener(_updateCurveAndDuration);
-    _animation.dispose();
-    _controller.dispose();
+    controller.dispose();
     super.dispose();
-  }
-
-  bool _shouldAnimateTween(Tween<dynamic> tween, dynamic targetValue) {
-    return targetValue != (tween.end ?? tween.begin);
-  }
-
-  void _updateTween(Tween<dynamic>? tween, dynamic targetValue) {
-    if (tween == null) {
-      return;
-    }
-    tween
-      ..begin = tween.evaluate(_animation)
-      ..end = targetValue;
   }
 
   bool _constructTweens() {
@@ -456,7 +407,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     forEachTween((Tween<dynamic>? tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
       if (targetValue != null) {
         tween ??= constructor(targetValue);
-        if (_shouldAnimateTween(tween, targetValue)) {
+        if (targetValue != (tween.end ?? tween.begin)) {
           shouldStartAnimation = true;
         } else {
           tween.end ??= tween.begin;
@@ -600,56 +551,21 @@ typedef AnimationBuilder<T> = Widget Function(BuildContext context, Animation<T>
 ///
 /// This class is similar to [ValueNotifier] but uses an [AnimationProvider]
 /// to smoothly transition between values.
-class ValueAnimation<T> extends ValueAnimationBase<T> implements StyledAnimation<T> {
+class ValueAnimation<T> extends ValueAnimationBase<T> {
   /// Creates a [ValueListenable] that smoothly animates between values.
   ///
   /// {@macro flutter.animation.ValueAnimation.value_setter}
   ValueAnimation({
-    required AnimationProvider vsync,
+    required super.vsync,
     required super.initialValue,
-    Duration? duration,
-    Curve? curve,
+    super.duration,
+    super.curve,
     LerpCallback<T>? lerp,
     super.animationBehavior,
     super.debugLabel,
-  }) : _configuredDuration = duration,
-       _configuredCurve = curve,
-       super.lerpWith(
-         vsync: vsync,
-         duration: DefaultAnimationStyle.fallbackDuration,
-         curve: DefaultAnimationStyle.fallbackCurve,
+  }) : super.lerpWith(
          lerp: lerp ?? AnimatedValue.lerpCallbackOfExactType<T>(),
-       ) {
-    vsync.registerAnimation(this);
-  }
-
-  @override
-  Duration get duration => _configuredDuration ?? super.duration;
-  Duration? _configuredDuration;
-  @override
-  set duration(Duration? value) {
-    _configuredDuration = value;
-  }
-
-  @override
-  Curve get curve => _configuredCurve ?? super.curve;
-  Curve? _configuredCurve;
-  @override
-  set curve(Curve? value) {
-    _configuredCurve = value;
-  }
-
-  @override
-  void updateStyle(AnimationStyle newStyle) {
-    late final Duration? newDuration = newStyle.duration;
-    late final Curve? newCurve = newStyle.curve;
-    if (_configuredDuration == null && newDuration != null) {
-      super.duration = newDuration;
-    }
-    if (_configuredCurve == null && newCurve != null) {
-      super.curve = newCurve;
-    }
-  }
+       );
 }
 
 /// A widget that animates based on changes to its [value].

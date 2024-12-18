@@ -149,7 +149,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   RenderAnimatedSizeState _state = RenderAnimatedSizeState.start;
 
   /// The duration of the animation.
-  Duration get duration => _controller.duration!;
+  Duration get duration => _controller.duration;
   set duration(Duration value) {
     if (value == _controller.duration) {
       return;
