@@ -69,17 +69,28 @@ class AnimationStyle with Diagnosticable {
     );
   }
 
+  /// Returns a modified version of the [other] style, where its `null` properties
+  /// are filled in with the non-null properties of this style, where applicable.
+  /// 
+  /// If a `null` argument is passed, returns this text style.
+  AnimationStyle merge(AnimationStyle? other) {
+    if (other == null) {
+      return this;
+    }
+    return copyWith(
+      curve: other.curve,
+      duration: other.duration,
+      reverseCurve: other.reverseCurve,
+      reverseDuration: other.reverseDuration,
+    );
+  }
+
   /// Linearly interpolate between two animation styles.
   static AnimationStyle? lerp(AnimationStyle? a, AnimationStyle? b, double t) {
     if (identical(a, b)) {
       return a;
     }
-    return AnimationStyle(
-      curve: t < 0.5 ? a?.curve : b?.curve,
-      duration: t < 0.5 ? a?.duration : b?.duration,
-      reverseCurve: t < 0.5 ? a?.reverseCurve : b?.reverseCurve,
-      reverseDuration: t < 0.5 ? a?.reverseDuration : b?.reverseDuration,
-    );
+    return t < 0.5 ? a : b;
   }
 
   @override

@@ -31,13 +31,31 @@ void main() {
     expect(copy.reverseDuration, const Duration(seconds: 2));
   });
 
+  testWidgets('AnimationStyle.merge() fills in null properties', (WidgetTester tester) async {
+    final AnimationStyle original = AnimationStyle(
+      curve: Curves.ease,
+      duration: const Duration(seconds: 1),
+      reverseCurve: Curves.ease,
+      reverseDuration: const Duration(seconds: 1),
+    );
+    final AnimationStyle other = AnimationStyle(
+      curve: Curves.linear,
+      duration: const Duration(seconds: 2),
+    );
+    final AnimationStyle merged = original.merge(other);
+    expect(merged.curve, Curves.linear);
+    expect(merged.duration, const Duration(seconds: 2));
+    expect(merged.reverseCurve, Curves.ease);
+    expect(merged.reverseDuration, const Duration(seconds: 1));
+  });
+
   test('AnimationStyle.lerp identical a,b', () {
     expect(AnimationStyle.lerp(null, null, 0), null);
     final AnimationStyle data = AnimationStyle();
     expect(identical(AnimationStyle.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgets('default AnimationStyle debugFillProperties', (WidgetTester tester) async {
+  testWidgets('AnimationStyle.lerp control test', (WidgetTester tester) async {
     final AnimationStyle a = AnimationStyle(
       curve: Curves.ease,
       duration: const Duration(seconds: 1),
