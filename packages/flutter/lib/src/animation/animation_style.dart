@@ -91,29 +91,18 @@ class AnimationStyle with Diagnosticable {
       return a;
     }
     return AnimationStyle(
-      curve: _lerpCurve(a?.curve, b?.curve, t),
-      duration: _lerpDuration(a?.duration, b?.duration, t),
-      reverseCurve: _lerpCurve(a?.reverseCurve, b?.reverseCurve, t),
-      reverseDuration: _lerpDuration(a?.reverseDuration, b?.reverseDuration, t),
-    );
-  }
-  
-  static Duration? _lerpDuration(Duration? a, Duration? b, double t) {
-    if (t == 0.0) {
-      return a;
-    }
-    if (t == 1.0) {
-      return b;
-    }
-    if (a == null || b == null) {
-      return a ?? b;
-    }
-    return Duration(
-      microseconds: (a.inMicroseconds * (1.0 - t) + b.inMicroseconds * t).round(),
+      curve: _lerp(a?.curve, b?.curve, t, _LerpedCurve.new),
+      duration: _lerp(a?.duration, b?.duration, t, _lerpDuration),
+      reverseCurve: _lerp(a?.reverseCurve, b?.reverseCurve, t, _LerpedCurve.new),
+      reverseDuration: _lerp(a?.reverseDuration, b?.reverseDuration, t, _lerpDuration),
     );
   }
 
-  static Curve? _lerpCurve(Curve? a, Curve? b, double t) {
+  @optionalTypeArgs
+  static T? _lerp<T extends Object>(T? a, T? b, double t, T Function(T a, T b, double t) lerp) {
+    if (identical(a, b)) {
+      return a;
+    }
     if (t == 0.0) {
       return a;
     }
@@ -123,7 +112,13 @@ class AnimationStyle with Diagnosticable {
     if (a == null || b == null) {
       return a ?? b;
     }
-    return _LerpedCurve(a, b, t);
+    return lerp(a, b, t);
+  }
+
+  static Duration _lerpDuration(Duration a, Duration b, double t) {
+    return Duration(
+      microseconds: (a.inMicroseconds * (1.0 - t) + b.inMicroseconds * t).round(),
+    );
   }
 
   @override
