@@ -71,7 +71,7 @@ class AnimationStyle with Diagnosticable {
 
   /// Returns a modified version of the [other] style, where its `null` properties
   /// are filled in with the non-null properties of this style, where applicable.
-  /// 
+  ///
   /// If a `null` argument is passed, returns this text style.
   AnimationStyle merge(AnimationStyle? other) {
     if (other == null) {
@@ -126,12 +126,12 @@ class AnimationStyle with Diagnosticable {
   }
 }
 
-/// An animation that interfaces with an [AnimationStyleProvider].
+/// An animation that interfaces with an [AnimationProvider].
 ///
 /// Typically, this interface is used to allow animations to inherit
 /// fallback [Duration] and [Curve] values from the ambient [DefaultAnimationStyle].
 abstract interface class StyledAnimation<T> implements Animation<T> {
-  /// Called when the associated [AnimationStyleProvider] is updated
+  /// Called when the associated [AnimationProvider] is updated
   /// with a new [AnimationStyle].
   void updateStyle(AnimationStyle newStyle);
 }
@@ -141,7 +141,7 @@ abstract interface class StyledAnimation<T> implements Animation<T> {
 /// Any [StyledAnimation]s registered via [registerAnimation] will be given
 /// fallback [Duration] and [Curve] values, typically from the ambient
 /// [DefaultAnimationStyle].
-abstract interface class AnimationStyleProvider implements TickerProvider {
+abstract interface class AnimationProvider implements TickerProvider {
   /// Registers the [StyledAnimation] object with this provider.
   ///
   /// [StyledAnimation.updateStyle] is called immediately, and then called again

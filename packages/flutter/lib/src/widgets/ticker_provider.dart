@@ -9,7 +9,7 @@ import 'package:flutter/scheduler.dart';
 import 'default_animation_style.dart';
 import 'framework.dart';
 
-export 'package:flutter/animation.dart' show AnimationStyleProvider;
+export 'package:flutter/animation.dart' show AnimationProvider;
 export 'package:flutter/scheduler.dart' show TickerProvider;
 
 // Examples can assume:
@@ -180,7 +180,7 @@ typedef _StyleNotifier = ValueListenable<AnimationStyle>;
 /// [AnimationController] objects over the lifetime of the [State], use a full
 /// [TickerProviderStateMixin] instead.
 @optionalTypeArgs
-mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> implements AnimationStyleProvider {
+mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> implements AnimationProvider {
   Ticker? _ticker;
 
   @override
