@@ -5,19 +5,36 @@
 import 'dart:convert' show JsonEncoder;
 import 'dart:io' as io;
 
+import 'package:archive/archive_io.dart';
+import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as pathlib;
 
+import '../common.dart';
 import '../environment.dart';
 import '../exceptions.dart';
 import '../felt_config.dart';
 import '../pipeline.dart';
 import '../utils.dart';
 
+sealed class ArtifactSource {}
+
+class LocalArtifactSource implements ArtifactSource {
+  LocalArtifactSource({required this.mode});
+
+  final RuntimeMode mode;
+}
+
+class GcsArtifactSource implements ArtifactSource {
+  GcsArtifactSource({required this.realm});
+
+  final LuciRealm realm;
+}
+
 class CopyArtifactsStep implements PipelineStep {
-  CopyArtifactsStep(this.artifactDeps, { required this.runtimeMode });
+  CopyArtifactsStep(this.artifactDeps, { required this.source });
 
   final ArtifactDependencies artifactDeps;
-  final RuntimeMode runtimeMode;
+  final ArtifactSource source;
 
   @override
   String get description => 'copy_artifacts';
@@ -30,24 +47,65 @@ class CopyArtifactsStep implements PipelineStep {
     await cleanup();
   }
 
+  Future<io.Directory> _downloadArtifacts(LuciRealm realm) async {
+    final String realmComponent = switch (realm) {
+      LuciRealm.Prod => '',
+      LuciRealm.Staging || LuciRealm.Try => 'flutter_archives_v2/',
+      LuciRealm.Unknown => throw ToolExit('Could not generate artifact bucket url for unknown realm.'),
+    };
+    final Uri url = Uri.https('storage.googleapis.com', '${realmComponent}flutter_infra_release/flutter/$gitRevision/flutter-web-sdk.zip');
+    final http.Response response = await http.Client().get(url);
+    if (response.statusCode != 200) {
+      throw ToolExit('Could not download flutter-web-sdk.zip from cloud bucket at URL: $url. Response status code: ${response.statusCode}');
+    }
+    final Archive archive = ZipDecoder().decodeBytes(response.bodyBytes);
+    final io.Directory tempDirectory = await io.Directory.systemTemp.createTemp();
+    await extractArchiveToDisk(archive, tempDirectory.absolute.path);
+    return tempDirectory;
+  }
+
   @override
   Future<void> run() async {
+    final String flutterJsSourceDirectory;
+    final String canvaskitSourceDirectory;
+    final String canvaskitChromiumSourceDirectory;
+    final String skwasmSourceDirectory;
+    final String skwasmStSourceDirectory;
+    switch (source) {
+      case LocalArtifactSource(:final mode):
+        final buildDirectory = getBuildDirectoryForRuntimeMode(mode).path;
+        flutterJsSourceDirectory = pathlib.join(buildDirectory, 'flutter_web_sdk', 'flutter_js');
+        canvaskitSourceDirectory = pathlib.join(buildDirectory, 'canvaskit');
+        canvaskitChromiumSourceDirectory = pathlib.join(buildDirectory, 'canvaskit_chromium');
+        skwasmSourceDirectory = pathlib.join(buildDirectory, 'skwasm');
+        skwasmStSourceDirectory = pathlib.join(buildDirectory, 'skwasm_st');
+
+      case GcsArtifactSource(:final realm):
+        final artifactsDirectory = (await _downloadArtifacts(realm)).path;
+        flutterJsSourceDirectory = pathlib.join(artifactsDirectory, 'flutter_js');
+        canvaskitSourceDirectory = pathlib.join(artifactsDirectory, 'canvaskit');
+        canvaskitChromiumSourceDirectory = pathlib.join(artifactsDirectory, 'canvaskit', 'chromium');
+        skwasmSourceDirectory = pathlib.join(artifactsDirectory, 'canvaskit');
+        skwasmStSourceDirectory = pathlib.join(artifactsDirectory, 'canvaskit');
+    }
+
     await environment.webTestsArtifactsDir.create(recursive: true);
     await buildHostPage();
     await copyTestFonts();
     await copySkiaTestImages();
-    await copyFlutterJsFiles();
+    await copyFlutterJsFiles(flutterJsSourceDirectory);
     if (artifactDeps.canvasKit) {
       print('Copying CanvasKit...');
-      await copyCanvasKitFiles('canvaskit', 'canvaskit');
+      await copyWasmLibrary('canvaskit', canvaskitSourceDirectory, 'canvaskit');
     }
     if (artifactDeps.canvasKitChromium) {
       print('Copying CanvasKit (Chromium)...');
-      await copyCanvasKitFiles('canvaskit_chromium', 'canvaskit/chromium');
+      await copyWasmLibrary('canvaskit', canvaskitChromiumSourceDirectory, 'canvaskit/chromium');
     }
     if (artifactDeps.skwasm) {
       print('Copying Skwasm...');
-      await copySkwasm();
+      await copyWasmLibrary('skwasm', skwasmSourceDirectory, 'canvaskit');
+      await copyWasmLibrary('skwasm_st', skwasmStSourceDirectory, 'canvaskit');
     }
   }
 
@@ -151,12 +209,8 @@ class CopyArtifactsStep implements PipelineStep {
     }
   }
 
-  Future<void> copyFlutterJsFiles() async {
-    final io.Directory flutterJsInputDirectory = io.Directory(pathlib.join(
-      outBuildPath,
-      'flutter_web_sdk',
-      'flutter_js',
-    ));
+  Future<void> copyFlutterJsFiles(String sourcePath) async {
+    final io.Directory flutterJsInputDirectory = io.Directory(sourcePath);
     final String targetDirectoryPath = pathlib.join(
       environment.webTestsArtifactsDir.path,
       'flutter_js',
@@ -182,24 +236,19 @@ class CopyArtifactsStep implements PipelineStep {
     }
   }
 
-  Future<void> copyCanvasKitFiles(String sourcePath, String destinationPath) async {
-    final String sourceDirectoryPath = pathlib.join(
-      outBuildPath,
-      sourcePath,
-    );
-
+  Future<void> copyWasmLibrary(String libraryName, String sourcePath, String destinationPath) async {
     final String targetDirectoryPath = pathlib.join(
       environment.webTestsArtifactsDir.path,
       destinationPath,
     );
 
     for (final String filename in <String>[
-      'canvaskit.js',
-      'canvaskit.wasm',
-      'canvaskit.wasm.map',
+      '$libraryName.js',
+      '$libraryName.wasm',
+      '$libraryName.wasm.map',
     ]) {
       final io.File sourceFile = io.File(pathlib.join(
-        sourceDirectoryPath,
+        sourcePath,
         filename,
       ));
       final io.File targetFile = io.File(pathlib.join(
@@ -212,51 +261,10 @@ class CopyArtifactsStep implements PipelineStep {
           // they are optional.
           continue;
         } {
-          throw ToolExit('Built CanvasKit artifact not found at path "$sourceFile".');
+          throw ToolExit('Built artifact not found at path "$sourceFile".');
         }
       }
       await targetFile.create(recursive: true);
-      await sourceFile.copy(targetFile.path);
-    }
-  }
-
-  String get outBuildPath => getBuildDirectoryForRuntimeMode(runtimeMode).path;
-
-  Future<void> copySkwasm() async {
-    final io.Directory targetDir = io.Directory(pathlib.join(
-      environment.webTestsArtifactsDir.path,
-      'canvaskit',
-    ));
-
-    await targetDir.create(recursive: true);
-
-    for (final String fileName in <String>[
-      'skwasm.wasm',
-      'skwasm.wasm.map',
-      'skwasm.js',
-      'skwasm_st.wasm',
-      'skwasm_st.wasm.map',
-      'skwasm_st.js',
-    ]) {
-      final io.File sourceFile = io.File(pathlib.join(
-        outBuildPath,
-        'flutter_web_sdk',
-        'canvaskit',
-        fileName,
-      ));
-      if (!sourceFile.existsSync()) {
-        if (fileName.endsWith('.map')) {
-          // Sourcemaps are only generated under certain build conditions, so
-          // they are optional.
-          continue;
-        } {
-          throw ToolExit('Built Skwasm artifact not found at path "$sourceFile".');
-        }
-      }
-      final io.File targetFile = io.File(pathlib.join(
-        targetDir.path,
-        fileName,
-      ));
       await sourceFile.copy(targetFile.path);
     }
   }
