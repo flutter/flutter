@@ -964,6 +964,7 @@ targets:
   - name: Linux build_android_host_app_with_module_source
     recipe: devicelab/devicelab_drone
     timeout: 60
+    presubmit: false
     properties:
       dependencies: >-
         [
@@ -4116,6 +4117,7 @@ targets:
   - name: Mac build_android_host_app_with_module_source
     recipe: devicelab/devicelab_drone
     timeout: 60
+    presubmit: false
     properties:
       dependencies: >-
         [
@@ -5796,6 +5798,7 @@ targets:
   - name: Windows build_android_host_app_with_module_source
     recipe: devicelab/devicelab_drone
     timeout: 60
+    presubmit: false
     properties:
       dependencies: >-
         [
