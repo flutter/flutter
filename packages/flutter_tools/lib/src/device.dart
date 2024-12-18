@@ -1044,7 +1044,7 @@ class DebuggingOptions {
       startPaused = false,
       dartFlags = '',
       disableServiceAuthCodes = false,
-      enableDds = true,
+      enableDds = false,
       cacheStartupProfile = false,
       enableSoftwareRendering = false,
       skiaDeterministicRendering = false,

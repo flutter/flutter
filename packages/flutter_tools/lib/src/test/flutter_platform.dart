@@ -327,7 +327,7 @@ class FlutterPlatform extends PlatformPlugin {
   }) {
     _testGoldenComparator = TestGoldenComparator(
       flutterTesterBinPath: shellPath,
-      compilerFactory: () => TestCompiler(buildInfo, flutterProject, testTimeRecorder: testTimeRecorder),
+      compilerFactory: () => compiler ?? TestCompiler(buildInfo, flutterProject, testTimeRecorder: testTimeRecorder),
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
@@ -397,7 +397,9 @@ class FlutterPlatform extends PlatformPlugin {
     return controller.suite;
   }
 
-  StreamChannel<dynamic> loadChannel(String path, SuitePlatform platform) {
+  /// Used as an implementation detail for [load]ing a test suite.
+  @visibleForTesting
+  StreamChannel<Object?> loadChannel(String path, SuitePlatform platform) {
     if (_testCount > 0) {
       // Fail if there will be a port conflict.
       if (debuggingOptions.hostVmServicePort != null) {
@@ -497,7 +499,9 @@ class FlutterPlatform extends PlatformPlugin {
   }) {
     if (uri != null) {
       globals.printTrace('test $testCount: VM Service uri is available at $uri');
-      _listenToVmServiceForGoldens(uri: uri, testPath: testPath);
+      if (_isIntegrationTest) {
+        _listenToVmServiceForGoldens(uri: uri, testPath: testPath);
+      }
     } else {
       globals.printTrace('test $testCount: VM Service uri is not available');
     }
@@ -513,8 +517,6 @@ class FlutterPlatform extends PlatformPlugin {
   }) async {
     final Uri goldensBaseUri = Uri.parse(testPath);
     final FlutterVmService vmService = await connectToVmService(uri, logger: logger);
-
-    // TODO(matanlurey): Determine if we actually need to lookup/use the test isolate.
     final IsolateRef testAppIsolate = await vmService.findExtensionIsolate(_kExtension);
     await vmService.service.streamListen(_kEventName);
     vmService.service.onEvent(_kEventName).listen((Event e) async {
