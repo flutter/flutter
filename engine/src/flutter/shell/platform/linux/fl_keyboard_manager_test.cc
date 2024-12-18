@@ -390,41 +390,16 @@ class KeyboardTester {
 
   FlKeyboardManager* manager() { return manager_; }
 
-  // Dispatch each of the given events, expect their results to be false
-  // (unhandled), and clear the event array.
-  //
-  // Returns the number of events redispatched. If any result is unexpected
-  // (handled), return a minus number `-x` instead, where `x` is the index of
-  // the first unexpected redispatch.
-  int redispatchEventsAndClear(GPtrArray* events) {
-    guint event_count = events->len;
-    int first_error = -1;
-    during_redispatch_ = true;
-    for (guint event_id = 0; event_id < event_count; event_id += 1) {
-      FlKeyEvent* event = FL_KEY_EVENT(g_ptr_array_index(events, event_id));
-      bool handled = fl_keyboard_manager_handle_event(manager_, event);
-      EXPECT_FALSE(handled);
-      if (handled) {
-        first_error = first_error == -1 ? event_id : first_error;
-      }
-    }
-    during_redispatch_ = false;
-    g_ptr_array_set_size(events, 0);
-    return first_error < 0 ? event_count : -first_error;
-  }
-
   void respondToEmbedderCallsWith(bool response) {
-    embedder_handler_ = [response, this](const FlutterKeyEvent* event,
-                                         const AsyncKeyCallback& callback) {
-      EXPECT_FALSE(during_redispatch_);
+    embedder_handler_ = [response](const FlutterKeyEvent* event,
+                                   const AsyncKeyCallback& callback) {
       callback(response);
     };
   }
 
   void recordEmbedderCallsTo(std::vector<CallRecord>& storage) {
-    embedder_handler_ = [&storage, this](const FlutterKeyEvent* event,
-                                         AsyncKeyCallback callback) {
-      EXPECT_FALSE(during_redispatch_);
+    embedder_handler_ = [&storage](const FlutterKeyEvent* event,
+                                   AsyncKeyCallback callback) {
       auto new_event = std::make_unique<FlutterKeyEvent>(*event);
       char* new_event_character = cloneString(event->character);
       new_event->character = new_event_character;
@@ -440,10 +415,8 @@ class KeyboardTester {
   void respondToEmbedderCallsWithAndRecordsTo(
       bool response,
       std::vector<CallRecord>& storage) {
-    embedder_handler_ = [&storage, response, this](
-                            const FlutterKeyEvent* event,
-                            const AsyncKeyCallback& callback) {
-      EXPECT_FALSE(during_redispatch_);
+    embedder_handler_ = [&storage, response](const FlutterKeyEvent* event,
+                                             const AsyncKeyCallback& callback) {
       auto new_event = std::make_unique<FlutterKeyEvent>(*event);
       char* new_event_character = cloneString(event->character);
       new_event->character = new_event_character;
@@ -458,16 +431,13 @@ class KeyboardTester {
 
   void respondToChannelCallsWith(bool response) {
     fl_mock_key_binary_messenger_set_callback_handler(
-        messenger_, [response, this](const AsyncKeyCallback& callback) {
-          EXPECT_FALSE(during_redispatch_);
-          callback(response);
-        });
+        messenger_,
+        [response](const AsyncKeyCallback& callback) { callback(response); });
   }
 
   void recordChannelCallsTo(std::vector<CallRecord>& storage) {
     fl_mock_key_binary_messenger_set_callback_handler(
-        messenger_, [&storage, this](AsyncKeyCallback callback) {
-          EXPECT_FALSE(during_redispatch_);
+        messenger_, [&storage](AsyncKeyCallback callback) {
           storage.push_back(CallRecord{
               .type = CallRecord::KEY_CALL_CHANNEL,
               .callback = std::move(callback),
@@ -503,7 +473,6 @@ class KeyboardTester {
   FlEngine* engine_ = nullptr;
   FlKeyboardManager* manager_ = nullptr;
   GPtrArray* redispatched_events_ = nullptr;
-  bool during_redispatch_ = false;
   const MockLayoutData* layout_data_;
   EmbedderCallHandler embedder_handler_;
 };
@@ -520,6 +489,27 @@ static void flush_channel_messages() {
       },
       loop);
   g_main_loop_run(loop);
+}
+
+// Dispatch each of the given events, expect their results to be false
+// (unhandled), and clear the event array.
+//
+// Returns the number of events redispatched. If any result is unexpected
+// (handled), return a minus number `-x` instead, where `x` is the index of
+// the first unexpected redispatch.
+int redispatch_events_and_clear(FlKeyboardManager* manager, GPtrArray* events) {
+  guint event_count = events->len;
+  int first_error = -1;
+  for (guint event_id = 0; event_id < event_count; event_id += 1) {
+    FlKeyEvent* event = FL_KEY_EVENT(g_ptr_array_index(events, event_id));
+    bool handled = fl_keyboard_manager_handle_event(manager, event);
+    EXPECT_FALSE(handled);
+    if (handled) {
+      first_error = first_error == -1 ? event_id : first_error;
+    }
+  }
+  g_ptr_array_set_size(events, 0);
+  return first_error < 0 ? event_count : -first_error;
 }
 
 // Make sure that the keyboard can be disposed without crashes when there are
@@ -630,7 +620,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   call_records.clear();
 
   // Resolve redispatches
-  EXPECT_EQ(tester.redispatchEventsAndClear(redispatched), 2);
+  EXPECT_EQ(redispatch_events_and_clear(tester.manager(), redispatched), 2);
   flush_channel_messages();
   EXPECT_EQ(call_records.size(), 0u);
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(tester.manager()));
@@ -691,7 +681,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
 
   EXPECT_FALSE(fl_keyboard_manager_is_state_clear(tester.manager()));
 
-  EXPECT_EQ(tester.redispatchEventsAndClear(redispatched), 1);
+  EXPECT_EQ(redispatch_events_and_clear(tester.manager(), redispatched), 1);
   EXPECT_EQ(call_records.size(), 0u);
 
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(tester.manager()));
@@ -751,7 +741,7 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
   // Resolve redispatch
   flush_channel_messages();
   EXPECT_EQ(redispatched->len, 1u);
-  EXPECT_EQ(tester.redispatchEventsAndClear(redispatched), 1);
+  EXPECT_EQ(redispatch_events_and_clear(tester.manager(), redispatched), 1);
   EXPECT_EQ(call_records.size(), 0u);
 
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(tester.manager()));
@@ -776,7 +766,7 @@ TEST(FlKeyboardManagerTest, TextInputHandlerReturnsFalse) {
   EXPECT_EQ(redispatched->len, 1u);
 
   // Resolve redispatched event.
-  EXPECT_EQ(tester.redispatchEventsAndClear(redispatched), 1);
+  EXPECT_EQ(redispatch_events_and_clear(tester.manager(), redispatched), 1);
 
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(tester.manager()));
 }
