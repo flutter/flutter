@@ -319,10 +319,11 @@ class KeyboardTester {
  public:
   KeyboardTester() {
     messenger_ = fl_mock_key_binary_messenger_new();
+    fl_mock_key_binary_messenger_set_callback_handler(
+        messenger_, [](const AsyncKeyCallback& callback) { callback(false); });
 
     view_ = fl_mock_view_delegate_new();
     respondToEmbedderCallsWith(false);
-    respondToChannelCallsWith(false);
     respondToTextInputWith(false);
     setLayout(kLayoutUs);
 
@@ -412,12 +413,6 @@ class KeyboardTester {
       });
       callback(response);
     };
-  }
-
-  void respondToChannelCallsWith(bool response) {
-    fl_mock_key_binary_messenger_set_callback_handler(
-        messenger_,
-        [response](const AsyncKeyCallback& callback) { callback(response); });
   }
 
   void recordChannelCallsTo(std::vector<CallRecord>& storage) {
