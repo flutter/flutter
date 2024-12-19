@@ -330,46 +330,24 @@ class KeyboardTester {
  public:
   KeyboardTester() {
     messenger_ = fl_mock_key_binary_messenger_new();
-    fl_mock_key_binary_messenger_set_callback_handler(
-        messenger_,
-        [](FlutterKeyEventCallback callback, gpointer callback_user_data,
-           gpointer user_data) { callback(false, callback_user_data); },
-        nullptr);
-
     view_ = fl_mock_view_delegate_new();
-    respondToTextInputWith(false);
-    setLayout(kLayoutUs);
-
     engine_ = FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
                                      FL_BINARY_MESSENGER(messenger_), nullptr));
     manager_ =
         fl_keyboard_manager_new(engine_, FL_KEYBOARD_VIEW_DELEGATE(view_));
-    fl_keyboard_manager_set_send_key_event_handler(
-        manager_,
-        [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
-           void* callback_user_data,
-           gpointer user_data) { callback(false, callback_user_data); },
-        this);
     fl_keyboard_manager_set_lookup_key_handler(
         manager_,
         [](const GdkKeymapKey* key, gpointer user_data) {
-          KeyboardTester* self = reinterpret_cast<KeyboardTester*>(user_data);
+          MockLayoutData* layout_data = static_cast<MockLayoutData*>(user_data);
           guint8 group = static_cast<guint8>(key->group);
-          EXPECT_LT(group, self->layout_data_->size());
-          const MockGroupLayoutData* group_layout =
-              (*self->layout_data_)[group];
-          EXPECT_TRUE(group_layout != nullptr);
+          EXPECT_LT(group, layout_data->size());
+          const MockGroupLayoutData* group_layout = (*layout_data)[group];
+          EXPECT_NE(group_layout, nullptr);
           EXPECT_TRUE(key->level == 0 || key->level == 1);
           bool shift = key->level == 1;
           return (*group_layout)[key->keycode * 2 + shift];
         },
-        this);
-    fl_keyboard_manager_set_redispatch_handler(
-        manager_,
-        [](FlKeyEvent* event, gpointer user_data) {
-
-        },
-        nullptr);
+        (gpointer)(&kLayoutUs));
   }
 
   ~KeyboardTester() {
@@ -383,18 +361,11 @@ class KeyboardTester {
 
   FlMockKeyBinaryMessenger* messenger() { return messenger_; }
 
-  void respondToTextInputWith(bool response) {
-    fl_mock_view_set_text_filter_result(view_, response);
-  }
-
-  void setLayout(const MockLayoutData& layout) { layout_data_ = &layout; }
-
  private:
   FlMockViewDelegate* view_;
   FlMockKeyBinaryMessenger* messenger_ = nullptr;
   FlEngine* engine_ = nullptr;
   FlKeyboardManager* manager_ = nullptr;
-  const MockLayoutData* layout_data_;
 };
 
 // Block until all GdkMainLoop messages are processed, which is basically used
@@ -477,6 +448,12 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   std::vector<CallRecord> call_records;
   g_autoptr(GPtrArray) redispatched =
       g_ptr_array_new_with_free_func(g_object_unref);
+
+  fl_mock_key_binary_messenger_set_callback_handler(
+      tester.messenger(),
+      [](FlutterKeyEventCallback callback, gpointer callback_user_data,
+         gpointer user_data) { callback(false, callback_user_data); },
+      nullptr);
 
   /// Test 1: One event that is handled by the framework
   fl_keyboard_manager_set_send_key_event_handler(
@@ -582,6 +559,12 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
   std::vector<CallRecord> call_records;
   g_autoptr(GPtrArray) redispatched =
       g_ptr_array_new_with_free_func(g_object_unref);
+
+  fl_mock_key_binary_messenger_set_callback_handler(
+      tester.messenger(),
+      [](FlutterKeyEventCallback callback, gpointer callback_user_data,
+         gpointer user_data) { callback(false, callback_user_data); },
+      nullptr);
 
   /// Test 1: One event that is handled by the framework
   fl_keyboard_manager_set_send_key_event_handler(
