@@ -24,7 +24,6 @@ class GenerateBuilderJsonCommand extends Command<bool> {
 
   @override
   FutureOr<bool>? run() {
-    print('running');
     final PackageLock packageLock = PackageLock();
     final FeltConfig config = FeltConfig.fromFile(
       path.join(environment.webUiTestDir.path, 'felt_config.yaml')
@@ -49,7 +48,6 @@ class GenerateBuilderJsonCommand extends Command<bool> {
     ));
     buildConfigFile.createSync(recursive: true);
     buildConfigFile.writeAsStringSync('$builderConfig\n');
-    print('wrote $filename');
   }
 
   String _generateBuilderJson(Iterable<Map<String, dynamic>> builds, Iterable<Map<String, dynamic>> tests) {
