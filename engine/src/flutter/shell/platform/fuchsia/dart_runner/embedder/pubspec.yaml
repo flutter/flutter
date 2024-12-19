@@ -5,6 +5,8 @@
 # The presence of this file is necessary in order to use the dart_library
 # template in BUILD.gn.
 
+name: fuchsia_embedder
+
 environment:
   sdk: ^3.7.0-0
 
