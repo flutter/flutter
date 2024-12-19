@@ -1064,7 +1064,6 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    assert(_imageStream != null);
     WidgetsBinding.instance.removeObserver(this);
     _stopListeningToStream();
     _completerHandle?.dispose();
@@ -1076,9 +1075,12 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   @override
   void didChangeDependencies() {
     _updateInvertColors();
-    _resolveImage();
 
+    // Resolve and decode the image only if ticker mode is not disabled.
+    // Thus, if ticker mode is disabled in the whole lifecycle of the image,
+    // it does not need to get a stream.
     if (TickerMode.of(context)) {
+      _resolveImage();
       _listenToStream();
     } else {
       _stopListeningToStream(keepStreamAlive: true);
