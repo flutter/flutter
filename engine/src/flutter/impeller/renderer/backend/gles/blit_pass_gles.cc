@@ -41,9 +41,8 @@ void BlitPassGLES::OnSetLabel(std::string_view label) {
     return true;
   }
 
-  const auto& gl = reactor.GetProcTable();
-
 #ifdef IMPELLER_DEBUG
+  const auto& gl = reactor.GetProcTable();
   fml::ScopedCleanupClosure pop_pass_debug_marker(
       [&gl]() { gl.PopDebugGroup(); });
   if (!label.empty()) {
