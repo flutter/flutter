@@ -83,13 +83,22 @@ Future<void> main() async {
     await driver.close();
     final Map<String, dynamic> result =
         jsonDecode(data) as Map<String, dynamic>;
+    print('Test finished!');
     print(result);
     exitCode = result['result'] == 'true' ? 0 : 1;
   } catch (e) {
     print(e);
     exitCode = 1;
   } finally {
-    print('Test finished. Reverting Adb changes...');
+    print('Removing Synthetic notch...');
+    Process.runSync('adb', <String>[
+      'shell',
+      'cmd',
+      'overlay',
+      'disable',
+      'com.android.internal.display.cutout.emulation.tall',
+    ]);
+    print('Reverting Adb changes...');
     if (shouldResetDevSettings) {
       print('Disabling developer settings...');
       Process.runSync('adb', <String>[
@@ -101,14 +110,6 @@ Future<void> main() async {
         '0',
       ]);
     }
-    print('Removing Synthetic notch...');
-    Process.runSync('adb', <String>[
-      'shell',
-      'cmd',
-      'overlay',
-      'disable',
-      'com.android.internal.display.cutout.emulation.tall',
-    ]);
   }
   return;
 }
