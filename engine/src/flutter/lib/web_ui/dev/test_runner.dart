@@ -87,11 +87,11 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
       )
       ..addFlag(
         'gcs-staging',
-        help: 'Use artifacts from the prod gcs bucket populated by CI.'
+        help: 'Use artifacts from the staging gcs bucket populated by CI.'
       )
       ..addFlag(
         'gcs-try',
-        help: 'Use artifacts from the prod gcs bucket populated by CI.'
+        help: 'Use artifacts from the try gcs bucket populated by CI.'
       )
       ..addFlag(
         'dwarf',
