@@ -67,12 +67,7 @@ const String dataDir = 'dev/tools/gen_defaults/data';
 Future<void> main(List<String> args) async {
   // Parse arguments
   final ArgParser parser = ArgParser();
-  parser.addFlag(
-    'verbose',
-    abbr: 'v',
-    help: 'Enable verbose output',
-    negatable: false,
-  );
+  parser.addFlag('verbose', abbr: 'v', help: 'Enable verbose output', negatable: false);
   final ArgResults argResults = parser.parse(args);
   final bool verbose = argResults['verbose'] as bool;
 
