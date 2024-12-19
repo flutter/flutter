@@ -1819,7 +1819,7 @@ Future<void> main() async {
 
     await tester.tap(find.text('two'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 501));
 
     expect(find.byKey(firstKey), findsNothing);
     expect(find.byKey(secondKey), isOnstage);
@@ -1855,7 +1855,7 @@ Future<void> main() async {
 
     await tester.tap(find.text('two'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 501));
 
     expect(find.byKey(firstKey), findsNothing);
     expect(find.byKey(secondKey), isOnstage);
