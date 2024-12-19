@@ -5,14 +5,19 @@
     // hand-formatted, the default settings are changed to prevent inadvertent
     // reformatting of code.
     "[dart]": {
-        "editor.formatOnSave": false,
-        "editor.formatOnType": false,
-        "editor.formatOnPaste": false,
+        "editor.formatOnSave": true,
+        "editor.formatOnType": true,
+        "editor.formatOnPaste": true,
     },
 
     "html.format.enable": false,
     "githubPullRequests.ignoredPullRequestBranches": [
         "master"
     ],
-    "files.trimTrailingWhitespace": true
+    "files.trimTrailingWhitespace": true,
+    "files.autoSave": "afterDelay",
+    "dart.lineLength": 100,
+    "editor.rulers": [
+        100
+    ]
 }
