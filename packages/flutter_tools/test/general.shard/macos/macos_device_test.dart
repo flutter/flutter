@@ -41,7 +41,6 @@ void main() {
     expect(device.name, 'macOS');
     expect(await device.installApp(package), true);
     expect(await device.uninstallApp(package), true);
-    expect(await device.isLatestBuildInstalled(package), true);
     expect(await device.isAppInstalled(package), true);
     expect(device.category, Category.desktop);
 

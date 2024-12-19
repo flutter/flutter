@@ -50,7 +50,6 @@ void main() {
       final FakeDesktopDevice device = setUpDesktopDevice();
 
       expect(await device.isAppInstalled(FakeApplicationPackage()), true);
-      expect(await device.isLatestBuildInstalled(FakeApplicationPackage()), true);
       expect(device.category, Category.desktop);
     });
 
@@ -60,11 +59,9 @@ void main() {
 
       expect(await device.uninstallApp(package), true);
       expect(await device.isAppInstalled(package), true);
-      expect(await device.isLatestBuildInstalled(package), true);
 
       expect(await device.installApp(package), true);
       expect(await device.isAppInstalled(package), true);
-      expect(await device.isLatestBuildInstalled(package), true);
       expect(device.category, Category.desktop);
     });
   });

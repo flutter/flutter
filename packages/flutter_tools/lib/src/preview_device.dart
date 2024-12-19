@@ -141,9 +141,6 @@ class PreviewDevice extends Device {
   Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async => false;
 
   @override
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
-
-  @override
   Future<bool> get isLocalEmulator async => false;
 
   @override

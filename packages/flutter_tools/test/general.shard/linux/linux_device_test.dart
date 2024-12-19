@@ -38,7 +38,6 @@ void main() {
     expect(device.name, 'Linux');
     expect(await device.installApp(linuxApp), true);
     expect(await device.uninstallApp(linuxApp), true);
-    expect(await device.isLatestBuildInstalled(linuxApp), true);
     expect(await device.isAppInstalled(linuxApp), true);
     expect(await device.stopApp(linuxApp), true);
     expect(device.category, Category.desktop);

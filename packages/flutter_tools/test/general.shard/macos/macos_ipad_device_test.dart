@@ -120,7 +120,6 @@ void main() {
 
     expect(await device.installApp(FakeApplicationPackage()), isTrue);
     expect(await device.isAppInstalled(FakeApplicationPackage()), isTrue);
-    expect(await device.isLatestBuildInstalled(FakeApplicationPackage()), isTrue);
     expect(await device.uninstallApp(FakeApplicationPackage()), isTrue);
 
     expect(device.isSupported(), isTrue);
