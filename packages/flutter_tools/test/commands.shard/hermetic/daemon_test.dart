@@ -1129,6 +1129,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   final String name = 'android device';
 
   @override
+  String get displayName => name;
+
+  @override
   Future<String> get emulatorId async => 'device';
 
   @override

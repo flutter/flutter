@@ -1331,6 +1331,9 @@ class FakeDevice extends Fake implements Device {
   String get name => 'Fake Device';
 
   @override
+  String get displayName => name;
+
+  @override
   DartDevelopmentService dds = DartDevelopmentService(logger: FakeLogger());
 
   @override
