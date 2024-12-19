@@ -18,6 +18,7 @@ import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'framework.dart';
 import 'overscroll_indicator.dart';
 import 'scroll_physics.dart';
+import 'scroll_view.dart';
 import 'scrollable.dart';
 import 'scrollable_helpers.dart';
 import 'scrollbar.dart';
@@ -89,6 +90,7 @@ class ScrollBehavior {
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
     ScrollPhysics? physics,
     TargetPlatform? platform,
+    ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior,
   }) {
     return _WrappedScrollBehavior(
       delegate: this,
@@ -99,6 +101,7 @@ class ScrollBehavior {
       pointerAxisModifiers: pointerAxisModifiers,
       physics: physics,
       platform: platform,
+      keyboardDismissBehavior: keyboardDismissBehavior,
     );
   }
 
@@ -263,6 +266,13 @@ class ScrollBehavior {
   /// method returns false, the rebuilds might be optimized away.
   bool shouldNotify(covariant ScrollBehavior oldDelegate) => false;
 
+  /// {@template flutter.widgets.scrollBehavior.getKeyboardDismissBehavior}
+  /// The default keyboard dismissal behavior for [Scrollable] widgets.
+  ///
+  /// Defaults to [ScrollViewKeyboardDismissBehavior.manual].
+  /// {@endtemplate}
+  ScrollViewKeyboardDismissBehavior getKeyboardDismissBehavior(BuildContext context) => ScrollViewKeyboardDismissBehavior.manual;
+
   @override
   String toString() => objectRuntimeType(this, 'ScrollBehavior');
 }
@@ -277,6 +287,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
     this.physics,
     this.platform,
+    this.keyboardDismissBehavior,
   }) : _dragDevices = dragDevices,
        _pointerAxisModifiers = pointerAxisModifiers;
 
@@ -285,6 +296,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   final bool overscroll;
   final ScrollPhysics? physics;
   final TargetPlatform? platform;
+  final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
   final Set<PointerDeviceKind>? _dragDevices;
   final MultitouchDragStrategy? multitouchDragStrategy;
   final Set<LogicalKeyboardKey>? _pointerAxisModifiers;
@@ -325,6 +337,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
     ScrollPhysics? physics,
     TargetPlatform? platform,
+    ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior,
   }) {
     return delegate.copyWith(
       scrollbars: scrollbars ?? this.scrollbars,
@@ -334,6 +347,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
       pointerAxisModifiers: pointerAxisModifiers ?? this.pointerAxisModifiers,
       physics: physics ?? this.physics,
       platform: platform ?? this.platform,
+      keyboardDismissBehavior: keyboardDismissBehavior ?? this.keyboardDismissBehavior,
     );
   }
 
@@ -348,6 +362,11 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   }
 
   @override
+  ScrollViewKeyboardDismissBehavior getKeyboardDismissBehavior(BuildContext context) {
+    return keyboardDismissBehavior ?? delegate.getKeyboardDismissBehavior(context);
+  }
+
+  @override
   bool shouldNotify(_WrappedScrollBehavior oldDelegate) {
     return oldDelegate.delegate.runtimeType != delegate.runtimeType
         || oldDelegate.scrollbars != scrollbars
@@ -357,6 +376,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
         || !setEquals<LogicalKeyboardKey>(oldDelegate.pointerAxisModifiers, pointerAxisModifiers)
         || oldDelegate.physics != physics
         || oldDelegate.platform != platform
+        || oldDelegate.keyboardDismissBehavior != keyboardDismissBehavior
         || delegate.shouldNotify(oldDelegate.delegate);
   }
 
