@@ -566,7 +566,7 @@ void main() {
         builder: (BuildContext context, StateSetter stateSetter) {
           setState = stateSetter;
           return Theme(
-            data: ThemeData(cardTheme: CardTheme(data: cardThemeData)),
+            data: ThemeData(cardTheme: cardThemeData),
             child: const ThemedCard(),
           );
         },
