@@ -388,9 +388,6 @@ class KeyboardTester {
 
   void setLayout(const MockLayoutData& layout) {
     layout_data_ = &layout;
-    if (manager_ != nullptr) {
-      fl_keyboard_manager_notify_layout_changed(manager_);
-    }
   }
 
  private:
