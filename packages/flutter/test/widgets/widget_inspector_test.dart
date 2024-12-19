@@ -909,7 +909,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         // Column numbers are more stable than line numbers.
         expect(column, equals(28));
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip:
+          !WidgetInspectorService.instance
+              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     testWidgets(
@@ -992,7 +994,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final double exitButtonXAfterMovingLeft = tester.getCenter(exitButton).dx;
         expect(exitButtonXAfterMovingLeft, equals(initialExitButtonX));
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip:
+          !WidgetInspectorService.instance
+              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     testWidgets('test transformDebugCreator will re-order if after stack trace', (
@@ -1133,7 +1137,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(nodes[3].name, 'dummy2');
         expect(nodes[4].runtimeType, DiagnosticsStackTrace);
       },
-      skip: WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --no-track-widget-creation flag.
+      skip:
+          WidgetInspectorService.instance
+              .isWidgetCreationTracked(), // [intended] Test requires --no-track-widget-creation flag.
     );
 
     testWidgets(
@@ -1174,7 +1180,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(nodes[4].runtimeType, ErrorSpacer);
         expect(nodes[5].runtimeType, StringProperty);
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip:
+          !WidgetInspectorService.instance
+              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     testWidgets(
@@ -1212,7 +1220,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(nodes[2].runtimeType, ErrorSpacer);
         expect(nodes[3].runtimeType, StringProperty);
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip:
+          !WidgetInspectorService.instance
+              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     testWidgets(
@@ -1250,7 +1260,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(nodes[2].runtimeType, ErrorSpacer);
         expect(nodes[3].runtimeType, StringProperty);
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip:
+          !WidgetInspectorService.instance
+              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     // TODO(CoderDake): Clean up pubRootDirectory tests https://github.com/flutter/flutter/issues/107186
@@ -2789,7 +2801,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             expect(columnA, equals(columnB));
           });
         },
-        skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+        skip:
+            !WidgetInspectorService.instance
+                .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
       );
     });
 
@@ -3319,7 +3333,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           },
         );
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip:
+          !WidgetInspectorService.instance
+              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     group(
@@ -3445,7 +3461,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           );
         });
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip:
+          !WidgetInspectorService.instance
+              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     Map<Object, Object?> removeLastEvent(List<Map<Object, Object?>> events) {
@@ -3673,7 +3691,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           );
         });
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip:
+          !WidgetInspectorService.instance
+              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     group(
@@ -3823,7 +3843,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           );
         });
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip:
+          !WidgetInspectorService.instance
+              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     testWidgets(
@@ -3848,7 +3870,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
         await tester.pumpWidget(widget);
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip:
+          !WidgetInspectorService.instance
+              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     testWidgets(
@@ -3895,7 +3919,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(names, contains('Directionality'));
         expect(names, contains('ClockText'));
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip:
+          !WidgetInspectorService.instance
+              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     testWidgets(
@@ -4118,7 +4144,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         // Verify that rebuild events are not fired once the extension is disabled.
         expect(rebuildEvents, isEmpty);
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip:
+          !WidgetInspectorService.instance
+              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     testWidgets(
@@ -4248,7 +4276,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         // Verify that repaint events are not fired once the extension is disabled.
         expect(repaintEvents, isEmpty);
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip:
+          !WidgetInspectorService.instance
+              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     testWidgets('ext.flutter.inspector.show', (WidgetTester tester) async {
@@ -4752,7 +4782,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           matchesGoldenFile('inspector.sizedBox_debugPaint_margin.png'),
         );
       },
-      skip: impellerEnabled, // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/143616
+      skip:
+          impellerEnabled, // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/143616
     );
 
     group('layout explorer', () {
@@ -5535,7 +5566,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         visitChildren(detailedChildren);
         expect(appBars.single, isNot(contains('children')));
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip:
+          !WidgetInspectorService.instance
+              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     testWidgets('InspectorSerializationDelegate addAdditionalPropertiesCallback', (
@@ -5621,7 +5654,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(debugIsLocalCreationLocation(paddingElement), isFalse);
         expect(debugIsLocalCreationLocation(paddingElement.widget), isFalse);
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip:
+          !WidgetInspectorService.instance
+              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     testWidgets(
@@ -5648,7 +5683,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final Element paddingElement = paddingFinder.evaluate().first;
         expect(debugIsWidgetLocalCreation(paddingElement.widget), isFalse);
       },
-      skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
+      skip:
+          !WidgetInspectorService.instance
+              .isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
     testWidgets(
@@ -5669,7 +5706,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final Element element = key.currentContext! as Element;
         expect(debugIsWidgetLocalCreation(element.widget), isFalse);
       },
-      skip: WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --no-track-widget-creation flag.
+      skip:
+          WidgetInspectorService.instance
+              .isWidgetCreationTracked(), // [intended] Test requires --no-track-widget-creation flag.
     );
 
     test('devToolsInspectorUri test', () {
