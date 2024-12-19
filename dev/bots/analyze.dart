@@ -2257,6 +2257,7 @@ const Set<String> kExecutableAllowlist = <String>{
   'dev/tools/repackage_gradle_wrapper.sh',
   'dev/tools/bin/engine_hash.sh',
   'dev/tools/format.sh',
+  'dev/tools/test/mock_git.sh',
 
   'packages/flutter_tools/bin/macos_assemble.sh',
   'packages/flutter_tools/bin/tool_backend.sh',
