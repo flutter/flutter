@@ -167,7 +167,7 @@ class ReorderableList extends StatefulWidget {
     this.anchor = 0.0,
     this.cacheExtent,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
+    this.keyboardDismissBehavior,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
     this.autoScrollerVelocityScalar,
@@ -279,8 +279,10 @@ class ReorderableList extends StatefulWidget {
 
   /// {@macro flutter.widgets.scroll_view.keyboardDismissBehavior}
   ///
-  /// The default is [ScrollViewKeyboardDismissBehavior.manual]
-  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
+  /// If [keyboardDismissBehavior] is null then it will fallback to
+  /// [scrollBehavior] or to the closest [ScrollConfiguration] provided
+  /// by the context.
+  final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
 
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String? restorationId;
