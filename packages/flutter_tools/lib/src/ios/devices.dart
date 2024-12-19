@@ -386,9 +386,6 @@ class IOSDevice extends Device {
   }
 
   @override
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
-
-  @override
   Future<bool> installApp(
     covariant IOSApp app, {
     String? userIdentifier,

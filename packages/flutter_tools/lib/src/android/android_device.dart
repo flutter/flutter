@@ -362,12 +362,6 @@ class AndroidDevice extends Device {
     return '/data/local/tmp/sky.${apk.id}.sha1';
   }
 
-  Future<String> _getDeviceApkSha1(AndroidApk apk) async {
-    final RunResult result = await _processUtils.run(
-      adbCommandForDevice(<String>['shell', 'cat', _getDeviceSha1Path(apk)]));
-    return result.stdout;
-  }
-
   String _getSourceSha1(AndroidApk apk) {
     final File shaFile = _fileSystem.file('${apk.applicationPackage.path}.sha1');
     return shaFile.existsSync() ? shaFile.readAsStringSync() : '';
@@ -403,12 +397,6 @@ class AndroidDevice extends Device {
   }
 
   @override
-  Future<bool> isLatestBuildInstalled(covariant AndroidApk app) async {
-    final String installedSha1 = await _getDeviceApkSha1(app);
-    return installedSha1.isNotEmpty && installedSha1 == _getSourceSha1(app);
-  }
-
-  @override
   Future<bool> installApp(
     covariant AndroidApk app, {
     String? userIdentifier,
@@ -416,17 +404,12 @@ class AndroidDevice extends Device {
     if (!await _adbIsValid) {
       return false;
     }
-    final bool wasInstalled = await isAppInstalled(app, userIdentifier: userIdentifier);
-    if (wasInstalled && await isLatestBuildInstalled(app)) {
-      _logger.printTrace('Latest build already installed.');
-      return true;
-    }
     _logger.printTrace('Installing APK.');
     if (await _installApp(app, userIdentifier: userIdentifier)) {
       return true;
     }
     _logger.printTrace('Warning: Failed to install APK.');
-    if (!wasInstalled) {
+    if (!await isAppInstalled(app, userIdentifier: userIdentifier)) {
       return false;
     }
     _logger.printStatus('Uninstalling old version...');

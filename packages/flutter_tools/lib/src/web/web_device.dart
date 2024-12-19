@@ -102,9 +102,6 @@ abstract class ChromiumDevice extends Device {
   }) async => true;
 
   @override
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => true;
-
-  @override
   Future<bool> get isLocalEmulator async => false;
 
   @override
@@ -424,9 +421,6 @@ class WebServerDevice extends Device {
     ApplicationPackage app, {
     String? userIdentifier,
   }) async => true;
-
-  @override
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => true;
 
   @override
   bool get supportsFlutterExit => false;

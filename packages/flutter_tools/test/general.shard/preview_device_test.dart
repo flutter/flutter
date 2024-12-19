@@ -61,7 +61,6 @@ void main() {
 
     expect(device.isSupported(), true);
     expect(device.isSupportedForProject(FakeFlutterProject()), true);
-    expect(await device.isLatestBuildInstalled(FakeApplicationPackage()), false);
     expect(await device.isAppInstalled(FakeApplicationPackage()), false);
     expect(await device.uninstallApp(FakeApplicationPackage()), true);
   });

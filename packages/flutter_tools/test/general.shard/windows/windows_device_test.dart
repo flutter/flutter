@@ -28,7 +28,6 @@ void main() {
     expect(windowsDevice.name, 'Windows');
     expect(await windowsDevice.installApp(windowsApp), true);
     expect(await windowsDevice.uninstallApp(windowsApp), true);
-    expect(await windowsDevice.isLatestBuildInstalled(windowsApp), true);
     expect(await windowsDevice.isAppInstalled(windowsApp), true);
     expect(windowsDevice.category, Category.desktop);
 
