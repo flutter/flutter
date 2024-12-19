@@ -9,8 +9,6 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
-import 'package:pub_semver/pub_semver.dart';
-import 'package:pubspec_parse/pubspec_parse.dart';
 
 // the numbers below are prime, so that the totals don't seem round. :-)
 const double todoCost = 1009.0; // about two average SWE days, in dollars
@@ -29,7 +27,6 @@ final RegExp asDynamicPattern = RegExp(r'\bas dynamic\b');
 final RegExp deprecationPattern = RegExp(r'^ *@[dD]eprecated');
 const Pattern globalsPattern = 'globals.';
 const String legacyDeprecationPattern = '// flutter_ignore: deprecation_syntax, https';
-final RegExp dartVersionPattern = RegExp(r'// *@dart *= *(\d+).(\d+)');
 
 Future<double> findCostsForFile(File file) async {
   if (path.extension(file.path) == '.py') {
@@ -41,7 +38,6 @@ Future<double> findCostsForFile(File file) async {
     return 0.0;
   }
   final bool isTest = file.path.endsWith('_test.dart');
-  final bool isDart = file.path.endsWith('.dart');
   double total = 0.0;
   for (final String line in await file.readAsLines()) {
     if (line.contains(todoPattern)) {
