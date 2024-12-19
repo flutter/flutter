@@ -1488,6 +1488,15 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   @mustCallSuper
   void didChangeDependencies() {}
 
+  @protected
+  @visibleForTesting
+  @override
+  DiagnosticsNode toDiagnosticsNode({ String? name, DiagnosticsTreeStyle? style }) {
+    return super.toDiagnosticsNode(name: name, style: style);
+  }
+
+  @protected
+  @visibleForTesting
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
