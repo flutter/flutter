@@ -65,7 +65,6 @@ import 'suite_runners/run_flutter_packages_tests.dart';
 import 'suite_runners/run_framework_coverage_tests.dart';
 import 'suite_runners/run_framework_tests.dart';
 import 'suite_runners/run_fuchsia_precache.dart';
-import 'suite_runners/run_realm_checker_tests.dart';
 import 'suite_runners/run_skp_generator_tests.dart';
 import 'suite_runners/run_test_harness_tests.dart';
 import 'suite_runners/run_verify_binaries_codesigned_tests.dart';
@@ -150,7 +149,6 @@ Future<void> main(List<String> args) async {
       'flutter_driver_android': runFlutterDriverAndroidTests,
       'flutter_plugins': flutterPackagesRunner,
       'skp_generator': skpGeneratorTestsRunner,
-      'realm_checker': realmCheckerTestRunner,
       'customer_testing': customerTestingRunner,
       'analyze': analyzeRunner,
       'fuchsia_precache': fuchsiaPrecacheRunner,
