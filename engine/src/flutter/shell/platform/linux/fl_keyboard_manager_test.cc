@@ -15,6 +15,7 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_method_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
+#include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
 #include "flutter/shell/platform/linux/testing/mock_keymap.h"
 #include "flutter/testing/testing.h"
 
@@ -386,9 +387,7 @@ class KeyboardTester {
     fl_mock_view_set_text_filter_result(view_, response);
   }
 
-  void setLayout(const MockLayoutData& layout) {
-    layout_data_ = &layout;
-  }
+  void setLayout(const MockLayoutData& layout) { layout_data_ = &layout; }
 
  private:
   FlMockViewDelegate* view_;
@@ -758,12 +757,16 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
 TEST(FlKeyboardManagerTest, TextInputHandlerReturnsFalse) {
   ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
 
-  g_autoptr(FlMockKeyBinaryMessenger) messenger =
-      fl_mock_key_binary_messenger_new();
-  fl_mock_key_binary_messenger_set_callback_handler(
-      messenger,
-      [](FlutterKeyEventCallback callback, gpointer callback_user_data,
-         gpointer user_data) { callback(false, callback_user_data); },
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  fl_mock_binary_messenger_set_json_message_channel(
+      messenger, "flutter/keyevent",
+      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
+         gpointer user_data) {
+        g_autoptr(FlValue) return_value = fl_value_new_map();
+        fl_value_set_string_take(return_value, "handled",
+                                 fl_value_new_bool(FALSE));
+        return fl_value_ref(return_value);
+      },
       nullptr);
   g_autoptr(FlEngine) engine =
       FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
@@ -799,14 +802,17 @@ TEST(FlKeyboardManagerTest, TextInputHandlerReturnsFalse) {
 TEST(FlKeyboardManagerTest, TextInputHandlerReturnsTrue) {
   ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
 
-  g_autoptr(FlMockKeyBinaryMessenger) messenger =
-      fl_mock_key_binary_messenger_new();
-  fl_mock_key_binary_messenger_set_callback_handler(
-      messenger,
-      [](FlutterKeyEventCallback callback, gpointer callback_user_data,
-         gpointer user_data) { callback(false, callback_user_data); },
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  fl_mock_binary_messenger_set_json_message_channel(
+      messenger, "flutter/keyevent",
+      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
+         gpointer user_data) {
+        g_autoptr(FlValue) return_value = fl_value_new_map();
+        fl_value_set_string_take(return_value, "handled",
+                                 fl_value_new_bool(FALSE));
+        return fl_value_ref(return_value);
+      },
       nullptr);
-
   g_autoptr(FlEngine) engine =
       FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
                              FL_BINARY_MESSENGER(messenger), nullptr));
