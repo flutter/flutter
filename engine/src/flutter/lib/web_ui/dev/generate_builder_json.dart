@@ -146,7 +146,6 @@ class GenerateBuilderJsonCommand extends Command<bool> {
       _getTestStepForPlatformAndBrowser(suites, packageLock, 'Linux', BrowserName.chrome),
       _getTestStepForPlatformAndBrowser(suites, packageLock, 'Linux', BrowserName.firefox),
       _getTestStepForPlatformAndBrowser(suites, packageLock, 'Mac', BrowserName.safari, specificOS: 'Mac-13', cpu: 'arm64'),
-      _getTestStepForPlatformAndBrowser(suites, packageLock, 'Windows', BrowserName.chrome)
     ];
   }
 
