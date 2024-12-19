@@ -4,10 +4,10 @@
 
 import 'dart:ui';
 
+import 'package:display_cutout_rotation/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:display_cutout_rotation/main.dart';
 import 'package:integration_test/integration_test.dart';
 
 void main() {
@@ -16,13 +16,13 @@ void main() {
   group('end-to-end test', () {
     // Test assumes a custom driver that enables
     // "com.android.internal.display.cutout.emulation.tall".
-    testWidgets('cutout should be on top in portrait mode', (tester) async {
+    testWidgets('cutout should be on top in portrait mode', (WidgetTester tester) async {
       // Force rotation
       await setOrientationAndWaitUntilRotation(
           tester, DeviceOrientation.portraitUp);
       // Load app widget.
       await tester.pumpWidget(const MyApp());
-      BuildContext context = tester.element(find.byType(Text));
+      final BuildContext context = tester.element(find.byType(Text));
       final Iterable<DisplayFeature> displayFeatures = getCutouts(tester, context);
       // Test is expecting one cutout setup in the test harness.
       expect(
@@ -40,12 +40,12 @@ void main() {
       );
     });
 
-    testWidgets('cutout should be on left in landscape left', (tester) async {
+    testWidgets('cutout should be on left in landscape left', (WidgetTester tester) async {
       await setOrientationAndWaitUntilRotation(
           tester, DeviceOrientation.landscapeLeft);
       // Load app widget.
       await tester.pumpWidget(const MyApp());
-      BuildContext context = tester.element(find.byType(Text));
+      final BuildContext context = tester.element(find.byType(Text));
       // Verify that app code thinks there is a left cutout.
       final Iterable<DisplayFeature> displayFeatures = getCutouts(tester, context);
 
@@ -64,10 +64,10 @@ void main() {
       );
     });
 
-    testWidgets('cutout handles rotation', (tester) async {
+    testWidgets('cutout handles rotation', (WidgetTester tester) async {
       await setOrientationAndWaitUntilRotation(
           tester, DeviceOrientation.portraitUp);
-      const widgetUnderTest = MyApp();
+      const MyApp widgetUnderTest = MyApp();
       // Load app widget.
       await tester.pumpWidget(widgetUnderTest);
       BuildContext context = tester.element(find.byType(Text));
@@ -109,7 +109,7 @@ void main() {
     tearDown(() {
       // After each test reset to device perfered orientations to avoid
       // test pollution.
-      SystemChrome.setPreferredOrientations([]);
+      SystemChrome.setPreferredOrientations(<DeviceOrientation>[]);
     });
   });
 }
@@ -124,18 +124,17 @@ Future<void> setOrientationAndWaitUntilRotation(
   WidgetTester tester,
   DeviceOrientation orientation,
 ) async {
-  SystemChrome.setPreferredOrientations([orientation]);
+  SystemChrome.setPreferredOrientations(<DeviceOrientation>[orientation]);
   Orientation expectedOrientation;
   switch (orientation) {
     case DeviceOrientation.portraitUp:
     case DeviceOrientation.portraitDown:
       expectedOrientation = Orientation.portrait;
-      break;
     case DeviceOrientation.landscapeRight:
     case DeviceOrientation.landscapeLeft:
       expectedOrientation = Orientation.landscape;
-      break;
   }
+  // ignore: literal_only_boolean_expressions
   do {
     final BuildContext context = tester.element(find.byType(Text));
     if (expectedOrientation == MediaQuery.of(context).orientation) {
