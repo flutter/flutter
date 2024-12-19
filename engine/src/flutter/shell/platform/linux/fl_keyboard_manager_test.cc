@@ -137,7 +137,6 @@ G_DECLARE_FINAL_TYPE(FlMockKeyBinaryMessenger,
 
 G_END_DECLS
 
-/***** FlMockKeyBinaryMessenger *****/
 /* Mock a binary messenger that only processes messages from the embedding on
  * the key event channel, and does so according to the callback set by
  * fl_mock_key_binary_messenger_set_callback_handler */
@@ -275,8 +274,6 @@ static void fl_mock_key_binary_messenger_set_callback_handler(
   self->callback_user_data = user_data;
 }
 
-/***** FlMockViewDelegate *****/
-
 struct _FlMockViewDelegate {
   GObject parent_instance;
   bool text_filter_result;
@@ -322,8 +319,6 @@ static void fl_mock_view_set_text_filter_result(FlMockViewDelegate* self,
                                                 bool result) {
   self->text_filter_result = result;
 }
-
-/***** End FlMockViewDelegate *****/
 
 // Block until all GdkMainLoop messages are processed, which is basically used
 // only for channel messages.
