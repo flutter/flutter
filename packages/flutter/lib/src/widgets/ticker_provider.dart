@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/animation.dart';
-library;
-
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
+import 'default_animation_style.dart';
 import 'framework.dart';
 
+export 'package:flutter/animation.dart' show AnimationStyleProvider;
 export 'package:flutter/scheduler.dart' show TickerProvider;
 
 // Examples can assume:
@@ -167,6 +167,8 @@ class _EffectiveTickerMode extends InheritedWidget {
   }
 }
 
+typedef _StyleNotifier = ValueListenable<AnimationStyle>;
+
 /// Provides a single [Ticker] that is configured to only tick while the current
 /// tree is enabled, as defined by [TickerMode].
 ///
@@ -178,7 +180,7 @@ class _EffectiveTickerMode extends InheritedWidget {
 /// [AnimationController] objects over the lifetime of the [State], use a full
 /// [TickerProviderStateMixin] instead.
 @optionalTypeArgs
-mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> implements TickerProvider {
+mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> implements AnimationStyleProvider {
   Ticker? _ticker;
 
   @override
@@ -201,6 +203,34 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
     _updateTickerModeNotifier();
     _updateTicker(); // Sets _ticker.mute correctly.
     return _ticker!;
+  }
+
+  StyledAnimation<Object?>? _animation;
+  late _StyleNotifier _styleNotifier = DefaultAnimationStyle.getNotifier(context);
+  void _updateAnimationStyle() {
+    _animation?.updateStyle(_styleNotifier.value);
+  }
+
+  @override
+  void registerAnimation(StyledAnimation<Object?> animation) {
+    assert(() {
+      if (_animation == null) {
+        return true;
+      }
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary(
+          '$runtimeType uses the SingleTickerProviderStateMixin '
+          'but multiple animations were registered to it.',
+        ),
+        ErrorDescription('A SingleTickerProviderStateMixin can only be used for a single Animation object.'),
+        ErrorHint(
+          'If a State is used for multiple AnimationController objects, or if it is passed to other '
+          'objects that might use it multiple times, consider using TickerProviderStateMixin instead.',
+        ),
+      ]);
+    }());
+    _animation = animation;
+    _styleNotifier.addListener(_updateAnimationStyle..call());
   }
 
   @override
@@ -226,6 +256,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
     }());
     _tickerModeNotifier?.removeListener(_updateTicker);
     _tickerModeNotifier = null;
+    _styleNotifier.removeListener(_updateAnimationStyle);
     super.dispose();
   }
 
@@ -237,6 +268,13 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
     // We may have a new TickerMode ancestor.
     _updateTickerModeNotifier();
     _updateTicker();
+
+    final _StyleNotifier styleNotifier = DefaultAnimationStyle.getNotifier(context);
+    if (styleNotifier != _styleNotifier) {
+      _styleNotifier.removeListener(_updateAnimationStyle);
+      _styleNotifier = styleNotifier..addListener(_updateAnimationStyle);
+      _updateAnimationStyle();
+    }
   }
 
   void _updateTicker() => _ticker?.muted = !_tickerModeNotifier!.value;
