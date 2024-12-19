@@ -26,20 +26,75 @@
 // stacktrace wouldn't print where the function is called in the unit tests.
 
 #define EXPECT_KEY_EVENT(RECORD, TYPE, PHYSICAL, LOGICAL, CHAR, SYNTHESIZED) \
-  EXPECT_EQ((RECORD).type, CallRecord::KEY_CALL_EMBEDDER);                   \
-  EXPECT_EQ((RECORD).event->type, (TYPE));                                   \
-  EXPECT_EQ((RECORD).event->physical, (PHYSICAL));                           \
-  EXPECT_EQ((RECORD).event->logical, (LOGICAL));                             \
-  EXPECT_STREQ((RECORD).event->character, (CHAR));                           \
-  EXPECT_EQ((RECORD).event->synthesized, (SYNTHESIZED));
+  EXPECT_EQ((RECORD)->type, CALL_RECORD_TYPE_EMBEDDER);                      \
+  EXPECT_EQ((RECORD)->event_type, (TYPE));                                   \
+  EXPECT_EQ((RECORD)->event_physical, (PHYSICAL));                           \
+  EXPECT_EQ((RECORD)->event_logical, (LOGICAL));                             \
+  EXPECT_STREQ((RECORD)->event_character, (CHAR));                           \
+  EXPECT_EQ((RECORD)->event_synthesized, (SYNTHESIZED));
 
-#define VERIFY_DOWN(OUT_LOGICAL, OUT_CHAR)                          \
-  EXPECT_EQ(call_records[0].type, CallRecord::KEY_CALL_EMBEDDER);   \
-  EXPECT_EQ(call_records[0].event->type, kFlutterKeyEventTypeDown); \
-  EXPECT_EQ(call_records[0].event->logical, (OUT_LOGICAL));         \
-  EXPECT_STREQ(call_records[0].event->character, (OUT_CHAR));       \
-  EXPECT_EQ(call_records[0].event->synthesized, false);             \
-  call_records.clear()
+#define VERIFY_DOWN(OUT_LOGICAL, OUT_CHAR)                                  \
+  EXPECT_EQ(                                                                \
+      static_cast<CallRecord*>(g_ptr_array_index(call_records, 0))->type,   \
+      CALL_RECORD_TYPE_EMBEDDER);                                           \
+  EXPECT_EQ(static_cast<CallRecord*>(g_ptr_array_index(call_records, 0))    \
+                ->event_type,                                               \
+            kFlutterKeyEventTypeDown);                                      \
+  EXPECT_EQ(static_cast<CallRecord*>(g_ptr_array_index(call_records, 0))    \
+                ->event_logical,                                            \
+            (OUT_LOGICAL));                                                 \
+  EXPECT_STREQ(static_cast<CallRecord*>(g_ptr_array_index(call_records, 0)) \
+                   ->event_character,                                       \
+               (OUT_CHAR));                                                 \
+  EXPECT_EQ(static_cast<CallRecord*>(g_ptr_array_index(call_records, 0))    \
+                ->event_synthesized,                                        \
+            false);                                                         \
+  g_ptr_array_set_size(call_records, 0)
+
+typedef enum {
+  CALL_RECORD_TYPE_EMBEDDER,
+  CALL_RECORD_TYPE_CHANNEL,
+} CallRecordType;
+
+typedef struct {
+  CallRecordType type;
+  FlutterKeyEventType event_type;
+  uint64_t event_physical;
+  uint64_t event_logical;
+  gchar* event_character;
+  bool event_synthesized;
+  FlutterKeyEventCallback callback;
+  void* callback_user_data;
+} CallRecord;
+
+static CallRecord* call_record_new(CallRecordType type,
+                                   const FlutterKeyEvent* event,
+                                   FlutterKeyEventCallback callback,
+                                   void* callback_user_data) {
+  CallRecord* record = g_new0(CallRecord, 1);
+  record->type = type;
+  record->event_type =
+      event != nullptr ? event->type : static_cast<FlutterKeyEventType>(0);
+  record->event_physical = event != nullptr ? event->physical : 0;
+  record->event_logical = event != nullptr ? event->logical : 0;
+  record->event_character =
+      event != nullptr ? g_strdup(event->character) : nullptr;
+  record->event_synthesized = event != nullptr ? event->synthesized : false;
+  record->callback = callback;
+  record->callback_user_data = callback_user_data;
+  return record;
+}
+
+static void call_record_free(CallRecord* record) {
+  g_free(record->event_character);
+  g_free(record);
+}
+
+static void call_record_respond(CallRecord* record, bool handled) {
+  if (record->callback != nullptr) {
+    record->callback(handled, record->callback_user_data);
+  }
+}
 
 namespace {
 using ::flutter::testing::keycodes::kLogicalAltLeft;
@@ -64,41 +119,6 @@ using ::flutter::testing::keycodes::kPhysicalKeyA;
 using ::flutter::testing::keycodes::kPhysicalKeyB;
 using ::flutter::testing::keycodes::kPhysicalMetaLeft;
 using ::flutter::testing::keycodes::kPhysicalShiftLeft;
-
-// A type that can record all kinds of effects that the keyboard handler
-// triggers.
-//
-// An instance of `CallRecord` might not have all the fields filled.
-typedef struct {
-  enum {
-    KEY_CALL_EMBEDDER,
-    KEY_CALL_CHANNEL,
-  } type;
-
-  FlutterKeyEventCallback callback;
-  void* callback_user_data;
-  std::unique_ptr<FlutterKeyEvent> event;
-  std::unique_ptr<char[]> event_character;
-} CallRecord;
-
-static void call_callback(CallRecord& record, bool handled) {
-  if (record.callback != nullptr) {
-    record.callback(handled, record.callback_user_data);
-  }
-}
-
-// Clone a C-string.
-//
-// Must be deleted by delete[].
-char* cloneString(const char* source) {
-  if (source == nullptr) {
-    return nullptr;
-  }
-  size_t charLen = strlen(source);
-  char* target = new char[charLen + 1];
-  strncpy(target, source, charLen + 1);
-  return target;
-}
 
 constexpr guint16 kKeyCodeKeyA = 0x26u;
 constexpr guint16 kKeyCodeKeyB = 0x38u;
@@ -408,7 +428,8 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
       manager, [](const GdkKeymapKey* key, gpointer user_data) { return 0u; },
       nullptr);
 
-  std::vector<CallRecord> call_records;
+  g_autoptr(GPtrArray) call_records = g_ptr_array_new_with_free_func(
+      reinterpret_cast<GDestroyNotify>(call_record_free));
   g_autoptr(GPtrArray) redispatched =
       g_ptr_array_new_with_free_func(g_object_unref);
 
@@ -423,20 +444,12 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
       manager,
       [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
          void* callback_user_data, gpointer user_data) {
-        std::vector<CallRecord>* call_records =
-            static_cast<std::vector<CallRecord>*>(user_data);
-        auto new_event = std::make_unique<FlutterKeyEvent>(*event);
-        char* new_event_character = cloneString(event->character);
-        new_event->character = new_event_character;
-        call_records->push_back(CallRecord{
-            .type = CallRecord::KEY_CALL_EMBEDDER,
-            .callback = callback,
-            .callback_user_data = callback_user_data,
-            .event = std::move(new_event),
-            .event_character = std::unique_ptr<char[]>(new_event_character),
-        });
+        GPtrArray* call_records = static_cast<GPtrArray*>(user_data);
+        g_ptr_array_add(call_records,
+                        call_record_new(CALL_RECORD_TYPE_EMBEDDER, event,
+                                        callback, callback_user_data));
       },
-      &call_records);
+      call_records);
   fl_keyboard_manager_set_redispatch_handler(
       manager,
       [](FlKeyEvent* event, gpointer user_data) {
@@ -451,15 +464,17 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event1));
   flush_channel_messages();
   EXPECT_EQ(redispatched->len, 0u);
-  EXPECT_EQ(call_records.size(), 1u);
-  EXPECT_KEY_EVENT(call_records[0], kFlutterKeyEventTypeDown, kPhysicalKeyA,
-                   kLogicalKeyA, "a", false);
+  EXPECT_EQ(call_records->len, 1u);
+  EXPECT_KEY_EVENT(static_cast<CallRecord*>(g_ptr_array_index(call_records, 0)),
+                   kFlutterKeyEventTypeDown, kPhysicalKeyA, kLogicalKeyA, "a",
+                   false);
 
-  call_callback(call_records[0], true);
+  call_record_respond(
+      static_cast<CallRecord*>(g_ptr_array_index(call_records, 0)), true);
   flush_channel_messages();
   EXPECT_EQ(redispatched->len, 0u);
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(manager));
-  call_records.clear();
+  g_ptr_array_set_size(call_records, 0);
 
   /// Test 2: Two events that are unhandled by the framework
   g_autoptr(FlKeyEvent) event2 = fl_key_event_new(
@@ -467,9 +482,10 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event2));
   flush_channel_messages();
   EXPECT_EQ(redispatched->len, 0u);
-  EXPECT_EQ(call_records.size(), 1u);
-  EXPECT_KEY_EVENT(call_records[0], kFlutterKeyEventTypeUp, kPhysicalKeyA,
-                   kLogicalKeyA, nullptr, false);
+  EXPECT_EQ(call_records->len, 1u);
+  EXPECT_KEY_EVENT(static_cast<CallRecord*>(g_ptr_array_index(call_records, 0)),
+                   kFlutterKeyEventTypeUp, kPhysicalKeyA, kLogicalKeyA, nullptr,
+                   false);
 
   // Dispatch another key event
   g_autoptr(FlKeyEvent) event3 = fl_key_event_new(
@@ -477,17 +493,20 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event3));
   flush_channel_messages();
   EXPECT_EQ(redispatched->len, 0u);
-  EXPECT_EQ(call_records.size(), 2u);
-  EXPECT_KEY_EVENT(call_records[1], kFlutterKeyEventTypeDown, kPhysicalKeyB,
-                   kLogicalKeyB, "b", false);
+  EXPECT_EQ(call_records->len, 2u);
+  EXPECT_KEY_EVENT(static_cast<CallRecord*>(g_ptr_array_index(call_records, 1)),
+                   kFlutterKeyEventTypeDown, kPhysicalKeyB, kLogicalKeyB, "b",
+                   false);
 
   // Resolve the second event first to test out-of-order response
-  call_callback(call_records[1], false);
+  call_record_respond(
+      static_cast<CallRecord*>(g_ptr_array_index(call_records, 1)), false);
   EXPECT_EQ(redispatched->len, 1u);
   EXPECT_EQ(
       fl_key_event_get_keyval(FL_KEY_EVENT(g_ptr_array_index(redispatched, 0))),
       0x62u);
-  call_callback(call_records[0], false);
+  call_record_respond(
+      static_cast<CallRecord*>(g_ptr_array_index(call_records, 0)), false);
   flush_channel_messages();
   EXPECT_EQ(redispatched->len, 2u);
   EXPECT_EQ(
@@ -495,12 +514,12 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
       0x61u);
 
   EXPECT_FALSE(fl_keyboard_manager_is_state_clear(manager));
-  call_records.clear();
+  g_ptr_array_set_size(call_records, 0);
 
   // Resolve redispatches
   EXPECT_EQ(redispatch_events_and_clear(manager, redispatched), 2);
   flush_channel_messages();
-  EXPECT_EQ(call_records.size(), 0u);
+  EXPECT_EQ(call_records->len, 0u);
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(manager));
 
   /// Test 3: Dispatch the same event again to ensure that prevention from
@@ -510,9 +529,10 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event4));
   flush_channel_messages();
   EXPECT_EQ(redispatched->len, 0u);
-  EXPECT_EQ(call_records.size(), 1u);
+  EXPECT_EQ(call_records->len, 1u);
 
-  call_callback(call_records[0], true);
+  call_record_respond(
+      static_cast<CallRecord*>(g_ptr_array_index(call_records, 0)), true);
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(manager));
 }
 
@@ -530,7 +550,8 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
       manager, [](const GdkKeymapKey* key, gpointer user_data) { return 0u; },
       nullptr);
 
-  std::vector<CallRecord> call_records;
+  g_autoptr(GPtrArray) call_records = g_ptr_array_new_with_free_func(
+      reinterpret_cast<GDestroyNotify>(call_record_free));
   g_autoptr(GPtrArray) redispatched =
       g_ptr_array_new_with_free_func(g_object_unref);
 
@@ -545,21 +566,13 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
       manager,
       [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
          void* callback_user_data, gpointer user_data) {
-        std::vector<CallRecord>* call_records =
-            static_cast<std::vector<CallRecord>*>(user_data);
-        auto new_event = std::make_unique<FlutterKeyEvent>(*event);
-        char* new_event_character = cloneString(event->character);
-        new_event->character = new_event_character;
-        call_records->push_back(CallRecord{
-            .type = CallRecord::KEY_CALL_EMBEDDER,
-            .callback = callback,
-            .callback_user_data = callback_user_data,
-            .event = std::move(new_event),
-            .event_character = std::unique_ptr<char[]>(new_event_character),
-        });
+        GPtrArray* call_records = static_cast<GPtrArray*>(user_data);
+        g_ptr_array_add(call_records,
+                        call_record_new(CALL_RECORD_TYPE_EMBEDDER, event,
+                                        callback, callback_user_data));
         callback(true, callback_user_data);
       },
-      &call_records);
+      call_records);
   fl_keyboard_manager_set_redispatch_handler(
       manager,
       [](FlKeyEvent* event, gpointer user_data) {
@@ -573,11 +586,12 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
   EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event1));
   flush_channel_messages();
-  EXPECT_EQ(call_records.size(), 1u);
-  EXPECT_KEY_EVENT(call_records[0], kFlutterKeyEventTypeDown, kPhysicalKeyA,
-                   kLogicalKeyA, "a", false);
+  EXPECT_EQ(call_records->len, 1u);
+  EXPECT_KEY_EVENT(static_cast<CallRecord*>(g_ptr_array_index(call_records, 0)),
+                   kFlutterKeyEventTypeDown, kPhysicalKeyA, kLogicalKeyA, "a",
+                   false);
   EXPECT_EQ(redispatched->len, 0u);
-  call_records.clear();
+  g_ptr_array_set_size(call_records, 0);
 
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(manager));
   g_ptr_array_set_size(redispatched, 0);
@@ -587,35 +601,28 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
       manager,
       [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
          void* callback_user_data, gpointer user_data) {
-        std::vector<CallRecord>* call_records =
-            static_cast<std::vector<CallRecord>*>(user_data);
-        auto new_event = std::make_unique<FlutterKeyEvent>(*event);
-        char* new_event_character = cloneString(event->character);
-        new_event->character = new_event_character;
-        call_records->push_back(CallRecord{
-            .type = CallRecord::KEY_CALL_EMBEDDER,
-            .callback = callback,
-            .callback_user_data = callback_user_data,
-            .event = std::move(new_event),
-            .event_character = std::unique_ptr<char[]>(new_event_character),
-        });
+        GPtrArray* call_records = static_cast<GPtrArray*>(user_data);
+        g_ptr_array_add(call_records,
+                        call_record_new(CALL_RECORD_TYPE_EMBEDDER, event,
+                                        callback, callback_user_data));
         callback(false, callback_user_data);
       },
-      &call_records);
+      call_records);
   g_autoptr(FlKeyEvent) event2 = fl_key_event_new(
       0, FALSE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
   EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event2));
   flush_channel_messages();
-  EXPECT_EQ(call_records.size(), 1u);
-  EXPECT_KEY_EVENT(call_records[0], kFlutterKeyEventTypeUp, kPhysicalKeyA,
-                   kLogicalKeyA, nullptr, false);
+  EXPECT_EQ(call_records->len, 1u);
+  EXPECT_KEY_EVENT(static_cast<CallRecord*>(g_ptr_array_index(call_records, 0)),
+                   kFlutterKeyEventTypeUp, kPhysicalKeyA, kLogicalKeyA, nullptr,
+                   false);
   EXPECT_EQ(redispatched->len, 1u);
-  call_records.clear();
+  g_ptr_array_set_size(call_records, 0);
 
   EXPECT_FALSE(fl_keyboard_manager_is_state_clear(manager));
 
   EXPECT_EQ(redispatch_events_and_clear(manager, redispatched), 1);
-  EXPECT_EQ(call_records.size(), 0u);
+  EXPECT_EQ(call_records->len, 0u);
 
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(manager));
 }
@@ -634,7 +641,8 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
       manager, [](const GdkKeymapKey* key, gpointer user_data) { return 0u; },
       nullptr);
 
-  std::vector<CallRecord> call_records;
+  g_autoptr(GPtrArray) call_records = g_ptr_array_new_with_free_func(
+      reinterpret_cast<GDestroyNotify>(call_record_free));
   g_autoptr(GPtrArray) redispatched =
       g_ptr_array_new_with_free_func(g_object_unref);
 
@@ -642,33 +650,22 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
       manager,
       [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
          void* callback_user_data, gpointer user_data) {
-        std::vector<CallRecord>* call_records =
-            static_cast<std::vector<CallRecord>*>(user_data);
-        auto new_event = std::make_unique<FlutterKeyEvent>(*event);
-        char* new_event_character = cloneString(event->character);
-        new_event->character = new_event_character;
-        call_records->push_back(CallRecord{
-            .type = CallRecord::KEY_CALL_EMBEDDER,
-            .callback = callback,
-            .callback_user_data = callback_user_data,
-            .event = std::move(new_event),
-            .event_character = std::unique_ptr<char[]>(new_event_character),
-        });
+        GPtrArray* call_records = static_cast<GPtrArray*>(user_data);
+        g_ptr_array_add(call_records,
+                        call_record_new(CALL_RECORD_TYPE_EMBEDDER, event,
+                                        callback, callback_user_data));
       },
-      &call_records);
+      call_records);
   fl_mock_key_binary_messenger_set_callback_handler(
       messenger,
       [](FlutterKeyEventCallback callback, gpointer callback_user_data,
          gpointer user_data) {
-        std::vector<CallRecord>* call_records =
-            static_cast<std::vector<CallRecord>*>(user_data);
-        call_records->push_back(CallRecord{
-            .type = CallRecord::KEY_CALL_CHANNEL,
-            .callback = callback,
-            .callback_user_data = callback_user_data,
-        });
+        GPtrArray* call_records = static_cast<GPtrArray*>(user_data);
+        g_ptr_array_add(call_records,
+                        call_record_new(CALL_RECORD_TYPE_CHANNEL, nullptr,
+                                        callback, callback_user_data));
       },
-      &call_records);
+      call_records);
   fl_keyboard_manager_set_redispatch_handler(
       manager,
       [](FlKeyEvent* event, gpointer user_data) {
@@ -684,18 +681,22 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
   EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event1));
 
   EXPECT_EQ(redispatched->len, 0u);
-  EXPECT_EQ(call_records.size(), 2u);
+  EXPECT_EQ(call_records->len, 2u);
 
-  EXPECT_EQ(call_records[0].type, CallRecord::KEY_CALL_EMBEDDER);
-  EXPECT_EQ(call_records[1].type, CallRecord::KEY_CALL_CHANNEL);
+  EXPECT_EQ(static_cast<CallRecord*>(g_ptr_array_index(call_records, 0))->type,
+            CALL_RECORD_TYPE_EMBEDDER);
+  EXPECT_EQ(static_cast<CallRecord*>(g_ptr_array_index(call_records, 1))->type,
+            CALL_RECORD_TYPE_CHANNEL);
 
-  call_callback(call_records[0], true);
-  call_callback(call_records[1], false);
+  call_record_respond(
+      static_cast<CallRecord*>(g_ptr_array_index(call_records, 0)), true);
+  call_record_respond(
+      static_cast<CallRecord*>(g_ptr_array_index(call_records, 1)), false);
   flush_channel_messages();
   EXPECT_EQ(redispatched->len, 0u);
 
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(manager));
-  call_records.clear();
+  g_ptr_array_set_size(call_records, 0);
 
   /// Test 2: All delegates respond false
   g_autoptr(FlKeyEvent) event2 = fl_key_event_new(
@@ -703,21 +704,25 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
   EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event2));
 
   EXPECT_EQ(redispatched->len, 0u);
-  EXPECT_EQ(call_records.size(), 2u);
+  EXPECT_EQ(call_records->len, 2u);
 
-  EXPECT_EQ(call_records[0].type, CallRecord::KEY_CALL_EMBEDDER);
-  EXPECT_EQ(call_records[1].type, CallRecord::KEY_CALL_CHANNEL);
+  EXPECT_EQ(static_cast<CallRecord*>(g_ptr_array_index(call_records, 0))->type,
+            CALL_RECORD_TYPE_EMBEDDER);
+  EXPECT_EQ(static_cast<CallRecord*>(g_ptr_array_index(call_records, 1))->type,
+            CALL_RECORD_TYPE_CHANNEL);
 
-  call_callback(call_records[0], false);
-  call_callback(call_records[1], false);
+  call_record_respond(
+      static_cast<CallRecord*>(g_ptr_array_index(call_records, 0)), false);
+  call_record_respond(
+      static_cast<CallRecord*>(g_ptr_array_index(call_records, 1)), false);
 
-  call_records.clear();
+  g_ptr_array_set_size(call_records, 0);
 
   // Resolve redispatch
   flush_channel_messages();
   EXPECT_EQ(redispatched->len, 1u);
   EXPECT_EQ(redispatch_events_and_clear(manager, redispatched), 1);
-  EXPECT_EQ(call_records.size(), 0u);
+  EXPECT_EQ(call_records->len, 0u);
 
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(manager));
 }
@@ -821,25 +826,18 @@ TEST(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
   g_autoptr(FlKeyboardManager) manager =
       fl_keyboard_manager_new(engine, FL_KEYBOARD_VIEW_DELEGATE(view));
 
-  std::vector<CallRecord> call_records;
+  g_autoptr(GPtrArray) call_records = g_ptr_array_new_with_free_func(
+      reinterpret_cast<GDestroyNotify>(call_record_free));
   fl_keyboard_manager_set_send_key_event_handler(
       manager,
       [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
          void* callback_user_data, gpointer user_data) {
-        std::vector<CallRecord>* call_records =
-            static_cast<std::vector<CallRecord>*>(user_data);
-        auto new_event = std::make_unique<FlutterKeyEvent>(*event);
-        char* new_event_character = cloneString(event->character);
-        new_event->character = new_event_character;
-        call_records->push_back(CallRecord{
-            .type = CallRecord::KEY_CALL_EMBEDDER,
-            .callback = callback,
-            .callback_user_data = callback_user_data,
-            .event = std::move(new_event),
-            .event_character = std::unique_ptr<char[]>(new_event_character),
-        });
+        GPtrArray* call_records = static_cast<GPtrArray*>(user_data);
+        g_ptr_array_add(call_records,
+                        call_record_new(CALL_RECORD_TYPE_EMBEDDER, event,
+                                        callback, callback_user_data));
       },
-      &call_records);
+      call_records);
   fl_keyboard_manager_set_lookup_key_handler(
       manager, [](const GdkKeymapKey* key, gpointer user_data) { return 0u; },
       nullptr);
@@ -964,48 +962,43 @@ TEST(FlKeyboardManagerTest, SynthesizeModifiersIfNeeded) {
   g_autoptr(FlKeyboardManager) manager =
       fl_keyboard_manager_new(engine, FL_KEYBOARD_VIEW_DELEGATE(view));
 
-  std::vector<CallRecord> call_records;
+  g_autoptr(GPtrArray) call_records = g_ptr_array_new_with_free_func(
+      reinterpret_cast<GDestroyNotify>(call_record_free));
   fl_keyboard_manager_set_send_key_event_handler(
       manager,
       [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
          void* callback_user_data, gpointer user_data) {
-        std::vector<CallRecord>* call_records =
-            static_cast<std::vector<CallRecord>*>(user_data);
-        auto new_event = std::make_unique<FlutterKeyEvent>(*event);
-        char* new_event_character = cloneString(event->character);
-        new_event->character = new_event_character;
-        call_records->push_back(CallRecord{
-            .type = CallRecord::KEY_CALL_EMBEDDER,
-            .callback = callback,
-            .callback_user_data = callback_user_data,
-            .event = std::move(new_event),
-            .event_character = std::unique_ptr<char[]>(new_event_character),
-        });
+        GPtrArray* call_records = static_cast<GPtrArray*>(user_data);
+        g_ptr_array_add(call_records,
+                        call_record_new(CALL_RECORD_TYPE_EMBEDDER, event,
+                                        callback, callback_user_data));
       },
-      &call_records);
+      call_records);
 
   auto verifyModifierIsSynthesized = [&](GdkModifierType mask,
                                          uint64_t physical, uint64_t logical) {
     // Modifier is pressed.
     guint state = mask;
     fl_keyboard_manager_sync_modifier_if_needed(manager, state, 1000);
-    EXPECT_EQ(call_records.size(), 1u);
-    EXPECT_KEY_EVENT(call_records[0], kFlutterKeyEventTypeDown, physical,
-                     logical, NULL, true);
+    EXPECT_EQ(call_records->len, 1u);
+    EXPECT_KEY_EVENT(
+        static_cast<CallRecord*>(g_ptr_array_index(call_records, 0)),
+        kFlutterKeyEventTypeDown, physical, logical, NULL, true);
     // Modifier is released.
     state = state ^ mask;
     fl_keyboard_manager_sync_modifier_if_needed(manager, state, 1001);
-    EXPECT_EQ(call_records.size(), 2u);
-    EXPECT_KEY_EVENT(call_records[1], kFlutterKeyEventTypeUp, physical, logical,
-                     NULL, true);
-    call_records.clear();
+    EXPECT_EQ(call_records->len, 2u);
+    EXPECT_KEY_EVENT(
+        static_cast<CallRecord*>(g_ptr_array_index(call_records, 1)),
+        kFlutterKeyEventTypeUp, physical, logical, NULL, true);
+    g_ptr_array_set_size(call_records, 0);
   };
 
   // No modifiers pressed.
   guint state = 0;
   fl_keyboard_manager_sync_modifier_if_needed(manager, state, 1000);
-  EXPECT_EQ(call_records.size(), 0u);
-  call_records.clear();
+  EXPECT_EQ(call_records->len, 0u);
+  g_ptr_array_set_size(call_records, 0);
 
   // Press and release each modifier once.
   verifyModifierIsSynthesized(GDK_CONTROL_MASK, kPhysicalControlLeft,
