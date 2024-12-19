@@ -41,25 +41,11 @@ if ((Test-Path "$flutterRoot\DEPS" -PathType Leaf) -and (Test-Path "$flutterRoot
         # The realm on CI is passed in.
         if ($Env:FLUTTER_REALM) {
             [System.IO.File]::WriteAllText("$flutterRoot\bin\internal\engine.realm", $Env:FLUTTER_REALM, $utf8NoBom)
-            $engineRealm = "$Env:FLUTTER_REALM"
-        }
-        else {
-            if (Test-Path -Path "$flutterRoot\bin\internal\engine.realm") {
-                $engineRealm = (Get-Content "$flutterRoot\bin\internal\engine.realm")
-            }
         }
     }
-    else {
-        # Release branch - these files will exist
-        $engineVersion = (Get-Content "$flutterRoot\bin\internal\engine.version")
-        $engineRealm = (Get-Content "$flutterRoot\bin\internal\engine.realm")
-    }
 }
-else {
-    # Non-fusion repository - these files will exist
-    $engineVersion = (Get-Content "$flutterRoot\bin\internal\engine.version")
-    $engineRealm = (Get-Content "$flutterRoot\bin\internal\engine.realm")
-}
+$engineVersion = (Get-Content "$flutterRoot\bin\internal\engine.version")
+$engineRealm = (Get-Content "$flutterRoot\bin\internal\engine.realm")
 
 $oldDartSdkPrefix = "dart-sdk.old"
 
