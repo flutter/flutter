@@ -6,6 +6,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart' show TickerProvider;
 
 import 'curves.dart';
 import 'tween.dart';
@@ -28,7 +29,7 @@ import 'tween.dart';
 @immutable
 class AnimationStyle with Diagnosticable {
   /// Creates an instance of Animation Style class.
-  AnimationStyle({
+  const AnimationStyle({
     this.curve,
     this.duration,
     this.reverseCurve,
@@ -36,7 +37,7 @@ class AnimationStyle with Diagnosticable {
   });
 
   /// Creates an instance of Animation Style class with no animation.
-  static AnimationStyle noAnimation = AnimationStyle(
+  static const AnimationStyle noAnimation = AnimationStyle(
     duration: Duration.zero,
     reverseDuration: Duration.zero,
   );
@@ -52,6 +53,14 @@ class AnimationStyle with Diagnosticable {
 
   /// When specified, the reverse animation will use this duration.
   final Duration? reverseDuration;
+
+  /// Widgets that interface with [DefaultAnimationStyle] can
+  /// use this value if a [Duration] is not present in the current scope.
+  static const Duration fallbackDuration = Duration(milliseconds: 300);
+
+  /// Widgets that interface with [DefaultAnimationStyle] can
+  /// use this value if a [Curve] is not present in the current scope.
+  static const Curve fallbackCurve = Curves.linear;
 
   /// Creates a new [AnimationStyle] based on the current selection, with the
   /// provided parameters overridden.
@@ -69,17 +78,28 @@ class AnimationStyle with Diagnosticable {
     );
   }
 
+  /// Returns a modified version of the [other] style, where its `null` properties
+  /// are filled in with the non-null properties of this style, where applicable.
+  ///
+  /// If a `null` argument is passed, returns this text style.
+  AnimationStyle merge(AnimationStyle? other) {
+    if (other == null) {
+      return this;
+    }
+    return copyWith(
+      curve: other.curve,
+      duration: other.duration,
+      reverseCurve: other.reverseCurve,
+      reverseDuration: other.reverseDuration,
+    );
+  }
+
   /// Linearly interpolate between two animation styles.
   static AnimationStyle? lerp(AnimationStyle? a, AnimationStyle? b, double t) {
     if (identical(a, b)) {
       return a;
     }
-    return AnimationStyle(
-      curve: t < 0.5 ? a?.curve : b?.curve,
-      duration: t < 0.5 ? a?.duration : b?.duration,
-      reverseCurve: t < 0.5 ? a?.reverseCurve : b?.reverseCurve,
-      reverseDuration: t < 0.5 ? a?.reverseDuration : b?.reverseDuration,
-    );
+    return t < 0.5 ? a : b;
   }
 
   @override
@@ -113,4 +133,28 @@ class AnimationStyle with Diagnosticable {
     properties.add(DiagnosticsProperty<Curve>('reverseCurve', reverseCurve, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('reverseDuration', reverseDuration, defaultValue: null));
   }
+}
+
+/// An animation that can delegate its configuration to an [AnimationStyle].
+///
+/// Typically, this class interfaces with an [AnimationProvider],
+/// allowing animations to inherit fallback [Duration] and [Curve] values
+/// from the ambient [DefaultAnimationStyle].
+abstract interface class StyledAnimation<T> implements Animation<T> {
+  /// Called when the associated [AnimationProvider] is updated
+  /// with a new [AnimationStyle].
+  void updateStyle(AnimationStyle newStyle);
+}
+
+/// A [TickerProvider] that can also provide a relevant [AnimationStyle].
+///
+/// Any [StyledAnimation]s registered via [registerAnimation] will be given
+/// fallback [Duration] and [Curve] values, typically from the ambient
+/// [DefaultAnimationStyle].
+abstract interface class AnimationProvider implements TickerProvider {
+  /// Registers the [StyledAnimation] object with this provider.
+  ///
+  /// [StyledAnimation.updateStyle] is called immediately, and then called again
+  /// each time there's a relevant change.
+  void registerAnimation(StyledAnimation<Object?> animation);
 }

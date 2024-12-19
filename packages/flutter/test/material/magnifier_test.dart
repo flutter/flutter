@@ -380,7 +380,7 @@ void main() {
       bool getIsAnimated(WidgetTester tester) {
         final AnimatedPositioned animatedPositioned =
             tester.firstWidget(find.byType(AnimatedPositioned));
-        return animatedPositioned.duration.compareTo(Duration.zero) != 0;
+        return animatedPositioned.duration?.compareTo(Duration.zero) != 0;
       }
 
       testWidgets('should not be animated on the initial state',

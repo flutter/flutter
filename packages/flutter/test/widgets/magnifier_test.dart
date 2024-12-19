@@ -180,7 +180,7 @@ void main() {
               AnimationStatus.forward);
           expect(magnifierController.shown, true);
 
-          async.elapse(animationController.duration!);
+          async.elapse(animationController.duration);
           await tester.pumpAndSettle();
 
           expect(magnifierController.animationController?.status,
@@ -196,7 +196,7 @@ void main() {
               AnimationStatus.reverse);
           expect(magnifierController.shown, false);
 
-          async.elapse(animationController.duration!);
+          async.elapse(animationController.duration);
           await tester.pumpAndSettle();
 
           expect(magnifierController.animationController?.status,
@@ -278,7 +278,7 @@ void main() {
           WidgetsBinding.instance.scheduleFrame();
           await tester.pump();
 
-          async.elapse(animationController.duration!);
+          async.elapse(animationController.duration);
           await tester.pumpAndSettle();
 
           magnifierController.show(context: context, builder: (_) => testMagnifier2);
