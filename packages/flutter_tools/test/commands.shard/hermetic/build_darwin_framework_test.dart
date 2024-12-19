@@ -57,7 +57,7 @@ void main() {
           fileSystem: memoryFileSystem,
           processManager: FakeProcessManager.any(),
         );
-        rootOverride.childDirectory('bin').childDirectory('internal').childFile('engine.version')
+        rootOverride.childDirectory('bin').childDirectory('cache').childFile('engine-dart-sdk.stamp')
           ..createSync(recursive: true)
           ..writeAsStringSync(engineRevision);
       });
@@ -294,7 +294,7 @@ void main() {
           fileSystem: memoryFileSystem,
           processManager: FakeProcessManager.any(),
         );
-        rootOverride.childDirectory('bin').childDirectory('internal').childFile('engine.version')
+        rootOverride.childDirectory('bin').childDirectory('cache').childFile('engine-dart-sdk.stamp')
           ..createSync(recursive: true)
           ..writeAsStringSync(engineRevision);
       });
