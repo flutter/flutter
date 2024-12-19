@@ -4199,8 +4199,11 @@ class IndexedStack extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> wrappedChildren = List<Widget>.generate(children.length, (int i) {
-      return Visibility.maintain(
+      return Visibility(
         visible: i == index,
+        maintainSize: true,
+        maintainState: true,
+        maintainAnimation: true,
         child: children[i],
       );
     });
