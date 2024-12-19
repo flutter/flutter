@@ -85,7 +85,7 @@ Future<int> findGlobalsForFile(File file) async {
 Future<double> findCostsForRepo() async {
   final Process git = await startProcess(
     'git',
-    <String>['ls-files', '--full-name', flutterDirectory.path],
+    <String>['ls-files', '--exclude', 'engine',  '--full-name', flutterDirectory.path],
     workingDirectory: flutterDirectory.path,
   );
   double total = 0.0;
