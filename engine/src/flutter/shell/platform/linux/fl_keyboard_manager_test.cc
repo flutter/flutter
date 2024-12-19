@@ -957,10 +957,16 @@ TEST(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
 
 TEST(FlKeyboardManagerTest, SynthesizeModifiersIfNeeded) {
   ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
-  KeyboardTester tester;
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  g_autoptr(FlMockViewDelegate) view = fl_mock_view_delegate_new();
+  g_autoptr(FlKeyboardManager) manager =
+      fl_keyboard_manager_new(engine, FL_KEYBOARD_VIEW_DELEGATE(view));
+
   std::vector<CallRecord> call_records;
   fl_keyboard_manager_set_send_key_event_handler(
-      tester.manager(),
+      manager,
       [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
          void* callback_user_data, gpointer user_data) {
         std::vector<CallRecord>* call_records =
@@ -982,13 +988,13 @@ TEST(FlKeyboardManagerTest, SynthesizeModifiersIfNeeded) {
                                          uint64_t physical, uint64_t logical) {
     // Modifier is pressed.
     guint state = mask;
-    fl_keyboard_manager_sync_modifier_if_needed(tester.manager(), state, 1000);
+    fl_keyboard_manager_sync_modifier_if_needed(manager, state, 1000);
     EXPECT_EQ(call_records.size(), 1u);
     EXPECT_KEY_EVENT(call_records[0], kFlutterKeyEventTypeDown, physical,
                      logical, NULL, true);
     // Modifier is released.
     state = state ^ mask;
-    fl_keyboard_manager_sync_modifier_if_needed(tester.manager(), state, 1001);
+    fl_keyboard_manager_sync_modifier_if_needed(manager, state, 1001);
     EXPECT_EQ(call_records.size(), 2u);
     EXPECT_KEY_EVENT(call_records[1], kFlutterKeyEventTypeUp, physical, logical,
                      NULL, true);
@@ -997,7 +1003,7 @@ TEST(FlKeyboardManagerTest, SynthesizeModifiersIfNeeded) {
 
   // No modifiers pressed.
   guint state = 0;
-  fl_keyboard_manager_sync_modifier_if_needed(tester.manager(), state, 1000);
+  fl_keyboard_manager_sync_modifier_if_needed(manager, state, 1000);
   EXPECT_EQ(call_records.size(), 0u);
   call_records.clear();
 
