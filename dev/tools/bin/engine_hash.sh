@@ -6,7 +6,7 @@
 # ---------------------------------- NOTE ---------------------------------- #
 #
 # This file will appear unused within the monorepo. It is used internally
-# (in google3) as part of the roll process, and care should be put before 
+# (in google3) as part of the roll process, and care should be put before
 # making changes.
 #
 # See cl/688973229.
