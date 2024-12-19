@@ -393,6 +393,7 @@ targets:
   - name: Linux packages_autoroller
     presubmit: false
     recipe: pub_autoroller/pub_autoroller
+    bringup: true # https://github.com/flutter/flutter/issues/160473
     # This takes a while because we need to fetch network dependencies and run
     # Gradle for every android app in the repo
     timeout: 45
@@ -802,12 +803,14 @@ targets:
   - name: Linux fuchsia_precache
     recipe: flutter/flutter_drone
     timeout: 60
+    presubmit: false
     properties:
       shard: fuchsia_precache
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - bin/internal/engine.version
+      - engine/**
+      - DEPS
       - .ci.yaml
 
   - name: Linux gradle_desugar_classes_test
@@ -962,6 +965,7 @@ targets:
   - name: Linux build_android_host_app_with_module_source
     recipe: devicelab/devicelab_drone
     timeout: 60
+    presubmit: false
     properties:
       dependencies: >-
         [
@@ -1156,7 +1160,8 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - bin/internal/engine.version
+      - engine/**
+      - DEPS
       - .ci.yaml
 
   - name: Linux tool_integration_tests_1_6
@@ -2606,7 +2611,8 @@ targets:
     # presubmit during engine rolls. This test is the *only* automated e2e
     # test for external textures for the engine, it should never break.
     runIf:
-      - bin/internal/engine.version
+      - engine/**
+      - DEPS
       - .ci.yaml
     properties:
       tags: >
@@ -2621,7 +2627,8 @@ targets:
     # presubmit during engine rolls. This test is the *only* automated e2e
     # test for external textures for the engine, it should never break.
     runIf:
-      - bin/internal/engine.version
+      - engine/**
+      - DEPS
       - .ci.yaml
     properties:
       tags: >
@@ -4111,6 +4118,7 @@ targets:
   - name: Mac build_android_host_app_with_module_source
     recipe: devicelab/devicelab_drone
     timeout: 60
+    presubmit: false
     properties:
       dependencies: >-
         [
@@ -5791,6 +5799,7 @@ targets:
   - name: Windows build_android_host_app_with_module_source
     recipe: devicelab/devicelab_drone
     timeout: 60
+    presubmit: false
     properties:
       dependencies: >-
         [
