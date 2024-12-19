@@ -182,6 +182,9 @@ class FakeDevice extends Fake implements Device {
   String get name => 'test';
 
   @override
+  String get displayName => name;
+
+  @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   bool wasDisposed = false;

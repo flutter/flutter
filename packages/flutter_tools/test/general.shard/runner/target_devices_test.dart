@@ -2775,6 +2775,15 @@ class FakeDevice extends Fake implements Device {
   String name;
 
   @override
+  String get displayName {
+    String result = name;
+    if (isWirelesslyConnected) {
+      result += ' (wireless)';
+    }
+    return result;
+  }
+
+  @override
   final bool ephemeral;
 
   @override
@@ -2866,6 +2875,15 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   String name;
+
+  @override
+  String get displayName {
+    String result = name;
+    if (isWirelesslyConnected) {
+      result += ' (wireless)';
+    }
+    return result;
+  }
 
   @override
   final bool ephemeral;
