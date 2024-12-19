@@ -20,8 +20,8 @@ const String _kGoldctlKey = 'GOLDCTL';
 const String _kPresubmitEnvName = 'GOLD_TRYJOB';
 const String _kLuciEnvName = 'LUCI_CONTEXT';
 
-const String _skiaGoldHost = 'https://flutter-engine-gold.skia.org';
-const String _instance = 'flutter-engine';
+const String _skiaGoldHost = 'https://flutter-gold.skia.org';
+const String _instance = 'flutter';
 
 /// Uploads images and makes baseline requests to Skia Gold.
 ///

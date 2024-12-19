@@ -21,7 +21,7 @@ void main() {
   /// Simulating what a presubmit environment would look like.
   const Map<String, String> presubmitEnv = <String, String>{
     'GOLDCTL': 'python tools/goldctl.py',
-    'GOLD_TRYJOB': 'flutter/engine/1234567890',
+    'GOLD_TRYJOB': 'flutter/flutter/1234567890',
     'LOGDOG_STREAM_PREFIX': 'buildbucket/cr-buildbucket.appspot.com/1234567890/+/logdog',
     'LUCI_CONTEXT': '{}',
   };
@@ -577,7 +577,7 @@ void main() {
 
       final String hash = client.getTraceID('test-name');
       fixture.httpClient.setJsonResponse(
-        Uri.parse('https://flutter-engine-gold.skia.org/json/v2/latestpositivedigest/$hash'),
+        Uri.parse('https://flutter-gold.skia.org/json/v2/latestpositivedigest/$hash'),
         <String, Object?>{
           'digest': 'digest',
         },
