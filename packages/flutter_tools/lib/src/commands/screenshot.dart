@@ -83,7 +83,7 @@ class ScreenshotCommand extends FlutterCommand {
           throwToolExit('Must have a connected device for screenshot type $screenshotType');
         }
         if (!device!.supportsScreenshot) {
-          throwToolExit('Screenshot not supported for ${device!.name}.');
+          throwToolExit('Screenshot not supported for ${device!.displayName}.');
         }
       default:
         if (vmServiceUrl == null) {

@@ -174,7 +174,10 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       final String devToolsUrl = activeDevToolsServer!.uri!.replace(
         queryParameters: <String, dynamic>{'uri': '${device!.vmService!.httpAddress}'},
       ).toString();
-      _logger.printStatus('Launching Flutter DevTools for ${device.device!.name} at $devToolsUrl');
+      _logger.printStatus(
+        'Launching Flutter DevTools for '
+        '${device.device!.displayName} at $devToolsUrl',
+      );
       unawaited(Chrome.start(<String>[devToolsUrl]));
     }
     launchedInBrowser = true;

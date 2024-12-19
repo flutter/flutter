@@ -425,7 +425,7 @@ class FlutterDevice {
     final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
     globals.printStatus(
       'Launching ${getDisplayPath(hotRunner.mainPath, globals.fs)} '
-      'on ${device!.name} in $modeName mode...',
+      'on ${device!.displayName} in $modeName mode...',
     );
 
     final TargetPlatform targetPlatform = await device!.targetPlatform;
@@ -465,7 +465,9 @@ class FlutterDevice {
     final LaunchResult result = await futureResult;
 
     if (!result.started) {
-      globals.printError('Error launching application on ${device!.name}.');
+      globals.printError(
+        'Error launching application on ${device!.displayName}.',
+      );
       await stopEchoingDeviceLog();
       return 2;
     }
@@ -509,7 +511,7 @@ class FlutterDevice {
     final bool prebuiltMode = coldRunner.applicationBinary != null;
     globals.printStatus(
       'Launching ${getDisplayPath(coldRunner.mainPath, globals.fs)} '
-      'on ${device!.name} in $modeName mode...',
+      'on ${device!.displayName} in $modeName mode...',
     );
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
@@ -528,7 +530,9 @@ class FlutterDevice {
     );
 
     if (!result.started) {
-      globals.printError('Error running application on ${device!.name}.');
+      globals.printError(
+        'Error running application on ${device!.displayName}.',
+      );
       await stopEchoingDeviceLog();
       return 2;
     }
@@ -557,7 +561,7 @@ class FlutterDevice {
     required PackageConfig packageConfig,
   }) async {
     final Status devFSStatus = globals.logger.startProgress(
-      'Syncing files to device ${device!.name}...',
+      'Syncing files to device ${device!.displayName}...',
       progressId: 'devFS.update',
     );
     UpdateFSReport report;
@@ -930,7 +934,7 @@ abstract class ResidentHandlers {
       return;
     }
     final Status status = logger.startProgress(
-      'Taking screenshot for ${device.device!.name}...',
+      'Taking screenshot for ${device.device!.displayName}...',
     );
     final File outputFile = getUniqueFile(
       fileSystem!.currentDirectory,
@@ -1466,8 +1470,8 @@ abstract class ResidentRunner extends ResidentHandlers {
       if (includeVmService) {
         // Caution: This log line is parsed by device lab tests.
         globals.printStatus(
-          'A Dart VM Service on ${device.device!.name} is available at: '
-          '${device.vmService!.httpAddress}',
+          'A Dart VM Service on ${device.device!.displayName} '
+          'is available at: ${device.vmService!.httpAddress}',
         );
       }
       if (includeDevtools) {
@@ -1483,7 +1487,8 @@ abstract class ResidentRunner extends ResidentHandlers {
         if (uri != null) {
           globals.printStatus(
             'The Flutter DevTools debugger and profiler '
-            'on ${device.device!.name} is available at: ${urlToDisplayString(uri)}',
+            'on ${device.device!.displayName} '
+            'is available at: ${urlToDisplayString(uri)}',
           );
         }
       }
