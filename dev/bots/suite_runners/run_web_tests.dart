@@ -91,14 +91,15 @@ class WebTestsSuite {
 
   /// Coarse-grained integration tests running on the Web.
   Future<void> webLongRunningTestsRunner() async {
-
     final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
-    final String engineRealmFile = path.join(flutterRoot, 'bin', 'internal', 'engine.realm');
     final String engineVersion = File(engineVersionFile).readAsStringSync().trim();
+
+    // The realm file is only populated in presubmit because presubmit engine binaries
+    // are not uploaded to the prod GCS buckets.
+    final String engineRealmFile = path.join(flutterRoot, 'bin', 'internal', 'engine.realm');
     final String engineRealm = File(engineRealmFile).readAsStringSync().trim();
-    if (engineRealm.isNotEmpty) {
-      return;
-    }
+    final bool isPostSubmit = engineRealm.isEmpty;
+
     final List<ShardRunner> tests = <ShardRunner>[
       for (final String buildMode in _kAllBuildModes) ...<ShardRunner>[
         () => _runFlutterDriverWebTest(
@@ -206,10 +207,14 @@ class WebTestsSuite {
       () => _runWebDebugTest('lib/stack_trace.dart'),
       () => _runWebDebugTest('lib/framework_stack_trace.dart'),
       () => _runWebDebugTest('lib/web_directory_loading.dart'),
-      () => _runWebDebugTest('lib/web_resources_cdn_test.dart',
-        additionalArguments: <String>[
-          '--dart-define=TEST_FLUTTER_ENGINE_VERSION=$engineVersion',
-        ]),
+
+      // Only run the CDN test in post-submit because presubmit binaries never go to the CDN.
+      if (isPostSubmit)
+        () => _runWebDebugTest('lib/web_resources_cdn_test.dart',
+          additionalArguments: <String>[
+            '--dart-define=TEST_FLUTTER_ENGINE_VERSION=$engineVersion',
+          ]),
+
       () => _runWebDebugTest('test/test.dart'),
       () => _runWebDebugTest('lib/null_safe_main.dart'),
       () => _runWebDebugTest('lib/web_define_loading.dart',
