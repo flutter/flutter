@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'editable_text.dart';
-/// @docImport 'scroll_view.dart';
-/// @docImport 'table.dart';
+/// @docImport 'package:flutter/widgets.dart';
 library;
 
 import 'dart:math' as math;
@@ -92,7 +90,7 @@ class InteractiveViewer extends StatefulWidget {
        assert(maxScale > 0),
        assert(!maxScale.isNaN),
        assert(maxScale >= minScale),
-       // boundaryMargin must be either fully infinite or fully finite, but not
+       // The boundaryMargin must be either fully infinite or fully finite, but not
        // a mix of both.
        assert(
          (boundaryMargin.horizontal.isInfinite
@@ -100,6 +98,7 @@ class InteractiveViewer extends StatefulWidget {
            && boundaryMargin.right.isFinite && boundaryMargin.bottom.isFinite
            && boundaryMargin.left.isFinite),
        ),
+       _transformChild = true,
        builder = null;
 
   /// Creates an InteractiveViewer for a child that is created on demand.
@@ -135,7 +134,7 @@ class InteractiveViewer extends StatefulWidget {
        assert(maxScale > 0),
        assert(!maxScale.isNaN),
        assert(maxScale >= minScale),
-       // boundaryMargin must be either fully infinite or fully finite, but not
+       // The boundaryMargin must be either fully infinite or fully finite, but not
        // a mix of both.
        assert(
          (boundaryMargin.horizontal.isInfinite && boundaryMargin.vertical.isInfinite) ||
@@ -145,7 +144,61 @@ class InteractiveViewer extends StatefulWidget {
                  boundaryMargin.left.isFinite),
        ),
        constrained = false,
+       _transformChild = true,
        child = null;
+
+  /// Creates an [InteractiveViewer] that does not apply its current transform to its child widget.
+  ///
+  /// Using [InteractiveViewer.raw] will not transform the child based on the [Matrix4]
+  /// in the [TransformationController] enabling the direct child to stay static while
+  /// delegating layout to widgets like [Stack] and [CustomMultiChildLayout].
+  ///
+  /// {@tool dartpad}
+  /// The following example is how to construct an infinite canvas where the background is static
+  /// and the nodes are positioned manually.
+  ///
+  /// ** See code in examples/api/lib/widgets/interactive_viewer/interactive_viewer.raw.0.dart **
+  /// {@end-tool}
+  InteractiveViewer.raw({
+    super.key,
+    this.clipBehavior = Clip.hardEdge,
+    this.panAxis = PanAxis.free,
+    this.boundaryMargin = EdgeInsets.zero,
+    // These default scale values were eyeballed as reasonable limits for common
+    // use cases.
+    this.maxScale = 2.5,
+    this.minScale = 0.8,
+    this.interactionEndFrictionCoefficient = _kDrag,
+    this.onInteractionEnd,
+    this.onInteractionStart,
+    this.onInteractionUpdate,
+    this.panEnabled = true,
+    this.scaleEnabled = true,
+    this.scaleFactor = 200.0,
+    this.transformationController,
+    this.trackpadScrollCausesScale = false,
+    required InteractiveViewerWidgetBuilder this.builder,
+  }) : assert(minScale > 0),
+       assert(interactionEndFrictionCoefficient > 0),
+       assert(minScale.isFinite),
+       assert(maxScale > 0),
+       assert(!maxScale.isNaN),
+       assert(maxScale >= minScale),
+       // The boundaryMargin must be either fully infinite or fully finite, but not
+       // a mix of both.
+       assert(
+         (boundaryMargin.horizontal.isInfinite && boundaryMargin.vertical.isInfinite) ||
+             (boundaryMargin.top.isFinite &&
+                 boundaryMargin.right.isFinite &&
+                 boundaryMargin.bottom.isFinite &&
+                 boundaryMargin.left.isFinite),
+       ),
+       constrained = false,
+       alignment = null,
+       _transformChild = false,
+       child = null;
+
+  final bool _transformChild;
 
   /// The alignment of the child's origin, relative to the size of the box.
   final Alignment? alignment;
@@ -459,7 +512,7 @@ class InteractiveViewer extends StatefulWidget {
     );
   }
 
-  /// Returns true iff the point is inside the rectangle given by the Quad,
+  /// Returns true if the point is inside the rectangle given by the Quad,
   /// inclusively.
   /// Algorithm from https://math.stackexchange.com/a/190373.
   @visibleForTesting
@@ -707,7 +760,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       ..translate(-focalPointScene.dx, -focalPointScene.dy);
   }
 
-  // Returns true iff the given _GestureType is enabled.
+  // Returns true if the given _GestureType is enabled.
   bool _gestureIsSupported(_GestureType? gestureType) {
     return switch (gestureType) {
       _GestureType.rotate => _rotateEnabled,
@@ -1081,6 +1134,13 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   void didUpdateWidget(InteractiveViewer oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    if (oldWidget.scaleEnabled != widget.scaleEnabled ||
+        oldWidget.panEnabled != widget.panEnabled) {
+      if (mounted) {
+        _handleTransformation();
+      }
+    }
+
     final TransformationController? newController = widget.transformationController;
     if (newController == oldWidget.transformationController) {
       return;
@@ -1114,6 +1174,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         constrained: widget.constrained,
         matrix: _transformer.value,
         alignment: widget.alignment,
+        transformChild: widget._transformChild,
         child: widget.child!,
       );
     } else {
@@ -1130,6 +1191,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
             constrained: widget.constrained,
             alignment: widget.alignment,
             matrix: matrix,
+            transformChild: widget._transformChild,
             child: widget.builder!(
               context,
               _transformViewport(matrix, Offset.zero & constraints.biggest),
@@ -1165,6 +1227,7 @@ class _InteractiveViewerBuilt extends StatelessWidget {
     required this.constrained,
     required this.matrix,
     required this.alignment,
+    required this.transformChild,
   });
 
   final Widget child;
@@ -1173,17 +1236,22 @@ class _InteractiveViewerBuilt extends StatelessWidget {
   final bool constrained;
   final Matrix4 matrix;
   final Alignment? alignment;
+  final bool transformChild;
 
   @override
   Widget build(BuildContext context) {
-    Widget child = Transform(
-      transform: matrix,
-      alignment: alignment,
-      child: KeyedSubtree(
-        key: childKey,
-        child: this.child,
-      ),
+    Widget child = KeyedSubtree(
+      key: childKey,
+      child: this.child,
     );
+
+    if (transformChild) {
+      child = Transform(
+        transform: matrix,
+        alignment: alignment,
+        child: child,
+      );
+    }
 
     if (!constrained) {
       child = OverflowBox(
