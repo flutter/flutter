@@ -67,9 +67,24 @@ void setUpImplicitView() {
     await myWindow.resetHistory();
     myWindow.dispose();
   });
+
+  ignoreUnhandledPlatformMessages();
+}
+
+// This is necessary in tests to avoid spamming the console with warnings.
+//
+// App lifecycle is one of the culprits here. It keeps trying to send messages
+// to update the lifecycle state, but that leads to a warning because there's
+// no platform message handler.
+void ignoreUnhandledPlatformMessages() {
+  setUp(() {
+    ui.channelBuffers.debugPrintOverflowWarning = false;
+  });
 }
 
 Future<void> bootstrapAndRunApp({bool withImplicitView = false}) async {
+  ui.channelBuffers.debugPrintOverflowWarning = false;
+
   final Completer<void> completer = Completer<void>();
   await ui_web.bootstrapEngine(runApp: () => completer.complete());
   await completer.future;

@@ -10,13 +10,18 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/view_embedder/embedding_strategy/full_page_embedding_strategy.dart';
 
+import '../../../common/test_initialization.dart';
+
 void main() {
   internalBootstrapBrowserTest(() => doTests);
 }
 
 void doTests() {
+  ignoreUnhandledPlatformMessages();
+
   group('initialize', () {
     test('Prepares target environment', () {
+      FullPageEmbeddingStrategy.debugPrintExistingMetaWarning = false;
       final DomElement target = domDocument.body!;
       final DomHTMLMetaElement meta = createDomHTMLMetaElement();
       meta
@@ -52,6 +57,7 @@ void doTests() {
         isTrue,
         reason: 'Should install flutter viewport meta tag.',
       );
+      FullPageEmbeddingStrategy.debugPrintExistingMetaWarning = true;
     });
   });
 

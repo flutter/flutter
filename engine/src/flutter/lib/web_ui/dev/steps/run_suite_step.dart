@@ -173,13 +173,11 @@ class RunSuiteStep implements PipelineStep {
 
   Future<SkiaGoldClient?> _createSkiaClient() async {
     if (suite.testBundle.compileConfigs.length > 1) {
-      print('Not creating skia client due to multiple compile configs');
       // Multiple compile configs are only used for our fallback tests, which
       // do not collect goldens.
       return null;
     }
     if (suite.runConfig.browser == BrowserName.safari) {
-      print('Not creating skia client for Safari');
       // Goldens from Safari produce too many diffs, disabled for now.
       // See https://github.com/flutter/flutter/issues/143591
       return null;
@@ -204,14 +202,14 @@ class RunSuiteStep implements PipelineStep {
       'Renderer': rendererName,
       if (variant != null) 'CanvasKitVariant': variant.name,
     };
-    print('Created Skia Gold Client. dimensions: $dimensions');
     final SkiaGoldClient skiaClient = SkiaGoldClient(workDirectory, dimensions: dimensions);
 
     if (await _checkSkiaClient(skiaClient)) {
-      print('Successfully checked Skia Gold Client');
+      print('Using SkiaGoldClient with dimensions: $dimensions');
       return skiaClient;
     }
 
+    print('Could not connect to Skia Gold.');
     if (requireSkiaGold) {
       throw ToolExit('Skia Gold is required but is unavailable.');
     }

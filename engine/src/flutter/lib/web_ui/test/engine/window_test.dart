@@ -13,28 +13,20 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/matchers.dart';
+import '../common/test_initialization.dart';
 
 const int kPhysicalKeyA = 0x00070004;
 const int kLogicalKeyA = 0x00000000061;
+
+EnginePlatformDispatcher get dispatcher => EnginePlatformDispatcher.instance;
+EngineFlutterWindow get myWindow => dispatcher.implicitView!;
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 Future<void> testMain() async {
-  late EngineFlutterWindow myWindow;
-  final EnginePlatformDispatcher dispatcher = EnginePlatformDispatcher.instance;
-
-  setUp(() {
-    myWindow = EngineFlutterView.implicit(dispatcher, createDomHTMLDivElement());
-    dispatcher.viewManager.registerView(myWindow);
-  });
-
-  tearDown(() async {
-    dispatcher.viewManager.unregisterView(myWindow.viewId);
-    await myWindow.resetHistory();
-    myWindow.dispose();
-  });
+  setUpImplicitView();
 
   test('onTextScaleFactorChanged preserves the zone', () {
     final Zone innerZone = Zone.current.fork();
@@ -499,6 +491,7 @@ Future<void> testMain() async {
   });
 
   test('in full-page mode, Flutter window replaces viewport meta tags', () {
+    FullPageEmbeddingStrategy.debugPrintExistingMetaWarning = false;
     final DomHTMLMetaElement existingMeta =
         createDomHTMLMetaElement()
           ..name = 'viewport'
@@ -521,6 +514,7 @@ Future<void> testMain() async {
     expect(newMeta.content, contains('maximum-scale=1.0'));
     expect(newMeta.content, contains('user-scalable=no'));
     implicitView.dispose();
+    FullPageEmbeddingStrategy.debugPrintExistingMetaWarning = true;
   });
 
   test('auto-view-id', () {

@@ -12,6 +12,8 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui show Offset;
 
+import '../../common/test_initialization.dart';
+
 void main() {
   internalBootstrapBrowserTest(() => doTests);
 }
@@ -28,6 +30,8 @@ void doTests() {
     target.dispatchEvent(e);
     return (await nextEvent) as DomPointerEvent;
   }
+
+  ignoreUnhandledPlatformMessages();
 
   group('computeEventOffsetToTarget', () {
     setUp(() {
@@ -135,14 +139,17 @@ void doTests() {
 
     test('Event dispatched by TalkBack gets a computed offset', () async {
       // Fill this in to test _computeOffsetForTalkbackEvent
-    }, skip: 'To be implemented!');
+
+      // To be implemented!
+    }, skip: true);
 
     test(
       'Event dispatched on text editing node computes offset with framework geometry',
       () async {
         // Fill this in to test _computeOffsetForInputs
       },
-      skip: 'To be implemented!',
+      // To be implemented!
+      skip: true,
     );
   });
 }

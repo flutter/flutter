@@ -11,6 +11,8 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 
+import '../common/test_initialization.dart';
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -19,6 +21,8 @@ void testMain() {
   int callOrder = 1;
   int initCalled = 0;
   int runCalled = 0;
+
+  ignoreUnhandledPlatformMessages();
 
   setUp(() {
     callOrder = 1;

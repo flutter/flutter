@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/util.dart' show setElementStyle;
 
@@ -18,6 +19,9 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
     _applyViewportMeta();
     _setHostStyles();
   }
+
+  @visibleForTesting
+  static bool debugPrintExistingMetaWarning = true;
 
   @override
   final DomElement hostElement = domDocument.body!;
@@ -66,6 +70,10 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
       'meta[name="viewport"]',
     )) {
       assert(() {
+        if (!debugPrintExistingMetaWarning) {
+          return true;
+        }
+
         // Filter out the meta tag that the engine placed on the page. This is
         // to avoid UI flicker during hot restart. Hot restart will clean up the
         // old meta tag synchronously with the first post-restart frame.
