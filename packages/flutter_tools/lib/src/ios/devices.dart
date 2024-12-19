@@ -1184,7 +1184,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
       iMobileDevice,
       device.majorSdkVersion,
       device.id,
-      device.name,
+      device.displayName,
       device.isWirelesslyConnected,
       device.isCoreDevice,
       appName,

@@ -671,7 +671,7 @@ class AppDomain extends Domain {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
         '${sentenceCase(options.buildInfo.friendlyModeName)} '
-        'mode is not supported for ${device.name}.',
+        'mode is not supported for ${device.displayName}.',
       );
     }
 
@@ -1378,7 +1378,7 @@ class DevToolsDomain extends Domain {
 Future<Map<String, Object?>> _deviceToMap(Device device) async {
   return <String, Object?>{
     'id': device.id,
-    'name': device.name,
+    'name': device.displayName,
     'platform': getNameForTargetPlatform(await device.targetPlatform),
     'emulator': await device.isLocalEmulator,
     'category': device.category?.toString(),

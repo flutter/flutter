@@ -358,7 +358,9 @@ class TargetDevices {
   void _displayDeviceOptions(List<Device> devices) {
     int count = 1;
     for (final Device device in devices) {
-      _logger.printStatus(_chooseDeviceOptionMessage(count, device.name, device.id));
+      _logger.printStatus(
+        _chooseDeviceOptionMessage(count, device.displayName, device.id),
+      );
       count++;
     }
   }
@@ -424,7 +426,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   Future<Device?> _waitForIOSDeviceToConnect(IOSDevice device) async {
     for (final DeviceDiscovery discoverer in _deviceManager.deviceDiscoverers) {
       if (discoverer is IOSDevices) {
-        _logger.printStatus('Waiting for ${device.name} to connect...');
+        _logger.printStatus('Waiting for ${device.displayName} to connect...');
         final Status waitingStatus = _logger.startSpinner(
           timeout: const Duration(seconds: 30),
           warningColor: TerminalColor.red,
@@ -501,14 +503,16 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
         if (matchedDevice is IOSDevice) {
           // If the only matching device is not paired, print a warning
           if (!matchedDevice.isPaired) {
-            _logger.printStatus(flutterSpecifiedDeviceUnpaired(matchedDevice.name));
+            _logger.printStatus(flutterSpecifiedDeviceUnpaired(
+              matchedDevice.displayName),
+            );
             return null;
           }
           // If the only matching device does not have Developer Mode enabled,
           // print a warning
           if (!matchedDevice.devModeEnabled) {
             _logger.printStatus(
-                flutterSpecifiedDeviceDevModeDisabled(matchedDevice.name)
+              flutterSpecifiedDeviceDevModeDisabled(matchedDevice.displayName),
             );
             return null;
           }
@@ -526,13 +530,15 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
         for (final IOSDevice device in specifiedDevices.whereType<IOSDevice>()) {
           // Print warning for every matching unpaired device.
           if (!device.isPaired) {
-            _logger.printStatus(flutterSpecifiedDeviceUnpaired(device.name));
+            _logger.printStatus(
+              flutterSpecifiedDeviceUnpaired(device.displayName),
+            );
           }
 
           // Print warning for every matching device that does not have Developer Mode enabled.
           if (!device.devModeEnabled) {
             _logger.printStatus(
-                flutterSpecifiedDeviceDevModeDisabled(device.name)
+              flutterSpecifiedDeviceDevModeDisabled(device.displayName)
             );
           }
         }
