@@ -51,7 +51,12 @@ interface class SkiaGoldClient {
     Map<String, String>? dimensions,
     bool verbose = false,
   }) {
-    return SkiaGoldClient.forTesting(workDirectory, dimensions: dimensions, verbose: verbose);
+    return SkiaGoldClient.forTesting(
+      workDirectory,
+      dimensions: dimensions,
+      verbose: verbose,
+      prefix: prefix,
+    );
   }
 
   /// Creates a [SkiaGoldClient] for testing.
