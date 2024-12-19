@@ -2601,7 +2601,8 @@ void main() {
 
     await tester.restoreFrom(restorationData);
     expect(find.byType(AlertDialog), findsOneWidget);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+    // https://github.com/flutter/flutter/issues/33615
+  }, skip: isBrowser);
 
   testWidgets('AlertDialog.actionsAlignment', (WidgetTester tester) async {
     final Key actionKey = UniqueKey();

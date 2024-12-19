@@ -23,7 +23,8 @@ void main() {
     // When a MissingPluginException is thrown, it is caught and a null response
     // is returned.
     expect(response, isNull);
-  }, skip: kIsWeb); // [intended]
+    // [intended]
+  }, skip: kIsWeb);
 
   for (final bool? returnValue in <bool?>[false, true, null]) {
     test('Scribe.isStylusHandwritingAvailable calls through to platform channel', () async {
@@ -44,7 +45,8 @@ void main() {
 
       expect(calls, hasLength(1));
       expect(calls.first.method, 'Scribe.isStylusHandwritingAvailable');
-    }, skip: kIsWeb); // [intended]
+      // [intended]
+    }, skip: kIsWeb);
   }
 
   for (final bool? returnValue in <bool?>[false, true, null]) {
@@ -66,7 +68,8 @@ void main() {
 
       expect(calls, hasLength(1));
       expect(calls.first.method, 'Scribe.isFeatureAvailable');
-    }, skip: kIsWeb); // [intended]
+      // [intended]
+    }, skip: kIsWeb);
   }
 
   test('Scribe.startStylusHandwriting calls through to platform channel', () async {
@@ -80,5 +83,6 @@ void main() {
     Scribe.startStylusHandwriting();
     expect(calls, hasLength(1));
     expect(calls.first.method, 'Scribe.startStylusHandwriting');
-  }, skip: kIsWeb); // [intended]
+    // [intended]
+  }, skip: kIsWeb);
 }

@@ -37,7 +37,8 @@ void main() {
 
     testWidgets('respects the skip flag', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
-      final Future<void> future = expectLater(null, FakeMatcher(completer), skip: 'testing skip'); // [intended] API testing
+      // [intended] API testing
+      final Future<void> future = expectLater(null, FakeMatcher(completer), skip: 'testing skip');
       bool completed = false;
       future.then<void>((_) {
         completed = true;
@@ -76,7 +77,8 @@ void main() {
     testWidgets('should be skipped', (WidgetTester tester) async {
       expect(false, true);
     });
-  }, skip: true); // [intended] API testing
+    // [intended] API testing
+  }, skip: true);
 
   group('pumping', () {
     testWidgets('pumping', (WidgetTester tester) async {

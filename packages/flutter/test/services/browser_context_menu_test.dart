@@ -34,7 +34,8 @@ void main() {
       }
     });
   },
-    skip: kIsWeb, // [intended]
+  // [intended]
+    skip: kIsWeb,
   );
 
   group('on web', () {
@@ -77,6 +78,7 @@ void main() {
       });
     });
   },
-    skip: !kIsWeb, // [intended]
+  // [intended]
+    skip: !kIsWeb,
   );
 }

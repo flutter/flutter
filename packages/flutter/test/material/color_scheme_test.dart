@@ -579,7 +579,8 @@ void main() {
     expect(scheme.onInverseSurface, const Color(0xfff3eff7));
     expect(scheme.inversePrimary, const Color(0xffc0c1ff));
     expect(scheme.surfaceTint, const Color(0xff575992));
-  }, skip: isBrowser, // [intended] uses dart:typed_data.
+    // [intended] uses dart:typed_data.
+  }, skip: isBrowser,
 );
 
   test('can generate a dark scheme from an imageProvider', () async {
@@ -636,7 +637,8 @@ void main() {
     expect(scheme.onInverseSurface, const Color(0xff303036));
     expect(scheme.inversePrimary, const Color(0xff575992));
     expect(scheme.surfaceTint, const Color(0xffc0c1ff));
-  }, skip: isBrowser, // [intended] uses dart:isolate and io.
+    // [intended] uses dart:isolate and io.
+  }, skip: isBrowser,
   );
 
   test('fromSeed() asserts on invalid contrast levels', () {
@@ -702,7 +704,8 @@ void main() {
     );
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
-    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
+  // https://github.com/flutter/flutter/issues/44115
+    skip: isBrowser,
   );
 
   testWidgets('Color values in ColorScheme.fromSeed with different variants matches values in DynamicScheme', (WidgetTester tester) async {

@@ -149,7 +149,8 @@ void main() {
     expect(findOverflowNextButton(), findsNothing);
 
     expect(findOverflowBackButton(), overflowBackPaintPattern());
-  }, skip: kIsWeb); // Path.combine is not implemented in the HTML backend https://github.com/flutter/flutter/issues/44572
+    // Path.combine is not implemented in the HTML backend https://github.com/flutter/flutter/issues/44572
+  }, skip: kIsWeb);
 
   testWidgets('paginates children if they overflow', (WidgetTester tester) async {
     late StateSetter setState;
@@ -239,7 +240,8 @@ void main() {
     expect(find.byType(TestBox), findsNWidgets(7));
     expect(findOverflowNextButton(), findsOneWidget);
     expect(findOverflowBackButton(), findsNothing);
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+    // [intended] We do not use Flutter-rendered context menu on the Web.
+  }, skip: kIsWeb);
 
   testWidgets('does not paginate if children fit with zero margin', (WidgetTester tester) async {
     final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
@@ -266,7 +268,8 @@ void main() {
     expect(find.byType(TestBox), findsNWidgets(children.length));
     expect(findOverflowNextButton(), findsNothing);
     expect(findOverflowBackButton(), findsNothing);
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+    // [intended] We do not use Flutter-rendered context menu on the Web.
+  }, skip: kIsWeb);
 
   testWidgets('correctly sizes large toolbar buttons', (WidgetTester tester) async {
     final GlobalKey firstBoxKey = GlobalKey();
@@ -322,7 +325,8 @@ void main() {
     expect(find.byKey(secondBoxKey), findsNothing);
     expect(find.byKey(thirdBoxKey), findsOneWidget);
     expect(find.byKey(fourthBoxKey), findsOneWidget);
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+    // [intended] We do not use Flutter-rendered context menu on the Web.
+  }, skip: kIsWeb);
 
   testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
     late StateSetter setState;
@@ -388,7 +392,8 @@ void main() {
     await tester.pump();
     toolbarY = tester.getTopLeft(findToolbar()).dy;
     expect(toolbarY, equals(anchorAboveY - height + _kToolbarArrowSize.height - _kToolbarContentDistance));
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+    // [intended] We do not use Flutter-rendered context menu on the Web.
+  }, skip: kIsWeb);
 
   testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
@@ -422,7 +427,8 @@ void main() {
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Select all'), findsNothing);
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+    // [intended] We do not use Flutter-rendered context menu on the Web.
+  }, skip: kIsWeb);
 
   for (final Brightness? themeBrightness in <Brightness?>[...Brightness.values, null]) {
     for (final Brightness? mediaBrightness in <Brightness?>[...Brightness.values, null]) {
@@ -474,7 +480,8 @@ void main() {
               ? _kToolbarTextColor.darkColor.value
               : _kToolbarTextColor.color.value,
         );
-      }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+        // [intended] We do not use Flutter-rendered context menu on the Web.
+      }, skip: kIsWeb);
     }
   }
 
@@ -543,7 +550,8 @@ void main() {
         color: const Color(0x33000000),
       ),
     );
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+    // [intended] We do not use Flutter-rendered context menu on the Web.
+  }, skip: kIsWeb);
 
   testWidgets('Basic golden tests', (WidgetTester tester) async {
     final Key key = UniqueKey();
@@ -590,5 +598,6 @@ void main() {
       }
     }
     debugDisableShadows = true;
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+    // [intended] We do not use Flutter-rendered context menu on the Web.
+  }, skip: kIsWeb);
 }

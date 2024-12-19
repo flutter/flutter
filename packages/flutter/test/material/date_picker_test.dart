@@ -2259,7 +2259,8 @@ void main() {
     // newly selected date.
     expect(find.byType(DatePickerDialog), findsNothing);
     expect(find.text('30/7/2021'), findsOneWidget);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+    // https://github.com/flutter/flutter/issues/33615
+  }, skip: isBrowser);
 
   testWidgets('DatePickerDialog state restoration - DatePickerEntryMode', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -2308,7 +2309,8 @@ void main() {
     // Only in calendar mode and cannot switch out.
     expect(find.byType(TextField), findsNothing);
     expect(find.byIcon(Icons.edit), findsNothing);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+    // https://github.com/flutter/flutter/issues/33615
+  }, skip: isBrowser);
 
   testWidgets('Test Callback on Toggle of DatePicker Mode', (WidgetTester tester) async {
     prepareDatePicker(tester, (Future<DateTime?> date) async {

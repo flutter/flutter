@@ -795,7 +795,8 @@ void main() {
     // "Collapsed".
     expect(tester.takeAnnouncements().first.message, localizations.expandedHint);
     handle.dispose();
-  }, skip: defaultTargetPlatform == TargetPlatform.iOS); // [intended] https://github.com/flutter/flutter/issues/122101.
+    // [intended] https://github.com/flutter/flutter/issues/122101.
+  }, skip: defaultTargetPlatform == TargetPlatform.iOS);
 
   // This is a regression test for https://github.com/flutter/flutter/issues/132264.
   testWidgets('ExpansionTile Semantics announcement is delayed on iOS', (WidgetTester tester) async {

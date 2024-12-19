@@ -70,5 +70,6 @@ void main() {
       // testing the behavior. So it's OK that asserts are enabled.
       mayRunWithAsserts: true,
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87871
+    // https://github.com/flutter/flutter/issues/87871
+  }, skip: isBrowser);
 }

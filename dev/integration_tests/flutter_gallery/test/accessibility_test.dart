@@ -64,7 +64,8 @@ void main() {
       await tester.pumpWidget(const TestMaterialApp(home: ChipDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
-    }, skip: true); // https://github.com/flutter/flutter/issues/42455
+      // https://github.com/flutter/flutter/issues/42455
+    }, skip: true);
 
     testWidgets('data_table_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
@@ -304,7 +305,8 @@ void main() {
       await tester.pumpWidget(const TestMaterialApp(home: DataTableDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
-    }, skip: true); // DataTables are not accessible, https://github.com/flutter/flutter/issues/10830
+      // DataTables are not accessible, https://github.com/flutter/flutter/issues/10830
+    }, skip: true);
 
     testWidgets('date_and_time_picker_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();

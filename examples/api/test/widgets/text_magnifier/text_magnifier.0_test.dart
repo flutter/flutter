@@ -96,7 +96,8 @@ void main() {
     );
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
-    skip: true, // This image is flaky. https://github.com/flutter/flutter/issues/144350
+    // This image is flaky. https://github.com/flutter/flutter/issues/144350
+    skip: true,
   );
 
 

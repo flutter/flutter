@@ -72,7 +72,8 @@ void main() {
         .having((NetworkImageLoadException e) => e.uri, 'uri', Uri.base.resolve(requestUrl)),
     );
     expect(httpClient.request.response.drained, true);
-  }, skip: isBrowser); // [intended] Browser implementation does not use HTTP client but an <img> tag.
+    // [intended] Browser implementation does not use HTTP client but an <img> tag.
+  }, skip: isBrowser);
 
   test('Expect thrown exception with statusCode - evicts from cache and drains, when using ResizeImage', () async {
     const int errorStatusCode = HttpStatus.notFound;
@@ -108,7 +109,8 @@ void main() {
           .having((NetworkImageLoadException e) => e.uri, 'uri', Uri.base.resolve(requestUrl)),
     );
     expect(httpClient.request.response.drained, true);
-  }, skip: isBrowser); // [intended] Browser implementation does not use HTTP client but an <img> tag.
+    // [intended] Browser implementation does not use HTTP client but an <img> tag.
+  }, skip: isBrowser);
 
   test('Uses the HttpClient provided by debugNetworkImageHttpClientProvider if set', () async {
     httpClient.thrownError = 'client1';
@@ -133,7 +135,8 @@ void main() {
     debugNetworkImageHttpClientProvider = () => client2;
     await loadNetworkImage();
     expect(capturedErrors, <dynamic>['client1', 'client2']);
-  }, skip: isBrowser); // [intended] Browser implementation does not use HTTP client but an <img> tag.
+    // [intended] Browser implementation does not use HTTP client but an <img> tag.
+  }, skip: isBrowser);
 
   test('Propagates http client errors during resolve()', () async {
     httpClient.thrownError = Error();
@@ -194,7 +197,8 @@ void main() {
       expect(events[i].cumulativeBytesLoaded, math.min((i + 1) * chunkSize, kTransparentImage.length));
       expect(events[i].expectedTotalBytes, kTransparentImage.length);
     }
-  }, skip: isBrowser); // [intended] Browser loads images through <img> not Http.
+    // [intended] Browser loads images through <img> not Http.
+  }, skip: isBrowser);
 
   test('NetworkImage is evicted from cache on SocketException', () async {
     final _FakeHttpClient mockHttpClient = _FakeHttpClient();
@@ -226,7 +230,8 @@ void main() {
     expect(imageCache.containsKey(result), isFalse);
 
     debugNetworkImageHttpClientProvider = null;
-  }, skip: isBrowser); // [intended] Browser does not resolve images this way.
+    // [intended] Browser does not resolve images this way.
+  }, skip: isBrowser);
 
   test('Network image sets tag', () async {
     const String url = 'http://test.png';

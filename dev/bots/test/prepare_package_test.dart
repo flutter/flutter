@@ -383,7 +383,8 @@ void main() {
             contains('The binary $binPath was not codesigned!'),
           )),
         );
-      }, skip: !platform.isMacOS); // [intended] codesign is only available on macOS
+        // [intended] codesign is only available on macOS
+      }, skip: !platform.isMacOS);
     });
 
     group('ArchivePublisher for $platformName', () {

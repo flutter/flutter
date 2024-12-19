@@ -99,7 +99,8 @@ void main() {
     expect(focusNode.hasFocus, isTrue);
 
     // On web, let the browser handle handwriting input.
-  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })); // [intended]
+    // [intended]
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
   testWidgets('when Scribe is unavailable, does not start handwriting on tap down', (WidgetTester tester) async {
     isFeatureAvailableReturnValue = false;
@@ -118,7 +119,8 @@ void main() {
     expect(calls.first.method, 'Scribe.isFeatureAvailable');
 
     await gesture.up();
-  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })); // [intended]
+    // [intended]
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
   testWidgets('tap down event must be from a stylus in order to start handwriting', (WidgetTester tester) async {
     isFeatureAvailableReturnValue = true;
@@ -133,7 +135,8 @@ void main() {
     expect(calls, isEmpty);
 
     await gesture.up();
-  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })); // [intended]
+    // [intended]
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
   testWidgets('tap down event on a collapsed selection handle is handled by the handle and does not start handwriting', (WidgetTester tester) async {
     isFeatureAvailableReturnValue = true;
@@ -170,7 +173,8 @@ void main() {
     expect(calls, hasLength(0));
 
     await gesture.up();
-  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })); // [intended]
+    // [intended]
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
   testWidgets('tap down event on the end selection handle is handled by the handle and does not start handwriting', (WidgetTester tester) async {
     isFeatureAvailableReturnValue = true;
@@ -208,7 +212,8 @@ void main() {
     expect(calls, isEmpty);
 
     await gesture.up();
-  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })); // [intended]
+    // [intended]
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate implements TextSelectionGestureDetectorBuilderDelegate {

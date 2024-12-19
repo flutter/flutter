@@ -289,7 +289,8 @@ void main() {
           await _expectImageSize(resizedImage, const Size(25, 25));
         });
       });
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/73120);
+      // https://github.com/flutter/flutter/issues/73120)
+    }, skip: isBrowser);
 
     test('does not resize when no size is passed', () async {
       final Uint8List bytes = Uint8List.fromList(kTransparentImage);

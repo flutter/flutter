@@ -211,7 +211,8 @@ void main() {
             cocoaPodsPlugin: integrationTestPlugin,
           ),
         );
-      }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+        // [intended] Swift Package Manager only works on macos.
+      }, skip: !platform.isMacOS);
     }
 
     test('Build $platformName-framework with non-module app uses CocoaPods', () async {
@@ -291,7 +292,8 @@ void main() {
           .childDirectory('${integrationTestPlugin.pluginName}.xcframework'),
         exists,
       );
-    }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+      // [intended] Swift Package Manager only works on macos.
+    }, skip: !platform.isMacOS);
 
     test('Caches build targets between builds with Swift Package Manager on $platformName', () async {
       final Directory workingDirectory = fileSystem.systemTempDirectory
@@ -360,7 +362,8 @@ void main() {
           'Starting due to',
         ],
       );
-    }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+      // [intended] Swift Package Manager only works on macos.
+    }, skip: !platform.isMacOS);
   }
 
   test('Build ios-framework with module app uses CocoaPods', () async {
@@ -462,7 +465,8 @@ void main() {
         .childDirectory('${integrationTestPlugin.pluginName}.xcframework'),
       exists,
     );
-  }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+    // [intended] Swift Package Manager only works on macos.
+  }, skip: !platform.isMacOS);
 
   test('Build ios-framework with non module app uses CocoaPods', () async {
     final Directory workingDirectory = fileSystem.systemTempDirectory
@@ -557,7 +561,8 @@ void main() {
     final bool? swiftPackageManagerEnabledIos = swiftPackageManagerEnabled?['ios'] as bool?;
 
     expect(swiftPackageManagerEnabledIos, isFalse);
-  }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+    // [intended] Swift Package Manager only works on macos.
+  }, skip: !platform.isMacOS);
 
   test("Generated Swift package uses iOS's project minimum deployment", () async {
     final Directory workingDirectory = fileSystem.systemTempDirectory
@@ -624,7 +629,8 @@ void main() {
 ''';
 
     expect(generatedManifest.contains(expected), isTrue);
-  }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+    // [intended] Swift Package Manager only works on macos.
+  }, skip: !platform.isMacOS);
 
   test("Generated Swift package uses macOS's project minimum deployment", () async {
     final Directory workingDirectory = fileSystem.systemTempDirectory
@@ -691,7 +697,8 @@ void main() {
 ''';
 
     expect(generatedManifest, contains(expected));
-  }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+    // [intended] Swift Package Manager only works on macos.
+  }, skip: !platform.isMacOS);
 
   test('Removing the last plugin updates the generated Swift package', () async {
     final Directory workingDirectory = fileSystem.systemTempDirectory
@@ -777,7 +784,8 @@ void main() {
 
     expect(generatedManifest, isNot(contains(generatedSwiftDependency)));
     expect(generatedManifest, contains(emptyDependencies));
-  }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+    // [intended] Swift Package Manager only works on macos.
+  }, skip: !platform.isMacOS);
 
   test('Migrated app builds after Swift Package Manager is turned off', () async {
     final Directory workingDirectory = fileSystem.systemTempDirectory
@@ -888,5 +896,6 @@ void main() {
     expect(generatedManifest, isNot(contains('integration_test')));
     expect(generatedManifest, contains(emptyDependencies));
     expect(cocoaPodsPluginFramework, exists);
-  }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+    // [intended] Swift Package Manager only works on macos.
+  }, skip: !platform.isMacOS);
 }

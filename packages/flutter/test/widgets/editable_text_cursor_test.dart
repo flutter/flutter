@@ -1264,7 +1264,8 @@ void main() {
       paints..rect(color: cursorColor, rect: caretRect),
     );
   },
-  skip: isBrowser && !isSkiaWeb, // https://github.com/flutter/flutter/issues/56308
+  // https://github.com/flutter/flutter/issues/56308
+  skip: isBrowser && !isSkiaWeb,
   );
 
   testWidgets(
@@ -1309,7 +1310,8 @@ void main() {
       );
     },
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.macOS, TargetPlatform.iOS}),
-    skip: isBrowser && !isCanvasKit, // https://github.com/flutter/flutter/issues/56308
+    // https://github.com/flutter/flutter/issues/56308
+    skip: isBrowser && !isCanvasKit,
   );
 
   testWidgets(
@@ -1354,7 +1356,8 @@ void main() {
       );
     },
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.macOS, TargetPlatform.iOS}),
-    skip: isBrowser && !isCanvasKit, // https://github.com/flutter/flutter/issues/56308
+    // https://github.com/flutter/flutter/issues/56308
+    skip: isBrowser && !isCanvasKit,
   );
 
   testWidgets('getLocalRectForCaret reports the real caret Rect', (WidgetTester tester) async {

@@ -75,7 +75,8 @@ void main() {
       matchesGoldenFile('LiveBinding.press.animation.png'),
     );
     // Currently skipped due to daily flake: https://github.com/flutter/flutter/issues/87588
-  }, skip: true); // Typically skip: isBrowser https://github.com/flutter/flutter/issues/42767
+    // Typically skip: isBrowser https://github.com/flutter/flutter/issues/42767
+  }, skip: true);
 
   testWidgets('Should show event indicator for pointer events with setSurfaceSize',
   (WidgetTester tester) async {
@@ -137,6 +138,7 @@ void main() {
       matchesGoldenFile('LiveBinding.press.animation.2.png'),
     );
   },
-    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+  // [intended] https://github.com/flutter/flutter/issues/56001
+    skip: isBrowser,
   );
 }

@@ -45,7 +45,8 @@ void main() {
     expect(typedData.isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.left), isTrue);
 
     await tester.pumpWidget(Container());
-  }, skip: isBrowser); // [intended] This is a Fuchsia-specific test.
+    // [intended] This is a Fuchsia-specific test.
+  }, skip: isBrowser);
 
   testWidgets('Web key event', (WidgetTester tester) async {
     final List<RawKeyEvent> events = <RawKeyEvent>[];

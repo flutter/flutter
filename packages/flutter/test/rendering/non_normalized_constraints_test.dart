@@ -38,5 +38,6 @@ void main() {
     expect(text, contains('BoxConstraints has non-normalized width constraints.'));
     expect(text, contains('which probably computed the invalid constraints in question:\n  RenderFoo.performLayout ('));
     expect(text, contains('non_normalized_constraints_test.dart:'));
-  }, skip: kIsWeb); // [intended] stack traces on web are insufficiently predictable
+    // [intended] stack traces on web are insufficiently predictable
+  }, skip: kIsWeb);
 }

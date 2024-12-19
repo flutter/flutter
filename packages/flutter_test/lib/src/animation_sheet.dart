@@ -108,7 +108,8 @@ class _AsyncImage {
 ///     animationSheet.collate(800),
 ///     matchesGoldenFile('inkwell.press.animation.png'),
 ///   );
-/// }, skip: isBrowser); // Animation sheet does not support browser https://github.com/flutter/flutter/issues/56001
+///   // Animation sheet does not support browser https://github.com/flutter/flutter/issues/56001
+/// }, skip: isBrowser);
 /// ```
 /// {@end-tool}
 ///

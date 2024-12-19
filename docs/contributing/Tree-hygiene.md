@@ -501,13 +501,15 @@ Tests can be skipped using the `skip` parameter of `test()`, `group()` and `test
 The first is if there is a test that is flaky, we can mark is as *temporarily* skipped to keep the tree green while a fix for it is developed. For these types of skips you need to file a tracking issue so we can ensure there is follow up to remove the skip. This tracking issue should be tagged with the `skip-test` label. Then in a comment on the same line as the parameter, include a link to this issue:
 
 ```dart
-  skip: true, // https://github.com/flutter/flutter/issues/XXXXX
+  // https://github.com/flutter/flutter/issues/XXXXX
+  skip: true,
 ```
 
 The other reason to use the skip parameter is to mark a test that by design doesn't make sense to test under a specific condition. An example would be a test that only tests a feature available on a specific platform or environment. For these cases, include a comment on the same line as the skip parameter with the text `[intended]` and a short description of why the skip is needed:
 
 ```dart
-  skip: isBrowser, // [intended] There are no default transitions to test on the web.
+  // [intended] There are no default transitions to test on the web.
+  skip: isBrowser,
 ```
 
 If the analyzer script sees a skip without a comment containing either an issue link or an `[intended]` tag, it will report and error and fail the check.

@@ -198,14 +198,16 @@ void main() {
       '   Unable to load asset: "key".\n'
       '   HTTP status code: 400\n',
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+    // https://github.com/flutter/flutter/issues/39998
+  }, skip: isBrowser);
 
   test('toString works as intended', () {
     final Uri uri = Uri.http('example.org', '/path');
     final NetworkAssetBundle bundle = NetworkAssetBundle(uri);
 
     expect(bundle.toString(), 'NetworkAssetBundle#${shortHash(bundle)}($uri)');
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+    // https://github.com/flutter/flutter/issues/39998
+  }, skip: isBrowser);
 
   test('Throws expected exceptions when loading not exists asset', () async {
     late final FlutterError error;
@@ -221,7 +223,8 @@ void main() {
         'The asset does not exist or has empty data.',
       ),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56314
+    // https://github.com/flutter/flutter/issues/56314
+  }, skip: isBrowser);
 
   test('loadStructuredBinaryData correctly loads ByteData', () async {
     final TestAssetBundle bundle = TestAssetBundle();

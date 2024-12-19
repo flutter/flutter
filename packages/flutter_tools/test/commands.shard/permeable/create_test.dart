@@ -168,7 +168,8 @@ void main() {
     );
   }, overrides: <Type, Generator>{
     Logger: () => BufferLogger.test(),
-  }, skip: !io.Platform.isWindows // [intended] relies on Windows file system
+    // [intended] relies on Windows file system
+  }, skip: !io.Platform.isWindows
   );
 
   // Verify that we create a default project ('app') that is

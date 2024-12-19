@@ -332,7 +332,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       expect(controller.value.canUndo, true);
       expect(controller.value.canRedo, false);
-    }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+      // [intended]
+    }, variant: TargetPlatformVariant.all(), skip: kIsWeb);
 
     testWidgets('duplicate changes do not affect the undo history', (WidgetTester tester) async {
       final ValueNotifier<int> value = ValueNotifier<int>(0);
@@ -509,7 +510,8 @@ void main() {
       methodCall = log.lastWhere((MethodCall m) => m.method == 'UndoManager.setUndoState');
       expect(methodCall.method, 'UndoManager.setUndoState');
       expect(methodCall.arguments as Map<String, dynamic>, <String, bool>{'canUndo': false, 'canRedo': true});
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}), skip: kIsWeb); // [intended]
+      // [intended]
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}), skip: kIsWeb);
 
     testWidgets('handlePlatformUndo should undo or redo appropriately on iOS', (WidgetTester tester) async {
       final ValueNotifier<int> value = ValueNotifier<int>(0);
@@ -597,7 +599,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       expect(controller.value.canUndo, true);
       expect(controller.value.canRedo, false);
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}), skip: kIsWeb); // [intended]
+      // [intended]
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}), skip: kIsWeb);
   });
 
   group('UndoHistoryController', () {

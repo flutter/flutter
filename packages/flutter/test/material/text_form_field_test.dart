@@ -99,7 +99,8 @@ void main() {
     expect(find.byType(CupertinoButton), findsNothing);
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }),
-    skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
+    // [intended] we don't supply the cut/copy/paste buttons on the web.
+    skip: kIsWeb,
   );
 
   testWidgets('can use the desktop cut/copy/paste buttons on Windows and Linux', (WidgetTester tester) async {
@@ -246,7 +247,8 @@ void main() {
     expect(find.byType(CupertinoButton), findsNothing);
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.windows }),
-    skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
+    // [intended] we don't supply the cut/copy/paste buttons on the web.
+    skip: kIsWeb,
   );
 
   testWidgets(
@@ -275,7 +277,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.pump();
   },
-    skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
+  // [intended] we don't supply the cut/copy/paste buttons on the web.
+    skip: kIsWeb,
   );
 
   testWidgets('the desktop cut/copy/paste buttons are disabled for read-only obscured form fields', (WidgetTester tester) async {
@@ -320,7 +323,8 @@ void main() {
     expect(find.byType(CupertinoButton), findsNothing);
   },
     variant: TargetPlatformVariant.desktop(),
-    skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
+    // [intended] we don't supply the cut/copy/paste buttons on the web.
+    skip: kIsWeb,
   );
 
   testWidgets('the desktop cut/copy buttons are disabled for obscured form fields', (WidgetTester tester) async {
@@ -372,7 +376,8 @@ void main() {
     expect(find.text('Paste'), findsOneWidget);
   },
     variant: TargetPlatformVariant.desktop(),
-    skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
+    // [intended] we don't supply the cut/copy/paste buttons on the web.
+    skip: kIsWeb,
   );
 
   testWidgets('TextFormField accepts TextField.noMaxLength as value to maxLength parameter', (WidgetTester tester) async {
@@ -733,7 +738,8 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 200));
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
-  }, skip: isBrowser); // [intended] We do not use Flutter-rendered context menu on the Web.
+    // [intended] We do not use Flutter-rendered context menu on the Web.
+  }, skip: isBrowser);
 
   testWidgets('onTap is called upon tap', (WidgetTester tester) async {
     int tapCount = 0;
@@ -1321,7 +1327,8 @@ void main() {
     }
   },
     variant: TargetPlatformVariant.all(),
-    skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
+    // [intended] we don't supply the cut/copy/paste buttons on the web.
+    skip: kIsWeb,
   );
 
   testWidgets('spellCheckConfiguration passes through to EditableText', (WidgetTester tester) async {

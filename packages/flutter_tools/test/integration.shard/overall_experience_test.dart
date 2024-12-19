@@ -65,7 +65,8 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-  }, skip: Platform.isWindows); // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
+    // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
+  }, skip: Platform.isWindows);
 
   testWithoutContext('flutter run handle SIGUSR1/2 run', () async {
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
@@ -138,7 +139,8 @@ void main() {
     } finally {
       tryToDelete(fileSystem.directory(tempDirectory));
     }
-  }, skip: Platform.isWindows); // [intended] Windows doesn't support sending signals.
+    // [intended] Windows doesn't support sending signals.
+  }, skip: Platform.isWindows);
 
   testWithoutContext('flutter run can hot reload and hot restart, handle "p" key', () async {
     final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();

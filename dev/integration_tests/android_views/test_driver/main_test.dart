@@ -63,6 +63,8 @@ Future<void> main() async {
         find.byValueKey('WindowClickCount'),
       ))!;
       expect(windowClickCount, 'Click count: 1');
-    }, timeout: Timeout.none, skip: true); // TODO(garyq): Skipped, see https://github.com/flutter/flutter/issues/88479
+    }, timeout: Timeout.none,
+    // TODO(garyq): Skipped, see https://github.com/flutter/flutter/issues/88479
+    skip: true,);
   });
 }

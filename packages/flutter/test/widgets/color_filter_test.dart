@@ -67,7 +67,8 @@ void main() {
       find.byType(ColorFiltered),
       matchesGoldenFile('color_filter_sepia.png'),
     );
-  }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
+    // https://github.com/flutter/flutter/issues/143616
+  }, skip: impellerEnabled);
 
   testWidgets('Color filter - reuses its layer', (WidgetTester tester) async {
     Future<void> pumpWithColor(Color color) async {

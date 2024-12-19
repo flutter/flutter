@@ -274,7 +274,8 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
   },
-    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
+  // https://github.com/flutter/flutter/issues/44115
+    skip: isBrowser,
   );
 
   testWidgets('MaterialButton gets focus when autofocus is set.', (WidgetTester tester) async {

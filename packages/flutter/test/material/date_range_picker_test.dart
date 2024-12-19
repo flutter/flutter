@@ -1244,7 +1244,8 @@ void main() {
     // newly selected date.
     expect(find.byType(DateRangePickerDialog), findsNothing);
     expect(find.text('12/1/2021 to 14/1/2021'), findsOneWidget);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+    // https://github.com/flutter/flutter/issues/33615
+  }, skip: isBrowser);
 
   testWidgets('DateRangePickerDialog state restoration - DatePickerEntryMode', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1293,7 +1294,8 @@ void main() {
     // Only in calendar mode and cannot switch out.
     expect(find.byType(TextField), findsNothing);
     expect(find.byIcon(Icons.edit), findsNothing);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
+    // https://github.com/flutter/flutter/issues/33615
+  }, skip: isBrowser);
 
   group('showDateRangePicker avoids overlapping display features', () {
     testWidgets('positioning with anchorPoint', (WidgetTester tester) async {

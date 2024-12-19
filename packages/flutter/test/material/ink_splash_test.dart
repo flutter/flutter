@@ -138,7 +138,8 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
     }
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+    // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb);
 
   // Regression test for https://github.com/flutter/flutter/issues/136441.
   testWidgets('PageView item can dispose when widget with NoSplash.splashFactory is tapped', (WidgetTester tester) async {

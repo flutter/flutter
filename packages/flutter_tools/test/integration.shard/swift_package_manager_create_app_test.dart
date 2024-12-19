@@ -77,7 +77,8 @@ void main() {
             recursive: true,
           );
         }
-      }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+        // [intended] Swift Package Manager only works on macos.
+      }, skip: !platform.isMacOS);
 
       test('Create $platformName $iosLanguage app with Swift Package Manager enabled', () async {
         final Directory workingDirectory = fileSystem.systemTempDirectory
@@ -139,7 +140,8 @@ void main() {
             recursive: true,
           );
         }
-      }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
+        // [intended] Swift Package Manager only works on macos.
+      }, skip: !platform.isMacOS);
     }
   }
 }

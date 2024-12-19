@@ -5647,7 +5647,8 @@ void main() {
       find.byType(MaterialApp),
       matchesGoldenFile('selectable_text_golden.TextSelectionStyle.1.png'),
     );
-  }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
+    // https://github.com/flutter/flutter/issues/143616
+  }, skip: impellerEnabled);
 
   testWidgets('text selection style 2', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -5699,7 +5700,8 @@ void main() {
       find.byType(MaterialApp),
       matchesGoldenFile('selectable_text_golden.TextSelectionStyle.2.png'),
     );
- }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
+    // https://github.com/flutter/flutter/issues/143616
+ }, skip: impellerEnabled);
 
   testWidgets('keeps alive when has focus', (WidgetTester tester) async {
     await tester.pumpWidget(

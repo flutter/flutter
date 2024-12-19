@@ -161,7 +161,8 @@ void main() {
 
     expect(boxes.any((ui.TextBox box) => box.left == 250 && box.top == 0), isTrue);
     expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10), isTrue);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
+    // https://github.com/flutter/flutter/issues/61016
+  }, skip: isBrowser);
 
   test('getBoxesForSelection test with multiple TextSpans and lines', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -206,7 +207,8 @@ void main() {
     expect(boxes[2], const TextBox.fromLTRBD(0.0, 10.0, 130.0, 20.0, TextDirection.ltr));
     // 'fifth':
     expect(boxes[3], const TextBox.fromLTRBD(0.0, 20.0, 50.0, 30.0, TextDirection.ltr));
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/61016
+    // https://github.com/flutter/flutter/issues/61016
+  }, skip: kIsWeb && !isSkiaWeb);
 
   test('getBoxesForSelection test with boxHeightStyle and boxWidthStyle set to max', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -248,7 +250,8 @@ void main() {
     expect(boxes[3], const TextBox.fromLTRBD(130.0, 10.0, 156.0, 20.0, TextDirection.ltr));
     // 'fifth':
     expect(boxes[4], const TextBox.fromLTRBD(0.0, 20.0, 50.0, 30.0, TextDirection.ltr));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
+    // https://github.com/flutter/flutter/issues/61016
+  }, skip: isBrowser);
 
   test('getWordBoundary control test', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -344,7 +347,8 @@ void main() {
 
     relayoutWith(maxLines: 100, softWrap: true, overflow: TextOverflow.fade);
     expect(paragraph.debugHasOverflowShader, isFalse);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61018
+    // https://github.com/flutter/flutter/issues/61018
+  }, skip: isBrowser);
 
   test('maxLines', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -373,7 +377,8 @@ void main() {
 
     layoutAt(3);
     expect(paragraph.size.height, 30.0);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61018
+    // https://github.com/flutter/flutter/issues/61018
+  }, skip: isBrowser);
 
   test('textAlign triggers TextPainter relayout in the paint method', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -592,7 +597,8 @@ void main() {
     expect(boxes[2], const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
     expect(boxes[3], const TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
     expect(boxes[4], const TextBox.fromLTRBD(48.0, 0.0, 62.0, 14.0, TextDirection.ltr));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+    // https://github.com/flutter/flutter/issues/61020
+  }, skip: isBrowser);
 
   test('getBoxesForSelection with boxHeightStyle for inline widgets', () {
     const TextSpan text = TextSpan(
@@ -634,7 +640,8 @@ void main() {
     expect(boxes[2], const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
     expect(boxes[3], const TextBox.fromLTRBD(38.0, 0.0, 48.0, 14.0, TextDirection.ltr));
     expect(boxes[4], const TextBox.fromLTRBD(48.0, 0.0, 62.0, 14.0, TextDirection.ltr));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+    // https://github.com/flutter/flutter/issues/61020
+  }, skip: isBrowser);
 
   test('inline widgets multiline test', () {
     const TextSpan text = TextSpan(
@@ -687,7 +694,8 @@ void main() {
     // Wraps
     expect(boxes[7], const TextBox.fromLTRBD(0.0, 28.0, 14.0, 42.0, TextDirection.ltr));
     expect(boxes[8], const TextBox.fromLTRBD(14.0, 28.0, 28.0, 42.0 , TextDirection.ltr));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+    // https://github.com/flutter/flutter/issues/61020
+  }, skip: isBrowser);
 
   test('Does not include the semantics node of truncated rendering children', () {
     // Regression test for https://github.com/flutter/flutter/issues/88180
@@ -815,7 +823,8 @@ void main() {
     final SemanticsNode node = SemanticsNode();
     paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
     expect(node.childrenCount, 2);
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+    // https://github.com/flutter/flutter/issues/61020
+  }, skip: isBrowser);
 
   test('Basic TextSpan Hit testing', () {
     final TextSpan textSpanA = TextSpan(text: 'A' * 10);
@@ -980,7 +989,8 @@ void main() {
       expect(paintingContext.canvas.drawnRect!.isEmpty, false);
       expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
       expect(paintingContext.canvas.drawnRectPaint!.color, isSameColorAs(selectionColor));
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
+      // https://github.com/flutter/flutter/issues/61016
+    }, skip: isBrowser);
 
     test('getPositionForOffset works', () async {
       final RenderParagraph paragraph = RenderParagraph(const TextSpan(text: '1234567'), textDirection: TextDirection.ltr);

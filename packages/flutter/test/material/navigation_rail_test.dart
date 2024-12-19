@@ -3102,7 +3102,8 @@ void main() {
           color: const Color(0xffe8def8),
         ),
     );
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+    // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb);
 
   testWidgets('NavigationRail indicator renders ripple - extended', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/117126
@@ -3450,7 +3451,8 @@ void main() {
           color: const Color(0xffe8def8),
         ),
     );
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+    // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb);
 
   testWidgets('NavigationRail indicator renders properly with large icon', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/133799.
@@ -3553,7 +3555,8 @@ void main() {
           color: const Color(0xffe8def8),
         ),
     );
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+    // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb);
 
   testWidgets('NavigationRail indicator renders properly when text direction is rtl', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/134361.
@@ -3652,7 +3655,8 @@ void main() {
           color: const Color(0xffe8def8),
         ),
     );
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+    // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb);
 
   testWidgets('NavigationRail indicator scale transform', (WidgetTester tester) async {
     int selectedIndex = 0;
@@ -3882,7 +3886,8 @@ void main() {
 
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..circle(color: Colors.transparent));
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+    // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb);
 
   testWidgets('Navigation rail can have expanded widgets inside', (WidgetTester tester) async {
     await _pumpNavigationRail(
@@ -4284,7 +4289,8 @@ void main() {
           ),
         ),
       );
-    }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+      // https://github.com/flutter/flutter/issues/99933
+    }, skip: kIsWeb && !isSkiaWeb);
 
     testWidgets('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=3.0', (WidgetTester tester) async {
       // Since the rail is icon only, its destinations should not be affected by
@@ -4354,7 +4360,8 @@ void main() {
           ),
         ),
       );
-    }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+      // https://github.com/flutter/flutter/issues/99933
+    }, skip: kIsWeb && !isSkiaWeb);
 
     testWidgets('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=0.75', (WidgetTester tester) async {
       // Since the rail is icon only, its destinations should not be affected by
@@ -4424,7 +4431,8 @@ void main() {
           ),
         ),
       );
-    }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+      // https://github.com/flutter/flutter/issues/99933
+    }, skip: kIsWeb && !isSkiaWeb);
 
     testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
       await _pumpNavigationRail(

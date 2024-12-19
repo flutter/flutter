@@ -201,7 +201,8 @@ void main() {
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Select all'), findsNothing);
-  }, skip: kIsWeb); // [intended] We don't show the toolbar on the web.
+    // [intended] We don't show the toolbar on the web.
+  }, skip: kIsWeb);
 
   for (final ColorScheme colorScheme in <ColorScheme>[ThemeData.light().colorScheme, ThemeData.dark().colorScheme]) {
     testWidgets('default background color', (WidgetTester tester) async {

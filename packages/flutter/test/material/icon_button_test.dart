@@ -2065,7 +2065,8 @@ void main() {
 
     focusNode.dispose();
   },
-    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
+  // https://github.com/flutter/flutter/issues/44115
+    skip: isBrowser,
   );
 
   testWidgets('IconButton uses stateful color for icon color in different states - M3', (WidgetTester tester) async {

@@ -46,7 +46,8 @@ void main() {
     // Wasm stacks are not reliable, even in debug mode, so the stack
     // parser doesn't do the standard debug stack parsing this test is
     // expecting here.
-    skip: kIsWasm, // [intended] See comments above
+    // [intended] See comments above
+    skip: kIsWasm,
     () {
       expect(
         StackFrame.fromStackString(webStackTrace),
@@ -75,9 +76,10 @@ void main() {
       expect(frames.contains(StackFrame.stackOverFlowElision), true);
     }
     expect(overflowed, true);
-  }, skip: isBrowser); // [intended] The VM test harness can handle a
-  // stack overflow, but the browser cannot - running this test in a browser
-  // will cause it to become unresponsive.
+     // [intended] The VM test harness can handle a stack overflow, but the
+     // browser cannot - running this test in a browser will cause it to become
+     // unresponsive.
+  }, skip: isBrowser);
 
   test('Traces from package:stack_trace throw assertion', () {
     try {

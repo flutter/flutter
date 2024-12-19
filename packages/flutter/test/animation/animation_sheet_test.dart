@@ -30,7 +30,8 @@ void main() {
       const Duration(milliseconds: 100),
     );
   },
-    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+  // [intended] https://github.com/flutter/flutter/issues/56001
+    skip: isBrowser,
   );
 
   testWidgets('correctly records frames using collate',
@@ -68,8 +69,9 @@ void main() {
       matchesGoldenFile('test.animation_sheet_builder.collate.png'),
     );
   },
-    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
-  ); // https://github.com/flutter/flutter/issues/56001
+  // [intended] https://github.com/flutter/flutter/issues/56001
+    skip: isBrowser,
+  );
 
   testWidgets('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(
@@ -102,7 +104,8 @@ void main() {
       matchesGoldenFile('test.animation_sheet_builder.out_of_tree.png'),
     );
   },
-    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+  // [intended] https://github.com/flutter/flutter/issues/56001
+    skip: isBrowser,
   );
 }
 

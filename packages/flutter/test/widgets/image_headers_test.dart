@@ -26,7 +26,8 @@ void main() {
     }, createHttpClient: (SecurityContext? _) {
       return client;
     });
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/57187
+    // https://github.com/flutter/flutter/issues/57187
+  }, skip: isBrowser);
 }
 
 class MockHttpClient extends Fake implements HttpClient {

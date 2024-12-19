@@ -474,7 +474,8 @@ void main() {
     await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
-    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
+  // https://github.com/flutter/flutter/issues/44115
+    skip: isBrowser,
   );
 
   testWidgets('FilledButton default overlayColor and elevation resolve pressed state', (WidgetTester tester) async {

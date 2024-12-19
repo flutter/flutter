@@ -1214,7 +1214,8 @@ void main() {
     await tester.tap(find.text('Paste'));
     await tester.pump();
     expect(textField.controller!.text.length, 15);
-  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+    // [intended] We do not use Flutter-rendered context menu on the Web.
+  }, skip: kIsWeb);
 
   testWidgets('showSearch with maintainState on the route', (WidgetTester tester) async {
     final _MyNavigatorObserver navigationObserver = _MyNavigatorObserver();

@@ -78,7 +78,8 @@ void main() {
     }
   },
     variant: TargetPlatformVariant.all(),
-    skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
+    // [intended] see https://github.com/flutter/flutter/issues/108382
+    skip: isBrowser,
   );
 
   testWidgets('Can build children directly as well', (WidgetTester tester) async {
@@ -168,7 +169,8 @@ void main() {
     controller.dispose();
     focusNode.dispose();
   },
-    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  // [intended] on web the browser handles the context menu.
+    skip: kIsWeb,
     variant: TargetPlatformVariant.all(),
   );
 
@@ -269,7 +271,8 @@ void main() {
         expect(findLiveTextButton(), findsOneWidget);
     }
   },
-    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  // [intended] on web the browser handles the context menu.
+    skip: kIsWeb,
     variant: TargetPlatformVariant.all(),
   );
 
@@ -374,7 +377,8 @@ void main() {
       controller.dispose();
     },
       variant: TargetPlatformVariant.all(),
-      skip: kIsWeb, // [intended]
+      // [intended]
+      skip: kIsWeb,
     );
 
     testWidgets('getAdaptiveButtons builds the correct button widgets per-platform', (WidgetTester tester) async {

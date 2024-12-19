@@ -41,7 +41,8 @@ void main() {
 
     expect(tester.takeException(), isAssertionError);
   },
-    skip: kIsWeb, // [intended]
+  // [intended]
+    skip: kIsWeb,
     variant: TargetPlatformVariant.all(),
   );
 
@@ -90,7 +91,8 @@ void main() {
 
     expect(tester.takeException(), isAssertionError);
   },
-    skip: !kIsWeb, // [intended]
+  // [intended]
+    skip: !kIsWeb,
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
@@ -138,7 +140,8 @@ void main() {
     await tester.pump();
     expect(find.byType(SystemContextMenu), findsNothing);
   },
-    skip: kIsWeb, // [intended]
+  // [intended]
+    skip: kIsWeb,
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
@@ -211,7 +214,8 @@ void main() {
     expect(targetRects, hasLength(2));
     expect(targetRects.last['width'], greaterThan(0.0));
   },
-    skip: kIsWeb, // [intended]
+  // [intended]
+    skip: kIsWeb,
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
@@ -263,7 +267,8 @@ void main() {
 
     expect(tester.takeException(), isNull);
   },
-    skip: kIsWeb, // [intended]
+  // [intended]
+    skip: kIsWeb,
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
@@ -362,7 +367,8 @@ void main() {
     expect(find.byKey(menu1Key), findsNothing);
     expect(find.byKey(menu2Key), findsOneWidget);
   },
-    skip: kIsWeb, // [intended]
+  // [intended]
+    skip: kIsWeb,
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
@@ -425,7 +431,8 @@ void main() {
     expect(exception, isAssertionError);
     expect(exception.toString(), contains('only be shown for an active text input connection'));
   },
-    skip: kIsWeb, // [intended]
+  // [intended]
+    skip: kIsWeb,
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
@@ -488,7 +495,8 @@ void main() {
     await tester.pump();
     expect(exception, isNull);
   },
-    skip: kIsWeb, // [intended]
+  // [intended]
+    skip: kIsWeb,
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 }

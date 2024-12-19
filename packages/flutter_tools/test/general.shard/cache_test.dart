@@ -95,7 +95,8 @@ void main() {
         Cache.flutterRoot = oldRoot;
       }
       // TODO(zanderso): implement support for lock so this can be tested with the memory file system.
-    }, skip: true); // https://github.com/flutter/flutter/issues/87923
+      // https://github.com/flutter/flutter/issues/87923
+    }, skip: true);
 
     testWithoutContext('throws tool exit when lockfile open fails', () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
@@ -105,7 +106,8 @@ void main() {
 
       expect(() async => cache.lock(), throwsToolExit());
       // TODO(zanderso): implement support for lock so this can be tested with the memory file system.
-    }, skip: true); // https://github.com/flutter/flutter/issues/87923
+      // https://github.com/flutter/flutter/issues/87923
+    }, skip: true);
 
     testWithoutContext('should not throw when FLUTTER_ALREADY_LOCKED is set', () {
      final Cache cache = Cache.test(

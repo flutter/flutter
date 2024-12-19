@@ -531,7 +531,8 @@ void main() {
     // Ensure we can render the same scene again after rendering an interior
     // layer.
     parent.buildScene(SceneBuilder());
-  }, skip: isBrowser && !isSkiaWeb); // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
+    // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
+  }, skip: isBrowser && !isSkiaWeb);
 
   test('ContainerLayer.toImageSync can render interior layer', () {
     final OffsetLayer parent = OffsetLayer();
@@ -549,7 +550,8 @@ void main() {
     // Ensure we can render the same scene again after rendering an interior
     // layer.
     parent.buildScene(SceneBuilder());
-  }, skip: isBrowser && !isSkiaWeb); // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
+    // TODO(yjbanov): `toImage` doesn't work in HTML: https://github.com/flutter/flutter/issues/49857
+  }, skip: isBrowser && !isSkiaWeb);
 
   test('PictureLayer does not let you call dispose unless refcount is 0', () {
     PictureLayer layer = PictureLayer(Rect.zero);

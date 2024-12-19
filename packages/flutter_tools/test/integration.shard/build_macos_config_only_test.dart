@@ -68,5 +68,6 @@ void main() {
     final ProcessResult secondRunResult = await processManager.run(buildCommand, workingDirectory: workingDirectory);
 
     expect(secondRunResult, const ProcessResultMatcher());
-  }, skip: !platform.isMacOS); // [intended] macOS builds only work on macos.
+    // [intended] macOS builds only work on macos.
+  }, skip: !platform.isMacOS);
 }

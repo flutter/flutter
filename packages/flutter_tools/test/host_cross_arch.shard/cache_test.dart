@@ -20,7 +20,8 @@ Future<void> main() async {
       logger: BufferLogger.test(),
     );
     expect(dartArch, os.hostPlatform);
-  }, skip: !platform.isMacOS); // [intended] Calls macOS-specific commands
+    // [intended] Calls macOS-specific commands
+  }, skip: !platform.isMacOS);
 }
 
 // Call `file` on the path and parse the output.

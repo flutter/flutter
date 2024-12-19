@@ -2672,7 +2672,8 @@ void main() {
       expect(closed, unorderedEquals(<TestMenu>[TestMenu.mainMenu1, TestMenu.subMenu11]));
       expect(opened, isEmpty);
     });
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
+    // https://github.com/flutter/flutter/issues/145527
+  }, skip: kIsWeb && !isCanvasKit);
 
   group('MenuItemButton', () {
     testWidgets('Shortcut mnemonics are displayed', (WidgetTester tester) async {
@@ -2783,7 +2784,8 @@ void main() {
       expect(mnemonic2.data, equals('↵'));
     },
       variant: TargetPlatformVariant.all(),
-      skip: kIsWeb && !isCanvasKit, // https://github.com/flutter/flutter/issues/145527
+      // https://github.com/flutter/flutter/issues/145527
+      skip: kIsWeb && !isCanvasKit,
     );
 
     // Regression test for https://github.com/flutter/flutter/issues/145040.
@@ -2835,7 +2837,8 @@ void main() {
       }
     },
       variant: TargetPlatformVariant.all(),
-      skip: kIsWeb && !isCanvasKit, // https://github.com/flutter/flutter/issues/145527
+      // https://github.com/flutter/flutter/issues/145527
+      skip: kIsWeb && !isCanvasKit,
     );
 
     testWidgets('leadingIcon is used when set', (WidgetTester tester) async {
@@ -2929,7 +2932,8 @@ void main() {
       await tester.pump();
 
       expect(find.text('trailingIcon'), findsOneWidget);
-    }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
+      // https://github.com/flutter/flutter/issues/145527
+    }, skip: kIsWeb && !isCanvasKit);
 
     testWidgets('SubmenuButton uses supplied controller', (WidgetTester tester) async {
       final MenuController submenuController = MenuController();
@@ -3172,7 +3176,8 @@ void main() {
       // This should throw an error.
       final AssertionError exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
-    }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+      // https://github.com/flutter/flutter/issues/99933
+    }, skip: kIsWeb && !isCanvasKit);
 
     testWidgets('MenuItemButton.styleFrom overlayColor overrides default overlay color', (WidgetTester tester) async {
       const Color overlayColor = Color(0xffff0000);
@@ -4038,7 +4043,8 @@ void main() {
       expect(find.text(allExpected), findsOneWidget);
       expect(find.text(charExpected), findsOneWidget);
     }, variant: TargetPlatformVariant.all());
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
+    // https://github.com/flutter/flutter/issues/145527
+  }, skip: kIsWeb && !isCanvasKit);
 
   group('CheckboxMenuButton', () {
     testWidgets('tapping toggles checkbox', (WidgetTester tester) async {
@@ -4467,7 +4473,8 @@ void main() {
     expect(material.textStyle?.fontStyle, menuTextStyle.fontStyle);
     expect(material.textStyle?.wordSpacing, menuTextStyle.wordSpacing);
     expect(material.textStyle?.decoration, menuTextStyle.decoration);
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
+    // https://github.com/flutter/flutter/issues/145527
+  }, skip: kIsWeb && !isCanvasKit);
 
   testWidgets('SubmenuButton.onFocusChange is respected', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -4613,8 +4620,9 @@ void main() {
       });
 
       expect(state.target, isNull);
-    }, skip: true // Skipped for everyone else: forceGC is flaky, see https://github.com/flutter/flutter/issues/154858
-    // Skipped on Web: [intended] ForceGC does not work in web and in release mode. See https://api.flutter.dev/flutter/package-leak_tracker_leak_tracker/forceGC.html
+      // Skipped for everyone else: forceGC is flaky, see https://github.com/flutter/flutter/issues/154858
+      // Skipped on Web: [intended] ForceGC does not work in web and in release mode. See https://api.flutter.dev/flutter/package-leak_tracker_leak_tracker/forceGC.html
+    }, skip: true
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/154798.

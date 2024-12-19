@@ -278,7 +278,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     await expectLater(find.byKey(key), matchesGoldenFile('m2_zoom_page_transition.big.png'));
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
+    // [intended] rasterization is not used on the web.
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb);
 
   testWidgets('Material3 - test page transition (_ZoomPageTransition) with rasterization re-rasterizes when view insets change', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
@@ -320,7 +321,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     await expectLater(find.byKey(key), matchesGoldenFile('m3_zoom_page_transition.big.png'));
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
+    // [intended] rasterization is not used on the web.
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb);
 
   testWidgets(
       'test page transition (_ZoomPageTransition) with rasterization disables snapshotting for enter route',
@@ -402,7 +404,8 @@ void main() {
     // Page 1 on top.
     await tester.pumpAndSettle();
     expect(isSnapshotted(page1Finder), isFalse);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
+    // [intended] rasterization is not used on the web.
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb);
 
   testWidgets('test fullscreen dialog transition', (WidgetTester tester) async {
     await tester.pumpWidget(

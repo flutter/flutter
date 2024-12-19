@@ -353,7 +353,8 @@ void main() {
 
     focusNode.dispose();
   },
-    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
+  // https://github.com/flutter/flutter/issues/44115
+    skip: isBrowser,
   );
 
   testWidgets('TextButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
@@ -422,7 +423,8 @@ void main() {
 
     focusNode.dispose();
   },
-    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
+  // https://github.com/flutter/flutter/issues/44115
+    skip: isBrowser,
   );
 
   testWidgets('TextButton default overlayColor resolves pressed state', (WidgetTester tester) async {
@@ -811,7 +813,8 @@ void main() {
 
     expect(tester.getSize(find.byType(TextButton)), const Size(134.0, 48.0));
     expect(tester.getSize(find.byType(Text)), const Size(126.0, 42.0));
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/61016
+    // https://github.com/flutter/flutter/issues/61016
+  }, skip: kIsWeb && !isSkiaWeb);
 
   testWidgets('TextButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {

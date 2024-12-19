@@ -82,5 +82,6 @@ void main() {
       ];
       checkEncodeDecode<dynamic>(standard, message);
     });
-  }, skip: isBrowser); // [intended] Javascript can't handle the big integer literals used here.
+    // [intended] Javascript can't handle the big integer literals used here.
+  }, skip: isBrowser);
 }

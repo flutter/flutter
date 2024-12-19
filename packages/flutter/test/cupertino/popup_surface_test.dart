@@ -85,7 +85,8 @@ void main() {
         matchesGoldenFile('cupertinoPopupSurface.color-filter.light.png'),
       );
     },
-    skip: kIsWasm, // https://github.com/flutter/flutter/issues/152026
+    // https://github.com/flutter/flutter/issues/152026
+    skip: kIsWasm,
   );
 
   // Golden displays the color filter effect of the CupertinoPopupSurface
@@ -107,7 +108,8 @@ void main() {
         matchesGoldenFile('cupertinoPopupSurface.color-filter.dark.png'),
       );
     },
-    skip: kIsWasm, // https://github.com/flutter/flutter/issues/152026
+    // https://github.com/flutter/flutter/issues/152026
+    skip: kIsWasm,
   );
 
   // Golden displays color tiles without CupertinoPopupSurface being
@@ -236,7 +238,8 @@ void main() {
         matchesGoldenFile('cupertinoPopupSurface.blur.30.png'),
       );
     },
-    skip: kIsWasm, // https://github.com/flutter/flutter/issues/152026
+    // https://github.com/flutter/flutter/issues/152026
+    skip: kIsWasm,
   );
 
   // Golden displays a CupertinoPopupSurface with a blur sigma of 0. Because
