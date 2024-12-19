@@ -16,8 +16,8 @@ import 'package_lock.dart';
 class GenerateBuilderJsonCommand extends Command<bool> {
   @override
   String get description =>
-    'Generates JSON for the engine_v2 builders to build and copy all artifacts, '
-    'compile all test bundles, and run all test suites on all platforms.';
+      'Generates JSON for the engine_v2 builders to build and copy all artifacts, '
+      'compile all test bundles, and run all test suites on all platforms.';
 
   @override
   String get name => 'generate-builder-json';
@@ -26,15 +26,12 @@ class GenerateBuilderJsonCommand extends Command<bool> {
   FutureOr<bool>? run() {
     final PackageLock packageLock = PackageLock();
     final FeltConfig config = FeltConfig.fromFile(
-      path.join(environment.webUiTestDir.path, 'felt_config.yaml')
+      path.join(environment.webUiTestDir.path, 'felt_config.yaml'),
     );
     final String configString = generate(config, packageLock);
-    final io.File configFile = io.File(path.join(
-      environment.flutterDirectory.path,
-      'ci',
-      'builders',
-      'linux_web_engine.json',
-    ));
+    final io.File configFile = io.File(
+      path.join(environment.flutterDirectory.path, 'ci', 'builders', 'linux_web_engine.json'),
+    );
     configFile.writeAsStringSync('$configString\n');
     return true;
   }
@@ -45,10 +42,9 @@ class GenerateBuilderJsonCommand extends Command<bool> {
       '_comment2': 'See `generate_builder_json.dart` for the generator code',
       'builds': <dynamic>[
         _getArtifactBuildStep(),
-        for (final TestBundle bundle in config.testBundles)
-          _getBundleBuildStep(bundle),
+        for (final TestBundle bundle in config.testBundles) _getBundleBuildStep(bundle),
       ],
-      'tests': _getAllTestSteps(config.testSuites, packageLock)
+      'tests': _getAllTestSteps(config.testSuites, packageLock),
     };
     return const JsonEncoder.withIndent('  ').convert(outputJson);
   }
@@ -56,64 +52,44 @@ class GenerateBuilderJsonCommand extends Command<bool> {
   Map<String, dynamic> _getArtifactBuildStep() {
     return <String, dynamic>{
       'name': 'web_tests/artifacts',
-      'drone_dimensions': <String>[
-        'device_type=none',
-        'os=Linux',
-        'cores=32'
-      ],
+      'drone_dimensions': <String>['device_type=none', 'os=Linux', 'cores=32'],
       'gclient_variables': <String, dynamic>{
         'download_android_deps': false,
         'download_jdk': false,
         'download_emsdk': true,
       },
-      'gn': <String>[
-        '--web',
-        '--runtime-mode=release',
-        '--no-goma',
-      ],
+      'gn': <String>['--web', '--runtime-mode=release', '--no-goma'],
       'ninja': <String, dynamic>{
         'config': 'wasm_release',
-        'targets': <String>[
-          'flutter/web_sdk:flutter_web_sdk_archive'
-        ]
+        'targets': <String>['flutter/web_sdk:flutter_web_sdk_archive'],
       },
       'archives': <dynamic>[
         <String, dynamic>{
           'name': 'wasm_release',
           'base_path': 'out/wasm_release/zip_archives/',
           'type': 'gcs',
-          'include_paths': <String>[
-            'out/wasm_release/zip_archives/flutter-web-sdk.zip'
-          ],
+          'include_paths': <String>['out/wasm_release/zip_archives/flutter-web-sdk.zip'],
           'realm': 'production',
-        }
+        },
       ],
       'generators': <String, dynamic>{
         'tasks': <dynamic>[
           <String, dynamic>{
             'name': 'check licenses',
-            'parameters': <String>[
-              'check-licenses'
-            ],
-            'scripts': <String>[ 'flutter/lib/web_ui/dev/felt' ],
-
+            'parameters': <String>['check-licenses'],
+            'scripts': <String>['flutter/lib/web_ui/dev/felt'],
           },
           <String, dynamic>{
             'name': 'web engine analysis',
-            'parameters': <String>[
-              'analyze'
-            ],
-            'scripts': <String>[ 'flutter/lib/web_ui/dev/felt' ],
+            'parameters': <String>['analyze'],
+            'scripts': <String>['flutter/lib/web_ui/dev/felt'],
           },
           <String, dynamic>{
             'name': 'copy artifacts for web tests',
-            'parameters': <String>[
-              'test',
-              '--copy-artifacts',
-            ],
-            'scripts': <String>[ 'flutter/lib/web_ui/dev/felt' ],
+            'parameters': <String>['test', '--copy-artifacts'],
+            'scripts': <String>['flutter/lib/web_ui/dev/felt'],
           },
-        ]
+        ],
       },
     };
   }
@@ -121,22 +97,15 @@ class GenerateBuilderJsonCommand extends Command<bool> {
   Map<String, dynamic> _getBundleBuildStep(TestBundle bundle) {
     return <String, dynamic>{
       'name': 'web_tests/test_bundles/${bundle.name}',
-      'drone_dimensions': <String>[
-        'device_type=none',
-        'os=Linux',
-      ],
+      'drone_dimensions': <String>['device_type=none', 'os=Linux'],
       'generators': <String, dynamic>{
         'tasks': <dynamic>[
           <String, dynamic>{
             'name': 'compile bundle ${bundle.name}',
-            'parameters': <String>[
-              'test',
-              '--compile',
-              '--bundle=${bundle.name}',
-            ],
-            'scripts': <String>[ 'flutter/lib/web_ui/dev/felt' ],
-          }
-        ]
+            'parameters': <String>['test', '--compile', '--bundle=${bundle.name}'],
+            'scripts': <String>['flutter/lib/web_ui/dev/felt'],
+          },
+        ],
       },
     };
   }
@@ -145,7 +114,14 @@ class GenerateBuilderJsonCommand extends Command<bool> {
     return <dynamic>[
       _getTestStepForPlatformAndBrowser(suites, packageLock, 'Linux', BrowserName.chrome),
       _getTestStepForPlatformAndBrowser(suites, packageLock, 'Linux', BrowserName.firefox),
-      _getTestStepForPlatformAndBrowser(suites, packageLock, 'Mac', BrowserName.safari, specificOS: 'Mac-13', cpu: 'arm64'),
+      _getTestStepForPlatformAndBrowser(
+        suites,
+        packageLock,
+        'Mac',
+        BrowserName.safari,
+        specificOS: 'Mac-13',
+        cpu: 'arm64',
+      ),
     ];
   }
 
@@ -167,10 +143,7 @@ class GenerateBuilderJsonCommand extends Command<bool> {
         'os=${specificOS ?? platform}',
         if (cpu != null) 'cpu=$cpu',
       ],
-      'gclient_variables': <String, dynamic>{
-        'download_android_deps': false,
-        'download_jdk': false,
-      },
+      'gclient_variables': <String, dynamic>{'download_android_deps': false, 'download_jdk': false},
       'dependencies': <String>[
         'web_tests/artifacts',
         ...bundles.map((bundle) => 'web_tests/test_bundles/${bundle.name}'),
@@ -189,17 +162,18 @@ class GenerateBuilderJsonCommand extends Command<bool> {
           <String, dynamic>{
             'dependency': 'firefox',
             'version': 'version:${packageLock.firefoxLock.version}',
-          }
+          },
       ],
-      'tasks': filteredSuites.map((suite) => <String, dynamic> {
-        'name': 'run suite ${suite.name}',
-        'parameters': <String>[
-          'test',
-          '--run',
-          '--suite=${suite.name}',
-        ],
-        'script': 'flutter/lib/web_ui/dev/felt',
-      }).toList(),
+      'tasks':
+          filteredSuites
+              .map(
+                (suite) => <String, dynamic>{
+                  'name': 'run suite ${suite.name}',
+                  'parameters': <String>['test', '--run', '--suite=${suite.name}'],
+                  'script': 'flutter/lib/web_ui/dev/felt',
+                },
+              )
+              .toList(),
     };
   }
 }
