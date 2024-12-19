@@ -27,7 +27,15 @@ if ((Test-Path "$flutterRoot\DEPS" -PathType Leaf) -and (Test-Path "$flutterRoot
     # Calculate the engine hash from tracked git files.
     $branch = (git -C "$flutterRoot" rev-parse --abbrev-ref HEAD)
     if ($null -eq $Env:LUCI_CONTEXT) {
-        $engineVersion = (git -C "$flutterRoot"  merge-base HEAD upstream/master)
+        $ErrorActionPreference = "Continue"
+        git -C "$flutterRoot" remote get-url upstream *> $null
+        $exitCode = $?
+        $ErrorActionPreference = "Stop"
+        if ($exitCode) {
+            $engineVersion = (git -C "$flutterRoot"  merge-base HEAD upstream/master)
+        } else {
+            $engineVersion = (git -C "$flutterRoot"  merge-base HEAD origin/master)
+        }
     }
     else {
         $engineVersion = (git -C "$flutterRoot" rev-parse HEAD)
