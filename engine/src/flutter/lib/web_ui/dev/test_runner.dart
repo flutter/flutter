@@ -64,37 +64,15 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
         help:
             'Copy artifacts needed for test suites. If this is specified on '
             'its own, we will only copy the artifacts and not compile or run'
-            'the tests bundles or suites.'
+            'the tests bundles or suites.',
       )
-      ..addFlag(
-        'profile',
-        help:
-            'Use artifacts from the profile build instead of release.'
-      )
-      ..addFlag(
-        'debug',
-        help: 'Use artifacts from the debug build instead of release.'
-      )
-      ..addFlag(
-        'release',
-        help: 'Use artifacts from the release build. This is the default.'
-      )
-      ..addFlag(
-        'gcs-prod',
-        help: 'Use artifacts from the prod gcs bucket populated by CI.'
-      )
-      ..addFlag(
-        'gcs-staging',
-        help: 'Use artifacts from the staging gcs bucket populated by CI.'
-      )
-      ..addFlag(
-        'gcs-try',
-        help: 'Use artifacts from the try gcs bucket populated by CI.'
-      )
-      ..addFlag(
-        'dwarf',
-        help: 'Debug wasm modules using embedded DWARF data.'
-      )
+      ..addFlag('profile', help: 'Use artifacts from the profile build instead of release.')
+      ..addFlag('debug', help: 'Use artifacts from the debug build instead of release.')
+      ..addFlag('release', help: 'Use artifacts from the release build. This is the default.')
+      ..addFlag('gcs-prod', help: 'Use artifacts from the prod gcs bucket populated by CI.')
+      ..addFlag('gcs-staging', help: 'Use artifacts from the staging gcs bucket populated by CI.')
+      ..addFlag('gcs-try', help: 'Use artifacts from the try gcs bucket populated by CI.')
+      ..addFlag('dwarf', help: 'Debug wasm modules using embedded DWARF data.')
       ..addFlag('profile', help: 'Use artifacts from the profile build instead of release.')
       ..addFlag('debug', help: 'Use artifacts from the debug build instead of release.')
       ..addFlag('dwarf', help: 'Debug wasm modules using embedded DWARF data.')
@@ -404,29 +382,27 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
     }
 
     final Set<FilePath>? testFiles = targetFiles.isEmpty ? null : Set<FilePath>.from(targetFiles);
-    final Pipeline testPipeline = Pipeline(steps: <PipelineStep>[
-      if (isWatchMode) ClearTerminalScreenStep(),
-      if (shouldCopyArtifacts) CopyArtifactsStep(artifacts, source: artifactSource),
-      if (shouldCompile)
-        for (final TestBundle bundle in bundles)
-          CompileBundleStep(
-            bundle: bundle,
-            isVerbose: isVerbose,
-            testFiles: testFiles,
-          ),
-      if (shouldRun)
-        for (final TestSuite suite in filteredSuites)
-          RunSuiteStep(
-            suite,
-            startPaused: startPaused,
-            isVerbose: isVerbose,
-            doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
-            requireSkiaGold: requireSkiaGold,
-            overridePathToCanvasKit: overridePathToCanvasKit,
-            testFiles: testFiles,
-            useDwarf: boolArg('dwarf'),
-          ),
-    ]);
+    final Pipeline testPipeline = Pipeline(
+      steps: <PipelineStep>[
+        if (isWatchMode) ClearTerminalScreenStep(),
+        if (shouldCopyArtifacts) CopyArtifactsStep(artifacts, source: artifactSource),
+        if (shouldCompile)
+          for (final TestBundle bundle in bundles)
+            CompileBundleStep(bundle: bundle, isVerbose: isVerbose, testFiles: testFiles),
+        if (shouldRun)
+          for (final TestSuite suite in filteredSuites)
+            RunSuiteStep(
+              suite,
+              startPaused: startPaused,
+              isVerbose: isVerbose,
+              doUpdateScreenshotGoldens: doUpdateScreenshotGoldens,
+              requireSkiaGold: requireSkiaGold,
+              overridePathToCanvasKit: overridePathToCanvasKit,
+              testFiles: testFiles,
+              useDwarf: boolArg('dwarf'),
+            ),
+      ],
+    );
 
     try {
       await testPipeline.run();

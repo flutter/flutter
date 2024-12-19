@@ -208,12 +208,7 @@ class DevNull implements StringSink {
   void writeln([Object? obj = '']) {}
 }
 
-enum LuciRealm {
-  Prod,
-  Staging,
-  Try,
-  Unknown,
-}
+enum LuciRealm { Prod, Staging, Try, Unknown }
 
 class LuciConfig {
   LuciConfig(this.realm);
@@ -253,9 +248,12 @@ final String gitRevision = () {
     <String>['rev-parse', 'HEAD'],
     workingDirectory: path.join(environment.engineSrcDir.path, 'flutter'),
     stderrEncoding: utf8,
-    stdoutEncoding: utf8);
+    stdoutEncoding: utf8,
+  );
   if (result.exitCode != 0) {
-    throw ToolExit('Failed to get git revision. Exit code: ${result.exitCode} Error: ${result.stderr}');
+    throw ToolExit(
+      'Failed to get git revision. Exit code: ${result.exitCode} Error: ${result.stderr}',
+    );
   }
   return (result.stdout as String).trim();
 }();

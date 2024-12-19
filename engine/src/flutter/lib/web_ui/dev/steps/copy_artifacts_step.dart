@@ -31,7 +31,7 @@ class GcsArtifactSource implements ArtifactSource {
 }
 
 class CopyArtifactsStep implements PipelineStep {
-  CopyArtifactsStep(this.artifactDeps, { required this.source });
+  CopyArtifactsStep(this.artifactDeps, {required this.source});
 
   final ArtifactDependencies artifactDeps;
   final ArtifactSource source;
@@ -51,12 +51,18 @@ class CopyArtifactsStep implements PipelineStep {
     final String realmComponent = switch (realm) {
       LuciRealm.Prod || LuciRealm.Staging => '',
       LuciRealm.Try => 'flutter_archives_v2/',
-      LuciRealm.Unknown => throw ToolExit('Could not generate artifact bucket url for unknown realm.'),
+      LuciRealm.Unknown =>
+        throw ToolExit('Could not generate artifact bucket url for unknown realm.'),
     };
-    final Uri url = Uri.https('storage.googleapis.com', '${realmComponent}flutter_infra_release/flutter/$gitRevision/flutter-web-sdk.zip');
+    final Uri url = Uri.https(
+      'storage.googleapis.com',
+      '${realmComponent}flutter_infra_release/flutter/$gitRevision/flutter-web-sdk.zip',
+    );
     final http.Response response = await http.Client().get(url);
     if (response.statusCode != 200) {
-      throw ToolExit('Could not download flutter-web-sdk.zip from cloud bucket at URL: $url. Response status code: ${response.statusCode}');
+      throw ToolExit(
+        'Could not download flutter-web-sdk.zip from cloud bucket at URL: $url. Response status code: ${response.statusCode}',
+      );
     }
     final Archive archive = ZipDecoder().decodeBytes(response.bodyBytes);
     final io.Directory tempDirectory = await io.Directory.systemTemp.createTemp();
@@ -84,7 +90,11 @@ class CopyArtifactsStep implements PipelineStep {
         final artifactsDirectory = (await _downloadArtifacts(realm)).path;
         flutterJsSourceDirectory = pathlib.join(artifactsDirectory, 'flutter_js');
         canvaskitSourceDirectory = pathlib.join(artifactsDirectory, 'canvaskit');
-        canvaskitChromiumSourceDirectory = pathlib.join(artifactsDirectory, 'canvaskit', 'chromium');
+        canvaskitChromiumSourceDirectory = pathlib.join(
+          artifactsDirectory,
+          'canvaskit',
+          'chromium',
+        );
         skwasmSourceDirectory = pathlib.join(artifactsDirectory, 'canvaskit');
         skwasmStSourceDirectory = pathlib.join(artifactsDirectory, 'canvaskit');
     }
@@ -228,7 +238,11 @@ class CopyArtifactsStep implements PipelineStep {
     }
   }
 
-  Future<void> copyWasmLibrary(String libraryName, String sourcePath, String destinationPath) async {
+  Future<void> copyWasmLibrary(
+    String libraryName,
+    String sourcePath,
+    String destinationPath,
+  ) async {
     final String targetDirectoryPath = pathlib.join(
       environment.webTestsArtifactsDir.path,
       destinationPath,
@@ -239,20 +253,15 @@ class CopyArtifactsStep implements PipelineStep {
       '$libraryName.wasm',
       '$libraryName.wasm.map',
     ]) {
-      final io.File sourceFile = io.File(pathlib.join(
-        sourcePath,
-        filename,
-      ));
-      final io.File targetFile = io.File(pathlib.join(
-        targetDirectoryPath,
-        filename,
-      ));
+      final io.File sourceFile = io.File(pathlib.join(sourcePath, filename));
+      final io.File targetFile = io.File(pathlib.join(targetDirectoryPath, filename));
       if (!sourceFile.existsSync()) {
         if (filename.endsWith('.map')) {
           // Sourcemaps are only generated under certain build conditions, so
           // they are optional.
           continue;
-        } {
+        }
+        {
           throw ToolExit('Built artifact not found at path "$sourceFile".');
         }
       }
