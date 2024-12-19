@@ -9,13 +9,20 @@ import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
-/// Tests that the Flutter plugin template works. Use `pod lib lint`
-/// to confirm the plugin module can be imported into an app.
+/// Tests that the Flutter plugin template works using CocoaPods integration.
+/// Use `pod lib lint` to confirm the plugin module can be imported into an app.
 Future<void> main() async {
   await task(() async {
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_plugin_test.');
     try {
+      section('Use CocoaPods');
+
+      await exec(
+        'flutter',
+        <String>['config', '--no-enable-swift-package-manager'],
+      );
+
       section('Lint integration_test');
 
       await inDirectory(tempDir, () async {
