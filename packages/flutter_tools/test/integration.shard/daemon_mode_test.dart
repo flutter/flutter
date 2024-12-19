@@ -45,7 +45,7 @@ void main() {
       .where((Map<String, Object?>? value) => value != null)
       .cast<Map<String, Object?>>();
 
-    final [Map<String, Object?> connectedEvent, Map<String, Object?> logMessage] = await Future.wait([
+    final [Map<String, Object?> connectedEvent, Map<String, Object?> logMessage] = await Future.wait(<Future<Map<String, Object?>>>[
       stream.firstWhere((Map<String, Object?> e) => e['event'] == 'daemon.connected'),
       stream.firstWhere((Map<String, Object?> e) => e['event'] == 'daemon.logMessage')
     ]);
