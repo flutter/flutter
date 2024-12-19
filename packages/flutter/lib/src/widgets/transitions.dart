@@ -1104,6 +1104,24 @@ class ListenableBuilder extends AnimatedWidget {
     this.child,
   });
 
+  /// Creates a [ListenableBuilder] that responds to changes in multiple [listenables].
+  ///
+  /// This constructor is useful when you need to react to changes from multiple
+  /// [Listenable] objects simultaneously.
+  ///
+  /// [listenables] is an iterable of [Listenable] objects whose changes will trigger rebuilds.
+  /// [builder] is the callback function that builds the widget based on the latest state.
+  /// [child] is an optional child widget that doesn't depend on the [listenables].
+  ///
+  /// The returned [ListenableBuilder] instance is configured to listen to all provided
+  /// [listenables] through a merged [Listenable].
+  ListenableBuilder.multiple({
+    super.key,
+    required Iterable<Listenable> listenables,
+    required this.builder,
+    this.child,
+  }) : super(listenable: Listenable.merge(listenables));
+
   /// The [Listenable] supplied to the constructor.
   ///
   /// {@tool dartpad}
