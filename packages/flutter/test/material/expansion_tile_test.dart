@@ -818,8 +818,9 @@ void main() {
       expect(tester.takeAnnouncements().first.message, localizations.expandedHint);
       handle.dispose();
     },
+    // [intended] https://github.com/flutter/flutter/issues/122101.
     skip: defaultTargetPlatform == TargetPlatform.iOS,
-  ); // [intended] https://github.com/flutter/flutter/issues/122101.
+  );
 
   // This is a regression test for https://github.com/flutter/flutter/issues/132264.
   testWidgets(

@@ -737,8 +737,8 @@ void main() {
 
       pumpFrame(phase: EnginePhase.composite, onErrors: expectAssertionError);
     },
-    skip: kIsWeb,
-  ); // https://github.com/flutter/flutter/issues/102086
+    skip: kIsWeb, // https://github.com/flutter/flutter/issues/102086
+  );
 
   test(
     'RenderObject with repaint boundary asserts when a composited layer is replaced during painting',
@@ -761,8 +761,8 @@ void main() {
 
       pumpFrame(phase: EnginePhase.composite, onErrors: expectAssertionError);
     },
-    skip: kIsWeb,
-  ); // https://github.com/flutter/flutter/issues/102086
+    skip: kIsWeb, // https://github.com/flutter/flutter/issues/102086
+  );
 
   test(
     'RenderObject with repaint boundary asserts when a composited layer tries to update its own offset',
@@ -785,8 +785,8 @@ void main() {
 
       pumpFrame(phase: EnginePhase.composite, onErrors: expectAssertionError);
     },
-    skip: kIsWeb,
-  ); // https://github.com/flutter/flutter/issues/102086
+    skip: kIsWeb, // https://github.com/flutter/flutter/issues/102086
+  );
 
   test(
     'RenderObject markNeedsPaint while repaint boundary, and then updated to no longer be a repaint boundary with '

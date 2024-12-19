@@ -49,8 +49,9 @@ void main() {
         },
       );
     },
+    // [intended] Test relies on captureImage, which is not supported on web currently.
     skip: !canCaptureImage || impellerEnabled,
-  ); // [intended] Test relies on captureImage, which is not supported on web currently.
+  );
 
   testWidgets(
     'Default text color',
@@ -83,8 +84,9 @@ void main() {
         },
       );
     },
+    // [intended] Test relies on captureImage, which is not supported on web currently.
     skip: !canCaptureImage || impellerEnabled,
-  ); // [intended] Test relies on captureImage, which is not supported on web currently.
+  );
 
   testWidgets(
     'Default text selection color',
@@ -153,8 +155,9 @@ void main() {
         },
       );
     },
+    // [intended] Test relies on captureImage, which is not supported on web currently.
     skip: !canCaptureImage || impellerEnabled,
-  ); // [intended] Test relies on captureImage, which is not supported on web currently.
+  );
 }
 
 Color _getPixel(ByteData bytes, int x, int y, int width) {

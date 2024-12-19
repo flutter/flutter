@@ -852,8 +852,9 @@ void main() {
       // TODO(yjbanov): This test is failing in the Dart HHH-web bot and
       //                needs additional investigation before it can be reenabled.
     },
+    // https://github.com/flutter/flutter/issues/93691
     skip: const bool.fromEnvironment('DART_HHH_BOT'),
-  ); // https://github.com/flutter/flutter/issues/93691
+  );
 
   test('getEndpointsForSelection handles empty characters', () {
     final TextSelectionDelegate delegate = _FakeEditableTextState();

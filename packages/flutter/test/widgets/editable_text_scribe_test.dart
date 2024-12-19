@@ -106,9 +106,9 @@ void main() {
 
       // On web, let the browser handle handwriting input.
     },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
-  ); // [intended]
+  );
 
   testWidgets(
     'when Scribe is unavailable, does not start handwriting on tap down',
@@ -133,9 +133,9 @@ void main() {
 
       await gesture.up();
     },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
-  ); // [intended]
+  );
 
   testWidgets(
     'tap down event must be from a stylus in order to start handwriting',
@@ -156,9 +156,9 @@ void main() {
 
       await gesture.up();
     },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
-  ); // [intended]
+  );
 
   testWidgets(
     'tap down event on a collapsed selection handle is handled by the handle and does not start handwriting',
@@ -201,9 +201,9 @@ void main() {
 
       await gesture.up();
     },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
-  ); // [intended]
+  );
 
   testWidgets(
     'tap down event on the end selection handle is handled by the handle and does not start handwriting',
@@ -247,9 +247,9 @@ void main() {
 
       await gesture.up();
     },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
-  ); // [intended]
+  );
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate

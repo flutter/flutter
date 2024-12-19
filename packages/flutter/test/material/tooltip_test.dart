@@ -574,8 +574,8 @@ void main() {
       expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
       expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(330.0));
     },
-    skip: kIsWeb && !isSkiaWeb,
-  ); // https://github.com/flutter/flutter/issues/99933
+    skip: kIsWeb && !isSkiaWeb, // https://github.com/flutter/flutter/issues/99933
+  );
 
   testWidgets('Material2 - Does tooltip end up in the right place - near the edge', (
     WidgetTester tester,

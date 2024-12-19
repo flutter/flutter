@@ -375,8 +375,8 @@ void main() {
         checkCaretOffsetsLtr('abc👩‍🚀');
         checkCaretOffsetsLtr('abcd👩‍🚀');
       },
-      skip: isBrowser && !isSkiaWeb,
-    ); // https://github.com/flutter/flutter/issues/56308
+      skip: isBrowser && !isSkiaWeb, // https://github.com/flutter/flutter/issues/56308
+    );
 
     test('TextPainter caret zalgo test', () {
       // Regression test for https://github.com/flutter/flutter/issues/98516
@@ -439,8 +439,8 @@ void main() {
           <double>[0, 14, 28, 42, 56, 70, 84, 112, 112, 112, 112, 112],
         );
       },
-      skip: isBrowser && !isSkiaWeb,
-    ); // https://github.com/flutter/flutter/issues/56308
+      skip: isBrowser && !isSkiaWeb, // https://github.com/flutter/flutter/issues/56308
+    );
 
     test(
       'TextPainter caret emoji test RTL: letters next to emoji, as separate TextBoxes',
@@ -471,8 +471,8 @@ void main() {
           <double>[112, 98, 84, 70, 56, 42, 28, 0, 0, 0, 0, 0],
         );
       },
-      skip: isBrowser && !isSkiaWeb,
-    ); // https://github.com/flutter/flutter/issues/56308
+      skip: isBrowser && !isSkiaWeb, // https://github.com/flutter/flutter/issues/56308
+    );
 
     test('TextPainter caret center space test', () {
       final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
@@ -1586,8 +1586,8 @@ void main() {
       );
       painter.dispose();
     },
-    skip: isBrowser && !isSkiaWeb,
-  ); // https://github.com/flutter/flutter/issues/56308
+    skip: isBrowser && !isSkiaWeb, // https://github.com/flutter/flutter/issues/56308
+  );
 
   test(
     'TextPainter does not require layout after providing identical placeholder dimensions',
@@ -1632,8 +1632,8 @@ void main() {
       );
       painter.dispose();
     },
-    skip: isBrowser && !isSkiaWeb,
-  ); // https://github.com/flutter/flutter/issues/56308
+    skip: isBrowser && !isSkiaWeb, // https://github.com/flutter/flutter/issues/56308
+  );
 
   test('TextPainter - debugDisposed', () {
     final TextPainter painter = TextPainter();
@@ -1955,8 +1955,9 @@ void main() {
         expect(painter.height, 100);
       });
     },
+    // [intended] strut support for HTML renderer https://github.com/flutter/flutter/issues/32243.
     skip: kIsWeb && !isSkiaWeb,
-  ); // [intended] strut support for HTML renderer https://github.com/flutter/flutter/issues/32243.
+  );
 
   test('getOffsetForCaret does not crash on decomposed characters', () {
     final TextPainter painter = TextPainter(

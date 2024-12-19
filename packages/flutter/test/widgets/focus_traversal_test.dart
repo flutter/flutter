@@ -2410,9 +2410,10 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
         expect(Focus.of(upperLeftKey.currentContext!).hasPrimaryFocus, isTrue);
       },
+      // https://github.com/flutter/flutter/issues/35347
       skip: isBrowser,
       variant: KeySimulatorTransitModeVariant.all(),
-    ); // https://github.com/flutter/flutter/issues/35347
+    );
 
     testWidgets(
       'Focus traversal actions works when current focus skip traversal',
@@ -2470,9 +2471,10 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         expect(Focus.of(key3.currentContext!).hasPrimaryFocus, isTrue);
       },
+      // https://github.com/flutter/flutter/issues/35347
       skip: isBrowser,
       variant: KeySimulatorTransitModeVariant.all(),
-    ); // https://github.com/flutter/flutter/issues/35347
+    );
 
     testWidgets(
       'Focus traversal inside a vertical scrollable scrolls to stay visible.',
@@ -2595,9 +2597,10 @@ void main() {
         expect(topNode.hasPrimaryFocus, isTrue);
         expect(controller.offset, equals(0.0));
       },
+      // https://github.com/flutter/flutter/issues/35347
       skip: isBrowser,
       variant: KeySimulatorTransitModeVariant.all(),
-    ); // https://github.com/flutter/flutter/issues/35347
+    );
 
     testWidgets(
       'Focus traversal inside a horizontal scrollable scrolls to stay visible.',
@@ -2721,9 +2724,10 @@ void main() {
         expect(leftNode.hasPrimaryFocus, isTrue);
         expect(controller.offset, equals(0.0));
       },
+      // https://github.com/flutter/flutter/issues/35347
       skip: isBrowser,
       variant: KeySimulatorTransitModeVariant.all(),
-    ); // https://github.com/flutter/flutter/issues/35347
+    );
 
     testWidgets(
       'Arrow focus traversal actions can be re-enabled for text fields.',

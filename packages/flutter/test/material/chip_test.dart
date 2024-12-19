@@ -2605,8 +2605,8 @@ void main() {
       expect(tester.getSize(find.byKey(key2)).width, moreOrLessEquals(90.4, epsilon: 0.1));
       expect(tester.getSize(find.byKey(key2)).height, equals(38.0));
     },
-    skip: kIsWeb && !isSkiaWeb,
-  ); // https://github.com/flutter/flutter/issues/99933
+    skip: kIsWeb && !isSkiaWeb, // https://github.com/flutter/flutter/issues/99933
+  );
 
   testWidgets('Chip uses the right theme colors for the right components', (
     WidgetTester tester,
@@ -5975,8 +5975,8 @@ void main() {
       expect(materialBox, isNot(paints..path(color: checkmarkColor)));
       expect(tester.getSize(find.byType(RawChip)).width, closeTo(132.6, 0.1));
     },
-    skip: kIsWeb && !isSkiaWeb,
-  ); // https://github.com/flutter/flutter/issues/99933
+    skip: kIsWeb && !isSkiaWeb, // https://github.com/flutter/flutter/issues/99933
+  );
 
   testWidgets(
     'ChipAnimationStyle.deleteDrawerAnimation overrides chip delete icon animation duration',
@@ -6048,8 +6048,8 @@ void main() {
       expect(find.byIcon(Icons.cancel), findsNothing);
       expect(tester.getSize(find.byType(RawChip)).width, closeTo(132.6, 0.1));
     },
-    skip: kIsWeb && !isSkiaWeb,
-  ); // https://github.com/flutter/flutter/issues/99933
+    skip: kIsWeb && !isSkiaWeb, // https://github.com/flutter/flutter/issues/99933
+  );
 
   testWidgets('Chip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
     final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(

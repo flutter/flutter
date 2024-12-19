@@ -821,8 +821,8 @@ void main() {
       paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
       expect(node.childrenCount, 2);
     },
-    skip: isBrowser,
-  ); // https://github.com/flutter/flutter/issues/61020
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+  );
 
   test('Basic TextSpan Hit testing', () {
     final TextSpan textSpanA = TextSpan(text: 'A' * 10);

@@ -266,7 +266,7 @@ void main() {
       expect(find.byKey(directKey), findsNothing);
       expect(controller.isShown, isFalse);
     },
-    skip:
-        isContextMenuProvidedByPlatform, // [intended] no Flutter-drawn text selection toolbar on web.
+    // [intended] no Flutter-drawn text selection toolbar on web.
+    skip: isContextMenuProvidedByPlatform,
   );
 }
