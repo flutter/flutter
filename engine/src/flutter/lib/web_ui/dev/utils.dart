@@ -12,7 +12,6 @@ import 'package:path/path.dart' as path;
 
 import 'common.dart';
 import 'environment.dart';
-import 'exceptions.dart';
 import 'felt_config.dart';
 
 enum RuntimeMode {
@@ -312,21 +311,6 @@ mixin ArgUtils<T> on Command<T> {
 
   /// Extracts a string argument from [argResults].
   String stringArg(String name) => argResults![name] as String;
-
-  RuntimeMode get runtimeMode {
-    final bool isProfile = boolArg('profile');
-    final bool isDebug = boolArg('debug');
-    if (isProfile && isDebug) {
-      throw ToolExit('Cannot specify both --profile and --debug at the same time.');
-    }
-    if (isProfile) {
-      return RuntimeMode.profile;
-    } else if (isDebug) {
-      return RuntimeMode.debug;
-    } else {
-      return RuntimeMode.release;
-    }
-  }
 }
 
 io.Directory getBuildDirectoryForRuntimeMode(RuntimeMode runtimeMode) =>
