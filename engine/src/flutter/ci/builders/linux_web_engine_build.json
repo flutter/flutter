@@ -36,9 +36,9 @@
           ],
           "realm": "production"
         }
-      ]
+      ],
+      "cas_archive": false
     }
   ],
-  "tests": [],
-  "cas_archive": false
+  "tests": []
 }
