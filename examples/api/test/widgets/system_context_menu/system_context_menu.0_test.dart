@@ -50,8 +50,8 @@ void main() {
       }
     },
     variant: TargetPlatformVariant.all(),
-    skip: kIsWeb,
-  ); // [intended]
+    skip: kIsWeb, // [intended]
+  );
 
   testWidgets(
     'does not show the system context menu when not supported',
@@ -73,6 +73,6 @@ void main() {
       expect(find.byType(SystemContextMenu), findsNothing);
     },
     variant: TargetPlatformVariant.all(),
-    skip: kIsWeb,
-  ); // [intended]
+    skip: kIsWeb, // [intended]
+  );
 }

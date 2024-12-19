@@ -327,8 +327,8 @@ void main() {
         expect(controller.value.canRedo, false);
       },
       variant: TargetPlatformVariant.all(),
-      skip: kIsWeb,
-    ); // [intended]
+      skip: kIsWeb, // [intended]
+    );
 
     testWidgets('duplicate changes do not affect the undo history', (WidgetTester tester) async {
       final ValueNotifier<int> value = ValueNotifier<int>(0);
@@ -525,8 +525,8 @@ void main() {
         });
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
-      skip: kIsWeb,
-    ); // [intended]
+      skip: kIsWeb, // [intended]
+    );
 
     testWidgets(
       'handlePlatformUndo should undo or redo appropriately on iOS',
@@ -615,8 +615,8 @@ void main() {
         expect(controller.value.canRedo, false);
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
-      skip: kIsWeb,
-    ); // [intended]
+      skip: kIsWeb, // [intended]
+    );
   });
 
   group('UndoHistoryController', () {

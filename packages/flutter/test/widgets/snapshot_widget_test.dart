@@ -279,8 +279,8 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(tester.layers.last, isA<PlatformViewLayer>());
     },
-    skip: kIsWeb,
-  ); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+    skip: kIsWeb, // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+  );
 
   testWidgets(
     'SnapshotWidget should have same result when enabled',
@@ -325,8 +325,9 @@ void main() {
 
       await expectLater(find.byKey(repaintBoundaryKey), matchesReferenceImage(imageWhenDisabled));
     },
+    // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
     skip: kIsWeb || impellerEnabled,
-  ); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+  );
 
   test('SnapshotPainter dispatches memory events', () async {
     await expectLater(

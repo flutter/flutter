@@ -140,8 +140,8 @@ void main() {
         );
       }
     },
-    skip: Platform.isWindows,
-  ); // https://github.com/flutter/flutter/issues/157640
+    skip: Platform.isWindows, // https://github.com/flutter/flutter/issues/157640
+  );
 
   // TODO(54566): Remove test when issue is resolved.
   /// Test project with a `settings.gradle` (PluginEach) that apps were created
@@ -158,8 +158,8 @@ void main() {
       expect(buildApkResult.stderr.toString(), isNot(contains('Please fix your settings.gradle')));
       expect(buildApkResult, const ProcessResultMatcher());
     },
-    skip: Platform.isWindows,
-  ); // https://github.com/flutter/flutter/issues/157640
+    skip: Platform.isWindows, // https://github.com/flutter/flutter/issues/157640
+  );
 
   // TODO(54566): Remove test when issue is resolved.
   /// Test project with a `settings.gradle` (PluginEach) that apps were created
@@ -177,8 +177,8 @@ void main() {
       expect(buildApkResult.stderr.toString(), isNot(contains('Please fix your settings.gradle')));
       expect(buildApkResult, const ProcessResultMatcher());
     },
-    skip: Platform.isWindows,
-  ); // https://github.com/flutter/flutter/issues/157640
+    skip: Platform.isWindows, // https://github.com/flutter/flutter/issues/157640
+  );
 
   // TODO(54566): Remove test when issue is resolved.
   /// Test project with a `settings.gradle` (PluginEach) that apps were created
@@ -200,8 +200,8 @@ void main() {
         const ProcessResultMatcher(stderrPattern: 'Please fix your settings.gradle'),
       );
     },
-    skip: Platform.isWindows,
-  ); // https://github.com/flutter/flutter/issues/157640
+    skip: Platform.isWindows, // https://github.com/flutter/flutter/issues/157640
+  );
 }
 
 const String pubspecWithPluginPath = r'''

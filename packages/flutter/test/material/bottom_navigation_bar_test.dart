@@ -1687,8 +1687,8 @@ void main() {
       await tester.longPress(find.text(label));
       expect(tester.getSize(find.text(label).last).height, equals(80.0));
     },
-    skip: kIsWeb && !isSkiaWeb,
-  ); // https://github.com/flutter/flutter/issues/99933
+    skip: kIsWeb && !isSkiaWeb, // https://github.com/flutter/flutter/issues/99933
+  );
 
   testWidgets('Different behaviour of tool tip in BottomNavigationBarItem', (
     WidgetTester tester,

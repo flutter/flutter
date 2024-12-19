@@ -89,8 +89,9 @@ void main() {
       );
       expect(httpClient.request.response.drained, true);
     },
+    // [intended] Browser implementation does not use HTTP client but an <img> tag.
     skip: isBrowser,
-  ); // [intended] Browser implementation does not use HTTP client but an <img> tag.
+  );
 
   test(
     'Expect thrown exception with statusCode - evicts from cache and drains, when using ResizeImage',
@@ -137,8 +138,9 @@ void main() {
       );
       expect(httpClient.request.response.drained, true);
     },
+    // [intended] Browser implementation does not use HTTP client but an <img> tag.
     skip: isBrowser,
-  ); // [intended] Browser implementation does not use HTTP client but an <img> tag.
+  );
 
   test(
     'Uses the HttpClient provided by debugNetworkImageHttpClientProvider if set',
@@ -168,8 +170,9 @@ void main() {
       await loadNetworkImage();
       expect(capturedErrors, <dynamic>['client1', 'client2']);
     },
+    // [intended] Browser implementation does not use HTTP client but an <img> tag.
     skip: isBrowser,
-  ); // [intended] Browser implementation does not use HTTP client but an <img> tag.
+  );
 
   test('Propagates http client errors during resolve()', () async {
     httpClient.thrownError = Error();

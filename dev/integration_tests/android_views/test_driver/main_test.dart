@@ -62,7 +62,8 @@ Future<void> main() async {
         expect(windowClickCount, 'Click count: 1');
       },
       timeout: Timeout.none,
+      // TODO(garyq): Skipped, see https://github.com/flutter/flutter/issues/88479
       skip: true,
-    ); // TODO(garyq): Skipped, see https://github.com/flutter/flutter/issues/88479
+    );
   });
 }

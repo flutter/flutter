@@ -4560,9 +4560,9 @@ void main() {
 
       expect(state.target, isNull);
     },
-    skip:
-        true, // Skipped for everyone else: forceGC is flaky, see https://github.com/flutter/flutter/issues/154858
     // Skipped on Web: [intended] ForceGC does not work in web and in release mode. See https://api.flutter.dev/flutter/package-leak_tracker_leak_tracker/forceGC.html
+    // Skipped for everyone else: forceGC is flaky, see https://github.com/flutter/flutter/issues/154858
+    skip: true,
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/154798.

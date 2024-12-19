@@ -26,6 +26,7 @@ void main() {
       ]);
       expect(result.stdout, contains('args: ["(?!Golden).+"]'));
     },
+    // https://github.com/flutter/flutter/issues/87934
     skip: 'Reverted in https://github.com/flutter/flutter/pull/86000',
-  ); // https://github.com/flutter/flutter/issues/87934
+  );
 }

@@ -2172,12 +2172,12 @@ void main() {
       // On web, we don't show the Flutter toolbar and instead rely on the browser
       // toolbar. Until we change that, this test should remain skipped.
     },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.iOS,
       TargetPlatform.android,
     }),
-  ); // [intended]
+  );
 
   testWidgets('Paste is shown only when there is something to paste', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -2262,14 +2262,14 @@ void main() {
       expect(copySelectionRange, localController.selection);
       expect(find.text('Copy'), findsNothing);
     },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.iOS,
       TargetPlatform.macOS,
       TargetPlatform.linux,
       TargetPlatform.windows,
     }),
-  ); // [intended]
+  );
 
   testWidgets(
     'Copy selection collapses selection and hides the toolbar on Android and Fuchsia',
@@ -2313,12 +2313,12 @@ void main() {
       );
       expect(find.text('Copy'), findsNothing);
     },
-    skip: kIsWeb,
+    skip: kIsWeb, // [intended]
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.android,
       TargetPlatform.fuchsia,
     }),
-  ); // [intended]
+  );
 
   testWidgets('can show the toolbar after clearing all text', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/35998.
@@ -6929,8 +6929,8 @@ void main() {
       // On web, using keyboard for selection is handled by the browser.
     },
     variant: TargetPlatformVariant.all(),
-    skip: kIsWeb,
-  ); // [intended]
+    skip: kIsWeb, // [intended]
+  );
 
   testWidgets(
     'keyboard text selection works (ui.KeyData then RawKeyEvent)',
@@ -6944,8 +6944,8 @@ void main() {
       // On web, using keyboard for selection is handled by the browser.
     },
     variant: TargetPlatformVariant.all(),
-    skip: kIsWeb,
-  ); // [intended]
+    skip: kIsWeb, // [intended]
+  );
 
   testWidgets(
     'keyboard shortcuts respect read-only',
@@ -8767,8 +8767,8 @@ void main() {
       // On web, we don't show the Flutter toolbar and instead rely on the browser
       // toolbar. Until we change that, this test should remain skipped.
     },
-    skip: kIsWeb,
-  ); // [intended]
+    skip: kIsWeb, // [intended]
+  );
 
   testWidgets('bringIntoView brings the caret into view when in a viewport', (
     WidgetTester tester,
@@ -11360,8 +11360,8 @@ void main() {
       // On web, using keyboard for selection is handled by the browser.
     },
     variant: TargetPlatformVariant.all(),
-    skip: kIsWeb,
-  ); // [intended]
+    skip: kIsWeb, // [intended]
+  );
 
   testWidgets(
     'navigating multiline text',
@@ -11514,8 +11514,8 @@ void main() {
       // On web, using keyboard for selection is handled by the browser.
     },
     variant: TargetPlatformVariant.all(),
-    skip: kIsWeb,
-  ); // [intended]
+    skip: kIsWeb, // [intended]
+  );
 
   testWidgets(
     "Mac's expand by line behavior on multiple lines",
@@ -12765,8 +12765,8 @@ void main() {
         // On web, these keyboard shortcuts are handled by the browser.
       },
       variant: TargetPlatformVariant.all(),
-      skip: kIsWeb,
-    ); // [intended]
+      skip: kIsWeb, // [intended]
+    );
 
     testWidgets(
       'Should have no effect on an empty and focused field',
@@ -12793,8 +12793,8 @@ void main() {
         // On web, these keyboard shortcuts are handled by the browser.
       },
       variant: TargetPlatformVariant.all(),
-      skip: kIsWeb,
-    ); // [intended]
+      skip: kIsWeb, // [intended]
+    );
 
     testWidgets(
       'Can undo/redo a single insertion',
@@ -12836,8 +12836,8 @@ void main() {
         // On web, these keyboard shortcuts are handled by the browser.
       },
       variant: TargetPlatformVariant.all(),
-      skip: kIsWeb,
-    ); // [intended]
+      skip: kIsWeb, // [intended]
+    );
 
     testWidgets(
       'Can undo/redo multiple insertions',
@@ -12880,8 +12880,8 @@ void main() {
         // On web, these keyboard shortcuts are handled by the browser.
       },
       variant: TargetPlatformVariant.all(),
-      skip: kIsWeb,
-    ); // [intended]
+      skip: kIsWeb, // [intended]
+    );
 
     // Regression test for https://github.com/flutter/flutter/issues/120794.
     // This is only reproducible on Android platform because it is the only
@@ -12941,8 +12941,8 @@ void main() {
         // On web, these keyboard shortcuts are handled by the browser.
       },
       variant: TargetPlatformVariant.only(TargetPlatform.android),
-      skip: kIsWeb,
-    ); // [intended]
+      skip: kIsWeb, // [intended]
+    );
 
     // Regression test for https://github.com/flutter/flutter/issues/120194.
     testWidgets(
@@ -12971,8 +12971,8 @@ void main() {
         // On web, these keyboard shortcuts are handled by the browser.
       },
       variant: TargetPlatformVariant.all(),
-      skip: kIsWeb,
-    ); // [intended]
+      skip: kIsWeb, // [intended]
+    );
 
     testWidgets(
       'Initial value is recorded when an undo is received just after getting the focus',
@@ -13001,8 +13001,8 @@ void main() {
         // On web, these keyboard shortcuts are handled by the browser.
       },
       variant: TargetPlatformVariant.all(),
-      skip: kIsWeb,
-    ); // [intended]
+      skip: kIsWeb, // [intended]
+    );
 
     testWidgets(
       'Can make changes in the middle of the history',
@@ -13058,8 +13058,8 @@ void main() {
         // On web, these keyboard shortcuts are handled by the browser.
       },
       variant: TargetPlatformVariant.all(),
-      skip: kIsWeb,
-    ); // [intended]
+      skip: kIsWeb, // [intended]
+    );
 
     testWidgets(
       'inside EditableText, duplicate changes',
@@ -13154,8 +13154,8 @@ void main() {
         // On web, these keyboard shortcuts are handled by the browser.
       },
       variant: TargetPlatformVariant.all(),
-      skip: kIsWeb,
-    ); // [intended]
+      skip: kIsWeb, // [intended]
+    );
 
     testWidgets(
       'inside EditableText, autofocus',
@@ -13214,8 +13214,8 @@ void main() {
         );
       },
       variant: TargetPlatformVariant.all(),
-      skip: kIsWeb,
-    ); // [intended]
+      skip: kIsWeb, // [intended]
+    );
 
     testWidgets(
       'does not save composing changes (except Android)',
@@ -13338,8 +13338,8 @@ void main() {
         // On web, these keyboard shortcuts are handled by the browser.
       },
       variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.android}),
-      skip: kIsWeb,
-    ); // [intended]
+      skip: kIsWeb, // [intended]
+    );
 
     testWidgets(
       'does save composing changes on Android',
@@ -13503,8 +13503,8 @@ void main() {
         // On web, these keyboard shortcuts are handled by the browser.
       },
       variant: TargetPlatformVariant.only(TargetPlatform.android),
-      skip: kIsWeb,
-    ); // [intended]
+      skip: kIsWeb, // [intended]
+    );
 
     testWidgets(
       'saves right up to composing change even when throttled',
@@ -13668,8 +13668,8 @@ void main() {
         // On web, these keyboard shortcuts are handled by the browser.
       },
       variant: TargetPlatformVariant.all(),
-      skip: kIsWeb,
-    ); // [intended]
+      skip: kIsWeb, // [intended]
+    );
   });
 
   testWidgets(
@@ -13808,8 +13808,8 @@ void main() {
         return tester.tap(find.text('Paste'));
       });
     },
-    skip: kIsWeb,
-  ); // [intended]
+    skip: kIsWeb, // [intended]
+  );
 
   // Regression test for https://github.com/flutter/flutter/issues/98322.
   testWidgets('EditableText consumes ActivateIntent and ButtonActivateIntent', (

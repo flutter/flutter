@@ -50,14 +50,14 @@ void main() {
     expect(
       hebrew1,
       const TextRange(start: 0, end: 8),
-      skip: skipExpectsWithKnownBugs,
-    ); // https://github.com/flutter/flutter/issues/87536
+      skip: skipExpectsWithKnownBugs, // https://github.com/flutter/flutter/issues/87536
+    );
     final TextRange english2 = painter.getWordBoundary(const TextPosition(offset: 14));
     expect(
       english2,
       const TextRange(start: 9, end: 19),
-      skip: skipExpectsWithKnownBugs,
-    ); // https://github.com/flutter/flutter/issues/87536
+      skip: skipExpectsWithKnownBugs, // https://github.com/flutter/flutter/issues/87536
+    );
     final TextRange hebrew3 = painter.getWordBoundary(const TextPosition(offset: 24));
     expect(hebrew3, const TextRange(start: 20, end: 28));
 
@@ -202,14 +202,14 @@ void main() {
     expect(
       hebrew1,
       const TextRange(start: 0, end: 8),
-      skip: skipExpectsWithKnownBugs,
-    ); // https://github.com/flutter/flutter/issues/87536
+      skip: skipExpectsWithKnownBugs, // https://github.com/flutter/flutter/issues/87536
+    );
     final TextRange english2 = painter.getWordBoundary(const TextPosition(offset: 14));
     expect(
       english2,
       const TextRange(start: 9, end: 19),
-      skip: skipExpectsWithKnownBugs,
-    ); // https://github.com/flutter/flutter/issues/87536
+      skip: skipExpectsWithKnownBugs, // https://github.com/flutter/flutter/issues/87536
+    );
     final TextRange hebrew3 = painter.getWordBoundary(const TextPosition(offset: 24));
     expect(hebrew3, const TextRange(start: 20, end: 28));
 
@@ -592,16 +592,16 @@ void main() {
       //                 ^
       painter.getPositionForOffset(const Offset(32.0, 5.0)).toString(),
       const TextPosition(offset: 6, affinity: TextAffinity.upstream).toString(),
-      skip:
-          skipExpectsWithKnownBugs, // this is part of https://github.com/flutter/flutter/issues/11375
+      // this is part of https://github.com/flutter/flutter/issues/11375
+      skip: skipExpectsWithKnownBugs,
     );
     expect(
       //  Aaa  Bbb  Ccc  Gimel  Bet  Alef  Ddd  Eee  Fff
       //                                ^
       painter.getPositionForOffset(const Offset(58.0, 5.0)).toString(),
       const TextPosition(offset: 3).toString(),
-      skip:
-          skipExpectsWithKnownBugs, // this is part of https://github.com/flutter/flutter/issues/11375
+      // this is part of https://github.com/flutter/flutter/issues/11375
+      skip: skipExpectsWithKnownBugs,
     );
     expect(
       //  Aaa  Bbb  Ccc  Gimel  Bet  Alef  Ddd  Eee  Fff
@@ -651,16 +651,16 @@ void main() {
       //              ^
       painter.getPositionForOffset(const Offset(32.0, 5.0)).toString(),
       const TextPosition(offset: 3).toString(),
-      skip:
-          skipExpectsWithKnownBugs, // this is part of https://github.com/flutter/flutter/issues/11375
+      // this is part of https://github.com/flutter/flutter/issues/11375
+      skip: skipExpectsWithKnownBugs,
     );
     expect(
       // Vav He Dalet Aaa Bbb Ccc Gimel Bet Alef
       //                        ^
       painter.getPositionForOffset(const Offset(58.0, 5.0)).toString(),
       const TextPosition(offset: 6, affinity: TextAffinity.upstream).toString(),
-      skip:
-          skipExpectsWithKnownBugs, // this is part of https://github.com/flutter/flutter/issues/11375
+      // this is part of https://github.com/flutter/flutter/issues/11375
+      skip: skipExpectsWithKnownBugs,
     );
     expect(
       // Vav He Dalet Aaa Bbb Ccc Gimel Bet Alef

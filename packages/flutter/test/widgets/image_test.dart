@@ -2051,8 +2051,9 @@ void main() {
       await tester.pump();
       await expectLater(find.byKey(key), matchesGoldenFile('image_test.missing.2.png'));
     },
+    // https://github.com/flutter/flutter/issues/74935 (broken assets not being reported on web)
     skip: kIsWeb,
-  ); // https://github.com/flutter/flutter/issues/74935 (broken assets not being reported on web)
+  );
 
   testWidgets('Image.file throws a non-implemented error on web', (WidgetTester tester) async {
     const String expectedError =
