@@ -94,7 +94,7 @@ void main() {
             ],
             exampleDirectory.path,
             <Transition>[
-              Multiple(<Pattern>[
+              Multiple.contains(<Pattern>[
                 'Flutter run key commands.',
               ], handler: (String line) {
                 if (buildMode == 'debug') {
@@ -106,8 +106,8 @@ void main() {
                 }
               }),
               if (buildMode == 'debug') ...<Transition>[
-                Barrier(
-                  'Performing hot reload...'.padRight(progressMessageWidth),
+                Barrier.contains(
+                  'Performing hot reload...',
                   logging: true,
                 ),
                 Multiple(<Pattern>[
@@ -116,15 +116,15 @@ void main() {
                   // Do a hot restart, pushing a new complete dill file.
                   return 'R';
                 }),
-                Barrier('Performing hot restart...'.padRight(progressMessageWidth)),
+                Barrier.contains('Performing hot restart...'),
                 Multiple(<Pattern>[
                   RegExp('Restarted application .*'),
                 ], handler: (String line) {
                   // Do another hot reload, pushing a diff to the second dill file.
                   return 'r';
                 }),
-                Barrier(
-                  'Performing hot reload...'.padRight(progressMessageWidth),
+                Barrier.contains(
+                  'Performing hot reload...',
                   logging: true,
                 ),
                 Multiple(<Pattern>[
@@ -133,7 +133,7 @@ void main() {
                   return 'q';
                 }),
               ],
-              const Barrier('Application finished.'),
+              Barrier.contains('Application finished.'),
             ],
             logging: false,
           );
