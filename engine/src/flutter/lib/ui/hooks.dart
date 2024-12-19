@@ -18,7 +18,8 @@ void _addView(
   double viewInsetRight,
   double viewInsetBottom,
   double viewInsetLeft,
-  double systemGestureInsetTop,
+  double 
+  systemGestureInsetTop,
   double systemGestureInsetRight,
   double systemGestureInsetBottom,
   double systemGestureInsetLeft,
@@ -26,7 +27,8 @@ void _addView(
   List<double> displayFeaturesBounds,
   List<int> displayFeaturesType,
   List<int> displayFeaturesState,
-  int displayId,
+  int 
+  displayId,
 ) {
   final _ViewConfiguration viewConfiguration = _buildViewConfiguration(
     devicePixelRatio,
