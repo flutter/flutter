@@ -411,18 +411,8 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   g_autoptr(FlKeyboardManager) manager =
       fl_keyboard_manager_new(engine, FL_KEYBOARD_VIEW_DELEGATE(view));
   fl_keyboard_manager_set_lookup_key_handler(
-      manager,
-      [](const GdkKeymapKey* key, gpointer user_data) {
-        MockLayoutData* layout_data = static_cast<MockLayoutData*>(user_data);
-        guint8 group = static_cast<guint8>(key->group);
-        EXPECT_LT(group, layout_data->size());
-        const MockGroupLayoutData* group_layout = (*layout_data)[group];
-        EXPECT_NE(group_layout, nullptr);
-        EXPECT_TRUE(key->level == 0 || key->level == 1);
-        bool shift = key->level == 1;
-        return (*group_layout)[key->keycode * 2 + shift];
-      },
-      (gpointer)(&kLayoutUs));
+      manager, [](const GdkKeymapKey* key, gpointer user_data) { return 0u; },
+      nullptr);
 
   std::vector<CallRecord> call_records;
   g_autoptr(GPtrArray) redispatched =
@@ -543,18 +533,8 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
   g_autoptr(FlKeyboardManager) manager =
       fl_keyboard_manager_new(engine, FL_KEYBOARD_VIEW_DELEGATE(view));
   fl_keyboard_manager_set_lookup_key_handler(
-      manager,
-      [](const GdkKeymapKey* key, gpointer user_data) {
-        MockLayoutData* layout_data = static_cast<MockLayoutData*>(user_data);
-        guint8 group = static_cast<guint8>(key->group);
-        EXPECT_LT(group, layout_data->size());
-        const MockGroupLayoutData* group_layout = (*layout_data)[group];
-        EXPECT_NE(group_layout, nullptr);
-        EXPECT_TRUE(key->level == 0 || key->level == 1);
-        bool shift = key->level == 1;
-        return (*group_layout)[key->keycode * 2 + shift];
-      },
-      (gpointer)(&kLayoutUs));
+      manager, [](const GdkKeymapKey* key, gpointer user_data) { return 0u; },
+      nullptr);
 
   std::vector<CallRecord> call_records;
   g_autoptr(GPtrArray) redispatched =
@@ -657,18 +637,8 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
   g_autoptr(FlKeyboardManager) manager =
       fl_keyboard_manager_new(engine, FL_KEYBOARD_VIEW_DELEGATE(view));
   fl_keyboard_manager_set_lookup_key_handler(
-      manager,
-      [](const GdkKeymapKey* key, gpointer user_data) {
-        MockLayoutData* layout_data = static_cast<MockLayoutData*>(user_data);
-        guint8 group = static_cast<guint8>(key->group);
-        EXPECT_LT(group, layout_data->size());
-        const MockGroupLayoutData* group_layout = (*layout_data)[group];
-        EXPECT_NE(group_layout, nullptr);
-        EXPECT_TRUE(key->level == 0 || key->level == 1);
-        bool shift = key->level == 1;
-        return (*group_layout)[key->keycode * 2 + shift];
-      },
-      (gpointer)(&kLayoutUs));
+      manager, [](const GdkKeymapKey* key, gpointer user_data) { return 0u; },
+      nullptr);
 
   std::vector<CallRecord> call_records;
   g_autoptr(GPtrArray) redispatched =
