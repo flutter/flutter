@@ -5,16 +5,22 @@
 
 
 import 'dart:async';
+import 'dart:typed_data';
 
+import 'package:async/async.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
+import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service_io.dart';
 
 import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -28,7 +34,9 @@ import '../project.dart';
 import '../test/test_wrapper.dart';
 
 import '../vmservice.dart';
+import '../web/compile.dart';
 import 'flutter_tester_device.dart';
+import 'flutter_web_goldens.dart';
 import 'font_config_manager.dart';
 import 'integration_test_device.dart';
 import 'test_compiler.dart';
@@ -55,6 +63,10 @@ FlutterPlatform installHook({
   TestWrapper testWrapper = const TestWrapper(),
   required String shellPath,
   required DebuggingOptions debuggingOptions,
+  required BuildInfo buildInfo,
+  required FileSystem fileSystem,
+  required Logger logger,
+  required ProcessManager processManager,
   TestWatcher? watcher,
   bool enableVmService = false,
   bool machine = false,
@@ -71,7 +83,6 @@ FlutterPlatform installHook({
   String? integrationTestUserIdentifier,
   TestTimeRecorder? testTimeRecorder,
   TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-  BuildInfo? buildInfo,
 }) {
   assert(enableVmService || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
 
@@ -103,6 +114,9 @@ FlutterPlatform installHook({
     testTimeRecorder: testTimeRecorder,
     nativeAssetsBuilder: nativeAssetsBuilder,
     buildInfo: buildInfo,
+    fileSystem: fileSystem,
+    logger: logger,
+    processManager: processManager,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -293,6 +307,10 @@ class FlutterPlatform extends PlatformPlugin {
   FlutterPlatform({
     required this.shellPath,
     required this.debuggingOptions,
+    required this.buildInfo,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required ProcessManager processManager,
     this.watcher,
     this.enableVmService,
     this.machine,
@@ -308,9 +326,19 @@ class FlutterPlatform extends PlatformPlugin {
     this.integrationTestUserIdentifier,
     this.testTimeRecorder,
     this.nativeAssetsBuilder,
-    this.buildInfo,
     this.shutdownHooks,
-  });
+  }) {
+    _testGoldenComparator = TestGoldenComparator(
+      shellPath,
+      () => TestCompiler(buildInfo, flutterProject, testTimeRecorder: testTimeRecorder),
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      // FIXME: Remove this being required.
+      webRenderer: WebRendererMode.defaultForWasm,
+    );
+
+  }
 
   final String shellPath;
   final DebuggingOptions debuggingOptions;
@@ -327,7 +355,7 @@ class FlutterPlatform extends PlatformPlugin {
   final String? icudtlPath;
   final TestTimeRecorder? testTimeRecorder;
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
-  final BuildInfo? buildInfo;
+  final BuildInfo buildInfo;
   final ShutdownHooks? shutdownHooks;
 
   /// The device to run the test on for Integration Tests.
@@ -336,10 +364,12 @@ class FlutterPlatform extends PlatformPlugin {
   /// Tester; otherwise it will run as a Integration Test on this device.
   final Device? integrationTestDevice;
   bool get _isIntegrationTest => integrationTestDevice != null;
+  late TestGoldenComparator _testGoldenComparator;
 
   final String? integrationTestUserIdentifier;
 
   final FontConfigManager _fontConfigManager = FontConfigManager();
+  final AsyncMemoizer<void> _closeMemo = AsyncMemoizer<void>();
 
   /// The test compiler produces dill files for each test main.
   ///
@@ -466,13 +496,57 @@ class FlutterPlatform extends PlatformPlugin {
     );
   }
 
-  void _handleStartedDevice(Uri? uri, int testCount) {
+  void _handleStartedDevice(Uri? uri, int testCount, String testPath, {required Logger logger}) {
     if (uri != null) {
       globals.printTrace('test $testCount: VM Service uri is available at $uri');
+      _listenToVmServiceForGoldens(uri, testPath, logger: logger);
     } else {
       globals.printTrace('test $testCount: VM Service uri is not available');
     }
     watcher?.handleStartedDevice(uri);
+  }
+
+  Future<void> _listenToVmServiceForGoldens(Uri vmServiceUri, String testPath, {required Logger logger}) async {
+    final Uri goldensBaseUri = Uri.parse(testPath);
+    final FlutterVmService vmService = await connectToVmService(vmServiceUri, logger: logger);
+    final IsolateRef testAppIsolate = await vmService.findExtensionIsolate('ext.integration_test.VmServiceProxyGoldenFileComparator');
+    await vmService.service.streamListen('integration_test.VmServiceProxyGoldenFileComparator');
+    vmService.service.onEvent('integration_test.VmServiceProxyGoldenFileComparator').listen((Event e) async {
+      switch (e.extensionKind) {
+        case 'compare':
+        case 'update':
+          final Map<String, Object?>? data = e.extensionData?.data;
+          if (data == null) {
+            throw StateError('Expected VM service data, but got null.');
+          }
+          final int id = data['id']! as int;
+          final Uri relativePath = Uri.parse(data['path']! as String);
+          final Uint8List bytes = base64.decode(data['bytes']! as String);
+          final bool update = e.extensionKind == 'update';
+
+          final String? error = await _testGoldenComparator.compareGoldens(
+            goldensBaseUri,
+            bytes,
+            relativePath,
+            update,
+          );
+          await vmService.callMethodWrapper(
+            'ext.integration_test.VmServiceProxyGoldenFileComparator',
+            isolateId: testAppIsolate.id,
+            args: <String, Object?>{
+              'id': id,
+              if (error == null)
+                'result': true
+              else if (error == 'does not match')
+                'result': false
+              else
+                'error': error,
+            },
+          );
+        default:
+          throw StateError('Unknown command: "${e.extensionKind}".');
+      }
+    });
   }
 
   Future<_AsyncError?> _startTest(
@@ -600,7 +674,7 @@ class FlutterPlatform extends PlatformPlugin {
               // This future may depend on [_handleStartedDevice] having been called
               remoteChannelCompleter.future,
               testDevice.vmServiceUri.then<void>((Uri? processVmServiceUri) {
-                _handleStartedDevice(processVmServiceUri, ourTestCount);
+                _handleStartedDevice(processVmServiceUri, ourTestCount, testPath, logger: globals.logger);
               }),
             ],
             // If [remoteChannelCompleter.future] errors, we may never get the
@@ -694,8 +768,7 @@ class FlutterPlatform extends PlatformPlugin {
     return generateTestBootstrap(
       testUrl: testUrl,
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl), globals.logger),
-      // This MUST be a file URI.
-      packageConfigUri: buildInfo != null ? globals.fs.path.toUri(buildInfo!.packageConfigPath) : null,
+      packageConfigUri: globals.fs.path.toUri(buildInfo.packageConfigPath),
       host: host!,
       updateGoldens: updateGoldens!,
       flutterTestDep: packageConfig['flutter_test'] != null,
@@ -705,13 +778,11 @@ class FlutterPlatform extends PlatformPlugin {
   }
 
   @override
-  Future<dynamic> close() async {
-    if (compiler != null) {
-      await compiler!.dispose();
-      compiler = null;
-    }
+  Future<void> close() => _closeMemo.runOnce(() async {
+    await compiler?.dispose();
+    await _testGoldenComparator.close();
     await _fontConfigManager.dispose();
-  }
+  });
 }
 
 // The [_shellProcessClosed] future can't have errors thrown on it because it

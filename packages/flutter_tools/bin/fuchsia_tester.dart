@@ -137,6 +137,16 @@ Future<void> run(List<String> args) async {
     }
 
     // TODO(dnfield): This should be injected.
+    final BuildInfo buildInfo = BuildInfo(
+      BuildMode.debug,
+      '',
+      treeShakeIcons: false,
+      packageConfigPath: globals.fs.path.normalize(
+        globals.fs.path.absolute(
+          argResults[_kOptionPackages] as String,
+        ),
+      ),
+    );
     exitCode = await const FlutterTestRunner().runTests(
       const TestWrapper(),
       tests.keys.map(Uri.file).toList(),
@@ -159,6 +169,7 @@ Future<void> run(List<String> args) async {
       icudtlPath: globals.fs.path.absolute(argResults[_kOptionIcudtl] as String),
       coverageDirectory: coverageDirectory,
       nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
+      buildInfo: buildInfo,
     );
 
     if (collector != null) {
