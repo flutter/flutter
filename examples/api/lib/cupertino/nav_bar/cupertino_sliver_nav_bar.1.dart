@@ -4,7 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 
-/// Flutter code sample for [CupertinoSliverNavigationBar].
+/// Flutter code sample for [CupertinoSliverNavigationBar.search].
 
 void main() => runApp(const SliverNavBarApp());
 
@@ -78,10 +78,17 @@ class SliverNavBarExample extends StatelessWidget {
   }
 }
 
-class NextPage extends StatelessWidget {
+class NextPage extends StatefulWidget {
   const NextPage({super.key, this.bottomMode = NavigationBarBottomMode.automatic});
 
   final NavigationBarBottomMode bottomMode;
+
+  @override
+  State<NextPage> createState() => _NextPageState();
+}
+
+class _NextPageState extends State<NextPage> {
+  bool isFocused = false;
 
   @override
   Widget build(BuildContext context) {
@@ -100,17 +107,37 @@ class NextPage extends StatelessWidget {
             ),
             middle: const Text('Contacts Group'),
             largeTitle: const Text('Family'),
-            bottomMode: bottomMode,
-          ),
-          const SliverFillRemaining(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Text('Drag me up', textAlign: TextAlign.center),
-                Text('Tap on the leading button to navigate back',
-                    textAlign: TextAlign.center),
-              ],
+            bottomMode: widget.bottomMode,
+            searchField: CupertinoSearchTextField(
+              placeholder: isFocused ? 'Enter search text' : 'Search',
             ),
+            onSearchActiveChanged: (bool value) {
+              setState(() {
+                isFocused = value;
+              });
+            },
+          ),
+          SliverFillRemaining(
+            child: isFocused
+              ? const ColoredBox(
+                  color: CupertinoColors.extraLightBackgroundGray,
+                  child: Center(
+                    child: Text(
+                      'This is a search view',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                )
+              : const Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Text('Drag me up', textAlign: TextAlign.center),
+                    Text('Tap on the search field to open the search view',
+                        textAlign: TextAlign.center),
+                    Text('Tap on the leading button to navigate back',
+                        textAlign: TextAlign.center),
+                  ],
+                ),
           ),
         ],
       ),
