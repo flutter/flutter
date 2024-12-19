@@ -171,6 +171,8 @@ void main() {
           'VERBOSE_SCRIPT_LOGGING=YES'
         else
           '-quiet',
+        '-allowProvisioningUpdates',
+        '-allowProvisioningDeviceRegistration',
         '-workspace',
         if (customNaming)
           'RenamedWorkspace.xcworkspace'
