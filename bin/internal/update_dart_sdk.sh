@@ -29,7 +29,7 @@ if [ -f "$FLUTTER_ROOT/DEPS" ] && [ -f "$FLUTTER_ROOT/engine/src/.gn" ]; then
   if [ -z "${LUCI_CONTEXT}" ]; then
     set +e
     # Run the git command and capture the exit code
-    git -C "$flutterRoot" remote get-url upstream > /dev/null 2>&1
+    git -C "$FLUTTER_ROOT" remote get-url upstream > /dev/null 2>&1
     exit_code=$?
     set -e
 
