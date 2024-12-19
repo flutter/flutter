@@ -108,3 +108,17 @@ void test18() { }
 )
 void test19() { }
 // dart format on
+
+// flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/000000
+@Deprecated(
+  'Missing the version line. '
+)
+void test20() { }
+
+class TestClass1 {
+  // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/000000
+  @Deprecated(
+    'Missing the version line. '
+  )
+  void test() { }
+}

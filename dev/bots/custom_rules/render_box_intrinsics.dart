@@ -12,8 +12,8 @@ import '../utils.dart';
 import 'analyze.dart';
 
 /// Verify that no RenderBox subclasses call compute* instead of get* for
-/// computing the intrinsic dimensions. The full list of RenderBox intrinsic
-/// methods checked by this rule is listed in [candidates].
+/// computing the intrinsic dimensions. The [candidates] variable contains the
+/// full list of RenderBox intrinsic method invocations checked by this rule.
 final AnalyzeRule renderBoxIntrinsicCalculation = _RenderBoxIntrinsicCalculationRule();
 
 const Map<String, String> candidates = <String, String> {
