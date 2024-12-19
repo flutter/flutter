@@ -4497,7 +4497,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _schedulePeriodicPostFrameCallbacks([Duration? duration]) {
-    if (!_hasInputConnection) {
+    if (!_hasInputConnection || !mounted) {
       return;
     }
     _updateSelectionRects();
