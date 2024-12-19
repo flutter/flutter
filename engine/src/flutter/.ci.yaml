@@ -396,14 +396,6 @@ targets:
       # For more details see the issue
       # at https://github.com/flutter/flutter/issues/152186.
       cores: "8"
-    runIf:
-      - DEPS
-      - engine/src/flutter/.ci.yaml
-      - engine/src/flutter/lib/web_ui/**
-      - engine/src/flutter/web_sdk/**
-      - engine/src/flutter/tools/**
-      - engine/src/flutter/ci/**
-      - engine/src/flutter/flutter_frontend_server/**
 
   - name: Linux clangd
     recipe: engine_v2/builder

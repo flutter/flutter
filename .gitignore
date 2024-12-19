@@ -3,7 +3,6 @@
 
 # This is dynamic in a monorepo
 bin/internal/engine.version
-bin/internal/engine.realm
 
 # Miscellaneous
 *.class
