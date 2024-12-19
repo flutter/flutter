@@ -846,11 +846,16 @@ TEST(FlKeyboardManagerTest, TextInputHandlerReturnsTrue) {
 
 TEST(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
   ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
-  KeyboardTester tester;
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  g_autoptr(FlMockViewDelegate) view = fl_mock_view_delegate_new();
+  g_autoptr(FlKeyboardManager) manager =
+      fl_keyboard_manager_new(engine, FL_KEYBOARD_VIEW_DELEGATE(view));
 
   std::vector<CallRecord> call_records;
   fl_keyboard_manager_set_send_key_event_handler(
-      tester.manager(),
+      manager,
       [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
          void* callback_user_data, gpointer user_data) {
         std::vector<CallRecord>* call_records =
@@ -867,14 +872,27 @@ TEST(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
         });
       },
       &call_records);
+  fl_keyboard_manager_set_lookup_key_handler(
+      manager,
+      [](const GdkKeymapKey* key, gpointer user_data) {
+        MockLayoutData* layout_data = static_cast<MockLayoutData*>(user_data);
+        guint8 group = static_cast<guint8>(key->group);
+        EXPECT_LT(group, layout_data->size());
+        const MockGroupLayoutData* group_layout = (*layout_data)[group];
+        EXPECT_NE(group_layout, nullptr);
+        EXPECT_TRUE(key->level == 0 || key->level == 1);
+        bool shift = key->level == 1;
+        return (*group_layout)[key->keycode * 2 + shift];
+      },
+      (gpointer)(&kLayoutUs));
 
   auto sendTap = [&](guint8 keycode, guint keyval, guint8 group) {
     g_autoptr(FlKeyEvent) event1 = fl_key_event_new(
         0, TRUE, keycode, keyval, static_cast<GdkModifierType>(0), group);
-    fl_keyboard_manager_handle_event(tester.manager(), event1);
+    fl_keyboard_manager_handle_event(manager, event1);
     g_autoptr(FlKeyEvent) event2 = fl_key_event_new(
         0, FALSE, keycode, keyval, static_cast<GdkModifierType>(0), group);
-    fl_keyboard_manager_handle_event(tester.manager(), event2);
+    fl_keyboard_manager_handle_event(manager, event2);
   };
 
   /* US keyboard layout */
@@ -900,7 +918,19 @@ TEST(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
   /* French keyboard layout, group 3, which is when the input method is showing
    * "Fr" */
 
-  tester.setLayout(kLayoutFrench);
+  fl_keyboard_manager_set_lookup_key_handler(
+      manager,
+      [](const GdkKeymapKey* key, gpointer user_data) {
+        MockLayoutData* layout_data = static_cast<MockLayoutData*>(user_data);
+        guint8 group = static_cast<guint8>(key->group);
+        EXPECT_LT(group, layout_data->size());
+        const MockGroupLayoutData* group_layout = (*layout_data)[group];
+        EXPECT_NE(group_layout, nullptr);
+        EXPECT_TRUE(key->level == 0 || key->level == 1);
+        bool shift = key->level == 1;
+        return (*group_layout)[key->keycode * 2 + shift];
+      },
+      (gpointer)(&kLayoutFrench));
 
   sendTap(kKeyCodeKeyA, GDK_KEY_q, 3);  // KeyA
   VERIFY_DOWN(kLogicalKeyQ, "q");
@@ -936,7 +966,19 @@ TEST(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
   VERIFY_DOWN(kLogicalDigit1, "1");
 
   /* Russian keyboard layout, group 2 */
-  tester.setLayout(kLayoutRussian);
+  fl_keyboard_manager_set_lookup_key_handler(
+      manager,
+      [](const GdkKeymapKey* key, gpointer user_data) {
+        MockLayoutData* layout_data = static_cast<MockLayoutData*>(user_data);
+        guint8 group = static_cast<guint8>(key->group);
+        EXPECT_LT(group, layout_data->size());
+        const MockGroupLayoutData* group_layout = (*layout_data)[group];
+        EXPECT_NE(group_layout, nullptr);
+        EXPECT_TRUE(key->level == 0 || key->level == 1);
+        bool shift = key->level == 1;
+        return (*group_layout)[key->keycode * 2 + shift];
+      },
+      (gpointer)(&kLayoutRussian));
 
   sendTap(kKeyCodeKeyA, GDK_KEY_Cyrillic_ef, 2);  // KeyA
   VERIFY_DOWN(kLogicalKeyA, "ф");
