@@ -47,6 +47,7 @@ interface class SkiaGoldClient {
   /// spammy for regular use.
   factory SkiaGoldClient(
     io.Directory workDirectory, {
+    String prefix = 'engine.',
     Map<String, String>? dimensions,
     bool verbose = false,
   }) {
@@ -77,6 +78,7 @@ interface class SkiaGoldClient {
     this.workDirectory, {
     this.dimensions,
     this.verbose = false,
+    String? prefix,
     io.HttpClient? httpClient,
     ProcessManager? processManager,
     StringSink? stderr,
@@ -84,6 +86,7 @@ interface class SkiaGoldClient {
     Engine? engineRoot,
   }) : httpClient = httpClient ?? io.HttpClient(),
        process = processManager ?? const LocalProcessManager(),
+       _prefix = prefix,
        _stderr = stderr ?? io.stderr,
        _environment = environment ?? io.Platform.environment,
        _engineRoot = engineRoot ?? Engine.findWithin() {
@@ -162,6 +165,9 @@ interface class SkiaGoldClient {
   /// The local [Directory] for the current test context. In this directory, the
   /// client will create image and JSON files for the `goldctl` tool to use.
   final io.Directory workDirectory;
+
+  /// Prefix to add to all test names, if any.
+  final String? _prefix;
 
   String get _tempPath => path.join(workDirectory.path, 'temp');
   String get _keysPath => path.join(workDirectory.path, 'keys.json');
@@ -324,6 +330,11 @@ interface class SkiaGoldClient {
 
     // Clean the test name to remove the file extension.
     testName = path.basenameWithoutExtension(testName);
+
+    // Add a prefix to avoid repo-wide conflicts.
+    if (_prefix != null) {
+      testName = '$_prefix$testName';
+    }
 
     // In release branches, we add a unique test suffix to the test name.
     // For example "testName" -> "testName_Release_3_21".

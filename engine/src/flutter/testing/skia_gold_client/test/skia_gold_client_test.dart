@@ -48,6 +48,7 @@ void main() {
     required Map<String, String> environment,
     ReleaseVersion? engineVersion,
     Map<String, String>? dimensions,
+    String? prefix,
     bool verbose = false,
     io.ProcessResult Function(List<String> command) onRun = _runUnhandled,
   }) {
@@ -62,6 +63,7 @@ void main() {
       verbose: verbose,
       stderr: fixture.outputSink,
       environment: environment,
+      prefix: prefix,
     );
   }
 
@@ -218,6 +220,51 @@ void main() {
             p.join(fixture.workDirectory.path, 'temp'),
             '--test-name',
             'test-name',
+            '--png-file',
+            p.join(fixture.workDirectory.path, 'temp', 'golden.png'),
+            '--add-test-optional-key',
+            'image_matching_algorithm:fuzzy',
+            '--add-test-optional-key',
+            'fuzzy_max_different_pixels:10',
+            '--add-test-optional-key',
+            'fuzzy_pixel_delta_threshold:0',
+          ]);
+          return io.ProcessResult(0, 0, '', '');
+        },
+      );
+
+      await client.addImg(
+        'test-name.foo',
+        io.File(p.join(fixture.workDirectory.path, 'temp', 'golden.png')),
+        screenshotSize: 1000,
+      );
+    } finally {
+      fixture.dispose();
+    }
+  });
+
+  test('addImg uses prefix, if specified', () async {
+    final _TestFixture fixture = _TestFixture();
+    try {
+      final SkiaGoldClient client = createClient(
+        fixture,
+        environment: presubmitEnv,
+        prefix: 'engine.',
+        onRun: (List<String> command) {
+          if (command case ['git', ...]) {
+            return io.ProcessResult(0, 0, mockCommitHash, '');
+          }
+          if (command case ['python tools/goldctl.py', 'imgtest', 'init', ...]) {
+            return io.ProcessResult(0, 0, '', '');
+          }
+          expect(command, <String>[
+            'python tools/goldctl.py',
+            'imgtest',
+            'add',
+            '--work-dir',
+            p.join(fixture.workDirectory.path, 'temp'),
+            '--test-name',
+            'engine.test-name',
             '--png-file',
             p.join(fixture.workDirectory.path, 'temp', 'golden.png'),
             '--add-test-optional-key',
