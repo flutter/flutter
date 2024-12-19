@@ -61,13 +61,11 @@ static CallRecord* call_record_new(const FlutterKeyEvent* event,
                                    FlutterKeyEventCallback callback,
                                    void* callback_user_data) {
   CallRecord* record = g_new0(CallRecord, 1);
-  record->event_type =
-      event != nullptr ? event->type : static_cast<FlutterKeyEventType>(0);
-  record->event_physical = event != nullptr ? event->physical : 0;
-  record->event_logical = event != nullptr ? event->logical : 0;
-  record->event_character =
-      event != nullptr ? g_strdup(event->character) : nullptr;
-  record->event_synthesized = event != nullptr ? event->synthesized : false;
+  record->event_type = event->type;
+  record->event_physical = event->physical;
+  record->event_logical = event->logical;
+  record->event_character = g_strdup(event->character);
+  record->event_synthesized = event->synthesized;
   record->callback = callback;
   record->callback_user_data = callback_user_data;
   return record;
@@ -116,8 +114,6 @@ constexpr guint16 kKeyCodeMinus = 0x14u;
 constexpr guint16 kKeyCodeSemicolon = 0x2fu;
 constexpr guint16 kKeyCodeKeyLeftBracket = 0x22u;
 
-static constexpr char kKeyEventChannelName[] = "flutter/keyevent";
-
 // All key clues for a keyboard layout.
 //
 // The index is (keyCode * 2 + hasShift), where each value is the character for
@@ -137,150 +133,7 @@ G_DECLARE_FINAL_TYPE(FlMockViewDelegate,
                      MOCK_VIEW_DELEGATE,
                      GObject);
 
-G_DECLARE_FINAL_TYPE(FlMockKeyBinaryMessenger,
-                     fl_mock_key_binary_messenger,
-                     FL,
-                     MOCK_KEY_BINARY_MESSENGER,
-                     GObject)
-
 G_END_DECLS
-
-/* Mock a binary messenger that only processes messages from the embedding on
- * the key event channel, and does so according to the callback set by
- * fl_mock_key_binary_messenger_set_callback_handler */
-
-struct _FlMockKeyBinaryMessenger {
-  GObject parent_instance;
-
-  void (*callback)(FlutterKeyEventCallback callback,
-                   gpointer callback_user_data,
-                   gpointer user_data);
-  gpointer callback_user_data;
-};
-
-static void fl_mock_key_binary_messenger_iface_init(
-    FlBinaryMessengerInterface* iface);
-
-G_DEFINE_TYPE_WITH_CODE(
-    FlMockKeyBinaryMessenger,
-    fl_mock_key_binary_messenger,
-    G_TYPE_OBJECT,
-    G_IMPLEMENT_INTERFACE(fl_binary_messenger_get_type(),
-                          fl_mock_key_binary_messenger_iface_init))
-
-static void fl_mock_key_binary_messenger_init(FlMockKeyBinaryMessenger* self) {}
-
-static void fl_mock_key_binary_messenger_dispose(GObject* object) {
-  G_OBJECT_CLASS(fl_mock_key_binary_messenger_parent_class)->dispose(object);
-}
-
-static void fl_mock_key_binary_messenger_class_init(
-    FlMockKeyBinaryMessengerClass* klass) {
-  G_OBJECT_CLASS(klass)->dispose = fl_mock_key_binary_messenger_dispose;
-}
-
-static void fl_mock_key_binary_messenger_send_on_channel(
-    FlBinaryMessenger* messenger,
-    const gchar* channel,
-    GBytes* message,
-    GCancellable* cancellable,
-    GAsyncReadyCallback callback,
-    gpointer user_data) {
-  FlMockKeyBinaryMessenger* self = FL_MOCK_KEY_BINARY_MESSENGER(messenger);
-
-  if (callback != nullptr) {
-    EXPECT_STREQ(channel, kKeyEventChannelName);
-    self->callback(
-        [](bool handled, gpointer user_data) {
-          g_autoptr(GTask) task = static_cast<GTask*>(user_data);
-          g_autoptr(FlValue) result = fl_value_new_map();
-          fl_value_set_string_take(result, "handled",
-                                   fl_value_new_bool(handled));
-          g_autoptr(FlJsonMessageCodec) codec = fl_json_message_codec_new();
-          g_autoptr(GError) error = nullptr;
-          GBytes* message_data = fl_message_codec_encode_message(
-              FL_MESSAGE_CODEC(codec), result, &error);
-
-          g_task_return_pointer(
-              task, message_data,
-              reinterpret_cast<GDestroyNotify>(g_bytes_unref));
-        },
-        g_task_new(self, cancellable, callback, user_data),
-        self->callback_user_data);
-  }
-}
-
-static GBytes* fl_mock_key_binary_messenger_send_on_channel_finish(
-    FlBinaryMessenger* messenger,
-    GAsyncResult* result,
-    GError** error) {
-  return static_cast<GBytes*>(g_task_propagate_pointer(G_TASK(result), error));
-}
-
-static void fl_mock_binary_messenger_resize_channel(
-    FlBinaryMessenger* messenger,
-    const gchar* channel,
-    int64_t new_size) {
-  // Mock implementation. Do nothing.
-}
-
-static void fl_mock_binary_messenger_set_warns_on_channel_overflow(
-    FlBinaryMessenger* messenger,
-    const gchar* channel,
-    bool warns) {
-  // Mock implementation. Do nothing.
-}
-
-static void fl_mock_binary_messenger_shutdown(FlBinaryMessenger* messenger) {
-  // Mock implementation. Do nothing.
-}
-
-static void fl_mock_key_binary_messenger_iface_init(
-    FlBinaryMessengerInterface* iface) {
-  iface->set_message_handler_on_channel =
-      [](FlBinaryMessenger* messenger, const gchar* channel,
-         FlBinaryMessengerMessageHandler handler, gpointer user_data,
-         GDestroyNotify destroy_notify) {
-        EXPECT_STREQ(channel, kKeyEventChannelName);
-        // No need to mock. The key event channel expects no incoming messages
-        // from the framework.
-      };
-  iface->send_response = [](FlBinaryMessenger* messenger,
-                            FlBinaryMessengerResponseHandle* response_handle,
-                            GBytes* response, GError** error) -> gboolean {
-    // The key event channel expects no incoming messages from the framework,
-    // hence no responses either.
-    g_return_val_if_reached(TRUE);
-    return TRUE;
-  };
-  iface->send_on_channel = fl_mock_key_binary_messenger_send_on_channel;
-  iface->send_on_channel_finish =
-      fl_mock_key_binary_messenger_send_on_channel_finish;
-  iface->resize_channel = fl_mock_binary_messenger_resize_channel;
-  iface->set_warns_on_channel_overflow =
-      fl_mock_binary_messenger_set_warns_on_channel_overflow;
-  iface->shutdown = fl_mock_binary_messenger_shutdown;
-}
-
-static FlMockKeyBinaryMessenger* fl_mock_key_binary_messenger_new() {
-  FlMockKeyBinaryMessenger* self = FL_MOCK_KEY_BINARY_MESSENGER(
-      g_object_new(fl_mock_key_binary_messenger_get_type(), NULL));
-
-  // Added to stop compiler complaining about an unused function.
-  FL_IS_MOCK_KEY_BINARY_MESSENGER(self);
-
-  return self;
-}
-
-static void fl_mock_key_binary_messenger_set_callback_handler(
-    FlMockKeyBinaryMessenger* self,
-    void (*callback)(FlutterKeyEventCallback callback,
-                     gpointer callback_user_data,
-                     gpointer user_data),
-    gpointer user_data) {
-  self->callback = callback;
-  self->callback_user_data = user_data;
-}
 
 struct _FlMockViewDelegate {
   GObject parent_instance;
@@ -404,8 +257,19 @@ TEST(FlKeyboardManagerTest, DisposeWithUnresolvedPends) {
 
 TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
-  g_autoptr(FlMockKeyBinaryMessenger) messenger =
-      fl_mock_key_binary_messenger_new();
+
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  fl_mock_binary_messenger_set_json_message_channel(
+      messenger, "flutter/keyevent",
+      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
+         gpointer user_data) {
+        g_autoptr(FlValue) return_value = fl_value_new_map();
+        fl_value_set_string_take(return_value, "handled",
+                                 fl_value_new_bool(FALSE));
+        return fl_value_ref(return_value);
+      },
+      nullptr);
+
   g_autoptr(FlMockViewDelegate) view = fl_mock_view_delegate_new();
   g_autoptr(FlEngine) engine =
       FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
@@ -416,18 +280,9 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
       manager, [](const GdkKeymapKey* key, gpointer user_data) { return 0u; },
       nullptr);
 
+  /// Test 1: One event that is handled by the framework
   g_autoptr(GPtrArray) call_records = g_ptr_array_new_with_free_func(
       reinterpret_cast<GDestroyNotify>(call_record_free));
-  g_autoptr(GPtrArray) redispatched =
-      g_ptr_array_new_with_free_func(g_object_unref);
-
-  fl_mock_key_binary_messenger_set_callback_handler(
-      messenger,
-      [](FlutterKeyEventCallback callback, gpointer callback_user_data,
-         gpointer user_data) { callback(false, callback_user_data); },
-      nullptr);
-
-  /// Test 1: One event that is handled by the framework
   fl_keyboard_manager_set_send_key_event_handler(
       manager,
       [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
@@ -437,6 +292,8 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
                         call_record_new(event, callback, callback_user_data));
       },
       call_records);
+  g_autoptr(GPtrArray) redispatched =
+      g_ptr_array_new_with_free_func(g_object_unref);
   fl_keyboard_manager_set_redispatch_handler(
       manager,
       [](FlKeyEvent* event, gpointer user_data) {
@@ -525,8 +382,19 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
 
 TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
   ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
-  g_autoptr(FlMockKeyBinaryMessenger) messenger =
-      fl_mock_key_binary_messenger_new();
+
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  fl_mock_binary_messenger_set_json_message_channel(
+      messenger, "flutter/keyevent",
+      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
+         gpointer user_data) {
+        g_autoptr(FlValue) return_value = fl_value_new_map();
+        fl_value_set_string_take(return_value, "handled",
+                                 fl_value_new_bool(FALSE));
+        return fl_value_ref(return_value);
+      },
+      nullptr);
+
   g_autoptr(FlMockViewDelegate) view = fl_mock_view_delegate_new();
   g_autoptr(FlEngine) engine =
       FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
@@ -537,18 +405,9 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
       manager, [](const GdkKeymapKey* key, gpointer user_data) { return 0u; },
       nullptr);
 
+  /// Test 1: One event that is handled by the framework
   g_autoptr(GPtrArray) call_records = g_ptr_array_new_with_free_func(
       reinterpret_cast<GDestroyNotify>(call_record_free));
-  g_autoptr(GPtrArray) redispatched =
-      g_ptr_array_new_with_free_func(g_object_unref);
-
-  fl_mock_key_binary_messenger_set_callback_handler(
-      messenger,
-      [](FlutterKeyEventCallback callback, gpointer callback_user_data,
-         gpointer user_data) { callback(false, callback_user_data); },
-      nullptr);
-
-  /// Test 1: One event that is handled by the framework
   fl_keyboard_manager_set_send_key_event_handler(
       manager,
       [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
@@ -559,6 +418,8 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
         callback(true, callback_user_data);
       },
       call_records);
+  g_autoptr(GPtrArray) redispatched =
+      g_ptr_array_new_with_free_func(g_object_unref);
   fl_keyboard_manager_set_redispatch_handler(
       manager,
       [](FlKeyEvent* event, gpointer user_data) {
@@ -612,10 +473,31 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(manager));
 }
 
+static void channel_respond(FlMockBinaryMessenger* messenger,
+                            GTask* task,
+                            gboolean handled) {
+  g_autoptr(FlValue) value = fl_value_new_map();
+  fl_value_set_string_take(value, "handled", fl_value_new_bool(handled));
+  fl_mock_binary_messenger_json_message_channel_respond(messenger, task, value);
+}
+
 TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
   ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
-  g_autoptr(FlMockKeyBinaryMessenger) messenger =
-      fl_mock_key_binary_messenger_new();
+
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  g_autoptr(GPtrArray) channel_calls =
+      g_ptr_array_new_with_free_func(g_object_unref);
+  fl_mock_binary_messenger_set_json_message_channel(
+      messenger, "flutter/keyevent",
+      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
+         gpointer user_data) {
+        GPtrArray* call_records = static_cast<GPtrArray*>(user_data);
+        g_ptr_array_add(call_records, g_object_ref(task));
+        // Will respond async
+        return static_cast<FlValue*>(nullptr);
+      },
+      channel_calls);
+
   g_autoptr(FlMockViewDelegate) view = fl_mock_view_delegate_new();
   g_autoptr(FlEngine) engine =
       FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
@@ -637,17 +519,6 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
                         call_record_new(event, callback, callback_user_data));
       },
       embedder_call_records);
-  g_autoptr(GPtrArray) channel_call_records = g_ptr_array_new_with_free_func(
-      reinterpret_cast<GDestroyNotify>(call_record_free));
-  fl_mock_key_binary_messenger_set_callback_handler(
-      messenger,
-      [](FlutterKeyEventCallback callback, gpointer callback_user_data,
-         gpointer user_data) {
-        GPtrArray* call_records = static_cast<GPtrArray*>(user_data);
-        g_ptr_array_add(call_records,
-                        call_record_new(nullptr, callback, callback_user_data));
-      },
-      channel_call_records);
   g_autoptr(GPtrArray) redispatched =
       g_ptr_array_new_with_free_func(g_object_unref);
   fl_keyboard_manager_set_redispatch_handler(
@@ -666,20 +537,20 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
 
   EXPECT_EQ(redispatched->len, 0u);
   EXPECT_EQ(embedder_call_records->len, 1u);
-  EXPECT_EQ(channel_call_records->len, 1u);
+  EXPECT_EQ(channel_calls->len, 1u);
 
   call_record_respond(
       static_cast<CallRecord*>(g_ptr_array_index(embedder_call_records, 0)),
       true);
-  call_record_respond(
-      static_cast<CallRecord*>(g_ptr_array_index(channel_call_records, 0)),
-      false);
+  channel_respond(messenger,
+                  static_cast<GTask*>(g_ptr_array_index(channel_calls, 0)),
+                  FALSE);
   flush_channel_messages();
   EXPECT_EQ(redispatched->len, 0u);
 
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(manager));
   g_ptr_array_set_size(embedder_call_records, 0);
-  g_ptr_array_set_size(channel_call_records, 0);
+  g_ptr_array_set_size(channel_calls, 0);
 
   /// Test 2: All delegates respond false
   g_autoptr(FlKeyEvent) event2 = fl_key_event_new(
@@ -688,24 +559,24 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
 
   EXPECT_EQ(redispatched->len, 0u);
   EXPECT_EQ(embedder_call_records->len, 1u);
-  EXPECT_EQ(channel_call_records->len, 1u);
+  EXPECT_EQ(channel_calls->len, 1u);
 
   call_record_respond(
       static_cast<CallRecord*>(g_ptr_array_index(embedder_call_records, 0)),
       false);
-  call_record_respond(
-      static_cast<CallRecord*>(g_ptr_array_index(channel_call_records, 0)),
-      false);
+  channel_respond(messenger,
+                  static_cast<GTask*>(g_ptr_array_index(channel_calls, 0)),
+                  FALSE);
 
   g_ptr_array_set_size(embedder_call_records, 0);
-  g_ptr_array_set_size(channel_call_records, 0);
+  g_ptr_array_set_size(channel_calls, 0);
 
   // Resolve redispatch
   flush_channel_messages();
   EXPECT_EQ(redispatched->len, 1u);
   EXPECT_EQ(redispatch_events_and_clear(manager, redispatched), 1);
   EXPECT_EQ(embedder_call_records->len, 0u);
-  EXPECT_EQ(channel_call_records->len, 0u);
+  EXPECT_EQ(channel_calls->len, 0u);
 
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(manager));
 }
