@@ -182,6 +182,9 @@ class _ScreenshotDevice extends Fake implements Device {
   final String name;
 
   @override
+  String get displayName => name;
+
+  @override
   final String id;
 
   final bool _isSupportedForProject;
