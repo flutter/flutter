@@ -648,117 +648,130 @@ Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 20
   }
 }
 
-final RegExp _findDeprecationPattern = RegExp(r'@[Dd]eprecated');
-final RegExp _deprecationStartPattern = RegExp(
-  r'^(?<indent> *)@Deprecated\($' // flutter_ignore: deprecation_syntax (see analyze.dart)
-); 
-final RegExp _deprecationMessagePattern = RegExp(r"^ *'(?<message>.+) '$");
-final RegExp _deprecationVersionPattern = RegExp(r"^ *'This feature was deprecated after v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?<build>-\d+\.\d+\.pre)?\.',?$");
-final RegExp _deprecationEndPattern = RegExp(r'^ *\)$');
+class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
+  _DeprecationMessagesVisitor(this.parseResult, this.filePath);
 
-/// Some deprecation notices are special, for example they're used to annotate members that
-/// will never go away and were never allowed but which we are trying to show messages for.
-/// (One example would be a library that intentionally conflicts with a member in another
-/// library to indicate that it is incompatible with that other library. Another would be
-/// the regexp just above...)
-const String _ignoreDeprecation = ' // flutter_ignore: deprecation_syntax (see analyze.dart)';
+  final ParseStringResult parseResult;
+  final String filePath;
+  final List<String> errors = <String>[];
 
-/// Some deprecation notices are exempt for historical reasons. They must have an issue listed.
-final RegExp _legacyDeprecation = RegExp(r' // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/\d+$');
+  /// Some deprecation notices are special, for example they're used to annotate members that
+  /// will never go away and were never allowed but which we are trying to show messages for.
+  /// (One example would be a library that intentionally conflicts with a member in another
+  /// library to indicate that it is incompatible with that other library. Another would be
+  /// the regexp just above...)
+  static const Pattern ignoreDeprecration = '// flutter_ignore: deprecation_syntax (see analyze.dart)';
+  /// Some deprecation notices are exempt for historical reasons. They must have an issue listed.
+  final RegExp legacyDeprecation = RegExp(r'// flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/\d+$');
+
+  final RegExp _deprecationMessagePattern = RegExp(r"^ *'(?<message>.+) '$");
+  final RegExp _deprecationVersionPattern = RegExp(r"'This feature was deprecated after v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?<build>-\d+\.\d+\.pre)?\.',?$");
+
+  String _errorWithLineInfo(AstNode node, { required String error }) {
+    final int lineNumber = parseResult.lineInfo.getLocation(node.offset).lineNumber;
+    return '$filePath:$lineNumber: $error';
+  }
+  @override
+  void visitAnnotation(Annotation node) {
+    super.visitAnnotation(node);
+    final bool shouldCheckAnnotation = node.name.name == 'Deprecated'
+                                    && !hasInlineIgnore(node, parseResult, ignoreDeprecration)
+                                    && !hasInlineIgnore(node, parseResult, legacyDeprecation);
+    if (!shouldCheckAnnotation) {
+      return;
+    }
+    final NodeList<StringLiteral> strings;
+    try {
+      strings =  switch (node.arguments?.arguments) {
+        null || NodeList<Expression>(first: AdjacentStrings(strings:[]), length: 1) => throw _errorWithLineInfo(node, error: '@Deprecated annotation should take exactly one string as parameter, got ${node.arguments}'),
+        NodeList<Expression>(first: AdjacentStrings(:final NodeList<StringLiteral> strings), length: 1) => strings,
+        final NodeList<Expression> expressions                                      => throw _errorWithLineInfo(node, error: '@Deprecated annotation should take exactly one string as parameter, but got $expressions'),
+      };
+    } catch (error) {
+      errors.add(error.toString());
+      return;
+    }
+
+    final Iterator<StringLiteral> deprecationMessageIterator = strings.iterator;
+    final bool isNotEmpty = deprecationMessageIterator.moveNext();
+    assert(isNotEmpty);
+
+    try {
+      RegExpMatch? versionMatch;
+      String? message;
+      do {
+        final StringLiteral deprecationString = deprecationMessageIterator.current;
+        final String line = deprecationString.toSource();
+        final RegExpMatch? messageMatch = _deprecationMessagePattern.firstMatch(line);
+        if (messageMatch == null) {
+          String possibleReason = '';
+          if (line.trimLeft().startsWith('"')) {
+            possibleReason = ' You might have used double quotes (") for the string instead of single quotes (\').';
+          } else if (!line.contains("'")) {
+            possibleReason = ' It might be missing the line saying "This feature was deprecated after...".';
+          } else if (!line.trimRight().endsWith(" '")) {
+            if (line.contains('This feature was deprecated')) {
+              possibleReason = ' There might not be an explanatory message.';
+            } else {
+              possibleReason = ' There might be a missing space character at the end of the line.';
+            }
+          }
+          throw _errorWithLineInfo(deprecationString, error: 'Deprecation notice does not match required pattern.$possibleReason');
+        }
+        if (message == null) {
+          message = messageMatch.namedGroup('message');
+          final String firstChar = String.fromCharCode(message!.runes.first);
+          if (firstChar.toUpperCase() != firstChar) {
+            throw _errorWithLineInfo(
+              deprecationString,
+              error: 'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md',
+            );
+          }
+        } else {
+          message += messageMatch.namedGroup('message')!;
+        }
+        if (!deprecationMessageIterator.moveNext()) {
+          throw _errorWithLineInfo(deprecationString, error: ' It might be missing the line saying "This feature was deprecated after...".');
+        }
+        versionMatch = _deprecationVersionPattern.firstMatch(deprecationMessageIterator.current.toSource());
+      } while (versionMatch == null);
+
+      final int major = int.parse(versionMatch.namedGroup('major')!);
+      final int minor = int.parse(versionMatch.namedGroup('minor')!);
+      final int patch = int.parse(versionMatch.namedGroup('patch')!);
+      final bool hasBuild = versionMatch.namedGroup('build') != null;
+      // There was a beta release that was mistakenly labeled 3.1.0 without a build.
+      final bool specialBeta = major == 3 && minor == 1 && patch == 0;
+      if (!specialBeta && (major > 1 || (major == 1 && minor >= 20))) {
+        if (!hasBuild) {
+          throw _errorWithLineInfo(
+            deprecationMessageIterator.current,
+            error: 'Deprecation notice does not accurately indicate a beta branch version number; please see https://flutter.dev/docs/development/tools/sdk/releases to find the latest beta build version number.',
+          );
+        }
+      }
+      if (!message.endsWith('.') && !message.endsWith('!') && !message.endsWith('?')) {
+        throw _errorWithLineInfo(
+          node,
+          error: 'Deprecation notice should be a grammatically correct sentence and end with a period; notice appears to be "$message".',
+        );
+      }
+    } catch (error) {
+      errors.add(error.toString());
+    }
+  }
+}
 
 Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 2000 }) async {
   final List<String> errors = <String>[];
   await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
-    int lineNumber = 0;
-    final List<String> lines = file.readAsLinesSync();
-    final List<int> linesWithDeprecations = <int>[];
-    for (final String line in lines) {
-      if (line.contains(_findDeprecationPattern) &&
-          !line.endsWith(_ignoreDeprecation) &&
-          !line.contains(_legacyDeprecation)) {
-        linesWithDeprecations.add(lineNumber);
-      }
-      lineNumber += 1;
-    }
-    for (int lineNumber in linesWithDeprecations) {
-      try {
-        final RegExpMatch? startMatch = _deprecationStartPattern.firstMatch(lines[lineNumber]);
-        if (startMatch == null) {
-          throw 'Deprecation notice does not match required pattern.';
-        }
-        final String indent = startMatch.namedGroup('indent')!;
-        lineNumber += 1;
-        if (lineNumber >= lines.length) {
-          throw 'Incomplete deprecation notice.';
-        }
-        RegExpMatch? versionMatch;
-        String? message;
-        do {
-          final RegExpMatch? messageMatch = _deprecationMessagePattern.firstMatch(lines[lineNumber]);
-          if (messageMatch == null) {
-            String possibleReason = '';
-            if (lines[lineNumber].trimLeft().startsWith('"')) {
-              possibleReason = ' You might have used double quotes (") for the string instead of single quotes (\').';
-            } else if (!lines[lineNumber].contains("'")) {
-              possibleReason = ' It might be missing the line saying "This feature was deprecated after...".';
-            } else if (!lines[lineNumber].trimRight().endsWith(" '")) {
-              if (lines[lineNumber].contains('This feature was deprecated')) {
-                possibleReason = ' There might not be an explanatory message.';
-              } else {
-                possibleReason = ' There might be a missing space character at the end of the line.';
-              }
-            }
-            throw 'Deprecation notice does not match required pattern.$possibleReason';
-          }
-          if (!lines[lineNumber].startsWith("$indent  '")) {
-            throw 'Unexpected deprecation notice indent.';
-          }
-          if (message == null) {
-            message = messageMatch.namedGroup('message');
-            final String firstChar = String.fromCharCode(message!.runes.first);
-            if (firstChar.toUpperCase() != firstChar) {
-              throw 'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md';
-            }
-          } else {
-            message += messageMatch.namedGroup('message')!;
-          }
-          lineNumber += 1;
-          if (lineNumber >= lines.length) {
-            throw 'Incomplete deprecation notice.';
-          }
-          versionMatch = _deprecationVersionPattern.firstMatch(lines[lineNumber]);
-        } while (versionMatch == null);
-        final int major = int.parse(versionMatch.namedGroup('major')!);
-        final int minor = int.parse(versionMatch.namedGroup('minor')!);
-        final int patch = int.parse(versionMatch.namedGroup('patch')!);
-        final bool hasBuild = versionMatch.namedGroup('build') != null;
-        // There was a beta release that was mistakenly labeled 3.1.0 without a build.
-        final bool specialBeta = major == 3 && minor == 1 && patch == 0;
-        if (!specialBeta && (major > 1 || (major == 1 && minor >= 20))) {
-          if (!hasBuild) {
-            throw 'Deprecation notice does not accurately indicate a beta branch version number; please see https://flutter.dev/docs/development/tools/sdk/releases to find the latest beta build version number.';
-          }
-        }
-        if (!message.endsWith('.') && !message.endsWith('!') && !message.endsWith('?')) {
-          throw 'Deprecation notice should be a grammatically correct sentence and end with a period; notice appears to be "$message".';
-        }
-        if (!lines[lineNumber].startsWith("$indent  '")) {
-          throw 'Unexpected deprecation notice indent.';
-        }
-        lineNumber += 1;
-        if (lineNumber >= lines.length) {
-          throw 'Incomplete deprecation notice.';
-        }
-        if (!lines[lineNumber].contains(_deprecationEndPattern)) {
-          throw 'End of deprecation notice does not match required pattern.';
-        }
-        if (!lines[lineNumber].startsWith('$indent)')) {
-          throw 'Unexpected deprecation notice indent.';
-        }
-      } catch (error) {
-        errors.add('${file.path}:${lineNumber + 1}: $error');
-      }
-    }
+    final ParseStringResult parseResult = parseFile(
+      featureSet: _parsingFeatureSet(),
+      path: file.absolute.path,
+    );
+    final _DeprecationMessagesVisitor visitor = _DeprecationMessagesVisitor(parseResult, file.path);
+    visitor.visitCompilationUnit(parseResult.unit);
+    errors.addAll(visitor.errors);
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
@@ -861,11 +874,18 @@ class _TestSkipLinesVisitor<T> extends RecursiveAstVisitor<T> {
     return name.startsWith('test') || name == 'group' || name == 'expect';
   }
 
+  static final Pattern _skipTestIntentionalPattern = RegExp(r'// .*[intended]');
+  static final Pattern _skipTestTrackingBugPattern = RegExp(r'// .*https+?://github.com/.*/issues/\d+');
+  bool _hasValidJustificationComment(Label skipLabel) {
+    return hasInlineIgnore(skipLabel, parseResult, _skipTestIntentionalPattern)
+        || hasInlineIgnore(skipLabel, parseResult, _skipTestTrackingBugPattern);
+  }
+
   @override
   T? visitMethodInvocation(MethodInvocation node) {
     if (isTestMethod(node.methodName.toString())) {
       for (final Expression argument in node.argumentList.arguments) {
-        if (argument is NamedExpression && argument.name.label.name == 'skip') {
+        if (argument is NamedExpression && argument.name.label.name == 'skip' && !_hasValidJustificationComment(argument.name)) {
           skips.add(_getLine(parseResult, argument.beginToken.charOffset));
         }
       }
@@ -874,10 +894,6 @@ class _TestSkipLinesVisitor<T> extends RecursiveAstVisitor<T> {
   }
 }
 
-final RegExp _skipTestCommentPattern = RegExp(r'//(.*)$');
-const Pattern _skipTestIntentionalPattern = '[intended]';
-final Pattern _skipTestTrackingBugPattern = RegExp(r'https+?://github.com/.*/issues/\d+');
-
 Future<void> verifySkipTestComments(String workingDirectory) async {
   final List<String> errors = <String>[];
   final Stream<File> testFiles =_allFiles(workingDirectory, 'dart', minimumMatches: 1500)
@@ -885,13 +901,7 @@ Future<void> verifySkipTestComments(String workingDirectory) async {
 
   await for (final File file in testFiles) {
     for (final _Line skip in _getTestSkips(file)) {
-      final Match? match = _skipTestCommentPattern.firstMatch(skip.content);
-      final String? skipComment = match?.group(1);
-      if (skipComment == null ||
-          !(skipComment.contains(_skipTestIntentionalPattern) ||
-            skipComment.contains(_skipTestTrackingBugPattern))) {
-        errors.add('${file.path}:${skip.line}: skip test without a justification comment.');
-      }
+      errors.add('${file.path}:${skip.line}: skip test without a justification comment.');
     }
   }
 
@@ -2068,8 +2078,26 @@ Future<void> _checkConsumerDependencies() async {
   }
 }
 
-const String _kDebugOnlyAnnotation = '@_debugOnly';
-final RegExp _nullInitializedField = RegExp(r'kDebugMode \? [\w<> ,{}()]+ : null;');
+
+class _DebugOnlyFieldVisitor extends RecursiveAstVisitor<void> {
+  _DebugOnlyFieldVisitor(this.parseResult);
+
+  final ParseStringResult parseResult;
+  final List<AstNode> errors = <AstNode>[];
+
+  static const String _kDebugOnlyAnnotation = '_debugOnly';
+  static final RegExp _nullInitializedField = RegExp(r'kDebugMode \? [\w<> ,{}()]+ : null;', multiLine: true);
+
+  @override
+  void visitFieldDeclaration(FieldDeclaration node) {
+    super.visitFieldDeclaration(node);
+    if (node.metadata.any((Annotation annotation) => annotation.name.name == _kDebugOnlyAnnotation)) {
+      if (!node.toSource().contains(_nullInitializedField)) {
+        errors.add(node);
+      }
+    }
+  }
+}
 
 Future<void> verifyNullInitializedDebugExpensiveFields(String workingDirectory, {int minimumMatches = 400}) async {
   final String flutterLib = path.join(workingDirectory, 'packages', 'flutter', 'lib');
@@ -2077,16 +2105,11 @@ Future<void> verifyNullInitializedDebugExpensiveFields(String workingDirectory, 
     .toList();
   final List<String> errors = <String>[];
   for (final File file in files) {
-    final List<String> lines = file.readAsLinesSync();
-    for (int index = 0; index < lines.length; index += 1) {
-      final String line = lines[index];
-      if (!line.contains(_kDebugOnlyAnnotation)) {
-        continue;
-      }
-      final String nextLine = lines[index + 1];
-      if (_nullInitializedField.firstMatch(nextLine) == null) {
-        errors.add('${file.path}:$index');
-      }
+    final ParseStringResult parsedFile = parseFile(featureSet: _parsingFeatureSet(), path: file.absolute.path);
+    final _DebugOnlyFieldVisitor visitor = _DebugOnlyFieldVisitor(parsedFile);
+    visitor.visitCompilationUnit(parsedFile.unit);
+    for (final AstNode badNode in visitor.errors) {
+      errors.add('${file.path}:${parsedFile.lineInfo.getLocation(badNode.offset).lineNumber}');
     }
   }
   if (errors.isNotEmpty) {

@@ -206,8 +206,8 @@ void main() {
       minimumMatches: 1,
     ), shouldHaveErrors: true);
 
-    expect(result, contains(':15'));
-    expect(result, isNot(contains(':12')));
+    expect(result, contains(':16'));
+    expect(result, isNot(contains(':13')));
   });
 
   test('analyze.dart - verifyTabooDocumentation', () async {
