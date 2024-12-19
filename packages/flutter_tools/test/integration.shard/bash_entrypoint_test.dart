@@ -48,8 +48,9 @@ Future<void> main() async {
       );
       expect(stdout, contains('Successfully received SIGTERM!'));
     },
+    // [intended] Windows does not use the bash entrypoint
     skip: platform.isWindows,
-  ); // [intended] Windows does not use the bash entrypoint
+  );
 
   test('shared.sh does not compile flutter tool if PROG_NAME=dart', () async {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('bash_entrypoint_test');

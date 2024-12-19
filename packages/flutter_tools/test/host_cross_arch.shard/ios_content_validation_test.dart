@@ -271,8 +271,9 @@ void main() {
               expect(outputFlutterFrameworkBinary.existsSync(), isTrue);
               expect(outputAppFrameworkBinary.existsSync(), isTrue);
             },
+            // [intended] only makes sense on macos.
             skip: !platform.isMacOS || buildMode != BuildMode.release,
-          ); // [intended] only makes sense on macos.
+          );
 
           testWithoutContext('validate obfuscation', () {
             // HelloPlugin class is present in project.

@@ -231,8 +231,8 @@ void main() {
             ),
           );
         },
-        skip: !platform.isMacOS,
-      ); // [intended] Swift Package Manager only works on macos.
+        skip: !platform.isMacOS, // [intended] Swift Package Manager only works on macos.
+      );
     }
 
     test('Build $platformName-framework with non-module app uses CocoaPods', () async {
@@ -367,8 +367,8 @@ void main() {
           unexpectedLines: <String>['Starting due to'],
         );
       },
-      skip: !platform.isMacOS,
-    ); // [intended] Swift Package Manager only works on macos.
+      skip: !platform.isMacOS, // [intended] Swift Package Manager only works on macos.
+    );
   }
 
   test('Build ios-framework with module app uses CocoaPods', () async {

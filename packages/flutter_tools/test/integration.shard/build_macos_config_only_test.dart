@@ -81,6 +81,6 @@ void main() {
 
       expect(secondRunResult, const ProcessResultMatcher());
     },
-    skip: !platform.isMacOS,
-  ); // [intended] macOS builds only work on macos.
+    skip: !platform.isMacOS, // [intended] macOS builds only work on macos.
+  );
 }
