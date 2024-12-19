@@ -1333,8 +1333,7 @@ Future<int> main(List<String> arguments) async {
   parser.addMultiOption('check',
       abbr: 'c',
       allowed: formatCheckNames(),
-      // TODO(goderbauer): Enable dart by default when we turned on the formatter.
-      defaultsTo: formatCheckNames()..remove(FormatCheck.dart.name),
+      defaultsTo: formatCheckNames(),
       help: 'Specifies which checks will be performed. Defaults to all checks. '
           'May be specified more than once to perform multiple types of checks. ');
   parser.addFlag('verbose', help: 'Print verbose output.', defaultsTo: verbose);
