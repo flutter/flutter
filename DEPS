@@ -152,7 +152,6 @@ vars = {
   "upstream_benchmark": "https://github.com/google/benchmark.git",
   "upstream_boringssl": "https://github.com/openssl/openssl.git",
   "upstream_brotli": "https://github.com/google/brotli.git",
-  "upstream_buildroot": "https://github.com/flutter/buildroot.git",
   "upstream_dart_style": "https://github.com/dart-lang/dart_style.git",
   "upstream_dartdoc": "https://github.com/dart-lang/dartdoc.git",
   "upstream_equatable": "https://github.com/felangel/equatable.git",
