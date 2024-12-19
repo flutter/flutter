@@ -202,6 +202,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addEnableImpellerFlag(verboseHelp: verboseHelp);
     addEnableVulkanValidationFlag(verboseHelp: verboseHelp);
     addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
+    addMultiWindowFlag(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -217,6 +218,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
+  bool get enableMultiWindow => boolArg('enable-multi-window');
 
   @override
   bool get refreshWirelessDevices => true;
@@ -280,6 +282,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         uninstallFirst: uninstallFirst,
         enableDartProfiling: enableDartProfiling,
         enableEmbedderApi: enableEmbedderApi,
+        enableMultiWindow: enableMultiWindow,
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
       );
@@ -338,6 +341,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         serveObservatory: boolArg('serve-observatory'),
         enableDartProfiling: enableDartProfiling,
         enableEmbedderApi: enableEmbedderApi,
+        enableMultiWindow: enableMultiWindow,
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
         enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
