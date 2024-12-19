@@ -78,7 +78,7 @@ class GenerateBuilderJsonCommand extends Command<bool> {
 
   Map<String, dynamic> _getArtifactBuildStep() {
     return <String, dynamic>{
-      'name': 'wasm_release',
+      'name': 'ci/wasm_release',
       'drone_dimensions': <String>[
         'device_type=none',
         'os=Linux',

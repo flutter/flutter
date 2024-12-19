@@ -3,7 +3,7 @@
   "_comment2": "See `generate_builder_json.dart` for the generator code",
   "builds": [
     {
-      "name": "wasm_release",
+      "name": "ci/wasm_release",
       "drone_dimensions": [
         "device_type=none",
         "os=Linux",
