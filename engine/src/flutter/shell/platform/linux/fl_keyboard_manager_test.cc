@@ -8,18 +8,11 @@
 #include <vector>
 
 #include "flutter/shell/platform/embedder/test_utils/key_codes.g.h"
-#include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
-#include "flutter/shell/platform/linux/fl_method_codec_private.h"
 #include "flutter/shell/platform/linux/key_mapping.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_method_codec.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
 #include "flutter/shell/platform/linux/testing/mock_keymap.h"
-#include "flutter/testing/testing.h"
 
-#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 // Define compound `expect` in macros. If they were defined in functions, the
