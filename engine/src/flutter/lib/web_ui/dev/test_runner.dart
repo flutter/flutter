@@ -73,9 +73,6 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
       ..addFlag('gcs-staging', help: 'Use artifacts from the staging gcs bucket populated by CI.')
       ..addFlag('gcs-try', help: 'Use artifacts from the try gcs bucket populated by CI.')
       ..addFlag('dwarf', help: 'Debug wasm modules using embedded DWARF data.')
-      ..addFlag('profile', help: 'Use artifacts from the profile build instead of release.')
-      ..addFlag('debug', help: 'Use artifacts from the debug build instead of release.')
-      ..addFlag('dwarf', help: 'Debug wasm modules using embedded DWARF data.')
       ..addFlag(
         'require-skia-gold',
         help:

@@ -88,20 +88,6 @@ class GenerateBuilderJsonCommand extends Command<bool> {
           'realm': 'production',
         },
       ],
-      'generators': <String, dynamic>{
-        'tasks': <dynamic>[
-          <String, dynamic>{
-            'name': 'check licenses',
-            'parameters': <String>['check-licenses'],
-            'scripts': <String>['flutter/lib/web_ui/dev/felt'],
-          },
-          <String, dynamic>{
-            'name': 'web engine analysis',
-            'parameters': <String>['analyze'],
-            'scripts': <String>['flutter/lib/web_ui/dev/felt'],
-          },
-        ],
-      },
     };
   }
 
@@ -121,8 +107,29 @@ class GenerateBuilderJsonCommand extends Command<bool> {
     };
   }
 
+  Map<String, dynamic> _getAnalysisAndLicenseStep() {
+    return <String, dynamic>{
+      'name': 'web engine analysis and license checks',
+      'recipe': 'engine_v2/tester_engine',
+      'drone_dimensions': <String>['device_type=none', 'os=Linux'],
+      'tasks': <dynamic>[
+        <String, dynamic>{
+          'name': 'check licenses',
+          'parameters': <String>['check-licenses'],
+          'scripts': <String>['flutter/lib/web_ui/dev/felt'],
+        },
+        <String, dynamic>{
+          'name': 'web engine analysis',
+          'parameters': <String>['analyze'],
+          'scripts': <String>['flutter/lib/web_ui/dev/felt'],
+        },
+      ],
+    };
+  }
+
   Iterable<Map<String, dynamic>> _getAllTestSteps(List<TestSuite> suites, PackageLock packageLock) {
     return <Map<String, dynamic>>[
+      _getAnalysisAndLicenseStep(),
       _getTestStepForPlatformAndBrowser(suites, packageLock, 'Linux', BrowserName.chrome),
       _getTestStepForPlatformAndBrowser(suites, packageLock, 'Linux', BrowserName.firefox),
       _getTestStepForPlatformAndBrowser(

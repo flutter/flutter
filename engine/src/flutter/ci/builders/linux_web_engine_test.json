@@ -181,6 +181,34 @@
   ],
   "tests": [
     {
+      "name": "web engine analysis and license checks",
+      "recipe": "engine_v2/tester_engine",
+      "drone_dimensions": [
+        "device_type=none",
+        "os=Linux"
+      ],
+      "tasks": [
+        {
+          "name": "check licenses",
+          "parameters": [
+            "check-licenses"
+          ],
+          "scripts": [
+            "flutter/lib/web_ui/dev/felt"
+          ]
+        },
+        {
+          "name": "web engine analysis",
+          "parameters": [
+            "analyze"
+          ],
+          "scripts": [
+            "flutter/lib/web_ui/dev/felt"
+          ]
+        }
+      ]
+    },
+    {
       "name": "Linux run chrome suites",
       "recipe": "engine_v2/tester_engine",
       "drone_dimensions": [
