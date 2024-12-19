@@ -9,11 +9,8 @@ import 'package:ui/ui.dart' as ui;
 
 const String kCanvasContainerTag = 'flt-canvas-container';
 
-typedef RenderResult = ({
-  List<DomImageBitmap> imageBitmaps,
-  int rasterStartMicros,
-  int rasterEndMicros,
-});
+typedef RenderResult =
+    ({List<DomImageBitmap> imageBitmaps, int rasterStartMicros, int rasterEndMicros});
 
 // This is an interface that renders a `ScenePicture` as a `DomImageBitmap`.
 // It is optionally asynchronous. It is required for the `EngineSceneView` to
@@ -24,11 +21,7 @@ abstract class PictureRenderer {
 }
 
 class _SceneRender {
-  _SceneRender(
-    this.scene,
-    this._completer, {
-    this.recorder,
-  }) {
+  _SceneRender(this.scene, this._completer, {this.recorder}) {
     scene.beginRender();
   }
 
@@ -214,7 +207,7 @@ final class PictureSliceContainer extends SliceContainer {
     final DomElement container = domDocument.createElement(kCanvasContainerTag);
     final DomCanvasElement canvas = createDomCanvasElement(
       width: bounds.width.toInt(),
-      height: bounds.height.toInt()
+      height: bounds.height.toInt(),
     );
     container.appendChild(canvas);
     return PictureSliceContainer._(bounds, container, canvas);
@@ -242,7 +235,7 @@ final class PictureSliceContainer extends SliceContainer {
         bounds.left.floorToDouble(),
         bounds.top.floorToDouble(),
         bounds.right.ceilToDouble(),
-        bounds.bottom.ceilToDouble()
+        bounds.bottom.ceilToDouble(),
       );
       final DomCSSStyleDeclaration style = canvas.style;
       final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
@@ -271,10 +264,10 @@ final class PictureSliceContainer extends SliceContainer {
 }
 
 final class PlatformViewContainer extends SliceContainer {
-  PlatformViewContainer(this.viewId) :
-    container = createDomElement('flt-clip'),
-    slot = createPlatformViewSlot(viewId) {
-      container.appendChild(slot);
+  PlatformViewContainer(this.viewId)
+    : container = createDomElement('flt-clip'),
+      slot = createPlatformViewSlot(viewId) {
+    container.appendChild(slot);
   }
 
   final int viewId;
@@ -364,11 +357,14 @@ final class PlatformViewContainer extends SliceContainer {
         transform = position.transform!.clone()..translate(_bounds!.left, _bounds!.top);
       } else {
         final ui.Offset offset = position.offset ?? ui.Offset.zero;
-        transform = Matrix4.translationValues(_bounds!.left + offset.dx, _bounds!.top + offset.dy, 0);
+        transform = Matrix4.translationValues(
+          _bounds!.left + offset.dx,
+          _bounds!.top + offset.dy,
+          0,
+        );
       }
       final double inverseScale = 1.0 / devicePixelRatio;
-      final Matrix4 scaleMatrix =
-        Matrix4.diagonal3Values(inverseScale, inverseScale, 1);
+      final Matrix4 scaleMatrix = Matrix4.diagonal3Values(inverseScale, inverseScale, 1);
       scaleMatrix.multiply(transform);
       style.transform = float64ListToCssTransform(scaleMatrix.storage);
       style.transformOrigin = '0 0 0';
