@@ -16,24 +16,39 @@ Future<void> main() async {
   if (!(Platform.isLinux || Platform.isMacOS)) {
     // Not a fundemental limitation, developer shortcut.
     print('This test must be run on a POSIX host. Skipping...');
-    exit(0);
+    return;
   }
   final bool adbExists =
       Process.runSync('which', <String>['adb']).exitCode == 0;
   if (!adbExists) {
     print(r'This test needs ADB to exist on the $PATH.');
-    exit(1);
+    exitCode = 1;
+    return;
+  }
+  // Test requires developer settings added in 28 and behavior added in 30
+  final ProcessResult checkApiLevel = Process.runSync('adb', <String>[
+    'shell',
+    'getprop',
+    'ro.build.version.sdk',
+  ]);
+  final String apiStdout = checkApiLevel.stdout.toString();
+  // Api level 30 or higher.
+  if (apiStdout.startsWith('2') ||
+      apiStdout.startsWith('1') ||
+      apiStdout.length == 1) {
+    print('This test must be run on api 30 or higher. Skipping...');
+    return;
   }
   // Developer settings are required on target device for cutout manipulation.
   bool shouldResetDevSettings = false;
-  ProcessResult checkDevSettingsResult = Process.runSync('adb', <String>[
+  final ProcessResult checkDevSettingsResult = Process.runSync('adb', <String>[
     'shell',
     'settings',
     'get',
     'global',
     'development_settings_enabled',
   ]);
-  if (checkDevSettingsResult.stdout.startsWith('0')) {
+  if (checkDevSettingsResult.stdout.toString().startsWith('0')) {
     print('Enabling developer settings...');
     // Developer settings not enabled, enable them and mark that the origional
     // state should be restored after.
@@ -56,38 +71,44 @@ Future<void> main() async {
     'enable',
     'com.android.internal.display.cutout.emulation.tall',
   ]);
-  await Future.delayed(const Duration(milliseconds: 1000));
   print('Starting test.');
-  final FlutterDriver driver = await FlutterDriver.connect();
-  final String data = await driver.requestData(
-    null,
-    timeout: const Duration(
-      minutes: 1,
-    ),
-  );
-  await driver.close();
-  print('Test finished. Reverting Adb changes...');
-  if (shouldResetDevSettings) {
-    print('Disabling developer settings...');
+  try {
+    final FlutterDriver driver = await FlutterDriver.connect();
+    final String data = await driver.requestData(
+      null,
+      timeout: const Duration(
+        minutes: 1,
+      ),
+    );
+    await driver.close();
+    final Map<String, dynamic> result =
+        jsonDecode(data) as Map<String, dynamic>;
+    print(result);
+    exitCode = result['result'] == 'true' ? 0 : 1;
+  } catch (e) {
+    print(e);
+    exitCode = 1;
+  } finally {
+    print('Test finished. Reverting Adb changes...');
+    if (shouldResetDevSettings) {
+      print('Disabling developer settings...');
+      Process.runSync('adb', <String>[
+        'shell',
+        'settings',
+        'put',
+        'global',
+        'development_settings_enabled',
+        '0',
+      ]);
+    }
+    print('Removing Synthetic notch...');
     Process.runSync('adb', <String>[
       'shell',
-      'settings',
-      'put',
-      'global',
-      'development_settings_enabled',
-      '0',
+      'cmd',
+      'overlay',
+      'disable',
+      'com.android.internal.display.cutout.emulation.tall',
     ]);
   }
-  print('Removing Synthetic notch...');
-  Process.runSync('adb', <String>[
-    'shell',
-    'cmd',
-    'overlay',
-    'disable',
-    'com.android.internal.display.cutout.emulation.tall',
-  ]);
-
-  final Map<String, dynamic> result = jsonDecode(data) as Map<String, dynamic>;
-  print(result);
-  exit(result['result'] == 'true' ? 0 : 1);
+  return;
 }
