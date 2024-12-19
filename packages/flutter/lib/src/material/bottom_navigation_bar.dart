@@ -910,6 +910,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           }
         }),
       );
+    } else {
+      _backgroundColor = widget.items[index].backgroundColor;
     }
   }
 
@@ -933,8 +935,13 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       _controllers[oldWidget.currentIndex].reverse();
       _controllers[widget.currentIndex].forward();
     } else {
-      if (_backgroundColor != widget.items[widget.currentIndex].backgroundColor) {
-        _backgroundColor = widget.items[widget.currentIndex].backgroundColor;
+        switch (_effectiveType) {
+        case BottomNavigationBarType.fixed:
+          break;
+        case BottomNavigationBarType.shifting:
+          if (_backgroundColor != widget.items[widget.currentIndex].backgroundColor) {
+            _pushCircle(widget.currentIndex);
+          }
       }
     }
   }
