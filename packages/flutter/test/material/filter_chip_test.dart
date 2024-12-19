@@ -1290,7 +1290,7 @@ void main() {
   });
 
   testWidgets('FilterChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
-    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+    const ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
       enableAnimation: AnimationStyle.noAnimation,
       selectAnimation: AnimationStyle(duration: Durations.extralong4),
     );
@@ -1309,7 +1309,7 @@ void main() {
   });
 
   testWidgets('Elevated FilterChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
-    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+    const ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
       enableAnimation: AnimationStyle.noAnimation,
       selectAnimation: AnimationStyle(duration: Durations.extralong4),
     );

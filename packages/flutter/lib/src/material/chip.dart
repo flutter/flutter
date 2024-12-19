@@ -619,7 +619,7 @@ abstract interface class TappableChipAttributes {
 /// A helper class that overrides the default chip animation parameters.
 class ChipAnimationStyle {
   /// Creates an instance of Chip Animation Style class.
-  ChipAnimationStyle({
+  const ChipAnimationStyle({
     this.enableAnimation,
     this.selectAnimation,
     this.avatarDrawerAnimation,

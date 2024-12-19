@@ -49,10 +49,10 @@ class _ChipAnimationStyleExampleState extends State<ChipAnimationStyleExample> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 FilterChip.elevated(
-                  chipAnimationStyle: ChipAnimationStyle(
+                  chipAnimationStyle: const ChipAnimationStyle(
                     enableAnimation: AnimationStyle(
-                      duration: const Duration(seconds: 3),
-                      reverseDuration: const Duration(seconds: 1),
+                      duration: Duration(seconds: 3),
+                      reverseDuration: Duration(seconds: 1),
                     ),
                   ),
                   onSelected: !enabled ? null : (bool value) {},
@@ -75,10 +75,10 @@ class _ChipAnimationStyleExampleState extends State<ChipAnimationStyleExample> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 FilterChip.elevated(
-                  chipAnimationStyle: ChipAnimationStyle(
+                  chipAnimationStyle: const ChipAnimationStyle(
                     selectAnimation: AnimationStyle(
-                      duration: const Duration(seconds: 3),
-                      reverseDuration: const Duration(seconds: 1),
+                      duration: Duration(seconds: 3),
+                      reverseDuration: Duration(seconds: 1),
                     ),
                   ),
                   backgroundColor: Colors.amber,
@@ -108,10 +108,10 @@ class _ChipAnimationStyleExampleState extends State<ChipAnimationStyleExample> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 FilterChip.elevated(
-                  chipAnimationStyle: ChipAnimationStyle(
+                  chipAnimationStyle: const ChipAnimationStyle(
                     avatarDrawerAnimation: AnimationStyle(
-                      duration: const Duration(seconds: 2),
-                      reverseDuration: const Duration(seconds: 1),
+                      duration: Duration(seconds: 2),
+                      reverseDuration: Duration(seconds: 1),
                     ),
                   ),
                   selected: showCheckmark,
@@ -134,10 +134,10 @@ class _ChipAnimationStyleExampleState extends State<ChipAnimationStyleExample> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 FilterChip.elevated(
-                  chipAnimationStyle: ChipAnimationStyle(
+                  chipAnimationStyle: const ChipAnimationStyle(
                     deleteDrawerAnimation: AnimationStyle(
-                      duration: const Duration(seconds: 2),
-                      reverseDuration: const Duration(seconds: 1),
+                      duration: Duration(seconds: 2),
+                      reverseDuration: Duration(seconds: 1),
                     ),
                   ),
                   onDeleted: showDeleteIcon ? () {} : null,
