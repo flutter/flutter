@@ -12,7 +12,7 @@
 /// @docImport 'tween_animation_builder.dart';
 library;
 
-import 'dart:ui' as ui show TextHeightBehavior;
+import 'dart:ui' as ui show TextHeightBehavior, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -25,6 +25,7 @@ import 'framework.dart';
 import 'text.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
+import 'value_listenable_builder.dart';
 
 // Examples can assume:
 // class MyWidget extends ImplicitlyAnimatedWidget {
@@ -286,16 +287,16 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   /// Initializes fields for subclasses.
   const ImplicitlyAnimatedWidget({
     super.key,
-    this.curve = Curves.linear,
-    required this.duration,
+    this.curve,
+    this.duration,
     this.onEnd,
   });
 
   /// The curve to apply when animating the parameters of this container.
-  final Curve curve;
+  final Curve? curve;
 
   /// The duration over which to animate the parameters of this container.
-  final Duration duration;
+  final Duration? duration;
 
   /// Called every time an animation completes.
   ///
@@ -309,7 +310,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
+    properties.add(IntProperty('duration', duration?.inMilliseconds, unit: 'ms'));
   }
 }
 
@@ -358,22 +359,19 @@ typedef TweenVisitor<T extends Object> = Tween<T>? Function(Tween<T>? tween, T t
 abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin<T> {
   /// The animation controller driving this widget's implicit animations.
   @protected
-  AnimationController get controller => _controller;
-  late final AnimationController _controller = AnimationController(
-    duration: widget.duration,
+  late final AnimationController controller = AnimationController(
     debugLabel: kDebugMode ? widget.toStringShort() : null,
     vsync: this,
   );
 
   /// The animation driving this widget's implicit animations.
-  Animation<double> get animation => _animation;
-  late CurvedAnimation _animation = _createCurve();
+  Animation<double> get animation => controller;
 
   @protected
   @override
   void initState() {
     super.initState();
-    _controller.addStatusListener((AnimationStatus status) {
+    controller.addStatusListener((AnimationStatus status) {
       if (status.isCompleted) {
         widget.onEnd?.call();
       }
@@ -386,46 +384,22 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   @override
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.curve != oldWidget.curve) {
-      _animation.dispose();
-      _animation = _createCurve();
-    }
-    _controller.duration = widget.duration;
     if (_constructTweens()) {
       forEachTween((Tween<dynamic>? tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
-        _updateTween(tween, targetValue);
-        return tween;
+        return tween
+          ?..begin = tween.evaluate(controller)
+          ..end = targetValue;
       });
-      _controller
-        ..value = 0.0
-        ..forward();
+      controller.animateTo(1.0, from: 0.0, duration: widget.duration, curve: widget.curve);
       didUpdateTweens();
     }
-  }
-
-  CurvedAnimation _createCurve() {
-    return CurvedAnimation(parent: _controller, curve: widget.curve);
   }
 
   @protected
   @override
   void dispose() {
-    _animation.dispose();
-    _controller.dispose();
+    controller.dispose();
     super.dispose();
-  }
-
-  bool _shouldAnimateTween(Tween<dynamic> tween, dynamic targetValue) {
-    return targetValue != (tween.end ?? tween.begin);
-  }
-
-  void _updateTween(Tween<dynamic>? tween, dynamic targetValue) {
-    if (tween == null) {
-      return;
-    }
-    tween
-      ..begin = tween.evaluate(_animation)
-      ..end = targetValue;
   }
 
   bool _constructTweens() {
@@ -433,7 +407,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     forEachTween((Tween<dynamic>? tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
       if (targetValue != null) {
         tween ??= constructor(targetValue);
-        if (_shouldAnimateTween(tween, targetValue)) {
+        if (targetValue != (tween.end ?? tween.begin)) {
           shouldStartAnimation = true;
         } else {
           tween.end ??= tween.begin;
@@ -569,6 +543,378 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   }
 }
 
+/// Signature for a [Widget] built using an [Animation] of the type `T`.
+typedef AnimationBuilder<T> = Widget Function(BuildContext context, Animation<T> animation);
+
+/// A [ValueListenable] whose [value] updates each frame
+/// over the specified [duration] to create a continuous visual transition.
+///
+/// This class is similar to [ValueNotifier] but uses an [AnimationProvider]
+/// to smoothly transition between values.
+class ValueAnimation<T> extends ValueAnimationBase<T> {
+  /// Creates a [ValueListenable] that smoothly animates between values.
+  ///
+  /// {@macro flutter.animation.ValueAnimation.value_setter}
+  ValueAnimation({
+    required super.vsync,
+    required super.initialValue,
+    super.duration,
+    super.curve,
+    LerpCallback<T>? lerp,
+    super.animationBehavior,
+    super.debugLabel,
+  }) : super.lerpWith(
+         lerp: lerp ?? AnimatedValue.lerpCallbackOfExactType<T>(),
+       );
+}
+
+/// A widget that animates based on changes to its [value].
+///
+/// This class uses a [duration], [curve], and [lerp] callback to determine
+/// its transition from one value to another.
+///
+/// The widget will immediately animate from its [initialValue] to the [value],
+/// if an [initialValue] is specified. Otherwise, the widget is "implicitly"
+/// animated: it performs an animation when its [value] changes.
+///
+// /// [AnimatedContainer], a subclass of [AnimatedValue], uses a [Record] as its
+// /// [value] type: this allows it to [lerp] multiple properties at once.
+// ///
+// /// Other subtypes of `AnimatedValue` include:
+// ///
+// ///  * [AnimatedAlign], which is an implicitly animated version of [Align].
+// ///  * [AnimatedDefaultTextStyle], which is an implicitly animated version of
+// ///    [DefaultTextStyle].
+// ///  * [AnimatedScale], which is an implicitly animated version of [Transform.scale].
+// ///  * [AnimatedRotation], which is an implicitly animated version of [Transform.rotate].
+// ///  * [AnimatedSlide], which implicitly animates the position of a widget relative to its normal position.
+// ///  * [AnimatedOpacity], which is an implicitly animated version of [Opacity].
+// ///  * [AnimatedPadding], which is an implicitly animated version of [Padding].
+// ///  * [AnimatedPhysicalModel], which is an implicitly animated version of
+// ///    [PhysicalModel].
+// ///  * [AnimatedPositioned], which is an implicitly animated version of
+// ///    [Positioned].
+// ///  * [AnimatedPositionedDirectional], which is an implicitly animated version
+// ///    of [PositionedDirectional].
+// ///  * [AnimatedTheme], which is an implicitly animated version of [Theme].
+//
+// TODO(nate-thegrate): migrate ImplicitlyAnimatedWidget subclasses!
+///
+/// See also:
+///
+// ///  * [ImplicitlyAnimatedWidget], which was used to create implicit animations
+// ///    before [Record] types were supported in Dart.
+///  * [TweenAnimationBuilder], which is similar to [AnimatedValue.builder],
+///    but uses a [Tween] rather than a [LerpCallback] for evaluation.
+///  * [AnimatedCrossFade], which cross-fades between two given children and
+///    animates itself between their sizes.
+///  * [AnimatedSize], which automatically transitions its size over a given
+///    duration.
+///  * [AnimatedSwitcher], which fades from one widget to another.
+abstract class AnimatedValue<T extends Object> extends StatefulWidget {
+  /// Initializes fields for subclasses.
+  const AnimatedValue({
+    super.key,
+    required this.value,
+    this.initialValue,
+    this.duration,
+    this.curve,
+    this.lerp,
+    this.onEnd,
+    this.child,
+  }) : assert(
+         // dart format off
+         lerp != null ||
+         T == double           || T == Radius        ||
+         T == FractionalOffset || T == Offset        || T == Size            ||
+         T == Rect             || T == RRect         || T == RelativeRect    ||
+         T == TextStyle        || T == FontWeight    || T == FontVariation   ||
+         T == Decoration       || T == BoxDecoration || T == ShapeDecoration ||
+         T == BorderSide       || T == ShapeBorder   || T == OutlinedBorder  ||
+         T == TableBorder      ||
+         T == LinearBorderEdge ||
+         T == DecorationImage  ||
+         T == AlignmentGeometry    || T == Alignment    || T == AlignmentDirectional    ||
+         T == BorderRadiusGeometry || T == BorderRadius || T == BorderRadiusDirectional ||
+         T == EdgeInsetsGeometry   || T == EdgeInsets   || T == EdgeInsetsDirectional   ||
+         T == BoxBorder            || T == Border       || T == BorderDirectional       ||
+         T == Color     || T == HSVColor          || T == HSLColor       || T == ColorSwatch   ||
+         T == Gradient  || T == LinearGradient    || T == RadialGradient || T == SweepGradient ||
+         T == Shadow    || T == (List<Shadow>)    ||
+         T == BoxShadow || T == (List<BoxShadow>) ||
+         T == BoxConstraints,
+         // dart format on
+         'a "lerp" callback must be provided for the type <$T>.',
+       );
+
+  /// Creates an animated widget using the provided [value] and [AnimationBuilder].
+  ///
+  /// {@template flutter.widgets.AnimatedValue.no_rebuilds}
+  /// Instead of rebuilding each frame during a transition, a notification is
+  /// sent by the [Animation] object.
+  ///
+  /// For direct updates each frame, consider using [AnimatedValue.builder].
+  /// {@endtemplate}
+  const factory AnimatedValue.transition(
+    T value, {
+    Key? key,
+    T? initial,
+    Duration? duration,
+    Curve curve,
+    LerpCallback<T>? lerp,
+    VoidCallback? onEnd,
+    required AnimationBuilder<T> builder,
+  }) = _AnimatedValueTransition<T>;
+
+  /// Builds an animation using the provided [ValueWidgetBuilder].
+  ///
+  /// See also:
+  ///
+  ///  * [TweenAnimationBuilder], which does the same,
+  ///    using a [Tween] rather than a [LerpCallback].
+  const factory AnimatedValue.builder(
+    T value, {
+    Key? key,
+    T? initial,
+    required Duration duration,
+    Curve curve,
+    required ValueWidgetBuilder<T> builder,
+    LerpCallback<T>? lerp,
+    VoidCallback? onEnd,
+    Widget? child,
+  }) = _AnimatedValueBuilder<T>;
+
+  /// The target value of the animation.
+  ///
+  /// When this value changes, this widget's associated [ValueAnimation]
+  /// will smoothly transition to its new value.
+  final T value;
+
+  /// If this is non-null, the widget will immediately start animating from this
+  /// value toward the target [value] when it is first built.
+  final T? initialValue;
+
+  /// The curve to apply when the widget animates.
+  ///
+  /// For example, using [Curves.ease] may improve the animation's visual appeal
+  /// by mitigating the linear animation's abrupt stop.
+  final Curve? curve;
+
+  /// The duration over which to animate changes to the [value].
+  final Duration? duration;
+
+  /// A function that defines the type [T]'s linear interpolation
+  /// from one [value] to another.
+  ///
+  /// {@macro flutter.animation.LerpCallback}
+  ///
+  /// If the [LerpCallback] is defined as a global function or `static` method,
+  /// it can be used in a `const` constructor!
+  ///
+  /// Prefer passing a callback when extending the class. If null,
+  /// it is determined by [ValueAnimation.lerpCallbackOfExactType].
+  final LerpCallback<T>? lerp;
+
+  /// Called each time the animation completes.
+  ///
+  /// This can be useful to trigger additional actions (e.g. another animation)
+  /// at the end of the current animation.
+  final VoidCallback? onEnd;
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget? child;
+
+  /// Builds a [Widget] using an [Animation] of the type `T`.
+  ///
+  /// {@macro flutter.widgets.AnimatedValue.no_rebuilds}
+  Widget build(BuildContext context, Animation<T> animation);
+
+  /// Returns the [LerpCallback] corresponding to the provided type argument.
+  ///
+  /// This function covers each of the relevant types defined in `dart:ui`
+  /// and Flutter's widgets library. For other lerp functions, consider
+  /// passing a callback directly.
+  static LerpCallback<T> lerpCallbackOfExactType<T>() => switch (T) {
+    // dart format off
+    const (double)                  => ui.lerpDouble,
+    const (Offset)                  => Offset.lerp,
+    const (Size)                    => Size.lerp,
+    const (Rect)                    => Rect.lerp,
+    const (Radius)                  => Radius.lerp,
+    const (RRect)                   => RRect.lerp,
+    const (Color)                   => Color.lerp,
+    const (Shadow)                  => Shadow.lerp,
+    const (List<Shadow>)            => Shadow.lerpList,
+    const (FontWeight)              => FontWeight.lerp,
+    const (FontVariation)           => FontVariation.lerp,
+    const (AlignmentGeometry)       => AlignmentGeometry.lerp,
+    const (Alignment)               => Alignment.lerp,
+    const (AlignmentDirectional)    => AlignmentDirectional.lerp,
+    const (BorderRadiusGeometry)    => BorderRadiusGeometry.lerp,
+    const (BorderRadius)            => BorderRadius.lerp,
+    const (BorderRadiusDirectional) => BorderRadiusDirectional.lerp,
+    const (BorderSide)              => BorderSide.lerp,
+    const (ShapeBorder)             => ShapeBorder.lerp,
+    const (OutlinedBorder)          => OutlinedBorder.lerp,
+    const (BoxBorder)               => BoxBorder.lerp,
+    const (Border)                  => Border.lerp,
+    const (BorderDirectional)       => BorderDirectional.lerp,
+    const (BoxDecoration)           => BoxDecoration.lerp,
+    const (BoxShadow)               => BoxShadow.lerp,
+    const (List<BoxShadow>)         => BoxShadow.lerpList,
+    const (HSVColor)                => HSVColor.lerp,
+    const (HSLColor)                => HSLColor.lerp,
+    const (ColorSwatch)             => ColorSwatch.lerp,
+    const (DecorationImage)         => DecorationImage.lerp,
+    const (Decoration)              => Decoration.lerp,
+    const (EdgeInsetsGeometry)      => EdgeInsetsGeometry.lerp,
+    const (EdgeInsets)              => EdgeInsets.lerp,
+    const (EdgeInsetsDirectional)   => EdgeInsetsDirectional.lerp,
+    const (FractionalOffset)        => FractionalOffset.lerp,
+    const (Gradient)                => Gradient.lerp,
+    const (LinearGradient)          => LinearGradient.lerp,
+    const (RadialGradient)          => RadialGradient.lerp,
+    const (SweepGradient)           => SweepGradient.lerp,
+    const (LinearBorderEdge)        => LinearBorderEdge.lerp,
+    const (ShapeDecoration)         => ShapeDecoration.lerp,
+    const (TextStyle)               => TextStyle.lerp,
+    const (BoxConstraints)          => BoxConstraints.lerp,
+    const (RelativeRect)            => RelativeRect.lerp,
+    const (TableBorder)             => TableBorder.lerp,
+    // dart format on
+    _ => throw ArgumentError(
+      'The type argument <$T> is not supported for lerpCallbackOfExactType(). '
+      'Consider passing a "lerp" function directly.',
+    ),
+  } as LerpCallback<T>;
+
+
+  @override
+  State<AnimatedValue<T>> createState() => _AnimatedValueState<T>();
+}
+
+
+/// The [State] of an [AnimatedValue] widget.
+///
+/// This class uses a [ValueAnimation] to transition each time [AnimatedValue.value] changes.
+class _AnimatedValueState<T extends Object> extends State<AnimatedValue<T>> with SingleTickerProviderStateMixin {
+  /// The [ValueAnimation] used to drive transitions.
+  late final ValueAnimation<T> animation = ValueAnimation<T>(
+    vsync: this,
+    initialValue: widget.initialValue ?? widget.value,
+    duration: widget.duration,
+    curve: widget.curve,
+    lerp: widget.lerp,
+  );
+
+  void _statusUpdate(AnimationStatus status) {
+    if (status.isCompleted) {
+      widget.onEnd?.call();
+    }
+  }
+
+  @protected
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.initialValue != null) {
+      animation.animateTo(widget.value);
+    }
+    animation.addStatusListener(_statusUpdate);
+  }
+
+  @protected
+  @override
+  void didUpdateWidget(covariant AnimatedValue<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value != oldWidget.value) {
+      animation.animateTo(
+        widget.value,
+        duration: widget.duration,
+        curve: widget.curve,
+      );
+    } else {
+      animation
+        ..duration = widget.duration
+        ..curve = widget.curve;
+    }
+  }
+
+  @protected
+  @override
+  void dispose() {
+    animation.dispose();
+    super.dispose();
+  }
+
+  @protected
+  @override
+  Widget build(BuildContext context) => widget.build(context, animation);
+}
+
+class _AnimatedValueBuilder<T extends Object> extends AnimatedValue<T> {
+  const _AnimatedValueBuilder(
+    T value, {
+    super.key,
+    T? initial,
+    required super.duration,
+    super.curve,
+    super.lerp,
+    super.onEnd,
+    required this.builder,
+    super.child,
+  }) : super(value: value, initialValue: initial);
+
+  final ValueWidgetBuilder<T> builder;
+
+  @override
+  _AnimatedValueState<T> createState() => _AnimatedValueBuilderState<T>();
+
+  @override
+  Widget build(BuildContext context, Animation<T> animation) {
+    throw StateError('not used');
+  }
+}
+
+class _AnimatedValueTransition<T extends Object> extends AnimatedValue<T> {
+  const _AnimatedValueTransition(
+    T value, {
+    super.key,
+    T? initial,
+    super.duration,
+    super.curve,
+    super.lerp,
+    super.onEnd,
+    required this.builder,
+  }) : super(value: value, initialValue: initial);
+
+  final AnimationBuilder<T> builder;
+
+  @override
+  Widget build(BuildContext context, Animation<T> animation) {
+    return builder(context, animation);
+  }
+}
+
+/// Configures the [animation] to call [Element.markNeedsBuild]
+/// each time its value changes.
+class _AnimatedValueBuilderState<T extends Object> extends _AnimatedValueState<T> {
+  @override
+  void initState() {
+    super.initState();
+    animation.addListener(() => setState(() {}));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ValueWidgetBuilder<T> builder = (widget as _AnimatedValueBuilder<T>).builder;
+    return builder(context, animation.value, widget.child);
+  }
+}
+
 /// Animated version of [Container] that gradually changes its values over a period of time.
 ///
 /// The [AnimatedContainer] will automatically animate between the old and
@@ -622,7 +968,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     this.child,
     this.clipBehavior = Clip.none,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   }) : assert(margin == null || margin.isNonNegative),
        assert(padding == null || padding.isNonNegative),
@@ -816,7 +1162,7 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
     required this.padding,
     this.child,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   }) : assert(padding.isNonNegative);
 
@@ -904,7 +1250,7 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
     this.heightFactor,
     this.widthFactor,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   }) : assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0);
@@ -1043,7 +1389,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     this.width,
     this.height,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   }) : assert(left == null || right == null || width == null),
        assert(top == null || bottom == null || height == null);
@@ -1054,7 +1400,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     required this.child,
     required Rect rect,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   }) : left = rect.left,
        top = rect.top,
@@ -1190,7 +1536,7 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
     this.width,
     this.height,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   }) : assert(start == null || end == null || width == null),
        assert(top == null || bottom == null || height == null);
@@ -1348,7 +1694,7 @@ class AnimatedScale extends ImplicitlyAnimatedWidget {
     this.alignment = Alignment.center,
     this.filterQuality,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   });
 
@@ -1470,7 +1816,7 @@ class AnimatedRotation extends ImplicitlyAnimatedWidget {
     this.alignment = Alignment.center,
     this.filterQuality,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   });
 
@@ -1562,7 +1908,7 @@ class AnimatedSlide extends ImplicitlyAnimatedWidget {
     this.child,
     required this.offset,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   });
 
@@ -1693,7 +2039,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
     this.child,
     required this.opacity,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
     this.alwaysIncludeSemantics = false,
   }) : assert(opacity >= 0.0 && opacity <= 1.0);
@@ -1804,7 +2150,7 @@ class SliverAnimatedOpacity extends ImplicitlyAnimatedWidget {
     this.sliver,
     required this.opacity,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
     this.alwaysIncludeSemantics = false,
   }) : assert(opacity >= 0.0 && opacity <= 1.0);
@@ -1895,7 +2241,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   }) : assert(maxLines == null || maxLines > 0);
 
@@ -2014,7 +2360,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     required this.shadowColor,
     this.animateShadowColor = true,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   }) : assert(elevation >= 0.0);
 
@@ -2157,7 +2503,7 @@ class AnimatedFractionallySizedBox extends ImplicitlyAnimatedWidget {
     this.heightFactor,
     this.widthFactor,
     super.curve,
-    required super.duration,
+    super.duration,
     super.onEnd,
   }) : assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0);

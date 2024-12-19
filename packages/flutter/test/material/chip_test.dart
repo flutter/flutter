@@ -5752,9 +5752,9 @@ void main() {
                 children: <Widget>[
                   RawChip(
                     chipAnimationStyle: ChipAnimationStyle(
-                      enableAnimation: AnimationStyle(
-                        duration: const Duration(milliseconds: 300),
-                        reverseDuration: const Duration(milliseconds: 150),
+                      enableAnimation: const AnimationStyle(
+                        duration: Duration(milliseconds: 300),
+                        reverseDuration: Duration(milliseconds: 150),
                       ),
                     ),
                     isEnabled: enabled,
@@ -5826,9 +5826,9 @@ void main() {
                 children: <Widget>[
                   RawChip(
                     chipAnimationStyle: ChipAnimationStyle(
-                      selectAnimation: AnimationStyle(
-                        duration: const Duration(milliseconds: 600),
-                        reverseDuration: const Duration(milliseconds: 300),
+                      selectAnimation: const AnimationStyle(
+                        duration: Duration(milliseconds: 600),
+                        reverseDuration: Duration(milliseconds: 300),
                       ),
                     ),
                     backgroundColor: backgroundColor,
@@ -5900,9 +5900,9 @@ void main() {
                 children: <Widget>[
                   RawChip(
                     chipAnimationStyle: ChipAnimationStyle(
-                      avatarDrawerAnimation: AnimationStyle(
-                        duration: const Duration(milliseconds: 800),
-                        reverseDuration: const Duration(milliseconds: 400),
+                      avatarDrawerAnimation: const AnimationStyle(
+                        duration: Duration(milliseconds: 800),
+                        reverseDuration: Duration(milliseconds: 400),
                       ),
                     ),
                     checkmarkColor: checkmarkColor,
@@ -5976,9 +5976,9 @@ void main() {
                 children: <Widget>[
                   RawChip(
                     chipAnimationStyle: ChipAnimationStyle(
-                      deleteDrawerAnimation: AnimationStyle(
-                        duration: const Duration(milliseconds: 500),
-                        reverseDuration: const Duration(milliseconds: 250),
+                      deleteDrawerAnimation: const AnimationStyle(
+                        duration: Duration(milliseconds: 500),
+                        reverseDuration: Duration(milliseconds: 250),
                       ),
                     ),
                     onDeleted: showDeleteIcon ? () {} : null,
@@ -6034,7 +6034,7 @@ void main() {
   testWidgets('Chip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
     final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
       enableAnimation: AnimationStyle.noAnimation,
-      selectAnimation: AnimationStyle(duration: Durations.long3),
+      selectAnimation: const AnimationStyle(duration: Durations.long3),
     );
 
     await tester.pumpWidget(wrapForChip(
