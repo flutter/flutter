@@ -326,6 +326,7 @@ void main() {
       });
 
       test('fails if binary is not codesigned', () async {
+        throw Exception('haha');
         final String createBase = path.join(tempDir.absolute.path, 'create_');
         final String archiveName = path.join(tempDir.absolute.path,
             'flutter_${platformName}_v1.2.3-beta${platform.isLinux ? '.tar.xz' : '.zip'}');
@@ -383,7 +384,7 @@ void main() {
             contains('The binary $binPath was not codesigned!'),
           )),
         );
-      }, skip: !platform.isMacOS); // [intended] codesign is only available on macOS
+      }, testOn: 'mac-os'); // [intended] codesign is only available on macOS
     });
 
     group('ArchivePublisher for $platformName', () {
