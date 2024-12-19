@@ -95,6 +95,7 @@ class GenerateBuilderJsonCommand extends Command<bool> {
       'gn': <String>[
         '--web',
         '--runtime-mode=release',
+        '--no-rbe',
         '--no-goma',
       ],
       'ninja': <String, dynamic>{
