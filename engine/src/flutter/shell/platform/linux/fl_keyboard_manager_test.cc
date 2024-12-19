@@ -26,7 +26,6 @@
 // stacktrace wouldn't print where the function is called in the unit tests.
 
 #define EXPECT_KEY_EVENT(RECORD, TYPE, PHYSICAL, LOGICAL, CHAR, SYNTHESIZED) \
-  EXPECT_EQ((RECORD)->type, CALL_RECORD_TYPE_EMBEDDER);                      \
   EXPECT_EQ((RECORD)->event_type, (TYPE));                                   \
   EXPECT_EQ((RECORD)->event_physical, (PHYSICAL));                           \
   EXPECT_EQ((RECORD)->event_logical, (LOGICAL));                             \
@@ -34,9 +33,6 @@
   EXPECT_EQ((RECORD)->event_synthesized, (SYNTHESIZED));
 
 #define VERIFY_DOWN(OUT_LOGICAL, OUT_CHAR)                                  \
-  EXPECT_EQ(                                                                \
-      static_cast<CallRecord*>(g_ptr_array_index(call_records, 0))->type,   \
-      CALL_RECORD_TYPE_EMBEDDER);                                           \
   EXPECT_EQ(static_cast<CallRecord*>(g_ptr_array_index(call_records, 0))    \
                 ->event_type,                                               \
             kFlutterKeyEventTypeDown);                                      \
@@ -51,13 +47,7 @@
             false);                                                         \
   g_ptr_array_set_size(call_records, 0)
 
-typedef enum {
-  CALL_RECORD_TYPE_EMBEDDER,
-  CALL_RECORD_TYPE_CHANNEL,
-} CallRecordType;
-
 typedef struct {
-  CallRecordType type;
   FlutterKeyEventType event_type;
   uint64_t event_physical;
   uint64_t event_logical;
@@ -67,12 +57,10 @@ typedef struct {
   void* callback_user_data;
 } CallRecord;
 
-static CallRecord* call_record_new(CallRecordType type,
-                                   const FlutterKeyEvent* event,
+static CallRecord* call_record_new(const FlutterKeyEvent* event,
                                    FlutterKeyEventCallback callback,
                                    void* callback_user_data) {
   CallRecord* record = g_new0(CallRecord, 1);
-  record->type = type;
   record->event_type =
       event != nullptr ? event->type : static_cast<FlutterKeyEventType>(0);
   record->event_physical = event != nullptr ? event->physical : 0;
@@ -446,8 +434,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
          void* callback_user_data, gpointer user_data) {
         GPtrArray* call_records = static_cast<GPtrArray*>(user_data);
         g_ptr_array_add(call_records,
-                        call_record_new(CALL_RECORD_TYPE_EMBEDDER, event,
-                                        callback, callback_user_data));
+                        call_record_new(event, callback, callback_user_data));
       },
       call_records);
   fl_keyboard_manager_set_redispatch_handler(
@@ -568,8 +555,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
          void* callback_user_data, gpointer user_data) {
         GPtrArray* call_records = static_cast<GPtrArray*>(user_data);
         g_ptr_array_add(call_records,
-                        call_record_new(CALL_RECORD_TYPE_EMBEDDER, event,
-                                        callback, callback_user_data));
+                        call_record_new(event, callback, callback_user_data));
         callback(true, callback_user_data);
       },
       call_records);
@@ -603,8 +589,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
          void* callback_user_data, gpointer user_data) {
         GPtrArray* call_records = static_cast<GPtrArray*>(user_data);
         g_ptr_array_add(call_records,
-                        call_record_new(CALL_RECORD_TYPE_EMBEDDER, event,
-                                        callback, callback_user_data));
+                        call_record_new(event, callback, callback_user_data));
         callback(false, callback_user_data);
       },
       call_records);
@@ -641,31 +626,30 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
       manager, [](const GdkKeymapKey* key, gpointer user_data) { return 0u; },
       nullptr);
 
-  g_autoptr(GPtrArray) call_records = g_ptr_array_new_with_free_func(
+  g_autoptr(GPtrArray) embedder_call_records = g_ptr_array_new_with_free_func(
       reinterpret_cast<GDestroyNotify>(call_record_free));
-  g_autoptr(GPtrArray) redispatched =
-      g_ptr_array_new_with_free_func(g_object_unref);
-
   fl_keyboard_manager_set_send_key_event_handler(
       manager,
       [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
          void* callback_user_data, gpointer user_data) {
         GPtrArray* call_records = static_cast<GPtrArray*>(user_data);
         g_ptr_array_add(call_records,
-                        call_record_new(CALL_RECORD_TYPE_EMBEDDER, event,
-                                        callback, callback_user_data));
+                        call_record_new(event, callback, callback_user_data));
       },
-      call_records);
+      embedder_call_records);
+  g_autoptr(GPtrArray) channel_call_records = g_ptr_array_new_with_free_func(
+      reinterpret_cast<GDestroyNotify>(call_record_free));
   fl_mock_key_binary_messenger_set_callback_handler(
       messenger,
       [](FlutterKeyEventCallback callback, gpointer callback_user_data,
          gpointer user_data) {
         GPtrArray* call_records = static_cast<GPtrArray*>(user_data);
         g_ptr_array_add(call_records,
-                        call_record_new(CALL_RECORD_TYPE_CHANNEL, nullptr,
-                                        callback, callback_user_data));
+                        call_record_new(nullptr, callback, callback_user_data));
       },
-      call_records);
+      channel_call_records);
+  g_autoptr(GPtrArray) redispatched =
+      g_ptr_array_new_with_free_func(g_object_unref);
   fl_keyboard_manager_set_redispatch_handler(
       manager,
       [](FlKeyEvent* event, gpointer user_data) {
@@ -681,22 +665,21 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
   EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event1));
 
   EXPECT_EQ(redispatched->len, 0u);
-  EXPECT_EQ(call_records->len, 2u);
-
-  EXPECT_EQ(static_cast<CallRecord*>(g_ptr_array_index(call_records, 0))->type,
-            CALL_RECORD_TYPE_EMBEDDER);
-  EXPECT_EQ(static_cast<CallRecord*>(g_ptr_array_index(call_records, 1))->type,
-            CALL_RECORD_TYPE_CHANNEL);
+  EXPECT_EQ(embedder_call_records->len, 1u);
+  EXPECT_EQ(channel_call_records->len, 1u);
 
   call_record_respond(
-      static_cast<CallRecord*>(g_ptr_array_index(call_records, 0)), true);
+      static_cast<CallRecord*>(g_ptr_array_index(embedder_call_records, 0)),
+      true);
   call_record_respond(
-      static_cast<CallRecord*>(g_ptr_array_index(call_records, 1)), false);
+      static_cast<CallRecord*>(g_ptr_array_index(channel_call_records, 0)),
+      false);
   flush_channel_messages();
   EXPECT_EQ(redispatched->len, 0u);
 
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(manager));
-  g_ptr_array_set_size(call_records, 0);
+  g_ptr_array_set_size(embedder_call_records, 0);
+  g_ptr_array_set_size(channel_call_records, 0);
 
   /// Test 2: All delegates respond false
   g_autoptr(FlKeyEvent) event2 = fl_key_event_new(
@@ -704,25 +687,25 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
   EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event2));
 
   EXPECT_EQ(redispatched->len, 0u);
-  EXPECT_EQ(call_records->len, 2u);
-
-  EXPECT_EQ(static_cast<CallRecord*>(g_ptr_array_index(call_records, 0))->type,
-            CALL_RECORD_TYPE_EMBEDDER);
-  EXPECT_EQ(static_cast<CallRecord*>(g_ptr_array_index(call_records, 1))->type,
-            CALL_RECORD_TYPE_CHANNEL);
+  EXPECT_EQ(embedder_call_records->len, 1u);
+  EXPECT_EQ(channel_call_records->len, 1u);
 
   call_record_respond(
-      static_cast<CallRecord*>(g_ptr_array_index(call_records, 0)), false);
+      static_cast<CallRecord*>(g_ptr_array_index(embedder_call_records, 0)),
+      false);
   call_record_respond(
-      static_cast<CallRecord*>(g_ptr_array_index(call_records, 1)), false);
+      static_cast<CallRecord*>(g_ptr_array_index(channel_call_records, 0)),
+      false);
 
-  g_ptr_array_set_size(call_records, 0);
+  g_ptr_array_set_size(embedder_call_records, 0);
+  g_ptr_array_set_size(channel_call_records, 0);
 
   // Resolve redispatch
   flush_channel_messages();
   EXPECT_EQ(redispatched->len, 1u);
   EXPECT_EQ(redispatch_events_and_clear(manager, redispatched), 1);
-  EXPECT_EQ(call_records->len, 0u);
+  EXPECT_EQ(embedder_call_records->len, 0u);
+  EXPECT_EQ(channel_call_records->len, 0u);
 
   EXPECT_TRUE(fl_keyboard_manager_is_state_clear(manager));
 }
@@ -834,8 +817,7 @@ TEST(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
          void* callback_user_data, gpointer user_data) {
         GPtrArray* call_records = static_cast<GPtrArray*>(user_data);
         g_ptr_array_add(call_records,
-                        call_record_new(CALL_RECORD_TYPE_EMBEDDER, event,
-                                        callback, callback_user_data));
+                        call_record_new(event, callback, callback_user_data));
       },
       call_records);
   fl_keyboard_manager_set_lookup_key_handler(
@@ -970,8 +952,7 @@ TEST(FlKeyboardManagerTest, SynthesizeModifiersIfNeeded) {
          void* callback_user_data, gpointer user_data) {
         GPtrArray* call_records = static_cast<GPtrArray*>(user_data);
         g_ptr_array_add(call_records,
-                        call_record_new(CALL_RECORD_TYPE_EMBEDDER, event,
-                                        callback, callback_user_data));
+                        call_record_new(event, callback, callback_user_data));
       },
       call_records);
 
