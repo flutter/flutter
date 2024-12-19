@@ -246,6 +246,7 @@ class ExpansionTile extends StatefulWidget {
     this.expandedCrossAxisAlignment,
     this.expandedAlignment,
     this.childrenPadding,
+    this.childrenBackgroundColor,
     this.backgroundColor,
     this.collapsedBackgroundColor,
     this.textColor,
@@ -406,6 +407,15 @@ class ExpansionTile extends StatefulWidget {
   /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
   ///   [ExpansionTileThemeData].
   final EdgeInsetsGeometry? childrenPadding;
+
+  /// The color to display behind the expanded children section of the tile.
+  ///
+  /// If this property is null, the value from [ExpansionTileThemeData.childrenBackgroundColor] is
+  /// used if specified. If both are null, then [backgroundColor] will be used.
+  ///
+  /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
+  ///   [ExpansionTileThemeData].
+  final Color? childrenBackgroundColor;
 
   /// The icon color of tile's expansion arrow icon when the sublist is expanded.
   ///
@@ -710,6 +720,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     final ThemeData theme = Theme.of(context);
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final Color backgroundColor = _backgroundColor.value ?? expansionTileTheme.backgroundColor ?? Colors.transparent;
+    final Color childrenBackgroundColor = widget.childrenBackgroundColor ?? expansionTileTheme.childrenBackgroundColor ?? backgroundColor;
     final ShapeBorder expansionTileBorder = _border.value ?? const Border(
       top: BorderSide(color: Colors.transparent),
       bottom: BorderSide(color: Colors.transparent),
@@ -771,7 +782,10 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
                 ?? expansionTileTheme.expandedAlignment
                 ?? Alignment.center,
               heightFactor: _heightFactor.value,
-              child: child,
+              child: ColoredBox(
+                color: childrenBackgroundColor,
+                child: child,
+              ),
             ),
           ),
         ],
@@ -906,9 +920,11 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
         enabled: !closed,
         child: Padding(
           padding: widget.childrenPadding ?? expansionTileTheme.childrenPadding ?? EdgeInsets.zero,
-          child: Column(
-            crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
-            children: widget.children,
+          child: Material(
+            child: Column(
+              crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
+              children: widget.children,
+            ),
           ),
         ),
       ),
