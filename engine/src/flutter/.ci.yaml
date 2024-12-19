@@ -50,6 +50,7 @@ targets:
     enabled_branches:
       - master
     recipe: engine_v2/engine_v2
+    bringup: true
     properties:
       config_name: local_engine
     # local_engine schedules a bunch of other builds, so it's likely to timeout waiting for those builds to run.
