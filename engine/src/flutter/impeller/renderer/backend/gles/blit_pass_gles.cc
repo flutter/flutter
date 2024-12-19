@@ -32,7 +32,6 @@ void BlitPassGLES::OnSetLabel(std::string_view label) {
 }
 
 [[nodiscard]] bool EncodeCommandsInReactor(
-    const std::shared_ptr<Allocator>& transients_allocator,
     const ReactorGLES& reactor,
     const std::vector<std::unique_ptr<BlitEncodeGLES>>& commands,
     const std::string& label) {
@@ -44,6 +43,7 @@ void BlitPassGLES::OnSetLabel(std::string_view label) {
 
   const auto& gl = reactor.GetProcTable();
 
+#ifdef IMPELLER_DEBUG
   fml::ScopedCleanupClosure pop_pass_debug_marker(
       [&gl]() { gl.PopDebugGroup(); });
   if (!label.empty()) {
@@ -51,8 +51,10 @@ void BlitPassGLES::OnSetLabel(std::string_view label) {
   } else {
     pop_pass_debug_marker.Release();
   }
+#endif  // IMPELLER_DEBUG
 
   for (const auto& command : commands) {
+#ifdef IMPELLER_DEBUG
     fml::ScopedCleanupClosure pop_cmd_debug_marker(
         [&gl]() { gl.PopDebugGroup(); });
     auto label = command->GetLabel();
@@ -61,6 +63,7 @@ void BlitPassGLES::OnSetLabel(std::string_view label) {
     } else {
       pop_cmd_debug_marker.Release();
     }
+#endif  // IMPELLER_DEBUG
 
     if (!command->Encode(reactor)) {
       return false;
@@ -71,8 +74,7 @@ void BlitPassGLES::OnSetLabel(std::string_view label) {
 }
 
 // |BlitPass|
-bool BlitPassGLES::EncodeCommands(
-    const std::shared_ptr<Allocator>& transients_allocator) const {
+bool BlitPassGLES::EncodeCommands() const {
   if (!IsValid()) {
     return false;
   }
@@ -81,11 +83,9 @@ bool BlitPassGLES::EncodeCommands(
   }
 
   std::shared_ptr<const BlitPassGLES> shared_this = shared_from_this();
-  return reactor_->AddOperation([transients_allocator,
-                                 blit_pass = std::move(shared_this),
+  return reactor_->AddOperation([blit_pass = std::move(shared_this),
                                  label = label_](const auto& reactor) {
-    auto result = EncodeCommandsInReactor(transients_allocator, reactor,
-                                          blit_pass->commands_, label);
+    auto result = EncodeCommandsInReactor(reactor, blit_pass->commands_, label);
     FML_CHECK(result) << "Must be able to encode GL commands without error.";
   });
 }
