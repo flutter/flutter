@@ -27,7 +27,17 @@ if [ -f "$FLUTTER_ROOT/DEPS" ] && [ -f "$FLUTTER_ROOT/engine/src/.gn" ]; then
   BRANCH=$(git -C "$FLUTTER_ROOT" rev-parse --abbrev-ref HEAD)
   # In a fusion repository; the engine.version comes from the git hashes.
   if [ -z "${LUCI_CONTEXT}" ]; then
-    ENGINE_VERSION=$(git -C "$FLUTTER_ROOT" merge-base HEAD upstream/master)
+    set +e
+    # Run the git command and capture the exit code
+    git -C "$FLUTTER_ROOT" remote get-url upstream > /dev/null 2>&1
+    exit_code=$?
+    set -e
+
+    if [[ $exit_code -eq 0 ]]; then
+      ENGINE_VERSION=$(git -C "$FLUTTER_ROOT" merge-base HEAD upstream/master)
+    else
+      ENGINE_VERSION=$(git -C "$FLUTTER_ROOT" merge-base HEAD origin/master)
+    fi
   else
     ENGINE_VERSION=$(git -C "$FLUTTER_ROOT" rev-parse HEAD)
   fi
@@ -39,22 +49,11 @@ if [ -f "$FLUTTER_ROOT/DEPS" ] && [ -f "$FLUTTER_ROOT/engine/src/.gn" ]; then
     # The realm on CI is passed in.
     if [ -n "${FLUTTER_REALM}" ]; then
       echo $FLUTTER_REALM > "$FLUTTER_ROOT/bin/internal/engine.realm"
-      ENGINE_REALM="$FLUTTER_REALM"
-    else
-      if [ -f "$FLUTTER_ROOT/bin/internal/engine.realm" ]; then
-        ENGINE_REALM=$(cat "$FLUTTER_ROOT/bin/internal/engine.realm" | tr -d '[:space:]')
-      fi
     fi
-  else
-    # Release branch - these files will exist
-    ENGINE_VERSION=$(cat "$FLUTTER_ROOT/bin/internal/engine.version")
-    ENGINE_REALM=$(cat "$FLUTTER_ROOT/bin/internal/engine.realm" | tr -d '[:space:]')
   fi
-else
-  # Non-fusion repository - these files will exist
-  ENGINE_VERSION=$(cat "$FLUTTER_ROOT/bin/internal/engine.version")
-  ENGINE_REALM=$(cat "$FLUTTER_ROOT/bin/internal/engine.realm" | tr -d '[:space:]')
 fi
+ENGINE_VERSION=$(cat "$FLUTTER_ROOT/bin/internal/engine.version")
+ENGINE_REALM=$(cat "$FLUTTER_ROOT/bin/internal/engine.realm" | tr -d '[:space:]')
 
 if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; then
   command -v curl > /dev/null 2>&1 || {
