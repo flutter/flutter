@@ -27,7 +27,17 @@ if [ -f "$FLUTTER_ROOT/DEPS" ] && [ -f "$FLUTTER_ROOT/engine/src/.gn" ]; then
   BRANCH=$(git -C "$FLUTTER_ROOT" rev-parse --abbrev-ref HEAD)
   # In a fusion repository; the engine.version comes from the git hashes.
   if [ -z "${LUCI_CONTEXT}" ]; then
-    ENGINE_VERSION=$(git -C "$FLUTTER_ROOT" merge-base HEAD upstream/master)
+    set +e
+    # Run the git command and capture the exit code
+    git -C "$flutterRoot" remote get-url upstream > /dev/null 2>&1
+    exit_code=$?
+    set -e
+
+    if [[ $exit_code -eq 0 ]]; then
+      ENGINE_VERSION=$(git -C "$FLUTTER_ROOT" merge-base HEAD upstream/master)
+    else
+      ENGINE_VERSION=$(git -C "$FLUTTER_ROOT" merge-base HEAD origin/master)
+    fi
   else
     ENGINE_VERSION=$(git -C "$FLUTTER_ROOT" rev-parse HEAD)
   fi
