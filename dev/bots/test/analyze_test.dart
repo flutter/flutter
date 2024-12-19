@@ -50,18 +50,14 @@ void main() {
   test('analyze.dart - verifyDeprecations', () async {
     final String result = await capture(() => verifyDeprecations(testRootPath, minimumMatches: 2), shouldHaveErrors: true);
     final String lines = <String>[
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:12: Deprecation notice does not match required pattern. There might be a missing space character at the end of the line.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:18: Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: STYLE_GUIDE_URL',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:25: Deprecation notice should be a grammatically correct sentence and end with a period; notice appears to be "Also bad grammar".',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:29: Deprecation notice does not match required pattern.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:32: Deprecation notice does not match required pattern.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:37: Deprecation notice does not match required pattern. It might be missing the line saying "This feature was deprecated after...".',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:41: Deprecation notice does not match required pattern. There might not be an explanatory message.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:48: End of deprecation notice does not match required pattern.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:51: Unexpected deprecation notice indent.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:70: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:76: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:99: Deprecation notice does not match required pattern. You might have used double quotes (") for the string instead of single quotes (\').',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:12: Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: STYLE_GUIDE_URL',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:18: Deprecation notice should be a grammatically correct sentence and end with a period; notice appears to be "Also bad grammar".',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:23: Deprecation notice must be an adjacent string.',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:26: Deprecation notice must be an adjacent string.',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:31: Deprecation notice must be an adjacent string.',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:50: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:56: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
+        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:79: Deprecation notice does not match required pattern. You might have used double quotes (") for the string instead of single quotes (\').',
       ]
       .map((String line) {
         return line
@@ -224,8 +220,15 @@ void main() {
       minimumMatches: 1,
     ), shouldHaveErrors: true);
 
-    expect(result, contains(':15'));
-    expect(result, isNot(contains(':12')));
+    expect(result, isNot(contains(':13')));
+    expect(result, isNot(contains(':14')));
+    expect(result, isNot(contains(':15')));
+    expect(result, isNot(contains(':19')));
+    expect(result, isNot(contains(':20')));
+    expect(result, isNot(contains(':21')));
+    expect(result, isNot(contains(':22')));
+
+    expect(result, contains(':17'));
   });
 
   test('analyze.dart - verifyTabooDocumentation', () async {
