@@ -14,7 +14,8 @@ import 'package:path/path.dart' as path;
 const double todoCost = 1009.0; // about two average SWE days, in dollars
 const double ignoreCost = 2003.0; // four average SWE days, in dollars
 const double pythonCost = 3001.0; // six average SWE days, in dollars
-const double skipCost = 2473.0; // 20 hours: 5 to fix the issue we're ignoring, 15 to fix the bugs we missed because the test was off
+const double skipCost =
+    2473.0; // 20 hours: 5 to fix the issue we're ignoring, 15 to fix the bugs we missed because the test was off
 const double ignoreForFileCost = 2477.0; // similar thinking as skipCost
 const double asDynamicCost = 2011.0; // a few days to refactor the code.
 const double deprecationCost = 233.0; // a few hours to remove the old code.
@@ -79,13 +80,17 @@ Future<int> findGlobalsForFile(File file) async {
 }
 
 Future<double> findCostsForRepo() async {
-  final Process git = await startProcess(
-    'git',
-    <String>['ls-files', '--exclude', 'engine',  '--full-name', flutterDirectory.path],
-    workingDirectory: flutterDirectory.path,
-  );
+  final Process git = await startProcess('git', <String>[
+    'ls-files',
+    '--exclude',
+    'engine',
+    '--full-name',
+    flutterDirectory.path,
+  ], workingDirectory: flutterDirectory.path);
   double total = 0.0;
-  await for (final String entry in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
+  await for (final String entry in git.stdout
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())) {
     total += await findCostsForFile(File(path.join(flutterDirectory.path, entry)));
   }
   final int gitExitCode = await git.exitCode;
@@ -96,13 +101,15 @@ Future<double> findCostsForRepo() async {
 }
 
 Future<int> findGlobalsForTool() async {
-  final Process git = await startProcess(
-    'git',
-    <String>['ls-files', '--full-name', path.join(flutterDirectory.path, 'packages', 'flutter_tools')],
-    workingDirectory: flutterDirectory.path,
-  );
+  final Process git = await startProcess('git', <String>[
+    'ls-files',
+    '--full-name',
+    path.join(flutterDirectory.path, 'packages', 'flutter_tools'),
+  ], workingDirectory: flutterDirectory.path);
   int total = 0;
-  await for (final String entry in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
+  await for (final String entry in git.stdout
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())) {
     total += await findGlobalsForFile(File(path.join(flutterDirectory.path, entry)));
   }
   final int gitExitCode = await git.exitCode;
@@ -119,7 +126,9 @@ Future<int> countDependencies() async {
   )).split('\n');
   final int count = lines.where((String line) => line.contains('->')).length;
   if (count < 2) {
-    throw Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
+    throw Exception(
+      '"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}',
+    );
   }
   return count;
 }
@@ -131,7 +140,9 @@ Future<int> countConsumerDependencies() async {
   )).split('\n');
   final int count = lines.where((String line) => line.contains('->')).length;
   if (count < 2) {
-    throw Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
+    throw Exception(
+      '"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}',
+    );
   }
   return count;
 }
