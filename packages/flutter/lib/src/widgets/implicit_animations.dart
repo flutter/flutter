@@ -358,8 +358,7 @@ typedef TweenVisitor<T extends Object> = Tween<T>? Function(Tween<T>? tween, T t
 abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin<T> {
   /// The animation controller driving this widget's implicit animations.
   @protected
-  AnimationController get controller => _controller;
-  late final AnimationController _controller = AnimationController(
+  late final AnimationController controller = AnimationController(
     duration: widget.duration,
     debugLabel: kDebugMode ? widget.toStringShort() : null,
     vsync: this,
@@ -373,7 +372,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   @override
   void initState() {
     super.initState();
-    _controller.addStatusListener((AnimationStatus status) {
+    controller.addStatusListener((AnimationStatus status) {
       if (status.isCompleted) {
         widget.onEnd?.call();
       }
@@ -390,42 +389,28 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
       _animation.dispose();
       _animation = _createCurve();
     }
-    _controller.duration = widget.duration;
+    controller.duration = widget.duration;
     if (_constructTweens()) {
       forEachTween((Tween<dynamic>? tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
-        _updateTween(tween, targetValue);
-        return tween;
+        return tween
+          ?..begin = tween.evaluate(_animation)
+          ..end = targetValue;
       });
-      _controller
-        ..value = 0.0
-        ..forward();
+      controller.forward(from: 0.0);
       didUpdateTweens();
     }
   }
 
   CurvedAnimation _createCurve() {
-    return CurvedAnimation(parent: _controller, curve: widget.curve);
+    return CurvedAnimation(parent: controller, curve: widget.curve);
   }
 
   @protected
   @override
   void dispose() {
     _animation.dispose();
-    _controller.dispose();
+    controller.dispose();
     super.dispose();
-  }
-
-  bool _shouldAnimateTween(Tween<dynamic> tween, dynamic targetValue) {
-    return targetValue != (tween.end ?? tween.begin);
-  }
-
-  void _updateTween(Tween<dynamic>? tween, dynamic targetValue) {
-    if (tween == null) {
-      return;
-    }
-    tween
-      ..begin = tween.evaluate(_animation)
-      ..end = targetValue;
   }
 
   bool _constructTweens() {
@@ -433,7 +418,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     forEachTween((Tween<dynamic>? tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
       if (targetValue != null) {
         tween ??= constructor(targetValue);
-        if (_shouldAnimateTween(tween, targetValue)) {
+        if (targetValue != (tween.end ?? tween.begin)) {
           shouldStartAnimation = true;
         } else {
           tween.end ??= tween.begin;
