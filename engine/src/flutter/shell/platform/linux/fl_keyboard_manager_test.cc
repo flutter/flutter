@@ -374,7 +374,6 @@ class KeyboardTester {
     g_clear_object(&messenger_);
     g_clear_object(&engine_);
     g_clear_object(&manager_);
-    g_clear_pointer(&redispatched_events_, g_ptr_array_unref);
   }
 
   FlKeyboardManager* manager() { return manager_; }
@@ -425,17 +424,6 @@ class KeyboardTester {
     fl_mock_view_set_text_filter_result(view_, response);
   }
 
-  void recordRedispatchedEventsTo(GPtrArray* storage) {
-    redispatched_events_ = g_ptr_array_ref(storage);
-    fl_keyboard_manager_set_redispatch_handler(
-        manager_,
-        [](FlKeyEvent* event, gpointer user_data) {
-          KeyboardTester* self = reinterpret_cast<KeyboardTester*>(user_data);
-          g_ptr_array_add(self->redispatched_events_, g_object_ref(event));
-        },
-        this);
-  }
-
   void setLayout(const MockLayoutData& layout) {
     layout_data_ = &layout;
     if (manager_ != nullptr) {
@@ -448,7 +436,6 @@ class KeyboardTester {
   FlMockKeyBinaryMessenger* messenger_ = nullptr;
   FlEngine* engine_ = nullptr;
   FlKeyboardManager* manager_ = nullptr;
-  GPtrArray* redispatched_events_ = nullptr;
   const MockLayoutData* layout_data_;
   EmbedderCallHandler embedder_handler_;
 };
@@ -536,7 +523,13 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
 
   /// Test 1: One event that is handled by the framework
   tester.recordEmbedderCallsTo(call_records);
-  tester.recordRedispatchedEventsTo(redispatched);
+  fl_keyboard_manager_set_redispatch_handler(
+      tester.manager(),
+      [](FlKeyEvent* event, gpointer user_data) {
+        GPtrArray* redispatched = static_cast<GPtrArray*>(user_data);
+        g_ptr_array_add(redispatched, g_object_ref(event));
+      },
+      redispatched);
 
   // Dispatch a key event
   g_autoptr(FlKeyEvent) event1 = fl_key_event_new(
@@ -618,7 +611,13 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
 
   /// Test 1: One event that is handled by the framework
   tester.respondToEmbedderCallsWithAndRecordsTo(true, call_records);
-  tester.recordRedispatchedEventsTo(redispatched);
+  fl_keyboard_manager_set_redispatch_handler(
+      tester.manager(),
+      [](FlKeyEvent* event, gpointer user_data) {
+        GPtrArray* redispatched = static_cast<GPtrArray*>(user_data);
+        g_ptr_array_add(redispatched, g_object_ref(event));
+      },
+      redispatched);
 
   // Dispatch a key event
   g_autoptr(FlKeyEvent) event1 = fl_key_event_new(
@@ -663,7 +662,13 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
 
   tester.recordEmbedderCallsTo(call_records);
   tester.recordChannelCallsTo(call_records);
-  tester.recordRedispatchedEventsTo(redispatched);
+  fl_keyboard_manager_set_redispatch_handler(
+      tester.manager(),
+      [](FlKeyEvent* event, gpointer user_data) {
+        GPtrArray* redispatched = static_cast<GPtrArray*>(user_data);
+        g_ptr_array_add(redispatched, g_object_ref(event));
+      },
+      redispatched);
 
   /// Test 1: One delegate responds true, the other false
 
