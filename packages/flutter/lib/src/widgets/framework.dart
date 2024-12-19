@@ -3120,7 +3120,9 @@ class BuildOwner {
 
   /// The number of [GlobalKey] instances that are currently associated with
   /// [Element]s that have been built by this build owner.
-  int get globalKeyCount => _globalKeyRegistry.length;
+  int get
+  globalKeyCount =>
+      _globalKeyRegistry.length;
 
   void _debugRemoveGlobalKeyReservationFor(Element parent, Element child) {
     assert(() {
