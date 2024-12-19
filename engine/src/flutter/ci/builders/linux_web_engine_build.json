@@ -60,5 +60,6 @@
       }
     }
   ],
-  "tests": []
+  "tests": [],
+  "cas_archive": false
 }
