@@ -11,6 +11,7 @@ import 'dart:math' as math;
 
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/source/line_info.dart';
 import 'package:collection/collection.dart';
 import 'package:file/file.dart' as fs;
 import 'package:file/local.dart';
@@ -322,6 +323,43 @@ Future<bool> _isPortAvailable(int port) async {
 
 String locationInFile(ResolvedUnitResult unit, AstNode node, String workingDirectory) {
   return '${path.relative(path.relative(unit.path, from: workingDirectory))}:${unit.lineInfo.getLocation(node.offset).lineNumber}';
+}
+
+/// Whether the given [AstNode] within the `compilationUnit` is under the effect
+/// of an inline ignore directive described by `ignoreDirectivePattern`.
+///
+/// The `compilationUnit` parameter is the parsed dart file containing the given
+/// [AstNode]. The `ignoreDirectivePattern` is a [Pattern] that should precisely
+/// match the ignore directive of interest (including the slashes, example:
+/// `// flutter_ignore: deprecation_syntax`).
+///
+/// The implementation assumes the `ignoreDirectivePattern` matches no more than
+/// one line. It searches for the given `ignoreDirectivePattern` in the
+/// `compilationUnit`, that either starts the line above the given `node`, or
+/// appears after `node` but on the same line, such that the ignore directive
+/// works the same way as dart's "ignore" comment: it can either be added above
+/// or after the line that needs to be exemped.
+bool hasInlineIgnore(AstNode node, ParseStringResult compilationUnit, Pattern ignoreDirectivePattern) {
+  final LineInfo lineInfo = compilationUnit.lineInfo;
+  // In case the node has multiple lines, match from its start offset.
+  final String textAfterNode = compilationUnit.content.substring(
+    node.offset,
+    // This assumes every line ends with a newline character (including the last
+    // line) and the new line character is not included to match the given pattern.
+    lineInfo.getOffsetOfLineAfter(node.offset) - 1,
+  );
+  if (textAfterNode.contains(ignoreDirectivePattern)) {
+    return true;
+  }
+  // The lineNumber getter uses one-based index while everything else uses zero-based index.
+  final int lineNumber = lineInfo.getLocation(node.offset).lineNumber - 1;
+  if (lineNumber <= 0) {
+    return false;
+  }
+  return compilationUnit.content.substring(
+    lineInfo.getOffsetOfLine(lineNumber - 1),
+    lineInfo.getOffsetOfLine(lineNumber) - 1, // Excludes LF, see the comment above.
+  ).trimLeft().contains(ignoreDirectivePattern);
 }
 
 // The seed used to shuffle tests. If not passed with
