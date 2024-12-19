@@ -304,8 +304,9 @@ void main() {
         await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
         handle.dispose();
       },
+      // DataTables are not accessible, https://github.com/flutter/flutter/issues/10830
       skip: true,
-    ); // DataTables are not accessible, https://github.com/flutter/flutter/issues/10830
+    );
 
     testWidgets('date_and_time_picker_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
