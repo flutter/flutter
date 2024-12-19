@@ -56,15 +56,16 @@ void main() {
     final io.ProcessResult result = io.Process.runSync(
       p.join(tmpFlutterRoot.path, 'dev', 'tools', 'bin', 'engine_hash.sh'),
       <String>[],
-      environment: <String, String>{
-        'GIT': p.join(p.current, 'test', 'mock_git.sh'),
-      },
+      environment: <String, String>{'GIT': p.join(p.current, 'test', 'mock_git.sh')},
     );
     expect(result.exitCode, 0, reason: result.stderr.toString());
-    expect(result.stdout, stringContainsInOrder(<String>[
-      'Mock Git: -C',
-      'engine_hash_test',
-      'merge-base HEAD upstream/master',
-    ]));
+    expect(
+      result.stdout,
+      stringContainsInOrder(<String>[
+        'Mock Git: -C',
+        'engine_hash_test',
+        'merge-base HEAD upstream/master',
+      ]),
+    );
   });
 }
