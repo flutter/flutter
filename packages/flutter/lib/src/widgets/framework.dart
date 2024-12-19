@@ -310,7 +310,32 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
 @immutable
 abstract class Widget extends DiagnosticableTree {
   /// Initializes [key] for subclasses.
-  const Widget({ this.key });
+  const Widget({Key? key}) : objectKey = key;
+
+  /// Returns the key passed to this widget's constructor.
+  ///
+  /// This getter will be deprecated in a future release, to allow any [Object]
+  /// to be used as a key. Consider using the [objectKey] field to access
+  /// this value.
+  Key? get key {
+    final Object? key = objectKey;
+    assert(() {
+      if (key is Key?) {
+        return true;
+      }
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('$runtimeType\'s key is not a "Key".'),
+        ErrorDescription(
+          'This widget has its key set to "$key", which is a ${key.runtimeType}.',
+        ),
+        ErrorHint(
+          "Consider accessing the widget's `.objectKey` getter instead.",
+        )
+      ]);
+    }());
+
+    return key is Key ? key : null;
+  }
 
   /// Controls how one widget replaces another widget in the tree.
   ///
@@ -333,8 +358,9 @@ abstract class Widget extends DiagnosticableTree {
   ///
   /// See also:
   ///
-  ///  * The discussions at [Key] and [GlobalKey].
-  final Key? key;
+  ///  * [key], which returns this value if a [Key] object was passed.
+  ///  * The discussion at [GlobalKey].
+  final Object? objectKey;
 
   /// Inflates this configuration to a concrete instance.
   ///
@@ -351,7 +377,7 @@ abstract class Widget extends DiagnosticableTree {
   @override
   String toStringShort() {
     final String type = objectRuntimeType(this, 'Widget');
-    return key == null ? type : '$type-$key';
+    return objectKey == null ? type : '$type-$objectKey';
   }
 
   @override
@@ -380,7 +406,7 @@ abstract class Widget extends DiagnosticableTree {
   /// different.
   static bool canUpdate(Widget oldWidget, Widget newWidget) {
     return oldWidget.runtimeType == newWidget.runtimeType
-        && oldWidget.key == newWidget.key;
+        && oldWidget.objectKey == newWidget.objectKey;
   }
 
   // Return a numeric encoding of the specific `Widget` concrete subtype.
