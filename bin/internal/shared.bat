@@ -82,7 +82,7 @@ GOTO :after_subroutine
   REM The following IF conditions are all linked with a logical OR. However,
   REM there is no OR operator in batch and a GOTO construct is used as replacement.
 
-  GOTO do_ensure_engine_version
+  CALL :do_ensure_engine_version
   IF NOT EXIST "%engine_stamp%" GOTO do_sdk_update_and_snapshot
   SET /P dart_required_version=<"%engine_version_path%"
   SET /P dart_installed_version=<"%engine_stamp%"
