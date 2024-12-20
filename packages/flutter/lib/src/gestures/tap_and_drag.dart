@@ -1169,10 +1169,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     }
 
     if (dragStartBehavior == DragStartBehavior.start) {
-      _initialPosition += OffsetPair(
-        global: event.delta,
-        local: event.localDelta,
-      );
+      _initialPosition += OffsetPair(global: event.delta, local: event.localDelta);
       _currentPosition = _initialPosition;
     }
     _checkDragStart(event);
@@ -1187,10 +1184,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
         untransformedDelta: localDelta,
         untransformedEndPosition: correctedLocalPosition,
       );
-      final OffsetPair updateDelta = OffsetPair(
-        local: localDelta,
-        global: globalUpdateDelta,
-      );
+      final OffsetPair updateDelta = OffsetPair(local: localDelta, global: globalUpdateDelta);
       // Only adds delta for down behaviour
       _checkDragUpdate(event, corrected: _initialPosition + updateDelta);
     }

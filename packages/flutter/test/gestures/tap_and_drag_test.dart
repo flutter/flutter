@@ -1030,13 +1030,14 @@ void main() {
 
   testGesture('Contains correct positions in the drag end details', (GestureTester tester) {
     late TapDragEndDetails tapDragEndDetails;
-    tapAndDrag = TapAndHorizontalDragGestureRecognizer()
-      ..dragStartBehavior = DragStartBehavior.down
-      ..eagerVictoryOnDrag = true
-      ..maxConsecutiveTap = 3
-      ..onDragEnd = (TapDragEndDetails details) {
-        tapDragEndDetails = details;
-      };
+    tapAndDrag =
+        TapAndHorizontalDragGestureRecognizer()
+          ..dragStartBehavior = DragStartBehavior.down
+          ..eagerVictoryOnDrag = true
+          ..maxConsecutiveTap = 3
+          ..onDragEnd = (TapDragEndDetails details) {
+            tapDragEndDetails = details;
+          };
     addTearDown(tapAndDrag.dispose);
 
     final TestPointer pointer = TestPointer(5);
