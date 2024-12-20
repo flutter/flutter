@@ -29,7 +29,7 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/create_base.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/flutter_project_metadata.dart' show FlutterProjectType;
+import 'package:flutter_tools/src/flutter_project_metadata.dart' show FlutterTemplateType;
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -233,60 +233,6 @@ void main() {
           ),
       Logger: () => logger,
       Analytics: () => fakeAnalytics,
-    },
-  );
-
-  testUsingContext(
-    'can create a skeleton (list/detail) app',
-    () async {
-      await _createAndAnalyzeProject(
-        projectDir,
-        <String>['-t', 'skeleton', '-i', 'objc', '-a', 'java', '--implementation-tests'],
-        <String>[
-          '.dart_tool/flutter_gen/pubspec.yaml',
-          '.dart_tool/flutter_gen/gen_l10n/app_localizations.dart',
-          'analysis_options.yaml',
-          'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
-          'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
-          'flutter_project.iml',
-          'ios/Flutter/AppFrameworkInfo.plist',
-          'ios/Runner/AppDelegate.m',
-          'ios/Runner/GeneratedPluginRegistrant.h',
-          'lib/main.dart',
-          'l10n.yaml',
-          'assets/images/2.0x/flutter_logo.png',
-          'assets/images/flutter_logo.png',
-          'assets/images/3.0x/flutter_logo.png',
-          'test/unit_test.dart',
-          'test/widget_test.dart',
-          'test/implementation_test.dart',
-          'lib/src/localization/app_en.arb',
-          'lib/src/app.dart',
-          'lib/src/sample_feature/sample_item_details_view.dart',
-          'lib/src/sample_feature/sample_item_list_view.dart',
-          'lib/src/sample_feature/sample_item.dart',
-          'lib/src/settings/settings_controller.dart',
-          'lib/src/settings/settings_view.dart',
-          'lib/src/settings/settings_service.dart',
-          'lib/main.dart',
-          'pubspec.yaml',
-          'README.md',
-        ],
-        expectedGitignoreLines: flutterPluginsIgnores,
-      );
-      return _runFlutterTest(projectDir);
-    },
-    overrides: <Type, Generator>{
-      Pub:
-          () => Pub.test(
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            processManager: globals.processManager,
-            usage: globals.flutterUsage,
-            botDetector: globals.botDetector,
-            platform: globals.platform,
-            stdio: mockStdio,
-          ),
     },
   );
 
@@ -4629,15 +4575,14 @@ void main() {
     () async {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
-      final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[
-        FlutterProjectType.app,
-        FlutterProjectType.skeleton,
-        FlutterProjectType.module,
+      final List<FlutterTemplateType> relevantProjectTypes = <FlutterTemplateType>[
+        FlutterTemplateType.app,
+        FlutterTemplateType.module,
       ];
 
-      for (final FlutterProjectType projectType in relevantProjectTypes) {
+      for (final FlutterTemplateType projectType in relevantProjectTypes) {
         final String relevantAgpVersion =
-            projectType == FlutterProjectType.module
+            projectType == FlutterTemplateType.module
                 ? _kIncompatibleAgpVersionForModule
                 : templateAndroidGradlePluginVersion;
         final String expectedMessage = getIncompatibleJavaGradleAgpMessageHeader(
@@ -4657,7 +4602,7 @@ void main() {
           'create',
           '--no-pub',
           '--template=${projectType.cliName}',
-          if (projectType != FlutterProjectType.module) '--platforms=android',
+          if (projectType != FlutterTemplateType.module) '--platforms=android',
           projectDir.path,
         ]);
 
@@ -4674,7 +4619,7 @@ void main() {
         );
 
         // Check expected file for updating Gradle version is present.
-        if (projectType == FlutterProjectType.app || projectType == FlutterProjectType.skeleton) {
+        if (projectType == FlutterTemplateType.app) {
           expect(
             logger.warningText,
             contains(
@@ -4716,17 +4661,16 @@ void main() {
     () async {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
-      final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[
-        FlutterProjectType.app,
-        FlutterProjectType.skeleton,
-        FlutterProjectType.pluginFfi,
-        FlutterProjectType.module,
-        FlutterProjectType.plugin,
+      final List<FlutterTemplateType> relevantProjectTypes = <FlutterTemplateType>[
+        FlutterTemplateType.app,
+        FlutterTemplateType.pluginFfi,
+        FlutterTemplateType.module,
+        FlutterTemplateType.plugin,
       ];
 
-      for (final FlutterProjectType projectType in relevantProjectTypes) {
+      for (final FlutterTemplateType projectType in relevantProjectTypes) {
         final String relevantAgpVersion =
-            projectType == FlutterProjectType.module
+            projectType == FlutterTemplateType.module
                 ? _kIncompatibleAgpVersionForModule
                 : templateAndroidGradlePluginVersion;
         final String expectedMessage = getIncompatibleJavaGradleAgpMessageHeader(
@@ -4746,7 +4690,7 @@ void main() {
           'create',
           '--no-pub',
           '--template=${projectType.cliName}',
-          if (projectType != FlutterProjectType.module) '--platforms=android',
+          if (projectType != FlutterTemplateType.module) '--platforms=android',
           projectDir.path,
         ]);
 
@@ -4759,14 +4703,13 @@ void main() {
         );
 
         // Check expected file(s) for updating AGP version is/are present.
-        if (projectType == FlutterProjectType.app ||
-            projectType == FlutterProjectType.skeleton ||
-            projectType == FlutterProjectType.pluginFfi) {
+        if (projectType == FlutterTemplateType.app ||
+            projectType == FlutterTemplateType.pluginFfi) {
           expect(
             logger.warningText,
             contains(globals.fs.path.join(projectDir.path, 'android/build.gradle')),
           );
-        } else if (projectType == FlutterProjectType.plugin) {
+        } else if (projectType == FlutterTemplateType.plugin) {
           expect(
             logger.warningText,
             contains(globals.fs.path.join(projectDir.path, 'android/app/build.gradle')),
@@ -4808,17 +4751,16 @@ void main() {
     () async {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
-      final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[
-        FlutterProjectType.app,
-        FlutterProjectType.skeleton,
-        FlutterProjectType.pluginFfi,
-        FlutterProjectType.module,
-        FlutterProjectType.plugin,
+      final List<FlutterTemplateType> relevantProjectTypes = <FlutterTemplateType>[
+        FlutterTemplateType.app,
+        FlutterTemplateType.pluginFfi,
+        FlutterTemplateType.module,
+        FlutterTemplateType.plugin,
       ];
 
-      for (final FlutterProjectType projectType in relevantProjectTypes) {
+      for (final FlutterTemplateType projectType in relevantProjectTypes) {
         final String relevantAgpVersion =
-            projectType == FlutterProjectType.module
+            projectType == FlutterTemplateType.module
                 ? _kIncompatibleAgpVersionForModule
                 : templateAndroidGradlePluginVersion;
         final String unexpectedIncompatibleAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(
@@ -4839,7 +4781,7 @@ void main() {
           'create',
           '--no-pub',
           '--template=${projectType.cliName}',
-          if (projectType != FlutterProjectType.module) '--platforms=android',
+          if (projectType != FlutterTemplateType.module) '--platforms=android',
           projectDir.path,
         ]);
 
@@ -4866,17 +4808,16 @@ void main() {
     () async {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
-      final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[
-        FlutterProjectType.app,
-        FlutterProjectType.skeleton,
-        FlutterProjectType.pluginFfi,
-        FlutterProjectType.module,
-        FlutterProjectType.plugin,
+      final List<FlutterTemplateType> relevantProjectTypes = <FlutterTemplateType>[
+        FlutterTemplateType.app,
+        FlutterTemplateType.pluginFfi,
+        FlutterTemplateType.module,
+        FlutterTemplateType.plugin,
       ];
 
-      for (final FlutterProjectType projectType in relevantProjectTypes) {
+      for (final FlutterTemplateType projectType in relevantProjectTypes) {
         final String relevantAgpVersion =
-            projectType == FlutterProjectType.module
+            projectType == FlutterTemplateType.module
                 ? _kIncompatibleAgpVersionForModule
                 : templateAndroidGradlePluginVersion;
         final String unexpectedIncompatibleAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(
@@ -4897,7 +4838,7 @@ void main() {
           'create',
           '--no-pub',
           '--template=${projectType.cliName}',
-          if (projectType != FlutterProjectType.module) '--platforms=android',
+          if (projectType != FlutterTemplateType.module) '--platforms=android',
           projectDir.path,
         ]);
 
@@ -4924,17 +4865,16 @@ void main() {
     () async {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
-      final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[
-        FlutterProjectType.app,
-        FlutterProjectType.skeleton,
-        FlutterProjectType.pluginFfi,
-        FlutterProjectType.module,
-        FlutterProjectType.plugin,
+      final List<FlutterTemplateType> relevantProjectTypes = <FlutterTemplateType>[
+        FlutterTemplateType.app,
+        FlutterTemplateType.pluginFfi,
+        FlutterTemplateType.module,
+        FlutterTemplateType.plugin,
       ];
 
-      for (final FlutterProjectType projectType in relevantProjectTypes) {
+      for (final FlutterTemplateType projectType in relevantProjectTypes) {
         final String relevantAgpVersion =
-            projectType == FlutterProjectType.module
+            projectType == FlutterTemplateType.module
                 ? _kIncompatibleAgpVersionForModule
                 : templateAndroidGradlePluginVersion;
         final String unexpectedIncompatibleAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(
@@ -4955,7 +4895,7 @@ void main() {
           'create',
           '--no-pub',
           '--template=${projectType.cliName}',
-          if (projectType != FlutterProjectType.module) '--platforms=android',
+          if (projectType != FlutterTemplateType.module) '--platforms=android',
           projectDir.path,
         ]);
 
