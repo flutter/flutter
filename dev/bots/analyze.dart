@@ -166,13 +166,10 @@ Future<void> run(List<String> arguments) async {
 
   // Ensure that all package dependencies are in sync.
   printProgress('Package dependencies...');
-  await runCommand(
-      flutter,
-      <String>[
-        'update-packages',
-        '--verify-only',
-      ],
-      workingDirectory: flutterRoot);
+  await runCommand(flutter, <String>[
+    'update-packages',
+    '--verify-only',
+  ], workingDirectory: flutterRoot);
 
   /// Ensure that no new dependencies have been accidentally
   /// added to core packages.
@@ -187,13 +184,10 @@ Future<void> run(List<String> arguments) async {
   );
 
   printProgress('Check formatting of Dart files...');
-  await runCommand(
-      dart,
-      <String>[
-        '--enable-asserts',
-        path.join(flutterRoot, 'dev', 'tools', 'bin', 'format.dart'),
-      ],
-      workingDirectory: flutterRoot);
+  await runCommand(dart, <String>[
+    '--enable-asserts',
+    path.join(flutterRoot, 'dev', 'tools', 'bin', 'format.dart'),
+  ], workingDirectory: flutterRoot);
 
   if (dartAnalyzeResult.exitCode == 0) {
     // Only run the private lints when the code is free of type errors. The
@@ -246,37 +240,28 @@ Future<void> run(List<String> arguments) async {
 
   // Analyze the code in `{@tool snippet}` sections in the repo.
   printProgress('Snippet code...');
-  await runCommand(
-      dart,
-      <String>[
-        '--enable-asserts',
-        path.join(flutterRoot, 'dev', 'bots', 'analyze_snippet_code.dart'),
-        '--verbose',
-      ],
-      workingDirectory: flutterRoot);
+  await runCommand(dart, <String>[
+    '--enable-asserts',
+    path.join(flutterRoot, 'dev', 'bots', 'analyze_snippet_code.dart'),
+    '--verbose',
+  ], workingDirectory: flutterRoot);
 
   // Make sure that all of the existing samples are linked from at least one API doc comment.
   printProgress('Code sample link validation...');
-  await runCommand(
-      dart,
-      <String>[
-        '--enable-asserts',
-        path.join(flutterRoot, 'dev', 'bots', 'check_code_samples.dart'),
-      ],
-      workingDirectory: flutterRoot);
+  await runCommand(dart, <String>[
+    '--enable-asserts',
+    path.join(flutterRoot, 'dev', 'bots', 'check_code_samples.dart'),
+  ], workingDirectory: flutterRoot);
 
   // Try analysis against a big version of the gallery; generate into a temporary directory.
   printProgress('Dart analysis (mega gallery)...');
   final Directory outDir = Directory.systemTemp.createTempSync('flutter_mega_gallery.');
   try {
-    await runCommand(
-        dart,
-        <String>[
-          path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart'),
-          '--out',
-          outDir.path,
-        ],
-        workingDirectory: flutterRoot);
+    await runCommand(dart, <String>[
+      path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart'),
+      '--out',
+      outDir.path,
+    ], workingDirectory: flutterRoot);
     await _runFlutterAnalyze(
       outDir.path,
       failureMessage: 'Dart analyzer failed on mega_gallery benchmark.',
@@ -500,13 +485,10 @@ Future<void> verifyMaterialFilesAreUpToDateWithTemplateFiles(
   }
 
   // Run gen_defaults.dart to generate the token template files.
-  await runCommand(
-      dartExecutable,
-      <String>[
-        '--enable-asserts',
-        path.join('dev', 'tools', 'gen_defaults', 'bin', 'gen_defaults.dart'),
-      ],
-      workingDirectory: workingDirectory);
+  await runCommand(dartExecutable, <String>[
+    '--enable-asserts',
+    path.join('dev', 'tools', 'gen_defaults', 'bin', 'gen_defaults.dart'),
+  ], workingDirectory: workingDirectory);
 
   for (final String line in lines) {
     if (line.contains('updateFile();')) {
@@ -713,10 +695,12 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
 
   /// Some deprecation notices are exempt for historical reasons. They must have an issue listed.
   static final RegExp legacyDeprecation = RegExp(
-      r'// flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/\d+$');
+    r'// flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/\d+$',
+  );
 
   static final RegExp deprecationVersionPattern = RegExp(
-      r'This feature was deprecated after v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?<build>-\d+\.\d+\.pre)?\.$');
+    r'This feature was deprecated after v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?<build>-\d+\.\d+\.pre)?\.$',
+  );
 
   void _addErrorWithLineInfo(AstNode node, {required String error}) {
     final int lineNumber = parseResult.lineInfo.getLocation(node.offset).lineNumber;
@@ -726,7 +710,8 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitAnnotation(Annotation node) {
     super.visitAnnotation(node);
-    final bool shouldCheckAnnotation = node.name.name == 'Deprecated' &&
+    final bool shouldCheckAnnotation =
+        node.name.name == 'Deprecated' &&
         !hasInlineIgnore(node, parseResult, ignoreDeprecration) &&
         !hasInlineIgnore(node, parseResult, legacyDeprecation);
     if (!shouldCheckAnnotation) {
@@ -734,8 +719,10 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
     }
     final NodeList<Expression>? arguments = node.arguments?.arguments;
     if (arguments == null || arguments.length != 1) {
-      _addErrorWithLineInfo(node,
-          error: 'A @Deprecation annotation must take have exactly one deprecation notice String.');
+      _addErrorWithLineInfo(
+        node,
+        error: 'A @Deprecation annotation must take have exactly one deprecation notice String.',
+      );
       return;
     }
     final Expression deprecationNotice = arguments.first;
@@ -751,9 +738,10 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
     final [...List<StringLiteral> messageLiterals, StringLiteral versionLiteral] = strings;
 
     // Verify the version literal has the correct pattern.
-    final RegExpMatch? versionMatch = versionLiteral is SimpleStringLiteral
-        ? deprecationVersionPattern.firstMatch(versionLiteral.value)
-        : null;
+    final RegExpMatch? versionMatch =
+        versionLiteral is SimpleStringLiteral
+            ? deprecationVersionPattern.firstMatch(versionLiteral.value)
+            : null;
     if (versionMatch == null) {
       _addErrorWithLineInfo(
         versionLiteral,
@@ -812,10 +800,11 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
         return;
       }
     }
-    final String fullExplanation = messageLiterals
-        .map((StringLiteral message) => message.stringValue ?? '')
-        .join()
-        .trimRight();
+    final String fullExplanation =
+        messageLiterals
+            .map((StringLiteral message) => message.stringValue ?? '')
+            .join()
+            .trimRight();
     if (fullExplanation.isEmpty) {
       _addErrorWithLineInfo(
         messageLiterals.last,
@@ -839,8 +828,11 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
 
 Future<void> verifyDeprecations(String workingDirectory, {int minimumMatches = 2000}) async {
   final List<String> errors = <String>[];
-  await for (final File file
-      in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
+  await for (final File file in _allFiles(
+    workingDirectory,
+    'dart',
+    minimumMatches: minimumMatches,
+  )) {
     final ParseStringResult parseResult = parseFile(
       featureSet: _parsingFeatureSet(),
       path: file.absolute.path,
@@ -1038,8 +1030,9 @@ class _TestSkipLinesVisitor<T> extends RecursiveAstVisitor<T> {
   }
 
   static final Pattern _skipTestIntentionalPattern = RegExp(r'// .*[intended]');
-  static final Pattern _skipTestTrackingBugPattern =
-      RegExp(r'// .*https+?://github.com/.*/issues/\d+');
+  static final Pattern _skipTestTrackingBugPattern = RegExp(
+    r'// .*https+?://github.com/.*/issues/\d+',
+  );
   bool _hasValidJustificationComment(Label skipLabel) {
     return hasInlineIgnore(skipLabel, parseResult, _skipTestIntentionalPattern) ||
         hasInlineIgnore(skipLabel, parseResult, _skipTestTrackingBugPattern);
@@ -1094,11 +1087,12 @@ const Set<String> _exemptTestImports = <String>{
 Future<void> verifyNoTestImports(String workingDirectory) async {
   final List<String> errors = <String>[];
   assert("// foo\nimport 'binding_test.dart' as binding;\n'".contains(_testImportPattern));
-  final List<File> dartFiles = await _allFiles(
-    path.join(workingDirectory, 'packages'),
-    'dart',
-    minimumMatches: 1500,
-  ).toList();
+  final List<File> dartFiles =
+      await _allFiles(
+        path.join(workingDirectory, 'packages'),
+        'dart',
+        minimumMatches: 1500,
+      ).toList();
   for (final File file in dartFiles) {
     for (final String line in file.readAsLinesSync()) {
       final Match? match = _testImportPattern.firstMatch(line);
@@ -1121,20 +1115,22 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
   final String libPath = path.join(workingDirectory, 'packages', 'flutter', 'lib');
   final String srcPath = path.join(workingDirectory, 'packages', 'flutter', 'lib', 'src');
   // Verify there's one libPath/*.dart for each srcPath/*/.
-  final List<String> packages = Directory(libPath)
-      .listSync()
-      .where(
-        (FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart',
-      )
-      .map<String>((FileSystemEntity entity) => path.basenameWithoutExtension(entity.path))
-      .toList()
-    ..sort();
-  final List<String> directories = Directory(srcPath)
-      .listSync()
-      .whereType<Directory>()
-      .map<String>((Directory entity) => path.basename(entity.path))
-      .toList()
-    ..sort();
+  final List<String> packages =
+      Directory(libPath)
+          .listSync()
+          .where(
+            (FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart',
+          )
+          .map<String>((FileSystemEntity entity) => path.basenameWithoutExtension(entity.path))
+          .toList()
+        ..sort();
+  final List<String> directories =
+      Directory(srcPath)
+          .listSync()
+          .whereType<Directory>()
+          .map<String>((Directory entity) => path.basename(entity.path))
+          .toList()
+        ..sort();
   if (!_listEquals<String>(packages, directories)) {
     errors.add(
       <String>[
@@ -1175,8 +1171,9 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
       }
       // Sanity check before performing _deepSearch, to ensure there's no rogue
       // dependencies.
-      final String validFilenames =
-          dependencyMap.keys.map((String name) => '$name.dart').join(', ');
+      final String validFilenames = dependencyMap.keys
+          .map((String name) => '$name.dart')
+          .join(', ');
       errors.add(
         '$key imported package:flutter/$dependency.dart '
         'which is not one of the valid exports { $validFilenames }.\n'
@@ -1205,11 +1202,12 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
 
 Future<void> verifyNoBadImportsInFlutterTools(String workingDirectory) async {
   final List<String> errors = <String>[];
-  final List<File> files = await _allFiles(
-    path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'),
-    'dart',
-    minimumMatches: 200,
-  ).toList();
+  final List<File> files =
+      await _allFiles(
+        path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'),
+        'dart',
+        minimumMatches: 200,
+      ).toList();
   for (final File file in files) {
     if (file.readAsStringSync().contains('package:flutter_tools/')) {
       errors.add('$yellow${file.path}$reset imports flutter_tools.');
@@ -1230,13 +1228,14 @@ Future<void> verifyNoBadImportsInFlutterTools(String workingDirectory) async {
 Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
   final List<String> errors = <String>[];
   final String dev = path.join(workingDirectory, 'dev');
-  final List<File> files = await _allFiles(dev, 'dart', minimumMatches: 1)
-      .where(
-        (File file) =>
-            file.path.contains('test_driver') &&
-            (file.path.endsWith('_test.dart') || file.path.endsWith('util.dart')),
-      )
-      .toList();
+  final List<File> files =
+      await _allFiles(dev, 'dart', minimumMatches: 1)
+          .where(
+            (File file) =>
+                file.path.contains('test_driver') &&
+                (file.path.endsWith('_test.dart') || file.path.endsWith('util.dart')),
+          )
+          .toList();
   for (final File file in files) {
     final String contents = file.readAsStringSync();
     final int testCount = ' test('.allMatches(contents).length;
@@ -1259,22 +1258,16 @@ Future<void> verifyIntegrationTestTimeouts(String workingDirectory) async {
 }
 
 Future<void> verifyInternationalizations(String workingDirectory, String dartExecutable) async {
-  final EvalResult materialGenResult = await _evalCommand(
-      dartExecutable,
-      <String>[
-        path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
-        '--material',
-        '--remove-undefined',
-      ],
-      workingDirectory: workingDirectory);
-  final EvalResult cupertinoGenResult = await _evalCommand(
-      dartExecutable,
-      <String>[
-        path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
-        '--cupertino',
-        '--remove-undefined',
-      ],
-      workingDirectory: workingDirectory);
+  final EvalResult materialGenResult = await _evalCommand(dartExecutable, <String>[
+    path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
+    '--material',
+    '--remove-undefined',
+  ], workingDirectory: workingDirectory);
+  final EvalResult cupertinoGenResult = await _evalCommand(dartExecutable, <String>[
+    path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
+    '--cupertino',
+    '--remove-undefined',
+  ], workingDirectory: workingDirectory);
 
   final String materialLocalizationsFile = path.join(
     workingDirectory,
@@ -1326,11 +1319,12 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
 /// Verifies that all instances of "checked mode" have been migrated to "debug mode".
 Future<void> verifyNoCheckedMode(String workingDirectory) async {
   final String flutterPackages = path.join(workingDirectory, 'packages');
-  final List<File> files = await _allFiles(
-    flutterPackages,
-    'dart',
-    minimumMatches: 400,
-  ).where((File file) => path.extension(file.path) == '.dart').toList();
+  final List<File> files =
+      await _allFiles(
+        flutterPackages,
+        'dart',
+        minimumMatches: 400,
+      ).where((File file) => path.extension(file.path) == '.dart').toList();
   final List<String> problems = <String>[];
   for (final File file in files) {
     int lineCount = 0;
@@ -1353,11 +1347,12 @@ Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
   final Set<String> excludedFiles = <String>{
     path.join(flutterLib, 'src', 'foundation', 'object.dart'), // Calls this from within an assert.
   };
-  final List<File> files = await _allFiles(
-    flutterLib,
-    'dart',
-    minimumMatches: 400,
-  ).where((File file) => !excludedFiles.contains(file.path)).toList();
+  final List<File> files =
+      await _allFiles(
+        flutterLib,
+        'dart',
+        minimumMatches: 400,
+      ).where((File file) => !excludedFiles.contains(file.path)).toList();
   final RegExp toStringRegExp = RegExp(r'^\s+String\s+to(.+?)?String(.+?)?\(\)\s+(\{|=>)');
   final List<String> problems = <String>[];
   for (final File file in files) {
@@ -1409,16 +1404,17 @@ Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
 }
 
 Future<void> verifyNoTrailingSpaces(String workingDirectory, {int minimumMatches = 4000}) async {
-  final List<File> files = await _allFiles(workingDirectory, null, minimumMatches: minimumMatches)
-      .where((File file) => path.basename(file.path) != 'serviceaccount.enc')
-      .where((File file) => path.basename(file.path) != 'Ahem.ttf')
-      .where((File file) => path.extension(file.path) != '.snapshot')
-      .where((File file) => path.extension(file.path) != '.png')
-      .where((File file) => path.extension(file.path) != '.jpg')
-      .where((File file) => path.extension(file.path) != '.ico')
-      .where((File file) => path.extension(file.path) != '.jar')
-      .where((File file) => path.extension(file.path) != '.swp')
-      .toList();
+  final List<File> files =
+      await _allFiles(workingDirectory, null, minimumMatches: minimumMatches)
+          .where((File file) => path.basename(file.path) != 'serviceaccount.enc')
+          .where((File file) => path.basename(file.path) != 'Ahem.ttf')
+          .where((File file) => path.extension(file.path) != '.snapshot')
+          .where((File file) => path.extension(file.path) != '.png')
+          .where((File file) => path.extension(file.path) != '.jpg')
+          .where((File file) => path.extension(file.path) != '.ico')
+          .where((File file) => path.extension(file.path) != '.jar')
+          .where((File file) => path.extension(file.path) != '.swp')
+          .toList();
   final List<String> problems = <String>[];
   for (final File file in files) {
     final List<String> lines = file.readAsLinesSync();
@@ -1460,11 +1456,12 @@ Future<void> verifySpacesAfterFlowControlStatements(
     '.h',
     '.m',
   };
-  final List<File> files = await _allFiles(
-    workingDirectory,
-    null,
-    minimumMatches: minimumMatches,
-  ).where((File file) => extensions.contains(path.extension(file.path))).toList();
+  final List<File> files =
+      await _allFiles(
+        workingDirectory,
+        null,
+        minimumMatches: minimumMatches,
+      ).where((File file) => extensions.contains(path.extension(file.path))).toList();
   final List<String> problems = <String>[];
   for (final File file in files) {
     final List<String> lines = file.readAsLinesSync();
@@ -2346,8 +2343,9 @@ class _DebugOnlyFieldVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitFieldDeclaration(FieldDeclaration node) {
     super.visitFieldDeclaration(node);
-    if (node.metadata
-        .any((Annotation annotation) => annotation.name.name == _kDebugOnlyAnnotation)) {
+    if (node.metadata.any(
+      (Annotation annotation) => annotation.name.name == _kDebugOnlyAnnotation,
+    )) {
       if (!node.toSource().contains(_nullInitializedField)) {
         errors.add(node.fields); // Use the fields node for line number.
       }
@@ -2364,8 +2362,10 @@ Future<void> verifyNullInitializedDebugExpensiveFields(
       await _allFiles(flutterLib, 'dart', minimumMatches: minimumMatches).toList();
   final List<String> errors = <String>[];
   for (final File file in files) {
-    final ParseStringResult parsedFile =
-        parseFile(featureSet: _parsingFeatureSet(), path: file.absolute.path);
+    final ParseStringResult parsedFile = parseFile(
+      featureSet: _parsingFeatureSet(),
+      path: file.absolute.path,
+    );
     final _DebugOnlyFieldVisitor visitor = _DebugOnlyFieldVisitor(parsedFile);
     visitor.visitCompilationUnit(parsedFile.unit);
     for (final AstNode badNode in visitor.errors) {
@@ -2417,15 +2417,13 @@ Future<void> verifyTabooDocumentation(String workingDirectory, {int minimumMatch
 Future<void> lintKotlinFiles(String workingDirectory) async {
   const String baselineRelativePath = 'dev/bots/test/analyze-test-input/ktlint-baseline.xml';
   const String editorConfigRelativePath = 'dev/bots/test/analyze-test-input/.editorconfig';
-  final EvalResult lintResult = await _evalCommand(
-      'ktlint',
-      <String>[
-        '--baseline=$flutterRoot/$baselineRelativePath',
-        '--editorconfig=$flutterRoot/$editorConfigRelativePath',
-      ],
-      workingDirectory: workingDirectory);
+  final EvalResult lintResult = await _evalCommand('ktlint', <String>[
+    '--baseline=$flutterRoot/$baselineRelativePath',
+    '--editorconfig=$flutterRoot/$editorConfigRelativePath',
+  ], workingDirectory: workingDirectory);
   if (lintResult.exitCode != 0) {
-    final String errorMessage = 'Found lint violations in Kotlin files:\n ${lintResult.stdout}\n\n'
+    final String errorMessage =
+        'Found lint violations in Kotlin files:\n ${lintResult.stdout}\n\n'
         'To reproduce this lint locally:\n'
         '1. Identify the CIPD version tag used to resolve this particular version of ktlint (check the dependencies section of this shard in the ci.yaml). \n'
         '2. Download that version from https://chrome-infra-packages.appspot.com/p/flutter/ktlint/linux-amd64/+/<version_tag>\n'
@@ -2505,9 +2503,11 @@ Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
       appFileContents = _removeLicenseIfPresent(appFileContents, license);
       if (appFileContents != templateFileContents) {
         int indexOfDifference;
-        for (indexOfDifference = 0;
-            indexOfDifference < appFileContents.length;
-            indexOfDifference++) {
+        for (
+          indexOfDifference = 0;
+          indexOfDifference < appFileContents.length;
+          indexOfDifference++
+        ) {
           if (indexOfDifference >= templateFileContents.length ||
               templateFileContents.codeUnitAt(indexOfDifference) !=
                   appFileContents.codeUnitAt(indexOfDifference)) {
@@ -2603,29 +2603,31 @@ Future<Set<String>> _findFlutterDependencies(
   List<String> errors, {
   bool checkForMeta = false,
 }) async {
-  return _allFiles(srcPath, 'dart', minimumMatches: 1).map<Set<String>>((File file) {
-    final Set<String> result = <String>{};
-    for (final String line in file.readAsLinesSync()) {
-      Match? match = _importPattern.firstMatch(line);
-      if (match != null) {
-        result.add(match.group(2)!);
-      }
-      if (checkForMeta) {
-        match = _importMetaPattern.firstMatch(line);
-        if (match != null) {
-          errors.add(
-            '${file.path}\nThis package imports the ${yellow}meta$reset package.\n'
-            'You should instead import the "foundation.dart" library.',
-          );
+  return _allFiles(srcPath, 'dart', minimumMatches: 1)
+      .map<Set<String>>((File file) {
+        final Set<String> result = <String>{};
+        for (final String line in file.readAsLinesSync()) {
+          Match? match = _importPattern.firstMatch(line);
+          if (match != null) {
+            result.add(match.group(2)!);
+          }
+          if (checkForMeta) {
+            match = _importMetaPattern.firstMatch(line);
+            if (match != null) {
+              errors.add(
+                '${file.path}\nThis package imports the ${yellow}meta$reset package.\n'
+                'You should instead import the "foundation.dart" library.',
+              );
+            }
+          }
         }
-      }
-    }
-    return result;
-  }).reduce((Set<String>? value, Set<String> element) {
-    value ??= <String>{};
-    value.addAll(element);
-    return value;
-  });
+        return result;
+      })
+      .reduce((Set<String>? value, Set<String> element) {
+        value ??= <String>{};
+        value.addAll(element);
+        return value;
+      });
 }
 
 List<T>? _deepSearch<T>(Map<T, Set<T>> map, T start, [Set<T>? seen]) {

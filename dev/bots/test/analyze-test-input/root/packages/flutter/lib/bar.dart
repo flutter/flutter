@@ -17,9 +17,7 @@ class Foo {
   final Map<String, String>? bar = kDebugMode ? null : <String, String>{};
 
   @_debugOnly
-  final Map<String, String>? multiline = kDebugMode
-    ? <String, String> { }
-    : null;
+  final Map<String, String>? multiline = kDebugMode ? <String, String>{} : null;
 }
 
 /// Simply avoid this
