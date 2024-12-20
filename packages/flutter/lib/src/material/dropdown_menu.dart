@@ -812,7 +812,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     return result;
   }
 
-  void handleUpKeyInvoke(_) {
+  void handleUpKeyInvoke(_ArrowUpIntent _) {
     setState(() {
       if (!widget.enabled || !_menuHasEnabledItem || !_controller.isOpen) {
         return;
@@ -832,7 +832,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     });
   }
 
-  void handleDownKeyInvoke(_) {
+  void handleDownKeyInvoke(_ArrowDownIntent _) {
     setState(() {
       if (!widget.enabled || !_menuHasEnabledItem || !_controller.isOpen) {
         return;
