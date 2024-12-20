@@ -36,9 +36,10 @@ void main(List<String> args) async {
     await cbuilder.run(
       config: config,
       output: outputCatcher,
-      logger: Logger('')
-        ..level = Level.ALL
-        ..onRecord.listen((LogRecord record) => print(record.message)),
+      logger:
+          Logger('')
+            ..level = Level.ALL
+            ..onRecord.listen((LogRecord record) => print(record.message)),
     );
     final BuildOutput catchedOutput = BuildOutput(outputCatcher.json);
     output.addDependencies(catchedOutput.dependencies);
