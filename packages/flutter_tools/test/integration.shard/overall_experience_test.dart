@@ -74,8 +74,9 @@ void main() {
         tryToDelete(fileSystem.directory(tempDirectory));
       }
     },
+    // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
     skip: Platform.isWindows,
-  ); // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
+  );
 
   testWithoutContext('flutter run handle SIGUSR1/2 run', () async {
     final String tempDirectory =

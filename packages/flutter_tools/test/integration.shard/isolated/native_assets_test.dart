@@ -102,6 +102,12 @@ void main() {
                   },
                 ),
                 Barrier.contains('Performing hot reload...', logging: true),
+                Multiple(
+                  <Pattern>[RegExp('Reloaded .*')],
+                  handler: (String line) {
+                    return 'q';
+                  },
+                ),
               ],
               Barrier.contains('Application finished.'),
             ],
