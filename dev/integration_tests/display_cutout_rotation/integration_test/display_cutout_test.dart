@@ -134,14 +134,13 @@ Future<void> setOrientationAndWaitUntilRotation(
     case DeviceOrientation.landscapeLeft:
       expectedOrientation = Orientation.landscape;
   }
-  // ignore: literal_only_boolean_expressions
-  do {
+  while(true) {
     final BuildContext context = tester.element(find.byType(Text));
     if (expectedOrientation == MediaQuery.of(context).orientation) {
       break;
     }
     await tester.pumpAndSettle();
-  } while (true);
+  }
 }
 
 Iterable<DisplayFeature> getCutouts(WidgetTester tester, BuildContext context) {
