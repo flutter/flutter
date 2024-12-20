@@ -468,7 +468,8 @@ void expectCCompilerIsConfigured(Directory appDirectory) {
 
     final File configFile = subDir.childFile('config.json');
     expect(configFile, exists);
-    final Map<String, Object?> config = json.decode(configFile.readAsStringSync()) as Map<String, Object?>;
+    final Map<String, Object?> config =
+        json.decode(configFile.readAsStringSync()) as Map<String, Object?>;
     if (!(config['supported_asset_types']! as List<dynamic>).contains(CodeAsset.type)) {
       continue;
     }
