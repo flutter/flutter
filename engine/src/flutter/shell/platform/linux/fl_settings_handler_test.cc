@@ -8,7 +8,6 @@
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
-#include "flutter/shell/platform/linux/testing/fl_test.h"
 #include "flutter/shell/platform/linux/testing/mock_settings.h"
 #include "flutter/testing/testing.h"
 
@@ -191,16 +190,21 @@ TEST(FlSettingsHandlerTest, TextScaleFactor) {
 // MOCK_ENGINE_PROC is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 TEST(FlSettingsHandlerTest, AccessibilityFeatures) {
-  g_autoptr(FlEngine) engine = make_mock_engine();
-  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
 
   std::vector<FlutterAccessibilityFeature> calls;
-  embedder_api->UpdateAccessibilityFeatures = MOCK_ENGINE_PROC(
-      UpdateAccessibilityFeatures,
-      ([&calls](auto engine, FlutterAccessibilityFeature features) {
-        calls.push_back(features);
-        return kSuccess;
-      }));
+  fl_engine_get_embedder_api(engine)->UpdateAccessibilityFeatures =
+      MOCK_ENGINE_PROC(
+          UpdateAccessibilityFeatures,
+          ([&calls](auto engine, FlutterAccessibilityFeature features) {
+            calls.push_back(features);
+            return kSuccess;
+          }));
 
   g_autoptr(FlSettingsHandler) handler = fl_settings_handler_new(engine);
 
