@@ -4,10 +4,12 @@
 
 @Deprecated(
   'This is the reason and what you should use instead. '
-  'This feature was deprecated after v1.2.3.'
+  'This feature was deprecated after v1.2.3.',
 )
-void test1() { }
+void test1() {}
 
+// The code below is intentionally miss-formatted for testing.
+// dart format off
 @Deprecated(
   'bad grammar. '
   'This feature was deprecated after v1.2.3.'
@@ -85,6 +87,7 @@ void test14() { }
   'Missing the version line. '
 )
 void test15() { }
+// dart format on
 
 // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/000000
 @Deprecated(
