@@ -251,6 +251,18 @@ class DriverInfoVK {
   ///
   bool CanBatchSubmitCommandBuffers() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Returns Mali GPU info if this is a Mali GPU, otherwise
+  ///             std::nullopt.
+  ///
+  std::optional<MaliGPU> GetMaliGPUInfo() const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Returns Adreno GPU info if this is a Adreno GPU, otherwise
+  ///             std::nullopt.
+  ///
+  std::optional<AdrenoGPU> GetAdrenoGPUInfo() const;
+
  private:
   bool is_valid_ = false;
   Version api_version_;
