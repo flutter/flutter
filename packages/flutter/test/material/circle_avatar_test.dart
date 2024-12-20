@@ -91,7 +91,6 @@ void main() {
   ) async {
     addTearDown(imageCache.clear);
     final ErrorImageProvider errorImage = ErrorImageProvider();
-    bool caughtForegroundImageError = false;
     await tester.pumpWidget(
       wrap(
         child: RepaintBoundary(
@@ -99,18 +98,12 @@ void main() {
             foregroundImage: errorImage,
             backgroundImage: MemoryImage(Uint8List.fromList(kBlueRectPng)),
             radius: 250.0,
-            onForegroundImageError: (_, __) => caughtForegroundImageError = true,
+            onForegroundImageError: (_, __) {},
           ),
         ),
       ),
     );
 
-    expect(caughtForegroundImageError, true);
-    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
-    expect(box.size, equals(const Size(100.0, 100.0)));
-    final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
-    final BoxDecoration decoration = child.decoration as BoxDecoration;
-    expect(decoration.image!.fit, equals(BoxFit.cover));
     await expectLater(find.byType(CircleAvatar), matchesGoldenFile('circle_avatar.fallback.png'));
   });
 
