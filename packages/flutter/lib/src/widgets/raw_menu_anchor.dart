@@ -959,7 +959,7 @@ class _RawMenuAnchorOverlayState
     }
 
     assert(_isRootAnchor);
-    return widget.useRootOverlay ?? false;
+    return widget.useRootOverlay;
   }
 
   Offset? _menuPosition;
