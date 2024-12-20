@@ -93,7 +93,6 @@ void main() {
               'templates',
               'app_integration_test',
             ),
-            globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'app_shared'),
             globals.fs.path.join(
               'flutter',
               'packages',

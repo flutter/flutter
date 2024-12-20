@@ -476,7 +476,7 @@ mixin CreateBase on FlutterCommand {
   }) async {
     int generatedCount = 0;
     generatedCount += await renderMerged(
-      <String>[...templateNames, 'app_shared'],
+      <String>[...templateNames],
       directory,
       templateContext,
       overwrite: overwrite,
