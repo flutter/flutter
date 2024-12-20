@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 
 import 'package:watcher/src/watch_event.dart';
 
+import 'common.dart';
 import 'environment.dart';
 import 'exceptions.dart';
 import 'felt_config.dart';
@@ -67,6 +68,10 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
       )
       ..addFlag('profile', help: 'Use artifacts from the profile build instead of release.')
       ..addFlag('debug', help: 'Use artifacts from the debug build instead of release.')
+      ..addFlag('release', help: 'Use artifacts from the release build. This is the default.')
+      ..addFlag('gcs-prod', help: 'Use artifacts from the prod gcs bucket populated by CI.')
+      ..addFlag('gcs-staging', help: 'Use artifacts from the staging gcs bucket populated by CI.')
+      ..addFlag('gcs-try', help: 'Use artifacts from the try gcs bucket populated by CI.')
       ..addFlag('dwarf', help: 'Debug wasm modules using embedded DWARF data.')
       ..addFlag(
         'require-skia-gold',
@@ -300,6 +305,40 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
     );
   }
 
+  ArtifactSource get artifactSource {
+    final List<ArtifactSource> sources = <ArtifactSource>[];
+    if (boolArg('debug')) {
+      sources.add(LocalArtifactSource(mode: RuntimeMode.debug));
+    }
+    if (boolArg('profile')) {
+      sources.add(LocalArtifactSource(mode: RuntimeMode.profile));
+    }
+    if (boolArg('release')) {
+      sources.add(LocalArtifactSource(mode: RuntimeMode.release));
+    }
+    if (boolArg('gcs-prod')) {
+      sources.add(GcsArtifactSource(realm: LuciRealm.Prod));
+    }
+    if (boolArg('gcs-staging')) {
+      sources.add(GcsArtifactSource(realm: LuciRealm.Staging));
+    }
+    if (boolArg('gcs-try')) {
+      sources.add(GcsArtifactSource(realm: LuciRealm.Try));
+    }
+    if (sources.length > 1) {
+      throw ToolExit('Cannot specify more than one artifact source.');
+    }
+    if (sources.length == 1) {
+      return sources.first;
+    }
+    final realm = luciConfig?.realm;
+    if (realm != null) {
+      return GcsArtifactSource(realm: realm);
+    } else {
+      return LocalArtifactSource(mode: RuntimeMode.release);
+    }
+  }
+
   @override
   Future<bool> run() async {
     final List<TestSuite> filteredSuites = _filterTestSuites();
@@ -343,7 +382,7 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
     final Pipeline testPipeline = Pipeline(
       steps: <PipelineStep>[
         if (isWatchMode) ClearTerminalScreenStep(),
-        if (shouldCopyArtifacts) CopyArtifactsStep(artifacts, runtimeMode: runtimeMode),
+        if (shouldCopyArtifacts) CopyArtifactsStep(artifacts, source: artifactSource),
         if (shouldCompile)
           for (final TestBundle bundle in bundles)
             CompileBundleStep(bundle: bundle, isVerbose: isVerbose, testFiles: testFiles),
