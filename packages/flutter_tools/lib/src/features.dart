@@ -54,6 +54,9 @@ abstract class FeatureFlags {
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled => false;
 
+  /// Whether explicit package dependency management is enabled.
+  bool get isExplicitPackageDependenciesEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -74,12 +77,14 @@ const List<Feature> allFeatures = <Feature>[
   nativeAssets,
   previewDevice,
   swiftPackageManager,
+  explicitPackageDependencies,
 ];
 
 /// All current Flutter feature flags that can be configured.
 ///
 /// [Feature.configSetting] is not `null`.
-Iterable<Feature> get allConfigurableFeatures => allFeatures.where((Feature feature) => feature.configSetting != null);
+Iterable<Feature> get allConfigurableFeatures =>
+    allFeatures.where((Feature feature) => feature.configSetting != null);
 
 /// The [Feature] for flutter web.
 const Feature flutterWebFeature = Feature.fullyEnabled(
@@ -126,24 +131,16 @@ const Feature flutterFuchsiaFeature = Feature(
   name: 'Flutter for Fuchsia',
   configSetting: 'enable-fuchsia',
   environmentOverride: 'FLUTTER_FUCHSIA',
-  master: FeatureChannelSetting(
-    available: true,
-  ),
+  master: FeatureChannelSetting(available: true),
 );
 
 const Feature flutterCustomDevicesFeature = Feature(
   name: 'early support for custom device types',
   configSetting: 'enable-custom-devices',
   environmentOverride: 'FLUTTER_CUSTOM_DEVICES',
-  master: FeatureChannelSetting(
-    available: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-  ),
+  master: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
 );
 
 /// The [Feature] for CLI animations.
@@ -159,9 +156,7 @@ const Feature nativeAssets = Feature(
   name: 'native assets compilation and bundling',
   configSetting: 'enable-native-assets',
   environmentOverride: 'FLUTTER_NATIVE_ASSETS',
-  master: FeatureChannelSetting(
-    available: true,
-  ),
+  master: FeatureChannelSetting(available: true),
 );
 
 /// Enable Flutter preview prebuilt device.
@@ -169,28 +164,36 @@ const Feature previewDevice = Feature(
   name: 'Flutter preview prebuilt device',
   configSetting: 'enable-flutter-preview',
   environmentOverride: 'FLUTTER_PREVIEW_DEVICE',
-  master: FeatureChannelSetting(
-    available: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-  ),
+  master: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true),
 );
 
 /// Enable Swift Package Manager as a darwin dependency manager.
 const Feature swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
   configSetting: 'enable-swift-package-manager',
-  environmentOverride: 'SWIFT_PACKAGE_MANAGER',
-  master: FeatureChannelSetting(
-    available: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-  ),
+  environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER',
+  master: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
+);
+
+/// Enable explicit resolution and generation of package dependencies.
+const Feature explicitPackageDependencies = Feature(
+  name: 'support for dev_dependency plugins',
+  configSetting: 'explicit-package-dependencies',
+  extraHelpText:
+      'Plugins that are resolved as result of being in "dev_dependencies" of a '
+      'package are not included in release builds of an app. By enabling this '
+      'feature, the synthetic "package:flutter_gen" can no longer be generated '
+      'and the legacy ".flutter-plugins" tool artifact is no longer generated.\n'
+      '\n'
+      'See also:\n'
+      '* https://flutter.dev/to/flutter-plugins-configuration.\n'
+      '* https://flutter.dev/to/flutter-gen-deprecation.',
+  master: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.
@@ -210,27 +213,18 @@ class Feature {
     this.extraHelpText,
     this.master = const FeatureChannelSetting(),
     this.beta = const FeatureChannelSetting(),
-    this.stable = const FeatureChannelSetting()
+    this.stable = const FeatureChannelSetting(),
   });
 
   /// Creates a [Feature] that is fully enabled across channels.
-  const Feature.fullyEnabled(
-      {required this.name,
-      this.environmentOverride,
-      this.configSetting,
-      this.extraHelpText})
-      : master = const FeatureChannelSetting(
-          available: true,
-          enabledByDefault: true,
-        ),
-        beta = const FeatureChannelSetting(
-          available: true,
-          enabledByDefault: true,
-        ),
-        stable = const FeatureChannelSetting(
-          available: true,
-          enabledByDefault: true,
-        );
+  const Feature.fullyEnabled({
+    required this.name,
+    this.environmentOverride,
+    this.configSetting,
+    this.extraHelpText,
+  }) : master = const FeatureChannelSetting(available: true, enabledByDefault: true),
+       beta = const FeatureChannelSetting(available: true, enabledByDefault: true),
+       stable = const FeatureChannelSetting(available: true, enabledByDefault: true);
 
   /// The user visible name for this feature.
   final String name;
@@ -298,10 +292,7 @@ class Feature {
 
 /// A description of the conditions to enable a feature for a particular channel.
 class FeatureChannelSetting {
-  const FeatureChannelSetting({
-    this.available = false,
-    this.enabledByDefault = false,
-  });
+  const FeatureChannelSetting({this.available = false, this.enabledByDefault = false});
 
   /// Whether the feature is available on this channel.
   ///

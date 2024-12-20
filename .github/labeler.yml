@@ -3,6 +3,8 @@
 # found in the LICENSE file.
 
 # See https://github.com/actions/labeler/blob/main/README.md for docs.
+# Use git ls-files '<pattern>' to see the list of matching files.
+
 'a: accessibility':
   - changed-files:
     - any-glob-to-any-file:
@@ -61,7 +63,8 @@
 engine:
   - changed-files:
     - any-glob-to-any-file:
-      - bin/internal/engine.version
+      - DEPS
+      - engine/**/*
       - docs/engine/**/*
 
 'f: cupertino':
@@ -136,6 +139,8 @@ platform-android:
   - changed-files:
     - any-glob-to-any-file:
       - docs/platform/android/**/*
+      - packages/flutter_tools/*android*'
+      - packages/flutter_tools/gradle/**/*
 
 platform-ios:
   - changed-files:

@@ -33,7 +33,8 @@ rootProject.allprojects {
 
 android {
     namespace = "dev.flutter.integration_test"
-    compileSdk = 34
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -41,7 +42,7 @@ android {
     }
 
     defaultConfig {
-        minSdk = 21
+        minSdk = flutter.minSdkVersion
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("lib-proguard-rules.txt")
     }

@@ -30,11 +30,13 @@ enum SelectionResult {
   /// [SelectionEdgeUpdateEvent].
   /// {@endtemplate}
   next,
+
   /// Selection does not reach this [Selectable] and is located before it in
   /// screen order.
   ///
   /// {@macro flutter.rendering.selection.SelectionResult.footNote}
   previous,
+
   /// Selection ends in this [Selectable].
   ///
   /// Part of the [Selectable] may or may not be selected, but there is still
@@ -42,6 +44,7 @@ enum SelectionResult {
   ///
   /// {@macro flutter.rendering.selection.SelectionResult.footNote}
   end,
+
   /// The result can't be determined in this frame.
   ///
   /// This is typically used when the subtree is scrolling to reveal more
@@ -51,6 +54,7 @@ enum SelectionResult {
   // See `_SelectableRegionState._triggerSelectionEndEdgeUpdate` for how this
   // result affects the selection.
   pending,
+
   /// There is no result for the selection event.
   ///
   /// This is used when a selection result is not applicable, e.g.
@@ -90,6 +94,11 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   /// Return `null` if nothing is selected.
   SelectedContent? getSelectedContent();
 
+  /// Gets the [SelectedContentRange] representing the selected range in this object.
+  ///
+  /// When nothing is selected, subclasses should return `null`.
+  SelectedContentRange? getSelection();
+
   /// Handles the [SelectionEvent] sent to this object.
   ///
   /// The subclasses need to update their selections or delegate the
@@ -102,12 +111,93 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   /// See also:
   ///  * [SelectionEventType], which contains all of the possible types.
   SelectionResult dispatchSelectionEvent(SelectionEvent event);
+
+  /// The length of the content in this object.
+  int get contentLength;
+}
+
+/// This class stores the range information of the selection under a [Selectable]
+/// or [SelectionHandler].
+///
+/// The [SelectedContentRange] for a given [Selectable] or [SelectionHandler]
+/// can be retrieved by calling [SelectionHandler.getSelection].
+@immutable
+class SelectedContentRange with Diagnosticable {
+  /// Creates a [SelectedContentRange] with the given values.
+  const SelectedContentRange({required this.startOffset, required this.endOffset})
+    : assert((startOffset >= 0 && endOffset >= 0));
+
+  /// The start of the selection relative to the start of the content.
+  ///
+  /// {@template flutter.rendering.selection.SelectedContentRange.selectionOffsets}
+  /// For example a [Text] widget's content is in the format of an [TextSpan] tree.
+  ///
+  /// Take the [Text] widget and [TextSpan] tree below:
+  ///
+  /// {@tool snippet}
+  /// ```dart
+  /// const Text.rich(
+  ///   TextSpan(
+  ///     text: 'Hello world, ',
+  ///     children: <InlineSpan>[
+  ///       WidgetSpan(
+  ///         child: Text('how are you today? '),
+  ///       ),
+  ///       TextSpan(
+  ///         text: 'Good, thanks for asking.',
+  ///       ),
+  ///     ],
+  ///   ),
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// If we select from the beginning of 'world' to the end of the '.'
+  /// at the end of the [TextSpan] tree, the [SelectedContentRange] from
+  /// [SelectionHandler.getSelection] will be relative to the text of the
+  /// [TextSpan] tree, with [WidgetSpan] content being flattened. The [startOffset]
+  /// will be 6, and [endOffset] will be 56. This takes into account the
+  /// length of the content in the [WidgetSpan], which is 19, making the overall
+  /// length of the content 56.
+  /// {@endtemplate}
+  final int startOffset;
+
+  /// The end of the selection relative to the start of the content.
+  ///
+  /// {@macro flutter.rendering.selection.SelectedContentRange.selectionOffsets}
+  final int endOffset;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is SelectedContentRange &&
+        other.startOffset == startOffset &&
+        other.endOffset == endOffset;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(startOffset, endOffset);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IntProperty('startOffset', startOffset));
+    properties.add(IntProperty('endOffset', endOffset));
+  }
 }
 
 /// The selected content in a [Selectable] or [SelectionHandler].
 // TODO(chunhtai): Add more support for rich content.
 // https://github.com/flutter/flutter/issues/104206.
-class SelectedContent {
+@immutable
+class SelectedContent with Diagnosticable {
   /// Creates a selected content object.
   ///
   /// Only supports plain text.
@@ -115,6 +205,12 @@ class SelectedContent {
 
   /// The selected content in plain text format.
   final String plainText;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('plainText', plainText));
+  }
 }
 
 /// A mixin that can be selected by users when under a [SelectionArea] widget.
@@ -138,7 +234,7 @@ class SelectedContent {
 /// {@macro flutter.rendering.SelectionHandler}
 ///
 /// See also:
-///  * [SelectionArea], which provides an overview of selection system.
+///  * [SelectableRegion], which provides an overview of selection system.
 mixin Selectable implements SelectionHandler {
   /// {@macro flutter.rendering.RenderObject.getTransformTo}
   Matrix4 getTransformTo(RenderObject? ancestor);
@@ -232,9 +328,7 @@ abstract final class SelectionUtils {
     if (point.dy > targetRect.bottom) {
       return SelectionResult.next;
     }
-    return point.dx >= targetRect.right
-        ? SelectionResult.next
-        : SelectionResult.previous;
+    return point.dx >= targetRect.right ? SelectionResult.next : SelectionResult.previous;
   }
 
   /// Adjusts the dragging offset based on the target rect.
@@ -258,7 +352,11 @@ abstract final class SelectionUtils {
   /// For points in Area 2:
   ///   Move them to bottom-right of the rect if text direction is ltr, or
   ///   bottom-left if rtl.
-  static Offset adjustDragOffset(Rect targetRect, Offset point, {TextDirection direction = TextDirection.ltr}) {
+  static Offset adjustDragOffset(
+    Rect targetRect,
+    Offset point, {
+    TextDirection direction = TextDirection.ltr,
+  }) {
     if (targetRect.contains(point)) {
       return point;
     }
@@ -362,14 +460,14 @@ abstract class SelectionEvent {
 /// ctrl + A, or cmd + A in macOS.
 class SelectAllSelectionEvent extends SelectionEvent {
   /// Creates a select all selection event.
-  const SelectAllSelectionEvent(): super._(SelectionEventType.selectAll);
+  const SelectAllSelectionEvent() : super._(SelectionEventType.selectAll);
 }
 
 /// Clears the selection from the [Selectable] and removes any existing
 /// highlight as if there is no selection at all.
 class ClearSelectionEvent extends SelectionEvent {
   /// Create a clear selection event.
-  const ClearSelectionEvent(): super._(SelectionEventType.clear);
+  const ClearSelectionEvent() : super._(SelectionEventType.clear);
 }
 
 /// Selects the whole word at the location.
@@ -377,7 +475,8 @@ class ClearSelectionEvent extends SelectionEvent {
 /// This event can be sent as the result of mobile long press selection.
 class SelectWordSelectionEvent extends SelectionEvent {
   /// Creates a select word event at the [globalPosition].
-  const SelectWordSelectionEvent({required this.globalPosition}): super._(SelectionEventType.selectWord);
+  const SelectWordSelectionEvent({required this.globalPosition})
+    : super._(SelectionEventType.selectWord);
 
   /// The position in global coordinates to select word at.
   final Offset globalPosition;
@@ -388,7 +487,8 @@ class SelectWordSelectionEvent extends SelectionEvent {
 /// This event can be sent as the result of a triple click to select.
 class SelectParagraphSelectionEvent extends SelectionEvent {
   /// Creates a select paragraph event at the [globalPosition].
-  const SelectParagraphSelectionEvent({required this.globalPosition, this.absorb = false}): super._(SelectionEventType.selectParagraph);
+  const SelectParagraphSelectionEvent({required this.globalPosition, this.absorb = false})
+    : super._(SelectionEventType.selectParagraph);
 
   /// The position in global coordinates to select paragraph at.
   final Offset globalPosition;
@@ -422,8 +522,9 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   /// This value defaults to [TextGranularity.character].
   const SelectionEdgeUpdateEvent.forStart({
     required this.globalPosition,
-    TextGranularity? granularity
-  }) : granularity = granularity ?? TextGranularity.character, super._(SelectionEventType.startEdgeUpdate);
+    TextGranularity? granularity,
+  }) : granularity = granularity ?? TextGranularity.character,
+       super._(SelectionEventType.startEdgeUpdate);
 
   /// Creates a selection end edge update event.
   ///
@@ -433,8 +534,9 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   /// This value defaults to [TextGranularity.character].
   const SelectionEdgeUpdateEvent.forEnd({
     required this.globalPosition,
-    TextGranularity? granularity
-  }) : granularity = granularity ?? TextGranularity.character, super._(SelectionEventType.endEdgeUpdate);
+    TextGranularity? granularity,
+  }) : granularity = granularity ?? TextGranularity.character,
+       super._(SelectionEventType.endEdgeUpdate);
 
   /// The new location of the selection edge.
   final Offset globalPosition;
@@ -628,7 +730,7 @@ enum SelectionStatus {
 /// The positions in geometry are in local coordinates of the [SelectionHandler]
 /// or [Selectable].
 @immutable
-class SelectionGeometry {
+class SelectionGeometry with Diagnosticable {
   /// Creates a selection geometry object.
   ///
   /// If any of the [startSelectionPoint] and [endSelectionPoint] is not null,
@@ -639,7 +741,10 @@ class SelectionGeometry {
     this.selectionRects = const <Rect>[],
     required this.status,
     required this.hasContent,
-  }) : assert((startSelectionPoint == null && endSelectionPoint == null) || status != SelectionStatus.none);
+  }) : assert(
+         (startSelectionPoint == null && endSelectionPoint == null) ||
+             status != SelectionStatus.none,
+       );
 
   /// The geometry information at the selection start.
   ///
@@ -710,23 +815,27 @@ class SelectionGeometry {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is SelectionGeometry
-        && other.startSelectionPoint == startSelectionPoint
-        && other.endSelectionPoint == endSelectionPoint
-        && listEquals(other.selectionRects, selectionRects)
-        && other.status == status
-        && other.hasContent == hasContent;
+    return other is SelectionGeometry &&
+        other.startSelectionPoint == startSelectionPoint &&
+        other.endSelectionPoint == endSelectionPoint &&
+        listEquals(other.selectionRects, selectionRects) &&
+        other.status == status &&
+        other.hasContent == hasContent;
   }
 
   @override
   int get hashCode {
-    return Object.hash(
-      startSelectionPoint,
-      endSelectionPoint,
-      selectionRects,
-      status,
-      hasContent,
-    );
+    return Object.hash(startSelectionPoint, endSelectionPoint, selectionRects, status, hasContent);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<SelectionPoint>('startSelectionPoint', startSelectionPoint));
+    properties.add(DiagnosticsProperty<SelectionPoint>('endSelectionPoint', endSelectionPoint));
+    properties.add(IterableProperty<Rect>('selectionRects', selectionRects));
+    properties.add(EnumProperty<SelectionStatus>('status', status));
+    properties.add(DiagnosticsProperty<bool>('hasContent', hasContent));
   }
 }
 
@@ -760,19 +869,15 @@ class SelectionPoint with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is SelectionPoint
-        && other.localPosition == localPosition
-        && other.lineHeight == lineHeight
-        && other.handleType == handleType;
+    return other is SelectionPoint &&
+        other.localPosition == localPosition &&
+        other.lineHeight == lineHeight &&
+        other.handleType == handleType;
   }
 
   @override
   int get hashCode {
-    return Object.hash(
-      localPosition,
-      lineHeight,
-      handleType,
-    );
+    return Object.hash(localPosition, lineHeight, handleType);
   }
 
   @override

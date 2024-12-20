@@ -82,7 +82,6 @@ class FilledButton extends ButtonStyleButton {
     super.clipBehavior = Clip.none,
     super.statesController,
     required super.child,
-    super.iconAlignment,
   }) : _variant = _FilledButtonVariant.filled;
 
   /// Create a filled button from [icon] and [label].
@@ -107,9 +106,9 @@ class FilledButton extends ButtonStyleButton {
     MaterialStatesController? statesController,
     Widget? icon,
     required Widget label,
-    IconAlignment iconAlignment = IconAlignment.start,
+    IconAlignment? iconAlignment,
   }) {
-     if (icon == null) {
+    if (icon == null) {
       return FilledButton(
         key: key,
         onPressed: onPressed,
@@ -180,7 +179,7 @@ class FilledButton extends ButtonStyleButton {
     MaterialStatesController? statesController,
     Widget? icon,
     required Widget label,
-    IconAlignment iconAlignment = IconAlignment.start,
+    IconAlignment? iconAlignment,
   }) {
     if (icon == null) {
       return FilledButton.tonal(
@@ -275,6 +274,7 @@ class FilledButton extends ButtonStyleButton {
     Color? surfaceTintColor,
     Color? iconColor,
     double? iconSize,
+    IconAlignment? iconAlignment,
     Color? disabledIconColor,
     Color? overlayColor,
     double? elevation,
@@ -296,16 +296,18 @@ class FilledButton extends ButtonStyleButton {
     ButtonLayerBuilder? backgroundBuilder,
     ButtonLayerBuilder? foregroundBuilder,
   }) {
-    final MaterialStateProperty<Color?>? overlayColorProp = switch ((foregroundColor, overlayColor)) {
+    final MaterialStateProperty<Color?>? overlayColorProp = switch ((
+      foregroundColor,
+      overlayColor,
+    )) {
       (null, null) => null,
       (_, Color(a: 0.0)) => WidgetStatePropertyAll<Color?>(overlayColor),
-      (_, final Color color) || (final Color color, _) => WidgetStateProperty<Color?>.fromMap(
-        <WidgetState, Color?>{
+      (_, final Color color) || (final Color color, _) =>
+        WidgetStateProperty<Color?>.fromMap(<WidgetState, Color?>{
           WidgetState.pressed: color.withOpacity(0.1),
           WidgetState.hovered: color.withOpacity(0.08),
           WidgetState.focused: color.withOpacity(0.1),
-        },
-      ),
+        }),
     };
 
     return ButtonStyle(
@@ -317,6 +319,7 @@ class FilledButton extends ButtonStyleButton {
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
       iconColor: ButtonStyleButton.defaultColor(iconColor, disabledIconColor),
       iconSize: ButtonStyleButton.allOrNull<double>(iconSize),
+      iconAlignment: iconAlignment,
       elevation: ButtonStyleButton.allOrNull(elevation),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
@@ -324,12 +327,10 @@ class FilledButton extends ButtonStyleButton {
       maximumSize: ButtonStyleButton.allOrNull<Size>(maximumSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
-      mouseCursor: WidgetStateProperty<MouseCursor?>.fromMap(
-        <WidgetStatesConstraint, MouseCursor?>{
-          WidgetState.disabled: disabledMouseCursor,
-          WidgetState.any: enabledMouseCursor,
-        },
-      ),
+      mouseCursor: WidgetStateProperty<MouseCursor?>.fromMap(<WidgetStatesConstraint, MouseCursor?>{
+        WidgetState.disabled: disabledMouseCursor,
+        WidgetState.any: enabledMouseCursor,
+      }),
       visualDensity: visualDensity,
       tapTargetSize: tapTargetSize,
       animationDuration: animationDuration,
@@ -462,7 +463,7 @@ class FilledButton extends ButtonStyleButton {
   ButtonStyle defaultStyleOf(BuildContext context) {
     return switch (_variant) {
       _FilledButtonVariant.filled => _FilledButtonDefaultsM3(context),
-      _FilledButtonVariant.tonal  => _FilledTonalButtonDefaultsM3(context),
+      _FilledButtonVariant.tonal => _FilledTonalButtonDefaultsM3(context),
     };
   }
 
@@ -480,10 +481,10 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
   final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
   final double padding1x = theme.useMaterial3 ? 24.0 : 16.0;
   return ButtonStyleButton.scaledPadding(
-     EdgeInsets.symmetric(horizontal: padding1x),
-     EdgeInsets.symmetric(horizontal: padding1x / 2),
-     EdgeInsets.symmetric(horizontal: padding1x / 2 / 2),
-     effectiveTextScale,
+    EdgeInsets.symmetric(horizontal: padding1x),
+    EdgeInsets.symmetric(horizontal: padding1x / 2),
+    EdgeInsets.symmetric(horizontal: padding1x / 2 / 2),
+    effectiveTextScale,
   );
 }
 
@@ -501,7 +502,7 @@ class _FilledButtonWithIcon extends FilledButton {
     super.statesController,
     required Widget icon,
     required Widget label,
-    super.iconAlignment,
+    IconAlignment? iconAlignment,
   }) : super(
          autofocus: autofocus ?? false,
          child: _FilledButtonWithIconChild(
@@ -510,7 +511,7 @@ class _FilledButtonWithIcon extends FilledButton {
            buttonStyle: style,
            iconAlignment: iconAlignment,
          ),
-      );
+       );
 
   _FilledButtonWithIcon.tonal({
     super.key,
@@ -525,7 +526,7 @@ class _FilledButtonWithIcon extends FilledButton {
     super.statesController,
     required Widget icon,
     required Widget label,
-    required IconAlignment iconAlignment,
+    IconAlignment? iconAlignment,
   }) : super.tonal(
          autofocus: autofocus ?? false,
          child: _FilledButtonWithIconChild(
@@ -540,21 +541,25 @@ class _FilledButtonWithIcon extends FilledButton {
   ButtonStyle defaultStyleOf(BuildContext context) {
     final bool useMaterial3 = Theme.of(context).useMaterial3;
     final ButtonStyle buttonStyle = super.defaultStyleOf(context);
-    final double defaultFontSize = buttonStyle.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
-    final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
+    final double defaultFontSize =
+        buttonStyle.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
+    final double effectiveTextScale =
+        MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
 
-    final EdgeInsetsGeometry scaledPadding = useMaterial3
-      ? ButtonStyleButton.scaledPadding(
-        const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
-        const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
-        const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
-        effectiveTextScale,
-      ) : ButtonStyleButton.scaledPadding(
-        const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
-        const EdgeInsets.symmetric(horizontal: 8),
-        const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
-        effectiveTextScale,
-      );
+    final EdgeInsetsGeometry scaledPadding =
+        useMaterial3
+            ? ButtonStyleButton.scaledPadding(
+              const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
+              const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
+              const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
+              effectiveTextScale,
+            )
+            : ButtonStyleButton.scaledPadding(
+              const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
+              const EdgeInsets.symmetric(horizontal: 8),
+              const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
+              effectiveTextScale,
+            );
     return buttonStyle.copyWith(
       padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
     );
@@ -572,20 +577,29 @@ class _FilledButtonWithIconChild extends StatelessWidget {
   final Widget label;
   final Widget icon;
   final ButtonStyle? buttonStyle;
-  final IconAlignment iconAlignment;
+  final IconAlignment? iconAlignment;
 
   @override
   Widget build(BuildContext context) {
-    final double defaultFontSize = buttonStyle?.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
-    final double scale = clampDouble(MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0, 1.0, 2.0) - 1.0;
+    final double defaultFontSize =
+        buttonStyle?.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
+    final double scale =
+        clampDouble(MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0, 1.0, 2.0) - 1.0;
     // Adjust the gap based on the text scale factor. Start at 8, and lerp
     // to 4 based on how large the text is.
     final double gap = lerpDouble(8, 4, scale)!;
+    final FilledButtonThemeData filledButtonTheme = FilledButtonTheme.of(context);
+    final IconAlignment effectiveIconAlignment =
+        iconAlignment ??
+        filledButtonTheme.style?.iconAlignment ??
+        buttonStyle?.iconAlignment ??
+        IconAlignment.start;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: iconAlignment == IconAlignment.start
-        ? <Widget>[icon, SizedBox(width: gap), Flexible(child: label)]
-        : <Widget>[Flexible(child: label), SizedBox(width: gap), icon],
+      children:
+          effectiveIconAlignment == IconAlignment.start
+              ? <Widget>[icon, SizedBox(width: gap), Flexible(child: label)]
+              : <Widget>[Flexible(child: label), SizedBox(width: gap), icon],
     );
   }
 }
@@ -597,6 +611,7 @@ class _FilledButtonWithIconChild extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _FilledButtonDefaultsM3 extends ButtonStyle {
   _FilledButtonDefaultsM3(this.context)
    : super(
@@ -732,6 +747,7 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
   @override
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - FilledButton
 
@@ -742,6 +758,7 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
   _FilledTonalButtonDefaultsM3(this.context)
    : super(
@@ -877,5 +894,6 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
   @override
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - FilledTonalButton

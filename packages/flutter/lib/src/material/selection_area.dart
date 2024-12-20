@@ -41,6 +41,8 @@ import 'theme.dart';
 ///
 ///  * [SelectableRegion], which provides an overview of the selection system.
 ///  * [SelectableText], which enables selection on a single run of text.
+///  * [SelectionListener], which enables accessing the [SelectionDetails] of
+///    the selectable subtree it wraps.
 class SelectionArea extends StatefulWidget {
   /// Creates a [SelectionArea].
   ///
@@ -97,7 +99,10 @@ class SelectionArea extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  static Widget _defaultContextMenuBuilder(BuildContext context, SelectableRegionState selectableRegionState) {
+  static Widget _defaultContextMenuBuilder(
+    BuildContext context,
+    SelectableRegionState selectableRegionState,
+  ) {
     return AdaptiveTextSelectionToolbar.selectableRegion(
       selectableRegionState: selectableRegionState,
     );
@@ -109,33 +114,30 @@ class SelectionArea extends StatefulWidget {
 
 /// State for a [SelectionArea].
 class SelectionAreaState extends State<SelectionArea> {
-  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_internalNode ??= FocusNode());
-  FocusNode? _internalNode;
   final GlobalKey<SelectableRegionState> _selectableRegionKey = GlobalKey<SelectableRegionState>();
+
   /// The [State] of the [SelectableRegion] for which this [SelectionArea] wraps.
   SelectableRegionState get selectableRegion => _selectableRegionKey.currentState!;
 
-  @override
-  void dispose() {
-    _internalNode?.dispose();
-    super.dispose();
-  }
-
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    final TextSelectionControls controls = widget.selectionControls ?? switch (Theme.of(context).platform) {
-      TargetPlatform.android || TargetPlatform.fuchsia => materialTextSelectionHandleControls,
-      TargetPlatform.linux || TargetPlatform.windows   => desktopTextSelectionHandleControls,
-      TargetPlatform.iOS                               => cupertinoTextSelectionHandleControls,
-      TargetPlatform.macOS                             => cupertinoDesktopTextSelectionHandleControls,
-    };
+    final TextSelectionControls controls =
+        widget.selectionControls ??
+        switch (Theme.of(context).platform) {
+          TargetPlatform.android || TargetPlatform.fuchsia => materialTextSelectionHandleControls,
+          TargetPlatform.linux || TargetPlatform.windows => desktopTextSelectionHandleControls,
+          TargetPlatform.iOS => cupertinoTextSelectionHandleControls,
+          TargetPlatform.macOS => cupertinoDesktopTextSelectionHandleControls,
+        };
     return SelectableRegion(
       key: _selectableRegionKey,
       selectionControls: controls,
-      focusNode: _effectiveFocusNode,
+      focusNode: widget.focusNode,
       contextMenuBuilder: widget.contextMenuBuilder,
-      magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
+      magnifierConfiguration:
+          widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
       onSelectionChanged: widget.onSelectionChanged,
       child: widget.child,
     );

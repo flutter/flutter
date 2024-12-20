@@ -9,8 +9,6 @@ import 'package:path/path.dart' as path;
 import 'task_result.dart';
 import 'utils.dart';
 
-final String platformLineSep = Platform.isWindows ? '\r\n' : '\n';
-
 final List<String> flutterAssets = <String>[
   'assets/flutter_assets/AssetManifest.json',
   'assets/flutter_assets/NOTICES.Z',
@@ -24,14 +22,13 @@ final List<String> debugAssets = <String>[
   'assets/flutter_assets/vm_snapshot_data',
 ];
 
-final List<String> baseApkFiles = <String> [
-  'classes.dex',
-  'AndroidManifest.xml',
-];
+final List<String> baseApkFiles = <String>['classes.dex', 'AndroidManifest.xml'];
 
 /// Runs the given [testFunction] on a freshly generated Flutter project.
 Future<void> runProjectTest(Future<void> Function(FlutterProject project) testFunction) async {
-  final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_gradle_plugin_test.');
+  final Directory tempDir = Directory.systemTemp.createTempSync(
+    'flutter_devicelab_gradle_plugin_test.',
+  );
   final FlutterProject project = await FlutterProject.create(tempDir, 'hello');
 
   try {
@@ -42,8 +39,12 @@ Future<void> runProjectTest(Future<void> Function(FlutterProject project) testFu
 }
 
 /// Runs the given [testFunction] on a freshly generated Flutter plugin project.
-Future<void> runPluginProjectTest(Future<void> Function(FlutterPluginProject pluginProject) testFunction) async {
-  final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_gradle_plugin_test.');
+Future<void> runPluginProjectTest(
+  Future<void> Function(FlutterPluginProject pluginProject) testFunction,
+) async {
+  final Directory tempDir = Directory.systemTemp.createTempSync(
+    'flutter_devicelab_gradle_plugin_test.',
+  );
   final FlutterPluginProject pluginProject = await FlutterPluginProject.create(tempDir, 'aaa');
 
   try {
@@ -54,9 +55,16 @@ Future<void> runPluginProjectTest(Future<void> Function(FlutterPluginProject plu
 }
 
 /// Runs the given [testFunction] on a freshly generated Flutter module project.
-Future<void> runModuleProjectTest(Future<void> Function(FlutterModuleProject moduleProject) testFunction) async {
-  final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_gradle_module_test.');
-  final FlutterModuleProject moduleProject = await FlutterModuleProject.create(tempDir, 'hello_module');
+Future<void> runModuleProjectTest(
+  Future<void> Function(FlutterModuleProject moduleProject) testFunction,
+) async {
+  final Directory tempDir = Directory.systemTemp.createTempSync(
+    'flutter_devicelab_gradle_module_test.',
+  );
+  final FlutterModuleProject moduleProject = await FlutterModuleProject.create(
+    tempDir,
+    'hello_module',
+  );
 
   try {
     await testFunction(moduleProject);
@@ -68,18 +76,12 @@ Future<void> runModuleProjectTest(Future<void> Function(FlutterModuleProject mod
 /// Returns the list of files inside an Android Package Kit.
 Future<Iterable<String>> getFilesInApk(String apk) async {
   if (!File(apk).existsSync()) {
-    throw TaskResult.failure(
-        'Gradle did not produce an output artifact file at: $apk');
+    throw TaskResult.failure('Gradle did not produce an output artifact file at: $apk');
   }
-  final String files = await _evalApkAnalyzer(
-    <String>[
-      'files',
-      'list',
-      apk,
-    ]
-  );
+  final String files = await _evalApkAnalyzer(<String>['files', 'list', apk]);
   return files.split('\n').map((String file) => file.substring(1).trim());
 }
+
 /// Returns the list of files inside an Android App Bundle.
 Future<Iterable<String>> getFilesInAppBundle(String bundle) {
   return getFilesInApk(bundle);
@@ -104,8 +106,8 @@ bool hasMultipleOccurrences(String text, Pattern pattern) {
 
 /// The Android home directory.
 String get _androidHome {
-  final String? androidHome = Platform.environment['ANDROID_HOME'] ??
-      Platform.environment['ANDROID_SDK_ROOT'];
+  final String? androidHome =
+      Platform.environment['ANDROID_HOME'] ?? Platform.environment['ANDROID_SDK_ROOT'];
   if (androidHome == null || androidHome.isEmpty) {
     throw Exception('Environment variable `ANDROID_HOME` is not set.');
   }
@@ -122,19 +124,22 @@ Future<String> _evalApkAnalyzer(
   if (javaHome == null || javaHome.isEmpty) {
     throw Exception('No JAVA_HOME set.');
   }
-  final String apkAnalyzer = path
-     .join(_androidHome, 'cmdline-tools', 'latest', 'bin', Platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer');
-   if (canRun(apkAnalyzer)) {
-     return eval(
-       apkAnalyzer,
-       args,
-       printStdout: printStdout,
-       workingDirectory: workingDirectory,
-       environment: <String, String>{
-         'JAVA_HOME': javaHome,
-       },
-     );
-   }
+  final String apkAnalyzer = path.join(
+    _androidHome,
+    'cmdline-tools',
+    'latest',
+    'bin',
+    Platform.isWindows ? 'apkanalyzer.bat' : 'apkanalyzer',
+  );
+  if (canRun(apkAnalyzer)) {
+    return eval(
+      apkAnalyzer,
+      args,
+      printStdout: printStdout,
+      workingDirectory: workingDirectory,
+      environment: <String, String>{'JAVA_HOME': javaHome},
+    );
+  }
 
   final String javaBinary = path.join(javaHome, 'bin', 'java');
   assert(canRun(javaBinary));
@@ -142,7 +147,7 @@ Future<String> _evalApkAnalyzer(
   final String libs = path.join(androidTools, 'lib');
   assert(Directory(libs).existsSync());
 
-  final String classSeparator =  Platform.isWindows ? ';' : ':';
+  final String classSeparator = Platform.isWindows ? ';' : ':';
   return eval(
     javaBinary,
     <String>[
@@ -173,25 +178,32 @@ class ApkExtractor {
     if (_extracted) {
       return;
     }
-    final String packages = await _evalApkAnalyzer(
-      <String>[
-        'dex',
-        'packages',
-        apkFile.path,
-      ],
-    );
+    final String packages = await _evalApkAnalyzer(<String>['dex', 'packages', apkFile.path]);
     final List<String> lines = packages.split('\n');
     _classes = Set<String>.from(
-      lines.where((String line) => line.startsWith('C'))
-           .map<String>((String line) => line.split('\t').last),
+      lines
+          .where((String line) => line.startsWith('C'))
+          .map<String>((String line) => line.split('\t').last),
     );
     assert(_classes.isNotEmpty);
     _methods = Set<String>.from(
-      lines.where((String line) => line.startsWith('M'))
-           .map<String>((String line) => line.split('\t').last)
+      lines
+          .where((String line) => line.startsWith('M'))
+          .map<String>((String line) => line.split('\t').last),
     );
     assert(_methods.isNotEmpty);
     _extracted = true;
+  }
+
+  /// Returns true if APK contains classes from library with given [libraryName].
+  Future<bool> containsLibrary(String libraryName) async {
+    await _extractDex();
+    for (final String className in _classes) {
+      if (className.startsWith(libraryName)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /// Returns true if the APK contains a given class.
@@ -210,14 +222,15 @@ class ApkExtractor {
 
 /// Gets the content of the `AndroidManifest.xml`.
 Future<String> getAndroidManifest(String apk) async {
-  return _evalApkAnalyzer(
-    <String>[
-      'manifest',
-      'print',
-      apk,
-    ],
-    workingDirectory: _androidHome,
-  );
+  return _evalApkAnalyzer(<String>['manifest', 'print', apk], workingDirectory: _androidHome);
+}
+
+/// Checks that the [apk] includes any classes from a particularly library with
+/// given [libraryName] in the [apk] and returns true if so, false otherwise.
+Future<bool> checkApkContainsMethodsFromLibrary(File apk, String libraryName) async {
+  final ApkExtractor extractor = ApkExtractor(apk);
+  final bool apkContainsMethodsFromLibrary = await extractor.containsLibrary(libraryName);
+  return apkContainsMethodsFromLibrary;
 }
 
 /// Checks that the classes are contained in the APK, throws otherwise.
@@ -274,16 +287,17 @@ android {
   }
 
   /// Adds a plugin to the pubspec.
-  /// In pubspec, each dependency is expressed as key, value pair joined by a colon `:`.
-  /// such as `plugin_a`:`^0.0.1` or `plugin_a`:`\npath: /some/path`.
-  void addPlugin(String plugin, { String value = '' }) {
-    final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
-    String content = pubspec.readAsStringSync();
-    content = content.replaceFirst(
-      '${platformLineSep}dependencies:$platformLineSep',
-      '${platformLineSep}dependencies:$platformLineSep  $plugin: $value$platformLineSep',
-    );
-    pubspec.writeAsStringSync(content, flush: true);
+  ///
+  /// If a particular version of the [plugin] is desired, it should be included
+  /// in the name as it would be in the  `flutter pub add` command, e.g.
+  /// `google_maps_flutter:^2.2.1`.
+  ///
+  /// Include all other desired options for running `flutter pub add` to
+  /// [options], e.g. `<String>['--path', 'path/to/plugin']`.
+  Future<void> addPlugin(String plugin, {List<String> options = const <String>[]}) async {
+    await inDirectory(Directory(rootPath), () async {
+      await flutter('pub', options: <String>['add', plugin, ...options]);
+    });
   }
 
   Future<void> setMinSdkVersion(int sdkVersion) async {
@@ -307,14 +321,16 @@ android {
   Future<void> addProductFlavors(Iterable<String> flavors) async {
     final File buildScript = appBuildFile;
 
-    final String flavorConfig = flavors.map((String name) {
-      return '''
+    final String flavorConfig = flavors
+        .map((String name) {
+          return '''
 create("$name") {
     applicationIdSuffix = ".$name"
     versionNameSuffix = "-$name"
 }
       ''';
-    }).join('\n');
+        })
+        .join('\n');
 
     buildScript.openWrite(mode: FileMode.append).write('''
 android {
@@ -328,21 +344,24 @@ android {
 
   Future<void> introduceError() async {
     final File buildScript = appBuildFile;
-    await buildScript.writeAsString((await buildScript.readAsString()).replaceAll('buildTypes', 'builTypes'));
+    await buildScript.writeAsString(
+      (await buildScript.readAsString()).replaceAll('buildTypes', 'builTypes'),
+    );
   }
 
   Future<void> introducePubspecError() async {
-    final File pubspec = File(
-      path.join(parent.path, 'hello', 'pubspec.yaml')
-    );
+    final File pubspec = File(path.join(parent.path, 'hello', 'pubspec.yaml'));
     final String contents = pubspec.readAsStringSync();
-    final String newContents = contents.replaceFirst('${platformLineSep}flutter:$platformLineSep', '''
+    final String newContents = contents.replaceFirst(
+      '${Platform.lineTerminator}flutter:${Platform.lineTerminator}',
+      '''
 
 flutter:
   assets:
     - lib/gallery/example_code.dart
 
-''');
+''',
+    );
     pubspec.writeAsStringSync(newContents);
   }
 
@@ -369,9 +388,13 @@ class FlutterPluginProject {
   final Directory parent;
   final String name;
 
-  static Future<FlutterPluginProject> create(Directory directory, String name) async {
+  static Future<FlutterPluginProject> create(
+    Directory directory,
+    String name, {
+    List<String> options = const <String>['--platforms=ios,android'],
+  }) async {
     await inDirectory(directory, () async {
-      await flutter('create', options: <String>['--template=plugin', '--platforms=ios,android', name]);
+      await flutter('create', options: <String>['--template=plugin', ...options, name]);
     });
     return FlutterPluginProject(directory, name);
   }
@@ -379,11 +402,22 @@ class FlutterPluginProject {
   String get rootPath => path.join(parent.path, name);
   String get examplePath => path.join(rootPath, 'example');
   String get exampleAndroidPath => path.join(examplePath, 'android');
-  String get debugApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk', 'app-debug.apk');
-  String get releaseApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk', 'app-release.apk');
-  String get releaseArmApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk','app-armeabi-v7a-release.apk');
-  String get releaseArm64ApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk', 'app-arm64-v8a-release.apk');
-  String get releaseBundlePath => path.join(examplePath, 'build', 'app', 'outputs', 'bundle', 'release', 'app.aab');
+  String get debugApkPath =>
+      path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk', 'app-debug.apk');
+  String get releaseApkPath =>
+      path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk', 'app-release.apk');
+  String get releaseArmApkPath => path.join(
+    examplePath,
+    'build',
+    'app',
+    'outputs',
+    'flutter-apk',
+    'app-armeabi-v7a-release.apk',
+  );
+  String get releaseArm64ApkPath =>
+      path.join(examplePath, 'build', 'app', 'outputs', 'flutter-apk', 'app-arm64-v8a-release.apk');
+  String get releaseBundlePath =>
+      path.join(examplePath, 'build', 'app', 'outputs', 'bundle', 'release', 'app.aab');
 }
 
 class FlutterModuleProject {
@@ -408,9 +442,10 @@ Future<void> _runGradleTask({
   List<String>? options,
 }) async {
   final ProcessResult result = await _resultOfGradleTask(
-      workingDirectory: workingDirectory,
-      task: task,
-      options: options);
+    workingDirectory: workingDirectory,
+    task: task,
+    options: options,
+  );
   if (result.exitCode != 0) {
     print('stdout:');
     print(result.stdout);
@@ -436,44 +471,61 @@ Future<ProcessResult> _resultOfGradleTask({
 
   print('\nUsing JAVA_HOME=$javaHome');
 
-  final List<String> args = <String>[
-    'app:$task',
-    ...?options,
-  ];
-  final String gradle = path.join(workingDirectory, Platform.isWindows ? 'gradlew.bat' : './gradlew');
+  final List<String> args = <String>['app:$task', ...?options];
+  final String gradle = path.join(
+    workingDirectory,
+    Platform.isWindows ? 'gradlew.bat' : './gradlew',
+  );
   print('┌── $gradle');
-  print(File(path.join(workingDirectory, gradle)).readAsLinesSync().map((String line) => '| $line').join('\n'));
+  print(
+    File(
+      path.join(workingDirectory, gradle),
+    ).readAsLinesSync().map((String line) => '| $line').join('\n'),
+  );
   print('└─────────────────────────────────────────────────────────────────────────────────────');
   print(
     'Running Gradle:\n'
     '  Executable: $gradle\n'
     '  Arguments: ${args.join(' ')}\n'
     '  Working directory: $workingDirectory\n'
-    '  JAVA_HOME: $javaHome\n'
+    '  JAVA_HOME: $javaHome\n',
   );
   return Process.run(
     gradle,
     args,
     workingDirectory: workingDirectory,
-    environment: <String, String>{ 'JAVA_HOME': javaHome },
+    environment: <String, String>{'JAVA_HOME': javaHome},
   );
 }
 
 /// Returns [null] if target matches [expectedTarget], otherwise returns an error message.
 String? validateSnapshotDependency(FlutterProject project, String expectedTarget) {
   final File snapshotBlob = File(
-      path.join(project.rootPath, 'build', 'app', 'intermediates',
-          'flutter', 'debug', 'flutter_build.d'));
+    path.join(
+      project.rootPath,
+      'build',
+      'app',
+      'intermediates',
+      'flutter',
+      'debug',
+      'flutter_build.d',
+    ),
+  );
 
   assert(snapshotBlob.existsSync());
   final String contentSnapshot = snapshotBlob.readAsStringSync();
   return contentSnapshot.contains('$expectedTarget ')
-    ? null : 'Dependency file should have $expectedTarget as target. Instead found $contentSnapshot';
+      ? null
+      : 'Dependency file should have $expectedTarget as target. Instead found $contentSnapshot';
 }
 
 File getAndroidBuildFile(String androidAppPath, {bool settings = false}) {
-  final File groovyFile = File(path.join(androidAppPath, settings ? 'settings.gradle' : 'build.gradle'));
-  final File kotlinFile = File(path.join(androidAppPath, settings ? 'settings.gradle.kts' : 'build.gradle.kts'));
+  final File groovyFile = File(
+    path.join(androidAppPath, settings ? 'settings.gradle' : 'build.gradle'),
+  );
+  final File kotlinFile = File(
+    path.join(androidAppPath, settings ? 'settings.gradle.kts' : 'build.gradle.kts'),
+  );
 
   if (groovyFile.existsSync()) {
     return groovyFile;

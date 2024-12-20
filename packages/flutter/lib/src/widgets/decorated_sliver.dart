@@ -25,14 +25,26 @@ import 'image.dart';
 ///
 /// Commonly used with [BoxDecoration].
 ///
-/// The [child] is not clipped. To clip a child to the shape of a particular
-/// [ShapeDecoration], consider using a [ClipPath] widget.
 ///
 /// {@tool dartpad}
 /// This sample shows a radial gradient that draws a moon on a night sky:
 ///
 /// ** See code in examples/api/lib/widgets/sliver/decorated_sliver.0.dart **
 /// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example demonstrates how the [CustomScrollView.clipBehavior]
+/// impacts a decorated sliver's appearance.
+///
+/// The [Switch] determines whether clipping is enabled, and
+/// the [Slider] adjusts the height of window.
+///
+/// ** See code in examples/api/lib/widgets/sliver/decorated_sliver.1.dart **
+/// {@end-tool}
+///
+/// This widget does not apply any additional clipping to its [child].
+/// To clip a child based on the [Decoration]'s shape, consider using
+/// a [ClipPath] widget.
 ///
 /// See also:
 ///
@@ -83,7 +95,9 @@ class DecoratedSliver extends SingleChildRenderObjectWidget {
       DecorationPosition.background => 'bg',
       DecorationPosition.foreground => 'fg',
     };
-    properties.add(EnumProperty<DecorationPosition>('position', position, level: DiagnosticLevel.hidden));
+    properties.add(
+      EnumProperty<DecorationPosition>('position', position, level: DiagnosticLevel.hidden),
+    );
     properties.add(DiagnosticsProperty<Decoration>(label, decoration));
   }
 }
