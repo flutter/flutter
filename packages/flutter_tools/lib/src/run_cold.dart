@@ -111,12 +111,9 @@ class ColdRunner extends ResidentRunner {
       // Only trace startup for the first device.
       final FlutterDevice device = flutterDevices.first;
       if (device.vmService != null) {
-        globals.printStatus(
-          'Tracing startup on ${device.device!.displayName}.',
-        );
+        globals.printStatus('Tracing startup on ${device.device!.displayName}.');
         final String outputPath =
-            globals.platform.environment[kFlutterTestOutputsDirEnvName] ??
-                getBuildDirectory();
+            globals.platform.environment[kFlutterTestOutputsDirEnvName] ?? getBuildDirectory();
         await downloadStartupTrace(
           device.vmService!,
           awaitFirstFrame: awaitFirstFrameWhenTracing,

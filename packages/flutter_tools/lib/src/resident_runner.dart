@@ -476,9 +476,7 @@ class FlutterDevice {
     final LaunchResult result = await futureResult;
 
     if (!result.started) {
-      globals.printError(
-        'Error launching application on ${device!.displayName}.',
-      );
+      globals.printError('Error launching application on ${device!.displayName}.');
       await stopEchoingDeviceLog();
       return 2;
     }
@@ -534,9 +532,7 @@ class FlutterDevice {
     );
 
     if (!result.started) {
-      globals.printError(
-        'Error running application on ${device!.displayName}.',
-      );
+      globals.printError('Error running application on ${device!.displayName}.');
       await stopEchoingDeviceLog();
       return 2;
     }
@@ -929,11 +925,7 @@ abstract class ResidentHandlers {
     final Status status = logger.startProgress(
       'Taking screenshot for ${device.device!.displayName}...',
     );
-    final File outputFile = getUniqueFile(
-      fileSystem!.currentDirectory,
-      'flutter',
-      'png',
-    );
+    final File outputFile = getUniqueFile(fileSystem!.currentDirectory, 'flutter', 'png');
 
     try {
       bool result;

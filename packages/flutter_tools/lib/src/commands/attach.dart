@@ -421,7 +421,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         if (runner.exited || !runner.isWaitingForVmService) {
           break;
         }
-        _logger.printStatus('Waiting for a new connection from Flutter on ${device.displayName}...');
+        _logger.printStatus(
+          'Waiting for a new connection from Flutter on '
+          '${device.displayName}...',
+        );
       }
     } on RPCError catch (err) {
       if (err.code == RPCErrorKind.kServiceDisappeared.code ||
