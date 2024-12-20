@@ -16,11 +16,16 @@ import 'version.dart';
 /// The result of parsing `--template=` for `flutter create` and related commands.
 @immutable
 sealed class ParsedFlutterTemplateType implements CliEnum {
+  static const List<ParsedFlutterTemplateType> _values = <ParsedFlutterTemplateType>[
+    ...FlutterTemplateType.values,
+    ...RemovedFlutterTemplateType.values,
+  ];
+
   /// Parses and returns a [ParsedFlutterTemplateType], if any, for [cliName].
   ///
   /// If no match was found `null` is returned.
   static ParsedFlutterTemplateType? fromCliName(String cliName) {
-    for (final FlutterTemplateType type in FlutterTemplateType.values) {
+    for (final ParsedFlutterTemplateType type in _values) {
       if (cliName == type.cliName) {
         return type;
       }
@@ -30,14 +35,9 @@ sealed class ParsedFlutterTemplateType implements CliEnum {
 
   /// Returns template types that are enabled based on the current [featureFlags].
   static List<ParsedFlutterTemplateType> enabledValues(FeatureFlags featureFlags) {
-    final List<ParsedFlutterTemplateType> allFlags = <ParsedFlutterTemplateType>[
-      ...FlutterTemplateType.values,
-      ...RemovedFlutterTemplateType.values,
-    ];
-    allFlags.retainWhere((ParsedFlutterTemplateType templateType) {
+    return _values.toList()..retainWhere((ParsedFlutterTemplateType templateType) {
       return templateType.isEnabled(featureFlags);
     });
-    return allFlags;
   }
 
   /// Whether the flag is enabled based on a flag being set.

@@ -4290,6 +4290,30 @@ void main() {
   });
 
   testUsingContext(
+    'show an error message for removed --template=skeleton',
+    () async {
+      final CreateCommand command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await expectLater(
+        runner.run(<String>['create', '--no-pub', '--template=skeleton', projectDir.path]),
+        throwsToolExit(message: 'The template skeleton is no longer available'),
+      );
+    },
+    overrides: <Type, Generator>{
+      Pub:
+          () => Pub.test(
+            fileSystem: globals.fs,
+            logger: globals.logger,
+            processManager: globals.processManager,
+            usage: globals.flutterUsage,
+            botDetector: globals.botDetector,
+            platform: globals.platform,
+            stdio: mockStdio,
+          ),
+    },
+  );
+
+  testUsingContext(
     'create an FFI plugin with ios, then add macos',
     () async {
       final CreateCommand command = CreateCommand();
