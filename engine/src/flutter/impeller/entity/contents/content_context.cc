@@ -268,11 +268,10 @@ ContentContext::ContentContext(
     auto buffer_view = host_buffer.Emplace(data);
     blit_pass->AddCopy(buffer_view, empty_texture_);
 
-    if (!blit_pass->EncodeCommands(GetContext()->GetResourceAllocator()) ||
-        !GetContext()
-             ->GetCommandQueue()
-             ->Submit({std::move(cmd_buffer)})
-             .ok()) {
+    if (!blit_pass->EncodeCommands() || !GetContext()
+                                             ->GetCommandQueue()
+                                             ->Submit({std::move(cmd_buffer)})
+                                             .ok()) {
       VALIDATION_LOG << "Failed to create empty texture.";
     }
   }
