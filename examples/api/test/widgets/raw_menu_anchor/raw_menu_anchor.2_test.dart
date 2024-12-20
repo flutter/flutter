@@ -5,7 +5,8 @@
 import 'package:flutter/material.dart' show Icons, MenuItemButton;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_api_samples/widgets/raw_menu_anchor/raw_menu_anchor.2.dart' as example;
+import 'package:flutter_api_samples/widgets/raw_menu_anchor/raw_menu_anchor.2.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 final Finder opacityFinder = find.descendant(
@@ -15,7 +16,8 @@ final Finder opacityFinder = find.descendant(
 
 IconData? iconByMenuItemLabel(String label, WidgetTester tester) {
   final Finder finder = find.widgetWithText(MenuItemButton, label);
-  final Icon? icon = tester.widget<MenuItemButton>(finder).trailingIcon as Icon?;
+  final Icon? icon =
+      tester.widget<MenuItemButton>(finder).trailingIcon as Icon?;
   return icon?.icon;
 }
 
@@ -81,17 +83,19 @@ void main() {
     // Felis catus
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
 
-    expect(primaryFocus?.debugLabel, equals('MenuItemButton(Text("Felis catus"))'));
+    expect(primaryFocus?.debugLabel,
+        equals('MenuItemButton(Text("Felis catus"))'));
 
     // Dog is disabled so it should stay on Felis catus. Focus does not loop
     // because we are in a custom overlay.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
 
-    expect(primaryFocus?.debugLabel, equals('MenuItemButton(Text("Felis catus"))'));
+    expect(primaryFocus?.debugLabel,
+        equals('MenuItemButton(Text("Felis catus"))'));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp); // Kitten
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp); // Cat
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);   // Select Cat
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter); // Select Cat
     await tester.pump();
     await tester.pump();
 
@@ -99,13 +103,14 @@ void main() {
     expect(find.text('Felis catus'), findsNothing);
   });
 
-  testWidgets('Menu position shifts over selected item', (WidgetTester tester) async {
+  testWidgets('Menu position shifts over selected item',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const example.MenuOverlayBuilderApp());
 
     await tester.tap(find.text('Select One'));
     await tester.pumpAndSettle();
 
-     expect(
+    expect(
       tester.getRect(find.byType(example.ItemAwareMenuSurface)),
       rectMoreOrLessEquals(
         const Rect.fromLTRB(449.2, 265.5, 674.2, 453.5),

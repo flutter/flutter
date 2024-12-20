@@ -4,7 +4,8 @@
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_api_samples/widgets/raw_menu_anchor/raw_menu_anchor.3.dart' as example;
+import 'package:flutter_api_samples/widgets/raw_menu_anchor/raw_menu_anchor.3.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 T findMenuPanelDescendent<T extends Widget>(WidgetTester tester) {
@@ -21,7 +22,9 @@ Finder findMenuPanel() {
 }
 
 void main() {
-  testWidgets('Initializes with correct number of menu items in expected position', (WidgetTester tester) async {
+  testWidgets(
+      'Initializes with correct number of menu items in expected position',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const example.MenuNodeApp());
 
     expect(find.byType(RawMenuAnchor).evaluate().length, 5);
@@ -61,7 +64,8 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
 
-    expect(primaryFocus?.debugLabel, equals('MenuItemButton(Text("Copy Link"))'));
+    expect(
+        primaryFocus?.debugLabel, equals('MenuItemButton(Text("Copy Link"))'));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
@@ -86,7 +90,8 @@ void main() {
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
 
-    expect(primaryFocus?.debugLabel, equals('MenuItemButton(Text("Spelling"))'));
+    expect(
+        primaryFocus?.debugLabel, equals('MenuItemButton(Text("Spelling"))'));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
 
@@ -94,11 +99,13 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
 
-    expect(primaryFocus?.debugLabel, equals('MenuItemButton(Text("Thesaurus"))'));
+    expect(
+        primaryFocus?.debugLabel, equals('MenuItemButton(Text("Thesaurus"))'));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
 
-    expect(primaryFocus?.debugLabel, equals('MenuItemButton(Text("Dictionary"))'));
+    expect(
+        primaryFocus?.debugLabel, equals('MenuItemButton(Text("Dictionary"))'));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pump();
@@ -107,7 +114,8 @@ void main() {
     expect(find.text('Selected: Dictionary'), findsOneWidget);
   });
 
-  testWidgets('Platform Brightness does not affect menu appearance', (WidgetTester tester) async {
+  testWidgets('Platform Brightness does not affect menu appearance',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(platformBrightness: Brightness.dark),
