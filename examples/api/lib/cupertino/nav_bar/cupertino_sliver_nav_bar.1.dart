@@ -59,9 +59,7 @@ class SliverNavBarExample extends StatelessWidget {
                         context,
                         CupertinoPageRoute<Widget>(
                           builder: (BuildContext context) {
-                            return const NextPage(
-                              bottomMode: NavigationBarBottomMode.always,
-                            );
+                            return const NextPage(bottomMode: NavigationBarBottomMode.always);
                           },
                         ),
                       );
@@ -100,9 +98,8 @@ class _NextPageState extends State<NextPage> {
             backgroundColor: CupertinoColors.systemYellow,
             border: Border(
               bottom: BorderSide(
-                color: brightness == Brightness.light
-                    ? CupertinoColors.black
-                    : CupertinoColors.white,
+                color:
+                    brightness == Brightness.light ? CupertinoColors.black : CupertinoColors.white,
               ),
             ),
             middle: const Text('Contacts Group'),
