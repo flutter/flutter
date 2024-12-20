@@ -20,10 +20,10 @@ final class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    final List<DisplayFeature> displayFeatures =
-        MediaQuery.of(context).displayFeatures;
+    final List<DisplayFeature> displayFeatures = MediaQuery.of(context).displayFeatures;
     displayFeatures.retainWhere(
-        (DisplayFeature feature) => feature.type == DisplayFeatureType.cutout);
+      (DisplayFeature feature) => feature.type == DisplayFeatureType.cutout,
+    );
     String text;
     // None of this complexity is required for the test but it helps when
     // visually debugging or watching a video of a remote device.

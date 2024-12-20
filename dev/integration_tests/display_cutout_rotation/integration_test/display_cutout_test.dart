@@ -18,18 +18,13 @@ void main() {
     // "com.android.internal.display.cutout.emulation.tall".
     testWidgets('cutout should be on top in portrait mode', (WidgetTester tester) async {
       // Force rotation
-      await setOrientationAndWaitUntilRotation(
-          tester, DeviceOrientation.portraitUp);
+      await setOrientationAndWaitUntilRotation(tester, DeviceOrientation.portraitUp);
       // Load app widget.
       await tester.pumpWidget(const MyApp());
       final BuildContext context = tester.element(find.byType(Text));
       final Iterable<DisplayFeature> displayFeatures = getCutouts(tester, context);
       // Test is expecting one cutout setup in the test harness.
-      expect(
-        displayFeatures.length,
-        1,
-        reason: 'Single cutout display feature expected',
-      );
+      expect(displayFeatures.length, 1, reason: 'Single cutout display feature expected');
       // Verify that app code thinks there is a top cutout.
       expect(
         displayFeatures.first.bounds.top,
@@ -41,8 +36,7 @@ void main() {
     });
 
     testWidgets('cutout should be on left in landscape left', (WidgetTester tester) async {
-      await setOrientationAndWaitUntilRotation(
-          tester, DeviceOrientation.landscapeLeft);
+      await setOrientationAndWaitUntilRotation(tester, DeviceOrientation.landscapeLeft);
       // Load app widget.
       await tester.pumpWidget(const MyApp());
       final BuildContext context = tester.element(find.byType(Text));
@@ -50,11 +44,7 @@ void main() {
       final Iterable<DisplayFeature> displayFeatures = getCutouts(tester, context);
 
       // Test is expecting one cutout setup in the test harness.
-      expect(
-        displayFeatures.length,
-        1,
-        reason: 'Single cutout display feature expected',
-      );
+      expect(displayFeatures.length, 1, reason: 'Single cutout display feature expected');
       expect(
         displayFeatures.first.bounds.left,
         0,
@@ -65,19 +55,14 @@ void main() {
     });
 
     testWidgets('cutout handles rotation', (WidgetTester tester) async {
-      await setOrientationAndWaitUntilRotation(
-          tester, DeviceOrientation.portraitUp);
+      await setOrientationAndWaitUntilRotation(tester, DeviceOrientation.portraitUp);
       const MyApp widgetUnderTest = MyApp();
       // Load app widget.
       await tester.pumpWidget(widgetUnderTest);
       BuildContext context = tester.element(find.byType(Text));
       Iterable<DisplayFeature> displayFeatures = getCutouts(tester, context);
       // Test is expecting one cutout setup in the test harness.
-      expect(
-        displayFeatures.length,
-        1,
-        reason: 'Single cutout display feature expected',
-      );
+      expect(displayFeatures.length, 1, reason: 'Single cutout display feature expected');
       // Verify that app code thinks there is a top cutout.
       expect(
         displayFeatures.first.bounds.top,
@@ -86,19 +71,14 @@ void main() {
             'cutout should start at the top, does the test device have a '
             'camera cutout or window inset?',
       );
-      await setOrientationAndWaitUntilRotation(
-          tester, DeviceOrientation.landscapeLeft);
+      await setOrientationAndWaitUntilRotation(tester, DeviceOrientation.landscapeLeft);
       await tester.pumpWidget(widgetUnderTest);
 
       // Requery for display features after rotation.
       context = tester.element(find.byType(Text));
       displayFeatures = getCutouts(tester, context);
       // Test is expecting one cutout setup in the test harness.
-      expect(
-        displayFeatures.length,
-        1,
-        reason: 'Single cutout display feature expected',
-      );
+      expect(displayFeatures.length, 1, reason: 'Single cutout display feature expected');
       expect(
         displayFeatures.first.bounds.left,
         0,
@@ -134,7 +114,7 @@ Future<void> setOrientationAndWaitUntilRotation(
     case DeviceOrientation.landscapeLeft:
       expectedOrientation = Orientation.landscape;
   }
-  while(true) {
+  while (true) {
     final BuildContext context = tester.element(find.byType(Text));
     if (expectedOrientation == MediaQuery.of(context).orientation) {
       break;
@@ -144,8 +124,7 @@ Future<void> setOrientationAndWaitUntilRotation(
 }
 
 Iterable<DisplayFeature> getCutouts(WidgetTester tester, BuildContext context) {
-  final List<DisplayFeature> displayFeatures =
-      MediaQuery.of(context).displayFeatures;
+  final List<DisplayFeature> displayFeatures = MediaQuery.of(context).displayFeatures;
   return displayFeatures.where(
     (DisplayFeature feature) => feature.type == DisplayFeatureType.cutout,
   );

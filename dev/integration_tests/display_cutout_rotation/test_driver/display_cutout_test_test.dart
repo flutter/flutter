@@ -18,8 +18,7 @@ Future<void> main() async {
     print('This test must be run on a POSIX host. Skipping...');
     return;
   }
-  final bool adbExists =
-      Process.runSync('which', <String>['adb']).exitCode == 0;
+  final bool adbExists = Process.runSync('which', <String>['adb']).exitCode == 0;
   if (!adbExists) {
     print(r'This test needs ADB to exist on the $PATH.');
     exitCode = 1;
@@ -33,9 +32,7 @@ Future<void> main() async {
   ]);
   final String apiStdout = checkApiLevel.stdout.toString();
   // Api level 30 or higher.
-  if (apiStdout.startsWith('2') ||
-      apiStdout.startsWith('1') ||
-      apiStdout.length == 1) {
+  if (apiStdout.startsWith('2') || apiStdout.startsWith('1') || apiStdout.length == 1) {
     print('This test must be run on api 30 or higher. Skipping...');
     return;
   }
@@ -74,15 +71,9 @@ Future<void> main() async {
   print('Starting test.');
   try {
     final FlutterDriver driver = await FlutterDriver.connect();
-    final String data = await driver.requestData(
-      null,
-      timeout: const Duration(
-        minutes: 1,
-      ),
-    );
+    final String data = await driver.requestData(null, timeout: const Duration(minutes: 1));
     await driver.close();
-    final Map<String, dynamic> result =
-        jsonDecode(data) as Map<String, dynamic>;
+    final Map<String, dynamic> result = jsonDecode(data) as Map<String, dynamic>;
     print('Test finished!');
     print(result);
     exitCode = result['result'] == 'true' ? 0 : 1;
