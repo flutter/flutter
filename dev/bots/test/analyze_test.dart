@@ -296,9 +296,9 @@ void main() {
       shouldHaveErrors: true,
     );
 
-    expect(result, isNot(contains(':19')));
-    expect(result, contains(':20'));
-    expect(result, contains(':21'));
+    expect(result, isNot(contains(':24')));
+    expect(result, contains(':25'));
+    expect(result, contains(':26'));
   });
 
   test('analyze.dart - clampDouble', () async {
