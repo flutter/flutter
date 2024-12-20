@@ -2337,7 +2337,9 @@ void main() {
     },
   );
 
-  testWidgets('CupertinoSliverNavigationBar.search field collapses nav bar on tap', (WidgetTester tester) async {
+  testWidgets('CupertinoSliverNavigationBar.search field collapses nav bar on tap', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CustomScrollView(
@@ -2348,25 +2350,17 @@ void main() {
               largeTitle: Text('Large title'),
               middle: Text('middle'),
             ),
-            SliverFillRemaining(
-              child: SizedBox(
-                height: 1000.0,
-              ),
-            ),
+            SliverFillRemaining(child: SizedBox(height: 1000.0)),
           ],
         ),
       ),
     );
 
     final Finder searchFieldFinder = find.byType(CupertinoSearchTextField);
-    final Finder largeTitleFinder = find.ancestor(
-      of: find.text('Large title').first,
-      matching: find.byType(Padding),
-    ).first;
-    final Finder middleFinder = find.ancestor(
-      of: find.text('middle').first,
-      matching: find.byType(Padding),
-    ).first;
+    final Finder largeTitleFinder =
+        find.ancestor(of: find.text('Large title').first, matching: find.byType(Padding)).first;
+    final Finder middleFinder =
+        find.ancestor(of: find.text('middle').first, matching: find.byType(Padding)).first;
 
     // Initially, all widgets are visible.
     expect(find.byIcon(CupertinoIcons.person_2), findsOneWidget);
@@ -2417,13 +2411,11 @@ void main() {
                   ),
                 ),
                 SliverFillRemaining(
-                  child: Container(
-                    color: isFocused ? focusedColor : unfocusedColor,
-                  ),
+                  child: Container(color: isFocused ? focusedColor : unfocusedColor),
                 ),
               ],
             );
-          }
+          },
         ),
       ),
     );
@@ -2432,9 +2424,12 @@ void main() {
     expect(find.text('Large title'), findsOneWidget);
     expect(find.text('middle'), findsOneWidget);
     expect(find.widgetWithText(CupertinoSearchTextField, 'Search'), findsOneWidget);
-    expect(find.byWidgetPredicate((Widget widget) {
-      return widget is Container && widget.color == unfocusedColor;
-    }), findsOneWidget);
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is Container && widget.color == unfocusedColor;
+      }),
+      findsOneWidget,
+    );
 
     // Tap the search field.
     await tester.tap(find.widgetWithText(CupertinoSearchTextField, 'Search'), warnIfMissed: false);
@@ -2444,9 +2439,12 @@ void main() {
     expect(isFocused, true);
     expect(find.widgetWithText(CupertinoSearchTextField, 'Enter search text'), findsOneWidget);
     expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
-    expect(find.byWidgetPredicate((Widget widget) {
-      return widget is Container && widget.color == focusedColor;
-    }), findsOneWidget);
+    expect(
+      find.byWidgetPredicate((Widget widget) {
+        return widget is Container && widget.color == focusedColor;
+      }),
+      findsOneWidget,
+    );
   });
 
   testWidgets('CupertinoNavigationBar with bottom widget', (WidgetTester tester) async {
