@@ -239,19 +239,6 @@ class DriverInfoVK {
   bool IsKnownBadDriver() const;
 
   //----------------------------------------------------------------------------
-  /// @brief      Determines if the driver can batch submit command buffers
-  ///             without triggering erronious deadlock errors.
-  ///
-  ///             Early 600 series Adreno drivers would deadlock if a command
-  ///             buffer submission had too much work attached to it, this
-  ///             requires the renderer to split up command buffers that could
-  ///             be logically combined.
-  ///
-  /// @return     True if device can batch submit command buffers.
-  ///
-  bool CanBatchSubmitCommandBuffers() const;
-
-  //----------------------------------------------------------------------------
   /// @brief      Returns Mali GPU info if this is a Mali GPU, otherwise
   ///             std::nullopt.
   ///
