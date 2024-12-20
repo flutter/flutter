@@ -33,39 +33,49 @@ import 'test_utils.dart' show fileSystem;
 import 'transition_test_utils.dart';
 
 void main() {
-  testWithoutContext('flutter run writes and clears pidfile appropriately', () async {
-    final String tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_overall_experience_test.').resolveSymbolicLinksSync();
-    final String pidFile = fileSystem.path.join(tempDirectory, 'flutter.pid');
-    final String testDirectory = fileSystem.path.join(flutterRoot, 'examples', 'hello_world');
-    bool? existsDuringTest;
-    try {
-      expect(fileSystem.file(pidFile).existsSync(), isFalse);
-      final ProcessTestResult result = await runFlutter(
-        <String>['run', '-dflutter-tester', '--pid-file', pidFile],
-        testDirectory,
-        <Transition>[
-          Barrier('q Quit (terminate the application on the device).', handler: (String line) {
-            existsDuringTest = fileSystem.file(pidFile).existsSync();
-            return 'q';
-          }),
-          Barrier('Application finished.'),
-        ],
-      );
-      expect(existsDuringTest, isNot(isNull));
-      expect(existsDuringTest, isTrue);
-      expect(result.exitCode, 0, reason: 'subprocess failed; $result');
-      expect(fileSystem.file(pidFile).existsSync(), isFalse);
-      // This first test ignores the stdout and stderr, so that if the
-      // first run outputs "building flutter", or the "there's a new
-      // flutter" banner, or other such first-run messages, they won't
-      // fail the tests. This does mean that running this test first is
-      // actually important in the case where you're running the tests
-      // manually. (On CI, all those messages are expected to be seen
-      // long before we get here, e.g. because we run "flutter doctor".)
-    } finally {
-      tryToDelete(fileSystem.directory(tempDirectory));
-    }
-  }, skip: Platform.isWindows); // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
+  testWithoutContext(
+    'flutter run writes and clears pidfile appropriately',
+    () async {
+      final String tempDirectory =
+          fileSystem.systemTempDirectory
+              .createTempSync('flutter_overall_experience_test.')
+              .resolveSymbolicLinksSync();
+      final String pidFile = fileSystem.path.join(tempDirectory, 'flutter.pid');
+      final String testDirectory = fileSystem.path.join(flutterRoot, 'examples', 'hello_world');
+      bool? existsDuringTest;
+      try {
+        expect(fileSystem.file(pidFile).existsSync(), isFalse);
+        final ProcessTestResult result = await runFlutter(
+          <String>['run', '-dflutter-tester', '--pid-file', pidFile],
+          testDirectory,
+          <Transition>[
+            Barrier(
+              'q Quit (terminate the application on the device).',
+              handler: (String line) {
+                existsDuringTest = fileSystem.file(pidFile).existsSync();
+                return 'q';
+              },
+            ),
+            Barrier('Application finished.'),
+          ],
+        );
+        expect(existsDuringTest, isNot(isNull));
+        expect(existsDuringTest, isTrue);
+        expect(result.exitCode, 0, reason: 'subprocess failed; $result');
+        expect(fileSystem.file(pidFile).existsSync(), isFalse);
+        // This first test ignores the stdout and stderr, so that if the
+        // first run outputs "building flutter", or the "there's a new
+        // flutter" banner, or other such first-run messages, they won't
+        // fail the tests. This does mean that running this test first is
+        // actually important in the case where you're running the tests
+        // manually. (On CI, all those messages are expected to be seen
+        // long before we get here, e.g. because we run "flutter doctor".)
+      } finally {
+        tryToDelete(fileSystem.directory(tempDirectory));
+      }
+    },
+    skip: Platform.isWindows,
+  ); // [intended] Windows doesn't support sending signals so we don't care if it can store the PID.
 
   testWithoutContext('flutter run handle SIGUSR1/2 run', () async {
     final String tempDirectory =
@@ -119,9 +129,12 @@ void main() {
           ),
           Barrier('Performing hot restart...'.padRight(progressMessageWidth)),
           // This could look like 'Restarted application in 1,237ms.'
-          Multiple(<Pattern>[RegExp(r'^Restarted application in .+m?s.$'), 'called main', 'called paint'], handler: (String line) {
-            return 'q';
-          }),
+          Multiple(
+            <Pattern>[RegExp(r'^Restarted application in .+m?s.$'), 'called main', 'called paint'],
+            handler: (String line) {
+              return 'q';
+            },
+          ),
           Barrier('Application finished.'),
         ],
         logging:
@@ -200,15 +213,24 @@ void main() {
             },
           ),
           Barrier('Performing hot restart...'.padRight(progressMessageWidth)),
-          Multiple(<Pattern>['ready', 'called main', 'called paint'], handler: (String line) {
-            return 'p';
-          }),
-          Multiple(<Pattern>['ready', 'called paint', 'called debugPaintSize'], handler: (String line) {
-            return 'p';
-          }),
-          Multiple(<Pattern>['ready', 'called paint'], handler: (String line) {
-            return 'q';
-          }),
+          Multiple(
+            <Pattern>['ready', 'called main', 'called paint'],
+            handler: (String line) {
+              return 'p';
+            },
+          ),
+          Multiple(
+            <Pattern>['ready', 'called paint', 'called debugPaintSize'],
+            handler: (String line) {
+              return 'p';
+            },
+          ),
+          Multiple(
+            <Pattern>['ready', 'called paint'],
+            handler: (String line) {
+              return 'q';
+            },
+          ),
           Barrier('Application finished.'),
         ],
         logging:
@@ -356,12 +378,18 @@ void main() {
       <String>['run', '-dflutter-tester'],
       testDirectory,
       <Transition>[
-        Barrier(finalLine, handler: (String line) {
-          return 'h';
-        }),
-        Barrier(finalLine, handler: (String line) {
-          return 'q';
-        }),
+        Barrier(
+          finalLine,
+          handler: (String line) {
+            return 'h';
+          },
+        ),
+        Barrier(
+          finalLine,
+          handler: (String line) {
+            return 'q';
+          },
+        ),
         Barrier('Application finished.'),
       ],
     );

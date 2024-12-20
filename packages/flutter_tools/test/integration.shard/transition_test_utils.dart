@@ -76,20 +76,14 @@ class Barrier extends Transition {
 }
 
 class Multiple extends Transition {
-  Multiple(
-    List<Pattern> patterns, {
-    super.handler,
-    super.logging,
-  })  : _originalPatterns = patterns,
-        patterns = patterns.toList(),
-        contains = false;
-  Multiple.contains(
-    List<Pattern> patterns, {
-    super.handler,
-    super.logging,
-  })  : _originalPatterns = patterns,
-        patterns = patterns.toList(),
-        contains = true;
+  Multiple(List<Pattern> patterns, {super.handler, super.logging})
+    : _originalPatterns = patterns,
+      patterns = patterns.toList(),
+      contains = false;
+  Multiple.contains(List<Pattern> patterns, {super.handler, super.logging})
+    : _originalPatterns = patterns,
+      patterns = patterns.toList(),
+      contains = true;
 
   final List<Pattern> _originalPatterns;
   final List<Pattern> patterns;
