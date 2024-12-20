@@ -461,12 +461,9 @@ class Doctor {
         if (!verbose || executionTime == null) {
           return '';
         }
-        final String formatted;
-        if (executionTime.inSeconds < 2) {
-          formatted = getElapsedAsMilliseconds(executionTime);
-        } else {
-          formatted = getElapsedAsSeconds(executionTime);
-        }
+        final String formatted = executionTime.inSeconds < 2
+            ? getElapsedAsMilliseconds(executionTime)
+            : getElapsedAsSeconds(executionTime);
         return ' [$formatted]';
       }();
 
