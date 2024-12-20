@@ -98,7 +98,7 @@ void main() {
           child: CircleAvatar(
             foregroundImage: errorImage,
             backgroundImage: MemoryImage(Uint8List.fromList(kBlueRectPng)),
-            radius: 50.0,
+            radius: 250.0,
             onForegroundImageError: (_, __) => caughtForegroundImageError = true,
           ),
         ),
