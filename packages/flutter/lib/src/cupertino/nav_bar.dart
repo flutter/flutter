@@ -1091,7 +1091,8 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
 // A state class exists for the nav bar so that the keys of its sub-components
 // don't change when rebuilding the nav bar, causing the sub-components to
 // lose their own states.
-class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigationBar> with TickerProviderStateMixin {
+class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigationBar>
+    with TickerProviderStateMixin {
   late _NavigationBarStaticComponentsKeys keys;
   ScrollableState? _scrollableState;
   PreferredSizeWidget? preferredSizeSearchField;
@@ -1109,10 +1110,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _fadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 150),
-    );
+    _fadeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 150));
     final Tween<double> persistentHeightTween = Tween<double>(
       begin: _kNavBarPersistentHeight,
       end: 0.0,
@@ -1150,8 +1148,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   double _getBottomHeight() {
     if (widget._searchable) {
       return preferredSizeSearchField!.preferredSize.height;
-    }
-    else if (widget.bottom != null) {
+    } else if (widget.bottom != null) {
       return widget.bottom!.preferredSize.height;
     }
     return 0.0;
@@ -1164,8 +1161,9 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     }
 
     double? target;
-    final bool canScrollBottom = (widget._searchable || widget.bottom != null)
-                              && (widget.bottomMode == NavigationBarBottomMode.automatic || widget.bottomMode == null);
+    final bool canScrollBottom =
+        (widget._searchable || widget.bottom != null) &&
+        (widget.bottomMode == NavigationBarBottomMode.automatic || widget.bottomMode == null);
     final double bottomScrollOffset = _getBottomHeight();
 
     // Snap the scroll view to a target determined by the navigation bar's
@@ -1194,7 +1192,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     switch (status) {
       case AnimationStatus.completed:
       case AnimationStatus.dismissed:
-        setState(() { });
+        setState(() {});
       case AnimationStatus.forward:
         expanded = false;
       case AnimationStatus.reverse:
@@ -1206,64 +1204,65 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   Widget build(BuildContext context) {
     Widget? searchableBottom;
     if (widget._searchable) {
-      searchableBottom = expanded
-        ? GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            child: preferredSizeSearchField,
-            onTap: () {
-              setState(() {
-                if (widget.onSearchActiveChanged != null) {
-                  widget.onSearchActiveChanged!(expanded);
-                }
-                _animationController.forward();
-                _fadeController.forward();
-              });
-            },
-          )
-        : Row(
-            children: <Widget>[
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(8.0, 0.0, 0.0, 0.0),
-                  child: widget.searchField,
-                ),
-              ),
-              Center(
-                child: CupertinoButton(
-                  child: const Text('Cancel'),
-                  onPressed: () {
-                    setState(() {
-                      if (widget.onSearchActiveChanged != null) {
-                        widget.onSearchActiveChanged!(expanded);
-                      }
-                      _animationController.reverse();
-                      _fadeController.reverse();
-                    });
-                  }),
-              ),
-            ],
-          );
+      searchableBottom =
+          expanded
+              ? GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                child: preferredSizeSearchField,
+                onTap: () {
+                  setState(() {
+                    if (widget.onSearchActiveChanged != null) {
+                      widget.onSearchActiveChanged!(expanded);
+                    }
+                    _animationController.forward();
+                    _fadeController.forward();
+                  });
+                },
+              )
+              : Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(8.0, 0.0, 0.0, 0.0),
+                      child: widget.searchField,
+                    ),
+                  ),
+                  Center(
+                    child: CupertinoButton(
+                      child: const Text('Cancel'),
+                      onPressed: () {
+                        setState(() {
+                          if (widget.onSearchActiveChanged != null) {
+                            widget.onSearchActiveChanged!(expanded);
+                          }
+                          _animationController.reverse();
+                          _fadeController.reverse();
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              );
     }
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
       route: ModalRoute.of(context),
-      userLeading: widget.leading != null
-        ? Visibility(visible: expanded, child: widget.leading!)
-        : null,
+      userLeading:
+          widget.leading != null ? Visibility(visible: expanded, child: widget.leading!) : null,
       automaticallyImplyLeading: widget.automaticallyImplyLeading,
       automaticallyImplyTitle: widget.automaticallyImplyTitle,
       previousPageTitle: widget.previousPageTitle,
       userMiddle: _animationController.isAnimating ? const Text('') : widget.middle,
-      userTrailing: widget.trailing != null
-        ? Visibility(visible: expanded, child: widget.trailing!)
-        : null,
-      userLargeTitle: _animationController.isAnimating
-        ? FadeTransition(
-            opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_fadeController),
-            child: widget.largeTitle,
-          )
-        : widget.largeTitle,
+      userTrailing:
+          widget.trailing != null ? Visibility(visible: expanded, child: widget.trailing!) : null,
+      userLargeTitle:
+          _animationController.isAnimating
+              ? FadeTransition(
+                opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_fadeController),
+                child: widget.largeTitle,
+              )
+              : widget.largeTitle,
       padding: widget.padding,
       large: true,
       staticBar: false, // This one scrolls.
@@ -1279,7 +1278,9 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
               keys: keys,
               components: components,
               userMiddle: widget.middle,
-              backgroundColor: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor,
+              backgroundColor:
+                  CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ??
+                  CupertinoTheme.of(context).barBackgroundColor,
               automaticBackgroundVisibility: widget.automaticBackgroundVisibility,
               brightness: widget.brightness,
               border: widget.border,
@@ -1290,16 +1291,20 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
               persistentHeight: persistentHeightAnimation.value + MediaQuery.paddingOf(context).top,
               largeTitleHeight: largeTitleHeightAnimation.value,
               alwaysShowMiddle: widget.alwaysShowMiddle && widget.middle != null,
-              stretchConfiguration: expanded && widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
+              stretchConfiguration:
+                  expanded && widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
               enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
-              bottom: (widget._searchable ? searchableBottom : widget.bottom) ?? const SizedBox.shrink(),
-              bottomMode: expanded
-                ? widget.bottomMode ?? NavigationBarBottomMode.automatic
-                : NavigationBarBottomMode.always,
+              bottom:
+                  (widget._searchable ? searchableBottom : widget.bottom) ??
+                  const SizedBox.shrink(),
+              bottomMode:
+                  expanded
+                      ? widget.bottomMode ?? NavigationBarBottomMode.automatic
+                      : NavigationBarBottomMode.always,
               bottomHeight: _getBottomHeight(),
             ),
           );
-        }
+        },
       ),
     );
   }
@@ -1498,22 +1503,22 @@ class _LargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDeleg
 
   @override
   bool shouldRebuild(_LargeTitleNavigationBarSliverDelegate oldDelegate) {
-    return components != oldDelegate.components
-        || userMiddle != oldDelegate.userMiddle
-        || backgroundColor != oldDelegate.backgroundColor
-        || automaticBackgroundVisibility != oldDelegate.automaticBackgroundVisibility
-        || border != oldDelegate.border
-        || padding != oldDelegate.padding
-        || actionsForegroundColor != oldDelegate.actionsForegroundColor
-        || transitionBetweenRoutes != oldDelegate.transitionBetweenRoutes
-        || persistentHeight != oldDelegate.persistentHeight
-        || largeTitleHeight != oldDelegate.largeTitleHeight
-        || alwaysShowMiddle != oldDelegate.alwaysShowMiddle
-        || heroTag != oldDelegate.heroTag
-        || enableBackgroundFilterBlur != oldDelegate.enableBackgroundFilterBlur
-        || bottom != oldDelegate.bottom
-        || bottomMode != oldDelegate.bottomMode
-        || bottomHeight != oldDelegate.bottomHeight;
+    return components != oldDelegate.components ||
+        userMiddle != oldDelegate.userMiddle ||
+        backgroundColor != oldDelegate.backgroundColor ||
+        automaticBackgroundVisibility != oldDelegate.automaticBackgroundVisibility ||
+        border != oldDelegate.border ||
+        padding != oldDelegate.padding ||
+        actionsForegroundColor != oldDelegate.actionsForegroundColor ||
+        transitionBetweenRoutes != oldDelegate.transitionBetweenRoutes ||
+        persistentHeight != oldDelegate.persistentHeight ||
+        largeTitleHeight != oldDelegate.largeTitleHeight ||
+        alwaysShowMiddle != oldDelegate.alwaysShowMiddle ||
+        heroTag != oldDelegate.heroTag ||
+        enableBackgroundFilterBlur != oldDelegate.enableBackgroundFilterBlur ||
+        bottom != oldDelegate.bottom ||
+        bottomMode != oldDelegate.bottomMode ||
+        bottomHeight != oldDelegate.bottomHeight;
   }
 }
 
@@ -3012,10 +3017,7 @@ class _NavigationBarSearchField extends StatelessWidget implements PreferredSize
     return IgnorePointer(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: padding, vertical: padding),
-        child: SizedBox(
-          height: searchFieldHeight,
-          child: searchField,
-        ),
+        child: SizedBox(height: searchFieldHeight, child: searchField),
       ),
     );
   }

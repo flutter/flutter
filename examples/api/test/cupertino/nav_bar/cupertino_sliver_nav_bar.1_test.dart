@@ -92,9 +92,7 @@ void main() {
   });
 
   testWidgets('Opens the search view when the search field is tapped', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.SliverNavBarApp(),
-    );
+    await tester.pumpWidget(const example.SliverNavBarApp());
 
     // Navigate to a page with a search field.
     final Finder nextButton = find.text('Bottom Automatic mode');
@@ -126,10 +124,10 @@ void main() {
     expect(find.text('This is a search view'), findsNothing);
   });
 
-  testWidgets('CupertinoSliverNavigationBar with previous route has back button', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.SliverNavBarApp(),
-    );
+  testWidgets('CupertinoSliverNavigationBar with previous route has back button', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.SliverNavBarApp());
 
     // Navigate to the first page.
     final Finder nextButton1 = find.text('Bottom Automatic mode');

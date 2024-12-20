@@ -115,26 +115,28 @@ class _NextPageState extends State<NextPage> {
             },
           ),
           SliverFillRemaining(
-            child: isFocused
-              ? const ColoredBox(
-                  color: CupertinoColors.extraLightBackgroundGray,
-                  child: Center(
-                    child: Text(
-                      'This is a search view',
-                      textAlign: TextAlign.center,
+            child:
+                isFocused
+                    ? const ColoredBox(
+                      color: CupertinoColors.extraLightBackgroundGray,
+                      child: Center(
+                        child: Text('This is a search view', textAlign: TextAlign.center),
+                      ),
+                    )
+                    : const Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Text('Drag me up', textAlign: TextAlign.center),
+                        Text(
+                          'Tap on the search field to open the search view',
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          'Tap on the leading button to navigate back',
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
-                  ),
-                )
-              : const Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Text('Drag me up', textAlign: TextAlign.center),
-                    Text('Tap on the search field to open the search view',
-                        textAlign: TextAlign.center),
-                    Text('Tap on the leading button to navigate back',
-                        textAlign: TextAlign.center),
-                  ],
-                ),
           ),
         ],
       ),
