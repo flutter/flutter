@@ -27,10 +27,9 @@ Future<String> capture(AsyncVoidCallback callback, {bool shouldHaveErrors = fals
     expect(
       hasError,
       shouldHaveErrors,
-      reason:
-          buffer.isEmpty
-              ? '(No output to report.)'
-              : hasError
+      reason: buffer.isEmpty
+          ? '(No output to report.)'
+          : hasError
               ? 'Unexpected errors:\n$buffer'
               : 'Unexpected success:\n$buffer',
     );
@@ -55,47 +54,47 @@ void main() {
   final String testGenDefaultsPath = path.join('test', 'analyze-gen-defaults');
 
   test('analyze.dart - verifyDeprecations', () async {
-    final String result = await capture(() => verifyDeprecations(testRootPath, minimumMatches: 2), shouldHaveErrors: true);
+    final String result = await capture(() => verifyDeprecations(testRootPath, minimumMatches: 2),
+        shouldHaveErrors: true);
     final String lines = <String>[
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:12: Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: STYLE_GUIDE_URL',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:18: Deprecation notice should be a grammatically correct sentence and end with a period; notice appears to be "Also bad grammar".',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:23: Deprecation notice must be an adjacent string.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:26: Deprecation notice must be an adjacent string.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:31: Deprecation notice must be an adjacent string.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:50: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:56: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
-        '║ test/analyze-test-input/root/packages/foo/deprecation.dart:79: Deprecation notice does not match required pattern. You might have used double quotes (") for the string instead of single quotes (\').',
-      ]
-      .map((String line) {
-        return line
+      '║ test/analyze-test-input/root/packages/foo/deprecation.dart:12: Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: STYLE_GUIDE_URL',
+      '║ test/analyze-test-input/root/packages/foo/deprecation.dart:18: Deprecation notice should be a grammatically correct sentence and end with a period; notice appears to be "Also bad grammar".',
+      '║ test/analyze-test-input/root/packages/foo/deprecation.dart:23: Deprecation notice must be an adjacent string.',
+      '║ test/analyze-test-input/root/packages/foo/deprecation.dart:26: Deprecation notice must be an adjacent string.',
+      '║ test/analyze-test-input/root/packages/foo/deprecation.dart:31: Deprecation notice must be an adjacent string.',
+      '║ test/analyze-test-input/root/packages/foo/deprecation.dart:50: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
+      '║ test/analyze-test-input/root/packages/foo/deprecation.dart:56: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
+      '║ test/analyze-test-input/root/packages/foo/deprecation.dart:79: Deprecation notice does not match required pattern. You might have used double quotes (") for the string instead of single quotes (\').',
+    ].map((String line) {
+      return line
           .replaceAll('/', Platform.isWindows ? r'\' : '/')
-          .replaceAll('STYLE_GUIDE_URL', 'https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md')
+          .replaceAll('STYLE_GUIDE_URL',
+              'https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md')
           .replaceAll('RELEASES_URL', 'https://flutter.dev/docs/development/tools/sdk/releases');
-      })
-      .join('\n');
-    expect(result,
-      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
-      '$lines\n'
-      '║ See: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes\n'
-      '╚═══════════════════════════════════════════════════════════════════════════════\n'
-    );
+    }).join('\n');
+    expect(
+        result,
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
+        '$lines\n'
+        '║ See: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes\n'
+        '╚═══════════════════════════════════════════════════════════════════════════════\n');
   });
 
   test('analyze.dart - verifyGoldenTags', () async {
     final List<String> result = (await capture(
       () => verifyGoldenTags(testRootPath, minimumMatches: 6),
       shouldHaveErrors: true,
-    )).split('\n');
+    ))
+        .split('\n');
     const String noTag =
         "Files containing golden tests must be tagged using @Tags(<String>['reduced-test-set']) "
         'at the top of the file before import statements.';
     const String missingTag =
         "Files containing golden tests must be tagged with 'reduced-test-set'.";
-    final List<String> lines =
-        <String>[
-          '║ test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
-          '║ test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
-        ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/')).toList();
+    final List<String> lines = <String>[
+      '║ test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
+      '║ test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
+    ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/')).toList();
     expect(
       result.length,
       4 + lines.length,
@@ -163,10 +162,9 @@ void main() {
       shouldHaveErrors: true,
     );
     const String bannedBranch = 'master';
-    final String file =
-        Platform.isWindows
-            ? r'test\analyze-test-input\root\packages\foo\bad_repository_links.dart'
-            : 'test/analyze-test-input/root/packages/foo/bad_repository_links.dart';
+    final String file = Platform.isWindows
+        ? r'test\analyze-test-input\root\packages\foo\bad_repository_links.dart'
+        : 'test/analyze-test-input/root/packages/foo/bad_repository_links.dart';
     final String lines = <String>[
       '║ $file contains https://android.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
       '║ $file contains https://chromium.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
