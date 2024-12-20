@@ -23,7 +23,8 @@ id<MTLBuffer> DeviceBufferMTL::GetMTLBuffer() const {
 }
 
 uint8_t* DeviceBufferMTL::OnGetContents() const {
-  if (storage_mode_ != MTLStorageModeShared) {
+  if (storage_mode_ != MTLStorageModeShared ||
+      storage_mode_ != MTLResourceStorageModeManaged) {
     return nullptr;
   }
   return reinterpret_cast<uint8_t*>(buffer_.contents);
