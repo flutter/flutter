@@ -58,7 +58,7 @@ fi
 
 # Test for fusion repository
 if [ -f "$FLUTTER_ROOT/DEPS" ]; then
-    ENGINE_VERSION=$($GIT_BIN -C "$FLUTTER_ROOT" merge-base HEAD upstream/master)
+    ENGINE_VERSION=$($GIT_BIN -C "$FLUTTER_ROOT" merge-base HEAD origin/master)
 elif [ -f "$FLUTTER_ROOT/bin/internal/engine.version" ]; then
     ENGINE_VERSION=$(cat "$FLUTTER_ROOT/bin/internal/engine.version")
 else

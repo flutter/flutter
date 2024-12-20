@@ -52,7 +52,7 @@ void main() {
     expect(result.stdout, '12345\n');
   });
 
-  test('uses git -C merge-base HEAD upstream/master', () {
+  test('uses git -C merge-base HEAD origin/master', () {
     final io.ProcessResult result = io.Process.runSync(
       p.join(tmpFlutterRoot.path, 'dev', 'tools', 'bin', 'engine_hash.sh'),
       <String>[],
@@ -64,7 +64,8 @@ void main() {
       stringContainsInOrder(<String>[
         'Mock Git: -C',
         'engine_hash_test',
-        'merge-base HEAD upstream/master',
+        // This needs to be origin/master if the google3 script is running from a fresh checkout.
+        'merge-base HEAD origin/master',
       ]),
     );
   });
