@@ -121,7 +121,7 @@ GOTO :after_subroutine
     REM PowerShell command must have exit code set in order to prevent all non-zero exit codes from being translated
     REM into 1. The exit code 2 is used to detect the case where the major version is incorrect and there should be
     REM no subsequent retries.
-    %powershell_executable% -ExecutionPolicy Bypass -NoProfile -Command "Unblock-File -Path '%update_engine_bin%'; & '%update_dart_bin%'; exit $LASTEXITCODE;"
+    %powershell_executable% -ExecutionPolicy Bypass -NoProfile -Command "Unblock-File -Path '%update_engine_bin%'; & '%update_engine_bin%'; exit $LASTEXITCODE;"
     IF "%ERRORLEVEL%" EQU "2" (
       EXIT 1
     )
@@ -129,6 +129,8 @@ GOTO :after_subroutine
       ECHO Error: Unable to determine engine version... 1>&2
       EXIT 1
     )
+    REM Do not fall through - return from subroutine
+    EXIT /B
 
   :do_sdk_update_and_snapshot
     REM Detect which PowerShell executable is available on the Host
