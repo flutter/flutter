@@ -262,10 +262,11 @@ void main() {
     expect(find.byType(CupertinoPageTransition), findsOneWidget);
 
     await tester.tap(find.text('push'));
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 499));
     expect(tester.hasRunningAnimations, isTrue);
 
-    await tester.pump(const Duration(milliseconds: 501));
+    await tester.pump(const Duration(milliseconds: 10));
     expect(tester.hasRunningAnimations, isFalse);
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
