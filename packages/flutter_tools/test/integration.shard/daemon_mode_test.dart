@@ -57,7 +57,7 @@ void main() {
     // Check we got the startup message.
     final Map<String, Object?> logParams = logMessage['params']! as Map<String, Object?>;
     expect(logParams['level'], 'status');
-    expect(logParams['message'], 'Device daemon started');
+    expect(logParams['message'], 'Device daemon started.');
   });
 
   testWithoutContext('device.getDevices', () async {
