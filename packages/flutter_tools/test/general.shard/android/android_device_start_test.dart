@@ -190,15 +190,7 @@ void main() {
     processManager.addCommand(kAdbVersionCommand);
     processManager.addCommand(kStartServer);
     processManager.addCommand(
-      const FakeCommand(
-        command: <String>[
-          'adb',
-          '-s',
-          '1234',
-          'shell',
-          'getprop',
-        ],
-      ),
+      const FakeCommand(command: <String>['adb', '-s', '1234', 'shell', 'getprop']),
     );
     processManager.addCommand(
       const FakeCommand(
