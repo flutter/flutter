@@ -721,7 +721,7 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
     if (arguments == null || arguments.length != 1) {
       _addErrorWithLineInfo(
         node,
-        error: 'A @Deprecation annotation must take have exactly one deprecation notice String.',
+        error: 'A @Deprecation annotation must have exactly one deprecation notice String.',
       );
       return;
     }
