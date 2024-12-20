@@ -207,6 +207,7 @@ void main() {
       );
       expect(result, ProcessResultMatcher(stdoutPattern: RegExp(r'\+\d+: All tests passed!')));
     },
+    skip: 'https://github.com/flutter/flutter/issues/160685',
   );
 
   testWithoutContext('flutter test should run a test when its name contains a string', () async {
@@ -230,6 +231,7 @@ void main() {
       );
       expect(result, ProcessResultMatcher(stdoutPattern: RegExp(r'\+\d+: All tests passed!')));
     },
+    skip: 'https://github.com/flutter/flutter/issues/160685',
   );
 
   testWithoutContext('flutter test should run a test with a given tag', () async {
@@ -253,6 +255,7 @@ void main() {
       );
       expect(result, ProcessResultMatcher(stdoutPattern: RegExp(r'\+\d+: All tests passed!')));
     },
+    skip: 'https://github.com/flutter/flutter/issues/160685',
   );
 
   testWithoutContext('flutter test should not run a test with excluded tag', () async {
@@ -294,6 +297,7 @@ void main() {
         ),
       );
     },
+    skip: 'https://github.com/flutter/flutter/issues/160685',
   );
 
   testWithoutContext('flutter test should run a widgetTest with a given tag', () async {
@@ -384,6 +388,7 @@ void main() {
       }
       expect(result, const ProcessResultMatcher());
     },
+    skip: 'https://github.com/flutter/flutter/issues/160685',
   );
 
   testWithoutContext(
