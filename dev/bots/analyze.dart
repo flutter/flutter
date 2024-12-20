@@ -2324,28 +2324,6 @@ class _DebugOnlyFieldVisitor extends RecursiveAstVisitor<void> {
   }
 }
 
-  final ParseStringResult parseResult;
-  final List<AstNode> errors = <AstNode>[];
-
-  static const String _kDebugOnlyAnnotation = '_debugOnly';
-  static final RegExp _nullInitializedField = RegExp(
-    r'kDebugMode \? [\w<> ,{}()]+ : null;',
-    multiLine: true,
-  );
-
-  @override
-  void visitFieldDeclaration(FieldDeclaration node) {
-    super.visitFieldDeclaration(node);
-    if (node.metadata.any(
-      (Annotation annotation) => annotation.name.name == _kDebugOnlyAnnotation,
-    )) {
-      if (!node.toSource().contains(_nullInitializedField)) {
-        errors.add(node);
-      }
-    }
-  }
-}
-
 Future<void> verifyNullInitializedDebugExpensiveFields(
   String workingDirectory, {
   int minimumMatches = 400,
