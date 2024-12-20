@@ -22,7 +22,7 @@ Future<CCompilerConfig?> cCompilerConfigWindows() async {
   final Uri? envScript = _toOptionalFileUri(visualStudio.vcvarsPath);
 
   if (compiler == null || archiver == null || linker == null || envScript == null) {
-    // Visual studio might not be installed, dont exit tool.
+    // Visual Studio might not be installed, don't exit tool.
     return null;
   }
 
