@@ -116,11 +116,11 @@ bool CanUsePrimitiveRestartSubmitTest(std::string_view driver_name,
 
 TEST(DriverInfoVKTest, CanUsePrimitiveRestart) {
   // Adreno no primitive restart
-  EXPECT_FALSE(CanBatchSubmitTest("Adreno (TM) 540", true));
-  EXPECT_FALSE(CanBatchSubmitTest("Adreno (TM) 750", true));
+  EXPECT_FALSE(CanUsePrimitiveRestartSubmitTest("Adreno (TM) 540", true));
+  EXPECT_FALSE(CanUsePrimitiveRestartSubmitTest("Adreno (TM) 750", true));
 
   // Mali A-OK
-  EXPECT_TRUE(CanBatchSubmitTest("Mali-G51", false));
+  EXPECT_TRUE(CanUsePrimitiveRestartSubmitTest("Mali-G51", false));
 }
 
 TEST(DriverInfoVKTest, DriverParsingMali) {
