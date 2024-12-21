@@ -786,19 +786,6 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
         );
         return;
       }
-      final String firstChar = String.fromCharCode(switch (message) {
-        SimpleStringLiteral(:final String value) => value.runes.first,
-        StringInterpolation(:final InterpolationString firstString) =>
-          firstString.value.runes.first,
-      });
-      if (firstChar.toUpperCase() != firstChar) {
-        _addErrorWithLineInfo(
-          message,
-          error:
-              'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md',
-        );
-        return;
-      }
     }
     final String fullExplanation =
         messageLiterals
@@ -810,6 +797,15 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
         messageLiterals.last,
         error:
             'Deprecation notice should be a grammatically correct sentence and end with a period; There might not be an explanatory message.',
+      );
+      return;
+    }
+    final String firstChar = String.fromCharCode(fullExplanation.runes.first);
+    if (firstChar.toUpperCase() != firstChar) {
+      _addErrorWithLineInfo(
+        messageLiterals.first,
+        error:
+            'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md',
       );
       return;
     }
