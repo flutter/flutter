@@ -9,7 +9,7 @@ import 'package:native_assets_cli/code_assets_builder.dart';
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
 import '../../../base/io.dart';
-import '../../../build_info.dart' as build_info;
+import '../../../build_info.dart';
 import '../../../convert.dart';
 import '../../../globals.dart' as globals;
 
@@ -137,7 +137,7 @@ Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
 
 Future<void> codesignDylib(
   String? codesignIdentity,
-  build_info.BuildMode buildMode,
+  BuildMode buildMode,
   FileSystemEntity target,
 ) async {
   if (codesignIdentity == null || codesignIdentity.isEmpty) {
@@ -148,7 +148,7 @@ Future<void> codesignDylib(
     '--force',
     '--sign',
     codesignIdentity,
-    if (buildMode != build_info.BuildMode.release) ...<String>[
+    if (buildMode != BuildMode.release) ...<String>[
       // Mimic Xcode's timestamp codesigning behavior on non-release binaries.
       '--timestamp=none',
     ],
