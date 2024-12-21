@@ -619,7 +619,7 @@ targets:
       - packages/flutter_web_plugins/**
       - packages/integration_test/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
       - dartdoc_options.yaml
 
@@ -686,7 +686,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
     runIf:
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
       - dev/bots/**
 
@@ -725,7 +725,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux framework_tests_slow
@@ -753,7 +753,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux framework_tests_misc
@@ -786,7 +786,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux framework_tests_widgets
@@ -813,7 +813,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux fuchsia_precache
@@ -825,7 +825,7 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - engine/**
+      - !engine/**
       - DEPS
       - .ci.yaml
 
@@ -1182,7 +1182,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux technical_debt__cost
@@ -1211,7 +1211,7 @@ targets:
       - engine/**
       - DEPS
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux tool_integration_tests_1_6
@@ -1239,7 +1239,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux tool_integration_tests_2_6
@@ -1267,7 +1267,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux tool_integration_tests_3_6
@@ -1295,7 +1295,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux tool_integration_tests_4_6
@@ -1323,7 +1323,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux tool_integration_tests_5_6
@@ -1351,7 +1351,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux tool_integration_tests_6_6
@@ -1379,7 +1379,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux android_preview_tool_integration_tests
@@ -1410,7 +1410,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux android_java11_tool_integration_tests
@@ -1437,7 +1437,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux android_java11_dependency_smoke_tests
@@ -1503,7 +1503,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux tool_tests_general
@@ -1525,7 +1525,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux_android_emu flutter_driver_android_test
@@ -1629,7 +1629,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_long_running_tests_2_5
@@ -1653,7 +1653,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_long_running_tests_3_5
@@ -1677,7 +1677,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_long_running_tests_4_5
@@ -1701,7 +1701,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_long_running_tests_5_5
@@ -1725,7 +1725,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_tests_0
@@ -1749,7 +1749,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_tests_1
@@ -1773,7 +1773,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_tests_2
@@ -1797,7 +1797,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_tests_3
@@ -1821,7 +1821,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_tests_4
@@ -1845,7 +1845,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_tests_5
@@ -1869,7 +1869,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_tests_6
@@ -1893,7 +1893,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_tests_7_last
@@ -1917,7 +1917,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_canvaskit_tests_0
@@ -1941,7 +1941,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_canvaskit_tests_1
@@ -1965,7 +1965,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_canvaskit_tests_2
@@ -1989,7 +1989,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_canvaskit_tests_3
@@ -2013,7 +2013,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_canvaskit_tests_4
@@ -2037,7 +2037,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_canvaskit_tests_5
@@ -2061,7 +2061,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_canvaskit_tests_6
@@ -2085,7 +2085,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_canvaskit_tests_7_last
@@ -2109,7 +2109,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_skwasm_tests_0
@@ -2133,7 +2133,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_skwasm_tests_1
@@ -2157,7 +2157,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_skwasm_tests_2
@@ -2181,7 +2181,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_skwasm_tests_3
@@ -2205,7 +2205,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_skwasm_tests_4
@@ -2251,7 +2251,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_skwasm_tests_6
@@ -2275,7 +2275,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_skwasm_tests_7_last
@@ -2299,7 +2299,7 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux web_tool_tests
@@ -2324,7 +2324,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Linux_android_emu android_defines_test
@@ -4004,7 +4004,7 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
     runIf:
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
       - dev/bots/**
 
@@ -4019,7 +4019,7 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
     runIf:
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
       - dev/bots/**
 
@@ -4056,7 +4056,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Mac framework_tests_impeller
@@ -4084,7 +4084,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Mac_x64 framework_tests_misc
@@ -4115,7 +4115,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Mac_arm64 framework_tests_misc
@@ -4147,7 +4147,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Mac framework_tests_widgets
@@ -4175,7 +4175,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Mac gradle_plugin_bundle_test
@@ -5800,7 +5800,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Windows framework_tests_libraries_leak_tracking
@@ -5833,7 +5833,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Windows framework_tests_misc
@@ -5864,7 +5864,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Windows framework_tests_widgets
@@ -5891,7 +5891,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Windows framework_tests_widgets_leak_tracking
@@ -5924,7 +5924,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Windows gradle_plugin_bundle_test
@@ -6270,7 +6270,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Windows tool_integration_tests_2_9
@@ -6296,7 +6296,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Windows tool_integration_tests_3_9
@@ -6322,7 +6322,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Windows tool_integration_tests_4_9
@@ -6348,7 +6348,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Windows tool_integration_tests_5_9
@@ -6374,7 +6374,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Windows tool_integration_tests_6_9
@@ -6400,7 +6400,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Windows tool_integration_tests_7_9
@@ -6426,7 +6426,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Windows tool_integration_tests_8_9
@@ -6452,7 +6452,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Windows tool_integration_tests_9_9
@@ -6478,7 +6478,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Windows tool_tests_commands
@@ -6500,7 +6500,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Windows tool_tests_general
@@ -6522,7 +6522,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Windows web_tool_tests_1_2
@@ -6546,7 +6546,7 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
 
   - name: Windows web_tool_tests_2_2
@@ -6569,7 +6569,7 @@ targets:
     - packages/flutter_tools/**
     - bin/**
     - .ci.yaml
-    - engine/**
+    - !engine/**
     - DEPS
 
   - name: Windows windows_home_scroll_perf__timeline_summary
@@ -6850,7 +6850,7 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
     runIf:
       - .ci.yaml
-      - engine/**
+      - !engine/**
       - DEPS
       - dev/bots/**
 
