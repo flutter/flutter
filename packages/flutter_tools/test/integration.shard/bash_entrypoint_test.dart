@@ -130,7 +130,7 @@ echo executed dart binary
     } finally {
       tryToDelete(tempDir);
     }
-  }, skip: platform.isWindows); // [intended] Windows does not use the bash entrypoint
+  }, skip: true); // [intended] https://github.com/flutter/flutter/issues/160689
 }
 
 // A test Dart app that will run until it receives SIGTERM
