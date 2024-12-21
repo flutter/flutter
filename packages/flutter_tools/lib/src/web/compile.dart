@@ -240,17 +240,14 @@ enum WebRendererMode {
   Iterable<String> get dartDefines => switch (this) {
     auto => const <String>{'FLUTTER_WEB_AUTO_DETECT=true'},
     canvaskit => const <String>{
-      'FLUTTER_WEB_AUTO_DETECT=false',
       'FLUTTER_WEB_USE_SKIA=true',
       'FLUTTER_WEB_USE_SKWASM=false',
     },
     html => const <String>{
-      'FLUTTER_WEB_AUTO_DETECT=false',
       'FLUTTER_WEB_USE_SKIA=false',
       'FLUTTER_WEB_USE_SKWASM=false',
     },
     skwasm => const <String>{
-      'FLUTTER_WEB_AUTO_DETECT=false',
       'FLUTTER_WEB_USE_SKIA=false',
       'FLUTTER_WEB_USE_SKWASM=true',
     },
