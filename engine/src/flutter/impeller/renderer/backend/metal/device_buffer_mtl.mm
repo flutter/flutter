@@ -33,7 +33,7 @@ uint8_t* DeviceBufferMTL::OnGetContents() const {
     return nullptr;
   }
 #endif  // !FML_OS_IOS
-  
+
   return reinterpret_cast<uint8_t*>(buffer_.contents);
 }
 
