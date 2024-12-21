@@ -9,7 +9,12 @@ library;
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder, Diagnosticable, DiagnosticsProperty, VoidCallback;
+import 'package:flutter/foundation.dart'
+    show
+        DiagnosticPropertiesBuilder,
+        Diagnosticable,
+        DiagnosticsProperty,
+        VoidCallback;
 
 import 'constants.dart';
 import 'details_with_positions.dart';
@@ -80,7 +85,8 @@ typedef GestureTapDragDownCallback = void Function(TapDragDownDetails details);
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
-class TapDragDownDetails extends GestureDetailsWithPositions with Diagnosticable {
+class TapDragDownDetails extends GestureDetailsWithPositions
+    with Diagnosticable {
   /// Creates details for a [GestureTapDragDownCallback].
   TapDragDownDetails({
     required super.globalPosition,
@@ -100,7 +106,8 @@ class TapDragDownDetails extends GestureDetailsWithPositions with Diagnosticable
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
-    properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
+    properties.add(
+        DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
   }
 }
 
@@ -143,7 +150,8 @@ class TapDragUpDetails extends GestureDetailsWithPositions with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
-    properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
+    properties.add(
+        DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
   }
 }
 
@@ -153,7 +161,8 @@ class TapDragUpDetails extends GestureDetailsWithPositions with Diagnosticable {
 /// screen is given by [TapDragStartDetails.consecutiveTapCount].
 ///
 /// Used by [BaseTapAndDragGestureRecognizer.onDragStart].
-typedef GestureTapDragStartCallback = void Function(TapDragStartDetails details);
+typedef GestureTapDragStartCallback = void Function(
+    TapDragStartDetails details);
 
 /// Details for [GestureTapDragStartCallback], such as the number of
 /// consecutive taps.
@@ -166,7 +175,8 @@ typedef GestureTapDragStartCallback = void Function(TapDragStartDetails details)
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
-class TapDragStartDetails extends GestureDetailsWithPositions with Diagnosticable {
+class TapDragStartDetails extends GestureDetailsWithPositions
+    with Diagnosticable {
   /// Creates details for a [GestureTapDragStartCallback].
   TapDragStartDetails({
     required super.globalPosition,
@@ -192,9 +202,11 @@ class TapDragStartDetails extends GestureDetailsWithPositions with Diagnosticabl
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
+    properties.add(
+        DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
     properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
-    properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
+    properties.add(
+        DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
   }
 }
 
@@ -204,7 +216,8 @@ class TapDragStartDetails extends GestureDetailsWithPositions with Diagnosticabl
 /// screen is given by [TapDragUpdateDetails.consecutiveTapCount].
 ///
 /// Used by [BaseTapAndDragGestureRecognizer.onDragUpdate].
-typedef GestureTapDragUpdateCallback = void Function(TapDragUpdateDetails details);
+typedef GestureTapDragUpdateCallback = void Function(
+    TapDragUpdateDetails details);
 
 /// Details for [GestureTapDragUpdateCallback], such as the number of
 /// consecutive taps.
@@ -217,7 +230,8 @@ typedef GestureTapDragUpdateCallback = void Function(TapDragUpdateDetails detail
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
-class TapDragUpdateDetails extends GestureDetailsWithPositions with Diagnosticable {
+class TapDragUpdateDetails extends GestureDetailsWithPositions
+    with Diagnosticable {
   /// Creates details for a [GestureTapDragUpdateCallback].
   ///
   /// If [primaryDelta] is non-null, then its value must match one of the
@@ -233,10 +247,10 @@ class TapDragUpdateDetails extends GestureDetailsWithPositions with Diagnosticab
     required this.localOffsetFromOrigin,
     required this.consecutiveTapCount,
   }) : assert(
-         primaryDelta == null ||
-             (primaryDelta == delta.dx && delta.dy == 0.0) ||
-             (primaryDelta == delta.dy && delta.dx == 0.0),
-       );
+          primaryDelta == null ||
+              (primaryDelta == delta.dx && delta.dy == 0.0) ||
+              (primaryDelta == delta.dy && delta.dx == 0.0),
+        );
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -293,13 +307,17 @@ class TapDragUpdateDetails extends GestureDetailsWithPositions with Diagnosticab
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
+    properties.add(
+        DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
     properties.add(DiagnosticsProperty<Offset>('delta', delta));
     properties.add(DiagnosticsProperty<double?>('primaryDelta', primaryDelta));
     properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
-    properties.add(DiagnosticsProperty<Offset>('offsetFromOrigin', offsetFromOrigin));
-    properties.add(DiagnosticsProperty<Offset>('localOffsetFromOrigin', localOffsetFromOrigin));
-    properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
+    properties
+        .add(DiagnosticsProperty<Offset>('offsetFromOrigin', offsetFromOrigin));
+    properties.add(DiagnosticsProperty<Offset>(
+        'localOffsetFromOrigin', localOffsetFromOrigin));
+    properties.add(
+        DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
   }
 }
 
@@ -331,10 +349,10 @@ class TapDragEndDetails extends GestureDetailsWithPositions {
     this.primaryVelocity,
     required this.consecutiveTapCount,
   }) : assert(
-         primaryVelocity == null ||
-             primaryVelocity == velocity.pixelsPerSecond.dx ||
-             primaryVelocity == velocity.pixelsPerSecond.dy,
-       );
+          primaryVelocity == null ||
+              primaryVelocity == velocity.pixelsPerSecond.dx ||
+              primaryVelocity == velocity.pixelsPerSecond.dy,
+        );
 
   /// The velocity the pointer was moving when it stopped contacting the screen.
   ///
@@ -361,8 +379,10 @@ class TapDragEndDetails extends GestureDetailsWithPositions {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Velocity>('velocity', velocity));
-    properties.add(DiagnosticsProperty<double?>('primaryVelocity', primaryVelocity));
-    properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
+    properties
+        .add(DiagnosticsProperty<double?>('primaryVelocity', primaryVelocity));
+    properties.add(
+        DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
   }
 }
 
@@ -479,7 +499,8 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   void handleEvent(PointerEvent event) {
     if (event is PointerMoveEvent) {
       final double computedSlop = computeHitSlop(event.kind, gestureSettings);
-      final bool isSlopPastTolerance = _getGlobalDistance(event, _originPosition) > computedSlop;
+      final bool isSlopPastTolerance =
+          _getGlobalDistance(event, _originPosition) > computedSlop;
 
       if (isSlopPastTolerance) {
         _consecutiveTapTimerStop();
@@ -512,7 +533,8 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     _down = event;
     _previousButtons = event.buttons;
     _lastTapOffset = event.position;
-    _originPosition = OffsetPair(local: event.localPosition, global: event.position);
+    _originPosition =
+        OffsetPair(local: event.localPosition, global: event.position);
     onTapTrackStart?.call();
   }
 
@@ -541,7 +563,8 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   }
 
   void _consecutiveTapTimerStart() {
-    _consecutiveTapTimer ??= Timer(kDoubleTapTimeout, _consecutiveTapTimerTimeout);
+    _consecutiveTapTimer ??=
+        Timer(kDoubleTapTimeout, _consecutiveTapTimerTimeout);
   }
 
   void _consecutiveTapTimerStop() {
@@ -696,8 +719,8 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// )
 /// ```
 /// {@end-tool}
-sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognizer
-    with _TapStatusTrackerMixin {
+sealed class BaseTapAndDragGestureRecognizer
+    extends OneSequenceGestureRecognizer with _TapStatusTrackerMixin {
   /// Creates a tap and drag gesture recognizer.
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
@@ -706,8 +729,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     super.supportedDevices,
     super.allowedButtonsFilter,
     this.eagerVictoryOnDrag = true,
-  }) : _deadline = kPressTimeout,
-       dragStartBehavior = DragStartBehavior.start;
+  })  : _deadline = kPressTimeout,
+        dragStartBehavior = DragStartBehavior.start;
 
   /// Configure the behavior of offsets passed to [onDragStart].
   ///
@@ -869,7 +892,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
 
   Offset _getDeltaForDetails(Offset delta);
   double? _getPrimaryValueFromOffset(Offset value);
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind);
+  bool _hasSufficientGlobalDistanceToAccept(
+      PointerDeviceKind pointerDeviceKind);
 
   // Drag updates may require throttling to avoid excessive updating, such as for text layouts in text
   // fields. The frequency of invocations is controlled by the [dragUpdateThrottleFrequency].
@@ -879,7 +903,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
   void _handleDragUpdateThrottled() {
     assert(_lastDragUpdateDetails != null);
     if (onDragUpdate != null) {
-      invokeCallback<void>('onDragUpdate', () => onDragUpdate!(_lastDragUpdateDetails!));
+      invokeCallback<void>(
+          'onDragUpdate', () => onDragUpdate!(_lastDragUpdateDetails!));
     }
     _dragUpdateThrottleTimer = null;
     _lastDragUpdateDetails = null;
@@ -918,9 +943,11 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
       _globalDistanceMoved = 0.0;
       _globalDistanceMovedAllAxes = 0.0;
       _dragState = _DragState.possible;
-      _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
+      _initialPosition =
+          OffsetPair(global: event.position, local: event.localPosition);
       _currentPosition = _initialPosition;
-      _deadlineTimer = Timer(_deadline, () => _didExceedDeadlineWithEvent(event));
+      _deadlineTimer =
+          Timer(_deadline, () => _didExceedDeadlineWithEvent(event));
     }
   }
 
@@ -1043,8 +1070,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
       // a sufficient global distance from the initial position to be considered a drag.
       // In this case since the gesture cannot be a tap, it defaults to a drag.
       final double computedSlop = computeHitSlop(event.kind, gestureSettings);
-      _pastSlopTolerance =
-          _pastSlopTolerance || _getGlobalDistance(event, _initialPosition) > computedSlop;
+      _pastSlopTolerance = _pastSlopTolerance ||
+          _getGlobalDistance(event, _initialPosition) > computedSlop;
 
       if (_dragState == _DragState.accepted) {
         _currentPosition = OffsetPair.fromEventPosition(event);
@@ -1107,7 +1134,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     }
 
     if (dragStartBehavior == DragStartBehavior.start) {
-      _initialPosition += OffsetPair(global: event.delta, local: event.localDelta);
+      _initialPosition +=
+          OffsetPair(global: event.delta, local: event.localDelta);
       _currentPosition = _initialPosition;
     }
     _checkDragStart(event);
@@ -1122,7 +1150,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
         untransformedDelta: localDelta,
         untransformedEndPosition: correctedLocalPosition,
       );
-      final OffsetPair updateDelta = OffsetPair(local: localDelta, global: globalUpdateDelta);
+      final OffsetPair updateDelta =
+          OffsetPair(local: localDelta, global: globalUpdateDelta);
       // Only adds delta for down behaviour
       _checkDragUpdate(event, corrected: _initialPosition + updateDelta);
     }
@@ -1132,15 +1161,13 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     final Matrix4? localToGlobalTransform =
         event.transform == null ? null : Matrix4.tryInvert(event.transform!);
     final Offset movedLocally = _getDeltaForDetails(event.localDelta);
-    _globalDistanceMoved +=
-        PointerEvent.transformDeltaViaPositions(
+    _globalDistanceMoved += PointerEvent.transformDeltaViaPositions(
           transform: localToGlobalTransform,
           untransformedDelta: movedLocally,
           untransformedEndPosition: event.localPosition,
         ).distance *
         (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
-    _globalDistanceMovedAllAxes +=
-        PointerEvent.transformDeltaViaPositions(
+    _globalDistanceMovedAllAxes += PointerEvent.transformDeltaViaPositions(
           transform: localToGlobalTransform,
           untransformedDelta: event.localDelta,
           untransformedEndPosition: event.localPosition,
@@ -1148,7 +1175,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
         1.sign;
     if (_hasSufficientGlobalDistanceToAccept(event.kind) ||
         (_wonArenaForPrimaryPointer &&
-            _globalDistanceMovedAllAxes.abs() > computePanSlop(event.kind, gestureSettings))) {
+            _globalDistanceMovedAllAxes.abs() >
+                computePanSlop(event.kind, gestureSettings))) {
       _start = event;
       if (eagerVictoryOnDrag) {
         _dragState = _DragState.accepted;
@@ -1234,7 +1262,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     if (dragUpdateThrottleFrequency != null) {
       _lastDragUpdateDetails = details;
       // Only schedule a new timer if there's not one pending.
-      _dragUpdateThrottleTimer ??= Timer(dragUpdateThrottleFrequency!, _handleDragUpdateThrottled);
+      _dragUpdateThrottleTimer ??=
+          Timer(dragUpdateThrottleFrequency!, _handleDragUpdateThrottled);
     } else {
       if (onDragUpdate != null) {
         invokeCallback<void>('onDragUpdate', () => onDragUpdate!(details));
@@ -1346,15 +1375,19 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
 ///  pointer being tracked.
 ///  * [HorizontalDragGestureRecognizer], for a similar recognizer that only recognizes
 ///  horizontal movement.
-class TapAndHorizontalDragGestureRecognizer extends BaseTapAndDragGestureRecognizer {
+class TapAndHorizontalDragGestureRecognizer
+    extends BaseTapAndDragGestureRecognizer {
   /// Create a gesture recognizer for interactions in the horizontal axis.
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
-  TapAndHorizontalDragGestureRecognizer({super.debugOwner, super.supportedDevices});
+  TapAndHorizontalDragGestureRecognizer(
+      {super.debugOwner, super.supportedDevices});
 
   @override
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
-    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind, gestureSettings);
+  bool _hasSufficientGlobalDistanceToAccept(
+      PointerDeviceKind pointerDeviceKind) {
+    return _globalDistanceMoved.abs() >
+        computeHitSlop(pointerDeviceKind, gestureSettings);
   }
 
   @override
@@ -1388,8 +1421,10 @@ class TapAndPanGestureRecognizer extends BaseTapAndDragGestureRecognizer {
   TapAndPanGestureRecognizer({super.debugOwner, super.supportedDevices});
 
   @override
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
-    return _globalDistanceMoved.abs() > computePanSlop(pointerDeviceKind, gestureSettings);
+  bool _hasSufficientGlobalDistanceToAccept(
+      PointerDeviceKind pointerDeviceKind) {
+    return _globalDistanceMoved.abs() >
+        computePanSlop(pointerDeviceKind, gestureSettings);
   }
 
   @override
@@ -1407,9 +1442,9 @@ class TapAndPanGestureRecognizer extends BaseTapAndDragGestureRecognizer {
   'TapAndPanGestureRecognizer works exactly the same but has a more disambiguated name from BaseTapAndDragGestureRecognizer. '
   'This feature was deprecated after v3.9.0-19.0.pre.',
 )
+
 /// {@macro flutter.gestures.selectionrecognizers.TapAndPanGestureRecognizer}
-class TapAndDragGestureRecognizer
-    extends BaseTapAndDragGestureRecognizer {
+class TapAndDragGestureRecognizer extends BaseTapAndDragGestureRecognizer {
   /// Create a gesture recognizer for interactions on a plane.
   @Deprecated(
     'Use TapAndPanGestureRecognizer instead. '
@@ -1419,8 +1454,10 @@ class TapAndDragGestureRecognizer
   TapAndDragGestureRecognizer({super.debugOwner, super.supportedDevices});
 
   @override
-  bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
-    return _globalDistanceMoved.abs() > computePanSlop(pointerDeviceKind, gestureSettings);
+  bool _hasSufficientGlobalDistanceToAccept(
+      PointerDeviceKind pointerDeviceKind) {
+    return _globalDistanceMoved.abs() >
+        computePanSlop(pointerDeviceKind, gestureSettings);
   }
 
   @override
