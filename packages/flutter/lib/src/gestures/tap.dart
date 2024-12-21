@@ -7,7 +7,7 @@
 /// @docImport 'multitap.dart';
 library;
 
-import 'package:flutter/foundation.dart' show FlagProperty, protected;
+import 'package:flutter/foundation.dart' show DiagnosticsProperty, FlagProperty, protected;
 
 import 'arena.dart';
 import 'constants.dart';

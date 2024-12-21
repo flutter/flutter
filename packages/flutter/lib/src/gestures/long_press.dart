@@ -5,6 +5,8 @@
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
+import 'package:flutter/foundation.dart' show DiagnosticsProperty;
+
 import 'constants.dart';
 import 'details_with_positions.dart';
 import 'events.dart';

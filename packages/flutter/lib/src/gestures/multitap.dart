@@ -7,6 +7,8 @@ library;
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show Diagnosticable, DiagnosticsProperty;
+
 import 'arena.dart';
 import 'binding.dart';
 import 'constants.dart';
