@@ -115,12 +115,12 @@ class GenerateBuilderJsonCommand extends Command<bool> {
         <String, dynamic>{
           'name': 'check licenses',
           'parameters': <String>['check-licenses'],
-          'scripts': <String>['flutter/lib/web_ui/dev/felt'],
+          'script': 'flutter/lib/web_ui/dev/felt',
         },
         <String, dynamic>{
           'name': 'web engine analysis',
           'parameters': <String>['analyze'],
-          'scripts': <String>['flutter/lib/web_ui/dev/felt'],
+          'script': 'flutter/lib/web_ui/dev/felt',
         },
       ],
     };
