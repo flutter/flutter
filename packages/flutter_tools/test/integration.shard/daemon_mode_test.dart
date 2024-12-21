@@ -39,15 +39,18 @@ void main() {
 
     final StreamController<String> stdout = StreamController<String>.broadcast();
     transformToLines(daemonProcess.stdout).listen((String line) => stdout.add(line));
-    final Stream<Map<String, Object?>> stream = stdout
-      .stream
-      .map<Map<String, Object?>?>(parseFlutterResponse)
-      .where((Map<String, Object?>? value) => value != null)
-      .cast<Map<String, Object?>>();
+    final Stream<Map<String, Object?>> stream =
+        stdout.stream
+            .map<Map<String, Object?>?>(parseFlutterResponse)
+            .where((Map<String, Object?>? value) => value != null)
+            .cast<Map<String, Object?>>();
 
-    final [Map<String, Object?> connectedEvent, Map<String, Object?> logMessage] = await Future.wait(<Future<Map<String, Object?>>>[
+    final [
+      Map<String, Object?> connectedEvent,
+      Map<String, Object?> logMessage,
+    ] = await Future.wait(<Future<Map<String, Object?>>>[
       stream.firstWhere((Map<String, Object?> e) => e['event'] == 'daemon.connected'),
-      stream.firstWhere((Map<String, Object?> e) => e['event'] == 'daemon.logMessage')
+      stream.firstWhere((Map<String, Object?> e) => e['event'] == 'daemon.logMessage'),
     ]);
 
     // Check the connected message has a version.
