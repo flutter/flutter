@@ -15,6 +15,13 @@ class Foo {
 
   @_debugOnly
   final Map<String, String>? bar = kDebugMode ? null : <String, String>{};
+
+  // dart format off
+  @_debugOnly
+  final Map<String, String>? multiline = kDebugMode
+    ? <String, String>{}
+    : null;
+  // dart format on
 }
 
 /// Simply avoid this
