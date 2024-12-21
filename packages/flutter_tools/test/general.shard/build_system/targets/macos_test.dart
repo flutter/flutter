@@ -60,7 +60,6 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       engineVersion: '2',
-      usage: usage,
       analytics: fakeAnalytics,
     );
 
@@ -606,10 +605,6 @@ void main() {
 
       await const ReleaseMacOSBundleFlutterAssets().build(environment);
       expect(
-        usage.events,
-        contains(const TestUsageEvent('assemble', 'macos-archive', label: 'success')),
-      );
-      expect(
         fakeAnalytics.sentEvents,
         contains(
           Event.appleUsageEvent(
@@ -636,10 +631,6 @@ void main() {
       await expectLater(
         () => const ReleaseMacOSBundleFlutterAssets().build(environment),
         throwsA(const TypeMatcher<FileSystemException>()),
-      );
-      expect(
-        usage.events,
-        contains(const TestUsageEvent('assemble', 'macos-archive', label: 'fail')),
       );
       expect(
         fakeAnalytics.sentEvents,
