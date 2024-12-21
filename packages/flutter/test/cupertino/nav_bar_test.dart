@@ -2368,7 +2368,8 @@ void main() {
     expect(largeTitleFinder, findsOneWidget);
     expect(middleFinder.hitTestable(), findsOneWidget);
     expect(searchFieldFinder, findsOneWidget);
-    expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsNothing);
+    // A decoy 'Cancel' button used in the animation.
+    expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
 
     // Tap the search field.
     await tester.tap(searchFieldFinder, warnIfMissed: false);

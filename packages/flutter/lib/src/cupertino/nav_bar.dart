@@ -446,9 +446,6 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final Widget? trailing;
 
-  // TODO(xster): https://github.com/flutter/flutter/issues/10469 implement
-  // support for double row navigation bars.
-
   /// {@template flutter.cupertino.CupertinoNavigationBar.backgroundColor}
   /// The background color of the navigation bar. If it contains transparency, the
   /// tab bar will automatically produce a blurring effect to the content
@@ -1110,7 +1107,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _fadeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 150));
+    _fadeController = AnimationController(vsync: this, duration: _kNavBarTitleFadeDuration);
     final Tween<double> persistentHeightTween = Tween<double>(
       begin: _kNavBarPersistentHeight,
       end: 0.0,
@@ -1206,17 +1203,50 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     if (widget._searchable) {
       searchableBottom =
           expanded
-              ? GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                child: preferredSizeSearchField,
-                onTap: () {
-                  setState(() {
+              ? AnimatedBuilder(
+                animation: persistentHeightAnimation,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  child: preferredSizeSearchField,
+                  onTap: () {
                     if (widget.onSearchActiveChanged != null) {
                       widget.onSearchActiveChanged!(expanded);
                     }
                     _animationController.forward();
                     _fadeController.forward();
-                  });
+                  },
+                ),
+                builder: (BuildContext context, Widget? child) {
+                  return LayoutBuilder(
+                    builder: (BuildContext context, BoxConstraints constraints) {
+                      return Align(
+                        alignment: Alignment.centerLeft,
+                        child: Row(
+                          children: <Widget>[
+                            SizedBox(
+                              width: constraints.maxWidth - (83.0 * _animationController.value),
+                              child: child,
+                            ),
+                            SizedBox(
+                              width: _animationController.value * 83.0,
+                              child: Opacity(
+                                opacity: 0.4,
+                                child: CupertinoButton(
+                                  padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+                                  child: const Text(
+                                    'Cancel',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.clip,
+                                  ),
+                                  onPressed: () {},
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
                 },
               )
               : Row(
@@ -1227,19 +1257,25 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                       child: widget.searchField,
                     ),
                   ),
-                  Center(
-                    child: CupertinoButton(
-                      child: const Text('Cancel'),
-                      onPressed: () {
-                        setState(() {
+                  AnimatedBuilder(
+                    animation: persistentHeightAnimation,
+                    child: FadeTransition(
+                      opacity: Tween<double>(begin: 0.0, end: 1.0).animate(_fadeController),
+                      child: CupertinoButton(
+                        padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+                        child: const Text('Cancel', maxLines: 1, overflow: TextOverflow.clip),
+                        onPressed: () {
                           if (widget.onSearchActiveChanged != null) {
                             widget.onSearchActiveChanged!(expanded);
                           }
                           _animationController.reverse();
                           _fadeController.reverse();
-                        });
-                      },
+                        },
+                      ),
                     ),
+                    builder: (BuildContext context, Widget? child) {
+                      return SizedBox(width: _animationController.value * 83.0, child: child);
+                    },
                   ),
                 ],
               );
