@@ -1468,10 +1468,10 @@ void main() {
       )
     ));
 
-    final Container headerContainer = tester.widget<Container>(
+    final ColoredBox headerContainer = tester.widget<ColoredBox>(
       find.descendant(
         of: find.byType(PaginatedDataTable),
-        matching: find.byType(Container).first,
+        matching: find.byType(ColoredBox).first,
       ),
     );
     expect(headerContainer.color, headerBackgroundColor);
@@ -1479,13 +1479,13 @@ void main() {
      final Finder footerFinder = find.descendant(
       of: find.byType(PaginatedDataTable),
       matching: find.byWidgetPredicate((Widget widget) =>
-        widget is Container &&
+        widget is ColoredBox &&
         widget.child is SingleChildScrollView &&
         (widget.child! as SingleChildScrollView).child is Row
       ),
     );
     expect(footerFinder, findsOneWidget);
-    final Container footerContainer = tester.widget<Container>(footerFinder);
+    final ColoredBox footerContainer = tester.widget<ColoredBox>(footerFinder);
     expect(footerContainer.color, footerBackgroundColor);
   });
 }
