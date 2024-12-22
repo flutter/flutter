@@ -109,6 +109,7 @@ void main() {
     });
     final List<TappableLabel> primary, selected;
     (:primary, :selected) = TappableLabel.labels(tester.widget(findDialPaint));
+
     expect(primary.map<String?>((TappableLabel tp) => tp.textSpan?.text), labels00To22);
     expect(selected.map<String?>((TappableLabel tp) => tp.textSpan?.text), labels00To22);
   });
