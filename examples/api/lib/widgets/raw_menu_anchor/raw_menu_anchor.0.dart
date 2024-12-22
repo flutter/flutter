@@ -17,7 +17,6 @@ class SimpleMenuExample extends StatefulWidget {
 
 class _SimpleMenuExampleState extends State<SimpleMenuExample> {
   final MenuController controller = MenuController();
-
   String _selected = '';
 
   void _handlePressed(String value) {
@@ -39,30 +38,32 @@ class _SimpleMenuExampleState extends State<SimpleMenuExample> {
           ),
           RawMenuAnchor(
             controller: controller,
-            constraints: const BoxConstraints(minWidth: 120),
             padding: const EdgeInsets.symmetric(vertical: 5),
             alignmentOffset: const Offset(0, 6),
-            surfaceDecoration: RawMenuAnchor.defaultLightOverlayDecoration,
-            menuChildren: <Widget>[
-              MenuItemButton(
-                onPressed: () {
-                  _handlePressed('Cut');
-                },
-                child: const Text('Cut'),
-              ),
-              MenuItemButton(
-                onPressed: () {
-                  _handlePressed('Copy');
-                },
-                child: const Text('Copy'),
-              ),
-              MenuItemButton(
-                onPressed: () {
-                  _handlePressed('Paste');
-                },
-                child: const Text('Paste'),
-              ),
-            ],
+            panel: RawMenuPanel(
+              decoration: RawMenuPanel.lightSurfaceDecoration,
+              constraints: const BoxConstraints(minWidth: 120),
+              menuChildren: <Widget>[
+                MenuItemButton(
+                  onPressed: () {
+                    _handlePressed('Cut');
+                  },
+                  child: const Text('Cut'),
+                ),
+                MenuItemButton(
+                  onPressed: () {
+                    _handlePressed('Copy');
+                  },
+                  child: const Text('Copy'),
+                ),
+                MenuItemButton(
+                  onPressed: () {
+                    _handlePressed('Paste');
+                  },
+                  child: const Text('Paste'),
+                ),
+              ],
+            ),
             builder: (
               BuildContext context,
               MenuController controller,
@@ -93,7 +94,8 @@ class SimpleMenuApp extends StatelessWidget {
     splashFactory: InkSparkle.splashFactory,
     iconSize: WidgetStatePropertyAll<double>(17),
     overlayColor: WidgetStatePropertyAll<Color>(Color(0x0D1A1A1A)),
-    padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 12)),
+    padding: WidgetStatePropertyAll<EdgeInsets>(
+        EdgeInsets.symmetric(horizontal: 12)),
     textStyle: WidgetStatePropertyAll<TextStyle>(TextStyle(fontSize: 14)),
     visualDensity: VisualDensity(
       horizontal: VisualDensity.minimumDensity,

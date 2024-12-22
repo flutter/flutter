@@ -393,7 +393,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
       state: this,
       child: RawMenuAnchor.overlayBuilder(
         useRootOverlay: widget.useRootOverlay,
-        menuChildren: widget.menuChildren,
         onOpen: widget.onOpen,
         onClose: widget.onClose,
         consumeOutsideTaps: widget.consumeOutsideTap,
@@ -417,7 +416,6 @@ class _MenuAnchorState extends State<MenuAnchor> {
 
   Widget _buildOverlay(
     BuildContext context,
-    List<Widget> children,
     RawMenuAnchorOverlayPosition position,
   ) {
     return _Submenu(
@@ -2418,22 +2416,10 @@ class _MenuBarAnchorState extends _MenuAnchorState {
     return _MenuAnchorScope(
       state: this,
       child: RawMenuAnchor.node(
-        menuChildren: widget.menuChildren,
         controller: _menuController,
         builder: _buildMenuBar,
-      ),
-    );
-  }
-
-  Widget _buildMenuBar(BuildContext context, List<Widget> menuChildren) {
-    final MenuController controller = MenuController.maybeOf(context)!;
-    return FocusScope(
-      node: _menuScopeNode,
-      skipTraversal: !controller.isOpen,
-      canRequestFocus: controller.isOpen,
-      descendantsAreFocusable: true,
-      child: ExcludeFocus(
-        excluding: !controller.isOpen,
+        // Actions, Shortcuts, and _MenuPanel are not reliant on
+        // MenuController.isOpen, so they needn't be included in the builder.
         child: Actions(
           actions: actions,
           child: Shortcuts(
@@ -2446,6 +2432,20 @@ class _MenuBarAnchorState extends _MenuAnchorState {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildMenuBar(BuildContext context, Widget? child) {
+    final bool isOpen = MenuController.maybeOf(context)!.isOpen;
+    return FocusScope(
+      node: _menuScopeNode,
+      skipTraversal: !isOpen,
+      canRequestFocus: isOpen,
+      descendantsAreFocusable: true,
+      child: ExcludeFocus(
+        excluding: !isOpen,
+        child: child!,
       ),
     );
   }

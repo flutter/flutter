@@ -14,19 +14,15 @@ import 'package:flutter_test/flutter_test.dart';
 T findMenuPanelDescendent<T extends Widget>(WidgetTester tester) {
   return tester.firstWidget<T>(
     find.descendant(
-      of: findMenuPanel(),
+      of: find.byType(RawMenuPanel),
       matching: find.byType(T),
     ),
   );
 }
 
-Finder findMenuPanel() {
-  return find.byType(RawMenuAnchor.debugMenuOverlayPanelType);
-}
-
 List<Rect> collectOverlays({bool clipped = true}) {
   final List<Rect> menuRects = <Rect>[];
-  final Finder finder = findMenuPanel();
+  final Finder finder = find.byType(RawMenuPanel);
   for (final Element candidate in finder.evaluate().toList()) {
     final RenderBox box = candidate.renderObject! as RenderBox;
     final Offset topLeft = box.localToGlobal(box.size.topLeft(Offset.zero));
@@ -172,7 +168,7 @@ void main() {
 
     expect(
       findMenuPanelDescendent<Container>(tester).decoration,
-      RawMenuAnchor.defaultLightOverlayDecoration,
+      RawMenuPanel.lightSurfaceDecoration,
     );
   }, variant: TargetPlatformVariant.desktop());
 
@@ -182,8 +178,9 @@ void main() {
     await tester.tapAt(const Offset(100, 200), buttons: kSecondaryButton);
     await tester.pump();
 
-    expect(BrowserContextMenu.enabled, isFalse);
-  },
-      skip:
-          !kIsWeb); // [intended] Browser context menu is only enabled on the web
+    if (kIsWeb) {
+      expect(BrowserContextMenu.enabled, isFalse);
+    }
+  }, skip: !kIsWeb // [intended] Browser context menu is only enabled on the web
+      );
 }

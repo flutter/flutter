@@ -11,14 +11,10 @@ import 'package:flutter_test/flutter_test.dart';
 T findMenuPanelDescendent<T extends Widget>(WidgetTester tester) {
   return tester.firstWidget<T>(
     find.descendant(
-      of: findMenuPanel(),
+      of: find.byType(RawMenuPanel),
       matching: find.byType(T),
     ),
   );
-}
-
-Finder findMenuPanel() {
-  return find.byType(RawMenuAnchor.debugMenuOverlayPanelType);
 }
 
 void main() {
@@ -30,7 +26,7 @@ void main() {
     expect(find.byType(RawMenuAnchor).evaluate().length, 5);
     expect(
       tester.getRect(find.byType(RawMenuAnchor).first),
-      const Rect.fromLTRB(233.0, 284.0, 567.0, 316.0),
+      const Rect.fromLTRB(233.0, 278.0, 567.0, 322.0),
     );
   });
 
@@ -130,7 +126,7 @@ void main() {
     expect(find.text('New'), findsOneWidget);
     expect(
       findMenuPanelDescendent<Container>(tester).decoration,
-      RawMenuAnchor.defaultLightOverlayDecoration,
+      RawMenuPanel.lightSurfaceDecoration,
     );
   });
 }

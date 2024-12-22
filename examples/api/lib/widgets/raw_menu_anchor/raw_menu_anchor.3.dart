@@ -9,39 +9,39 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MenuNodeApp());
 
 class MenuItem {
-  const MenuItem(this.label, {this.leading, this.children = const <MenuItem>[]});
+  const MenuItem(this.label, {this.leading, this.children});
   final String label;
   final Widget? leading;
-  final List<MenuItem> children;
+  final List<MenuItem>? children;
 }
 
 const List<MenuItem> menuItems = <MenuItem>[
   MenuItem('File', children: <MenuItem>[
-    MenuItem('New',   leading: Icon(Icons.edit_document)),
-    MenuItem('Open',  leading: Icon(Icons.folder)),
+    MenuItem('New', leading: Icon(Icons.edit_document)),
+    MenuItem('Open', leading: Icon(Icons.folder)),
     MenuItem('Print', leading: Icon(Icons.print)),
     MenuItem('Share', leading: Icon(Icons.share), children: <MenuItem>[
-      MenuItem('Email',     leading: Icon(Icons.email)),
-      MenuItem('Message',   leading: Icon(Icons.message)),
+      MenuItem('Email', leading: Icon(Icons.email)),
+      MenuItem('Message', leading: Icon(Icons.message)),
       MenuItem('Copy Link', leading: Icon(Icons.link)),
     ]),
   ]),
   MenuItem('Edit', children: <MenuItem>[
-    MenuItem('Undo',  leading: Icon(Icons.undo)),
-    MenuItem('Redo',  leading: Icon(Icons.redo)),
-    MenuItem('Cut',   leading: Icon(Icons.cut)),
-    MenuItem('Copy',  leading: Icon(Icons.copy)),
+    MenuItem('Undo', leading: Icon(Icons.undo)),
+    MenuItem('Redo', leading: Icon(Icons.redo)),
+    MenuItem('Cut', leading: Icon(Icons.cut)),
+    MenuItem('Copy', leading: Icon(Icons.copy)),
     MenuItem('Paste', leading: Icon(Icons.paste))
   ]),
   MenuItem('View', children: <MenuItem>[
-    MenuItem('Zoom In',  leading: Icon(Icons.zoom_in)),
+    MenuItem('Zoom In', leading: Icon(Icons.zoom_in)),
     MenuItem('Zoom Out', leading: Icon(Icons.zoom_out)),
-    MenuItem('Fit',      leading: Icon(Icons.fullscreen)),
+    MenuItem('Fit', leading: Icon(Icons.fullscreen)),
   ]),
   MenuItem('Tools', children: <MenuItem>[
-    MenuItem('Spelling',   leading: Icon(Icons.spellcheck)),
-    MenuItem('Grammar',    leading: Icon(Icons.text_format)),
-    MenuItem('Thesaurus',  leading: Icon(Icons.book_outlined)),
+    MenuItem('Spelling', leading: Icon(Icons.spellcheck)),
+    MenuItem('Grammar', leading: Icon(Icons.text_format)),
+    MenuItem('Thesaurus', leading: Icon(Icons.book_outlined)),
     MenuItem('Dictionary', leading: Icon(Icons.book)),
   ]),
 ];
@@ -54,31 +54,40 @@ class MenuNodeExample extends StatefulWidget {
 }
 
 class _MenuNodeExampleState extends State<MenuNodeExample> {
-  final MenuController controller = MenuController();
-  String _selected = '';
+  final MenuController rootController = MenuController();
+  static const WidgetStatePropertyAll<Color> menuButtonHoverColor =
+      WidgetStatePropertyAll<Color>(Color(0x0D1A1A1A));
+  static const EdgeInsets padding = EdgeInsets.symmetric(vertical: 5);
+  MenuItem? _selected;
 
-  RawMenuAnchor _buildSubmenu(MenuItem option, {bool isSubmenu = false}) {
+  ButtonStyle? get menuButtonStyle => Theme.of(context).menuButtonTheme.style;
+  TextStyle? get titleStyle => Theme.of(context).textTheme.titleMedium;
+
+  RawMenuAnchor _buildSubmenu(MenuItem option, {double depth = 0}) {
     return RawMenuAnchor(
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      alignmentOffset: const Offset(-4, 0),
-      constraints: const BoxConstraints(minWidth: 180),
-      surfaceDecoration: RawMenuAnchor.defaultLightOverlayDecoration,
-      menuChildren: <Widget>[
-        for (final MenuItem child in option.children)
-          if (child.children.isNotEmpty)
-            _buildSubmenu(child, isSubmenu: true)
-          else
-            MenuItemButton(
-              onPressed: () {
-                setState(() {
-                  _selected = child.label;
-                });
-                controller.close();
-              },
-              leadingIcon: child.leading,
-              child: Text(child.label),
-            )
-      ],
+      padding: padding,
+      alignmentOffset: depth == 0 ? const Offset(0, 5) : const Offset(-4, 0),
+      panel: RawMenuPanel(
+        padding: padding,
+        constraints: const BoxConstraints(minWidth: 180),
+        decoration: RawMenuPanel.lightSurfaceDecoration,
+        menuChildren: <Widget>[
+          for (final MenuItem child in option.children!)
+            if (child.children != null)
+              _buildSubmenu(child, depth: depth + 1)
+            else
+              MenuItemButton(
+                onPressed: () {
+                  setState(() {
+                    _selected = child;
+                  });
+                  rootController.close();
+                },
+                leadingIcon: child.leading,
+                child: Text(child.label),
+              )
+        ],
+      ),
       builder: (
         BuildContext context,
         MenuController controller,
@@ -87,22 +96,31 @@ class _MenuNodeExampleState extends State<MenuNodeExample> {
         return MergeSemantics(
           child: Semantics(
             expanded: controller.isOpen,
-            child: ColoredBox(
-              color: controller.isOpen ? const Color(0x0D1A1A1A)
-                                       : Colors.transparent,
-              child: MenuItemButton(
-                onPressed: () {
-                  if (controller.isOpen) {
-                    controller.close();
-                  } else {
-                    controller.open();
-                  }
-                },
-                leadingIcon: option.leading,
-                trailingIcon: isSubmenu ? const Icon(Icons.keyboard_arrow_right)
-                                        : null,
-                child: Text(option.label),
-              ),
+            child: MenuItemButton(
+              style: controller.isOpen
+                  ? menuButtonStyle?.copyWith(
+                      backgroundColor: menuButtonHoverColor,
+                    )
+                  : menuButtonStyle,
+              onHover: (bool value) {
+                if (value && rootController.isOpen) {
+                  controller.open();
+                }
+              },
+              onPressed: () {
+                if (controller.isOpen) {
+                  controller.close();
+                } else {
+                  controller.open();
+                }
+              },
+              leadingIcon: option.leading,
+              trailingIcon: depth > 0
+                  ? const Icon(
+                      Icons.keyboard_arrow_right,
+                    )
+                  : null,
+              child: Text(option.label),
             ),
           ),
         );
@@ -116,21 +134,23 @@ class _MenuNodeExampleState extends State<MenuNodeExample> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          if (_selected.isNotEmpty)
+          if (_selected != null)
             Text(
-              'Selected: $_selected',
-              style: Theme.of(context).textTheme.titleMedium
+              'Selected: ${_selected!.label}',
+              style: titleStyle,
             ),
           RawMenuAnchor.node(
-            controller: controller,
-            menuChildren: <Widget>[
-              for (final MenuItem option in menuItems)
-                _buildSubmenu(option),
-            ],
-            builder: (BuildContext context, List<Widget> menuChildren) {
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: menuChildren,
+            controller: rootController,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <RawMenuAnchor>[
+                for (final MenuItem item in menuItems) _buildSubmenu(item),
+              ],
+            ),
+            builder: (BuildContext context, Widget? child) {
+              return SizedBox(
+                height: 44,
+                child: child,
               );
             },
           ),
@@ -147,7 +167,8 @@ class MenuNodeApp extends StatelessWidget {
     splashFactory: InkSparkle.splashFactory,
     iconSize: WidgetStatePropertyAll<double>(17),
     overlayColor: WidgetStatePropertyAll<Color>(Color(0x0D1A1A1A)),
-    padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 12)),
+    padding: WidgetStatePropertyAll<EdgeInsets>(
+        EdgeInsets.symmetric(horizontal: 12)),
     textStyle: WidgetStatePropertyAll<TextStyle>(TextStyle(fontSize: 14)),
     visualDensity: VisualDensity(
       horizontal: VisualDensity.minimumDensity,
@@ -163,7 +184,7 @@ class MenuNodeApp extends StatelessWidget {
       ).copyWith(
         menuButtonTheme: const MenuButtonThemeData(style: menuButtonStyle),
       ),
-      home: const MenuNodeExample(),
+      home: const Scaffold(body: MenuNodeExample()),
     );
   }
 }

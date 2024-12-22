@@ -10,7 +10,7 @@ import 'package:flutter_api_samples/widgets/raw_menu_anchor/raw_menu_anchor.2.da
 import 'package:flutter_test/flutter_test.dart';
 
 final Finder opacityFinder = find.descendant(
-  of: find.byType(example.ItemAwareMenuSurface),
+  of: find.byType(example.ShiftingMenuOverlay),
   matching: find.byType(Opacity),
 );
 
@@ -30,30 +30,30 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    expect(find.byType(example.ItemAwareMenuSurface), findsOneWidget);
+    expect(find.byType(example.ShiftingMenuOverlay), findsOneWidget);
     expect(
-      tester.getRect(find.byType(example.ItemAwareMenuSurface)),
+      tester.getRect(find.byType(example.ShiftingMenuOverlay)),
       rectMoreOrLessEquals(
-        const Rect.fromLTRB(449.2, 265.5, 674.2, 453.5),
+        const Rect.fromLTRB(449.2, 272.0, 674.2, 460.0),
         epsilon: 0.1,
       ),
     );
 
     Opacity opacity = tester.widget<Opacity>(opacityFinder);
 
-    expect(opacity.opacity, moreOrLessEquals(0.5088, epsilon: 0.001));
+    expect(opacity.opacity, moreOrLessEquals(0.2525, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
 
     opacity = tester.widget<Opacity>(opacityFinder);
 
-    expect(opacity.opacity, moreOrLessEquals(0.9406, epsilon: 0.001));
+    expect(opacity.opacity, moreOrLessEquals(0.5632, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
 
     opacity = tester.widget<Opacity>(opacityFinder);
 
-    expect(opacity.opacity, moreOrLessEquals(0.9943, epsilon: 0.001));
+    expect(opacity.opacity, moreOrLessEquals(0.8564, epsilon: 0.001));
 
     await tester.pumpAndSettle();
 
@@ -80,19 +80,16 @@ void main() {
 
     expect(primaryFocus?.debugLabel, equals('MenuItemButton(Text("Kitten"))'));
 
-    // Felis catus
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown); // Felis catus
 
     expect(primaryFocus?.debugLabel,
         equals('MenuItemButton(Text("Felis catus"))'));
 
-    // Dog is disabled so it should stay on Felis catus. Focus does not loop
-    // because we are in a custom overlay.
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown); // Dog
 
-    expect(primaryFocus?.debugLabel,
-        equals('MenuItemButton(Text("Felis catus"))'));
+    expect(primaryFocus?.debugLabel, equals('MenuItemButton(Text("Dog"))'));
 
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp); // Felis catus
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp); // Kitten
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp); // Cat
     await tester.sendKeyEvent(LogicalKeyboardKey.enter); // Select Cat
@@ -111,9 +108,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      tester.getRect(find.byType(example.ItemAwareMenuSurface)),
+      tester.getRect(find.byType(example.ShiftingMenuOverlay)),
       rectMoreOrLessEquals(
-        const Rect.fromLTRB(449.2, 265.5, 674.2, 453.5),
+        const Rect.fromLTRB(449.2, 272.0, 674.2, 460.0),
         epsilon: 0.1,
       ),
     );
@@ -127,9 +124,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      tester.getRect(find.byType(example.ItemAwareMenuSurface)),
+      tester.getRect(find.byType(example.ShiftingMenuOverlay)),
       rectMoreOrLessEquals(
-        const Rect.fromLTRB(449.2, 222.0, 674.2, 410.0),
+        const Rect.fromLTRB(449.2, 228.0, 674.2, 416.0),
         epsilon: 0.1,
       ),
     );

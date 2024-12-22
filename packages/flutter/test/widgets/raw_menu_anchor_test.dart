@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 // constructor the test applies to:
 //  * [Default]: Applies to [RawMenuAnchor],
 //  * [OverlayBuilder]: Applies to [RawMenuAnchor.overlayBuilder]
-//  * [Panel]: Applies to [RawMenuAnchor.menuPanel].
+//  * [Node]: Applies to [RawMenuAnchor.menuPanel].
 //  * [Overlays]: Applies to [RawMenuAnchor] and [RawMenuAnchor.overlayBuilder]
 // Otherwise, the test applies to all constructors.
 
@@ -63,13 +63,9 @@ void main() {
     addTearDown(() => FocusManager.instance.removeListener(handleFocusChange));
   }
 
-  Finder findMenuPanel() {
-    return find.byType(RawMenuAnchor.debugMenuOverlayPanelType);
-  }
-
   Finder findOverlayContents() {
     return find.descendant(
-      of: findMenuPanel(),
+      of: find.byType(RawMenuPanel),
       matching: find.byType(IntrinsicWidth),
     );
   }
@@ -77,7 +73,7 @@ void main() {
   T findMenuPanelDescendent<T extends Widget>(WidgetTester tester) {
     return tester.firstWidget<T>(
       find.descendant(
-        of: findMenuPanel(),
+        of: find.byType(RawMenuPanel),
         matching: find.byType(T),
       ),
     );
@@ -103,7 +99,7 @@ void main() {
       App(
         RawMenuAnchor(
           controller: controller,
-          menuChildren: <Widget>[Text(Tag.a.text)],
+          panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.a.text)]),
           child: const AnchorButton(Tag.anchor),
         ),
       ),
@@ -130,14 +126,14 @@ void main() {
       App(
         RawMenuAnchor(
           controller: controller,
-          menuChildren: <Widget>[
+          panel: RawMenuPanel(menuChildren: <Widget>[
             Text(Tag.a.text),
             RawMenuAnchor(
               controller: nestedController,
-              menuChildren: <Widget>[Text(Tag.b.a.text)],
+              panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.b.a.text)]),
               child: const AnchorButton(Tag.b),
             ),
-          ],
+          ]),
           child: const AnchorButton(Tag.anchor),
         ),
       ),
@@ -208,14 +204,14 @@ void main() {
         App(
           RawMenuAnchor(
             controller: controller,
-            menuChildren: <Widget>[
+            panel: RawMenuPanel(menuChildren: <Widget>[
               Text(Tag.a.text),
               RawMenuAnchor(
                 childFocusNode: focusNode,
-                menuChildren: <Widget>[Text(Tag.b.a.text)],
+                panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.b.a.text)]),
                 child: AnchorButton(Tag.b, focusNode: focusNode),
               ),
-            ],
+            ]),
             child: const AnchorButton(Tag.anchor),
           ),
         ),
@@ -252,21 +248,19 @@ void main() {
         RawMenuAnchor.overlayBuilder(
           overlayBuilder: (
             BuildContext context,
-            List<Widget> menuChildren,
             RawMenuAnchorOverlayPosition position,
           ) {
-            return Column(children: menuChildren);
+            return Column(children: <Widget>[
+              RawMenuAnchor(
+                panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.a.a.text)]),
+                child: const AnchorButton(Tag.a),
+              ),
+              RawMenuAnchor(
+                panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.b.a.text)]),
+                child: const AnchorButton(Tag.b),
+              ),
+            ]);
           },
-          menuChildren: <Widget>[
-            RawMenuAnchor(
-              menuChildren: <Widget>[Text(Tag.a.a.text)],
-              child: const AnchorButton(Tag.a),
-            ),
-            RawMenuAnchor(
-              menuChildren: <Widget>[Text(Tag.b.a.text)],
-              child: const AnchorButton(Tag.b),
-            ),
-          ],
           child: const AnchorButton(Tag.anchor),
         ),
       ),
@@ -300,7 +294,7 @@ void main() {
         RawMenuAnchor(
           menuAlignment: AlignmentDirectional.bottomStart,
           alignment: AlignmentDirectional.topStart,
-          menuChildren: <Widget>[Button.tag(Tag.a.a)],
+          panel: RawMenuPanel(menuChildren: <Widget>[Button.tag(Tag.a.a)]),
           builder: (
             BuildContext context,
             MenuController controller,
@@ -313,7 +307,8 @@ void main() {
                 RawMenuAnchor(
                   alignment: AlignmentDirectional.bottomStart,
                   menuAlignment: AlignmentDirectional.topStart,
-                  menuChildren: <Widget>[Button.tag(Tag.b.a)],
+                  panel:
+                      RawMenuPanel(menuChildren: <Widget>[Button.tag(Tag.b.a)]),
                   child: const AnchorButton(Tag.b),
                 ),
               ],
@@ -335,29 +330,29 @@ void main() {
   });
 
   testWidgets(
-      '[Panel] MenuController.isOpen is true when a descendent menu is open',
+      '[Node] MenuController.isOpen is true when a descendent menu is open',
       (WidgetTester tester) async {
     await tester.pumpWidget(
       App(
         RawMenuAnchor.node(
           controller: controller,
-          builder: (BuildContext context, List<Widget> children) {
-            return Row(children: children);
-          },
-          menuChildren: <Widget>[
-            RawMenuAnchor(
-              menuChildren: <Widget>[Text(Tag.a.a.text)],
-              child: const AnchorButton(Tag.a),
-            ),
-            // Menu should not need to be a direct descendent.
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: RawMenuAnchor(
-                menuChildren: <Widget>[Text(Tag.b.a.text)],
-                child: const AnchorButton(Tag.b),
+          child: Row(
+            children: <Widget>[
+              RawMenuAnchor(
+                panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.a.a.text)]),
+                child: const AnchorButton(Tag.a),
               ),
-            ),
-          ],
+              // Menu should not need to be a direct descendent.
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: RawMenuAnchor(
+                  panel:
+                      RawMenuPanel(menuChildren: <Widget>[Text(Tag.b.a.text)]),
+                  child: const AnchorButton(Tag.b),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -386,25 +381,26 @@ void main() {
     expect(find.text(Tag.b.a.text), findsNothing);
   });
 
-  testWidgets('[Panel] MenuController.open does nothing',
+  testWidgets('[Node] MenuController.open does nothing',
       (WidgetTester tester) async {
     final MenuController nestedController = MenuController();
     await tester.pumpWidget(
       App(
         RawMenuAnchor.node(
-          builder: (BuildContext context, List<Widget> children) {
-            return Column(children: children);
-          },
           controller: controller,
-          menuChildren: <Widget>[
-            RawMenuAnchor(
-              controller: nestedController,
-              menuChildren: <Widget>[
-                Text(Tag.b.a.text),
-              ],
-              child: const AnchorButton(Tag.b),
-            ),
-          ],
+          child: Column(
+            children: <Widget>[
+              RawMenuAnchor(
+                controller: nestedController,
+                panel: RawMenuPanel(
+                  menuChildren: <Widget>[
+                    Text(Tag.b.a.text),
+                  ],
+                ),
+                child: const AnchorButton(Tag.b),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -425,30 +421,29 @@ void main() {
     expect(find.text(Tag.b.a.text), findsNothing);
   });
 
-  testWidgets('[Panel] MenuController.close closes children',
+  testWidgets('[Node] MenuController.close closes children',
       (WidgetTester tester) async {
     final MenuController nestedController = MenuController();
     await tester.pumpWidget(
       App(
         RawMenuAnchor.node(
-          builder: (BuildContext context, List<Widget> children) {
-            return Column(children: children);
-          },
           controller: controller,
-          menuChildren: <Widget>[
-            RawMenuAnchor(
-              controller: nestedController,
-              menuChildren: <Widget>[
-                Text(Tag.b.a.text),
-              ],
-              child: const AnchorButton(Tag.b),
-            ),
-          ],
+          child: Column(
+            children: <Widget>[
+              RawMenuAnchor(
+                controller: nestedController,
+                panel: RawMenuPanel(
+                  menuChildren: <Widget>[Text(Tag.b.a.text)],
+                ),
+                child: const AnchorButton(Tag.b),
+              ),
+            ],
+          ),
         ),
       ),
     );
 
-    // Open the nested anchor
+    // Open the nested anchor.
     nestedController.open();
     await tester.pump();
 
@@ -467,70 +462,68 @@ void main() {
     expect(find.text(Tag.b.a.text), findsNothing);
   });
 
-  testWidgets('[Panel] MenuController.closeChildren closes children',
+  testWidgets('[Node] MenuController.closeChildren closes children',
       (WidgetTester tester) async {
-    final MenuController controllerB = MenuController();
+    final MenuController nestedController = MenuController();
     await tester.pumpWidget(
       App(
         RawMenuAnchor.node(
-          builder: (BuildContext context, List<Widget> children) {
-            return Column(children: children);
-          },
           controller: controller,
-          menuChildren: <Widget>[
-            RawMenuAnchor(
-              controller: controllerB,
-              menuChildren: <Widget>[
-                Text(Tag.b.a.text),
-              ],
-              child: const AnchorButton(Tag.b),
-            ),
-          ],
+          child: Column(
+            children: <Widget>[
+              RawMenuAnchor(
+                controller: nestedController,
+                panel: RawMenuPanel(
+                  menuChildren: <Widget>[Text(Tag.b.a.text)],
+                ),
+                child: const AnchorButton(Tag.b),
+              ),
+            ],
+          ),
         ),
       ),
     );
 
-    // Open the nested anchor
-    controllerB.open();
+    // Open the nested anchor.
+    nestedController.open();
     await tester.pump();
 
     expect(controller.isOpen, isTrue);
-    expect(controllerB.isOpen, isTrue);
+    expect(nestedController.isOpen, isTrue);
     expect(find.text(Tag.b.text), findsOneWidget);
     expect(find.text(Tag.b.a.text), findsOneWidget);
 
-    // Close the root menu panel
+    // Close the root menu panel.
     controller.closeChildren();
     await tester.pump();
 
     expect(controller.isOpen, isFalse);
-    expect(controllerB.isOpen, isFalse);
+    expect(nestedController.isOpen, isFalse);
     expect(find.text(Tag.b.text), findsOneWidget);
     expect(find.text(Tag.b.a.text), findsNothing);
   });
 
-  testWidgets('[Panel] Should only display one open child anchor at a time',
+  testWidgets('[Node] Should only display one open child anchor at a time',
       (WidgetTester tester) async {
     await tester.pumpWidget(
       App(
         RawMenuAnchor.node(
-          builder: (BuildContext context, List<Widget> children) {
-            return Row(children: children);
-          },
-          menuChildren: <Widget>[
-            RawMenuAnchor(
-              menuChildren: <Widget>[
-                Text(Tag.a.a.text),
-              ],
-              child: const AnchorButton(Tag.a),
-            ),
-            RawMenuAnchor(
-              menuChildren: <Widget>[
-                Text(Tag.b.a.text),
-              ],
-              child: const AnchorButton(Tag.b),
-            ),
-          ],
+          child: Row(
+            children: <Widget>[
+              RawMenuAnchor(
+                panel: RawMenuPanel(
+                  menuChildren: <Widget>[Text(Tag.a.a.text)],
+                ),
+                child: const AnchorButton(Tag.a),
+              ),
+              RawMenuAnchor(
+                panel: RawMenuPanel(
+                  menuChildren: <Widget>[Text(Tag.b.a.text)],
+                ),
+                child: const AnchorButton(Tag.b),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -553,7 +546,6 @@ void main() {
     expect(find.text(Tag.b.a.text), findsOneWidget);
   });
 
-  // This test could be merged with the next one.
   testWidgets('MenuController notifies dependents on open and close',
       (WidgetTester tester) async {
     final MenuController controller = MenuController();
@@ -568,39 +560,43 @@ void main() {
     await tester.pumpWidget(
       App(
         RawMenuAnchor.node(
-          menuChildren: <Widget>[
-            // Panel context.
-            Builder(builder: (BuildContext context) {
-              panelController = MenuController.maybeOf(context);
-              panelBuilds += 1;
-              return Text(Tag.a.text);
-            }),
-            RawMenuAnchor(
-              controller: controller,
-              menuChildren: <Widget>[
-                // Overlay context.
-                Builder(builder: (BuildContext context) {
-                  overlayController = MenuController.maybeOf(context);
-                  overlayBuilds += 1;
-                  return Text(Tag.b.a.a.text);
-                }),
-                RawMenuAnchor(
-                  controller: nestedController,
-                  menuChildren: <Widget>[Button.tag(Tag.b.a.b.a)],
-                  child: Button.tag(Tag.b.a.b),
-                )
-              ],
-              // Anchor context.
-              child: Builder(builder: (BuildContext context) {
-                anchorController = MenuController.maybeOf(context);
-                anchorBuilds += 1;
-                return Text(Tag.b.a.text);
+          child: Column(
+            children: <Widget>[
+              // Panel context.
+              Builder(builder: (BuildContext context) {
+                panelController = MenuController.maybeOf(context);
+                panelBuilds += 1;
+                return Text(Tag.a.text);
               }),
-            ),
-          ],
-          builder: (BuildContext context, List<Widget> children) {
-            return Column(children: children);
-          },
+              RawMenuAnchor(
+                controller: controller,
+                panel: RawMenuPanel(
+                  menuChildren: <Widget>[
+                    // Overlay context.
+                    Builder(builder: (BuildContext context) {
+                      overlayController = MenuController.maybeOf(context);
+                      overlayBuilds += 1;
+                      return Text(Tag.b.a.a.text);
+                    }),
+                    RawMenuAnchor(
+                      controller: nestedController,
+                      panel: RawMenuPanel(
+                          menuChildren: <Widget>[Button.tag(Tag.b.a.b.a)]),
+                      child: Button.tag(Tag.b.a.b),
+                    )
+                  ],
+                ),
+                // Anchor context.
+                child: Builder(
+                  builder: (BuildContext context) {
+                    anchorController = MenuController.maybeOf(context);
+                    anchorBuilds += 1;
+                    return Text(Tag.b.a.text);
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -657,37 +653,36 @@ void main() {
       return App(
         RawMenuAnchor.node(
           controller: panel,
-          menuChildren: <Widget>[
-            // Panel context.
-            Builder(builder: (BuildContext context) {
-              panelController = MenuController.maybeOf(context);
-              panelBuilds += 1;
-              return Text(Tag.a.text);
-            }),
-            RawMenuAnchor(
-              controller: overlay,
-              menuChildren: <Widget>[
-                // Overlay context.
-                Builder(builder: (BuildContext context) {
-                  overlayController = MenuController.maybeOf(context);
-                  overlayBuilds += 1;
-                  return Text(Tag.b.a.a.text);
-                }),
-              ],
-              // Anchor context.
-              child: Builder(
-                key: anchorKey,
-                builder: (BuildContext context) {
-                  anchorController = MenuController.maybeOf(context);
-                  anchorBuilds += 1;
-                  return Text(Tag.b.a.text);
-                },
+          child: Column(
+            children: <Widget>[
+              // Panel context.
+              Builder(builder: (BuildContext context) {
+                panelController = MenuController.maybeOf(context);
+                panelBuilds += 1;
+                return Text(Tag.a.text);
+              }),
+              RawMenuAnchor(
+                controller: overlay,
+                panel: RawMenuPanel(menuChildren: <Widget>[
+                  // Overlay context.
+                  Builder(builder: (BuildContext context) {
+                    overlayController = MenuController.maybeOf(context);
+                    overlayBuilds += 1;
+                    return Text(Tag.b.a.a.text);
+                  }),
+                ]),
+                // Anchor context.
+                child: Builder(
+                  key: anchorKey,
+                  builder: (BuildContext context) {
+                    anchorController = MenuController.maybeOf(context);
+                    anchorBuilds += 1;
+                    return Text(Tag.b.a.text);
+                  },
+                ),
               ),
-            ),
-          ],
-          builder: (BuildContext context, List<Widget> children) {
-            return Column(children: children);
-          },
+            ],
+          ),
         ),
       );
     }
@@ -749,7 +744,6 @@ void main() {
             controller: controller,
             overlayBuilder: (
               BuildContext context,
-              List<Widget> menuChildren,
               RawMenuAnchorOverlayPosition position,
             ) {
               builderPosition = position;
@@ -760,9 +754,6 @@ void main() {
                 ),
               );
             },
-            menuChildren: <Widget>[
-              Text(Tag.b.a.text),
-            ],
             child: AnchorButton(Tag.b, key: anchorKey),
           ),
         ),
@@ -789,22 +780,25 @@ void main() {
           children: <Widget>[
             RawMenuAnchor.node(
               controller: controller,
-              builder: (BuildContext context, List<Widget> children) {
-                return Row(children: children);
-              },
-              menuChildren: <Widget>[
-                RawMenuAnchor(
-                  menuChildren: <Widget>[
-                    RawMenuAnchor(
+              child: Row(
+                children: <Widget>[
+                  RawMenuAnchor(
+                    panel: RawMenuPanel(
                       menuChildren: <Widget>[
-                        Button.tag(Tag.a.a.a, focusNode: aaaFocusNode),
+                        RawMenuAnchor(
+                          panel: RawMenuPanel(
+                            menuChildren: <Widget>[
+                              Button.tag(Tag.a.a.a, focusNode: aaaFocusNode),
+                            ],
+                          ),
+                          child: AnchorButton(Tag.a.a),
+                        ),
                       ],
-                      child: AnchorButton(Tag.a.a),
                     ),
-                  ],
-                  child: const AnchorButton(Tag.a),
-                ),
-              ],
+                    child: const AnchorButton(Tag.a),
+                  ),
+                ],
+              ),
             ),
             Button.tag(
               Tag.b,
@@ -847,25 +841,26 @@ void main() {
     await tester.pumpWidget(
       App(
         RawMenuAnchor.node(
-          builder: (BuildContext context, List<Widget> children) {
-            return Row(children: children);
-          },
-          menuChildren: <Widget>[
-            RawMenuAnchor(
-              menuChildren: <Widget>[
-                Button.tag(Tag.a.a, focusNode: buttonFocus),
-                Button.tag(Tag.a.b),
-                RawMenuAnchor(
-                  controller: controller,
+          child: Row(
+            children: <Widget>[
+              RawMenuAnchor(
+                panel: RawMenuPanel(
                   menuChildren: <Widget>[
-                    Button.tag(Tag.a.c.a, focusNode: acaFocusNode),
+                    Button.tag(Tag.a.a, focusNode: buttonFocus),
+                    Button.tag(Tag.a.b),
+                    RawMenuAnchor(
+                      controller: controller,
+                      panel: RawMenuPanel(menuChildren: <Widget>[
+                        Button.tag(Tag.a.c.a, focusNode: acaFocusNode),
+                      ]),
+                      child: AnchorButton(Tag.a.c),
+                    ),
                   ],
-                  child: AnchorButton(Tag.a.c),
                 ),
-              ],
-              child: const AnchorButton(Tag.a),
-            ),
-          ],
+                child: const AnchorButton(Tag.a),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -899,24 +894,27 @@ void main() {
     await tester.pumpWidget(
       App(
         RawMenuAnchor.node(
-          builder: (BuildContext context, List<Widget> menuChildren) {
-            return Row(children: menuChildren);
-          },
-          menuChildren: <Widget>[
-            Button.tag(Tag.a, focusNode: aFocusNode),
-            RawMenuAnchor(
-              controller: controller,
-              menuChildren: <Widget>[
-                RawMenuAnchor(
+          child: Row(
+            children: <Widget>[
+              Button.tag(Tag.a, focusNode: aFocusNode),
+              RawMenuAnchor(
+                controller: controller,
+                panel: RawMenuPanel(
                   menuChildren: <Widget>[
-                    Button.tag(Tag.b.a.a, focusNode: baaFocusNode)
+                    RawMenuAnchor(
+                      panel: RawMenuPanel(
+                        menuChildren: <Widget>[
+                          Button.tag(Tag.b.a.a, focusNode: baaFocusNode)
+                        ],
+                      ),
+                      child: AnchorButton(Tag.b.a),
+                    ),
                   ],
-                  child: AnchorButton(Tag.b.a),
                 ),
-              ],
-              child: const AnchorButton(Tag.b),
-            ),
-          ],
+                child: const AnchorButton(Tag.b),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -930,7 +928,7 @@ void main() {
     expect(FocusManager.instance.primaryFocus, aFocusNode);
     expect(find.text(Tag.b.a.text), findsOneWidget);
 
-    // Test panel child can close siblings with escape key
+    // Test panel child can close siblings with escape key.
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pump();
 
@@ -945,7 +943,7 @@ void main() {
 
     expect(FocusManager.instance.primaryFocus, baaFocusNode);
 
-    // Test ancestors menus are closed with escape key
+    // Test ancestors menus are closed with escape key.
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pump();
 
@@ -989,19 +987,18 @@ void main() {
             ),
           },
           child: RawMenuAnchor.node(
-            menuChildren: <Widget>[
-              RawMenuAnchor(
-                menuChildren: <Widget>[
-                  Text(Tag.a.text),
-                ],
-                child: AnchorButton(Tag.anchor, focusNode: aFocusNode),
-              ),
-            ],
-            builder: (BuildContext context, List<Widget> menuChildren) {
-              return Row(
-                children: menuChildren,
-              );
-            },
+            child: Row(
+              children: <Widget>[
+                RawMenuAnchor(
+                  panel: RawMenuPanel(
+                    menuChildren: <Widget>[
+                      Text(Tag.a.text),
+                    ],
+                  ),
+                  child: AnchorButton(Tag.anchor, focusNode: aFocusNode),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -1077,22 +1074,20 @@ void main() {
                 },
                 child: RawMenuAnchor.overlayBuilder(
                   controller: controller,
-                  menuChildren: <Widget>[
-                    Button.tag(Tag.a),
-                    Shortcuts(
-                      // Web doesn't automatically handle directional traversal.
-                      shortcuts: traversalShortcuts,
-                      child: Button.tag(Tag.b, focusNode: bFocusNode),
-                    ),
-                    Button.tag(Tag.d),
-                  ],
                   overlayBuilder: (
                     BuildContext context,
-                    List<Widget> menuChildren,
                     RawMenuAnchorOverlayPosition position,
                   ) {
                     return Column(
-                      children: menuChildren,
+                      children: <Widget>[
+                        Button.tag(Tag.a),
+                        Shortcuts(
+                          // Web doesn't automatically handle directional traversal.
+                          shortcuts: traversalShortcuts,
+                          child: Button.tag(Tag.b, focusNode: bFocusNode),
+                        ),
+                        Button.tag(Tag.d),
+                      ],
                     );
                   },
                   child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
@@ -1188,9 +1183,9 @@ void main() {
             },
             child: RawMenuAnchor(
               childFocusNode: anchorFocusNode,
-              menuChildren: <Widget>[
+              panel: RawMenuPanel(menuChildren: <Widget>[
                 Button.tag(Tag.a, focusNode: aFocusNode),
-              ],
+              ]),
               child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
             ),
           ),
@@ -1221,22 +1216,28 @@ void main() {
     await tester.pumpWidget(
       App(
         RawMenuAnchor(
-          menuChildren: <Widget>[
-            Text(Tag.a.text),
-            RawMenuAnchor(
-              menuChildren: <Widget>[
-                Text(Tag.b.a.text),
-                RawMenuAnchor(
-                  controller: controller,
+          panel: RawMenuPanel(
+            menuChildren: <Widget>[
+              Text(Tag.a.text),
+              RawMenuAnchor(
+                panel: RawMenuPanel(
                   menuChildren: <Widget>[
-                    Text(Tag.b.b.a.text),
+                    Text(Tag.b.a.text),
+                    RawMenuAnchor(
+                      controller: controller,
+                      panel: RawMenuPanel(
+                        menuChildren: <Widget>[
+                          Text(Tag.b.b.a.text),
+                        ],
+                      ),
+                      child: AnchorButton(Tag.b.b, focusNode: focusNode),
+                    ),
                   ],
-                  child: AnchorButton(Tag.b.b, focusNode: focusNode),
                 ),
-              ],
-              child: const AnchorButton(Tag.b),
-            ),
-          ],
+                child: const AnchorButton(Tag.b),
+              ),
+            ],
+          ),
           child: const AnchorButton(Tag.anchor),
         ),
       ),
@@ -1265,30 +1266,30 @@ void main() {
     expect(find.text(Tag.a.text), findsNothing);
   });
 
-  testWidgets('[Panel] Menu panel builder', (WidgetTester tester) async {
+  testWidgets('[Node] Menu panel builder', (WidgetTester tester) async {
     await tester.pumpWidget(
       App(
         alignment: AlignmentDirectional.topStart,
         RawMenuAnchor.node(
-          builder: (BuildContext context, List<Widget> children) {
-            return Padding(
-              key: Tag.anchor.key,
-              padding: const EdgeInsets.all(8.0),
-              child: Row(mainAxisSize: MainAxisSize.min, children: children),
-            );
-          },
-          menuChildren: <Widget>[
-            Container(
-              width: 100,
-              height: 100,
-              color: const ui.Color(0xff0000ff),
+          child: Padding(
+            key: Tag.anchor.key,
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Container(
+                  width: 100,
+                  height: 100,
+                  color: const ui.Color(0xff0000ff),
+                ),
+                Container(
+                  width: 100,
+                  height: 100,
+                  color: const ui.Color(0xFFFF00D4),
+                )
+              ],
             ),
-            Container(
-              width: 100,
-              height: 100,
-              color: const ui.Color(0xFFFF00D4),
-            )
-          ],
+          ),
         ),
       ),
     );
@@ -1305,10 +1306,8 @@ void main() {
     RawMenuAnchorOverlayPosition? overlayPosition;
     await tester.pumpWidget(App(
       RawMenuAnchor.overlayBuilder(
-        menuChildren: const <Widget>[],
         overlayBuilder: (
           BuildContext context,
-          List<Widget> menuChildren,
           RawMenuAnchorOverlayPosition position,
         ) {
           overlayPosition = position;
@@ -1328,10 +1327,8 @@ void main() {
       (WidgetTester tester) async {
     await tester.pumpWidget(App(
       RawMenuAnchor.overlayBuilder(
-        menuChildren: const <Widget>[],
         overlayBuilder: (
           BuildContext context,
-          List<Widget> menuChildren,
           RawMenuAnchorOverlayPosition position,
         ) {
           return Positioned(
@@ -1365,10 +1362,8 @@ void main() {
     await tester.pumpWidget(
       App(
         RawMenuAnchor.overlayBuilder(
-          menuChildren: const <Widget>[],
           overlayBuilder: (
             BuildContext context,
-            List<Widget> menuChildren,
             RawMenuAnchorOverlayPosition position,
           ) {
             return Positioned.fromRect(
@@ -1430,28 +1425,29 @@ void main() {
               },
             ),
             RawMenuAnchor.node(
-              builder: (BuildContext context, List<Widget> menuChildren) {
-                return Column(children: menuChildren);
-              },
-              menuChildren: <Widget>[
-                RawMenuAnchor(
-                  consumeOutsideTaps: true,
-                  onOpen: () => onOpen(Tag.anchor),
-                  onClose: () => onClose(Tag.anchor),
-                  menuChildren: <Widget>[
-                    RawMenuAnchor(
-                      consumeOutsideTaps: true,
-                      onOpen: () => onOpen(Tag.a),
-                      onClose: () => onClose(Tag.a),
+              child: Column(
+                children: <Widget>[
+                  RawMenuAnchor(
+                    consumeOutsideTaps: true,
+                    onOpen: () => onOpen(Tag.anchor),
+                    onClose: () => onClose(Tag.anchor),
+                    panel: RawMenuPanel(
                       menuChildren: <Widget>[
-                        Text(Tag.a.a.text),
+                        RawMenuAnchor(
+                          consumeOutsideTaps: true,
+                          onOpen: () => onOpen(Tag.a),
+                          onClose: () => onClose(Tag.a),
+                          panel: RawMenuPanel(menuChildren: <Widget>[
+                            Text(Tag.a.a.text),
+                          ]),
+                          child: AnchorButton(Tag.a, onPressed: onPressed),
+                        ),
                       ],
-                      child: AnchorButton(Tag.a, onPressed: onPressed),
                     ),
-                  ],
-                  child: AnchorButton(Tag.anchor, onPressed: onPressed),
-                ),
-              ],
+                    child: AnchorButton(Tag.anchor, onPressed: onPressed),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -1508,28 +1504,31 @@ void main() {
               },
             ),
             RawMenuAnchor.node(
-              menuChildren: <Widget>[
-                RawMenuAnchor(
-                  onOpen: () => onOpen(Tag.anchor),
-                  onClose: () => onClose(Tag.anchor),
-                  // ignore: avoid_redundant_argument_values
-                  consumeOutsideTaps: false,
-                  menuChildren: <Widget>[
-                    RawMenuAnchor(
-                      onOpen: () => onOpen(Tag.a),
-                      onClose: () => onClose(Tag.a),
+              child: Column(
+                children: <Widget>[
+                  RawMenuAnchor(
+                    onOpen: () => onOpen(Tag.anchor),
+                    onClose: () => onClose(Tag.anchor),
+                    // ignore: avoid_redundant_argument_values
+                    consumeOutsideTaps: false,
+                    panel: RawMenuPanel(
                       menuChildren: <Widget>[
-                        Text(Tag.a.a.text),
+                        RawMenuAnchor(
+                          onOpen: () => onOpen(Tag.a),
+                          onClose: () => onClose(Tag.a),
+                          panel: RawMenuPanel(
+                            menuChildren: <Widget>[
+                              Text(Tag.a.a.text),
+                            ],
+                          ),
+                          child: AnchorButton(Tag.a, onPressed: onPressed),
+                        ),
                       ],
-                      child: AnchorButton(Tag.a, onPressed: onPressed),
                     ),
-                  ],
-                  child: AnchorButton(Tag.anchor, onPressed: onPressed),
-                )
-              ],
-              builder: (BuildContext context, List<Widget> menuChildren) {
-                return Column(children: menuChildren);
-              },
+                    child: AnchorButton(Tag.anchor, onPressed: onPressed),
+                  )
+                ],
+              ),
             ),
           ],
         ),
@@ -1584,7 +1583,7 @@ void main() {
           onOpen: () {
             opened = true;
           },
-          menuChildren: const <Widget>[],
+          panel: const RawMenuPanel(menuChildren: <Widget>[]),
           child: const AnchorButton(Tag.anchor),
         ),
       ),
@@ -1620,7 +1619,7 @@ void main() {
           onClose: () {
             closed = true;
           },
-          menuChildren: const <Widget>[],
+          panel: const RawMenuPanel(menuChildren: <Widget>[]),
           child: const AnchorButton(Tag.anchor),
         ),
       ),
@@ -1647,14 +1646,42 @@ void main() {
     expect(closed, isTrue);
   });
 
-  testWidgets('diagnostics', (WidgetTester tester) async {
+  testWidgets('panel diagnostics', (WidgetTester tester) async {
+    const RawMenuPanel panel = RawMenuPanel(
+      menuChildren: <Widget>[Text('1')],
+      padding: EdgeInsetsDirectional.all(5),
+      constrainCrossAxis: true,
+      clipBehavior: Clip.hardEdge,
+    );
+
+    await tester.pumpWidget(const App(panel));
+    await tester.pump();
+
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    panel.debugFillProperties(builder);
+    final List<String> properties = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+    expect(
+      properties,
+      const <String>[
+        'clipBehavior: Clip.hardEdge',
+        'constrainCrossAxis: true',
+        'padding override: EdgeInsetsDirectional(5.0, 5.0, 5.0, 5.0)'
+      ],
+    );
+  });
+
+  testWidgets('[Default] diagnostics', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final RawMenuAnchor menuAnchor = RawMenuAnchor(
       controller: controller,
-      menuChildren: const <Widget>[
-        Text('1'),
-      ],
-      consumeOutsideTaps: true,
+      childFocusNode: focusNode,
       alignmentOffset: const Offset(10, 10),
+      panel: const Text('PANEL'),
       child: const Text('BUTTON'),
     );
 
@@ -1664,17 +1691,37 @@ void main() {
 
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     menuAnchor.debugFillProperties(builder);
-    final List<String> description = builder.properties
+    final List<String> properties = builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(
-        description.join(' '),
-        equalsIgnoringWhitespace('focusNode: null '
-            'clipBehavior: antiAlias '
-            'alignmentOffset: Offset(10.0, 10.0) '
-            'consumeOutsideTap: true '));
+      properties,
+      const <String>[
+        'has controller',
+        'has focusNode',
+        'alignmentOffset: Offset(10.0, 10.0)'
+      ],
+    );
+  });
+
+  testWidgets('[Node] diagnostics', (WidgetTester tester) async {
+    final RawMenuAnchor menuNode = RawMenuAnchor.node(
+        controller: controller, child: const SizedBox(height: 30, width: 30));
+
+    await tester.pumpWidget(App(menuNode));
+    await tester.pump();
+
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    menuNode.debugFillProperties(builder);
+    final Iterable<String> properties = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString());
+    expect(
+      properties,
+      equals(const <String>['has controller']),
+    );
   });
 
   testWidgets('Surface clip behavior', (WidgetTester tester) async {
@@ -1682,9 +1729,9 @@ void main() {
       App(
         RawMenuAnchor(
           controller: controller,
-          menuChildren: const <Widget>[
+          panel: const RawMenuPanel(menuChildren: <Widget>[
             Text('Button 1'),
-          ],
+          ]),
           child: const AnchorButton(Tag.anchor),
         ),
       ),
@@ -1703,10 +1750,12 @@ void main() {
       App(
         RawMenuAnchor(
           controller: controller,
-          clipBehavior: Clip.hardEdge,
-          menuChildren: const <Widget>[
-            Text('Button 1'),
-          ],
+          panel: const RawMenuPanel(
+            menuChildren: <Widget>[
+              Text('Button 1'),
+            ],
+            clipBehavior: Clip.hardEdge,
+          ),
           child: const AnchorButton(Tag.anchor),
         ),
       ),
@@ -1733,22 +1782,27 @@ void main() {
     await tester.pumpWidget(
       App(
         RawMenuAnchor(
-          constraints: const BoxConstraints(maxHeight: 500),
           childFocusNode: anchorFocusNode,
-          menuChildren: <Widget>[
-            Button.tag(Tag.a),
-            Button.tag(Tag.b, constraints: anchorConstraints),
-            Button.tag(Tag.c, constraints: anchorConstraints),
-            RawMenuAnchor(
-              controller: controller,
-              menuChildren: <Widget>[
-                Button.tag(Tag.d.a),
-                Button.tag(Tag.d.b),
-                Button.tag(Tag.d.c, focusNode: focusNode),
-              ],
-              child: const AnchorButton(Tag.d, constraints: anchorConstraints),
-            ),
-          ],
+          panel: RawMenuPanel(
+            constraints: const BoxConstraints(maxHeight: 500),
+            menuChildren: <Widget>[
+              Button.tag(Tag.a),
+              Button.tag(Tag.b, constraints: anchorConstraints),
+              Button.tag(Tag.c, constraints: anchorConstraints),
+              RawMenuAnchor(
+                controller: controller,
+                panel: RawMenuPanel(
+                  menuChildren: <Widget>[
+                    Button.tag(Tag.d.a),
+                    Button.tag(Tag.d.b),
+                    Button.tag(Tag.d.c, focusNode: focusNode),
+                  ],
+                ),
+                child:
+                    const AnchorButton(Tag.d, constraints: anchorConstraints),
+              ),
+            ],
+          ),
           child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
         ),
       ),
@@ -1767,7 +1821,7 @@ void main() {
 
     expect(focusedMenu, equals(Tag.anchor.focusNode));
 
-    // Test from adjacent menu item sibling
+    // Test from adjacent menu item sibling.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
 
@@ -1793,7 +1847,7 @@ void main() {
     expect(focusedMenu, equals(Tag.a.focusNode));
     expect(find.text(Tag.a.text).hitTestable(), findsOneWidget);
 
-    // Test from nested overlay
+    // Test from nested overlay.
     await tester.ensureVisible(find.text(Tag.d.text));
     await tester.tap(find.text(Tag.d.text));
     await tester.pump();
@@ -1831,24 +1885,25 @@ void main() {
     await tester.pumpWidget(
       App(
         RawMenuAnchor(
-          constraints: const BoxConstraints(maxHeight: 500),
           childFocusNode: anchorFocusNode,
           controller: controller,
-          menuChildren: <Widget>[
-            Button.tag(Tag.a, constraints: anchorConstraints),
-            RawMenuAnchor(
-              childFocusNode: bFocusNode,
+          panel: RawMenuPanel(
+              constraints: const BoxConstraints(maxHeight: 500),
               menuChildren: <Widget>[
-                Button.tag(Tag.b.a, focusNode: baFocusNode),
-                Button.tag(Tag.b.b),
-                Button.tag(Tag.b.c),
-              ],
-              child: AnchorButton(Tag.b,
-                  focusNode: bFocusNode, constraints: anchorConstraints),
-            ),
-            Button.tag(Tag.c, constraints: anchorConstraints),
-            Button.tag(Tag.d, constraints: anchorConstraints),
-          ],
+                Button.tag(Tag.a, constraints: anchorConstraints),
+                RawMenuAnchor(
+                  childFocusNode: bFocusNode,
+                  panel: RawMenuPanel(menuChildren: <Widget>[
+                    Button.tag(Tag.b.a, focusNode: baFocusNode),
+                    Button.tag(Tag.b.b),
+                    Button.tag(Tag.b.c),
+                  ]),
+                  child: AnchorButton(Tag.b,
+                      focusNode: bFocusNode, constraints: anchorConstraints),
+                ),
+                Button.tag(Tag.c, constraints: anchorConstraints),
+                Button.tag(Tag.d, constraints: anchorConstraints),
+              ]),
           child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
         ),
       ),
@@ -1871,7 +1926,7 @@ void main() {
     expect(focusedMenu, Tag.a.focusNode);
     expect(find.text(Tag.d.text).hitTestable(), findsNothing);
 
-    // Test from menu item sibling
+    // Test from menu item sibling.
     await tester.sendKeyEvent(LogicalKeyboardKey.end);
 
     expect(focusedMenu, equals(Tag.d.focusNode));
@@ -1902,7 +1957,7 @@ void main() {
     expect(find.text(Tag.b.a.text), findsOneWidget);
     expect(focusedMenu, equals(Tag.b.a.focusNode));
 
-    // Test from nested overlay
+    // Test from nested overlay.
     await tester.sendKeyEvent(LogicalKeyboardKey.end);
 
     expect(focusedMenu, equals(Tag.b.c.focusNode));
@@ -1919,7 +1974,8 @@ void main() {
         RawMenuAnchor(
           controller: controller,
           childFocusNode: focusNode,
-          menuChildren: <Widget>[Button.tag(Tag.a), Button.tag(Tag.b)],
+          panel: RawMenuPanel(
+              menuChildren: <Widget>[Button.tag(Tag.a), Button.tag(Tag.b)]),
           child: AnchorButton(Tag.anchor, focusNode: focusNode),
         ),
       ),
@@ -1942,18 +1998,17 @@ void main() {
     await tester.pumpWidget(
       App(
         RawMenuAnchor.node(
-          builder: (BuildContext context, List<Widget> children) {
-            return Column(children: children);
-          },
-          menuChildren: <Widget>[
+            child: Column(
+          children: <Widget>[
             RawMenuAnchor(
               controller: controller,
               childFocusNode: focusNode,
-              menuChildren: <Widget>[Button.tag(Tag.a), Button.tag(Tag.b)],
+              panel: RawMenuPanel(
+                  menuChildren: <Widget>[Button.tag(Tag.a), Button.tag(Tag.b)]),
               child: AnchorButton(Tag.anchor, focusNode: focusNode),
             )
           ],
-        ),
+        )),
       ),
     );
 
@@ -1980,7 +2035,8 @@ void main() {
         RawMenuAnchor(
           controller: controller,
           childFocusNode: focusNode,
-          menuChildren: <Widget>[Button.tag(Tag.a), Button.tag(Tag.b)],
+          panel: RawMenuPanel(
+              menuChildren: <Widget>[Button.tag(Tag.a), Button.tag(Tag.b)]),
           child: AnchorButton(Tag.anchor, focusNode: focusNode),
         ),
       ),
@@ -2003,16 +2059,19 @@ void main() {
     await tester.pumpWidget(
       App(
         RawMenuAnchor.node(
-          builder: (BuildContext context, List<Widget> children) {
-            return Column(children: children);
-          },
-          menuChildren: <Widget>[
-            RawMenuAnchor(
+          child: Column(
+            children: <Widget>[
+              RawMenuAnchor(
                 controller: controller,
                 childFocusNode: focusNode,
-                menuChildren: <Widget>[Button.tag(Tag.a), Button.tag(Tag.b)],
-                child: AnchorButton(Tag.anchor, focusNode: focusNode))
-          ],
+                panel: RawMenuPanel(menuChildren: <Widget>[
+                  Button.tag(Tag.a),
+                  Button.tag(Tag.b)
+                ]),
+                child: AnchorButton(Tag.anchor, focusNode: focusNode),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -2038,17 +2097,21 @@ void main() {
     await tester.pumpWidget(
       App(
         RawMenuAnchor(
-          menuChildren: <Widget>[
-            Button.tag(Tag.a),
-            Button.tag(Tag.b),
-            RawMenuAnchor(
-              menuChildren: <Widget>[
-                Button.tag(Tag.c.a),
-                Button.tag(Tag.c.b),
-              ],
-              child: AnchorButton(Tag.c, focusNode: focusNode),
-            ),
-          ],
+          panel: RawMenuPanel(
+            menuChildren: <Widget>[
+              Button.tag(Tag.a),
+              Button.tag(Tag.b),
+              RawMenuAnchor(
+                panel: RawMenuPanel(
+                  menuChildren: <Widget>[
+                    Button.tag(Tag.c.a),
+                    Button.tag(Tag.c.b),
+                  ],
+                ),
+                child: AnchorButton(Tag.c, focusNode: focusNode),
+              ),
+            ],
+          ),
           child: const AnchorButton(Tag.anchor),
         ),
       ),
@@ -2083,17 +2146,21 @@ void main() {
       App(
         textDirection: TextDirection.rtl,
         RawMenuAnchor(
-          menuChildren: <Widget>[
-            Button.tag(Tag.a),
-            Button.tag(Tag.b),
-            RawMenuAnchor(
-              menuChildren: <Widget>[
-                Button.tag(Tag.c.a),
-                Button.tag(Tag.c.b),
-              ],
-              child: AnchorButton(Tag.c, focusNode: focusNode),
-            ),
-          ],
+          panel: RawMenuPanel(
+            menuChildren: <Widget>[
+              Button.tag(Tag.a),
+              Button.tag(Tag.b),
+              RawMenuAnchor(
+                panel: RawMenuPanel(
+                  menuChildren: <Widget>[
+                    Button.tag(Tag.c.a),
+                    Button.tag(Tag.c.b),
+                  ],
+                ),
+                child: AnchorButton(Tag.c, focusNode: focusNode),
+              ),
+            ],
+          ),
           child: const AnchorButton(Tag.anchor),
         ),
       ),
@@ -2126,21 +2193,27 @@ void main() {
     await tester.pumpWidget(
       App(
         RawMenuAnchor(
-          menuChildren: <Widget>[
-            Button.tag(Tag.a),
-            Button.tag(Tag.b),
-            RawMenuAnchor(
-              menuChildren: <Widget>[
-                Button.tag(Tag.c.a),
-                Button.tag(Tag.c.b),
-                RawMenuAnchor(
-                  menuChildren: const <Widget>[],
-                  child: AnchorButton(Tag.c.c),
+          panel: RawMenuPanel(
+            menuChildren: <Widget>[
+              Button.tag(Tag.a),
+              Button.tag(Tag.b),
+              RawMenuAnchor(
+                panel: RawMenuPanel(
+                  menuChildren: <Widget>[
+                    Button.tag(Tag.c.a),
+                    Button.tag(Tag.c.b),
+                    RawMenuAnchor(
+                      panel: const RawMenuPanel(
+                        menuChildren: <Widget>[],
+                      ),
+                      child: AnchorButton(Tag.c.c),
+                    ),
+                  ],
                 ),
-              ],
-              child: const AnchorButton(Tag.c),
-            ),
-          ],
+                child: const AnchorButton(Tag.c),
+              ),
+            ],
+          ),
           child: AnchorButton(Tag.anchor, focusNode: focusNode),
         ),
       ),
@@ -2148,7 +2221,7 @@ void main() {
 
     listenForFocusChanges();
 
-    // Move into submenu
+    // Move into submenu.
     focusNode.requestFocus();
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
@@ -2203,21 +2276,25 @@ void main() {
       App(
         textDirection: TextDirection.rtl,
         RawMenuAnchor(
-          menuChildren: <Widget>[
-            Button.tag(Tag.a),
-            Button.tag(Tag.b),
-            RawMenuAnchor(
-              menuChildren: <Widget>[
-                Button.tag(Tag.c.a),
-                Button.tag(Tag.c.b),
-                RawMenuAnchor(
-                  menuChildren: const <Widget>[],
-                  child: AnchorButton(Tag.c.c),
+          panel: RawMenuPanel(
+            menuChildren: <Widget>[
+              Button.tag(Tag.a),
+              Button.tag(Tag.b),
+              RawMenuAnchor(
+                panel: RawMenuPanel(
+                  menuChildren: <Widget>[
+                    Button.tag(Tag.c.a),
+                    Button.tag(Tag.c.b),
+                    RawMenuAnchor(
+                      panel: const RawMenuPanel(menuChildren: <Widget>[]),
+                      child: AnchorButton(Tag.c.c),
+                    ),
+                  ],
                 ),
-              ],
-              child: const AnchorButton(Tag.c),
-            ),
-          ],
+                child: const AnchorButton(Tag.c),
+              ),
+            ],
+          ),
           child: AnchorButton(Tag.anchor, focusNode: focusNode),
         ),
       ),
@@ -2225,7 +2302,7 @@ void main() {
 
     listenForFocusChanges();
 
-    // Move into submenu
+    // Move into submenu.
     focusNode.requestFocus();
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
@@ -2291,33 +2368,41 @@ void main() {
           },
           child: RawMenuAnchor(
             childFocusNode: focusNode,
-            menuChildren: <Widget>[
-              Button.tag(Tag.a),
-              Button.tag(Tag.b),
-              RawMenuAnchor(
-                menuChildren: <Widget>[
-                  Button.tag(Tag.c.a),
-                  Button.tag(Tag.c.b),
-                ],
-                child: const AnchorButton(Tag.c),
-              ),
-              Button.tag(Tag.d),
-              RawMenuAnchor(
-                menuChildren: <Widget>[
-                  Button.tag(Tag.e.a),
-                  Button.tag(Tag.e.b),
-                  RawMenuAnchor(
-                    menuChildren: <Button>[
-                      Button.tag(Tag.e.c.a),
-                      Button.tag(Tag.e.c.b),
-                      Button.tag(Tag.e.c.c),
+            panel: RawMenuPanel(
+              menuChildren: <Widget>[
+                Button.tag(Tag.a),
+                Button.tag(Tag.b),
+                RawMenuAnchor(
+                  panel: RawMenuPanel(
+                    menuChildren: <Widget>[
+                      Button.tag(Tag.c.a),
+                      Button.tag(Tag.c.b),
                     ],
-                    child: AnchorButton(Tag.e.c),
                   ),
-                ],
-                child: const AnchorButton(Tag.e),
-              ),
-            ],
+                  child: const AnchorButton(Tag.c),
+                ),
+                Button.tag(Tag.d),
+                RawMenuAnchor(
+                  panel: RawMenuPanel(
+                    menuChildren: <Widget>[
+                      Button.tag(Tag.e.a),
+                      Button.tag(Tag.e.b),
+                      RawMenuAnchor(
+                        panel: RawMenuPanel(
+                          menuChildren: <Widget>[
+                            Button.tag(Tag.e.c.a),
+                            Button.tag(Tag.e.c.b),
+                            Button.tag(Tag.e.c.c),
+                          ],
+                        ),
+                        child: AnchorButton(Tag.e.c),
+                      ),
+                    ],
+                  ),
+                  child: const AnchorButton(Tag.e),
+                ),
+              ],
+            ),
             child: AnchorButton(Tag.anchor, focusNode: focusNode),
           ),
         ),
@@ -2453,33 +2538,39 @@ void main() {
           },
           child: RawMenuAnchor(
             childFocusNode: focusNode,
-            menuChildren: <Widget>[
-              Button.tag(Tag.a),
-              Button.tag(Tag.b),
-              RawMenuAnchor(
-                menuChildren: <Widget>[
-                  Button.tag(Tag.c.a),
-                  Button.tag(Tag.c.b),
-                ],
-                child: const AnchorButton(Tag.c),
-              ),
-              Button.tag(Tag.d),
-              RawMenuAnchor(
-                menuChildren: <Widget>[
-                  Button.tag(Tag.e.a),
-                  Button.tag(Tag.e.b),
-                  RawMenuAnchor(
-                    menuChildren: <Button>[
-                      Button.tag(Tag.e.c.a),
-                      Button.tag(Tag.e.c.b),
-                      Button.tag(Tag.e.c.c),
+            panel: RawMenuPanel(
+              menuChildren: <Widget>[
+                Button.tag(Tag.a),
+                Button.tag(Tag.b),
+                RawMenuAnchor(
+                  panel: RawMenuPanel(menuChildren: <Widget>[
+                    Button.tag(Tag.c.a),
+                    Button.tag(Tag.c.b),
+                  ]),
+                  child: const AnchorButton(Tag.c),
+                ),
+                Button.tag(Tag.d),
+                RawMenuAnchor(
+                  panel: RawMenuPanel(
+                    menuChildren: <Widget>[
+                      Button.tag(Tag.e.a),
+                      Button.tag(Tag.e.b),
+                      RawMenuAnchor(
+                        panel: RawMenuPanel(
+                          menuChildren: <Widget>[
+                            Button.tag(Tag.e.c.a),
+                            Button.tag(Tag.e.c.b),
+                            Button.tag(Tag.e.c.c),
+                          ],
+                        ),
+                        child: AnchorButton(Tag.e.c),
+                      ),
                     ],
-                    child: AnchorButton(Tag.e.c),
                   ),
-                ],
-                child: const AnchorButton(Tag.e),
-              ),
-            ],
+                  child: const AnchorButton(Tag.e),
+                ),
+              ],
+            ),
             child: AnchorButton(Tag.anchor, focusNode: focusNode),
           ),
         ),
@@ -2607,11 +2698,13 @@ void main() {
             Button.tag(Tag.a),
             RawMenuAnchor(
               controller: controller,
-              menuChildren: <Widget>[
-                Button.tag(Tag.b.a),
-                Button.tag(Tag.b.b),
-                Button.tag(Tag.b.c),
-              ],
+              panel: RawMenuPanel(
+                menuChildren: <Widget>[
+                  Button.tag(Tag.b.a),
+                  Button.tag(Tag.b.b),
+                  Button.tag(Tag.b.c),
+                ],
+              ),
               child: AnchorButton(Tag.b, focusNode: focusNode),
             ),
             Button.tag(Tag.c),
@@ -2670,25 +2763,24 @@ void main() {
                 ),
               },
               child: RawMenuAnchor.node(
-                menuChildren: <Widget>[
-                  Button.tag(Tag.a),
-                  RawMenuAnchor(
-                    controller: controller,
-                    childFocusNode: focusNode,
-                    menuChildren: <Widget>[
-                      Button.tag(Tag.b.a),
-                      Button.tag(Tag.b.b),
-                      Button.tag(Tag.b.c),
-                    ],
-                    child: AnchorButton(Tag.b, focusNode: focusNode),
-                  ),
-                  Button.tag(Tag.c),
-                ],
-                builder: (BuildContext context, List<Widget> menuChildren) {
-                  return Column(
-                    children: menuChildren,
-                  );
-                },
+                child: Column(
+                  children: <Widget>[
+                    Button.tag(Tag.a),
+                    RawMenuAnchor(
+                      controller: controller,
+                      childFocusNode: focusNode,
+                      panel: RawMenuPanel(
+                        menuChildren: <Widget>[
+                          Button.tag(Tag.b.a),
+                          Button.tag(Tag.b.b),
+                          Button.tag(Tag.b.c),
+                        ],
+                      ),
+                      child: AnchorButton(Tag.b, focusNode: focusNode),
+                    ),
+                    Button.tag(Tag.c),
+                  ],
+                ),
               ),
             ),
           ],
@@ -2765,16 +2857,20 @@ void main() {
             Button.tag(Tag.a),
             RawMenuAnchor(
               childFocusNode: bFocusNode,
-              menuChildren: <Widget>[
-                Button.tag(Tag.b.a),
-                RawMenuAnchor(
-                  menuChildren: <Widget>[
-                    Button.tag(Tag.b.b.a),
-                  ],
-                  child: AnchorButton(Tag.b.b),
-                ),
-                Button.tag(Tag.b.c),
-              ],
+              panel: RawMenuPanel(
+                menuChildren: <Widget>[
+                  Button.tag(Tag.b.a),
+                  RawMenuAnchor(
+                    panel: RawMenuPanel(
+                      menuChildren: <Widget>[
+                        Button.tag(Tag.b.b.a),
+                      ],
+                    ),
+                    child: AnchorButton(Tag.b.b),
+                  ),
+                  Button.tag(Tag.b.c),
+                ],
+              ),
               child: AnchorButton(Tag.b, focusNode: bFocusNode),
             ),
             Button.tag(Tag.c, focusNode: cFocusNode),
@@ -2878,9 +2974,11 @@ void main() {
         RawMenuAnchor(
           controller: controller,
           menuAlignment: Alignment.center,
-          menuChildren: const <Widget>[
-            SizedBox(height: 100, width: 200),
-          ],
+          panel: const RawMenuPanel(
+            menuChildren: <Widget>[
+              SizedBox(height: 100, width: 200),
+            ],
+          ),
           child: Container(),
         ),
       ),
@@ -2891,12 +2989,7 @@ void main() {
 
     expect(
       findMenuPanelDescendent<Container>(tester).decoration,
-      RawMenuAnchor.defaultLightOverlayDecoration,
-    );
-
-    await expectLater(
-      find.byType(App),
-      matchesGoldenFile('rawMenuAnchor.surfaceDecoration.light.png'),
+      RawMenuPanel.lightSurfaceDecoration,
     );
   });
 
@@ -2908,9 +3001,11 @@ void main() {
           child: RawMenuAnchor(
             controller: controller,
             menuAlignment: Alignment.center,
-            menuChildren: const <Widget>[
-              SizedBox(height: 100, width: 200),
-            ],
+            panel: const RawMenuPanel(
+              menuChildren: <Widget>[
+                SizedBox(height: 100, width: 200),
+              ],
+            ),
             child: Container(),
           ),
         ),
@@ -2922,12 +3017,7 @@ void main() {
 
     expect(
       findMenuPanelDescendent<Container>(tester).decoration,
-      RawMenuAnchor.defaultDarkOverlayDecoration,
-    );
-
-    await expectLater(
-      find.byType(App),
-      matchesGoldenFile('rawMenuAnchor.surfaceDecoration.dark.png'),
+      RawMenuPanel.darkSurfaceDecoration,
     );
   });
 
@@ -2936,12 +3026,14 @@ void main() {
     await tester.pumpWidget(
       App(
         RawMenuAnchor(
-          surfaceDecoration: decoration,
           controller: controller,
           menuAlignment: Alignment.center,
-          menuChildren: const <Widget>[
-            SizedBox(height: 100, width: 200),
-          ],
+          panel: const RawMenuPanel(
+            decoration: decoration,
+            menuChildren: <Widget>[
+              SizedBox(height: 100, width: 200),
+            ],
+          ),
           child: Container(),
         ),
       ),
@@ -2953,11 +3045,6 @@ void main() {
     expect(
       findMenuPanelDescendent<Container>(tester).decoration,
       decoration,
-    );
-
-    await expectLater(
-      find.byType(App),
-      matchesGoldenFile('rawMenuAnchor.customDecoration.png'),
     );
   });
 
@@ -2988,9 +3075,11 @@ void main() {
                   closed = true;
                 },
                 controller: controller,
-                menuChildren: <Text>[
-                  Text(Tag.a.text),
-                ],
+                panel: RawMenuPanel(
+                  menuChildren: <Widget>[
+                    Text(Tag.a.text),
+                  ],
+                ),
                 child: const AnchorButton(Tag.anchor),
               ),
             ),
@@ -3031,12 +3120,14 @@ void main() {
             onClose: () {
               onClose(Tag.anchor);
             },
-            menuChildren: <Widget>[
-              Button.tag(Tag.a),
-              Button.tag(Tag.b),
-              Button.tag(Tag.c),
-              Button.tag(Tag.d),
-            ],
+            panel: RawMenuPanel(
+              menuChildren: <Widget>[
+                Button.tag(Tag.a),
+                Button.tag(Tag.b),
+                Button.tag(Tag.c),
+                Button.tag(Tag.d),
+              ],
+            ),
             child: const AnchorButton(Tag.anchor),
           ),
         ),
@@ -3084,29 +3175,34 @@ void main() {
               onClose: () {
                 rootOpened = false;
               },
-              menuChildren: <Widget>[
-                RawMenuAnchor(
-                  alignmentOffset: const Offset(10, 0),
-                  alignment: Alignment.topRight,
-                  menuAlignment: Alignment.topLeft,
-                  onOpen: () {
-                    onOpen(Tag.a);
-                  },
-                  onClose: () {
-                    onClose(Tag.a);
-                  },
-                  menuChildren: <Widget>[
-                    Button.tag(Tag.a.a, constraints: largeButtonConstraints),
-                  ],
-                  child: const AnchorButton(
-                    Tag.a,
-                    constraints: largeButtonConstraints,
+              panel: RawMenuPanel(
+                menuChildren: <Widget>[
+                  RawMenuAnchor(
+                    alignmentOffset: const Offset(10, 0),
+                    alignment: Alignment.topRight,
+                    menuAlignment: Alignment.topLeft,
+                    onOpen: () {
+                      onOpen(Tag.a);
+                    },
+                    onClose: () {
+                      onClose(Tag.a);
+                    },
+                    panel: RawMenuPanel(
+                      menuChildren: <Widget>[
+                        Button.tag(Tag.a.a,
+                            constraints: largeButtonConstraints),
+                      ],
+                    ),
+                    child: const AnchorButton(
+                      Tag.a,
+                      constraints: largeButtonConstraints,
+                    ),
                   ),
-                ),
-                Button.tag(Tag.b, constraints: largeButtonConstraints),
-                Button.tag(Tag.c, constraints: largeButtonConstraints),
-                Button.tag(Tag.d, constraints: largeButtonConstraints),
-              ],
+                  Button.tag(Tag.b, constraints: largeButtonConstraints),
+                  Button.tag(Tag.c, constraints: largeButtonConstraints),
+                  Button.tag(Tag.d, constraints: largeButtonConstraints),
+                ],
+              ),
               child: const AnchorButton(Tag.anchor),
             ),
           ),
@@ -3152,9 +3248,11 @@ void main() {
     await tester.pumpWidget(
       App(
         RawMenuAnchor(
-          menuChildren: <Widget>[
-            Button.text('Menu Item'),
-          ],
+          panel: RawMenuPanel(
+            menuChildren: <Widget>[
+              Button.text('Menu Item'),
+            ],
+          ),
           builder:
               (BuildContext context, MenuController controller, Widget? child) {
             isOpen = controller.isOpen;
@@ -3223,12 +3321,15 @@ void main() {
               child: RawMenuAnchor(
                 useRootOverlay: true,
                 controller: controller,
-                menuChildren: <Widget>[
-                  RawMenuAnchor(
-                    menuChildren: <Widget>[Button.tag(Tag.a.a)],
-                    child: const AnchorButton(Tag.a),
-                  ),
-                ],
+                panel: RawMenuPanel(
+                  menuChildren: <Widget>[
+                    RawMenuAnchor(
+                      panel: RawMenuPanel(
+                          menuChildren: <Widget>[Button.tag(Tag.a.a)]),
+                      child: const AnchorButton(Tag.a),
+                    ),
+                  ],
+                ),
               ),
             );
           }),
@@ -3293,15 +3394,18 @@ void main() {
             return Center(
               child: RawMenuAnchor(
                 controller: controller,
-                menuChildren: <Widget>[
-                  // Nested menus should be rendered in the same overlay as
-                  // their parent, so useRootOverlay should have no effect.
-                  RawMenuAnchor(
-                    useRootOverlay: true,
-                    menuChildren: <Widget>[Button.tag(Tag.a.a)],
-                    child: const AnchorButton(Tag.a),
-                  ),
-                ],
+                panel: RawMenuPanel(
+                  menuChildren: <Widget>[
+                    // Nested menus should be rendered in the same overlay as
+                    // their parent, so useRootOverlay should have no effect.
+                    RawMenuAnchor(
+                      useRootOverlay: true,
+                      panel: RawMenuPanel(
+                          menuChildren: <Widget>[Button.tag(Tag.a.a)]),
+                      child: const AnchorButton(Tag.a),
+                    ),
+                  ],
+                ),
               ),
             );
           }),
@@ -3351,7 +3455,8 @@ void main() {
     /// rect is taken after UnconstrainedBox clips its contents.
     List<Rect> collectOverlays({bool clipped = true}) {
       final List<Rect> menuRects = <Rect>[];
-      final Finder finder = clipped ? findMenuPanel() : findOverlayContents();
+      final Finder finder =
+          clipped ? find.byType(RawMenuPanel) : findOverlayContents();
       for (final Element candidate in finder.evaluate().toList()) {
         final RenderBox box = candidate.renderObject! as RenderBox;
         final Offset topLeft = box.localToGlobal(box.size.topLeft(Offset.zero));
@@ -3366,15 +3471,17 @@ void main() {
           RawMenuAnchor(
             alignment: alignment,
             menuAlignment: Alignment.center,
-            surfaceDecoration: const BoxDecoration(),
-            menuChildren: <Widget>[
-              Container(
-                width: 100,
-                height: 50,
-                color: const Color(0xFF0000FF),
-                child: Text(Tag.a.text),
-              )
-            ],
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                Container(
+                  width: 100,
+                  height: 50,
+                  color: const Color(0xFF0000FF),
+                  child: Text(Tag.a.text),
+                )
+              ],
+            ),
             child: const AnchorButton(Tag.anchor),
           ),
         );
@@ -3410,15 +3517,17 @@ void main() {
           RawMenuAnchor(
             alignment: alignment,
             menuAlignment: Alignment.center,
-            surfaceDecoration: const BoxDecoration(),
-            menuChildren: <Widget>[
-              Container(
-                width: 100,
-                height: 50,
-                color: const Color(0xFF0000FF),
-                child: Text(Tag.a.text),
-              )
-            ],
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                Container(
+                  width: 100,
+                  height: 50,
+                  color: const Color(0xFF0000FF),
+                  child: Text(Tag.a.text),
+                )
+              ],
+            ),
             child: const AnchorButton(Tag.anchor),
           ),
         );
@@ -3456,16 +3565,18 @@ void main() {
           RawMenuAnchor(
             alignment: Alignment.center,
             menuAlignment: alignment,
-            surfaceDecoration: const BoxDecoration(),
-            menuChildren: <Widget>[
-              Container(
-                width: 100,
-                height: 50,
-                alignment: Alignment.center,
-                color: const Color(0xFF0000FF),
-                child: Text(Tag.a.text),
-              )
-            ],
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                Container(
+                  width: 100,
+                  height: 50,
+                  alignment: Alignment.center,
+                  color: const Color(0xFF0000FF),
+                  child: Text(Tag.a.text),
+                )
+              ],
+            ),
             child: const AnchorButton(Tag.anchor),
           ),
         );
@@ -3501,15 +3612,17 @@ void main() {
           RawMenuAnchor(
             alignment: Alignment.center,
             menuAlignment: alignment,
-            surfaceDecoration: const BoxDecoration(),
-            menuChildren: <Widget>[
-              Container(
-                width: 100,
-                height: 50,
-                color: const Color(0xFF0000FF),
-                child: Text(Tag.a.text),
-              )
-            ],
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                Container(
+                  width: 100,
+                  height: 50,
+                  color: const Color(0xFF0000FF),
+                  child: Text(Tag.a.text),
+                )
+              ],
+            ),
             child: const AnchorButton(Tag.anchor),
           ),
         );
@@ -3538,14 +3651,16 @@ void main() {
       await tester.pumpWidget(
         App(
           RawMenuAnchor(
-            surfaceDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
-            menuChildren: <Widget>[
-              Container(
-                width: 100,
-                height: 100,
-                color: const Color(0xFF00FF00),
-              ),
-            ],
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(color: Color(0xFF0000FF)),
+              menuChildren: <Widget>[
+                Container(
+                  width: 100,
+                  height: 100,
+                  color: const Color(0xFF00FF00),
+                ),
+              ],
+            ),
             child: AnchorButton.small(Tag.anchor),
           ),
         ),
@@ -3567,14 +3682,16 @@ void main() {
         App(
           textDirection: TextDirection.rtl,
           RawMenuAnchor(
-            surfaceDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
-            menuChildren: <Widget>[
-              Container(
-                width: 100,
-                height: 100,
-                color: const Color(0xFF00FF00),
-              ),
-            ],
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(color: Color(0xFF0000FF)),
+              menuChildren: <Widget>[
+                Container(
+                  width: 100,
+                  height: 100,
+                  color: const Color(0xFF00FF00),
+                ),
+              ],
+            ),
             child: AnchorButton.small(Tag.anchor),
           ),
         ),
@@ -3595,20 +3712,24 @@ void main() {
       await tester.pumpWidget(
         App(
           RawMenuAnchor(
-            surfaceDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
-            menuChildren: <Widget>[
-              RawMenuAnchor(
-                surfaceDecoration: const BoxDecoration(),
-                menuChildren: <Widget>[
-                  Container(
-                    width: 100,
-                    height: 100,
-                    color: const Color(0xFF00FF00),
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(color: Color(0xFF0000FF)),
+              menuChildren: <Widget>[
+                RawMenuAnchor(
+                  panel: RawMenuPanel(
+                    decoration: const BoxDecoration(),
+                    menuChildren: <Widget>[
+                      Container(
+                        width: 100,
+                        height: 100,
+                        color: const Color(0xFF00FF00),
+                      ),
+                    ],
                   ),
-                ],
-                child: AnchorButton.small(Tag.a),
-              )
-            ],
+                  child: AnchorButton.small(Tag.a),
+                )
+              ],
+            ),
             child: AnchorButton.small(Tag.anchor),
           ),
         ),
@@ -3631,17 +3752,20 @@ void main() {
         App(
           textDirection: TextDirection.rtl,
           RawMenuAnchor(
-            surfaceDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
-            menuChildren: <Widget>[
-              RawMenuAnchor(
-                surfaceDecoration:
-                    const BoxDecoration(color: Color(0xFFFF00FF)),
-                menuChildren: const <Widget>[
-                  SizedBox.square(dimension: 100),
-                ],
-                child: AnchorButton.small(Tag.a),
-              )
-            ],
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(color: Color(0xFF0000FF)),
+              menuChildren: <Widget>[
+                RawMenuAnchor(
+                  panel: const RawMenuPanel(
+                    decoration: BoxDecoration(color: Color(0xFFFF00FF)),
+                    menuChildren: <Widget>[
+                      SizedBox.square(dimension: 100),
+                    ],
+                  ),
+                  child: AnchorButton.small(Tag.a),
+                )
+              ],
+            ),
             child: AnchorButton.small(Tag.anchor),
           ),
         ),
@@ -3670,16 +3794,18 @@ void main() {
           textDirection: textDirection,
           RawMenuAnchor(
             alignmentOffset: alignmentOffset,
-            surfaceDecoration: const BoxDecoration(),
-            menuChildren: <Widget>[
-              Container(
-                width: 250,
-                height: 66,
-                alignment: Alignment.center,
-                color: const Color(0xFF0000FF),
-                child: Text(Tag.a.text),
-              )
-            ],
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                Container(
+                  width: 250,
+                  height: 66,
+                  alignment: Alignment.center,
+                  color: const Color(0xFF0000FF),
+                  child: Text(Tag.a.text),
+                )
+              ],
+            ),
             child: AnchorButton.small(Tag.anchor),
           ),
         );
@@ -3723,16 +3849,18 @@ void main() {
             alignment: anchorAlignment,
             menuAlignment: Alignment.center,
             alignmentOffset: alignmentOffset,
-            surfaceDecoration: const BoxDecoration(),
-            menuChildren: <Widget>[
-              Container(
-                width: 125,
-                height: 66,
-                alignment: Alignment.center,
-                color: const Color(0xFF0000FF),
-                child: Text(Tag.a.text),
-              )
-            ],
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                Container(
+                  width: 125,
+                  height: 66,
+                  alignment: Alignment.center,
+                  color: const Color(0xFF0000FF),
+                  child: Text(Tag.a.text),
+                )
+              ],
+            ),
             child: AnchorButton.small(Tag.anchor),
           ),
         );
@@ -3768,16 +3896,18 @@ void main() {
             alignment: anchorAlignment,
             menuAlignment: Alignment.center,
             alignmentOffset: alignmentOffset,
-            surfaceDecoration: const BoxDecoration(),
-            menuChildren: <Widget>[
-              Container(
-                width: 125,
-                height: 66,
-                alignment: Alignment.center,
-                color: const Color(0xFF0000FF),
-                child: Text(Tag.a.text),
-              )
-            ],
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                Container(
+                  width: 125,
+                  height: 66,
+                  alignment: Alignment.center,
+                  color: const Color(0xFF0000FF),
+                  child: Text(Tag.a.text),
+                )
+              ],
+            ),
             child: AnchorButton.small(Tag.anchor),
           ),
         );
@@ -3812,16 +3942,18 @@ void main() {
           RawMenuAnchor(
             alignmentOffset: alignmentOffset,
             alignment: alignment,
-            surfaceDecoration: const BoxDecoration(),
             menuAlignment: Alignment.center,
-            menuChildren: <Widget>[
-              Container(
-                width: 50,
-                height: 66,
-                color: const Color(0xFF0000FF),
-                child: Text(Tag.a.text),
-              )
-            ],
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                Container(
+                  width: 50,
+                  height: 66,
+                  color: const Color(0xFF0000FF),
+                  child: Text(Tag.a.text),
+                )
+              ],
+            ),
             child: const AnchorButton(
               Tag.anchor,
               constraints: BoxConstraints.tightFor(width: 125, height: 66),
@@ -3873,16 +4005,17 @@ void main() {
             controller: controller,
             alignmentOffset: alignmentOffset,
             alignment: alignment,
-            surfaceDecoration: const BoxDecoration(),
             menuAlignment: Alignment.center,
-            menuChildren: <Widget>[
-              Container(
-                width: 50,
-                height: 66,
-                color: const Color(0xFF0000FF),
-                child: Text(Tag.a.text),
-              )
-            ],
+            panel: RawMenuPanel(
+                decoration: const BoxDecoration(),
+                menuChildren: <Widget>[
+                  Container(
+                    width: 50,
+                    height: 66,
+                    color: const Color(0xFF0000FF),
+                    child: Text(Tag.a.text),
+                  )
+                ]),
             child: AnchorButton.small(Tag.anchor),
           ),
         );
@@ -3931,15 +4064,17 @@ void main() {
             menuAlignment: alignment,
             alignmentOffset: alignmentOffset,
             alignment: Alignment.center,
-            surfaceDecoration: const BoxDecoration(),
-            menuChildren: <Widget>[
-              Container(
-                width: 50,
-                height: 66,
-                color: const Color(0xFF0000FF),
-                child: Text(Tag.a.text),
-              )
-            ],
+            panel: RawMenuPanel(
+              menuChildren: <Widget>[
+                Container(
+                  width: 50,
+                  height: 66,
+                  color: const Color(0xFF0000FF),
+                  child: Text(Tag.a.text),
+                )
+              ],
+              decoration: const BoxDecoration(),
+            ),
             child: AnchorButton.small(Tag.anchor),
           ),
         );
@@ -3984,23 +4119,27 @@ void main() {
       await tester.pumpWidget(
         App(
           RawMenuAnchor(
-            constraints: constraints,
             alignmentOffset: const Offset(-100, 100),
-            surfaceDecoration: const BoxDecoration(),
-            menuChildren: <Widget>[
-              RawMenuAnchor(
-                constraints: constraints,
-                alignmentOffset: const Offset(100, -100),
-                surfaceDecoration: const BoxDecoration(),
-                menuChildren: <Widget>[
-                  Container(
-                    color: const Color(0xFF0000FF),
+            panel: RawMenuPanel(
+              constraints: constraints,
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                RawMenuAnchor(
+                  alignmentOffset: const Offset(100, -100),
+                  panel: RawMenuPanel(
                     constraints: constraints,
-                  )
-                ],
-                child: const AnchorButton(Tag.a, constraints: constraints),
-              ),
-            ],
+                    decoration: const BoxDecoration(),
+                    menuChildren: <Widget>[
+                      Container(
+                        color: const Color(0xFF0000FF),
+                        constraints: constraints,
+                      )
+                    ],
+                  ),
+                  child: const AnchorButton(Tag.a, constraints: constraints),
+                ),
+              ],
+            ),
             child: const AnchorButton(Tag.anchor, constraints: constraints),
           ),
         ),
@@ -4025,29 +4164,35 @@ void main() {
         height: 100,
       );
 
-      await tester.pumpWidget(App(
-        textDirection: TextDirection.rtl,
-        RawMenuAnchor(
-          constraints: constraints,
-          alignmentOffset: const Offset(-100, 100),
-          surfaceDecoration: const BoxDecoration(),
-          menuChildren: <Widget>[
-            RawMenuAnchor(
+      await tester.pumpWidget(
+        App(
+          textDirection: TextDirection.rtl,
+          RawMenuAnchor(
+            alignmentOffset: const Offset(-100, 100),
+            panel: RawMenuPanel(
               constraints: constraints,
-              alignmentOffset: const Offset(100, -100),
-              surfaceDecoration: const BoxDecoration(),
+              decoration: const BoxDecoration(),
               menuChildren: <Widget>[
-                Container(
-                  color: const Color(0xFF0000FF),
-                  constraints: constraints,
-                )
+                RawMenuAnchor(
+                  alignmentOffset: const Offset(100, -100),
+                  panel: RawMenuPanel(
+                    constraints: constraints,
+                    decoration: const BoxDecoration(),
+                    menuChildren: <Widget>[
+                      Container(
+                        color: const Color(0xFF0000FF),
+                        constraints: constraints,
+                      )
+                    ],
+                  ),
+                  child: const AnchorButton(Tag.a, constraints: constraints),
+                ),
               ],
-              child: const AnchorButton(Tag.a, constraints: constraints),
             ),
-          ],
-          child: const AnchorButton(Tag.anchor, constraints: constraints),
+            child: const AnchorButton(Tag.anchor, constraints: constraints),
+          ),
         ),
-      ));
+      );
 
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
@@ -4071,16 +4216,20 @@ void main() {
       await tester.pumpWidget(
         App(
           RawMenuAnchor(
-            surfaceDecoration: const BoxDecoration(),
-            menuChildren: <Widget>[
-              RawMenuAnchor(
-                surfaceDecoration: const BoxDecoration(),
-                menuChildren: <Widget>[
-                  Button.tag(Tag.a.a, constraints: constraints)
-                ],
-                child: const AnchorButton(Tag.a, constraints: constraints),
-              ),
-            ],
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                RawMenuAnchor(
+                  panel: RawMenuPanel(
+                    decoration: const BoxDecoration(),
+                    menuChildren: <Widget>[
+                      Button.tag(Tag.a.a, constraints: constraints)
+                    ],
+                  ),
+                  child: const AnchorButton(Tag.a, constraints: constraints),
+                ),
+              ],
+            ),
             child: const AnchorButton(Tag.anchor, constraints: constraints),
           ),
         ),
@@ -4115,16 +4264,20 @@ void main() {
         App(
           textDirection: TextDirection.rtl,
           RawMenuAnchor(
-            surfaceDecoration: const BoxDecoration(),
-            menuChildren: <Widget>[
-              RawMenuAnchor(
-                surfaceDecoration: const BoxDecoration(),
-                menuChildren: <Widget>[
-                  Button.tag(Tag.a.a, constraints: constraints)
-                ],
-                child: const AnchorButton(Tag.a, constraints: constraints),
-              ),
-            ],
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                RawMenuAnchor(
+                  panel: RawMenuPanel(
+                    decoration: const BoxDecoration(),
+                    menuChildren: <Widget>[
+                      Button.tag(Tag.a.a, constraints: constraints)
+                    ],
+                  ),
+                  child: const AnchorButton(Tag.a, constraints: constraints),
+                ),
+              ],
+            ),
             child: const AnchorButton(Tag.anchor, constraints: constraints),
           ),
         ),
@@ -4155,18 +4308,22 @@ void main() {
       await tester.pumpWidget(
         App(
           RawMenuAnchor(
-            constrainCrossAxis: true,
-            surfaceDecoration: const BoxDecoration(),
-            menuChildren: <Widget>[
-              RawMenuAnchor(
-                constrainCrossAxis: true,
-                surfaceDecoration: const BoxDecoration(),
-                menuChildren: <Widget>[
-                  Button.tag(Tag.a.a, constraints: constraints)
-                ],
-                child: const AnchorButton(Tag.a, constraints: constraints),
-              ),
-            ],
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
+              constrainCrossAxis: true,
+              menuChildren: <Widget>[
+                RawMenuAnchor(
+                  panel: RawMenuPanel(
+                    constrainCrossAxis: true,
+                    decoration: const BoxDecoration(),
+                    menuChildren: <Widget>[
+                      Button.tag(Tag.a.a, constraints: constraints)
+                    ],
+                  ),
+                  child: const AnchorButton(Tag.a, constraints: constraints),
+                ),
+              ],
+            ),
             child: const AnchorButton(Tag.anchor, constraints: constraints),
           ),
         ),
@@ -4196,18 +4353,22 @@ void main() {
         App(
           textDirection: TextDirection.rtl,
           RawMenuAnchor(
-            constrainCrossAxis: true,
-            surfaceDecoration: const BoxDecoration(),
-            menuChildren: <Widget>[
-              RawMenuAnchor(
-                constrainCrossAxis: true,
-                surfaceDecoration: const BoxDecoration(),
-                menuChildren: <Widget>[
-                  Button.tag(Tag.a.a, constraints: constraints)
-                ],
-                child: const AnchorButton(Tag.a, constraints: constraints),
-              ),
-            ],
+            panel: RawMenuPanel(
+              constrainCrossAxis: true,
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                RawMenuAnchor(
+                  panel: RawMenuPanel(
+                    constrainCrossAxis: true,
+                    decoration: const BoxDecoration(),
+                    menuChildren: <Widget>[
+                      Button.tag(Tag.a.a, constraints: constraints)
+                    ],
+                  ),
+                  child: const AnchorButton(Tag.a, constraints: constraints),
+                ),
+              ],
+            ),
             child: const AnchorButton(Tag.anchor, constraints: constraints),
           ),
         ),
@@ -4232,14 +4393,16 @@ void main() {
           ConstrainedBox(
             constraints: const BoxConstraints.tightFor(width: 40, height: 40),
             child: RawMenuAnchor(
-              surfaceDecoration: const BoxDecoration(),
-              menuChildren: <Widget>[
-                Container(
-                  color: const Color(0xFFFF0000),
-                  height: 125,
-                  width: 200,
-                )
-              ],
+              panel: RawMenuPanel(
+                decoration: const BoxDecoration(),
+                menuChildren: <Widget>[
+                  Container(
+                    color: const Color(0xFFFF0000),
+                    height: 125,
+                    width: 200,
+                  )
+                ],
+              ),
               child: AnchorButton.small(Tag.anchor),
             ),
           ),
@@ -4257,22 +4420,26 @@ void main() {
 
     testWidgets('LTR menu position flips to left when overflowing screen right',
         (WidgetTester tester) async {
-      await tester.pumpWidget(App(
-        alignment: const Alignment(0.5, 0),
-        RawMenuAnchor(
-          surfaceDecoration: const BoxDecoration(),
-          alignment: Alignment.topLeft,
-          menuAlignment: const Alignment(-0.75, -0.75),
-          menuChildren: <Widget>[
-            Container(
-              width: 350,
-              height: 100,
-              color: const Color(0x86FF00FF),
-            )
-          ],
-          child: AnchorButton.small(Tag.anchor),
+      await tester.pumpWidget(
+        App(
+          alignment: const Alignment(0.5, 0),
+          RawMenuAnchor(
+            alignment: Alignment.topLeft,
+            menuAlignment: const Alignment(-0.75, -0.75),
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                Container(
+                  width: 350,
+                  height: 100,
+                  color: const Color(0x86FF00FF),
+                )
+              ],
+            ),
+            child: AnchorButton.small(Tag.anchor),
+          ),
         ),
-      ));
+      );
 
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
@@ -4292,16 +4459,18 @@ void main() {
           textDirection: TextDirection.rtl,
           alignment: const Alignment(0.5, 0),
           RawMenuAnchor(
-            surfaceDecoration: const BoxDecoration(),
             alignment: Alignment.topLeft,
             menuAlignment: const Alignment(-0.75, -0.75),
-            menuChildren: <Widget>[
-              Container(
-                width: 350,
-                height: 100,
-                color: const Color(0x86FF00FF),
-              )
-            ],
+            panel: RawMenuPanel(
+              menuChildren: <Widget>[
+                Container(
+                  width: 350,
+                  height: 100,
+                  color: const Color(0x86FF00FF),
+                )
+              ],
+              decoration: const BoxDecoration(),
+            ),
             child: AnchorButton.small(Tag.anchor),
           ),
         ),
@@ -4321,22 +4490,26 @@ void main() {
 
     testWidgets('LTR menu position flips to right when overflowing screen left',
         (WidgetTester tester) async {
-      await tester.pumpWidget(App(
-        alignment: const Alignment(-0.5, 0),
-        RawMenuAnchor(
-          surfaceDecoration: const BoxDecoration(),
-          alignment: Alignment.topLeft,
-          menuAlignment: const Alignment(0.75, -0.75),
-          menuChildren: <Widget>[
-            Container(
-              width: 350,
-              height: 100,
-              color: const Color(0x86FF00FF),
-            )
-          ],
-          child: AnchorButton.small(Tag.anchor),
+      await tester.pumpWidget(
+        App(
+          alignment: const Alignment(-0.5, 0),
+          RawMenuAnchor(
+            alignment: Alignment.topLeft,
+            menuAlignment: const Alignment(0.75, -0.75),
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                Container(
+                  width: 350,
+                  height: 100,
+                  color: const Color(0x86FF00FF),
+                )
+              ],
+            ),
+            child: AnchorButton.small(Tag.anchor),
+          ),
         ),
-      ));
+      );
 
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
@@ -4351,23 +4524,27 @@ void main() {
 
     testWidgets('RTL menu position flips to right when overflowing screen left',
         (WidgetTester tester) async {
-      await tester.pumpWidget(App(
-        textDirection: TextDirection.rtl,
-        alignment: const Alignment(-0.5, 0),
-        RawMenuAnchor(
-          surfaceDecoration: const BoxDecoration(),
-          alignment: Alignment.topLeft,
-          menuAlignment: const Alignment(0.75, -0.75),
-          menuChildren: <Widget>[
-            Container(
-              width: 350,
-              height: 100,
-              color: const Color(0x86FF00FF),
-            )
-          ],
-          child: AnchorButton.small(Tag.anchor),
+      await tester.pumpWidget(
+        App(
+          textDirection: TextDirection.rtl,
+          alignment: const Alignment(-0.5, 0),
+          RawMenuAnchor(
+            alignment: Alignment.topLeft,
+            menuAlignment: const Alignment(0.75, -0.75),
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                Container(
+                  width: 350,
+                  height: 100,
+                  color: const Color(0x86FF00FF),
+                )
+              ],
+            ),
+            child: AnchorButton.small(Tag.anchor),
+          ),
         ),
-      ));
+      );
 
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
@@ -4387,15 +4564,17 @@ void main() {
         App(
           RawMenuAnchor(
             controller: controller,
-            surfaceDecoration: const BoxDecoration(),
             menuAlignment: Alignment.center,
-            menuChildren: <Widget>[
-              Container(
-                width: 100,
-                height: 100,
-                color: const Color(0x86FF00FF),
-              )
-            ],
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                Container(
+                  width: 100,
+                  height: 100,
+                  color: const Color(0x86FF00FF),
+                )
+              ],
+            ),
             child: const Stack(
               children: <Widget>[
                 Positioned.fill(child: ColoredBox(color: Color(0xff00ff00)))
@@ -4429,33 +4608,37 @@ void main() {
 
       await tester.pumpWidget(
         App(
-          // Overlaps the bottom of the anchor by 4px
+          // Overlaps the bottom of the anchor by 4px.
           RawMenuAnchor(
-            surfaceDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
             alignmentOffset: const Offset(0, -4),
             alignment: AlignmentDirectional.bottomEnd,
             menuAlignment: AlignmentDirectional.topStart,
-            menuChildren: <Widget>[
-              // Overlaps the top of the anchor by 4px
-              RawMenuAnchor(
-                surfaceDecoration:
-                    const BoxDecoration(color: Color(0xFF0000FF)),
-                alignmentOffset: const Offset(0, 4),
-                alignment: AlignmentDirectional.topStart,
-                menuAlignment: AlignmentDirectional.bottomEnd,
-                menuChildren: <Widget>[
-                  Container(
-                    width: 125,
-                    height: 30,
-                    color: const Color(0xFFFF00FF),
-                  )
-                ],
-                child: const AnchorButton(
-                  Tag.a,
-                  constraints: BoxConstraints.tightFor(width: 125, height: 30),
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(color: Color(0xFF0000FF)),
+              menuChildren: <Widget>[
+                // Overlaps the top of the anchor by 4px.
+                RawMenuAnchor(
+                  alignmentOffset: const Offset(0, 4),
+                  alignment: AlignmentDirectional.topStart,
+                  menuAlignment: AlignmentDirectional.bottomEnd,
+                  panel: RawMenuPanel(
+                    decoration: const BoxDecoration(color: Color(0xFF0000FF)),
+                    menuChildren: <Widget>[
+                      Container(
+                        width: 125,
+                        height: 30,
+                        color: const Color(0xFFFF00FF),
+                      )
+                    ],
+                  ),
+                  child: const AnchorButton(
+                    Tag.a,
+                    constraints:
+                        BoxConstraints.tightFor(width: 125, height: 30),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
             child: const AnchorButton(
               Tag.anchor,
               constraints: BoxConstraints.tightFor(width: 125, height: 30),
@@ -4483,21 +4666,25 @@ void main() {
 
     testWidgets('Menu flips above anchor when overflowing screen bottom',
         (WidgetTester tester) async {
-      await tester.pumpWidget(App(
-        alignment: const Alignment(0, 0.5),
-        RawMenuAnchor(
-          surfaceDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
-          alignmentOffset: const Offset(0, -8),
-          menuChildren: <Widget>[
-            Container(
-              width: 225,
-              height: 230,
-              color: const Color(0xFFFF00FF),
-            )
-          ],
-          child: AnchorButton.small(Tag.anchor),
+      await tester.pumpWidget(
+        App(
+          alignment: const Alignment(0, 0.5),
+          RawMenuAnchor(
+            alignmentOffset: const Offset(0, -8),
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(color: Color(0xFF0000FF)),
+              menuChildren: <Widget>[
+                Container(
+                  width: 225,
+                  height: 230,
+                  color: const Color(0xFFFF00FF),
+                )
+              ],
+            ),
+            child: AnchorButton.small(Tag.anchor),
+          ),
         ),
-      ));
+      );
 
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
@@ -4512,23 +4699,27 @@ void main() {
 
     testWidgets('Menu flips below anchor when overflowing screen top',
         (WidgetTester tester) async {
-      await tester.pumpWidget(App(
-        alignment: const Alignment(0, -0.5),
-        RawMenuAnchor(
-          surfaceDecoration: const BoxDecoration(color: Color(0xFF0000FF)),
-          alignment: AlignmentDirectional.topStart,
-          menuAlignment: AlignmentDirectional.bottomStart,
-          alignmentOffset: const Offset(0, -8),
-          menuChildren: <Widget>[
-            Container(
-              width: 225,
-              height: 230,
-              color: const Color(0xFFFF00FF),
-            )
-          ],
-          child: AnchorButton.small(Tag.anchor),
+      await tester.pumpWidget(
+        App(
+          alignment: const Alignment(0, -0.5),
+          RawMenuAnchor(
+            alignment: AlignmentDirectional.topStart,
+            menuAlignment: AlignmentDirectional.bottomStart,
+            alignmentOffset: const Offset(0, -8),
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(color: Color(0xFF0000FF)),
+              menuChildren: <Widget>[
+                Container(
+                  width: 225,
+                  height: 230,
+                  color: const Color(0xFFFF00FF),
+                )
+              ],
+            ),
+            child: AnchorButton.small(Tag.anchor),
+          ),
         ),
-      ));
+      );
 
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
@@ -4550,14 +4741,16 @@ void main() {
             alignment: Alignment.center,
             menuAlignment: Alignment.center,
             alignmentOffset: const Offset(200, 200),
-            surfaceDecoration: const BoxDecoration(),
-            menuChildren: <Widget>[
-              Container(
-                width: 50,
-                height: 50,
-                color: const Color(0xFFFF00FF),
-              )
-            ],
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                Container(
+                  width: 50,
+                  height: 50,
+                  color: const Color(0xFFFF00FF),
+                )
+              ],
+            ),
             child: AnchorButton.small(Tag.anchor),
           ),
         ),
@@ -4582,14 +4775,16 @@ void main() {
           RawMenuAnchor(
             alignment: AlignmentDirectional.bottomEnd,
             menuAlignment: Alignment.center,
-            surfaceDecoration: const BoxDecoration(),
-            menuChildren: <Widget>[
-              Container(
-                width: 50,
-                height: 50,
-                color: const Color(0xFFFF00FF),
-              )
-            ],
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                Container(
+                  width: 50,
+                  height: 50,
+                  color: const Color(0xFFFF00FF),
+                )
+              ],
+            ),
             child: AnchorButton.small(Tag.anchor),
           ),
         ),
@@ -4614,14 +4809,16 @@ void main() {
           RawMenuAnchor(
             alignment: Alignment.center,
             menuAlignment: AlignmentDirectional.topStart,
-            surfaceDecoration: const BoxDecoration(),
-            menuChildren: <Widget>[
-              Container(
-                width: 50,
-                height: 50,
-                color: const Color(0xFFFF00FF),
-              )
-            ],
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                Container(
+                  width: 50,
+                  height: 50,
+                  color: const Color(0xFFFF00FF),
+                )
+              ],
+            ),
             child: AnchorButton.small(Tag.anchor),
           ),
         ),
@@ -4647,17 +4844,19 @@ void main() {
         return App(
           textDirection: textDirection,
           RawMenuAnchor(
-            constraints: const BoxConstraints(),
             controller: controller,
             alignment: Alignment.topLeft,
             menuAlignment: Alignment.topCenter,
-            menuChildren: <Widget>[
-              Container(
-                color: const Color(0xFFFF0000),
-                height: 100,
-                width: 100,
-              )
-            ],
+            panel: RawMenuPanel(
+              constraints: const BoxConstraints(),
+              menuChildren: <Widget>[
+                Container(
+                  color: const Color(0xFFFF0000),
+                  height: 100,
+                  width: 100,
+                )
+              ],
+            ),
             child: Container(
               width: 100,
               height: 100,
@@ -4679,7 +4878,7 @@ void main() {
 
       expect(collectOverlays().first, control.shift(const Offset(33, 45)));
 
-      // Should not be affected by text direction
+      // Should not be affected by text direction.
       await tester.pumpWidget(buildApp(TextDirection.rtl));
 
       expect(collectOverlays().first, control.shift(const Offset(33, 45)));
@@ -4694,32 +4893,36 @@ void main() {
         (WidgetTester tester) async {
       await tester.binding.setSurfaceSize(const Size(800, 600));
 
-      await tester.pumpWidget(App(
-        RawMenuAnchor(
-          alignmentOffset: const Offset(33, 45),
-          constraints: const BoxConstraints(),
-          controller: controller,
-          alignment: Alignment.topLeft,
-          menuAlignment: Alignment.topCenter,
-          menuChildren: <Widget>[
-            Container(
-              color: const Color(0xFFFF0000),
-              height: 100,
+      await tester.pumpWidget(
+        App(
+          RawMenuAnchor(
+            alignmentOffset: const Offset(33, 45),
+            controller: controller,
+            alignment: Alignment.topLeft,
+            menuAlignment: Alignment.topCenter,
+            panel: RawMenuPanel(
+              constraints: const BoxConstraints(),
+              menuChildren: <Widget>[
+                Container(
+                  color: const Color(0xFFFF0000),
+                  height: 100,
+                  width: 100,
+                )
+              ],
+            ),
+            child: Container(
               width: 100,
-            )
-          ],
-          child: Container(
-            width: 100,
-            height: 100,
-            color: const ui.Color(0xFF00FF00),
+              height: 100,
+              color: const ui.Color(0xFF00FF00),
+            ),
           ),
         ),
-      ));
+      );
 
       controller.open();
       await tester.pump();
 
-      // Get position with alignmentOffset
+      // Get position with alignmentOffset.
       final ui.Rect control = collectOverlays().first;
 
       controller.open(position: Offset.zero);
@@ -4736,17 +4939,19 @@ void main() {
       await tester.pumpWidget(
         App(
           RawMenuAnchor(
-            constraints: const BoxConstraints(),
             controller: controller,
             alignment: Alignment.bottomRight,
             menuAlignment: Alignment.topLeft,
-            menuChildren: <Widget>[
-              Container(
-                color: const Color(0xFFFF0000),
-                height: 100,
-                width: 100,
-              )
-            ],
+            panel: RawMenuPanel(
+              constraints: const BoxConstraints(),
+              menuChildren: <Widget>[
+                Container(
+                  color: const Color(0xFFFF0000),
+                  height: 100,
+                  width: 100,
+                )
+              ],
+            ),
             child: Container(
               width: 100,
               height: 100,
@@ -4758,7 +4963,7 @@ void main() {
       controller.open();
       await tester.pump();
 
-      // Get position with alignmentOffset
+      // Get position with alignmentOffset.
       final ui.Rect control = collectOverlays().first;
 
       controller.open(position: Offset.zero);
@@ -4777,18 +4982,20 @@ void main() {
       await tester.pumpWidget(
         App(
           RawMenuAnchor(
-            constraints: const BoxConstraints(),
             controller: controller,
             alignment: Alignment.topLeft,
             menuAlignment: Alignment.center,
             padding: const EdgeInsets.all(25),
-            menuChildren: <Widget>[
-              Container(
-                color: const Color(0xFFFF0000),
-                height: 100,
-                width: 100,
-              )
-            ],
+            panel: RawMenuPanel(
+              constraints: const BoxConstraints(),
+              menuChildren: <Widget>[
+                Container(
+                  color: const Color(0xFFFF0000),
+                  height: 100,
+                  width: 100,
+                )
+              ],
+            ),
             child: Container(
               width: 100,
               height: 100,
@@ -4800,7 +5007,7 @@ void main() {
       controller.open();
       await tester.pump();
 
-      // Get position with alignmentOffset
+      // Get position with alignmentOffset.
       final ui.Rect control = collectOverlays().first;
 
       controller.open(position: const Offset(100, 100));
@@ -4816,29 +5023,33 @@ void main() {
     testWidgets(
         'Menus opened with a position flip relative to an empty rect at `position`',
         (WidgetTester tester) async {
-      await tester.pumpWidget(App(
-        RawMenuAnchor(
-          constraints: const BoxConstraints(),
-          surfaceDecoration: const BoxDecoration(),
-          controller: controller,
-          menuAlignment: Alignment.topLeft,
-          menuChildren: <Widget>[
-            Container(
-              color: const ui.Color(0xFF2200FF),
-              height: 100,
-              width: 100,
-            )
-          ],
-          child: const Stack(
-            fit: StackFit.expand,
-            children: <Widget>[
-              ColoredBox(
-                color: ui.Color(0xFFFFC800),
-              ),
-            ],
+      await tester.pumpWidget(
+        App(
+          RawMenuAnchor(
+            controller: controller,
+            menuAlignment: Alignment.topLeft,
+            panel: RawMenuPanel(
+              constraints: const BoxConstraints(),
+              decoration: const BoxDecoration(),
+              menuChildren: <Widget>[
+                Container(
+                  color: const ui.Color(0xFF2200FF),
+                  height: 100,
+                  width: 100,
+                )
+              ],
+            ),
+            child: const Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
+                ColoredBox(
+                  color: ui.Color(0xFFFFC800),
+                ),
+              ],
+            ),
           ),
         ),
-      ));
+      );
 
       controller.open(position: const Offset(700, 500));
       await tester.pump();
@@ -4850,7 +5061,7 @@ void main() {
         equals(const Offset(700, 500) & const Size(100, 100)),
       );
 
-      // Overflow right and bottom by 50 pixels
+      // Overflow right and bottom by 50 pixels.
       controller.open(position: const Offset(750, 550));
       await tester.pump();
 
@@ -4868,30 +5079,36 @@ void main() {
       final RawMenuAnchor child = RawMenuAnchor(
         controller: controller,
         padding: const EdgeInsets.fromLTRB(0, 5, 0, 3),
-        surfaceDecoration: const BoxDecoration(color: paddingColor),
         alignment: AlignmentDirectional.bottomStart,
         menuAlignment: AlignmentDirectional.topStart,
-        menuChildren: <Widget>[
-          ColoredBox(
-            color: childColor,
-            child: RawMenuAnchor(
-              surfaceDecoration: const BoxDecoration(color: paddingColor),
-              alignment: AlignmentDirectional.topEnd,
-              menuAlignment: AlignmentDirectional.topStart,
-              padding: const EdgeInsets.fromLTRB(0, 11, 0, 17),
-              menuChildren: <Widget>[
-                Container(
-                  key: ValueKey<String>(Tag.a.a.text),
-                  color: childColor,
-                  height: 100,
-                  width: 100,
-                  child: Text(Tag.a.a.text),
+        panel: RawMenuPanel(
+          padding: const EdgeInsets.fromLTRB(0, 5, 0, 3),
+          decoration: const BoxDecoration(color: paddingColor),
+          menuChildren: <Widget>[
+            ColoredBox(
+              color: childColor,
+              child: RawMenuAnchor(
+                alignment: AlignmentDirectional.topEnd,
+                menuAlignment: AlignmentDirectional.topStart,
+                padding: const EdgeInsets.fromLTRB(0, 11, 0, 17),
+                panel: RawMenuPanel(
+                  padding: const EdgeInsets.fromLTRB(0, 11, 0, 17),
+                  decoration: const BoxDecoration(color: paddingColor),
+                  menuChildren: <Widget>[
+                    Container(
+                      key: ValueKey<String>(Tag.a.a.text),
+                      color: childColor,
+                      height: 100,
+                      width: 100,
+                      child: Text(Tag.a.a.text),
+                    ),
+                  ],
                 ),
-              ],
-              child: const AnchorButton(Tag.a),
+                child: const AnchorButton(Tag.a),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
         child: AnchorButton.small(Tag.anchor),
       );
       // First, collect measurements without padding.
@@ -4962,30 +5179,34 @@ void main() {
       final RawMenuAnchor child = RawMenuAnchor(
         controller: controller,
         padding: const EdgeInsetsDirectional.fromSTEB(5, 0, 3, 0),
-        surfaceDecoration: const BoxDecoration(color: paddingColor),
         alignment: AlignmentDirectional.bottomStart,
         menuAlignment: AlignmentDirectional.topStart,
-        menuChildren: <Widget>[
-          ColoredBox(
-            color: childColor,
-            child: RawMenuAnchor(
-              surfaceDecoration: const BoxDecoration(color: paddingColor),
-              alignment: AlignmentDirectional.topEnd,
-              menuAlignment: AlignmentDirectional.topStart,
-              padding: const EdgeInsetsDirectional.fromSTEB(11, 0, 17, 0),
-              menuChildren: <Widget>[
-                Container(
-                  key: ValueKey<String>(Tag.a.a.text),
-                  color: childColor,
-                  height: 100,
-                  width: 100,
-                  child: Text(Tag.a.a.text),
+        panel: RawMenuPanel(
+          decoration: const BoxDecoration(color: paddingColor),
+          menuChildren: <Widget>[
+            ColoredBox(
+              color: childColor,
+              child: RawMenuAnchor(
+                alignment: AlignmentDirectional.topEnd,
+                menuAlignment: AlignmentDirectional.topStart,
+                padding: const EdgeInsetsDirectional.fromSTEB(11, 0, 17, 0),
+                panel: RawMenuPanel(
+                  decoration: const BoxDecoration(color: paddingColor),
+                  menuChildren: <Widget>[
+                    Container(
+                      key: ValueKey<String>(Tag.a.a.text),
+                      color: childColor,
+                      height: 100,
+                      width: 100,
+                      child: Text(Tag.a.a.text),
+                    ),
+                  ],
                 ),
-              ],
-              child: const AnchorButton(Tag.a),
+                child: const AnchorButton(Tag.a),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
         child: AnchorButton.small(Tag.anchor),
       );
       // First, collect measurements without padding.
@@ -5053,30 +5274,34 @@ void main() {
       final RawMenuAnchor child = RawMenuAnchor(
         controller: controller,
         padding: const EdgeInsetsDirectional.fromSTEB(5, 0, 3, 0),
-        surfaceDecoration: const BoxDecoration(color: paddingColor),
         alignment: AlignmentDirectional.bottomStart,
         menuAlignment: AlignmentDirectional.topStart,
-        menuChildren: <Widget>[
-          ColoredBox(
-            color: childColor,
-            child: RawMenuAnchor(
-              surfaceDecoration: const BoxDecoration(color: paddingColor),
-              alignment: AlignmentDirectional.topEnd,
-              menuAlignment: AlignmentDirectional.topStart,
-              padding: const EdgeInsetsDirectional.fromSTEB(11, 0, 17, 0),
-              menuChildren: <Widget>[
-                Container(
-                  key: ValueKey<String>(Tag.a.a.text),
-                  color: childColor,
-                  height: 100,
-                  width: 100,
-                  child: Text(Tag.a.a.text),
+        panel: RawMenuPanel(
+          decoration: const BoxDecoration(color: paddingColor),
+          menuChildren: <Widget>[
+            ColoredBox(
+              color: childColor,
+              child: RawMenuAnchor(
+                alignment: AlignmentDirectional.topEnd,
+                menuAlignment: AlignmentDirectional.topStart,
+                padding: const EdgeInsetsDirectional.fromSTEB(11, 0, 17, 0),
+                panel: RawMenuPanel(
+                  decoration: const BoxDecoration(color: paddingColor),
+                  menuChildren: <Widget>[
+                    Container(
+                      key: ValueKey<String>(Tag.a.a.text),
+                      color: childColor,
+                      height: 100,
+                      width: 100,
+                      child: Text(Tag.a.a.text),
+                    ),
+                  ],
                 ),
-              ],
-              child: const AnchorButton(Tag.a),
+                child: const AnchorButton(Tag.a),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
         child: AnchorButton.small(Tag.anchor),
       );
       // First, collect measurements without padding.
@@ -5139,17 +5364,19 @@ void main() {
       final Widget menu = RawMenuAnchor(
         controller: controller,
         padding: const EdgeInsets.only(right: 50, top: 30),
-        surfaceDecoration: const BoxDecoration(color: Color(0x62000DFF)),
         alignment: AlignmentDirectional.topEnd,
         menuAlignment: AlignmentDirectional.topStart,
-        menuChildren: <Widget>[
-          Container(
-            key: ValueKey<String>(Tag.a.text),
-            color: const Color(0xACFF0080),
-            height: 100,
-            width: 100,
-          ),
-        ],
+        panel: RawMenuPanel(
+          decoration: const BoxDecoration(color: Color(0x62000DFF)),
+          menuChildren: <Widget>[
+            Container(
+              key: ValueKey<String>(Tag.a.text),
+              color: const Color(0xACFF0080),
+              height: 100,
+              width: 100,
+            ),
+          ],
+        ),
         child: AnchorButton.small(Tag.anchor),
       );
 
@@ -5215,7 +5442,7 @@ void main() {
       //    - anchor position affected
       //
       // Padding inside App DOES NOT affect the overlay position but
-      // DOES affect the anchor position
+      // DOES affect the anchor position.
       await changeSurfaceSize(tester, const Size(400, 400));
 
       Widget buildApp({
@@ -5233,12 +5460,15 @@ void main() {
                 child: RawMenuAnchor(
                   alignment: AlignmentDirectional.topStart,
                   menuAlignment: AlignmentDirectional.bottomEnd,
-                  menuChildren: <Widget>[
-                    RawMenuAnchor(
-                      menuChildren: <Widget>[Button.tag(Tag.a.a)],
-                      child: AnchorButton.small(Tag.a),
-                    ),
-                  ],
+                  panel: RawMenuPanel(
+                    menuChildren: <Widget>[
+                      RawMenuAnchor(
+                        panel: RawMenuPanel(
+                            menuChildren: <Widget>[Button.tag(Tag.a.a)]),
+                        child: AnchorButton.small(Tag.a),
+                      ),
+                    ],
+                  ),
                   child: AnchorButton.small(Tag.anchor),
                 ),
               ),
@@ -5295,7 +5525,7 @@ void main() {
       //    - anchor position affected
       //
       // Padding inside App DOES NOT affect the overlay position but
-      // DOES affect the anchor position
+      // DOES affect the anchor position.
 
       // First, collect measurements without padding.
       Widget buildApp({
@@ -5313,12 +5543,15 @@ void main() {
                 child: RawMenuAnchor(
                   alignment: AlignmentDirectional.topStart,
                   menuAlignment: AlignmentDirectional.bottomEnd,
-                  menuChildren: <Widget>[
-                    RawMenuAnchor(
-                      menuChildren: <Widget>[Button.tag(Tag.a.a)],
-                      child: AnchorButton.small(Tag.a),
-                    ),
-                  ],
+                  panel: RawMenuPanel(
+                    menuChildren: <Widget>[
+                      RawMenuAnchor(
+                        panel: RawMenuPanel(
+                            menuChildren: <Widget>[Button.tag(Tag.a.a)]),
+                        child: AnchorButton.small(Tag.a),
+                      ),
+                    ],
+                  ),
                   child: AnchorButton.small(Tag.anchor),
                 ),
               ),
@@ -5383,11 +5616,13 @@ void main() {
               constraints: const BoxConstraints(maxHeight: 30),
             ),
           RawMenuAnchor(
-            constraints: BoxConstraints(minWidth: 125 + 75.0 * layers),
             padding: const EdgeInsetsDirectional.fromSTEB(0.5, 4, 1, 6),
             alignmentOffset: const Offset(-1, 0),
             alignment: AlignmentDirectional.topEnd,
-            menuChildren: children,
+            panel: RawMenuPanel(
+              constraints: BoxConstraints(minWidth: 125 + 75.0 * layers),
+              menuChildren: children,
+            ),
             child: AnchorButton(
               Tag.values[layers % Tag.values.length],
               constraints: const BoxConstraints(maxHeight: 30),
@@ -5399,8 +5634,10 @@ void main() {
         App(
           alignment: AlignmentDirectional.topStart,
           RawMenuAnchor(
-            constraints: const BoxConstraints(maxWidth: 150),
-            menuChildren: children,
+            panel: RawMenuPanel(
+              constraints: const BoxConstraints(maxWidth: 150),
+              menuChildren: children,
+            ),
             child: AnchorButton.small(Tag.anchor),
           ),
         ),
@@ -5446,11 +5683,13 @@ void main() {
               constraints: const BoxConstraints(maxHeight: 30),
             ),
           RawMenuAnchor(
-            constraints: BoxConstraints(minWidth: 125 + 75.0 * layers),
             padding: const EdgeInsetsDirectional.fromSTEB(0.5, 4, 1, 6),
             alignmentOffset: const Offset(-1, 0),
             alignment: AlignmentDirectional.topEnd,
-            menuChildren: children,
+            panel: RawMenuPanel(
+              constraints: BoxConstraints(minWidth: 125 + 75.0 * layers),
+              menuChildren: children,
+            ),
             child: AnchorButton(
               Tag.values[layers % Tag.values.length],
               constraints: const BoxConstraints(maxHeight: 30),
@@ -5463,8 +5702,10 @@ void main() {
           textDirection: TextDirection.rtl,
           alignment: AlignmentDirectional.topStart,
           RawMenuAnchor(
-            constraints: const BoxConstraints(maxWidth: 150),
-            menuChildren: children,
+            panel: RawMenuPanel(
+              constraints: const BoxConstraints(maxWidth: 150),
+              menuChildren: children,
+            ),
             child: AnchorButton.small(Tag.anchor),
           ),
         ),
@@ -5516,7 +5757,7 @@ void main() {
               color: const Color(0xFF004CFF),
               child: Stack(
                 children: <Widget>[
-                  // Pink box for visualizing the display feature
+                  // Pink box for visualizing the display feature.
                   Positioned.fromRect(
                     rect: const Rect.fromLTRB(390, 0, 410, 600),
                     child: const ColoredBox(color: Color(0xF7FF2190)),
@@ -5527,12 +5768,14 @@ void main() {
                     child: RawMenuAnchor(
                       alignment: Alignment.topLeft,
                       menuAlignment: Alignment.topRight,
-                      menuChildren: const <Widget>[
-                        SizedBox(
-                          width: 150,
-                          height: 50,
-                        )
-                      ],
+                      panel: const RawMenuPanel(
+                        menuChildren: <Widget>[
+                          SizedBox(
+                            width: 150,
+                            height: 50,
+                          )
+                        ],
+                      ),
                       child: AnchorButton.small(Tag.anchor),
                     ),
                   ),
@@ -5560,16 +5803,18 @@ void main() {
       await tester.pumpWidget(
         App(
           RawMenuAnchor(
-            constraints: const BoxConstraints(minWidth: 75, maxHeight: 100),
-            surfaceDecoration: const BoxDecoration(),
-            menuChildren: <Widget>[
-              Container(
-                key: Tag.a.key,
-                color: const Color(0xFFFF0000),
-                height: 150,
-                width: 50,
-              )
-            ],
+            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
+              constraints: const BoxConstraints(minWidth: 75, maxHeight: 100),
+              menuChildren: <Widget>[
+                Container(
+                  key: Tag.a.key,
+                  color: const Color(0xFFFF0000),
+                  height: 150,
+                  width: 50,
+                )
+              ],
+            ),
             child: const AnchorButton(Tag.anchor),
           ),
         ),
@@ -5586,6 +5831,107 @@ void main() {
           tester.getSize(find.byKey(Tag.a.key)), equals(const Size(75, 150)));
     });
 
+    testWidgets('Padding is applied before constraints',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        App(
+          RawMenuAnchor(
+            panel: ColoredBox(
+              color: const Color(0xFF0000FF),
+              child: RawMenuPanel(
+                decoration: const BoxDecoration(),
+                constraints: BoxConstraints.tight(const Size(100, 100)),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 50, horizontal: 35),
+                menuChildren: <Widget>[
+                  Container(
+                    key: Tag.a.key,
+                    color: const Color(0xFFFF0000),
+                    height: 50,
+                    width: 50,
+                  )
+                ],
+              ),
+            ),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text(Tag.anchor.text));
+      await tester.pump();
+
+      expect(tester.getSize(find.byType(RawMenuPanel)),
+          equals(const Size(100, 100)));
+    });
+
+    testWidgets(
+        'Padding applied to RawMenuPanel overrides inherited padding from RawMenuAnchor',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        App(
+          RawMenuAnchor(
+            padding: const EdgeInsets.all(50),
+            panel: ColoredBox(
+              color: const Color(0xFF0000FF),
+              child: RawMenuPanel(
+                decoration: const BoxDecoration(),
+                menuChildren: <Widget>[
+                  Container(
+                    key: Tag.a.key,
+                    color: const Color(0xFFFF0000),
+                    height: 50,
+                    width: 50,
+                  )
+                ],
+              ),
+            ),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text(Tag.anchor.text));
+      await tester.pump();
+
+      final ui.Rect inheritedRect = tester.getRect(find.byType(RawMenuPanel));
+
+      await tester.pumpWidget(
+        App(
+          RawMenuAnchor(
+            padding: const EdgeInsets.all(50),
+            panel: ColoredBox(
+              color: const Color(0xFF0000FF),
+              child: RawMenuPanel(
+                padding: const EdgeInsets.all(5),
+                decoration: const BoxDecoration(),
+                menuChildren: <Widget>[
+                  Container(
+                    key: Tag.a.key,
+                    color: const Color(0xFFFF0000),
+                    height: 50,
+                    width: 50,
+                  )
+                ],
+              ),
+            ),
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      );
+
+      final ui.Rect overrideRect = tester.getRect(find.byType(RawMenuPanel));
+
+      expect(
+        inheritedRect.topLeft - overrideRect.topLeft,
+        equals(Offset.zero),
+      );
+      expect(
+        inheritedRect.bottomRight - overrideRect.bottomRight,
+        equals(const Offset(90, 90)),
+      );
+    });
+
     testWidgets(
         'Menu is positioned in the root overlay when useRootOverlay is true',
         (WidgetTester tester) async {
@@ -5597,15 +5943,19 @@ void main() {
             bottom: 0,
             child: RawMenuAnchor(
               useRootOverlay: true,
-              surfaceDecoration: BoxDecoration(color: Color(0xFF0000FF)),
-              menuChildren: <Widget>[
-                RawMenuAnchor(
-                  menuAlignment: AlignmentDirectional.topStart,
-                  alignment: AlignmentDirectional.bottomStart,
-                  menuChildren: <Widget>[SizedBox.square(dimension: 100)],
-                  child: AnchorButton(Tag.a),
-                )
-              ],
+              panel: RawMenuPanel(
+                decoration: BoxDecoration(color: Color(0xFF0000FF)),
+                menuChildren: <Widget>[
+                  RawMenuAnchor(
+                    menuAlignment: AlignmentDirectional.topStart,
+                    alignment: AlignmentDirectional.bottomStart,
+                    panel: RawMenuPanel(menuChildren: <Widget>[
+                      SizedBox.square(dimension: 100)
+                    ]),
+                    child: AnchorButton(Tag.a),
+                  )
+                ],
+              ),
               child: AnchorButton(Tag.anchor),
             ),
           );
@@ -5664,19 +6014,23 @@ void main() {
           return const Positioned(
             bottom: 0,
             child: RawMenuAnchor(
-              surfaceDecoration: BoxDecoration(color: Color(0xFF0000FF)),
-              menuChildren: <Widget>[
-                // Nested menus should be placed in the same overlay as their
-                // parent menu, so this menu should be placed in the nearest
-                // overlay instead of the root overlay.
-                RawMenuAnchor(
-                  useRootOverlay: true,
-                  menuAlignment: AlignmentDirectional.topStart,
-                  alignment: AlignmentDirectional.bottomStart,
-                  menuChildren: <Widget>[SizedBox.square(dimension: 100)],
-                  child: AnchorButton(Tag.a),
-                )
-              ],
+              panel: RawMenuPanel(
+                decoration: BoxDecoration(color: Color(0xFF0000FF)),
+                menuChildren: <Widget>[
+                  // Nested menus should be placed in the same overlay as their
+                  // parent menu, so this menu should be placed in the nearest
+                  // overlay instead of the root overlay.
+                  RawMenuAnchor(
+                    useRootOverlay: true,
+                    menuAlignment: AlignmentDirectional.topStart,
+                    alignment: AlignmentDirectional.bottomStart,
+                    panel: RawMenuPanel(menuChildren: <Widget>[
+                      SizedBox.square(dimension: 100)
+                    ]),
+                    child: AnchorButton(Tag.a),
+                  ),
+                ],
+              ),
               child: AnchorButton(Tag.anchor),
             ),
           );
