@@ -482,6 +482,10 @@ class _CarouselViewState extends State<CarouselView> {
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
+        if (constraints.maxWidth == 0 || constraints.maxHeight == 0) {
+          return const SizedBox();
+        }
+
         final double mainAxisExtent = switch (widget.scrollDirection) {
           Axis.horizontal => constraints.maxWidth,
           Axis.vertical => constraints.maxHeight,

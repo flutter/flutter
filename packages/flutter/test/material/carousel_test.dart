@@ -532,9 +532,9 @@ void main() {
     await tester.pumpAndSettle();
 
     Finder getItem(int index) => find.descendant(
-      of: find.byType(CarouselView),
-      matching: find.ancestor(of: find.text('$index'), matching: find.byType(Padding)),
-    );
+          of: find.byType(CarouselView),
+          matching: find.ancestor(of: find.text('$index'), matching: find.byType(Padding)),
+        );
 
     // Show item 0, 1, and 2.
     expect(getItem(0), findsOneWidget);
@@ -1413,6 +1413,39 @@ void main() {
       expect(buttonPressed, isTrue);
     },
   );
+
+  testWidgets('CarouselView does not crash if layout constraints are zero',
+      (WidgetTester tester) async {
+    Widget buildCarrouselApp({double width = 0, double height = 0}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: width,
+            height: height,
+            child: CarouselView(
+              itemExtent: 100,
+              children: <Widget>[
+                Container(
+                  color: Colors.red,
+                  width: 100,
+                  height: 100,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildCarrouselApp(width: 100));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(buildCarrouselApp(height: 100));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(buildCarrouselApp());
+    expect(tester.takeException(), isNull);
+  });
 }
 
 Finder getItem(int index) {
