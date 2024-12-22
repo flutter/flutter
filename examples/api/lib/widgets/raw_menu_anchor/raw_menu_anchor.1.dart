@@ -111,7 +111,6 @@ class _ContextMenuExampleState extends State<ContextMenuExample> {
           ),
           const Divider(thickness: 0.0, indent: 12, endIndent: 12),
           RawMenuAnchor(
-            controller: controller,
             padding: const EdgeInsetsDirectional.symmetric(vertical: 5),
             panel: RawMenuPanel(
               padding: const EdgeInsetsDirectional.symmetric(vertical: 5),
@@ -150,9 +149,7 @@ class _ContextMenuExampleState extends State<ContextMenuExample> {
                 child: Semantics(
                   expanded: controller.isOpen,
                   child: ColoredBox(
-                    color: controller.isOpen
-                        ? const Color(0x0D1A1A1A)
-                        : Colors.transparent,
+                    color: controller.isOpen ? const Color(0x0D1A1A1A) : Colors.transparent,
                     child: MenuItemButton(
                       onPressed: () {
                         if (controller.isOpen) {
@@ -175,10 +172,7 @@ class _ContextMenuExampleState extends State<ContextMenuExample> {
       child: NestedWidget(
         child: Text(
           _selected.isEmpty ? 'Right-click me!' : 'Selected: $_selected',
-          style: Theme.of(context)
-              .textTheme
-              .displaySmall!
-              .copyWith(color: Colors.white),
+          style: Theme.of(context).textTheme.displaySmall!.copyWith(color: Colors.white),
         ),
       ),
     );
@@ -199,16 +193,14 @@ class NestedWidget extends StatelessWidget {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         onLongPressStart = (LongPressStartDetails details) {
-          MenuController.maybeOf(context)
-              ?.open(position: details.localPosition);
+          MenuController.maybeOf(context)?.open(position: details.localPosition);
           HapticFeedback.heavyImpact();
         };
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         onSecondaryTapDown = (TapDownDetails details) {
-          MenuController.maybeOf(context)
-              ?.open(position: details.localPosition);
+          MenuController.maybeOf(context)?.open(position: details.localPosition);
         };
     }
     return GestureDetector(
@@ -232,8 +224,7 @@ class ContextMenuApp extends StatelessWidget {
     splashFactory: InkSparkle.splashFactory,
     iconSize: WidgetStatePropertyAll<double>(17),
     overlayColor: WidgetStatePropertyAll<Color>(Color(0x12262627)),
-    padding: WidgetStatePropertyAll<EdgeInsets>(
-        EdgeInsets.symmetric(horizontal: 12)),
+    padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 12)),
     textStyle: WidgetStatePropertyAll<TextStyle>(TextStyle(fontSize: 14)),
     visualDensity: VisualDensity(
       horizontal: VisualDensity.minimumDensity,
