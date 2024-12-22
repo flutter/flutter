@@ -94,6 +94,16 @@ echo downloaded dart sdk
 ''');
       makeExecutable(updateDartSdk);
 
+      final File udpateEngine = tempDir
+        .childDirectory('bin')
+        .childDirectory('internal')
+        .childFile('update_engine_version.sh')..writeAsStringSync('''
+#!/usr/bin/env bash
+
+echo engine version
+''');
+      makeExecutable(udpateEngine);
+
       // create a fake dart runtime
       final File dartBin = (tempDir
         .childDirectory('bin')
