@@ -163,7 +163,11 @@ final class VmServiceProxyGoldenFileComparator extends GoldenFileComparator {
   int _nextId = 0;
   final Map<int, Completer<_Result>> _pendingRequests = <int, Completer<_Result>>{};
 
-  Future<_Result> _postAndWait(Uint8List imageBytes, Uri golden, {required String operation}) async {
+  Future<_Result> _postAndWait(
+    Uint8List imageBytes,
+    Uri golden, {
+    required String operation,
+  }) async {
     final int nextId = ++_nextId;
     assert(!_pendingRequests.containsKey(nextId));
 
@@ -183,7 +187,7 @@ final class VmServiceProxyGoldenFileComparator extends GoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    return switch(await _postAndWait(imageBytes, golden, operation: 'compare')) {
+    return switch (await _postAndWait(imageBytes, golden, operation: 'compare')) {
       _Success(:final bool result) => result,
       _Failure(:final String error) => Future<bool>.error(error),
     };
@@ -207,10 +211,12 @@ final class VmServiceProxyGoldenFileComparator extends GoldenFileComparator {
 // an alternative approach that might simplify the code above, but it's probably
 // not worth it.
 sealed class _Result {}
+
 final class _Success implements _Result {
   _Success(this.result);
   final bool result;
 }
+
 final class _Failure implements _Result {
   _Failure(this.error);
   final String error;

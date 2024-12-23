@@ -28,7 +28,10 @@ void main() {
 
     test('is set on mobile platforms', () {
       integration_test.VmServiceProxyGoldenFileComparator.useIfRunningOnDevice();
-      expect(goldenFileComparator, isInstanceOf<integration_test.VmServiceProxyGoldenFileComparator>());
+      expect(
+        goldenFileComparator,
+        isInstanceOf<integration_test.VmServiceProxyGoldenFileComparator>(),
+      );
     }, testOn: 'ios || android');
   });
 
@@ -36,40 +39,39 @@ void main() {
     late integration_test.VmServiceProxyGoldenFileComparator goldenFileComparator;
 
     setUp(() {
-      goldenFileComparator = integration_test.VmServiceProxyGoldenFileComparator.forTesting((
-        String operation,
-        Map<Object?, Object?> params, {
-        String stream = '',
-      }) {});
+      goldenFileComparator = integration_test.VmServiceProxyGoldenFileComparator.forTesting(
+        (String operation, Map<Object?, Object?> params, {String stream = ''}) {},
+      );
     });
 
     test('"id" must be provided', () async {
-      final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(<String, String>{
-        'result': 'true',
-      });
+      final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(
+        <String, String>{'result': 'true'},
+      );
       expect(response.errorDetail, contains('Required parameter "id" not present in response'));
     });
 
     test('"id" must be an integer', () async {
-      final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(<String, String>{
-        'id': 'not-an-integer',
-        'result': 'true',
-      });
-      expect(response.errorDetail, stringContainsInOrder(<String>[
-        'Required parameter "id" not a valid integer',
-        'not-an-integer',
-      ]));
+      final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(
+        <String, String>{'id': 'not-an-integer', 'result': 'true'},
+      );
+      expect(
+        response.errorDetail,
+        stringContainsInOrder(<String>[
+          'Required parameter "id" not a valid integer',
+          'not-an-integer',
+        ]),
+      );
     });
 
     test('"id" must match a pending request (never occurred)', () async {
-      final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(<String, String>{
-        'id': '12345',
-        'result': 'true',
-      });
-      expect(response.errorDetail, stringContainsInOrder(<String>[
-        'No pending request with method ID',
-        '12345',
-      ]));
+      final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(
+        <String, String>{'id': '12345', 'result': 'true'},
+      );
+      expect(
+        response.errorDetail,
+        stringContainsInOrder(<String>['No pending request with method ID', '12345']),
+      );
     });
 
     test('"id" must match a pending request (already occurred)', () async {
@@ -89,10 +91,10 @@ void main() {
         'id': '$nextId',
         'result': 'true',
       });
-      expect(response.errorDetail, stringContainsInOrder(<String>[
-        'No pending request with method ID',
-        '1',
-      ]));
+      expect(
+        response.errorDetail,
+        stringContainsInOrder(<String>['No pending request with method ID', '1']),
+      );
     });
 
     test('requests that contain "error" completes it as an error', () async {
@@ -104,10 +106,9 @@ void main() {
         throwsA(contains('We did a bad')),
       );
 
-      final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(<String, String>{
-        'id': '$nextId',
-        'error': 'We did a bad',
-      });
+      final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(
+        <String, String>{'id': '$nextId', 'error': 'We did a bad'},
+      );
       expect(response.errorDetail, isNull);
       expect(response.result, '{}');
     });
@@ -117,10 +118,9 @@ void main() {
       const int nextId = 1;
       goldenFileComparator.update(Uri(path: 'some-file'), Uint8List(0));
 
-      final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(<String, String>{
-        'id': '$nextId',
-        'result': 'true',
-      });
+      final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(
+        <String, String>{'id': '$nextId', 'result': 'true'},
+      );
       expect(response.errorDetail, isNull);
       expect(response.result, '{}');
     });
@@ -130,9 +130,9 @@ void main() {
       const int nextId = 1;
       goldenFileComparator.update(Uri(path: 'some-file'), Uint8List(0));
 
-      final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(<String, String>{
-        'id': '$nextId',
-      });
+      final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(
+        <String, String>{'id': '$nextId'},
+      );
       expect(response.errorDetail, contains('Required parameter "result" not present in response'));
     });
 
@@ -141,14 +141,16 @@ void main() {
       const int nextId = 1;
       goldenFileComparator.update(Uri(path: 'some-file'), Uint8List(0));
 
-      final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(<String, String>{
-        'id': '$nextId',
-        'result': 'not-a-boolean',
-      });
-      expect(response.errorDetail, stringContainsInOrder(<String>[
-        'Required parameter "result" not a valid boolean',
-        'not-a-boolean',
-      ]));
+      final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(
+        <String, String>{'id': '$nextId', 'result': 'not-a-boolean'},
+      );
+      expect(
+        response.errorDetail,
+        stringContainsInOrder(<String>[
+          'Required parameter "result" not a valid boolean',
+          'not-a-boolean',
+        ]),
+      );
     });
 
     group('compare', () {
@@ -171,16 +173,9 @@ void main() {
         const int nextId = 1;
 
         final Uint8List bytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
-        expect(
-          goldenFileComparator.compare(bytes, Uri(path: 'golden-path')),
-          completion(true),
-        );
+        expect(goldenFileComparator.compare(bytes, Uri(path: 'golden-path')), completion(true));
 
-
-        await goldenFileComparator.handleEvent(<String, String>{
-          'id': '$nextId',
-          'result': 'true',
-        });
+        await goldenFileComparator.handleEvent(<String, String>{'id': '$nextId', 'result': 'true'});
 
         final (String event, Map<Object?, Object?> params) = postedEvents.single;
         expect(event, 'compare');
@@ -196,11 +191,7 @@ void main() {
         const int nextId = 1;
 
         final Uint8List bytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
-        expect(
-          goldenFileComparator.compare(bytes, Uri(path: 'golden-path')),
-          completion(false),
-        );
-
+        expect(goldenFileComparator.compare(bytes, Uri(path: 'golden-path')), completion(false));
 
         await goldenFileComparator.handleEvent(<String, String>{
           'id': '$nextId',
@@ -225,7 +216,6 @@ void main() {
           goldenFileComparator.compare(bytes, Uri(path: 'golden-path')),
           throwsA(contains('We did a bad')),
         );
-
 
         await goldenFileComparator.handleEvent(<String, String>{
           'id': '$nextId',
@@ -262,16 +252,9 @@ void main() {
         const int nextId = 1;
 
         final Uint8List bytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
-        expect(
-          goldenFileComparator.update(Uri(path: 'golden-path'), bytes),
-          completes,
-        );
+        expect(goldenFileComparator.update(Uri(path: 'golden-path'), bytes), completes);
 
-
-        await goldenFileComparator.handleEvent(<String, String>{
-          'id': '$nextId',
-          'result': 'true',
-        });
+        await goldenFileComparator.handleEvent(<String, String>{'id': '$nextId', 'result': 'true'});
 
         final (String event, Map<Object?, Object?> params) = postedEvents.single;
         expect(event, 'update');
@@ -291,7 +274,6 @@ void main() {
           goldenFileComparator.update(Uri(path: 'golden-path'), bytes),
           throwsA(contains('We did a bad')),
         );
-
 
         await goldenFileComparator.handleEvent(<String, String>{
           'id': '$nextId',
