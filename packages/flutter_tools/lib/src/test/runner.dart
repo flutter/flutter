@@ -397,6 +397,7 @@ void createChannelAndConnect(String path, String name, Function testMain) {
   channel.pipe(RemoteListener.start(() => testMain));
 }
 
+@pragma('vm:entry-point')
 void testMain() {
   final String route = PlatformDispatcher.instance.defaultRouteName;
   switch (route) {
@@ -421,6 +422,7 @@ void testMain() {
   }
 }
 
+@pragma('vm:entry-point')
 void main([dynamic sendPort]) {
   if (sendPort is SendPort) {
     final ReceivePort receivePort = ReceivePort();
@@ -498,6 +500,7 @@ Future<void> spawn({
   commandPort.send(<Object>['spawn', port, entrypoint, route]);
 }
 
+@pragma('vm:entry-point')
 void main() async {
   final String route = PlatformDispatcher.instance.defaultRouteName;
 
