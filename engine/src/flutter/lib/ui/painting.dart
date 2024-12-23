@@ -309,18 +309,22 @@ class Color {
     double? blue,
     ColorSpace? colorSpace,
   }) {
-    Color updated = Color.from(
-      alpha: alpha ?? a,
-      red: red ?? r,
-      green: green ?? g,
-      blue: blue ?? b,
-      colorSpace: this.colorSpace,
-    );
-    if (colorSpace != this.colorSpace) {
-      final _ColorTransform transform = _getColorTransform(this.colorSpace, colorSpace);
-      updated = transform.transform(updated, colorSpace);
+    Color? updatedComponents;
+    if (alpha != null || red != null || green != null || blue != null) {
+      updatedComponents = Color.from(
+        alpha: alpha ?? a,
+        red: red ?? r,
+        green: green ?? g,
+        blue: blue ?? b,
+        colorSpace: this.colorSpace,
+      );
     }
-    return updated;
+    if (colorSpace != null && colorSpace != this.colorSpace) {
+      final _ColorTransform transform = _getColorTransform(this.colorSpace, colorSpace);
+      return transform.transform(updatedComponents ?? this, colorSpace);
+    } else {
+      return updatedComponents ?? this;
+    }
   }
 
   /// Returns a new color that matches this color with the alpha channel
