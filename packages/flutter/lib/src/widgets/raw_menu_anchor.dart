@@ -28,15 +28,24 @@ import 'shortcuts.dart';
 import 'single_child_scroll_view.dart';
 import 'tap_region.dart';
 
+// Examples can assume:
+// late BuildContext context;
+// late StateSetter setState;
+// late List<Widget> menuItems;
 const bool _kDebugMenus = false;
 
-const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent>{
+const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts =
+    <ShortcutActivator, Intent>{
   SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
   SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
-  SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
-  SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
-  SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left),
-  SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right),
+  SingleActivator(LogicalKeyboardKey.arrowDown):
+      DirectionalFocusIntent(TraversalDirection.down),
+  SingleActivator(LogicalKeyboardKey.arrowUp):
+      DirectionalFocusIntent(TraversalDirection.up),
+  SingleActivator(LogicalKeyboardKey.arrowLeft):
+      DirectionalFocusIntent(TraversalDirection.left),
+  SingleActivator(LogicalKeyboardKey.arrowRight):
+      DirectionalFocusIntent(TraversalDirection.right),
   SingleActivator(LogicalKeyboardKey.home): _FocusFirstMenuItemIntent(),
   SingleActivator(LogicalKeyboardKey.end): _FocusLastMenuItemIntent(),
 };
@@ -202,7 +211,7 @@ class _RawMenuAnchorScope extends InheritedWidget {
 ///   panel: RawMenuPanel(
 ///     padding: const EdgeInsets.symmetric(vertical: 4),
 ///     constraints: const BoxConstraints(minWidth: 200),
-///     decoration: RawMenuPanel.defaultLightDecoration,
+///     decoration: RawMenuPanel.lightSurfaceDecoration,
 ///     menuChildren: <Widget>[
 ///       MenuItemButton(onPressed: () {}, child: const Text('Undo')),
 ///       MenuItemButton(onPressed: () {}, child: const Text('Redo')),
@@ -269,7 +278,7 @@ class RawMenuAnchor extends StatelessWidget {
   ///
   /// The builder is called with a [RawMenuAnchorOverlayPosition] that defines
   /// the anchor's rect, the size of the overlay, the [TapRegion.groupId] for
-  /// the menu system, and the [position] argument passed to
+  /// the menu system, and the position argument passed to
   /// [MenuController.open].
   ///
   /// To ensure taps within the menu register as within the menu system, the
@@ -281,7 +290,7 @@ class RawMenuAnchor extends StatelessWidget {
   ///   onTapOutside: (PointerDownEvent event) {
   ///     MenuController.maybeOf(context)?.close();
   ///   },
-  ///   child: _Panel(children: children)
+  ///   child: Column(children: menuItems),
   /// )
   /// ```
   ///
@@ -407,7 +416,8 @@ class RawMenuAnchor extends StatelessWidget {
     this.controller,
     this.child,
     TransitionBuilder? builder,
-  })  : assert(builder != null || child != null, 'Either a builder or a child must be provided.'),
+  })  : assert(builder != null || child != null,
+            'Either a builder or a child must be provided.'),
         _overlayBuilder = null,
         alignment = null,
         menuAlignment = null,
@@ -837,7 +847,8 @@ class RawMenuPanel extends StatelessWidget {
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior))
-      ..add(DiagnosticsProperty<bool>('constrainCrossAxis', constrainCrossAxis));
+      ..add(
+          DiagnosticsProperty<bool>('constrainCrossAxis', constrainCrossAxis));
     if (padding != null) {
       properties.add(
         DiagnosticsProperty<EdgeInsetsGeometry>('padding override', padding),
@@ -889,7 +900,8 @@ sealed class _RawMenuAnchorState<T extends _RawMenuAnchor> extends State<T> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final _RawMenuAnchorState? newParent = MenuController.maybeOf(context)?._anchor;
+    final _RawMenuAnchorState? newParent =
+        MenuController.maybeOf(context)?._anchor;
     if (newParent != _parent) {
       assert(
         newParent != this,
@@ -968,7 +980,8 @@ sealed class _RawMenuAnchorState<T extends _RawMenuAnchor> extends State<T> {
   void _childChangedOpenState() {
     _parent?._childChangedOpenState();
     assert(mounted);
-    if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
+    if (SchedulerBinding.instance.schedulerPhase !=
+        SchedulerPhase.persistentCallbacks) {
       setState(() {/* Mark dirty now, but only if not in a build. */});
     } else {
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
@@ -990,8 +1003,10 @@ sealed class _RawMenuAnchorState<T extends _RawMenuAnchor> extends State<T> {
   void _open({Offset? position});
   void _close({bool inDispose = false});
   void _closeChildren({bool inDispose = false}) {
-    assert(_debugMenuInfo('Closing children of $this${inDispose ? ' (dispose)' : ''}'));
-    for (final _RawMenuAnchorState child in List<_RawMenuAnchorState>.from(_anchorChildren)) {
+    assert(_debugMenuInfo(
+        'Closing children of $this${inDispose ? ' (dispose)' : ''}'));
+    for (final _RawMenuAnchorState child
+        in List<_RawMenuAnchorState>.from(_anchorChildren)) {
       child._close(inDispose: inDispose);
     }
   }
@@ -1015,7 +1030,8 @@ sealed class _RawMenuAnchorState<T extends _RawMenuAnchor> extends State<T> {
         actions: <Type, Action<Intent>>{
           // Check if open to allow DismissIntent to bubble when the menu is
           // closed.
-          if (_isOpen) DismissIntent: DismissMenuAction(controller: _menuController),
+          if (_isOpen)
+            DismissIntent: DismissMenuAction(controller: _menuController),
         },
         child: Builder(builder: _buildAnchor),
       ),
@@ -1068,8 +1084,10 @@ class _RawMenuAnchorOverlay extends _RawMenuAnchor {
   State<_RawMenuAnchorOverlay> createState() => _RawMenuAnchorOverlayState();
 }
 
-class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverlay> {
-  static final Map<Type, Action<Intent>> _rootOverlayAnchorActions = <Type, Action<Intent>>{
+class _RawMenuAnchorOverlayState
+    extends _RawMenuAnchorState<_RawMenuAnchorOverlay> {
+  static final Map<Type, Action<Intent>> _rootOverlayAnchorActions =
+      <Type, Action<Intent>>{
     DirectionalFocusIntent: _AnchorDirectionalFocusAction(),
   };
 
@@ -1085,7 +1103,8 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
   );
 
   bool get useRootOverlay {
-    if (_parent case _RawMenuAnchorOverlayState(useRootOverlay: final bool useRoot)) {
+    if (_parent
+        case _RawMenuAnchorOverlayState(useRootOverlay: final bool useRoot)) {
       return useRoot;
     }
 
@@ -1102,17 +1121,20 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
       return null;
     }
 
-    return FocusTraversalGroup.maybeOf(_menuScopeNode!.context!) ?? ReadingOrderTraversalPolicy();
+    return FocusTraversalGroup.maybeOf(_menuScopeNode!.context!) ??
+        ReadingOrderTraversalPolicy();
   }
 
   FocusNode? get _firstFocus {
     assert(_menuScopeNode != null, '_firstFocus requires a menu scope node.');
-    return _overlayTraversalPolicy?.findFirstFocus(_menuScopeNode!, ignoreCurrentFocus: true);
+    return _overlayTraversalPolicy?.findFirstFocus(_menuScopeNode!,
+        ignoreCurrentFocus: true);
   }
 
   FocusNode? get _lastFocus {
     assert(_menuScopeNode != null, '_lastFocus requires a menu scope node.');
-    return _overlayTraversalPolicy?.findLastFocus(_menuScopeNode!, ignoreCurrentFocus: true);
+    return _overlayTraversalPolicy?.findLastFocus(_menuScopeNode!,
+        ignoreCurrentFocus: true);
   }
 
   @override
@@ -1123,10 +1145,12 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
     super.initState();
     // If the overlay is custom, then focus is handled externally.
     if (!widget.hasExternalFocusScope) {
-      _menuScopeNode =
-          FocusScopeNode(debugLabel: kReleaseMode ? null : '${describeIdentity(this)} Sub Menu');
-      _menuFocusNode =
-          FocusNode(debugLabel: kReleaseMode ? null : '${describeIdentity(this)} Focus Node');
+      _menuScopeNode = FocusScopeNode(
+          debugLabel:
+              kReleaseMode ? null : '${describeIdentity(this)} Sub Menu');
+      _menuFocusNode = FocusNode(
+          debugLabel:
+              kReleaseMode ? null : '${describeIdentity(this)} Focus Node');
     }
   }
 
@@ -1149,7 +1173,8 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
         child: Builder(
           key: _anchorKey,
           builder: (BuildContext context) {
-            return widget.builder?.call(context, _menuController, widget.child) ??
+            return widget.builder
+                    ?.call(context, _menuController, widget.child) ??
                 widget.child ??
                 const SizedBox();
           },
@@ -1193,9 +1218,10 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
 
   Widget _buildOverlay(BuildContext context) {
     final BuildContext anchorContext = _anchorKey.currentContext!;
-    final RenderBox overlay = Overlay.of(anchorContext, rootOverlay: useRootOverlay)
-        .context
-        .findRenderObject()! as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(anchorContext, rootOverlay: useRootOverlay)
+            .context
+            .findRenderObject()! as RenderBox;
     final RenderBox anchorBox = anchorContext.findRenderObject()! as RenderBox;
     final ui.Offset upperLeft = anchorBox.localToGlobal(
       Offset.zero,
@@ -1259,7 +1285,9 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
     }
 
     widget.onOpen?.call();
-    if (mounted && SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
+    if (mounted &&
+        SchedulerBinding.instance.schedulerPhase !=
+            SchedulerPhase.persistentCallbacks) {
       setState(() {
         // Mark dirty to notify MenuController dependents.
       });
@@ -1279,7 +1307,8 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
 
     _closeChildren(inDispose: inDispose);
     // Don't hide if we're in the middle of a build.
-    if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
+    if (SchedulerBinding.instance.schedulerPhase !=
+        SchedulerPhase.persistentCallbacks) {
       _overlayController.hide();
     } else if (!inDispose) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -1293,7 +1322,8 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
       _parent?._childChangedOpenState();
       widget.onClose?.call();
       if (mounted &&
-          SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
+          SchedulerBinding.instance.schedulerPhase !=
+              SchedulerPhase.persistentCallbacks) {
         setState(() {
           // Mark dirty, but only if mounted and not in a build.
         });
@@ -1339,14 +1369,18 @@ class _RawMenuAnchorNode extends _RawMenuAnchor {
 
 class _RawMenuAnchorNodeState extends _RawMenuAnchorState<_RawMenuAnchorNode> {
   @override
-  bool get _isOpen => _anchorChildren.any((_RawMenuAnchorState child) => child._isOpen);
+  bool get _isOpen =>
+      _anchorChildren.any((_RawMenuAnchorState child) => child._isOpen);
 
   @override
   void _close({bool inDispose = false}) {
     _closeChildren(inDispose: inDispose);
     if (!inDispose) {
-      if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
-        setState(() {/* Mark dirty, but only if mounted and not in a build. */});
+      if (SchedulerBinding.instance.schedulerPhase !=
+          SchedulerPhase.persistentCallbacks) {
+        setState(() {
+          /* Mark dirty, but only if mounted and not in a build. */
+        });
       } else {
         SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
           if (mounted) {
@@ -1527,7 +1561,8 @@ class _MenuOverlay extends StatelessWidget {
   final AlignmentGeometry? menuAlignment;
   final String? semanticLabel;
 
-  static final Map<Type, Action<Intent>> _defaultOverlayActions = <Type, Action<Intent>>{
+  static final Map<Type, Action<Intent>> _defaultOverlayActions =
+      <Type, Action<Intent>>{
     DirectionalFocusIntent: _OverlayDirectionalFocusAction(),
     _FocusFirstMenuItemIntent: _FocusFirstMenuItemAction(),
     _FocusLastMenuItemIntent: _FocusLastMenuItemAction(),
@@ -1536,7 +1571,8 @@ class _MenuOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MenuController menuController = MenuController.maybeOf(context)!;
-    final _RawMenuAnchorOverlayState anchor = menuController._anchor! as _RawMenuAnchorOverlayState;
+    final _RawMenuAnchorOverlayState anchor =
+        menuController._anchor! as _RawMenuAnchorOverlayState;
 
     final Widget panel = Semantics.fromProperties(
       explicitChildNodes: true,
@@ -1573,13 +1609,16 @@ class _MenuOverlay extends StatelessWidget {
         // Resolve fallback alignment here so that alignmentOffset defaults to
         // being directionally-agnostic.
         final AlignmentGeometry anchorAlignment = alignment ??
-            (anchor._isRootAnchor ? AlignmentDirectional.bottomStart : AlignmentDirectional.topEnd)
+            (anchor._isRootAnchor
+                    ? AlignmentDirectional.bottomStart
+                    : AlignmentDirectional.topEnd)
                 .resolve(textDirection);
         return CustomSingleChildLayout(
           delegate: _MenuLayout(
             screenPadding: mediaQuery.padding,
             padding: padding,
-            avoidBounds: DisplayFeatureSubScreen.avoidBounds(mediaQuery).toSet(),
+            avoidBounds:
+                DisplayFeatureSubScreen.avoidBounds(mediaQuery).toSet(),
             textDirection: textDirection,
             anchorRect: position.anchorRect,
             alignmentOffset: alignmentOffset,
@@ -1622,12 +1661,14 @@ class DismissMenuAction extends DismissAction {
   }
 }
 
-class _AnchorDirectionalFocusAction extends ContextAction<DirectionalFocusIntent> {
+class _AnchorDirectionalFocusAction
+    extends ContextAction<DirectionalFocusIntent> {
   _AnchorDirectionalFocusAction();
 
   @override
   void invoke(DirectionalFocusIntent intent, [BuildContext? context]) {
-    final _RawMenuAnchorState? anchor = MenuController.maybeOf(context!)?._anchor;
+    final _RawMenuAnchorState? anchor =
+        MenuController.maybeOf(context!)?._anchor;
     if (anchor is! _RawMenuAnchorOverlayState) {
       assert(
         anchor is! _RawMenuAnchorNodeState,
@@ -1645,11 +1686,13 @@ class _AnchorDirectionalFocusAction extends ContextAction<DirectionalFocusIntent
         break;
       case TraversalDirection.up:
         if (lastFocus != null) {
-          return anchor._overlayTraversalPolicy?.requestFocusCallback(lastFocus);
+          return anchor._overlayTraversalPolicy
+              ?.requestFocusCallback(lastFocus);
         }
       case TraversalDirection.down:
         if (firstFocus != null) {
-          return anchor._overlayTraversalPolicy?.requestFocusCallback(firstFocus);
+          return anchor._overlayTraversalPolicy
+              ?.requestFocusCallback(firstFocus);
         }
     }
 
@@ -1657,12 +1700,14 @@ class _AnchorDirectionalFocusAction extends ContextAction<DirectionalFocusIntent
   }
 }
 
-class _OverlayDirectionalFocusAction extends ContextAction<DirectionalFocusIntent> {
+class _OverlayDirectionalFocusAction
+    extends ContextAction<DirectionalFocusIntent> {
   _OverlayDirectionalFocusAction();
 
   @override
   void invoke(DirectionalFocusIntent intent, [BuildContext? context]) {
-    final _RawMenuAnchorState? anchor = MenuController.maybeOf(context!)?._anchor;
+    final _RawMenuAnchorState? anchor =
+        MenuController.maybeOf(context!)?._anchor;
     if (anchor is! _RawMenuAnchorOverlayState) {
       assert(
         anchor is! _RawMenuAnchorNodeState,
@@ -1692,7 +1737,8 @@ class _OverlayDirectionalFocusAction extends ContextAction<DirectionalFocusInten
           break;
         }
 
-        if (primaryFocus == lastFocus!.enclosingScope || primaryFocus == firstFocus) {
+        if (primaryFocus == lastFocus!.enclosingScope ||
+            primaryFocus == firstFocus) {
           overlay._overlayTraversalPolicy?.requestFocusCallback(lastFocus);
           return;
         }
@@ -1701,7 +1747,8 @@ class _OverlayDirectionalFocusAction extends ContextAction<DirectionalFocusInten
           break;
         }
 
-        if (primaryFocus == firstFocus!.enclosingScope || primaryFocus == lastFocus) {
+        if (primaryFocus == firstFocus!.enclosingScope ||
+            primaryFocus == lastFocus) {
           overlay._overlayTraversalPolicy?.requestFocusCallback(firstFocus);
           return;
         }
@@ -1724,12 +1771,15 @@ class _OverlayDirectionalFocusAction extends ContextAction<DirectionalFocusInten
         if (isSubmenuAnchor) {
           if (anchor._isOpen) {
             // Use requestFocusCallback to trigger scroll-to-focus behavior.
-            anchor._overlayTraversalPolicy?.requestFocusCallback(anchor._firstFocus!);
+            anchor._overlayTraversalPolicy
+                ?.requestFocusCallback(anchor._firstFocus!);
           } else {
             anchor._open();
-            SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
+            SchedulerBinding.instance
+                .addPostFrameCallback((Duration timestamp) {
               if (anchor._isOpen) {
-                anchor._overlayTraversalPolicy?.requestFocusCallback(anchor._firstFocus!);
+                anchor._overlayTraversalPolicy
+                    ?.requestFocusCallback(anchor._firstFocus!);
               }
             });
           }
@@ -1745,7 +1795,8 @@ class _FocusFirstMenuItemIntent extends Intent {
   const _FocusFirstMenuItemIntent();
 }
 
-class _FocusFirstMenuItemAction extends ContextAction<_FocusFirstMenuItemIntent> {
+class _FocusFirstMenuItemAction
+    extends ContextAction<_FocusFirstMenuItemIntent> {
   _FocusFirstMenuItemAction();
 
   @override
@@ -1809,7 +1860,8 @@ class _FocusLastMenuItemAction extends ContextAction<_FocusLastMenuItemIntent> {
     }
 
     final FocusTraversalPolicy traversalPolicy =
-        FocusTraversalGroup.maybeOfNode(lastFocus) ?? ReadingOrderTraversalPolicy();
+        FocusTraversalGroup.maybeOfNode(lastFocus) ??
+            ReadingOrderTraversalPolicy();
 
     traversalPolicy.requestFocusCallback(lastFocus);
   }
@@ -1863,13 +1915,16 @@ class _MenuLayout extends SingleChildLayoutDelegate {
   //
   // The closest screen is defined as the screen whose center is closest to the
   // anchor position.
-  Rect _findClosestScreen(Size parentSize, Offset point, Set<Rect> avoidBounds) {
+  Rect _findClosestScreen(
+      Size parentSize, Offset point, Set<Rect> avoidBounds) {
     final Iterable<ui.Rect> screens =
-        DisplayFeatureSubScreen.subScreensInBounds(Offset.zero & parentSize, avoidBounds);
+        DisplayFeatureSubScreen.subScreensInBounds(
+            Offset.zero & parentSize, avoidBounds);
 
     Rect closest = screens.first;
     for (final ui.Rect screen in screens) {
-      if ((screen.center - point).distance < (closest.center - point).distance) {
+      if ((screen.center - point).distance <
+          (closest.center - point).distance) {
         closest = screen;
       }
     }
@@ -1884,7 +1939,8 @@ class _MenuLayout extends SingleChildLayoutDelegate {
     Offset anchorPosition,
   ) {
     final EdgeInsets? padding = menuPadding?.resolve(textDirection);
-    final Rect anchor = menuPosition == null ? anchorRect : anchorPosition & Size.zero;
+    final Rect anchor =
+        menuPosition == null ? anchorRect : anchorPosition & Size.zero;
 
     double x = position.dx;
     double y = position.dy;
@@ -2021,8 +2077,8 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       anchorOffset = anchorRect.topLeft + menuPosition!;
     }
 
-    final ui.Offset position =
-        anchorOffset - menuAlignment.resolve(textDirection).alongSize(childSize);
+    final ui.Offset position = anchorOffset -
+        menuAlignment.resolve(textDirection).alongSize(childSize);
 
     final Rect screen = _findClosestScreen(
       size,
