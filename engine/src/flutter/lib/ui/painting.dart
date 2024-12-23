@@ -64,7 +64,7 @@ Color _scaleAlpha(Color x, double factor) {
 /// Here are some ways it could be constructed:
 ///
 /// ```dart
-/// Color c1 = const Color(alpha: 1.0, red: 0.2588, green: 0.6471, blue: 0.9608);
+/// Color c1 = const Color.from(alpha: 1.0, red: 0.2588, green: 0.6471, blue: 0.9608);
 /// Color c2 = const Color(0xFF42A5F5);
 /// Color c3 = const Color.fromARGB(0xFF, 0x42, 0xA5, 0xF5);
 /// Color c4 = const Color.fromARGB(255, 66, 165, 245);
