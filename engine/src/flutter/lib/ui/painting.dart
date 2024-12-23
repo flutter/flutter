@@ -318,7 +318,7 @@ class Color {
     );
     if (colorSpace != this.colorSpace) {
       final _ColorTransform transform = _getColorTransform(this.colorSpace, colorSpace);
-      updated = transform.transform(updatedComponents ?? this, colorSpace);
+      updated = transform.transform(updated, colorSpace);
     }
     return updated;
   }
