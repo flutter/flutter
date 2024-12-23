@@ -1505,7 +1505,7 @@ void main() {
       ]);
 
       void expectExists(String relPath) {
-        expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), true);
+        expect(globals.fs.file('${projectDir.path}/$relPath'), exists);
       }
 
       expectExists('lib/main.dart');
