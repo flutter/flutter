@@ -7,6 +7,8 @@ library;
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show Diagnosticable, DiagnosticsProperty;
+
 import 'arena.dart';
 import 'binding.dart';
 import 'constants.dart';
@@ -707,12 +709,8 @@ class SerialTapUpDetails extends GestureDetailsWithPositions {
   /// Creates details for a [GestureSerialTapUpCallback].
   ///
   /// The `count` argument must be greater than zero.
-  const SerialTapUpDetails({
-    super.globalPosition,
-    super.localPosition,
-    this.kind,
-    this.count = 1,
-  }) : assert(count > 0);
+  const SerialTapUpDetails({super.globalPosition, super.localPosition, this.kind, this.count = 1})
+    : assert(count > 0);
 
   /// The kind of the device that initiated the event.
   final PointerDeviceKind? kind;

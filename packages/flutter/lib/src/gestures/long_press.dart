@@ -5,6 +5,8 @@
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
+import 'package:flutter/foundation.dart' show DiagnosticsProperty;
+
 import 'constants.dart';
 import 'details_with_positions.dart';
 import 'events.dart';
@@ -113,11 +115,7 @@ class LongPressDownDetails extends GestureDetailsWithPositions {
   ///
   /// If the `localPosition` argument is not specified, it will default to the
   /// global position.
-  const LongPressDownDetails({
-    super.globalPosition,
-    super.localPosition,
-    this.kind,
-  });
+  const LongPressDownDetails({super.globalPosition, super.localPosition, this.kind});
 
   /// The kind of the device that initiated the event.
   final PointerDeviceKind? kind;
@@ -138,10 +136,7 @@ class LongPressDownDetails extends GestureDetailsWithPositions {
 ///  * [LongPressEndDetails], the details for [GestureLongPressEndCallback].
 class LongPressStartDetails extends GestureDetailsWithPositions {
   /// Creates the details for a [GestureLongPressStartCallback].
-  const LongPressStartDetails({
-    super.globalPosition,
-    super.localPosition,
-  });
+  const LongPressStartDetails({super.globalPosition, super.localPosition});
 }
 
 /// Details for callbacks that use [GestureLongPressMoveUpdateCallback].

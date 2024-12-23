@@ -5,6 +5,8 @@
 /// @docImport 'monodrag.dart';
 library;
 
+import 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder, DiagnosticsProperty;
+
 import 'details_with_positions.dart';
 import 'velocity_tracker.dart';
 
@@ -22,10 +24,7 @@ export 'velocity_tracker.dart' show Velocity;
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
 class DragDownDetails extends GestureDetailsWithPositions {
   /// Creates details for a [GestureDragDownCallback].
-  const DragDownDetails({
-    super.globalPosition,
-    super.localPosition,
-  });
+  const DragDownDetails({super.globalPosition, super.localPosition});
 }
 
 /// Signature for when a pointer has contacted the screen and might begin to

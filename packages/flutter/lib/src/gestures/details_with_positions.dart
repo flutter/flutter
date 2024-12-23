@@ -9,16 +9,12 @@ import 'dart:ui' show Offset;
 
 import 'package:flutter/foundation.dart';
 
-export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder, Diagnosticable, DiagnosticsProperty;
-
 /// Details that contain positions at which the single pointer interacts
 /// with the screen.
 abstract class GestureDetailsWithPositions with Diagnosticable {
   /// Creates details with positions.
-  const GestureDetailsWithPositions({
-    this.globalPosition = Offset.zero,
-    Offset? localPosition,
-  }) : localPosition = localPosition ?? globalPosition;
+  const GestureDetailsWithPositions({this.globalPosition = Offset.zero, Offset? localPosition})
+    : localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer interacts with the screen.
   ///  * For *start details, interact means contacting the screen.

@@ -2309,14 +2309,19 @@ class PointerPanZoomUpdateEvent extends PointerEvent
 
   @override
   final Offset pan;
+
   @override
   Offset get localPan => pan;
+
   @override
   final Offset panDelta;
+
   @override
   Offset get localPanDelta => panDelta;
+
   @override
   final double scale;
+
   @override
   final double rotation;
 
