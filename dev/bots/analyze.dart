@@ -2443,7 +2443,7 @@ final String _kTemplateRelativePath = path.join(
   'packages',
   'flutter_tools',
   'templates',
-  'app_shared',
+  'app',
   'windows.tmpl',
   'runner',
 );
