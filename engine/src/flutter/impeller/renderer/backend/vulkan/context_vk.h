@@ -131,6 +131,10 @@ class ContextVK final : public Context,
   // |Context|
   const std::shared_ptr<const Capabilities>& GetCapabilities() const override;
 
+  // |Context|
+  virtual bool SubmitFinalCommandBuffer(
+      std::shared_ptr<CommandBuffer> cmd_buffer) override;
+
   const std::shared_ptr<YUVConversionLibraryVK>& GetYUVConversionLibrary()
       const;
 

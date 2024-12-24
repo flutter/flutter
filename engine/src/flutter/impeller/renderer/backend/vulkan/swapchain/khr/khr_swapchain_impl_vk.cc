@@ -13,11 +13,12 @@
 #include "impeller/renderer/backend/vulkan/gpu_tracer_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/khr/khr_swapchain_image_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/surface_vk.h"
+#include "impeller/renderer/backend/vulkan/texture_vk.h"
 #include "impeller/renderer/context.h"
 
 namespace impeller {
 
-static constexpr size_t kMaxFramesInFlight = 3u;
+static constexpr size_t kMaxFramesInFlight = 2u;
 
 struct KHRFrameSynchronizerVK {
   vk::UniqueFence acquire;
@@ -378,6 +379,12 @@ KHRSwapchainImplVK::AcquireResult KHRSwapchainImplVK::AcquireNextDrawable() {
       )};
 }
 
+void KHRSwapchainImplVK::AddFinalCommandBuffer(
+    std::shared_ptr<CommandBuffer> cmd_buffer) {
+  const auto& sync = synchronizers_[current_frame_];
+  sync->final_cmd_buffer = std::move(cmd_buffer);
+}
+
 bool KHRSwapchainImplVK::Present(
     const std::shared_ptr<KHRSwapchainImageVK>& image,
     uint32_t index) {
@@ -393,11 +400,7 @@ bool KHRSwapchainImplVK::Present(
   //----------------------------------------------------------------------------
   /// Transition the image to color-attachment-optimal.
   ///
-  sync->final_cmd_buffer = context.CreateCommandBuffer();
-  if (!sync->final_cmd_buffer) {
-    return false;
-  }
-
+  FML_DCHECK(!!sync->final_cmd_buffer);
   auto vk_final_cmd_buffer =
       CommandBufferVK::Cast(*sync->final_cmd_buffer).GetCommandBuffer();
   {

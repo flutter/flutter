@@ -14,7 +14,6 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/texture.h"
 #include "impeller/core/vertex_buffer.h"
-#include "impeller/renderer/backend/vulkan/barrier_vk.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
@@ -24,8 +23,6 @@
 #include "impeller/renderer/backend/vulkan/sampler_vk.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
-#include "vulkan/vulkan.hpp"
-#include "vulkan/vulkan_handles.hpp"
 
 namespace impeller {
 
@@ -81,7 +78,8 @@ static size_t GetVKClearValues(
 SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
     const ContextVK& context,
     const SharedHandleVK<vk::RenderPass>& recycled_renderpass,
-    const std::shared_ptr<CommandBufferVK>& command_buffer) const {
+    const std::shared_ptr<CommandBufferVK>& command_buffer,
+    bool is_swapchain) const {
   RenderPassBuilderVK builder;
 
   render_target_.IterateAllColorAttachments(
@@ -92,14 +90,8 @@ SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
             attachment.texture->GetTextureDescriptor().sample_count,  //
             attachment.load_action,                                   //
             attachment.store_action,                                  //
-            TextureVK::Cast(*attachment.texture).GetLayout()          //
+            vk::ImageLayout::eUndefined                               //
         );
-        TextureVK::Cast(*attachment.texture)
-            .SetLayoutWithoutEncoding(vk::ImageLayout::eGeneral);
-        if (attachment.resolve_texture) {
-          TextureVK::Cast(*attachment.resolve_texture)
-              .SetLayoutWithoutEncoding(vk::ImageLayout::eGeneral);
-        }
         return true;
       });
 
@@ -163,8 +155,9 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
 
   const auto& target_size = render_target_.GetRenderTargetSize();
 
-  render_pass_ =
-      CreateVKRenderPass(vk_context, recycled_render_pass, command_buffer_);
+  render_pass_ = CreateVKRenderPass(
+      vk_context, recycled_render_pass, command_buffer_,
+      TextureVK::Cast(*resolve_image_vk_).IsSwapchainImage());
   if (!render_pass_) {
     VALIDATION_LOG << "Could not create renderpass.";
     is_valid_ = false;
@@ -188,6 +181,8 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   if (resolve_image_vk_) {
     TextureVK::Cast(*resolve_image_vk_).SetCachedFramebuffer(framebuffer);
     TextureVK::Cast(*resolve_image_vk_).SetCachedRenderPass(render_pass_);
+    TextureVK::Cast(*resolve_image_vk_)
+        .SetLayoutWithoutEncoding(vk::ImageLayout::eGeneral);
   }
 
   std::array<vk::ClearValue, kMaxAttachments> clears;

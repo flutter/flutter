@@ -40,7 +40,7 @@ std::shared_ptr<Texture> InlinePassContext::GetTexture() {
   return pass_target_.GetRenderTarget().GetRenderTargetTexture();
 }
 
-bool InlinePassContext::EndPass() {
+bool InlinePassContext::EndPass(bool last_cmd_buffer) {
   if (!IsActive()) {
     return true;
   }
@@ -63,8 +63,13 @@ bool InlinePassContext::EndPass() {
   }
 
   pass_ = nullptr;
-  return renderer_.GetContext()->EnqueueCommandBuffer(
-      std::move(command_buffer_));
+  if (last_cmd_buffer) {
+    return renderer_.GetContext()->SubmitFinalCommandBuffer(
+        std::move(command_buffer_));
+  } else {
+    return renderer_.GetContext()->EnqueueCommandBuffer(
+        std::move(command_buffer_));
+  }
 }
 
 EntityPassTarget& InlinePassContext::GetPassTarget() const {

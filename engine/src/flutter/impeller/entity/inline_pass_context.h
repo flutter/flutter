@@ -27,7 +27,7 @@ class InlinePassContext {
 
   std::shared_ptr<Texture> GetTexture();
 
-  bool EndPass();
+  bool EndPass(bool last_cmd_buffer = false);
 
   EntityPassTarget& GetPassTarget() const;
 

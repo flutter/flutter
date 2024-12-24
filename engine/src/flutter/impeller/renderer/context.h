@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "fml/closure.h"
 #include "impeller/core/allocator.h"
@@ -241,6 +242,11 @@ class Context {
   /// This is used by the engine shell and other subsystems for loading the
   /// correct shader types.
   virtual RuntimeStageBackend GetRuntimeStageBackend() const = 0;
+
+  virtual bool SubmitFinalCommandBuffer(
+      std::shared_ptr<CommandBuffer> cmd_buffer) {
+    return EnqueueCommandBuffer(std::move(cmd_buffer));
+  }
 
  protected:
   Context();
