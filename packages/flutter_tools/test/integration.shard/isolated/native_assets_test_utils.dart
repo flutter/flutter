@@ -180,14 +180,18 @@ FFI_PLUGIN_EXPORT intptr_t add(intptr_t a, intptr_t b) {
 
   // Update builder to build the native library and link it into the main library.
   const String builderSource = r'''
-import 'package:native_toolchain_c/native_toolchain_c.dart';
+
 import 'package:logging/logging.dart';
-import 'package:native_assets_cli/native_assets_cli.dart';
+import 'package:native_assets_cli/code_assets.dart';
+import 'package:native_toolchain_c/native_toolchain_c.dart';
 
 void main(List<String> args) async {
   await build(args, (config, output) async {
     final packageName = config.packageName;
 
+    if (!config.supportedAssetTypes.contains(CodeAsset.type)) {
+      return;
+    }
     final builders = [
       CBuilder.library(
         name: 'add',
