@@ -237,6 +237,7 @@ class ExpansionTile extends StatefulWidget {
     required this.title,
     this.subtitle,
     this.onExpansionChanged,
+    this.childrenSpacing = 0.0,
     this.children = const <Widget>[],
     this.trailing,
     this.showTrailingIcon = true,
@@ -294,6 +295,14 @@ class ExpansionTile extends StatefulWidget {
   /// true. When the tile starts collapsing, this function is called with
   /// the value false.
   final ValueChanged<bool>? onExpansionChanged;
+
+  /// Specifies the spacing between each child in a [children], which are arranged in a column when
+  /// the tile is expanded.
+  ///
+  /// The internals of the expanded tile make use of a [Column] widget for
+  /// [children]. The [childrenSpacing] parameter is passed directly into the spacing parameter
+  /// inside [Column].
+  final double childrenSpacing;
 
   /// The widgets that are displayed when the tile expands.
   ///
@@ -923,6 +932,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           padding: widget.childrenPadding ?? expansionTileTheme.childrenPadding ?? EdgeInsets.zero,
           child: Column(
             crossAxisAlignment: widget.expandedCrossAxisAlignment ?? CrossAxisAlignment.center,
+            spacing: widget.childrenSpacing,
             children: widget.children,
           ),
         ),
