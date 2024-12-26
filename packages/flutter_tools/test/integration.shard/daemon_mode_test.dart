@@ -32,10 +32,12 @@ void main() {
     await project.setUpIn(tempDir);
 
     const ProcessManager processManager = LocalProcessManager();
-    daemonProcess = await processManager.start(
-      <String>[flutterBin, ...getLocalEngineArguments(), '--show-test-device', 'daemon'],
-      workingDirectory: tempDir.path,
-    );
+    daemonProcess = await processManager.start(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      '--show-test-device',
+      'daemon',
+    ], workingDirectory: tempDir.path);
 
     final StreamController<String> stdout = StreamController<String>.broadcast();
     transformToLines(daemonProcess.stdout).listen((String line) => stdout.add(line));
