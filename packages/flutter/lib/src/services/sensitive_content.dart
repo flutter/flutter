@@ -2,50 +2,67 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'system_channels.dart';
 
-/// Specifies the sensitivity level that a [SensitiveContent] widget could
-/// set for the Flutter app screen.
+/// The level of sensitivity that content in a particular Flutter view
+/// contains.
+/// 
+/// * See [SensitiveContent] for how to set a [ContentSensitivity] level
+///   in order for sensitive content to be obscured when the Flutter screen
+///   is shared. 
 enum ContentSensitivity {
-  /// Content sensitivity auto-detected by the native framework.
+  /// Content sensitivity is auto-detected by the native framework.
   /// 
-  /// On Android, a heurisitc based on autofill hints for text input is used to determine
-  /// if sensitive content is present. See
-  /// https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_AUTO.
-  // TODO(camsim99): Implement `autoSensitive` mode that will attempt to match
-  // the behavior of `CONTENT_SENSITIVITY_AUTO` on Android that has implemented
-  // based on autofill hints.
+  /// When this level is set via a [SensitiveContent] widget, the window
+  /// hosting the screen will only be marked as secure if other [SensitiveContent]
+  /// widgets with the [sensitive] level are present in the widget tree.
+  /// 
+  /// For Android, the sensitive content is unable to be auto-detected by the
+  /// native framework.
+  // TODO(camsim99): Implement `autoSensitive` mode that matches the behavior
+  // of `CONTENT_SENSITIVITY_AUTO` on Android that has implemented based on autofill hints.
+  // See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_AUTO.
   autoSensitive,
   
-  /// The screen displays sensitive content and the window hosting the screen
-  /// will be marked as secure during an active media projection session.
+  /// The view displays sensitive content.
+  /// 
+  /// When this level is set via a [SensitiveContent] widget, the window
+  /// hosting the screen will be marked as secure during an active media
+  /// projection session.
   /// 
   /// For Android, see https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_NOT_SENSITIVE.
   sensitive,
 
-  /// The screen does not display sensitive content.
+  /// The view does not display sensitive content.
+  /// 
+  /// When this level is set via a [SensitiveContent] widget, the window
+  /// hosting the screen will only be marked as secure if other [SensitiveContent]
+  /// widgets with the [sensitive] level are present in the widget tree.
   /// 
   /// For Android, see https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_NOT_SENSITIVE.
   notSensitive,
 }
 
-/// Service for setting content sensitivity of native Flutter views.
+/// Service for setting the content sensitivity of native Flutter views.
 class SensitiveContentService {
-  /// Creates service to content sensitivity via communication
-  /// over the sensitive content [MethodChannel].
+  /// Creates service to set content sensitivity of Flutter views via
+  /// communication over the sensitive content [MethodChannel].
   SensitiveContentService() {
     sensitiveContentChannel = SystemChannels.sensitiveContent;
   }
 
-  /// The channel used to communicate with the shell side to set
-  /// content sensitivity.
+  /// The channel used to communicate with the shell side to set the
+  /// content sensitivity of Flutter views.
   late MethodChannel sensitiveContentChannel;
 
-   /// Sets content sensitivity level of the Android `View` or `Fragment` with the specified
-   /// [flutterViewId] to the level specified by [contentSensitivity] by making a call to the
-   /// native embedder.
+   /// Sets content sensitivity level of the native backing to a Flutter view
+   /// with the specified [flutterViewId] to the level specified by
+   /// [contentSensitivity] via a call to the native embedder.
   void setContentSensitivity(int flutterViewId, ContentSensitivity contentSensitivity) {
     try {
       sensitiveContentChannel.invokeMethod(
