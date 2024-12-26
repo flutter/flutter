@@ -32,6 +32,7 @@ import 'platform_view.dart';
 import 'route.dart';
 import 'scrollable.dart';
 import 'semantics_helper.dart';
+import 'tabs.dart';
 import 'tappable.dart';
 import 'text_field.dart';
 
@@ -235,6 +236,7 @@ class SemanticsNodeUpdate {
     required this.additionalActions,
     required this.headingLevel,
     this.linkUrl,
+    required this.role,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -341,6 +343,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final String? linkUrl;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final ui.SemanticsRole role;
 }
 
 /// Identifies [SemanticRole] implementations.
@@ -401,6 +406,15 @@ enum SemanticRoleKind {
 
   /// Denotes a header.
   header,
+
+  /// An individual tab button.
+  tab,
+
+  /// Contains tab buttons.
+  tabList,
+
+  /// A main content for a tab.
+  tabPanel,
 
   /// A role used when a more specific role cannot be assigend to
   /// a [SemanticsObject].
@@ -1232,6 +1246,9 @@ class SemanticsObject {
   /// Controls the semantics tree that this node participates in.
   final EngineSemanticsOwner owner;
 
+  /// The role of this node.
+  late ui.SemanticsRole role;
+
   /// Bitfield showing which fields have been updated but have not yet been
   /// applied to the DOM.
   ///
@@ -1518,6 +1535,8 @@ class SemanticsObject {
       _markLinkUrlDirty();
     }
 
+    role = update.role;
+
     // Apply updates to the DOM.
     _updateRole();
 
@@ -1718,7 +1737,19 @@ class SemanticsObject {
     // The most specific role should take precedence.
     if (isPlatformView) {
       return SemanticRoleKind.platformView;
-    } else if (isHeading) {
+    }
+    switch (role) {
+      case ui.SemanticsRole.tab:
+        return SemanticRoleKind.tab;
+      case ui.SemanticsRole.tabPanel:
+        return SemanticRoleKind.tabPanel;
+      case ui.SemanticsRole.tabBar:
+        return SemanticRoleKind.tabList;
+      case ui.SemanticsRole.none:
+      // fallback to checking semantics properties.
+    }
+
+    if (isHeading) {
       // IMPORTANT: because headings also cover certain kinds of headers, the
       //            `heading` role has precedence over the `header` role.
       return SemanticRoleKind.heading;
@@ -1758,6 +1789,9 @@ class SemanticsObject {
       SemanticRoleKind.link => SemanticLink(this),
       SemanticRoleKind.heading => SemanticHeading(this),
       SemanticRoleKind.header => SemanticHeader(this),
+      SemanticRoleKind.tab => SemanticTab(this),
+      SemanticRoleKind.tabList => SemanticTabList(this),
+      SemanticRoleKind.tabPanel => SemanticTabPanel(this),
       SemanticRoleKind.generic => GenericRole(this),
     };
   }
