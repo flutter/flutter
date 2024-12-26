@@ -173,13 +173,22 @@ class Template {
     required Logger logger,
     required TemplateRenderer templateRenderer,
   }) async {
+    // TODO(matanl): Remove this once https://github.com/flutter/packages/pull/8336 is merged and published.
+    // See https://github.com/flutter/flutter/issues/160692.
+    final List<String> imageNames;
+    if (names.contains('app')) {
+      // Emulates what used to happen when app_shared existed. It still exist in package:flutter_template_images.
+      imageNames = <String>[...names, 'app_shared'];
+    } else {
+      imageNames = names;
+    }
     // All named templates are placed in the 'templates' directory
     return Template._(
       <Directory>[
         for (final String name in names) templatePathProvider.directoryInPackage(name, fileSystem),
       ],
       <Directory>[
-        for (final String name in names)
+        for (final String name in imageNames)
           if ((await templatePathProvider.imageDirectory(name, fileSystem, logger)).existsSync())
             await templatePathProvider.imageDirectory(name, fileSystem, logger),
       ],

@@ -2443,7 +2443,7 @@ final String _kTemplateRelativePath = path.join(
   'packages',
   'flutter_tools',
   'templates',
-  'app_shared',
+  'app',
   'windows.tmpl',
   'runner',
 );
@@ -2556,6 +2556,7 @@ const Set<String> kExecutableAllowlist = <String>{
   'bin/flutter',
   'bin/flutter-dev',
   'bin/internal/update_dart_sdk.sh',
+  'bin/internal/update_engine_version.sh',
 
   'dev/bots/accept_android_sdk_licenses.sh',
   'dev/bots/codelabs_build_test.sh',
@@ -2578,6 +2579,7 @@ const Set<String> kExecutableAllowlist = <String>{
   'dev/tools/repackage_gradle_wrapper.sh',
   'dev/tools/bin/engine_hash.sh',
   'dev/tools/format.sh',
+  'dev/tools/test/mock_git.sh',
 
   'packages/flutter_tools/bin/macos_assemble.sh',
   'packages/flutter_tools/bin/tool_backend.sh',
