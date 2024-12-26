@@ -16,11 +16,9 @@ class Foo {
   @_debugOnly
   final Map<String, String>? bar = kDebugMode ? null : <String, String>{};
 
-  // dart format off
+  // dart format off, checks the annotation works for multiline expressions
   @_debugOnly
-  final Map<String, String>? multiline = kDebugMode
-    ? <String, String>{}
-    : null;
+  final Map<String, String>? multiline = kDebugMode ? <String, String>{} : null;
   // dart format on
 }
 
