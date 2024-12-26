@@ -23,7 +23,7 @@ Future<Set<String>> computeExclusiveDevDependencies(
   Never fail([String? reason]) {
     logger.printTrace(const JsonEncoder.withIndent('  ').convert(jsonResult));
     throw StateError(
-      'dart pub deps --json ${reason != null ? 'had unexpected output: $reason' : 'failed'}'
+      'dart pub deps --json ${reason != null ? 'had unexpected output: $reason' : 'failed'}',
     );
   }
 
@@ -37,7 +37,7 @@ Future<Set<String>> computeExclusiveDevDependencies(
     }
     return <T>[
       for (final Object? any in value)
-        if (any is T) any else fail('Expected element to be a $T, got "$any"')
+        if (any is T) any else fail('Expected element to be a $T, got "$any"'),
     ];
   }
 
@@ -64,10 +64,7 @@ Future<Set<String>> computeExclusiveDevDependencies(
   //   ]
   // }
   // ```
-  final List<Map<String, Object?>> packages = asListOrFail(
-    jsonResult['packages'],
-    'packages',
-  );
+  final List<Map<String, Object?>> packages = asListOrFail(jsonResult['packages'], 'packages');
 
   Map<String, Object?> packageWhere(
     bool Function(Map<String, Object?>) test, {
@@ -82,10 +79,8 @@ Future<Set<String>> computeExclusiveDevDependencies(
   );
 
   // Start initially with every `devDependency` listed.
-  final Set<String> devDependencies = asListOrFail<String>(
-    rootPackage['devDependencies'] ?? <String>[],
-    'devDependencies',
-  ).toSet();
+  final Set<String> devDependencies =
+      asListOrFail<String>(rootPackage['devDependencies'] ?? <String>[], 'devDependencies').toSet();
 
   // Then traverse and exclude non-dev dependencies that list that dependency.
   //
@@ -117,7 +112,7 @@ Future<Set<String>> computeExclusiveDevDependencies(
 
     // Remove any listed dependency from dev dependencies; it might have been
     // a dev dependency for the app (root) package, but it is being used as a
-    // real dependency for a dependend on package, so we would not want to send
+    // real dependency for a dependent on package, so we would not want to send
     // a signal that the package can be ignored/removed.
     devDependencies.removeAll(directDependencies);
 

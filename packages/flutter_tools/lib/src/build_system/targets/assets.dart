@@ -22,6 +22,7 @@ import '../tools/scene_importer.dart';
 import '../tools/shader_compiler.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
+import 'native_assets.dart';
 
 /// A helper function to copy an asset bundle into an [environment]'s output
 /// directory.
@@ -42,7 +43,8 @@ Future<Depfile> copyAssets(
   String? flavor,
 }) async {
   // Check for an SkSL bundle.
-  final String? shaderBundlePath = environment.defines[kBundleSkSLPath] ?? environment.inputs[kBundleSkSLPath];
+  final String? shaderBundlePath =
+      environment.defines[kBundleSkSLPath] ?? environment.inputs[kBundleSkSLPath];
   final DevFSContent? skslBundle = processSkSLBundle(
     shaderBundlePath,
     engineVersion: environment.engineVersion,
@@ -51,14 +53,15 @@ Future<Depfile> copyAssets(
     targetPlatform: targetPlatform,
   );
 
-  final File pubspecFile =  environment.projectDir.childFile('pubspec.yaml');
+  final File pubspecFile = environment.projectDir.childFile('pubspec.yaml');
   // Only the default asset bundle style is supported in assemble.
-  final AssetBundle assetBundle = AssetBundleFactory.defaultInstance(
-    logger: environment.logger,
-    fileSystem: environment.fileSystem,
-    platform: environment.platform,
-    splitDeferredAssets: buildMode != BuildMode.debug && buildMode != BuildMode.jitRelease,
-  ).createBundle();
+  final AssetBundle assetBundle =
+      AssetBundleFactory.defaultInstance(
+        logger: environment.logger,
+        fileSystem: environment.fileSystem,
+        platform: environment.platform,
+        splitDeferredAssets: buildMode != BuildMode.debug && buildMode != BuildMode.jitRelease,
+      ).createBundle();
   final int resultCode = await assetBundle.build(
     manifestPath: pubspecFile.path,
     packageConfigPath: findPackageConfigFileOrDefault(environment.projectDir).path,
@@ -136,7 +139,8 @@ Future<Depfile> copyAssets(
         // platform channels in the framework will URI encode these values,
         // and the native APIs will look for files this way.
         final File file = environment.fileSystem.file(
-          environment.fileSystem.path.join(outputDirectory.path, entry.key));
+          environment.fileSystem.path.join(outputDirectory.path, entry.key),
+        );
         outputs.add(file);
         file.parent.createSync(recursive: true);
         final DevFSContent content = entry.value.content;
@@ -155,27 +159,32 @@ Future<Depfile> copyAssets(
                 );
                 doCopy = false;
                 if (failure != null) {
-                  throwToolExit('User-defined transformation of asset "${entry.key}" failed.\n'
-                      '${failure.message}');
+                  throwToolExit(
+                    'User-defined transformation of asset "${entry.key}" failed.\n'
+                    '${failure.message}',
+                  );
                 }
               }
             case AssetKind.font:
-              doCopy = !await iconTreeShaker.subsetFont(
-                input: content.file as File,
-                outputPath: file.path,
-                relativePath: entry.key,
-              );
+              doCopy =
+                  !await iconTreeShaker.subsetFont(
+                    input: content.file as File,
+                    outputPath: file.path,
+                    relativePath: entry.key,
+                  );
             case AssetKind.shader:
-              doCopy = !await shaderCompiler.compileShader(
-                input: content.file as File,
-                outputPath: file.path,
-                targetPlatform: targetPlatform,
-              );
+              doCopy =
+                  !await shaderCompiler.compileShader(
+                    input: content.file as File,
+                    outputPath: file.path,
+                    targetPlatform: targetPlatform,
+                  );
             case AssetKind.model:
-              doCopy = !await sceneImporter.importScene(
-                input: content.file as File,
-                outputPath: file.path,
-              );
+              doCopy =
+                  !await sceneImporter.importScene(
+                    input: content.file as File,
+                    outputPath: file.path,
+                  );
           }
           if (doCopy) {
             await (content.file as File).copy(file.path);
@@ -186,22 +195,26 @@ Future<Depfile> copyAssets(
       } finally {
         resource.release();
       }
-  }));
+    }),
+  );
 
   // Copy deferred components assets only for release or profile builds.
   // The assets are included in assetBundle.entries as a normal asset when
   // building as debug.
   if (environment.defines[kDeferredComponents] == 'true') {
-    await Future.wait<void>(assetBundle.deferredComponentsEntries.entries.map<Future<void>>(
-      (MapEntry<String, Map<String, AssetBundleEntry>> componentEntries) async {
-        final Directory componentOutputDir =
-            environment.projectDir
-                .childDirectory('build')
-                .childDirectory(componentEntries.key)
-                .childDirectory('intermediates')
-                .childDirectory('flutter');
+    await Future.wait<void>(
+      assetBundle.deferredComponentsEntries.entries.map<Future<void>>((
+        MapEntry<String, Map<String, AssetBundleEntry>> componentEntries,
+      ) async {
+        final Directory componentOutputDir = environment.projectDir
+            .childDirectory('build')
+            .childDirectory(componentEntries.key)
+            .childDirectory('intermediates')
+            .childDirectory('flutter');
         await Future.wait<void>(
-          componentEntries.value.entries.map<Future<void>>((MapEntry<String, AssetBundleEntry> entry) async {
+          componentEntries.value.entries.map<Future<void>>((
+            MapEntry<String, AssetBundleEntry> entry,
+          ) async {
             final PoolResource resource = await pool.request();
             try {
               // This will result in strange looking files, for example files with `/`
@@ -211,11 +224,20 @@ Future<Depfile> copyAssets(
               // and the native APIs will look for files this way.
 
               // If deferred components are disabled, then copy assets to regular location.
-              final File file = environment.defines[kDeferredComponents] == 'true'
-                ? environment.fileSystem.file(
-                    environment.fileSystem.path.join(componentOutputDir.path, buildMode.cliName, 'deferred_assets', 'flutter_assets', entry.key))
-                : environment.fileSystem.file(
-                    environment.fileSystem.path.join(outputDirectory.path, entry.key));
+              final File file =
+                  environment.defines[kDeferredComponents] == 'true'
+                      ? environment.fileSystem.file(
+                        environment.fileSystem.path.join(
+                          componentOutputDir.path,
+                          buildMode.cliName,
+                          'deferred_assets',
+                          'flutter_assets',
+                          entry.key,
+                        ),
+                      )
+                      : environment.fileSystem.file(
+                        environment.fileSystem.path.join(outputDirectory.path, entry.key),
+                      );
               outputs.add(file);
               file.parent.createSync(recursive: true);
               final DevFSContent content = entry.value.content;
@@ -234,13 +256,14 @@ Future<Depfile> copyAssets(
             } finally {
               resource.release();
             }
-        }));
-    }));
+          }),
+        );
+      }),
+    );
   }
   final Depfile depfile = Depfile(inputs + assetBundle.additionalDependencies, outputs);
   if (shaderBundlePath != null) {
-    final File skSLBundleFile = environment.fileSystem
-      .file(shaderBundlePath).absolute;
+    final File skSLBundleFile = environment.fileSystem.file(shaderBundlePath).absolute;
     depfile.inputs.add(skSLBundleFile);
   }
   return depfile;
@@ -258,7 +281,8 @@ const String kSkSLShaderBundlePath = 'io.flutter.shaders.json';
 ///
 /// If the current target platform is different than the platform constructed
 /// for the bundle, a warning will be printed.
-DevFSContent? processSkSLBundle(String? bundlePath, {
+DevFSContent? processSkSLBundle(
+  String? bundlePath, {
   required TargetPlatform targetPlatform,
   required FileSystem fileSystem,
   required Logger logger,
@@ -297,7 +321,7 @@ DevFSContent? processSkSLBundle(String? bundlePath, {
     logger.printError(
       'Expected Flutter $bundleEngineRevision, but found $engineVersion\n'
       'The SkSL bundle was produced with a different engine version. It must '
-      'be recreated for the current Flutter version.'
+      'be recreated for the current Flutter version.',
     );
     throw Exception('SkSL bundle was invalid');
   }
@@ -311,12 +335,10 @@ DevFSContent? processSkSLBundle(String? bundlePath, {
     logger.printError(
       'The SkSL bundle was created for $bundlePlatform, but the current '
       'platform is $targetPlatform. This may lead to less efficient shader '
-      'caching.'
+      'caching.',
     );
   }
-  return DevFSStringContent(json.encode(<String, Object?>{
-    'data': bundle['data'],
-  }));
+  return DevFSStringContent(json.encode(<String, Object?>{'data': bundle['data']}));
 }
 
 /// Copy the assets defined in the flutter manifest into a build directory.
@@ -327,13 +349,13 @@ class CopyAssets extends Target {
   String get name => 'copy_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    KernelSnapshot(),
-  ];
+  List<Target> get dependencies => const <Target>[KernelSnapshot(), InstallCodeAssets()];
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/assets.dart'),
+    Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/assets.dart',
+    ),
     ...IconTreeShaker.inputs,
     ...ShaderCompiler.inputs,
   ];
@@ -342,9 +364,7 @@ class CopyAssets extends Target {
   List<Source> get outputs => const <Source>[];
 
   @override
-  List<String> get depfiles => const <String>[
-    'flutter_assets.d',
-  ];
+  List<String> get depfiles => const <String>['flutter_assets.d'];
 
   @override
   Future<void> build(Environment environment) async {
@@ -353,9 +373,7 @@ class CopyAssets extends Target {
       throw MissingDefineException(kBuildMode, name);
     }
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
-    final Directory output = environment
-      .buildDir
-      .childDirectory('flutter_assets');
+    final Directory output = environment.buildDir.childDirectory('flutter_assets');
     output.createSync(recursive: true);
     final Depfile depfile = await copyAssets(
       environment,
@@ -363,6 +381,11 @@ class CopyAssets extends Target {
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],
+      additionalContent: <String, DevFSContent>{
+        'NativeAssetsManifest.json': DevFSFileContent(
+          environment.buildDir.childFile('native_assets.json'),
+        ),
+      },
     );
     environment.depFileService.writeToFile(
       depfile,
