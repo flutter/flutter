@@ -227,14 +227,14 @@ class Color {
   }
 
   /// A 32 bit value representing this color.
-  /// 
+  ///
   /// This getter is a _stub_. It is recommended instead to use the explicit
   /// [toARGB32] method.
   @Deprecated('Use component accessors like .r or .g, or toARGB32 for an explicit conversion')
   int get value => toARGB32();
 
   /// Returns a 32-bit value representing this color.
-  /// 
+  ///
   /// The returned value is compatible with the default constructor
   /// ([Color.new]) but does _not_ guarantee to result in the same color due to
   /// [imprecisions in numeric conversions](https://en.wikipedia.org/wiki/Floating-point_error_mitigation).
@@ -253,7 +253,7 @@ class Color {
   /// * Bits 16-23 represents the [r] channel as an 8-bit unsigned integer.
   /// * Bits 8-15 represents the [g] channel as an 8-bit unsigned integer.
   /// * Bits 0-7 represents the [b] channel as an 8-bit unsigned integer.
-  /// 
+  ///
   /// > [!WARNING]
   /// > The value returned by this getter implicitly converts normalized
   /// > component values (such as `0.5`) into their 8-bit equivalent by using
