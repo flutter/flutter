@@ -1765,6 +1765,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
       }
       await project.regeneratePlatformSpecificTooling(
         allowedPlugins: allowedPlugins,
+        releaseMode: getBuildMode().isRelease,
       );
       if (reportNullSafety) {
         await _sendNullSafetyAnalyticsEvents(project);

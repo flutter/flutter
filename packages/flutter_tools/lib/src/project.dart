@@ -346,6 +346,7 @@ class FlutterProject {
   Future<void> regeneratePlatformSpecificTooling({
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     Iterable<String>? allowedPlugins,
+    bool? releaseMode,
   }) async {
     return ensureReadyForPlatformSpecificTooling(
       androidPlatform: android.existsSync(),
@@ -358,6 +359,7 @@ class FlutterProject {
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       deprecationBehavior: deprecationBehavior,
       allowedPlugins: allowedPlugins,
+      releaseMode: releaseMode,
     );
   }
 
@@ -372,6 +374,7 @@ class FlutterProject {
     bool webPlatform = false,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     Iterable<String>? allowedPlugins,
+    bool? releaseMode,
   }) async {
     if (!directory.existsSync() || isPlugin) {
       return;
@@ -399,6 +402,7 @@ class FlutterProject {
     if (webPlatform) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
+    print('>>> releaseMode: $releaseMode');
     await injectPlugins(
       this,
       androidPlatform: androidPlatform,
@@ -407,6 +411,7 @@ class FlutterProject {
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
       allowedPlugins: allowedPlugins,
+      releaseMode: releaseMode,
     );
   }
 

@@ -439,6 +439,7 @@ class FlutterPlugin implements Plugin<Project> {
             project.getConfigurations().named("api")
             configuration = "${variantName}Api"
         } catch(UnknownTaskException ignored) {
+            println("CAMILLE: OOPS!!!!")
             configuration = "${variantName}Compile"
         }
         project.dependencies.add(configuration, dependency, config)
@@ -630,7 +631,8 @@ class FlutterPlugin implements Plugin<Project> {
         // This prevents duplicated classes when using custom build types. That is, a custom build
         // type like profile is used, and the plugin and app projects have API dependencies on the
         // embedding.
-        if (!isFlutterAppProject() || getPluginList(project).size() == 0) {
+        if (!isFlutterAppProject() || getPluginList(project).size() == 0) { //TODO(camsim99): It's possible that this is ignoring edge cases
+            println("camille: adding embedding dependency")
             addApiDependencies(project, buildType.name,
                     "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
         }
@@ -651,7 +653,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Finally, the project's `settings.gradle` loads each plugin's android directory as a subproject.
      */
     private void configurePlugins(Project project) {
-        configureLegacyPluginEachProjects(project)
+        // configureLegacyPluginEachProjects(project)
         getPluginList(project).each(this.&configurePluginProject)
         getPluginList(project).each(this.&configurePluginDependencies)
     }
@@ -763,6 +765,8 @@ class FlutterPlugin implements Plugin<Project> {
     /** Adds the plugin project dependency to the app project. */
     private void configurePluginProject(Map<String, Object> pluginObject) {
         assert(pluginObject.name instanceof String)
+        println("camille: configuring plugin project for:")
+        println(pluginObject.name)
         Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
         if (pluginProject == null) {
             return
@@ -772,18 +776,36 @@ class FlutterPlugin implements Plugin<Project> {
         pluginProject.extensions.create("flutter", FlutterExtension)
 
         // Add plugin dependency to the app project.
-        project.android.buildTypes.each { buildType ->
-            String flutterBuildMode = buildModeFor(buildType)
-            if (flutterBuildMode != "release" || !pluginObject.dev_dependency) {
-                // Only add dependency on dev dependencies in non-release builds.
-                project.dependencies {
-                    api(pluginProject)
-                }
+        // project.android.buildTypes.each { buildType ->
+        //     println("camille: 6 adding plugin dependency for buildtype: ")
+        //     String flutterBuildMode = buildModeFor(buildType)
+        //     println(flutterBuildMode)
+        //     // if (!pluginObject.dev_dependency) {
+        //     if (flutterBuildMode != "release" || !pluginObject.dev_dependency) {
+        //         // Only add dependency on dev dependencies in non-release builds.
+        //         println("camille: 7 actually adding it!")
+        //         project.dependencies {
+        //             api(pluginProject)
+        //         }
+        //     }
+        // }
+        if (pluginObject.dev_dependency) {
+            project.dependencies {
+                debugApi(pluginProject)
+            }
+        } else {
+            project.dependencies {
+                api(pluginProject)
             }
         }
 
+        println("----------------------------------------------")
+
         Closure addEmbeddingDependencyToPlugin = { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
+            println("camille 44: adding embedding dependency for build mode: ")
+            println(flutterBuildMode)
+            println(pluginObject.name)
             // In AGP 3.5, the embedding must be added as an API implementation,
             // so java8 features are desugared against the runtime classpath.
             // For more, see https://github.com/flutter/flutter/issues/40126
@@ -793,17 +815,22 @@ class FlutterPlugin implements Plugin<Project> {
             if (!pluginProject.hasProperty("android")) {
                 return
             }
+            //TODO(camsim99): It's possible that this is ignoring when we may still need the embedding.
+            // println("test 1")
             if (flutterBuildMode == "release" && pluginObject.dev_dependency) {
                 // This plugin is a dev dependency and will not be included in
                 // the release build,  so no need to add the embedding
                 // dependency to it.
+                println("camille: 5 not adding embedding dependency to plugin")
                 return
             }
             // Copy build types from the app to the plugin.
             // This allows to build apps with plugins and custom build types or flavors.
+            println("adding 1")
             pluginProject.android.buildTypes {
                 "${buildType.name}" {}
             }
+            println("adding 2")
             // The embedding is API dependency of the plugin, so the AGP is able to desugar
             // default method implementations when the interface is implemented by a plugin.
             //
@@ -814,6 +841,7 @@ class FlutterPlugin implements Plugin<Project> {
               buildType.name,
               "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
             )
+            println("adding 3")
         }
 
         // Wait until the Android plugin loaded.
@@ -985,6 +1013,8 @@ class FlutterPlugin implements Plugin<Project> {
      */
     private void configurePluginDependencies(Map<String, Object> pluginObject) {
         assert(pluginObject.name instanceof String)
+        println("camille: 1 configuring plugin dependencies for:")
+        println(pluginObject.name)
         Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
         if (pluginProject == null) {
             return
@@ -992,11 +1022,17 @@ class FlutterPlugin implements Plugin<Project> {
 
         project.android.buildTypes.each { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
+            println("camille: BUILD MODE:")
+            println(flutterBuildMode)
             if (flutterBuildMode == "release" && pluginObject.dev_dependency) {
                 // This plugin is a dev dependency will not be included in the
                 // release build, so no need to add its dependencies.
+                println("camille: 2 not configuring dependencies for:")
+                println(pluginObject.name)
                 return
             }
+            println("camille: 3 configuring dependencies for:")
+            println(pluginObject.name)
             def dependencies = pluginObject.dependencies
             assert(dependencies instanceof List<String>)
             dependencies.each { pluginDependencyName ->

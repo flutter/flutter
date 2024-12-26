@@ -354,7 +354,7 @@ public final class GeneratedPluginRegistrant {
 }
 ''';
 
-List<Map<String, Object?>> _extractPlatformMaps(List<Plugin> plugins, String type) {
+List<Map<String, Object?>> _extractPlatformMaps(Iterable<Plugin> plugins, String type) {
   return <Map<String, Object?>>[
     for (final Plugin plugin in plugins)
       if (plugin.platforms[type] case final PluginPlatform platformPlugin)
@@ -362,8 +362,12 @@ List<Map<String, Object?>> _extractPlatformMaps(List<Plugin> plugins, String typ
   ];
 }
 
-Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(plugins, AndroidPlugin.kConfigKey);
+Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins, {required bool releaseMode}) async {
+  Iterable<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(plugins, AndroidPlugin.kConfigKey);
+  if (releaseMode) {
+    methodChannelPlugins = methodChannelPlugins.where((Plugin p) => !p.isDevDependency);
+  }
+
   final List<Map<String, Object?>> androidPlugins = _extractPlatformMaps(methodChannelPlugins, AndroidPlugin.kConfigKey);
 
   final Map<String, Object> templateContext = <String, Object>{
@@ -391,6 +395,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
     globals.fs.file(registryPath),
     globals.templateRenderer,
   );
+  print(globals.fs.file(registryPath).readAsStringSync());
 }
 
 const String _objcPluginRegistryHeaderTemplate = '''
@@ -1129,12 +1134,13 @@ Future<void> injectPlugins(
   bool windowsPlatform = false,
   Iterable<String>? allowedPlugins,
   DarwinDependencyManagement? darwinDependencyManagement,
+  bool? releaseMode,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
   final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(plugins, pluginResolutionType: _PluginResolutionType.nativeOrDart);
 
   if (androidPlatform) {
-    await _writeAndroidPluginRegistrant(project, pluginsByPlatform[AndroidPlugin.kConfigKey]!);
+    await _writeAndroidPluginRegistrant(project, pluginsByPlatform[AndroidPlugin.kConfigKey]!, releaseMode: releaseMode ?? false);
   }
   if (iosPlatform) {
     await _writeIOSPluginRegistrant(project, pluginsByPlatform[IOSPlugin.kConfigKey]!);
