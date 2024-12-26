@@ -8,17 +8,17 @@ import '../web.dart' as web;
 import 'image_stream.dart';
 
 /// An [ImageInfo] object indicating that the image can only be displayed in
-/// an <img> element, and no [dart:ui.Image] can be created for it.
+/// an `<img>` element, and no [dart:ui.Image] can be created for it.
 ///
 /// This occurs on the web when the image resource is from a different origin
 /// and is not configured for CORS. Since the image bytes cannot be directly
 /// fetched, [ui.Image]s cannot be created from it. However, the image can
-/// still be displayed if an <img> element is used.
+/// still be displayed if an `<img>` element is used.
 class WebImageInfo implements ImageInfo {
-  /// Creates a new [WebImageInfo] from a given <img> element.
+  /// Creates a new [WebImageInfo] from a given `<img>` element.
   WebImageInfo(this.htmlImage, {this.debugLabel});
 
-  /// The <img> element used to display this image. This <img> element has
+  /// The <img> element used to display this image. This `<img>` element has
   /// already been decoded, so size information can be retrieved from it.
   final web.HTMLImageElement htmlImage;
 

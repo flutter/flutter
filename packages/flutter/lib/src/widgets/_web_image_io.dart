@@ -6,7 +6,7 @@ import '../painting/_web_image_info_io.dart';
 import 'basic.dart';
 import 'framework.dart';
 
-/// A [Widget] that displays an image that is backed by an <img> element.
+/// A [Widget] that displays an image that is backed by an `<img>` element.
 class RawWebImage extends StatelessWidget {
   /// Creates a [RawWebImage].
   RawWebImage({

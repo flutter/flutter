@@ -6,6 +6,7 @@
 // late BuildContext context;
 
 /// @docImport 'package:flutter/widgets.dart';
+/// @docImport '_web_image_info_io.dart';
 library;
 
 import 'dart:async';
@@ -1466,9 +1467,43 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   }
 }
 
+/// The strategy for [Image.network] and [NetworkImage] to decide whether to
+/// display images in `<img>` elements in a platform view instead of fetching
+/// bytes.
+///
+/// See [Image.network] for more explanation on the impact.
+///
+/// This option is only effective on the Web platform. Other platforms always
+/// display network images by fetching bytes.
+enum WebImgElementStrategy {
+  /// Never use `<img>` elements.
+  ///
+  /// Fetch errors, including CORS errors, are reported.
+  never,
+
+  /// Use `<img>` elements when fetching bytes is not available.
+  ///
+  /// This strategy uses `<img>` elements if `headers` is empty and the fetch
+  /// encounters errors.
+  whenNecessary,
+
+  /// Always use `<img>` elements as long as `headers` is empty.
+  ///
+  /// This strategy still fetches bytes if `headers` is not empty, since `<img>`
+  /// elements do not support headers.
+  always,
+}
+
 /// Fetches the given URL from the network, associating it with the given scale.
 ///
 /// The image will be cached regardless of cache headers from the server.
+///
+/// Typically this class resolves to an image stream that ultimately produces
+/// [dart:ui.Image]s. On the Web platform, the [useImgElement] parameter
+/// can be used to make the image stream ultimately produce an [WebImageInfo]
+/// instead, which makes [Image.network] display the image as an HTML `<img>`
+/// element in a platform view. The feature is by default turned off
+/// ([WebImgElementStrategy.never]). See [Image.network] for more explanation.
 ///
 /// See also:
 ///
@@ -1483,8 +1518,14 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
   ///
   /// The [scale] argument is the linear scale factor for drawing this image at
   /// its intended size. See [ImageInfo.scale] for more information.
-  const factory NetworkImage(String url, {double scale, Map<String, String>? headers}) =
-      network_image.NetworkImage;
+  ///
+  /// The [useImgElement] is by default [WebImgElementStrategy.never].
+  const factory NetworkImage(
+    String url, {
+      double scale,
+      Map<String, String>? headers,
+      WebImgElementStrategy useImgElement,
+    }) = network_image.NetworkImage;
 
   /// The URL from which the image will be fetched.
   String get url;
@@ -1496,6 +1537,17 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
   ///
   /// When running Flutter on the web, headers are not used.
   Map<String, String>? get headers;
+
+  /// On the Web platform, specifies when the image is loaded as a
+  /// [WebImageInfo], which causes [Image.network] to display the image in an
+  /// HTML `<img>` tag in a platform view.
+  ///
+  /// See [Image.network] for more explanation.
+  ///
+  /// Defaults to [WebImgElementStrategy.never].
+  ///
+  /// Has no effect on other platforms, which always fetch bytes.
+  WebImgElementStrategy get useImgElement;
 
   @override
   ImageStreamCompleter loadBuffer(NetworkImage key, DecoderBufferCallback decode);
