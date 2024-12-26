@@ -54,7 +54,7 @@ enum RemovedFlutterTemplateType implements ParsedFlutterTemplateType {
         'Formerly generated a list view / detail view Flutter application that '
         'followed some community best practices. For up to date resources, see '
         'https://flutter.github.io/samples, https://docs.flutter.dev/codelabs, '
-        'and external resources such as https://flutter-builder.app/.',
+        'and community resources such as https://flutter-builder.app/.',
   );
 
   const RemovedFlutterTemplateType({required this.helpText});
