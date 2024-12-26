@@ -311,12 +311,12 @@ void main() {
       shouldHaveErrors: true,
     );
     final String lines = <String>[
-      '║ packages/flutter/lib/bar.dart:44: input.clamp(0.0, 2)',
-      '║ packages/flutter/lib/bar.dart:45: input.toDouble().clamp(0, 2)',
-      '║ packages/flutter/lib/bar.dart:49: nullableInt?.clamp(0, 2.0)',
-      '║ packages/flutter/lib/bar.dart:50: nullableDouble?.clamp(0, 2)',
-      '║ packages/flutter/lib/bar.dart:55: nullableInt?.clamp',
-      '║ packages/flutter/lib/bar.dart:57: nullableDouble?.clamp',
+      '║ packages/flutter/lib/bar.dart:45: input.clamp(0.0, 2)',
+      '║ packages/flutter/lib/bar.dart:46: input.toDouble().clamp(0, 2)',
+      '║ packages/flutter/lib/bar.dart:50: nullableInt?.clamp(0, 2.0)',
+      '║ packages/flutter/lib/bar.dart:51: nullableDouble?.clamp(0, 2)',
+      '║ packages/flutter/lib/bar.dart:56: nullableInt?.clamp',
+      '║ packages/flutter/lib/bar.dart:58: nullableDouble?.clamp',
     ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/')).join('\n');
     expect(
       result,
