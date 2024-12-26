@@ -14,6 +14,7 @@
 /// @docImport 'raw_keyboard.dart';
 /// @docImport 'raw_keyboard_android.dart';
 /// @docImport 'raw_keyboard_fuchsia.dart';
+/// @docImport 'sensitive_content.dart';
 /// @docImport 'system_chrome.dart';
 /// @docImport 'system_navigator.dart';
 /// @docImport 'system_sound.dart';
@@ -591,15 +592,14 @@ abstract final class SystemChannels {
     'flutter/keyboard',
   );
 
-  /// A [MethodChannel] for setting content sensitivity of native Flutter views.
+  /// A [MethodChannel] for setting content sensitivity of Flutter views.
+  /// Currently supported on Android only.
   /// 
   /// The following outgoing method is defined for this channel (invvoked using
   /// [OptionalMethodChannel.invokeMethod]):
   /// 
-  ///  * `setContentSensitivity`: Sets the content sensitivity of the Flutter view.
-  ///     Only one of the [ContentSensitivity] levels allowed.
-  /// 
-  /// Current only suppoted on Android.
+  ///  * `setContentSensitivity`: Sets the content sensitivity level of the native backing
+  ///     backing for the Flutter view to one of the [ContentSensitivity] levels.
   static const MethodChannel sensitiveContent = OptionalMethodChannel(
     'flutter/sensitivecontent',
   );
