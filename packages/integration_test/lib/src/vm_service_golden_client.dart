@@ -37,7 +37,7 @@ import 'package:meta/meta.dart';
 /// with [dev.postEvent]:
 ///
 /// ```dart
-/// postEvent('compare' /* or 'update' */, <String, Object?>{
+/// dev.postEvent('compare' /* or 'update' */, <String, Object?>{
 ///   'id':    1001,                 // a valid unique integer, often incrementing;
 ///   'path':  'path/to/image.png',  // golden key created by matchesGoldenFile;
 ///   'bytes': '...base64encoded',   // base64 encoded bytes representing the current image.
