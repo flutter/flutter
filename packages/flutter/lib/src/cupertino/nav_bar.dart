@@ -63,6 +63,10 @@ const double _kNavBarBottomPadding = 8.0;
 
 const double _kNavBarBackButtonTapWidth = 50.0;
 
+/// The width of the 'Cancel' button if the search field in a
+/// [CupertinoSliverNavigationBar.search] is active.
+const double _kSearchFieldCancelButtonWidth = 83.0;
+
 /// Title text transfer fade.
 const Duration _kNavBarTitleFadeDuration = Duration(milliseconds: 150);
 
@@ -1228,7 +1232,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                               child: child,
                             ),
                             SizedBox(
-                              width: _animationController.value * 83.0,
+                              width: _animationController.value * _kSearchFieldCancelButtonWidth,
                               child: Opacity(
                                 opacity: 0.4,
                                 child: CupertinoButton(
@@ -1274,7 +1278,10 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                       ),
                     ),
                     builder: (BuildContext context, Widget? child) {
-                      return SizedBox(width: _animationController.value * 83.0, child: child);
+                      return SizedBox(
+                        width: _animationController.value * _kSearchFieldCancelButtonWidth,
+                        child: child,
+                      );
                     },
                   ),
                 ],

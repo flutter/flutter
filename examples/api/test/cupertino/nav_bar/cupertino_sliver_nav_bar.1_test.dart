@@ -102,8 +102,9 @@ void main() {
 
     expect(find.widgetWithText(CupertinoSearchTextField, 'Search'), findsOneWidget);
     expect(find.text('Tap on the search field to open the search view'), findsOneWidget);
-    expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsNothing);
     expect(find.text('This is a search view'), findsNothing);
+    // A decoy 'Cancel' button used in the animation.
+    expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
 
     // Tap on the search field to open the search view.
     await tester.tap(find.byType(CupertinoSearchTextField), warnIfMissed: false);
@@ -120,8 +121,9 @@ void main() {
 
     expect(find.widgetWithText(CupertinoSearchTextField, 'Search'), findsOneWidget);
     expect(find.text('Tap on the search field to open the search view'), findsOneWidget);
-    expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsNothing);
     expect(find.text('This is a search view'), findsNothing);
+    // A decoy 'Cancel' button used in the animation.
+    expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
   });
 
   testWidgets('CupertinoSliverNavigationBar with previous route has back button', (
@@ -137,7 +139,7 @@ void main() {
     expect(nextButton1, findsNothing);
 
     // Go back to the previous page.
-    final Finder backButton1 = find.byType(CupertinoButton);
+    final Finder backButton1 = find.byType(CupertinoButton).first;
     expect(backButton1, findsOneWidget);
     await tester.tap(backButton1);
     await tester.pumpAndSettle();
@@ -151,7 +153,7 @@ void main() {
     expect(nextButton2, findsNothing);
 
     // Go back to the previous page.
-    final Finder backButton2 = find.byType(CupertinoButton);
+    final Finder backButton2 = find.byType(CupertinoButton).first;
     expect(backButton2, findsOneWidget);
     await tester.tap(backButton2);
     await tester.pumpAndSettle();
