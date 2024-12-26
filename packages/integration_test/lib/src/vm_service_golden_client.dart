@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Examples can assume:
+// import 'dart:developer' as dev;
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as dev;
@@ -34,7 +37,7 @@ import 'package:meta/meta.dart';
 /// with [dev.postEvent]:
 ///
 /// ```dart
-/// postEvent('compare' /* or 'update' */, {
+/// postEvent('compare' /* or 'update' */, <String, Object?>{
 ///   'id':    1001,                 // a valid unique integer, often incrementing;
 ///   'path':  'path/to/image.png',  // golden key created by matchesGoldenFile;
 ///   'bytes': '...base64encoded',   // base64 encoded bytes representing the current image.
@@ -46,7 +49,7 @@ import 'package:meta/meta.dart';
 /// of the following formats:
 ///
 /// ```dart
-/// {
+/// <String, Object?>{
 ///   'error': 'Description of why the operation failed'
 /// }
 /// ```
@@ -54,7 +57,7 @@ import 'package:meta/meta.dart';
 /// or:
 ///
 /// ```dart
-/// {
+/// <String, Object?>{
 ///   'result': true /* or possibly false, in the case of 'compare' calls */
 /// }
 /// ```
