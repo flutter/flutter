@@ -403,7 +403,7 @@ interface class SkiaGoldClient {
             ..writeln('testing. Golden file images in flutter/engine are triaged ')
             ..writeln('in pre-submit during code review for the given PR.')
             ..writeln()
-            ..writeln('Visit https://flutter-engine-gold.skia.org/ to view and approve ')
+            ..writeln('Visit https://flutter-gold.skia.org/ to view and approve ')
             ..writeln('the image(s), or revert the associated change. For more ')
             ..writeln('information, visit the wiki: ')
             ..writeln(
