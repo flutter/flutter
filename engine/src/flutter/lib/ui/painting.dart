@@ -64,11 +64,11 @@ Color _scaleAlpha(Color x, double factor) {
 /// Here are some ways it could be constructed:
 ///
 /// ```dart
-/// Color c1 = const Color.from(alpha: 1.0, red: 0.2588, green: 0.6471, blue: 0.9608);
-/// Color c2 = const Color(0xFF42A5F5);
-/// Color c3 = const Color.fromARGB(0xFF, 0x42, 0xA5, 0xF5);
-/// Color c4 = const Color.fromARGB(255, 66, 165, 245);
-/// Color c5 = const Color.fromRGBO(66, 165, 245, 1.0);
+/// const c1 = Color.from(alpha: 1.0, red: 0.2588, green: 0.6471, blue: 0.9608);
+/// const c2 = Color(0xFF42A5F5);
+/// const c3 = Color.fromARGB(0xFF, 0x42, 0xA5, 0xF5);
+/// const c4 = Color.fromARGB(255, 66, 165, 245);
+/// const c5 = Color.fromRGBO(66, 165, 245, 1.0);
 /// ```
 ///
 /// If you are having a problem with [Color.new] wherein it seems your color is
@@ -77,11 +77,11 @@ Color _scaleAlpha(Color x, double factor) {
 /// assumed to be zero, which means fully-transparent:
 ///
 /// ```dart
-/// Color c1 = const Color(0xFFFFFF); // fully transparent white (invisible)
-/// Color c2 = const Color(0xFFFFFFFF); // fully opaque white (visible)
+/// const c1 = Color(0xFFFFFF); // fully transparent white (invisible)
+/// const c2 = Color(0xFFFFFFFF); // fully opaque white (visible)
 ///
 /// // Or use double-based channel values:
-/// Color c3 = const Color.from(alpha: 1.0, red: 1.0, green: 1.0, blue: 1.0);
+/// const c3 = Color.from(alpha: 1.0, red: 1.0, green: 1.0, blue: 1.0);
 /// ```
 ///
 /// [Color]'s color components are stored as floating-point values. Care should
@@ -108,7 +108,7 @@ class Color {
   ///
   /// In other words, if AA is the alpha value in hex, RR the red value in hex,
   /// GG the green value in hex, and BB the blue value in hex, a color can be
-  /// expressed as `const Color(0xAARRGGBB)`.
+  /// expressed as `Color(0xAARRGGBB)`.
   ///
   /// For example, to get a fully opaque orange, you would use `const
   /// Color(0xFFFF9000)` (`FF` for the alpha, `FF` for the red, `90` for the
@@ -134,13 +134,13 @@ class Color {
   ///
   /// ```dart
   /// // Fully opaque maximum red color
-  /// const Color c1 = Color.from(alpha: 1.0, red: 1.0, green: 0.0, blue: 0.0);
+  /// const c1 = Color.from(alpha: 1.0, red: 1.0, green: 0.0, blue: 0.0);
   ///
   /// // Partially transparent moderately blue and green color
-  /// const Color c2 = Color.from(alpha: 0.5, red: 0.0, green: 0.5, blue: 0.5);
+  /// const c2 = Color.from(alpha: 0.5, red: 0.0, green: 0.5, blue: 0.5);
   ///
   /// // Fully transparent color
-  /// const Color c3 = Color.from(alpha: 0.0, red: 0.0, green: 0.0, blue: 0.0);
+  /// const c3 = Color.from(alpha: 0.0, red: 0.0, green: 0.0, blue: 0.0);
   /// ```
   const Color.from({
     required double alpha,
@@ -3963,7 +3963,7 @@ class ColorFilter implements ImageFilter {
   /// in unnormalized, 0...255, space. For example, the identity matrix is:
   ///
   /// ```dart
-  /// const ColorFilter identity = ColorFilter.matrix(<double>[
+  /// const identity = ColorFilter.matrix(<double>[
   ///   1, 0, 0, 0, 0,
   ///   0, 1, 0, 0, 0,
   ///   0, 0, 1, 0, 0,
@@ -3976,7 +3976,7 @@ class ColorFilter implements ImageFilter {
   /// An inversion color matrix:
   ///
   /// ```dart
-  /// const ColorFilter invert = ColorFilter.matrix(<double>[
+  /// const invert = ColorFilter.matrix(<double>[
   ///   -1,  0,  0, 0, 255,
   ///    0, -1,  0, 0, 255,
   ///    0,  0, -1, 0, 255,
@@ -3987,7 +3987,7 @@ class ColorFilter implements ImageFilter {
   /// A sepia-toned color matrix (values based on the [Filter Effects Spec](https://www.w3.org/TR/filter-effects-1/#sepiaEquivalent)):
   ///
   /// ```dart
-  /// const ColorFilter sepia = ColorFilter.matrix(<double>[
+  /// const sepia = ColorFilter.matrix(<double>[
   ///   0.393, 0.769, 0.189, 0, 0,
   ///   0.349, 0.686, 0.168, 0, 0,
   ///   0.272, 0.534, 0.131, 0, 0,
@@ -3998,7 +3998,7 @@ class ColorFilter implements ImageFilter {
   /// A greyscale color filter (values based on the [Filter Effects Spec](https://www.w3.org/TR/filter-effects-1/#grayscaleEquivalent)):
   ///
   /// ```dart
-  /// const ColorFilter greyscale = ColorFilter.matrix(<double>[
+  /// const greyscale = ColorFilter.matrix(<double>[
   ///   0.2126, 0.7152, 0.0722, 0, 0,
   ///   0.2126, 0.7152, 0.0722, 0, 0,
   ///   0.2126, 0.7152, 0.0722, 0, 0,
