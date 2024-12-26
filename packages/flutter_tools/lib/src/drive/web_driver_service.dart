@@ -178,8 +178,9 @@ class WebDriverService extends DriverService {
               'height': height,
               'pixelRatio': double.parse(browserDimension[2]),
             },
-            'userAgent': 'Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36 '
-                '(KHTML, like Gecko) Chrome/131.0.6778.200 Mobile Safari/537.36',
+            'userAgent':
+                'Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36 (KHTML, '
+                'like Gecko) Chrome/131.0.6778.200 Mobile Safari/537.36',
           };
         }
       } on FormatException {
