@@ -58,17 +58,17 @@ Color _scaleAlpha(Color x, double factor) {
 /// is fully opaque, with a red [r] channel value of `0.2588` (or `0x42` or `66`
 /// as an 8-bit value), a green [g] channel value of `0.6471` (or `0xA5` or
 /// `165` as an 8-bit value), and a blue [b] channel value of `0.9608` (or
-/// `0xF5` or `245` as an 8-bit value). In the common "hash syntax" for RGB
-/// color values, it would be described as `#42A5F5`.
+/// `0xF5` or `245` as an 8-bit value). In a common [CSS hex color syntax](https://developer.mozilla.org/en-US/docs/Web/CSS/hex-color)
+/// for RGB color values, it would be described as `#42A5F5`.
 ///
 /// Here are some ways it could be constructed:
 ///
 /// ```dart
-/// const c1 = Color.from(alpha: 1.0, red: 0.2588, green: 0.6471, blue: 0.9608);
-/// const c2 = Color(0xFF42A5F5);
-/// const c3 = Color.fromARGB(0xFF, 0x42, 0xA5, 0xF5);
-/// const c4 = Color.fromARGB(255, 66, 165, 245);
-/// const c5 = Color.fromRGBO(66, 165, 245, 1.0);
+/// const Color c1 = Color.from(alpha: 1.0, red: 0.2588, green: 0.6471, blue: 0.9608);
+/// const Color c2 = Color(0xFF42A5F5);
+/// const Color c3 = Color.fromARGB(0xFF, 0x42, 0xA5, 0xF5);
+/// const Color c4 = Color.fromARGB(255, 66, 165, 245);
+/// const Color c5 = Color.fromRGBO(66, 165, 245, 1.0);
 /// ```
 ///
 /// If you are having a problem with [Color.new] wherein it seems your color is
@@ -77,11 +77,11 @@ Color _scaleAlpha(Color x, double factor) {
 /// assumed to be zero, which means fully-transparent:
 ///
 /// ```dart
-/// const c1 = Color(0xFFFFFF); // fully transparent white (invisible)
-/// const c2 = Color(0xFFFFFFFF); // fully opaque white (visible)
+/// const Color c1 = Color(0xFFFFFF); // fully transparent white (invisible)
+/// const Color c2 = Color(0xFFFFFFFF); // fully opaque white (visible)
 ///
 /// // Or use double-based channel values:
-/// const c3 = Color.from(alpha: 1.0, red: 1.0, green: 1.0, blue: 1.0);
+/// const Color c3 = Color.from(alpha: 1.0, red: 1.0, green: 1.0, blue: 1.0);
 /// ```
 ///
 /// [Color]'s color components are stored as floating-point values. Care should
@@ -134,13 +134,13 @@ class Color {
   ///
   /// ```dart
   /// // Fully opaque maximum red color
-  /// const c1 = Color.from(alpha: 1.0, red: 1.0, green: 0.0, blue: 0.0);
+  /// const Color c1 = Color.from(alpha: 1.0, red: 1.0, green: 0.0, blue: 0.0);
   ///
   /// // Partially transparent moderately blue and green color
-  /// const c2 = Color.from(alpha: 0.5, red: 0.0, green: 0.5, blue: 0.5);
+  /// const Color c2 = Color.from(alpha: 0.5, red: 0.0, green: 0.5, blue: 0.5);
   ///
   /// // Fully transparent color
-  /// const c3 = Color.from(alpha: 0.0, red: 0.0, green: 0.0, blue: 0.0);
+  /// const Color c3 = Color.from(alpha: 0.0, red: 0.0, green: 0.0, blue: 0.0);
   /// ```
   const Color.from({
     required double alpha,
@@ -210,7 +210,7 @@ class Color {
   /// The normalized green channel of this color.
   ///
   /// A value of `0.0` represents no red in this color. A value of `1.0`
-  /// represents the maximum amount of greeb.
+  /// represents the maximum amount of green.
   final double g;
 
   /// The blue channel of this color.
@@ -227,24 +227,17 @@ class Color {
   }
 
   /// A 32 bit value representing this color.
-  ///
-  /// The bits are assigned as follows:
-  ///
-  /// * Bits 24-31 are the alpha value.
-  /// * Bits 16-23 are the red value.
-  /// * Bits 8-15 are the green value.
-  /// * Bits 0-7 are the blue value.
-  ///
-  /// > [!WARNING]
-  /// > The value returned by this getter implicitly converts normalized
-  /// > component values (such as `0.5`) into their 8-bit equivalent by using
-  /// > the [toARGB32] method; the returned value is not guaranteed to be stable
-  /// > across different platforms or executions due to the complexity of
-  /// > floating-point math.
+  /// 
+  /// This getter is a _stub_. It is recommended instead to use the explicit
+  /// [toARGB32] method.
   @Deprecated('Use component accessors like .r or .g, or toARGB32 for an explicit conversion')
   int get value => toARGB32();
 
   /// Returns a 32-bit value representing this color.
+  /// 
+  /// The returned value is compatible with the default constructor
+  /// ([Color.new]) but does _not_ guarantee to result in the same color due to
+  /// [imprecisions in numeric conversions](https://en.wikipedia.org/wiki/Floating-point_error_mitigation).
   ///
   /// Unlike accessing the floating point equivalent channels individually
   /// ([a], [r], [g], [b]), this method is intentionally _lossy_, and scales
@@ -260,6 +253,13 @@ class Color {
   /// * Bits 16-23 represents the [r] channel as an 8-bit unsigned integer.
   /// * Bits 8-15 represents the [g] channel as an 8-bit unsigned integer.
   /// * Bits 0-7 represents the [b] channel as an 8-bit unsigned integer.
+  /// 
+  /// > [!WARNING]
+  /// > The value returned by this getter implicitly converts normalized
+  /// > component values (such as `0.5`) into their 8-bit equivalent by using
+  /// > the [toARGB32] method; the returned value is not guaranteed to be stable
+  /// > across different platforms or executions due to the complexity of
+  /// > floating-point math.
   int toARGB32() {
     return _floatToInt8(a) << 24 |
         _floatToInt8(r) << 16 |
@@ -3963,7 +3963,7 @@ class ColorFilter implements ImageFilter {
   /// in unnormalized, 0...255, space. For example, the identity matrix is:
   ///
   /// ```dart
-  /// const identity = ColorFilter.matrix(<double>[
+  /// const ColorFilter identity = ColorFilter.matrix(<double>[
   ///   1, 0, 0, 0, 0,
   ///   0, 1, 0, 0, 0,
   ///   0, 0, 1, 0, 0,
@@ -3976,7 +3976,7 @@ class ColorFilter implements ImageFilter {
   /// An inversion color matrix:
   ///
   /// ```dart
-  /// const invert = ColorFilter.matrix(<double>[
+  /// const ColorFilter invert = ColorFilter.matrix(<double>[
   ///   -1,  0,  0, 0, 255,
   ///    0, -1,  0, 0, 255,
   ///    0,  0, -1, 0, 255,
@@ -3987,7 +3987,7 @@ class ColorFilter implements ImageFilter {
   /// A sepia-toned color matrix (values based on the [Filter Effects Spec](https://www.w3.org/TR/filter-effects-1/#sepiaEquivalent)):
   ///
   /// ```dart
-  /// const sepia = ColorFilter.matrix(<double>[
+  /// const ColorFilter sepia = ColorFilter.matrix(<double>[
   ///   0.393, 0.769, 0.189, 0, 0,
   ///   0.349, 0.686, 0.168, 0, 0,
   ///   0.272, 0.534, 0.131, 0, 0,
@@ -3998,7 +3998,7 @@ class ColorFilter implements ImageFilter {
   /// A greyscale color filter (values based on the [Filter Effects Spec](https://www.w3.org/TR/filter-effects-1/#grayscaleEquivalent)):
   ///
   /// ```dart
-  /// const greyscale = ColorFilter.matrix(<double>[
+  /// const ColorFilter greyscale = ColorFilter.matrix(<double>[
   ///   0.2126, 0.7152, 0.0722, 0, 0,
   ///   0.2126, 0.7152, 0.0722, 0, 0,
   ///   0.2126, 0.7152, 0.0722, 0, 0,
