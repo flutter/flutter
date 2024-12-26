@@ -238,6 +238,74 @@ void sendSemanticsUpdate() {
   _semanticsUpdate(builder.build());
 }
 
+@pragma('vm:entry-point')
+void sendSemanticsUpdateWithRole() {
+  final SemanticsUpdateBuilder builder = SemanticsUpdateBuilder();
+
+  final Float64List transform = Float64List(16);
+  final Int32List childrenInTraversalOrder = Int32List(0);
+  final Int32List childrenInHitTestOrder = Int32List(0);
+  final Int32List additionalActions = Int32List(0);
+  transform[0] = 1;
+  transform[1] = 0;
+  transform[2] = 0;
+  transform[3] = 0;
+
+  transform[4] = 0;
+  transform[5] = 1;
+  transform[6] = 0;
+  transform[7] = 0;
+
+  transform[8] = 0;
+  transform[9] = 0;
+  transform[10] = 1;
+  transform[11] = 0;
+
+  transform[12] = 0;
+  transform[13] = 0;
+  transform[14] = 0;
+  transform[15] = 0;
+  builder.updateNode(
+    id: 0,
+    flags: 0,
+    actions: 0,
+    maxValueLength: 0,
+    currentValueLength: 0,
+    textSelectionBase: -1,
+    textSelectionExtent: -1,
+    platformViewId: -1,
+    scrollChildren: 0,
+    scrollIndex: 0,
+    scrollPosition: 0,
+    scrollExtentMax: 0,
+    scrollExtentMin: 0,
+    rect: Rect.fromLTRB(0, 0, 10, 10),
+    elevation: 0,
+    thickness: 0,
+    identifier: "identifier",
+    label: "label",
+    labelAttributes: const <StringAttribute>[],
+    value: "value",
+    valueAttributes: const <StringAttribute>[],
+    increasedValue: "increasedValue",
+    increasedValueAttributes: const <StringAttribute>[],
+    decreasedValue: "decreasedValue",
+    decreasedValueAttributes: const <StringAttribute>[],
+    hint: "hint",
+    hintAttributes: const <StringAttribute>[],
+    tooltip: "tooltip",
+    textDirection: TextDirection.ltr,
+    transform: transform,
+    childrenInTraversalOrder: childrenInTraversalOrder,
+    childrenInHitTestOrder: childrenInHitTestOrder,
+    additionalActions: additionalActions,
+    headingLevel: 0,
+    linkUrl: '',
+    role: SemanticsRole.tab,
+  );
+  _semanticsUpdate(builder.build());
+}
+
 @pragma('vm:external-name', 'SemanticsUpdate')
 external void _semanticsUpdate(SemanticsUpdate update);
 
