@@ -60,14 +60,14 @@ void main() {
       shouldHaveErrors: true,
     );
     final String lines = <String>[
-          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:12: Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: STYLE_GUIDE_URL',
-          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:18: Deprecation notice should be a grammatically correct sentence and end with a period; notice appears to be "Also bad grammar".',
-          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:23: Deprecation notice must be an adjacent string.',
-          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:26: Deprecation notice must be an adjacent string.',
-          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:31: Deprecation notice must be an adjacent string.',
-          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:50: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
-          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:56: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
-          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:79: Deprecation notice does not match required pattern. You might have used double quotes (") for the string instead of single quotes (\').',
+          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:14: Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: STYLE_GUIDE_URL',
+          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:20: Deprecation notice should be a grammatically correct sentence and end with a period; notice appears to be "Also bad grammar".',
+          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:25: Deprecation notice must be an adjacent string.',
+          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:28: Deprecation notice must be an adjacent string.',
+          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:33: Deprecation notice must be an adjacent string.',
+          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:52: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
+          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:58: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
+          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:81: Deprecation notice does not match required pattern. You might have used double quotes (") for the string instead of single quotes (\').',
         ]
         .map((String line) {
           return line
@@ -296,9 +296,9 @@ void main() {
       shouldHaveErrors: true,
     );
 
-    expect(result, isNot(contains(':26')));
-    expect(result, contains(':27'));
+    expect(result, isNot(contains(':27')));
     expect(result, contains(':28'));
+    expect(result, contains(':29'));
   });
 
   test('analyze.dart - clampDouble', () async {
