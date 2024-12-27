@@ -67,6 +67,10 @@ const double _kNavBarBackButtonTapWidth = 50.0;
 /// [CupertinoSliverNavigationBar.search] is active.
 const double _kSearchFieldCancelButtonWidth = 83.0;
 
+/// The duration of the animation when the search field in
+/// [CupertinoSliverNavigationBar.search] is tapped.
+const Duration _kNavBarSearchDuration = Duration(milliseconds: 300);
+
 /// Title text transfer fade.
 const Duration _kNavBarTitleFadeDuration = Duration(milliseconds: 150);
 
@@ -1107,10 +1111,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   void initState() {
     super.initState();
     keys = _NavigationBarStaticComponentsKeys();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
+    _animationController = AnimationController(vsync: this, duration: _kNavBarSearchDuration);
     _fadeController = AnimationController(vsync: this, duration: _kNavBarTitleFadeDuration);
     final Tween<double> persistentHeightTween = Tween<double>(
       begin: _kNavBarPersistentHeight,
@@ -1201,8 +1202,15 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  void _onSearchFieldTap() {
+    if (widget.onSearchActiveChanged != null) {
+      widget.onSearchActiveChanged!(expanded);
+    }
+    _animationController.toggle();
+    _fadeController.toggle();
+  }
+
+  Widget? _getSearchableBottom() {
     Widget? searchableBottom;
     if (widget._searchable) {
       searchableBottom =
@@ -1211,14 +1219,8 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                 animation: persistentHeightAnimation,
                 child: GestureDetector(
                   behavior: HitTestBehavior.translucent,
+                  onTap: _onSearchFieldTap,
                   child: preferredSizeSearchField,
-                  onTap: () {
-                    if (widget.onSearchActiveChanged != null) {
-                      widget.onSearchActiveChanged!(expanded);
-                    }
-                    _animationController.forward();
-                    _fadeController.forward();
-                  },
                 ),
                 builder: (BuildContext context, Widget? child) {
                   return LayoutBuilder(
@@ -1228,21 +1230,25 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                         child: Row(
                           children: <Widget>[
                             SizedBox(
-                              width: constraints.maxWidth - (83.0 * _animationController.value),
+                              width:
+                                  constraints.maxWidth -
+                                  (_kSearchFieldCancelButtonWidth * _animationController.value),
                               child: child,
                             ),
                             SizedBox(
                               width: _animationController.value * _kSearchFieldCancelButtonWidth,
                               child: Opacity(
                                 opacity: 0.4,
-                                child: CupertinoButton(
-                                  padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
-                                  child: const Text(
-                                    'Cancel',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.clip,
+                                child: Center(
+                                  child: CupertinoButton(
+                                    padding: EdgeInsets.zero,
+                                    child: const Text(
+                                      'Cancel',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.clip,
+                                    ),
+                                    onPressed: () {},
                                   ),
-                                  onPressed: () {},
                                 ),
                               ),
                             ),
@@ -1253,41 +1259,41 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                   );
                 },
               )
-              : Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(8.0, 0.0, 0.0, 0.0),
-                      child: widget.searchField,
-                    ),
-                  ),
-                  AnimatedBuilder(
-                    animation: persistentHeightAnimation,
-                    child: FadeTransition(
-                      opacity: Tween<double>(begin: 0.0, end: 1.0).animate(_fadeController),
-                      child: CupertinoButton(
-                        padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
-                        child: const Text('Cancel', maxLines: 1, overflow: TextOverflow.clip),
-                        onPressed: () {
-                          if (widget.onSearchActiveChanged != null) {
-                            widget.onSearchActiveChanged!(expanded);
-                          }
-                          _animationController.reverse();
-                          _fadeController.reverse();
-                        },
+              : Padding(
+                padding: const EdgeInsets.only(left: _kNavBarEdgePadding),
+                child: Row(
+                  spacing: _kNavBarEdgePadding,
+                  children: <Widget>[
+                    Expanded(child: widget.searchField ?? const SizedBox.shrink()),
+                    AnimatedBuilder(
+                      animation: persistentHeightAnimation,
+                      child: FadeTransition(
+                        opacity: Tween<double>(begin: 0.0, end: 1.0).animate(_fadeController),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: CupertinoButton(
+                            padding: EdgeInsets.zero,
+                            onPressed: _onSearchFieldTap,
+                            child: const Text('Cancel', maxLines: 1, overflow: TextOverflow.clip),
+                          ),
+                        ),
                       ),
+                      builder: (BuildContext context, Widget? child) {
+                        return SizedBox(
+                          width: _animationController.value * _kSearchFieldCancelButtonWidth,
+                          child: child,
+                        );
+                      },
                     ),
-                    builder: (BuildContext context, Widget? child) {
-                      return SizedBox(
-                        width: _animationController.value * _kSearchFieldCancelButtonWidth,
-                        child: child,
-                      );
-                    },
-                  ),
-                ],
+                  ],
+                ),
               );
     }
+    return searchableBottom;
+  }
 
+  @override
+  Widget build(BuildContext context) {
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
       route: ModalRoute.of(context),
@@ -1338,7 +1344,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                   expanded && widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
               enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
               bottom:
-                  (widget._searchable ? searchableBottom : widget.bottom) ??
+                  (widget._searchable ? _getSearchableBottom() : widget.bottom) ??
                   const SizedBox.shrink(),
               bottomMode:
                   expanded
@@ -3051,7 +3057,7 @@ Widget _navBarHeroFlightShuttleBuilder(
 class _NavigationBarSearchField extends StatelessWidget implements PreferredSizeWidget {
   const _NavigationBarSearchField({required this.searchField});
 
-  static const double padding = 8.0;
+  static const double verticalPadding = 8.0;
   static const double searchFieldHeight = 35.0;
   final Widget searchField;
 
@@ -3059,12 +3065,15 @@ class _NavigationBarSearchField extends StatelessWidget implements PreferredSize
   Widget build(BuildContext context) {
     return IgnorePointer(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: padding, vertical: padding),
+        padding: const EdgeInsets.symmetric(
+          horizontal: _kNavBarEdgePadding,
+          vertical: verticalPadding,
+        ),
         child: SizedBox(height: searchFieldHeight, child: searchField),
       ),
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(searchFieldHeight + padding * 2);
+  Size get preferredSize => const Size.fromHeight(searchFieldHeight + verticalPadding * 2);
 }
