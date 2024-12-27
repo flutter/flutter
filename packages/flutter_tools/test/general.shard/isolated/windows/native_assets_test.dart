@@ -145,8 +145,8 @@ void main() {
             stringContainsInOrder(<String>[
               'package:bar/bar.dart',
               if (flutterTester)
-                    // Tests run on host system, so the have the full path on the system.
-                    projectUri
+                // Tests run on host system, so the have the full path on the system.
+                projectUri
                     .resolve('build/native_assets/$expectedDirectory/bar.dll')
                     .toFilePath()
                     .replaceAll(r'\', r'\\') // Undo JSON string escaping.
