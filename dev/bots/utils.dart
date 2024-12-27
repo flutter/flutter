@@ -378,8 +378,8 @@ bool hasInlineIgnore(
   }
   return compilationUnit.content
       .substring(lineInfo.getOffsetOfLine(lineNumber - 1), lineInfo.getOffsetOfLine(lineNumber))
-       .trimLeft()
-       .contains(ignoreDirectivePattern);
+      .trimLeft()
+      .contains(ignoreDirectivePattern);
 }
 
 // The seed used to shuffle tests. If not passed with
