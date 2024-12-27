@@ -555,6 +555,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
     runIf:
       - .ci.yaml
+      - DEPS
 
   - name: Linux customer_testing
     # This really just runs dev/bots/customer_testing/ci.sh,
