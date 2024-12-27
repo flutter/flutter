@@ -179,7 +179,7 @@ class Template {
         for (final String name in names) templatePathProvider.directoryInPackage(name, fileSystem),
       ],
       <Directory>[
-        for (final String name in imageNames)
+        for (final String name in names)
           if ((await templatePathProvider.imageDirectory(name, fileSystem, logger)).existsSync())
             await templatePathProvider.imageDirectory(name, fileSystem, logger),
       ],
