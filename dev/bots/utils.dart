@@ -381,7 +381,7 @@ bool hasInlineIgnore(
         lineInfo.getOffsetOfLine(lineNumber - 1),
         lineInfo.getOffsetOfLine(lineNumber) - 1, // Excludes LF, see the comment above.
       );
-    if (s.startsWith('flutter_ignore') && !s.trimLeft().contains(ignoreDirectivePattern)) { 
+    if (s.contains('flutter_ignore') && !s.trimLeft().contains(ignoreDirectivePattern)) { 
       print('$s @ $lineNumber, chars = ${s.runes}');
     }
   return compilationUnit.content
