@@ -42,7 +42,7 @@ void test6() { }
 void test7() { }
 
 @Deprecated(
-  'Version number test (should fail). '
+  'Version number test (should pass). '
   'This feature was deprecated after v1.19.0.'
 )
 void test8() { }
