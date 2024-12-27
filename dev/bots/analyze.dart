@@ -727,7 +727,7 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
     }
     final Expression deprecationNotice = arguments.first;
     if (deprecationNotice is! AdjacentStrings) {
-      _addErrorWithLineInfo(node, error: 'Deprecation notice must be an adjacent string.');
+      _addErrorWithLineInfo(node, error: 'Deprecation notice must be an adjacent string. ??? $deprecationNotice (${deprecationNotice.runtimeType})');
       return;
     }
     final List<StringLiteral> strings = deprecationNotice.strings;
