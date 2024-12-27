@@ -37,18 +37,18 @@
   "signedInLabel": "چوونە ژوورەوە",
   "hideAccountsLabel": "شاردنەوەی هەژمارەکان",
   "showAccountsLabel": "پیشاندانی هەژمارەکان",
-  "modalBarrierDismissLabel": "دەرچوون",
+  "modalBarrierDismissLabel": "داخستن",
   "drawerLabel": "مێنیوی ڕێنیشاندەر",
   "popupMenuLabel": "مێنیوی دەرکەوتوو",
   "dialogLabel": "دیالۆگ",
   "alertDialogLabel": "ئاگادارکردنەوە",
   "searchFieldLabel": "گەڕان",
-  "reorderItemToStart": "بگوازەوە بۆ سەرەتا",
-  "reorderItemToEnd": "بگوازەوە بۆ کۆتایی",
-  "reorderItemUp": "بگوازەوە بۆ سەرەوە",
-  "reorderItemDown": "بگوازەوە بۆ خوارەوە",
-  "reorderItemLeft": "بگوازەوە بۆ چەپ",
-  "reorderItemRight": "بگوازەوە بۆ ڕاست",
+  "reorderItemToStart": "گواستنەوە بۆ سەرەتا",
+  "reorderItemToEnd": "گواستنەوە بۆ کۆتایی",
+  "reorderItemUp": "گواستنەوە بۆ سەرەوە",
+  "reorderItemDown": "گواستنەوە بۆ خوارەوە",
+  "reorderItemLeft": "گواستنەوە بۆ چەپ",
+  "reorderItemRight": "گواستنەوە بۆ ڕاست",
   "expandedIconTapHint": "داخستنەوە",
   "collapsedIconTapHint": "فراوانکردن",
   "remainingTextFieldCharacterCountOne": "١ پیت ماوە",
@@ -146,23 +146,5 @@
   "searchWebButtonLabel": "گەڕان لە وێب",
   "shareButtonLabel": "هاوبەشکردن",
   "clearButtonTooltip": "سڕینەوەی دەق",
-  "selectedDateLabel": "هەڵبژێردراو",
-  "@datePickerDateOrder": {
-    "notUsed": "This key is handled in cupertino_ckb.arb"
-  },
-  "@datePickerDateTimeOrder": {
-    "notUsed": "This key is handled in cupertino_ckb.arb"
-  },
-  "@todayLabel": {
-    "notUsed": "This key is handled in cupertino_ckb.arb"
-  },
-  "@clearButtonLabel": {
-    "notUsed": "This key is handled in cupertino_ckb.arb"
-  },
-  "@noSpellCheckReplacementsLabel": {
-    "notUsed": "This key is handled in cupertino_ckb.arb"
-  },
-  "@searchTextFieldPlaceholderLabel": {
-    "notUsed": "This key is handled in cupertino_ckb.arb"
-  }
+  "selectedDateLabel": "هەڵبژێردراو"
 }

@@ -32,6 +32,9 @@ class MaterialLocalizationCkb extends GlobalMaterialLocalizations {
   }) : super(localeName: localeName);
 
   @override
+  TextDirection get textDirection => TextDirection.rtl;
+
+  @override
   String get aboutListTileTitleRaw => r'دەربارەی $applicationName';
 
   @override
@@ -83,7 +86,7 @@ class MaterialLocalizationCkb extends GlobalMaterialLocalizations {
   String get dateOutOfRangeLabel => 'دەرەوەی مەودا.';
 
   @override
-  String get datePickerHelpText => 'هەڵبژاردنی بەروار';
+  String get datePickerHelpText => 'هەڵبژا��دنی بەروار';
 
   @override
   String get dateRangeEndDateSemanticLabelRaw => r'بەرواری کۆتایی $fullDate';
@@ -131,7 +134,7 @@ class MaterialLocalizationCkb extends GlobalMaterialLocalizations {
   String get inputTimeModeButtonLabel => 'گۆڕین بۆ دۆخی نووسین';
 
   @override
-  String get invalidDateFormatLabel => 'فۆرماتی نادروست.';
+  String get invalidDateFormatLabel => 'فۆرماتی ناد��وست.';
 
   @override
   String get invalidDateRangeLabel => 'ماوەی نادروست.';
@@ -176,8 +179,7 @@ class MaterialLocalizationCkb extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow لە $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw =>
-      r'$firstRow–$lastRow لە نزیکەی $rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow لە نزیکەی $rowCount';
 
   @override
   String get pasteButtonLabel => 'لکاندن';
@@ -201,8 +203,7 @@ class MaterialLocalizationCkb extends GlobalMaterialLocalizations {
   String get remainingTextFieldCharacterCountOne => '١ پیت ماوە';
 
   @override
-  String get remainingTextFieldCharacterCountOther =>
-      r'$remainingCount پیت ماوە';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount پیت ماوە';
 
   @override
   String get remainingTextFieldCharacterCountZero => 'هیچ پیتێک نەماوە';
@@ -244,8 +245,7 @@ class MaterialLocalizationCkb extends GlobalMaterialLocalizations {
   String get selectedRowCountTitleOne => '١ دانە هەڵبژێردرا';
 
   @override
-  String get selectedRowCountTitleOther =>
-      r'$selectedRowCount دانە هەڵبژێردران';
+  String get selectedRowCountTitleOther => r'$selectedRowCount دانە هەڵبژێردران';
 
   @override
   String get selectedRowCountTitleZero => 'هیچ هەڵنەبژێردراوە';
@@ -336,9 +336,6 @@ class MaterialLocalizationCkb extends GlobalMaterialLocalizations {
 
   @override
   String get scanTextButtonLabel => 'سکانکردنی دەق';
-
-  @override
-  TextDirection get textDirection => TextDirection.rtl;
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
