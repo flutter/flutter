@@ -88,7 +88,7 @@ final class VmServiceProxyGoldenFileComparator extends GoldenFileComparator {
 
   static void _assertNotRunningOnFuchsia() {
     if (!kIsWeb && io.Platform.isFuchsia) {
-      throw UnsupportedError('Fuchsia is not supported');
+      throw UnsupportedError('Golden testing with integration_test does not support Fuchsia.');
     }
   }
 

@@ -531,7 +531,7 @@ class FlutterPlatform extends PlatformPlugin {
     final IsolateRef testAppIsolate = await vmService.findExtensionIsolate(_kExtension);
     await vmService.service.streamListen(_kEventName);
     vmService.service.onEvent(_kEventName).listen((Event e) async {
-      if (e.extensionKind != 'compare' && e.extensionKind != 'update') {
+      if (!const <String>['compare', 'update'].contains(e.extensionKind)) {
         throw StateError('Unexpected command: "${e.extensionKind}".');
       }
 
