@@ -1470,8 +1470,7 @@ class TapAndPanGestureRecognizer extends BaseTapAndDragGestureRecognizer {
   'This feature was deprecated after v3.9.0-19.0.pre.',
 )
 /// {@macro flutter.gestures.selectionrecognizers.TapAndPanGestureRecognizer}
-class TapAndDragGestureRecognizer
-    extends BaseTapAndDragGestureRecognizer {
+class TapAndDragGestureRecognizer extends BaseTapAndDragGestureRecognizer {
   /// Create a gesture recognizer for interactions on a plane.
   @Deprecated(
     'Use TapAndPanGestureRecognizer instead. '
