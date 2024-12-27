@@ -2231,6 +2231,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - DEPS
+      - engine/**
 
   - name: Linux web_skwasm_tests_5
     recipe: flutter/flutter_drone
