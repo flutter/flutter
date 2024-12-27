@@ -106,7 +106,7 @@ public interface TextureRegistry {
     /**
      * Sets whether to trim memory automatically when memory pressure signals are received.
      *
-     * <p>On Android 14, the default is <code>true</code>.</p>
+     * <p>On Android 14, the default is <code>true</code>.
      *
      * @param trimOnMemoryPressure <code>true</code> to trim.
      */
