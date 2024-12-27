@@ -103,6 +103,15 @@ public interface TextureRegistry {
      */
     void setCallback(Callback callback);
 
+    /**
+     * Sets whether to trim memory automatically when memory pressure signals are received.
+     *
+     * <p>On Android 14, the default is <code>true</code>.</p>
+     *
+     * @param trimOnMemoryPressure <code>true</code> to trim.
+     */
+    void setTrimOnMemoryPressure(boolean trimOnMemoryPressure);
+
     /** Callback invoked by {@link #setCallback(Callback)}. */
     interface Callback {
       /**

@@ -222,6 +222,11 @@ public class FlutterRenderer implements TextureRegistry {
       imageReaderProducers.add(producer);
       Log.v(TAG, "New ImageReaderSurfaceProducer ID: " + id);
       entry = producer;
+
+      // If it is Android 14, there is a bug and background memory *must* be trimmed.
+      if (Build.VERSION.SDK_INT == API_LEVELS.API_34) {
+        producer.setTrimOnMemoryPressure(true);
+      }
     } else {
       // TODO(matanlurey): Actually have the class named "*Producer" to well, produce
       // something. This is a code smell, but does guarantee the paths for both
@@ -442,17 +447,12 @@ public class FlutterRenderer implements TextureRegistry {
     // Flip when debugging to see verbose logs.
     private static final boolean VERBOSE_LOGS = false;
 
-    // We must always cleanup on memory pressure on Android 14 due to a bug in Android.
-    // It is safe to do on all versions so we unconditionally have this set to true.
-    private static final boolean CLEANUP_ON_MEMORY_PRESSURE = true;
-
     private final long id;
 
     private boolean released;
     // Will be true in tests and on Android API < 33.
     private boolean ignoringFence = false;
-
-    private static final boolean trimOnMemoryPressure = CLEANUP_ON_MEMORY_PRESSURE;
+    private boolean trimOnMemoryPressure = false;
 
     // The requested width and height are updated by setSize.
     private int requestedWidth = 1;
@@ -701,6 +701,11 @@ public class FlutterRenderer implements TextureRegistry {
             });
       }
       return r;
+    }
+
+    @Override
+    public void setTrimOnMemoryPressure(boolean trimOnMemoryPressure) {
+      this.trimOnMemoryPressure = trimOnMemoryPressure;
     }
 
     @Override

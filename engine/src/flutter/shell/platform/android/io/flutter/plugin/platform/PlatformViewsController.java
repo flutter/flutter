@@ -986,6 +986,14 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       TextureRegistry textureRegistry) {
     if (enableSurfaceProducerRenderTarget && Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
       final TextureRegistry.SurfaceProducer textureEntry = textureRegistry.createSurfaceProducer();
+
+      // TODO(matanlurey): Prior to refactors, ImageReaderSurfaceProducer, which is what is
+      // created when using createSurfaceProducer() on >= API 29, always (unconditionally) trimmed
+      // on memory pressure. Setting this flag manually preserves that behavior, and if future
+      // investigation discovers it is not needed, it can be removed (or this TODO can be replaced
+      // with more confident messaging).
+      textureEntry.setTrimOnMemoryPressure(true);
+
       Log.i(TAG, "PlatformView is using SurfaceProducer backend");
       return new SurfaceProducerPlatformViewRenderTarget(textureEntry);
     }

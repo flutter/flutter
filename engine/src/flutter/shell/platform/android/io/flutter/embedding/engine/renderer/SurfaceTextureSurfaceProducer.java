@@ -61,6 +61,11 @@ final class SurfaceTextureSurfaceProducer
   }
 
   @Override
+  public void setTrimOnMemoryPressure(boolean trimOnMemoryPressure) {
+    // Intentionally blank: SurfaceTextures don't listen to trim memory commands.
+  }
+
+  @Override
   public boolean handlesCropAndRotation() {
     return true;
   }
