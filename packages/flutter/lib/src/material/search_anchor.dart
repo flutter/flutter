@@ -143,6 +143,7 @@ class SearchAnchor extends StatefulWidget {
     this.textCapitalization,
     this.viewOnChanged,
     this.viewOnSubmitted,
+    this.viewOnClose,
     required this.builder,
     required this.suggestionsBuilder,
     this.textInputAction,
@@ -168,6 +169,7 @@ class SearchAnchor extends StatefulWidget {
     GestureTapCallback? onTap,
     ValueChanged<String>? onSubmitted,
     ValueChanged<String>? onChanged,
+    VoidCallback? onClose,
     MaterialStateProperty<double?>? barElevation,
     MaterialStateProperty<Color?>? barBackgroundColor,
     MaterialStateProperty<Color?>? barOverlayColor,
@@ -366,6 +368,9 @@ class SearchAnchor extends StatefulWidget {
   /// of the search view.
   final ValueChanged<String>? viewOnSubmitted;
 
+  /// Called when the view is disposed.
+  final VoidCallback? viewOnClose;
+
   /// Called to create a widget which can open a search view route when it is tapped.
   ///
   /// The widget returned by this builder is faded out when it is tapped.
@@ -455,6 +460,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
     _route = _SearchViewRoute(
       viewOnChanged: widget.viewOnChanged,
       viewOnSubmitted: widget.viewOnSubmitted,
+      viewOnClose: widget.viewOnClose,
       viewLeading: widget.viewLeading,
       viewTrailing: widget.viewTrailing,
       viewHintText: widget.viewHintText,
@@ -533,6 +539,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   _SearchViewRoute({
     this.viewOnChanged,
     this.viewOnSubmitted,
+    this.viewOnClose,
     this.toggleVisibility,
     this.textDirection,
     this.viewBuilder,
@@ -564,6 +571,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
 
   final ValueChanged<String>? viewOnChanged;
   final ValueChanged<String>? viewOnSubmitted;
+  final VoidCallback? viewOnClose;
   final ValueGetter<bool>? toggleVisibility;
   final TextDirection? textDirection;
   final ViewBuilder? viewBuilder;
@@ -654,6 +662,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     if (willDisposeSearchController) {
       searchController.dispose();
     }
+    viewOnClose?.call();
     super.dispose();
   }
 
@@ -1179,6 +1188,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.textCapitalization,
     ValueChanged<String>? onChanged,
     ValueChanged<String>? onSubmitted,
+    VoidCallback? onClose,
     required super.suggestionsBuilder,
     super.textInputAction,
     super.keyboardType,
@@ -1191,6 +1201,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
          headerHintStyle: viewHeaderHintStyle,
          viewOnSubmitted: onSubmitted,
          viewOnChanged: onChanged,
+         viewOnClose: onClose,
          builder: (BuildContext context, SearchController controller) {
            return SearchBar(
              constraints: constraints,
