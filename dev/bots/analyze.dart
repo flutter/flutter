@@ -695,7 +695,7 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
 
   /// Some deprecation notices are exempt for historical reasons. They must have an issue listed.
   static final RegExp legacyDeprecation = RegExp(
-    r'// flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/\d+(\r\n|\r|\n)',
+    r'// flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/\d+',
   );
 
   static final RegExp deprecationVersionPattern = RegExp(
