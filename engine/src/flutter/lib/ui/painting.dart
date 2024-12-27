@@ -112,7 +112,7 @@ class Color {
   /// Construct a color with normalized color components.
   ///
   /// Normalized color components allows arbitrary bit depths for color
-  /// components to be be supported. The values will be normalized relative to
+  /// components to be supported. The values will be normalized relative to
   /// the [ColorSpace] argument.
   const Color.from({
     required double alpha,
