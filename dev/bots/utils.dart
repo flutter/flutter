@@ -377,12 +377,9 @@ bool hasInlineIgnore(
     return false;
   }
   return compilationUnit.content
-      .substring(
-        lineInfo.getOffsetOfLine(lineNumber - 1),
-        lineInfo.getOffsetOfLine(lineNumber),
-      )
-      .trimLeft()
-      .contains(ignoreDirectivePattern);
+      .substring(lineInfo.getOffsetOfLine(lineNumber - 1), lineInfo.getOffsetOfLine(lineNumber))
+       .trimLeft()
+       .contains(ignoreDirectivePattern);
 }
 
 // The seed used to shuffle tests. If not passed with
