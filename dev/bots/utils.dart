@@ -379,7 +379,7 @@ bool hasInlineIgnore(
   return compilationUnit.content
       .substring(
         lineInfo.getOffsetOfLine(lineNumber - 1),
-        lineInfo.getOffsetOfLine(lineNumber) - 1, // Excludes LF, see the comment above.
+        lineInfo.getOffsetOfLine(lineNumber),
       )
       .trimLeft()
       .contains(ignoreDirectivePattern);
