@@ -78,6 +78,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   remoteTerminatedHandshakeHandler,
   couldNotOpenCacheDirectoryHandler,
   incompatibleCompileSdk35AndAgpVersionHandler,
+  usageOfV1EmbeddingReferencesHandler,
   jlinkErrorWithJava21AndSourceCompatibility,
   incompatibleKotlinVersionHandler, // This handler should always be last, as its key log output is sometimes in error messages with other root causes.
 ];
@@ -679,6 +680,30 @@ ${_getAgpLocation(project)}''', title: _boxTitle);
     return GradleBuildStatus.exit;
   },
   eventLabel: 'r8-dexing-bug-in-AGP-7.3',
+);
+
+@visibleForTesting
+final GradleHandledError usageOfV1EmbeddingReferencesHandler = GradleHandledError(
+  test:
+      (String line) =>
+          line.contains('io.flutter.plugin.common.PluginRegistry.Registrar') &&
+          line.contains('private'),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+  }) async {
+    globals.printBox(
+      '''
+${globals.logger.terminal.warningMark} This is likely due to v1 embedding removal and the plugin's continued usage of removed references to the v1 embedding.
+To fix this error, please upgrade your current package's dependencies to latest versions by running `flutter pub upgrade`.
+If that does not work, please file an issue for the problematic plugin here: https://github.com/flutter/flutter/issues''',
+      title: _boxTitle,
+    );
+
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'usage-of-v1-embedding-references',
 );
 
 @visibleForTesting
