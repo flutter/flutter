@@ -2994,6 +2994,8 @@ targets:
     runIf:
       - .ci.yaml
       - dev/**
+      - DEPS
+      - engine/**
 
   # linux mokey test
   - name: Linux_mokey hybrid_android_views_integration_test
@@ -4841,6 +4843,8 @@ targets:
     runIf:
       - .ci.yaml
       - dev/**
+      - DEPS
+      - engine/**
     timeout: 60
     properties:
       tags: >
