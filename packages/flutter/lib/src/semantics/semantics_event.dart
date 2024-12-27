@@ -49,11 +49,8 @@ abstract class SemanticsEvent {
   ///
   /// [nodeId] is the unique identifier of the semantics node associated with
   /// the event, or null if the event is not associated with a semantics node.
-  Map<String, dynamic> toMap({ int? nodeId }) {
-    final Map<String, dynamic> event = <String, dynamic>{
-      'type': type,
-      'data': getDataMap(),
-    };
+  Map<String, dynamic> toMap({int? nodeId}) {
+    final Map<String, dynamic> event = <String, dynamic>{'type': type, 'data': getDataMap()};
     if (nodeId != null) {
       event['nodeId'] = nodeId;
     }
@@ -87,10 +84,12 @@ abstract class SemanticsEvent {
 /// When possible, prefer using mechanisms like [Semantics] to implicitly
 /// trigger announcements over using this event.
 class AnnounceSemanticsEvent extends SemanticsEvent {
-
   /// Constructs an event that triggers an announcement by the platform.
-  const AnnounceSemanticsEvent(this.message, this.textDirection, {this.assertiveness = Assertiveness.polite})
-    : super('announce');
+  const AnnounceSemanticsEvent(
+    this.message,
+    this.textDirection, {
+    this.assertiveness = Assertiveness.polite,
+  }) : super('announce');
 
   /// The message to announce.
   final String message;
@@ -108,11 +107,10 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
 
   @override
   Map<String, dynamic> getDataMap() {
-    return <String, dynamic> {
+    return <String, dynamic>{
       'message': message,
       'textDirection': textDirection.index,
-      if (assertiveness != Assertiveness.polite)
-        'assertiveness': assertiveness.index,
+      if (assertiveness != Assertiveness.polite) 'assertiveness': assertiveness.index,
     };
   }
 }
@@ -129,43 +127,7 @@ class TooltipSemanticsEvent extends SemanticsEvent {
 
   @override
   Map<String, dynamic> getDataMap() {
-    return <String, dynamic>{
-      'message': message,
-    };
-  }
-}
-
-/// An event to notify native OS that flutter starts or stops the semantics tree
-/// generation
-///
-/// The [generating] indicate whether flutter starts generating the semantics
-/// tree. If true, flutter will start sending semantics update to platform
-/// embedding.
-///
-/// Embeddings must be ready to receive semantics update after they receive this
-/// event with [generating] set to true as framework will start sending
-/// semantics update in the next frame.
-///
-/// If [generating] is false, embeddings need to clean up previous updates as
-/// the framework semantics tree was completely destroyed.
-class GeneratingSemanticsTreeSemanticsEvent extends SemanticsEvent {
-
-  /// Constructs an event that notify platform whether it is generating
-  /// semantics tree.
-  const GeneratingSemanticsTreeSemanticsEvent(this.generating)
-      : super('generatingSemanticsTree');
-
-  /// Whether framework starts generating the semantics tree.
-  ///
-  /// If true, flutter starts sending semantics update to platform
-  /// embedding.
-  final bool generating;
-
-  @override
-  Map<String, dynamic> getDataMap() {
-    return <String, dynamic> {
-      'generating': generating,
-    };
+    return <String, dynamic>{'message': message};
   }
 }
 

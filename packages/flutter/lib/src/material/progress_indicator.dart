@@ -114,10 +114,10 @@ abstract class ProgressIndicator extends StatefulWidget {
 
   Color _getValueColor(BuildContext context, {Color? defaultColor}) {
     return valueColor?.value ??
-      color ??
-      ProgressIndicatorTheme.of(context).color ??
-      defaultColor ??
-      Theme.of(context).colorScheme.primary;
+        color ??
+        ProgressIndicatorTheme.of(context).color ??
+        defaultColor ??
+        Theme.of(context).colorScheme.primary;
   }
 
   @override
@@ -126,19 +126,12 @@ abstract class ProgressIndicator extends StatefulWidget {
     properties.add(PercentProperty('value', value, showName: false, ifNull: '<indeterminate>'));
   }
 
-  Widget _buildSemanticsWrapper({
-    required BuildContext context,
-    required Widget child,
-  }) {
+  Widget _buildSemanticsWrapper({required BuildContext context, required Widget child}) {
     String? expandedSemanticsValue = semanticsValue;
     if (value != null) {
       expandedSemanticsValue ??= '${(value! * 100).round()}%';
     }
-    return Semantics(
-      label: semanticsLabel,
-      value: expandedSemanticsValue,
-      child: child,
-    );
+    return Semantics(label: semanticsLabel, value: expandedSemanticsValue, child: child);
   }
 }
 
@@ -276,15 +269,15 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_LinearProgressIndicatorPainter oldPainter) {
-    return oldPainter.trackColor != trackColor
-        || oldPainter.valueColor != valueColor
-        || oldPainter.value != value
-        || oldPainter.animationValue != animationValue
-        || oldPainter.textDirection != textDirection
-        || oldPainter.indicatorBorderRadius != indicatorBorderRadius
-        || oldPainter.stopIndicatorColor != stopIndicatorColor
-        || oldPainter.stopIndicatorRadius != stopIndicatorRadius
-        || oldPainter.trackGap != trackGap;
+    return oldPainter.trackColor != trackColor ||
+        oldPainter.valueColor != valueColor ||
+        oldPainter.value != value ||
+        oldPainter.animationValue != animationValue ||
+        oldPainter.textDirection != textDirection ||
+        oldPainter.indicatorBorderRadius != indicatorBorderRadius ||
+        oldPainter.stopIndicatorColor != stopIndicatorColor ||
+        oldPainter.stopIndicatorRadius != stopIndicatorRadius ||
+        oldPainter.trackGap != trackGap;
   }
 }
 
@@ -312,6 +305,8 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 ///
 /// {@tool dartpad}
 /// This example showcases determinate and indeterminate [LinearProgressIndicator]s.
+/// The [LinearProgressIndicator]s will use the ![updated Material 3 Design appearance](https://m3.material.io/components/progress-indicators/overview)
+/// when setting the [LinearProgressIndicator.year2023] flag to false.
 ///
 /// ** See code in examples/api/lib/material/progress_indicator/linear_progress_indicator.0.dart **
 /// {@end-tool}
@@ -349,9 +344,9 @@ class LinearProgressIndicator extends ProgressIndicator {
     this.trackGap,
     @Deprecated(
       'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
-      'This feature was deprecated after v3.26.0-0.1.pre.'
+      'This feature was deprecated after v3.26.0-0.1.pre.',
     )
-    this.year2023 = true,
+    this.year2023,
   }) : assert(minHeight == null || minHeight > 0);
 
   /// {@template flutter.material.LinearProgressIndicator.trackColor}
@@ -414,24 +409,28 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// If that is null, then defaults to 4.
   final double? trackGap;
 
-  /// When true, the [LinearProgressIndicator] will use the 2023 Material 3
-  /// Design appearance.
+  /// When true, the [LinearProgressIndicator] will use the 2023 Material Design 3
+  /// appearance.
   ///
-  /// Defaults to true. If false, the [LinearProgressIndicator] will use the
-  /// latest Material 3 Design appearance, which was introduced in December 2023.
+  /// If null, then the [ProgressIndicatorThemeData.year2023] will be used.
+  /// If that is null, then defaults to true.
+  ///
+  /// If this is set to false, the [LinearProgressIndicator] will use the
+  /// latest Material Design 3 appearance, which was introduced in December 2023.
   ///
   /// If [ThemeData.useMaterial3] is false, then this property is ignored.
   @Deprecated(
     'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
-    'This feature was deprecated after v3.27.0-0.1.pre.'
+    'This feature was deprecated after v3.27.0-0.1.pre.',
   )
-  final bool year2023;
+  final bool? year2023;
 
   @override
   State<LinearProgressIndicator> createState() => _LinearProgressIndicatorState();
 }
 
-class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with SingleTickerProviderStateMixin {
+class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -463,44 +462,38 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
   }
 
   Widget _buildIndicator(BuildContext context, double animationValue, TextDirection textDirection) {
+    final ProgressIndicatorThemeData indicatorTheme = ProgressIndicatorTheme.of(context);
+    final bool year2023 = widget.year2023 ?? indicatorTheme.year2023 ?? true;
     final ProgressIndicatorThemeData defaults = switch (Theme.of(context).useMaterial3) {
-      true => widget.year2023
-        ? _LinearProgressIndicatorDefaultsM3Year2023(context)
-        : _LinearProgressIndicatorDefaultsM3(context),
+      true =>
+        year2023
+            ? _LinearProgressIndicatorDefaultsM3Year2023(context)
+            : _LinearProgressIndicatorDefaultsM3(context),
       false => _LinearProgressIndicatorDefaultsM2(context),
     };
-
-    final ProgressIndicatorThemeData indicatorTheme = ProgressIndicatorTheme.of(context);
-    final Color trackColor = widget.backgroundColor ??
-      indicatorTheme.linearTrackColor ??
-      defaults.linearTrackColor!;
-    final double minHeight = widget.minHeight ??
-      indicatorTheme.linearMinHeight ??
-      defaults.linearMinHeight!;
-    final BorderRadiusGeometry? borderRadius = widget.borderRadius
-      ?? indicatorTheme.borderRadius
-      ?? defaults.borderRadius;
-    final Color? stopIndicatorColor = !widget.year2023
-      ? widget.stopIndicatorColor ??
-        indicatorTheme.stopIndicatorColor ??
-        defaults.stopIndicatorColor
-      : null;
-    final double? stopIndicatorRadius = !widget.year2023
-      ? widget.stopIndicatorRadius ??
-        indicatorTheme.stopIndicatorRadius ??
-        defaults.stopIndicatorRadius
-      : null;
-    final double? trackGap = !widget.year2023
-      ? widget.trackGap ??
-        indicatorTheme.trackGap ??
-        defaults.trackGap
-      : null;
+    final Color trackColor =
+        widget.backgroundColor ?? indicatorTheme.linearTrackColor ?? defaults.linearTrackColor!;
+    final double minHeight =
+        widget.minHeight ?? indicatorTheme.linearMinHeight ?? defaults.linearMinHeight!;
+    final BorderRadiusGeometry? borderRadius =
+        widget.borderRadius ?? indicatorTheme.borderRadius ?? defaults.borderRadius;
+    final Color? stopIndicatorColor =
+        !year2023
+            ? widget.stopIndicatorColor ??
+                indicatorTheme.stopIndicatorColor ??
+                defaults.stopIndicatorColor
+            : null;
+    final double? stopIndicatorRadius =
+        !year2023
+            ? widget.stopIndicatorRadius ??
+                indicatorTheme.stopIndicatorRadius ??
+                defaults.stopIndicatorRadius
+            : null;
+    final double? trackGap =
+        !year2023 ? widget.trackGap ?? indicatorTheme.trackGap ?? defaults.trackGap : null;
 
     Widget result = ConstrainedBox(
-      constraints: BoxConstraints(
-        minWidth: double.infinity,
-        minHeight: minHeight,
-      ),
+      constraints: BoxConstraints(minWidth: double.infinity, minHeight: minHeight),
       child: CustomPaint(
         painter: _LinearProgressIndicatorPainter(
           trackColor: trackColor,
@@ -518,16 +511,10 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
 
     // Clip is only needed with indeterminate progress indicators
     if (borderRadius != null && widget.value == null) {
-      result = ClipRRect(
-        borderRadius: borderRadius,
-        child: result,
-      );
+      result = ClipRRect(borderRadius: borderRadius, child: result);
     }
 
-    return widget._buildSemanticsWrapper(
-      context: context,
-      child: result,
-    );
+    return widget._buildSemanticsWrapper(context: context, child: result);
   }
 
   @override
@@ -561,12 +548,17 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     this.strokeCap,
     this.trackGap,
     this.year2023 = true,
-  }) : arcStart = value != null
-         ? _startAngle
-         : _startAngle + tailValue * 3 / 2 * math.pi + rotationValue * math.pi * 2.0 + offsetValue * 0.5 * math.pi,
-       arcSweep = value != null
-         ? clampDouble(value, 0.0, 1.0) * _sweep
-         : math.max(headValue * 3 / 2 * math.pi - tailValue * 3 / 2 * math.pi, _epsilon);
+  }) : arcStart =
+           value != null
+               ? _startAngle
+               : _startAngle +
+                   tailValue * 3 / 2 * math.pi +
+                   rotationValue * math.pi * 2.0 +
+                   offsetValue * 0.5 * math.pi,
+       arcSweep =
+           value != null
+               ? clampDouble(value, 0.0, 1.0) * _sweep
+               : math.max(headValue * 3 / 2 * math.pi - tailValue * 3 / 2 * math.pi, _epsilon);
 
   final Color? trackColor;
   final Color valueColor;
@@ -591,57 +583,47 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = valueColor
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke;
+    final Paint paint =
+        Paint()
+          ..color = valueColor
+          ..strokeWidth = strokeWidth
+          ..style = PaintingStyle.stroke;
 
     // Use the negative operator as intended to keep the exposed constant value
     // as users are already familiar with.
     final double strokeOffset = strokeWidth / 2 * -strokeAlign;
     final Offset arcBaseOffset = Offset(strokeOffset, strokeOffset);
-    final Size arcActualSize = Size(
-      size.width - strokeOffset * 2,
-      size.height - strokeOffset * 2,
-    );
+    final Size arcActualSize = Size(size.width - strokeOffset * 2, size.height - strokeOffset * 2);
     final bool hasGap = trackGap != null && trackGap! > 0;
 
     if (trackColor != null) {
-      final Paint backgroundPaint = Paint()
-        ..color = trackColor!
-        ..strokeWidth = strokeWidth
-        ..strokeCap = strokeCap ?? StrokeCap.round
-        ..style = PaintingStyle.stroke;
+      final Paint backgroundPaint =
+          Paint()
+            ..color = trackColor!
+            ..strokeWidth = strokeWidth
+            ..strokeCap = strokeCap ?? StrokeCap.round
+            ..style = PaintingStyle.stroke;
       // If hasGap is true, draw the background arc with a gap.
       if (hasGap && value! > _epsilon) {
         final double arcRadius = arcActualSize.shortestSide / 2;
-        final double strokeRadius =  strokeWidth / arcRadius;
+        final double strokeRadius = strokeWidth / arcRadius;
         final double gapRadius = trackGap! / arcRadius;
         final double startGap = strokeRadius + gapRadius;
         final double endGap = value! < _epsilon ? startGap : startGap * 2;
         final double startSweep = (-math.pi / 2.0) + startGap;
-        final double endSweep = math.max(0.0, _twoPi - clampDouble(value!, 0.0,  1.0) * _twoPi - endGap);
+        final double endSweep = math.max(
+          0.0,
+          _twoPi - clampDouble(value!, 0.0, 1.0) * _twoPi - endGap,
+        );
         // Flip the canvas for the background arc.
         canvas.save();
         canvas.scale(-1, 1);
         canvas.translate(-size.width, 0);
-        canvas.drawArc(
-          arcBaseOffset & arcActualSize,
-          startSweep,
-          endSweep,
-          false,
-          backgroundPaint,
-        );
+        canvas.drawArc(arcBaseOffset & arcActualSize, startSweep, endSweep, false, backgroundPaint);
         // Restore the canvas to draw the foreground arc.
         canvas.restore();
       } else {
-        canvas.drawArc(
-          arcBaseOffset & arcActualSize,
-          0,
-          _sweep,
-          false,
-          backgroundPaint,
-        );
+        canvas.drawArc(arcBaseOffset & arcActualSize, 0, _sweep, false, backgroundPaint);
       }
     }
 
@@ -657,29 +639,23 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
       paint.strokeCap = strokeCap ?? StrokeCap.round;
     }
 
-    canvas.drawArc(
-      arcBaseOffset & arcActualSize,
-      arcStart,
-      arcSweep,
-      false,
-      paint,
-    );
+    canvas.drawArc(arcBaseOffset & arcActualSize, arcStart, arcSweep, false, paint);
   }
 
   @override
   bool shouldRepaint(_CircularProgressIndicatorPainter oldPainter) {
-    return oldPainter.trackColor != trackColor
-        || oldPainter.valueColor != valueColor
-        || oldPainter.value != value
-        || oldPainter.headValue != headValue
-        || oldPainter.tailValue != tailValue
-        || oldPainter.offsetValue != offsetValue
-        || oldPainter.rotationValue != rotationValue
-        || oldPainter.strokeWidth != strokeWidth
-        || oldPainter.strokeAlign != strokeAlign
-        || oldPainter.strokeCap != strokeCap
-        || oldPainter.trackGap != trackGap
-        || oldPainter.year2023 != year2023;
+    return oldPainter.trackColor != trackColor ||
+        oldPainter.valueColor != valueColor ||
+        oldPainter.value != value ||
+        oldPainter.headValue != headValue ||
+        oldPainter.tailValue != tailValue ||
+        oldPainter.offsetValue != offsetValue ||
+        oldPainter.rotationValue != rotationValue ||
+        oldPainter.strokeWidth != strokeWidth ||
+        oldPainter.strokeAlign != strokeAlign ||
+        oldPainter.strokeCap != strokeCap ||
+        oldPainter.trackGap != trackGap ||
+        oldPainter.year2023 != year2023;
   }
 }
 
@@ -704,7 +680,9 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// specify a constant color use: `AlwaysStoppedAnimation<Color>(color)`.
 ///
 /// {@tool dartpad}
-/// This example shows a [CircularProgressIndicator] with a changing value.
+/// This example showcases determinate and indeterminate [CircularProgressIndicator]s.
+/// The [CircularProgressIndicator]s will use the ![updated Material 3 Design appearance](https://m3.material.io/components/progress-indicators/overview)
+/// when setting the [CircularProgressIndicator.year2023] flag to false.
 ///
 /// ** See code in examples/api/lib/material/progress_indicator/circular_progress_indicator.0.dart **
 /// {@end-tool}
@@ -742,9 +720,9 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.trackGap,
     @Deprecated(
       'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
-      'This feature was deprecated after v3.27.0-0.1.pre.'
+      'This feature was deprecated after v3.27.0-0.1.pre.',
     )
-    this.year2023 = true,
+    this.year2023,
     this.padding,
   }) : _indicatorType = _ActivityIndicatorType.material;
 
@@ -772,9 +750,9 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.trackGap,
     @Deprecated(
       'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
-      'This feature was deprecated after v3.27.0-0.2.pre.'
+      'This feature was deprecated after v3.27.0-0.2.pre.',
     )
-    this.year2023 = true,
+    this.year2023,
     this.padding,
   }) : _indicatorType = _ActivityIndicatorType.adaptive;
 
@@ -843,18 +821,21 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// If that is null, then defaults to 4.
   final double? trackGap;
 
-  /// When true, the [CircularProgressIndicator] will use the 2023 Material 3
-  /// Design appearance.
+  /// When true, the [CircularProgressIndicator] will use the 2023 Material Design 3
+  /// appearance.
   ///
-  /// Defaults to true. If false, the [CircularProgressIndicator] will use the
-  /// latest Material 3 Design appearance, which was introduced in December 2023.
+  /// If null, then the [ProgressIndicatorThemeData.year2023] will be used.
+  /// If that is null, then defaults to true.
+  ///
+  /// If this is set to false, the [CircularProgressIndicator] will use the
+  /// latest Material Design 3 appearance, which was introduced in December 2023.
   ///
   /// If [ThemeData.useMaterial3] is false, then this property is ignored.
   @Deprecated(
     'Use ProgressIndicatorTheme to customize the ProgressIndicator appearance. '
-    'This feature was deprecated after v3.27.0-0.2.pre.'
+    'This feature was deprecated after v3.27.0-0.2.pre.',
   )
-  final bool year2023;
+  final bool? year2023;
 
   /// The padding around the indicator track.
   ///
@@ -886,22 +867,21 @@ class CircularProgressIndicator extends ProgressIndicator {
   State<CircularProgressIndicator> createState() => _CircularProgressIndicatorState();
 }
 
-class _CircularProgressIndicatorState extends State<CircularProgressIndicator> with SingleTickerProviderStateMixin {
+class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
+    with SingleTickerProviderStateMixin {
   static const int _pathCount = _kIndeterminateCircularDuration ~/ 1333;
   static const int _rotationCount = _kIndeterminateCircularDuration ~/ 2222;
 
   static final Animatable<double> _strokeHeadTween = CurveTween(
     curve: const Interval(0.0, 0.5, curve: Curves.fastOutSlowIn),
-  ).chain(CurveTween(
-    curve: const SawTooth(_pathCount),
-  ));
+  ).chain(CurveTween(curve: const SawTooth(_pathCount)));
   static final Animatable<double> _strokeTailTween = CurveTween(
     curve: const Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
-  ).chain(CurveTween(
-    curve: const SawTooth(_pathCount),
-  ));
+  ).chain(CurveTween(curve: const SawTooth(_pathCount)));
   static final Animatable<double> _offsetTween = CurveTween(curve: const SawTooth(_pathCount));
-  static final Animatable<double> _rotationTween = CurveTween(curve: const SawTooth(_rotationCount));
+  static final Animatable<double> _rotationTween = CurveTween(
+    curve: const SawTooth(_rotationCount),
+  );
 
   late AnimationController _controller;
 
@@ -937,48 +917,47 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
     final Color? tickColor = widget.backgroundColor;
     final double? value = widget.value;
     if (value == null) {
-      return CupertinoActivityIndicator(
-        key: widget.key,
-        color: tickColor
-      );
+      return CupertinoActivityIndicator(key: widget.key, color: tickColor);
     }
     return CupertinoActivityIndicator.partiallyRevealed(
       key: widget.key,
       color: tickColor,
-      progress: value
+      progress: value,
     );
   }
 
-  Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
+  Widget _buildMaterialIndicator(
+    BuildContext context,
+    double headValue,
+    double tailValue,
+    double offsetValue,
+    double rotationValue,
+  ) {
+    final ProgressIndicatorThemeData indicatorTheme = ProgressIndicatorTheme.of(context);
+    final bool year2023 = widget.year2023 ?? indicatorTheme.year2023 ?? true;
     final ProgressIndicatorThemeData defaults = switch (Theme.of(context).useMaterial3) {
-      true => widget.year2023
-        ? _CircularProgressIndicatorDefaultsM3Year2023(context, indeterminate: widget.value == null)
-        : _CircularProgressIndicatorDefaultsM3(context, indeterminate: widget.value == null),
+      true =>
+        year2023
+            ? _CircularProgressIndicatorDefaultsM3Year2023(
+              context,
+              indeterminate: widget.value == null,
+            )
+            : _CircularProgressIndicatorDefaultsM3(context, indeterminate: widget.value == null),
       false => _CircularProgressIndicatorDefaultsM2(context, indeterminate: widget.value == null),
     };
-    final ProgressIndicatorThemeData indicatorTheme = ProgressIndicatorTheme.of(context);
-    final Color? trackColor = widget.backgroundColor
-      ?? indicatorTheme.circularTrackColor
-      ?? defaults.circularTrackColor;
-    final double strokeWidth = widget.strokeWidth
-      ?? indicatorTheme.strokeWidth
-      ?? defaults.strokeWidth!;
-    final double strokeAlign = widget.strokeAlign
-      ?? indicatorTheme.strokeAlign
-      ?? defaults.strokeAlign!;
-    final StrokeCap? strokeCap = widget.strokeCap
-      ?? indicatorTheme.strokeCap;
-    final BoxConstraints constraints = widget.constraints
-      ?? indicatorTheme.constraints
-      ?? defaults.constraints!;
-    final double? trackGap = widget.year2023
-      ? null
-      : widget.trackGap ??
-        indicatorTheme.trackGap ??
-        defaults.trackGap;
-    final EdgeInsetsGeometry? effectivePadding = widget.padding
-      ?? indicatorTheme.circularTrackPadding
-      ?? defaults.circularTrackPadding;
+    final Color? trackColor =
+        widget.backgroundColor ?? indicatorTheme.circularTrackColor ?? defaults.circularTrackColor;
+    final double strokeWidth =
+        widget.strokeWidth ?? indicatorTheme.strokeWidth ?? defaults.strokeWidth!;
+    final double strokeAlign =
+        widget.strokeAlign ?? indicatorTheme.strokeAlign ?? defaults.strokeAlign!;
+    final StrokeCap? strokeCap = widget.strokeCap ?? indicatorTheme.strokeCap;
+    final BoxConstraints constraints =
+        widget.constraints ?? indicatorTheme.constraints ?? defaults.constraints!;
+    final double? trackGap =
+        year2023 ? null : widget.trackGap ?? indicatorTheme.trackGap ?? defaults.trackGap;
+    final EdgeInsetsGeometry? effectivePadding =
+        widget.padding ?? indicatorTheme.circularTrackPadding ?? defaults.circularTrackPadding;
 
     Widget result = ConstrainedBox(
       constraints: constraints,
@@ -995,22 +974,16 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
           strokeAlign: strokeAlign,
           strokeCap: strokeCap,
           trackGap: trackGap,
-          year2023: widget.year2023,
+          year2023: year2023,
         ),
       ),
     );
 
     if (effectivePadding != null) {
-      result = Padding(
-        padding: effectivePadding,
-        child: result,
-      );
+      result = Padding(padding: effectivePadding, child: result);
     }
 
-    return widget._buildSemanticsWrapper(
-      context: context,
-      child: result,
-    );
+    return widget._buildSemanticsWrapper(context: context, child: result);
   }
 
   Widget _buildAnimation() {
@@ -1081,21 +1054,23 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
     assert(size.width == size.height);
     final double radius = size.width / 2.0;
     final double arrowheadPointX = radius + ux * radius + -uy * strokeWidth * 2.0 * arrowheadScale;
-    final double arrowheadPointY = radius + uy * radius +  ux * strokeWidth * 2.0 * arrowheadScale;
+    final double arrowheadPointY = radius + uy * radius + ux * strokeWidth * 2.0 * arrowheadScale;
     final double arrowheadRadius = strokeWidth * 2.0 * arrowheadScale;
     final double innerRadius = radius - arrowheadRadius;
     final double outerRadius = radius + arrowheadRadius;
 
-    final Path path = Path()
-      ..moveTo(radius + ux * innerRadius, radius + uy * innerRadius)
-      ..lineTo(radius + ux * outerRadius, radius + uy * outerRadius)
-      ..lineTo(arrowheadPointX, arrowheadPointY)
-      ..close();
+    final Path path =
+        Path()
+          ..moveTo(radius + ux * innerRadius, radius + uy * innerRadius)
+          ..lineTo(radius + ux * outerRadius, radius + uy * outerRadius)
+          ..lineTo(arrowheadPointX, arrowheadPointY)
+          ..close();
 
-    final Paint paint = Paint()
-      ..color = valueColor
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.fill;
+    final Paint paint =
+        Paint()
+          ..color = valueColor
+          ..strokeWidth = strokeWidth
+          ..style = PaintingStyle.fill;
     canvas.drawPath(path, paint);
   }
 
@@ -1215,8 +1190,8 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
     final double? value = widget.value;
     if (value != null) {
       _lastValue = value;
-      _controller.value = _convertTween.transform(value)
-        * (1333 / 2 / _kIndeterminateCircularDuration);
+      _controller.value =
+          _convertTween.transform(value) * (1333 / 2 / _kIndeterminateCircularDuration);
     }
     return _buildAnimation();
   }
@@ -1239,9 +1214,16 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   }
 
   @override
-  Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
+  Widget _buildMaterialIndicator(
+    BuildContext context,
+    double headValue,
+    double tailValue,
+    double offsetValue,
+    double rotationValue,
+  ) {
     final double? value = widget.value;
-    final double arrowheadScale = value == null ? 0.0 : const Interval(0.1, _strokeHeadInterval).transform(value);
+    final double arrowheadScale =
+        value == null ? 0.0 : const Interval(0.1, _strokeHeadInterval).transform(value);
     final double rotation;
 
     if (value == null && _lastValue == null) {
@@ -1259,17 +1241,15 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
       false => _CircularProgressIndicatorDefaultsM2(context, indeterminate: value == null),
     };
     final ProgressIndicatorThemeData indicatorTheme = ProgressIndicatorTheme.of(context);
-    final Color backgroundColor = widget.backgroundColor
-      ?? indicatorTheme.refreshBackgroundColor
-      ?? Theme.of(context).canvasColor;
-    final double strokeWidth = widget.strokeWidth
-      ?? indicatorTheme.strokeWidth
-      ?? defaults.strokeWidth!;
-    final double strokeAlign = widget.strokeAlign
-      ?? indicatorTheme.strokeAlign
-      ?? defaults.strokeAlign!;
-    final StrokeCap? strokeCap = widget.strokeCap
-      ?? indicatorTheme.strokeCap;
+    final Color backgroundColor =
+        widget.backgroundColor ??
+        indicatorTheme.refreshBackgroundColor ??
+        Theme.of(context).canvasColor;
+    final double strokeWidth =
+        widget.strokeWidth ?? indicatorTheme.strokeWidth ?? defaults.strokeWidth!;
+    final double strokeAlign =
+        widget.strokeAlign ?? indicatorTheme.strokeAlign ?? defaults.strokeAlign!;
+    final StrokeCap? strokeCap = widget.strokeCap ?? indicatorTheme.strokeCap;
 
     return widget._buildSemanticsWrapper(
       context: context,
@@ -1313,7 +1293,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
 
 // Hand coded defaults based on Material Design 2.
 class _CircularProgressIndicatorDefaultsM2 extends ProgressIndicatorThemeData {
-  _CircularProgressIndicatorDefaultsM2(this.context, { required this.indeterminate });
+  _CircularProgressIndicatorDefaultsM2(this.context, {required this.indeterminate});
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -1329,10 +1309,7 @@ class _CircularProgressIndicatorDefaultsM2 extends ProgressIndicatorThemeData {
   double? get strokeAlign => CircularProgressIndicator.strokeAlignCenter;
 
   @override
-  BoxConstraints get constraints => const BoxConstraints(
-    minWidth: 36.0,
-    minHeight: 36.0,
-  );
+  BoxConstraints get constraints => const BoxConstraints(minWidth: 36.0, minHeight: 36.0);
 }
 
 class _LinearProgressIndicatorDefaultsM2 extends ProgressIndicatorThemeData {
@@ -1352,7 +1329,7 @@ class _LinearProgressIndicatorDefaultsM2 extends ProgressIndicatorThemeData {
 }
 
 class _CircularProgressIndicatorDefaultsM3Year2023 extends ProgressIndicatorThemeData {
-  _CircularProgressIndicatorDefaultsM3Year2023(this.context, { required this.indeterminate });
+  _CircularProgressIndicatorDefaultsM3Year2023(this.context, {required this.indeterminate});
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -1368,10 +1345,7 @@ class _CircularProgressIndicatorDefaultsM3Year2023 extends ProgressIndicatorThem
   double? get strokeAlign => CircularProgressIndicator.strokeAlignCenter;
 
   @override
-  BoxConstraints get constraints => const BoxConstraints(
-    minWidth: 36.0,
-    minHeight: 36.0,
-  );
+  BoxConstraints get constraints => const BoxConstraints(minWidth: 36.0, minHeight: 36.0);
 }
 
 class _LinearProgressIndicatorDefaultsM3Year2023 extends ProgressIndicatorThemeData {
@@ -1397,6 +1371,7 @@ class _LinearProgressIndicatorDefaultsM3Year2023 extends ProgressIndicatorThemeD
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _CircularProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
   _CircularProgressIndicatorDefaultsM3(this.context, { required this.indeterminate });
 
@@ -1456,5 +1431,6 @@ class _LinearProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
   @override
   double? get trackGap => 4.0;
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - ProgressIndicator

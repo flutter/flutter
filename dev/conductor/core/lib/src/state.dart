@@ -47,33 +47,27 @@ const String stablePostReleaseMsg = """
 // * `String presentState(pb.ConductorState state)` - pretty print the state file.
 // This is a little easier to read than the raw JSON.
 
-String luciConsoleLink(String channel, String groupName) {
+String luciConsoleLink(String candidateBranch, String repoName) {
   assert(
-    globals.kReleaseChannels.contains(channel),
-    'channel "$channel" not recognized',
+    globals.releaseCandidateBranchRegex.hasMatch(candidateBranch),
+    'Malformed candidateBranch argument passed: "$candidateBranch"',
   );
   assert(
-    <String>['flutter', 'engine', 'packaging'].contains(groupName),
-    'group named $groupName not recognized',
+    <String>['flutter', 'engine', 'packaging'].contains(repoName),
+    'group named $repoName not recognized',
   );
-  final String consoleName =
-      channel == 'master' ? groupName : '${channel}_$groupName';
-  if (groupName == 'packaging') {
+  if (repoName == 'packaging') {
     return 'https://luci-milo.appspot.com/p/dart-internal/g/flutter_packaging/console';
   }
-  return 'https://ci.chromium.org/p/flutter/g/$consoleName/console';
+  return 'https://flutter-dashboard.appspot.com/#/build?repo=$repoName&branch=$candidateBranch';
 }
 
 String defaultStateFilePath(Platform platform) {
   final String? home = platform.environment['HOME'];
   if (home == null) {
-    throw globals.ConductorException(
-        r'Environment variable $HOME must be set!');
+    throw globals.ConductorException(r'Environment variable $HOME must be set!');
   }
-  return <String>[
-    home,
-    kStateFileName,
-  ].join(platform.pathSeparator);
+  return <String>[home, kStateFileName].join(platform.pathSeparator);
 }
 
 String presentState(pb.ConductorState state) {
@@ -83,9 +77,11 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('Release version: ${state.releaseVersion}');
   buffer.writeln();
   buffer.writeln(
-      'Release started at: ${DateTime.fromMillisecondsSinceEpoch(state.createdDate.toInt())}');
+    'Release started at: ${DateTime.fromMillisecondsSinceEpoch(state.createdDate.toInt())}',
+  );
   buffer.writeln(
-      'Last updated at: ${DateTime.fromMillisecondsSinceEpoch(state.lastUpdatedDate.toInt())}');
+    'Last updated at: ${DateTime.fromMillisecondsSinceEpoch(state.lastUpdatedDate.toInt())}',
+  );
   buffer.writeln();
   buffer.writeln('Engine Repo');
   buffer.writeln('\tCandidate branch: ${state.engine.candidateBranch}');
@@ -93,7 +89,8 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('\tCurrent git HEAD: ${state.engine.currentGitHead}');
   buffer.writeln('\tPath to checkout: ${state.engine.checkoutPath}');
   buffer.writeln(
-      '\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'engine')}');
+    '\tPost-submit LUCI dashboard: ${luciConsoleLink(state.engine.candidateBranch, 'engine')}',
+  );
   if (state.engine.cherrypicks.isNotEmpty) {
     buffer.writeln('${state.engine.cherrypicks.length} Engine Cherrypicks:');
     for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
@@ -111,10 +108,10 @@ String presentState(pb.ConductorState state) {
   buffer.writeln('\tCurrent git HEAD: ${state.framework.currentGitHead}');
   buffer.writeln('\tPath to checkout: ${state.framework.checkoutPath}');
   buffer.writeln(
-      '\tPost-submit LUCI dashboard: ${luciConsoleLink(state.releaseChannel, 'flutter')}');
+    '\tPost-submit LUCI dashboard: ${luciConsoleLink(state.framework.candidateBranch, 'flutter')}',
+  );
   if (state.framework.cherrypicks.isNotEmpty) {
-    buffer.writeln(
-        '${state.framework.cherrypicks.length} Framework Cherrypicks:');
+    buffer.writeln('${state.framework.cherrypicks.length} Framework Cherrypicks:');
     for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
       buffer.writeln('\t${cherrypick.trunkRevision} - ${cherrypick.state}');
     }
@@ -180,7 +177,7 @@ String phaseInstructions(pb.ConductorState state) {
     case ReleasePhase.VERIFY_ENGINE_CI:
       if (!requiresEnginePR(state)) {
         return 'You must verify engine CI has passed: '
-            '${luciConsoleLink(state.releaseChannel, 'engine')}';
+            '${luciConsoleLink(state.engine.candidateBranch, 'engine')}';
       }
       // User's working branch was pushed to their mirror, but a PR needs to be
       // opened on GitHub.
@@ -189,20 +186,19 @@ String phaseInstructions(pb.ConductorState state) {
         repoName: 'engine',
         state: state,
       );
+      final String consoleLink = luciConsoleLink(state.engine.candidateBranch, 'engine');
       return <String>[
         'Your working branch ${state.engine.workingBranch} was pushed to your mirror.',
         'You must now open a pull request at $newPrLink, verify pre-submit CI',
         'builds on your engine pull request are successful, merge your pull request,',
-        'validate post-submit CI, and then codesign the binaries on the merge commit.',
+        'validate post-submit CI at $consoleLink.',
       ].join('\n');
     case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
       final List<pb.Cherrypick> outstandingCherrypicks =
-          state.framework.cherrypicks.where(
-        (pb.Cherrypick cp) {
-          return cp.state == pb.CherrypickState.PENDING ||
-              cp.state == pb.CherrypickState.PENDING_WITH_CONFLICT;
-        },
-      ).toList();
+          state.framework.cherrypicks.where((pb.Cherrypick cp) {
+            return cp.state == pb.CherrypickState.PENDING ||
+                cp.state == pb.CherrypickState.PENDING_WITH_CONFLICT;
+          }).toList();
       if (outstandingCherrypicks.isNotEmpty) {
         return <String>[
           'You must now manually apply the following framework cherrypicks to the checkout',
@@ -232,7 +228,7 @@ String phaseInstructions(pb.ConductorState state) {
         'pull request, validate post-submit CI.',
       ].join('\n');
     case ReleasePhase.VERIFY_RELEASE:
-      return 'Release archive packages must be verified on cloud storage: ${luciConsoleLink(state.releaseChannel, 'packaging')}';
+      return 'Release archive packages must be verified on cloud storage: ${luciConsoleLink(state.framework.candidateBranch, 'packaging')}';
     case ReleasePhase.RELEASE_COMPLETED:
       if (state.releaseChannel == 'beta') {
         return <String>[
@@ -257,7 +253,8 @@ String phaseInstructions(pb.ConductorState state) {
 /// Second group = account name
 /// Third group = repo name
 final RegExp githubRemotePattern = RegExp(
-    r'^(git@github\.com:|https?:\/\/github\.com\/)([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+)(\.git)?$');
+  r'^(git@github\.com:|https?:\/\/github\.com\/)([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+)(\.git)?$',
+);
 
 /// Parses a Git remote URL and returns the account name.
 ///
@@ -266,15 +263,11 @@ String githubAccount(String remoteUrl) {
   final String engineUrl = remoteUrl;
   final RegExpMatch? match = githubRemotePattern.firstMatch(engineUrl);
   if (match == null) {
-    throw globals.ConductorException(
-      'Cannot determine the GitHub account from $engineUrl',
-    );
+    throw globals.ConductorException('Cannot determine the GitHub account from $engineUrl');
   }
   final String? accountName = match.group(2);
   if (accountName == null || accountName.isEmpty) {
-    throw globals.ConductorException(
-      'Cannot determine the GitHub account from $match',
-    );
+    throw globals.ConductorException('Cannot determine the GitHub account from $match');
   }
   return accountName;
 }
@@ -305,18 +298,13 @@ const JsonEncoder _encoder = JsonEncoder.withIndent('  ');
 
 void writeStateToFile(File file, pb.ConductorState state, List<String> logs) {
   state.logs.addAll(logs);
-  file.writeAsStringSync(
-    _encoder.convert(state.toProto3Json()),
-    flush: true,
-  );
+  file.writeAsStringSync(_encoder.convert(state.toProto3Json()), flush: true);
 }
 
 pb.ConductorState readStateFromFile(File file) {
   final pb.ConductorState state = pb.ConductorState();
   final String stateAsString = file.readAsStringSync();
-  state.mergeFromProto3Json(
-    jsonDecode(stateAsString),
-  );
+  state.mergeFromProto3Json(jsonDecode(stateAsString));
   return state;
 }
 
@@ -342,8 +330,9 @@ bool requiresFrameworkPR(pb.ConductorState state) {
   if (requiresEnginePR(state)) {
     return true;
   }
-  final bool hasRequiredCherrypicks = state.framework.cherrypicks
-      .any((pb.Cherrypick cp) => cp.state != pb.CherrypickState.ABANDONED);
+  final bool hasRequiredCherrypicks = state.framework.cherrypicks.any(
+    (pb.Cherrypick cp) => cp.state != pb.CherrypickState.ABANDONED,
+  );
   if (hasRequiredCherrypicks) {
     return true;
   }
