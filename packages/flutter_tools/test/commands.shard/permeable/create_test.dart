@@ -3606,7 +3606,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
     final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
     final Pubspec pubspec = Pubspec.parse(rawPubspec);
-    final Map<String, VersionConstraint?> env = pubspec.environment!;
+    final Map<String, VersionConstraint?> env = pubspec.environment;
     expect(env['flutter']!.allows(Version(3, 3, 0)), true);
     expect(env['flutter']!.allows(Version(3, 2, 9)), false);
   });
@@ -4283,7 +4283,7 @@ void main() {
     final Pubspec pubspec = Pubspec.parse(rawPubspec);
 
     expect(
-      pubspec.environment!['sdk'].toString(),
+      pubspec.environment['sdk'].toString(),
       startsWith('^'),
       reason: 'The caret syntax is recommended over the traditional syntax.',
     );
