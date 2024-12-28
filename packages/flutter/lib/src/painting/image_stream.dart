@@ -1071,7 +1071,11 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       final int completedCycles = _framesEmitted ~/ _codec!.frameCount;
       if (_codec!.repetitionCount == -1 || completedCycles <= _codec!.repetitionCount) {
         _decodeNextFrameAndSchedule();
+        return;
       }
+
+      _codec!.dispose();
+      _codec = null;
       return;
     }
     final Duration delay = _frameDuration! - (timestamp - _shownTimestamp);
@@ -1105,6 +1109,11 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       );
       return;
     }
+    if (_codec == null) {
+      // codec was disposed during getNextFrame
+      return;
+    }
+
     if (_codec!.frameCount == 1) {
       // ImageStreamCompleter listeners removed while waiting for next frame to
       // be decoded.
@@ -1119,6 +1128,9 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       );
       _nextFrame!.image.dispose();
       _nextFrame = null;
+
+      _codec!.dispose();
+      _codec = null;
       return;
     }
     _scheduleAppFrame();
@@ -1161,6 +1173,9 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _chunkSubscription?.onData(null);
       _chunkSubscription?.cancel();
       _chunkSubscription = null;
+
+      _codec?.dispose();
+      _codec = null;
     }
   }
 }
