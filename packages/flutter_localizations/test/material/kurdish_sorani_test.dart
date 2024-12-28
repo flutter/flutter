@@ -8,16 +8,32 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Kurdish Sorani translations test', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      supportedLocales: const <Locale>[
-        Locale('ckb'),
-      ],
-      home: Container(),
-    ));
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('ckb'),
+        supportedLocales: const <Locale>[Locale('ckb')],
+        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: Builder(
+          builder: (BuildContext context) {
+            return Column(
+              children: <Widget>[
+                Text(MaterialLocalizations.of(context).okButtonLabel),
+                Text(MaterialLocalizations.of(context).backButtonTooltip),
+              ],
+            );
+          },
+        ),
+      ),
+    );
 
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(tester.element(find.byType(Container)));
+    await tester.pumpAndSettle();
+
+    final BuildContext context = tester.element(find.byType(Column));
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     expect(localizations.okButtonLabel, 'باشە');
     expect(localizations.backButtonTooltip, 'گەڕانەوە');
@@ -34,13 +50,13 @@ void main() {
     expect(localizations.copyButtonLabel, 'لەبەرگرتنەوە');
     expect(localizations.cutButtonLabel, 'بڕین');
     expect(localizations.pasteButtonLabel, 'لکاندن');
-    expect(localizations.selectAllButtonLabel, 'هەڵبژاردنی هەموو');
+    expect(localizations.selectAllButtonLabel, 'هەموو هەڵبژێرە');
     expect(localizations.viewLicensesButtonLabel, 'بینینی مۆڵەتەکان');
     expect(localizations.anteMeridiemAbbreviation, 'پ.ن');
     expect(localizations.postMeridiemAbbreviation, 'د.ن');
     expect(localizations.timePickerHourModeAnnouncement, 'هەڵبژاردنی کاتژمێر');
     expect(localizations.timePickerMinuteModeAnnouncement, 'هەڵبژاردنی خولەک');
-    expect(localizations.modalBarrierDismissLabel, 'دەرچوون');
+    expect(localizations.modalBarrierDismissLabel, 'داخستن');
     expect(localizations.drawerLabel, 'مێنیوی ڕێنیشاندەر');
     expect(localizations.popupMenuLabel, 'مێنیوی دەرکەوتوو');
     expect(localizations.dialogLabel, 'دیالۆگ');
@@ -89,13 +105,10 @@ void main() {
     expect(localizations.selectedDateLabel, 'هەڵبژێردراو');
     expect(localizations.scrimLabel, 'Scrim');
     expect(localizations.scrimOnTapHint('test'), 'داخستنی test');
-    expect(localizations.expansionTileExpandedHint,
-        'دووجار کرتە بکە بۆ داخستنەوە');
-    expect(localizations.expansionTileCollapsedHint,
-        'دووجار کرتە بکە بۆ فراوانکردن');
+    expect(localizations.expansionTileExpandedHint, 'دووجار کرتە بکە بۆ داخستنەوە');
+    expect(localizations.expansionTileCollapsedHint, 'دووجار کرتە بکە بۆ فراوانکردن');
     expect(localizations.expansionTileExpandedTapHint, 'داخستنەوە');
-    expect(localizations.expansionTileCollapsedTapHint,
-        'فراوانکردن بۆ وردەکاری زیاتر');
+    expect(localizations.expansionTileCollapsedTapHint, 'فراوانکردن بۆ وردەکاری زیاتر');
     expect(localizations.expandedHint, 'داخراوەتەوە');
     expect(localizations.collapsedHint, 'فراوانکراوە');
     expect(localizations.scanTextButtonLabel, 'سکانکردنی دەق');
