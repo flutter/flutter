@@ -980,7 +980,8 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   /// Immediately starts decoding the first image frame when the codec is ready.
   ///
   /// The `codec` parameter is a future for an initialized [ui.Codec] that will
-  /// be used to decode the image.
+  /// be used to decode the image. This completer takes ownership of the passed
+  /// `codec` and will dispose it once it is no longer needed.
   ///
   /// The `scale` parameter is the linear scale factor for drawing this frames
   /// of this image at their intended size.
