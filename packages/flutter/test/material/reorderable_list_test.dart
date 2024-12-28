@@ -2366,7 +2366,7 @@ void main() {
           body: ReorderableListView.builder(
             mouseCursor: const WidgetStateMouseCursor.fromMap(<WidgetStatesConstraint, MouseCursor>{
               WidgetState.dragged: SystemMouseCursors.copy,
-              WidgetState.hovered: SystemMouseCursors.resizeColumn,
+              WidgetState.any: SystemMouseCursors.resizeColumn,
             }),
             itemBuilder: (BuildContext context, int index) {
               return ReorderableDragStartListener(
