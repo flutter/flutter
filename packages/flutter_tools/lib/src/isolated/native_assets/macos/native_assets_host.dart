@@ -128,10 +128,9 @@ Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
   return <String>{
     for (final List<String> architectureSection
         in parseOtoolArchitectureSections(installNameResult.stdout as String).values)
-          // For each architecture, a separate install name is reported, which are
-          // not necessarily the same.
-          architectureSection
-          .single,
+      // For each architecture, a separate install name is reported, which are
+      // not necessarily the same.
+      architectureSection.single,
   };
 }
 
