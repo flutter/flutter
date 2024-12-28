@@ -305,11 +305,10 @@ class ReorderableListView extends StatefulWidget {
   /// If [mouseCursor] is a [WidgetStateMouseCursor],
   /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [WidgetState.hovered].
   ///  * [WidgetState.dragged].
   ///
-  /// If this property is null, [WidgetStateMouseCursor.drag] will be used when
-  /// hovering, and [WidgetStateMouseCursor.drag] when dragging.
+  /// If this property is null, [SystemMouseCursors.grab] will be used when
+  ///  hovering, and [SystemMouseCursors.grabbing] when dragging.
   final MouseCursor? mouseCursor;
 
   @override
@@ -317,7 +316,7 @@ class ReorderableListView extends StatefulWidget {
 }
 
 class _ReorderableListViewState extends State<ReorderableListView> {
-  final ValueNotifier<int?> _dragIndex = ValueNotifier<int?>(null);
+  final ValueNotifier<bool> _dragging = ValueNotifier<bool>(false);
 
   Widget _itemBuilder(BuildContext context, int index) {
     final Widget item = widget.itemBuilder(context, index);
@@ -337,18 +336,15 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         case TargetPlatform.macOS:
 
         final ListenableBuilder dragHandle = ListenableBuilder(
-          listenable: _dragIndex,
+          listenable: _dragging,
           builder: (BuildContext context, Widget? child) {
             final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
               widget.mouseCursor ?? const WidgetStateMouseCursor.fromMap(<WidgetStatesConstraint, MouseCursor>{
                 WidgetState.dragged: SystemMouseCursors.grabbing,
-                WidgetState.hovered: SystemMouseCursors.grab,
+                WidgetState.any: SystemMouseCursors.grab,
               }),
               <WidgetState>{
-                if (_dragIndex.value == index)
-                  WidgetState.dragged
-                else
-                  WidgetState.hovered,
+                  if (_dragging.value) WidgetState.dragged
               },
             );
             return MouseRegion(
@@ -426,7 +422,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
 
   @override
   void dispose() {
-    _dragIndex.dispose();
+    _dragging.dispose();
     super.dispose();
   }
 
@@ -488,11 +484,11 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             itemCount: widget.itemCount,
             onReorder: widget.onReorder,
             onReorderStart: (int index) {
-                _dragIndex.value = index;
+                _dragging.value = true;
               widget.onReorderStart?.call(index);
             },
             onReorderEnd: (int index) {
-                _dragIndex.value = null;
+                _dragging.value = false;
               widget.onReorderEnd?.call(index);
             },
             proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
