@@ -12,11 +12,7 @@ void main() {
       MaterialApp(
         locale: const Locale('ckb'),
         supportedLocales: const <Locale>[Locale('ckb')],
-        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         home: Builder(
           builder: (BuildContext context) {
             return Column(
