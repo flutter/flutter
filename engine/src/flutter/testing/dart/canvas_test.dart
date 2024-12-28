@@ -173,7 +173,7 @@ String get _flutterBuildPath {
 }
 
 void main() async {
-  final ImageComparer comparer = await ImageComparer.create();
+  final ImageComparer comparer = await ImageComparer.create(verbose: true);
 
   testNoCrashes();
 

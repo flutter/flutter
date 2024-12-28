@@ -40,11 +40,7 @@ class ImageComparer {
         SkiaGoldClient.isAvailable() && _useSkiaGold
             ? SkiaGoldClient(workDirectory, dimensions: dimensions, verbose: verbose)
             : _FakeSkiaGoldClient(workDirectory, dimensions, verbose: verbose);
-    if (!SkiaGoldClient.isAvailable()) {
-      print('Intentionally skipping Skia Gold as it does not appear available');
-    } else if (!_useSkiaGold) {
-      print('Intentionally skipping Skia Gold as --force-multithreading is not golden tested');
-    }
+
     await client.auth();
     return ImageComparer._(client: client);
   }
