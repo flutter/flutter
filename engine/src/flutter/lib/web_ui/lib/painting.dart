@@ -713,6 +713,7 @@ void decodeImageFromList(Uint8List list, ImageDecoderCallback callback) {
 Future<void> _decodeImageFromListAsync(Uint8List list, ImageDecoderCallback callback) async {
   final Codec codec = await instantiateImageCodec(list);
   final FrameInfo frameInfo = await codec.getNextFrame();
+  codec.dispose();
   callback(frameInfo.image);
 }
 
