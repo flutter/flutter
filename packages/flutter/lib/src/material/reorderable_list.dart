@@ -334,27 +334,21 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         case TargetPlatform.linux:
         case TargetPlatform.windows:
         case TargetPlatform.macOS:
-
-        final ListenableBuilder dragHandle = ListenableBuilder(
-          listenable: _dragging,
-          builder: (BuildContext context, Widget? child) {
-            final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
-              widget.mouseCursor ?? const WidgetStateMouseCursor.fromMap(<WidgetStatesConstraint, MouseCursor>{
-                WidgetState.dragged: SystemMouseCursors.grabbing,
-                WidgetState.any: SystemMouseCursors.grab,
-              }),
-              <WidgetState>{
-                  if (_dragging.value) WidgetState.dragged
-              },
-            );
-            return MouseRegion(
-              cursor: effectiveMouseCursor,
-              child:child,
-            );
-          },
-          child: const Icon(Icons.drag_handle),
-
-        );
+          final ListenableBuilder dragHandle = ListenableBuilder(
+            listenable: _dragging,
+            builder: (BuildContext context, Widget? child) {
+              final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
+                widget.mouseCursor ??
+                    const WidgetStateMouseCursor.fromMap(<WidgetStatesConstraint, MouseCursor>{
+                      WidgetState.dragged: SystemMouseCursors.grabbing,
+                      WidgetState.any: SystemMouseCursors.grab,
+                    }),
+                <WidgetState>{if (_dragging.value) WidgetState.dragged},
+              );
+              return MouseRegion(cursor: effectiveMouseCursor, child: child);
+            },
+            child: const Icon(Icons.drag_handle),
+          );
           switch (widget.scrollDirection) {
             case Axis.horizontal:
               return Stack(
@@ -368,10 +362,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
                     bottom: 8,
                     child: Align(
                       alignment: AlignmentDirectional.bottomCenter,
-                      child: ReorderableDragStartListener(
-                        index: index,
-                        child: dragHandle,
-                      ),
+                      child: ReorderableDragStartListener(index: index, child: dragHandle),
                     ),
                   ),
                 ],
@@ -388,10 +379,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
                     end: 8,
                     child: Align(
                       alignment: AlignmentDirectional.centerEnd,
-                      child: ReorderableDragStartListener(
-                        index: index,
-                        child: dragHandle,
-                      ),
+                      child: ReorderableDragStartListener(index: index, child: dragHandle),
                     ),
                   ),
                 ],
@@ -484,11 +472,11 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             itemCount: widget.itemCount,
             onReorder: widget.onReorder,
             onReorderStart: (int index) {
-                _dragging.value = true;
+              _dragging.value = true;
               widget.onReorderStart?.call(index);
             },
             onReorderEnd: (int index) {
-                _dragging.value = false;
+              _dragging.value = false;
               widget.onReorderEnd?.call(index);
             },
             proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
