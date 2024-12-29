@@ -1519,14 +1519,24 @@ class MenuController {
   }
 
   /// Returns the [MenuController] of the ancestor [RawMenuAnchor] nearest to
-  /// the given `context`, if one exists.
+  /// the given `context`, if one exists. Otherwise, returns null.
   ///
-  /// Otherwise, returns null.
-  static MenuController? maybeOf(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<_RawMenuAnchorScope>()
-        ?.anchor
-        ._menuController;
+  /// If `createDependency` is true, then the provided [BuildContext] will
+  /// rebuild when the menu opens and closes, or when the [MenuController]
+  /// changes.
+  static MenuController? maybeOf(
+    BuildContext context, {
+    bool createDependency = false,
+  }) {
+    if (createDependency) {
+      return context
+          .dependOnInheritedWidgetOfExactType<_RawMenuAnchorScope>()
+          ?.controller;
+    } else {
+      return context
+          .getInheritedWidgetOfExactType<_RawMenuAnchorScope>()
+          ?.controller;
+    }
   }
 
   @override
