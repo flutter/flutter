@@ -3443,6 +3443,41 @@ void main() {
     expect(menuTheater, submenuTheater);
   });
 
+  testWidgets('Parent updates are not triggered during builds',
+      (WidgetTester tester) async {
+    // Ensures that _MenuAnchor._childChangedOpenState does not
+    // rebuild a child's parent if that parent is currently building.
+    final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
+
+    Widget build(Size size) {
+      return App(
+        MediaQuery(
+          data: mediaQueryData.copyWith(size: size),
+          child: RawMenuAnchor.node(
+            controller: controller,
+            child: const RawMenuAnchor(
+              panel: RawMenuPanel(menuChildren: <Widget>[]),
+              child: AnchorButton(Tag.anchor),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(mediaQueryData.size));
+
+    await tester.tap(find.text(Tag.anchor.text));
+    await tester.pump();
+
+    const Size smallSize = Size(200, 200);
+    await changeSurfaceSize(tester, smallSize);
+
+    await tester.pumpWidget(build(smallSize));
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+  });
+
   group('[Default] Layout', () {
     final List<AlignmentGeometry> alignments = <AlignmentGeometry>[
       for (double x = -2; x <= 2; x += 1)

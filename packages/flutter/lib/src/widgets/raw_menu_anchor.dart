@@ -985,14 +985,15 @@ sealed class _RawMenuAnchorState<T extends _RawMenuAnchor> extends State<T> {
 
   void _childChangedOpenState() {
     _parent?._childChangedOpenState();
-    assert(mounted);
     if (SchedulerBinding.instance.schedulerPhase !=
         SchedulerPhase.persistentCallbacks) {
-      setState(() {/* Mark dirty now, but only if not in a build. */});
+      setState(() {
+        // Mark dirty now, but only if not in a build.
+      });
     } else {
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
         setState(() {
-          /* Mark dirty after this frame, but only if in a build. */
+          // Mark dirty
         });
       });
     }
@@ -1362,17 +1363,22 @@ class _RawMenuAnchorNodeState extends _RawMenuAnchorState<_RawMenuAnchorNode> {
 
   @override
   void _close({bool inDispose = false}) {
+    if (!_isOpen) {
+      return;
+    }
     _closeChildren(inDispose: inDispose);
     if (!inDispose) {
       if (SchedulerBinding.instance.schedulerPhase !=
           SchedulerPhase.persistentCallbacks) {
         setState(() {
-          /* Mark dirty, but only if mounted and not in a build. */
+          // Mark dirty, but only if mounted and not in a build.
         });
       } else {
         SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
           if (mounted) {
-            setState(() {/* Mark dirty */});
+            setState(() {
+              // Mark dirty.
+            });
           }
         });
       }
@@ -1382,7 +1388,7 @@ class _RawMenuAnchorNodeState extends _RawMenuAnchorState<_RawMenuAnchorNode> {
   @override
   void _open({Offset? position}) {
     assert(_menuController._anchor == this);
-    // Menu bars are always open, so this is a no-op.
+    // Menu nodes are always open, so this is a no-op.
     return;
   }
 
