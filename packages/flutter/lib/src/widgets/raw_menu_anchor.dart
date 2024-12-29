@@ -853,8 +853,7 @@ class RawMenuPanel extends StatelessWidget {
           DiagnosticsProperty<bool>('constrainCrossAxis', constrainCrossAxis));
     if (padding != null) {
       properties.add(
-        DiagnosticsProperty<EdgeInsetsGeometry>('padding override', padding),
-      );
+          DiagnosticsProperty<EdgeInsetsGeometry>('padding override', padding));
     }
   }
 }
@@ -862,11 +861,16 @@ class RawMenuPanel extends StatelessWidget {
 // Base class that provides the common interface and state for the different
 // types of RawMenuAnchors, [_RawMenuAnchorOverlay] and [_RawMenuAnchorNode].
 sealed class _RawMenuAnchor extends StatefulWidget {
-  const _RawMenuAnchor();
-  MenuController? get controller;
-  bool get consumeOutsideTaps;
-  FocusNode? get childFocusNode => null;
-  EdgeInsetsGeometry? get padding => null;
+  const _RawMenuAnchor({
+    this.childFocusNode,
+    required this.consumeOutsideTaps,
+    this.controller,
+    this.padding,
+  });
+  final FocusNode? childFocusNode;
+  final bool consumeOutsideTaps;
+  final MenuController? controller;
+  final EdgeInsetsGeometry? padding;
 
   @override
   State<_RawMenuAnchor> createState();
@@ -1046,17 +1050,17 @@ sealed class _RawMenuAnchorState<T extends _RawMenuAnchor> extends State<T> {
 
 class _RawMenuAnchorOverlay extends _RawMenuAnchor {
   const _RawMenuAnchorOverlay({
-    this.controller,
-    this.childFocusNode,
-    this.consumeOutsideTaps = false,
     this.onOpen,
     this.onClose,
     this.hasExternalFocusScope = false,
     this.useRootOverlay = false,
-    this.padding,
     required this.overlayBuilder,
     this.builder,
     this.child,
+    super.padding,
+    super.controller,
+    super.childFocusNode,
+    super.consumeOutsideTaps = false,
   });
 
   final VoidCallback? onOpen;
@@ -1066,21 +1070,9 @@ class _RawMenuAnchorOverlay extends _RawMenuAnchor {
   final RawMenuAnchorOverlayBuilder overlayBuilder;
   final bool useRootOverlay;
 
-  @override
-  final EdgeInsetsGeometry? padding;
-
   // Whether focus is handled by this class (default overlay) or externally
   // (overlayBuilder).
   final bool hasExternalFocusScope;
-
-  @override
-  final FocusNode? childFocusNode;
-
-  @override
-  final bool consumeOutsideTaps;
-
-  @override
-  final MenuController? controller;
 
   @override
   State<_RawMenuAnchorOverlay> createState() => _RawMenuAnchorOverlayState();
@@ -1350,20 +1342,14 @@ class _RawMenuAnchorOverlayState
 
 class _RawMenuAnchorNode extends _RawMenuAnchor {
   const _RawMenuAnchorNode({
-    this.consumeOutsideTaps = false,
-    this.controller,
+    super.consumeOutsideTaps = false,
+    super.controller,
     this.child,
     required this.builder,
   });
 
   final Widget? child;
   final TransitionBuilder? builder;
-
-  @override
-  final bool consumeOutsideTaps;
-
-  @override
-  final MenuController? controller;
 
   @override
   State<_RawMenuAnchorNode> createState() => _RawMenuAnchorNodeState();
