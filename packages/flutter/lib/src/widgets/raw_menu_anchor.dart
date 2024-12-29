@@ -32,6 +32,8 @@ import 'tap_region.dart';
 // late BuildContext context;
 // late StateSetter setState;
 // late List<Widget> menuItems;
+// late RawMenuAnchorOverlayPosition position;
+
 const bool _kDebugMenus = false;
 
 const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts =
