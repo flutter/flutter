@@ -555,6 +555,8 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
     runIf:
       - .ci.yaml
+      - DEPS
+      - engine/**
 
   - name: Linux customer_testing
     # This really just runs dev/bots/customer_testing/ci.sh,
@@ -2229,6 +2231,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - DEPS
+      - engine/**
 
   - name: Linux web_skwasm_tests_5
     recipe: flutter/flutter_drone
@@ -2990,6 +2994,8 @@ targets:
     runIf:
       - .ci.yaml
       - dev/**
+      - DEPS
+      - engine/**
 
   # linux mokey test
   - name: Linux_mokey hybrid_android_views_integration_test
@@ -4837,6 +4843,8 @@ targets:
     runIf:
       - .ci.yaml
       - dev/**
+      - DEPS
+      - engine/**
     timeout: 60
     properties:
       tags: >
