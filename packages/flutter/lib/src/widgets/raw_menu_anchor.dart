@@ -1907,12 +1907,14 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       Size parentSize, Offset point, Set<Rect> avoidBounds) {
     final Iterable<ui.Rect> screens =
         DisplayFeatureSubScreen.subScreensInBounds(
-            Offset.zero & parentSize, avoidBounds);
+      Offset.zero & parentSize,
+      avoidBounds,
+    );
 
     Rect closest = screens.first;
-    for (final ui.Rect screen in screens) {
-      if ((screen.center - point).distance <
-          (closest.center - point).distance) {
+    for (final ui.Rect screen in screens.skip(1)) {
+      if ((screen.center - point).distanceSquared <
+          (closest.center - point).distanceSquared) {
         closest = screen;
       }
     }
