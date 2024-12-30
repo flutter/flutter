@@ -393,6 +393,34 @@ class Image extends StatefulWidget {
   /// In the case where the network image is on the Web platform, the [cacheWidth]
   /// and [cacheHeight] parameters are ignored as the web engine delegates
   /// image decoding to the web which does not support custom decode sizes.
+  ///
+  /// ### Same-origin policy on Web
+  ///
+  /// Due to browser restriction on Cross-Origin Resource Sharing (CORS),
+  /// Flutter on the Web platform can not fetch images from other origins
+  /// (domain, scheme, or port) than the origin that hosts the app, unless the
+  /// image hosting origin explicitly allows so. CORS errors can be resolved
+  /// by configuring the image hosting server. More information can be
+  /// found at Mozilla's introduction on
+  /// [same-origin policy](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy)
+  /// and
+  /// [CORS errors](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors).
+  ///
+  /// If it's not possible to configure the host, such as when images
+  /// are hosted on a CDN or from arbitrary URLs, the app can set the
+  /// `useImgElement` parameter of [Image.network] to display the image
+  /// in an HTML `<img>` element, which bypasses the same-origin policy.
+  ///
+  /// The `<img>` element is placed in a platform view, and therefore has the
+  /// following drawbacks:
+  ///
+  ///  * Suboptimal performance.
+  ///  * Can't be captured by screenshot widgets.
+  ///  * The `headers` argument must be null or empty.
+  ///  * Some image options are ignored, including [opacity], [colorBlendMode],
+  ///    [repeat], filtering, and blurring.
+  ///
+  /// By default, this feature is turned off ([WebImgElementStrategy.never]).
   Image.network(
     String src, {
     super.key,
@@ -418,10 +446,11 @@ class Image extends StatefulWidget {
     Map<String, String>? headers,
     int? cacheWidth,
     int? cacheHeight,
+    WebImgElementStrategy useImgElement = WebImgElementStrategy.never,
   }) : image = ResizeImage.resizeIfNeeded(
          cacheWidth,
          cacheHeight,
-         NetworkImage(src, scale: scale, headers: headers),
+         NetworkImage(src, scale: scale, headers: headers, useImgElement: useImgElement),
        ),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0);
