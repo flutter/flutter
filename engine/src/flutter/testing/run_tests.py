@@ -962,7 +962,6 @@ def build_dart_host_test_list(build_dir):
   dart_host_tests = [
       os.path.join('flutter', 'ci'),
       os.path.join('flutter', 'flutter_frontend_server'),
-      os.path.join('flutter', 'testing', 'ios_scenario_app'),
       os.path.join('flutter', 'testing', 'skia_gold_client'),
       os.path.join('flutter', 'tools', 'api_check'),
       os.path.join('flutter', 'tools', 'build_bucket_golden_scraper'),
