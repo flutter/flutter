@@ -6,7 +6,6 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:process/process.dart';
 import 'package:yaml/yaml.dart';
 
@@ -130,6 +129,7 @@ void main(List<String> args) async {
         buildCommand,
         '--debug',
         if (!codeSign) '--no-codesign',
+        '--verbose',
       ];
       io.stderr.writeln('Running $args...');
       final io.Process process = await processManager.start(
