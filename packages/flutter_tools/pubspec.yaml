@@ -57,7 +57,7 @@ dependencies:
   graphs: 2.3.2
   native_assets_builder:
     git:
-      url: git@github.com:dart-lang/native.git
+      url: https://github.com/dart-lang/native.git
       ref: unstuck-flutter-roll
       path: pkgs/native_assets_builder/
   native_assets_cli: 0.10.0
