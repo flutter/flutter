@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
@@ -106,9 +107,20 @@ void main(List<String> args) async {
 }
 ''');
 
+      // Analyze the hook to see if the API is still correct.
+      {
+        final List<String> args = <String>[dartBin, 'analyze', 'hook/build.dart'];
+        io.stderr.writeln('Running $args...');
+        final io.ProcessResult result = processManager.runSync(
+          args,
+          workingDirectory: packageDirectory.path,
+        );
+        printOnFailure(result.stdout.toString());
+        printOnFailure(result.stderr.toString());
+        expect(result.exitCode, 0);
+      }
+
       // Try building.
-      //
-      // TODO(matanlurey): Stream the app so that we can see partial output.
       final List<String> args = <String>[
         flutterBin,
         'build',
@@ -120,8 +132,20 @@ void main(List<String> args) async {
       final io.Process process = await processManager.start(
         args,
         workingDirectory: packageDirectory.path,
-        mode: ProcessStartMode.inheritStdio,
       );
+      final Future<void> stdoutFuture =
+          process.stdout
+              .transform<String>(const Utf8Decoder())
+              .transform<String>(const LineSplitter())
+              .listen(printOnFailure)
+              .asFuture<void>();
+      final Future<void> stderrFuture =
+          process.stderr
+              .transform<String>(const Utf8Decoder())
+              .transform<String>(const LineSplitter())
+              .listen(printOnFailure)
+              .asFuture<void>();
+      await Future.wait(<Future<void>>[stdoutFuture, stderrFuture]);
       expect(await process.exitCode, 0);
     });
   }, tags: <String>['flutter-build-apk']);

@@ -15,6 +15,13 @@ import 'test_driver.dart';
 /// The [FileSystem] for the integration test environment.
 const FileSystem fileSystem = LocalFileSystem();
 
+/// The (real) `flutter` binary (i.e. `{ROOT}/bin/dart`) to execute in tests.
+final String dartBin = fileSystem.path.join(
+  getFlutterRoot(),
+  'bin',
+  platform.isWindows ? 'dart.bat' : 'dart',
+);
+
 /// The (real) `flutter` binary (i.e. `{ROOT}/bin/flutter`) to execute in tests.
 final String flutterBin = fileSystem.path.join(
   getFlutterRoot(),
