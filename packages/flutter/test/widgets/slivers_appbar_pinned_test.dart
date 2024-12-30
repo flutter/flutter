@@ -12,7 +12,7 @@ void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
   final SliverPhysicalParentData parentData = target.parentData! as SliverPhysicalParentData;
   final Offset actual = parentData.paintOffset;
   expect(actual, ideal);
-  final SliverGeometry geometry = target.geometry!;
+  final SliverGeometry geometry = target.geometry;
   expect(geometry.visible, visible);
 }
 
@@ -74,7 +74,7 @@ void main() {
     );
     await tester.pumpAndSettle(const Duration(milliseconds: 10));
 
-    final RenderObject renderObject = key.currentContext!.findRenderObject()!;
+    final RenderObject renderObject = key.currentContext!.findRenderObject();
     // The delegate must only start throwing immediately before calling
     // toStringDeep to avoid triggering spurious exceptions.
     // If the _RenderSliverPinnedPersistentHeaderForWidgets class was not

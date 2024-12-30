@@ -246,7 +246,7 @@ class TravelDestinationContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextStyle titleStyle = theme.textTheme.headlineSmall!.copyWith(color: Colors.white);
-    final TextStyle descriptionStyle = theme.textTheme.titleMedium!;
+    final TextStyle descriptionStyle = theme.textTheme.titleMedium;
     final ButtonStyle textButtonStyle = TextButton.styleFrom(foregroundColor: Colors.amber.shade500);
 
     return Column(

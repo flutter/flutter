@@ -435,7 +435,7 @@ void main() {
     parentPipelineOwner.visitChildren((PipelineOwner child) {
       children.add(child);
     });
-    final PipelineOwner rawViewOwner = rawView.owner!;
+    final PipelineOwner rawViewOwner = rawView.owner;
     expect(children, contains(rawViewOwner));
 
     // Remove that View from the tree.
@@ -456,7 +456,7 @@ void main() {
 
   testWidgets('RenderView does not use size of child if constraints are tight', (WidgetTester tester) async {
     const Size physicalSize = Size(300, 600);
-    final Size logicalSize = physicalSize / tester.view.devicePixelRatio;
+    const Size logicalSize = physicalSize / tester.view.devicePixelRatio;
     tester.view.physicalConstraints = ViewConstraints.tight(physicalSize);
     await tester.pumpWidget(const Placeholder());
 
@@ -464,7 +464,7 @@ void main() {
     expect(renderView.constraints, BoxConstraints.tight(logicalSize));
     expect(renderView.size, logicalSize);
 
-    final RenderBox child = renderView.child!;
+    final RenderBox child = renderView.child;
     expect(child.constraints, BoxConstraints.tight(logicalSize));
     expect(child.debugCanParentUseSize, isFalse);
     expect(child.size, logicalSize);
@@ -479,7 +479,7 @@ void main() {
     expect(renderView.constraints, const BoxConstraints());
     expect(renderView.size, size);
 
-    final RenderBox child = renderView.child!;
+    final RenderBox child = renderView.child;
     expect(child.constraints, const BoxConstraints());
     expect(child.debugCanParentUseSize, isTrue);
     expect(child.size, size);
@@ -496,7 +496,7 @@ void main() {
     expect(renderView.constraints, boxConstraints);
     expect(renderView.size, size);
 
-    final RenderBox child = renderView.child!;
+    final RenderBox child = renderView.child;
     expect(child.constraints, boxConstraints);
     expect(child.debugCanParentUseSize, isTrue);
     expect(child.size, size);
@@ -511,7 +511,7 @@ void main() {
     final RenderView renderView = tester.renderObject<RenderView>(find.byType(View));
     expect(renderView.size, const Size(100, 200)); // viewConstraints.biggest / devicePixelRatio
 
-    final RenderBox child = renderView.child!;
+    final RenderBox child = renderView.child;
     expect(child.debugCanParentUseSize, isTrue);
     expect(child.size, const Size(100, 200));
   });

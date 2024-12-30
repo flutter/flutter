@@ -290,7 +290,7 @@ void main() {
           'helloChannel', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 10),
-                () => jsonMessage.encodeMessage(<dynamic>['hello world'])!);
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
           });
       channel.invokeMethod<String>('sayHello', 'hello');
 
@@ -324,7 +324,7 @@ void main() {
           'helloChannel1', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 10),
-                () => jsonMessage.encodeMessage(<dynamic>['hello world'])!);
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
           });
 
       // Configures channel 2
@@ -333,7 +333,7 @@ void main() {
           'helloChannel2', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 20),
-                () => jsonMessage.encodeMessage(<dynamic>['hello world'])!);
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
           });
 
       channel1.invokeMethod<String>('sayHello', 'hello');
@@ -373,7 +373,7 @@ void main() {
           'helloChannel1', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 10),
-                () => jsonMessage.encodeMessage(<dynamic>['hello world'])!);
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
           });
 
       // Configures channel 2
@@ -382,7 +382,7 @@ void main() {
           'helloChannel2', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 20),
-                () => jsonMessage.encodeMessage(<dynamic>['hello world'])!);
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
           });
 
       channel1.invokeMethod<String>('sayHello', 'hello');
@@ -424,7 +424,7 @@ void main() {
           'helloChannel1', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 20),
-                () => jsonMessage.encodeMessage(<dynamic>['hello world'])!);
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
           });
 
       // Configures channel 2
@@ -433,7 +433,7 @@ void main() {
           'helloChannel2', (ByteData? message) {
             return Future<ByteData>.delayed(
                 const Duration(milliseconds: 10),
-                () => jsonMessage.encodeMessage(<dynamic>['hello world'])!);
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
           });
 
       channel1.invokeMethod<String>('sayHello', 'hello');

@@ -31,13 +31,13 @@ class _MessageHandler {
         return const JsonEncoder.withIndent('  ').convert(_allDemos);
       case 'profileDemos':
         controller ??= LiveWidgetController(WidgetsBinding.instance);
-        await runDemos(kProfiledDemos, controller!);
+        await runDemos(kProfiledDemos, controller);
         _unTestedDemos.removeAll(kProfiledDemos);
         return const JsonEncoder.withIndent('  ').convert(kProfiledDemos);
       case 'restDemos':
         controller ??= LiveWidgetController(WidgetsBinding.instance);
         final List<String> restDemos =  _unTestedDemos.toList();
-        await runDemos(restDemos, controller!);
+        await runDemos(restDemos, controller);
         return const JsonEncoder.withIndent('  ').convert(restDemos);
       default:
         throw ArgumentError;

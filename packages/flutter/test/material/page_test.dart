@@ -41,7 +41,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
 
     FadeTransition widget2Opacity =
-        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>()!;
+        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>();
     Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
     final Size widget2Size = tester.getSize(find.text('Page 2'));
 
@@ -65,7 +65,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
 
     widget2Opacity =
-        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>()!;
+        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>();
     widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
 
     // Page 2 starts to move down.
@@ -105,7 +105,7 @@ void main() {
     Offset widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
     Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
     final RenderDecoratedBox box = tester.element(find.byKey(page2Key))
-        .findAncestorRenderObjectOfType<RenderDecoratedBox>()!;
+        .findAncestorRenderObjectOfType<RenderDecoratedBox>();
 
     // Page 1 is moving to the left.
     expect(widget1TransientTopLeft.dx < widget1InitialTopLeft.dx, true);
@@ -367,7 +367,7 @@ void main() {
                 },
               ),
             ),
-            child: Builder(builder: (_) => child!),
+            child: Builder(builder: (_) => child),
           );
         },
       ),

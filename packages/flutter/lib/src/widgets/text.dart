@@ -504,7 +504,7 @@ class Text extends StatelessWidget {
   ///
   /// See [RichText] which provides a lower-level way to draw text.
   const Text.rich(
-    InlineSpan this.textSpan, {
+    this.textSpan, {
     super.key,
     this.style,
     this.strutStyle,
@@ -691,7 +691,7 @@ class Text extends StatelessWidget {
           text: TextSpan(
             style: effectiveTextStyle,
             text: data,
-            children: textSpan != null ? <InlineSpan>[textSpan!] : null,
+            children: textSpan != null ? <InlineSpan>[textSpan] : null,
           ),
         ),
       );
@@ -711,7 +711,7 @@ class Text extends StatelessWidget {
         text: TextSpan(
           style: effectiveTextStyle,
           text: data,
-          children: textSpan != null ? <InlineSpan>[textSpan!] : null,
+          children: textSpan != null ? <InlineSpan>[textSpan] : null,
         ),
       );
     }

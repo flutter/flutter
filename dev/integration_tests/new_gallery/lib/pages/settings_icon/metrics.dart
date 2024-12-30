@@ -106,7 +106,7 @@ Offset knobCenter(double time) {
   } else {
     // Calculates the current location.
     final Offset center = Offset(knobDistanceFromCenter / tan(pi / 8), 0);
-    final double radius = (lowerKnobCenter - center).distance;
+    const double radius = (lowerKnobCenter - center).distance;
     final double angle = pi + (progress - 1 / 2) * pi / 4;
     return center + Offset.fromDirection(angle, radius);
   }

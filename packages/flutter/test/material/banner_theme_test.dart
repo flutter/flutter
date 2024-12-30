@@ -75,7 +75,7 @@ void main() {
       theme: theme,
       builder:(BuildContext context, Widget? child) {
         localizedTheme = Theme.of(context);
-        return child!;
+        return child;
       },
       home: Scaffold(
         body: MaterialBanner(

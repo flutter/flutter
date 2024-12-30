@@ -48,7 +48,7 @@ class UnderlineTabIndicator extends Decoration {
     if (a is UnderlineTabIndicator) {
       return UnderlineTabIndicator(
         borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
-        insets: EdgeInsetsGeometry.lerp(a.insets, insets, t)!,
+        insets: EdgeInsetsGeometry.lerp(a.insets, insets, t),
       );
     }
     return super.lerpFrom(a, t);
@@ -59,7 +59,7 @@ class UnderlineTabIndicator extends Decoration {
     if (b is UnderlineTabIndicator) {
       return UnderlineTabIndicator(
         borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
-        insets: EdgeInsetsGeometry.lerp(insets, b.insets, t)!,
+        insets: EdgeInsetsGeometry.lerp(insets, b.insets, t),
       );
     }
     return super.lerpTo(b, t);
@@ -105,7 +105,7 @@ class _UnderlinePainter extends BoxPainter {
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
     assert(configuration.size != null);
     final Rect rect = offset & configuration.size!;
-    final TextDirection textDirection = configuration.textDirection!;
+    final TextDirection textDirection = configuration.textDirection;
     final Paint paint;
     if (borderRadius != null) {
       paint = Paint()..color = decoration.borderSide.color;

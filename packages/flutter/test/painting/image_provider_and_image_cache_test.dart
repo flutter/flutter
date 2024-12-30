@@ -76,7 +76,7 @@ void main() {
     final MemoryImage imageProvider = MemoryImage(bytes);
     final ImageStreamCompleter cacheStream = otherCache.putIfAbsent(
       imageProvider, () => imageProvider.loadBuffer(imageProvider, basicDecoder),
-    )!;
+    );
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
     final Completer<void> completer = Completer<void>();
     final Completer<void> cacheCompleter = Completer<void>();

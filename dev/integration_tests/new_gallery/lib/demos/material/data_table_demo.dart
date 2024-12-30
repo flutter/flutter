@@ -150,7 +150,7 @@ class _DataTableDemoState extends State<DataTableDemo> with RestorationMixin {
               rowsPerPage: _rowsPerPage.value,
               onRowsPerPageChanged: (int? value) {
                 setState(() {
-                  _rowsPerPage.value = value!;
+                  _rowsPerPage.value = value;
                 });
               },
               initialFirstRowIndex: _rowIndex.value,

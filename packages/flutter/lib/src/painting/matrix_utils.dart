@@ -56,7 +56,7 @@ abstract final class MatrixUtils {
     }
     assert(a != null || b != null);
     if (a == null) {
-      return isIdentity(b!);
+      return isIdentity(b);
     }
     if (b == null) {
       return isIdentity(a);

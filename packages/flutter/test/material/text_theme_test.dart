@@ -121,21 +121,21 @@ void main() {
     expect(theme.labelSmall!.color, bodyColor);
 
     final List<TextStyle> themeStyles = <TextStyle>[
-      theme.displayLarge!,
-      theme.displayMedium!,
-      theme.displaySmall!,
-      theme.headlineLarge!,
-      theme.headlineMedium!,
-      theme.headlineSmall!,
-      theme.titleLarge!,
-      theme.titleMedium!,
-      theme.titleSmall!,
-      theme.bodyLarge!,
-      theme.bodyMedium!,
-      theme.bodySmall!,
-      theme.labelLarge!,
-      theme.labelMedium!,
-      theme.labelSmall!,
+      theme.displayLarge,
+      theme.displayMedium,
+      theme.displaySmall,
+      theme.headlineLarge,
+      theme.headlineMedium,
+      theme.headlineSmall,
+      theme.titleLarge,
+      theme.titleMedium,
+      theme.titleSmall,
+      theme.bodyLarge,
+      theme.bodyMedium,
+      theme.bodySmall,
+      theme.labelLarge,
+      theme.labelMedium,
+      theme.labelSmall,
     ];
     expect(themeStyles.every((TextStyle style) => style.fontFamily == fontFamily), true);
     expect(themeStyles.every((TextStyle style) => style.fontFamilyFallback == fontFamilyFallback), true);

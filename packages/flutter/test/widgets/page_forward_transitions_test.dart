@@ -103,12 +103,12 @@ void main() {
                         TestTransition(
                           childFirstHalf: const Text('A'),
                           childSecondHalf: const Text('B'),
-                          animation: route.animation!,
+                          animation: route.animation,
                         ),
                         TestTransition(
                           childFirstHalf: const Text('C'),
                           childSecondHalf: const Text('D'),
-                          animation: route.secondaryAnimation!,
+                          animation: route.secondaryAnimation,
                         ),
                       ],
                     );
@@ -124,7 +124,7 @@ void main() {
       ),
     );
 
-    final NavigatorState navigator = insideKey.currentContext!.findAncestorStateOfType<NavigatorState>()!;
+    final NavigatorState navigator = insideKey.currentContext!.findAncestorStateOfType<NavigatorState>();
 
     expect(state(), equals('BC')); // transition ->1 is at 1.0
 

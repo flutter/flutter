@@ -203,7 +203,7 @@ class _SaveLayerDrawer extends CustomPainter {
 Future<ui.Image> _drawImage() async {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   const Size markerSize = Size(120, 120);
-  final double canvasSize = markerSize.height + 3;
+  const double canvasSize = markerSize.height + 3;
   final Canvas canvas = Canvas(
     recorder,
     Rect.fromLTWH(0, 0, canvasSize, canvasSize),

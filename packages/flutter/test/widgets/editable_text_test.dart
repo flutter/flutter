@@ -3004,7 +3004,7 @@ void main() {
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
           onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
-            selectionCause = cause!;
+            selectionCause = cause;
           },
         ),
       ),
@@ -3530,7 +3530,7 @@ void main() {
       TextInputAction.previous: true,
     };
 
-    final TextInputAction action = focusVariants.currentValue!;
+    final TextInputAction action = focusVariants.currentValue;
     expect(actionShouldLoseFocus.containsKey(action), isTrue);
 
     Future<void> ensureCorrectFocusHandlingForAction(
@@ -5113,7 +5113,7 @@ void main() {
       await tester.tap(find.byType(EditableText));
       await tester.pump();
 
-      final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
+      final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner;
       const int expectedNodeId = 5;
 
       expect(
@@ -5195,7 +5195,7 @@ void main() {
         await tester.tap(find.byType(EditableText));
         await tester.pump();
 
-        final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
+        final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner;
         const int expectedNodeId = 5;
 
         expect(controller.value.selection.isCollapsed, isTrue);
@@ -5236,7 +5236,7 @@ void main() {
     await tester.tap(find.byType(EditableText));
     await tester.pump();
 
-    final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
+    final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner;
     const int expectedNodeId = 4;
 
     expect(
@@ -6643,7 +6643,7 @@ void main() {
             textAlign: TextAlign.right,
             onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
               selection = newSelection;
-              cause = newCause!;
+              cause = newCause;
             },
           ),
         ),
@@ -7844,7 +7844,7 @@ void main() {
             textAlign: TextAlign.right,
             onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
               selection = newSelection;
-              cause = newCause!;
+              cause = newCause;
             },
           ),
         ),
@@ -7991,7 +7991,7 @@ void main() {
             textAlign: TextAlign.right,
             onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
               selection = newSelection;
-              cause = newCause!;
+              cause = newCause;
             },
           ),
         ),
@@ -8147,7 +8147,7 @@ void main() {
             textAlign: TextAlign.right,
             onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
               selection = newSelection;
-              cause = newCause!;
+              cause = newCause;
             },
           ),
         ),
@@ -8304,7 +8304,7 @@ void main() {
             textAlign: TextAlign.right,
             onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
               selection = newSelection;
-              cause = newCause!;
+              cause = newCause;
             },
           ),
         ),
@@ -8671,7 +8671,7 @@ void main() {
             textAlign: TextAlign.right,
             onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
               selection = newSelection;
-              cause = newCause!;
+              cause = newCause;
             },
           ),
         ),
@@ -8856,7 +8856,7 @@ void main() {
             textAlign: TextAlign.right,
             onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
               selection = newSelection;
-              cause = newCause!;
+              cause = newCause;
             },
           ),
         ),
@@ -13243,7 +13243,7 @@ void main() {
 
       // Populate [maxScrollExtent].
       await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: false);
-      return key.currentState!;
+      return key.currentState;
     }
 
     testWidgets('SelectAll toolbar action will not set max scroll on designated platforms', (WidgetTester tester) async {

@@ -91,7 +91,7 @@ void main() {
   }
 
   ButtonStyle actionButtonStyle(WidgetTester tester, String text) {
-    return tester.widget<TextButton>(find.widgetWithText(TextButton, text)).style!;
+    return tester.widget<TextButton>(find.widgetWithText(TextButton, text)).style;
   }
 
   const Size wideWindowSize = Size(1920.0, 1080.0);
@@ -408,14 +408,14 @@ void main() {
     expect(selectedDate.style?.fontSize, datePickerTheme.headerHeadlineStyle?.fontSize);
 
     final Text day31 = tester.widget<Text>(find.text('31'));
-    final ShapeDecoration day31Decoration = findDayDecoration(tester, '31')!;
+    final ShapeDecoration day31Decoration = findDayDecoration(tester, '31');
     expect(day31.style?.color, datePickerTheme.dayForegroundColor?.resolve(<MaterialState>{}));
     expect(day31.style?.fontSize, datePickerTheme.dayStyle?.fontSize);
     expect(day31Decoration.color, datePickerTheme.dayBackgroundColor?.resolve(<MaterialState>{}));
     expect(day31Decoration.shape, datePickerTheme.dayShape?.resolve(<MaterialState>{}));
 
     final Text day24 = tester.widget<Text>(find.text('24')); // DatePickerDialog.currentDate
-    final ShapeDecoration day24Decoration = findDayDecoration(tester, '24')!;
+    final ShapeDecoration day24Decoration = findDayDecoration(tester, '24');
     final OutlinedBorder day24Shape = day24Decoration.shape as OutlinedBorder;
     expect(day24.style?.fontSize, datePickerTheme.dayStyle?.fontSize);
     expect(day24.style?.color, datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}));
@@ -443,13 +443,13 @@ void main() {
     await tester.pumpAndSettle();
 
     final Text year2022 = tester.widget<Text>(find.text('2022'));
-    final BoxDecoration year2022Decoration = findTextDecoration(tester, '2022')!;
+    final BoxDecoration year2022Decoration = findTextDecoration(tester, '2022');
     expect(year2022.style?.fontSize, datePickerTheme.yearStyle?.fontSize);
     expect(year2022.style?.color, datePickerTheme.yearForegroundColor?.resolve(<MaterialState>{}));
     expect(year2022Decoration.color, datePickerTheme.yearBackgroundColor?.resolve(<MaterialState>{}));
 
     final Text year2023 = tester.widget<Text>(find.text('2023')); // DatePickerDialog.currentDate
-    final BoxDecoration year2023Decoration = findTextDecoration(tester, '2023')!;
+    final BoxDecoration year2023Decoration = findTextDecoration(tester, '2023');
     expect(year2023.style?.fontSize, datePickerTheme.yearStyle?.fontSize);
     expect(year2023.style?.color, datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}));
     expect(year2023Decoration.color, datePickerTheme.todayBackgroundColor?.resolve(<MaterialState>{}));
@@ -507,7 +507,7 @@ void main() {
     expect(selectDate.style?.fontSize, datePickerTheme.headerHelpStyle?.fontSize);
     expect(headerMaterial.color, datePickerTheme.headerBackgroundColor);
 
-    final InputDecoration inputDecoration = tester.widget<TextField>(find.byType(TextField)).decoration!;
+    final InputDecoration inputDecoration = tester.widget<TextField>(find.byType(TextField)).decoration;
     expect(inputDecoration.fillColor, datePickerTheme.inputDecorationTheme?.fillColor);
 
     final ButtonStyle cancelButtonStyle = actionButtonStyle(tester, 'Cancel');
@@ -717,7 +717,7 @@ void main() {
         inputDecorationTheme: const InputDecorationTheme(filled: true),
         datePickerTheme: datePickerTheme,
       ));
-      InputDecoration inputDecoration = tester.widget<TextField>(find.byType(TextField)).decoration!;
+      InputDecoration inputDecoration = tester.widget<TextField>(find.byType(TextField)).decoration;
       expect(inputDecoration.fillColor, datePickerTheme.inputDecorationTheme!.fillColor);
       expect(inputDecoration.border , datePickerTheme.inputDecorationTheme!.border);
 
@@ -731,7 +731,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      inputDecoration = tester.widget<TextField>(find.byType(TextField)).decoration!;
+      inputDecoration = tester.widget<TextField>(find.byType(TextField)).decoration;
       expect(inputDecoration.fillColor, const Color(0xFF00FF00));
       expect(inputDecoration.border , const OutlineInputBorder());
   });

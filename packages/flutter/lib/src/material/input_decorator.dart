@@ -1334,7 +1334,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         TextDirection.rtl => overallWidth - icon!.size.width,
         TextDirection.ltr => 0.0,
       };
-      centerLayout(icon!, x);
+      centerLayout(icon, x);
     }
 
     final double subtextBaseline = (layout.subtextSize?.ascent ?? 0.0) + layout.containerHeight;
@@ -1370,67 +1370,67 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       case TextDirection.rtl: {
         if (prefixIcon != null) {
           start += contentPadding.start;
-          start -= centerLayout(prefixIcon!, start - prefixIcon!.size.width);
+          start -= centerLayout(prefixIcon, start - prefixIcon!.size.width);
         }
         if (label != null) {
           if (decoration.alignLabelWithHint) {
-            baselineLayout(label!, start - label!.size.width);
+            baselineLayout(label, start - label!.size.width);
           } else {
-            centerLayout(label!, start - label!.size.width);
+            centerLayout(label, start - label!.size.width);
           }
         }
         if (prefix != null) {
-          start -= baselineLayout(prefix!, start - prefix!.size.width);
+          start -= baselineLayout(prefix, start - prefix!.size.width);
         }
         if (input != null) {
-          baselineLayout(input!, start - input!.size.width);
+          baselineLayout(input, start - input!.size.width);
         }
         if (hint != null) {
-          baselineLayout(hint!, start - hint!.size.width);
+          baselineLayout(hint, start - hint!.size.width);
         }
         if (suffixIcon != null) {
           end -= contentPadding.end;
-          end += centerLayout(suffixIcon!, end);
+          end += centerLayout(suffixIcon, end);
         }
         if (suffix != null) {
-          end += baselineLayout(suffix!, end);
+          end += baselineLayout(suffix, end);
         }
         break;
       }
       case TextDirection.ltr: {
         if (prefixIcon != null) {
           start -= contentPadding.start;
-          start += centerLayout(prefixIcon!, start);
+          start += centerLayout(prefixIcon, start);
         }
         if (label != null) {
           if (decoration.alignLabelWithHint) {
-            baselineLayout(label!, start);
+            baselineLayout(label, start);
           } else {
-            centerLayout(label!, start);
+            centerLayout(label, start);
           }
         }
         if (prefix != null) {
-          start += baselineLayout(prefix!, start);
+          start += baselineLayout(prefix, start);
         }
         if (input != null) {
-          baselineLayout(input!, start);
+          baselineLayout(input, start);
         }
         if (hint != null) {
-          baselineLayout(hint!, start);
+          baselineLayout(hint, start);
         }
         if (suffixIcon != null) {
           end += contentPadding.end;
-          end -= centerLayout(suffixIcon!, end - suffixIcon!.size.width);
+          end -= centerLayout(suffixIcon, end - suffixIcon!.size.width);
         }
         if (suffix != null) {
-          end -= baselineLayout(suffix!, end - suffix!.size.width);
+          end -= baselineLayout(suffix, end - suffix!.size.width);
         }
         break;
       }
     }
 
     if (label != null) {
-      final double labelX = _boxParentData(label!).offset.dx;
+      final double labelX = _boxParentData(label).offset.dx;
       // +1 shifts the range of x from (-1.0, 1.0) to (0.0, 2.0).
       final double floatAlign = decoration.floatingLabelAlignment._x + 1;
       final double floatWidth = _boxSize(label).width * _kFinalLabelScale;
@@ -1479,7 +1479,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     doPaint(container);
 
     if (label != null) {
-      final Offset labelOffset = _boxParentData(label!).offset;
+      final Offset labelOffset = _boxParentData(label).offset;
       final double labelHeight = _boxSize(label).height;
       final double labelWidth = _boxSize(label).width;
       // +1 shifts the range of x from (-1.0, 1.0) to (0.0, 2.0).
@@ -1495,7 +1495,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       final double outlinedFloatingY = (-labelHeight * _kFinalLabelScale) / 2.0 + borderWeight / 2.0;
       final double floatingY = isOutlineBorder ? outlinedFloatingY : contentPadding.top + _densityOffset.dy / 2;
       final double scale = lerpDouble(1.0, _kFinalLabelScale, t)!;
-      final double centeredFloatX = _boxParentData(container!).offset.dx +
+      final double centeredFloatX = _boxParentData(container).offset.dx +
           _boxSize(container).width / 2.0 - floatWidth / 2.0;
       final double startX;
       double floatStartX;
@@ -1544,7 +1544,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     if (child == label && _labelTransform != null) {
-      final Offset labelOffset = _boxParentData(label!).offset;
+      final Offset labelOffset = _boxParentData(label).offset;
       transform
         ..multiply(_labelTransform!)
         ..translate(-labelOffset.dx, -labelOffset.dy);
@@ -2171,7 +2171,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
 
     final TextStyle labelStyle = _getInlineLabelStyle(themeData, defaults);
-    final TextBaseline textBaseline = labelStyle.textBaseline!;
+    final TextBaseline textBaseline = labelStyle.textBaseline;
 
     final TextStyle hintStyle = _getInlineHintStyle(themeData, defaults);
     final String? hintText = decoration.hintText;

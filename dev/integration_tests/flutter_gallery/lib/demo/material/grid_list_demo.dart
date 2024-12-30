@@ -85,7 +85,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
   // The maximum offset value is 0,0. If the size of this renderer's box is w,h
   // then the minimum offset value is w - _scale * w, h - _scale * h.
   Offset _clampOffset(Offset offset) {
-    final Size size = context.size!;
+    final Size size = context.size;
     final Offset minOffset = Offset(size.width, size.height) * (1.0 - _scale);
     return Offset(
       offset.dx.clamp(minOffset.dx, 0.0),

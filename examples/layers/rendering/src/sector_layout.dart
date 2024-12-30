@@ -179,7 +179,7 @@ abstract class RenderDecoratedSector extends RenderSector {
 
     if (_decoration!.color != null) {
       final Canvas canvas = context.canvas;
-      final Paint paint = Paint()..color = _decoration!.color!;
+      final Paint paint = Paint()..color = _decoration!.color;
       final Path path = Path();
       final double outerRadius = parentData!.radius + deltaRadius;
       final Rect outerBounds = Rect.fromLTRB(offset.dx-outerRadius, offset.dy-outerRadius, offset.dx+outerRadius, offset.dy+outerRadius);
@@ -281,11 +281,9 @@ class RenderSectorRing extends RenderSectorWithChildren {
       remainingDeltaTheta -= childDimensions.deltaTheta;
       final SectorChildListParentData childParentData = child.parentData! as SectorChildListParentData;
       child = childParentData.nextSibling;
-      if (child != null) {
-        innerTheta += paddingTheta;
-        remainingDeltaTheta -= paddingTheta;
-      }
-    }
+      innerTheta += paddingTheta;
+      remainingDeltaTheta -= paddingTheta;
+        }
     return SectorDimensions.withConstraints(
       constraints,
       deltaRadius: outerDeltaRadius,
@@ -317,11 +315,9 @@ class RenderSectorRing extends RenderSectorWithChildren {
       remainingDeltaTheta -= child.deltaTheta;
       final SectorChildListParentData childParentData = child.parentData! as SectorChildListParentData;
       child = childParentData.nextSibling;
-      if (child != null) {
-        innerTheta += paddingTheta;
-        remainingDeltaTheta -= paddingTheta;
-      }
-    }
+      innerTheta += paddingTheta;
+      remainingDeltaTheta -= paddingTheta;
+        }
     deltaTheta = innerTheta;
   }
 

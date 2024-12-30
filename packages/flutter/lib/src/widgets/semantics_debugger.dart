@@ -111,7 +111,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
 
   void _handleTap() {
     assert(_lastPointerDownLocation != null);
-    _performAction(_lastPointerDownLocation!, SemanticsAction.tap);
+    _performAction(_lastPointerDownLocation, SemanticsAction.tap);
     setState(() {
       _lastPointerDownLocation = null;
     });
@@ -119,7 +119,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
 
   void _handleLongPress() {
     assert(_lastPointerDownLocation != null);
-    _performAction(_lastPointerDownLocation!, SemanticsAction.longPress);
+    _performAction(_lastPointerDownLocation, SemanticsAction.longPress);
     setState(() {
       _lastPointerDownLocation = null;
     });
@@ -133,17 +133,17 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
     }
     if (vx.abs() > vy.abs()) {
       if (vx.sign < 0) {
-        _performAction(_lastPointerDownLocation!, SemanticsAction.decrease);
-        _performAction(_lastPointerDownLocation!, SemanticsAction.scrollLeft);
+        _performAction(_lastPointerDownLocation, SemanticsAction.decrease);
+        _performAction(_lastPointerDownLocation, SemanticsAction.scrollLeft);
       } else {
-        _performAction(_lastPointerDownLocation!, SemanticsAction.increase);
-        _performAction(_lastPointerDownLocation!, SemanticsAction.scrollRight);
+        _performAction(_lastPointerDownLocation, SemanticsAction.increase);
+        _performAction(_lastPointerDownLocation, SemanticsAction.scrollRight);
       }
     } else {
       if (vy.sign < 0) {
-        _performAction(_lastPointerDownLocation!, SemanticsAction.scrollUp);
+        _performAction(_lastPointerDownLocation, SemanticsAction.scrollUp);
       } else {
-        _performAction(_lastPointerDownLocation!, SemanticsAction.scrollDown);
+        _performAction(_lastPointerDownLocation, SemanticsAction.scrollDown);
       }
     }
     setState(() {
@@ -159,7 +159,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
   Widget build(BuildContext context) {
     return CustomPaint(
       foregroundPainter: _SemanticsDebuggerPainter(
-        _pipelineOwner!,
+        _pipelineOwner,
         _generation,
         _lastPointerDownLocation, // in physical pixels
         View.of(context).devicePixelRatio,

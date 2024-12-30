@@ -283,7 +283,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   )
   // TODO(goderbauer): When this deprecated property is removed also delete the _ReusableRenderView class.
   late final RenderView renderView = _ReusableRenderView(
-    view: platformDispatcher.implicitView!,
+    view: platformDispatcher.implicitView,
   );
 
   /// Creates the [PipelineOwner] that serves as the root of the pipeline owner

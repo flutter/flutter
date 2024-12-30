@@ -835,14 +835,14 @@ class ClipCachePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final RenderPhysicalShape physicalShape = findPhysicalShapeChild(context)!;
+    final RenderPhysicalShape physicalShape = findPhysicalShapeChild(context);
     value = physicalShape.clipper!.getClip(size);
   }
 
   RenderPhysicalShape? findPhysicalShapeChild(BuildContext context) {
     RenderPhysicalShape? result;
     context.visitChildElements((Element e) {
-      final RenderObject renderObject = e.findRenderObject()!;
+      final RenderObject renderObject = e.findRenderObject();
       if (renderObject.runtimeType == RenderPhysicalShape) {
         assert(result == null);
         result = renderObject as RenderPhysicalShape;

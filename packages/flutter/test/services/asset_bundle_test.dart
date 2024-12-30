@@ -26,7 +26,7 @@ class TestAssetBundle extends CachingAssetBundle {
 
     if (key == 'AssetManifest.bin.json') {
       // Encode the manifest data that will be used by the app
-      final ByteData data = const StandardMessageCodec().encodeMessage(<String, Object> {'one': <Object>[]})!;
+      final ByteData data = const StandardMessageCodec().encodeMessage(<String, Object> {'one': <Object>[]});
       // Simulate the behavior of NetworkAssetBundle.load here, for web tests
       return ByteData.sublistView(
         utf8.encode(

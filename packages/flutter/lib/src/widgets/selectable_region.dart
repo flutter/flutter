@@ -654,13 +654,13 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case 2:
         switch (defaultTargetPlatform) {
           case TargetPlatform.iOS:
-            if (kIsWeb && details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+            if (kIsWeb && details.kind != null && !_isPrecisePointerDevice(details.kind)) {
               // Double tap on iOS web triggers when a drag begins after the double tap.
               _doubleTapOffset = details.globalPosition;
               break;
             }
             _selectWordAt(offset: details.globalPosition);
-            if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+            if (details.kind != null && !_isPrecisePointerDevice(details.kind)) {
               _showHandles();
             }
           case TargetPlatform.android:
@@ -675,7 +675,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.iOS:
-            if (details.kind != null && _isPrecisePointerDevice(details.kind!)) {
+            if (details.kind != null && _isPrecisePointerDevice(details.kind)) {
               // Triple tap on static text is only supported on mobile
               // platforms using a precise pointer device.
               _selectParagraphAt(offset: details.globalPosition);
@@ -692,7 +692,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _handleMouseDragStart(TapDragStartDetails details) {
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
-        if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+        if (details.kind != null && !_isPrecisePointerDevice(details.kind)) {
           // Drag to select is only enabled with a precise pointer device.
           return;
         }
@@ -704,7 +704,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _handleMouseDragUpdate(TapDragUpdateDetails details) {
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
-        if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+        if (details.kind != null && !_isPrecisePointerDevice(details.kind)) {
           // Drag to select is only enabled with a precise pointer device.
           return;
         }
@@ -715,18 +715,18 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.fuchsia:
             // Double tap + drag is only supported on Android when using a precise
             // pointer device or when not on the web.
-            if (!kIsWeb || details.kind != null && _isPrecisePointerDevice(details.kind!)) {
+            if (!kIsWeb || details.kind != null && _isPrecisePointerDevice(details.kind)) {
               _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
             }
           case TargetPlatform.iOS:
-            if (kIsWeb && details.kind != null && !_isPrecisePointerDevice(details.kind!) && _doubleTapOffset != null) {
+            if (kIsWeb && details.kind != null && !_isPrecisePointerDevice(details.kind) && _doubleTapOffset != null) {
               // On iOS web a double tap does not select the word at the position,
               // until the drag has begun.
-              _selectWordAt(offset: _doubleTapOffset!);
+              _selectWordAt(offset: _doubleTapOffset);
               _doubleTapOffset = null;
             }
             _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
-            if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+            if (details.kind != null && !_isPrecisePointerDevice(details.kind)) {
               _showHandles();
             }
           case TargetPlatform.macOS:
@@ -741,7 +741,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.iOS:
             // Triple tap + drag is only supported on mobile devices when using
             // a precise pointer device.
-            if (details.kind != null && _isPrecisePointerDevice(details.kind!)) {
+            if (details.kind != null && _isPrecisePointerDevice(details.kind)) {
               _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.paragraph);
             }
           case TargetPlatform.macOS:
@@ -892,12 +892,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         // keep the current selection, if not then collapse it.
         final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
         if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
-          _collapseSelectionAt(offset: _lastSecondaryTapDownPosition!);
+          _collapseSelectionAt(offset: _lastSecondaryTapDownPosition);
         }
         _showHandles();
         _showToolbar(location: _lastSecondaryTapDownPosition);
       case TargetPlatform.iOS:
-        _selectWordAt(offset: _lastSecondaryTapDownPosition!);
+        _selectWordAt(offset: _lastSecondaryTapDownPosition);
         _showHandles();
         _showToolbar(location: _lastSecondaryTapDownPosition);
       case TargetPlatform.macOS:
@@ -905,7 +905,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           hideToolbar();
           return;
         }
-        _selectWordAt(offset: _lastSecondaryTapDownPosition!);
+        _selectWordAt(offset: _lastSecondaryTapDownPosition);
         _showHandles();
         _showToolbar(location: _lastSecondaryTapDownPosition);
       case TargetPlatform.linux:
@@ -917,7 +917,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         // keep the current selection, if not then collapse it.
         final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
         if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
-          _collapseSelectionAt(offset: _lastSecondaryTapDownPosition!);
+          _collapseSelectionAt(offset: _lastSecondaryTapDownPosition);
         }
         _showHandles();
         _showToolbar(location: _lastSecondaryTapDownPosition);
@@ -1031,7 +1031,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
     _selectionOverlay!.showMagnifier(_buildInfoForMagnifier(
       details.globalPosition,
-      _selectionDelegate.value.startSelectionPoint!,
+      _selectionDelegate.value.startSelectionPoint,
     ));
     _updateSelectedContentIfNeeded();
   }
@@ -1045,7 +1045,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
     _selectionOverlay!.updateMagnifier(_buildInfoForMagnifier(
       details.globalPosition,
-      _selectionDelegate.value.startSelectionPoint!,
+      _selectionDelegate.value.startSelectionPoint,
     ));
     _updateSelectedContentIfNeeded();
   }
@@ -1058,7 +1058,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
     _selectionOverlay!.showMagnifier(_buildInfoForMagnifier(
       details.globalPosition,
-      _selectionDelegate.value.endSelectionPoint!,
+      _selectionDelegate.value.endSelectionPoint,
     ));
     _updateSelectedContentIfNeeded();
   }
@@ -1072,7 +1072,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
     _selectionOverlay!.updateMagnifier(_buildInfoForMagnifier(
       details.globalPosition,
-      _selectionDelegate.value.endSelectionPoint!,
+      _selectionDelegate.value.endSelectionPoint,
     ));
     _updateSelectedContentIfNeeded();
   }
@@ -1400,7 +1400,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   TextSelectionToolbarAnchors get contextMenuAnchors {
     if (_lastSecondaryTapDownPosition != null) {
       return TextSelectionToolbarAnchors(
-        primaryAnchor: _lastSecondaryTapDownPosition!,
+        primaryAnchor: _lastSecondaryTapDownPosition,
       );
     }
     final RenderBox renderBox = context.findRenderObject()! as RenderBox;
@@ -1419,8 +1419,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
     final bool isReversed;
     final SelectionPoint start = _selectionDelegate.value
-        .startSelectionPoint!;
-    final SelectionPoint end = _selectionDelegate.value.endSelectionPoint!;
+        .startSelectionPoint;
+    final SelectionPoint end = _selectionDelegate.value.endSelectionPoint;
     if (start.localPosition.dy > end.localPosition.dy) {
       isReversed = true;
     } else if (start.localPosition.dy < end.localPosition.dy) {

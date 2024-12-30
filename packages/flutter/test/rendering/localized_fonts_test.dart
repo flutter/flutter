@@ -28,7 +28,7 @@ void main() {
           home: Builder(
             builder: (BuildContext context) {
               const String character = '骨';
-              final TextStyle style = Theme.of(context).textTheme.displayMedium!;
+              final TextStyle style = Theme.of(context).textTheme.displayMedium;
               return Scaffold(
                 body: Container(
                   padding: const EdgeInsets.all(48.0),
@@ -74,7 +74,7 @@ void main() {
           home: Builder(
             builder: (BuildContext context) {
               const String character = '骨';
-              final TextStyle style = Theme.of(context).textTheme.displayMedium!;
+              final TextStyle style = Theme.of(context).textTheme.displayMedium;
               return Scaffold(
                 body: Container(
                   padding: const EdgeInsets.all(48.0),
@@ -119,7 +119,7 @@ void main() {
           home: Builder(
             builder: (BuildContext context) {
               const String character = '骨';
-              final TextStyle style = Theme.of(context).textTheme.displayMedium!;
+              final TextStyle style = Theme.of(context).textTheme.displayMedium;
               return Scaffold(
                 body: Container(
                   padding: const EdgeInsets.all(48.0),
@@ -171,7 +171,7 @@ void main() {
           home: Builder(
             builder: (BuildContext context) {
               const String character = '骨';
-              final TextStyle style = Theme.of(context).textTheme.displayMedium!;
+              final TextStyle style = Theme.of(context).textTheme.displayMedium;
               return Scaffold(
                 body: Container(
                   padding: const EdgeInsets.all(48.0),
@@ -223,7 +223,7 @@ void main() {
           home: Builder(
             builder: (BuildContext context) {
               const String character = '骨';
-              final TextStyle style = Theme.of(context).textTheme.displayMedium!;
+              final TextStyle style = Theme.of(context).textTheme.displayMedium;
               return Scaffold(
                 body: Container(
                   padding: const EdgeInsets.all(48.0),
@@ -267,7 +267,7 @@ void main() {
           home: Builder(
             builder: (BuildContext context) {
               const String character = '骨';
-              final TextStyle style = Theme.of(context).textTheme.displayMedium!;
+              final TextStyle style = Theme.of(context).textTheme.displayMedium;
               return Scaffold(
                 body: Container(
                   padding: const EdgeInsets.all(48.0),

@@ -81,7 +81,7 @@ class _MyContextMenuState extends State<MyContextMenu> {
     // shortcuts, they only display the shortcut hint text.
     final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{
       for (final MenuEntry item in MenuEntry.values)
-        if (item.shortcut != null) item.shortcut!: VoidCallbackIntent(() => _activate(item)),
+        if (item.shortcut != null) item.shortcut: VoidCallbackIntent(() => _activate(item)),
     };
     // Register the shortcuts with the ShortcutRegistry so that they are
     // available to the entire application.

@@ -41,7 +41,7 @@ void main() {
             overlayEntry1 = OverlayEntry(
               builder: (BuildContext context) {
                 didBuild = true;
-                final Overlay overlay = context.findAncestorWidgetOfExactType<Overlay>()!;
+                final Overlay overlay = context.findAncestorWidgetOfExactType<Overlay>();
                 expect(overlay.key, equals(overlayKey));
                 return Container();
               },
@@ -54,7 +54,7 @@ void main() {
       ),
     );
     expect(didBuild, isTrue);
-    final RenderObject theater = overlayKey.currentContext!.findRenderObject()!;
+    final RenderObject theater = overlayKey.currentContext!.findRenderObject();
 
     expect(theater, hasAGoodToStringDeep);
     expect(
@@ -134,7 +134,7 @@ void main() {
         ),
       ),
     );
-    final RenderObject theater = overlayKey.currentContext!.findRenderObject()!;
+    final RenderObject theater = overlayKey.currentContext!.findRenderObject();
 
     expect(theater, hasAGoodToStringDeep);
     expect(

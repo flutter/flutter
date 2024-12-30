@@ -1047,7 +1047,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
         onPressStateChange: (bool state) {
           _onPressedUpdate(_kCancelButtonIndex, state);
         },
-        child: widget.cancelButton!,
+        child: widget.cancelButton,
       ),
     );
   }
@@ -1689,7 +1689,7 @@ class _ActionSheetMainSheet extends StatelessWidget {
       return _scrolledActionsSection(context);
     }
     return _PriorityColumn(
-      top: contentSection!,
+      top: contentSection,
       bottom: _dividerAndActionsSection(context),
       bottomMinHeight: _kActionSheetActionsSectionMinHeight + _kDividerThickness,
     );
@@ -2266,7 +2266,7 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
     final double height = getMinIntrinsicHeight(overallWidth);
     size = Size(overallWidth, height);
 
-    RenderBox slot = firstChild!;
+    RenderBox slot = firstChild;
     double x = 0;
     while (true) {
       slot.layout(BoxConstraints.tight(Size(slotWidth, height)), parentUsesSize: true);
@@ -2281,7 +2281,7 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
       (divider.parentData! as FlexParentData).offset = Offset(x, 0);
       x += dividerThickness;
 
-      slot = childAfter(divider)!;
+      slot = childAfter(divider);
     }
   }
 
@@ -2309,7 +2309,7 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
       return false;
     }
     final double slotWidth = horizontalSlotWidthFor(overallWidth: overallWidth);
-    RenderBox child = firstChild!;
+    RenderBox child = firstChild;
     while (true) {
       // If both children fit into a half-row slot, use the horizontal layout.
       // Max intrinsic widths are used here, which, according to
@@ -2322,21 +2322,21 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
       if (divider == null) {
         break;
       }
-      child = childAfter(divider)!;
+      child = childAfter(divider);
     }
     return true;
   }
 
   void _forEachSlot(ValueSetter<RenderBox> action) {
     assert(childCount.isOdd);
-    RenderBox slot = firstChild!;
+    RenderBox slot = firstChild;
     while (true) {
       action(slot);
       final RenderBox? divider = childAfter(slot);
       if (divider == null) {
         break;
       }
-      slot = childAfter(divider)!;
+      slot = childAfter(divider);
     }
   }
 }

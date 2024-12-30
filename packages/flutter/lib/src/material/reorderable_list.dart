@@ -308,7 +308,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
       return true;
     }());
 
-    final Key itemGlobalKey = _ReorderableListViewChildGlobalKey(item.key!, this);
+    final Key itemGlobalKey = _ReorderableListViewChildGlobalKey(item.key, this);
 
     if (widget.buildDefaultDragHandles) {
       switch (Theme.of(context).platform) {

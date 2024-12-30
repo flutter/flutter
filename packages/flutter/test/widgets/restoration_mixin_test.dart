@@ -81,7 +81,7 @@ void main() {
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
     expect(state.bucket!.restorationId, 'child1');
     expect(state.bucket!.read<int>('foo'), 22);
-    final RestorationBucket bucket = state.bucket!;
+    final RestorationBucket bucket = state.bucket;
 
     state.property.log.clear();
     state.restoreStateLog.clear();
@@ -125,7 +125,7 @@ void main() {
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
     expect(state.bucket!.restorationId, 'child1');
     expect(state.bucket!.read<int>('foo'), 22);
-    final RestorationBucket bucket = state.bucket!;
+    final RestorationBucket bucket = state.bucket;
 
     state.property.log.clear();
     state.restoreStateLog.clear();
@@ -217,7 +217,7 @@ void main() {
     state.restoreStateLog.clear();
     state.toggleBucketLog.clear();
 
-    final RestorationBucket bucket = state.bucket!;
+    final RestorationBucket bucket = state.bucket;
 
     // Change id back to null.
     await tester.pumpWidget(
@@ -281,7 +281,7 @@ void main() {
     state.restoreStateLog.clear();
     state.toggleBucketLog.clear();
 
-    final RestorationBucket bucket = state.bucket!;
+    final RestorationBucket bucket = state.bucket;
 
     // Move out of scope again.
     await tester.pumpWidget(
@@ -327,7 +327,7 @@ void main() {
     final _TestRestorableWidgetState state = tester.state(find.byType(_TestRestorableWidget));
     expect(state.bucket!.restorationId, 'moving-child');
     expect((((rawData[childrenMapKey] as Map<Object?, Object?>)['fixed']! as Map<String, dynamic>)[childrenMapKey] as Map<Object?, Object?>).containsKey('moving-child'), isTrue);
-    final RestorationBucket bucket = state.bucket!;
+    final RestorationBucket bucket = state.bucket;
     state.property.log.clear();
     state.restoreStateLog.clear();
 
@@ -432,7 +432,7 @@ void main() {
     _clearLogs(state);
 
     final _TestRestorableWidgetState oldState = state;
-    final RestorationBucket oldBucket = oldState.bucket!;
+    final RestorationBucket oldBucket = oldState.bucket;
     await tester.restoreFrom(data);
     state = tester.state(find.byType(_TestRestorableWidget));
 

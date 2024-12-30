@@ -1347,7 +1347,7 @@ void main() {
       final List<Key> keys = <Key>[];
       bool visitor(FocusNode node) {
         nodes.add(node);
-        keys.add(node.context!.widget.key!);
+        keys.add(node.context!.widget.key);
         return true;
       }
 
@@ -2002,7 +2002,7 @@ void main() {
 
     testWidgets('Focus widget gains input focus when it gains accessibility focus', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
-      final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+      final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(

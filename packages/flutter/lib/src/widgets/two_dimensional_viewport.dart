@@ -946,7 +946,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     // up from `target`.
     RenderObject child = target;
     while (child.parent != this) {
-      child = child.parent!;
+      child = child.parent;
     }
 
     assert(child.parent == this);
@@ -964,7 +964,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     };
 
     // The scroll offset in the viewport to `rect`.
-    final Offset paintOffset = parentDataOf(box).paintOffset!;
+    final Offset paintOffset = parentDataOf(box).paintOffset;
     leadingScrollOffset += switch (axisDirection) {
       AxisDirection.up    => viewportDimension.height - paintOffset.dy - box.size.height,
       AxisDirection.left  => viewportDimension.width - paintOffset.dx - box.size.width,
@@ -1325,7 +1325,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     }
     _lastChild = previousChild;
     if (_lastChild != null) {
-      parentDataOf(_lastChild!)._nextSibling = null;
+      parentDataOf(_lastChild)._nextSibling = null;
     }
     // Reset for next layout pass.
     _leadingXIndex = null;
@@ -1340,7 +1340,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     // For example, a table can have merged cells, spanning multiple
     // indices, but only represented by one RenderBox and ChildVicinity.
     if (_children.containsKey(vicinity)) {
-      final RenderBox child = _children[vicinity]!;
+      final RenderBox child = _children[vicinity];
       assert(parentDataOf(child).vicinity == vicinity);
       updateChildPaintData(child);
       if (previousChild == null) {
@@ -1437,7 +1437,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     }
 
     assert(_children.containsKey(vicinity));
-    final RenderBox child = _children[vicinity]!;
+    final RenderBox child = _children[vicinity];
     _activeChildrenForLayoutPass[vicinity] = child;
     parentDataOf(child).vicinity = vicinity;
     return child;
@@ -1459,13 +1459,13 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
 
     // Set paintExtent (and visibility)
     childParentData._paintExtent = computeChildPaintExtent(
-      childParentData.layoutOffset!,
+      childParentData.layoutOffset,
       child.size,
     );
     // Set paintOffset
     childParentData.paintOffset = computeAbsolutePaintOffsetFor(
       child,
-      layoutOffset: childParentData.layoutOffset!,
+      layoutOffset: childParentData.layoutOffset,
     );
     // If the child is partially visible, or not visible at all, there is
     // visual overflow.
@@ -1641,7 +1641,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     // have been removed by _removeChild. Thus, it is ok to overwrite it.
     assert(() {
       if (_keepAliveBucket.containsKey(childParentData.vicinity)) {
-        _debugDanglingKeepAlives.add(_keepAliveBucket[childParentData.vicinity]!);
+        _debugDanglingKeepAlives.add(_keepAliveBucket[childParentData.vicinity]);
       }
       return true;
     }());
@@ -1739,7 +1739,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    final Offset paintOffset = parentDataOf(child).paintOffset!;
+    final Offset paintOffset = parentDataOf(child).paintOffset;
     transform.translate(paintOffset.dx, paintOffset.dy);
   }
 

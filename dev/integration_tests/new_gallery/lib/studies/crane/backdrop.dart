@@ -187,7 +187,7 @@ class _BackdropState extends State<Backdrop>
     });
 
     // Offsets to create a horizontal gap between front layers.
-    final Animation<double> tabControllerAnimation = _tabController.animation!;
+    final Animation<double> tabControllerAnimation = _tabController.animation;
 
     _flyLayerHorizontalOffset = tabControllerAnimation.drive(
         Tween<Offset>(begin: Offset.zero, end: const Offset(-0.05, 0)));

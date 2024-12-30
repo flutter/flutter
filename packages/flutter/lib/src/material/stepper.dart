@@ -514,7 +514,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             color: _stepStyle(index)?.color ?? _circleColor(index),
             shape: BoxShape.circle,
             border: _stepStyle(index)?.border,
-            boxShadow: _stepStyle(index)?.boxShadow != null ? <BoxShadow>[_stepStyle(index)!.boxShadow!] : null,
+            boxShadow: _stepStyle(index)?.boxShadow != null ? <BoxShadow>[_stepStyle(index)!.boxShadow] : null,
             gradient: _stepStyle(index)?.gradient,
           ),
           child: Center(

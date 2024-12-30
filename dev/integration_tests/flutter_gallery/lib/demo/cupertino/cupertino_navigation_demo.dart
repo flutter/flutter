@@ -645,7 +645,7 @@ class Tab2ConversationAvatar extends StatelessWidget {
           begin: FractionalOffset.topCenter,
           end: FractionalOffset.bottomCenter,
           colors: <Color>[
-            color!,
+            color,
             Color.fromARGB(
               color!.alpha,
               (color!.red - 60).clamp(0, 255),

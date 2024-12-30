@@ -14,9 +14,9 @@ void main() {
     assert(lerpTo == null || lerpFrom == null); // They can't both be set.
     ShapeBorder shape;
     if (lerpTo != null) {
-      shape = border.lerpTo(lerpTo, lerpAmount)!;
+      shape = border.lerpTo(lerpTo, lerpAmount);
     } else if (lerpFrom != null) {
-      shape = border.lerpFrom(lerpFrom, lerpAmount)!;
+      shape = border.lerpFrom(lerpFrom, lerpAmount);
     } else {
       shape = border;
     }

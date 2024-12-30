@@ -86,7 +86,7 @@ void main() {
           of: find.byType(Icon),
           matching: find.byType(RichText),
         ),
-      ).text.style!;
+      ).text.style;
     }
 
     TextStyle getTextStyle(String text) {
@@ -95,7 +95,7 @@ void main() {
           of: find.text(text),
           matching: find.byType(RichText),
         ),
-      ).text.style!;
+      ).text.style;
     }
 
     useCaptureAll = false;
@@ -197,7 +197,7 @@ void main() {
           of: find.byKey(key),
           matching: find.byType(RichText),
         ),
-      ).text.style!;
+      ).text.style;
     }
 
     expect(getIconStyle(icon1).color, innerColor);
@@ -243,7 +243,7 @@ void main() {
           of: find.text(text),
           matching: find.byType(RichText),
         ),
-      ).text.style!;
+      ).text.style;
     }
 
     expect(getTextStyle('Hello').fontSize, null);

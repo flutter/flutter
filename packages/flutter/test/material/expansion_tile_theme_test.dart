@@ -210,8 +210,8 @@ void main() {
     expect(listTileRect.top, tallerWidget.top - remainingHeight / 2 - 12);
     expect(listTileRect.bottom, tallerWidget.bottom + remainingHeight / 2 + 10);
 
-    Color getIconColor() => tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
-    Color getTextColor() => tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
+    Color getIconColor() => tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color;
+    Color getTextColor() => tester.state<TestTextState>(find.byType(TestText)).textStyle.color;
 
     // Check the collapsed icon color when iconColor is applied.
     expect(getIconColor(), collapsedIconColor);
@@ -294,8 +294,8 @@ void main() {
     expect(listTileRect.top, tallerWidget.top - remainingHeight / 2 - 12);
     expect(listTileRect.bottom, tallerWidget.bottom + remainingHeight / 2 + 10);
 
-    Color getIconColor() => tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
-    Color getTextColor() => tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
+    Color getIconColor() => tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color;
+    Color getTextColor() => tester.state<TestTextState>(find.byType(TestText)).textStyle.color;
 
     // Check the expanded icon color when iconColor is applied.
     expect(getIconColor(), iconColor);

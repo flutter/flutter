@@ -185,13 +185,13 @@ void main() {
     final Finder tableContainerFinder = find.ancestor(of: find.byType(Table), matching: find.byType(Container));
     expect(tester.widgetList<Container>(tableContainerFinder).first.decoration, decoration);
 
-    final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style!;
+    final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style;
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
     expect(_tableRowBoxDecoration(tester: tester, index: 1).color, dataRowColor.resolve(<MaterialState>{}));
     expect(_tableRowBoxDecoration(tester: tester, index: 1).border!.top.width, dividerThickness);
     expect(tester.getSize(_findFirstContainerFor('Data')).height, minMaxDataRowHeight);
 
-    final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style!;
+    final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style;
     expect(headingRowTextStyle.fontSize, headingTextStyle.fontSize);
     expect(_tableRowBoxDecoration(tester: tester, index: 0).color, headingRowColor.resolve(<MaterialState>{}));
 
@@ -332,13 +332,13 @@ void main() {
     final Finder tableContainerFinder = find.ancestor(of: find.byType(Table), matching: find.byType(Container));
     expect(tester.widget<Container>(tableContainerFinder).decoration, decoration);
 
-    final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style!;
+    final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style;
     expect(dataRowTextStyle.fontSize, dataTextStyle.fontSize);
     expect(_tableRowBoxDecoration(tester: tester, index: 1).color, dataRowColor.resolve(<MaterialState>{}));
     expect(_tableRowBoxDecoration(tester: tester, index: 1).border!.top.width, dividerThickness);
     expect(tester.getSize(_findFirstContainerFor('Data')).height, minMaxDataRowHeight);
 
-    final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style!;
+    final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style;
     expect(headingRowTextStyle.fontSize, headingTextStyle.fontSize);
     expect(_tableRowBoxDecoration(tester: tester, index: 0).color, headingRowColor.resolve(<MaterialState>{}));
 
@@ -485,13 +485,13 @@ void main() {
     final Finder tableContainerFinder = find.ancestor(of: find.byType(Table), matching: find.byType(Container));
     expect(tester.widgetList<Container>(tableContainerFinder).first.decoration, localThemeDecoration);
 
-    final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style!;
+    final TextStyle dataRowTextStyle = tester.renderObject<RenderParagraph>(find.text('Data')).text.style;
     expect(dataRowTextStyle.fontSize, localThemeDataTextStyle.fontSize);
     expect(_tableRowBoxDecoration(tester: tester, index: 1).color, localThemeDataRowColor.resolve(<MaterialState>{}));
     expect(_tableRowBoxDecoration(tester: tester, index: 1).border!.top.width, localThemeDividerThickness);
     expect(tester.getSize(_findFirstContainerFor('Data')).height, minMaxLocalThemeDataRowHeight);
 
-    final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style!;
+    final TextStyle headingRowTextStyle = tester.renderObject<RenderParagraph>(find.text('A')).text.style;
     expect(headingRowTextStyle.fontSize, localThemeHeadingTextStyle.fontSize);
     expect(_tableRowBoxDecoration(tester: tester, index: 0).color, localThemeHeadingRowColor.resolve(<MaterialState>{}));
 

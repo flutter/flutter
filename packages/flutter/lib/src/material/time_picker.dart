@@ -421,7 +421,7 @@ class _HourControl extends StatelessWidget {
       child: _HourMinuteControl(
         isSelected: _TimePickerModel.hourMinuteModeOf(context) == _HourMinuteMode.hour,
         text: formattedHour,
-        onTap: Feedback.wrapForTap(() => _TimePickerModel.setHourMinuteMode(context, _HourMinuteMode.hour), context)!,
+        onTap: Feedback.wrapForTap(() => _TimePickerModel.setHourMinuteMode(context, _HourMinuteMode.hour), context),
         onDoubleTap: _TimePickerModel.of(context, _TimePickerAspect.onHourDoubleTapped).onHourDoubleTapped,
       ),
     );
@@ -531,7 +531,7 @@ class _MinuteControl extends StatelessWidget {
       child: _HourMinuteControl(
         isSelected: _TimePickerModel.hourMinuteModeOf(context) == _HourMinuteMode.minute,
         text: formattedMinute,
-        onTap: Feedback.wrapForTap(() => _TimePickerModel.setHourMinuteMode(context, _HourMinuteMode.minute), context)!,
+        onTap: Feedback.wrapForTap(() => _TimePickerModel.setHourMinuteMode(context, _HourMinuteMode.minute), context),
         onDoubleTap: _TimePickerModel.of(context, _TimePickerAspect.onMinuteDoubleTapped).onMinuteDoubleTapped,
       ),
     );
@@ -2307,7 +2307,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
 
   void _handleOk() {
     if (_entryMode.value == TimePickerEntryMode.input || _entryMode.value == TimePickerEntryMode.inputOnly) {
-      final FormState form = _formKey.currentState!;
+      final FormState form = _formKey.currentState;
       if (!form.validate()) {
         setState(() {
           _autovalidateMode.value = AutovalidateMode.always;
@@ -3527,7 +3527,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
   @override
   TextStyle get helpTextStyle {
     return MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-      final TextStyle textStyle = _textTheme.labelMedium!;
+      final TextStyle textStyle = _textTheme.labelMedium;
       return textStyle.copyWith(color: _colors.onSurfaceVariant);
     });
   }

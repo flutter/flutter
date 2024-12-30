@@ -244,7 +244,7 @@ class SingleChildScrollView extends StatelessWidget {
     final AxisDirection axisDirection = _getDirection(context);
     Widget? contents = child;
     if (padding != null) {
-      contents = Padding(padding: padding!, child: contents);
+      contents = Padding(padding: padding, child: contents);
     }
     final bool effectivePrimary = primary
         ?? controller == null && PrimaryScrollController.shouldInherit(context, scrollDirection);

@@ -639,7 +639,7 @@ class _LocalizationsState extends State<Localizations> {
       textDirection: _textDirection,
       child: _LocalizationsScope(
         key: _localizedResourcesScopeKey,
-        locale: _locale!,
+        locale: _locale,
         localizationsState: this,
         typeToResources: _typeToResources,
         child: Directionality(

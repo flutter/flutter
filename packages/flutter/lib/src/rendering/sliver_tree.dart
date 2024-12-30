@@ -249,7 +249,7 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
         break;
       }
       if (_animationLeadingIndices.keys.contains(index)) {
-        final UniqueKey animationKey = _animationLeadingIndices[index]!;
+        final UniqueKey animationKey = _animationLeadingIndices[index];
         if (_animationOffsets[animationKey] == null) {
           // We have not computed the distance this block is traversing over the
           // lifetime of the animation.
@@ -308,7 +308,7 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
         break;
       }
       if (_animationLeadingIndices.keys.contains(currentIndex)) {
-        final UniqueKey animationKey = _animationLeadingIndices[currentIndex]!;
+        final UniqueKey animationKey = _animationLeadingIndices[currentIndex];
         assert(_animationOffsets[animationKey] != null);
         // We add the offset accounting for the animation value.
         totalAnimationOffset += _animationOffsets[animationKey]! * (1 - _activeAnimations[animationKey]!.value);
@@ -391,7 +391,7 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
       );
       // We use the same animation key to keep track of the clip layer, unless
       // this is the odd man out segment.
-      final UniqueKey key = _animationLeadingIndices[parentIndex]!;
+      final UniqueKey key = _animationLeadingIndices[parentIndex];
       _clipHandles[key] ??=  LayerHandle<ClipRectLayer>();
       _clipHandles[key]!.layer = context.pushClipRect(
         needsCompositing,

@@ -23,7 +23,7 @@ void main() {
 
     final List<Layer> layers = tester.binding.renderView.debugLayer!.depthFirstIterateChildren();
 
-    final RenderObject renderObject = key.currentContext!.findRenderObject()!;
+    final RenderObject renderObject = key.currentContext!.findRenderObject();
 
     for (final Layer layer in layers) {
       expect(layer.debugDisposed, false);

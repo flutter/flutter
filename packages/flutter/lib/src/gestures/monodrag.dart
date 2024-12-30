@@ -466,7 +466,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
 
     if (_moveDeltaBeforeFrame.containsKey(pointer)) {
-      final Offset offset = _moveDeltaBeforeFrame[pointer]!;
+      final Offset offset = _moveDeltaBeforeFrame[pointer];
       _moveDeltaBeforeFrame[pointer] = offset + localDelta;
     } else {
       _moveDeltaBeforeFrame[pointer] = localDelta;
@@ -484,7 +484,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       return sum;
     }
 
-    final Offset offset = _moveDeltaBeforeFrame[pointer]!;
+    final Offset offset = _moveDeltaBeforeFrame[pointer];
     if (positive) {
       if (axis == _DragDirection.vertical) {
         sum = max(offset.dy, 0.0);

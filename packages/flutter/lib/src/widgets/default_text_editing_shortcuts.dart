@@ -558,6 +558,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
       case TargetPlatform.macOS:
         return _macDisablingTextShortcuts;
     }
+    return null;
   }
 
   @override

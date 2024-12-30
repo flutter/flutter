@@ -213,7 +213,7 @@ class CardItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle textStyle = Theme.of(context).textTheme.headlineMedium!;
+    TextStyle textStyle = Theme.of(context).textTheme.headlineMedium;
     if (selected) {
       textStyle = textStyle.copyWith(color: Colors.lightGreenAccent[400]);
     }
@@ -258,7 +258,7 @@ class ItemSeparator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle textStyle = Theme.of(context).textTheme.headlineSmall!;
+    final TextStyle textStyle = Theme.of(context).textTheme.headlineSmall;
     return Padding(
       padding: const EdgeInsets.all(2.0),
       child: SizeTransition(

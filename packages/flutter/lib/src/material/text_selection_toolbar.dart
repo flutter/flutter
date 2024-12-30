@@ -482,7 +482,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
 
     // If the last child overflows, but only because of the width of the
     // overflow button, then just show it and hide the overflow button.
-    final RenderBox navButton = firstChild!;
+    final RenderBox navButton = firstChild;
     if (_lastIndexThatFits != -1
         && _lastIndexThatFits == childCount - 2
         && width - navButton.size.width <= sizedConstraints.maxWidth) {
@@ -515,7 +515,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
     int i = -1;
     Size nextSize = Size.zero;
     double fitWidth = 0.0;
-    final RenderBox navButton = firstChild!;
+    final RenderBox navButton = firstChild;
     double overflowHeight = overflowOpen && !isAbove ? navButton.size.height : 0.0;
     visitChildren((RenderObject renderObjectChild) {
       i++;
@@ -554,7 +554,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
 
     // Place the navigation button if needed.
     final ToolbarItemsParentData navButtonParentData = navButton.parentData! as ToolbarItemsParentData;
-    if (_shouldPaintChild(firstChild!, 0)) {
+    if (_shouldPaintChild(firstChild, 0)) {
       navButtonParentData.shouldPaint = true;
       if (overflowOpen) {
         navButtonParentData.offset = isAbove
@@ -582,7 +582,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
       return;
     }
 
-    final RenderBox navButton = firstChild!;
+    final RenderBox navButton = firstChild;
     int i = -1;
 
     visitChildren((RenderObject renderObjectChild) {

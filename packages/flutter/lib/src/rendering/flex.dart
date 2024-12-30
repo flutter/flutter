@@ -1142,7 +1142,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     for (RenderBox? child = topLeftChild; child != null; child = nextChild(child)) {
       final double? childBaselineOffset;
       final bool baselineAlign = baselineOffset != null
-        && (childBaselineOffset = child.getDistanceToBaseline(textBaseline!, onlyReal: true)) != null;
+        && (childBaselineOffset = child.getDistanceToBaseline(textBaseline, onlyReal: true)) != null;
       final double childCrossPosition = baselineAlign
         ? baselineOffset - childBaselineOffset!
         : crossAxisAlignment._getChildCrossAxisOffset(crossAxisExtent - _getCrossSize(child.size), flipCrossAxis);

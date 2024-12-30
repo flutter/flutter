@@ -277,7 +277,7 @@ class TravelDestinationContent extends StatelessWidget {
     final TextStyle titleStyle = theme.textTheme.headlineSmall!.copyWith(
       color: Colors.white,
     );
-    final TextStyle descriptionStyle = theme.textTheme.titleMedium!;
+    final TextStyle descriptionStyle = theme.textTheme.titleMedium;
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
     return Column(

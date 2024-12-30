@@ -74,11 +74,11 @@ void main() {
       global: Offset(70, 80),
     );
 
-    final OffsetPair sum = offset2 + offset1;
+    const OffsetPair sum = offset2 + offset1;
     expect(sum.local, const Offset(60, 80));
     expect(sum.global, const Offset(100, 120));
 
-    final OffsetPair difference = offset2 - offset1;
+    const OffsetPair difference = offset2 - offset1;
     expect(difference.local, const Offset(40, 40));
     expect(difference.global, const Offset(40, 40));
   });

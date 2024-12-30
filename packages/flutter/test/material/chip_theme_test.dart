@@ -634,7 +634,7 @@ void main() {
       iconTheme: const IconThemeData(size: 22.0),
     );
 
-    final ChipThemeData lerp = ChipThemeData.lerp(chipThemeBlack, chipThemeWhite, 0.5)!;
+    final ChipThemeData lerp = ChipThemeData.lerp(chipThemeBlack, chipThemeWhite, 0.5);
     const Color middleGrey = Color(0xff7f7f7f);
     expect(lerp.backgroundColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
     expect(lerp.deleteIconColor, isSameColorAs(middleGrey.withAlpha(0xde)));
@@ -659,7 +659,7 @@ void main() {
 
     expect(ChipThemeData.lerp(null, null, 0.25), isNull);
 
-    final ChipThemeData lerpANull25 = ChipThemeData.lerp(null, chipThemeWhite, 0.25)!;
+    final ChipThemeData lerpANull25 = ChipThemeData.lerp(null, chipThemeWhite, 0.25);
     expect(lerpANull25.backgroundColor, isSameColorAs(Colors.black.withAlpha(0x08)));
     expect(lerpANull25.deleteIconColor, isSameColorAs(Colors.black.withAlpha(0x38)));
     expect(lerpANull25.disabledColor, isSameColorAs(Colors.black.withAlpha(0x03)));
@@ -681,7 +681,7 @@ void main() {
     expect(lerpANull25.checkmarkColor, isSameColorAs(Colors.white.withAlpha(0x40)));
     expect(lerpANull25.iconTheme, const IconThemeData(size: 5.5));
 
-    final ChipThemeData lerpANull75 = ChipThemeData.lerp(null, chipThemeWhite, 0.75)!;
+    final ChipThemeData lerpANull75 = ChipThemeData.lerp(null, chipThemeWhite, 0.75);
     expect(lerpANull75.backgroundColor, isSameColorAs(Colors.black.withAlpha(0x17)));
     expect(lerpANull75.deleteIconColor, isSameColorAs(Colors.black.withAlpha(0xa7)));
     expect(lerpANull75.disabledColor, isSameColorAs(Colors.black.withAlpha(0x09)));
@@ -703,7 +703,7 @@ void main() {
     expect(lerpANull75.checkmarkColor, isSameColorAs(Colors.white.withAlpha(0xbf)));
     expect(lerpANull75.iconTheme, const IconThemeData(size: 16.5));
 
-    final ChipThemeData lerpBNull25 = ChipThemeData.lerp(chipThemeBlack, null, 0.25)!;
+    final ChipThemeData lerpBNull25 = ChipThemeData.lerp(chipThemeBlack, null, 0.25);
     expect(lerpBNull25.backgroundColor, isSameColorAs(Colors.white.withAlpha(0x17)));
     expect(lerpBNull25.deleteIconColor, isSameColorAs(Colors.white.withAlpha(0xa7)));
     expect(lerpBNull25.disabledColor, isSameColorAs(Colors.white.withAlpha(0x09)));
@@ -725,7 +725,7 @@ void main() {
     expect(lerpBNull25.checkmarkColor, isSameColorAs(Colors.black.withAlpha(0xbf)));
     expect(lerpBNull25.iconTheme, const IconThemeData(size: 19.5));
 
-    final ChipThemeData lerpBNull75 = ChipThemeData.lerp(chipThemeBlack, null, 0.75)!;
+    final ChipThemeData lerpBNull75 = ChipThemeData.lerp(chipThemeBlack, null, 0.75);
     expect(lerpBNull75.backgroundColor, isSameColorAs(Colors.white.withAlpha(0x08)));
     expect(lerpBNull75.deleteIconColor, isSameColorAs(Colors.white.withAlpha(0x38)));
     expect(lerpBNull75.disabledColor, isSameColorAs(Colors.white.withAlpha(0x03)));
@@ -806,7 +806,7 @@ void main() {
       );
     }
     Color textColor() {
-      return tester.renderObject<RenderParagraph>(find.text('Chip')).text.style!.color!;
+      return tester.renderObject<RenderParagraph>(find.text('Chip')).text.style!.color;
     }
 
     // Default, not disabled.

@@ -69,7 +69,7 @@ class _PointDemoPainter extends CustomPainter {
     final Paint paint = Paint();
 
     if (arc.center != null) {
-      drawPoint(canvas, arc.center!, Colors.grey.shade400);
+      drawPoint(canvas, arc.center, Colors.grey.shade400);
     }
 
     paint
@@ -83,8 +83,8 @@ class _PointDemoPainter extends CustomPainter {
       canvas.drawLine(arc.begin!, arc.end!, paint);
     }
 
-    drawPoint(canvas, arc.begin!, Colors.green);
-    drawPoint(canvas, arc.end!, Colors.red);
+    drawPoint(canvas, arc.begin, Colors.green);
+    drawPoint(canvas, arc.end, Colors.red);
 
     paint
       ..color = Colors.green
@@ -254,8 +254,8 @@ class _RectangleDemoPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    drawRect(canvas, arc.begin!, Colors.green);
-    drawRect(canvas, arc.end!, Colors.red);
+    drawRect(canvas, arc.begin, Colors.green);
+    drawRect(canvas, arc.end, Colors.red);
     drawRect(canvas, arc.lerp(_repaint.value), Colors.blue);
   }
 

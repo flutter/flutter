@@ -183,7 +183,7 @@ void main() {
     expect(s4.color, const Color(0xFF00FF00));
     expect(s4.leadingDistribution, TextLeadingDistribution.even);
 
-    final TextStyle s5 = TextStyle.lerp(s1, s3, 0.25)!;
+    final TextStyle s5 = TextStyle.lerp(s1, s3, 0.25);
     expect(s1.fontFamily, isNull);
     expect(s1.fontSize, 10.0);
     expect(s1.fontWeight, FontWeight.w800);
@@ -204,7 +204,7 @@ void main() {
 
     expect(TextStyle.lerp(null, null, 0.5), isNull);
 
-    final TextStyle s6 = TextStyle.lerp(null, s3, 0.25)!;
+    final TextStyle s6 = TextStyle.lerp(null, s3, 0.25);
     expect(s3.fontFamily, isNull);
     expect(s3.fontSize, 18.0);
     expect(s3.fontWeight, FontWeight.w400);
@@ -217,7 +217,7 @@ void main() {
     expect(s6.height, isNull);
     expect(s6.color, isNull);
 
-    final TextStyle s7 = TextStyle.lerp(null, s3, 0.75)!;
+    final TextStyle s7 = TextStyle.lerp(null, s3, 0.75);
     expect(s3.fontFamily, isNull);
     expect(s3.fontSize, 18.0);
     expect(s3.fontWeight, FontWeight.w400);
@@ -230,7 +230,7 @@ void main() {
     expect(s7.height, 123.0);
     expect(s7.color, isNull);
 
-    final TextStyle s8 = TextStyle.lerp(s3, null, 0.25)!;
+    final TextStyle s8 = TextStyle.lerp(s3, null, 0.25);
     expect(s3.fontFamily, isNull);
     expect(s3.fontSize, 18.0);
     expect(s3.fontWeight, FontWeight.w400);
@@ -243,7 +243,7 @@ void main() {
     expect(s8.height, 123.0);
     expect(s8.color, isNull);
 
-    final TextStyle s9 = TextStyle.lerp(s3, null, 0.75)!;
+    final TextStyle s9 = TextStyle.lerp(s3, null, 0.75);
     expect(s3.fontFamily, isNull);
     expect(s3.fontSize, 18.0);
     expect(s3.fontWeight, FontWeight.w400);
@@ -326,11 +326,11 @@ void main() {
     expect(emptyMerge.fontFamily, 'packages/p/font1');
     expect(emptyMerge.fontFamilyFallback, <String>['packages/p/fallback1']);
 
-    final TextStyle lerp1 = TextStyle.lerp(s1, s2, 0)!;
+    final TextStyle lerp1 = TextStyle.lerp(s1, s2, 0);
     expect(lerp1.fontFamily, 'packages/p/font1');
     expect(lerp1.fontFamilyFallback, <String>['packages/p/fallback1']);
 
-    final TextStyle lerp2 = TextStyle.lerp(s1, s2, 1.0)!;
+    final TextStyle lerp2 = TextStyle.lerp(s1, s2, 1.0);
     expect(lerp2.fontFamily, 'packages/p/font2');
     expect(lerp2.fontFamilyFallback, <String>['packages/p/fallback2']);
   });
@@ -419,7 +419,7 @@ void main() {
     const TextStyle s1 = TextStyle(shadows: <ui.Shadow>[shadow1, shadow2]);
     const TextStyle s2 = TextStyle(shadows: <ui.Shadow>[shadow3, shadow4]);
 
-    final TextStyle lerp12 = TextStyle.lerp(s1, s2, 0.5)!;
+    final TextStyle lerp12 = TextStyle.lerp(s1, s2, 0.5);
 
     expect(lerp12.shadows, hasLength(2));
     expect(lerp12.shadows?[0].blurRadius, ui.lerpDouble(shadow1.blurRadius, shadow3.blurRadius, 0.5));

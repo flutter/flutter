@@ -45,7 +45,7 @@ Declarer get _declarer {
       });
     });
   }
-  return _localDeclarer!;
+  return _localDeclarer;
 }
 
 Future<void> _runGroup(Suite suiteConfig, Group group, List<Group> parents, _Reporter reporter) async {

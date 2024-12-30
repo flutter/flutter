@@ -1148,7 +1148,7 @@ abstract class Finder extends FinderBase<Element> with _LegacyFinderMixin {
   @override
   Iterable<Element> get allCandidates {
     return collectAllElementsFrom(
-      WidgetsBinding.instance.rootElement!,
+      WidgetsBinding.instance.rootElement,
       skipOffstage: skipOffstage,
     );
   }
@@ -1189,7 +1189,7 @@ abstract class SemanticsFinder extends FinderBase<SemanticsNode> {
     final RenderView renderView = TestWidgetsFlutterBinding.instance.renderViews
         .firstWhere((RenderView r) => r.flutterView == view);
     return <SemanticsNode>[
-      renderView.owner!.semanticsOwner!.rootSemanticsNode!
+      renderView.owner!.semanticsOwner!.rootSemanticsNode
     ];
   }
 
@@ -1229,7 +1229,7 @@ class _StaticTextRangeFinder extends FinderBase<TextRangeContext> {
       return const Iterable<TextRangeContext>.empty();
     }
 
-    final View view = from.findAncestorWidgetOfExactType<View>()!;
+    final View view = from.findAncestorWidgetOfExactType<View>();
     final List<RenderParagraph> paragraphs = <RenderParagraph>[];
 
     void visitor(RenderObject child) {
@@ -1844,8 +1844,8 @@ class _AncestorSemanticsFinder extends FinderBase<SemanticsNode>
   Iterable<SemanticsNode> _collectAncestors(SemanticsNode child) {
     final List<SemanticsNode> ancestors = <SemanticsNode>[];
     while (child.parent != null) {
-      ancestors.add(child.parent!);
-      child = child.parent!;
+      ancestors.add(child.parent);
+      child = child.parent;
     }
     return ancestors;
   }

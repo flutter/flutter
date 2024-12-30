@@ -160,7 +160,7 @@ class _SourceVisitor<T> extends RecursiveAstVisitor<T> {
       if (node.documentationComment != null &&
           node.documentationComment!.tokens.isNotEmpty) {
         comment = _processComment(
-            declaration.name.lexeme, node.documentationComment!);
+            declaration.name.lexeme, node.documentationComment);
       }
       elements.add(
         SourceElement(
@@ -182,7 +182,7 @@ class _SourceVisitor<T> extends RecursiveAstVisitor<T> {
       List<SourceLine> comment = <SourceLine>[];
       if (node.documentationComment != null &&
           node.documentationComment!.tokens.isNotEmpty) {
-        comment = _processComment(node.name.lexeme, node.documentationComment!);
+        comment = _processComment(node.name.lexeme, node.documentationComment);
       }
       elements.add(
         SourceElement(
@@ -208,7 +208,7 @@ class _SourceVisitor<T> extends RecursiveAstVisitor<T> {
           node.documentationComment!.tokens.isNotEmpty) {
         assert(enclosingClass.isNotEmpty);
         comment = _processComment('$enclosingClass.${declaration.name.lexeme}',
-            node.documentationComment!);
+            node.documentationComment);
       }
       elements.add(
         SourceElement(
@@ -236,7 +236,7 @@ class _SourceVisitor<T> extends RecursiveAstVisitor<T> {
       if (node.documentationComment != null &&
           node.documentationComment!.tokens.isNotEmpty) {
         comment = _processComment(
-            '$enclosingClass.$fullName', node.documentationComment!);
+            '$enclosingClass.$fullName', node.documentationComment);
       }
       elements.add(
         SourceElement(
@@ -261,7 +261,7 @@ class _SourceVisitor<T> extends RecursiveAstVisitor<T> {
         if (node.documentationComment != null &&
             node.documentationComment!.tokens.isNotEmpty) {
           comment =
-              _processComment(node.name.lexeme, node.documentationComment!);
+              _processComment(node.name.lexeme, node.documentationComment);
         }
         elements.add(
           SourceElement(
@@ -286,7 +286,7 @@ class _SourceVisitor<T> extends RecursiveAstVisitor<T> {
           node.documentationComment!.tokens.isNotEmpty) {
         assert(enclosingClass.isNotEmpty);
         comment = _processComment(
-            '$enclosingClass.${node.name.lexeme}', node.documentationComment!);
+            '$enclosingClass.${node.name.lexeme}', node.documentationComment);
       }
       elements.add(
         SourceElement(
@@ -317,7 +317,7 @@ class _SourceVisitor<T> extends RecursiveAstVisitor<T> {
       List<SourceLine> comment = <SourceLine>[];
       if (node.documentationComment != null &&
           node.documentationComment!.tokens.isNotEmpty) {
-        comment = _processComment(node.name.lexeme, node.documentationComment!);
+        comment = _processComment(node.name.lexeme, node.documentationComment);
       }
       elements.add(
         SourceElement(
@@ -342,7 +342,7 @@ class _SourceVisitor<T> extends RecursiveAstVisitor<T> {
       List<SourceLine> comment = <SourceLine>[];
       if (node.documentationComment != null &&
           node.documentationComment!.tokens.isNotEmpty) {
-        comment = _processComment(node.name.lexeme, node.documentationComment!);
+        comment = _processComment(node.name.lexeme, node.documentationComment);
       }
       elements.add(
         SourceElement(

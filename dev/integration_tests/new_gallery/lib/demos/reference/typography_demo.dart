@@ -47,67 +47,67 @@ class TypographyDemo extends StatelessWidget {
     final List<_TextStyleItem> styleItems = <_TextStyleItem>[
       _TextStyleItem(
         name: 'Headline 1',
-        style: textTheme.displayLarge!,
+        style: textTheme.displayLarge,
         text: 'Light 96sp',
       ),
       _TextStyleItem(
         name: 'Headline 2',
-        style: textTheme.displayMedium!,
+        style: textTheme.displayMedium,
         text: 'Light 60sp',
       ),
       _TextStyleItem(
         name: 'Headline 3',
-        style: textTheme.displaySmall!,
+        style: textTheme.displaySmall,
         text: 'Regular 48sp',
       ),
       _TextStyleItem(
         name: 'Headline 4',
-        style: textTheme.headlineMedium!,
+        style: textTheme.headlineMedium,
         text: 'Regular 34sp',
       ),
       _TextStyleItem(
         name: 'Headline 5',
-        style: textTheme.headlineSmall!,
+        style: textTheme.headlineSmall,
         text: 'Regular 24sp',
       ),
       _TextStyleItem(
         name: 'Headline 6',
-        style: textTheme.titleLarge!,
+        style: textTheme.titleLarge,
         text: 'Medium 20sp',
       ),
       _TextStyleItem(
         name: 'Subtitle 1',
-        style: textTheme.titleMedium!,
+        style: textTheme.titleMedium,
         text: 'Regular 16sp',
       ),
       _TextStyleItem(
         name: 'Subtitle 2',
-        style: textTheme.titleSmall!,
+        style: textTheme.titleSmall,
         text: 'Medium 14sp',
       ),
       _TextStyleItem(
         name: 'Body Text 1',
-        style: textTheme.bodyLarge!,
+        style: textTheme.bodyLarge,
         text: 'Regular 16sp',
       ),
       _TextStyleItem(
         name: 'Body Text 2',
-        style: textTheme.bodyMedium!,
+        style: textTheme.bodyMedium,
         text: 'Regular 14sp',
       ),
       _TextStyleItem(
         name: 'Button',
-        style: textTheme.labelLarge!,
+        style: textTheme.labelLarge,
         text: 'MEDIUM (ALL CAPS) 14sp',
       ),
       _TextStyleItem(
         name: 'Caption',
-        style: textTheme.bodySmall!,
+        style: textTheme.bodySmall,
         text: 'Regular 12sp',
       ),
       _TextStyleItem(
         name: 'Overline',
-        style: textTheme.labelSmall!,
+        style: textTheme.labelSmall,
         text: 'REGULAR (ALL CAPS) 10sp',
       ),
     ];

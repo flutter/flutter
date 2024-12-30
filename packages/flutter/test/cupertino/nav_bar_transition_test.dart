@@ -42,7 +42,7 @@ Future<void> startTransitionBetween(
       .state<NavigatorState>(find.byType(Navigator))
       .push(CupertinoPageRoute<void>(
         title: fromTitle,
-        builder: (BuildContext context) => scaffoldForNavBar(from)!,
+        builder: (BuildContext context) => scaffoldForNavBar(from),
       ));
 
   await tester.pump();
@@ -52,7 +52,7 @@ Future<void> startTransitionBetween(
       .state<NavigatorState>(find.byType(Navigator))
       .push(CupertinoPageRoute<void>(
         title: toTitle,
-        builder: (BuildContext context) => scaffoldForNavBar(to)!,
+        builder: (BuildContext context) => scaffoldForNavBar(to),
       ));
 
   await tester.pump();
@@ -308,7 +308,7 @@ void main() {
         .state<NavigatorState>(find.byType(Navigator))
         .push(CupertinoPageRoute<void>(
           title: 'Page 1',
-          builder: (BuildContext context) => scaffoldForNavBar(null)!,
+          builder: (BuildContext context) => scaffoldForNavBar(null),
         ));
 
     await tester.pump();
@@ -319,7 +319,7 @@ void main() {
         .push(CupertinoPageRoute<void>(
           title: 'Page 2',
           fullscreenDialog: true,
-          builder: (BuildContext context) => scaffoldForNavBar(null)!,
+          builder: (BuildContext context) => scaffoldForNavBar(null),
         ));
 
     await tester.pump();
@@ -693,14 +693,14 @@ void main() {
     // Middle widget is visible when nav bar is collapsed.
     final RenderAnimatedOpacity userMiddleOpacity = tester
         .element(find.byWidget(userMiddle))
-        .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+        .findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
     expect(userMiddleOpacity.opacity.value, 1.0);
 
     tester
         .state<NavigatorState>(find.byType(Navigator))
         .push(CupertinoPageRoute<void>(
           title: 'Page 2',
-          builder: (BuildContext context) => scaffoldForNavBar(null)!,
+          builder: (BuildContext context) => scaffoldForNavBar(null),
         ));
 
     await tester.pump();
@@ -720,7 +720,7 @@ void main() {
         .state<NavigatorState>(find.byType(Navigator))
         .push(CupertinoPageRoute<void>(
           title: 'Page 1',
-          builder: (BuildContext context) => scaffoldForNavBar(null)!,
+          builder: (BuildContext context) => scaffoldForNavBar(null),
         ));
 
     await tester.pump();
@@ -765,7 +765,7 @@ void main() {
         .state<NavigatorState>(find.byType(Navigator))
         .push(CupertinoPageRoute<void>(
           title: 'Page 1',
-          builder: (BuildContext context) => scaffoldForNavBar(null)!,
+          builder: (BuildContext context) => scaffoldForNavBar(null),
         ));
 
     await tester.pump();
@@ -927,7 +927,7 @@ void main() {
         .state<NavigatorState>(find.byType(Navigator))
         .push(CupertinoPageRoute<void>(
           title: 'Page 3',
-          builder: (BuildContext context) => scaffoldForNavBar(null)!,
+          builder: (BuildContext context) => scaffoldForNavBar(null),
         ));
 
     await tester.pump();
@@ -970,7 +970,7 @@ void main() {
         .state<NavigatorState>(find.byType(Navigator))
         .push(CupertinoPageRoute<void>(
           title: 'Page 3',
-          builder: (BuildContext context) => scaffoldForNavBar(null)!,
+          builder: (BuildContext context) => scaffoldForNavBar(null),
         ));
 
     await tester.pump();

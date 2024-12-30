@@ -1148,7 +1148,7 @@ class RenderTable extends RenderBox {
             case TableCellVerticalAlignment.baseline:
               assert(textBaseline != null, 'An explicit textBaseline is required when using baseline alignment.');
               child.layout(BoxConstraints.tightFor(width: widths[x]), parentUsesSize: true);
-              final double? childBaseline = child.getDistanceToBaseline(textBaseline!, onlyReal: true);
+              final double? childBaseline = child.getDistanceToBaseline(textBaseline, onlyReal: true);
               if (childBaseline != null) {
                 beforeBaselineDistance = math.max(beforeBaselineDistance, childBaseline);
                 afterBaselineDistance = math.max(afterBaselineDistance, child.size.height - childBaseline);

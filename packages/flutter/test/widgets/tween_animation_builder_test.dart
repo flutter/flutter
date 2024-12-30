@@ -178,7 +178,7 @@ void main() {
           tween: IntTween(begin: 0, end: 100),
           duration: const Duration(seconds: 1),
           builder: (BuildContext context, int i, Widget? child) {
-            return child!;
+            return child;
           },
           child: const Text('Hello World'),
         ),

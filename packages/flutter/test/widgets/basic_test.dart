@@ -21,7 +21,7 @@ import 'semantics_tester.dart';
 void main() {
   group('RawImage', () {
     testWidgets('properties', (WidgetTester tester) async {
-      final ui.Image image1 = (await tester.runAsync<ui.Image>(() => createTestImage()))!;
+      final ui.Image image1 = (await tester.runAsync<ui.Image>(() => createTestImage()));
       addTearDown(image1.dispose);
 
       await tester.pumpWidget(
@@ -50,7 +50,7 @@ void main() {
       expect(renderObject.filterQuality, FilterQuality.medium);
       expect(renderObject.isAntiAlias, false);
 
-      final ui.Image image2 = (await tester.runAsync<ui.Image>(() => createTestImage(width: 2, height: 2)))!;
+      final ui.Image image2 = (await tester.runAsync<ui.Image>(() => createTestImage(width: 2, height: 2)));
       addTearDown(image2.dispose);
       const String debugImageLabel = 'debugImageLabel';
       const double width = 1;

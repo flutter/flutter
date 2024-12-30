@@ -58,7 +58,7 @@ void main() {
         gradient: RadialGradient(
           center: Alignment.topLeft,
           radius: 1.8,
-          colors: <Color>[Colors.yellow[500]!, Colors.blue[500]!],
+          colors: <Color>[Colors.yellow[500], Colors.blue[500]],
         ),
         boxShadow: kElevationToShadow[3],
       ),

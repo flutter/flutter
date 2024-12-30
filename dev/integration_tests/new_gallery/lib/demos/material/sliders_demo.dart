@@ -347,7 +347,7 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
         (TextDirection.ltr, Thumb.start) => _leftTriangle(size, center),
         (TextDirection.ltr, Thumb.end)   => _rightTriangle(size, center),
       },
-      Paint()..color = colorTween.evaluate(enableAnimation)!,
+      Paint()..color = colorTween.evaluate(enableAnimation),
     );
   }
 }
@@ -394,7 +394,7 @@ class _CustomThumbShape extends SliderComponentShape {
     final Path thumbPath = _downTriangle(size, thumbCenter);
     canvas.drawPath(
       thumbPath,
-      Paint()..color = colorTween.evaluate(enableAnimation)!,
+      Paint()..color = colorTween.evaluate(enableAnimation),
     );
   }
 }

@@ -120,7 +120,7 @@ class LocalizationTrackerState extends State<LocalizationTracker> {
 
   @override
   Widget build(BuildContext context) {
-    textBaseline = Theme.of(context).textTheme.bodySmall!.textBaseline!;
+    textBaseline = Theme.of(context).textTheme.bodySmall!.textBaseline;
     return Container();
   }
 }

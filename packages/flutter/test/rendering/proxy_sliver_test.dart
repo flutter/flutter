@@ -65,7 +65,7 @@ void main() {
 
     expect(renderSliverOpacity.debugLayer, null);
     layout(root, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size(10, 10)));
-    final ContainerLayer layer = renderSliverOpacity.debugLayer!;
+    final ContainerLayer layer = renderSliverOpacity.debugLayer;
     expect(layer, isNotNull);
 
     // Mark for repaint otherwise pumpFrame is a noop.
@@ -166,7 +166,7 @@ void main() {
 
     expect(renderSliverAnimatedOpacity.debugLayer, null);
     layout(root, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size(10, 10)));
-    final ContainerLayer layer = renderSliverAnimatedOpacity.debugLayer!;
+    final ContainerLayer layer = renderSliverAnimatedOpacity.debugLayer;
     expect(layer, isNotNull);
 
     // Mark for repaint otherwise pumpFrame is a noop.

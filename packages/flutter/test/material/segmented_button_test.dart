@@ -32,7 +32,7 @@ void main() {
     final RichText iconRichText = tester.widget<RichText>(
       find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
     );
-    return iconRichText.text.style!;
+    return iconRichText.text.style;
   }
 
   testWidgets('SegmentsButton when compositing does not crash', (WidgetTester tester) async {

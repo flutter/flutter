@@ -410,7 +410,7 @@ class PaletteTabView extends StatelessWidget {
           ...primaryKeys.map<Widget>((int index) {
             return DefaultTextStyle(
               style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
-              child: ColorItem(index: index, color: colors.primary[index]!),
+              child: ColorItem(index: index, color: colors.primary[index]),
             );
           }),
           if (colors.accent != null)
@@ -419,7 +419,7 @@ class PaletteTabView extends StatelessWidget {
                 style:
                     index > colors.threshold ? whiteTextStyle : blackTextStyle,
                 child: ColorItem(
-                    index: index, color: colors.accent![index]!, prefix: 'A'),
+                    index: index, color: colors.accent![index], prefix: 'A'),
               );
             }),
         ],

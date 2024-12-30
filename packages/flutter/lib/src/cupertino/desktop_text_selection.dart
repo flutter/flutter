@@ -188,17 +188,17 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
     }
 
     if (widget.handleCut != null) {
-      addToolbarButton(localizations.cutButtonLabel, widget.handleCut!);
+      addToolbarButton(localizations.cutButtonLabel, widget.handleCut);
     }
     if (widget.handleCopy != null) {
-      addToolbarButton(localizations.copyButtonLabel, widget.handleCopy!);
+      addToolbarButton(localizations.copyButtonLabel, widget.handleCopy);
     }
     if (widget.handlePaste != null
         && widget.clipboardStatus?.value == ClipboardStatus.pasteable) {
-      addToolbarButton(localizations.pasteButtonLabel, widget.handlePaste!);
+      addToolbarButton(localizations.pasteButtonLabel, widget.handlePaste);
     }
     if (widget.handleSelectAll != null) {
-      addToolbarButton(localizations.selectAllButtonLabel, widget.handleSelectAll!);
+      addToolbarButton(localizations.selectAllButtonLabel, widget.handleSelectAll);
     }
 
     // If there is no option available, build an empty widget.

@@ -287,7 +287,7 @@ class OverlayEntry implements Listenable {
 
 class _OverlayEntryWidget extends StatefulWidget {
   const _OverlayEntryWidget({
-    required Key super.key,
+    required super.key,
     required this.entry,
     required this.overlayState,
     this.tickerEnabled = true,
@@ -1002,8 +1002,8 @@ mixin _RenderTheaterMixin on RenderBox {
       return null;
     }
     final double y = switch (childParentData) {
-      StackParentData(:final double top?) => top,
-      StackParentData(:final double bottom?) => theaterSize.height - bottom - child.getDryLayout(childConstraints).height,
+      StackParentData(:final double top) => top,
+      StackParentData(:final double bottom) => theaterSize.height - bottom - child.getDryLayout(childConstraints).height,
       StackParentData() => alignment.alongOffset(theaterSize - child.getDryLayout(childConstraints) as Offset).dy,
     };
     return baselineOffset + y;

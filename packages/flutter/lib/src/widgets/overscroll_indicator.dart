@@ -181,7 +181,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
     super.initState();
     _leadingController = _GlowController(vsync: this, color: widget.color, axis: widget.axis);
     _trailingController = _GlowController(vsync: this, color: widget.color, axis: widget.axis);
-    _leadingAndTrailingListener = Listenable.merge(<Listenable>[_leadingController!, _trailingController!]);
+    _leadingAndTrailingListener = Listenable.merge(<Listenable>[_leadingController, _trailingController]);
   }
 
   @override

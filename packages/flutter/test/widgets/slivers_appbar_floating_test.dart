@@ -14,7 +14,7 @@ void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
   final SliverPhysicalParentData parentData = target.parentData! as SliverPhysicalParentData;
   final Offset actual = parentData.paintOffset;
   expect(actual, ideal);
-  final SliverGeometry geometry = target.geometry!;
+  final SliverGeometry geometry = target.geometry;
   expect(geometry.visible, visible);
 }
 
@@ -253,7 +253,7 @@ void main() {
       required double paintExtent
     }) {
       final RenderSliver target = key.currentContext!.findRenderObject()! as RenderSliver;
-      final SliverGeometry geometry = target.geometry!;
+      final SliverGeometry geometry = target.geometry;
       expect(geometry.visible, visible);
       expect(geometry.paintExtent, paintExtent);
     }

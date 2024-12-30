@@ -896,67 +896,67 @@ class RenderCustomPaint extends RenderProxyBox {
       config.isCheckStateMixed = properties.mixed;
     }
     if (properties.selected != null) {
-      config.isSelected = properties.selected!;
+      config.isSelected = properties.selected;
     }
     if (properties.button != null) {
-      config.isButton = properties.button!;
+      config.isButton = properties.button;
     }
     if (properties.expanded != null) {
       config.isExpanded = properties.expanded;
     }
     if (properties.link != null) {
-      config.isLink = properties.link!;
+      config.isLink = properties.link;
     }
     if (properties.linkUrl != null) {
       config.linkUrl = properties.linkUrl;
     }
     if (properties.textField != null) {
-      config.isTextField = properties.textField!;
+      config.isTextField = properties.textField;
     }
     if (properties.slider != null) {
-      config.isSlider = properties.slider!;
+      config.isSlider = properties.slider;
     }
     if (properties.keyboardKey != null) {
-      config.isKeyboardKey = properties.keyboardKey!;
+      config.isKeyboardKey = properties.keyboardKey;
     }
     if (properties.readOnly != null) {
-      config.isReadOnly = properties.readOnly!;
+      config.isReadOnly = properties.readOnly;
     }
     if (properties.focusable != null) {
-      config.isFocusable = properties.focusable!;
+      config.isFocusable = properties.focusable;
     }
     if (properties.focused != null) {
-      config.isFocused = properties.focused!;
+      config.isFocused = properties.focused;
     }
     if (properties.enabled != null) {
       config.isEnabled = properties.enabled;
     }
     if (properties.inMutuallyExclusiveGroup != null) {
-      config.isInMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup!;
+      config.isInMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup;
     }
     if (properties.obscured != null) {
-      config.isObscured = properties.obscured!;
+      config.isObscured = properties.obscured;
     }
     if (properties.multiline != null) {
-      config.isMultiline = properties.multiline!;
+      config.isMultiline = properties.multiline;
     }
     if (properties.hidden != null) {
-      config.isHidden = properties.hidden!;
+      config.isHidden = properties.hidden;
     }
     if (properties.header != null) {
-      config.isHeader = properties.header!;
+      config.isHeader = properties.header;
     }
     if (properties.headingLevel != null) {
-      config.headingLevel = properties.headingLevel!;
+      config.headingLevel = properties.headingLevel;
     }
     if (properties.scopesRoute != null) {
-      config.scopesRoute = properties.scopesRoute!;
+      config.scopesRoute = properties.scopesRoute;
     }
     if (properties.namesRoute != null) {
-      config.namesRoute = properties.namesRoute!;
+      config.namesRoute = properties.namesRoute;
     }
     if (properties.liveRegion != null) {
-      config.liveRegion = properties.liveRegion!;
+      config.liveRegion = properties.liveRegion;
     }
     if (properties.maxValueLength != null) {
       config.maxValueLength = properties.maxValueLength;
@@ -968,22 +968,22 @@ class RenderCustomPaint extends RenderProxyBox {
       config.isToggled = properties.toggled;
     }
     if (properties.image != null) {
-      config.isImage = properties.image!;
+      config.isImage = properties.image;
     }
     if (properties.label != null) {
-      config.label = properties.label!;
+      config.label = properties.label;
     }
     if (properties.value != null) {
-      config.value = properties.value!;
+      config.value = properties.value;
     }
     if (properties.increasedValue != null) {
-      config.increasedValue = properties.increasedValue!;
+      config.increasedValue = properties.increasedValue;
     }
     if (properties.decreasedValue != null) {
-      config.decreasedValue = properties.decreasedValue!;
+      config.decreasedValue = properties.decreasedValue;
     }
     if (properties.hint != null) {
-      config.hint = properties.hint!;
+      config.hint = properties.hint;
     }
     if (properties.textDirection != null) {
       config.textDirection = properties.textDirection;

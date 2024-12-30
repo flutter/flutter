@@ -152,7 +152,7 @@ class _RadioDemoState extends State<_RadioDemo> with RestorationMixin {
 
   void handleRadioValueChanged(int? value) {
     setState(() {
-      radioValue.value = value!;
+      radioValue.value = value;
     });
   }
 

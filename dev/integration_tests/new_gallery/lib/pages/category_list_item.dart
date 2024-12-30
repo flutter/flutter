@@ -112,7 +112,7 @@ class _CategoryListItemState extends State<CategoryListItem>
         _CategoryHeader(
           margin: _headerMargin.value,
           imagePadding: _headerImagePadding.value,
-          borderRadius: _headerBorderRadius.value!,
+          borderRadius: _headerBorderRadius.value,
           height: _headerHeight.value,
           chevronOpacity: _headerChevronOpacity.value,
           imageString: widget.imageString,

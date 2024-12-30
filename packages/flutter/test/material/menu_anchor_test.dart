@@ -176,7 +176,7 @@ void main() {
     final RichText iconRichText = tester.widget<RichText>(
       find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
     );
-    return iconRichText.text.style!;
+    return iconRichText.text.style;
   }
 
   testWidgets('Menu responds to density changes', (WidgetTester tester) async {

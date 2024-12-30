@@ -100,7 +100,7 @@ void main() {
       ),
     );
 
-    final Size size = alignKey.currentContext!.size!;
+    final Size size = alignKey.currentContext!.size;
     expect(size.width, equals(800.0));
     expect(size.height, equals(10.0));
   });

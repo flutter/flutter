@@ -85,7 +85,7 @@ void main() {
 
     late FlutterErrorDetails error;
     layout(opacity, phase: EnginePhase.flushSemantics, onErrors: () {
-      error = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;
+      error = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails();
     });
     expect('${error.exception}', contains('Attempted to set a layer to a repaint boundary render object.'));
   });

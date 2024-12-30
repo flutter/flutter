@@ -168,19 +168,19 @@ class CardCollectionState extends State<CardCollection> {
 
   void _selectColor(MaterialColor? selection) {
     setState(() {
-      _primaryColor = selection!;
+      _primaryColor = selection;
     });
   }
 
   void _changeDismissDirection(DismissDirection? newDismissDirection) {
     setState(() {
-      _dismissDirection = newDismissDirection!;
+      _dismissDirection = newDismissDirection;
     });
   }
 
   void _changeTextAlign(TextAlign? newTextAlign) {
     setState(() {
-      _textAlign = newTextAlign!;
+      _textAlign = newTextAlign;
     });
   }
 

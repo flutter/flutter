@@ -48,8 +48,8 @@ class MaterialPointArcTween extends Tween<Offset> {
     assert(this.begin != null);
     assert(this.end != null);
 
-    final Offset begin = this.begin!;
-    final Offset end = this.end!;
+    final Offset begin = this.begin;
+    final Offset end = this.end;
 
     // An explanation with a diagram can be found at https://goo.gl/vMSdRg
     final Offset delta = end - begin;
@@ -265,18 +265,18 @@ class MaterialRectArcTween extends RectTween {
     final Offset centersVector = end!.center - begin!.center;
     final _Diagonal diagonal = _maxBy<_Diagonal>(_allDiagonals, (_Diagonal d) => _diagonalSupport(centersVector, d));
     _beginArc = MaterialPointArcTween(
-      begin: _cornerFor(begin!, diagonal.beginId),
-      end: _cornerFor(end!, diagonal.beginId),
+      begin: _cornerFor(begin, diagonal.beginId),
+      end: _cornerFor(end, diagonal.beginId),
     );
     _endArc = MaterialPointArcTween(
-      begin: _cornerFor(begin!, diagonal.endId),
-      end: _cornerFor(end!, diagonal.endId),
+      begin: _cornerFor(begin, diagonal.endId),
+      end: _cornerFor(end, diagonal.endId),
     );
     _dirty = false;
   }
 
   double _diagonalSupport(Offset centersVector, _Diagonal diagonal) {
-    final Offset delta = _cornerFor(begin!, diagonal.endId) - _cornerFor(begin!, diagonal.beginId);
+    final Offset delta = _cornerFor(begin, diagonal.endId) - _cornerFor(begin, diagonal.beginId);
     final double length = delta.distance;
     return centersVector.dx * delta.dx / length + centersVector.dy * delta.dy / length;
   }

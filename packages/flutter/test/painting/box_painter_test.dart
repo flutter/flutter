@@ -61,8 +61,8 @@ void main() {
 
   test('Border control test', () {
     final Border border1 = Border.all(width: 4.0);
-    final Border border2 = Border.lerp(null, border1, 0.25)!;
-    final Border border3 = Border.lerp(border1, null, 0.25)!;
+    final Border border2 = Border.lerp(null, border1, 0.25);
+    final Border border3 = Border.lerp(border1, null, 0.25);
 
     expect(border1, hasOneLineDescription);
     expect(border1.hashCode, isNot(equals(border2.hashCode)));
@@ -70,7 +70,7 @@ void main() {
     expect(border2.top.width, equals(1.0));
     expect(border3.bottom.width, equals(3.0));
 
-    final Border border4 = Border.lerp(border2, border3, 0.5)!;
+    final Border border4 = Border.lerp(border2, border3, 0.5);
     expect(border4.left.width, equals(2.0));
   });
 
@@ -92,8 +92,8 @@ void main() {
 
   test('BoxShadow control test', () {
     const BoxShadow shadow1 = BoxShadow(blurRadius: 4.0);
-    final BoxShadow shadow2 = BoxShadow.lerp(null, shadow1, 0.25)!;
-    final BoxShadow shadow3 = BoxShadow.lerp(shadow1, null, 0.25)!;
+    final BoxShadow shadow2 = BoxShadow.lerp(null, shadow1, 0.25);
+    final BoxShadow shadow3 = BoxShadow.lerp(shadow1, null, 0.25);
 
     expect(shadow1, hasOneLineDescription);
     expect(shadow1.hashCode, isNot(equals(shadow2.hashCode)));
@@ -102,7 +102,7 @@ void main() {
     expect(shadow2.blurRadius, equals(1.0));
     expect(shadow3.blurRadius, equals(3.0));
 
-    final BoxShadow shadow4 = BoxShadow.lerp(shadow2, shadow3, 0.5)!;
+    final BoxShadow shadow4 = BoxShadow.lerp(shadow2, shadow3, 0.5);
     expect(shadow4.blurRadius, equals(2.0));
 
     List<BoxShadow> shadowList = BoxShadow.lerpList(<BoxShadow>[shadow2, shadow1], <BoxShadow>[shadow3], 0.5)!;
@@ -126,10 +126,10 @@ void main() {
   test('BoxShadow BlurStyle test', () {
     const BoxShadow shadow1 = BoxShadow(blurRadius: 4.0);
     const BoxShadow shadow2 = BoxShadow(blurRadius: 4.0, blurStyle: BlurStyle.outer);
-    final BoxShadow shadow3 = BoxShadow.lerp(shadow1, null, 0.25)!;
-    final BoxShadow shadow4 = BoxShadow.lerp(null, shadow1, 0.25)!;
-    final BoxShadow shadow5 = BoxShadow.lerp(shadow1, shadow2, 0.25)!;
-    final BoxShadow shadow6 = BoxShadow.lerp(const BoxShadow(blurStyle: BlurStyle.solid), shadow2, 0.25)!;
+    final BoxShadow shadow3 = BoxShadow.lerp(shadow1, null, 0.25);
+    final BoxShadow shadow4 = BoxShadow.lerp(null, shadow1, 0.25);
+    final BoxShadow shadow5 = BoxShadow.lerp(shadow1, shadow2, 0.25);
+    final BoxShadow shadow6 = BoxShadow.lerp(const BoxShadow(blurStyle: BlurStyle.solid), shadow2, 0.25);
 
     expect(shadow1.blurStyle, equals(BlurStyle.normal));
     expect(shadow2.blurStyle, equals(BlurStyle.outer));

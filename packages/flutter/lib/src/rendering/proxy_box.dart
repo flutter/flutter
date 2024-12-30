@@ -1574,7 +1574,7 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
         layer = context.pushClipRect(
           needsCompositing,
           offset,
-          _clip!,
+          _clip,
           super.paint,
           clipBehavior: clipBehavior,
           oldLayer: layer as ClipRectLayer?,
@@ -1677,7 +1677,7 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
           needsCompositing,
           offset,
           _clip!.outerRect,
-          _clip!,
+          _clip,
           super.paint,
           clipBehavior: clipBehavior,
           oldLayer: layer as ClipRRectLayer?,
@@ -1763,8 +1763,8 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
         layer = context.pushClipPath(
           needsCompositing,
           offset,
-          _clip!,
-          _getClipPath(_clip!),
+          _clip,
+          _getClipPath(_clip),
           super.paint,
           clipBehavior: clipBehavior,
           oldLayer: layer as ClipPathLayer?,
@@ -1784,7 +1784,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
       if (child != null) {
         super.debugPaintSize(context, offset);
         if (clipBehavior != Clip.none) {
-          context.canvas.drawPath(_getClipPath(_clip!).shift(offset), _debugPaint!);
+          context.canvas.drawPath(_getClipPath(_clip).shift(offset), _debugPaint!);
           _debugText!.paint(context.canvas, offset + Offset((_clip!.width - _debugText!.width) / 2.0, -_debugText!.text!.style!.fontSize! * 1.1));
         }
       }
@@ -1843,7 +1843,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
           needsCompositing,
           offset,
           Offset.zero & size,
-          _clip!,
+          _clip,
           super.paint,
           clipBehavior: clipBehavior,
           oldLayer: layer as ClipPathLayer?,
@@ -2071,7 +2071,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
       needsCompositing,
       offset,
       Offset.zero & size,
-      _clip!,
+      _clip,
       (PaintingContext context, Offset offset) {
         if (usesSaveLayer) {
           // If we want to avoid the bleeding edge artifact
@@ -2184,7 +2184,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
       needsCompositing,
       offset,
       Offset.zero & size,
-      _clip!,
+      _clip,
       (PaintingContext context, Offset offset) {
         if (usesSaveLayer) {
           // If we want to avoid the bleeding edge artifact
@@ -2561,7 +2561,7 @@ class RenderTransform extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      final Matrix4 transform = _effectiveTransform!;
+      final Matrix4 transform = _effectiveTransform;
       if (filterQuality == null) {
         final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
         if (childOffset == null) {
@@ -2809,7 +2809,7 @@ class RenderFittedBox extends RenderProxyBox {
       return context.pushTransform(
         needsCompositing,
         offset,
-        _transform!,
+        _transform,
         super.paint,
         oldLayer: layer is TransformLayer ? layer! as TransformLayer : null,
       );
@@ -4303,91 +4303,91 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isToggled = _properties.toggled;
     }
     if (_properties.selected != null) {
-      config.isSelected = _properties.selected!;
+      config.isSelected = _properties.selected;
     }
     if (_properties.button != null) {
-      config.isButton = _properties.button!;
+      config.isButton = _properties.button;
     }
     if (_properties.expanded != null) {
       config.isExpanded = _properties.expanded;
     }
     if (_properties.link != null) {
-      config.isLink = _properties.link!;
+      config.isLink = _properties.link;
     }
     if (_properties.linkUrl != null) {
       config.linkUrl = _properties.linkUrl;
     }
     if (_properties.slider != null) {
-      config.isSlider = _properties.slider!;
+      config.isSlider = _properties.slider;
     }
     if (_properties.keyboardKey != null) {
-      config.isKeyboardKey = _properties.keyboardKey!;
+      config.isKeyboardKey = _properties.keyboardKey;
     }
     if (_properties.header != null) {
-      config.isHeader = _properties.header!;
+      config.isHeader = _properties.header;
     }
     if (_properties.headingLevel != null) {
-      config.headingLevel = _properties.headingLevel!;
+      config.headingLevel = _properties.headingLevel;
     }
     if (_properties.textField != null) {
-      config.isTextField = _properties.textField!;
+      config.isTextField = _properties.textField;
     }
     if (_properties.readOnly != null) {
-      config.isReadOnly = _properties.readOnly!;
+      config.isReadOnly = _properties.readOnly;
     }
     if (_properties.focusable != null) {
-      config.isFocusable = _properties.focusable!;
+      config.isFocusable = _properties.focusable;
     }
     if (_properties.focused != null) {
-      config.isFocused = _properties.focused!;
+      config.isFocused = _properties.focused;
     }
     if (_properties.inMutuallyExclusiveGroup != null) {
-      config.isInMutuallyExclusiveGroup = _properties.inMutuallyExclusiveGroup!;
+      config.isInMutuallyExclusiveGroup = _properties.inMutuallyExclusiveGroup;
     }
     if (_properties.obscured != null) {
-      config.isObscured = _properties.obscured!;
+      config.isObscured = _properties.obscured;
     }
     if (_properties.multiline != null) {
-      config.isMultiline = _properties.multiline!;
+      config.isMultiline = _properties.multiline;
     }
     if (_properties.hidden != null) {
-      config.isHidden = _properties.hidden!;
+      config.isHidden = _properties.hidden;
     }
     if (_properties.image != null) {
-      config.isImage = _properties.image!;
+      config.isImage = _properties.image;
     }
     if (_properties.identifier != null) {
-      config.identifier = _properties.identifier!;
+      config.identifier = _properties.identifier;
     }
     if (_attributedLabel != null) {
-      config.attributedLabel = _attributedLabel!;
+      config.attributedLabel = _attributedLabel;
     }
     if (_attributedValue != null) {
-      config.attributedValue = _attributedValue!;
+      config.attributedValue = _attributedValue;
     }
     if (_attributedIncreasedValue != null) {
-      config.attributedIncreasedValue = _attributedIncreasedValue!;
+      config.attributedIncreasedValue = _attributedIncreasedValue;
     }
     if (_attributedDecreasedValue != null) {
-      config.attributedDecreasedValue = _attributedDecreasedValue!;
+      config.attributedDecreasedValue = _attributedDecreasedValue;
     }
     if (_attributedHint != null) {
-      config.attributedHint = _attributedHint!;
+      config.attributedHint = _attributedHint;
     }
     if (_properties.tooltip != null) {
-      config.tooltip = _properties.tooltip!;
+      config.tooltip = _properties.tooltip;
     }
     if (_properties.hintOverrides != null && _properties.hintOverrides!.isNotEmpty) {
       config.hintOverrides = _properties.hintOverrides;
     }
     if (_properties.scopesRoute != null) {
-      config.scopesRoute = _properties.scopesRoute!;
+      config.scopesRoute = _properties.scopesRoute;
     }
     if (_properties.namesRoute != null) {
-      config.namesRoute = _properties.namesRoute!;
+      config.namesRoute = _properties.namesRoute;
     }
     if (_properties.liveRegion != null) {
-      config.liveRegion = _properties.liveRegion!;
+      config.liveRegion = _properties.liveRegion;
     }
     if (_properties.maxValueLength != null) {
       config.maxValueLength = _properties.maxValueLength;
@@ -4471,7 +4471,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onFocus = _performFocus;
     }
     if (_properties.customSemanticsActions != null) {
-      config.customSemanticsActions = _properties.customSemanticsActions!;
+      config.customSemanticsActions = _properties.customSemanticsActions;
     }
   }
 

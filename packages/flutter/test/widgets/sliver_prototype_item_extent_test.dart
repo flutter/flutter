@@ -212,7 +212,7 @@ void main() {
     await tester.pumpWidget(buildFrame(count: 20, height: 100.0, prototypeKey: prototypeKey));
 
     final RenderObject scrollView = tester.renderObject(find.byType(CustomScrollView));
-    final RenderObject prototype = prototypeKey.currentContext!.findRenderObject()!;
+    final RenderObject prototype = prototypeKey.currentContext!.findRenderObject();
 
     expect(prototype.getTransformTo(scrollView), Matrix4.zero());
   });

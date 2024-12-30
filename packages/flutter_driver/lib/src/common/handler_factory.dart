@@ -326,7 +326,7 @@ mixin CommandHandlerFactory {
     final GetOffset getOffsetCommand = command as GetOffset;
     final Finder finder = await waitForElement(finderFactory.createFinder(getOffsetCommand.finder));
     final Element element = finder.evaluate().single;
-    final RenderBox box = (element.renderObject as RenderBox?)!;
+    final RenderBox box = (element.renderObject as RenderBox?);
     final Offset localPoint = switch (getOffsetCommand.offsetType) {
       OffsetType.topLeft     => Offset.zero,
       OffsetType.topRight    => box.size.topRight(Offset.zero),

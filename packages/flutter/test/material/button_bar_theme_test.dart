@@ -60,7 +60,7 @@ void main() {
       overflowDirection: VerticalDirection.up,
     );
 
-    final ButtonBarThemeData lerp = ButtonBarThemeData.lerp(barThemePrimary, barThemeAccent, 0.5)!;
+    final ButtonBarThemeData lerp = ButtonBarThemeData.lerp(barThemePrimary, barThemeAccent, 0.5);
     expect(lerp.alignment, equals(MainAxisAlignment.center));
     expect(lerp.mainAxisSize, equals(MainAxisSize.max));
     expect(lerp.buttonTextTheme, equals(ButtonTextTheme.accent));

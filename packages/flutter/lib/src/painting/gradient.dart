@@ -38,7 +38,7 @@ Color _sample(List<Color> colors, List<double> stops, double t) {
   return Color.lerp(
       colors[index], colors[index + 1],
       (t - stops[index]) / (stops[index + 1] - stops[index]),
-  )!;
+  );
 }
 
 _ColorsAndStops _interpolateColorsAndStops(
@@ -57,7 +57,7 @@ _ColorsAndStops _interpolateColorsAndStops(
     ..addAll(bStops);
   final List<double> interpolatedStops = stops.toList(growable: false);
   final List<Color> interpolatedColors = interpolatedStops.map<Color>(
-          (double stop) => Color.lerp(_sample(aColors, aStops, stop), _sample(bColors, bStops, stop), t)!,
+          (double stop) => Color.lerp(_sample(aColors, aStops, stop), _sample(bColors, bStops, stop), t),
   ).toList(growable: false);
   return _ColorsAndStops(interpolatedColors, interpolatedStops);
 }
@@ -451,7 +451,7 @@ class LinearGradient extends Gradient {
     return LinearGradient(
       begin: begin,
       end: end,
-      colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)!).toList(),
+      colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)).toList(),
       stops: stops,
       tileMode: tileMode,
     );
@@ -742,7 +742,7 @@ class RadialGradient extends Gradient {
     return RadialGradient(
       center: center,
       radius: radius,
-      colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)!).toList(),
+      colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)).toList(),
       stops: stops,
       tileMode: tileMode,
       focal: focal,
@@ -1028,7 +1028,7 @@ class SweepGradient extends Gradient {
       center: center,
       startAngle: startAngle,
       endAngle: endAngle,
-      colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)!).toList(),
+      colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)).toList(),
       stops: stops,
       tileMode: tileMode,
     );

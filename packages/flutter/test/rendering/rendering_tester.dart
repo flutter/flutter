@@ -46,7 +46,7 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
     _instance = this;
     // TODO(goderbauer): Create (fake) window if embedder doesn't provide an implicit view.
     assert(platformDispatcher.implicitView != null);
-    _renderView = initRenderView(platformDispatcher.implicitView!);
+    _renderView = initRenderView(platformDispatcher.implicitView);
   }
 
   @override

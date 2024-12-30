@@ -128,7 +128,7 @@ class _TransformationsDemoState extends State<TransformationsDemo>
                   viewportSize.width / 2 - _board.size.width / 2,
                   viewportSize.height / 2 - _board.size.height / 2,
                 );
-              _transformationController.value = _homeMatrix!;
+              _transformationController.value = _homeMatrix;
             }
 
             return ClipRect(

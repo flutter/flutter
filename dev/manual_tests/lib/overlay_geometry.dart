@@ -151,7 +151,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     ];
     cardModels = List<CardModel>.generate(cardHeights.length, (int i) {
       final Color? color = Color.lerp(Colors.red.shade300, Colors.blue.shade900, i / cardHeights.length);
-      return CardModel(i, cardHeights[i], color!);
+      return CardModel(i, cardHeights[i], color);
     });
   }
 

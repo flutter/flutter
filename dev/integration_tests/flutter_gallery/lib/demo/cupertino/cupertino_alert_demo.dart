@@ -21,7 +21,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
   void showDemoDialog({required BuildContext context, Widget? child}) {
     showCupertinoDialog<String>(
       context: context,
-      builder: (BuildContext context) => child!,
+      builder: (BuildContext context) => child,
     ).then((String? value) {
       if (value != null) {
         setState(() { lastSelectedValue = value; });
@@ -32,7 +32,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
   void showDemoActionSheet({required BuildContext context, Widget? child}) {
     showCupertinoModalPopup<String>(
       context: context,
-      builder: (BuildContext context) => child!,
+      builder: (BuildContext context) => child,
     ).then((String? value) {
       if (value != null) {
         setState(() { lastSelectedValue = value; });

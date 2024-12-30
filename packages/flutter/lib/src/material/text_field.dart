@@ -1641,7 +1641,7 @@ TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.re
   return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color);
 });
 
-TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge!;
+TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge;
 
 TextStyle _m3CounterErrorStyle(BuildContext context) =>
   Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.error);

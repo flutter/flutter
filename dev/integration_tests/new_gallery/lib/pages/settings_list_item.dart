@@ -177,7 +177,7 @@ class _SettingsListItemState<T> extends State<SettingsListItem<T?>>
         _CategoryHeader(
           margin: _headerMargin.value,
           padding: _headerPadding.value,
-          borderRadius: _headerBorderRadius.value!,
+          borderRadius: _headerBorderRadius.value,
           subtitleHeight: _headerSubtitleHeight,
           chevronRotation: _headerChevronRotation,
           title: widget.title,

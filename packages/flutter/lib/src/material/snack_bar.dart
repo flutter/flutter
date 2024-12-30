@@ -721,7 +721,7 @@ class _SnackBarState extends State<SnackBar> {
                 padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
               ),
             ),
-            child: widget.action!,
+            child: widget.action,
           ),
         ),
       if (showCloseIcon)

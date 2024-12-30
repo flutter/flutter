@@ -286,7 +286,7 @@ class ShapeDecoration extends Decoration {
   @override
   BoxPainter createBoxPainter([ VoidCallback? onChanged ]) {
     assert(onChanged != null || image == null);
-    return _ShapeDecorationPainter(this, onChanged!);
+    return _ShapeDecorationPainter(this, onChanged);
   }
 }
 
@@ -322,7 +322,7 @@ class _ShapeDecorationPainter extends BoxPainter {
     if (_interiorPaint == null && (_decoration.color != null || _decoration.gradient != null)) {
       _interiorPaint = Paint();
       if (_decoration.color != null) {
-        _interiorPaint!.color = _decoration.color!;
+        _interiorPaint!.color = _decoration.color;
       }
     }
     if (_decoration.gradient != null) {
@@ -409,7 +409,7 @@ class _ShapeDecorationPainter extends BoxPainter {
         // When border is filled, the rect is reduced to avoid anti-aliasing
         // rounding error leaking the background color around the clipped shape.
         final Rect adjustedRect = _adjustedRectOnOutlinedBorder(rect);
-        _decoration.shape.paintInterior(canvas, adjustedRect, _interiorPaint!, textDirection: textDirection);
+        _decoration.shape.paintInterior(canvas, adjustedRect, _interiorPaint, textDirection: textDirection);
       } else {
         canvas.drawPath(_outerPath, _interiorPaint!);
       }
@@ -432,7 +432,7 @@ class _ShapeDecorationPainter extends BoxPainter {
       return;
     }
     _imagePainter ??= _decoration.image!.createPainter(onChanged);
-    _imagePainter!.paint(canvas, _lastRect!, _innerPath, configuration);
+    _imagePainter!.paint(canvas, _lastRect, _innerPath, configuration);
   }
 
   @override

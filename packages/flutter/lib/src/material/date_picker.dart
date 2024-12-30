@@ -476,7 +476,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
   void _handleOk() {
     if (_entryMode.value == DatePickerEntryMode.input || _entryMode.value == DatePickerEntryMode.inputOnly) {
-      final FormState form = _formKey.currentState!;
+      final FormState form = _formKey.currentState;
       if (!form.validate()) {
         setState(() => _autovalidateMode.value = AutovalidateMode.always);
         return;

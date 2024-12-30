@@ -219,7 +219,7 @@ class OutlinedButton extends ButtonStyleButton {
     ButtonLayerBuilder? foregroundBuilder,
   }) {
     final MaterialStateProperty<Color?>? backgroundColorProp = switch ((backgroundColor, disabledBackgroundColor)) {
-      (_?, null) => WidgetStatePropertyAll<Color?>(backgroundColor),
+      (_, null) => WidgetStatePropertyAll<Color?>(backgroundColor),
       (_, _) => ButtonStyleButton.defaultColor(backgroundColor, disabledBackgroundColor),
     };
     final MaterialStateProperty<Color?>? overlayColorProp = switch ((foregroundColor, overlayColor)) {

@@ -236,23 +236,23 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
       if (widget.handleCut != null)
         _TextSelectionToolbarItemData(
           label: localizations.cutButtonLabel,
-          onPressed: widget.handleCut!,
+          onPressed: widget.handleCut,
         ),
       if (widget.handleCopy != null)
         _TextSelectionToolbarItemData(
           label: localizations.copyButtonLabel,
-          onPressed: widget.handleCopy!,
+          onPressed: widget.handleCopy,
         ),
       if (widget.handlePaste != null
           && widget.clipboardStatus?.value == ClipboardStatus.pasteable)
         _TextSelectionToolbarItemData(
           label: localizations.pasteButtonLabel,
-          onPressed: widget.handlePaste!,
+          onPressed: widget.handlePaste,
         ),
       if (widget.handleSelectAll != null)
         _TextSelectionToolbarItemData(
           label: localizations.selectAllButtonLabel,
-          onPressed: widget.handleSelectAll!,
+          onPressed: widget.handleSelectAll,
         ),
     ];
 

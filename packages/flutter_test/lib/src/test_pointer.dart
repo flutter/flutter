@@ -515,7 +515,7 @@ class TestGesture {
     assert(_pointer.location != null);
     if (_pointer.isPanZoomActive) {
       return panZoomUpdate(
-        _pointer.location!,
+        _pointer.location,
         pan: (_pointer.pan ?? Offset.zero) + offset,
         timeStamp: timeStamp
       );

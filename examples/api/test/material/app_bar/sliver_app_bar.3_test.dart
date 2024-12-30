@@ -25,7 +25,7 @@ void main() {
     // Based on https://m3.material.io/components/top-app-bar/specs the title of
     // the SliverAppBar.large widget is formatted with the headlineMedium style.
     final BuildContext context = tester.element(find.byType(MaterialApp));
-    final TextStyle expectedTitleStyle = Theme.of(context).textTheme.headlineMedium!;
+    final TextStyle expectedTitleStyle = Theme.of(context).textTheme.headlineMedium;
 
     // There are two Text widgets: expanded and collapsed. The expanded is first.
     final Finder titleFinder = find.text(title).first;

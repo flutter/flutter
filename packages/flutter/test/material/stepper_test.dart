@@ -1404,9 +1404,9 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
         home: Material(
           child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-            bodyLargeStyle = Theme.of(context).textTheme.bodyLarge!;
-            bodyMediumStyle = Theme.of(context).textTheme.bodyMedium!;
-            bodySmallStyle = Theme.of(context).textTheme.bodySmall!;
+            bodyLargeStyle = Theme.of(context).textTheme.bodyLarge;
+            bodyMediumStyle = Theme.of(context).textTheme.bodyMedium;
+            bodySmallStyle = Theme.of(context).textTheme.bodySmall;
             return Stepper(
               type: StepperType.horizontal,
               currentStep: index,

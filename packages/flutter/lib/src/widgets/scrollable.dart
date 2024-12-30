@@ -496,7 +496,7 @@ class Scrollable extends StatefulWidget {
     while (scrollable != null) {
       final List<Future<void>> newFutures;
       (newFutures, scrollable) = scrollable._performEnsureVisible(
-        context.findRenderObject()!,
+        context.findRenderObject(),
         alignment: alignment,
         duration: duration,
         curve: curve,
@@ -1293,7 +1293,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     if (currentSelectionStartIndex != -1 && (_currentDragStartRelatedToOrigin == null || forceUpdateStart)) {
       final SelectionGeometry geometry = selectables[currentSelectionStartIndex].value;
       assert(geometry.hasSelection);
-      final SelectionPoint start = geometry.startSelectionPoint!;
+      final SelectionPoint start = geometry.startSelectionPoint;
       final Matrix4 childTransform = selectables[currentSelectionStartIndex].getTransformTo(box);
       final Offset localDragStart = MatrixUtils.transformPoint(
         childTransform,
@@ -1304,7 +1304,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     if (currentSelectionEndIndex != -1 && (_currentDragEndRelatedToOrigin == null || forceUpdateEnd)) {
       final SelectionGeometry geometry = selectables[currentSelectionEndIndex].value;
       assert(geometry.hasSelection);
-      final SelectionPoint end = geometry.endSelectionPoint!;
+      final SelectionPoint end = geometry.endSelectionPoint;
       final Matrix4 childTransform = selectables[currentSelectionEndIndex].getTransformTo(box);
       final Offset localDragEnd = MatrixUtils.transformPoint(
         childTransform,
@@ -1378,7 +1378,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       edge = selectable.value.startSelectionPoint;
       lineHeight = selectable.value.startSelectionPoint?.lineHeight;
     }
-    if (lineHeight == null || edge == null) {
+    if (edge == null) {
       return;
     }
     final RenderBox scrollableBox = state.context.findRenderObject()! as RenderBox;
@@ -1645,7 +1645,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
     (_innerNode ??= SemanticsNode(showOnScreen: showOnScreen)).rect = node.rect;
 
     int? firstVisibleIndex;
-    final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode!];
+    final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
     final List<SemanticsNode> included = <SemanticsNode>[];
     for (final SemanticsNode child in children) {
       assert(child.isTagged(RenderViewport.useTwoPaneSemantics));

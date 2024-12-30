@@ -180,7 +180,7 @@ void main() {
     await tester.pumpWidget(buildBoilerPlate(
       Text('dummy', key: key),
     ));
-    final BuildContext textContext = key.currentContext!;
+    final BuildContext textContext = key.currentContext;
 
     // This should not throw error.
     final Router<dynamic>? router = Router.maybeOf(textContext);
@@ -1571,7 +1571,7 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
       routeInformationProvider: provider,
       routeInformationParser: CustomRouteInformationParser((RouteInformation information, BuildContext context) {
         parserCalled = true;
-        final DefaultTextStyle style = context.getInheritedWidgetOfExactType<DefaultTextStyle>()!;
+        final DefaultTextStyle style = context.getInheritedWidgetOfExactType<DefaultTextStyle>();
         return RouteInformation(uri: Uri.parse('${style.maxLines}'));
       }),
       routerDelegate: delegate,

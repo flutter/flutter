@@ -499,8 +499,8 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     // slow-path to be noticeable in the construction site of Material.
     if (widget.type == MaterialType.canvas && shape == null) {
       final Color color = theme.useMaterial3
-        ? ElevationOverlay.applySurfaceTint(backgroundColor!, widget.surfaceTintColor, widget.elevation)
-        : ElevationOverlay.applyOverlay(context, backgroundColor!, widget.elevation);
+        ? ElevationOverlay.applySurfaceTint(backgroundColor, widget.surfaceTintColor, widget.elevation)
+        : ElevationOverlay.applyOverlay(context, backgroundColor, widget.elevation);
 
       return AnimatedPhysicalModel(
         curve: Curves.fastOutSlowIn,
@@ -540,7 +540,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       borderOnForeground: widget.borderOnForeground,
       clipBehavior: widget.clipBehavior,
       elevation: widget.elevation,
-      color: backgroundColor!,
+      color: backgroundColor,
       shadowColor: modelShadowColor,
       surfaceTintColor: widget.surfaceTintColor,
       child: contents,
@@ -911,12 +911,12 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
 
   @override
   Widget build(BuildContext context) {
-    final ShapeBorder shape = _border!.evaluate(animation)!;
+    final ShapeBorder shape = _border!.evaluate(animation);
     final double elevation = _elevation!.evaluate(animation);
     final Color color = Theme.of(context).useMaterial3
       ? ElevationOverlay.applySurfaceTint(widget.color, _surfaceTintColor?.evaluate(animation), elevation)
       : ElevationOverlay.applyOverlay(context, widget.color, elevation);
-    final Color shadowColor = _shadowColor!.evaluate(animation)!;
+    final Color shadowColor = _shadowColor!.evaluate(animation);
 
     return PhysicalShape(
       clipper: ShapeBorderClipper(

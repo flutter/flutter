@@ -158,7 +158,7 @@ abstract class Repository {
     }
 
     _checkoutDirectory = parentDirectory.childDirectory(name);
-    await lazilyInitialize(_checkoutDirectory!);
+    await lazilyInitialize(_checkoutDirectory);
 
     return _checkoutDirectory!;
   }

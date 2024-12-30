@@ -1131,7 +1131,7 @@ void main() {
       return tester.firstWidget<IconTheme>(find.ancestor(
         of: find.byIcon(icon),
         matching: find.byType(IconTheme),
-      )).data.color!;
+      )).data.color;
     }
 
     // Test unselected state.

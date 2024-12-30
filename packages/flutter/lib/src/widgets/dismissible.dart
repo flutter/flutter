@@ -100,7 +100,7 @@ class Dismissible extends StatefulWidget {
   /// dismissed item. Using keys causes the widgets to sync according to their
   /// keys and avoids this pitfall.
   const Dismissible({
-    required Key super.key,
+    required super.key,
     required this.child,
     this.background,
     this.secondaryBackground,
@@ -360,7 +360,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   double get _dismissThreshold => widget.dismissThresholds[_dismissDirection] ?? _kDismissThreshold;
 
   double get _overallDragAxisExtent {
-    final Size size = context.size!;
+    final Size size = context.size;
     return _directionIsXAxis ? size.width : size.height;
   }
 
@@ -640,7 +640,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       }());
 
       return SizeTransition(
-        sizeFactor: _resizeAnimation!,
+        sizeFactor: _resizeAnimation,
         axis: _directionIsXAxis ? Axis.vertical : Axis.horizontal,
         child: SizedBox(
           width: _sizePriorToCollapse!.width,

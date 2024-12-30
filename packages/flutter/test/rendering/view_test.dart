@@ -42,7 +42,7 @@ void main() {
       final PipelineOwner owner = PipelineOwner();
       view.attach(owner);
       view.prepareInitialFrame();
-      final ContainerLayer firstLayer = view.debugLayer!;
+      final ContainerLayer firstLayer = view.debugLayer;
       view.configuration = createViewConfiguration();
       expect(identical(view.debugLayer, firstLayer), true);
 
@@ -58,7 +58,7 @@ void main() {
       final PipelineOwner owner = PipelineOwner();
       view.attach(owner);
       view.prepareInitialFrame();
-      final ContainerLayer firstLayer = view.debugLayer!;
+      final ContainerLayer firstLayer = view.debugLayer;
       view.configuration = createViewConfiguration(size: const Size(100.0, 1117.0));
       expect(identical(view.debugLayer, firstLayer), true);
     });

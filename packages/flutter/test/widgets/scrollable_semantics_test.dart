@@ -616,7 +616,7 @@ void main() {
 
     final SemanticsNode rootScrollNode = semantics.nodesWith(actions: <SemanticsAction>[SemanticsAction.scrollUp]).single;
     final SemanticsNode innerListPane = semantics.nodesWith(ancestor: rootScrollNode, scrollExtentMax: 0).single;
-    final SemanticsNode outerListPane = innerListPane.parent!;
+    final SemanticsNode outerListPane = innerListPane.parent;
     final List<SemanticsNode> hiddenNodes = semantics.nodesWith(flags: <SemanticsFlag>[SemanticsFlag.isHidden]).toList();
 
     // This test is only valid if some children are offscreen.

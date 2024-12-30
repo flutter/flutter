@@ -346,7 +346,7 @@ class AnimationController extends Animation<double>
 
   /// Recreates the [Ticker] with the new [TickerProvider].
   void resync(TickerProvider vsync) {
-    final Ticker oldTicker = _ticker!;
+    final Ticker oldTicker = _ticker;
     _ticker = vsync.createTicker(_tick);
     _ticker!.absorbTicker(oldTicker);
   }

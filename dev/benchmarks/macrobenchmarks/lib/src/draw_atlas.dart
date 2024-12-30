@@ -56,7 +56,7 @@ class _DrawAtlasPageState extends State<DrawAtlasPage> with SingleTickerProvider
     }
     return CustomPaint(
       size: const Size(500, 500),
-      painter: VerticesPainter(tick, image!),
+      painter: VerticesPainter(tick, image),
       child: Container(),
     );
   }

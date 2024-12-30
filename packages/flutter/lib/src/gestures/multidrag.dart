@@ -149,7 +149,7 @@ abstract class MultiDragPointerState {
     _client = client;
     final DragUpdateDetails details = DragUpdateDetails(
       sourceTimeStamp: _lastPendingEventTimestamp,
-      delta: pendingDelta!,
+      delta: pendingDelta,
       globalPosition: initialPosition,
     );
     _pendingDelta = null;

@@ -135,7 +135,7 @@ Color _getPixel(ByteData bytes, int x, int y, int width) {
 
 Future<void> _expectColors(WidgetTester tester, Finder finder, Set<Color> allowedColors, [ Map<Offset, Color>? spotChecks ]) async {
   final TestWidgetsFlutterBinding binding = tester.binding;
-  final ui.Image image = (await binding.runAsync<ui.Image>(() => captureImage(finder.evaluate().single)))!;
+  final ui.Image image = (await binding.runAsync<ui.Image>(() => captureImage(finder.evaluate().single)));
   addTearDown(image.dispose);
   final ByteData bytes = (await binding.runAsync<ByteData?>(() => image.toByteData(format: ui.ImageByteFormat.rawStraightRgba)))!;
   final Set<int> actualColorValues = <int>{};

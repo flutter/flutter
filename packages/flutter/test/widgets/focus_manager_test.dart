@@ -17,7 +17,7 @@ void main() {
   final GlobalKey widgetKey = GlobalKey();
   Future<BuildContext> setupWidget(WidgetTester tester) async {
     await tester.pumpWidget(Container(key: widgetKey));
-    return widgetKey.currentContext!;
+    return widgetKey.currentContext;
   }
 
   group(FocusNode, () {

@@ -2483,7 +2483,7 @@ abstract class RenderBox extends RenderObject {
         ]);
       }
       // verify that the size is within the constraints
-      if (!constraints.isSatisfiedBy(_size!)) {
+      if (!constraints.isSatisfiedBy(_size)) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('$runtimeType does not meet its constraints.'),
           DiagnosticsProperty<BoxConstraints>('Constraints', constraints, style: DiagnosticsTreeStyle.errorProperty),

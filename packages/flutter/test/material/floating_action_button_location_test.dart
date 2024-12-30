@@ -1617,7 +1617,7 @@ class _GeometryListenerState extends State<_GeometryListener> {
 
     geometryListenable?.removeListener(onGeometryChanged);
     geometryListenable = newListenable..addListener(onGeometryChanged);
-    cache = _GeometryCachePainter(geometryListenable!);
+    cache = _GeometryCachePainter(geometryListenable);
   }
 
   void onGeometryChanged() {

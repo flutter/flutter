@@ -594,7 +594,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
           ),
           focusColor,
           reactionFocusFade.value,
-        )!;
+        );
       final Animatable<double> radialReactionRadiusTween = Tween<double>(
         begin: 0.0,
         end: splashRadius,

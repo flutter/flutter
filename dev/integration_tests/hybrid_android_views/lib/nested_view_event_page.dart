@@ -209,6 +209,6 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
       viewChannel = MethodChannel('simple_view/$id');
     });
     driverDataHandler.registerHandler('hierarchy')
-      .complete(() async => (await channel.invokeMethod<String>('getViewHierarchy'))!);
+      .complete(() async => (await channel.invokeMethod<String>('getViewHierarchy')));
   }
 }

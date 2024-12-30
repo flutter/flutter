@@ -56,7 +56,7 @@ class _DrawVerticesPageState extends State<DrawVerticesPage> with SingleTickerPr
     }
     return CustomPaint(
       size: const Size(500, 500),
-      painter: VerticesPainter(tick, image!),
+      painter: VerticesPainter(tick, image),
       child: Container(),
     );
   }

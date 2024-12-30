@@ -192,10 +192,10 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
     assert(route.popGestureEnabled);
 
     return _CupertinoBackGestureController<T>(
-      navigator: route.navigator!,
+      navigator: route.navigator,
       getIsCurrent: () => route.isCurrent,
       getIsActive: () => route.isActive,
-      controller: route.controller!, // protected access
+      controller: route.controller, // protected access
     );
   }
 
@@ -935,10 +935,10 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
       return a;
     }
     if (a == null) {
-      return b!._colors == null ? b : _CupertinoEdgeShadowDecoration._(b._colors!.map<Color>((Color color) => Color.lerp(null, color, t)!).toList());
+      return b!._colors == null ? b : _CupertinoEdgeShadowDecoration._(b._colors!.map<Color>((Color color) => Color.lerp(null, color, t)).toList());
     }
     if (b == null) {
-      return a._colors == null ? a : _CupertinoEdgeShadowDecoration._(a._colors.map<Color>((Color color) => Color.lerp(null, color, 1.0 - t)!).toList());
+      return a._colors == null ? a : _CupertinoEdgeShadowDecoration._(a._colors.map<Color>((Color color) => Color.lerp(null, color, 1.0 - t)).toList());
     }
     assert(b._colors != null || a._colors != null);
     // If it ever becomes necessary, we could allow decorations with different
@@ -1049,7 +1049,7 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
         bandColorIndex += 1;
       }
       final Paint paint = Paint()
-        ..color = Color.lerp(colors[bandColorIndex], colors[bandColorIndex + 1], (dx % bandWidth) / bandWidth)!;
+        ..color = Color.lerp(colors[bandColorIndex], colors[bandColorIndex + 1], (dx % bandWidth) / bandWidth);
       final double x = start + shadowDirection * dx;
       canvas.drawRect(Rect.fromLTWH(x - 1.0, offset.dy, 1.0, shadowHeight), paint);
     }
@@ -1444,7 +1444,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
       );
     }
 
-    final CurvedAnimation fadeAnimation = _fadeAnimation!;
+    final CurvedAnimation fadeAnimation = _fadeAnimation;
 
     if (animation.status == AnimationStatus.reverse) {
       return FadeTransition(

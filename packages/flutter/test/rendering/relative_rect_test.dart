@@ -64,7 +64,7 @@ void main() {
   test('RelativeRect.lerp', () {
     const RelativeRect r1 = RelativeRect.fill;
     const RelativeRect r2 = RelativeRect.fromLTRB(10.0, 20.0, 30.0, 40.0);
-    final RelativeRect r3 = RelativeRect.lerp(r1, r2, 0.5)!;
+    final RelativeRect r3 = RelativeRect.lerp(r1, r2, 0.5);
     expect(r3, const RelativeRect.fromLTRB(5.0, 10.0, 15.0, 20.0));
   });
   test('RelativeRect.lerp identical a,b', () {

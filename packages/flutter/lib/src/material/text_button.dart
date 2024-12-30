@@ -92,7 +92,7 @@ class TextButton extends ButtonStyleButton {
     super.clipBehavior,
     super.statesController,
     super.isSemanticButton,
-    required Widget super.child,
+    required super.child,
     super.iconAlignment,
   });
 
@@ -226,11 +226,11 @@ class TextButton extends ButtonStyleButton {
     ButtonLayerBuilder? foregroundBuilder,
   }) {
     final MaterialStateProperty<Color?>? backgroundColorProp = switch ((backgroundColor, disabledBackgroundColor)) {
-      (_?, null) => MaterialStatePropertyAll<Color?>(backgroundColor),
+      (_, null) => MaterialStatePropertyAll<Color?>(backgroundColor),
       (_, _) => ButtonStyleButton.defaultColor(backgroundColor, disabledBackgroundColor),
     };
     final MaterialStateProperty<Color?>? iconColorProp = switch ((iconColor, disabledIconColor)) {
-      (_?, null) => MaterialStatePropertyAll<Color?>(iconColor),
+      (_, null) => MaterialStatePropertyAll<Color?>(iconColor),
       (_, _) => ButtonStyleButton.defaultColor(iconColor, disabledIconColor),
     };
     final MaterialStateProperty<Color?>? overlayColorProp = switch ((foregroundColor, overlayColor)) {

@@ -83,7 +83,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
   Widget build(BuildContext context) {
     return NavigatorPopHandler(
       onPop: () {
-        final NavigatorState navigator = navigatorKeys[selectedIndex].currentState!;
+        final NavigatorState navigator = navigatorKeys[selectedIndex].currentState;
         navigator.pop();
       },
       child: Scaffold(
@@ -159,7 +159,7 @@ class RootPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle headlineSmall = Theme.of(context).textTheme.headlineSmall!;
+    final TextStyle headlineSmall = Theme.of(context).textTheme.headlineSmall;
     final ButtonStyle buttonStyle = ElevatedButton.styleFrom(
       backgroundColor: destination.color,
       foregroundColor: Colors.white,

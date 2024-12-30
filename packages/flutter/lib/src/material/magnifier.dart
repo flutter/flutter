@@ -167,7 +167,7 @@ class _TextMagnifierState extends State<TextMagnifier> {
 
     // The insets, from either edge, that the focal point should not point
     // past lest the magnifier displays something out of bounds.
-    final double horizontalMaxFocalPointEdgeInsets =
+    const double horizontalMaxFocalPointEdgeInsets =
         (Magnifier.kDefaultMagnifierSize.width / 2) / Magnifier._magnification;
 
     // Adjust the focal point horizontally such that none of the magnifier

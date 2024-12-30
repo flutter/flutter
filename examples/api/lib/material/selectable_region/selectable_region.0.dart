@@ -66,7 +66,7 @@ class _SelectableAdapter extends SingleChildRenderObjectWidget {
   @override
   _RenderSelectableAdapter createRenderObject(BuildContext context) {
     return _RenderSelectableAdapter(
-      DefaultSelectionStyle.of(context).selectionColor!,
+      DefaultSelectionStyle.of(context).selectionColor,
       registrar,
     );
   }
@@ -74,7 +74,7 @@ class _SelectableAdapter extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, _RenderSelectableAdapter renderObject) {
     renderObject
-      ..selectionColor = DefaultSelectionStyle.of(context).selectionColor!
+      ..selectionColor = DefaultSelectionStyle.of(context).selectionColor
       ..registrar = registrar;
   }
 }

@@ -1407,7 +1407,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       selectedIndex: _selectedIndex ?? 0,
       elevation: widget.elevation,
       capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
-      style: _textStyle!,
+      style: _textStyle,
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       itemHeight: widget.itemHeight,
       menuWidth: widget.menuWidth,

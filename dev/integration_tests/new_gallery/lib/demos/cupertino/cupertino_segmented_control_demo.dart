@@ -30,7 +30,7 @@ class _CupertinoSegmentedControlDemoState
 
   void onValueChanged(int? newValue) {
     setState(() {
-      currentSegment.value = newValue!;
+      currentSegment.value = newValue;
     });
   }
 

@@ -228,7 +228,7 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
       final double centeredRowTitleX = rowTitleX + (rowTitleWidth - titleSize.width) / 2.0;
       final Offset columnTitleOrigin = Offset(columnTitleX, columnTitleY);
       final Offset rowTitleOrigin = Offset(centeredRowTitleX, rowTitleY);
-      final Offset titleOrigin = _interpolatePoint(columnTitleOrigin, rowTitleOrigin)!;
+      final Offset titleOrigin = _interpolatePoint(columnTitleOrigin, rowTitleOrigin);
       positionChild('title$index', titleOrigin + offset);
 
       // Layout the selection indicator for index.
@@ -240,7 +240,7 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
       final double centeredRowIndicatorX = rowIndicatorX + (rowIndicatorWidth - indicatorSize.width) / 2.0;
       final double rowIndicatorY = titleRect.bottomCenter.dy + 16.0;
       final Offset rowIndicatorOrigin = Offset(centeredRowIndicatorX, rowIndicatorY);
-      final Offset indicatorOrigin = _interpolatePoint(columnIndicatorOrigin, rowIndicatorOrigin)!;
+      final Offset indicatorOrigin = _interpolatePoint(columnIndicatorOrigin, rowIndicatorOrigin);
       positionChild('indicator$index', indicatorOrigin + offset);
 
       columnCardY += columnCardHeight;

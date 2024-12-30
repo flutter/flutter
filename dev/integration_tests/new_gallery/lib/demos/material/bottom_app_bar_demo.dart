@@ -62,7 +62,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo>
 
   void _onFabLocationChanged(int? value) {
     setState(() {
-      _currentFabLocation.value = value!;
+      _currentFabLocation.value = value;
     });
   }
 

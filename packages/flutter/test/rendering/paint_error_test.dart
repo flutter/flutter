@@ -18,7 +18,7 @@ void main() {
     late FlutterErrorDetails errorDetails;
     final RenderBox root = TestReentrantPaintingErrorRenderBox();
     layout(root, onErrors: () {
-      errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;
+      errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails();
     });
     pumpFrame(phase: EnginePhase.paint);
 

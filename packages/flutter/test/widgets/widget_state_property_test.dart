@@ -82,7 +82,7 @@ void main() {
       textStyle2,
       0.0,
       TextStyle.lerp,
-    )!.resolve(enabled)!;
+    )!.resolve(enabled);
     expect(textStyle.fontSize, 14.0);
 
     // Using `0.5` interpolation value.
@@ -91,7 +91,7 @@ void main() {
       textStyle2,
       0.5,
       TextStyle.lerp,
-    )!.resolve(enabled)!;
+    )!.resolve(enabled);
     expect(textStyle.fontSize, 17.0);
 
     // Using `1.0` interpolation value.
@@ -100,7 +100,7 @@ void main() {
       textStyle2,
       1.0,
       TextStyle.lerp,
-    )!.resolve(enabled)!;
+    )!.resolve(enabled);
     expect(textStyle.fontSize, 20.0);
   });
 
@@ -123,7 +123,7 @@ void main() {
       borderSide1,
       borderSide2,
       0.0,
-    )!.resolve(enabled)!;
+    )!.resolve(enabled);
     expect(borderSide.color, isSameColorAs(const Color(0xffff0000)));
     expect(borderSide.width, 4.0);
 
@@ -132,7 +132,7 @@ void main() {
       borderSide1,
       borderSide2,
       0.5,
-    )!.resolve(enabled)!;
+    )!.resolve(enabled);
     expect(borderSide.color, isSameColorAs(const Color(0xff7f007f)));
     expect(borderSide.width, 8.0);
 
@@ -141,7 +141,7 @@ void main() {
       borderSide1,
       borderSide2,
       1.0,
-    )!.resolve(enabled)!;
+    )!.resolve(enabled);
     expect(borderSide.color, isSameColorAs(const Color(0xff0000ff)));
     expect(borderSide.width, 12.0);
   });

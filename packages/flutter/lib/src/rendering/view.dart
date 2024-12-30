@@ -459,7 +459,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     // navigation bar style using only one annotated region layer (for instance the one
     // automatically created by an [AppBar]).
     final bool isAndroid = defaultTargetPlatform == TargetPlatform.android;
-    final SystemUiOverlayStyle definedOverlayStyle = (upperOverlayStyle ?? lowerOverlayStyle)!;
+    final SystemUiOverlayStyle definedOverlayStyle = (upperOverlayStyle ?? lowerOverlayStyle);
     final SystemUiOverlayStyle overlayStyle = SystemUiOverlayStyle(
       statusBarBrightness: definedOverlayStyle.statusBarBrightness,
       statusBarIconBrightness: definedOverlayStyle.statusBarIconBrightness,

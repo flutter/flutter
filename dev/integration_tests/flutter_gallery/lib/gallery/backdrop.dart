@@ -270,9 +270,9 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             _BackAppBar(
-              leading: widget.frontAction!,
+              leading: widget.frontAction,
               title: _CrossFadeTransition(
-                progress: _controller!,
+                progress: _controller,
                 alignment: AlignmentDirectional.centerStart,
                 child0: Semantics(namesRoute: true, child: widget.frontTitle),
                 child1: Semantics(namesRoute: true, child: widget.backTitle),

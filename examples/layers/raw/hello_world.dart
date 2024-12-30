@@ -46,7 +46,7 @@ void beginFrame(Duration timeStamp) {
 void main() {
   // TODO(goderbauer): Create a window if embedder doesn't provide an implicit view to draw into.
   assert(ui.PlatformDispatcher.instance.implicitView != null);
-  view = ui.PlatformDispatcher.instance.implicitView!;
+  view = ui.PlatformDispatcher.instance.implicitView;
 
   // The engine calls onBeginFrame whenever it wants us to produce a frame.
   ui.PlatformDispatcher.instance.onBeginFrame = beginFrame;

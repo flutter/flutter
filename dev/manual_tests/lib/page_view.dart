@@ -34,7 +34,7 @@ class PageViewAppState extends State<PageViewApp> {
 
     cardModels = List<CardModel>.generate(cardSizes.length, (int i) {
       final Color? color = Color.lerp(Colors.red.shade300, Colors.blue.shade900, i / cardSizes.length);
-      return CardModel(i, cardSizes[i], color!);
+      return CardModel(i, cardSizes[i], color);
     });
   }
 

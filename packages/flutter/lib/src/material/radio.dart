@@ -583,7 +583,7 @@ class _RadioPainter extends ToggleablePainter {
 
     // Outer circle
     final Paint paint = Paint()
-      ..color = Color.lerp(inactiveColor, activeColor, position.value)!
+      ..color = Color.lerp(inactiveColor, activeColor, position.value)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
     canvas.drawCircle(center, _kOuterRadius, paint);

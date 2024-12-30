@@ -190,7 +190,7 @@ void main() {
     image = await boundary.toImage();
     expect(image.width, equals(20));
     expect(image.height, equals(20));
-    ByteData data = (await image.toByteData())!;
+    ByteData data = (await image.toByteData());
 
     int getPixel(int x, int y) => data.getUint32((x + y * image.width) * 4);
 
@@ -204,7 +204,7 @@ void main() {
     image = await layer.toImage(Offset.zero & const Size(20.0, 20.0));
     expect(image.width, equals(20));
     expect(image.height, equals(20));
-    data = (await image.toByteData())!;
+    data = (await image.toByteData());
     expect(getPixel(0, 0), equals(0x00000080));
     expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
 
@@ -212,7 +212,7 @@ void main() {
     image = await layer.toImage(const Offset(-10.0, -10.0) & const Size(30.0, 30.0));
     expect(image.width, equals(30));
     expect(image.height, equals(30));
-    data = (await image.toByteData())!;
+    data = (await image.toByteData());
     expect(getPixel(0, 0), equals(0x00000000));
     expect(getPixel(10, 10), equals(0x00000080));
     expect(getPixel(image.width - 1, 0), equals(0x00000000));
@@ -222,7 +222,7 @@ void main() {
     image = await layer.toImage(const Offset(-10.0, -10.0) & const Size(30.0, 30.0), pixelRatio: 2.0);
     expect(image.width, equals(60));
     expect(image.height, equals(60));
-    data = (await image.toByteData())!;
+    data = (await image.toByteData());
     expect(getPixel(0, 0), equals(0x00000000));
     expect(getPixel(20, 20), equals(0x00000080));
     expect(getPixel(image.width - 1, 0), equals(0x00000000));
@@ -278,7 +278,7 @@ void main() {
     image = boundary.toImageSync();
     expect(image.width, equals(20));
     expect(image.height, equals(20));
-    ByteData data = (await image.toByteData())!;
+    ByteData data = (await image.toByteData());
 
     int getPixel(int x, int y) => data.getUint32((x + y * image.width) * 4);
 
@@ -292,7 +292,7 @@ void main() {
     image = layer.toImageSync(Offset.zero & const Size(20.0, 20.0));
     expect(image.width, equals(20));
     expect(image.height, equals(20));
-    data = (await image.toByteData())!;
+    data = (await image.toByteData());
     expect(getPixel(0, 0), equals(0x00000080));
     expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
 
@@ -300,7 +300,7 @@ void main() {
     image = layer.toImageSync(const Offset(-10.0, -10.0) & const Size(30.0, 30.0));
     expect(image.width, equals(30));
     expect(image.height, equals(30));
-    data = (await image.toByteData())!;
+    data = (await image.toByteData());
     expect(getPixel(0, 0), equals(0x00000000));
     expect(getPixel(10, 10), equals(0x00000080));
     expect(getPixel(image.width - 1, 0), equals(0x00000000));
@@ -310,7 +310,7 @@ void main() {
     image = layer.toImageSync(const Offset(-10.0, -10.0) & const Size(30.0, 30.0), pixelRatio: 2.0);
     expect(image.width, equals(60));
     expect(image.height, equals(60));
-    data = (await image.toByteData())!;
+    data = (await image.toByteData());
     expect(getPixel(0, 0), equals(0x00000000));
     expect(getPixel(20, 20), equals(0x00000080));
     expect(getPixel(image.width - 1, 0), equals(0x00000000));
@@ -1083,7 +1083,7 @@ class RenderFancyProxyBox extends RenderFancyBox
 }
 
 void expectAssertionError() {
-  final FlutterErrorDetails errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;
+  final FlutterErrorDetails errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails();
   final bool asserted = errorDetails.toString().contains('Failed assertion');
   if (!asserted) {
     FlutterError.reportError(errorDetails);

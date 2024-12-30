@@ -150,7 +150,7 @@ void main() {
     expect(parentData!.offset.dy, -(viewHeight / 2.0));
     expect(test.calls, 2); // The layout constraints change will clear the cached data.
 
-    final RenderObject parent = test.parent!;
+    final RenderObject parent = test.parent;
     expect(parent.debugNeedsLayout, false);
 
     // Do not forget notify parent dirty after the cached data be cleared by `layout()`

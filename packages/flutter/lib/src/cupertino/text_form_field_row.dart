@@ -363,7 +363,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
   void reset() {
     // Set the controller value before calling super.reset() to let
     // _handleControllerChanged suppress the change.
-    _effectiveController.text = widget.initialValue!;
+    _effectiveController.text = widget.initialValue;
     super.reset();
     _cupertinoTextFormFieldRow.onChanged?.call(_effectiveController.text);
   }

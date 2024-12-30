@@ -68,7 +68,7 @@ class DialogDemoState extends State<DialogDemo> {
   void showDemoDialog<T>({ required BuildContext context, Widget? child }) {
     showDialog<T>(
       context: context,
-      builder: (BuildContext context) => child!,
+      builder: (BuildContext context) => child,
     )
     .then((T? value) { // The value passed to Navigator.pop() or null.
       if (context.mounted && value != null) {

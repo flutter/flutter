@@ -134,7 +134,7 @@ class BackgroundWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = LogoModel.backgroundColorOf(context)!;
+    final Color color = LogoModel.backgroundColorOf(context);
 
     return AnimatedContainer(
       padding: const EdgeInsets.all(12.0),

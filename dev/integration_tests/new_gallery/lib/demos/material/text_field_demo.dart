@@ -165,7 +165,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
       _UsNumberTextInputFormatter();
 
   void _handleSubmitted() {
-    final FormState form = _formKey.currentState!;
+    final FormState form = _formKey.currentState;
     if (!form.validate()) {
       _autoValidateModeIndex.value =
           AutovalidateMode.always.index; // Start validating on every change.
@@ -200,7 +200,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo>
   }
 
   String? _validatePassword(String? value) {
-    final FormFieldState<String> passwordField = _passwordFieldKey.currentState!;
+    final FormFieldState<String> passwordField = _passwordFieldKey.currentState;
     if (passwordField.value == null || passwordField.value!.isEmpty) {
       return GalleryLocalizations.of(context)!.demoTextFieldEnterPassword;
     }

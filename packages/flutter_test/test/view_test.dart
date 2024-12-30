@@ -12,8 +12,8 @@ import 'utils/fake_and_mock_utils.dart';
 
 void main() {
   group('TestFlutterView', () {
-    FlutterView trueImplicitView() => PlatformDispatcher.instance.implicitView!;
-    FlutterView boundImplicitView() => WidgetsBinding.instance.platformDispatcher.implicitView!;
+    FlutterView trueImplicitView() => PlatformDispatcher.instance.implicitView;
+    FlutterView boundImplicitView() => WidgetsBinding.instance.platformDispatcher.implicitView;
 
     tearDown(() {
       final TestFlutterView view = (WidgetsBinding.instance as TestWidgetsFlutterBinding).platformDispatcher.views.single;

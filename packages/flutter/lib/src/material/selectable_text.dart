@@ -213,7 +213,7 @@ class SelectableText extends StatefulWidget {
   /// The [TextSpan.children] attribute of the [textSpan] parameter must only
   /// contain [TextSpan]s. Other types of [InlineSpan] are not allowed.
   const SelectableText.rich(
-    TextSpan this.textSpan, {
+    this.textSpan, {
     super.key,
     this.focusNode,
     this.style,

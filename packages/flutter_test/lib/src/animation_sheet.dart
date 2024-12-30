@@ -380,9 +380,9 @@ class _RenderRootableRepaintBoundary extends RenderRepaintBoundary {
   }
 
   TransformLayer _rootLayer() {
-    Layer layer = this.layer!;
+    Layer layer = this.layer;
     while (layer.parent != null) {
-      layer = layer.parent!;
+      layer = layer.parent;
     }
     return layer as TransformLayer;
   }

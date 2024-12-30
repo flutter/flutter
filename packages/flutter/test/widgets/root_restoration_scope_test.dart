@@ -292,7 +292,7 @@ void main() {
     final BucketSpyState state = tester.state(find.byType(BucketSpy));
     state.bucket!.write('foo', 42);
     expect((((firstRawData[childrenMapKey] as Map<Object?, Object?>)['root-child']! as Map<String, dynamic>)[valuesMapKey] as Map<Object?, Object?>)['foo'], 42);
-    final RestorationBucket firstBucket = state.bucket!;
+    final RestorationBucket firstBucket = state.bucket;
 
     // Replace with new root.
     final Map<String, dynamic> secondRawData = <String, dynamic>{

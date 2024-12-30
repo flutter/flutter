@@ -469,7 +469,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 
     if (backgroundColor != null) {
       final Paint backgroundPaint = Paint()
-        ..color = backgroundColor!
+        ..color = backgroundColor
         ..strokeWidth = strokeWidth
         ..style = PaintingStyle.stroke;
       canvas.drawArc(

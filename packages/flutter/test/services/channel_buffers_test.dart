@@ -33,7 +33,7 @@ void main() {
     ui.channelBuffers.push(channel, data, callback);
     bool didDrainData = false;
     binding.defaultBinaryMessenger.setMessageHandler(channel, (ByteData? message) async {
-      expect(getString(message!), payload);
+      expect(getString(message), payload);
       didDrainData = true;
       return null;
     });

@@ -23,8 +23,8 @@ class SectionCard extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: <Color>[
-              section.leftColor!,
-              section.rightColor!,
+              section.leftColor,
+              section.rightColor,
             ],
           ),
         ),

@@ -246,7 +246,7 @@ class ModalBarrier extends StatelessWidget {
         child: ConstrainedBox(
         constraints: const BoxConstraints.expand(),
         child: color == null ? null : ColoredBox(
-          color: color!,
+          color: color,
           ),
         ),
       ),
@@ -260,7 +260,7 @@ class ModalBarrier extends StatelessWidget {
 
     if (!excluding && clipDetailsNotifier != null) {
       barrier = _SemanticsClipper(
-        clipDetailsNotifier: clipDetailsNotifier!,
+        clipDetailsNotifier: clipDetailsNotifier,
         child: barrier,
       );
     }

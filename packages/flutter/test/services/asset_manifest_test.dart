@@ -28,13 +28,13 @@ class TestAssetBundle extends AssetBundle {
   @override
   Future<ByteData> load(String key) async {
     if (key == 'AssetManifest.bin') {
-      final ByteData data = const StandardMessageCodec().encodeMessage(_binManifestData)!;
+      final ByteData data = const StandardMessageCodec().encodeMessage(_binManifestData);
       return data;
     }
 
     if (key == 'AssetManifest.bin.json') {
       // Encode the manifest data that will be used by the app
-      final ByteData data = const StandardMessageCodec().encodeMessage(_binManifestData)!;
+      final ByteData data = const StandardMessageCodec().encodeMessage(_binManifestData);
       // Simulate the behavior of NetworkAssetBundle.load here, for web tests
       return ByteData.sublistView(
         utf8.encode(

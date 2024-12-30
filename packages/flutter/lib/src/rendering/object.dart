@@ -343,7 +343,7 @@ class PaintingContext extends ClipContext {
     assert(!_isRecording);
     _currentLayer = PictureLayer(estimatedBounds);
     _recorder = RendererBinding.instance.createPictureRecorder();
-    _canvas = RendererBinding.instance.createCanvas(_recorder!);
+    _canvas = RendererBinding.instance.createCanvas(_recorder);
     _containerLayer.append(_currentLayer!);
   }
 
@@ -3572,7 +3572,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   SemanticsConfiguration get _semanticsConfiguration {
     if (_cachedSemanticsConfiguration == null) {
       _cachedSemanticsConfiguration = SemanticsConfiguration();
-      describeSemanticsConfiguration(_cachedSemanticsConfiguration!);
+      describeSemanticsConfiguration(_cachedSemanticsConfiguration);
       assert(
         !_cachedSemanticsConfiguration!.explicitChildNodes || _cachedSemanticsConfiguration!.childConfigurationsDelegate == null,
         'A SemanticsConfiguration with explicitChildNode set to true cannot have a non-null childConfigsDelegate.',
@@ -3782,7 +3782,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         if (childConfigurationsDelegate != null && fragment.config != null) {
           // This fragment need to go through delegate to determine whether it
           // merge up or not.
-          childConfigurations.add(fragment.config!);
+          childConfigurations.add(fragment.config);
           configToFragment[fragment.config!] = fragment;
         } else {
           mergeUpFragments.add(fragment);
@@ -4755,7 +4755,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
       showOnScreen: owner.showOnScreen,
       owner: owner.owner!.semanticsOwner!,
     );
-    final SemanticsNode node = owner._semantics!;
+    final SemanticsNode node = owner._semantics;
     assert(MatrixUtils.matrixEquals(node.transform, Matrix4.identity()));
     assert(node.parentSemanticsClipRect == null);
     assert(node.parentPaintClipRect == null);

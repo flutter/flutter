@@ -165,7 +165,7 @@ void main() {
                 && widget.properties.label == 'Dismiss';
           }),
         ),
-      ).child!;
+      ).child;
     }
 
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();

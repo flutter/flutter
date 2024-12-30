@@ -181,15 +181,15 @@ void main() {
         final Alignment resolvedA = a?.resolve(direction) ?? defaultValue;
         for (final AlignmentGeometry? b in offsets) {
           final Alignment resolvedB = b?.resolve(direction) ?? defaultValue;
-          approxExpect(Alignment.lerp(resolvedA, resolvedB, 0.0)!, resolvedA);
-          approxExpect(Alignment.lerp(resolvedA, resolvedB, 1.0)!, resolvedB);
+          approxExpect(Alignment.lerp(resolvedA, resolvedB, 0.0), resolvedA);
+          approxExpect(Alignment.lerp(resolvedA, resolvedB, 1.0), resolvedB);
           approxExpect((AlignmentGeometry.lerp(a, b, 0.0) ?? defaultValue).resolve(direction), resolvedA);
           approxExpect((AlignmentGeometry.lerp(a, b, 1.0) ?? defaultValue).resolve(direction), resolvedB);
           for (final double t in times) {
             assert(t > 0.0);
             assert(t < 1.0);
             final Alignment value = (AlignmentGeometry.lerp(a, b, t) ?? defaultValue).resolve(direction);
-            approxExpect(value, Alignment.lerp(resolvedA, resolvedB, t)!);
+            approxExpect(value, Alignment.lerp(resolvedA, resolvedB, t));
             final double minDX = math.min(resolvedA.x, resolvedB.x);
             final double maxDX = math.max(resolvedA.x, resolvedB.x);
             final double minDY = math.min(resolvedA.y, resolvedB.y);

@@ -179,7 +179,7 @@ Future<void> _runTests() async {
   /// serialized is 14214 bytes.
   final List<Object?> largeBuffer = _makeTestBuffer(1000);
   final ByteData largeBufferBytes =
-      const StandardMessageCodec().encodeMessage(largeBuffer)!;
+      const StandardMessageCodec().encodeMessage(largeBuffer);
   final ByteData oneMB = ByteData(1024 * 1024);
 
   const int numMessages = 2500;

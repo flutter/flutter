@@ -510,7 +510,7 @@ void main() {
   testWidgets('thumb resizes gradually on overscroll', (WidgetTester tester) async {
     const EdgeInsets padding = EdgeInsets.fromLTRB(1, 2, 3, 4);
     const Size size = Size(60, 300);
-    final double scrollExtent = size.height * 10;
+    const double scrollExtent = size.height * 10;
     final ScrollMetrics metrics = defaultMetrics.copyWith(
       minScrollExtent: 0,
       maxScrollExtent: scrollExtent,
