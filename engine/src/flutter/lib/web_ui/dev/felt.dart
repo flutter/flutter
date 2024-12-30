@@ -6,7 +6,6 @@ import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 
-import 'analyze.dart';
 import 'build.dart';
 import 'clean.dart';
 import 'exceptions.dart';
