@@ -396,12 +396,7 @@ void main() {
       () async {
         processManager.addCommand(
           const FakeCommand(
-            command: <String>[
-              'flutter_tester',
-              '--disable-vm-service',
-              '--non-interactive',
-              '',
-            ],
+            command: <String>['flutter_tester', '--disable-vm-service', '--non-interactive', ''],
             stdout: '{"success": true}\n',
           ),
         );
