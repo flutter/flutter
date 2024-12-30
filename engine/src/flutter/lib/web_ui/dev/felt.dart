@@ -18,7 +18,6 @@ import 'utils.dart';
 
 CommandRunner<bool> runner =
     CommandRunner<bool>('felt', 'Command-line utility for building and testing Flutter web engine.')
-      ..addCommand(AnalyzeCommand())
       ..addCommand(BuildCommand())
       ..addCommand(CleanCommand())
       ..addCommand(RollFallbackFontsCommand())
