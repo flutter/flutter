@@ -41,5 +41,5 @@ DART="${DART_BIN}/dart"
 
 "$DART" \
   --disable-dart-dev \
-  testing/scenario_app/bin/run_ios_tests.dart \
+  testing/ios_scenario_app/bin/run_ios_tests.dart \
   "$@"

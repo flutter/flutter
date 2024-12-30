@@ -9,18 +9,18 @@ run:
 
 ```sh
 # From the root of the engine repository
-$ ./testing/scenario_app/run_ios_tests.sh ios_debug_sim_unopt
+$ ./testing/ios_scenario_app/run_ios_tests.sh ios_debug_sim_unopt
 ```
 
 or:
 
 ```sh
 # From the root of the engine repository
-$ ./testing/scenario_app/run_ios_tests.sh ios_debug_sim_unopt_arm64
+$ ./testing/ios_scenario_app/run_ios_tests.sh ios_debug_sim_unopt_arm64
 ```
 
 To run or debug in Xcode, open the xcodeproj file located in
-`<engine_out_dir>/ios_debug_sim_unopt/scenario_app/Scenarios/Scenarios.xcodeproj`.
+`<engine_out_dir>/ios_debug_sim_unopt/ios_scenario_app/Scenarios/Scenarios.xcodeproj`.
 
 ## CI Configuration
 

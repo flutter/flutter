@@ -7,7 +7,7 @@ import("//flutter/testing/rules/runtime_mode.gni")
 
 import("$dart_src/build/dart/copy_tree.gni")
 
-_app_framework_dir = "$root_out_dir/scenario_app/Scenarios/App.framework"
+_app_framework_dir = "$root_out_dir/ios_scenario_app/Scenarios/App.framework"
 
 shared_library("app_framework_dylib") {
   visibility = [ ":*" ]
@@ -22,7 +22,7 @@ shared_library("app_framework_dylib") {
 
   ldflags = [ "-Wl,-install_name,@rpath/App.framework/App" ]
 
-  deps = [ "//flutter/testing/scenario_app:scenario_app_snapshot" ]
+  deps = [ "//flutter/testing/ios_scenario_app:ios_scenario_app_snapshot" ]
 }
 
 copy("copy_dylib") {
@@ -45,7 +45,7 @@ copy_trees("scenario_ios") {
       target = "copy_ios_xcodeproj"
       visibility = [ ":*" ]
       source = "."
-      dest = "$root_out_dir/scenario_app"
+      dest = "$root_out_dir/ios_scenario_app"
 
       # Ignore any stale App.framework or Flutter.xcframework files from
       # historical builds.
