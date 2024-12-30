@@ -64,18 +64,12 @@ void main() {
   }
 
   Finder findOverlayContents() {
-    return find.descendant(
-      of: find.byType(RawMenuPanel),
-      matching: find.byType(IntrinsicWidth),
-    );
+    return find.descendant(of: find.byType(RawMenuPanel), matching: find.byType(IntrinsicWidth));
   }
 
   T findMenuPanelDescendent<T extends Widget>(WidgetTester tester) {
     return tester.firstWidget<T>(
-      find.descendant(
-        of: find.byType(RawMenuPanel),
-        matching: find.byType(T),
-      ),
+      find.descendant(of: find.byType(RawMenuPanel), matching: find.byType(T)),
     );
   }
 
@@ -92,9 +86,9 @@ void main() {
     return results;
   }
 
-  testWidgets(
-      "[Overlays] MenuController.isOpen is true when a menu's overlay is shown",
-      (WidgetTester tester) async {
+  testWidgets("[Overlays] MenuController.isOpen is true when a menu's overlay is shown", (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       App(
         RawMenuAnchor(
@@ -118,22 +112,24 @@ void main() {
     expect(find.text(Tag.a.text), findsNothing);
   });
 
-  testWidgets(
-      '[Overlays] MenuController.open() and .close() toggle overlay visibility',
-      (WidgetTester tester) async {
+  testWidgets('[Overlays] MenuController.open() and .close() toggle overlay visibility', (
+    WidgetTester tester,
+  ) async {
     final MenuController nestedController = MenuController();
     await tester.pumpWidget(
       App(
         RawMenuAnchor(
           controller: controller,
-          panel: RawMenuPanel(menuChildren: <Widget>[
-            Text(Tag.a.text),
-            RawMenuAnchor(
-              controller: nestedController,
-              panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.b.a.text)]),
-              child: const AnchorButton(Tag.b),
-            ),
-          ]),
+          panel: RawMenuPanel(
+            menuChildren: <Widget>[
+              Text(Tag.a.text),
+              RawMenuAnchor(
+                controller: nestedController,
+                panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.b.a.text)]),
+                child: const AnchorButton(Tag.b),
+              ),
+            ],
+          ),
           child: const AnchorButton(Tag.anchor),
         ),
       ),
@@ -194,72 +190,71 @@ void main() {
     expect(find.text(Tag.b.a.text), findsNothing);
   });
 
-  testWidgets(
-    '[Overlays] MenuController.closeChildren closes submenu children',
-    (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
+  testWidgets('[Overlays] MenuController.closeChildren closes submenu children', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
-      await tester.pumpWidget(
-        App(
-          RawMenuAnchor(
-            controller: controller,
-            panel: RawMenuPanel(menuChildren: <Widget>[
+    await tester.pumpWidget(
+      App(
+        RawMenuAnchor(
+          controller: controller,
+          panel: RawMenuPanel(
+            menuChildren: <Widget>[
               Text(Tag.a.text),
               RawMenuAnchor(
                 childFocusNode: focusNode,
                 panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.b.a.text)]),
                 child: AnchorButton(Tag.b, focusNode: focusNode),
               ),
-            ]),
-            child: const AnchorButton(Tag.anchor),
+            ],
           ),
+          child: const AnchorButton(Tag.anchor),
         ),
-      );
+      ),
+    );
 
-      await tester.tap(find.text(Tag.anchor.text));
-      await tester.pump();
+    await tester.tap(find.text(Tag.anchor.text));
+    await tester.pump();
 
-      await tester.tap(find.text(Tag.b.text));
-      await tester.pump();
+    await tester.tap(find.text(Tag.b.text));
+    await tester.pump();
 
-      focusNode.requestFocus();
-      await tester.pump();
+    focusNode.requestFocus();
+    await tester.pump();
 
-      expect(find.text(Tag.b.text), findsOneWidget);
-      expect(find.text(Tag.b.a.text), findsOneWidget);
+    expect(find.text(Tag.b.text), findsOneWidget);
+    expect(find.text(Tag.b.a.text), findsOneWidget);
 
-      controller.closeChildren();
-      await tester.pump();
+    controller.closeChildren();
+    await tester.pump();
 
-      expect(controller.isOpen, isTrue);
-      expect(find.text(Tag.b.text), findsOneWidget);
-      expect(find.text(Tag.b.a.text), findsNothing);
+    expect(controller.isOpen, isTrue);
+    expect(find.text(Tag.b.text), findsOneWidget);
+    expect(find.text(Tag.b.a.text), findsNothing);
 
-      // Focus should stay on the anchor button.
-      expect(FocusManager.instance.primaryFocus, focusNode);
-    },
-  );
+    // Focus should stay on the anchor button.
+    expect(FocusManager.instance.primaryFocus, focusNode);
+  });
 
-  testWidgets('[Overlays] Can only have one open child anchor',
-      (WidgetTester tester) async {
+  testWidgets('[Overlays] Can only have one open child anchor', (WidgetTester tester) async {
     await tester.pumpWidget(
       App(
         RawMenuAnchor.overlayBuilder(
-          overlayBuilder: (
-            BuildContext context,
-            RawMenuAnchorOverlayPosition position,
-          ) {
-            return Column(children: <Widget>[
-              RawMenuAnchor(
-                panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.a.a.text)]),
-                child: const AnchorButton(Tag.a),
-              ),
-              RawMenuAnchor(
-                panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.b.a.text)]),
-                child: const AnchorButton(Tag.b),
-              ),
-            ]);
+          overlayBuilder: (BuildContext context, RawMenuAnchorOverlayPosition position) {
+            return Column(
+              children: <Widget>[
+                RawMenuAnchor(
+                  panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.a.a.text)]),
+                  child: const AnchorButton(Tag.a),
+                ),
+                RawMenuAnchor(
+                  panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.b.a.text)]),
+                  child: const AnchorButton(Tag.b),
+                ),
+              ],
+            );
           },
           child: const AnchorButton(Tag.anchor),
         ),
@@ -287,19 +282,14 @@ void main() {
     expect(find.text(Tag.b.a.text), findsOneWidget);
   });
 
-  testWidgets('[Overlays] Context menus can be nested',
-      (WidgetTester tester) async {
+  testWidgets('[Overlays] Context menus can be nested', (WidgetTester tester) async {
     await tester.pumpWidget(
       App(
         RawMenuAnchor(
           menuAlignment: AlignmentDirectional.bottomStart,
           alignment: AlignmentDirectional.topStart,
           panel: RawMenuPanel(menuChildren: <Widget>[Button.tag(Tag.a.a)]),
-          builder: (
-            BuildContext context,
-            MenuController controller,
-            Widget? child,
-          ) {
+          builder: (BuildContext context, MenuController controller, Widget? child) {
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -307,8 +297,7 @@ void main() {
                 RawMenuAnchor(
                   alignment: AlignmentDirectional.bottomStart,
                   menuAlignment: AlignmentDirectional.topStart,
-                  panel:
-                      RawMenuPanel(menuChildren: <Widget>[Button.tag(Tag.b.a)]),
+                  panel: RawMenuPanel(menuChildren: <Widget>[Button.tag(Tag.b.a)]),
                   child: const AnchorButton(Tag.b),
                 ),
               ],
@@ -329,9 +318,9 @@ void main() {
     expect(find.text(Tag.b.a.text), findsOneWidget);
   });
 
-  testWidgets(
-      '[Node] MenuController.isOpen is true when a descendent menu is open',
-      (WidgetTester tester) async {
+  testWidgets('[Node] MenuController.isOpen is true when a descendent menu is open', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       App(
         RawMenuAnchor.node(
@@ -346,8 +335,7 @@ void main() {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: RawMenuAnchor(
-                  panel:
-                      RawMenuPanel(menuChildren: <Widget>[Text(Tag.b.a.text)]),
+                  panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.b.a.text)]),
                   child: const AnchorButton(Tag.b),
                 ),
               ),
@@ -381,8 +369,7 @@ void main() {
     expect(find.text(Tag.b.a.text), findsNothing);
   });
 
-  testWidgets('[Node] MenuController.open does nothing',
-      (WidgetTester tester) async {
+  testWidgets('[Node] MenuController.open does nothing', (WidgetTester tester) async {
     final MenuController nestedController = MenuController();
     await tester.pumpWidget(
       App(
@@ -392,11 +379,7 @@ void main() {
             children: <Widget>[
               RawMenuAnchor(
                 controller: nestedController,
-                panel: RawMenuPanel(
-                  menuChildren: <Widget>[
-                    Text(Tag.b.a.text),
-                  ],
-                ),
+                panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.b.a.text)]),
                 child: const AnchorButton(Tag.b),
               ),
             ],
@@ -421,8 +404,7 @@ void main() {
     expect(find.text(Tag.b.a.text), findsNothing);
   });
 
-  testWidgets('[Node] MenuController.close closes children',
-      (WidgetTester tester) async {
+  testWidgets('[Node] MenuController.close closes children', (WidgetTester tester) async {
     final MenuController nestedController = MenuController();
     await tester.pumpWidget(
       App(
@@ -432,9 +414,7 @@ void main() {
             children: <Widget>[
               RawMenuAnchor(
                 controller: nestedController,
-                panel: RawMenuPanel(
-                  menuChildren: <Widget>[Text(Tag.b.a.text)],
-                ),
+                panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.b.a.text)]),
                 child: const AnchorButton(Tag.b),
               ),
             ],
@@ -462,8 +442,7 @@ void main() {
     expect(find.text(Tag.b.a.text), findsNothing);
   });
 
-  testWidgets('[Node] MenuController.closeChildren closes children',
-      (WidgetTester tester) async {
+  testWidgets('[Node] MenuController.closeChildren closes children', (WidgetTester tester) async {
     final MenuController nestedController = MenuController();
     await tester.pumpWidget(
       App(
@@ -473,9 +452,7 @@ void main() {
             children: <Widget>[
               RawMenuAnchor(
                 controller: nestedController,
-                panel: RawMenuPanel(
-                  menuChildren: <Widget>[Text(Tag.b.a.text)],
-                ),
+                panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.b.a.text)]),
                 child: const AnchorButton(Tag.b),
               ),
             ],
@@ -503,23 +480,20 @@ void main() {
     expect(find.text(Tag.b.a.text), findsNothing);
   });
 
-  testWidgets('[Node] Should only display one open child anchor at a time',
-      (WidgetTester tester) async {
+  testWidgets('[Node] Should only display one open child anchor at a time', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       App(
         RawMenuAnchor.node(
           child: Row(
             children: <Widget>[
               RawMenuAnchor(
-                panel: RawMenuPanel(
-                  menuChildren: <Widget>[Text(Tag.a.a.text)],
-                ),
+                panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.a.a.text)]),
                 child: const AnchorButton(Tag.a),
               ),
               RawMenuAnchor(
-                panel: RawMenuPanel(
-                  menuChildren: <Widget>[Text(Tag.b.a.text)],
-                ),
+                panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.b.a.text)]),
                 child: const AnchorButton(Tag.b),
               ),
             ],
@@ -547,105 +521,109 @@ void main() {
   });
 
   testWidgets(
-      'MenuController.maybeOf notifies dependents on open and close when createDependency is true',
-      (WidgetTester tester) async {
-    final MenuController controller = MenuController();
-    final MenuController nestedController = MenuController();
-    MenuController? panelController;
-    MenuController? overlayController;
-    MenuController? anchorController;
-    int panelBuilds = 0;
-    int anchorBuilds = 0;
-    int overlayBuilds = 0;
+    'MenuController.maybeOf notifies dependents on open and close when createDependency is true',
+    (WidgetTester tester) async {
+      final MenuController controller = MenuController();
+      final MenuController nestedController = MenuController();
+      MenuController? panelController;
+      MenuController? overlayController;
+      MenuController? anchorController;
+      int panelBuilds = 0;
+      int anchorBuilds = 0;
+      int overlayBuilds = 0;
 
-    await tester.pumpWidget(
-      App(
-        RawMenuAnchor.node(
-          child: Column(
-            children: <Widget>[
-              // Panel context.
-              Builder(builder: (BuildContext context) {
-                panelController =
-                    MenuController.maybeOf(context, createDependency: true);
-                panelBuilds += 1;
-                return Text(Tag.a.text);
-              }),
-              RawMenuAnchor(
-                controller: controller,
-                panel: RawMenuPanel(
-                  menuChildren: <Widget>[
-                    // Overlay context.
-                    Builder(builder: (BuildContext context) {
-                      overlayController = MenuController.maybeOf(context,
-                          createDependency: true);
-                      overlayBuilds += 1;
-                      return Text(Tag.b.a.a.text);
-                    }),
-                    RawMenuAnchor(
-                      controller: nestedController,
-                      panel: RawMenuPanel(
-                          menuChildren: <Widget>[Button.tag(Tag.b.a.b.a)]),
-                      child: Button.tag(Tag.b.a.b),
-                    )
-                  ],
-                ),
-                // Anchor context.
-                child: Builder(
+      await tester.pumpWidget(
+        App(
+          RawMenuAnchor.node(
+            child: Column(
+              children: <Widget>[
+                // Panel context.
+                Builder(
                   builder: (BuildContext context) {
-                    anchorController =
-                        MenuController.maybeOf(context, createDependency: true);
-                    anchorBuilds += 1;
-                    return Text(Tag.b.a.text);
+                    panelController = MenuController.maybeOf(context, createDependency: true);
+                    panelBuilds += 1;
+                    return Text(Tag.a.text);
                   },
                 ),
-              ),
-            ],
+                RawMenuAnchor(
+                  controller: controller,
+                  panel: RawMenuPanel(
+                    menuChildren: <Widget>[
+                      // Overlay context.
+                      Builder(
+                        builder: (BuildContext context) {
+                          overlayController = MenuController.maybeOf(
+                            context,
+                            createDependency: true,
+                          );
+                          overlayBuilds += 1;
+                          return Text(Tag.b.a.a.text);
+                        },
+                      ),
+                      RawMenuAnchor(
+                        controller: nestedController,
+                        panel: RawMenuPanel(menuChildren: <Widget>[Button.tag(Tag.b.a.b.a)]),
+                        child: Button.tag(Tag.b.a.b),
+                      ),
+                    ],
+                  ),
+                  // Anchor context.
+                  child: Builder(
+                    builder: (BuildContext context) {
+                      anchorController = MenuController.maybeOf(context, createDependency: true);
+                      anchorBuilds += 1;
+                      return Text(Tag.b.a.text);
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(panelController!.isOpen, isFalse);
-    expect(anchorController!.isOpen, isFalse);
-    expect(panelBuilds, equals(1));
-    expect(anchorBuilds, equals(1));
-    expect(overlayBuilds, equals(0));
+      expect(panelController!.isOpen, isFalse);
+      expect(anchorController!.isOpen, isFalse);
+      expect(panelBuilds, equals(1));
+      expect(anchorBuilds, equals(1));
+      expect(overlayBuilds, equals(0));
 
-    controller.open();
-    await tester.pump();
+      controller.open();
+      await tester.pump();
 
-    expect(panelController!.isOpen, isTrue);
-    expect(anchorController!.isOpen, isTrue);
-    expect(overlayController!.isOpen, isTrue);
-    expect(panelBuilds, equals(2));
-    expect(anchorBuilds, equals(2));
-    expect(overlayBuilds, equals(1));
+      expect(panelController!.isOpen, isTrue);
+      expect(anchorController!.isOpen, isTrue);
+      expect(overlayController!.isOpen, isTrue);
+      expect(panelBuilds, equals(2));
+      expect(anchorBuilds, equals(2));
+      expect(overlayBuilds, equals(1));
 
-    nestedController.open();
-    await tester.pump();
+      nestedController.open();
+      await tester.pump();
 
-    // No new builds should have occurred since all controllers are already open.
-    expect(panelController!.isOpen, isTrue);
-    expect(anchorController!.isOpen, isTrue);
-    expect(overlayController!.isOpen, isTrue);
-    expect(panelBuilds, equals(2));
-    expect(anchorBuilds, equals(2));
-    expect(overlayBuilds, equals(1));
+      // No new builds should have occurred since all controllers are already open.
+      expect(panelController!.isOpen, isTrue);
+      expect(anchorController!.isOpen, isTrue);
+      expect(overlayController!.isOpen, isTrue);
+      expect(panelBuilds, equals(2));
+      expect(anchorBuilds, equals(2));
+      expect(overlayBuilds, equals(1));
 
-    controller.close();
-    await tester.pump();
+      controller.close();
+      await tester.pump();
 
-    expect(panelController!.isOpen, isFalse);
-    expect(anchorController!.isOpen, isFalse);
-    expect(overlayController!.isOpen, isFalse);
-    expect(panelBuilds, equals(3));
-    expect(anchorBuilds, equals(3));
-    expect(overlayBuilds, equals(1));
-  });
+      expect(panelController!.isOpen, isFalse);
+      expect(anchorController!.isOpen, isFalse);
+      expect(overlayController!.isOpen, isFalse);
+      expect(panelBuilds, equals(3));
+      expect(anchorBuilds, equals(3));
+      expect(overlayBuilds, equals(1));
+    },
+  );
 
-  testWidgets(
-      'MenuController.maybeOf notifies dependents when set if createDependency is true',
-      (WidgetTester tester) async {
+  testWidgets('MenuController.maybeOf notifies dependents when set if createDependency is true', (
+    WidgetTester tester,
+  ) async {
     final GlobalKey anchorKey = GlobalKey();
     MenuController? panelController;
     MenuController? overlayController;
@@ -661,29 +639,32 @@ void main() {
           child: Column(
             children: <Widget>[
               // Panel context.
-              Builder(builder: (BuildContext context) {
-                panelController =
-                    MenuController.maybeOf(context, createDependency: true);
-                panelBuilds += 1;
-                return Text(Tag.a.text);
-              }),
+              Builder(
+                builder: (BuildContext context) {
+                  panelController = MenuController.maybeOf(context, createDependency: true);
+                  panelBuilds += 1;
+                  return Text(Tag.a.text);
+                },
+              ),
               RawMenuAnchor(
                 controller: overlay,
-                panel: RawMenuPanel(menuChildren: <Widget>[
-                  // Overlay context.
-                  Builder(builder: (BuildContext context) {
-                    overlayController =
-                        MenuController.maybeOf(context, createDependency: true);
-                    overlayBuilds += 1;
-                    return Text(Tag.b.a.a.text);
-                  }),
-                ]),
+                panel: RawMenuPanel(
+                  menuChildren: <Widget>[
+                    // Overlay context.
+                    Builder(
+                      builder: (BuildContext context) {
+                        overlayController = MenuController.maybeOf(context, createDependency: true);
+                        overlayBuilds += 1;
+                        return Text(Tag.b.a.a.text);
+                      },
+                    ),
+                  ],
+                ),
                 // Anchor context.
                 child: Builder(
                   key: anchorKey,
                   builder: (BuildContext context) {
-                    anchorController =
-                        MenuController.maybeOf(context, createDependency: true);
+                    anchorController = MenuController.maybeOf(context, createDependency: true);
                     anchorBuilds += 1;
                     return Text(Tag.b.a.text);
                   },
@@ -725,195 +706,208 @@ void main() {
   });
 
   testWidgets(
-      'MenuController.maybeOf does not notify dependents on open and close if createDependency is false',
-      (WidgetTester tester) async {
-    final MenuController controller = MenuController();
-    final MenuController nestedController = MenuController();
-    MenuController? panelController;
-    MenuController? overlayController;
-    MenuController? anchorController;
-    int panelBuilds = 0;
-    int anchorBuilds = 0;
-    int overlayBuilds = 0;
+    'MenuController.maybeOf does not notify dependents on open and close if createDependency is false',
+    (WidgetTester tester) async {
+      final MenuController controller = MenuController();
+      final MenuController nestedController = MenuController();
+      MenuController? panelController;
+      MenuController? overlayController;
+      MenuController? anchorController;
+      int panelBuilds = 0;
+      int anchorBuilds = 0;
+      int overlayBuilds = 0;
 
-    await tester.pumpWidget(
-      App(
-        RawMenuAnchor.node(
-          child: Column(
-            children: <Widget>[
-              // Panel context.
-              Builder(builder: (BuildContext context) {
-                panelController = MenuController.maybeOf(context);
-                panelBuilds += 1;
-                return Text(Tag.a.text);
-              }),
-              RawMenuAnchor(
-                controller: controller,
-                panel: RawMenuPanel(
-                  menuChildren: <Widget>[
-                    // Overlay context.
-                    Builder(builder: (BuildContext context) {
-                      overlayController = MenuController.maybeOf(context);
-                      overlayBuilds += 1;
-                      return Text(Tag.b.a.a.text);
-                    }),
-                    RawMenuAnchor(
-                      controller: nestedController,
-                      panel: RawMenuPanel(
-                          menuChildren: <Widget>[Button.tag(Tag.b.a.b.a)]),
-                      child: Button.tag(Tag.b.a.b),
-                    )
-                  ],
-                ),
-                // Anchor context.
-                child: Builder(
+      await tester.pumpWidget(
+        App(
+          RawMenuAnchor.node(
+            child: Column(
+              children: <Widget>[
+                // Panel context.
+                Builder(
                   builder: (BuildContext context) {
-                    anchorController = MenuController.maybeOf(context);
-                    anchorBuilds += 1;
-                    return Text(Tag.b.a.text);
+                    panelController = MenuController.maybeOf(context);
+                    panelBuilds += 1;
+                    return Text(Tag.a.text);
                   },
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    expect(panelController!.isOpen, isFalse);
-    expect(anchorController!.isOpen, isFalse);
-    expect(panelBuilds, equals(1));
-    expect(anchorBuilds, equals(1));
-    expect(overlayBuilds, equals(0));
-
-    controller.open();
-    await tester.pump();
-
-    expect(panelController!.isOpen, isTrue);
-    expect(anchorController!.isOpen, isTrue);
-    expect(overlayController!.isOpen, isTrue);
-    expect(panelBuilds, equals(1));
-    expect(anchorBuilds, equals(1));
-    expect(overlayBuilds, equals(1));
-
-    nestedController.open();
-    await tester.pump();
-
-    // No new builds should have occurred since all controllers are already open.
-    expect(panelController!.isOpen, isTrue);
-    expect(anchorController!.isOpen, isTrue);
-    expect(overlayController!.isOpen, isTrue);
-    expect(panelBuilds, equals(1));
-    expect(anchorBuilds, equals(1));
-    expect(overlayBuilds, equals(1));
-
-    controller.close();
-    await tester.pump();
-
-    expect(panelController!.isOpen, isFalse);
-    expect(anchorController!.isOpen, isFalse);
-    expect(overlayController!.isOpen, isFalse);
-    expect(panelBuilds, equals(1));
-    expect(anchorBuilds, equals(1));
-    expect(overlayBuilds, equals(1));
-  });
-
-  testWidgets(
-      'MenuController.maybeOf does not notify dependents when set if createDependency is false',
-      (WidgetTester tester) async {
-    final GlobalKey anchorKey = GlobalKey();
-    MenuController? panelController;
-    MenuController? overlayController;
-    MenuController? anchorController;
-    int panelBuilds = 0;
-    int anchorBuilds = 0;
-    int overlayBuilds = 0;
-
-    Widget buildAnchor({MenuController? panel, MenuController? overlay}) {
-      return App(
-        RawMenuAnchor.node(
-          controller: panel,
-          child: Column(
-            children: <Widget>[
-              // Panel context.
-              Builder(builder: (BuildContext context) {
-                panelController = MenuController.maybeOf(context);
-                panelBuilds += 1;
-                return Text(Tag.a.text);
-              }),
-              RawMenuAnchor(
-                controller: overlay,
-                panel: RawMenuPanel(menuChildren: <Widget>[
-                  // Overlay context.
-                  Builder(builder: (BuildContext context) {
-                    overlayController = MenuController.maybeOf(context);
-                    overlayBuilds += 1;
-                    return Text(Tag.b.a.a.text);
-                  }),
-                ]),
-                // Anchor context.
-                child: Builder(
-                  key: anchorKey,
-                  builder: (BuildContext context) {
-                    anchorController = MenuController.maybeOf(context);
-                    anchorBuilds += 1;
-                    return Text(Tag.b.a.text);
-                  },
+                RawMenuAnchor(
+                  controller: controller,
+                  panel: RawMenuPanel(
+                    menuChildren: <Widget>[
+                      // Overlay context.
+                      Builder(
+                        builder: (BuildContext context) {
+                          overlayController = MenuController.maybeOf(context);
+                          overlayBuilds += 1;
+                          return Text(Tag.b.a.a.text);
+                        },
+                      ),
+                      RawMenuAnchor(
+                        controller: nestedController,
+                        panel: RawMenuPanel(menuChildren: <Widget>[Button.tag(Tag.b.a.b.a)]),
+                        child: Button.tag(Tag.b.a.b),
+                      ),
+                    ],
+                  ),
+                  // Anchor context.
+                  child: Builder(
+                    builder: (BuildContext context) {
+                      anchorController = MenuController.maybeOf(context);
+                      anchorBuilds += 1;
+                      return Text(Tag.b.a.text);
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       );
-    }
 
-    await tester.pumpWidget(buildAnchor());
+      expect(panelController!.isOpen, isFalse);
+      expect(anchorController!.isOpen, isFalse);
+      expect(panelBuilds, equals(1));
+      expect(anchorBuilds, equals(1));
+      expect(overlayBuilds, equals(0));
 
-    expect(panelController, isNot(controller));
-    expect(anchorController, isNot(controller));
+      controller.open();
+      await tester.pump();
 
-    await tester.pumpWidget(buildAnchor(panel: controller));
+      expect(panelController!.isOpen, isTrue);
+      expect(anchorController!.isOpen, isTrue);
+      expect(overlayController!.isOpen, isTrue);
+      expect(panelBuilds, equals(1));
+      expect(anchorBuilds, equals(1));
+      expect(overlayBuilds, equals(1));
 
-    expect(panelController, equals(controller));
-    expect(anchorController, isNot(controller));
-    expect(panelBuilds, equals(2));
-    expect(anchorBuilds, equals(2));
+      nestedController.open();
+      await tester.pump();
 
-    MenuController.maybeOf(anchorKey.currentContext!)?.open();
-    await tester.pump();
+      // No new builds should have occurred since all controllers are already open.
+      expect(panelController!.isOpen, isTrue);
+      expect(anchorController!.isOpen, isTrue);
+      expect(overlayController!.isOpen, isTrue);
+      expect(panelBuilds, equals(1));
+      expect(anchorBuilds, equals(1));
+      expect(overlayBuilds, equals(1));
 
-    expect(panelBuilds, equals(2));
-    expect(anchorBuilds, equals(2));
-    expect(overlayBuilds, equals(1));
+      controller.close();
+      await tester.pump();
 
-    await tester.pumpWidget(buildAnchor(overlay: controller));
+      expect(panelController!.isOpen, isFalse);
+      expect(anchorController!.isOpen, isFalse);
+      expect(overlayController!.isOpen, isFalse);
+      expect(panelBuilds, equals(1));
+      expect(anchorBuilds, equals(1));
+      expect(overlayBuilds, equals(1));
+    },
+  );
 
-    expect(panelController, isNot(controller));
-    expect(anchorController, equals(controller));
-    expect(overlayController, equals(controller));
-    expect(panelBuilds, equals(3));
-    expect(anchorBuilds, equals(3));
-    expect(overlayBuilds, equals(2));
-  });
+  testWidgets(
+    'MenuController.maybeOf does not notify dependents when set if createDependency is false',
+    (WidgetTester tester) async {
+      final GlobalKey anchorKey = GlobalKey();
+      MenuController? panelController;
+      MenuController? overlayController;
+      MenuController? anchorController;
+      int panelBuilds = 0;
+      int anchorBuilds = 0;
+      int overlayBuilds = 0;
+
+      Widget buildAnchor({MenuController? panel, MenuController? overlay}) {
+        return App(
+          RawMenuAnchor.node(
+            controller: panel,
+            child: Column(
+              children: <Widget>[
+                // Panel context.
+                Builder(
+                  builder: (BuildContext context) {
+                    panelController = MenuController.maybeOf(context);
+                    panelBuilds += 1;
+                    return Text(Tag.a.text);
+                  },
+                ),
+                RawMenuAnchor(
+                  controller: overlay,
+                  panel: RawMenuPanel(
+                    menuChildren: <Widget>[
+                      // Overlay context.
+                      Builder(
+                        builder: (BuildContext context) {
+                          overlayController = MenuController.maybeOf(context);
+                          overlayBuilds += 1;
+                          return Text(Tag.b.a.a.text);
+                        },
+                      ),
+                    ],
+                  ),
+                  // Anchor context.
+                  child: Builder(
+                    key: anchorKey,
+                    builder: (BuildContext context) {
+                      anchorController = MenuController.maybeOf(context);
+                      anchorBuilds += 1;
+                      return Text(Tag.b.a.text);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildAnchor());
+
+      expect(panelController, isNot(controller));
+      expect(anchorController, isNot(controller));
+
+      await tester.pumpWidget(buildAnchor(panel: controller));
+
+      expect(panelController, equals(controller));
+      expect(anchorController, isNot(controller));
+      expect(panelBuilds, equals(2));
+      expect(anchorBuilds, equals(2));
+
+      MenuController.maybeOf(anchorKey.currentContext!)?.open();
+      await tester.pump();
+
+      expect(panelBuilds, equals(2));
+      expect(anchorBuilds, equals(2));
+      expect(overlayBuilds, equals(1));
+
+      await tester.pumpWidget(buildAnchor(overlay: controller));
+
+      expect(panelController, isNot(controller));
+      expect(anchorController, equals(controller));
+      expect(overlayController, equals(controller));
+      expect(panelBuilds, equals(3));
+      expect(anchorBuilds, equals(3));
+      expect(overlayBuilds, equals(2));
+    },
+  );
 
   // Regression test for https://github.com/flutter/flutter/issues/156572.
-  testWidgets('Unattached MenuController does not throw when calling close',
-      (WidgetTester tester) async {
+  testWidgets('Unattached MenuController does not throw when calling close', (
+    WidgetTester tester,
+  ) async {
     final MenuController controller = MenuController();
     controller.close();
     await tester.pump();
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Unattached MenuController returns false when calling isOpen',
-      (WidgetTester tester) async {
+  testWidgets('Unattached MenuController returns false when calling isOpen', (
+    WidgetTester tester,
+  ) async {
     final MenuController controller = MenuController();
     expect(controller.isOpen, false);
   });
 
-  testWidgets(
-      '[Overlays] RawMenuAnchorOverlayPosition.anchorRect applies transformations',
-      (WidgetTester tester) async {
+  testWidgets('[Overlays] RawMenuAnchorOverlayPosition.anchorRect applies transformations', (
+    WidgetTester tester,
+  ) async {
     RawMenuAnchorOverlayPosition? builderPosition;
     final GlobalKey anchorKey = GlobalKey();
     await tester.pumpWidget(
@@ -922,16 +916,11 @@ void main() {
           transform: Matrix4.translationValues(-50, 50, 0)..scale(1.2),
           child: RawMenuAnchor.overlayBuilder(
             controller: controller,
-            overlayBuilder: (
-              BuildContext context,
-              RawMenuAnchorOverlayPosition position,
-            ) {
+            overlayBuilder: (BuildContext context, RawMenuAnchorOverlayPosition position) {
               builderPosition = position;
               return Positioned.fromRect(
                 rect: position.anchorRect,
-                child: Container(
-                  color: const Color(0xFF0000FF),
-                ),
+                child: Container(color: const Color(0xFF0000FF)),
               );
             },
             child: AnchorButton(Tag.b, key: anchorKey),
@@ -943,12 +932,10 @@ void main() {
     controller.open();
     await tester.pump();
 
-    expect(tester.getRect(find.byType(AnchorButton)),
-        equals(builderPosition?.anchorRect));
+    expect(tester.getRect(find.byType(AnchorButton)), equals(builderPosition?.anchorRect));
   });
 
-  testWidgets('[Default] Previous focus is restored on menu close',
-      (WidgetTester tester) async {
+  testWidgets('[Default] Previous focus is restored on menu close', (WidgetTester tester) async {
     final FocusNode externalFocus = FocusNode();
     final FocusNode aaaFocusNode = FocusNode();
     addTearDown(aaaFocusNode.dispose);
@@ -967,9 +954,7 @@ void main() {
                       menuChildren: <Widget>[
                         RawMenuAnchor(
                           panel: RawMenuPanel(
-                            menuChildren: <Widget>[
-                              Button.tag(Tag.a.a.a, focusNode: aaaFocusNode),
-                            ],
+                            menuChildren: <Widget>[Button.tag(Tag.a.a.a, focusNode: aaaFocusNode)],
                           ),
                           child: AnchorButton(Tag.a.a),
                         ),
@@ -980,11 +965,7 @@ void main() {
                 ],
               ),
             ),
-            Button.tag(
-              Tag.b,
-              autofocus: true,
-              focusNode: externalFocus,
-            ),
+            Button.tag(Tag.b, autofocus: true, focusNode: externalFocus),
           ],
         ),
       ),
@@ -1011,8 +992,7 @@ void main() {
     expect(FocusManager.instance.primaryFocus, equals(externalFocus));
   });
 
-  testWidgets('[Default] Previous focus is restored on submenu close',
-      (WidgetTester tester) async {
+  testWidgets('[Default] Previous focus is restored on submenu close', (WidgetTester tester) async {
     final FocusNode acaFocusNode = FocusNode();
     final FocusNode buttonFocus = FocusNode();
     addTearDown(acaFocusNode.dispose);
@@ -1030,9 +1010,9 @@ void main() {
                     Button.tag(Tag.a.b),
                     RawMenuAnchor(
                       controller: controller,
-                      panel: RawMenuPanel(menuChildren: <Widget>[
-                        Button.tag(Tag.a.c.a, focusNode: acaFocusNode),
-                      ]),
+                      panel: RawMenuPanel(
+                        menuChildren: <Widget>[Button.tag(Tag.a.c.a, focusNode: acaFocusNode)],
+                      ),
                       child: AnchorButton(Tag.a.c),
                     ),
                   ],
@@ -1083,9 +1063,7 @@ void main() {
                   menuChildren: <Widget>[
                     RawMenuAnchor(
                       panel: RawMenuPanel(
-                        menuChildren: <Widget>[
-                          Button.tag(Tag.b.a.a, focusNode: baaFocusNode)
-                        ],
+                        menuChildren: <Widget>[Button.tag(Tag.b.a.a, focusNode: baaFocusNode)],
                       ),
                       child: AnchorButton(Tag.b.a),
                     ),
@@ -1131,8 +1109,7 @@ void main() {
   });
 
   // Credit to Closure library for the test idea.
-  testWidgets('Intents are not blocked by closed anchor',
-      (WidgetTester tester) async {
+  testWidgets('Intents are not blocked by closed anchor', (WidgetTester tester) async {
     final List<Intent> invokedIntents = <Intent>[];
     final FocusNode aFocusNode = FocusNode();
     addTearDown(aFocusNode.dispose);
@@ -1170,11 +1147,7 @@ void main() {
             child: Row(
               children: <Widget>[
                 RawMenuAnchor(
-                  panel: RawMenuPanel(
-                    menuChildren: <Widget>[
-                      Text(Tag.a.text),
-                    ],
-                  ),
+                  panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.a.text)]),
                   child: AnchorButton(Tag.anchor, focusNode: aFocusNode),
                 ),
               ],
@@ -1186,209 +1159,200 @@ void main() {
 
     aFocusNode.requestFocus();
     await tester.pump();
-    Actions.invoke(aFocusNode.context!,
-        const DirectionalFocusIntent(TraversalDirection.up));
+    Actions.invoke(aFocusNode.context!, const DirectionalFocusIntent(TraversalDirection.up));
     Actions.invoke(aFocusNode.context!, const NextFocusIntent());
     Actions.invoke(aFocusNode.context!, const PreviousFocusIntent());
     Actions.invoke(aFocusNode.context!, const DismissIntent());
     await tester.pump();
 
     expect(
-        invokedIntents,
-        equals(const <Intent>[
-          DirectionalFocusIntent(TraversalDirection.up),
-          NextFocusIntent(),
-          PreviousFocusIntent(),
-          DismissIntent()
-        ]));
+      invokedIntents,
+      equals(const <Intent>[
+        DirectionalFocusIntent(TraversalDirection.up),
+        NextFocusIntent(),
+        PreviousFocusIntent(),
+        DismissIntent(),
+      ]),
+    );
   });
 
-  testWidgets(
-    '[OverlayBuilder] Focus traversal shortcuts are not bound to actions',
-    (WidgetTester tester) async {
-      final FocusNode anchorFocusNode = FocusNode(
-        debugLabel: Tag.anchor.focusNode,
-      );
-      final FocusNode bFocusNode = FocusNode(
-        debugLabel: Tag.b.focusNode,
-      );
-      addTearDown(anchorFocusNode.dispose);
-      addTearDown(bFocusNode.dispose);
+  testWidgets('[OverlayBuilder] Focus traversal shortcuts are not bound to actions', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode anchorFocusNode = FocusNode(debugLabel: Tag.anchor.focusNode);
+    final FocusNode bFocusNode = FocusNode(debugLabel: Tag.b.focusNode);
+    addTearDown(anchorFocusNode.dispose);
+    addTearDown(bFocusNode.dispose);
 
-      final Map<ShortcutActivator, Intent> traversalShortcuts =
-          <ShortcutActivator, Intent>{
-        LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
-        LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab):
-            const PreviousFocusIntent(),
-        LogicalKeySet(LogicalKeyboardKey.arrowLeft):
-            const DirectionalFocusIntent(TraversalDirection.left),
-      };
+    final Map<ShortcutActivator, Intent> traversalShortcuts = <ShortcutActivator, Intent>{
+      LogicalKeySet(LogicalKeyboardKey.tab): const NextFocusIntent(),
+      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const PreviousFocusIntent(),
+      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(
+        TraversalDirection.left,
+      ),
+    };
 
-      final List<Intent> invokedIntents = <Intent>[];
-      await tester.pumpWidget(
-        App(
-          Column(
-            children: <Widget>[
-              Button.tag(Tag.a),
-              Actions(
-                actions: <Type, Action<Intent>>{
-                  DirectionalFocusIntent:
-                      CallbackAction<DirectionalFocusIntent>(
-                    onInvoke: (DirectionalFocusIntent intent) {
-                      invokedIntents.add(intent);
-                      return null;
-                    },
-                  ),
-                  NextFocusIntent: CallbackAction<NextFocusIntent>(
-                    onInvoke: (NextFocusIntent intent) {
-                      invokedIntents.add(intent);
-                      return null;
-                    },
-                  ),
-                  PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(
-                    onInvoke: (PreviousFocusIntent intent) {
-                      invokedIntents.add(intent);
-                      return null;
-                    },
-                  ),
-                },
-                child: RawMenuAnchor.overlayBuilder(
-                  controller: controller,
-                  overlayBuilder: (
-                    BuildContext context,
-                    RawMenuAnchorOverlayPosition position,
-                  ) {
-                    return Column(
-                      children: <Widget>[
-                        Button.tag(Tag.a),
-                        Shortcuts(
-                          // Web doesn't automatically handle directional traversal.
-                          shortcuts: traversalShortcuts,
-                          child: Button.tag(Tag.b, focusNode: bFocusNode),
-                        ),
-                        Button.tag(Tag.d),
-                      ],
-                    );
+    final List<Intent> invokedIntents = <Intent>[];
+    await tester.pumpWidget(
+      App(
+        Column(
+          children: <Widget>[
+            Button.tag(Tag.a),
+            Actions(
+              actions: <Type, Action<Intent>>{
+                DirectionalFocusIntent: CallbackAction<DirectionalFocusIntent>(
+                  onInvoke: (DirectionalFocusIntent intent) {
+                    invokedIntents.add(intent);
+                    return null;
                   },
-                  child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
                 ),
+                NextFocusIntent: CallbackAction<NextFocusIntent>(
+                  onInvoke: (NextFocusIntent intent) {
+                    invokedIntents.add(intent);
+                    return null;
+                  },
+                ),
+                PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(
+                  onInvoke: (PreviousFocusIntent intent) {
+                    invokedIntents.add(intent);
+                    return null;
+                  },
+                ),
+              },
+              child: RawMenuAnchor.overlayBuilder(
+                controller: controller,
+                overlayBuilder: (BuildContext context, RawMenuAnchorOverlayPosition position) {
+                  return Column(
+                    children: <Widget>[
+                      Button.tag(Tag.a),
+                      Shortcuts(
+                        // Web doesn't automatically handle directional traversal.
+                        shortcuts: traversalShortcuts,
+                        child: Button.tag(Tag.b, focusNode: bFocusNode),
+                      ),
+                      Button.tag(Tag.d),
+                    ],
+                  );
+                },
+                child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
               ),
-              Button.tag(Tag.c),
-            ],
-          ),
-        ),
-      );
-
-      listenForFocusChanges();
-
-      controller.open();
-      await tester.pump();
-
-      anchorFocusNode.requestFocus();
-      await tester.pump();
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-      expect(focusedMenu, equals(Tag.anchor.focusNode));
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      expect(focusedMenu, equals(Tag.anchor.focusNode));
-
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
-      expect(focusedMenu, equals(Tag.anchor.focusNode));
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.home);
-      expect(focusedMenu, equals(Tag.anchor.focusNode));
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.end);
-      expect(focusedMenu, equals(Tag.anchor.focusNode));
-
-      bFocusNode.requestFocus();
-      await tester.pump();
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-      expect(focusedMenu, equals(Tag.b.focusNode));
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      expect(focusedMenu, equals(Tag.b.focusNode));
-
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
-      expect(focusedMenu, equals(Tag.b.focusNode));
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.home);
-      expect(focusedMenu, equals(Tag.b.focusNode));
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.end);
-      expect(focusedMenu, equals(Tag.b.focusNode));
-
-      expect(
-        invokedIntents,
-        equals(
-          const <Intent>[
-            DirectionalFocusIntent(TraversalDirection.left),
-            NextFocusIntent(),
-            PreviousFocusIntent(),
-            DirectionalFocusIntent(TraversalDirection.left),
-            NextFocusIntent(),
-            PreviousFocusIntent(),
+            ),
+            Button.tag(Tag.c),
           ],
         ),
-      );
-    },
-  );
+      ),
+    );
 
-  testWidgets(
-    'Actions that wrap RawMenuAnchor are invoked by both anchor and overlay',
-    (WidgetTester tester) async {
-      final FocusNode anchorFocusNode = FocusNode();
-      final FocusNode aFocusNode = FocusNode();
-      addTearDown(anchorFocusNode.dispose);
-      addTearDown(aFocusNode.dispose);
-      bool invokedAnchor = false;
-      bool invokedOverlay = false;
+    listenForFocusChanges();
 
-      await tester.pumpWidget(
-        App(
-          Actions(
-            actions: <Type, Action<Intent>>{
-              VoidCallbackIntent: CallbackAction<VoidCallbackIntent>(
-                onInvoke: (VoidCallbackIntent intent) {
-                  intent.callback();
-                  return null;
-                },
-              ),
-            },
-            child: RawMenuAnchor(
-              childFocusNode: anchorFocusNode,
-              panel: RawMenuPanel(menuChildren: <Widget>[
-                Button.tag(Tag.a, focusNode: aFocusNode),
-              ]),
-              child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
+    controller.open();
+    await tester.pump();
+
+    anchorFocusNode.requestFocus();
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    expect(focusedMenu, equals(Tag.anchor.focusNode));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    expect(focusedMenu, equals(Tag.anchor.focusNode));
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    expect(focusedMenu, equals(Tag.anchor.focusNode));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.home);
+    expect(focusedMenu, equals(Tag.anchor.focusNode));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.end);
+    expect(focusedMenu, equals(Tag.anchor.focusNode));
+
+    bFocusNode.requestFocus();
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    expect(focusedMenu, equals(Tag.b.focusNode));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    expect(focusedMenu, equals(Tag.b.focusNode));
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    expect(focusedMenu, equals(Tag.b.focusNode));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.home);
+    expect(focusedMenu, equals(Tag.b.focusNode));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.end);
+    expect(focusedMenu, equals(Tag.b.focusNode));
+
+    expect(
+      invokedIntents,
+      equals(const <Intent>[
+        DirectionalFocusIntent(TraversalDirection.left),
+        NextFocusIntent(),
+        PreviousFocusIntent(),
+        DirectionalFocusIntent(TraversalDirection.left),
+        NextFocusIntent(),
+        PreviousFocusIntent(),
+      ]),
+    );
+  });
+
+  testWidgets('Actions that wrap RawMenuAnchor are invoked by both anchor and overlay', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode anchorFocusNode = FocusNode();
+    final FocusNode aFocusNode = FocusNode();
+    addTearDown(anchorFocusNode.dispose);
+    addTearDown(aFocusNode.dispose);
+    bool invokedAnchor = false;
+    bool invokedOverlay = false;
+
+    await tester.pumpWidget(
+      App(
+        Actions(
+          actions: <Type, Action<Intent>>{
+            VoidCallbackIntent: CallbackAction<VoidCallbackIntent>(
+              onInvoke: (VoidCallbackIntent intent) {
+                intent.callback();
+                return null;
+              },
             ),
+          },
+          child: RawMenuAnchor(
+            childFocusNode: anchorFocusNode,
+            panel: RawMenuPanel(menuChildren: <Widget>[Button.tag(Tag.a, focusNode: aFocusNode)]),
+            child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
           ),
         ),
-      );
+      ),
+    );
 
-      await tester.tap(find.text(Tag.anchor.text));
-      await tester.pump();
+    await tester.tap(find.text(Tag.anchor.text));
+    await tester.pump();
 
-      Actions.invoke(anchorFocusNode.context!, VoidCallbackIntent(() {
+    Actions.invoke(
+      anchorFocusNode.context!,
+      VoidCallbackIntent(() {
         invokedAnchor = true;
-      }));
-      Actions.invoke(aFocusNode.context!, VoidCallbackIntent(() {
+      }),
+    );
+    Actions.invoke(
+      aFocusNode.context!,
+      VoidCallbackIntent(() {
         invokedOverlay = true;
-      }));
+      }),
+    );
 
-      await tester.pump();
+    await tester.pump();
 
-      // DismissIntent should not close the menu.
-      expect(invokedAnchor, isTrue);
-      expect(invokedOverlay, isTrue);
-    },
-  );
+    // DismissIntent should not close the menu.
+    expect(invokedAnchor, isTrue);
+    expect(invokedOverlay, isTrue);
+  });
 
   testWidgets('DismissMenuAction closes menus', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -1405,11 +1369,7 @@ void main() {
                     Text(Tag.b.a.text),
                     RawMenuAnchor(
                       controller: controller,
-                      panel: RawMenuPanel(
-                        menuChildren: <Widget>[
-                          Text(Tag.b.b.a.text),
-                        ],
-                      ),
+                      panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.b.b.a.text)]),
                       child: AnchorButton(Tag.b.b, focusNode: focusNode),
                     ),
                   ],
@@ -1457,16 +1417,8 @@ void main() {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Container(
-                  width: 100,
-                  height: 100,
-                  color: const ui.Color(0xff0000ff),
-                ),
-                Container(
-                  width: 100,
-                  height: 100,
-                  color: const ui.Color(0xFFFF00D4),
-                )
+                Container(width: 100, height: 100, color: const ui.Color(0xff0000ff)),
+                Container(width: 100, height: 100, color: const ui.Color(0xFFFF00D4)),
               ],
             ),
           ),
@@ -1475,27 +1427,24 @@ void main() {
     );
 
     expect(find.byKey(Tag.anchor.key), findsOneWidget);
-    expect(
-      tester.getRect(find.byKey(Tag.anchor.key)),
-      const Rect.fromLTWH(0, 0, 216, 116),
-    );
+    expect(tester.getRect(find.byKey(Tag.anchor.key)), const Rect.fromLTWH(0, 0, 216, 116));
   });
 
-  testWidgets('[OverlayBuilder] Overlay builder is passed anchor rect',
-      (WidgetTester tester) async {
+  testWidgets('[OverlayBuilder] Overlay builder is passed anchor rect', (
+    WidgetTester tester,
+  ) async {
     RawMenuAnchorOverlayPosition? overlayPosition;
-    await tester.pumpWidget(App(
-      RawMenuAnchor.overlayBuilder(
-        overlayBuilder: (
-          BuildContext context,
-          RawMenuAnchorOverlayPosition position,
-        ) {
-          overlayPosition = position;
-          return const SizedBox();
-        },
-        child: AnchorButton(Tag.anchor, onPressed: onPressed),
+    await tester.pumpWidget(
+      App(
+        RawMenuAnchor.overlayBuilder(
+          overlayBuilder: (BuildContext context, RawMenuAnchorOverlayPosition position) {
+            overlayPosition = position;
+            return const SizedBox();
+          },
+          child: AnchorButton(Tag.anchor, onPressed: onPressed),
+        ),
       ),
-    ));
+    );
 
     await tester.tap(find.text(Tag.anchor.text));
     await tester.pump();
@@ -1503,28 +1452,26 @@ void main() {
     expect(overlayPosition!.anchorRect, tester.getRect(find.byType(Button)));
   });
 
-  testWidgets('[OverlayBuilder] Overlay contents can be positioned',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(App(
-      RawMenuAnchor.overlayBuilder(
-        overlayBuilder: (
-          BuildContext context,
-          RawMenuAnchorOverlayPosition position,
-        ) {
-          return Positioned(
-            top: position.anchorRect.top,
-            left: position.anchorRect.left,
-            child: Container(
-              key: Tag.a.key,
-              width: 200,
-              height: 200,
-              color: const Color(0xFF00FF00),
-            ),
-          );
-        },
-        child: AnchorButton(Tag.anchor, onPressed: onPressed),
+  testWidgets('[OverlayBuilder] Overlay contents can be positioned', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      App(
+        RawMenuAnchor.overlayBuilder(
+          overlayBuilder: (BuildContext context, RawMenuAnchorOverlayPosition position) {
+            return Positioned(
+              top: position.anchorRect.top,
+              left: position.anchorRect.left,
+              child: Container(
+                key: Tag.a.key,
+                width: 200,
+                height: 200,
+                color: const Color(0xFF00FF00),
+              ),
+            );
+          },
+          child: AnchorButton(Tag.anchor, onPressed: onPressed),
+        ),
       ),
-    ));
+    );
 
     await tester.tap(find.text(Tag.anchor.text));
     await tester.pump();
@@ -1535,17 +1482,15 @@ void main() {
     expect(contentRect, anchorCorner & const Size(200, 200));
   });
 
-  testWidgets('[OverlayBuilder] TapRegion group ID is passed to overlay',
-      (WidgetTester tester) async {
+  testWidgets('[OverlayBuilder] TapRegion group ID is passed to overlay', (
+    WidgetTester tester,
+  ) async {
     bool? insideTap;
 
     await tester.pumpWidget(
       App(
         RawMenuAnchor.overlayBuilder(
-          overlayBuilder: (
-            BuildContext context,
-            RawMenuAnchorOverlayPosition position,
-          ) {
+          overlayBuilder: (BuildContext context, RawMenuAnchorOverlayPosition position) {
             return Positioned.fromRect(
               rect: position.anchorRect.translate(200, 200),
               child: TapRegion(
@@ -1592,8 +1537,9 @@ void main() {
     expect(insideTap, isFalse);
   });
 
-  testWidgets('Menus close and consume tap when consumesOutsideTap is true',
-      (WidgetTester tester) async {
+  testWidgets('Menus close and consume tap when consumesOutsideTap is true', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       App(
         Column(
@@ -1617,9 +1563,7 @@ void main() {
                           consumeOutsideTaps: true,
                           onOpen: () => onOpen(Tag.a),
                           onClose: () => onClose(Tag.a),
-                          panel: RawMenuPanel(menuChildren: <Widget>[
-                            Text(Tag.a.a.text),
-                          ]),
+                          panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.a.a.text)]),
                           child: AnchorButton(Tag.a, onPressed: onPressed),
                         ),
                       ],
@@ -1670,9 +1614,9 @@ void main() {
     closed.clear();
   });
 
-  testWidgets(
-      '[Overlays] Menus close and do not consume tap when consumesOutsideTap is false',
-      (WidgetTester tester) async {
+  testWidgets('[Overlays] Menus close and do not consume tap when consumesOutsideTap is false', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       App(
         Column(
@@ -1696,17 +1640,13 @@ void main() {
                         RawMenuAnchor(
                           onOpen: () => onOpen(Tag.a),
                           onClose: () => onClose(Tag.a),
-                          panel: RawMenuPanel(
-                            menuChildren: <Widget>[
-                              Text(Tag.a.a.text),
-                            ],
-                          ),
+                          panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.a.a.text)]),
                           child: AnchorButton(Tag.a, onPressed: onPressed),
                         ),
                       ],
                     ),
                     child: AnchorButton(Tag.anchor, onPressed: onPressed),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -1753,8 +1693,7 @@ void main() {
     closed.clear();
   });
 
-  testWidgets('onOpen is called when the menu is opened',
-      (WidgetTester tester) async {
+  testWidgets('onOpen is called when the menu is opened', (WidgetTester tester) async {
     bool opened = false;
     await tester.pumpWidget(
       App(
@@ -1786,8 +1725,7 @@ void main() {
     expect(opened, isTrue);
   });
 
-  testWidgets('onClose is called when the menu is closed',
-      (WidgetTester tester) async {
+  testWidgets('onClose is called when the menu is closed', (WidgetTester tester) async {
     bool closed = true;
     await tester.pumpWidget(
       App(
@@ -1839,19 +1777,17 @@ void main() {
 
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     panel.debugFillProperties(builder);
-    final List<String> properties = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+    final List<String> properties =
+        builder.properties
+            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+            .map((DiagnosticsNode node) => node.toString())
+            .toList();
 
-    expect(
-      properties,
-      const <String>[
-        'clipBehavior: Clip.hardEdge',
-        'constrainCrossAxis: true',
-        'padding override: EdgeInsetsDirectional(5.0, 5.0, 5.0, 5.0)'
-      ],
-    );
+    expect(properties, const <String>[
+      'clipBehavior: Clip.hardEdge',
+      'constrainCrossAxis: true',
+      'padding override: EdgeInsetsDirectional(5.0, 5.0, 5.0, 5.0)',
+    ]);
   });
 
   testWidgets('[Default] diagnostics', (WidgetTester tester) async {
@@ -1871,24 +1807,24 @@ void main() {
 
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     menuAnchor.debugFillProperties(builder);
-    final List<String> properties = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+    final List<String> properties =
+        builder.properties
+            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+            .map((DiagnosticsNode node) => node.toString())
+            .toList();
 
-    expect(
-      properties,
-      const <String>[
-        'has controller',
-        'has focusNode',
-        'alignmentOffset: Offset(10.0, 10.0)'
-      ],
-    );
+    expect(properties, const <String>[
+      'has controller',
+      'has focusNode',
+      'alignmentOffset: Offset(10.0, 10.0)',
+    ]);
   });
 
   testWidgets('[Node] diagnostics', (WidgetTester tester) async {
     final RawMenuAnchor menuNode = RawMenuAnchor.node(
-        controller: controller, child: const SizedBox(height: 30, width: 30));
+      controller: controller,
+      child: const SizedBox(height: 30, width: 30),
+    );
 
     await tester.pumpWidget(App(menuNode));
     await tester.pump();
@@ -1898,10 +1834,7 @@ void main() {
     final Iterable<String> properties = builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
         .map((DiagnosticsNode node) => node.toString());
-    expect(
-      properties,
-      equals(const <String>['has controller']),
-    );
+    expect(properties, equals(const <String>['has controller']));
   });
 
   testWidgets('Surface clip behavior', (WidgetTester tester) async {
@@ -1909,9 +1842,7 @@ void main() {
       App(
         RawMenuAnchor(
           controller: controller,
-          panel: const RawMenuPanel(menuChildren: <Widget>[
-            Text('Button 1'),
-          ]),
+          panel: const RawMenuPanel(menuChildren: <Widget>[Text('Button 1')]),
           child: const AnchorButton(Tag.anchor),
         ),
       ),
@@ -1921,19 +1852,14 @@ void main() {
     await tester.pump();
 
     // Test default clip behavior.
-    expect(
-      findMenuPanelDescendent<Container>(tester).clipBehavior,
-      equals(Clip.antiAlias),
-    );
+    expect(findMenuPanelDescendent<Container>(tester).clipBehavior, equals(Clip.antiAlias));
 
     await tester.pumpWidget(
       App(
         RawMenuAnchor(
           controller: controller,
           panel: const RawMenuPanel(
-            menuChildren: <Widget>[
-              Text('Button 1'),
-            ],
+            menuChildren: <Widget>[Text('Button 1')],
             clipBehavior: Clip.hardEdge,
           ),
           child: const AnchorButton(Tag.anchor),
@@ -1942,19 +1868,14 @@ void main() {
     );
 
     // Test custom clip behavior.
-    expect(
-      findMenuPanelDescendent<Container>(tester).clipBehavior,
-      equals(Clip.hardEdge),
-    );
+    expect(findMenuPanelDescendent<Container>(tester).clipBehavior, equals(Clip.hardEdge));
   });
 
-  testWidgets('[Default] Home key from a menu item focuses first sibling',
-      (WidgetTester tester) async {
-    const BoxConstraints anchorConstraints =
-        BoxConstraints.tightFor(height: 225);
-    final FocusNode anchorFocusNode = FocusNode(
-      debugLabel: Tag.anchor.focusNode,
-    );
+  testWidgets('[Default] Home key from a menu item focuses first sibling', (
+    WidgetTester tester,
+  ) async {
+    const BoxConstraints anchorConstraints = BoxConstraints.tightFor(height: 225);
+    final FocusNode anchorFocusNode = FocusNode(debugLabel: Tag.anchor.focusNode);
     final FocusNode focusNode = FocusNode(debugLabel: Tag.d.c.focusNode);
     addTearDown(anchorFocusNode.dispose);
     addTearDown(focusNode.dispose);
@@ -1978,8 +1899,7 @@ void main() {
                     Button.tag(Tag.d.c, focusNode: focusNode),
                   ],
                 ),
-                child:
-                    const AnchorButton(Tag.d, constraints: anchorConstraints),
+                child: const AnchorButton(Tag.d, constraints: anchorConstraints),
               ),
             ],
           ),
@@ -2042,21 +1962,13 @@ void main() {
     expect(focusedMenu, equals(Tag.d.a.focusNode));
   });
 
-  testWidgets('[Default] End key from a menu item focuses last sibling',
-      (WidgetTester tester) async {
-    const BoxConstraints anchorConstraints = BoxConstraints.tightFor(
-      height: 200,
-      width: 225,
-    );
-    final FocusNode anchorFocusNode = FocusNode(
-      debugLabel: Tag.anchor.focusNode,
-    );
-    final FocusNode bFocusNode = FocusNode(
-      debugLabel: Tag.b.focusNode,
-    );
-    final FocusNode baFocusNode = FocusNode(
-      debugLabel: Tag.b.a.focusNode,
-    );
+  testWidgets('[Default] End key from a menu item focuses last sibling', (
+    WidgetTester tester,
+  ) async {
+    const BoxConstraints anchorConstraints = BoxConstraints.tightFor(height: 200, width: 225);
+    final FocusNode anchorFocusNode = FocusNode(debugLabel: Tag.anchor.focusNode);
+    final FocusNode bFocusNode = FocusNode(debugLabel: Tag.b.focusNode);
+    final FocusNode baFocusNode = FocusNode(debugLabel: Tag.b.a.focusNode);
 
     addTearDown(anchorFocusNode.dispose);
     addTearDown(bFocusNode.dispose);
@@ -2068,22 +1980,24 @@ void main() {
           childFocusNode: anchorFocusNode,
           controller: controller,
           panel: RawMenuPanel(
-              constraints: const BoxConstraints(maxHeight: 500),
-              menuChildren: <Widget>[
-                Button.tag(Tag.a, constraints: anchorConstraints),
-                RawMenuAnchor(
-                  childFocusNode: bFocusNode,
-                  panel: RawMenuPanel(menuChildren: <Widget>[
+            constraints: const BoxConstraints(maxHeight: 500),
+            menuChildren: <Widget>[
+              Button.tag(Tag.a, constraints: anchorConstraints),
+              RawMenuAnchor(
+                childFocusNode: bFocusNode,
+                panel: RawMenuPanel(
+                  menuChildren: <Widget>[
                     Button.tag(Tag.b.a, focusNode: baFocusNode),
                     Button.tag(Tag.b.b),
                     Button.tag(Tag.b.c),
-                  ]),
-                  child: AnchorButton(Tag.b,
-                      focusNode: bFocusNode, constraints: anchorConstraints),
+                  ],
                 ),
-                Button.tag(Tag.c, constraints: anchorConstraints),
-                Button.tag(Tag.d, constraints: anchorConstraints),
-              ]),
+                child: AnchorButton(Tag.b, focusNode: bFocusNode, constraints: anchorConstraints),
+              ),
+              Button.tag(Tag.c, constraints: anchorConstraints),
+              Button.tag(Tag.d, constraints: anchorConstraints),
+            ],
+          ),
           child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
         ),
       ),
@@ -2143,9 +2057,9 @@ void main() {
     expect(focusedMenu, equals(Tag.b.c.focusNode));
   });
 
-  testWidgets(
-      '[Default] ArrowDown key from open root anchor focuses first menu item',
-      (WidgetTester tester) async {
+  testWidgets('[Default] ArrowDown key from open root anchor focuses first menu item', (
+    WidgetTester tester,
+  ) async {
     final FocusNode focusNode = FocusNode(debugLabel: Tag.anchor.focusNode);
     addTearDown(focusNode.dispose);
 
@@ -2154,8 +2068,7 @@ void main() {
         RawMenuAnchor(
           controller: controller,
           childFocusNode: focusNode,
-          panel: RawMenuPanel(
-              menuChildren: <Widget>[Button.tag(Tag.a), Button.tag(Tag.b)]),
+          panel: RawMenuPanel(menuChildren: <Widget>[Button.tag(Tag.a), Button.tag(Tag.b)]),
           child: AnchorButton(Tag.anchor, focusNode: focusNode),
         ),
       ),
@@ -2183,14 +2096,9 @@ void main() {
               RawMenuAnchor(
                 controller: controller,
                 childFocusNode: focusNode,
-                panel: RawMenuPanel(
-                  menuChildren: <Widget>[
-                    Button.tag(Tag.a),
-                    Button.tag(Tag.b),
-                  ],
-                ),
+                panel: RawMenuPanel(menuChildren: <Widget>[Button.tag(Tag.a), Button.tag(Tag.b)]),
                 child: AnchorButton(Tag.anchor, focusNode: focusNode),
-              )
+              ),
             ],
           ),
         ),
@@ -2209,9 +2117,9 @@ void main() {
     expect(focusedMenu, equals(Tag.a.focusNode));
   });
 
-  testWidgets(
-      '[Default] ArrowUp key from open root anchor focuses last menu item',
-      (WidgetTester tester) async {
+  testWidgets('[Default] ArrowUp key from open root anchor focuses last menu item', (
+    WidgetTester tester,
+  ) async {
     final FocusNode focusNode = FocusNode(debugLabel: Tag.anchor.focusNode);
     addTearDown(focusNode.dispose);
 
@@ -2220,8 +2128,7 @@ void main() {
         RawMenuAnchor(
           controller: controller,
           childFocusNode: focusNode,
-          panel: RawMenuPanel(
-              menuChildren: <Widget>[Button.tag(Tag.a), Button.tag(Tag.b)]),
+          panel: RawMenuPanel(menuChildren: <Widget>[Button.tag(Tag.a), Button.tag(Tag.b)]),
           child: AnchorButton(Tag.anchor, focusNode: focusNode),
         ),
       ),
@@ -2249,12 +2156,9 @@ void main() {
               RawMenuAnchor(
                 controller: controller,
                 childFocusNode: focusNode,
-                panel: RawMenuPanel(menuChildren: <Widget>[
-                  Button.tag(Tag.a),
-                  Button.tag(Tag.b)
-                ]),
+                panel: RawMenuPanel(menuChildren: <Widget>[Button.tag(Tag.a), Button.tag(Tag.b)]),
                 child: AnchorButton(Tag.anchor, focusNode: focusNode),
-              )
+              ),
             ],
           ),
         ),
@@ -2273,9 +2177,9 @@ void main() {
     expect(focusedMenu, equals(Tag.b.focusNode));
   });
 
-  testWidgets(
-      '[Default] LTR ArrowRight key opens a submenu anchor and focuses first item',
-      (WidgetTester tester) async {
+  testWidgets('[Default] LTR ArrowRight key opens a submenu anchor and focuses first item', (
+    WidgetTester tester,
+  ) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
@@ -2288,10 +2192,7 @@ void main() {
               Button.tag(Tag.b),
               RawMenuAnchor(
                 panel: RawMenuPanel(
-                  menuChildren: <Widget>[
-                    Button.tag(Tag.c.a),
-                    Button.tag(Tag.c.b),
-                  ],
+                  menuChildren: <Widget>[Button.tag(Tag.c.a), Button.tag(Tag.c.b)],
                 ),
                 child: AnchorButton(Tag.c, focusNode: focusNode),
               ),
@@ -2321,9 +2222,9 @@ void main() {
     expect(focusedMenu, equals(Tag.c.a.focusNode));
   });
 
-  testWidgets(
-      '[Default] RTL ArrowLeft key opens a submenu anchor and focuses first item',
-      (WidgetTester tester) async {
+  testWidgets('[Default] RTL ArrowLeft key opens a submenu anchor and focuses first item', (
+    WidgetTester tester,
+  ) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
@@ -2337,10 +2238,7 @@ void main() {
               Button.tag(Tag.b),
               RawMenuAnchor(
                 panel: RawMenuPanel(
-                  menuChildren: <Widget>[
-                    Button.tag(Tag.c.a),
-                    Button.tag(Tag.c.b),
-                  ],
+                  menuChildren: <Widget>[Button.tag(Tag.c.a), Button.tag(Tag.c.b)],
                 ),
                 child: AnchorButton(Tag.c, focusNode: focusNode),
               ),
@@ -2370,8 +2268,7 @@ void main() {
     expect(focusedMenu, equals(Tag.c.a.focusNode));
   });
 
-  testWidgets('[Default] LTR ArrowLeft key closes a submenu',
-      (WidgetTester tester) async {
+  testWidgets('[Default] LTR ArrowLeft key closes a submenu', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
@@ -2388,9 +2285,7 @@ void main() {
                     Button.tag(Tag.c.a),
                     Button.tag(Tag.c.b),
                     RawMenuAnchor(
-                      panel: const RawMenuPanel(
-                        menuChildren: <Widget>[],
-                      ),
+                      panel: const RawMenuPanel(menuChildren: <Widget>[]),
                       child: AnchorButton(Tag.c.c),
                     ),
                   ],
@@ -2452,8 +2347,7 @@ void main() {
     expect(find.text(Tag.c.a.text), findsNothing);
   });
 
-  testWidgets('[Default] RTL ArrowRight key closes a submenu',
-      (WidgetTester tester) async {
+  testWidgets('[Default] RTL ArrowRight key closes a submenu', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
@@ -2533,8 +2427,7 @@ void main() {
     expect(find.text(Tag.c.a.text), findsNothing);
   });
 
-  testWidgets('[Default] LTR Directional traversal',
-      (WidgetTester tester) async {
+  testWidgets('[Default] LTR Directional traversal', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
@@ -2559,10 +2452,7 @@ void main() {
                 Button.tag(Tag.b),
                 RawMenuAnchor(
                   panel: RawMenuPanel(
-                    menuChildren: <Widget>[
-                      Button.tag(Tag.c.a),
-                      Button.tag(Tag.c.b),
-                    ],
+                    menuChildren: <Widget>[Button.tag(Tag.c.a), Button.tag(Tag.c.b)],
                   ),
                   child: const AnchorButton(Tag.c),
                 ),
@@ -2702,8 +2592,7 @@ void main() {
     expect(eventBubbled, isFalse);
   });
 
-  testWidgets('[Default] RTL Directional traversal',
-      (WidgetTester tester) async {
+  testWidgets('[Default] RTL Directional traversal', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
@@ -2728,10 +2617,9 @@ void main() {
                 Button.tag(Tag.a),
                 Button.tag(Tag.b),
                 RawMenuAnchor(
-                  panel: RawMenuPanel(menuChildren: <Widget>[
-                    Button.tag(Tag.c.a),
-                    Button.tag(Tag.c.b),
-                  ]),
+                  panel: RawMenuPanel(
+                    menuChildren: <Widget>[Button.tag(Tag.c.a), Button.tag(Tag.c.b)],
+                  ),
                   child: const AnchorButton(Tag.c),
                 ),
                 Button.tag(Tag.d),
@@ -2870,9 +2758,9 @@ void main() {
     expect(eventBubbled, isFalse);
   });
 
-  testWidgets(
-      '[Default] Closed RawMenuAnchor does not affect anchor tab traversal',
-      (WidgetTester tester) async {
+  testWidgets('[Default] Closed RawMenuAnchor does not affect anchor tab traversal', (
+    WidgetTester tester,
+  ) async {
     final FocusNode focusNode = FocusNode(debugLabel: Tag.b.focusNode);
     addTearDown(focusNode.dispose);
 
@@ -3017,19 +2905,18 @@ void main() {
     expect(focusedMenu, equals(Tag.b.b.focusNode));
     expect(
       invokedIntents,
-      equals(
-        const <Intent>[
-          NextFocusIntent(),
-          PreviousFocusIntent(),
-          NextFocusIntent(),
-          PreviousFocusIntent(),
-        ],
-      ),
+      equals(const <Intent>[
+        NextFocusIntent(),
+        PreviousFocusIntent(),
+        NextFocusIntent(),
+        PreviousFocusIntent(),
+      ]),
     );
   });
 
-  testWidgets('[Default] Menus close when anchor and overlay are blurred',
-      (WidgetTester tester) async {
+  testWidgets('[Default] Menus close when anchor and overlay are blurred', (
+    WidgetTester tester,
+  ) async {
     final FocusNode bFocusNode = FocusNode(debugLabel: Tag.b.focusNode);
     final FocusNode cFocusNode = FocusNode(debugLabel: Tag.c.focusNode);
     addTearDown(bFocusNode.dispose);
@@ -3046,11 +2933,7 @@ void main() {
                 menuChildren: <Widget>[
                   Button.tag(Tag.b.a),
                   RawMenuAnchor(
-                    panel: RawMenuPanel(
-                      menuChildren: <Widget>[
-                        Button.tag(Tag.b.b.a),
-                      ],
-                    ),
+                    panel: RawMenuPanel(menuChildren: <Widget>[Button.tag(Tag.b.b.a)]),
                     child: AnchorButton(Tag.b.b),
                   ),
                   Button.tag(Tag.b.c),
@@ -3152,18 +3035,13 @@ void main() {
     expect(find.text(Tag.b.a.text), findsNothing);
   });
 
-  testWidgets('[Default] Light Surface Appearance',
-      (WidgetTester tester) async {
+  testWidgets('[Default] Light Surface Appearance', (WidgetTester tester) async {
     await tester.pumpWidget(
       App(
         RawMenuAnchor(
           controller: controller,
           menuAlignment: Alignment.center,
-          panel: const RawMenuPanel(
-            menuChildren: <Widget>[
-              SizedBox(height: 100, width: 200),
-            ],
-          ),
+          panel: const RawMenuPanel(menuChildren: <Widget>[SizedBox(height: 100, width: 200)]),
           child: Container(),
         ),
       ),
@@ -3186,11 +3064,7 @@ void main() {
           child: RawMenuAnchor(
             controller: controller,
             menuAlignment: Alignment.center,
-            panel: const RawMenuPanel(
-              menuChildren: <Widget>[
-                SizedBox(height: 100, width: 200),
-              ],
-            ),
+            panel: const RawMenuPanel(menuChildren: <Widget>[SizedBox(height: 100, width: 200)]),
             child: Container(),
           ),
         ),
@@ -3215,9 +3089,7 @@ void main() {
           menuAlignment: Alignment.center,
           panel: const RawMenuPanel(
             decoration: decoration,
-            menuChildren: <Widget>[
-              SizedBox(height: 100, width: 200),
-            ],
+            menuChildren: <Widget>[SizedBox(height: 100, width: 200)],
           ),
           child: Container(),
         ),
@@ -3227,10 +3099,7 @@ void main() {
     controller.open(position: const Offset(200, 200));
     await tester.pump();
 
-    expect(
-      findMenuPanelDescendent<Container>(tester).decoration,
-      decoration,
-    );
+    expect(findMenuPanelDescendent<Container>(tester).decoration, decoration);
   });
 
   testWidgets('Menu closes on view size change', (WidgetTester tester) async {
@@ -3260,11 +3129,7 @@ void main() {
                   closed = true;
                 },
                 controller: controller,
-                panel: RawMenuPanel(
-                  menuChildren: <Widget>[
-                    Text(Tag.a.text),
-                  ],
-                ),
+                panel: RawMenuPanel(menuChildren: <Widget>[Text(Tag.a.text)]),
                 child: const AnchorButton(Tag.anchor),
               ),
             ),
@@ -3333,16 +3198,12 @@ void main() {
     expect(closed, isNotEmpty);
   });
 
-  testWidgets('Menus do not close on root menu internal scroll',
-      (WidgetTester tester) async {
+  testWidgets('Menus do not close on root menu internal scroll', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/122168.
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     bool rootOpened = false;
-    const BoxConstraints largeButtonConstraints = BoxConstraints.tightFor(
-      width: 200,
-      height: 300,
-    );
+    const BoxConstraints largeButtonConstraints = BoxConstraints.tightFor(width: 200, height: 300);
 
     await tester.pumpWidget(
       App(
@@ -3374,14 +3235,10 @@ void main() {
                     },
                     panel: RawMenuPanel(
                       menuChildren: <Widget>[
-                        Button.tag(Tag.a.a,
-                            constraints: largeButtonConstraints),
+                        Button.tag(Tag.a.a, constraints: largeButtonConstraints),
                       ],
                     ),
-                    child: const AnchorButton(
-                      Tag.a,
-                      constraints: largeButtonConstraints,
-                    ),
+                    child: const AnchorButton(Tag.a, constraints: largeButtonConstraints),
                   ),
                   Button.tag(Tag.b, constraints: largeButtonConstraints),
                   Button.tag(Tag.c, constraints: largeButtonConstraints),
@@ -3402,9 +3259,7 @@ void main() {
     // Hover the first submenu anchor.
     final TestPointer pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     await tester.tap(find.text(Tag.a.text));
-    await tester.sendEventToBinding(
-      pointer.hover(tester.getCenter(find.text(Tag.a.text))),
-    );
+    await tester.sendEventToBinding(pointer.hover(tester.getCenter(find.text(Tag.a.text))));
     await tester.pump();
     expect(opened, equals(<Tag>[Tag.a]));
 
@@ -3424,8 +3279,9 @@ void main() {
   // Copied from [MenuAnchor] tests.
   //
   // Regression test for https://github.com/flutter/flutter/issues/157606.
-  testWidgets('RawMenuAnchor builder rebuilds when isOpen state changes',
-      (WidgetTester tester) async {
+  testWidgets('RawMenuAnchor builder rebuilds when isOpen state changes', (
+    WidgetTester tester,
+  ) async {
     bool isOpen = false;
     int openCount = 0;
     int closeCount = 0;
@@ -3433,13 +3289,8 @@ void main() {
     await tester.pumpWidget(
       App(
         RawMenuAnchor(
-          panel: RawMenuPanel(
-            menuChildren: <Widget>[
-              Button.text('Menu Item'),
-            ],
-          ),
-          builder:
-              (BuildContext context, MenuController controller, Widget? child) {
+          panel: RawMenuPanel(menuChildren: <Widget>[Button.text('Menu Item')]),
+          builder: (BuildContext context, MenuController controller, Widget? child) {
             isOpen = controller.isOpen;
             return Button(
               Text(isOpen ? 'close' : 'open'),
@@ -3483,9 +3334,9 @@ void main() {
   // Copied from [MenuAnchor] tests.
   //
   // Regression test for https://github.com/flutter/flutter/issues/155034.
-  testWidgets(
-      'Content is shown in the root overlay when useRootOverlay is true',
-      (WidgetTester tester) async {
+  testWidgets('Content is shown in the root overlay when useRootOverlay is true', (
+    WidgetTester tester,
+  ) async {
     final MenuController controller = MenuController();
     final UniqueKey overlayKey = UniqueKey();
     final Finder a = find.text(Tag.a.text);
@@ -3497,30 +3348,33 @@ void main() {
       overlayEntry.dispose();
     });
 
-    await tester.pumpWidget(App(
-      Overlay(
-        key: overlayKey,
-        initialEntries: <OverlayEntry>[
-          overlayEntry = OverlayEntry(builder: (BuildContext context) {
-            return Center(
-              child: RawMenuAnchor(
-                useRootOverlay: true,
-                controller: controller,
-                panel: RawMenuPanel(
-                  menuChildren: <Widget>[
-                    RawMenuAnchor(
-                      panel: RawMenuPanel(
-                          menuChildren: <Widget>[Button.tag(Tag.a.a)]),
-                      child: const AnchorButton(Tag.a),
+    await tester.pumpWidget(
+      App(
+        Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            overlayEntry = OverlayEntry(
+              builder: (BuildContext context) {
+                return Center(
+                  child: RawMenuAnchor(
+                    useRootOverlay: true,
+                    controller: controller,
+                    panel: RawMenuPanel(
+                      menuChildren: <Widget>[
+                        RawMenuAnchor(
+                          panel: RawMenuPanel(menuChildren: <Widget>[Button.tag(Tag.a.a)]),
+                          child: const AnchorButton(Tag.a),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            );
-          }),
-        ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
-    ));
+    );
 
     expect(a, findsNothing);
 
@@ -3537,29 +3391,22 @@ void main() {
     // overlay created by the boilerplate code.
     expect(find.byType(Overlay), findsNWidgets(2));
 
-    final Iterable<Overlay> overlays =
-        tester.widgetList<Overlay>(find.byType(Overlay));
+    final Iterable<Overlay> overlays = tester.widgetList<Overlay>(find.byType(Overlay));
     final Overlay nonRootOverlay = tester.widget(find.byKey(overlayKey));
-    final Overlay rootOverlay =
-        overlays.firstWhere((Overlay overlay) => overlay != nonRootOverlay);
+    final Overlay rootOverlay = overlays.firstWhere((Overlay overlay) => overlay != nonRootOverlay);
 
-    final RenderObject menuTheater =
-        findAncestorRenderTheaters(tester.renderObject(a)).first;
-    final RenderObject submenuTheater =
-        findAncestorRenderTheaters(tester.renderObject(aa)).first;
+    final RenderObject menuTheater = findAncestorRenderTheaters(tester.renderObject(a)).first;
+    final RenderObject submenuTheater = findAncestorRenderTheaters(tester.renderObject(aa)).first;
 
     // Check that the ancestor _RenderTheater for the menu item is the one
     // from the root overlay.
-    expect(
-      menuTheater,
-      tester.renderObject(find.byWidget(rootOverlay)),
-    );
+    expect(menuTheater, tester.renderObject(find.byWidget(rootOverlay)));
     expect(menuTheater, submenuTheater);
   });
 
-  testWidgets(
-      'Content is shown in the nearest ancestor overlay when useRootOverlay is false',
-      (WidgetTester tester) async {
+  testWidgets('Content is shown in the nearest ancestor overlay when useRootOverlay is false', (
+    WidgetTester tester,
+  ) async {
     final MenuController controller = MenuController();
     final UniqueKey overlayKey = UniqueKey();
     final Finder a = find.text(Tag.a.text);
@@ -3571,32 +3418,35 @@ void main() {
       overlayEntry.dispose();
     });
 
-    await tester.pumpWidget(App(
-      Overlay(
-        key: overlayKey,
-        initialEntries: <OverlayEntry>[
-          overlayEntry = OverlayEntry(builder: (BuildContext context) {
-            return Center(
-              child: RawMenuAnchor(
-                controller: controller,
-                panel: RawMenuPanel(
-                  menuChildren: <Widget>[
-                    // Nested menus should be rendered in the same overlay as
-                    // their parent, so useRootOverlay should have no effect.
-                    RawMenuAnchor(
-                      useRootOverlay: true,
-                      panel: RawMenuPanel(
-                          menuChildren: <Widget>[Button.tag(Tag.a.a)]),
-                      child: const AnchorButton(Tag.a),
+    await tester.pumpWidget(
+      App(
+        Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            overlayEntry = OverlayEntry(
+              builder: (BuildContext context) {
+                return Center(
+                  child: RawMenuAnchor(
+                    controller: controller,
+                    panel: RawMenuPanel(
+                      menuChildren: <Widget>[
+                        // Nested menus should be rendered in the same overlay as
+                        // their parent, so useRootOverlay should have no effect.
+                        RawMenuAnchor(
+                          useRootOverlay: true,
+                          panel: RawMenuPanel(menuChildren: <Widget>[Button.tag(Tag.a.a)]),
+                          child: const AnchorButton(Tag.a),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            );
-          }),
-        ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
-    ));
+    );
 
     expect(a, findsNothing);
 
@@ -3614,22 +3464,16 @@ void main() {
     expect(find.byType(Overlay), findsNWidgets(2));
 
     final Overlay nonRootOverlay = tester.widget(find.byKey(overlayKey));
-    final RenderObject menuTheater =
-        findAncestorRenderTheaters(tester.renderObject(a)).first;
-    final RenderObject submenuTheater =
-        findAncestorRenderTheaters(tester.renderObject(aa)).first;
+    final RenderObject menuTheater = findAncestorRenderTheaters(tester.renderObject(a)).first;
+    final RenderObject submenuTheater = findAncestorRenderTheaters(tester.renderObject(aa)).first;
 
     // Check that the ancestor _RenderTheater for the menu item is the one
     // from the root overlay.
-    expect(
-      menuTheater,
-      tester.renderObject(find.byWidget(nonRootOverlay)),
-    );
+    expect(menuTheater, tester.renderObject(find.byWidget(nonRootOverlay)));
     expect(menuTheater, submenuTheater);
   });
 
-  testWidgets('Parent updates are not triggered during builds',
-      (WidgetTester tester) async {
+  testWidgets('Parent updates are not triggered during builds', (WidgetTester tester) async {
     // This test ensures that _MenuAnchor._childChangedOpenState does not
     // rebuild a child's parent if that parent is currently building.
     final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
@@ -3675,8 +3519,7 @@ void main() {
     /// rect is taken after UnconstrainedBox clips its contents.
     List<Rect> collectOverlays({bool clipped = true}) {
       final List<Rect> menuRects = <Rect>[];
-      final Finder finder =
-          clipped ? find.byType(RawMenuPanel) : findOverlayContents();
+      final Finder finder = clipped ? find.byType(RawMenuPanel) : findOverlayContents();
       for (final Element candidate in finder.evaluate().toList()) {
         final RenderBox box = candidate.renderObject! as RenderBox;
         final Offset topLeft = box.localToGlobal(box.size.topLeft(Offset.zero));
@@ -3699,7 +3542,7 @@ void main() {
                   height: 50,
                   color: const Color(0xFF0000FF),
                   child: Text(Tag.a.text),
-                )
+                ),
               ],
             ),
             child: const AnchorButton(Tag.anchor),
@@ -3712,19 +3555,16 @@ void main() {
       await tester.pump();
 
       // Anchor position is fixed.
-      final ui.Rect anchorRect = tester.getRect(
-        find.widgetWithText(Button, Tag.anchor.text),
-      );
+      final ui.Rect anchorRect = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
 
       for (final AlignmentGeometry alignment in alignments) {
         await tester.pumpWidget(buildApp(alignment: alignment));
-        final ui.Rect overlay = tester.getRect(
-          find.widgetWithText(Container, Tag.a.text).first,
-        );
+        final ui.Rect overlay = tester.getRect(find.widgetWithText(Container, Tag.a.text).first);
         expect(
           alignment.resolve(TextDirection.ltr).withinRect(anchorRect),
           overlay.center,
-          reason: 'Anchor alignment: $alignment \n'
+          reason:
+              'Anchor alignment: $alignment \n'
               'Menu rect: $overlay \n',
         );
       }
@@ -3745,7 +3585,7 @@ void main() {
                   height: 50,
                   color: const Color(0xFF0000FF),
                   child: Text(Tag.a.text),
-                )
+                ),
               ],
             ),
             child: const AnchorButton(Tag.anchor),
@@ -3758,19 +3598,16 @@ void main() {
       await tester.pump();
 
       // Anchor position is fixed.
-      final ui.Rect anchorRect = tester.getRect(
-        find.widgetWithText(Button, Tag.anchor.text),
-      );
+      final ui.Rect anchorRect = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
 
       for (final AlignmentGeometry alignment in alignments) {
         await tester.pumpWidget(buildApp(alignment: alignment));
-        final ui.Rect overlay = tester.getRect(
-          find.widgetWithText(Container, Tag.a.text).first,
-        );
+        final ui.Rect overlay = tester.getRect(find.widgetWithText(Container, Tag.a.text).first);
         expect(
           alignment.resolve(TextDirection.rtl).withinRect(anchorRect),
           overlay.center,
-          reason: 'Anchor alignment: $alignment \n'
+          reason:
+              'Anchor alignment: $alignment \n'
               'Menu rect: $overlay \n',
         );
       }
@@ -3794,7 +3631,7 @@ void main() {
                   alignment: Alignment.center,
                   color: const Color(0xFF0000FF),
                   child: Text(Tag.a.text),
-                )
+                ),
               ],
             ),
             child: const AnchorButton(Tag.anchor),
@@ -3809,14 +3646,13 @@ void main() {
       for (final AlignmentGeometry alignment in alignments) {
         for (double y = -2; y <= 2; y += 1) {
           await tester.pumpWidget(buildApp(alignment: alignment));
-          final ui.Rect overlay = tester.getRect(
-            find.widgetWithText(Container, Tag.a.text).first,
-          );
+          final ui.Rect overlay = tester.getRect(find.widgetWithText(Container, Tag.a.text).first);
 
           expect(
             alignment.resolve(TextDirection.ltr).withinRect(overlay),
             size.center(Offset.zero),
-            reason: 'Menu alignment: $alignment \n'
+            reason:
+                'Menu alignment: $alignment \n'
                 'Menu rect: $overlay \n',
           );
         }
@@ -3840,7 +3676,7 @@ void main() {
                   height: 50,
                   color: const Color(0xFF0000FF),
                   child: Text(Tag.a.text),
-                )
+                ),
               ],
             ),
             child: const AnchorButton(Tag.anchor),
@@ -3854,31 +3690,27 @@ void main() {
 
       for (final AlignmentGeometry alignment in alignments) {
         await tester.pumpWidget(buildApp(alignment: alignment));
-        final ui.Rect overlay = tester.getRect(
-          find.widgetWithText(Container, Tag.a.text).first,
-        );
+        final ui.Rect overlay = tester.getRect(find.widgetWithText(Container, Tag.a.text).first);
         expect(
           alignment.resolve(TextDirection.rtl).withinRect(overlay),
           size.center(Offset.zero),
-          reason: 'Menu alignment: $alignment \n'
+          reason:
+              'Menu alignment: $alignment \n'
               'Menu rect: $overlay \n',
         );
       }
     });
 
-    testWidgets('LTR menu top-start attaches to anchor bottom-start by default',
-        (WidgetTester tester) async {
+    testWidgets('LTR menu top-start attaches to anchor bottom-start by default', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         App(
           RawMenuAnchor(
             panel: RawMenuPanel(
               decoration: const BoxDecoration(color: Color(0xFF0000FF)),
               menuChildren: <Widget>[
-                Container(
-                  width: 100,
-                  height: 100,
-                  color: const Color(0xFF00FF00),
-                ),
+                Container(width: 100, height: 100, color: const Color(0xFF00FF00)),
               ],
             ),
             child: AnchorButton.small(Tag.anchor),
@@ -3896,8 +3728,9 @@ void main() {
       expect(anchorBottomLeft, equals(collectOverlays().first.topLeft));
     });
 
-    testWidgets('RTL menu top-start attaches to anchor bottom-start by default',
-        (WidgetTester tester) async {
+    testWidgets('RTL menu top-start attaches to anchor bottom-start by default', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         App(
           textDirection: TextDirection.rtl,
@@ -3905,11 +3738,7 @@ void main() {
             panel: RawMenuPanel(
               decoration: const BoxDecoration(color: Color(0xFF0000FF)),
               menuChildren: <Widget>[
-                Container(
-                  width: 100,
-                  height: 100,
-                  color: const Color(0xFF00FF00),
-                ),
+                Container(width: 100, height: 100, color: const Color(0xFF00FF00)),
               ],
             ),
             child: AnchorButton.small(Tag.anchor),
@@ -3927,8 +3756,9 @@ void main() {
       expect(anchorBottomLeft, equals(collectOverlays().first.topLeft));
     });
 
-    testWidgets('LTR submenu top-start attaches to anchor top-end by default',
-        (WidgetTester tester) async {
+    testWidgets('LTR submenu top-start attaches to anchor top-end by default', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         App(
           RawMenuAnchor(
@@ -3939,15 +3769,11 @@ void main() {
                   panel: RawMenuPanel(
                     decoration: const BoxDecoration(),
                     menuChildren: <Widget>[
-                      Container(
-                        width: 100,
-                        height: 100,
-                        color: const Color(0xFF00FF00),
-                      ),
+                      Container(width: 100, height: 100, color: const Color(0xFF00FF00)),
                     ],
                   ),
                   child: AnchorButton.small(Tag.a),
-                )
+                ),
               ],
             ),
             child: AnchorButton.small(Tag.anchor),
@@ -3962,12 +3788,12 @@ void main() {
 
       final [ui.Rect menu, ui.Rect submenu] = collectOverlays();
       expect(submenu.topLeft, equals(menu.topRight));
-      expect(
-          submenu.bottomRight - menu.topRight, equals(const Offset(100, 100)));
+      expect(submenu.bottomRight - menu.topRight, equals(const Offset(100, 100)));
     });
 
-    testWidgets('RTL submenu top-start attaches to anchor top-end by default',
-        (WidgetTester tester) async {
+    testWidgets('RTL submenu top-start attaches to anchor top-end by default', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         App(
           textDirection: TextDirection.rtl,
@@ -3978,12 +3804,10 @@ void main() {
                 RawMenuAnchor(
                   panel: const RawMenuPanel(
                     decoration: BoxDecoration(color: Color(0xFFFF00FF)),
-                    menuChildren: <Widget>[
-                      SizedBox.square(dimension: 100),
-                    ],
+                    menuChildren: <Widget>[SizedBox.square(dimension: 100)],
                   ),
                   child: AnchorButton.small(Tag.a),
-                )
+                ),
               ],
             ),
             child: AnchorButton.small(Tag.anchor),
@@ -3998,12 +3822,10 @@ void main() {
 
       final [ui.Rect menu, ui.Rect submenu] = collectOverlays();
       expect(submenu.topRight, equals(menu.topLeft));
-      expect(
-          submenu.bottomRight - menu.topRight, equals(const Offset(-100, 100)));
+      expect(submenu.bottomRight - menu.topRight, equals(const Offset(-100, 100)));
     });
 
-    testWidgets('alignmentOffset is not directional by default',
-        (WidgetTester tester) async {
+    testWidgets('alignmentOffset is not directional by default', (WidgetTester tester) async {
       const ui.Offset offset = Offset(24, 33);
 
       Widget buildApp({
@@ -4023,7 +3845,7 @@ void main() {
                   alignment: Alignment.center,
                   color: const Color(0xFF0000FF),
                   child: Text(Tag.a.text),
-                )
+                ),
               ],
             ),
             child: AnchorButton.small(Tag.anchor),
@@ -4047,10 +3869,9 @@ void main() {
 
       final Rect rtlPosition = collectOverlays().first;
 
-      await tester.pumpWidget(buildApp(
-        alignmentOffset: offset,
-        textDirection: ui.TextDirection.rtl,
-      ));
+      await tester.pumpWidget(
+        buildApp(alignmentOffset: offset, textDirection: ui.TextDirection.rtl),
+      );
 
       final Rect rtlPositionTwo = collectOverlays().first;
 
@@ -4078,7 +3899,7 @@ void main() {
                   alignment: Alignment.center,
                   color: const Color(0xFF0000FF),
                   child: Text(Tag.a.text),
-                )
+                ),
               ],
             ),
             child: AnchorButton.small(Tag.anchor),
@@ -4125,7 +3946,7 @@ void main() {
                   alignment: Alignment.center,
                   color: const Color(0xFF0000FF),
                   child: Text(Tag.a.text),
-                )
+                ),
               ],
             ),
             child: AnchorButton.small(Tag.anchor),
@@ -4150,69 +3971,67 @@ void main() {
     });
 
     testWidgets(
-        'LTR alignmentOffset.dx does not change when menuAlignment is an AlignmentDirectional',
-        (WidgetTester tester) async {
-      const ui.Offset offset = Offset(24, 33);
+      'LTR alignmentOffset.dx does not change when menuAlignment is an AlignmentDirectional',
+      (WidgetTester tester) async {
+        const ui.Offset offset = Offset(24, 33);
 
-      Widget buildApp({
-        AlignmentGeometry alignment = Alignment.center,
-        Offset alignmentOffset = Offset.zero,
-      }) {
-        return App(
-          RawMenuAnchor(
-            alignmentOffset: alignmentOffset,
-            alignment: alignment,
-            menuAlignment: Alignment.center,
-            panel: RawMenuPanel(
-              decoration: const BoxDecoration(),
-              menuChildren: <Widget>[
-                Container(
-                  width: 50,
-                  height: 66,
-                  color: const Color(0xFF0000FF),
-                  child: Text(Tag.a.text),
-                )
-              ],
+        Widget buildApp({
+          AlignmentGeometry alignment = Alignment.center,
+          Offset alignmentOffset = Offset.zero,
+        }) {
+          return App(
+            RawMenuAnchor(
+              alignmentOffset: alignmentOffset,
+              alignment: alignment,
+              menuAlignment: Alignment.center,
+              panel: RawMenuPanel(
+                decoration: const BoxDecoration(),
+                menuChildren: <Widget>[
+                  Container(
+                    width: 50,
+                    height: 66,
+                    color: const Color(0xFF0000FF),
+                    child: Text(Tag.a.text),
+                  ),
+                ],
+              ),
+              child: const AnchorButton(
+                Tag.anchor,
+                constraints: BoxConstraints.tightFor(width: 125, height: 66),
+              ),
             ),
-            child: const AnchorButton(
-              Tag.anchor,
-              constraints: BoxConstraints.tightFor(width: 125, height: 66),
-            ),
-          ),
+          );
+        }
+
+        await tester.pumpWidget(buildApp());
+
+        await tester.tap(find.text(Tag.anchor.text));
+        await tester.pump();
+
+        final Rect center = collectOverlays().first;
+
+        await tester.pumpWidget(buildApp(alignmentOffset: offset));
+
+        final Rect centerOffset = collectOverlays().first;
+
+        // Switching from Alignment.center to AlignmentDirectional.center won't
+        // relayout the menu, so pump an empty offset to trigger a relayout.
+        await tester.pumpWidget(buildApp());
+
+        await tester.pumpWidget(
+          buildApp(alignmentOffset: offset, alignment: AlignmentDirectional.center),
         );
-      }
 
-      await tester.pumpWidget(buildApp());
+        final Rect centerDirectionalOffset = collectOverlays().first;
 
-      await tester.tap(find.text(Tag.anchor.text));
-      await tester.pump();
+        expect(centerOffset, equals(center.shift(offset)));
+        expect(centerDirectionalOffset, equals(centerOffset));
+      },
+    );
 
-      final Rect center = collectOverlays().first;
-
-      await tester.pumpWidget(buildApp(alignmentOffset: offset));
-
-      final Rect centerOffset = collectOverlays().first;
-
-      // Switching from Alignment.center to AlignmentDirectional.center won't
-      // relayout the menu, so pump an empty offset to trigger a relayout.
-      await tester.pumpWidget(buildApp());
-
-      await tester.pumpWidget(
-        buildApp(
-          alignmentOffset: offset,
-          alignment: AlignmentDirectional.center,
-        ),
-      );
-
-      final Rect centerDirectionalOffset = collectOverlays().first;
-
-      expect(centerOffset, equals(center.shift(offset)));
-      expect(centerDirectionalOffset, equals(centerOffset));
-    });
-
-    testWidgets(
-        'RTL alignmentOffset.dx is negated when alignment is an AlignmentDirectional',
-        (WidgetTester tester) async {
+    testWidgets('RTL alignmentOffset.dx is negated when alignment is an AlignmentDirectional', (
+      WidgetTester tester,
+    ) async {
       const ui.Offset offset = Offset(24, 33);
 
       Widget buildApp({
@@ -4227,73 +4046,15 @@ void main() {
             alignment: alignment,
             menuAlignment: Alignment.center,
             panel: RawMenuPanel(
-                decoration: const BoxDecoration(),
-                menuChildren: <Widget>[
-                  Container(
-                    width: 50,
-                    height: 66,
-                    color: const Color(0xFF0000FF),
-                    child: Text(Tag.a.text),
-                  )
-                ]),
-            child: AnchorButton.small(Tag.anchor),
-          ),
-        );
-      }
-
-      await tester.pumpWidget(buildApp());
-      await tester.tap(find.text(Tag.anchor.text));
-      await tester.pump();
-
-      final Rect center = collectOverlays().first;
-
-      await tester.pumpWidget(buildApp(alignmentOffset: offset));
-
-      final Rect centerOffset = collectOverlays().first;
-
-      // Switching from Alignment.center to AlignmentDirectional.center won't
-      // relayout the menu, so pump an empty offset to trigger a relayout.
-      await tester.pumpWidget(buildApp());
-
-      await tester.pumpWidget(
-        buildApp(
-          alignmentOffset: offset,
-          alignment: AlignmentDirectional.center,
-        ),
-      );
-
-      final Rect centerDirectionalOffset = collectOverlays().first;
-
-      expect(centerOffset, equals(center.shift(offset)));
-      expect(centerDirectionalOffset,
-          equals(center.shift(Offset(-offset.dx, offset.dy))));
-    });
-
-    testWidgets(
-        'RTL alignmentOffset.dx is not negated when menuAlignment is an AlignmentDirectional',
-        (WidgetTester tester) async {
-      const ui.Offset offset = Offset(24, 33);
-
-      Widget buildApp({
-        AlignmentGeometry alignment = Alignment.center,
-        Offset alignmentOffset = Offset.zero,
-      }) {
-        return App(
-          textDirection: ui.TextDirection.rtl,
-          RawMenuAnchor(
-            menuAlignment: alignment,
-            alignmentOffset: alignmentOffset,
-            alignment: Alignment.center,
-            panel: RawMenuPanel(
+              decoration: const BoxDecoration(),
               menuChildren: <Widget>[
                 Container(
                   width: 50,
                   height: 66,
                   color: const Color(0xFF0000FF),
                   child: Text(Tag.a.text),
-                )
+                ),
               ],
-              decoration: const BoxDecoration(),
             ),
             child: AnchorButton.small(Tag.anchor),
           ),
@@ -4301,7 +4062,6 @@ void main() {
       }
 
       await tester.pumpWidget(buildApp());
-
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
 
@@ -4316,25 +4076,75 @@ void main() {
       await tester.pumpWidget(buildApp());
 
       await tester.pumpWidget(
-        buildApp(
-          alignmentOffset: offset,
-          alignment: AlignmentDirectional.center,
-        ),
+        buildApp(alignmentOffset: offset, alignment: AlignmentDirectional.center),
       );
 
       final Rect centerDirectionalOffset = collectOverlays().first;
 
       expect(centerOffset, equals(center.shift(offset)));
-      expect(centerDirectionalOffset, equals(centerOffset));
+      expect(centerDirectionalOffset, equals(center.shift(Offset(-offset.dx, offset.dy))));
     });
 
-    testWidgets('LTR constrained and offset menu placement',
-        (WidgetTester tester) async {
+    testWidgets(
+      'RTL alignmentOffset.dx is not negated when menuAlignment is an AlignmentDirectional',
+      (WidgetTester tester) async {
+        const ui.Offset offset = Offset(24, 33);
+
+        Widget buildApp({
+          AlignmentGeometry alignment = Alignment.center,
+          Offset alignmentOffset = Offset.zero,
+        }) {
+          return App(
+            textDirection: ui.TextDirection.rtl,
+            RawMenuAnchor(
+              menuAlignment: alignment,
+              alignmentOffset: alignmentOffset,
+              alignment: Alignment.center,
+              panel: RawMenuPanel(
+                menuChildren: <Widget>[
+                  Container(
+                    width: 50,
+                    height: 66,
+                    color: const Color(0xFF0000FF),
+                    child: Text(Tag.a.text),
+                  ),
+                ],
+                decoration: const BoxDecoration(),
+              ),
+              child: AnchorButton.small(Tag.anchor),
+            ),
+          );
+        }
+
+        await tester.pumpWidget(buildApp());
+
+        await tester.tap(find.text(Tag.anchor.text));
+        await tester.pump();
+
+        final Rect center = collectOverlays().first;
+
+        await tester.pumpWidget(buildApp(alignmentOffset: offset));
+
+        final Rect centerOffset = collectOverlays().first;
+
+        // Switching from Alignment.center to AlignmentDirectional.center won't
+        // relayout the menu, so pump an empty offset to trigger a relayout.
+        await tester.pumpWidget(buildApp());
+
+        await tester.pumpWidget(
+          buildApp(alignmentOffset: offset, alignment: AlignmentDirectional.center),
+        );
+
+        final Rect centerDirectionalOffset = collectOverlays().first;
+
+        expect(centerOffset, equals(center.shift(offset)));
+        expect(centerDirectionalOffset, equals(centerOffset));
+      },
+    );
+
+    testWidgets('LTR constrained and offset menu placement', (WidgetTester tester) async {
       await changeSurfaceSize(tester, const Size(200, 200));
-      const BoxConstraints constraints = BoxConstraints.tightFor(
-        width: 100,
-        height: 100,
-      );
+      const BoxConstraints constraints = BoxConstraints.tightFor(width: 100, height: 100);
 
       await tester.pumpWidget(
         App(
@@ -4350,10 +4160,7 @@ void main() {
                     constraints: constraints,
                     decoration: const BoxDecoration(),
                     menuChildren: <Widget>[
-                      Container(
-                        color: const Color(0xFF0000FF),
-                        constraints: constraints,
-                      )
+                      Container(color: const Color(0xFF0000FF), constraints: constraints),
                     ],
                   ),
                   child: const AnchorButton(Tag.a, constraints: constraints),
@@ -4372,17 +4179,13 @@ void main() {
 
       expect(collectOverlays(), const <Rect>[
         Rect.fromLTRB(0.0, 100.0, 100.0, 200.0),
-        Rect.fromLTRB(100.0, 0.0, 200.0, 100.0)
+        Rect.fromLTRB(100.0, 0.0, 200.0, 100.0),
       ]);
     });
 
-    testWidgets('RTL constrained and offset menu placement',
-        (WidgetTester tester) async {
+    testWidgets('RTL constrained and offset menu placement', (WidgetTester tester) async {
       await changeSurfaceSize(tester, const Size(200, 200));
-      const BoxConstraints constraints = BoxConstraints.tightFor(
-        width: 100,
-        height: 100,
-      );
+      const BoxConstraints constraints = BoxConstraints.tightFor(width: 100, height: 100);
 
       await tester.pumpWidget(
         App(
@@ -4399,10 +4202,7 @@ void main() {
                     constraints: constraints,
                     decoration: const BoxDecoration(),
                     menuChildren: <Widget>[
-                      Container(
-                        color: const Color(0xFF0000FF),
-                        constraints: constraints,
-                      )
+                      Container(color: const Color(0xFF0000FF), constraints: constraints),
                     ],
                   ),
                   child: const AnchorButton(Tag.a, constraints: constraints),
@@ -4421,17 +4221,15 @@ void main() {
 
       expect(collectOverlays(), const <Rect>[
         Rect.fromLTRB(0.0, 100.0, 100.0, 200.0),
-        Rect.fromLTRB(0.0, 0.0, 100.0, 100.0)
+        Rect.fromLTRB(0.0, 0.0, 100.0, 100.0),
       ]);
     });
 
-    testWidgets('LTR constrained menu placement with unconstrained crossaxis',
-        (WidgetTester tester) async {
+    testWidgets('LTR constrained menu placement with unconstrained crossaxis', (
+      WidgetTester tester,
+    ) async {
       await changeSurfaceSize(tester, const Size(200, 200));
-      const BoxConstraints constraints = BoxConstraints.tightFor(
-        width: 300,
-        height: 40,
-      );
+      const BoxConstraints constraints = BoxConstraints.tightFor(width: 300, height: 40);
 
       await tester.pumpWidget(
         App(
@@ -4442,9 +4240,7 @@ void main() {
                 RawMenuAnchor(
                   panel: RawMenuPanel(
                     decoration: const BoxDecoration(),
-                    menuChildren: <Widget>[
-                      Button.tag(Tag.a.a, constraints: constraints)
-                    ],
+                    menuChildren: <Widget>[Button.tag(Tag.a.a, constraints: constraints)],
                   ),
                   child: const AnchorButton(Tag.a, constraints: constraints),
                 ),
@@ -4463,22 +4259,17 @@ void main() {
       // The (unclipped) menu surface can grow beyond the screen. The left
       // edge should be 0 so that the leading edge (left when LTR) of a menu
       // item is visible.
-      expect(
-        collectOverlays(clipped: false),
-        const <Rect>[
-          Rect.fromLTRB(0.0, 120.0, 300.0, 160.0),
-          Rect.fromLTRB(0.0, 160.0, 300.0, 200.0)
-        ],
-      );
+      expect(collectOverlays(clipped: false), const <Rect>[
+        Rect.fromLTRB(0.0, 120.0, 300.0, 160.0),
+        Rect.fromLTRB(0.0, 160.0, 300.0, 200.0),
+      ]);
     });
 
-    testWidgets('RTL constrained menu placement with unconstrained crossaxis',
-        (WidgetTester tester) async {
+    testWidgets('RTL constrained menu placement with unconstrained crossaxis', (
+      WidgetTester tester,
+    ) async {
       await changeSurfaceSize(tester, const Size(200, 200));
-      const BoxConstraints constraints = BoxConstraints.tightFor(
-        width: 300,
-        height: 40,
-      );
+      const BoxConstraints constraints = BoxConstraints.tightFor(width: 300, height: 40);
 
       await tester.pumpWidget(
         App(
@@ -4490,9 +4281,7 @@ void main() {
                 RawMenuAnchor(
                   panel: RawMenuPanel(
                     decoration: const BoxDecoration(),
-                    menuChildren: <Widget>[
-                      Button.tag(Tag.a.a, constraints: constraints)
-                    ],
+                    menuChildren: <Widget>[Button.tag(Tag.a.a, constraints: constraints)],
                   ),
                   child: const AnchorButton(Tag.a, constraints: constraints),
                 ),
@@ -4513,17 +4302,15 @@ void main() {
       // a menu item is visible.
       expect(collectOverlays(clipped: false), const <Rect>[
         Rect.fromLTRB(-100.0, 120.0, 200.0, 160.0),
-        Rect.fromLTRB(-100.0, 160.0, 200.0, 200.0)
+        Rect.fromLTRB(-100.0, 160.0, 200.0, 200.0),
       ]);
     });
 
-    testWidgets('LTR constrained menu placement with constrained crossaxis',
-        (WidgetTester tester) async {
+    testWidgets('LTR constrained menu placement with constrained crossaxis', (
+      WidgetTester tester,
+    ) async {
       await changeSurfaceSize(tester, const Size(200, 200));
-      const BoxConstraints constraints = BoxConstraints.tightFor(
-        width: 300,
-        height: 40,
-      );
+      const BoxConstraints constraints = BoxConstraints.tightFor(width: 300, height: 40);
 
       await tester.pumpWidget(
         App(
@@ -4536,9 +4323,7 @@ void main() {
                   panel: RawMenuPanel(
                     constrainCrossAxis: true,
                     decoration: const BoxDecoration(),
-                    menuChildren: <Widget>[
-                      Button.tag(Tag.a.a, constraints: constraints)
-                    ],
+                    menuChildren: <Widget>[Button.tag(Tag.a.a, constraints: constraints)],
                   ),
                   child: const AnchorButton(Tag.a, constraints: constraints),
                 ),
@@ -4557,17 +4342,15 @@ void main() {
       // The (unclipped) menu surface will not grow beyond the screen.
       expect(collectOverlays(clipped: false), const <ui.Rect>[
         Rect.fromLTRB(0.0, 120.0, 200.0, 160.0),
-        Rect.fromLTRB(0.0, 160.0, 200.0, 200.0)
+        Rect.fromLTRB(0.0, 160.0, 200.0, 200.0),
       ]);
     });
 
-    testWidgets('RTL constrained menu placement with constrained crossaxis',
-        (WidgetTester tester) async {
+    testWidgets('RTL constrained menu placement with constrained crossaxis', (
+      WidgetTester tester,
+    ) async {
       await changeSurfaceSize(tester, const Size(200, 200));
-      const BoxConstraints constraints = BoxConstraints.tightFor(
-        width: 300,
-        height: 40,
-      );
+      const BoxConstraints constraints = BoxConstraints.tightFor(width: 300, height: 40);
 
       await tester.pumpWidget(
         App(
@@ -4581,9 +4364,7 @@ void main() {
                   panel: RawMenuPanel(
                     constrainCrossAxis: true,
                     decoration: const BoxDecoration(),
-                    menuChildren: <Widget>[
-                      Button.tag(Tag.a.a, constraints: constraints)
-                    ],
+                    menuChildren: <Widget>[Button.tag(Tag.a.a, constraints: constraints)],
                   ),
                   child: const AnchorButton(Tag.a, constraints: constraints),
                 ),
@@ -4602,12 +4383,11 @@ void main() {
       // The (unclipped) menu surface will not grow beyond the screen.
       expect(collectOverlays(clipped: false), const <Rect>[
         Rect.fromLTRB(0.0, 120.0, 200.0, 160.0),
-        Rect.fromLTRB(0.0, 160.0, 200.0, 200.0)
+        Rect.fromLTRB(0.0, 160.0, 200.0, 200.0),
       ]);
     });
 
-    testWidgets('Constraints applied to anchor do not affect overlay',
-        (WidgetTester tester) async {
+    testWidgets('Constraints applied to anchor do not affect overlay', (WidgetTester tester) async {
       await tester.pumpWidget(
         App(
           ConstrainedBox(
@@ -4616,11 +4396,7 @@ void main() {
               panel: RawMenuPanel(
                 decoration: const BoxDecoration(),
                 menuChildren: <Widget>[
-                  Container(
-                    color: const Color(0xFFFF0000),
-                    height: 125,
-                    width: 200,
-                  )
+                  Container(color: const Color(0xFFFF0000), height: 125, width: 200),
                 ],
               ),
               child: AnchorButton.small(Tag.anchor),
@@ -4632,14 +4408,12 @@ void main() {
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
 
-      expect(
-        collectOverlays().first,
-        const Rect.fromLTRB(380.0, 320.0, 580.0, 445.0),
-      );
+      expect(collectOverlays().first, const Rect.fromLTRB(380.0, 320.0, 580.0, 445.0));
     });
 
-    testWidgets('LTR menu position flips to left when overflowing screen right',
-        (WidgetTester tester) async {
+    testWidgets('LTR menu position flips to left when overflowing screen right', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         App(
           alignment: const Alignment(0.5, 0),
@@ -4649,11 +4423,7 @@ void main() {
             panel: RawMenuPanel(
               decoration: const BoxDecoration(),
               menuChildren: <Widget>[
-                Container(
-                  width: 350,
-                  height: 100,
-                  color: const Color(0x86FF00FF),
-                )
+                Container(width: 350, height: 100, color: const Color(0x86FF00FF)),
               ],
             ),
             child: AnchorButton.small(Tag.anchor),
@@ -4666,14 +4436,13 @@ void main() {
       await tester.pump();
 
       final [ui.Rect menu] = collectOverlays();
-      final ui.Rect anchor =
-          tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
-      expect(const Alignment(0.75, -0.75).withinRect(menu),
-          equals(anchor.topRight));
+      final ui.Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+      expect(const Alignment(0.75, -0.75).withinRect(menu), equals(anchor.topRight));
     });
 
-    testWidgets('RTL menu position flips to left when overflowing screen right',
-        (WidgetTester tester) async {
+    testWidgets('RTL menu position flips to left when overflowing screen right', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         App(
           textDirection: TextDirection.rtl,
@@ -4683,11 +4452,7 @@ void main() {
             menuAlignment: const Alignment(-0.75, -0.75),
             panel: RawMenuPanel(
               menuChildren: <Widget>[
-                Container(
-                  width: 350,
-                  height: 100,
-                  color: const Color(0x86FF00FF),
-                )
+                Container(width: 350, height: 100, color: const Color(0x86FF00FF)),
               ],
               decoration: const BoxDecoration(),
             ),
@@ -4704,12 +4469,12 @@ void main() {
       final Offset anchorTopRight = tester.getTopRight(
         find.widgetWithText(Button, Tag.anchor.text),
       );
-      expect(const Alignment(0.75, -0.75).withinRect(menu),
-          equals(anchorTopRight));
+      expect(const Alignment(0.75, -0.75).withinRect(menu), equals(anchorTopRight));
     });
 
-    testWidgets('LTR menu position flips to right when overflowing screen left',
-        (WidgetTester tester) async {
+    testWidgets('LTR menu position flips to right when overflowing screen left', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         App(
           alignment: const Alignment(-0.5, 0),
@@ -4719,11 +4484,7 @@ void main() {
             panel: RawMenuPanel(
               decoration: const BoxDecoration(),
               menuChildren: <Widget>[
-                Container(
-                  width: 350,
-                  height: 100,
-                  color: const Color(0x86FF00FF),
-                )
+                Container(width: 350, height: 100, color: const Color(0x86FF00FF)),
               ],
             ),
             child: AnchorButton.small(Tag.anchor),
@@ -4738,12 +4499,12 @@ void main() {
       final ui.Offset anchorTopRight = tester.getTopRight(
         find.widgetWithText(Button, Tag.anchor.text),
       );
-      expect(const Alignment(-0.75, -0.75).withinRect(menu),
-          equals(anchorTopRight));
+      expect(const Alignment(-0.75, -0.75).withinRect(menu), equals(anchorTopRight));
     });
 
-    testWidgets('RTL menu position flips to right when overflowing screen left',
-        (WidgetTester tester) async {
+    testWidgets('RTL menu position flips to right when overflowing screen left', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         App(
           textDirection: TextDirection.rtl,
@@ -4754,11 +4515,7 @@ void main() {
             panel: RawMenuPanel(
               decoration: const BoxDecoration(),
               menuChildren: <Widget>[
-                Container(
-                  width: 350,
-                  height: 100,
-                  color: const Color(0x86FF00FF),
-                )
+                Container(width: 350, height: 100, color: const Color(0x86FF00FF)),
               ],
             ),
             child: AnchorButton.small(Tag.anchor),
@@ -4773,119 +4530,104 @@ void main() {
       final ui.Offset anchorTopRight = tester.getTopRight(
         find.widgetWithText(Button, Tag.anchor.text),
       );
-      expect(const Alignment(-0.75, -0.75).withinRect(menu),
-          equals(anchorTopRight));
+      expect(const Alignment(-0.75, -0.75).withinRect(menu), equals(anchorTopRight));
     });
 
     testWidgets(
-        'Menus that overflow the same screen edge when flipped are placed against that edge',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        App(
-          RawMenuAnchor(
-            controller: controller,
-            menuAlignment: Alignment.center,
-            panel: RawMenuPanel(
-              decoration: const BoxDecoration(),
-              menuChildren: <Widget>[
-                Container(
-                  width: 100,
-                  height: 100,
-                  color: const Color(0x86FF00FF),
-                )
-              ],
-            ),
-            child: const Stack(
-              children: <Widget>[
-                Positioned.fill(child: ColoredBox(color: Color(0xff00ff00)))
-              ],
+      'Menus that overflow the same screen edge when flipped are placed against that edge',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          App(
+            RawMenuAnchor(
+              controller: controller,
+              menuAlignment: Alignment.center,
+              panel: RawMenuPanel(
+                decoration: const BoxDecoration(),
+                menuChildren: <Widget>[
+                  Container(width: 100, height: 100, color: const Color(0x86FF00FF)),
+                ],
+              ),
+              child: const Stack(
+                children: <Widget>[Positioned.fill(child: ColoredBox(color: Color(0xff00ff00)))],
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      controller.open(position: const Offset(750, 50));
-      await tester.pump();
+        controller.open(position: const Offset(750, 50));
+        await tester.pump();
 
-      // Overflow top and right, so the menu should be placed against the top
-      // right corner.
-      expect(collectOverlays().first,
-          equals(const Rect.fromLTRB(700, 0, 800, 100)));
+        // Overflow top and right, so the menu should be placed against the top
+        // right corner.
+        expect(collectOverlays().first, equals(const Rect.fromLTRB(700, 0, 800, 100)));
 
-      controller.open(position: const Offset(50, 550));
-      await tester.pump();
+        controller.open(position: const Offset(50, 550));
+        await tester.pump();
 
-      // Overflow bottom and left, so the menu should be placed against the bottom
-      // left corner.
-      expect(collectOverlays().first,
-          equals(const Rect.fromLTRB(0, 500, 100, 600)));
-    });
+        // Overflow bottom and left, so the menu should be placed against the bottom
+        // left corner.
+        expect(collectOverlays().first, equals(const Rect.fromLTRB(0, 500, 100, 600)));
+      },
+    );
 
     testWidgets(
-        'Menu attaches to closest vertical edge of anchor when overflowing screen left and right',
-        (WidgetTester tester) async {
-      await changeSurfaceSize(tester, const Size(200, 200));
+      'Menu attaches to closest vertical edge of anchor when overflowing screen left and right',
+      (WidgetTester tester) async {
+        await changeSurfaceSize(tester, const Size(200, 200));
 
-      await tester.pumpWidget(
-        App(
-          // Overlaps the bottom of the anchor by 4px.
-          RawMenuAnchor(
-            alignmentOffset: const Offset(0, -4),
-            alignment: AlignmentDirectional.bottomEnd,
-            menuAlignment: AlignmentDirectional.topStart,
-            panel: RawMenuPanel(
-              decoration: const BoxDecoration(color: Color(0xFF0000FF)),
-              menuChildren: <Widget>[
-                // Overlaps the top of the anchor by 4px.
-                RawMenuAnchor(
-                  alignmentOffset: const Offset(0, 4),
-                  alignment: AlignmentDirectional.topStart,
-                  menuAlignment: AlignmentDirectional.bottomEnd,
-                  panel: RawMenuPanel(
-                    decoration: const BoxDecoration(color: Color(0xFF0000FF)),
-                    menuChildren: <Widget>[
-                      Container(
-                        width: 125,
-                        height: 30,
-                        color: const Color(0xFFFF00FF),
-                      )
-                    ],
+        await tester.pumpWidget(
+          App(
+            // Overlaps the bottom of the anchor by 4px.
+            RawMenuAnchor(
+              alignmentOffset: const Offset(0, -4),
+              alignment: AlignmentDirectional.bottomEnd,
+              menuAlignment: AlignmentDirectional.topStart,
+              panel: RawMenuPanel(
+                decoration: const BoxDecoration(color: Color(0xFF0000FF)),
+                menuChildren: <Widget>[
+                  // Overlaps the top of the anchor by 4px.
+                  RawMenuAnchor(
+                    alignmentOffset: const Offset(0, 4),
+                    alignment: AlignmentDirectional.topStart,
+                    menuAlignment: AlignmentDirectional.bottomEnd,
+                    panel: RawMenuPanel(
+                      decoration: const BoxDecoration(color: Color(0xFF0000FF)),
+                      menuChildren: <Widget>[
+                        Container(width: 125, height: 30, color: const Color(0xFFFF00FF)),
+                      ],
+                    ),
+                    child: const AnchorButton(
+                      Tag.a,
+                      constraints: BoxConstraints.tightFor(width: 125, height: 30),
+                    ),
                   ),
-                  child: const AnchorButton(
-                    Tag.a,
-                    constraints:
-                        BoxConstraints.tightFor(width: 125, height: 30),
-                  ),
-                ),
-              ],
-            ),
-            child: const AnchorButton(
-              Tag.anchor,
-              constraints: BoxConstraints.tightFor(width: 125, height: 30),
+                ],
+              ),
+              child: const AnchorButton(
+                Tag.anchor,
+                constraints: BoxConstraints.tightFor(width: 125, height: 30),
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.tap(find.text(Tag.anchor.text));
-      await tester.pump();
-      await tester.tap(find.text(Tag.a.text));
-      await tester.pump();
+        await tester.tap(find.text(Tag.anchor.text));
+        await tester.pump();
+        await tester.tap(find.text(Tag.a.text));
+        await tester.pump();
 
-      final Rect anchor = tester.getRect(
-        find.widgetWithText(Button, Tag.anchor.text),
-      );
-      final Rect nestedAnchor = tester.getRect(
-        find.widgetWithText(Button, Tag.a.text),
-      );
+        final Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+        final Rect nestedAnchor = tester.getRect(find.widgetWithText(Button, Tag.a.text));
 
-      final List<ui.Rect> overlays = collectOverlays();
-      expect(overlays.first.top, equals(anchor.bottom));
-      expect(overlays.last.bottom, equals(nestedAnchor.top));
-    });
+        final List<ui.Rect> overlays = collectOverlays();
+        expect(overlays.first.top, equals(anchor.bottom));
+        expect(overlays.last.bottom, equals(nestedAnchor.top));
+      },
+    );
 
-    testWidgets('Menu flips above anchor when overflowing screen bottom',
-        (WidgetTester tester) async {
+    testWidgets('Menu flips above anchor when overflowing screen bottom', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         App(
           alignment: const Alignment(0, 0.5),
@@ -4894,11 +4636,7 @@ void main() {
             panel: RawMenuPanel(
               decoration: const BoxDecoration(color: Color(0xFF0000FF)),
               menuChildren: <Widget>[
-                Container(
-                  width: 225,
-                  height: 230,
-                  color: const Color(0xFFFF00FF),
-                )
+                Container(width: 225, height: 230, color: const Color(0xFFFF00FF)),
               ],
             ),
             child: AnchorButton.small(Tag.anchor),
@@ -4909,16 +4647,11 @@ void main() {
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
 
-      final Rect anchor =
-          tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
-      expect(
-        collectOverlays().first.bottom,
-        equals(anchor.top + 8),
-      );
+      final Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+      expect(collectOverlays().first.bottom, equals(anchor.top + 8));
     });
 
-    testWidgets('Menu flips below anchor when overflowing screen top',
-        (WidgetTester tester) async {
+    testWidgets('Menu flips below anchor when overflowing screen top', (WidgetTester tester) async {
       await tester.pumpWidget(
         App(
           alignment: const Alignment(0, -0.5),
@@ -4929,11 +4662,7 @@ void main() {
             panel: RawMenuPanel(
               decoration: const BoxDecoration(color: Color(0xFF0000FF)),
               menuChildren: <Widget>[
-                Container(
-                  width: 225,
-                  height: 230,
-                  color: const Color(0xFFFF00FF),
-                )
+                Container(width: 225, height: 230, color: const Color(0xFFFF00FF)),
               ],
             ),
             child: AnchorButton.small(Tag.anchor),
@@ -4944,16 +4673,13 @@ void main() {
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
 
-      final Rect anchor =
-          tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
-      expect(
-        collectOverlays().first.top,
-        equals(anchor.bottom + 8),
-      );
+      final Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+      expect(collectOverlays().first.top, equals(anchor.bottom + 8));
     });
 
-    testWidgets('AlignmentOffset is reflected across anchor when menu flips',
-        (WidgetTester tester) async {
+    testWidgets('AlignmentOffset is reflected across anchor when menu flips', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         App(
           alignment: const Alignment(0.8, 0.8),
@@ -4964,11 +4690,7 @@ void main() {
             panel: RawMenuPanel(
               decoration: const BoxDecoration(),
               menuChildren: <Widget>[
-                Container(
-                  width: 50,
-                  height: 50,
-                  color: const Color(0xFFFF00FF),
-                )
+                Container(width: 50, height: 50, color: const Color(0xFFFF00FF)),
               ],
             ),
             child: AnchorButton.small(Tag.anchor),
@@ -4979,16 +4701,13 @@ void main() {
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
 
-      final Offset anchorCenter =
-          tester.getCenter(find.widgetWithText(Button, Tag.anchor.text));
-      expect(
-        collectOverlays().first.center,
-        equals(anchorCenter - const Offset(200, 200)),
-      );
+      final Offset anchorCenter = tester.getCenter(find.widgetWithText(Button, Tag.anchor.text));
+      expect(collectOverlays().first.center, equals(anchorCenter - const Offset(200, 200)));
     });
 
-    testWidgets('Alignment is reflected across anchor when menu flips',
-        (WidgetTester tester) async {
+    testWidgets('Alignment is reflected across anchor when menu flips', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         App(
           alignment: const AlignmentDirectional(0.95, 0.95),
@@ -4998,11 +4717,7 @@ void main() {
             panel: RawMenuPanel(
               decoration: const BoxDecoration(),
               menuChildren: <Widget>[
-                Container(
-                  width: 50,
-                  height: 50,
-                  color: const Color(0xFFFF00FF),
-                )
+                Container(width: 50, height: 50, color: const Color(0xFFFF00FF)),
               ],
             ),
             child: AnchorButton.small(Tag.anchor),
@@ -5013,16 +4728,13 @@ void main() {
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
 
-      final Offset anchorTopLeft =
-          tester.getTopLeft(find.widgetWithText(Button, Tag.anchor.text));
-      expect(
-        collectOverlays().first.center,
-        equals(anchorTopLeft),
-      );
+      final Offset anchorTopLeft = tester.getTopLeft(find.widgetWithText(Button, Tag.anchor.text));
+      expect(collectOverlays().first.center, equals(anchorTopLeft));
     });
 
-    testWidgets('MenuAlignment is reflected across anchor when menu flips',
-        (WidgetTester tester) async {
+    testWidgets('MenuAlignment is reflected across anchor when menu flips', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         App(
           alignment: const AlignmentDirectional(0.95, 0.95),
@@ -5032,11 +4744,7 @@ void main() {
             panel: RawMenuPanel(
               decoration: const BoxDecoration(),
               menuChildren: <Widget>[
-                Container(
-                  width: 50,
-                  height: 50,
-                  color: const Color(0xFFFF00FF),
-                )
+                Container(width: 50, height: 50, color: const Color(0xFFFF00FF)),
               ],
             ),
             child: AnchorButton.small(Tag.anchor),
@@ -5047,70 +4755,60 @@ void main() {
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
 
-      final Offset anchorCenter =
-          tester.getCenter(find.widgetWithText(Button, Tag.anchor.text));
-      expect(
-        collectOverlays().first.bottomLeft,
-        equals(anchorCenter),
-      );
+      final Offset anchorCenter = tester.getCenter(find.widgetWithText(Button, Tag.anchor.text));
+      expect(collectOverlays().first.bottomLeft, equals(anchorCenter));
     });
 
     testWidgets(
-        'Menus opened with a position apply the positional offset relative to the top left corner of the anchor',
-        (WidgetTester tester) async {
-      await tester.binding.setSurfaceSize(const Size(800, 600));
+      'Menus opened with a position apply the positional offset relative to the top left corner of the anchor',
+      (WidgetTester tester) async {
+        await tester.binding.setSurfaceSize(const Size(800, 600));
 
-      Widget buildApp([TextDirection textDirection = TextDirection.ltr]) {
-        return App(
-          textDirection: textDirection,
-          RawMenuAnchor(
-            controller: controller,
-            alignment: Alignment.topLeft,
-            menuAlignment: Alignment.topCenter,
-            panel: RawMenuPanel(
-              constraints: const BoxConstraints(),
-              menuChildren: <Widget>[
-                Container(
-                  color: const Color(0xFFFF0000),
-                  height: 100,
-                  width: 100,
-                )
-              ],
+        Widget buildApp([TextDirection textDirection = TextDirection.ltr]) {
+          return App(
+            textDirection: textDirection,
+            RawMenuAnchor(
+              controller: controller,
+              alignment: Alignment.topLeft,
+              menuAlignment: Alignment.topCenter,
+              panel: RawMenuPanel(
+                constraints: const BoxConstraints(),
+                menuChildren: <Widget>[
+                  Container(color: const Color(0xFFFF0000), height: 100, width: 100),
+                ],
+              ),
+              child: Container(width: 100, height: 100, color: const ui.Color(0xFF00FF00)),
             ),
-            child: Container(
-              width: 100,
-              height: 100,
-              color: const ui.Color(0xFF00FF00),
-            ),
-          ),
-        );
-      }
+          );
+        }
 
-      await tester.pumpWidget(buildApp());
+        await tester.pumpWidget(buildApp());
 
-      controller.open();
-      await tester.pump();
+        controller.open();
+        await tester.pump();
 
-      final ui.Rect control = collectOverlays().first;
+        final ui.Rect control = collectOverlays().first;
 
-      controller.open(position: const Offset(33, 45));
-      await tester.pump();
+        controller.open(position: const Offset(33, 45));
+        await tester.pump();
 
-      expect(collectOverlays().first, control.shift(const Offset(33, 45)));
+        expect(collectOverlays().first, control.shift(const Offset(33, 45)));
 
-      // Should not be affected by text direction.
-      await tester.pumpWidget(buildApp(TextDirection.rtl));
+        // Should not be affected by text direction.
+        await tester.pumpWidget(buildApp(TextDirection.rtl));
 
-      expect(collectOverlays().first, control.shift(const Offset(33, 45)));
+        expect(collectOverlays().first, control.shift(const Offset(33, 45)));
 
-      controller.open(position: const Offset(45, 75));
-      await tester.pump();
+        controller.open(position: const Offset(45, 75));
+        await tester.pump();
 
-      expect(collectOverlays().first, control.shift(const Offset(45, 75)));
-    });
+        expect(collectOverlays().first, control.shift(const Offset(45, 75)));
+      },
+    );
 
-    testWidgets('Menus opened with a position ignore `alignmentOffset`',
-        (WidgetTester tester) async {
+    testWidgets('Menus opened with a position ignore `alignmentOffset`', (
+      WidgetTester tester,
+    ) async {
       await tester.binding.setSurfaceSize(const Size(800, 600));
 
       await tester.pumpWidget(
@@ -5123,18 +4821,10 @@ void main() {
             panel: RawMenuPanel(
               constraints: const BoxConstraints(),
               menuChildren: <Widget>[
-                Container(
-                  color: const Color(0xFFFF0000),
-                  height: 100,
-                  width: 100,
-                )
+                Container(color: const Color(0xFFFF0000), height: 100, width: 100),
               ],
             ),
-            child: Container(
-              width: 100,
-              height: 100,
-              color: const ui.Color(0xFF00FF00),
-            ),
+            child: Container(width: 100, height: 100, color: const ui.Color(0xFF00FF00)),
           ),
         ),
       );
@@ -5152,8 +4842,7 @@ void main() {
       expect(collectOverlays().first, control.shift(const Offset(-33, -45)));
     });
 
-    testWidgets('Menus opened with a position ignore `alignment`',
-        (WidgetTester tester) async {
+    testWidgets('Menus opened with a position ignore `alignment`', (WidgetTester tester) async {
       await tester.binding.setSurfaceSize(const Size(800, 600));
 
       await tester.pumpWidget(
@@ -5165,18 +4854,10 @@ void main() {
             panel: RawMenuPanel(
               constraints: const BoxConstraints(),
               menuChildren: <Widget>[
-                Container(
-                  color: const Color(0xFFFF0000),
-                  height: 100,
-                  width: 100,
-                )
+                Container(color: const Color(0xFFFF0000), height: 100, width: 100),
               ],
             ),
-            child: Container(
-              width: 100,
-              height: 100,
-              color: const ui.Color(0xFF00FF00),
-            ),
+            child: Container(width: 100, height: 100, color: const ui.Color(0xFF00FF00)),
           ),
         ),
       );
@@ -5196,9 +4877,9 @@ void main() {
       expect(collectOverlays().first, control.shift(const Offset(-100, -100)));
     });
 
-    testWidgets(
-        'Menus opened with a position respect the menuAlignment property',
-        (WidgetTester tester) async {
+    testWidgets('Menus opened with a position respect the menuAlignment property', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         App(
           RawMenuAnchor(
@@ -5209,18 +4890,10 @@ void main() {
             panel: RawMenuPanel(
               constraints: const BoxConstraints(),
               menuChildren: <Widget>[
-                Container(
-                  color: const Color(0xFFFF0000),
-                  height: 100,
-                  width: 100,
-                )
+                Container(color: const Color(0xFFFF0000), height: 100, width: 100),
               ],
             ),
-            child: Container(
-              width: 100,
-              height: 100,
-              color: const ui.Color(0xFF00FF00),
-            ),
+            child: Container(width: 100, height: 100, color: const ui.Color(0xFF00FF00)),
           ),
         ),
       );
@@ -5240,9 +4913,9 @@ void main() {
       expect(collectOverlays().first, control.shift(const Offset(100, 100)));
     });
 
-    testWidgets(
-        'Menus opened with a position flip relative to an empty rect at `position`',
-        (WidgetTester tester) async {
+    testWidgets('Menus opened with a position flip relative to an empty rect at `position`', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         App(
           RawMenuAnchor(
@@ -5252,20 +4925,12 @@ void main() {
               constraints: const BoxConstraints(),
               decoration: const BoxDecoration(),
               menuChildren: <Widget>[
-                Container(
-                  color: const ui.Color(0xFF2200FF),
-                  height: 100,
-                  width: 100,
-                )
+                Container(color: const ui.Color(0xFF2200FF), height: 100, width: 100),
               ],
             ),
             child: const Stack(
               fit: StackFit.expand,
-              children: <Widget>[
-                ColoredBox(
-                  color: ui.Color(0xFFFFC800),
-                ),
-              ],
+              children: <Widget>[ColoredBox(color: ui.Color(0xFFFFC800))],
             ),
           ),
         ),
@@ -5276,10 +4941,7 @@ void main() {
 
       // The menu should be placed at the `position` argument, and should
       // fit within the overlay without flipping.
-      expect(
-        collectOverlays().first,
-        equals(const Offset(700, 500) & const Size(100, 100)),
-      );
+      expect(collectOverlays().first, equals(const Offset(700, 500) & const Size(100, 100)));
 
       // Overflow right and bottom by 50 pixels.
       controller.open(position: const Offset(750, 550));
@@ -5287,10 +4949,7 @@ void main() {
 
       // The menu should horizontally and vertically overflow the overlay,
       // leading to the menu surface flipping across the menu position.
-      expect(
-        collectOverlays().first,
-        equals(const Offset(650, 450) & const Size(100, 100)),
-      );
+      expect(collectOverlays().first, equals(const Offset(650, 450) & const Size(100, 100)));
     });
 
     testWidgets('Menu vertical padding', (WidgetTester tester) async {
@@ -5363,12 +5022,7 @@ void main() {
       await tester.pump();
 
       // Test flipped menu padding.
-      await tester.pumpWidget(
-        App(
-          alignment: const Alignment(0, 0.9),
-          child,
-        ),
-      );
+      await tester.pumpWidget(App(alignment: const Alignment(0, 0.9), child));
 
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
@@ -5457,12 +5111,7 @@ void main() {
       await tester.pump();
 
       // Test flipped menu padding.
-      await tester.pumpWidget(
-        App(
-          alignment: const AlignmentDirectional(0.9, 0.0),
-          child,
-        ),
-      );
+      await tester.pumpWidget(App(alignment: const AlignmentDirectional(0.9, 0.0), child));
 
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
@@ -5579,8 +5228,7 @@ void main() {
       expect(aa.right + 11, equals(sub.right));
     });
 
-    testWidgets('Menu padding should not overflow screen',
-        (WidgetTester tester) async {
+    testWidgets('Menu padding should not overflow screen', (WidgetTester tester) async {
       final Widget menu = RawMenuAnchor(
         controller: controller,
         padding: const EdgeInsets.only(right: 50, top: 30),
@@ -5603,13 +5251,7 @@ void main() {
       // The menu should fit in the top-right corner of the screen, with no
       // additional space to the right or top.
       await tester.pumpWidget(
-        App(
-          Stack(
-            children: <Widget>[
-              Positioned(top: 30, right: 150, child: menu),
-            ],
-          ),
-        ),
+        App(Stack(children: <Widget>[Positioned(top: 30, right: 150, child: menu)])),
       );
 
       await tester.tap(find.text(Tag.anchor.text));
@@ -5618,9 +5260,7 @@ void main() {
       final Offset anchorTopRight = tester.getTopRight(
         find.widgetWithText(Button, Tag.anchor.text),
       );
-      final Offset menuTopLeft = tester.getTopLeft(
-        find.byKey(ValueKey<String>(Tag.a.text)),
-      );
+      final Offset menuTopLeft = tester.getTopLeft(find.byKey(ValueKey<String>(Tag.a.text)));
 
       // Menu should not overflow the screen
       expect(menuTopLeft, equals(anchorTopRight));
@@ -5630,24 +5270,14 @@ void main() {
 
       // Reduce the amount of space available to the menu by (1px, 1px).
       await tester.pumpWidget(
-        App(
-          Stack(
-            children: <Widget>[
-              Positioned(top: 29, right: 149, child: menu),
-            ],
-          ),
-        ),
+        App(Stack(children: <Widget>[Positioned(top: 29, right: 149, child: menu)])),
       );
 
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
 
-      final Offset anchorTopLeft = tester.getTopLeft(
-        find.widgetWithText(Button, Tag.anchor.text),
-      );
-      final Offset menuTopRight = tester.getTopRight(
-        find.byKey(ValueKey<String>(Tag.a.text)),
-      );
+      final Offset anchorTopLeft = tester.getTopLeft(find.widgetWithText(Button, Tag.anchor.text));
+      final Offset menuTopRight = tester.getTopRight(find.byKey(ValueKey<String>(Tag.a.text)));
 
       // Menu overflowed the screen, so it should be placed at the top left
       // corner of the anchor.
@@ -5683,8 +5313,7 @@ void main() {
                   panel: RawMenuPanel(
                     menuChildren: <Widget>[
                       RawMenuAnchor(
-                        panel: RawMenuPanel(
-                            menuChildren: <Widget>[Button.tag(Tag.a.a)]),
+                        panel: RawMenuPanel(menuChildren: <Widget>[Button.tag(Tag.a.a)]),
                         child: AnchorButton.small(Tag.a),
                       ),
                     ],
@@ -5699,10 +5328,7 @@ void main() {
 
       // First, collect measurements without padding.
       await tester.pumpWidget(
-        buildApp(
-          appPadding: EdgeInsets.zero,
-          anchorPadding: EdgeInsets.zero,
-        ),
+        buildApp(appPadding: EdgeInsets.zero, anchorPadding: EdgeInsets.zero),
       );
 
       await tester.tap(find.text(Tag.anchor.text));
@@ -5712,9 +5338,7 @@ void main() {
       await tester.tap(find.text(Tag.a.a.text));
       await tester.pump();
 
-      final Rect anchor = tester.getRect(
-        find.widgetWithText(Button, Tag.anchor.text),
-      );
+      final Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
       final [Rect first, Rect second] = collectOverlays();
 
       await tester.pumpWidget(
@@ -5725,8 +5349,7 @@ void main() {
       );
 
       final [Rect firstPadded, Rect secondPadded] = collectOverlays();
-      final Rect paddedAnchor =
-          tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+      final Rect paddedAnchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
 
       expect(paddedAnchor, equals(anchor.shift(const Offset(31 + 64, 7 + 50))));
 
@@ -5766,8 +5389,7 @@ void main() {
                   panel: RawMenuPanel(
                     menuChildren: <Widget>[
                       RawMenuAnchor(
-                        panel: RawMenuPanel(
-                            menuChildren: <Widget>[Button.tag(Tag.a.a)]),
+                        panel: RawMenuPanel(menuChildren: <Widget>[Button.tag(Tag.a.a)]),
                         child: AnchorButton.small(Tag.a),
                       ),
                     ],
@@ -5782,10 +5404,7 @@ void main() {
 
       // First, collect measurements without padding.
       await tester.pumpWidget(
-        buildApp(
-          appPadding: EdgeInsets.zero,
-          anchorPadding: EdgeInsets.zero,
-        ),
+        buildApp(appPadding: EdgeInsets.zero, anchorPadding: EdgeInsets.zero),
       );
 
       await tester.tap(find.text(Tag.anchor.text));
@@ -5795,9 +5414,7 @@ void main() {
       await tester.tap(find.text(Tag.a.a.text));
       await tester.pump();
 
-      final Rect anchor = tester.getRect(
-        find.widgetWithText(Button, Tag.anchor.text),
-      );
+      final Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
       final [Rect first, Rect second] = collectOverlays();
 
       // Next, collect measurements with padding.
@@ -5809,23 +5426,16 @@ void main() {
       );
 
       final [Rect menuPadded, Rect subPadded] = collectOverlays();
-      final Rect anchorPadded = tester.getRect(
-        find.widgetWithText(Button, Tag.anchor.text),
-      );
+      final Rect anchorPadded = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
 
-      expect(
-          anchorPadded, equals(anchor.shift(const Offset(-31 - 64, 7 + 50))));
+      expect(anchorPadded, equals(anchor.shift(const Offset(-31 - 64, 7 + 50))));
       expect(menuPadded, equals(first.shift(const Offset(43, 7))));
       expect(subPadded, equals(second.shift(const Offset(43, 7))));
     });
 
     testWidgets('LTR nested menu placement', (WidgetTester tester) async {
       List<Widget> children = <Widget>[
-        Container(
-          height: 600,
-          width: 50,
-          color: const Color(0xFF0000FF),
-        )
+        Container(height: 600, width: 50, color: const Color(0xFF0000FF)),
       ];
       int layers = 5;
       while (layers-- > 0) {
@@ -5882,17 +5492,13 @@ void main() {
         Rect.fromLTRB(256.5, 267.0, 456.5, 428.0),
         Rect.fromLTRB(453.5, 387.5, 728.5, 548.5),
         Rect.fromLTRB(106.5, 387.0, 456.5, 548.0),
-        Rect.fromLTRB(375.0, 0.0, 800.0, 600.0)
+        Rect.fromLTRB(375.0, 0.0, 800.0, 600.0),
       ]);
     });
 
     testWidgets('RTL nested menu placement', (WidgetTester tester) async {
       List<Widget> children = <Widget>[
-        Container(
-          height: 600,
-          width: 50,
-          color: const Color(0xFF0000FF),
-        )
+        Container(height: 600, width: 50, color: const Color(0xFF0000FF)),
       ];
       int layers = 5;
       while (layers-- > 0) {
@@ -5950,12 +5556,11 @@ void main() {
         Rect.fromLTRB(343.5, 267.0, 543.5, 428.0),
         Rect.fromLTRB(71.5, 387.5, 346.5, 548.5),
         Rect.fromLTRB(343.5, 387.0, 693.5, 548.0),
-        Rect.fromLTRB(0.0, 0.0, 425.0, 600.0)
+        Rect.fromLTRB(0.0, 0.0, 425.0, 600.0),
       ]);
     });
 
-    testWidgets('Menu is positioned around display features',
-        (WidgetTester tester) async {
+    testWidgets('Menu is positioned around display features', (WidgetTester tester) async {
       await tester.pumpWidget(
         App(
           MediaQuery(
@@ -5989,12 +5594,7 @@ void main() {
                       alignment: Alignment.topLeft,
                       menuAlignment: Alignment.topRight,
                       panel: const RawMenuPanel(
-                        menuChildren: <Widget>[
-                          SizedBox(
-                            width: 150,
-                            height: 50,
-                          )
-                        ],
+                        menuChildren: <Widget>[SizedBox(width: 150, height: 50)],
                       ),
                       child: AnchorButton.small(Tag.anchor),
                     ),
@@ -6010,16 +5610,14 @@ void main() {
       await tester.pump();
 
       final double menuLeft = collectOverlays().first.left;
-      final ui.Rect anchor =
-          tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+      final ui.Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
 
       // Since the display feature splits the display into 2 sub-screens, the
       // menu should be positioned to fit in the second virtual screen.
       expect(menuLeft, equals(anchor.right));
     });
 
-    testWidgets('Menu constraints are applied to menu surface',
-        (WidgetTester tester) async {
+    testWidgets('Menu constraints are applied to menu surface', (WidgetTester tester) async {
       await tester.pumpWidget(
         App(
           RawMenuAnchor(
@@ -6027,12 +5625,7 @@ void main() {
               decoration: const BoxDecoration(),
               constraints: const BoxConstraints(minWidth: 75, maxHeight: 100),
               menuChildren: <Widget>[
-                Container(
-                  key: Tag.a.key,
-                  color: const Color(0xFFFF0000),
-                  height: 150,
-                  width: 50,
-                )
+                Container(key: Tag.a.key, color: const Color(0xFFFF0000), height: 150, width: 50),
               ],
             ),
             child: const AnchorButton(Tag.anchor),
@@ -6047,12 +5640,10 @@ void main() {
 
       // Width should expand to 75, but height will remain 150 since it's
       // located inside a scrollable.
-      expect(
-          tester.getSize(find.byKey(Tag.a.key)), equals(const Size(75, 150)));
+      expect(tester.getSize(find.byKey(Tag.a.key)), equals(const Size(75, 150)));
     });
 
-    testWidgets('Padding is applied before constraints',
-        (WidgetTester tester) async {
+    testWidgets('Padding is applied before constraints', (WidgetTester tester) async {
       await tester.pumpWidget(
         App(
           RawMenuAnchor(
@@ -6061,15 +5652,9 @@ void main() {
               child: RawMenuPanel(
                 decoration: const BoxDecoration(),
                 constraints: BoxConstraints.tight(const Size(100, 100)),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 50, horizontal: 35),
+                padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 35),
                 menuChildren: <Widget>[
-                  Container(
-                    key: Tag.a.key,
-                    color: const Color(0xFFFF0000),
-                    height: 50,
-                    width: 50,
-                  )
+                  Container(key: Tag.a.key, color: const Color(0xFFFF0000), height: 50, width: 50),
                 ],
               ),
             ),
@@ -6081,13 +5666,12 @@ void main() {
       await tester.tap(find.text(Tag.anchor.text));
       await tester.pump();
 
-      expect(tester.getSize(find.byType(RawMenuPanel)),
-          equals(const Size(100, 100)));
+      expect(tester.getSize(find.byType(RawMenuPanel)), equals(const Size(100, 100)));
     });
 
-    testWidgets(
-        'Padding applied to RawMenuPanel overrides inherited padding from RawMenuAnchor',
-        (WidgetTester tester) async {
+    testWidgets('Padding applied to RawMenuPanel overrides inherited padding from RawMenuAnchor', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         App(
           RawMenuAnchor(
@@ -6097,12 +5681,7 @@ void main() {
               child: RawMenuPanel(
                 decoration: const BoxDecoration(),
                 menuChildren: <Widget>[
-                  Container(
-                    key: Tag.a.key,
-                    color: const Color(0xFFFF0000),
-                    height: 50,
-                    width: 50,
-                  )
+                  Container(key: Tag.a.key, color: const Color(0xFFFF0000), height: 50, width: 50),
                 ],
               ),
             ),
@@ -6125,12 +5704,7 @@ void main() {
                 padding: const EdgeInsets.all(5),
                 decoration: const BoxDecoration(),
                 menuChildren: <Widget>[
-                  Container(
-                    key: Tag.a.key,
-                    color: const Color(0xFFFF0000),
-                    height: 50,
-                    width: 50,
-                  )
+                  Container(key: Tag.a.key, color: const Color(0xFFFF0000), height: 50, width: 50),
                 ],
               ),
             ),
@@ -6141,19 +5715,13 @@ void main() {
 
       final ui.Rect overrideRect = tester.getRect(find.byType(RawMenuPanel));
 
-      expect(
-        inheritedRect.topLeft - overrideRect.topLeft,
-        equals(Offset.zero),
-      );
-      expect(
-        inheritedRect.bottomRight - overrideRect.bottomRight,
-        equals(const Offset(90, 90)),
-      );
+      expect(inheritedRect.topLeft - overrideRect.topLeft, equals(Offset.zero));
+      expect(inheritedRect.bottomRight - overrideRect.bottomRight, equals(const Offset(90, 90)));
     });
 
-    testWidgets(
-        'Menu is positioned in the root overlay when useRootOverlay is true',
-        (WidgetTester tester) async {
+    testWidgets('Menu is positioned in the root overlay when useRootOverlay is true', (
+      WidgetTester tester,
+    ) async {
       // The menu should not overflow the bottom of the root overlay, so the
       // menu should be placed below the anchor button.
       final OverlayEntry entry = OverlayEntry(
@@ -6168,11 +5736,9 @@ void main() {
                   RawMenuAnchor(
                     menuAlignment: AlignmentDirectional.topStart,
                     alignment: AlignmentDirectional.bottomStart,
-                    panel: RawMenuPanel(menuChildren: <Widget>[
-                      SizedBox.square(dimension: 100)
-                    ]),
+                    panel: RawMenuPanel(menuChildren: <Widget>[SizedBox.square(dimension: 100)]),
                     child: AnchorButton(Tag.a),
-                  )
+                  ),
                 ],
               ),
               child: AnchorButton(Tag.anchor),
@@ -6198,9 +5764,7 @@ void main() {
                 width: 200,
                 child: ColoredBox(
                   color: const Color(0xFFFF0000),
-                  child: Overlay(
-                    initialEntries: <OverlayEntry>[entry],
-                  ),
+                  child: Overlay(initialEntries: <OverlayEntry>[entry]),
                 ),
               ),
             ],
@@ -6214,86 +5778,79 @@ void main() {
       await tester.pump();
 
       final [ui.Rect menu, ui.Rect subMenu] = collectOverlays();
-      final Rect anchor =
-          tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
-      final Rect subAnchor =
-          tester.getRect(find.widgetWithText(Button, Tag.a.text));
+      final Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+      final Rect subAnchor = tester.getRect(find.widgetWithText(Button, Tag.a.text));
 
       expect(menu.topLeft, equals(anchor.bottomLeft));
       expect(subMenu.topLeft, equals(subAnchor.bottomLeft));
     });
 
     testWidgets(
-        'Menu is positioned within the closest ancestor overlay when useRootOverlay is false',
-        (WidgetTester tester) async {
-      // The menu should overflow the bottom of the nearest ancestor overlay, so
-      // the menu should be placed above the anchor button.
-      final OverlayEntry entry = OverlayEntry(
-        builder: (BuildContext context) {
-          return const Positioned(
-            bottom: 0,
-            child: RawMenuAnchor(
-              panel: RawMenuPanel(
-                decoration: BoxDecoration(color: Color(0xFF0000FF)),
-                menuChildren: <Widget>[
-                  // Nested menus should be placed in the same overlay as their
-                  // parent menu, so this menu should be placed in the nearest
-                  // overlay instead of the root overlay.
-                  RawMenuAnchor(
-                    useRootOverlay: true,
-                    menuAlignment: AlignmentDirectional.topStart,
-                    alignment: AlignmentDirectional.bottomStart,
-                    panel: RawMenuPanel(menuChildren: <Widget>[
-                      SizedBox.square(dimension: 100)
-                    ]),
-                    child: AnchorButton(Tag.a),
-                  ),
-                ],
-              ),
-              child: AnchorButton(Tag.anchor),
-            ),
-          );
-        },
-      );
-
-      // Overlay entries leak if they are not disposed.
-      addTearDown(() {
-        entry.remove();
-        entry.dispose();
-      });
-
-      await tester.pumpWidget(
-        App(
-          Stack(
-            children: <Widget>[
-              Positioned(
-                left: 200,
-                top: 200,
-                height: 200,
-                width: 200,
-                child: Overlay(
-                  initialEntries: <OverlayEntry>[entry],
+      'Menu is positioned within the closest ancestor overlay when useRootOverlay is false',
+      (WidgetTester tester) async {
+        // The menu should overflow the bottom of the nearest ancestor overlay, so
+        // the menu should be placed above the anchor button.
+        final OverlayEntry entry = OverlayEntry(
+          builder: (BuildContext context) {
+            return const Positioned(
+              bottom: 0,
+              child: RawMenuAnchor(
+                panel: RawMenuPanel(
+                  decoration: BoxDecoration(color: Color(0xFF0000FF)),
+                  menuChildren: <Widget>[
+                    // Nested menus should be placed in the same overlay as their
+                    // parent menu, so this menu should be placed in the nearest
+                    // overlay instead of the root overlay.
+                    RawMenuAnchor(
+                      useRootOverlay: true,
+                      menuAlignment: AlignmentDirectional.topStart,
+                      alignment: AlignmentDirectional.bottomStart,
+                      panel: RawMenuPanel(menuChildren: <Widget>[SizedBox.square(dimension: 100)]),
+                      child: AnchorButton(Tag.a),
+                    ),
+                  ],
                 ),
+                child: AnchorButton(Tag.anchor),
               ),
-            ],
+            );
+          },
+        );
+
+        // Overlay entries leak if they are not disposed.
+        addTearDown(() {
+          entry.remove();
+          entry.dispose();
+        });
+
+        await tester.pumpWidget(
+          App(
+            Stack(
+              children: <Widget>[
+                Positioned(
+                  left: 200,
+                  top: 200,
+                  height: 200,
+                  width: 200,
+                  child: Overlay(initialEntries: <OverlayEntry>[entry]),
+                ),
+              ],
+            ),
           ),
-        ),
-      );
+        );
 
-      await tester.tap(find.text(Tag.anchor.text));
-      await tester.pump();
-      await tester.tap(find.text(Tag.a.text));
-      await tester.pump();
+        await tester.tap(find.text(Tag.anchor.text));
+        await tester.pump();
+        await tester.tap(find.text(Tag.a.text));
+        await tester.pump();
 
-      final [ui.Rect menu, ui.Rect subMenu] = collectOverlays();
-      final Rect anchor =
-          tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
-      final Rect subAnchor =
-          tester.getRect(find.widgetWithText(Button, Tag.a.text));
+        final [ui.Rect menu, ui.Rect subMenu] = collectOverlays();
+        final Rect anchor = tester.getRect(find.widgetWithText(Button, Tag.anchor.text));
+        final Rect subAnchor = tester.getRect(find.widgetWithText(Button, Tag.a.text));
 
-      expect(menu.bottomLeft, equals(anchor.topLeft));
-      expect(subMenu.bottomLeft, equals(subAnchor.topLeft));
-    });
+        expect(menu.bottomLeft, equals(anchor.topLeft));
+        expect(subMenu.bottomLeft, equals(subAnchor.topLeft));
+      },
+    );
   });
 }
 
@@ -6323,17 +5880,14 @@ abstract class Tag {
 }
 
 class NestedTag extends Tag {
-  const NestedTag(
-    String name, {
-    Tag? prefix,
-    this.level = 0,
-  })  : assert(
-          // Limit the nesting level to prevent stack overflow.
-          level < 9,
-          'NestedTag.level must be less than 9 (was $level).',
-        ),
-        _name = name,
-        _prefix = prefix;
+  const NestedTag(String name, {Tag? prefix, this.level = 0})
+    : assert(
+        // Limit the nesting level to prevent stack overflow.
+        level < 9,
+        'NestedTag.level must be less than 9 (was $level).',
+      ),
+      _name = name,
+      _prefix = prefix;
 
   final String _name;
   final Tag? _prefix;
@@ -6372,9 +5926,8 @@ class Button extends StatefulWidget {
     this.onFocusChange,
     String? focusNodeLabel,
     BoxConstraints? constraints,
-  })  : _focusNodeLabel = focusNodeLabel,
-        constraints = constraints ??
-            const BoxConstraints.tightFor(width: 225, height: 32);
+  }) : _focusNodeLabel = focusNodeLabel,
+       constraints = constraints ?? const BoxConstraints.tightFor(width: 225, height: 32);
 
   factory Button.text(
     String text, {
@@ -6432,8 +5985,7 @@ class Button extends StatefulWidget {
 class _ButtonState extends State<Button> {
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _activateOnIntent),
-    ButtonActivateIntent:
-        CallbackAction<ButtonActivateIntent>(onInvoke: _activateOnIntent),
+    ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: _activateOnIntent),
   };
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
   FocusNode? _internalFocusNode;
@@ -6447,7 +5999,9 @@ class _ButtonState extends State<Button> {
       _internalFocusNode = FocusNode(debugLabel: widget._focusNodeLabel);
     }
     _states.addListener(() {
-      setState(() {/* Rebuild on state changes. */});
+      setState(() {
+        /* Rebuild on state changes. */
+      });
     });
   }
 
@@ -6536,10 +6090,7 @@ class _ButtonState extends State<Button> {
                     constraints: widget.constraints,
                     decoration: _decoration,
                     padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: widget.child,
-                    ),
+                    child: Align(alignment: AlignmentDirectional.centerStart, child: widget.child),
                   ),
                 ),
               ),
@@ -6557,7 +6108,7 @@ class _ButtonState extends State<Button> {
     if (_states.value.contains(WidgetState.focused)) {
       return switch (_brightness) {
         Brightness.dark => const BoxDecoration(color: Color(0x95007BFF)),
-        Brightness.light => const BoxDecoration(color: Color(0x95007BFF))
+        Brightness.light => const BoxDecoration(color: Color(0x95007BFF)),
       };
     }
     if (_states.value.contains(WidgetState.hovered)) {
@@ -6572,7 +6123,7 @@ class _ButtonState extends State<Button> {
     }
     return switch (_brightness) {
       Brightness.dark => const TextStyle(color: Color(0xFFFFFFFF)),
-      Brightness.light => const TextStyle(color: Color(0xFF000000))
+      Brightness.light => const TextStyle(color: Color(0xFF000000)),
     };
   }
 }
@@ -6588,10 +6139,7 @@ class AnchorButton extends StatelessWidget {
   });
 
   factory AnchorButton.small(Tag tag) {
-    return AnchorButton(
-      tag,
-      constraints: BoxConstraints.tight(const Size(100, 30)),
-    );
+    return AnchorButton(tag, constraints: BoxConstraints.tight(const Size(100, 30)));
   }
 
   final Tag tag;
@@ -6623,12 +6171,7 @@ class AnchorButton extends StatelessWidget {
 }
 
 class App extends StatefulWidget {
-  const App(
-    this.child, {
-    super.key,
-    this.textDirection,
-    this.alignment = Alignment.center,
-  });
+  const App(this.child, {super.key, this.textDirection, this.alignment = Alignment.center});
   final Widget child;
   final TextDirection? textDirection;
   final AlignmentGeometry alignment;
@@ -6653,10 +6196,7 @@ class _AppState extends State<App> {
       child: WidgetsApp(
         color: const Color(0xff000000),
         onGenerateRoute: (RouteSettings settings) {
-          return PageRouteBuilder<void>(
-            settings: settings,
-            pageBuilder: _buildPage,
-          );
+          return PageRouteBuilder<void>(settings: settings, pageBuilder: _buildPage);
         },
       ),
     );
@@ -6668,12 +6208,8 @@ class _AppState extends State<App> {
     Animation<double> secondaryAnimation,
   ) {
     return Directionality(
-      textDirection:
-          widget.textDirection ?? _directionality ?? TextDirection.ltr,
-      child: Align(
-        alignment: widget.alignment,
-        child: widget.child,
-      ),
+      textDirection: widget.textDirection ?? _directionality ?? TextDirection.ltr,
+      child: Align(alignment: widget.alignment, child: widget.child),
     );
   }
 }

@@ -4,16 +4,12 @@
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_api_samples/widgets/raw_menu_anchor/raw_menu_anchor.0.dart'
-    as example;
+import 'package:flutter_api_samples/widgets/raw_menu_anchor/raw_menu_anchor.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 T findMenuPanelDescendent<T extends Widget>(WidgetTester tester) {
   return tester.firstWidget<T>(
-    find.descendant(
-      of: find.byType(RawMenuPanel),
-      matching: find.byType(T),
-    ),
+    find.descendant(of: find.byType(RawMenuPanel), matching: find.byType(T)),
   );
 }
 
@@ -29,8 +25,7 @@ List<Rect> collectOverlays({bool clipped = true}) {
 }
 
 void main() {
-  testWidgets('Menu opens and displays expected items',
-      (WidgetTester tester) async {
+  testWidgets('Menu opens and displays expected items', (WidgetTester tester) async {
     await tester.pumpWidget(const example.SimpleMenuApp());
     await tester.tap(find.text('Edit'));
     await tester.pump();
@@ -40,10 +35,7 @@ void main() {
     expect(find.text('Paste'), findsOneWidget);
     expect(
       collectOverlays().first,
-      rectMoreOrLessEquals(
-        const Rect.fromLTRB(359.8, 335.0, 479.8, 442.0),
-        epsilon: 0.1,
-      ),
+      rectMoreOrLessEquals(const Rect.fromLTRB(359.8, 335.0, 479.8, 442.0), epsilon: 0.1),
     );
 
     // Tap outside the menu to close.
@@ -53,9 +45,9 @@ void main() {
     expect(find.text('Cut'), findsNothing);
   });
 
-  testWidgets(
-      'Activating a menu item closes the menu and displays selected item text',
-      (WidgetTester tester) async {
+  testWidgets('Activating a menu item closes the menu and displays selected item text', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.SimpleMenuApp());
     await tester.tap(find.text('Edit'));
     await tester.pump();
@@ -95,8 +87,7 @@ void main() {
     expect(find.text('Cut'), findsNothing);
   });
 
-  testWidgets('Platform Brightness does not affect menu appearance',
-      (WidgetTester tester) async {
+  testWidgets('Platform Brightness does not affect menu appearance', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(platformBrightness: Brightness.dark),

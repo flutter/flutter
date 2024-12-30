@@ -30,8 +30,7 @@ class MenuOverlayBuilderExample extends StatefulWidget {
   static const double menuItemExtent = 44.0;
 
   @override
-  State<MenuOverlayBuilderExample> createState() =>
-      _MenuOverlayBuilderExampleState();
+  State<MenuOverlayBuilderExample> createState() => _MenuOverlayBuilderExampleState();
 }
 
 class _MenuOverlayBuilderExampleState extends State<MenuOverlayBuilderExample> {
@@ -51,17 +50,11 @@ class _MenuOverlayBuilderExampleState extends State<MenuOverlayBuilderExample> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Text(
-          'Favorite Animal:',
-          style: theme.textTheme.titleMedium,
-        ),
+        Text('Favorite Animal:', style: theme.textTheme.titleMedium),
         const SizedBox(width: 8),
         RawMenuAnchor.overlayBuilder(
           controller: controller,
-          overlayBuilder: (
-            BuildContext context,
-            RawMenuAnchorOverlayPosition position,
-          ) {
+          overlayBuilder: (BuildContext context, RawMenuAnchorOverlayPosition position) {
             return ShiftingMenuOverlay(
               position: position,
               itemExtent: MenuOverlayBuilderExample.menuItemExtent,
@@ -75,22 +68,14 @@ class _MenuOverlayBuilderExampleState extends State<MenuOverlayBuilderExample> {
                     onPressed: () {
                       _handlePressed(item);
                     },
-                    leadingIcon: SizedBox(
-                      width: 24,
-                      child: item.leading,
-                    ),
-                    trailingIcon:
-                        _selected == item ? const Icon(Icons.check) : null,
+                    leadingIcon: SizedBox(width: 24, child: item.leading),
+                    trailingIcon: _selected == item ? const Icon(Icons.check) : null,
                     child: Text(item.label),
                   ),
               ],
             );
           },
-          builder: (
-            BuildContext context,
-            MenuController controller,
-            Widget? child,
-          ) {
+          builder: (BuildContext context, MenuController controller, Widget? child) {
             return FilledButton(
               onPressed: () {
                 if (controller.isOpen) {
@@ -134,13 +119,10 @@ class ShiftingMenuOverlay extends StatelessWidget {
 
   static const Cubic curve = Cubic(0.36, 1.1, 0, 1);
 
-  static const Map<SingleActivator, Intent> shortcuts =
-      <SingleActivator, Intent>{
+  static const Map<SingleActivator, Intent> shortcuts = <SingleActivator, Intent>{
     SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowDown):
-        DirectionalFocusIntent(TraversalDirection.down),
-    SingleActivator(LogicalKeyboardKey.arrowUp):
-        DirectionalFocusIntent(TraversalDirection.up),
+    SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
+    SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
   };
 
   @override
@@ -156,11 +138,7 @@ class ShiftingMenuOverlay extends StatelessWidget {
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: 650),
       curve: curve,
-      builder: (
-        BuildContext context,
-        double value,
-        Widget? child,
-      ) {
+      builder: (BuildContext context, double value, Widget? child) {
         return Positioned(
           top: topCenter.dy - verticalOffset,
           left: topCenter.dx - 84,
@@ -168,10 +146,7 @@ class ShiftingMenuOverlay extends StatelessWidget {
             alignment: alignment,
             scaleY: value * 0.5 + 0.5,
             transformHitTests: false,
-            child: Opacity(
-              opacity: ui.clampDouble(value, 0, 1),
-              child: child,
-            ),
+            child: Opacity(opacity: ui.clampDouble(value, 0, 1), child: child),
           ),
         );
       },
@@ -199,9 +174,7 @@ class ShiftingMenuOverlay extends StatelessWidget {
                   child: ConstrainedBox(
                     constraints: constraints,
                     child: IntrinsicWidth(
-                      child: SingleChildScrollView(
-                        child: ListBody(children: children),
-                      ),
+                      child: SingleChildScrollView(child: ListBody(children: children)),
                     ),
                   ),
                 ),
@@ -223,10 +196,8 @@ class MenuOverlayBuilderApp extends StatelessWidget {
     iconSize: WidgetStatePropertyAll<double>(17),
     overlayColor: WidgetStatePropertyAll<Color>(ui.Color(0x1D82B0FF)),
     textStyle: WidgetStatePropertyAll<TextStyle>(TextStyle(fontSize: 15)),
-    padding: WidgetStatePropertyAll<EdgeInsets>(
-        EdgeInsets.symmetric(horizontal: 12)),
-    shape: WidgetStatePropertyAll<RoundedRectangleBorder>(
-        RoundedRectangleBorder()),
+    padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 12)),
+    shape: WidgetStatePropertyAll<RoundedRectangleBorder>(RoundedRectangleBorder()),
   );
 
   @override
@@ -238,17 +209,12 @@ class MenuOverlayBuilderApp extends StatelessWidget {
       ).copyWith(
         menuButtonTheme: const MenuButtonThemeData(style: buttonStyle),
         filledButtonTheme: FilledButtonThemeData(
-          style: buttonStyle.copyWith(
-            fixedSize: WidgetStateProperty.all(const Size(168, 36)),
-          ),
+          style: buttonStyle.copyWith(fixedSize: WidgetStateProperty.all(const Size(168, 36))),
         ),
       ),
       home: const Scaffold(
         body: Center(
-          child: UnconstrainedBox(
-            clipBehavior: Clip.hardEdge,
-            child: MenuOverlayBuilderExample(),
-          ),
+          child: UnconstrainedBox(clipBehavior: Clip.hardEdge, child: MenuOverlayBuilderExample()),
         ),
       ),
     );

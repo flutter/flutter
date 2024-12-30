@@ -7,16 +7,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_api_samples/widgets/raw_menu_anchor/raw_menu_anchor.1.dart'
-    as example;
+import 'package:flutter_api_samples/widgets/raw_menu_anchor/raw_menu_anchor.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 T findMenuPanelDescendent<T extends Widget>(WidgetTester tester) {
   return tester.firstWidget<T>(
-    find.descendant(
-      of: find.byType(RawMenuPanel),
-      matching: find.byType(T),
-    ),
+    find.descendant(of: find.byType(RawMenuPanel), matching: find.byType(T)),
   );
 }
 
@@ -34,23 +30,20 @@ List<Rect> collectOverlays({bool clipped = true}) {
 void main() {
   // These tests were copied from the Material version of this sample and
   // adapted to work with a menu without submenus.
-  testWidgets('Can open and close menu on desktop',
-      (WidgetTester tester) async {
+  testWidgets('Can open and close menu on desktop', (WidgetTester tester) async {
     await tester.pumpWidget(const example.ContextMenuApp());
 
     await tester.tapAt(const Offset(100, 200), buttons: kSecondaryButton);
     await tester.pump();
 
-    expect(collectOverlays().first,
-        equals(const Rect.fromLTRB(100.0, 200.0, 280.0, 435.0)));
+    expect(collectOverlays().first, equals(const Rect.fromLTRB(100.0, 200.0, 280.0, 435.0)));
     expect(find.text('Cut'), findsOneWidget);
 
     // Make sure tapping in a different place causes the menu to move.
     await tester.tapAt(const Offset(200, 100), buttons: kSecondaryButton);
     await tester.pump();
 
-    expect(collectOverlays().first,
-        equals(const Rect.fromLTRB(200.0, 100.0, 380.0, 335.0)));
+    expect(collectOverlays().first, equals(const Rect.fromLTRB(200.0, 100.0, 380.0, 335.0)));
     expect(find.text('Cut'), findsOneWidget);
 
     // Tap outside the menu to close.
@@ -66,16 +59,14 @@ void main() {
     await tester.longPressAt(const Offset(100, 200));
     await tester.pump();
 
-    expect(collectOverlays().first,
-        equals(const Rect.fromLTRB(100.0, 200.0, 280.0, 435.0)));
+    expect(collectOverlays().first, equals(const Rect.fromLTRB(100.0, 200.0, 280.0, 435.0)));
     expect(find.text('Cut'), findsOneWidget);
 
     // Make sure tapping in a different place causes the menu to move.
     await tester.longPressAt(const Offset(200, 100));
     await tester.pump();
 
-    expect(collectOverlays().first,
-        equals(const Rect.fromLTRB(200.0, 100.0, 380.0, 335.0)));
+    expect(collectOverlays().first, equals(const Rect.fromLTRB(200.0, 100.0, 380.0, 335.0)));
     expect(find.text('Cut'), findsOneWidget);
 
     // Tap outside the menu to close.
@@ -92,11 +83,7 @@ void main() {
     await tester.pump();
 
     expect(primaryFocus!.debugLabel, equals('MenuItemButton(Text("Undo"))'));
-    expect(
-        tester
-            .getSemantics(find.text('Format'))
-            .hasFlag(SemanticsFlag.isExpanded),
-        isFalse);
+    expect(tester.getSemantics(find.text('Format')).hasFlag(SemanticsFlag.isExpanded), isFalse);
     expect(find.text('Undo'), findsOneWidget);
     expect(find.text('Redo'), findsOneWidget);
     expect(find.text('Cut'), findsOneWidget);
@@ -117,11 +104,7 @@ void main() {
     await tester.pump();
 
     expect(primaryFocus!.debugLabel, equals('MenuItemButton(Text("Bold"))'));
-    expect(
-        tester
-            .getSemantics(find.text('Format'))
-            .hasFlag(SemanticsFlag.isExpanded),
-        isTrue);
+    expect(tester.getSemantics(find.text('Format')).hasFlag(SemanticsFlag.isExpanded), isTrue);
     expect(find.text('Undo'), findsOneWidget);
     expect(find.text('Redo'), findsOneWidget);
     expect(find.text('Cut'), findsOneWidget);
@@ -136,11 +119,7 @@ void main() {
     await tester.pump();
 
     expect(primaryFocus!.debugLabel, equals('MenuItemButton(Text("Format"))'));
-    expect(
-        tester
-            .getSemantics(find.text('Format'))
-            .hasFlag(SemanticsFlag.isExpanded),
-        isFalse);
+    expect(tester.getSemantics(find.text('Format')).hasFlag(SemanticsFlag.isExpanded), isFalse);
     expect(find.text('Bold'), findsNothing);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
@@ -155,8 +134,7 @@ void main() {
     expect(find.text('Selected: Undo'), findsOneWidget);
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Platform Brightness does not affect menu appearance',
-      (WidgetTester tester) async {
+  testWidgets('Platform Brightness does not affect menu appearance', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(platformBrightness: Brightness.dark),
@@ -173,15 +151,18 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Browser context menu is disabled', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.ContextMenuApp());
+  testWidgets(
+    'Browser context menu is disabled',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const example.ContextMenuApp());
 
-    await tester.tapAt(const Offset(100, 200), buttons: kSecondaryButton);
-    await tester.pump();
+      await tester.tapAt(const Offset(100, 200), buttons: kSecondaryButton);
+      await tester.pump();
 
-    if (kIsWeb) {
-      expect(BrowserContextMenu.enabled, isFalse);
-    }
-  }, skip: !kIsWeb // [intended] Browser context menu is only enabled on the web
-      );
+      if (kIsWeb) {
+        expect(BrowserContextMenu.enabled, isFalse);
+      }
+    },
+    skip: !kIsWeb, // [intended] Browser context menu is only enabled on the web
+  );
 }

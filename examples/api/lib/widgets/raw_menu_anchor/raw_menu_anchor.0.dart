@@ -32,10 +32,7 @@ class _SimpleMenuExampleState extends State<SimpleMenuExample> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Text(
-            'Selected: $_selected',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+          Text('Selected: $_selected', style: Theme.of(context).textTheme.bodyMedium),
           RawMenuAnchor(
             controller: controller,
             padding: const EdgeInsets.symmetric(vertical: 5),
@@ -64,11 +61,7 @@ class _SimpleMenuExampleState extends State<SimpleMenuExample> {
                 ),
               ],
             ),
-            builder: (
-              BuildContext context,
-              MenuController controller,
-              Widget? child,
-            ) {
+            builder: (BuildContext context, MenuController controller, Widget? child) {
               return TextButton(
                 onPressed: () {
                   if (controller.isOpen) {
@@ -94,8 +87,7 @@ class SimpleMenuApp extends StatelessWidget {
     splashFactory: InkSparkle.splashFactory,
     iconSize: WidgetStatePropertyAll<double>(17),
     overlayColor: WidgetStatePropertyAll<Color>(Color(0x0D1A1A1A)),
-    padding: WidgetStatePropertyAll<EdgeInsets>(
-        EdgeInsets.symmetric(horizontal: 12)),
+    padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 12)),
     textStyle: WidgetStatePropertyAll<TextStyle>(TextStyle(fontSize: 14)),
     visualDensity: VisualDensity(
       horizontal: VisualDensity.minimumDensity,
@@ -108,9 +100,7 @@ class SimpleMenuApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData.from(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-      ).copyWith(
-        menuButtonTheme: const MenuButtonThemeData(style: menuButtonStyle),
-      ),
+      ).copyWith(menuButtonTheme: const MenuButtonThemeData(style: menuButtonStyle)),
       home: const SimpleMenuExample(),
     );
   }
