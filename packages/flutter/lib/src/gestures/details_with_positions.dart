@@ -4,7 +4,8 @@
 
 import 'dart:ui' show Offset;
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart'
+    show DiagnosticPropertiesBuilder, Diagnosticable, DiagnosticsProperty;
 
 /// Details that contain positions at which the single pointer interacts
 /// with the screen.
