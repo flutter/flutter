@@ -1204,8 +1204,7 @@ class _PageTransitionsThemeTransitionsState<T> extends State<_PageTransitionsThe
           TargetPlatform.fuchsia ||
           TargetPlatform.windows ||
           TargetPlatform.macOS ||
-          TargetPlatform.linux =>
-            const ZoomPageTransitionsBuilder(),
+          TargetPlatform.linux => const ZoomPageTransitionsBuilder(),
         };
     return matchingBuilder.buildTransitions<T>(
       widget.route,
@@ -1305,7 +1304,7 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
     fade.addListener(notifyListeners);
   }
 
-  void _onStatusChange(_) {
+  void _onStatusChange(AnimationStatus _) {
     notifyListeners();
   }
 
@@ -1414,7 +1413,7 @@ class _ZoomExitTransitionPainter extends SnapshotPainter {
     animation.addStatusListener(_onStatusChange);
   }
 
-  void _onStatusChange(_) {
+  void _onStatusChange(AnimationStatus _) {
     notifyListeners();
   }
 
