@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'app.dart';
+/// @docImport 'color_scheme.dart';
 /// @docImport 'page.dart';
 /// @docImport 'predictive_back_page_transitions_builder.dart';
 library;
