@@ -103,8 +103,12 @@ class _MenuNodeExampleState extends State<MenuNodeExample> {
                     )
                   : menuButtonStyle,
               onHover: (bool value) {
-                if (value && rootController.isOpen) {
-                  controller.open();
+                if (rootController.isOpen) {
+                  if (value) {
+                    controller.open();
+                  }
+                } else if (!value) {
+                  Focus.of(context).unfocus();
                 }
               },
               onPressed: () {

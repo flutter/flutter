@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_api_samples/widgets/raw_menu_anchor/raw_menu_anchor.3.dart'
@@ -15,6 +17,15 @@ T findMenuPanelDescendent<T extends Widget>(WidgetTester tester) {
       matching: find.byType(T),
     ),
   );
+}
+
+Future<TestGesture> hoverOver(WidgetTester tester, Offset location) async {
+  final TestGesture gesture =
+      await tester.createGesture(kind: PointerDeviceKind.mouse);
+  addTearDown(gesture.removePointer);
+  await gesture.moveTo(location);
+  await tester.pumpAndSettle();
+  return gesture;
 }
 
 void main() {
@@ -128,5 +139,56 @@ void main() {
       findMenuPanelDescendent<Container>(tester).decoration,
       RawMenuPanel.lightSurfaceDecoration,
     );
+  });
+  testWidgets('Hover traversal opens submenus when the root menu is open',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(platformBrightness: Brightness.dark),
+        child: example.MenuNodeApp(),
+      ),
+    );
+
+    await hoverOver(tester, tester.getCenter(find.text('File')));
+    await tester.pump();
+
+    expect(find.text('New'), findsNothing);
+
+    await tester.tap(find.text('File'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('New'), findsOneWidget);
+
+    await hoverOver(tester, tester.getCenter(find.text('Tools')));
+    await tester.pump();
+
+    expect(find.text('Spelling'), findsOneWidget);
+
+    await hoverOver(tester, Offset.zero);
+    await tester.pump();
+
+    expect(find.text('Spelling'), findsOneWidget);
+    expect(
+      WidgetsBinding.instance.focusManager.primaryFocus?.debugLabel,
+      'MenuItemButton(Text("Tools"))',
+    );
+
+    await hoverOver(tester, tester.getCenter(find.text('Tools')));
+    await tester.tap(find.text('Tools'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Spelling'), findsNothing);
+    expect(
+      WidgetsBinding.instance.focusManager.primaryFocus?.debugLabel,
+      'MenuItemButton(Text("Tools"))',
+    );
+
+    await hoverOver(tester, Offset.zero);
+    await tester.pump();
+
+    expect(WidgetsBinding.instance.focusManager.primaryFocus?.debugLabel,
+        isNot('MenuItemButton(Text("Tools"))'));
   });
 }
