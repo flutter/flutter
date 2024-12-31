@@ -102,10 +102,7 @@ void _testBuildCommand({
 import 'package:native_assets_cli/native_assets_cli.dart';
 
 void main(List<String> args) async {
-  await build(args, (config, output) async {
-    print('Doing nothing!');
-  });
-  print('Done doing nothing!');
+  await build(args, (config, output) async {});
 }
 ''');
 
