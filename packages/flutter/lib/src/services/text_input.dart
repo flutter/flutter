@@ -243,7 +243,7 @@ class TextInputType {
     'address',
     'none',
     'webSearch',
-    'twitter'
+    'twitter',
   ];
 
   // Enum value name, this is what enum.toString() would normally return.
