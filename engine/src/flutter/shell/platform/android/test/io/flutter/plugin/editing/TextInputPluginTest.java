@@ -1421,7 +1421,8 @@ public class TextInputPluginTest {
         textInputPlugin.createInputConnection(testView, mock(KeyboardManager.class), editorInfo);
 
     assertEquals(
-        editorInfo.inputType, InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+        editorInfo.inputType,
+        InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
   }
 
   @Test
