@@ -1,0 +1,53 @@
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: CryptoPrice(),
+    );
+  }
+}
+
+class CryptoPrice extends StatefulWidget {
+  @override
+  _CryptoPriceState createState() => _CryptoPriceState();
+}
+
+class _CryptoPriceState extends State<CryptoPrice> {
+  String _price = 'Loading...';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPrice();
+    // 每 60 秒更新價格
+    Future.delayed(Duration(seconds: 60), () {
+      _fetchPrice();
+    });
+  }
+
+  Future<void> _fetchPrice() async {
+    final response = await http.get(Uri.parse('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      setState(() {
+        _price = data['bitcoin']['usd'].toString();
+      });
+    } else {
+      throw Exception('Failed to load price');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('虛擬貨幣即時價格')),
+      body: Center(child: Text('比特幣價格: \$$_price')),
+    );
+  }
+}
