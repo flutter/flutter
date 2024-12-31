@@ -331,7 +331,7 @@ FLUTTER_ASSERT_ARC
 
   FlutterTextInputView* inputView = inputFields[0];
 
-  // Verify keyboardType is set to the value specified in config. 
+  // Verify keyboardType is set to the value specified in config.
   XCTAssertEqual(inputView.keyboardType, UIKeyboardTypeTwitter);
 }
 
