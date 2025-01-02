@@ -710,6 +710,15 @@ deps = {
     ],
     'dep_type': 'cipd',
   },
+  'engine/src/flutter/third_party/ninja': {
+    'packages': [
+      {
+        'package': 'infra/3pp/tools/ninja/${{platform}}',
+        'version': 'version:2@1.11.1.chromium.4',
+      }
+    ],
+    'dep_type': 'cipd',
+  },
   'third_party/ninja': {
     'packages': [
       {
