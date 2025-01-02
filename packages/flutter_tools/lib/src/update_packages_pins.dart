@@ -27,7 +27,7 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'intl':
       '0.19.0', // 0.20.0 introduces new transitive dependencies that are not (yet) cleared in Flutter's allow list.
   'native_assets_builder':
-      '0.10.0', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
+      '0.10.1', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
   'native_assets_cli':
       '0.10.0', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
   'material_color_utilities': '0.11.1', // Keep pinned to latest until 1.0.0.
