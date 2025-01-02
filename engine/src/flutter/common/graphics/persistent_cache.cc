@@ -55,7 +55,7 @@ std::atomic<bool> PersistentCache::strategy_set_ = false;
 
 void PersistentCache::SetCacheSkSL(bool value) {
   if (strategy_set_ && value != cache_sksl_) {
-    FML_LOG(ERROR) << "Cache SkSL can only be set before the "
+    FML_LOG(ERROR) << "frob Cache SkSL can only be set before the "
                       "GrContextOptions::fShaderCacheStrategy is set.";
     return;
   }
