@@ -4,8 +4,6 @@
 
 // Logic for native assets shared between all host OSes.
 
-import 'dart:io' as io show Platform;
-
 import 'package:logging/logging.dart' as logging;
 import 'package:native_assets_builder/native_assets_builder.dart';
 import 'package:native_assets_cli/code_assets_builder.dart';
@@ -231,7 +229,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     fileSystem: fileSystem,
     // TODO(dcharkes): Filter the environment with
     // NativeAssetsBuildRunner.hookEnvironmentVariablesFilter.
-    hookEnvironment: io.Platform.environment,
+    hookEnvironment: const LocalPlatform().environment,
   );
 
   @override
