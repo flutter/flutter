@@ -12,7 +12,7 @@ dependencies:
   flutter_driver:
     sdk: flutter
   path_provider: 2.1.5
-  collection: 1.19.0
+  collection: 1.19.1
   assets_for_android_views:
     git:
       url: https://github.com/flutter/goldens.git
@@ -93,4 +93,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: d558
+# PUBSPEC CHECKSUM: c359

@@ -14,7 +14,7 @@ dependencies:
     sdk: flutter
   adaptive_breakpoints: 0.1.7
   animations: 2.0.11
-  collection: 1.19.0
+  collection: 1.19.1
   cupertino_icons: 1.0.8
   flutter_gallery_assets: 1.0.2
   flutter_localized_locales: 2.0.5
@@ -311,4 +311,4 @@ flutter:
       fonts:
         - asset: packages/flutter_gallery_assets/fonts/GalleryIcons.ttf
 
-# PUBSPEC CHECKSUM: 0f98
+# PUBSPEC CHECKSUM: 8a99
