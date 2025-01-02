@@ -44,10 +44,7 @@ final class AndroidNativeDriver implements NativeDriver {
     String? adbPath,
     io.Directory? tempDirectory,
   }) async {
-    final Adb adb = await Adb.create(
-      adbPath: adbPath,
-      target: target,
-    );
+    final Adb adb = await Adb.create(adbPath: adbPath, target: target);
     tempDirectory ??= io.Directory.systemTemp.createTempSync('native_driver.');
     final AndroidNativeDriver nativeDriver = AndroidNativeDriver.forTesting(
       adb: adb,
@@ -86,7 +83,7 @@ final class AndroidNativeDriver implements NativeDriver {
 
   @override
   Future<NativeScreenshot> screenshot() async {
-    // Indentical wait to what `FlutterDriver.screenshot` does.
+    // Identical wait to what `FlutterDriver.screenshot` does.
     await _waitFor2s();
     return _AdbScreencap(await _adb.screencap(), _tmpDir);
   }

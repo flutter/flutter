@@ -136,7 +136,7 @@ final class NaiveLocalFileComparator extends GoldenFileComparator {
 // late NativeDriver nativeDriver;
 
 /// Asserts that a [NativeScreenshot], [Future<NativeScreenshot>], or
-/// [List<int>] matches the golden image file indentified by [key], with an
+/// [List<int>] matches the golden image file identified by [key], with an
 /// optional [version] number].
 ///
 /// The [key] may be either a [Uri] or a [String] representation of a URL.
@@ -151,7 +151,7 @@ final class NaiveLocalFileComparator extends GoldenFileComparator {
 /// ## Golden File Testing
 ///
 /// The term __golden file__ refers to a master image that is considered the
-/// true renmdering of a given widget, state, application, or other visual
+/// true rendering of a given widget, state, application, or other visual
 /// representation you have chosen to capture.
 ///
 /// The master golden image files are tested against can be created or updated
@@ -171,8 +171,7 @@ AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
   return switch (key) {
     Uri() => _MatchesGoldenFile(key, version),
     String() => _MatchesGoldenFile.forStringPath(key, version),
-    _ => throw ArgumentError(
-        'Unexpected type for golden file: ${key.runtimeType}'),
+    _ => throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}'),
   };
 }
 
@@ -182,8 +181,7 @@ final class _MatchesGoldenFile extends AsyncMatcher {
   const _MatchesGoldenFile(this.key, this.version);
 
   /// Creates an instance of [MatchesGoldenFile] from a [String] path.
-  _MatchesGoldenFile.forStringPath(String path, this.version)
-      : key = Uri.parse(path);
+  _MatchesGoldenFile.forStringPath(String path, this.version) : key = Uri.parse(path);
 
   /// The [key] to the golden image.
   final Uri key;
@@ -201,9 +199,7 @@ final class _MatchesGoldenFile extends AsyncMatcher {
     } else if (item is FutureOr<NativeScreenshot>) {
       buffer = await (await item).readAsBytes();
     } else {
-      throw ArgumentError(
-        'Unexpected type for golden file: ${item.runtimeType}',
-      );
+      throw ArgumentError('Unexpected type for golden file: ${item.runtimeType}');
     }
 
     if (autoUpdateGoldenFiles) {
@@ -211,10 +207,7 @@ final class _MatchesGoldenFile extends AsyncMatcher {
       return null;
     }
     try {
-      final bool success = await goldenFileComparator.compare(
-        buffer,
-        testNameUri,
-      );
+      final bool success = await goldenFileComparator.compare(buffer, testNameUri);
       return success ? null : 'does not match';
     } on TestFailure catch (e) {
       return e.message;

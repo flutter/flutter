@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(matanlurey): Remove after debugging https://github.com/flutter/flutter/issues/159000.
-@Tags(<String>['flutter-build-apk'])
-library;
-
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
@@ -15,7 +11,6 @@ import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
 import '../test_utils.dart';
-import '../transition_test_utils.dart';
 import 'native_assets_test_utils.dart';
 
 /// Regression test as part of https://github.com/flutter/flutter/pull/150742.
@@ -30,7 +25,7 @@ import 'native_assets_test_utils.dart';
 /// combinations that could trigger this error.
 ///
 /// The version of `native_assets_cli` is derived from the template used by
-/// `flutter create --type=pacakges_ffi`. See
+/// `flutter create --type=packages_ffi`. See
 /// [_getPackageFfiTemplatePubspecVersion].
 void main() {
   if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {
@@ -42,11 +37,7 @@ void main() {
   final String constraint = _getPackageFfiTemplatePubspecVersion();
 
   setUpAll(() {
-    processManager.runSync(<String>[
-      flutterBin,
-      'config',
-      '--enable-native-assets',
-    ]);
+    processManager.runSync(<String>[flutterBin, 'config', '--enable-native-assets']);
   });
 
   // Test building a host, iOS, and APK (Android) target where possible.
@@ -75,49 +66,39 @@ void _testBuildCommand({
   required ProcessManager processManager,
   required bool codeSign,
 }) {
-  testWithoutContext(
-    'flutter build "$buildCommand" succeeds without libraries',
-    () async {
-      await inTempDir((Directory tempDirectory) async {
-        const String packageName = 'uses_package_native_assets_cli';
+  testWithoutContext('flutter build "$buildCommand" succeeds without libraries', () async {
+    await inTempDir((Directory tempDirectory) async {
+      const String packageName = 'uses_package_native_assets_cli';
 
-        // Create a new (plain Dart SDK) project.
-        await expectLater(
-          processManager.run(
-            <String>[
-              flutterBin,
-              'create',
-              '--no-pub',
-              packageName,
-            ],
-            workingDirectory: tempDirectory.path,
-          ),
-          completion(const ProcessResultMatcher()),
-        );
-
-        final Directory packageDirectory = tempDirectory.childDirectory(
+      // Create a new (plain Dart SDK) project.
+      await expectLater(
+        processManager.run(<String>[
+          flutterBin,
+          'create',
+          '--no-pub',
           packageName,
-        );
+        ], workingDirectory: tempDirectory.path),
+        completion(const ProcessResultMatcher()),
+      );
 
-        // Add native_assets_cli and resolve implicitly (pub add does pub get).
-        // See https://dart.dev/tools/pub/cmd/pub-add#version-constraint.
-        await expectLater(
-          processManager.run(
-            <String>[
-              flutterBin,
-              'packages',
-              'add',
-              'native_assets_cli:$nativeAssetsCliVersionConstraint',
-            ],
-            workingDirectory: packageDirectory.path,
-          ),
-          completion(const ProcessResultMatcher()),
-        );
+      final Directory packageDirectory = tempDirectory.childDirectory(packageName);
 
-        // Add a build hook that does nothing to the package.
-        packageDirectory.childDirectory('hook').childFile('build.dart')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
+      // Add native_assets_cli and resolve implicitly (pub add does pub get).
+      // See https://dart.dev/tools/pub/cmd/pub-add#version-constraint.
+      await expectLater(
+        processManager.run(<String>[
+          flutterBin,
+          'packages',
+          'add',
+          'native_assets_cli:$nativeAssetsCliVersionConstraint',
+        ], workingDirectory: packageDirectory.path),
+        completion(const ProcessResultMatcher()),
+      );
+
+      // Add a build hook that does nothing to the package.
+      packageDirectory.childDirectory('hook').childFile('build.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
 import 'package:native_assets_cli/native_assets_cli.dart';
 
 void main(List<String> args) async {
@@ -125,30 +106,25 @@ void main(List<String> args) async {
 }
 ''');
 
-        // Try building.
-        //
-        // TODO(matanlurey): Stream the app so that we can see partial output.
-        final List<String> args = <String>[
-          flutterBin,
-          'build',
-          buildCommand,
-          '--debug',
-          if (!codeSign) '--no-codesign',
-        ];
-        io.stderr.writeln('Running $args...');
-        final io.Process process = await processManager.start(
-          args,
-          workingDirectory: packageDirectory.path,
-          mode: ProcessStartMode.inheritStdio,
-        );
-        expect(await process.exitCode, 0);
-      },);
-    },
-    // TODO(matanlurey): Debug why flutter build apk often timesout.
-    // See https://github.com/flutter/flutter/issues/158560 for details.
-    skip: buildCommand == 'apk' ? 'flutter build apk times out' : false, // Temporary workaround for https://github.com/flutter/flutter/issues/158560.
-    tags: <String>['flutter-build-apk'],
-  );
+      // Try building.
+      //
+      // TODO(matanlurey): Stream the app so that we can see partial output.
+      final List<String> args = <String>[
+        flutterBin,
+        'build',
+        buildCommand,
+        '--debug',
+        if (!codeSign) '--no-codesign',
+      ];
+      io.stderr.writeln('Running $args...');
+      final io.Process process = await processManager.start(
+        args,
+        workingDirectory: packageDirectory.path,
+        mode: ProcessStartMode.inheritStdio,
+      );
+      expect(await process.exitCode, 0);
+    });
+  }, tags: <String>['flutter-build-apk']);
 }
 
 /// Reads `templates/package_ffi/pubspec.yaml.tmpl` to use the package version.

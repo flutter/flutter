@@ -67,6 +67,7 @@ class SystemContextMenu extends StatefulWidget {
       startGlyphHeight: double startGlyphHeight,
       endGlyphHeight: double endGlyphHeight,
     ) = editableTextState.getGlyphHeights();
+
     return SystemContextMenu._(
       key: key,
       anchor: TextSelectionToolbarAnchors.getSelectionRect(
@@ -171,9 +172,7 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
   @override
   void initState() {
     super.initState();
-    _systemContextMenuController = SystemContextMenuController(
-      onSystemHide: widget.onSystemHide,
-    );
+    _systemContextMenuController = SystemContextMenuController(onSystemHide: widget.onSystemHide);
   }
 
   @override
