@@ -59,35 +59,15 @@ void main() {
       () => verifyDeprecations(testRootPath, minimumMatches: 2),
       shouldHaveErrors: true,
     );
-    final String lines = <String>[
-          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:14: Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: STYLE_GUIDE_URL',
-          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:20: Deprecation notice should be a grammatically correct sentence and end with a period; notice appears to be "Also bad grammar".',
-          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:25: Deprecation notice must be an adjacent string.',
-          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:28: Deprecation notice must be an adjacent string.',
-          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:33: Deprecation notice must be an adjacent string.',
-          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:52: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
-          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:58: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
-          '║ test/analyze-test-input/root/packages/foo/deprecation.dart:81: Deprecation notice does not match required pattern. You might have used double quotes (") for the string instead of single quotes (\').',
-        ]
-        .map((String line) {
-          return line
-              .replaceAll('/', Platform.isWindows ? r'\' : '/')
-              .replaceAll(
-                'STYLE_GUIDE_URL',
-                'https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md',
-              )
-              .replaceAll(
-                'RELEASES_URL',
-                'https://flutter.dev/docs/development/tools/sdk/releases',
-              );
-        })
-        .join('\n');
+    final File fixture = File(path.join(testRootPath, 'packages', 'foo', 'deprecation.dart'));
     expect(
       result,
-      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
-      '$lines\n'
-      '║ See: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes\n'
-      '╚═══════════════════════════════════════════════════════════════════════════════\n',
+      matchesErrorsInFile(
+        fixture,
+        endsWith: <String>[
+          'See: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes',
+        ],
+      ),
     );
   });
 

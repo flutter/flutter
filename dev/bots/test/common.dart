@@ -45,11 +45,10 @@ class _ErrorMatcher extends Matcher {
   static const String mismatchDescriptionKey = 'mismatchDescription';
   static final int _errorBoxWidth = math.max(15, (hasColor ? stdout.terminalColumns : 80) - 1);
   static const String _title = 'ERROR #1';
-  static final String _firstLine =
-      '$red╔═╡$bold$_title$reset$red╞═${"═" * (_errorBoxWidth - 4 - _title.length)}';
+  static final String _firstLine = '╔═╡$_title╞═${"═" * (_errorBoxWidth - 4 - _title.length)}';
 
-  static final String _lastLine = '$red╚${"═" * _errorBoxWidth}';
-  static final String _linePrefix = '$red║$reset';
+  static final String _lastLine = '╚${"═" * _errorBoxWidth}';
+  static const String _linePrefix = '║ ';
 
   static bool mismatch(String mismatchDescription, Map<dynamic, dynamic> matchState) {
     matchState[mismatchDescriptionKey] = mismatchDescription;
@@ -69,39 +68,51 @@ class _ErrorMatcher extends Matcher {
     if (lines.isEmpty) {
       return mismatch('the actual error message is empty', matchState);
     }
-    if (lines.first == _firstLine) {
+    if (lines.first != _firstLine) {
       return mismatch(
         'the first line of the error message must be $_firstLine, got ${lines.first}',
         matchState,
       );
     }
-    if (lines.last == _lastLine) {
+    if (lines.last.isNotEmpty) {
       return mismatch(
-        'the last line of the error message must be $_lastLine, got ${lines.last}',
+        'missing newline at the end of the error message, got ${lines.last}',
         matchState,
       );
     }
-    final List<String> body = lines.sublist(1, lines.length - 1);
+    if (lines[lines.length - 2] != _lastLine) {
+      return mismatch(
+        'the last line of the error message must be $_lastLine, got ${lines[lines.length - 2]}',
+        matchState,
+      );
+    }
+    final List<String> body = lines.sublist(1, lines.length - 2);
     final String? noprefix = body.firstWhereOrNull((String line) => !line.startsWith(_linePrefix));
     if (noprefix != null) {
-      return mismatch('Line "$noprefix" should start with a prefix $_linePrefix', matchState);
+      return mismatch(
+        'Line "$noprefix" should start with a prefix $_linePrefix..\n$lines',
+        matchState,
+      );
     }
 
     final List<String> bodyWithoutPrefix = body
         .map((String s) => s.substring(_linePrefix.length))
         .toList(growable: false);
-    if (bodyWithoutPrefix.length < endsWith.length ||
-        IterableZip<String>(<Iterable<String>>[
-          bodyWithoutPrefix.reversed,
-          endsWith.reversed,
-        ]).any((List<String> ss) => ss[0] != ss[1])) {
+    final bool hasTailMismatch = IterableZip<String>(<Iterable<String>>[
+      bodyWithoutPrefix.reversed,
+      endsWith.reversed,
+    ]).any((List<String> ss) => ss[0] != ss[1]);
+    if (bodyWithoutPrefix.length < endsWith.length || hasTailMismatch) {
       return mismatch(
         'The error message should end with $endsWith.\n'
         'Actual error(s): $item',
         matchState,
       );
     }
-    return bodyMatcher.matches(item, matchState);
+    return bodyMatcher.matches(
+      bodyWithoutPrefix.sublist(0, bodyWithoutPrefix.length - endsWith.length),
+      matchState,
+    );
   }
 
   @override
@@ -116,7 +127,10 @@ class _ErrorMatcher extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    return mismatchDescription.add(matchState[mismatchDescriptionKey] as String);
+    final String? description = matchState[mismatchDescriptionKey] as String?;
+    return description != null
+        ? mismatchDescription.add(description)
+        : mismatchDescription.add('$matchState');
   }
 }
 
@@ -125,8 +139,7 @@ class _ErrorsInFileMatcher extends Matcher {
 
   final File file;
 
-  static final RegExp expectationMatcher = RegExp(r'// ERROR: (?<expectation>.+)$');
-  static const Pattern locationPattern = r'$LOCATION_LINENUMBER';
+  static final RegExp expectationMatcher = RegExp(r'//( ERROR: (?<expectation>.+))+$');
 
   static bool mismatch(String mismatchDescription, Map<dynamic, dynamic> matchState) {
     return _ErrorMatcher.mismatch(mismatchDescription, matchState);
@@ -135,28 +148,16 @@ class _ErrorsInFileMatcher extends Matcher {
   List<(int, String)> _expectedErrorMessagesFromFile(Map<dynamic, dynamic> matchState) {
     final List<(int, String)> returnValue = <(int, String)>[];
     for (final (int index, String line) in file.readAsLinesSync().indexed) {
-      final String? expectation = expectationMatcher.firstMatch(line)?.namedGroup('expectation');
-      if (expectation != null) {
+      final Iterable<String> expectations =
+          expectationMatcher
+              .allMatches(line)
+              .map((RegExpMatch m) => m.namedGroup('expectation'))
+              .whereType<String>();
+      for (final String expectation in expectations) {
         returnValue.add((index + 1, expectation));
       }
     }
     return returnValue;
-  }
-
-  String? extractFilePath(String expectedError, String actualError) {
-    final int locationIndex = expectedError.indexOf(locationPattern);
-    if (locationIndex == -1) {
-      return null;
-    }
-    if (locationIndex > 0 && !actualError.startsWith(expectedError.substring(0, locationIndex))) {
-      throw 'expected $expectedError, got $actualError';
-    }
-    // This assumes locationPattern is the only variable. The logic needs to
-    // be updated if more variables are introduced.
-    final int endIndex = actualError.indexOf(':', locationIndex);
-    return (endIndex == -1)
-        ? throw 'expected $expectedError, got $actualError'
-        : actualError.substring(locationIndex, endIndex);
   }
 
   @override
@@ -166,28 +167,44 @@ class _ErrorsInFileMatcher extends Matcher {
     if (expectedErrors.length != actualErrors.length) {
       return mismatch(
         'expected ${expectedErrors.length} error(s), got ${actualErrors.length}.\n'
-        'actual error(s): $item',
+        'expected lines with errors: ${expectedErrors.map(((int, String) x) => x.$1).toList()}\n'
+        'actual error(s): \n>${actualErrors.join('\n>')}',
         matchState,
       );
     }
-    String? filePath;
     for (int i = 0; i < actualErrors.length; ++i) {
       final String actualError = actualErrors[i];
       final (int lineNumber, String expectedError) = expectedErrors[i];
-      try {
-        filePath ??= extractFilePath(expectedError, actualError);
-      } catch (error) {
-        return mismatch(error as String, matchState);
-      }
-      final String expectedErrorResolved = expectedError.replaceAll(
-        locationPattern,
-        '$filePath:$lineNumber',
-      );
-      if (expectedErrorResolved != actualError) {
-        return mismatch(
-          'expected $expectedErrorResolved at line $lineNumber, got $actualError',
-          matchState,
-        );
+      //final String filePath;
+      switch (actualError.split(':')) {
+        case [final String _]:
+          return mismatch(
+            'No semicolons (":") found in the error message "$actualError".',
+            matchState,
+          );
+        case [final String path, final String line, ...final List<String> rest]:
+          if (!path.endsWith(file.uri.pathSegments.last)) {
+            return mismatch('"$path" does not match the file name of the source file.', matchState);
+          }
+          if (lineNumber.toString() != line) {
+            return mismatch(
+              'could not find the expected error "$expectedError" at line $lineNumber',
+              matchState,
+            );
+          }
+          final String actualMessage = rest.join(':').trimLeft();
+          if (actualMessage != expectedError) {
+            return mismatch(
+              'expected \n"$expectedError"\n at line $lineNumber, got \n"$actualMessage"',
+              matchState,
+            );
+          }
+
+        case _:
+          return mismatch(
+            'failed to recognize a valid path from the error message "$actualError".',
+            matchState,
+          );
       }
     }
     return true;
