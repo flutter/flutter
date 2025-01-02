@@ -2116,7 +2116,22 @@ void main() {
         }
         await expectLater(
           find.byType(BottomNavigationBar),
-          matchesGoldenFile('m2_bottom_navigation_bar.shifting_transition.${pump - 1}.png'),
+          matchesGoldenFile('m2_bottom_navigation_bar.shifting_transition_green.${pump - 1}.png'),
+        );
+      });
+    }
+
+    for (int pump = 1; pump < 9; pump++) {
+      testWidgets('pump $pump', (WidgetTester tester) async {
+        await tester.pumpWidget(runTest());
+        await tester.tap(find.text('Red'));
+
+        for (int i = 0; i < pump; i++) {
+          await tester.pump(const Duration(milliseconds: 30));
+        }
+        await expectLater(
+          find.byType(BottomNavigationBar),
+          matchesGoldenFile('m2_bottom_navigation_bar.shifting_transition_red.${pump - 1}.png'),
         );
       });
     }
@@ -2170,7 +2185,22 @@ void main() {
         }
         await expectLater(
           find.byType(BottomNavigationBar),
-          matchesGoldenFile('m3_bottom_navigation_bar.shifting_transition.${pump - 1}.png'),
+          matchesGoldenFile('m3_bottom_navigation_bar.shifting_transition_green.${pump - 1}.png'),
+        );
+      });
+    }
+
+    for (int pump = 1; pump < 9; pump++) {
+      testWidgets('pump $pump', (WidgetTester tester) async {
+        await tester.pumpWidget(runTest());
+        await tester.tap(find.text('Red'));
+
+        for (int i = 0; i < pump; i++) {
+          await tester.pump(const Duration(milliseconds: 30));
+        }
+        await expectLater(
+          find.byType(BottomNavigationBar),
+          matchesGoldenFile('m3_bottom_navigation_bar.shifting_transition_red.${pump - 1}.png'),
         );
       });
     }
