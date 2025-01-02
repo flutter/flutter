@@ -2072,6 +2072,7 @@ void main() {
     // Regression test for: https://github.com/flutter/flutter/issues/22226
     Widget runTest() {
       int currentIndex = 0;
+      Color backgroundColor = Colors.red;
       return MaterialApp(
         theme: ThemeData(useMaterial3: false),
         home: StatefulBuilder(
@@ -2084,15 +2085,18 @@ void main() {
                   onTap: (int index) {
                     setState(() {
                       currentIndex = index;
+                      if (index == 0) {
+                        backgroundColor = Colors.green;
+                      }
                     });
                   },
-                  items: const <BottomNavigationBarItem>[
+                  items: <BottomNavigationBarItem>[
                     BottomNavigationBarItem(
                       label: 'Red',
-                      backgroundColor: Colors.red,
-                      icon: Icon(Icons.dashboard),
+                      backgroundColor: backgroundColor,
+                      icon: const Icon(Icons.dashboard),
                     ),
-                    BottomNavigationBarItem(
+                    const BottomNavigationBarItem(
                       label: 'Green',
                       backgroundColor: Colors.green,
                       icon: Icon(Icons.menu),
@@ -2104,21 +2108,6 @@ void main() {
           },
         ),
       );
-    }
-
-    for (int pump = 1; pump < 9; pump++) {
-      testWidgets('pump $pump', (WidgetTester tester) async {
-        await tester.pumpWidget(runTest());
-        await tester.tap(find.text('Green'));
-
-        for (int i = 0; i < pump; i++) {
-          await tester.pump(const Duration(milliseconds: 30));
-        }
-        await expectLater(
-          find.byType(BottomNavigationBar),
-          matchesGoldenFile('m2_bottom_navigation_bar.shifting_transition_green.${pump - 1}.png'),
-        );
-      });
     }
 
     for (int pump = 1; pump < 9; pump++) {
@@ -2135,13 +2124,28 @@ void main() {
         );
       });
     }
+
+    for (int pump = 1; pump < 9; pump++) {
+      testWidgets('pump $pump', (WidgetTester tester) async {
+        await tester.pumpWidget(runTest());
+        await tester.tap(find.text('Green'));
+
+        for (int i = 0; i < pump; i++) {
+          await tester.pump(const Duration(milliseconds: 30));
+        }
+        await expectLater(
+          find.byType(BottomNavigationBar),
+          matchesGoldenFile('m2_bottom_navigation_bar.shifting_transition_green.${pump - 1}.png'),
+        );
+      });
+    }
   });
 
   group('Material3 - BottomNavigationBar shifting backgroundColor with transition', () {
     // Regression test for: https://github.com/flutter/flutter/issues/22226
     Widget runTest() {
       int currentIndex = 0;
-
+      Color backgroundColor = Colors.red;
       return MaterialApp(
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
@@ -2153,15 +2157,18 @@ void main() {
                   onTap: (int index) {
                     setState(() {
                       currentIndex = index;
+                      if (index == 0) {
+                        backgroundColor = Colors.green;
+                      }
                     });
                   },
-                  items: const <BottomNavigationBarItem>[
+                  items: <BottomNavigationBarItem>[
                     BottomNavigationBarItem(
                       label: 'Red',
-                      backgroundColor: Colors.red,
-                      icon: Icon(Icons.dashboard),
+                      backgroundColor: backgroundColor,
+                      icon: const Icon(Icons.dashboard),
                     ),
-                    BottomNavigationBarItem(
+                    const BottomNavigationBarItem(
                       label: 'Green',
                       backgroundColor: Colors.green,
                       icon: Icon(Icons.menu),
@@ -2178,21 +2185,6 @@ void main() {
     for (int pump = 1; pump < 9; pump++) {
       testWidgets('pump $pump', (WidgetTester tester) async {
         await tester.pumpWidget(runTest());
-        await tester.tap(find.text('Green'));
-
-        for (int i = 0; i < pump; i++) {
-          await tester.pump(const Duration(milliseconds: 30));
-        }
-        await expectLater(
-          find.byType(BottomNavigationBar),
-          matchesGoldenFile('m3_bottom_navigation_bar.shifting_transition_green.${pump - 1}.png'),
-        );
-      });
-    }
-
-    for (int pump = 1; pump < 9; pump++) {
-      testWidgets('pump $pump', (WidgetTester tester) async {
-        await tester.pumpWidget(runTest());
         await tester.tap(find.text('Red'));
 
         for (int i = 0; i < pump; i++) {
@@ -2201,6 +2193,21 @@ void main() {
         await expectLater(
           find.byType(BottomNavigationBar),
           matchesGoldenFile('m3_bottom_navigation_bar.shifting_transition_red.${pump - 1}.png'),
+        );
+      });
+    }
+
+    for (int pump = 1; pump < 9; pump++) {
+      testWidgets('pump $pump', (WidgetTester tester) async {
+        await tester.pumpWidget(runTest());
+        await tester.tap(find.text('Green'));
+
+        for (int i = 0; i < pump; i++) {
+          await tester.pump(const Duration(milliseconds: 30));
+        }
+        await expectLater(
+          find.byType(BottomNavigationBar),
+          matchesGoldenFile('m3_bottom_navigation_bar.shifting_transition_green.${pump - 1}.png'),
         );
       });
     }
