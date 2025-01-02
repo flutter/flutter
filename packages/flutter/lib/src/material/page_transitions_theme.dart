@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'app.dart';
+/// @docImport 'color_scheme.dart';
 /// @docImport 'page.dart';
 /// @docImport 'predictive_back_page_transitions_builder.dart';
 library;
@@ -1204,8 +1205,7 @@ class _PageTransitionsThemeTransitionsState<T> extends State<_PageTransitionsThe
           TargetPlatform.fuchsia ||
           TargetPlatform.windows ||
           TargetPlatform.macOS ||
-          TargetPlatform.linux =>
-            const ZoomPageTransitionsBuilder(),
+          TargetPlatform.linux => const ZoomPageTransitionsBuilder(),
         };
     return matchingBuilder.buildTransitions<T>(
       widget.route,
