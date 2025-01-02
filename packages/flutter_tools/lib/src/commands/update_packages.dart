@@ -1588,7 +1588,7 @@ String generateFakePubspec(Iterable<PubspecDependency> dependencies, {bool doUpg
     }
   }
   for (final PubspecDependency dependency in dependencies) {
-    if (!dependency.pointsToSdk && dependency.name != 'native_assets_cli') {
+    if (!dependency.pointsToSdk) {
       dependency.describeForFakePubspec(result, overrides, allowUpgrade: doUpgrade);
     }
   }

@@ -55,11 +55,7 @@ dependencies:
   unified_analytics: 7.0.1
 
   graphs: 2.3.2
-  native_assets_builder:
-    git:
-      url: https://github.com/dart-lang/native.git
-      ref: unstuck-flutter-roll
-      path: pkgs/native_assets_builder/
+  native_assets_builder: 0.10.0
   native_assets_cli: 0.10.0
 
   # We depend on very specific internal implementation details of the
@@ -124,4 +120,5 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
+
 # PUBSPEC CHECKSUM: 158c
