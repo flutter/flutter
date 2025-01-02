@@ -682,12 +682,17 @@ ${_getAgpLocation(project)}''', title: _boxTitle);
   eventLabel: 'r8-dexing-bug-in-AGP-7.3',
 );
 
+final RegExp _outdatedPluginDependencyPattern = RegExp(
+  r'.pub-cache/hosted/pub.dev/(.*?)/android/src/main/java/',
+);
+
+// Handler when an outdated plugin is still using v1 embedding references that
+// were removed in more recent plugin versions.
 @visibleForTesting
 final GradleHandledError usageOfV1EmbeddingReferencesHandler = GradleHandledError(
-  test:
-      (String line) =>
-          line.contains('io.flutter.plugin.common.PluginRegistry.Registrar') &&
-          line.contains('private'),
+  test: (String line) {
+    return _outdatedPluginDependencyPattern.hasMatch(line);
+  },
   handler: ({
     required String line,
     required FlutterProject project,
