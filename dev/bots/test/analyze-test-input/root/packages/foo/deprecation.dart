@@ -90,7 +90,9 @@ void test15() { }
 // dart format on
 
 // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/000000
-@Deprecated('Missing the version line. ')
+@Deprecated(
+  'Missing the version line. ', // ERROR: $pathToPackageRoot:$lineNumber: input.clamp(0.0, 2). bla bla bla bla bla bla bla bla bla.
+)
 void test16() {}
 
 class TestClass1 {

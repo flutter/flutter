@@ -43,7 +43,7 @@ void testNoDoubleClamp(int input) {
   nonDoubleClamp.clamp(0, 2);
   input.clamp(0, 2);
   input.clamp(0.0, 2); // bad.
-  input.toDouble().clamp(0, 2); // bad.
+  input.toDouble().clamp(0, 2); // ERROR: $pathToPackageRoot:$lineNumber: input.clamp(0.0, 2).
 
   nonDoubleClamp2?.clamp(0, 2);
   nullableInt?.clamp(0, 2);
