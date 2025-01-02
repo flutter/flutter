@@ -9,7 +9,7 @@ import 'package:native_toolchain_c/native_toolchain_c.dart';
 
 void main(List<String> args) async {
   await build(args, (BuildConfig config, BuildOutputBuilder output) async {
-    if (!config.supportedAssetTypes.contains(CodeAsset.type)) {
+    if (!config.buildAssetTypes.contains(CodeAsset.type)) {
       return;
     }
 
