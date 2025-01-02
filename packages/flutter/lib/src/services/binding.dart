@@ -414,7 +414,10 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       // system context menu while an old one is still visible.
       case 'ContextMenu.onDismissSystemContextMenu':
         if (_systemContextMenuClient == null) {
-          assert(false, 'Platform sent onDismissSystemContextMenu when no SystemContextMenuClient was registered.');
+          assert(
+            false,
+            'Platform sent onDismissSystemContextMenu when no SystemContextMenuClient was registered.',
+          );
           return;
         }
         _systemContextMenuClient!.handleSystemHide();
@@ -422,7 +425,10 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
         _systemContextMenuClient = null;
       case 'ContextMenu.onTapCustomActionItem':
         if (_systemContextMenuClient == null) {
-          assert(false, 'Platform sent onTapCustomActionItem when no SystemContextMenuClient was registered.');
+          assert(
+            false,
+            'Platform sent onTapCustomActionItem when no SystemContextMenuClient was registered.',
+          );
           return;
         }
         final List<dynamic> args = methodCall.arguments as List<dynamic>;

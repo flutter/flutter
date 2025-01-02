@@ -2582,7 +2582,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///  * [hide], which hides the menu shown by this method.
   ///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates whether
   ///    this method is supported on the current platform.
-  Future<void> show(Rect targetRect, [ List<SystemContextMenuItemData>? items ]) {
+  Future<void> show(Rect targetRect, [List<SystemContextMenuItemData>? items]) {
     assert(!_isDisposed);
     assert(
       TextInput._instance._currentConnection != null,
@@ -2590,9 +2590,10 @@ class SystemContextMenuController with SystemContextMenuClient {
     );
 
     // Don't show the same thing that's already being shown.
-    if (_lastShown != null && _lastShown!.isVisible
-        && _lastShown!._lastTargetRect == targetRect
-        && listEquals(_lastShown!._lastItems, items)) {
+    if (_lastShown != null &&
+        _lastShown!.isVisible &&
+        _lastShown!._lastTargetRect == targetRect &&
+        listEquals(_lastShown!._lastItems, items)) {
       return Future<void>.value();
     }
 
@@ -2626,9 +2627,10 @@ class SystemContextMenuController with SystemContextMenuClient {
           'height': targetRect.height,
         },
         if (items != null)
-          'items': items
-              .map<Map<String, dynamic>>((SystemContextMenuItemData item) => item._json)
-              .toList(),
+          'items':
+              items
+                  .map<Map<String, dynamic>>((SystemContextMenuItemData item) => item._json)
+                  .toList(),
       },
     );
   }
@@ -2705,8 +2707,7 @@ sealed class SystemContextMenuItemData {
   Map<String, dynamic> get _json {
     return <String, dynamic>{
       'callbackId': hashCode,
-      if (title != null)
-        'title': title,
+      if (title != null) 'title': title,
       'type': switch (this) {
         SystemContextMenuItemDataCopy() => 'copy',
         SystemContextMenuItemDataCut() => 'cut',
@@ -2731,9 +2732,9 @@ sealed class SystemContextMenuItemData {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is SystemContextMenuItemData
-        && other.title == title
-        && other.onPressed == onPressed;
+    return other is SystemContextMenuItemData &&
+        other.title == title &&
+        other.onPressed == onPressed;
   }
 }
 
@@ -2814,9 +2815,7 @@ class SystemContextMenuItemDataSelectAll extends SystemContextMenuItemData {
 ///    value.
 class SystemContextMenuItemDataLookUp extends SystemContextMenuItemData {
   /// Creates an instance of [SystemContextMenuItemDataLookUp].
-  const SystemContextMenuItemDataLookUp({
-    required this.title,
-  });
+  const SystemContextMenuItemDataLookUp({required this.title});
 
   @override
   final String title;
@@ -2844,9 +2843,7 @@ class SystemContextMenuItemDataLookUp extends SystemContextMenuItemData {
 ///    value.
 class SystemContextMenuItemDataSearchWeb extends SystemContextMenuItemData {
   /// Creates an instance of [SystemContextMenuItemDataSearchWeb].
-  const SystemContextMenuItemDataSearchWeb({
-    required this.title,
-  });
+  const SystemContextMenuItemDataSearchWeb({required this.title});
 
   @override
   final String title;
@@ -2873,9 +2870,7 @@ class SystemContextMenuItemDataSearchWeb extends SystemContextMenuItemData {
 ///    localized value.
 class SystemContextMenuItemDataShare extends SystemContextMenuItemData {
   /// Creates an instance of [SystemContextMenuItemDataShare].
-  const SystemContextMenuItemDataShare({
-    required this.title,
-  });
+  const SystemContextMenuItemDataShare({required this.title});
 
   @override
   final String title;
@@ -2902,10 +2897,7 @@ class SystemContextMenuItemDataShare extends SystemContextMenuItemData {
 class SystemContextMenuItemDataCustom extends SystemContextMenuItemData {
   /// Creates an instance of [SystemContextMenuItemDataCustom] with the given
   /// [title] and [onPressed] callback.
-  const SystemContextMenuItemDataCustom({
-    required this.onPressed,
-    required this.title,
-  });
+  const SystemContextMenuItemDataCustom({required this.onPressed, required this.title});
 
   @override
   final VoidCallback onPressed;

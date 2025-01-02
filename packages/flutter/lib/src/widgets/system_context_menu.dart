@@ -63,10 +63,8 @@ class SystemContextMenu extends StatefulWidget {
     required EditableTextState editableTextState,
     List<SystemContextMenuItem>? items,
   }) {
-    final (
-      startGlyphHeight: double startGlyphHeight,
-      endGlyphHeight: double endGlyphHeight,
-    ) = editableTextState.getGlyphHeights();
+    final (startGlyphHeight: double startGlyphHeight, endGlyphHeight: double endGlyphHeight) =
+        editableTextState.getGlyphHeights();
 
     return SystemContextMenu._(
       key: key,
@@ -122,7 +120,10 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
   /// SystemContextMenuItemData is a format that is meant to be consumed by
   /// SystemContextMenuController.show, where there is no expectation that
   /// localizations can be used under the hood.
-  SystemContextMenuItemData _itemToData(SystemContextMenuItem item, WidgetsLocalizations localizations) {
+  SystemContextMenuItemData _itemToData(
+    SystemContextMenuItem item,
+    WidgetsLocalizations localizations,
+  ) {
     return switch (item) {
       SystemContextMenuItemCut() => const SystemContextMenuItemDataCut(),
       SystemContextMenuItemCopy() => const SystemContextMenuItemDataCopy(),
@@ -159,8 +160,9 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
 
   void _show() {
     final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-    final Iterable<SystemContextMenuItemData>? datas =
-        widget.items?.map((SystemContextMenuItem item) => _itemToData(item, localizations));
+    final Iterable<SystemContextMenuItemData>? datas = widget.items?.map(
+      (SystemContextMenuItem item) => _itemToData(item, localizations),
+    );
     _systemContextMenuController.show(
       widget.anchor,
       // TODO(justinmc): Don't show irrelevant items, like don't show "search" if there is no selection.
@@ -178,9 +180,8 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
   @override
   void didUpdateWidget(SystemContextMenu oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_systemContextMenuController.isVisible
-        && (widget.anchor != oldWidget.anchor
-            || !listEquals(widget.items, oldWidget.items))) {
+    if (_systemContextMenuController.isVisible &&
+        (widget.anchor != oldWidget.anchor || !listEquals(widget.items, oldWidget.items))) {
       _show();
     }
   }
@@ -246,9 +247,7 @@ sealed class SystemContextMenuItem {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is SystemContextMenuItem
-        && other.title == title
-        && other.onPressed == onPressed;
+    return other is SystemContextMenuItem && other.title == title && other.onPressed == onPressed;
   }
 }
 
@@ -343,9 +342,7 @@ class SystemContextMenuItemSelectAll extends SystemContextMenuItem {
 ///    the platform for this same button.
 class SystemContextMenuItemLookUp extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemLookUp].
-  const SystemContextMenuItemLookUp({
-    this.title,
-  });
+  const SystemContextMenuItemLookUp({this.title});
 
   @override
   final String? title;
@@ -375,9 +372,7 @@ class SystemContextMenuItemLookUp extends SystemContextMenuItem {
 ///    to the platform for this same button.
 class SystemContextMenuItemSearchWeb extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemSearchWeb].
-  const SystemContextMenuItemSearchWeb({
-    this.title,
-  });
+  const SystemContextMenuItemSearchWeb({this.title});
 
   @override
   final String? title;
@@ -407,9 +402,7 @@ class SystemContextMenuItemSearchWeb extends SystemContextMenuItem {
 ///    the platform for this same button.
 class SystemContextMenuItemShare extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemShare].
-  const SystemContextMenuItemShare({
-    this.title,
-  });
+  const SystemContextMenuItemShare({this.title});
 
   @override
   final String? title;

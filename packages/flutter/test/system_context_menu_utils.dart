@@ -16,19 +16,10 @@ SystemContextMenuItemData systemContextMenuItemDataFromJson(Map<String, dynamic>
     'cut' => const SystemContextMenuItemDataCut(),
     'paste' => const SystemContextMenuItemDataPaste(),
     'selectAll' => const SystemContextMenuItemDataSelectAll(),
-    'searchWeb' => SystemContextMenuItemDataSearchWeb(
-      title: title!,
-    ),
-    'share' => SystemContextMenuItemDataShare(
-      title: title!,
-    ),
-    'lookUp' => SystemContextMenuItemDataLookUp(
-      title: title!,
-    ),
-    'custom' => SystemContextMenuItemDataCustom(
-      title: title!,
-      onPressed: onPressed!,
-    ),
+    'searchWeb' => SystemContextMenuItemDataSearchWeb(title: title!),
+    'share' => SystemContextMenuItemDataShare(title: title!),
+    'lookUp' => SystemContextMenuItemDataLookUp(title: title!),
+    'custom' => SystemContextMenuItemDataCustom(title: title!, onPressed: onPressed!),
     _ => throw FlutterError('Invalid json for SystemContextMenuItemData.type $type.'),
   };
 }

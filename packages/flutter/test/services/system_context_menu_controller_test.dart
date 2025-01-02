@@ -321,23 +321,28 @@ void main() {
     });
 
     final List<List<SystemContextMenuItemData>> itemsReceived = <List<SystemContextMenuItemData>>[];
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (MethodCall methodCall) async {
         switch (methodCall.method) {
           case 'ContextMenu.showSystemContextMenu':
             final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
             final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-            final List<SystemContextMenuItemData> lastItems = untypedItems.map((dynamic value) {
-              final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
-              return systemContextMenuItemDataFromJson(itemJson);
-            }).toList();
+            final List<SystemContextMenuItemData> lastItems =
+                untypedItems.map((dynamic value) {
+                  final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
+                  return systemContextMenuItemDataFromJson(itemJson);
+                }).toList();
             itemsReceived.add(lastItems);
         }
         return;
-      });
+      },
+    );
     addTearDown(() {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(SystemChannels.platform, null);
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      );
     });
 
     final SystemContextMenuController controller = SystemContextMenuController();
@@ -350,16 +355,14 @@ void main() {
     // Showing calls the platform.
     const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
     final List<SystemContextMenuItemData> items1 = <SystemContextMenuItemData>[
-        const SystemContextMenuItemDataCut(),
-        const SystemContextMenuItemDataCopy(),
-        const SystemContextMenuItemDataPaste(),
-        const SystemContextMenuItemDataSelectAll(),
-        const SystemContextMenuItemDataSearchWeb(
-          title: 'Special Search',
-        ),
-        // TODO(justinmc): Support the "custom" item type.
-        // https://github.com/flutter/flutter/issues/103163
-      ];
+      const SystemContextMenuItemDataCut(),
+      const SystemContextMenuItemDataCopy(),
+      const SystemContextMenuItemDataPaste(),
+      const SystemContextMenuItemDataSelectAll(),
+      const SystemContextMenuItemDataSearchWeb(title: 'Special Search'),
+      // TODO(justinmc): Support the "custom" item type.
+      // https://github.com/flutter/flutter/issues/103163
+    ];
 
     controller.show(rect, items1);
     expect(controller.isVisible, isTrue);
