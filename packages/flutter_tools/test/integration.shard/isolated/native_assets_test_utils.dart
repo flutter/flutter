@@ -189,7 +189,7 @@ void main(List<String> args) async {
   await build(args, (config, output) async {
     final packageName = config.packageName;
 
-    if (!config.supportedAssetTypes.contains(CodeAsset.type)) {
+    if (!config.buildAssetTypes.contains(CodeAsset.type)) {
       return;
     }
     final builders = [
@@ -221,7 +221,7 @@ void main(List<String> args) async {
 }
 
 extension on BuildConfig {
-  List<String> dynamicLinkingFlags(String libraryName) => switch (targetOS) {
+  List<String> dynamicLinkingFlags(String libraryName) => switch (codeConfig.targetOS) {
         OS.macOS || OS.iOS => [
             '-L${outputDirectory.toFilePath()}',
             '-l$libraryName',
@@ -234,7 +234,7 @@ extension on BuildConfig {
         OS.windows => [
             outputDirectory.resolve('$libraryName.lib').toFilePath()
           ],
-        _ => throw UnimplementedError('Unsupported OS: $targetOS'),
+        _ => throw UnimplementedError('Unsupported OS: ${codeConfig.targetOS}'),
       };
 }
 ''';
