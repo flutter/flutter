@@ -1518,7 +1518,7 @@ FAILURE: Build failed with an exception.
       // Text and link to file an issue.
       expect(
         testLogger.statusText,
-        contains('If that does not work, please file an issue for the problematic plugin here:'),
+        contains('If that does not work, please file an issue for the problematic plugin(s) here:'),
       );
       expect(testLogger.statusText, contains('https://github.com/flutter/flutter/issues'));
     },
