@@ -12,5 +12,10 @@ logger.error(
     "declarative plugins block: https://flutter.dev/to/flutter-gradle-plugin-apply\n"
 )
 
-val pathToThisDirectory = buildscript.sourceFile.parentFile
-apply(from = "$pathToThisDirectory/src/main/groovy/app_plugin_loader.groovy")
+// Use a safe call and handle the nullable case
+val pathToThisDirectory = buildscript.sourceFile?.parentFile
+if (pathToThisDirectory != null) {
+    apply(from = "$pathToThisDirectory/src/main/groovy/app_plugin_loader.groovy")
+} else {
+    logger.error("Failed to determine the path to this directory. `buildscript.sourceFile` is null.")
+}
