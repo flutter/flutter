@@ -296,7 +296,7 @@ class Color {
   ///
   /// If [colorSpace] is provided, and is different than the current color
   /// space, the component values are updated before transforming them to the
-  /// provided color space.
+  /// provided [ColorSpace].
   Color withValues({
     double? alpha,
     double? red,
