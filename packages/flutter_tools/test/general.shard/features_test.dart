@@ -409,7 +409,7 @@ void main() {
     });
 
     group('Swift Package Manager feature', () {
-      test('availability and default enabled', () {
+      testWithoutContext('availability and default enabled', () {
         expect(swiftPackageManager.master.enabledByDefault, false);
         expect(swiftPackageManager.master.available, true);
         expect(swiftPackageManager.beta.enabledByDefault, false);
@@ -418,7 +418,7 @@ void main() {
         expect(swiftPackageManager.stable.available, true);
       });
 
-      test('can be enabled', () {
+      testWithoutContext('can be enabled', () {
         platform.environment = <String, String>{'FLUTTER_SWIFT_PACKAGE_MANAGER': 'true'};
 
         expect(featureFlags.isSwiftPackageManagerEnabled, isTrue);
@@ -426,7 +426,7 @@ void main() {
     });
 
     group('Swift Package Manager app migration feature', () {
-      test('availability and default enabled', () {
+      testWithoutContext('availability and default enabled', () {
         expect(swiftPackageManagerMigration.master.enabledByDefault, false);
         expect(swiftPackageManagerMigration.master.available, true);
         expect(swiftPackageManagerMigration.beta.enabledByDefault, false);
@@ -435,7 +435,7 @@ void main() {
         expect(swiftPackageManagerMigration.stable.available, true);
       });
 
-      test('requires Swift Package Manager feature', () {
+      testWithoutContext('requires Swift Package Manager feature', () {
         platform.environment = <String, String>{
           'FLUTTER_SWIFT_PACKAGE_MANAGER': 'false',
           'FLUTTER_SWIFT_PACKAGE_MANAGER_MIGRATION': 'true',
@@ -445,7 +445,7 @@ void main() {
         expect(featureFlags.isSwiftPackageManagerMigrationEnabled, isFalse);
       });
 
-      test('is separate from the Swift Package Manager feature', () {
+      testWithoutContext('is separate from the Swift Package Manager feature', () {
         platform.environment = <String, String>{
           'FLUTTER_SWIFT_PACKAGE_MANAGER': 'true',
           'FLUTTER_SWIFT_PACKAGE_MANAGER_MIGRATION': 'false',
@@ -455,7 +455,7 @@ void main() {
         expect(featureFlags.isSwiftPackageManagerMigrationEnabled, isFalse);
       });
 
-      test('can be enabled', () {
+      testWithoutContext('can be enabled', () {
         platform.environment = <String, String>{
           'FLUTTER_SWIFT_PACKAGE_MANAGER': 'true',
           'FLUTTER_SWIFT_PACKAGE_MANAGER_MIGRATION': 'true',
