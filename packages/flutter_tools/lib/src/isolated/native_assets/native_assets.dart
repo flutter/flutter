@@ -230,7 +230,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     hookEnvironment: filteredEnvironment(<String>{
       ...NativeAssetsBuildRunner.hookEnvironmentVariablesFilter,
       ...(const LocalPlatform().environment.keys.toList()..sort()).where((String key) {
-        final bool keep = key.toLowerCase().startsWith(RegExp(r'[a-m]'));
+        final bool keep = key.toLowerCase().startsWith(RegExp(r'[a-g]'));
         _logger.info('Native assets environment: ${keep ? 'keeping' : 'removing'} $key');
         return keep;
       }),
