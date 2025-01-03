@@ -175,7 +175,6 @@ class _ErrorsInFileMatcher extends Matcher {
     for (int i = 0; i < actualErrors.length; ++i) {
       final String actualError = actualErrors[i];
       final (int lineNumber, String expectedError) = expectedErrors[i];
-      //final String filePath;
       switch (actualError.split(':')) {
         case [final String _]:
           return mismatch(
