@@ -60,10 +60,8 @@ localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
 
 def flutterSdkPath = properties.getProperty("flutter.sdk")
 assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
-
 apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle.kts"
-'''
-    );
+''');
       buildGradle.writeAsStringSync(r'''
 buildscript {
     ext.kotlin_version = '1.8.22'
