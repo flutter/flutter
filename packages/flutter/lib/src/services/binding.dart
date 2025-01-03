@@ -421,7 +421,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
           return;
         }
         _systemContextMenuClient!.handleSystemHide();
-        unregisterSystemContextMenuClient(_systemContextMenuClient!);
         _systemContextMenuClient = null;
       case 'ContextMenu.onTapCustomActionItem':
         if (_systemContextMenuClient == null) {
@@ -593,13 +592,10 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   /// Registers a [SystemContextMenuClient] that will receive system context
   /// menu calls from the engine.
-  static void registerSystemContextMenuClient(SystemContextMenuClient client) {
+  ///
+  /// To unregister, set to null.
+  static set systemContextMenuClient(SystemContextMenuClient? client) {
     instance._systemContextMenuClient = client;
-  }
-
-  /// Unregisters a [SystemContextMenuClient] so that it is no longer called.
-  static void unregisterSystemContextMenuClient(SystemContextMenuClient client) {
-    instance._systemContextMenuClient = null;
   }
 }
 
@@ -691,10 +687,9 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
 /// See also:
 ///  * [SystemContextMenuController], which uses this to provide a fully
 ///    featured way to control the system context menu.
-///  * [ServicesBinding.registerSystemContextMenuClient], which must be called
-///    to register an active client to receive events.
-///  * [ServicesBinding.unregisterSystemContextMenuClient], which must be called
-///    to remove an inactive client from receiving events.
+///  * [ServicesBinding.systemContextMenuClient], which can be set to a
+///    [SystemContextMenuClient] to register it to receive events, or null to
+///    unregister.
 ///  * [MediaQuery.maybeSupportsShowingSystemContextMenu], which indicates
 ///    whether the system context menu is supported.
 ///  * [SystemContextMenu], which provides a widget interface for displaying the
@@ -703,12 +698,12 @@ mixin SystemContextMenuClient {
   /// Handles the system hiding a context menu.
   ///
   /// Called only on the single active instance registered with
-  /// [ServicesBinding.registerSystemContextMenuClient].
+  /// [ServicesBinding.systemContextMenuClient].
   void handleSystemHide();
 
   /// Called when a custom system context menu button receives a tap.
   ///
   /// Called only on the single active instance registered with
-  /// [ServicesBinding.registerSystemContextMenuClient].
+  /// [ServicesBinding.systemContextMenuClient].
   void handleTapCustomActionItem(int callbackId);
 }

@@ -2491,7 +2491,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///
   /// Not shown until [show] is called.
   SystemContextMenuController({this.onSystemHide}) {
-    ServicesBinding.registerSystemContextMenuClient(this);
+    ServicesBinding.systemContextMenuClient = this;
   }
 
   /// Called when the system has hidden the context menu.
@@ -2611,7 +2611,7 @@ class SystemContextMenuController with SystemContextMenuClient {
       }
     }
 
-    ServicesBinding.registerSystemContextMenuClient(this);
+    ServicesBinding.systemContextMenuClient = this;
 
     _lastTargetRect = targetRect;
     _lastItems = items;
@@ -2656,7 +2656,7 @@ class SystemContextMenuController with SystemContextMenuClient {
     }
     _lastShown = null;
     _buttonCallbacks.clear();
-    ServicesBinding.unregisterSystemContextMenuClient(this);
+    ServicesBinding.systemContextMenuClient = null;
     // This may be called unnecessarily in the case where the user has already
     // hidden the menu (for example by tapping the screen).
     return _channel.invokeMethod<void>('ContextMenu.hideSystemContextMenu');
