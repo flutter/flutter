@@ -65,7 +65,7 @@ const double _kNavBarBackButtonTapWidth = 50.0;
 
 /// The width of the 'Cancel' button if the search field in a
 /// [CupertinoSliverNavigationBar.search] is active.
-const double _kSearchFieldCancelButtonWidth = 83.0;
+const double _kSearchFieldCancelButtonWidth = 65.0;
 
 /// The duration of the animation when the search field in
 /// [CupertinoSliverNavigationBar.search] is tapped.
@@ -3054,6 +3054,8 @@ Widget _navBarHeroFlightShuttleBuilder(
   }
 }
 
+/// The search field used in the expanded state of a
+/// [CupertinoSliverNavigationBar.search].
 class _NavigationBarSearchField extends StatelessWidget implements PreferredSizeWidget {
   const _NavigationBarSearchField({required this.searchField});
 
