@@ -46,8 +46,8 @@ Matcher throwsExceptionWith(String messageSubString) {
 /// error must start with the path to the file where the error resides, line
 /// number (1-based instead of 0-based) of the error, and a short description,
 /// delimited by colons (`:`). In the test fixture one could add the following
-/// comment on the line that would produce the error, to provide information
-/// for this matcher what to expect:
+/// comment on the line that would produce the error, to tell matcher what to
+/// expect:
 /// `// ERROR: <error message without the leading path and line number>`.
 Matcher matchesErrorsInFile(File fixture, {List<String> endsWith = const <Never>[]}) =>
     _ErrorMatcher(fixture, endsWith);
