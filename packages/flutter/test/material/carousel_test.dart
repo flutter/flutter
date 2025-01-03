@@ -1413,6 +1413,34 @@ void main() {
       expect(buttonPressed, isTrue);
     },
   );
+
+  testWidgets('CarouselView does not crash if layout constraints are zero', (
+    WidgetTester tester,
+  ) async {
+    Widget buildCarouselApp({double width = 0, double height = 0}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: width,
+            height: height,
+            child: CarouselView(
+              itemExtent: 100,
+              children: <Widget>[Container(color: Colors.red, width: 100, height: 100)],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildCarouselApp(width: 100));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(buildCarouselApp(height: 100));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(buildCarouselApp());
+    expect(tester.takeException(), isNull);
+  });
 }
 
 Finder getItem(int index) {
