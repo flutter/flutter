@@ -15,6 +15,14 @@ class Foo {
 
   @_debugOnly
   final Map<String, String>? bar = kDebugMode ? null : <String, String>{};
+
+  // dart format off
+  // Checks the annotation works for multiline expressions.
+  @_debugOnly
+  final Map<String, String>? multiline = kDebugMode
+    ? <String, String>{}
+    : null;
+  // dart format on
 }
 
 /// Simply avoid this
@@ -34,18 +42,18 @@ void testNoDoubleClamp(int input) {
 
   nonDoubleClamp.clamp(0, 2);
   input.clamp(0, 2);
-  input.clamp(0.0, 2);          // bad.
+  input.clamp(0.0, 2); // bad.
   input.toDouble().clamp(0, 2); // bad.
 
   nonDoubleClamp2?.clamp(0, 2);
   nullableInt?.clamp(0, 2);
-  nullableInt?.clamp(0, 2.0);   // bad
-  nullableDouble?.clamp(0, 2);  // bad.
+  nullableInt?.clamp(0, 2.0); // bad
+  nullableDouble?.clamp(0, 2); // bad.
 
   // ignore: unused_local_variable
   final ClassWithAClampMethod Function(double, double)? tearOff1 = nonDoubleClamp2?.clamp;
   // ignore: unused_local_variable
-  final num Function(num, num)? tearOff2 = nullableInt?.clamp;    // bad.
+  final num Function(num, num)? tearOff2 = nullableInt?.clamp; // bad.
   // ignore: unused_local_variable
   final num Function(num, num)? tearOff3 = nullableDouble?.clamp; // bad.
 }
