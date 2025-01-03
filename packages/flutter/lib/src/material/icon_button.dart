@@ -794,7 +794,8 @@ class IconButton extends StatelessWidget {
       onTap: onPressed,
       onHover: onHover,
       onLongPress: onPressed != null ? onLongPress : null,
-      mouseCursor: mouseCursor ?? (onPressed == null ? SystemMouseCursors.basic : SystemMouseCursors.click),
+      mouseCursor:
+          mouseCursor ?? (onPressed == null ? SystemMouseCursors.basic : SystemMouseCursors.click),
       enableFeedback: effectiveEnableFeedback,
       focusColor: focusColor ?? theme.focusColor,
       hoverColor: hoverColor ?? theme.hoverColor,
@@ -824,7 +825,9 @@ class IconButton extends StatelessWidget {
     properties.add(StringProperty('tooltip', tooltip, defaultValue: null, quoted: false));
     properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
     properties.add(ObjectFlagProperty<ValueChanged<bool>>('onHover', onHover, ifNull: 'disabled'));
-    properties.add(ObjectFlagProperty<VoidCallback>('onLongPress', onLongPress, ifNull: 'disabled'));
+    properties.add(
+      ObjectFlagProperty<VoidCallback>('onLongPress', onLongPress, ifNull: 'disabled'),
+    );
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
@@ -933,9 +936,7 @@ class _IconButtonM3 extends ButtonStyleButton {
     required this.toggleable,
     super.tooltip,
     required Widget super.child,
-  }) : super(
-      onFocusChange: null,
-      clipBehavior: Clip.none);
+  }) : super(onFocusChange: null, clipBehavior: Clip.none);
 
   final _IconButtonVariant variant;
   final bool toggleable;
