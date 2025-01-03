@@ -36,6 +36,19 @@ Matcher throwsExceptionWith(String messageSubString) {
   );
 }
 
+/// A matcher that matches error messages specified in the given `fixture` [File].
+///
+/// This matcher allows analyzer tests to specify the expected error messages
+/// in the test fixture file, eliminating the need to hard code line numbers in
+/// the test.
+///
+/// The error messages must be printed using the [foundError] function. Each
+/// error must start with the path to the file where the error resides, line
+/// number (1-based instead of 0-based) of the error, and a short description,
+/// delimited by colons (`:`). In the test fixture one could add the following
+/// comment on the line that would produce the error, to provide information
+/// for this matcher what to expect:
+/// `// ERROR: <error message without the leading path and line number>`.
 Matcher matchesErrorsInFile(File fixture, {List<String> endsWith = const <Never>[]}) =>
     _ErrorMatcher(fixture, endsWith);
 
@@ -177,10 +190,7 @@ class _ErrorsInFileMatcher extends Matcher {
       final (int lineNumber, String expectedError) = expectedErrors[i];
       switch (actualError.split(':')) {
         case [final String _]:
-          return mismatch(
-            'No semicolons (":") found in the error message "$actualError".',
-            matchState,
-          );
+          return mismatch('No colons (":") found in the error message "$actualError".', matchState);
         case [final String path, final String line, ...final List<String> rest]:
           if (!path.endsWith(file.uri.pathSegments.last)) {
             return mismatch('"$path" does not match the file name of the source file.', matchState);
