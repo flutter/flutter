@@ -686,8 +686,8 @@ ${_getAgpLocation(project)}''', title: _boxTitle);
 // were possibly removed in more recent plugin versions.
 @visibleForTesting
 final GradleHandledError usageOfV1EmbeddingReferencesHandler = GradleHandledError(
-  test: (String line) =>
-    line.contains('io.flutter.plugin.common.PluginRegistry.Registrar registrar'),
+  test:
+      (String line) => line.contains('io.flutter.plugin.common.PluginRegistry.Registrar registrar'),
   handler: ({
     required String line,
     required FlutterProject project,
