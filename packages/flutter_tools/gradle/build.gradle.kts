@@ -31,5 +31,5 @@ dependencies {
     //  * AGP version in the buildscript block in packages/flutter_tools/gradle/src/main/groovy/flutter.groovy
     //  * AGP version in the buildscript block in packages/flutter_tools/gradle/src/main/kotlin/dependency_version_checker.gradle.kts
     //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
-    compileOnly("com.android.tools.build:gradle:7.3.0")
+    compileOnly("com.android.tools.build:gradle:8.7.3")
 }

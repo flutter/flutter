@@ -10,7 +10,7 @@
 //
 // This includes:
 //   1. The embedding
-//   2. libflutter.so
+//   2. lib flutter.so
 
 import java.nio.file.Paths
 
@@ -58,7 +58,7 @@ dependencies {
     flutterDebug "io.flutter:x86_64_debug:1.0.0-$engineVersion"
 }
 
-task resolveDependencies {
+tasks.register('resolveDependencies') {
     configurations.each { configuration ->
         if (configuration.name.startsWith("flutter")) {
             configuration.resolve()
