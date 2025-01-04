@@ -132,10 +132,11 @@ void main() {
           expect(project.ios.usesSwiftPackageManager, isTrue);
         },
         overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(
-            isSwiftPackageManagerEnabled: true,
-            isSwiftPackageManagerMigrationEnabled: true,
-          ),
+          FeatureFlags:
+              () => TestFeatureFlags(
+                isSwiftPackageManagerEnabled: true,
+                isSwiftPackageManagerMigrationEnabled: true,
+              ),
           XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
         },
       );
@@ -149,9 +150,9 @@ void main() {
 
           // Create an Xcode project that appears to have SwiftPM integration.
           final File xcodeProjectFile = projectDirectory
-            .childDirectory('ios')
-            .childDirectory('Runner.xcodeproj')
-            .childFile('project.pbxproj');
+              .childDirectory('ios')
+              .childDirectory('Runner.xcodeproj')
+              .childFile('project.pbxproj');
           xcodeProjectFile.createSync(recursive: true);
           xcodeProjectFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
 
@@ -160,9 +161,7 @@ void main() {
           expect(project.ios.usesSwiftPackageManager, isTrue);
         },
         overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(
-            isSwiftPackageManagerEnabled: true,
-          ),
+          FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
           XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
         },
       );
@@ -294,10 +293,11 @@ void main() {
           expect(project.macos.usesSwiftPackageManager, isTrue);
         },
         overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(
-            isSwiftPackageManagerEnabled: true,
-            isSwiftPackageManagerMigrationEnabled: true,
-          ),
+          FeatureFlags:
+              () => TestFeatureFlags(
+                isSwiftPackageManagerEnabled: true,
+                isSwiftPackageManagerMigrationEnabled: true,
+              ),
           XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
         },
       );
@@ -311,9 +311,9 @@ void main() {
 
           // Create an Xcode project that appears to have SwiftPM integration.
           final File xcodeProjectFile = projectDirectory
-            .childDirectory('macos')
-            .childDirectory('Runner.xcodeproj')
-            .childFile('project.pbxproj');
+              .childDirectory('macos')
+              .childDirectory('Runner.xcodeproj')
+              .childFile('project.pbxproj');
           xcodeProjectFile.createSync(recursive: true);
           xcodeProjectFile.writeAsStringSync('FlutterGeneratedPluginSwiftPackage');
 
@@ -322,9 +322,7 @@ void main() {
           expect(project.macos.usesSwiftPackageManager, isTrue);
         },
         overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(
-            isSwiftPackageManagerEnabled: true,
-          ),
+          FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
           XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
         },
       );

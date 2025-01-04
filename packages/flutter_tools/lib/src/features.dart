@@ -188,15 +188,9 @@ const Feature swiftPackageManagerMigration = Feature(
   name: 'migrate iOS and macOS apps to add Swift Package Manager integration',
   configSetting: 'enable-swift-package-manager-migration',
   environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER_MIGRATION',
-    master: FeatureChannelSetting(
-    available: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-  ),
-  stable: FeatureChannelSetting(
-    available: true,
-  ),
+  master: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
 );
 
 /// Enable explicit resolution and generation of package dependencies.

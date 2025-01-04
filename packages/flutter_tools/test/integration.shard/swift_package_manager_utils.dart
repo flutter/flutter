@@ -20,11 +20,7 @@ class SwiftPackageManagerUtils {
     await _enableFeature(flutterBin, workingDirectory, swiftPackageManager);
 
     if (enableMigration) {
-      await _enableFeature(
-        flutterBin,
-        workingDirectory,
-        swiftPackageManagerMigration,
-      );
+      await _enableFeature(flutterBin, workingDirectory, swiftPackageManagerMigration);
     }
   }
 
@@ -34,11 +30,7 @@ class SwiftPackageManagerUtils {
     bool disableMigration = true,
   }) async {
     if (disableMigration) {
-      await _disableFeature(
-        flutterBin,
-        workingDirectory,
-        swiftPackageManagerMigration,
-      );
+      await _disableFeature(flutterBin, workingDirectory, swiftPackageManagerMigration);
     }
 
     await _disableFeature(flutterBin, workingDirectory, swiftPackageManager);
@@ -49,24 +41,21 @@ class SwiftPackageManagerUtils {
     String workingDirectory,
     Feature feature,
   ) async {
-    final ProcessResult result = await processManager.run(
-      <String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'config',
-        '--${feature.configSetting}',
-        '-v',
-      ],
-      workingDirectory: workingDirectory,
-    );
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'config',
+      '--${feature.configSetting}',
+      '-v',
+    ], workingDirectory: workingDirectory);
 
     expect(
       result.exitCode,
       0,
       reason:
-        'Failed to enable feature "${feature.name}": \n'
-        'stdout: \n${result.stdout}\n'
-        'stderr: \n${result.stderr}\n',
+          'Failed to enable feature "${feature.name}": \n'
+          'stdout: \n${result.stdout}\n'
+          'stderr: \n${result.stderr}\n',
       verbose: true,
     );
   }
@@ -76,24 +65,21 @@ class SwiftPackageManagerUtils {
     String workingDirectory,
     Feature feature,
   ) async {
-    final ProcessResult result = await processManager.run(
-      <String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'config',
-        '--no-${feature.configSetting}',
-        '-v',
-      ],
-      workingDirectory: workingDirectory,
-    );
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'config',
+      '--no-${feature.configSetting}',
+      '-v',
+    ], workingDirectory: workingDirectory);
 
     expect(
       result.exitCode,
       0,
       reason:
-        'Failed to disable feature "${feature.name}": \n'
-        'stdout: \n${result.stdout}\n'
-        'stderr: \n${result.stderr}\n',
+          'Failed to disable feature "${feature.name}": \n'
+          'stdout: \n${result.stdout}\n'
+          'stderr: \n${result.stderr}\n',
       verbose: true,
     );
   }

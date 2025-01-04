@@ -46,9 +46,7 @@ void main() {
             logger: testLogger,
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(),
-            features: TestFeatureFlags(
-              isSwiftPackageManagerMigrationEnabled: true,
-            ),
+            features: TestFeatureFlags(isSwiftPackageManagerMigrationEnabled: true),
           );
 
       await projectMigration.migrate();
@@ -63,22 +61,21 @@ void main() {
       final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
       final BufferLogger testLogger = BufferLogger.test();
 
-      final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
-        FakeXcodeProject(
-          platform: SupportedPlatform.ios.name,
-          fileSystem: memoryFileSystem,
-          logger: testLogger,
-        ),
-        SupportedPlatform.ios,
-        BuildInfo.debug,
-        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-        logger: testLogger,
-        fileSystem: memoryFileSystem,
-        plistParser: FakePlistParser(),
-        features: TestFeatureFlags(
-          isSwiftPackageManagerEnabled: true,
-        ),
-      );
+      final SwiftPackageManagerIntegrationMigration projectMigration =
+          SwiftPackageManagerIntegrationMigration(
+            FakeXcodeProject(
+              platform: SupportedPlatform.ios.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+            ),
+            SupportedPlatform.ios,
+            BuildInfo.debug,
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+            logger: testLogger,
+            fileSystem: memoryFileSystem,
+            plistParser: FakePlistParser(),
+            features: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+          );
       await projectMigration.migrate();
       expect(
         testLogger.traceText,
