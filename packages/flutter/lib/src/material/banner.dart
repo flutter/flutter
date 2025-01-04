@@ -326,6 +326,8 @@ class _MaterialBannerState extends State<MaterialBanner> {
   }
 
   void _onAnimationStatusChanged(AnimationStatus status) {
+    // ignore: avoid_print
+    print('test frob');
     if (status.isCompleted) {
       if (widget.onVisible != null && !_wasVisible) {
         widget.onVisible!();
