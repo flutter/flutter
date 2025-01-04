@@ -49,6 +49,7 @@ body:
         - google_sign_in
         - image_picker
         - in_app_purchase
+        - interactive_media_ads
         - ios_platform_images
         - local_auth
         - metrics_center

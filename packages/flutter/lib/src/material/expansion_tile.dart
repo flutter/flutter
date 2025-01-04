@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'text_theme.dart';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -259,6 +263,7 @@ class ExpansionTile extends StatefulWidget {
     this.enableFeedback = true,
     this.enabled = true,
     this.expansionAnimationStyle,
+    this.internalAddSemanticForOnTap = false,
   }) : assert(
        expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
        'CrossAxisAlignment.baseline is not supported since the expanded children '
@@ -558,6 +563,13 @@ class ExpansionTile extends StatefulWidget {
   /// {@end-tool}
   final AnimationStyle? expansionAnimationStyle;
 
+  /// Whether to add button:true to the semantics if onTap is provided.
+  /// This is a temporary flag to help changing the behavior of ListTile onTap semantics.
+  ///
+  // TODO(hangyujin): Remove this flag after fixing related g3 tests and flipping
+  // the default value to true.
+  final bool internalAddSemanticForOnTap;
+
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
 }
@@ -660,8 +672,11 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   }
 
   // Platform or null affinity defaults to trailing.
-  ListTileControlAffinity _effectiveAffinity(ListTileControlAffinity? affinity) {
-    switch (affinity ?? ListTileControlAffinity.trailing) {
+  ListTileControlAffinity _effectiveAffinity() {
+    final ListTileThemeData listTileTheme = ListTileTheme.of(context);
+    final ListTileControlAffinity affinity =
+        widget.controlAffinity ?? listTileTheme.controlAffinity ?? ListTileControlAffinity.trailing;
+    switch (affinity) {
       case ListTileControlAffinity.leading:
         return ListTileControlAffinity.leading;
       case ListTileControlAffinity.trailing:
@@ -678,14 +693,14 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   }
 
   Widget? _buildLeadingIcon(BuildContext context) {
-    if (_effectiveAffinity(widget.controlAffinity) != ListTileControlAffinity.leading) {
+    if (_effectiveAffinity() != ListTileControlAffinity.leading) {
       return null;
     }
     return _buildIcon(context);
   }
 
   Widget? _buildTrailingIcon(BuildContext context) {
-    if (_effectiveAffinity(widget.controlAffinity) != ListTileControlAffinity.trailing) {
+    if (_effectiveAffinity() != ListTileControlAffinity.trailing) {
       return null;
     }
     return _buildIcon(context);
@@ -746,6 +761,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
                 subtitle: widget.subtitle,
                 trailing: widget.showTrailingIcon ? widget.trailing ?? _buildTrailingIcon(context) : null,
                 minTileHeight: widget.minTileHeight,
+                internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
               ),
             ),
           ),

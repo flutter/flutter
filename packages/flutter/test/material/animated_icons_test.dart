@@ -327,14 +327,15 @@ void main() {
   });
 }
 
-PaintColorMatcher hasColor(int color) {
-  return PaintColorMatcher(color);
+PaintColorMatcher hasColor(int color, {double threshold = 1/255}) {
+  return PaintColorMatcher(color, threshold);
 }
 
 class PaintColorMatcher extends Matcher {
-  const PaintColorMatcher(this.expectedColor);
+  const PaintColorMatcher(this.expectedColor, this.threshold);
 
   final int expectedColor;
+  final double threshold;
 
   @override
   Description describe(Description description) =>
@@ -343,6 +344,11 @@ class PaintColorMatcher extends Matcher {
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     final Paint actualPaint = item as Paint;
-    return actualPaint.color == Color(expectedColor);
+    final Color expected = Color(expectedColor);
+    return actualPaint.color.colorSpace == expected.colorSpace &&
+      (actualPaint.color.a - expected.a).abs() < threshold &&
+      (actualPaint.color.r - expected.r).abs() < threshold &&
+      (actualPaint.color.g - expected.g).abs() < threshold &&
+      (actualPaint.color.b - expected.b).abs() < threshold;
   }
 }

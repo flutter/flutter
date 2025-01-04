@@ -26,7 +26,7 @@ class CardTemplate extends TokenTemplate {
 
   @override
   String generate() => '''
-class _${blockName}DefaultsM3 extends CardTheme {
+class _${blockName}DefaultsM3 extends CardThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(
         clipBehavior: Clip.none,

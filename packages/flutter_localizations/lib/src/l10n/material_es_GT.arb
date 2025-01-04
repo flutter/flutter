@@ -1,6 +1,8 @@
 {
+  "clearButtonTooltip": "Borrar texto",
+  "selectedDateLabel": "Seleccionada",
   "searchWebButtonLabel": "Buscar en la Web",
-  "shareButtonLabel": "Compartir…",
+  "shareButtonLabel": "Compartir",
   "scanTextButtonLabel": "Analizar texto",
   "lookUpButtonLabel": "Mirar hacia arriba",
   "menuDismissLabel": "Descartar menú",

@@ -517,7 +517,14 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
       globals.printError('Encountered error while creating the IPA:');
       globals.printError(errorMessage.toString());
-      globals.printError('Try distributing the app in Xcode: "open $absoluteArchivePath"');
+
+      final FileSystemEntityType type = globals.fs.typeSync(absoluteArchivePath);
+      globals.printError('Try distributing the app in Xcode:');
+      if (type == FileSystemEntityType.notFound) {
+        globals.printError('open ios/Runner.xcworkspace', indent: 2);
+      } else {
+        globals.printError('open $absoluteArchivePath', indent: 2);
+      }
 
       // Even though the IPA step didn't succeed, the xcarchive did.
       // Still count this as success since the user has been instructed about how to
@@ -592,8 +599,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
             return 'release-testing';
           case 'development':
             return 'debugging';
-          default:
-            throwToolExit('Encountered invalid export-method input.');
         }
       }
       return method;
@@ -713,7 +718,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         result,
         analytics: globals.analytics,
         fileSystem: globals.fs,
-        flutterUsage: globals.flutterUsage,
         logger: globals.logger,
         platform: SupportedPlatform.ios,
         project: app.project.parent,
@@ -726,7 +730,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       final SizeAnalyzer sizeAnalyzer = SizeAnalyzer(
         fileSystem: globals.fs,
         logger: globals.logger,
-        flutterUsage: globals.flutterUsage,
         analytics: analytics,
         appFilenamePattern: 'App'
       );

@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:file/src/interface/file_system_entity.dart';
 
 import '../integration.shard/test_utils.dart';
+<<<<<<< HEAD
 import '../src/common.dart';
 import '../src/context.dart';
 
@@ -56,6 +57,17 @@ const String gradleReplacementString = 'GRADLE_REPLACE_ME';
 // This test is currently on the preview shard (but not using the preview
 // version of Android) because it is the only one using Java 11. This test
 // requires Java 11 due to the intentionally low version of Gradle.
+=======
+import '../src/android_common.dart';
+import '../src/common.dart';
+import '../src/context.dart';
+
+
+
+// This test requires Java 11 due to the intentionally low version of Gradle.
+// It also overrides the template compile sdk version to 34, because using 35
+// requires AGP 8.0+.
+>>>>>>> 17025dd88227cd9532c33fa78f5250d548d87e9a
 void main() {
   late Directory tempDir;
 
@@ -67,6 +79,7 @@ void main() {
     tryToDelete(tempDir as FileSystemEntity);
   });
 
+<<<<<<< HEAD
   Future<ProcessResult> buildFlutterApkWithSpecifiedDependencyVersions({
     required String gradleVersion,
     required String agpVersion,
@@ -118,6 +131,15 @@ void main() {
         gradleVersion: '7.5',
         agpVersion: '7.0.0',
         kgpVersion: '1.7.10'
+=======
+  testUsingContext(
+      'AGP version out of "warn" support band but in "error" band builds '
+          'successfully and prints warning', () async {
+    final VersionTuple versionTuple = VersionTuple(agpVersion: '7.0.0', gradleVersion: '7.5', kotlinVersion: '1.7.10', compileSdkVersion: '34');
+    final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
+        versions: versionTuple,
+        tempDir: tempDir
+>>>>>>> 17025dd88227cd9532c33fa78f5250d548d87e9a
     );
     expect(result, const ProcessResultMatcher());
     expect(result.stderr, contains('Please upgrade your Android Gradle Plugin version'));
@@ -127,10 +149,17 @@ void main() {
       'Gradle version out of "warn" support band but in "error" band builds '
           'successfully and prints warning', () async {
     // Create a new flutter project.
+<<<<<<< HEAD
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
         gradleVersion: '7.0.2',
         agpVersion: '7.0.0',
         kgpVersion: '1.7.10'
+=======
+    final VersionTuple versionTuple = VersionTuple(agpVersion: '7.0.0', gradleVersion: '7.0.2', kotlinVersion: '1.7.10', compileSdkVersion: '34');
+    final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
+        versions: versionTuple,
+        tempDir: tempDir
+>>>>>>> 17025dd88227cd9532c33fa78f5250d548d87e9a
     );
     expect(result, const ProcessResultMatcher());
     expect(result.stderr, contains('Please upgrade your Gradle version'));
@@ -139,10 +168,17 @@ void main() {
   testUsingContext(
       'Kotlin version out of "warn" support band but in "error" band builds '
           'successfully and prints warning', () async {
+<<<<<<< HEAD
     final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
         gradleVersion: '7.5',
         agpVersion: '7.4.0',
         kgpVersion: '1.7.0'
+=======
+    final VersionTuple versionTuple = VersionTuple(agpVersion: '7.4.0', gradleVersion: '7.5', kotlinVersion: '1.7.0', compileSdkVersion: '34');
+    final ProcessResult result = await buildFlutterApkWithSpecifiedDependencyVersions(
+        versions: versionTuple,
+        tempDir: tempDir
+>>>>>>> 17025dd88227cd9532c33fa78f5250d548d87e9a
     );
 
     expect(result, const ProcessResultMatcher());

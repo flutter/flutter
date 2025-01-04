@@ -715,7 +715,7 @@ void main() {
       renderColoredBox.paint(mockContext, Offset.zero);
 
       expect(mockCanvas.rects.single, const Rect.fromLTWH(0, 0, 800, 600));
-      expect(mockCanvas.paints.single.color, colorToPaint);
+      expect(mockCanvas.paints.single.color, isSameColorAs(colorToPaint));
       expect(mockContext.children, isEmpty);
       expect(mockContext.offsets, isEmpty);
     });
@@ -731,7 +731,7 @@ void main() {
       renderColoredBox.paint(mockContext, Offset.zero);
 
       expect(mockCanvas.rects.single, const Rect.fromLTWH(0, 0, 800, 600));
-      expect(mockCanvas.paints.single.color, colorToPaint);
+      expect(mockCanvas.paints.single.color, isSameColorAs(colorToPaint));
       expect(mockContext.children.single, renderSizedBox);
       expect(mockContext.offsets.single, Offset.zero);
     });
@@ -750,7 +750,7 @@ void main() {
     // golden file can be approved at any time.
     await tester.pumpWidget(RepaintBoundary(
       child: Container(
-        color: const Color(0xFFF40125),
+        color: const Color(0xFF161145),
       ),
     ));
 

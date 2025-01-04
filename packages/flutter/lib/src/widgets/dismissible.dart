@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'scroll_view.dart';
+library;
+
 import 'package:flutter/gestures.dart';
 
 import 'automatic_keep_alive.dart';
@@ -133,10 +136,10 @@ class Dismissible extends StatefulWidget {
   ///
   /// The widget cannot be dragged again until the returned future resolves.
   ///
-  /// If the returned Future<bool> completes true, then this widget will be
+  /// If the returned `Future<bool>` completes true, then this widget will be
   /// dismissed, otherwise it will be moved back to its original location.
   ///
-  /// If the returned Future<bool?> completes to false or null the [onResize]
+  /// If the returned `Future<bool?>` completes to false or null the [onResize]
   /// and [onDismissed] callbacks will not run.
   final ConfirmDismissCallback? confirmDismiss;
 

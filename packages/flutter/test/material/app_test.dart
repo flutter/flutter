@@ -1590,7 +1590,7 @@ void main() {
     // Test the initial Scaffold background color.
     await tester.pumpWidget(buildWidget());
 
-    expect(tester.widget<Material>(find.byType(Material)).color, lightTheme.colorScheme.surface);
+    expect(tester.widget<Material>(find.byType(Material)).color, isSameColorAs(lightTheme.colorScheme.surface));
 
     // Test the Scaffold background color animation from light to dark theme.
     await tester.pumpWidget(buildWidget(themeMode: ThemeMode.dark));
@@ -1598,13 +1598,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50)); // Advance animation by 50 milliseconds.
 
     // Scaffold background color is slightly updated.
-    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xffc3bdc5));
+    expect(tester.widget<Material>(find.byType(Material)).color, isSameColorAs(const Color(0xffc3bdc5)));
 
     // Let the animation finish.
     await tester.pumpAndSettle();
 
     // Scaffold background color is fully updated to dark theme.
-    expect(tester.widget<Material>(find.byType(Material)).color, darkTheme.colorScheme.surface);
+    expect(tester.widget<Material>(find.byType(Material)).color, isSameColorAs(darkTheme.colorScheme.surface));
 
     // Reset to light theme to compare the Scaffold background color animation
     // with the default animation curve.
@@ -1621,13 +1621,13 @@ void main() {
 
     // Scaffold background color is slightly updated but with a different
     // color than the default animation curve.
-    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xffe7e1e9));
+    expect(tester.widget<Material>(find.byType(Material)).color, isSameColorAs(const Color(0xffe7e1e9)));
 
     // Let the animation finish.
     await tester.pumpAndSettle();
 
     // Scaffold background color is fully updated to dark theme.
-    expect(tester.widget<Material>(find.byType(Material)).color, darkTheme.colorScheme.surface);
+    expect(tester.widget<Material>(find.byType(Material)).color, isSameColorAs(darkTheme.colorScheme.surface));
 
     // Switch from dark to light theme with overridden animation duration.
     await tester.pumpWidget(buildWidget(animationStyle: AnimationStyle.noAnimation));
@@ -1635,7 +1635,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
 
     expect(tester.widget<Material>(find.byType(Material)).color, isNot(darkTheme.colorScheme.surface));
-    expect(tester.widget<Material>(find.byType(Material)).color, lightTheme.colorScheme.surface);
+    expect(tester.widget<Material>(find.byType(Material)).color, isSameColorAs(lightTheme.colorScheme.surface));
   });
 
   testWidgets('AnimationStyle.noAnimation removes AnimatedTheme from the tree', (WidgetTester tester) async {

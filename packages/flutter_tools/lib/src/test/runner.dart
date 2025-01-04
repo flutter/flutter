@@ -40,7 +40,6 @@ abstract class FlutterTestRunner {
     String? tags,
     String? excludeTags,
     bool enableVmService = false,
-    bool ipv6 = false,
     bool machine = false,
     String? precompiledDillPath,
     Map<String, String>? precompiledDillFiles,
@@ -64,6 +63,7 @@ abstract class FlutterTestRunner {
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    BuildInfo? buildInfo,
   });
 
   /// Runs tests using the experimental strategy of spawning each test in a
@@ -107,7 +107,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     String? tags,
     String? excludeTags,
     bool enableVmService = false,
-    bool ipv6 = false,
     bool machine = false,
     String? precompiledDillPath,
     Map<String, String>? precompiledDillFiles,
@@ -131,6 +130,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    BuildInfo? buildInfo,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts!.getArtifactPath(Artifact.flutterTester);
@@ -237,7 +237,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       ..addAll(testFiles.map((Uri uri) => uri.toString()));
 
     final InternetAddressType serverType =
-        ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
+        debuggingOptions.ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
 
     final loader.FlutterPlatform platform = loader.installHook(
       testWrapper: testWrapper,
@@ -258,6 +258,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       integrationTestUserIdentifier: integrationTestUserIdentifier,
       testTimeRecorder: testTimeRecorder,
       nativeAssetsBuilder: nativeAssetsBuilder,
+      buildInfo: buildInfo,
     );
 
     try {
@@ -824,6 +825,8 @@ class SpawnPlugin extends PlatformPlugin {
       'APP_NAME': flutterProject.manifest.appName,
       if (testAssetDirectory != null)
         'UNIT_TEST_ASSETS': testAssetDirectory,
+      if (nativeAssetsBuilder != null && globals.platform.isWindows)
+        'PATH': '${nativeAssetsBuilder.windowsBuildDirectory(flutterProject)};${globals.platform.environment['PATH']}',
     };
 
     globals.logger.printTrace('Starting flutter_tester process with command=$command, environment=$environment');

@@ -24,6 +24,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 INTERNAL NOTE
 -->
+<<<<<<< HEAD
 ## Flutter 3.24 Changes
 ### [3.24.5](https://github.com/flutter/flutter/releases/tag/3.24.5)
 - [flutter/157359](https://github.com/flutter/flutter/issues/157359) - [iOS] Fixed an issue where dSYM files were being incorrectly bundled with applications
@@ -35,6 +36,29 @@ INTERNAL NOTE
 - [dart 3.5.4 changelog](https://github.com/dart-lang/sdk/blob/stable/CHANGELOG.md#354---2024-10-17)
 - [flutter/154915](https://github.com/flutter/engine/pull/55366) - [iOS] Comply with the new Apple privacy manifest policy for the macOS Flutter engine framework and prevent the "Missing privacy manifest" warning when submitting a macOS app to the App Store.
 - [flutter/155837](https://github.com/flutter/flutter/pull/15578) - [Tool] Fixes RPCError crash when setting up log filtering for Android devices.
+=======
+## Flutter 3.27 Changes
+
+### [3.27.1](https://github.com/flutter/flutter/releases/tag/3.27.1)
+
+- [flutter/160041](https://github.com/flutter/flutter/issues/160041) - [Impeller][Android] Disables Impeller on older Android devices.
+- [flutter/160206](https://github.com/flutter/flutter/issues/160206) - [Impeller][Android] Disables Android HardwareBuffer based swapchains on all devices.
+- [flutter/160208](https://github.com/flutter/flutter/issues/160208) - [iOS] Fixes an issue on iOS preventing the ability to tap web view links in some plugins.
+
+### [3.27.0](https://github.com/flutter/flutter/releases/tag/3.27.0)
+Initial stable release.
+
+## Flutter 3.24 Changes
+
+### [3.24.5](https://github.com/flutter/flutter/releases/tag/3.24.5)
+- [flutter/158125](https://github.com/flutter/flutter/pull/158125) - [iOS] Fixed a tool issue causing failures when `flutter build ios-framework --xcframework` copies Flutter debug symbols.
+- [flutter/56301](https://github.com/flutter/engine/pull/56301) - [Android] Fixes a crash on Android devices when the surface is released unexpectedly when using PlatformView's.
+
+### [3.24.4](https://github.com/flutter/flutter/releases/tag/3.24.4)
+- [dart 3.5.4 changelog](https://github.com/dart-lang/sdk/blob/stable/CHANGELOG.md#354---2024-10-17)
+- [flutter/154915](https://github.com/flutter/engine/pull/55366) - [macOS] Comply with the new Apple privacy manifest policy for the macOS Flutter engine framework and prevent the "Missing privacy manifest" warning when submitting a macOS app to the App Store.
+- [flutter/153471](https://github.com/flutter/flutter/issues/153471) - [Tool] Fixes RPCError crash when setting up log filtering for Android devices.
+>>>>>>> 17025dd88227cd9532c33fa78f5250d548d87e9a
 
 ### [3.24.3](https://github.com/flutter/flutter/releases/tag/3.24.3)
 - [dart 3.5.3 changelog](https://github.com/dart-lang/sdk/blob/stable/CHANGELOG.md#353---2024-09-11)

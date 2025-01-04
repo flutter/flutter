@@ -2,6 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/animation.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
+///
+/// @docImport 'adapter.dart';
+/// @docImport 'app_lifecycle_listener.dart';
+/// @docImport 'basic.dart';
+/// @docImport 'focus_scope.dart';
+/// @docImport 'media_query.dart';
+/// @docImport 'navigator.dart';
+/// @docImport 'pop_scope.dart';
+library;
+
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:ui' show AccessibilityFeatures, AppExitResponse, AppLifecycleState,
@@ -1211,10 +1225,27 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// The [View] determines into what [FlutterView] the app is rendered into.
   /// This is currently [PlatformDispatcher.implicitView] from [platformDispatcher].
+  /// This method will throw a [StateError] if the [PlatformDispatcher.implicitView]
+  /// is null.
   ///
   /// The `rootWidget` widget provided to this method must not already be
   /// wrapped in a [View].
   Widget wrapWithDefaultView(Widget rootWidget) {
+    if (platformDispatcher.implicitView == null) {
+      throw StateError(
+        'The app requested a view, but the platform did not provide one.\n'
+        'This is likely because the app called `runApp` to render its root '
+        'widget, which expects the platform to provide a default view to '
+        'render into (the "implicit" view).\n'
+        'However, the platform likely has multi-view mode enabled, which does '
+        'not create this default "implicit" view.\n'
+        'Try using `runWidget` instead of `runApp` to start your app.\n'
+        '`runWidget` allows you to provide a `View` widget, without requiring '
+        'a default view.'
+        '${kIsWeb?"\nSee: https://flutter.dev/to/web-multiview-runwidget" : ""}'
+      );
+    }
+
     return View(
       view: platformDispatcher.implicitView!,
       deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner: pipelineOwner,

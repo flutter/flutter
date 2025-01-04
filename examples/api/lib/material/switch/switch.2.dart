@@ -36,12 +36,10 @@ class _SwitchExampleState extends State<SwitchExample> {
   bool light0 = true;
   bool light1 = true;
 
-  final MaterialStateProperty<Icon?> thumbIcon = MaterialStateProperty.resolveWith<Icon?>(
-    (Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        return const Icon(Icons.check);
-      }
-      return const Icon(Icons.close);
+  static const WidgetStateProperty<Icon> thumbIcon = WidgetStateProperty<Icon>.fromMap(
+    <WidgetStatesConstraint, Icon>{
+      WidgetState.selected: Icon(Icons.check),
+      WidgetState.any:      Icon(Icons.close),
     },
   );
 

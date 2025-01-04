@@ -4,8 +4,8 @@
 
 /// @docImport 'package:fake_async/fake_async.dart';
 ///
-/// @docImport 'widget_tester.dart';
 /// @docImport 'test_compat.dart';
+/// @docImport 'widget_tester.dart';
 library;
 
 import 'dart:async';

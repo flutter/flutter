@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'grid_tile_bar.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 /// A tile in a Material Design grid list.

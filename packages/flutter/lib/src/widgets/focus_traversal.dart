@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/services.dart';
+///
+/// @docImport 'app.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'actions.dart';

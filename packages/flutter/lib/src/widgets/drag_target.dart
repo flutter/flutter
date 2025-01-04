@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'scrollable.dart';
+library;
+
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -39,9 +42,10 @@ typedef DragTargetAcceptWithDetails<T> = void Function(DragTargetDetails<T> deta
 /// Signature for building children of a [DragTarget].
 ///
 /// The `candidateData` argument contains the list of drag data that is hovering
-/// over this [DragTarget] and that has passed [DragTarget.onWillAccept]. The
-/// `rejectedData` argument contains the list of drag data that is hovering over
-/// this [DragTarget] and that will not be accepted by the [DragTarget].
+/// over this [DragTarget] and that has passed
+/// [DragTarget.onWillAcceptWithDetails]. The `rejectedData` argument contains
+/// the list of drag data that is hovering over this [DragTarget] and that will
+/// not be accepted by the [DragTarget].
 ///
 /// Used by [DragTarget.builder].
 typedef DragTargetBuilder<T> = Widget Function(BuildContext context, List<T?> candidateData, List<dynamic> rejectedData);
@@ -633,6 +637,20 @@ class DragTarget<T extends Object> extends StatefulWidget {
   ///
   /// The builder can build different widgets depending on what is being dragged
   /// into this drag target.
+  ///
+  /// [onWillAccept] or [onWillAcceptWithDetails] is called when a draggable
+  /// enters the target. If true, then the data will appear in `candidateData`,
+  /// else in `rejectedData`.
+  ///
+  /// Typically the builder will check `candidateData` and `rejectedData` and
+  /// build a widget that indicates the result of dropping the `candidateData`
+  /// onto this target.
+  ///
+  /// The `candidateData` and `rejectedData` are [List] types to support multiple
+  /// simultaneous drags.
+  ///
+  /// If unexpected `null` values in `candidateData` or `rejectedData`, ensure
+  /// that the `data` argument of the [Draggable] is not `null`.
   final DragTargetBuilder<T> builder;
 
   /// Called to determine whether this widget is interested in receiving a given

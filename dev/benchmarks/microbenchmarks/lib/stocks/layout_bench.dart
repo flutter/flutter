@@ -12,7 +12,7 @@ import '../common.dart';
 
 const Duration kBenchmarkTime = Duration(seconds: 15);
 
-Future<void> main() async {
+Future<void> execute() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   stock_data.StockData.actuallyFetchData = false;
 
@@ -59,4 +59,11 @@ Future<void> main() async {
     name: 'stock_layout_iteration',
   );
   printer.printToStdout();
+}
+
+//
+//  Note that the benchmark is normally run by benchmark_collection.dart.
+//
+Future<void> main() async {
+  return execute();
 }

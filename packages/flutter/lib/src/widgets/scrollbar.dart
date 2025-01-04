@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
+///
+/// @docImport 'editable_text.dart';
+/// @docImport 'list_wheel_scroll_view.dart';
+/// @docImport 'nested_scroll_view.dart';
+/// @docImport 'page_view.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'widget_state.dart';
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -1127,7 +1139,7 @@ class RawScrollbar extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// Subclass [Scrollbar] can hide and show the scrollbar thumb in response to
-  /// [MaterialState]s by using [ScrollbarThemeData.thumbVisibility].
+  /// [WidgetState]s by using [ScrollbarThemeData.thumbVisibility].
   final bool? thumbVisibility;
 
   /// The [OutlinedBorder] of the scrollbar's thumb.
@@ -1203,7 +1215,7 @@ class RawScrollbar extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// Subclass [Scrollbar] can hide and show the scrollbar thumb in response to
-  /// [MaterialState]s by using [ScrollbarThemeData.trackVisibility].
+  /// [WidgetState]s by using [ScrollbarThemeData.trackVisibility].
   final bool? trackVisibility;
 
   /// The [Radius] of the scrollbar track's rounded rectangle corners.
@@ -1788,7 +1800,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _cachedController = null;
   }
 
-  void _handleTrackTapDown(TapDownDetails details) {
+  /// Handler called when the track is tapped in order to page in the tapped
+  /// direction.
+  @protected
+  @mustCallSuper
+  void handleTrackTapDown(TapDownDetails details) {
     // The Scrollbar should page towards the position of the tap on the track.
     assert(_debugCheckHasValidScrollPosition());
     _cachedController = _effectiveScrollController;
@@ -2007,7 +2023,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
           customPaintKey: _scrollbarPainterKey,
         ),
         (_TrackTapGestureRecognizer instance) {
-          instance.onTapDown = _handleTrackTapDown;
+          instance.onTapDown = handleTrackTapDown;
         },
       );
 

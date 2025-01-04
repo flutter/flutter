@@ -2,6 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/services.dart';
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'binding.dart';
+/// @docImport 'object.dart';
+/// @docImport 'performance_overlay.dart';
+/// @docImport 'proxy_box.dart';
+/// @docImport 'view.dart';
+library;
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -85,10 +95,10 @@ const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
 /// different parents. The scene must be explicitly recomposited after such
 /// changes are made; the layer tree does not maintain its own dirty state.
 ///
-/// To composite the tree, create a [SceneBuilder] object using
+/// To composite the tree, create a [ui.SceneBuilder] object using
 /// [RendererBinding.createSceneBuilder], pass it to the root [Layer] object's
-/// [addToScene] method, and then call [SceneBuilder.build] to obtain a [Scene].
-/// A [Scene] can then be painted using [dart:ui.FlutterView.render].
+/// [addToScene] method, and then call [ui.SceneBuilder.build] to obtain a [ui.Scene].
+/// A [ui.Scene] can then be painted using [ui.FlutterView.render].
 ///
 /// ## Memory
 ///
@@ -183,7 +193,7 @@ abstract class Layer with DiagnosticableTreeMixin {
   bool _debugMutationsLocked = false;
 
   /// Whether or not this layer, or any child layers, can be rasterized with
-  /// [Scene.toImage] or [Scene.toImageSync].
+  /// [ui.Scene.toImage] or [ui.Scene.toImageSync].
   ///
   /// If `false`, calling the above methods may yield an image which is
   /// incomplete.
@@ -297,7 +307,7 @@ abstract class Layer with DiagnosticableTreeMixin {
 
   /// Clears any retained resources that this layer holds.
   ///
-  /// This method must dispose resources such as [EngineLayer] and [Picture]
+  /// This method must dispose resources such as [ui.EngineLayer] and [ui.Picture]
   /// objects. The layer is still usable after this call, but any graphics
   /// related resources it holds will need to be recreated.
   ///
@@ -740,7 +750,7 @@ abstract class Layer with DiagnosticableTreeMixin {
 /// A handle to prevent a [Layer]'s platform graphics resources from being
 /// disposed.
 ///
-/// [Layer] objects retain native resources such as [EngineLayer]s and [Picture]
+/// [Layer] objects retain native resources such as [ui.EngineLayer]s and [ui.Picture]
 /// objects. These objects may in turn retain large chunks of texture memory,
 /// either directly or indirectly.
 ///
@@ -802,10 +812,10 @@ class LayerHandle<T extends Layer> {
   String toString() => 'LayerHandle(${_layer != null ? _layer.toString() : 'DISPOSED'})';
 }
 
-/// A composited layer containing a [Picture].
+/// A composited layer containing a [ui.Picture].
 ///
 /// Picture layers are always leaves in the layer tree. They are also
-/// responsible for disposing of the [Picture] object they hold. This is
+/// responsible for disposing of the [ui.Picture] object they hold. This is
 /// typically done when their parent and all [RenderObject]s that participated
 /// in painting the picture have been disposed.
 class PictureLayer extends Layer {
@@ -1337,7 +1347,7 @@ class ContainerLayer extends Layer {
   ///
   /// This method is typically used by [addToScene] to insert the children into
   /// the scene. Subclasses of [ContainerLayer] typically override [addToScene]
-  /// to apply effects to the scene using the [SceneBuilder] API, then insert
+  /// to apply effects to the scene using the [ui.SceneBuilder] API, then insert
   /// their children using [addChildrenToScene], then reverse the aforementioned
   /// effects before returning from [addToScene].
   void addChildrenToScene(ui.SceneBuilder builder) {
@@ -1356,7 +1366,7 @@ class ContainerLayer extends Layer {
   /// be unreliable unless the deepest layer in the chain collapses the
   /// `layerOffset` in [addToScene] to zero, meaning that it passes
   /// [Offset.zero] to its children, and bakes any incoming `layerOffset` into
-  /// the [SceneBuilder] as (for instance) a transform (which is then also
+  /// the [ui.SceneBuilder] as (for instance) a transform (which is then also
   /// included in the transformation applied by [applyTransform]).
   ///
   /// For example, if [addToScene] applies the `layerOffset` and then
@@ -1865,9 +1875,9 @@ class ColorFilterLayer extends ContainerLayer {
   }
 }
 
-/// A composite layer that applies an [ImageFilter] to its children.
+/// A composite layer that applies an [ui.ImageFilter] to its children.
 class ImageFilterLayer extends OffsetLayer {
-  /// Creates a layer that applies an [ImageFilter] to its children.
+  /// Creates a layer that applies an [ui.ImageFilter] to its children.
   ///
   /// The [imageFilter] property must be non-null before the compositing phase
   /// of the pipeline.

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/semantics.dart';
+/// @docImport 'package:flutter/widgets.dart';
+/// @docImport 'package:flutter_driver/flutter_driver.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
+library;
+
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
@@ -174,12 +180,12 @@ class BySemanticsLabel extends SerializableFinder {
 }
 
 /// A Flutter Driver finder that finds widgets by [text] inside a
-/// [widgets.Text] or [widgets.EditableText] widget.
+/// [Text] or [EditableText] widget.
 class ByText extends SerializableFinder {
   /// Creates a text finder given the text.
   const ByText(this.text);
 
-  /// The text that appears inside the [widgets.Text] or [widgets.EditableText]
+  /// The text that appears inside the [Text] or [EditableText]
   /// widget.
   final String text;
 

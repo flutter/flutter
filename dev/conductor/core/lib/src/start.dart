@@ -61,6 +61,11 @@ class StartCommand extends Command<void> {
       allowed: kBaseReleaseChannels,
     );
     argParser.addOption(
+      kFrameworkMirrorOption,
+      help:
+          'Configurable Framework repo mirror remote.',
+    );
+    argParser.addOption(
       kFrameworkUpstreamOption,
       defaultsTo: FrameworkRepository.defaultUpstream,
       help:
@@ -112,14 +117,8 @@ class StartCommand extends Command<void> {
   @override
   String get description => 'Initialize a new Flutter release.';
 
-  @override
-  Future<void> run() async {
-    final ArgResults argumentResults = argResults!;
-    if (!platform.isMacOS && !platform.isLinux) {
-      throw ConductorException(
-        'Error! This tool is only supported on macOS and Linux',
-      );
-    }
+  @visibleForTesting
+  StartContext createContext(ArgResults argumentResults) {
 
     final String frameworkUpstream = getValueFromEnvOrArgs(
       kFrameworkUpstreamOption,
@@ -131,7 +130,12 @@ class StartCommand extends Command<void> {
       argumentResults,
       platform.environment,
     )!;
-    final String frameworkMirror =
+    final String frameworkMirror = getValueFromEnvOrArgs(
+          kFrameworkMirrorOption,
+          argumentResults,
+          platform.environment,
+          allowNull: true,
+        ) ??
         'git@github.com:$githubUsername/flutter.git';
     final String engineUpstream = getValueFromEnvOrArgs(
       kEngineUpstreamOption,
@@ -175,7 +179,7 @@ class StartCommand extends Command<void> {
       versionOverride = Version.fromString(versionOverrideString);
     }
 
-    final StartContext context = StartContext(
+    return StartContext(
       candidateBranch: candidateBranch,
       checkouts: checkouts,
       dartRevision: dartRevision,
@@ -191,7 +195,18 @@ class StartCommand extends Command<void> {
       versionOverride: versionOverride,
       githubUsername: githubUsername,
     );
-    return context.run();
+  }
+
+  @override
+  Future<void> run() async {
+    final ArgResults argumentResults = argResults!;
+    if (!platform.isMacOS && !platform.isLinux) {
+      throw ConductorException(
+        'Error! This tool is only supported on macOS and Linux',
+      );
+    }
+
+    return createContext(argumentResults).run();
   }
 }
 

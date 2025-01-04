@@ -402,11 +402,11 @@ void main() {
       .toList();
 
     expect(description, <String>[
-      'foregroundColor: Color(0xfeedfeed)',
-      'backgroundColor: Color(0xcafecafe)',
-      'focusColor: Color(0xfeedfee1)',
-      'hoverColor: Color(0xfeedfee2)',
-      'splashColor: Color(0xfeedfee3)',
+      'foregroundColor: ${const Color(0xfeedfeed)}',
+      'backgroundColor: ${const Color(0xcafecafe)}',
+      'focusColor: ${const Color(0xfeedfee1)}',
+      'hoverColor: ${const Color(0xfeedfee2)}',
+      'splashColor: ${const Color(0xfeedfee3)}',
       'elevation: 23.0',
       'focusElevation: 9.0',
       'hoverElevation: 10.0',

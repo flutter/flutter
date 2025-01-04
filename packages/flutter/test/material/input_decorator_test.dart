@@ -2878,8 +2878,7 @@ void main() {
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
           final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -2943,8 +2942,7 @@ void main() {
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
           final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3008,8 +3006,7 @@ void main() {
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
           final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3073,8 +3070,7 @@ void main() {
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
           final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3138,8 +3134,7 @@ void main() {
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
           final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3347,8 +3342,7 @@ void main() {
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
           final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3460,8 +3454,7 @@ void main() {
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
           final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3525,8 +3518,7 @@ void main() {
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
           final Color expectedColor = theme.colorScheme.onSurface.withOpacity(0.38);
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3590,8 +3582,7 @@ void main() {
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
           final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3655,8 +3646,7 @@ void main() {
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
           final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3720,8 +3710,7 @@ void main() {
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
           final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -3927,8 +3916,7 @@ void main() {
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
           final Color expectedColor = theme.colorScheme.onSurfaceVariant;
-          // TODO(bleroux): from M3 specification, it should be textTheme.bodyLarge.
-          final TextStyle expectedStyle = theme.textTheme.titleMedium!.copyWith(color: expectedColor);
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor);
           expect(getHintStyle(tester), expectedStyle);
         });
       });
@@ -4517,6 +4505,120 @@ void main() {
       final Text hintTextWidget = tester.widget(hintTextFinder);
       expect(hintTextWidget.style!.overflow, decoration.hintStyle!.overflow);
     });
+
+    testWidgets('Widget height collapses from hint height when maintainHintHeight is false', (WidgetTester tester) async {
+      final String hintText = 'hint' * 20;
+      final InputDecoration decoration = InputDecoration(
+        hintText: hintText,
+        hintMaxLines: 3,
+        maintainHintHeight: false,
+      );
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decoration,
+        ),
+      );
+      expect(tester.getSize(find.byType(InputDecorator)).height, 48.0);
+    });
+
+    testWidgets('Widget height stays at hint height by default', (WidgetTester tester) async {
+      final String hintText = 'hint' * 20;
+      final InputDecoration decoration = InputDecoration(
+        hintMaxLines: 3,
+        hintText: hintText,
+      );
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decoration,
+        ),
+      );
+      final double hintHeight = tester.getSize(find.text(hintText)).height;
+      final double inputHeight = tester.getSize(find.byType(InputDecorator)).height;
+      expect(inputHeight, hintHeight + 16.0);
+    });
+
+    testWidgets('hintFadeDuration applies to hint fade-in when maintainHintHeight is false', (WidgetTester tester) async {
+      const InputDecoration decoration = InputDecoration(
+        hintText: hintText,
+        hintMaxLines: 3,
+        hintFadeDuration: Duration(milliseconds: 120),
+        maintainHintHeight: false,
+      );
+
+      // Build once with empty content.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decoration,
+        ),
+      );
+
+      // Hint is not exist.
+      expect(find.text(hintText), findsNothing);
+
+      // Rebuild with empty content.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: decoration,
+        ),
+      );
+
+      // The hint's opacity animates from 0.0 to 1.0.
+      // The animation's default duration is 20ms.
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getHintOpacity(tester);
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getHintOpacity(tester);
+      expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+      await tester.pump(const Duration(milliseconds: 20));
+      final double hintOpacity120ms = getHintOpacity(tester);
+      expect(hintOpacity120ms, 1.0);
+    });
+
+    testWidgets('hintFadeDuration applies to hint fade-out when maintainHintHeight is false', (WidgetTester tester) async {
+      const InputDecoration decoration = InputDecoration(
+        hintText: hintText,
+        hintMaxLines: 3,
+        hintFadeDuration: Duration(milliseconds: 120),
+        maintainHintHeight: false,
+      );
+
+      // Build once with empty content.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: decoration,
+        ),
+      );
+
+      // Hint is visible (opacity 1.0).
+      expect(getHintOpacity(tester), 1.0);
+
+      // Rebuild with non-empty content.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decoration,
+        ),
+      );
+
+      // The hint's opacity animates from 1.0 to 0.0.
+      // The animation's default duration is 20ms.
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getHintOpacity(tester);
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getHintOpacity(tester);
+      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+      await tester.pump(const Duration(milliseconds: 20));
+      final double hintOpacity120ms = getHintOpacity(tester);
+      expect(hintOpacity120ms, 0);
+      await tester.pump(const Duration(milliseconds: 1));
+      // The hintText replaced with SizeBox.
+      expect(find.text(hintText), findsNothing);
+    });
   });
 
   group('Material3 - InputDecoration helper/counter/error', () {
@@ -4536,7 +4638,7 @@ void main() {
     const double helperGap = 4.0;
     const double helperHeight = 16.0;
     const double containerHeight = topPadding + floatingLabelHeight + labelInputGap + inputHeight + bottomPadding; // 56.0
-    const double fullHeight = containerHeight + helperGap + helperHeight; // 80.0 (should be 76.0 based on M3 spec)
+    const double fullHeight = containerHeight + helperGap + helperHeight; // 76.0
     const double errorHeight = helperHeight;
     // TODO(bleroux): consider changing this padding because, from the M3 specification, it should be 16.
     const double helperStartPadding = 12.0;
@@ -6535,6 +6637,70 @@ void main() {
       expect(getBorderWeight(tester), 0.0);
     });
 
+    testWidgets('InputDecoration.collapsed accepts constraints', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: const InputDecoration.collapsed(
+            hintText: hintText,
+            constraints: BoxConstraints.tightFor(width: 200.0, height: 32.0),
+          ),
+        ),
+      );
+
+      expect(getDecoratorRect(tester).size, const Size(200.0, 32.0));
+    });
+
+    testWidgets('InputDecoration.collapsed accepts hintMaxLines', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: const InputDecoration.collapsed(
+            hintText: threeLines,
+            hintMaxLines: 2,
+          ),
+        ),
+      );
+
+      const double hintLineHeight = 24.0; // font size = 16 and font height = 1.5.
+      expect(getDecoratorRect(tester).size, const Size(800.0, 2 * hintLineHeight));
+    });
+
+    testWidgets('InputDecoration.collapsed accepts hintFadeDuration', (WidgetTester tester) async {
+      // Build once with empty content.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration.collapsed(
+            hintText: hintText,
+            hintFadeDuration: Duration(milliseconds: 120),
+          ),
+        ),
+      );
+
+      // Hint is visible (opacity 1.0).
+      expect(getHintOpacity(tester), 1.0);
+
+      // Rebuild with non-empty content.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: const InputDecoration.collapsed(
+            hintText: hintText,
+            hintFadeDuration: Duration(milliseconds: 120),
+          ),
+        ),
+      );
+
+      // The hint's opacity animates from 1.0 to 0.0.
+      // The animation's default duration is 20ms.
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getHintOpacity(tester);
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getHintOpacity(tester);
+      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(getHintOpacity(tester), 0.0);
+    });
+
     test('InputDecorationTheme.isCollapsed is applied', () {
       final InputDecoration decoration = const InputDecoration(
         hintText: 'Hello, Flutter!',
@@ -6553,7 +6719,7 @@ void main() {
       expect(decoration.isCollapsed, false);
     });
 
-    test('InputDecorationTheme.isCollapsed can be overriden', () {
+    test('InputDecorationTheme.isCollapsed can be overridden', () {
       final InputDecoration decoration = const InputDecoration(
         isCollapsed: true,
         hintText: 'Hello, Flutter!',
@@ -6725,7 +6891,7 @@ void main() {
     expect(nodeValues.length, 11);
   });
 
-  testWidgets('InputDecorationTheme.inputDecoration', (WidgetTester tester) async {
+  testWidgets('InputDecorationTheme.applyDefaults initializes empty field', (WidgetTester tester) async {
     const TextStyle themeStyle = TextStyle(color: Color(0xFF00FFFF));
     const Color themeColor = Color(0xFF00FF00);
     const InputBorder themeInputBorder = OutlineInputBorder(
@@ -6733,16 +6899,8 @@ void main() {
         color: Color(0xFF0000FF),
       ),
     );
-    const TextStyle decorationStyle = TextStyle(color: Color(0xFFFFFF00));
-    const Color decorationColor = Color(0xFF0000FF);
-    const InputBorder decorationInputBorder = OutlineInputBorder(
-      borderSide: BorderSide(
-        color: Color(0xFFFF00FF),
-      ),
-    );
 
-    // InputDecorationTheme arguments define InputDecoration properties.
-    InputDecoration decoration = const InputDecoration().applyDefaults(
+    final InputDecoration decoration = const InputDecoration().applyDefaults(
       const InputDecorationTheme(
         labelStyle: themeStyle,
         floatingLabelStyle: themeStyle,
@@ -6758,8 +6916,10 @@ void main() {
         iconColor: themeColor,
         prefixStyle: themeStyle,
         prefixIconColor: themeColor,
+        prefixIconConstraints: BoxConstraints(minWidth: 10, maxWidth: 10, minHeight: 30, maxHeight: 30),
         suffixStyle: themeStyle,
         suffixIconColor: themeColor,
+        suffixIconConstraints: BoxConstraints(minWidth: 20, maxWidth: 20, minHeight: 40, maxHeight: 40),
         counterStyle: themeStyle,
         filled: true,
         fillColor: themeColor,
@@ -6790,8 +6950,10 @@ void main() {
     expect(decoration.iconColor, themeColor);
     expect(decoration.prefixStyle, themeStyle);
     expect(decoration.prefixIconColor, themeColor);
+    expect(decoration.prefixIconConstraints, const BoxConstraints(minWidth: 10, maxWidth: 10, minHeight: 30, maxHeight: 30));
     expect(decoration.suffixStyle, themeStyle);
     expect(decoration.suffixIconColor, themeColor);
+    expect(decoration.suffixIconConstraints, const BoxConstraints(minWidth: 20, maxWidth: 20, minHeight: 40, maxHeight: 40));
     expect(decoration.counterStyle, themeStyle);
     expect(decoration.filled, true);
     expect(decoration.fillColor, themeColor);
@@ -6805,9 +6967,26 @@ void main() {
     expect(decoration.border, InputBorder.none);
     expect(decoration.alignLabelWithHint, true);
     expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
+  });
 
-    // InputDecoration (baseDecoration) defines InputDecoration properties
-    decoration = const InputDecoration(
+  testWidgets('InputDecorationTheme.applyDefaults does not override non-null fields', (WidgetTester tester) async {
+    const TextStyle themeStyle = TextStyle(color: Color(0xFF00FFFF));
+    const Color themeColor = Color(0xFF00FF00);
+    const InputBorder themeInputBorder = OutlineInputBorder(
+      borderSide: BorderSide(
+        color: Color(0xFF0000FF),
+      ),
+    );
+    const TextStyle decorationStyle = TextStyle(color: Color(0xFFFFFF00));
+    const Color decorationColor = Color(0xFF0000FF);
+    const InputBorder decorationInputBorder = OutlineInputBorder(
+      borderSide: BorderSide(
+        color: Color(0xFFFF00FF),
+      ),
+    );
+    const BoxConstraints decorationConstraints = BoxConstraints(minWidth: 40, maxWidth: 50, minHeight: 60, maxHeight: 70);
+
+    final InputDecoration decoration = const InputDecoration(
       labelStyle: decorationStyle,
       floatingLabelStyle: decorationStyle,
       helperStyle: decorationStyle,
@@ -6822,8 +7001,10 @@ void main() {
       iconColor: decorationColor,
       prefixStyle: decorationStyle,
       prefixIconColor: decorationColor,
+      prefixIconConstraints: decorationConstraints,
       suffixStyle: decorationStyle,
       suffixIconColor: decorationColor,
+      suffixIconConstraints: decorationConstraints,
       counterStyle: decorationStyle,
       filled: false,
       fillColor: decorationColor,
@@ -6836,7 +7017,7 @@ void main() {
       enabledBorder: decorationInputBorder,
       border: OutlineInputBorder(),
       alignLabelWithHint: false,
-      constraints: BoxConstraints(minWidth: 40, maxWidth: 50, minHeight: 60, maxHeight: 70),
+      constraints: decorationConstraints,
     ).applyDefaults(
       const InputDecorationTheme(
         labelStyle: themeStyle,
@@ -6885,8 +7066,10 @@ void main() {
     expect(decoration.iconColor, decorationColor);
     expect(decoration.prefixStyle, decorationStyle);
     expect(decoration.prefixIconColor, decorationColor);
+    expect(decoration.prefixIconConstraints, decorationConstraints);
     expect(decoration.suffixStyle, decorationStyle);
     expect(decoration.suffixIconColor, decorationColor);
+    expect(decoration.suffixIconConstraints, decorationConstraints);
     expect(decoration.counterStyle, decorationStyle);
     expect(decoration.filled, false);
     expect(decoration.fillColor, decorationColor);
@@ -6899,7 +7082,7 @@ void main() {
     expect(decoration.enabledBorder, decorationInputBorder);
     expect(decoration.border, const OutlineInputBorder());
     expect(decoration.alignLabelWithHint, false);
-    expect(decoration.constraints, const BoxConstraints(minWidth: 40, maxWidth: 50, minHeight: 60, maxHeight: 70));
+    expect(decoration.constraints, decorationConstraints);
   });
 
   testWidgets('InputDecorationTheme.inputDecoration with MaterialState', (WidgetTester tester) async {
@@ -7071,28 +7254,42 @@ void main() {
     // Spot check
     expect(debugString, contains('labelStyle: TextStyle(inherit: true, height: 1.0x)'));
     expect(debugString, contains('isDense: true'));
-    expect(debugString, contains('fillColor: Color(0x00000010)'));
-    expect(debugString, contains('focusColor: Color(0x00000020)'));
+    expect(debugString, contains('fillColor: ${const Color(0x00000010)}'));
+    expect(debugString, contains('focusColor: ${const Color(0x00000020)}'));
     expect(debugString, contains('errorBorder: UnderlineInputBorder()'));
     expect(debugString, contains('focusedBorder: OutlineInputBorder()'));
   });
 
   testWidgets('InputDecorationTheme implements debugFillDescription', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const BoxConstraints constraints = BoxConstraints(minWidth: 10, maxWidth: 10, minHeight: 30, maxHeight: 30);
     const InputDecorationTheme(
       labelStyle: TextStyle(),
+      floatingLabelStyle: TextStyle(),
       helperStyle: TextStyle(),
       helperMaxLines: 6,
       hintStyle: TextStyle(),
+      errorStyle: TextStyle(),
       errorMaxLines: 5,
       floatingLabelBehavior: FloatingLabelBehavior.never,
+      floatingLabelAlignment: FloatingLabelAlignment.center,
+      isDense: true,
       contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
+      isCollapsed: true,
+      iconColor: Colors.red,
+      prefixIconColor: Colors.blue,
+      prefixIconConstraints: constraints,
       prefixStyle: TextStyle(),
+      suffixIconColor: Colors.blue,
+      suffixIconConstraints: constraints,
       suffixStyle: TextStyle(),
       counterStyle: TextStyle(),
       filled: true,
       fillColor: Colors.red,
+      activeIndicatorBorder: BorderSide(),
+      outlineBorder: BorderSide(),
       focusColor: Colors.blue,
+      hoverColor: Colors.green,
       errorBorder: UnderlineInputBorder(),
       focusedBorder: UnderlineInputBorder(),
       focusedErrorBorder: UnderlineInputBorder(),
@@ -7100,24 +7297,38 @@ void main() {
       enabledBorder: UnderlineInputBorder(),
       border: UnderlineInputBorder(),
       alignLabelWithHint: true,
+      constraints: constraints,
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
         .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
         .map((DiagnosticsNode n) => n.toString()).toList();
     expect(description, <String>[
       'labelStyle: TextStyle(<all styles inherited>)',
+      'floatingLabelStyle: TextStyle(<all styles inherited>)',
       'helperStyle: TextStyle(<all styles inherited>)',
       'helperMaxLines: 6',
       'hintStyle: TextStyle(<all styles inherited>)',
+      'errorStyle: TextStyle(<all styles inherited>)',
       'errorMaxLines: 5',
       'floatingLabelBehavior: FloatingLabelBehavior.never',
+      'floatingLabelAlignment: FloatingLabelAlignment.center',
+      'isDense: true',
       'contentPadding: EdgeInsetsDirectional(40.0, 12.0, 0.0, 12.0)',
+      'isCollapsed: true',
+      'iconColor: MaterialColor(primary value: ${const Color(0xfff44336)})',
+      'prefixIconColor: MaterialColor(primary value: ${const Color(0xff2196f3)})',
+      'prefixIconConstraints: BoxConstraints(w=10.0, h=30.0)',
       'prefixStyle: TextStyle(<all styles inherited>)',
+      'suffixIconColor: MaterialColor(primary value: ${const Color(0xff2196f3)})',
+      'suffixIconConstraints: BoxConstraints(w=10.0, h=30.0)',
       'suffixStyle: TextStyle(<all styles inherited>)',
       'counterStyle: TextStyle(<all styles inherited>)',
       'filled: true',
-      'fillColor: MaterialColor(primary value: Color(0xfff44336))',
-      'focusColor: MaterialColor(primary value: Color(0xff2196f3))',
+      'fillColor: MaterialColor(primary value: ${const Color(0xfff44336)})',
+      'activeIndicatorBorder: BorderSide',
+      'outlineBorder: BorderSide',
+      'focusColor: MaterialColor(primary value: ${const Color(0xff2196f3)})',
+      'hoverColor: MaterialColor(primary value: ${const Color(0xff4caf50)})',
       'errorBorder: UnderlineInputBorder()',
       'focusedBorder: UnderlineInputBorder()',
       'focusedErrorBorder: UnderlineInputBorder()',
@@ -7125,6 +7336,7 @@ void main() {
       'enabledBorder: UnderlineInputBorder()',
       'border: UnderlineInputBorder()',
       'alignLabelWithHint: true',
+      'constraints: BoxConstraints(w=10.0, h=30.0)',
     ]);
   });
 
@@ -7580,6 +7792,72 @@ void main() {
     ));
 
     expect(tester.takeException(), isNull);
+  });
+
+  group('Intrinsic width', () {
+    const EdgeInsetsGeometry padding = EdgeInsetsDirectional.only(end: 24, start: 12);
+
+    const InputDecoration decorationWithoutIcons = InputDecoration(contentPadding: padding);
+    const InputDecoration decorationWithPrefix = InputDecoration(contentPadding: padding, prefixIcon: Icon(Icons.search));
+    const InputDecoration decorationWithSuffix = InputDecoration(contentPadding: padding, suffixIcon: Icon(Icons.search));
+    const InputDecoration decorationWithAffixes = InputDecoration(
+      contentPadding: padding,
+      prefixIcon: Icon(Icons.search),
+      suffixIcon: Icon(Icons.search),
+    );
+
+    Future<Size> measureText(WidgetTester tester, InputDecoration decoration, TextDirection direction) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decoration,
+          useIntrinsicWidth: true,
+          textDirection: direction,
+        ),
+      );
+      return tester.renderObject<RenderBox>(findInputText()).size;
+    }
+
+    testWidgets('with prefixIcon in LTR', (WidgetTester tester) async {
+      final Size textSizeWithoutIcon = await measureText(tester, decorationWithoutIcons, TextDirection.ltr);
+      final Size textSizeWithPrefixIcon = await measureText(tester, decorationWithPrefix, TextDirection.ltr);
+
+      expect(textSizeWithPrefixIcon.width, equals(textSizeWithoutIcon.width));
+    });
+
+    testWidgets('with suffixIcon in LTR', (WidgetTester tester) async {
+      final Size textSizeWithoutIcon = await measureText(tester, decorationWithoutIcons, TextDirection.ltr);
+      final Size textSizeWithSuffixIcon = await measureText(tester, decorationWithSuffix, TextDirection.ltr);
+
+      expect(textSizeWithSuffixIcon.width, equals(textSizeWithoutIcon.width));
+    });
+
+    testWidgets('with prefixIcon and suffixIcon in LTR', (WidgetTester tester) async {
+      final Size textSizeWithoutIcon = await measureText(tester, decorationWithoutIcons, TextDirection.ltr);
+      final Size textSizeWithIcons = await measureText(tester, decorationWithAffixes, TextDirection.ltr);
+
+      expect(textSizeWithIcons.width, equals(textSizeWithoutIcon.width));
+    });
+
+    testWidgets('with prefixIcon in RTL', (WidgetTester tester) async {
+      final Size textSizeWithoutIcon = await measureText(tester, decorationWithoutIcons, TextDirection.rtl);
+      final Size textSizeWithPrefixIcon = await measureText(tester, decorationWithPrefix, TextDirection.rtl);
+
+      expect(textSizeWithPrefixIcon.width, equals(textSizeWithoutIcon.width));
+    });
+
+    testWidgets('with suffixIcon in RTL', (WidgetTester tester) async {
+      final Size textSizeWithoutIcon = await measureText(tester, decorationWithoutIcons, TextDirection.rtl);
+      final Size textSizeWithSuffixIcon = await measureText(tester, decorationWithSuffix, TextDirection.rtl);
+
+      expect(textSizeWithSuffixIcon.width, equals(textSizeWithoutIcon.width));
+    });
+
+    testWidgets('with prefixIcon and suffixIcon in RTL', (WidgetTester tester) async {
+      final Size textSizeWithoutIcon = await measureText(tester, decorationWithoutIcons, TextDirection.rtl);
+      final Size textSizeWithIcons = await measureText(tester, decorationWithAffixes, TextDirection.rtl);
+
+      expect(textSizeWithIcons.width, equals(textSizeWithoutIcon.width));
+    });
   });
 
   testWidgets('Ensure the height of labelStyle remains unchanged when TextField is focused', (WidgetTester tester) async {
@@ -12279,57 +12557,57 @@ void main() {
 
       // Test filled text field.
       await pumpDecorator(hovering: false);
-      expect(getContainerColor(tester), equals(fillColor));
+      expect(getContainerColor(tester), isSameColorAs(fillColor));
       await tester.pump(const Duration(seconds: 10));
-      expect(getContainerColor(tester), equals(fillColor));
+      expect(getContainerColor(tester), isSameColorAs(fillColor));
 
       await pumpDecorator(hovering: true);
-      expect(getContainerColor(tester), equals(fillColor));
+      expect(getContainerColor(tester), isSameColorAs(fillColor));
       await tester.pump(const Duration(milliseconds: 15));
-      expect(getContainerColor(tester), equals(hoverColor));
+      expect(getContainerColor(tester), isSameColorAs(hoverColor));
 
       await pumpDecorator(hovering: false);
-      expect(getContainerColor(tester), equals(hoverColor));
+      expect(getContainerColor(tester), isSameColorAs(hoverColor));
       await tester.pump(const Duration(milliseconds: 15));
-      expect(getContainerColor(tester), equals(fillColor));
+      expect(getContainerColor(tester), isSameColorAs(fillColor));
 
       await pumpDecorator(hovering: false, enabled: false);
-      expect(getContainerColor(tester), equals(disabledColor));
+      expect(getContainerColor(tester), isSameColorAs(disabledColor));
       await tester.pump(const Duration(seconds: 10));
-      expect(getContainerColor(tester), equals(disabledColor));
+      expect(getContainerColor(tester), isSameColorAs(disabledColor));
 
       await pumpDecorator(hovering: true, enabled: false);
-      expect(getContainerColor(tester), equals(disabledColor));
+      expect(getContainerColor(tester), isSameColorAs(disabledColor));
       await tester.pump(const Duration(seconds: 10));
-      expect(getContainerColor(tester), equals(disabledColor));
+      expect(getContainerColor(tester), isSameColorAs(disabledColor));
 
       // Test outline text field.
       const Color blendedHoverColor = Color(0x74004400);
       await pumpDecorator(hovering: false, filled: false);
       await tester.pumpAndSettle();
-      expect(getBorderColor(tester), equals(enabledBorderColor));
+      expect(getBorderColor(tester), isSameColorAs(enabledBorderColor));
       await tester.pump(const Duration(seconds: 10));
-      expect(getBorderColor(tester), equals(enabledBorderColor));
+      expect(getBorderColor(tester), isSameColorAs(enabledBorderColor));
 
       await pumpDecorator(hovering: true, filled: false);
-      expect(getBorderColor(tester), equals(enabledBorderColor));
+      expect(getBorderColor(tester), isSameColorAs(enabledBorderColor));
       await tester.pump(const Duration(milliseconds: 167));
-      expect(getBorderColor(tester), equals(blendedHoverColor));
+      expect(getBorderColor(tester), isSameColorAs(blendedHoverColor));
 
       await pumpDecorator(hovering: false, filled: false);
-      expect(getBorderColor(tester), equals(blendedHoverColor));
+      expect(getBorderColor(tester), isSameColorAs(blendedHoverColor));
       await tester.pump(const Duration(milliseconds: 167));
-      expect(getBorderColor(tester), equals(enabledBorderColor));
+      expect(getBorderColor(tester), isSameColorAs(enabledBorderColor));
 
       await pumpDecorator(hovering: false, filled: false, enabled: false);
-      expect(getBorderColor(tester), equals(enabledBorderColor));
+      expect(getBorderColor(tester), isSameColorAs(enabledBorderColor));
       await tester.pump(const Duration(milliseconds: 167));
-      expect(getBorderColor(tester), equals(disabledColor));
+      expect(getBorderColor(tester), isSameColorAs(disabledColor));
 
       await pumpDecorator(hovering: true, filled: false, enabled: false);
-      expect(getBorderColor(tester), equals(disabledColor));
+      expect(getBorderColor(tester), isSameColorAs(disabledColor));
       await tester.pump(const Duration(seconds: 10));
-      expect(getBorderColor(tester), equals(disabledColor));
+      expect(getBorderColor(tester), isSameColorAs(disabledColor));
     });
 
     testWidgets('InputDecorator draws and animates focusColor', (WidgetTester tester) async {

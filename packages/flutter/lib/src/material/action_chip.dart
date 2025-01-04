@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'choice_chip.dart';
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'input_chip.dart';
+/// @docImport 'material.dart';
+/// @docImport 'outlined_button.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
@@ -307,7 +316,7 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
   @override
   BorderSide? get side => _chipVariant == _ChipVariant.flat
     ? isEnabled
-        ? BorderSide(color: _colors.outline)
+        ? BorderSide(color: _colors.outlineVariant)
         : BorderSide(color: _colors.onSurface.withOpacity(0.12))
     : const BorderSide(color: Colors.transparent);
 

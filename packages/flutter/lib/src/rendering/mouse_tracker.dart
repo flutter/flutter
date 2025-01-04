@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'binding.dart';
+library;
+
 import 'dart:collection' show LinkedHashMap;
 import 'dart:ui';
 
@@ -306,13 +309,10 @@ class MouseTracker extends ChangeNotifier {
     if (event is PointerSignalEvent) {
       return;
     }
-    final HitTestResult result;
-    if (event is PointerRemovedEvent) {
-      result = HitTestResult();
-    } else {
-      final int viewId = event.viewId;
-      result = hitTestResult ?? _hitTestInView(event.position, viewId);
-    }
+    final HitTestResult result = switch (event) {
+      PointerRemovedEvent() => HitTestResult(),
+      _ => hitTestResult ?? _hitTestInView(event.position, event.viewId),
+    };
     final int device = event.device;
     final _MouseState? existingState = _mouseStates[device];
     if (!_shouldMarkStateDirty(existingState, event)) {

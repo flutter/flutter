@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'drawer.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -64,7 +67,7 @@ class DrawerThemeData with Diagnosticable {
   /// Overrides the default value of [Drawer.shape].
   final ShapeBorder? shape;
 
-  /// Overrides the default value of [Drawer.shape] for a end drawer.
+  /// Overrides the default value of [Drawer.shape] for an end drawer.
   final ShapeBorder? endShape;
 
   /// Overrides the default value of [Drawer.width].

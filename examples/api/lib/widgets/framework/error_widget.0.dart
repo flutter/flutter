@@ -16,15 +16,7 @@ void main() {
       return ErrorWidget(details.exception);
     }
     // In release builds, show a yellow-on-blue message instead:
-    return Container(
-      alignment: Alignment.center,
-      child: Text(
-        'Error!\n${details.exception}',
-        style: const TextStyle(color: Colors.yellow),
-        textAlign: TextAlign.center,
-        textDirection: TextDirection.ltr,
-      ),
-    );
+    return ReleaseModeErrorWidget(details: details);
   };
 
   // Start the app.
@@ -67,5 +59,23 @@ class _ErrorWidgetExampleAppState extends State<ErrorWidgetExampleApp> {
         ),
       );
     }
+  }
+}
+
+class ReleaseModeErrorWidget extends StatelessWidget {
+  const ReleaseModeErrorWidget({super.key, required this.details});
+
+  final FlutterErrorDetails details;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        'Error!\n${details.exception}',
+        style: const TextStyle(color: Colors.yellow),
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+      ),
+    );
   }
 }
