@@ -115,6 +115,7 @@ void main(List<String> args) async {
         buildCommand,
         '--debug',
         if (!codeSign) '--no-codesign',
+        '--verbose',
       ];
       io.stderr.writeln('Running $args...');
       final io.Process process = await processManager.start(
