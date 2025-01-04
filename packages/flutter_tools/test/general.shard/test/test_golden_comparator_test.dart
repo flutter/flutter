@@ -222,7 +222,6 @@ FakeCommand _fakeFluterTester(
       pathToBinTool,
       '--disable-vm-service',
       '--non-interactive',
-      '--packages=.dart_tool/package_config.json',
       'compiler_output',
     ],
     stdout: stdout,
