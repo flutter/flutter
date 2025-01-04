@@ -221,7 +221,13 @@ class SvgFilterBuilder {
     element.result!.baseVal = result;
     final SVGNumberList value = element.values!.baseVal!;
     for (int i = 0; i < matrix.length; i++) {
-      value.appendItem(root.createSVGNumber()..value = matrix[i]);
+      /// Flutter documentation says the translation column of the color matrix
+      /// is specified in unnormalized 0..255 space. `feColorMatrix` expects the
+      /// translation values to be normalized to 0..1 space.
+      ///
+      /// See [https://api.flutter.dev/flutter/dart-ui/ColorFilter/ColorFilter.matrix.html].
+      final double divisor = (i % 5 == 4) ? 255.0 : 1.0;
+      value.appendItem(root.createSVGNumber()..value = matrix[i] / divisor);
     }
     filter.append(element);
   }
