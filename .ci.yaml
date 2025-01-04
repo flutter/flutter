@@ -2359,7 +2359,7 @@ targets:
 
   - name: Linux_pixel_7pro android_semantics_integration_test
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/124636
+    bringup: true # Failing: https://github.com/flutter/flutter/issues/153594
     presubmit: false
     timeout: 60
     properties:
