@@ -62,7 +62,7 @@ class FlutterExtension {
      * Chosen as default version of the AGP version below as found in
      * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp.
      */
-    public final String ndkVersion = "26.1.10909125"
+    public final String ndkVersion = "26.3.11579264"
 
     /**
      * Specifies the relative directory to the Flutter project directory.
@@ -279,6 +279,7 @@ class FlutterPlugin implements Plugin<Project> {
         extension.flutterVersionName = flutterVersionName ?: "1.0"
 
         this.addFlutterTasks(project)
+        forceNdkDownload(project, flutterRootPath)
 
         // By default, assembling APKs generates fat APKs if multiple platforms are passed.
         // Configuring split per ABI allows to generate separate APKs for each abi.
@@ -859,6 +860,36 @@ class FlutterPlugin implements Plugin<Project> {
         return version2
     }
 
+    private void forceNdkDownload(Project gradleProject, String flutterSdkRootPath) {
+        // If the project is already configuring a native build, we don't need to do anything.
+        Boolean forcingNotRequired = gradleProject.android.externalNativeBuild.cmake.path != null
+        if (forcingNotRequired) {
+            return
+        }
+
+        // Otherwise, point to an empty CMakeLists.txt, and ignore associated warnings.
+        gradleProject.android {
+            externalNativeBuild {
+                cmake {
+                    // Respect the existing configuration if it exists - the NDK will already be
+                    // downloaded in this case.
+                    path = flutterSdkRootPath + "/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+                }
+            }
+
+            defaultConfig {
+                externalNativeBuild {
+                    cmake {
+                        // CMake will print warnings when you try to build an empty project.
+                        // These arguments silence the warnings - our project is intentionally
+                        // empty.
+                        arguments("-Wno-dev", "--no-warn-unused-cli")
+                    }
+                }
+            }
+        }
+    }
+
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
     private void detectLowCompileSdkVersionOrNdkVersion() {
         project.afterEvaluate {
@@ -1259,8 +1290,18 @@ class FlutterPlugin implements Plugin<Project> {
             boolean isBuildingAar = project.hasProperty("is-plugin")
             // In add to app scenarios, a Gradle project contains a `:flutter` and `:app` project.
             // `:flutter` is used as a subproject when these tasks exists and the build isn't building an AAR.
-            Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
-            Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
+            Task packageAssets
+            Task cleanPackageAssets
+            try {
+                packageAssets = project.tasks.named("package${variant.name.capitalize()}Assets").get()
+            } catch (UnknownTaskException ignored) {
+                packageAssets = null
+            }
+            try {
+                cleanPackageAssets = project.tasks.named("cleanPackage${variant.name.capitalize()}Assets").get()
+            } catch (UnknownTaskException ignored) {
+                cleanPackageAssets = null
+            }
             boolean isUsedAsSubproject = packageAssets && cleanPackageAssets && !isBuildingAar
 
             String variantBuildMode = buildModeFor(variant.buildType)
