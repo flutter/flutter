@@ -1727,6 +1727,7 @@ void main() {
     final Offset offsetPlatform = tester.getTopLeft(platform);
     expect(offsetPlatform, const Offset(16.0, 17.0));
   });
+
   testWidgets('ExpansionTile uses childrenPaddingColor Color', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
@@ -1743,6 +1744,7 @@ void main() {
     final Color childrenPaddingColor = tester.widget<ColoredBox>(find.byType(ColoredBox)).color;
     expect(childrenPaddingColor, Colors.amber);
   });
+
   testWidgets('ExpansionTile without using childrenPaddingColor Color',
       (WidgetTester tester) async {
     const Color backgroundColor = Colors.red;
