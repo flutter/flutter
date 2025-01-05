@@ -198,6 +198,15 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
 
   command_buffer_vk_.beginRenderPass(pass_info, vk::SubpassContents::eInline);
 
+  if (resolve_image_vk_) {
+    TextureVK::Cast(*resolve_image_vk_)
+        .SetLayoutWithoutEncoding(vk::ImageLayout::eGeneral);
+  }
+  if (color_image_vk_) {
+    TextureVK::Cast(*color_image_vk_)
+        .SetLayoutWithoutEncoding(vk::ImageLayout::eGeneral);
+  }
+
   // Set the initial viewport.
   const auto vp = Viewport{.rect = Rect::MakeSize(target_size)};
   vk::Viewport viewport = vk::Viewport()
