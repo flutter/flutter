@@ -7,7 +7,6 @@
 
 #include <memory>
 #include <string>
-#include <utility>
 
 #include "fml/closure.h"
 #include "impeller/core/allocator.h"
