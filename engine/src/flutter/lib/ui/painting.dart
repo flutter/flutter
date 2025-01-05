@@ -2306,6 +2306,16 @@ class FrameInfo {
   final Image image;
 }
 
+/// Signature for [Codec] lifecycle events.
+typedef CodecEventCallback = void Function(Codec codec);
+
+///
+///
+/// For use in Flutter tests only.
+/// Do not take dependency. It will be deleted without notice.
+// TODO (): remove after fixing the tests.
+bool deprecatedDoNotUseWillBeRemovedWithoutNoticeLeakTrackCodec = false;
+
 /// A handle to an image codec.
 ///
 /// This class is created by the engine, and should not be instantiated
