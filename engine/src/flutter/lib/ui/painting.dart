@@ -2309,7 +2309,7 @@ class FrameInfo {
 /// Signature for [Codec] lifecycle events.
 typedef CodecEventCallback = void Function(Codec codec);
 
-///
+/// If true, Codec is leak tracked.
 ///
 /// For use in Flutter tests only.
 /// Do not take dependency. It will be deleted without notice.
