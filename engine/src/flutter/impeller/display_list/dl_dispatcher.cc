@@ -1290,11 +1290,12 @@ std::shared_ptr<Texture> DisplayListToTexture(
   return target.GetRenderTargetTexture();
 }
 
-bool RenderToOnscreen(ContentContext& context,
-                      RenderTarget render_target,
-                      const sk_sp<flutter::DisplayList>& display_list,
-                      SkIRect cull_rect,
-                      bool reset_host_buffer) {
+bool RenderToTarget(ContentContext& context,
+                    RenderTarget render_target,
+                    const sk_sp<flutter::DisplayList>& display_list,
+                    SkIRect cull_rect,
+                    bool reset_host_buffer,
+                    bool is_onscreen) {
   Rect ip_cull_rect = Rect::MakeLTRB(cull_rect.left(), cull_rect.top(),
                                      cull_rect.right(), cull_rect.bottom());
   FirstPassDispatcher collector(context, impeller::Matrix(), ip_cull_rect);
@@ -1303,7 +1304,7 @@ bool RenderToOnscreen(ContentContext& context,
   impeller::CanvasDlDispatcher impeller_dispatcher(
       context,                                   //
       render_target,                             //
-      /*is_onscreen=*/true,                      //
+      /*is_onscreen=*/is_onscreen,               //
       display_list->root_has_backdrop_filter(),  //
       display_list->max_root_blend_mode(),       //
       IRect::RoundOut(ip_cull_rect)              //

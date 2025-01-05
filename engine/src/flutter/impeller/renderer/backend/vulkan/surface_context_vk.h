@@ -73,8 +73,8 @@ class SurfaceContextVK : public Context,
   // |Context|
   RuntimeStageBackend GetRuntimeStageBackend() const override;
 
-  virtual bool SubmitFinalCommandBuffer(
-      std::shared_ptr<CommandBuffer> cmd_buffer) override;
+  // |Context|
+  bool SubmitOnscreen(std::shared_ptr<CommandBuffer> cmd_buffer) override;
 
   // |Context|
   void Shutdown() override;

@@ -26,6 +26,8 @@ struct KHRFrameSynchronizerVK {
   vk::UniqueSemaphore present_ready;
   std::shared_ptr<CommandBuffer> final_cmd_buffer;
   bool is_valid = false;
+  // Whether the renderer attached an onscreen command buffer to render to.
+  bool has_onscreen = false;
 
   explicit KHRFrameSynchronizerVK(const vk::Device& device) {
     auto acquire_res = device.createFenceUnique(
@@ -383,6 +385,7 @@ void KHRSwapchainImplVK::AddFinalCommandBuffer(
     std::shared_ptr<CommandBuffer> cmd_buffer) {
   const auto& sync = synchronizers_[current_frame_];
   sync->final_cmd_buffer = std::move(cmd_buffer);
+  sync->has_onscreen = true;
 }
 
 bool KHRSwapchainImplVK::Present(
@@ -400,7 +403,14 @@ bool KHRSwapchainImplVK::Present(
   //----------------------------------------------------------------------------
   /// Transition the image to color-attachment-optimal.
   ///
-  FML_DCHECK(!!sync->final_cmd_buffer);
+  if (!sync->has_onscreen) {
+    sync->final_cmd_buffer = context.CreateCommandBuffer();
+  }
+  sync->has_onscreen = false;
+  if (!sync->final_cmd_buffer) {
+    return false;
+  }
+
   auto vk_final_cmd_buffer =
       CommandBufferVK::Cast(*sync->final_cmd_buffer).GetCommandBuffer();
   {

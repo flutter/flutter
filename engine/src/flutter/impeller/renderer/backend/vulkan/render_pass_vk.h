@@ -135,8 +135,7 @@ class RenderPassVK final : public RenderPass {
   SharedHandleVK<vk::RenderPass> CreateVKRenderPass(
       const ContextVK& context,
       const SharedHandleVK<vk::RenderPass>& recycled_renderpass,
-      const std::shared_ptr<CommandBufferVK>& command_buffer,
-      bool is_swapchain) const;
+      const std::shared_ptr<CommandBufferVK>& command_buffer) const;
 
   SharedHandleVK<vk::Framebuffer> CreateVKFramebuffer(
       const ContextVK& context,

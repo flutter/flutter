@@ -322,7 +322,7 @@ class Canvas {
                                         bool should_remove_texture = false,
                                         bool should_use_onscreen = false);
 
-  bool BlitToOnscreen(bool final_cmd_buffer = false);
+  bool BlitToOnscreen(bool is_onscreen = false);
 
   size_t GetClipHeight() const;
 

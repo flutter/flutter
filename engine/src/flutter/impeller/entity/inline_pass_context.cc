@@ -40,7 +40,7 @@ std::shared_ptr<Texture> InlinePassContext::GetTexture() {
   return pass_target_.GetRenderTarget().GetRenderTargetTexture();
 }
 
-bool InlinePassContext::EndPass(bool last_cmd_buffer) {
+bool InlinePassContext::EndPass(bool is_onscreen) {
   if (!IsActive()) {
     return true;
   }
@@ -63,9 +63,8 @@ bool InlinePassContext::EndPass(bool last_cmd_buffer) {
   }
 
   pass_ = nullptr;
-  if (last_cmd_buffer) {
-    return renderer_.GetContext()->SubmitFinalCommandBuffer(
-        std::move(command_buffer_));
+  if (is_onscreen) {
+    return renderer_.GetContext()->SubmitOnscreen(std::move(command_buffer_));
   } else {
     return renderer_.GetContext()->EnqueueCommandBuffer(
         std::move(command_buffer_));

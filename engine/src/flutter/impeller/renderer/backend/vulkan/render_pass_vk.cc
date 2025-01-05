@@ -78,22 +78,22 @@ static size_t GetVKClearValues(
 SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
     const ContextVK& context,
     const SharedHandleVK<vk::RenderPass>& recycled_renderpass,
-    const std::shared_ptr<CommandBufferVK>& command_buffer,
-    bool is_swapchain) const {
+    const std::shared_ptr<CommandBufferVK>& command_buffer) const {
   RenderPassBuilderVK builder;
 
-  render_target_.IterateAllColorAttachments(
-      [&](size_t bind_point, const ColorAttachment& attachment) -> bool {
-        builder.SetColorAttachment(
-            bind_point,                                               //
-            attachment.texture->GetTextureDescriptor().format,        //
-            attachment.texture->GetTextureDescriptor().sample_count,  //
-            attachment.load_action,                                   //
-            attachment.store_action,                                  //
-            vk::ImageLayout::eUndefined                               //
-        );
-        return true;
-      });
+  render_target_.IterateAllColorAttachments([&](size_t bind_point,
+                                                const ColorAttachment&
+                                                    attachment) -> bool {
+    builder.SetColorAttachment(
+        bind_point,                                                          //
+        attachment.texture->GetTextureDescriptor().format,                   //
+        attachment.texture->GetTextureDescriptor().sample_count,             //
+        attachment.load_action,                                              //
+        attachment.store_action,                                             //
+        /*current_layout=*/TextureVK::Cast(*attachment.texture).GetLayout()  //
+    );
+    return true;
+  });
 
   if (auto depth = render_target_.GetDepthAttachment(); depth.has_value()) {
     builder.SetDepthStencilAttachment(
@@ -155,9 +155,8 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
 
   const auto& target_size = render_target_.GetRenderTargetSize();
 
-  render_pass_ = CreateVKRenderPass(
-      vk_context, recycled_render_pass, command_buffer_,
-      TextureVK::Cast(*resolve_image_vk_).IsSwapchainImage());
+  render_pass_ =
+      CreateVKRenderPass(vk_context, recycled_render_pass, command_buffer_);
   if (!render_pass_) {
     VALIDATION_LOG << "Could not create renderpass.";
     is_valid_ = false;

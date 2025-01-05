@@ -132,7 +132,7 @@ class ContextVK final : public Context,
   const std::shared_ptr<const Capabilities>& GetCapabilities() const override;
 
   // |Context|
-  virtual bool SubmitFinalCommandBuffer(
+  virtual bool SubmitOnscreen(
       std::shared_ptr<CommandBuffer> cmd_buffer) override;
 
   const std::shared_ptr<YUVConversionLibraryVK>& GetYUVConversionLibrary()

@@ -129,7 +129,7 @@ bool SurfaceContextVK::FlushCommandBuffers() {
   return parent_->FlushCommandBuffers();
 }
 
-bool SurfaceContextVK::SubmitFinalCommandBuffer(
+bool SurfaceContextVK::SubmitOnscreen(
     std::shared_ptr<CommandBuffer> cmd_buffer) {
   swapchain_->AddFinalCommandBuffer(std::move(cmd_buffer));
   return true;

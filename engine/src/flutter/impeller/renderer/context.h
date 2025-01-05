@@ -243,10 +243,8 @@ class Context {
   /// correct shader types.
   virtual RuntimeStageBackend GetRuntimeStageBackend() const = 0;
 
-  virtual bool SubmitFinalCommandBuffer(
-      std::shared_ptr<CommandBuffer> cmd_buffer) {
-    return EnqueueCommandBuffer(std::move(cmd_buffer));
-  }
+  /// @brief Submit the command buffer that renders to the onscreen surface.
+  virtual bool SubmitOnscreen(std::shared_ptr<CommandBuffer> cmd_buffer);
 
  protected:
   Context();

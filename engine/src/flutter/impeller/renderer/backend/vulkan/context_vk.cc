@@ -730,8 +730,7 @@ RuntimeStageBackend ContextVK::GetRuntimeStageBackend() const {
   return RuntimeStageBackend::kVulkan;
 }
 
-bool ContextVK::SubmitFinalCommandBuffer(
-    std::shared_ptr<CommandBuffer> cmd_buffer) {
+bool ContextVK::SubmitOnscreen(std::shared_ptr<CommandBuffer> cmd_buffer) {
   return EnqueueCommandBuffer(std::move(cmd_buffer));
 }
 

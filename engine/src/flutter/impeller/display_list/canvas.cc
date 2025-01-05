@@ -1665,7 +1665,7 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
   return input_texture;
 }
 
-bool Canvas::BlitToOnscreen(bool final_cmd_buffer) {
+bool Canvas::BlitToOnscreen(bool is_onscreen) {
   auto command_buffer = renderer_.GetContext()->CreateCommandBuffer();
   command_buffer->SetLabel("EntityPass Root Command Buffer");
   auto offscreen_target = render_passes_.back()
@@ -1709,9 +1709,8 @@ bool Canvas::BlitToOnscreen(bool final_cmd_buffer) {
     }
   }
 
-  if (final_cmd_buffer) {
-    return renderer_.GetContext()->SubmitFinalCommandBuffer(
-        std::move(command_buffer));
+  if (is_onscreen) {
+    return renderer_.GetContext()->SubmitOnscreen(std::move(command_buffer));
   } else {
     return renderer_.GetContext()->EnqueueCommandBuffer(
         std::move(command_buffer));
@@ -1722,14 +1721,14 @@ void Canvas::EndReplay() {
   FML_DCHECK(render_passes_.size() == 1u);
   render_passes_.back().inline_pass_context->GetRenderPass();
   render_passes_.back().inline_pass_context->EndPass(
-      /*last_cmd_buffer=*/!requires_readback_ && is_onscreen_);
+      /*is_onscreen=*/!requires_readback_ && is_onscreen_);
   backdrop_data_.clear();
 
   // If requires_readback_ was true, then we rendered to an offscreen texture
   // instead of to the onscreen provided in the render target. Now we need to
   // draw or blit the offscreen back to the onscreen.
   if (requires_readback_) {
-    BlitToOnscreen(/*final_cmd_buffer=*/is_onscreen_);
+    BlitToOnscreen(/*is_onscreen_=*/is_onscreen_);
   }
 
   if (!renderer_.GetContext()->FlushCommandBuffers()) {
