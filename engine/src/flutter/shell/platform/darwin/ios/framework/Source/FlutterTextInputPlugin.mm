@@ -2675,8 +2675,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   [self removeEnableFlutterTextInputViewAccessibilityTimer];
   _activeView.accessibilityEnabled = NO;
   [_activeView resignFirstResponder];
-  [_activeView removeFromSuperview];
-  [_inputHider removeFromSuperview];
+  [self cleanUpViewHierarchy:YES clearText:YES delayRemoval:NO];
 }
 
 - (void)triggerAutofillSave:(BOOL)saveEntries {
