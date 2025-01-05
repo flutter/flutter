@@ -2313,7 +2313,7 @@ typedef CodecEventCallback = void Function(Codec codec);
 ///
 /// For use in Flutter tests only.
 /// Do not take dependency. It will be deleted without notice.
-// TODO (): remove after fixing the tests.
+// TODO (https://github.com/flutter/flutter/issues/161132): remove after fixing the tests.
 bool deprecatedDoNotUseWillBeRemovedWithoutNoticeLeakTrackCodec = false;
 
 /// A handle to an image codec.
