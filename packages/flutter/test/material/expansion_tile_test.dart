@@ -1745,10 +1745,8 @@ void main() {
     expect(childrenPaddingColor, Colors.amber);
   });
 
-  testWidgets('ExpansionTile without using childrenPaddingColor Color',
-      (WidgetTester tester) async {
+  testWidgets('ExpansionTile without using childrenPaddingColor Color', (WidgetTester tester) async {
     const Color backgroundColor = Colors.red;
-
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: Center(
