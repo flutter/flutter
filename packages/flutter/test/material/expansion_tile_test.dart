@@ -103,8 +103,8 @@ void main() {
 
       double getHeight(Key key) => tester.getSize(find.byKey(key)).height;
       DecoratedBox getDecoratedBox(Key key) => tester.firstWidget(
-        find.descendant(of: find.byKey(key), matching: find.byType(DecoratedBox)),
-      );
+            find.descendant(of: find.byKey(key), matching: find.byType(DecoratedBox)),
+          );
 
       expect(getHeight(topKey), getHeight(expandedKey) - getHeight(tileKey) - 2.0);
       expect(getHeight(topKey), getHeight(collapsedKey) - 2.0);
@@ -522,32 +522,28 @@ void main() {
       ),
     );
 
-    ShapeDecoration shapeDecoration =
-        tester
-                .firstWidget<DecoratedBox>(
-                  find.descendant(
-                    of: find.byKey(expansionTileKey),
-                    matching: find.byType(DecoratedBox),
-                  ),
-                )
-                .decoration
-            as ShapeDecoration;
+    ShapeDecoration shapeDecoration = tester
+        .firstWidget<DecoratedBox>(
+          find.descendant(
+            of: find.byKey(expansionTileKey),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .decoration as ShapeDecoration;
 
     expect(shapeDecoration.color, collapsedBackgroundColor);
 
     await tester.tap(find.text('Title'));
     await tester.pumpAndSettle();
 
-    shapeDecoration =
-        tester
-                .firstWidget<DecoratedBox>(
-                  find.descendant(
-                    of: find.byKey(expansionTileKey),
-                    matching: find.byType(DecoratedBox),
-                  ),
-                )
-                .decoration
-            as ShapeDecoration;
+    shapeDecoration = tester
+        .firstWidget<DecoratedBox>(
+          find.descendant(
+            of: find.byKey(expansionTileKey),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .decoration as ShapeDecoration;
 
     expect(shapeDecoration.color, backgroundColor);
   });
@@ -1731,13 +1727,12 @@ void main() {
     final Offset offsetPlatform = tester.getTopLeft(platform);
     expect(offsetPlatform, const Offset(16.0, 17.0));
   });
-  testWidgets('ExpansionTile uses childrenBackgroundColor Color',
-      (WidgetTester tester) async {
+  testWidgets('ExpansionTile uses childrenPaddingColor Color', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: ExpansionTile(
           initiallyExpanded: true,
-          childrenBackgroundColor: Colors.amber,
+          childrenPaddingColor: Colors.amber,
           tilePadding: EdgeInsets.zero,
           title: Text('Title'),
           children: <Widget>[Text('Tile 1')],
@@ -1745,11 +1740,10 @@ void main() {
       ),
     ));
 
-    final Color childrenBackgroundColor =
-        tester.widget<ColoredBox>(find.byType(ColoredBox)).color;
-    expect(childrenBackgroundColor, Colors.amber);
+    final Color childrenPaddingColor = tester.widget<ColoredBox>(find.byType(ColoredBox)).color;
+    expect(childrenPaddingColor, Colors.amber);
   });
-  testWidgets('ExpansionTile without using childrenBackgroundColor Color',
+  testWidgets('ExpansionTile without using childrenPaddingColor Color',
       (WidgetTester tester) async {
     const Color backgroundColor = Colors.red;
 
@@ -1765,7 +1759,7 @@ void main() {
         ),
       ),
     ));
-    final Color childrenBackgroundColor = tester.widget<ColoredBox>(find.byType(ColoredBox)).color;
-    expect(childrenBackgroundColor, backgroundColor);
+    final Color childrenPaddingColor = tester.widget<ColoredBox>(find.byType(ColoredBox)).color;
+    expect(childrenPaddingColor, backgroundColor);
   });
 }

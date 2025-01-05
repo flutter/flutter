@@ -75,7 +75,7 @@ void main() {
     expect(theme.tilePadding, null);
     expect(theme.expandedAlignment, null);
     expect(theme.childrenPadding, null);
-    expect(theme.childrenBackgroundColor, null);
+    expect(theme.childrenPaddingColor, null);
     expect(theme.iconColor, null);
     expect(theme.collapsedIconColor, null);
     expect(theme.textColor, null);
@@ -90,11 +90,10 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TooltipThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
@@ -107,7 +106,7 @@ void main() {
       tilePadding: const EdgeInsets.all(20.0),
       expandedAlignment: Alignment.bottomCenter,
       childrenPadding: const EdgeInsets.all(10.0),
-      childrenBackgroundColor: const Color(0xffBEBEBE),
+      childrenPaddingColor: const Color(0xffBEBEBE),
       iconColor: const Color(0xffa7c61c),
       collapsedIconColor: const Color(0xffdd0b1f),
       textColor: const Color(0xffffffff),
@@ -118,11 +117,10 @@ void main() {
       expansionAnimationStyle: AnimationStyle(curve: Curves.easeInOut),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -132,7 +130,7 @@ void main() {
         'tilePadding: EdgeInsets.all(20.0)',
         'expandedAlignment: Alignment.bottomCenter',
         'childrenPadding: EdgeInsets.all(10.0)',
-        'childrenBackgroundColor: ${const Color(0xffBEBEBE)}',
+        'childrenPaddingColor: ${const Color(0xffBEBEBE)}',
         'iconColor: ${const Color(0xffa7c61c)}',
         'collapsedIconColor: ${const Color(0xffdd0b1f)}',
         'textColor: ${const Color(0xffffffff)}',
@@ -238,7 +236,7 @@ void main() {
     final Key iconKey = UniqueKey();
     const Color backgroundColor = Colors.orange;
     const Color collapsedBackgroundColor = Colors.red;
-    const Color childrenBackgroundColor = Colors.brown;
+    const Color childrenPaddingColor = Colors.brown;
     const Color iconColor = Colors.green;
     const Color collapsedIconColor = Colors.blue;
     const Color textColor = Colors.black;
@@ -262,7 +260,7 @@ void main() {
             tilePadding: EdgeInsets.fromLTRB(8, 12, 4, 10),
             expandedAlignment: Alignment.centerRight,
             childrenPadding: EdgeInsets.all(20.0),
-            childrenBackgroundColor: childrenBackgroundColor,
+            childrenPaddingColor: childrenPaddingColor,
             iconColor: iconColor,
             collapsedIconColor: collapsedIconColor,
             textColor: textColor,
@@ -293,8 +291,8 @@ void main() {
     // Check the tile's background color when backgroundColor is applied.
     expect(material.color, backgroundColor);
 
-    // Check the children background color when childrenBackgroundColor is applied.
-    expect(tester.widget<ColoredBox>(find.byType(ColoredBox).first).color, childrenBackgroundColor);
+    // Check the children background color when childrenPaddingColor is applied.
+    expect(tester.widget<ColoredBox>(find.byType(ColoredBox).first).color, childrenPaddingColor);
 
     final Rect titleRect = tester.getRect(find.text('Expanded Tile'));
     final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
