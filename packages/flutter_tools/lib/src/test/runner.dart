@@ -572,7 +572,6 @@ class SpawnPlugin extends PlatformPlugin {
 
   /// Runs tests using the experimental strategy of spawning each test in a
   /// separate lightweight Engine.
-  @override
   Future<int> runTestsBySpawningLightweightEngines(
     List<Uri> testFiles, {
     required DebuggingOptions debuggingOptions,
