@@ -448,8 +448,11 @@ class RegularWindow extends StatelessWidget {
   }
 }
 
+/// A widget that creates a popup window. This content of this window is
+/// rendered into a [View], meaning that this widget must be rendered into
+/// either a [ViewAnchor] or a [ViewCollection].
 class PopupWindow extends StatelessWidget {
-  /// Creates a regular window widget
+  /// Creates a popup window widget
   const PopupWindow(
       {this.controller,
       this.onDestroyed,
