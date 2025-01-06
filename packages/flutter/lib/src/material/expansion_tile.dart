@@ -897,7 +897,8 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     ExpansionTileThemeData defaults,
   ) {
     _iconColorTween
-      ..begin = widget.collapsedIconColor ??
+      ..begin =
+          widget.collapsedIconColor ??
           expansionTileTheme.collapsedIconColor ??
           defaults.collapsedIconColor
       ..end = widget.iconColor ?? expansionTileTheme.iconColor ?? defaults.iconColor;
