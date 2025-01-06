@@ -212,7 +212,7 @@ dependency_overrides:
   http:
     path: ./third_party/dart/third_party/pkg/http/pkgs/http
   http_multi_server:
-    path: ./third_party/dart/third_party/pkg/http_multi_server
+    path: ./third_party/dart/third_party/pkg/http/pkgs/http_multi_server
   http_parser:
     path: ./third_party/dart/third_party/pkg/http/pkgs/http_parser
   io:
