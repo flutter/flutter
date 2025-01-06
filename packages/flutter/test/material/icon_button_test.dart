@@ -3039,6 +3039,7 @@ void main() {
     final Offset iconButtonOffset = tester.getCenter(iconButton);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
 
     await gesture.moveTo(iconButtonOffset);
     await tester.pump();
@@ -3069,12 +3070,8 @@ void main() {
 
     final Finder iconButtonFilled = find.widgetWithIcon(IconButton, Icons.add);
     final Offset iconButtonFilledOffset = tester.getCenter(iconButtonFilled);
-    final TestGesture iconButtonFilledGesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-    );
-    await iconButtonFilledGesture.addPointer();
 
-    await iconButtonFilledGesture.moveTo(iconButtonFilledOffset);
+    await gesture.moveTo(iconButtonFilledOffset);
     await tester.pump();
     expect(onHovered, true);
 
@@ -3088,7 +3085,7 @@ void main() {
     await tester.pumpWidget(
       buildAllVariants(enabled: false, onLongPress: onLongPress, onHover: onHover),
     );
-    await iconButtonFilledGesture.moveTo(iconButtonFilledOffset);
+    await gesture.moveTo(iconButtonFilledOffset);
     await tester.pump();
     expect(onHovered, false);
 
@@ -3103,12 +3100,8 @@ void main() {
 
     final Finder iconButtonFilledTonal = find.widgetWithIcon(IconButton, Icons.add);
     final Offset iconButtonFilledTonalOffset = tester.getCenter(iconButtonFilledTonal);
-    final TestGesture iconButtonFilledTonalGesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-    );
-    await iconButtonFilledTonalGesture.addPointer();
 
-    await iconButtonFilledTonalGesture.moveTo(iconButtonFilledTonalOffset);
+    await gesture.moveTo(iconButtonFilledTonalOffset);
     await tester.pump();
     expect(onHovered, true);
 
@@ -3122,7 +3115,7 @@ void main() {
     await tester.pumpWidget(
       buildAllVariants(enabled: false, onLongPress: onLongPress, onHover: onHover),
     );
-    await iconButtonFilledTonalGesture.moveTo(iconButtonFilledTonalOffset);
+    await gesture.moveTo(iconButtonFilledTonalOffset);
     await tester.pump();
     expect(onHovered, false);
 
@@ -3137,12 +3130,8 @@ void main() {
 
     final Finder iconButtonOutlined = find.widgetWithIcon(IconButton, Icons.add);
     final Offset iconButtonOutlinedOffset = tester.getCenter(iconButtonOutlined);
-    final TestGesture iconButtonOutlinedGesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-    );
-    await iconButtonOutlinedGesture.addPointer();
 
-    await iconButtonOutlinedGesture.moveTo(iconButtonOutlinedOffset);
+    await gesture.moveTo(iconButtonOutlinedOffset);
     await tester.pump();
     expect(onHovered, true);
 
@@ -3156,7 +3145,7 @@ void main() {
     await tester.pumpWidget(
       buildAllVariants(enabled: false, onLongPress: onLongPress, onHover: onHover),
     );
-    await iconButtonOutlinedGesture.moveTo(iconButtonOutlinedOffset);
+    await gesture.moveTo(iconButtonOutlinedOffset);
     await tester.pump();
     expect(onHovered, false);
 
@@ -3188,6 +3177,7 @@ void main() {
     final Offset iconButtonOffset = tester.getCenter(iconButton);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
 
     await gesture.moveTo(iconButtonOffset);
     await tester.pump();
@@ -3225,12 +3215,8 @@ void main() {
 
     final Finder iconButtonFilled = find.widgetWithIcon(IconButton, Icons.add);
     final Offset iconButtonFilledOffset = tester.getCenter(iconButtonFilled);
-    final TestGesture iconButtonFilledGesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-    );
-    await iconButtonFilledGesture.addPointer();
 
-    await iconButtonFilledGesture.moveTo(iconButtonFilledOffset);
+    await gesture.moveTo(iconButtonFilledOffset);
     await tester.pump();
     expect(onHovered, true);
 
@@ -3249,7 +3235,7 @@ void main() {
         useMaterial3: false,
       ),
     );
-    await iconButtonFilledGesture.moveTo(iconButtonFilledOffset);
+    await gesture.moveTo(iconButtonFilledOffset);
     await tester.pump();
     expect(onHovered, false);
 
@@ -3266,12 +3252,8 @@ void main() {
 
     final Finder iconButtonFilledTonal = find.widgetWithIcon(IconButton, Icons.add);
     final Offset iconButtonFilledTonalOffset = tester.getCenter(iconButtonFilledTonal);
-    final TestGesture iconButtonFilledTonalGesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-    );
-    await iconButtonFilledTonalGesture.addPointer();
 
-    await iconButtonFilledTonalGesture.moveTo(iconButtonFilledTonalOffset);
+    await gesture.moveTo(iconButtonFilledTonalOffset);
     await tester.pump();
     expect(onHovered, true);
 
@@ -3290,7 +3272,7 @@ void main() {
         useMaterial3: false,
       ),
     );
-    await iconButtonFilledTonalGesture.moveTo(iconButtonFilledTonalOffset);
+    await gesture.moveTo(iconButtonFilledTonalOffset);
     await tester.pump();
     expect(onHovered, false);
 
@@ -3307,12 +3289,8 @@ void main() {
 
     final Finder iconButtonOutlined = find.widgetWithIcon(IconButton, Icons.add);
     final Offset iconButtonOutlinedOffset = tester.getCenter(iconButtonOutlined);
-    final TestGesture iconButtonOutlinedGesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-    );
-    await iconButtonOutlinedGesture.addPointer();
 
-    await iconButtonOutlinedGesture.moveTo(iconButtonOutlinedOffset);
+    await gesture.moveTo(iconButtonOutlinedOffset);
     await tester.pump();
     expect(onHovered, true);
 
@@ -3331,7 +3309,7 @@ void main() {
         useMaterial3: false,
       ),
     );
-    await iconButtonOutlinedGesture.moveTo(iconButtonOutlinedOffset);
+    await gesture.moveTo(iconButtonOutlinedOffset);
     await tester.pump();
     expect(onHovered, false);
 
