@@ -222,7 +222,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     switch (webHtmlElementStrategy) {
       case image_provider.WebHtmlElementStrategy.never:
         return loadViaDecode();
-      case image_provider.WebHtmlElementStrategy.always:
+      case image_provider.WebHtmlElementStrategy.prefer:
         return loadViaImgElement();
       case image_provider.WebHtmlElementStrategy.fallback:
         try {
