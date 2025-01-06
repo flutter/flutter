@@ -2226,7 +2226,9 @@ void main() {
         }
         await expectLater(
           find.byType(BottomNavigationBar),
-          matchesGoldenFile('m2_bottom_navigation_bar.same_item_shifting_transition.${pump - 1}.png'),
+          matchesGoldenFile(
+            'm2_bottom_navigation_bar.same_item_shifting_transition.${pump - 1}.png',
+          ),
         );
       });
     }
@@ -2281,7 +2283,9 @@ void main() {
         }
         await expectLater(
           find.byType(BottomNavigationBar),
-          matchesGoldenFile('m3_bottom_navigation_bar.same_item_shifting_transition.${pump - 1}.png'),
+          matchesGoldenFile(
+            'm3_bottom_navigation_bar.same_item_shifting_transition.${pump - 1}.png',
+          ),
         );
       });
     }
