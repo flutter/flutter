@@ -1522,7 +1522,8 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
   /// The [scale] argument is the linear scale factor for drawing this image at
   /// its intended size. See [ImageInfo.scale] for more information.
   ///
-  /// The [webHtmlElementStrategy] is by default [WebHtmlElementStrategy.never].
+  /// The [webHtmlElementStrategy] option is by default
+  /// [WebHtmlElementStrategy.never].
   const factory NetworkImage(
     String url, {
       double scale,

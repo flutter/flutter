@@ -18,8 +18,8 @@ class WebImageInfo implements ImageInfo {
   /// Creates a new [WebImageInfo] from a given HTML element.
   WebImageInfo(this.htmlImage, {this.debugLabel});
 
-  /// The <img> element used to display this image. This HTML element has
-  /// already been decoded, so size information can be retrieved from it.
+  /// The HTML element used to display this image. This HTML element has already
+  /// decoded the image, so size information can be retrieved from it.
   final web.HTMLImageElement htmlImage;
 
   @override

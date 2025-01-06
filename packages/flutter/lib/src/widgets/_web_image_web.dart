@@ -17,9 +17,9 @@ import 'basic.dart';
 import 'framework.dart';
 import 'platform_view.dart';
 
-/// Displays an HTML element with `src` set to [src].
+/// Displays an `<img>` element with `src` set to [src].
 class ImgElementPlatformView extends StatelessWidget {
-  /// Creates a platform view backed with an HTML element.
+  /// Creates a platform view backed with an `<img>` element.
   ImgElementPlatformView(this.src, {super.key}) {
     if (!_registered) {
       _register();
@@ -42,7 +42,7 @@ class ImgElementPlatformView extends StatelessWidget {
     });
   }
 
-  /// The `src` URL for the HTML tag.
+  /// The `src` URL for the `<img>` tag.
   final String? src;
 
   @override

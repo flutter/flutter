@@ -231,7 +231,7 @@ void runTests() {
     expect(imageInfo, isNull);
   }, skip: !isSkiaWeb);
 
-  testWidgets('When strategy is .always, emits an WebImageInfo if the image is same-origin',
+  testWidgets('When strategy is .prefer, emits an WebImageInfo if the image is same-origin',
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
@@ -249,7 +249,7 @@ void runTests() {
 
     const NetworkImage networkImage = NetworkImage(
       'https://www.example.com/images/frame7.png',
-      webHtmlElementStrategy: WebHtmlElementStrategy.always,
+      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
     );
     ImageInfo? imageInfo;
     Object? recordedError;
@@ -276,7 +276,7 @@ void runTests() {
     expect(webImageInfo.htmlImage.src, equals('https://www.example.com/images/frame7.png'));
   }, skip: !isSkiaWeb);
 
-  testWidgets('When strategy is .always, emits a normal image if headers is not null',
+  testWidgets('When strategy is .prefer, emits a normal image if headers is not null',
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
@@ -294,7 +294,7 @@ void runTests() {
 
     const NetworkImage networkImage = NetworkImage(
       'https://www.example.com/images/frame8.png',
-      webHtmlElementStrategy: WebHtmlElementStrategy.always,
+      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
       headers: <String, String>{
         'flutter': 'flutter',
         'second': 'second',
