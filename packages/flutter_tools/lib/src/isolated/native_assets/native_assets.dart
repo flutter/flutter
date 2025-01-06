@@ -221,7 +221,15 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
       }
     });
 
-  late final Uri _dartExecutable = fileSystem.directory(Cache.flutterRoot).uri.resolve('bin/dart');
+  // Flutter wraps the Dart executable to update it in place
+  // ($FLUTTER_ROOT/bin/dart). However, since this is a Dart process invocation
+  // in a Flutter process invocation, it should not try to update in place, so
+  // use the Dart standalone executable
+  // ($FLUTTER_ROOT/bin/cache/dart-sdk/bin/dart).
+  late final Uri _dartExecutable = fileSystem
+      .directory(Cache.flutterRoot)
+      .uri
+      .resolve('bin/cache/dart-sdk/bin/dart');
 
   late final NativeAssetsBuildRunner _buildRunner = NativeAssetsBuildRunner(
     logger: _logger,
@@ -229,11 +237,11 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     fileSystem: fileSystem,
     hookEnvironment: filteredEnvironment(<String>{
       ...NativeAssetsBuildRunner.hookEnvironmentVariablesFilter,
-      ...(const LocalPlatform().environment.keys.toList()..sort()).where((String key) {
-        final bool keep = key.toLowerCase().startsWith(RegExp(r'[h-j]'));
-        _logger.shout('Native assets environment: ${keep ? 'keeping' : 'removing'} $key');
-        return keep;
-      }),
+      // ...(const LocalPlatform().environment.keys.toList()..sort()).where((String key) {
+      //   final bool keep = key.toLowerCase().startsWith(RegExp(r'[h-j]'));
+      //   _logger.shout('Native assets environment: ${keep ? 'keeping' : 'removing'} $key');
+      //   return keep;
+      // }),
     }),
   );
 
