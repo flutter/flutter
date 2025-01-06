@@ -2571,6 +2571,12 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// without an active [TextInputConnection] will be a noop, even when
   /// specifying custom `items`.
   ///
+  /// Built-in menu items will only be shown when relevant. For example, if
+  /// [SystemContextMenuDataItem.copy] is passed, the copy button will only be
+  /// shown when there is something to copy (a non-empty selection). It's not
+  /// necessary to manually add and remove these items based on the state of the
+  /// field.
+  ///
   /// There can only be one system context menu visible at a time. Calling this
   /// while another system context menu is already visible will remove the old
   /// menu before showing the new menu.

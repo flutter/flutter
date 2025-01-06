@@ -85,6 +85,15 @@ class SystemContextMenu extends StatefulWidget {
   final Rect anchor;
 
   /// A list of the items to be displayed in the system context menu.
+  ///
+  /// If none are given, the items will be inferred by the platform based on the
+  /// current [TextInputConnection].
+  ///
+  /// Built-in items will only be shown when relevant. For example, if
+  /// [SystemContextMenuItem.copy] is passed, the copy button will only be shown
+  /// when there is a non-empty selection and not when the selection is
+  /// collapsed. It's not necessary to manually add and remove these items based
+  /// on the state of the field.
   final List<SystemContextMenuItem>? items;
 
   /// Called when the system hides this context menu.
