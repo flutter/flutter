@@ -117,7 +117,6 @@ class SystemContextMenu extends StatefulWidget {
 }
 
 class _SystemContextMenuState extends State<SystemContextMenu> {
-  bool isFirstBuild = true;
   late final SystemContextMenuController _systemContextMenuController;
 
   /// Return the SystemContextMenuItemData for the given SystemContextMenuItem.
@@ -167,32 +166,10 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
     };
   }
 
-  void _show() {
-    final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-    final Iterable<SystemContextMenuItemData>? datas = widget.items?.map(
-      (SystemContextMenuItem item) => _itemToData(item, localizations),
-    );
-    _systemContextMenuController.show(
-      widget.anchor,
-      // TODO(justinmc): Don't show irrelevant items, like don't show "search" if there is no selection.
-      // TODO(justinmc): In the flutter-rendered world, this is done with things like EditableText.copyEnabled. If you want to reuse those here, and I think you do, then I need some kind of correlation betweeen ContextMenuButtonItem and SystemContextMenuButtonItem.
-      datas?.toList(),
-    );
-  }
-
   @override
   void initState() {
     super.initState();
     _systemContextMenuController = SystemContextMenuController(onSystemHide: widget.onSystemHide);
-  }
-
-  @override
-  void didUpdateWidget(SystemContextMenu oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (_systemContextMenuController.isVisible &&
-        (widget.anchor != oldWidget.anchor || !listEquals(widget.items, oldWidget.items))) {
-      _show();
-    }
   }
 
   @override
@@ -204,10 +181,11 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
   @override
   Widget build(BuildContext context) {
     assert(SystemContextMenu.isSupported(context));
-    if (isFirstBuild) {
-      isFirstBuild = false;
-      _show();
-    }
+    final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
+    final Iterable<SystemContextMenuItemData>? datas = widget.items?.map(
+      (SystemContextMenuItem item) => _itemToData(item, localizations),
+    );
+    _systemContextMenuController.show(widget.anchor, datas?.toList());
 
     return const SizedBox.shrink();
   }
