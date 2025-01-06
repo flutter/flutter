@@ -1882,7 +1882,7 @@ class RSuperellipse {
 
   /// Whether this rounded superellipse has a side with no straight section.
   bool get isStadium {
-    return (width <= 2.0 * radius || height <= 2.0 * radius);
+    return width <= 2.0 * radius || height <= 2.0 * radius;
   }
 
   /// Whether this rounded superellipse would draw as a circle.
