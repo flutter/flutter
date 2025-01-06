@@ -94,7 +94,7 @@ host build available next to it: if you use `android_debug_unopt`, you should ha
 
 ### Compiling everything that matters on Linux
 
-The following script will update all the builds that matter if you're developing on Linux and testing on Android if your `.gclient` file is located at `~/dev/flutter/engine/.gclient`:
+The following script will update all the builds that matter if you're developing on Linux and testing on Android and your `.gclient` file is located at `~/dev/flutter/engine/.gclient`:
 
 ```bash
 set -ex
