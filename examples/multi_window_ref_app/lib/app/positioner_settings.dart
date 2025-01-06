@@ -15,7 +15,7 @@ class PositionerSetting {
 }
 
 class PositionerSettingsContainer {
-  List<PositionerSetting> positionerSettingsList = [
+  final List<PositionerSetting> positionerSettingsList = [
     PositionerSetting(
         name: "Left",
         parentAnchor: WindowPositionerAnchor.left,
@@ -80,4 +80,30 @@ class PositionerSettingsContainer {
           WindowPositionerConstraintAdjustment.slideY
         })
   ];
+}
+
+class PositionerSettingsModifier with ChangeNotifier {
+  int _positionerIndex = 0;
+  int get positionerIndex => _positionerIndex;
+
+  final PositionerSettingsContainer _mapping = PositionerSettingsContainer();
+  PositionerSettingsContainer get mapping => _mapping;
+
+  void setAtIndex(PositionerSetting setting, int index) {
+    if (index >= 0 && index < _mapping.positionerSettingsList.length) {
+      _mapping.positionerSettingsList[index] = setting;
+      notifyListeners();
+    }
+  }
+
+  void setSelectedIndex(int index) {
+    _positionerIndex =
+        index.clamp(0, _mapping.positionerSettingsList.length - 1);
+    notifyListeners();
+  }
+
+  PositionerSetting? getPositionerSetting(int? index) =>
+      index == null ? null : _mapping.positionerSettingsList[index];
+
+  PositionerSetting get selected => getPositionerSetting(_positionerIndex)!;
 }

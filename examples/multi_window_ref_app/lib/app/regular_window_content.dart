@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:multi_window_ref_app/app/window_controller_render.dart';
-import 'package:multi_window_ref_app/app/window_manager_model.dart';
-import 'package:multi_window_ref_app/app/window_settings.dart';
+import 'package:multi_window_ref_app/app/positioner_settings.dart';
+import 'child_window_renderer.dart';
+import 'window_manager_model.dart';
+import 'window_settings.dart';
 import 'dart:math';
 import 'package:vector_math/vector_math_64.dart';
 
 class RegularWindowContent extends StatefulWidget {
   const RegularWindowContent(
       {super.key,
-      required this.window,
+      required this.controller,
       required this.windowSettings,
+      required this.positionerSettingsModifier,
       required this.windowManagerModel});
 
-  final RegularWindowController window;
+  final RegularWindowController controller;
   final WindowSettings windowSettings;
+  final PositionerSettingsModifier positionerSettingsModifier;
   final WindowManagerModel windowManagerModel;
 
   @override
@@ -55,82 +58,62 @@ class _RegularWindowContentState extends State<RegularWindowContent>
 
   @override
   Widget build(BuildContext context) {
-    final dpr = MediaQuery.of(context).devicePixelRatio;
-
-    final child = Scaffold(
-      appBar: AppBar(title: Text('${widget.window.type}')),
-      body: Center(
-          child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              AnimatedBuilder(
-                animation: _animation,
-                builder: (context, child) {
-                  return CustomPaint(
-                    size: const Size(200, 200),
-                    painter: _RotatedWireCube(
-                        angle: _animation.value, color: cubeColor),
-                  );
-                },
-              ),
-            ],
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  widget.windowManagerModel.add(KeyedWindowController(
-                      controller: RegularWindowController()));
-                },
-                child: const Text('Create Regular Window'),
-              ),
-              const SizedBox(height: 20),
-              ListenableBuilder(
-                  listenable: widget.window,
-                  builder: (BuildContext context, Widget? _) {
-                    return Text(
-                      'View #${widget.window.view?.viewId ?? "Unknown"}\n'
-                      'Parent View: ${widget.window.parentViewId}\n'
-                      'View Size: ${(widget.window.view!.physicalSize.width / dpr).toStringAsFixed(1)}\u00D7${(widget.window.view!.physicalSize.height / dpr).toStringAsFixed(1)}\n'
-                      'Window Size: ${widget.window.size?.width}\u00D7${widget.window.size?.height}\n'
-                      'Device Pixel Ratio: $dpr',
-                      textAlign: TextAlign.center,
-                    );
-                  })
-            ],
-          ),
-        ],
-      )),
-    );
-
     return ViewAnchor(
-        view: ListenableBuilder(
-            listenable: widget.windowManagerModel,
-            builder: (BuildContext context, Widget? _) {
-              final List<Widget> childViews = <Widget>[];
-              for (final KeyedWindowController controller
-                  in widget.windowManagerModel.windows) {
-                if (controller.parent == widget.window) {
-                  childViews.add(WindowControllerRender(
-                    controller: controller.controller,
-                    key: controller.key,
-                    windowSettings: widget.windowSettings,
-                    windowManagerModel: widget.windowManagerModel,
-                    onDestroyed: () =>
-                        widget.windowManagerModel.remove(controller),
-                    onError: () => widget.windowManagerModel.remove(controller),
-                  ));
-                }
-              }
-
-              return ViewCollection(views: childViews);
-            }),
-        child: child);
+        view: ChildWindowRenderer(
+            windowManagerModel: widget.windowManagerModel,
+            windowSettings: widget.windowSettings,
+            positionerSettingsModifier: widget.positionerSettingsModifier,
+            controller: widget.controller),
+        child: Scaffold(
+            appBar: AppBar(title: Text('${widget.controller.type}')),
+            body: SingleChildScrollView(
+                child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AnimatedBuilder(
+                        animation: _animation,
+                        builder: (context, child) {
+                          return CustomPaint(
+                            size: const Size(200, 200),
+                            painter: _RotatedWireCube(
+                                angle: _animation.value, color: cubeColor),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          widget.windowManagerModel.add(KeyedWindowController(
+                              controller: RegularWindowController()));
+                        },
+                        child: const Text('Create Regular Window'),
+                      ),
+                      const SizedBox(height: 20),
+                      ListenableBuilder(
+                          listenable: widget.controller,
+                          builder: (BuildContext context, Widget? _) {
+                            return Text(
+                              'View #${widget.controller.view?.viewId ?? "Unknown"}\n'
+                              'Parent View: ${widget.controller.parentViewId}\n'
+                              'Logical Size: ${widget.controller.size?.width ?? "?"}\u00D7${widget.controller.size?.height ?? "?"}\n'
+                              'DPR: ${MediaQuery.of(context).devicePixelRatio}',
+                              textAlign: TextAlign.center,
+                            );
+                          })
+                    ],
+                  ),
+                ],
+              ),
+            ))));
   }
 }
 
