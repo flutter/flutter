@@ -2537,6 +2537,9 @@ class SystemContextMenuController with SystemContextMenuClient {
   void handleSystemHide() {
     assert(!_isDisposed);
     assert(isVisible);
+    if (_isDisposed || !isVisible) {
+      return;
+    }
     if (_lastShown == this) {
       _lastShown = null;
     }
@@ -2548,6 +2551,9 @@ class SystemContextMenuController with SystemContextMenuClient {
   void handleTapCustomActionItem(int callbackId) {
     assert(!_isDisposed);
     assert(isVisible);
+    if (_isDisposed || !isVisible) {
+      return;
+    }
     final VoidCallback? callback = _buttonCallbacks[callbackId];
     if (callback == null) {
       assert(false, 'Tap received for non-existent item with id $callbackId.');
