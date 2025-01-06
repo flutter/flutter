@@ -79,14 +79,28 @@ class IOSCoreDeviceControl {
 
     try {
       final RunResult result = await _processUtils.run(command, throwOnError: true);
+      final bool isToolPossiblyShutdown = _fileSystem is LocalFileSystem && _fileSystem.disposed;
 
-      if (!output.existsSync()) {
+      // It's possible that the tool is in the process of shutting down, which
+      // could result in the temp directory being deleted after the shutdown hooks run
+      // before we check if `output` exists. If this happens, we shouldn't crash
+      // but just carry on as if no devices were found as the tool will exit on
+      // its own.
+      //
+      // See https://github.com/flutter/flutter/issues/141892 for details.
+      if (!isToolPossiblyShutdown && !output.existsSync()) {
         _logger.printError('After running the command ${command.join(' ')} the file');
         _logger.printError('${output.path} was expected to exist, but it did not.');
         _logger.printError('The process exited with code ${result.exitCode} and');
         _logger.printError('Stdout:\n\n${result.stdout.trim()}\n');
         _logger.printError('Stderr:\n\n${result.stderr.trim()}');
+        _logger.printError('Using file system type: ${_fileSystem.runtimeType}');
+        if (_fileSystem is LocalFileSystem) {
+          _logger.printError('LocalFileSystem disposed: ${_fileSystem.disposed}');
+        }
         throw StateError('Expected the file ${output.path} to exist but it did not');
+      } else if (isToolPossiblyShutdown) {
+        return <Object?>[];
       }
       final String stringOutput = output.readAsStringSync();
       _logger.printTrace(stringOutput);

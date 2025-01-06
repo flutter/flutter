@@ -54,6 +54,9 @@ abstract class FeatureFlags {
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled => false;
 
+  /// Whether explicit package dependency management is enabled.
+  bool get isExplicitPackageDependenciesEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -74,6 +77,7 @@ const List<Feature> allFeatures = <Feature>[
   nativeAssets,
   previewDevice,
   swiftPackageManager,
+  explicitPackageDependencies,
 ];
 
 /// All current Flutter feature flags that can be configured.
@@ -146,14 +150,12 @@ const Feature flutterCustomDevicesFeature = Feature(
   ),
 );
 
-const String kCliAnimationsFeatureName = 'cli-animations';
-
 /// The [Feature] for CLI animations.
 ///
 /// The TERM environment variable set to "dumb" turns this off.
 const Feature cliAnimation = Feature.fullyEnabled(
   name: 'animations in the command line interface',
-  configSetting: kCliAnimationsFeatureName,
+  configSetting: 'cli-animations',
 );
 
 /// Enable native assets compilation and bundling.
@@ -183,7 +185,31 @@ const Feature previewDevice = Feature(
 const Feature swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
   configSetting: 'enable-swift-package-manager',
-  environmentOverride: 'SWIFT_PACKAGE_MANAGER',
+  environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER',
+  master: FeatureChannelSetting(
+    available: true,
+  ),
+  beta: FeatureChannelSetting(
+    available: true,
+  ),
+  stable: FeatureChannelSetting(
+    available: true,
+  ),
+);
+
+/// Enable explicit resolution and generation of package dependencies.
+const Feature explicitPackageDependencies = Feature(
+  name: 'support for dev_dependency plugins',
+  configSetting: 'explicit-package-dependencies',
+  extraHelpText:
+    'Plugins that are resolved as result of being in "dev_dependencies" of a '
+    'package are not included in release builds of an app. By enabling this '
+    'feature, the synthetic "package:flutter_gen" can no longer be generated '
+    'and the legacy ".flutter-plugins" tool artifact is no longer generated.\n'
+    '\n'
+    'See also:\n'
+    '* https://flutter.dev/to/flutter-plugins-configuration.\n'
+    '* https://flutter.dev/to/flutter-gen-deprecation.',
   master: FeatureChannelSetting(
     available: true,
   ),

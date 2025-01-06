@@ -29,8 +29,8 @@ android {
 
     sourceSets {
         applicationVariants.all { variant ->
-            main.assets.srcDirs += "${project.buildDir}/intermediates/flutter/${variant.name}/deferred_assets"
-            main.jniLibs.srcDirs += "${project.buildDir}/intermediates/flutter/${variant.name}/deferred_libs"
+            main.assets.srcDirs += "${project.layout.buildDirectory}/intermediates/flutter/${variant.name}/deferred_assets"
+            main.jniLibs.srcDirs += "${project.layout.buildDirectory}/intermediates/flutter/${variant.name}/deferred_libs"
         }
     }
 

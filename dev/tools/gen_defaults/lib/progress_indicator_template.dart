@@ -12,16 +12,35 @@ class ProgressIndicatorTemplate extends TokenTemplate {
   @override
   String generate() => '''
 class _Circular${blockName}DefaultsM3 extends ProgressIndicatorThemeData {
-  _Circular${blockName}DefaultsM3(this.context);
+  _Circular${blockName}DefaultsM3(this.context, { required this.indeterminate });
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
+  final bool indeterminate;
 
   @override
   Color get color => ${componentColor('md.comp.progress-indicator.active-indicator')};
 
   @override
-  Color get circularTrackColor => ${componentColor('md.comp.progress-indicator.track')};
+  Color? get circularTrackColor => indeterminate ? null : ${componentColor('md.comp.progress-indicator.track')};
+
+  @override
+  double get strokeWidth => ${getToken('md.comp.progress-indicator.track.thickness')};
+
+  @override
+  double? get strokeAlign => CircularProgressIndicator.strokeAlignInside;
+
+  @override
+  BoxConstraints get constraints => const BoxConstraints(
+    minWidth: 40.0,
+    minHeight: 40.0,
+  );
+
+  @override
+  double? get trackGap => ${getToken('md.comp.progress-indicator.active-indicator-track-space')};
+
+  @override
+  EdgeInsetsGeometry? get circularTrackPadding => const EdgeInsets.all(4.0);
 }
 
 class _Linear${blockName}DefaultsM3 extends ProgressIndicatorThemeData {
@@ -38,6 +57,18 @@ class _Linear${blockName}DefaultsM3 extends ProgressIndicatorThemeData {
 
   @override
   double get linearMinHeight => ${getToken('md.comp.progress-indicator.track.thickness')};
+
+  @override
+  BorderRadius get borderRadius => BorderRadius.circular(${getToken('md.comp.progress-indicator.track.thickness')} / 2);
+
+  @override
+  Color get stopIndicatorColor => ${componentColor('md.comp.progress-indicator.stop-indicator')};
+
+  @override
+  double? get stopIndicatorRadius => ${getToken('md.comp.progress-indicator.stop-indicator.size')} / 2;
+
+  @override
+  double? get trackGap => ${getToken('md.comp.progress-indicator.active-indicator-track-space')};
 }
 ''';
 }

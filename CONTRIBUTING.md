@@ -148,6 +148,14 @@ are generally excited about improving the Dart & Flutter developer experience.
 Please see the DevTools [CONTRIBUTING.md](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md)
 guide to get started.
 
+### Helping with existing PRs
+
+Once you've learned the process of contributing, if you aren't sure what to work on next you
+might be interested in helping other developers complete their contributions by picking up an
+incomplete patch from the list of [issues with partial patches][has-partial-patch].
+
+[has-partial-patch]: https://github.com/flutter/flutter/labels/has%20partial%20patch
+
 Outreach
 --------
 

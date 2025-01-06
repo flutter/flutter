@@ -2,16 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@Timeout(Duration(minutes: 10))
-library;
-
 import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
 
 import '../../src/common.dart';
-import '../test_utils.dart' show platform;
+import '../test_utils.dart' show flutterBin, platform;
 import '../transition_test_utils.dart';
 import 'native_assets_test_utils.dart';
 

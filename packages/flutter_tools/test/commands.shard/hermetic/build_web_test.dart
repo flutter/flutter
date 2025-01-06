@@ -53,7 +53,7 @@ void main() {
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     artifacts = Artifacts.test(fileSystem: fileSystem);
     logger = BufferLogger.test();
-    processManager = FakeProcessManager.empty();
+    processManager = FakeProcessManager.any();
     processUtils = ProcessUtils(
       logger: logger,
       processManager: processManager,
@@ -170,7 +170,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
       expect(environment.defines, <String, String>{
         'TargetFile': 'lib/main.dart',
@@ -371,7 +371,7 @@ void main() {
           'build',
           'web',
           '--no-pub',
-          '--web-renderer=${webRenderer.name}',
+          ...webRenderer.toCliDartDefines,
         ]);
       } on ToolExit catch (error) {
         expect(error, isA<ToolExit>());
@@ -402,12 +402,6 @@ void main() {
       expect(command.usage, contains(option));
     }
 
-    void expectHidden(String option) {
-      expect(command.argParser.options.keys, contains(option));
-      expect(command.argParser.options[option]!.hide, isTrue);
-      expect(command.usage, isNot(contains(option)));
-    }
-
     expectVisible('pwa-strategy');
     expectVisible('web-resources-cdn');
     expectVisible('optimization-level');
@@ -419,8 +413,6 @@ void main() {
     expectVisible('wasm');
     expectVisible('strip-wasm');
     expectVisible('base-href');
-
-    expectHidden('web-renderer');
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,

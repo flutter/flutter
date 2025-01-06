@@ -100,7 +100,7 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     final String? dartFileName = yaml[kDartFileName] as String?;
 
     if (dartPluginClass == null && dartFileName != null) {
-      throw throwToolExit('"dartFileName" cannot be specified without "dartPluginClass" in Android platform of plugin "$name"');
+      throwToolExit('"dartFileName" cannot be specified without "dartPluginClass" in Android platform of plugin "$name"');
     }
 
     return AndroidPlugin(

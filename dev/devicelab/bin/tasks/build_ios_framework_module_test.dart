@@ -188,15 +188,25 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
       'vm_snapshot_data',
     ));
 
+    final String dsymPath = path.join(
+        outputPath,
+        mode,
+        'App.xcframework',
+        'ios-arm64',
+        'dSYMs'
+    );
+    checkDirectoryExists(dsymPath);
+
     final String appFrameworkDsymPath = path.join(
-      outputPath,
-      mode,
-      'App.xcframework',
-      'ios-arm64',
-      'dSYMs',
-      'App.framework.dSYM'
+        dsymPath,
+        'App.framework.dSYM'
     );
     checkDirectoryExists(appFrameworkDsymPath);
+
+    if (Directory(dsymPath).listSync().whereType<Directory>().length != 1) {
+      throw TaskResult.failure('App.framework/dSYMs should ONLY contain App.xcframework.dSYM');
+    }
+
     await _checkDsym(path.join(
       appFrameworkDsymPath,
       'Contents',

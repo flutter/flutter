@@ -17,7 +17,6 @@ void main() {
       'integration_tests',
       'flutter_gallery',
     );
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
     await processManager.run(<String>[
       flutterBin,

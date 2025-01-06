@@ -245,6 +245,8 @@ class Context {
         extraArgs: <String>[
           '--filter',
           '- native_assets.yaml',
+          '--filter',
+          '- native_assets.json',
         ],
         nativeAssetsPath,
         xcodeFrameworksDir,

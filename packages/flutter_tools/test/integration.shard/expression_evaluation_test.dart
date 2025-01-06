@@ -18,16 +18,16 @@ void batch1() {
   late Directory tempDir;
   late FlutterRunTestDriver flutter;
 
-  Future<void> initProject() async {
+  setUp(() async {
     tempDir = createResolvedTempDirectorySync('run_expression_eval_test.');
     await project.setUpIn(tempDir);
     flutter = FlutterRunTestDriver(tempDir);
-  }
+  });
 
-  Future<void> cleanProject() async {
+  tearDown(() async {
     await flutter.stop();
     tryToDelete(tempDir);
-  }
+  });
 
   Future<void> breakInBuildMethod(FlutterTestDriver flutter) async {
     await flutter.breakAt(
@@ -43,52 +43,46 @@ void batch1() {
     );
   }
 
-  testWithoutContext('flutter run expression evaluation - can evaluate trivial expressions in top level function', () async {
-    await initProject();
+  testWithoutContext('can evaluate trivial expressions in top level function', () async {
     await flutter.run(withDebugger: true);
     await breakInTopLevelFunction(flutter);
     await evaluateTrivialExpressions(flutter);
-    await cleanProject();
   });
 
-  testWithoutContext('flutter run expression evaluation - can evaluate trivial expressions in build method', () async {
-    await initProject();
+  testWithoutContext('can evaluate trivial expressions in build method', () async {
     await flutter.run(withDebugger: true);
     await breakInBuildMethod(flutter);
     await evaluateTrivialExpressions(flutter);
-    await cleanProject();
   });
 
-  testWithoutContext('flutter run expression evaluation - can evaluate complex expressions in top level function', () async {
-    await initProject();
+  testWithoutContext('can evaluate complex expressions in top level function', () async {
     await flutter.run(withDebugger: true);
     await breakInTopLevelFunction(flutter);
     await evaluateComplexExpressions(flutter);
-    await cleanProject();
   });
 
-  testWithoutContext('flutter run expression evaluation - can evaluate complex expressions in build method', () async {
-    await initProject();
+  testWithoutContext('can evaluate complex expressions in build method', () async {
     await flutter.run(withDebugger: true);
     await breakInBuildMethod(flutter);
     await evaluateComplexExpressions(flutter);
-    await cleanProject();
   });
 
-  testWithoutContext('flutter run expression evaluation - can evaluate expressions returning complex objects in top level function', () async {
-    await initProject();
+  testWithoutContext('can evaluate expressions returning complex objects in top level function', () async {
     await flutter.run(withDebugger: true);
     await breakInTopLevelFunction(flutter);
     await evaluateComplexReturningExpressions(flutter);
-    await cleanProject();
   });
 
-  testWithoutContext('flutter run expression evaluation - can evaluate expressions returning complex objects in build method', () async {
-    await initProject();
+  testWithoutContext('can evaluate expressions returning complex objects in build method', () async {
     await flutter.run(withDebugger: true);
     await breakInBuildMethod(flutter);
     await evaluateComplexReturningExpressions(flutter);
-    await cleanProject();
+  });
+
+  testWithoutContext('evaluating invalid expressions throws an exception with compilation error details', () async {
+    await flutter.run(withDebugger: true);
+    await breakInTopLevelFunction(flutter);
+    await evaluateInvalidExpression(flutter);
   });
 }
 
@@ -97,19 +91,18 @@ void batch2() {
   late Directory tempDir;
   late FlutterTestTestDriver flutter;
 
-  Future<void> initProject() async {
+  setUp(() async {
     tempDir = createResolvedTempDirectorySync('test_expression_eval_test.');
     await project.setUpIn(tempDir);
     flutter = FlutterTestTestDriver(tempDir);
-  }
+  });
 
-  Future<void> cleanProject() async {
+  tearDown(() async {
     await flutter.waitForCompletion();
     tryToDelete(tempDir);
-  }
+  });
 
-  testWithoutContext('flutter test expression evaluation - can evaluate trivial expressions in a test', () async {
-    await initProject();
+  testWithoutContext('can evaluate trivial expressions in a test', () async {
     await flutter.test(
       withDebugger: true,
       beforeStart: () => flutter.addBreakpoint(project.breakpointUri, project.breakpointLine),
@@ -121,30 +114,33 @@ void batch2() {
     // https://github.com/Dart-Code/Dart-Code/issues/4243.
     final String dillFilename = '${project.testFilePath}.dill';
     expect(fileSystem.file(dillFilename).existsSync(), isFalse);
-
-    await cleanProject();
   });
 
-  testWithoutContext('flutter test expression evaluation - can evaluate complex expressions in a test', () async {
-    await initProject();
+  testWithoutContext('can evaluate complex expressions in a test', () async {
     await flutter.test(
       withDebugger: true,
       beforeStart: () => flutter.addBreakpoint(project.breakpointUri, project.breakpointLine),
     );
     await flutter.waitForPause();
     await evaluateComplexExpressions(flutter);
-    await cleanProject();
   });
 
-  testWithoutContext('flutter test expression evaluation - can evaluate expressions returning complex objects in a test', () async {
-    await initProject();
+  testWithoutContext('can evaluate expressions returning complex objects in a test', () async {
     await flutter.test(
       withDebugger: true,
       beforeStart: () => flutter.addBreakpoint(project.breakpointUri, project.breakpointLine),
     );
     await flutter.waitForPause();
     await evaluateComplexReturningExpressions(flutter);
-    await cleanProject();
+  });
+
+  testWithoutContext('evaluating invalid expressions throws an exception with compilation error details', () async {
+    await flutter.test(
+      withDebugger: true,
+      beforeStart: () => flutter.addBreakpoint(project.breakpointUri, project.breakpointLine),
+    );
+    await flutter.waitForPause();
+    await evaluateInvalidExpression(flutter);
   });
 }
 
@@ -153,19 +149,18 @@ void batch3() {
   late Directory tempDir;
   late FlutterTestTestDriver flutter;
 
-  Future<void> initProject() async {
+  setUp(() async {
     tempDir = createResolvedTempDirectorySync('integration_test_expression_eval_test.');
     await project.setUpIn(tempDir);
     flutter = FlutterTestTestDriver(tempDir);
-  }
+  });
 
-  Future<void> cleanProject() async {
+  tearDown(() async {
     await flutter.waitForCompletion();
     tryToDelete(tempDir);
-  }
+  });
 
-  testWithoutContext('flutter integration test expression evaluation - can evaluate expressions in a test', () async {
-    await initProject();
+  testWithoutContext('can evaluate expressions in a test', () async {
     await flutter.test(
       deviceId: 'flutter-tester',
       testFile: project.testFilePath,
@@ -179,10 +174,23 @@ void batch3() {
     // https://github.com/Dart-Code/Dart-Code/issues/4243.
     final String dillFilename = '${project.testFilePath}.dill';
     expect(fileSystem.file(dillFilename).existsSync(), isFalse);
-
-    await cleanProject();
   });
 
+  testWithoutContext('evaluating invalid expressions throws an exception with compilation error details', () async {
+    await flutter.test(
+      deviceId: 'flutter-tester',
+      testFile: project.testFilePath,
+      withDebugger: true,
+      beforeStart: () => flutter.addBreakpoint(project.breakpointUri, project.breakpointLine),
+    );
+    await flutter.waitForPause();
+    await evaluateInvalidExpression(flutter);
+
+    // Ensure we did not leave a dill file alongside the test.
+    // https://github.com/Dart-Code/Dart-Code/issues/4243.
+    final String dillFilename = '${project.testFilePath}.dill';
+    expect(fileSystem.file(dillFilename).existsSync(), isFalse);
+  });
 }
 
 Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {
@@ -211,6 +219,26 @@ Future<void> evaluateComplexReturningExpressions(FlutterTestDriver flutter) asyn
   expectValue(res, '${date.year}-${date.month}-${date.day}');
 }
 
+Future<void> evaluateInvalidExpression(FlutterTestDriver flutter) async {
+  try {
+    await flutter.evaluateInFrame('is Foo');
+    fail("'is Foo' is not a valid expression");
+  } on RPCError catch (e) {
+    expect(e.code, RPCErrorKind.kExpressionCompilationError.code);
+    expect(e.message, RPCErrorKind.kExpressionCompilationError.message);
+    expect(
+      e.details,
+      "org-dartlang-debug:synthetic_debug_expression:1:1: Error: Expected an identifier, but got 'is'.\n"
+      "Try inserting an identifier before 'is'.\n"
+      'is Foo\n'
+      '^^\n'
+      "org-dartlang-debug:synthetic_debug_expression:1:4: Error: 'Foo' isn't a type.\n"
+      'is Foo\n'
+      '   ^^^\n',
+    );
+  }
+}
+
 void expectInstanceOfClass(ObjRef result, String name) {
   expect(result,
     const TypeMatcher<InstanceRef>()
@@ -231,7 +259,7 @@ void expectValue(ObjRef result, String message) {
 }
 
 void main() {
-  batch1();
-  batch2();
-  batch3();
+  group('flutter run expression evaluation -', batch1);
+  group('flutter test expression evaluation -', batch2);
+  group('flutter integration test expression evaluation -', batch3);
 }

@@ -1145,27 +1145,26 @@ typedef SlowWarningCallback = String Function();
 /// a [Status] or one of its subclasses.
 abstract class Status {
   Status({
-    this.onFinish,
+    VoidCallback? onFinish,
     required Stopwatch stopwatch,
-    this.timeout,
-  }) : _stopwatch = stopwatch;
+    Duration? timeout,
+  })  : _timeout = timeout,
+        _onFinish = onFinish,
+        _stopwatch = stopwatch;
 
-  final VoidCallback? onFinish;
-  final Duration? timeout;
+  final VoidCallback? _onFinish;
+  final Duration? _timeout;
 
-  @protected
   final Stopwatch _stopwatch;
 
-  @protected
-  String get elapsedTime {
+  String get _elapsedTime {
     if (_stopwatch.elapsed.inSeconds > 2) {
       return getElapsedAsSeconds(_stopwatch.elapsed);
     }
     return getElapsedAsMilliseconds(_stopwatch.elapsed);
   }
 
-  @visibleForTesting
-  bool get seemsSlow => timeout != null && _stopwatch.elapsed > timeout!;
+  bool get seemsSlow => _timeout != null && _stopwatch.elapsed > _timeout;
 
   /// Call to start spinning.
   void start() {
@@ -1193,7 +1192,7 @@ abstract class Status {
   void finish() {
     assert(_stopwatch.isRunning);
     _stopwatch.stop();
-    onFinish?.call();
+    _onFinish?.call();
   }
 }
 
@@ -1206,7 +1205,7 @@ class SilentStatus extends Status {
 
   @override
   void finish() {
-    onFinish?.call();
+    _onFinish?.call();
   }
 }
 
@@ -1216,15 +1215,17 @@ const int _kTimePadding = 8; // should fit "99,999ms"
 /// [onFinish]. On [stop], will additionally print out summary information.
 class SummaryStatus extends Status {
   SummaryStatus({
-    this.message = '',
+    String message = '',
     required super.stopwatch,
-    this.padding = kDefaultStatusPadding,
+    int padding = kDefaultStatusPadding,
     super.onFinish,
     required Stdio stdio,
-  }) : _stdio = stdio;
+  })  : _padding = padding,
+        _message = message,
+        _stdio = stdio;
 
-  final String message;
-  final int padding;
+  final String _message;
+  final int _padding;
   final Stdio _stdio;
 
   bool _messageShowingOnCurrentLine = false;
@@ -1239,7 +1240,7 @@ class SummaryStatus extends Status {
 
   void _printMessage() {
     assert(!_messageShowingOnCurrentLine);
-    _writeToStdOut('${message.padRight(padding)}     ');
+    _writeToStdOut('${_message.padRight(_padding)}     ');
     _messageShowingOnCurrentLine = true;
   }
 
@@ -1250,7 +1251,7 @@ class SummaryStatus extends Status {
     }
     super.stop();
     assert(_messageShowingOnCurrentLine);
-    _writeToStdOut(elapsedTime.padLeft(_kTimePadding));
+    _writeToStdOut(_elapsedTime.padLeft(_kTimePadding));
     _writeToStdOut('\n');
   }
 
@@ -1281,18 +1282,20 @@ class AnonymousSpinnerStatus extends Status {
     required super.stopwatch,
     required Stdio stdio,
     required Terminal terminal,
-    this.slowWarningCallback,
-    this.warningColor,
+    SlowWarningCallback? slowWarningCallback,
+    TerminalColor? warningColor,
     super.timeout,
-  }) : _stdio = stdio,
-       _terminal = terminal,
-       _animation = _selectAnimation(terminal);
+  })  : _warningColor = warningColor,
+        _slowWarningCallback = slowWarningCallback,
+        _stdio = stdio,
+        _terminal = terminal,
+        _animation = _selectAnimation(terminal);
 
   final Stdio _stdio;
   final Terminal _terminal;
   String _slowWarning = '';
-  final SlowWarningCallback? slowWarningCallback;
-  final TerminalColor? warningColor;
+  final SlowWarningCallback? _slowWarningCallback;
+  final TerminalColor? _warningColor;
 
   static const String _backspaceChar = '\b';
   static const String _clearChar = ' ';
@@ -1333,10 +1336,14 @@ class AnonymousSpinnerStatus extends Status {
 
   final List<String> _animation;
 
-  Timer? timer;
-  int ticks = 0;
+  Timer? _timer;
+
+  int _ticks = 0;
+  @visibleForTesting
+  int get ticks => _ticks;
+
   int _lastAnimationFrameLength = 0;
-  bool timedOut = false;
+  bool _timedOut = false;
 
   String get _currentAnimationFrame => _animation[ticks % _animation.length];
   int get _currentLineLength => _lastAnimationFrameLength + _slowWarning.length;
@@ -1354,30 +1361,30 @@ class AnonymousSpinnerStatus extends Status {
   @override
   void start() {
     super.start();
-    assert(timer == null);
+    assert(_timer == null);
     _startSpinner();
   }
 
   void _startSpinner() {
-    timer = Timer.periodic(const Duration(milliseconds: 100), _callback);
-    _callback(timer!);
+    _timer = Timer.periodic(const Duration(milliseconds: 100), _callback);
+    _callback(_timer!);
   }
 
   void _callback(Timer timer) {
-    assert(this.timer == timer);
+    assert(_timer == timer);
     assert(timer.isActive);
     _writeToStdOut(_backspaceChar * _lastAnimationFrameLength);
-    ticks += 1;
+    _ticks += 1;
     if (seemsSlow) {
-      if (!timedOut) {
-        timedOut = true;
+      if (!_timedOut) {
+        _timedOut = true;
         if (_currentLineLength > _lastAnimationFrameLength) {
           _clear(_currentLineLength - _lastAnimationFrameLength);
         }
       }
-      final SlowWarningCallback? callback = slowWarningCallback;
+      final SlowWarningCallback? callback = _slowWarningCallback;
       if (_slowWarning.isEmpty && callback != null) {
-        final TerminalColor? color = warningColor;
+        final TerminalColor? color = _warningColor;
         if (color != null) {
           _slowWarning = _terminal.color(callback(), color);
         } else {
@@ -1394,30 +1401,30 @@ class AnonymousSpinnerStatus extends Status {
 
   @override
   void pause() {
-    assert(timer != null);
-    assert(timer!.isActive);
+    assert(_timer != null);
+    assert(_timer!.isActive);
     if (_terminal.supportsColor) {
       _writeToStdOut('\r\x1B[K'); // go to start of line and clear line
     } else {
       _clear(_currentLineLength);
     }
     _lastAnimationFrameLength = 0;
-    timer?.cancel();
+    _timer?.cancel();
   }
 
   @override
   void resume() {
-    assert(timer != null);
-    assert(!timer!.isActive);
+    assert(_timer != null);
+    assert(!_timer!.isActive);
     _startSpinner();
   }
 
   @override
   void finish() {
-    assert(timer != null);
-    assert(timer!.isActive);
-    timer?.cancel();
-    timer = null;
+    assert(_timer != null);
+    assert(_timer!.isActive);
+    _timer?.cancel();
+    _timer = null;
     _clear(_lastAnimationFrameLength + _slowWarning.length);
     _slowWarning = '';
     _lastAnimationFrameLength = 0;
@@ -1436,16 +1443,17 @@ class AnonymousSpinnerStatus extends Status {
 /// Call [pause] before outputting any text while this is running.
 class SpinnerStatus extends AnonymousSpinnerStatus {
   SpinnerStatus({
-    required this.message,
-    this.padding = kDefaultStatusPadding,
+    required String message,
+    int padding = kDefaultStatusPadding,
     super.onFinish,
     required super.stopwatch,
     required super.stdio,
     required super.terminal,
-  });
+  })  : _padding = padding,
+        _message = message;
 
-  final String message;
-  final int padding;
+  final String _message;
+  final int _padding;
 
   static final String _margin = AnonymousSpinnerStatus._clearChar * (5 + _kTimePadding - 1);
 
@@ -1461,7 +1469,7 @@ class SpinnerStatus extends AnonymousSpinnerStatus {
   }
 
   void _printStatus() {
-    final String line = '${message.padRight(padding)}$_margin';
+    final String line = '${_message.padRight(_padding)}$_margin';
     _totalMessageLength = line.length;
     _writeToStdOut(line);
   }
@@ -1483,7 +1491,7 @@ class SpinnerStatus extends AnonymousSpinnerStatus {
     super.stop(); // calls finish, which clears the spinner
     assert(_totalMessageLength > _kTimePadding);
     _writeToStdOut(AnonymousSpinnerStatus._backspaceChar * (_kTimePadding - 1));
-    _writeToStdOut(elapsedTime.padLeft(_kTimePadding));
+    _writeToStdOut(_elapsedTime.padLeft(_kTimePadding));
     _writeToStdOut('\n');
   }
 

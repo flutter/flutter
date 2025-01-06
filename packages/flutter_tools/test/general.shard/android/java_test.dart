@@ -44,6 +44,7 @@ void main() {
         final AndroidStudio androidStudio = _FakeAndroidStudioWithJdk();
         final String androidStudioBundledJdkHome = androidStudio.javaPath!;
         final String expectedJavaBinaryPath = fs.path.join(androidStudioBundledJdkHome, 'bin', 'java');
+        const JavaSource expectedJavaHomeSource = JavaSource.androidStudio;
 
         processManager.addCommand(FakeCommand(
           command: <String>[
@@ -70,12 +71,14 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
 
         expect(java.version!.toString(), 'OpenJDK Runtime Environment Zulu19.32+15-CA (build 19.0.2+7)');
         expect(java.version, equals(Version(19, 0, 2)));
+        expect(java.javaSource, expectedJavaHomeSource);
       });
 
       testWithoutContext('finds JAVA_HOME if it is set and the JDK bundled with Android Studio could not be found', () {
         final AndroidStudio androidStudio = _FakeAndroidStudioWithoutJdk();
         const String javaHome = '/java/home';
         final String expectedJavaBinaryPath = fs.path.join(javaHome, 'bin', 'java');
+        const JavaSource expectedJavaHomeSource = JavaSource.javaHome;
 
         final Java java = Java.find(
           config: config,
@@ -90,11 +93,14 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
 
         expect(java.javaHome, javaHome);
         expect(java.binaryPath, expectedJavaBinaryPath);
+        expect(java.javaSource, expectedJavaHomeSource);
       });
 
       testWithoutContext('returns the java binary found on PATH if no other can be found', () {
         final AndroidStudio androidStudio = _FakeAndroidStudioWithoutJdk();
         final OperatingSystemUtils os = _FakeOperatingSystemUtilsWithJava(fileSystem);
+        const JavaSource expectedJavaHomeSource = JavaSource.path;
+
 
         processManager.addCommand(
           const FakeCommand(
@@ -114,6 +120,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
 
         expect(java.javaHome, isNull);
         expect(java.binaryPath, os.which('java')!.path);
+        expect(java.javaSource, expectedJavaHomeSource);
       });
 
       testWithoutContext('returns null if no java could be found', () {
@@ -138,6 +145,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
       testWithoutContext('finds and prefers JDK found at config item "jdk-dir" if it is set', () {
         const String configuredJdkPath = '/jdk';
         config.setValue('jdk-dir', configuredJdkPath);
+        JavaSource expectedJavaHomeSource = JavaSource.flutterConfig;
 
         processManager.addCommand(
           const FakeCommand(
@@ -164,8 +172,11 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
         expect(java, isNotNull);
         expect(java!.javaHome, configuredJdkPath);
         expect(java.binaryPath, fs.path.join(configuredJdkPath, 'bin', 'java'));
+        expect(java.javaSource, expectedJavaHomeSource);
 
         config.removeValue('jdk-dir');
+
+        expectedJavaHomeSource = JavaSource.androidStudio;
 
         java = Java.find(
           config: config,
@@ -180,6 +191,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
         assert(androidStudio.javaPath != configuredJdkPath);
         expect(java!.javaHome, androidStudio.javaPath);
         expect(java.binaryPath, fs.path.join(androidStudio.javaPath!, 'bin', 'java'));
+        expect(java.javaSource, expectedJavaHomeSource);
       });
     });
 
@@ -196,6 +208,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           processManager: processManager,
           binaryPath: 'javaHome/bin/java',
           javaHome: 'javaHome',
+          javaSource: JavaSource.javaHome,
         );
       });
 

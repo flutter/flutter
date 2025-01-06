@@ -396,6 +396,8 @@ class AndroidBuildInfo {
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
 
+  bool get containsX86Target => targetArchs.contains(AndroidArch.x86);
+
   /// Whether to bootstrap an empty application.
   final bool fastStart;
 }

@@ -403,13 +403,23 @@ void main() {
       expect(nativeAssets.stable.available, false);
     });
 
-    test('${swiftPackageManager.name} availability and default enabled', () {
-      expect(swiftPackageManager.master.enabledByDefault, false);
-      expect(swiftPackageManager.master.available, true);
-      expect(swiftPackageManager.beta.enabledByDefault, false);
-      expect(swiftPackageManager.beta.available, true);
-      expect(swiftPackageManager.stable.enabledByDefault, false);
-      expect(swiftPackageManager.stable.available, true);
+    group('Swift Package Manager feature', () {
+      test('availability and default enabled', () {
+        expect(swiftPackageManager.master.enabledByDefault, false);
+        expect(swiftPackageManager.master.available, true);
+        expect(swiftPackageManager.beta.enabledByDefault, false);
+        expect(swiftPackageManager.beta.available, true);
+        expect(swiftPackageManager.stable.enabledByDefault, false);
+        expect(swiftPackageManager.stable.available, true);
+      });
+
+      test('can be enabled', () {
+        platform.environment = <String, String>{
+          'FLUTTER_SWIFT_PACKAGE_MANAGER': 'true',
+        };
+
+        expect(featureFlags.isSwiftPackageManagerEnabled, isTrue);
+      });
     });
   });
 }

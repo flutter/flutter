@@ -505,6 +505,7 @@ void main() {
 class FakeIosProject extends Fake implements IosProject {
   FakeIosProject({
     required MemoryFileSystem fileSystem,
+    required this.usesSwiftPackageManager,
   }) : hostAppRoot = fileSystem.directory('app_name').childDirectory('ios');
 
   @override
@@ -531,6 +532,9 @@ class FakeIosProject extends Fake implements IosProject {
   }
 
   @override
+  bool usesSwiftPackageManager;
+
+  @override
   Directory get managedDirectory => hostAppRoot.childDirectory('Flutter');
 
   @override
@@ -540,6 +544,7 @@ class FakeIosProject extends Fake implements IosProject {
 class FakeMacOSProject extends Fake implements MacOSProject {
   FakeMacOSProject({
     required MemoryFileSystem fileSystem,
+    required this.usesSwiftPackageManager,
   }) : hostAppRoot = fileSystem.directory('app_name').childDirectory('macos');
 
   @override
@@ -566,6 +571,9 @@ class FakeMacOSProject extends Fake implements MacOSProject {
   }
 
   @override
+  bool usesSwiftPackageManager;
+
+  @override
   Directory get managedDirectory => hostAppRoot.childDirectory('Flutter');
 
   @override
@@ -579,17 +587,20 @@ class FakeFlutterProject extends Fake implements FlutterProject {
     this.isModule = false,
   });
 
-  MemoryFileSystem fileSystem;
-
-
-  @override
-  late final IosProject ios = FakeIosProject(fileSystem: fileSystem);
-
-  @override
-  late final MacOSProject macos = FakeMacOSProject(fileSystem: fileSystem);
-
-  @override
+  final MemoryFileSystem fileSystem;
   final bool usesSwiftPackageManager;
+
+  @override
+  late final FakeIosProject ios = FakeIosProject(
+    fileSystem: fileSystem,
+    usesSwiftPackageManager: usesSwiftPackageManager,
+  );
+
+  @override
+  late final FakeMacOSProject macos = FakeMacOSProject(
+    fileSystem: fileSystem,
+    usesSwiftPackageManager: usesSwiftPackageManager,
+  );
 
   @override
   final bool isModule;

@@ -9,6 +9,7 @@
 /// @docImport 'package:flutter_test/flutter_test.dart';
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:meta/meta.dart';
@@ -26,6 +27,7 @@ import '../common/layer_tree.dart';
 import '../common/message.dart';
 import '../common/render_tree.dart';
 import '../common/request_data.dart';
+import '../common/screenshot.dart';
 import '../common/semantics.dart';
 import '../common/text.dart';
 import '../common/text_input_action.dart';
@@ -34,6 +36,7 @@ import 'timeline.dart';
 import 'vmservice_driver.dart';
 import 'web_driver.dart';
 
+export '../common/screenshot.dart' show ScreenshotFormat;
 export 'vmservice_driver.dart';
 export 'web_driver.dart';
 
@@ -630,8 +633,10 @@ abstract class FlutterDriver {
   /// In practice, sometimes the device gets really busy for a while and even
   /// two seconds isn't enough, which means that this is still racy and a source
   /// of flakes.
-  Future<List<int>> screenshot() async {
-    throw UnimplementedError();
+  Future<List<int>> screenshot({ScreenshotFormat format = ScreenshotFormat.png}) async {
+    await Future<void>.delayed(const Duration(seconds: 2));
+    final Map<String, Object?> jsonResponse = await sendCommand(ScreenshotCommand(format: format));
+    return base64.decode(jsonResponse['data']! as String);
   }
 
   /// Returns the Flags set in the Dart VM as JSON.

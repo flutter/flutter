@@ -30,6 +30,9 @@ analyzer:
       # Ignore protoc generated files
     - "dev/conductor/lib/proto/*"
 
+formatter:
+  page_width: 100
+
 linter:
   rules:
     # This list is derived from the list of all available lints located at
@@ -219,7 +222,7 @@ linter:
     # - unnecessary_lambdas # has false positives: https://github.com/dart-lang/linter/issues/498
     - unnecessary_late
     - unnecessary_library_directive
-    # - unnecessary_library_name # blocked on https://github.com/dart-lang/lints/issues/181#issuecomment-2018919034
+    # - unnecessary_library_name # blocked on https://github.com/dart-lang/dartdoc/issues/3882
     - unnecessary_new
     - unnecessary_null_aware_assignments
     - unnecessary_null_aware_operator_on_extension_on_nullable
@@ -236,7 +239,6 @@ linter:
     - unnecessary_to_list_in_spreads
     - unreachable_from_main
     - unrelated_type_equality_checks
-    - unsafe_html
     - use_build_context_synchronously
     - use_colored_box
     # - use_decorated_box # leads to bugs: DecoratedBox and Container are not equivalent (Container inserts extra padding)

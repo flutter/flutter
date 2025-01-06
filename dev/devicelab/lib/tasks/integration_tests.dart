@@ -131,6 +131,17 @@ TaskFunction createEndToEndKeyboardTextfieldTest() {
   ).call;
 }
 
+TaskFunction createSolidColorTest({required bool enableImpeller}) {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/solid_color.dart',
+    extraOptions: <String>[
+      if (enableImpeller)
+        '--enable-impeller'
+    ]
+  ).call;
+}
+
 TaskFunction dartDefinesTask() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',

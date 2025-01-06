@@ -62,7 +62,7 @@ name: font
 description: A test project that contains a font.
 
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.7.0-0
 
 flutter:
   uses-material-design: true
@@ -107,7 +107,7 @@ name: main
 description: A test project that has a package with a font as a dependency.
 
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.7.0-0
 
 dependencies:
   font:

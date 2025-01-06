@@ -7,6 +7,7 @@ import '../../base/build.dart';
 import '../../base/deferred_component.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
+import '../../devfs.dart';
 import '../../globals.dart' as globals show xcode;
 import '../../project.dart';
 import '../build_system.dart';
@@ -15,6 +16,7 @@ import '../exceptions.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
+import 'native_assets.dart';
 
 /// Prepares the asset bundle in the format expected by flutter.gradle.
 ///
@@ -68,6 +70,10 @@ abstract class AndroidAssetBundle extends Target {
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],
+      additionalContent: <String, DevFSContent>{
+        'NativeAssetsManifest.json':
+            DevFSFileContent(environment.buildDir.childFile('native_assets.json')),
+      },
     );
     environment.depFileService.writeToFile(
       assetDepfile,
@@ -78,6 +84,7 @@ abstract class AndroidAssetBundle extends Target {
   @override
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
+    InstallCodeAssets(),
   ];
 }
 

@@ -19,6 +19,7 @@ class Plugin {
     this.flutterConstraint,
     required this.dependencies,
     required this.isDirectDependency,
+    required this.isDevDependency,
     this.implementsPackage,
   });
 
@@ -68,6 +69,7 @@ class Plugin {
     VersionConstraint? flutterConstraint,
     List<String> dependencies, {
     required FileSystem fileSystem,
+    required bool isDevDependency,
     Set<String>? appDependencies,
   }) {
     final List<String> errors = validatePluginYaml(pluginYaml);
@@ -82,6 +84,7 @@ class Plugin {
         flutterConstraint,
         dependencies,
         fileSystem,
+        isDevDependency: isDevDependency,
         appDependencies != null && appDependencies.contains(name),
       );
     }
@@ -92,6 +95,7 @@ class Plugin {
       flutterConstraint,
       dependencies,
       fileSystem,
+      isDevDependency: isDevDependency,
       appDependencies != null && appDependencies.contains(name),
     );
   }
@@ -103,8 +107,9 @@ class Plugin {
     VersionConstraint? flutterConstraint,
     List<String> dependencies,
     FileSystem fileSystem,
-    bool isDirectDependency,
-  ) {
+    bool isDirectDependency, {
+    required bool isDevDependency,
+  }) {
     assert (pluginYaml['platforms'] != null, 'Invalid multi-platform plugin specification $name.');
     final YamlMap platformsYaml = pluginYaml['platforms'] as YamlMap;
 
@@ -184,6 +189,7 @@ class Plugin {
       dependencies: dependencies,
       isDirectDependency: isDirectDependency,
       implementsPackage: pluginYaml['implements'] != null ? pluginYaml['implements'] as String : '',
+      isDevDependency: isDevDependency,
     );
   }
 
@@ -194,8 +200,9 @@ class Plugin {
     VersionConstraint? flutterConstraint,
     List<String> dependencies,
     FileSystem fileSystem,
-    bool isDirectDependency,
-  ) {
+    bool isDirectDependency, {
+    required bool isDevDependency,
+  }) {
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
     final String? pluginClass = (pluginYaml as Map<dynamic, dynamic>)['pluginClass'] as String?;
     if (pluginClass != null) {
@@ -227,6 +234,7 @@ class Plugin {
       flutterConstraint: flutterConstraint,
       dependencies: dependencies,
       isDirectDependency: isDirectDependency,
+      isDevDependency: isDevDependency,
     );
   }
 
@@ -406,6 +414,16 @@ class Plugin {
   /// Whether this plugin is a direct dependency of the app.
   /// If [false], the plugin is a dependency of another plugin.
   final bool isDirectDependency;
+
+  /// Whether this plugin is exclusively used as a dev dependency of the app.
+  ///
+  /// If [false], the plugin is either:
+  /// - _Not_ a dev dependency
+  /// - _Not_ a dev dependency of some dependency that itself is not a dev
+  ///   dependency
+  ///
+  /// Dev dependencies are intended to be stripped out in release builds.
+  final bool isDevDependency;
 
   /// Expected path to the plugin's Package.swift. Returns null if the plugin
   /// does not support the [platform] or the [platform] is not iOS or macOS.

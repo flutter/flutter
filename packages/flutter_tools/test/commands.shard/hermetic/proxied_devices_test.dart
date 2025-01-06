@@ -354,10 +354,7 @@ class FakeDeviceLogReader implements DeviceLogReader {
   bool disposeCalled = false;
 
   @override
-  int? appPid;
-
-  @override
-  FlutterVmService? connectedVMService;
+  Future<void> provideVmService(FlutterVmService? connectedVmService) async { }
 
   @override
   void dispose() {

@@ -21,7 +21,6 @@ import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
-import 'macos/xcode.dart';
 import 'platform_plugins.dart';
 import 'project_validator_result.dart';
 import 'template.dart';
@@ -230,6 +229,10 @@ class FlutterProject {
   /// The `.dart-tool` directory of this project.
   Directory get dartTool => directory.childDirectory('.dart_tool');
 
+  /// The location of the generated scaffolding project for hosting widget
+  /// previews from this project.
+  Directory get widgetPreviewScaffold => dartTool.childDirectory('widget_preview_scaffold');
+
   /// The directory containing the generated code for this project.
   Directory get generated => directory
     .absolute
@@ -250,6 +253,12 @@ class FlutterProject {
     FlutterManifest.empty(logger: globals.logger),
   );
 
+  /// The generated scaffolding project for hosting widget previews from this
+  /// project.
+  FlutterProject get widgetPreviewScaffoldProject => FlutterProject.fromDirectory(
+    widgetPreviewScaffold,
+  );
+
   /// True if this project is a Flutter module project.
   bool get isModule => manifest.isModule;
 
@@ -261,24 +270,6 @@ class FlutterProject {
 
   /// True if this project has an example application.
   bool get hasExampleApp => _exampleDirectory(directory).existsSync();
-
-  /// True if this project doesn't have Swift Package Manager disabled in the
-  /// pubspec, has either an iOS or macOS platform implementation, is not a
-  /// module project, Xcode is 15 or greater, and the Swift Package Manager
-  /// feature is enabled.
-  bool get usesSwiftPackageManager {
-    if (!manifest.disabledSwiftPackageManager &&
-        (ios.existsSync() || macos.existsSync()) &&
-        !isModule) {
-      final Xcode? xcode = globals.xcode;
-      final Version? xcodeVersion = xcode?.currentVersion;
-      if (xcodeVersion == null || xcodeVersion.major < 15) {
-        return false;
-      }
-      return featureFlags.isSwiftPackageManagerEnabled;
-    }
-    return false;
-  }
 
   /// Returns a list of platform names that are supported by the project.
   List<SupportedPlatform> getSupportedPlatforms({bool includeRoot = false}) {
@@ -370,7 +361,11 @@ class FlutterProject {
     if (!directory.existsSync() || isPlugin) {
       return;
     }
-    await refreshPluginsList(this, iosPlatform: iosPlatform, macOSPlatform: macOSPlatform);
+    await refreshPluginsList(
+      this,
+      iosPlatform: iosPlatform,
+      macOSPlatform: macOSPlatform,
+    );
     if (androidPlatform) {
       await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
     }
@@ -880,7 +875,7 @@ $javaGradleCompatUrl
     }
     for (final XmlElement metaData in document.findAllElements('meta-data')) {
       final String? name = metaData.getAttribute('android:name');
-      // External code checks for this string to indentify flutter android apps.
+      // External code checks for this string to identify flutter android apps.
       // See cl/667760684 as an example.
       if (name == 'flutterEmbedding') {
         final String? embeddingVersionString = metaData.getAttribute('android:value');
@@ -996,10 +991,9 @@ class WebProject extends FlutterProjectPlatform {
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     /// Create .dart_tool/dartpad/web_plugin_registrant.dart.
     /// See: https://github.com/dart-lang/dart-services/pull/874
-    await injectBuildTimePluginFiles(
+    await injectBuildTimePluginFilesForWebPlatform(
       parent,
       destination: dartpadToolDirectory,
-      webPlatform: true,
     );
   }
 }

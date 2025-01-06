@@ -7,6 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
@@ -27,6 +28,7 @@ void main() {
   group('analytics', () {
     late Directory tempDir;
     late FakeAnalytics fakeAnalytics;
+    late FakeProcessInfo processInfo;
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
@@ -34,6 +36,7 @@ void main() {
         fs: MemoryFileSystem.test(),
         fakeFlutterVersion: FakeFlutterVersion(),
       );
+      processInfo = FakeProcessInfo();
     });
 
     tearDown(() {
@@ -135,7 +138,7 @@ void main() {
             commandPath: 'create',
             result: 'success',
             commandHasTerminal: false,
-            maxRss: globals.processInfo.maxRss,
+            maxRss: processInfo.maxRss,
           ),
         ),
       );
@@ -143,6 +146,50 @@ void main() {
     overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
       Analytics: () => fakeAnalytics,
+      ProcessInfo: () => processInfo,
+    });
+
+    testUsingContext('use of the deferred components feature sends a build info event indicating so', () async {
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>[
+          '--empty',
+          '--no-pub',
+          '--template=app',
+        ],
+      );
+
+      // Add deferred manifest.
+      final File pubspec = globals.localFileSystem
+        .directory(projectPath)
+        .childFile('pubspec.yaml');
+      final String modifiedContents = pubspec
+        .readAsStringSync()
+        .replaceAll('flutter:', 'flutter:\n  deferred-components:');
+      pubspec.writeAsStringSync(modifiedContents);
+      printOnFailure(pubspec.readAsStringSync());
+
+      final Directory oldCwd = globals.localFileSystem.currentDirectory;
+      try {
+        globals.localFileSystem.currentDirectory = globals.localFileSystem.directory(projectPath);
+        await runBuildAppBundleCommand(projectPath);
+      } finally {
+        globals.localFileSystem.currentDirectory = oldCwd;
+      }
+
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.flutterBuildInfo(
+            label: 'build-appbundle-deferred-components',
+            buildType: 'android',
+          ),
+        ),
+      );
+    }, overrides: <Type, Generator>{
+      AndroidBuilder: () => FakeAndroidBuilder(),
+      Analytics: () => fakeAnalytics,
+      ProcessInfo: () => processInfo,
     });
   });
 
@@ -290,4 +337,9 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   final Directory directory;
+}
+
+class FakeProcessInfo extends Fake implements ProcessInfo {
+  @override
+  int maxRss = 123456789;
 }

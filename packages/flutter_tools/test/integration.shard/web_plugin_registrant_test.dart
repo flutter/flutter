@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
+import '../commands.shard/permeable/utils/project_testing_utils.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/test_flutter_command_runner.dart';
@@ -26,7 +27,7 @@ void main() {
 
   setUpAll(() async {
     Cache.disableLocking();
-    await _ensureFlutterToolsSnapshot();
+    await ensureFlutterToolsSnapshot();
   });
 
   setUp(() {
@@ -40,7 +41,7 @@ void main() {
   });
 
   tearDownAll(() async {
-    await _restoreFlutterToolsSnapshot();
+    await restoreFlutterToolsSnapshot();
   });
 
   testUsingContext('generated plugin registrant passes analysis', () async {
@@ -239,65 +240,6 @@ void main() {
       stdio: globals.stdio,
     ),
   });
-}
-
-Future<void> _ensureFlutterToolsSnapshot() async {
-  final String flutterToolsPath = globals.fs.path.absolute(globals.fs.path.join(
-    'bin',
-    'flutter_tools.dart',
-  ));
-  final String flutterToolsSnapshotPath = globals.fs.path.absolute(
-    globals.fs.path.join(
-      '..',
-      '..',
-      'bin',
-      'cache',
-      'flutter_tools.snapshot',
-    ),
-  );
-  final String dotPackages = globals.fs.path.absolute(globals.fs.path.join(
-    '.dart_tool/package_config.json',
-  ));
-
-  final File snapshotFile = globals.fs.file(flutterToolsSnapshotPath);
-  if (snapshotFile.existsSync()) {
-    snapshotFile.renameSync('$flutterToolsSnapshotPath.bak');
-  }
-
-  final List<String> snapshotArgs = <String>[
-    '--snapshot=$flutterToolsSnapshotPath',
-    '--packages=$dotPackages',
-    flutterToolsPath,
-  ];
-  final ProcessResult snapshotResult = await Process.run(
-    '../../bin/cache/dart-sdk/bin/dart',
-    snapshotArgs,
-  );
-  printOnFailure('Output of dart ${snapshotArgs.join(" ")}:');
-  printOnFailure(snapshotResult.stdout.toString());
-  printOnFailure(snapshotResult.stderr.toString());
-  expect(snapshotResult, const ProcessResultMatcher());
-}
-
-Future<void> _restoreFlutterToolsSnapshot() async {
-  final String flutterToolsSnapshotPath = globals.fs.path.absolute(
-    globals.fs.path.join(
-      '..',
-      '..',
-      'bin',
-      'cache',
-      'flutter_tools.snapshot',
-    ),
-  );
-
-  final File snapshotBackup =
-      globals.fs.file('$flutterToolsSnapshotPath.bak');
-  if (!snapshotBackup.existsSync()) {
-    // No backup to restore.
-    return;
-  }
-
-  snapshotBackup.renameSync(flutterToolsSnapshotPath);
 }
 
 Future<void> _createProject(Directory dir, List<String> createArgs) async {

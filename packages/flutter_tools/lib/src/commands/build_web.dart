@@ -51,7 +51,6 @@ class BuildWebCommand extends BuildSubCommand {
       allowed: ServiceWorkerStrategy.values.map((ServiceWorkerStrategy e) => e.cliName),
       allowedHelp: CliEnum.allowedHelp(ServiceWorkerStrategy.values),
     );
-    usesWebRendererOption();
     usesWebResourcesCdnFlag();
 
     //
@@ -141,20 +140,23 @@ class BuildWebCommand extends BuildSubCommand {
         ? int.parse(dart2jsOptimizationLevelValue.substring(1))
         : optimizationLevel;
 
-    final String? webRendererString = stringArg(FlutterOptions.kWebRendererFlag);
-    final WebRendererMode? webRenderer = webRendererString == null
-        ? null
-        : WebRendererMode.values.byName(webRendererString);
+    final List<String> dartDefines = extractDartDefines(
+      defineConfigJsonMap: extractDartDefineConfigJsonMap()
+    );
+    final bool useWasm = boolArg(FlutterOptions.kWebWasmFlag);
+    // See also: RunCommandBase.webRenderer and TestCommand.webRenderer.
+    final WebRendererMode webRenderer = WebRendererMode.fromDartDefines(dartDefines, useWasm: useWasm);
 
     final bool sourceMaps = boolArg('source-maps');
 
     final List<WebCompilerConfig> compilerConfigs;
-    if (webRenderer != null && webRenderer.isDeprecated) {
+    if (webRenderer.isDeprecated) {
       globals.logger.printWarning(webRenderer.deprecationWarning);
     }
-    if (boolArg(FlutterOptions.kWebWasmFlag)) {
-      if (webRenderer != null) {
-        throwToolExit('"--${FlutterOptions.kWebRendererFlag}" cannot be combined with "--${FlutterOptions.kWebWasmFlag}"');
+
+    if (useWasm) {
+      if (webRenderer != WebRendererMode.getDefault(useWasm: true)) {
+        throwToolExit('Do not attempt to set a web renderer when using "--${FlutterOptions.kWebWasmFlag}"');
       }
       globals.logger.printBox(
         title: 'New feature',
@@ -185,7 +187,7 @@ class BuildWebCommand extends BuildSubCommand {
         nativeNullAssertions: boolArg('native-null-assertions'),
         noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
         sourceMaps: sourceMaps,
-        renderer: webRenderer ?? WebRendererMode.defaultForJs,
+        renderer: webRenderer,
       )];
     }
 

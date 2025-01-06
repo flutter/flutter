@@ -15,18 +15,12 @@ import 'test_utils.dart';
 void main() {
   late Directory tempDir;
   late Directory projectRoot;
-  late String flutterBin;
   late Directory releaseDir;
   late File exeFile;
 
   group('flutter build windows command', () {
     setUpAll(() {
       tempDir = createResolvedTempDirectorySync('build_windows_test.');
-      flutterBin = fileSystem.path.join(
-        getFlutterRoot(),
-        'bin',
-        'flutter',
-      );
       ProcessResult result = processManager.runSync(<String>[flutterBin, 'config',
         '--enable-windows-desktop',
       ]);

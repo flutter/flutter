@@ -176,7 +176,6 @@ class FlutterTesterTestDevice extends TestDevice {
 
         if (debuggingOptions.enableDds) {
           logger.printTrace('test $id: Starting Dart Development Service');
-
           await _ddsLauncher.startDartDevelopmentServiceFromDebuggingOptions(
             detectedUri,
             debuggingOptions: debuggingOptions,

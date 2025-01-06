@@ -11,16 +11,10 @@ import 'test_utils.dart';
 // Test that verbosity it propagated to Gradle tasks correctly.
 void main() {
   late Directory tempDir;
-  late String flutterBin;
   late Directory exampleAppDir;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('flutter_build_test.');
-    flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
     exampleAppDir = tempDir.childDirectory('aaa').childDirectory('example');
 
     processManager.runSync(<String>[

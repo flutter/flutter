@@ -21,8 +21,8 @@ const int benchmarkServerPort = 9999;
 const int chromeDebugPort = 10000;
 
 typedef WebBenchmarkOptions = ({
-  String webRenderer,
   bool useWasm,
+  bool forceSingleThreadedSkwasm,
 });
 
 Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
@@ -33,13 +33,13 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
     await flutter('clean');
     await evalFlutter('build', options: <String>[
       'web',
+      '--no-tree-shake-icons', // local engine builds are frequently out of sync with the Dart Kernel version
       if (benchmarkOptions.useWasm) ...<String>[
         '-O4',
         '--wasm',
         '--no-strip-wasm',
       ],
       '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
-      if (!benchmarkOptions.useWasm) '--web-renderer=${benchmarkOptions.webRenderer}',
       '--profile',
       '--no-web-resources-cdn',
       '-t',
@@ -142,8 +142,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
       final bool isUncalibratedSmokeTest = io.Platform.environment['CALIBRATED'] != 'true';
       // final bool isUncalibratedSmokeTest =
       //     io.Platform.environment['UNCALIBRATED_SMOKE_TEST'] == 'true';
+      final String urlParams = benchmarkOptions.forceSingleThreadedSkwasm ? '?force_st=true' : '';
       final ChromeOptions options = ChromeOptions(
-        url: 'http://localhost:$benchmarkServerPort/index.html',
+        url: 'http://localhost:$benchmarkServerPort/index.html$urlParams',
         userDataDirectory: userDataDir,
         headless: isUncalibratedSmokeTest,
         debugPort: chromeDebugPort,
@@ -171,7 +172,13 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           throw 'Benchmark name is empty';
         }
 
-        final String namespace = '$benchmarkName.${benchmarkOptions.webRenderer}';
+        final String webRendererName;
+        if (benchmarkOptions.useWasm) {
+          webRendererName = benchmarkOptions.forceSingleThreadedSkwasm ? 'skwasm_st' : 'skwasm';
+        } else {
+          webRendererName = 'canvaskit';
+        }
+        final String namespace = '$benchmarkName.$webRendererName';
         final List<String> scoreKeys = List<String>.from(profile['scoreKeys'] as List<dynamic>);
         if (scoreKeys.isEmpty) {
           throw 'No score keys in benchmark "$benchmarkName"';

@@ -116,6 +116,7 @@ void main() {
 
     // Create input files.
     testEnvironment.buildDir.childFile('app.dill').createSync();
+    testEnvironment.buildDir.childFile('native_assets.json').createSync();
     fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(
       <String, Object>{
         'engineRevision': '2',
@@ -169,6 +170,7 @@ void main() {
 
     // Create input files.
     testEnvironment.buildDir.childFile('app.so').createSync();
+    testEnvironment.buildDir.childFile('native_assets.json').createSync();
 
     await const LinuxAotBundle(AotElfProfile(TargetPlatform.linux_x64)).build(testEnvironment);
     await const ProfileBundleLinuxAssets(TargetPlatform.linux_x64).build(testEnvironment);
@@ -208,6 +210,7 @@ void main() {
 
     // Create input files.
     testEnvironment.buildDir.childFile('app.so').createSync();
+    testEnvironment.buildDir.childFile('native_assets.json').createSync();
 
     await const LinuxAotBundle(AotElfRelease(TargetPlatform.linux_x64)).build(testEnvironment);
     await const ReleaseBundleLinuxAssets(TargetPlatform.linux_x64).build(testEnvironment);

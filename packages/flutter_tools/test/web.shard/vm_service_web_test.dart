@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['flutter-test-driver'])
+library;
+
 import 'dart:async';
 
 import 'package:file/file.dart';
@@ -35,7 +38,7 @@ void main() {
     testWithoutContext('can validate flutter version', () async {
       await flutter.run(
         withDebugger: true, chrome: true,
-        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+        additionalCommandArgs: <String>['--verbose']);
 
       expect(flutter.vmServiceWsUri, isNotNull);
 
@@ -47,7 +50,7 @@ void main() {
     testWithoutContext('can validate flutter version in parallel', () async {
       await flutter.run(
         withDebugger: true, chrome: true,
-        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+        additionalCommandArgs: <String>['--verbose']);
 
       expect(flutter.vmServiceWsUri, isNotNull);
 
@@ -79,7 +82,7 @@ void main() {
     testWithoutContext('can validate flutter version', () async {
       await flutter.run(
         withDebugger: true, chrome: true,
-        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+        additionalCommandArgs: <String>['--verbose']);
 
       expect(flutter.vmServiceWsUri, isNotNull);
 

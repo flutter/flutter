@@ -1004,6 +1004,7 @@ class DebuggingOptions {
     this.serveObservatory = false,
     this.enableDartProfiling = true,
     this.enableEmbedderApi = false,
+    this.enableMultiWindow = false,
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
     this.enableDevTools = true,
@@ -1037,6 +1038,7 @@ class DebuggingOptions {
       this.uninstallFirst = false,
       this.enableDartProfiling = true,
       this.enableEmbedderApi = false,
+      this.enableMultiWindow = false,
       this.usingCISystem = false,
       this.debugLogsDirectoryPath,
     }) : debuggingEnabled = false,
@@ -1126,6 +1128,7 @@ class DebuggingOptions {
     required this.serveObservatory,
     required this.enableDartProfiling,
     required this.enableEmbedderApi,
+    required this.enableMultiWindow,
     required this.usingCISystem,
     required this.debugLogsDirectoryPath,
     required this.enableDevTools,
@@ -1174,6 +1177,7 @@ class DebuggingOptions {
   final bool serveObservatory;
   final bool enableDartProfiling;
   final bool enableEmbedderApi;
+  final bool enableMultiWindow;
   final bool usingCISystem;
   final String? debugLogsDirectoryPath;
   final bool enableDevTools;
@@ -1278,6 +1282,7 @@ class DebuggingOptions {
       if (interfaceType == DeviceConnectionInterface.wireless)
         '--vm-service-host=${ipv6 ? '::0' : '0.0.0.0'}',
       if (enableEmbedderApi) '--enable-embedder-api',
+      if (enableMultiWindow) '--enable-multi-window=true',
     ];
   }
 
@@ -1332,6 +1337,7 @@ class DebuggingOptions {
     'serveObservatory': serveObservatory,
     'enableDartProfiling': enableDartProfiling,
     'enableEmbedderApi': enableEmbedderApi,
+    'enableMultiWindow': enableMultiWindow,
     'usingCISystem': usingCISystem,
     'debugLogsDirectoryPath': debugLogsDirectoryPath,
     'enableDevTools': enableDevTools,
@@ -1398,6 +1404,7 @@ class DebuggingOptions {
       serveObservatory: (json['serveObservatory'] as bool?) ?? false,
       enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
       enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
+      enableMultiWindow: (json['enableMultiWindow']! as bool?) ?? false,
       usingCISystem: (json['usingCISystem'] as bool?) ?? false,
       debugLogsDirectoryPath: json['debugLogsDirectoryPath'] as String?,
       enableDevTools: (json['enableDevTools'] as bool?) ?? true,
@@ -1440,13 +1447,10 @@ abstract class DeviceLogReader {
 
   /// Some logs can be obtained from a VM service stream.
   /// Set this after the VM services are connected.
-  FlutterVmService? connectedVMService;
+  Future<void> provideVmService(FlutterVmService connectedVmService);
 
   @override
   String toString() => name;
-
-  /// Process ID of the app on the device.
-  int? appPid;
 
   // Clean up resources allocated by log reader e.g. subprocesses
   void dispose();
@@ -1467,16 +1471,13 @@ class NoOpDeviceLogReader implements DeviceLogReader {
   final String name;
 
   @override
-  int? appPid;
-
-  @override
-  FlutterVmService? connectedVMService;
-
-  @override
   Stream<String> get logLines => const Stream<String>.empty();
 
   @override
   void dispose() { }
+
+  @override
+  Future<void> provideVmService(FlutterVmService connectedVmService) async {}
 }
 
 /// Append --null_assertions to any existing Dart VM flags if

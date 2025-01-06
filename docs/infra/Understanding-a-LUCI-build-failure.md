@@ -51,3 +51,5 @@ Please refer to the above example of the infra failure.
 4. Check if a flaky bug has been filed in [the flaky issues list](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22c%3A+flake%22)
 5. File a new bug if needed
 6. If a rerun is needed, please refer to step 6 in the above infra failure session.
+
+See also: [How to fix a PR's failing checks](../contributing/testing/Fix-failing-checks.md)

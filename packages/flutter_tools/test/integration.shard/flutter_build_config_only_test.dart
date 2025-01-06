@@ -12,16 +12,10 @@ import 'test_utils.dart';
 // Test that configOnly creates the gradlew file and does not assemble and app.
 void main() {
   late Directory tempDir;
-  late String flutterBin;
   late Directory exampleAppDir;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('flutter_build_test.');
-    flutterBin = fileSystem.path.join(
-      getFlutterRoot(),
-      'bin',
-      'flutter',
-    );
     exampleAppDir = tempDir.childDirectory('bbb').childDirectory('example');
 
     processManager.runSync(
