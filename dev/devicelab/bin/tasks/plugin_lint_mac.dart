@@ -9,8 +9,8 @@ import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
-/// Tests that the Flutter plugin template works. Use `pod lib lint`
-/// to confirm the plugin module can be imported into an app.
+/// Tests that the Flutter plugin template works using CocoaPods integration.
+/// Use `pod lib lint` to confirm the plugin module can be imported into an app.
 Future<void> main() async {
   await task(() async {
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_plugin_test.');
@@ -184,6 +184,15 @@ Future<void> main() async {
       final String objcAppPath = path.join(tempDir.path, objcAppName);
       final File objcPubspec = File(path.join(objcAppPath, 'pubspec.yaml'));
       String pubspecContent = objcPubspec.readAsStringSync();
+      // Use CocoaPods to build the app.
+      pubspecContent = pubspecContent.replaceFirst(
+        '# The following section is specific to Flutter packages.\n'
+            'flutter:\n',
+        '# The following section is specific to Flutter packages.\n'
+            'flutter:\n'
+            '\n'
+            '  disable-swift-package-manager: true\n',
+      );
       // Add (randomly selected) first-party plugins that support iOS and macOS.
       // Add the new plugins we just made.
       pubspecContent = pubspecContent.replaceFirst(
