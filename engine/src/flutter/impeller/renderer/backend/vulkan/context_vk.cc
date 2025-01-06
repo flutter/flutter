@@ -657,6 +657,10 @@ bool ContextVK::EnqueueCommandBuffer(
 }
 
 bool ContextVK::FlushCommandBuffers() {
+  if (pending_command_buffers_.empty()) {
+    return true;
+  }
+
   if (should_batch_cmd_buffers_) {
     bool result = GetCommandQueue()->Submit(pending_command_buffers_).ok();
     pending_command_buffers_.clear();
@@ -731,6 +735,10 @@ bool ContextVK::GetShouldDisableSurfaceControlSwapchain() const {
 
 RuntimeStageBackend ContextVK::GetRuntimeStageBackend() const {
   return RuntimeStageBackend::kVulkan;
+}
+
+bool ContextVK::SubmitOnscreen(std::shared_ptr<CommandBuffer> cmd_buffer) {
+  return EnqueueCommandBuffer(std::move(cmd_buffer));
 }
 
 }  // namespace impeller
