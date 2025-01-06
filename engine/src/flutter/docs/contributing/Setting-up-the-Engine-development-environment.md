@@ -42,17 +42,12 @@ Run the following steps to set up your environment:
 >   * `GYP_MSVS_OVERRIDE_PATH=C:\Program Files\Microsoft Visual Studio\2022\Community`
 >     * Use the path of your installation.
 
-Clone the Flutter source code. As of late 2024, the engine source is part of the main [flutter/flutter repo](https://github.com/flutter/flutter). The convention is to fork this repo and point `origin` to your fork and `upstream` to `git@github.com:flutter/flutter.git`.
-```sh
-git clone git@github.com:<YOUR GITHUB USERNAME>/flutter.git
-cd flutter
-git remote add upstream git@github.com:flutter/flutter.git
-```
+Clone the Flutter source code. As of late 2024, the engine source is part of the main [flutter/flutter repo](https://github.com/flutter/flutter). The convention is to fork this repo and point `origin` to your fork and `upstream` to `git@github.com:flutter/flutter.git`. See [Setting up the Framework development environment](https://github.com/flutter/flutter/blob/master/docs/contributing/Setting-up-the-Framework-development-environment.md#set-up-your-environment) for more.
 
 > [!IMPORTANT]
 > On Windows, the following must be run as an Administrator due to [a known issue](https://github.com/flutter/flutter/issues/94580).
 
-Fetch the Flutter engine sources. This may take a while on a slow connection. Do **not** interrupt this process. Otherwise, a partial checkout cannot be resumed and you'll have to delete all the files including the hidden files in the engine directory and start over.
+Fetch the Flutter engine sources. This may take a while on a slow connection. Do **not** interrupt this process. Otherwise, a partial checkout cannot be resumed and you'll have to delete all the files including the hidden files in the engine directory and start over. From the root of your local checkout of flutter/flutter, run:
 ```sh
 cd engine
 fetch flutter
