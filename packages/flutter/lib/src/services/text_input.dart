@@ -2531,6 +2531,21 @@ class SystemContextMenuController with SystemContextMenuClient {
 
   final Map<int, VoidCallback> _buttonCallbacks = <int, VoidCallback>{};
 
+  /// Returns true only if the given list contains at least one pair of
+  /// identical SystemContextMenuItemDatas.
+  static bool _containsDuplicates(List<SystemContextMenuItemData> items) {
+    final Set<SystemContextMenuItemData> uniqueItems = <SystemContextMenuItemData>{};
+
+    for (final SystemContextMenuItemData item in items) {
+      if (uniqueItems.contains(item)) {
+        return true;
+      }
+      uniqueItems.add(item);
+    }
+
+    return false;
+  }
+
   // Begin SystemContextMenuClient.
 
   @override
@@ -2600,6 +2615,7 @@ class SystemContextMenuController with SystemContextMenuClient {
       TextInput._instance._currentConnection != null,
       'Currently, the system context menu can only be shown for an active text input connection',
     );
+    assert(items == null || !_containsDuplicates(items));
 
     // Don't show the same thing that's already being shown.
     if (_lastShown != null &&
