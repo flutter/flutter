@@ -732,7 +732,7 @@ TEST(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
         bool shift = key->level == 1;
         return (*group_layout)[key->keycode * 2 + shift];
       },
-      (gpointer)(&kLayoutFrench));
+      reinterpret_cast<gpointer>(const_cast<MockLayoutData*>(&kLayoutFrench)));
 
   sendTap(kKeyCodeKeyA, GDK_KEY_q, 3);  // KeyA
   VERIFY_DOWN(kLogicalKeyQ, "q");
@@ -780,7 +780,7 @@ TEST(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
         bool shift = key->level == 1;
         return (*group_layout)[key->keycode * 2 + shift];
       },
-      (gpointer)(&kLayoutRussian));
+      reinterpret_cast<gpointer>(const_cast<MockLayoutData*>(&kLayoutRussian)));
 
   sendTap(kKeyCodeKeyA, GDK_KEY_Cyrillic_ef, 2);  // KeyA
   VERIFY_DOWN(kLogicalKeyA, "ф");
