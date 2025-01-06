@@ -43,7 +43,6 @@ void main() {
         pathToBinTool,
         '--disable-vm-service',
         '--non-interactive',
-        '--packages=.dart_tool/package_config.json',
         'path_to_compiler_output.dill',
       ],
       stdout: stdout,

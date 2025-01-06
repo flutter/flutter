@@ -114,7 +114,6 @@ final class TestGoldenComparator {
           _flutterTesterBinPath,
           '--disable-vm-service',
           '--non-interactive',
-          '--packages=${_fileSystem.path.join('.dart_tool', 'package_config.json')}',
           outputPath,
         ];
 

@@ -400,7 +400,6 @@ void main() {
               'flutter_tester',
               '--disable-vm-service',
               '--non-interactive',
-              '--packages=.dart_tool/package_config.json',
               'path_to_output.dill',
             ],
             stdout: '{"success": true}\n',
