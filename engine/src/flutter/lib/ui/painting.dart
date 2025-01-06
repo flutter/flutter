@@ -123,10 +123,11 @@ class Color {
   const Color(int value)
     : this._fromARGBC(value >> 24, value >> 16, value >> 8, value, ColorSpace.sRGB);
 
-  /// Construct a color with color components with a minimum value of `0.0`.
+  /// Construct a color with floating-point color components.
   ///
   /// Color components allows arbitrary bit depths for color components to be be
-  /// supported. The values are interpted relative to the [ColorSpace] argument.
+  /// supported. The values are interpreted relative to the [ColorSpace]
+  /// argument.
   ///
   /// ## Example
   ///
@@ -194,24 +195,15 @@ class Color {
       b = (b & 0xff) / 255;
 
   /// The alpha channel of this color.
-  ///
-  /// A value of `0.0` means this color is fully transparent.
   final double a;
 
   /// The red channel of this color.
-  ///
-  /// A value of `0.0` represents no red in this color.
   final double r;
 
   /// The green channel of this color.
-  ///
-  /// A value of `0.0` represents no red in this color.
   final double g;
 
   /// The blue channel of this color.
-  ///
-  /// A value of `0.0` represents no blue in this color. A value of `1.0`
-  /// represents the maximum amount of blue.
   final double b;
 
   /// The color space of this color.
@@ -291,8 +283,7 @@ class Color {
   /// Returns a new color with the provided components updated.
   ///
   /// Each component ([alpha], [red], [green], [blue]) represents a
-  /// floating-point value where `0.0` is the minimum; see [Color.from] for
-  /// details and examples.
+  /// floating-point value; see [Color.from] for details and examples.
   ///
   /// If [colorSpace] is provided, and is different than the current color
   /// space, the component values are updated before transforming them to the
