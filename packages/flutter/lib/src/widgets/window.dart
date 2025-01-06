@@ -379,7 +379,7 @@ class _GenericWindowState extends State<_GenericWindow> {
     }
 
     // In the event that we're being disposed before we've been destroyed
-    // we need to destroy ther window on our way out.
+    // we need to destroy the window on our way out.
     if (!_hasBeenDestroyed && _viewId != null) {
       // In the event of an argument error, we do nothing. We assume that
       // the window has been successfully destroyed somehow else.
