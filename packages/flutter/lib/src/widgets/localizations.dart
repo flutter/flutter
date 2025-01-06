@@ -192,8 +192,6 @@ abstract class WidgetsLocalizations {
   /// list one space right in the list.
   String get reorderItemRight;
 
-  // TODO(justinmc): Did I move all of these localizations correctly?
-
   /// Label for "copy" edit buttons and menu items.
   String get copyButtonLabel;
 
