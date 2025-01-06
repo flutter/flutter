@@ -266,10 +266,10 @@ class ExpansionTile extends StatefulWidget {
     this.expansionAnimationStyle,
     this.internalAddSemanticForOnTap = false,
   }) : assert(
-          expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
-          'CrossAxisAlignment.baseline is not supported since the expanded children '
-          'are aligned in a column, not a row. Try to use another constant.',
-        );
+         expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
+         'CrossAxisAlignment.baseline is not supported since the expanded children '
+         'are aligned in a column, not a row. Try to use another constant.',
+       );
 
   /// A widget to display before the title.
   ///

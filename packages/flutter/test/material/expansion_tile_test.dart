@@ -103,8 +103,8 @@ void main() {
 
       double getHeight(Key key) => tester.getSize(find.byKey(key)).height;
       DecoratedBox getDecoratedBox(Key key) => tester.firstWidget(
-            find.descendant(of: find.byKey(key), matching: find.byType(DecoratedBox)),
-          );
+        find.descendant(of: find.byKey(key), matching: find.byType(DecoratedBox)),
+      );
 
       expect(getHeight(topKey), getHeight(expandedKey) - getHeight(tileKey) - 2.0);
       expect(getHeight(topKey), getHeight(collapsedKey) - 2.0);
@@ -522,28 +522,32 @@ void main() {
       ),
     );
 
-    ShapeDecoration shapeDecoration = tester
-        .firstWidget<DecoratedBox>(
-          find.descendant(
-            of: find.byKey(expansionTileKey),
-            matching: find.byType(DecoratedBox),
-          ),
-        )
-        .decoration as ShapeDecoration;
+    ShapeDecoration shapeDecoration =
+        tester
+                .firstWidget<DecoratedBox>(
+                  find.descendant(
+                    of: find.byKey(expansionTileKey),
+                    matching: find.byType(DecoratedBox),
+                  ),
+                )
+                .decoration
+            as ShapeDecoration;
 
     expect(shapeDecoration.color, collapsedBackgroundColor);
 
     await tester.tap(find.text('Title'));
     await tester.pumpAndSettle();
 
-    shapeDecoration = tester
-        .firstWidget<DecoratedBox>(
-          find.descendant(
-            of: find.byKey(expansionTileKey),
-            matching: find.byType(DecoratedBox),
-          ),
-        )
-        .decoration as ShapeDecoration;
+    shapeDecoration =
+        tester
+                .firstWidget<DecoratedBox>(
+                  find.descendant(
+                    of: find.byKey(expansionTileKey),
+                    matching: find.byType(DecoratedBox),
+                  ),
+                )
+                .decoration
+            as ShapeDecoration;
 
     expect(shapeDecoration.color, backgroundColor);
   });
