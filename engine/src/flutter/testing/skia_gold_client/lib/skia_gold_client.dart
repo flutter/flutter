@@ -88,6 +88,12 @@ interface class SkiaGoldClient {
       path.join(_engineRoot.flutterDir.path, '.engine-release.version'),
     );
 
+    if (!_isMainBranch) {
+      _stderr.writeln(
+        'Current git branch (${_environment['GIT_BRANCH']}) is not "main" or "master", so golden files are not checked.',
+      );
+    }
+
     // If the file is not found or cannot be read, we are in an invalid state.
     try {
       _releaseVersion = ReleaseVersion.parse(releaseVersionFile.readAsStringSync());
@@ -111,6 +117,14 @@ interface class SkiaGoldClient {
   /// Returns true if the current environment is a LUCI builder.
   static bool isLuciEnv({Map<String, String>? environment}) {
     return (environment ?? io.Platform.environment).containsKey(_kLuciEnvName);
+  }
+
+  /// Whether the client is currently running on the main branch.
+  bool get _isMainBranch {
+    return switch (_environment['GIT_BRANCH']) {
+      'main' || 'master' => true,
+      _ => false,
+    };
   }
 
   /// Whether the current environment is a presubmit job.
@@ -319,6 +333,13 @@ interface class SkiaGoldClient {
     int pixelColorDelta = 0,
     required int screenshotSize,
   }) async {
+    if (!_isMainBranch) {
+      if (verbose) {
+        _stderr.writeln('Skipping $testName (not on git main branch)');
+      }
+      return;
+    }
+
     assert(_isPresubmit || _isPostsubmit);
 
     // Clean the test name to remove the file extension.
