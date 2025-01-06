@@ -38,6 +38,17 @@ void main() {
 
     expect(find.text('Label behavior: alwaysHide'), findsOneWidget);
     navigationBarWidget = tester.firstWidget(find.byType(NavigationBar));
-    expect(navigationBarWidget.labelBehavior, NavigationDestinationLabelBehavior.alwaysHide);
+    expect(
+      navigationBarWidget.labelBehavior,
+      NavigationDestinationLabelBehavior.alwaysHide,
+    );
+  });
+
+  testWidgets('Overflow buttons are aligned in the center', (WidgetTester tester) async {
+    await tester.pumpWidget(const example.NavigationBarApp());
+
+    final OverflowBar overflowBar = tester.widget<OverflowBar>(find.byType(OverflowBar));
+    expect(overflowBar.overflowAlignment, OverflowBarAlignment.center);
+    expect(overflowBar.overflowSpacing, 10.0);
   });
 }

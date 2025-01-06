@@ -1,60 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:multi_window_ref_app/app/popup_window.dart';
+import 'package:multi_window_ref_app/app/window_controller_render.dart';
 
-import 'custom_positioner_dialog.dart';
-import 'positioner_settings.dart';
-import 'regular_window.dart';
 import 'window_settings.dart';
 import 'window_settings_dialog.dart';
-
-class PositionerSettingsModifier with ChangeNotifier {
-  int _positionerIndex = 0;
-  int get positionerIndex => _positionerIndex;
-
-  final PositionerSettingsContainer _mapping = PositionerSettingsContainer();
-  PositionerSettingsContainer get mapping => _mapping;
-
-  void setAtIndex(PositionerSetting setting, int index) {
-    if (index >= 0 && index < _mapping.positionerSettingsList.length) {
-      _mapping.positionerSettingsList[index] = setting;
-      notifyListeners();
-    }
-  }
-
-  void setSelectedIndex(int index) {
-    _positionerIndex =
-        index.clamp(0, _mapping.positionerSettingsList.length - 1);
-    notifyListeners();
-  }
-
-  PositionerSetting? getPositionerSetting(int? index) =>
-      index == null ? null : _mapping.positionerSettingsList[index];
-}
+import 'window_manager_model.dart';
 
 class MainWindow extends StatefulWidget {
-  const MainWindow({super.key});
+  MainWindow({super.key, required WindowController mainController}) {
+    _windowManagerModel.add(
+        KeyedWindowController(isMainWindow: true, controller: mainController));
+  }
+
+  final WindowManagerModel _windowManagerModel = WindowManagerModel();
+  final WindowSettings _settings = WindowSettings();
 
   @override
   State<MainWindow> createState() => _MainWindowState();
 }
 
 class _MainWindowState extends State<MainWindow> {
-  int selectedRowIndex = -1;
-  final positionerSettingsModifier = PositionerSettingsModifier();
-  final List<Window> _managedWindows = <Window>[];
-
   @override
   Widget build(BuildContext context) {
-    List<Window> getWindowsInTree(List<Window> windows) {
-      return windows
-          .expand((window) => [window, ...getWindowsInTree(window.children)])
-          .toList();
-    }
-
-    final List<Window> windows =
-        getWindowsInTree(MultiWindowAppContext.of(context)!.windows);
-
-    final widget = Scaffold(
+    final child = Scaffold(
       appBar: AppBar(
         title: const Text('Multi Window Reference App'),
       ),
@@ -66,11 +33,7 @@ class _MainWindowState extends State<MainWindow> {
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: _ActiveWindowsTable(
-                windows: windows,
-                selectedRowIndex: selectedRowIndex,
-                onSelectedRowIndexChanged: (int index) =>
-                    setState(() => selectedRowIndex = index),
-              ),
+                  windowManagerModel: widget._windowManagerModel),
             ),
           ),
           Expanded(
@@ -78,17 +41,14 @@ class _MainWindowState extends State<MainWindow> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _WindowCreatorCard(
-                    selectedWindow: selectedRowIndex < 0 ||
-                            selectedRowIndex >= windows.length
-                        ? null
-                        : windows[selectedRowIndex],
-                    positionerSettingsModifier: positionerSettingsModifier,
-                    onDialogOpened: (window) => _managedWindows.add(window),
-                    onDialogClosed: (window) => _managedWindows.remove(window)),
-                const SizedBox(height: 12),
-                _PositionerEditorCard(
-                    positionerSettingsModifier: positionerSettingsModifier)
+                ListenableBuilder(
+                    listenable: widget._windowManagerModel,
+                    builder: (BuildContext context, Widget? child) {
+                      return _WindowCreatorCard(
+                          selectedWindow: widget._windowManagerModel.selected,
+                          windowManagerModel: widget._windowManagerModel,
+                          windowSettings: widget._settings);
+                    })
               ],
             ),
           ),
@@ -96,138 +56,143 @@ class _MainWindowState extends State<MainWindow> {
       ),
     );
 
-    final window = WindowContext.of(context)!.window;
-    final List<Widget> childViews = <Widget>[];
-    for (final Window childWindow in window.children) {
-      if (!_shouldRenderWindow(childWindow)) {
-        continue;
-      }
+    return ViewAnchor(
+        view: ListenableBuilder(
+            listenable: widget._windowManagerModel,
+            builder: (BuildContext context, Widget? _) {
+              final List<Widget> childViews = <Widget>[];
+              for (final KeyedWindowController controller
+                  in widget._windowManagerModel.windows) {
+                if (controller.parent == null && !controller.isMainWindow) {
+                  childViews.add(WindowControllerRender(
+                    controller: controller.controller,
+                    key: controller.key,
+                    windowSettings: widget._settings,
+                    windowManagerModel: widget._windowManagerModel,
+                    onDestroyed: () =>
+                        widget._windowManagerModel.remove(controller),
+                    onError: () =>
+                        widget._windowManagerModel.remove(controller),
+                  ));
+                }
+              }
 
-      childViews.add(View(
-        view: childWindow.view,
-        child: WindowContext(
-          window: childWindow,
-          child: childWindow.builder(context),
-        ),
-      ));
-    }
-
-    return ViewAnchor(view: ViewCollection(views: childViews), child: widget);
-  }
-
-  bool _shouldRenderWindow(Window window) {
-    return !_managedWindows.contains(window);
+              return ViewCollection(views: childViews);
+            }),
+        child: child);
   }
 }
 
 class _ActiveWindowsTable extends StatelessWidget {
-  const _ActiveWindowsTable(
-      {required this.windows,
-      required this.selectedRowIndex,
-      required this.onSelectedRowIndexChanged});
+  const _ActiveWindowsTable({required this.windowManagerModel});
 
-  final List<Window> windows;
-  final int selectedRowIndex;
-  final void Function(int) onSelectedRowIndexChanged;
+  final WindowManagerModel windowManagerModel;
 
   @override
   Widget build(BuildContext context) {
-    return DataTable(
-      showBottomBorder: true,
-      onSelectAll: (selected) {
-        onSelectedRowIndexChanged(-1);
-      },
-      columns: const [
-        DataColumn(
-          label: SizedBox(
-            width: 20,
-            child: Text(
-              'ID',
-              style: TextStyle(
-                fontSize: 16,
+    return ListenableBuilder(
+        listenable: windowManagerModel,
+        builder: (BuildContext context, Widget? widget) {
+          return DataTable(
+            showBottomBorder: true,
+            onSelectAll: (selected) {
+              windowManagerModel.select(null);
+            },
+            columns: const [
+              DataColumn(
+                label: SizedBox(
+                  width: 20,
+                  child: Text(
+                    'ID',
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
-        ),
-        DataColumn(
-          label: SizedBox(
-            width: 120,
-            child: Text(
-              'Type',
-              style: TextStyle(
-                fontSize: 16,
+              DataColumn(
+                label: SizedBox(
+                  width: 120,
+                  child: Text(
+                    'Type',
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
-        ),
-        DataColumn(
-            label: SizedBox(
-              width: 20,
-              child: Text(''),
-            ),
-            numeric: true),
-      ],
-      rows: windows.asMap().entries.map<DataRow>((indexedEntry) {
-        final index = indexedEntry.key;
-        final Window entry = indexedEntry.value;
-        final window = entry;
-        final viewId = window.view.viewId;
-        final archetype = window.archetype;
-        final isSelected = selectedRowIndex == index;
-
-        return DataRow(
-          color: WidgetStateColor.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) {
-              return Theme.of(context).colorScheme.primary.withOpacity(0.08);
-            }
-            return Colors.transparent;
-          }),
-          selected: isSelected,
-          onSelectChanged: (selected) {
-            if (selected != null) {
-              onSelectedRowIndexChanged(selected ? index : -1);
-            }
-          },
-          cells: [
-            DataCell(
-              Text('$viewId'),
-            ),
-            DataCell(
-              Text(archetype.toString().replaceFirst('WindowArchetype.', '')),
-            ),
-            DataCell(
-              IconButton(
-                icon: const Icon(Icons.delete_outlined),
-                onPressed: () {
-                  destroyWindow(context, window);
+              DataColumn(
+                  label: SizedBox(
+                    width: 20,
+                    child: Text(''),
+                  ),
+                  numeric: true),
+            ],
+            rows: (windowManagerModel.windows)
+                .map<DataRow>((KeyedWindowController controller) {
+              return DataRow(
+                key: controller.key,
+                color: WidgetStateColor.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withAlpha(20);
+                  }
+                  return Colors.transparent;
+                }),
+                selected: controller.controller == windowManagerModel.selected,
+                onSelectChanged: (selected) {
+                  if (selected != null) {
+                    windowManagerModel.select(
+                        selected ? controller.controller.view?.viewId : null);
+                  }
                 },
-              ),
-            ),
-          ],
-        );
-      }).toList(),
-    );
+                cells: [
+                  DataCell(
+                    ListenableBuilder(
+                        listenable: controller.controller,
+                        builder: (BuildContext context, Widget? _) => Text(
+                            controller.controller.view != null
+                                ? '${controller.controller.view?.viewId}'
+                                : 'Loading...')),
+                  ),
+                  DataCell(
+                    ListenableBuilder(
+                        listenable: controller.controller,
+                        builder: (BuildContext context, Widget? _) => Text(
+                            controller.controller.type
+                                .toString()
+                                .replaceFirst('WindowArchetype.', ''))),
+                  ),
+                  DataCell(
+                    ListenableBuilder(
+                        listenable: controller.controller,
+                        builder: (BuildContext context, Widget? _) =>
+                            IconButton(
+                              icon: const Icon(Icons.delete_outlined),
+                              onPressed: () async {
+                                await controller.controller.destroy();
+                              },
+                            )),
+                  ),
+                ],
+              );
+            }).toList(),
+          );
+        });
   }
 }
 
-class _WindowCreatorCard extends StatefulWidget {
+class _WindowCreatorCard extends StatelessWidget {
   const _WindowCreatorCard(
       {required this.selectedWindow,
-      required this.positionerSettingsModifier,
-      required this.onDialogOpened,
-      required this.onDialogClosed});
+      required this.windowManagerModel,
+      required this.windowSettings});
 
-  final Window? selectedWindow;
-  final PositionerSettingsModifier positionerSettingsModifier;
-  final void Function(Window) onDialogOpened;
-  final void Function(Window) onDialogClosed;
-
-  @override
-  State<StatefulWidget> createState() => _WindowCreatorCardState();
-}
-
-class _WindowCreatorCardState extends State<_WindowCreatorCard> {
-  WindowSettings _settings = WindowSettings();
+  final WindowController? selectedWindow;
+  final WindowManagerModel windowManagerModel;
+  final WindowSettings windowSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -253,54 +218,10 @@ class _WindowCreatorCardState extends State<_WindowCreatorCard> {
               children: [
                 OutlinedButton(
                   onPressed: () async {
-                    await createRegular(
-                        context: context,
-                        size: _settings.regularSize,
-                        builder: (BuildContext context) {
-                          return const MaterialApp(home: RegularWindowContent());
-                        });
+                    windowManagerModel.add(KeyedWindowController(
+                        controller: RegularWindowController()));
                   },
                   child: const Text('Regular'),
-                ),
-                const SizedBox(height: 8),
-                OutlinedButton(
-                  onPressed: _canBeParentOf(WindowArchetype.popup)
-                      ? () async {
-                          final selectedPositionerSettings = widget
-                                  .positionerSettingsModifier
-                                  .mapping
-                                  .positionerSettingsList[
-                              widget
-                                  .positionerSettingsModifier.positionerIndex];
-                          if (widget.selectedWindow == null) {
-                            return;
-                          }
-
-                          await createPopup(
-                              context: context,
-                              parent: widget.selectedWindow!,
-                              size: _settings.popupSize,
-                              anchorRect: _settings.anchorToWindow
-                                  ? null
-                                  : _clampRectToSize(_settings.anchorRect,
-                                      widget.selectedWindow!.size),
-                              positioner: WindowPositioner(
-                                parentAnchor:
-                                    selectedPositionerSettings.parentAnchor,
-                                childAnchor:
-                                    selectedPositionerSettings.childAnchor,
-                                offset: selectedPositionerSettings.offset,
-                                constraintAdjustment: selectedPositionerSettings
-                                    .constraintAdjustments,
-                              ),
-                              builder: (BuildContext context) {
-                                return const PopupWindowContent();
-                              });
-                        }
-                      : null,
-                  child: Text(_canBeParentOf(WindowArchetype.popup)
-                      ? 'Popup of ID ${widget.selectedWindow!.view.viewId}'
-                      : 'Popup'),
                 ),
                 const SizedBox(height: 8),
                 Container(
@@ -308,15 +229,7 @@ class _WindowCreatorCardState extends State<_WindowCreatorCard> {
                   child: TextButton(
                     child: const Text('SETTINGS'),
                     onPressed: () {
-                      windowSettingsDialog(context, _settings,
-                              widget.onDialogOpened, widget.onDialogClosed)
-                          .then(
-                        (WindowSettings? settings) {
-                          if (settings != null) {
-                            _settings = settings;
-                          }
-                        },
-                      );
+                      windowSettingsDialog(context, windowSettings);
                     },
                   ),
                 ),
@@ -326,112 +239,6 @@ class _WindowCreatorCardState extends State<_WindowCreatorCard> {
           ],
         ),
       ),
-    );
-  }
-
-  // Check if the currently selected window can be made the parent of a
-  // window with the specified archetype.
-  bool _canBeParentOf(WindowArchetype archetype) {
-    return widget.selectedWindow?.canBeParentOf(archetype) ?? false;
-  }
-
-  Rect _clampRectToSize(Rect anchorRect, Size? size) {
-    double left = anchorRect.left.clamp(0, size?.width as double);
-    double top = anchorRect.top.clamp(0, size?.height as double);
-    double right = anchorRect.right.clamp(0, size?.width as double);
-    double bottom = anchorRect.bottom.clamp(0, size?.height as double);
-    return Rect.fromLTRB(left, top, right, bottom);
-  }
-}
-
-class _PositionerEditorCard extends StatefulWidget {
-  const _PositionerEditorCard({required this.positionerSettingsModifier});
-
-  final PositionerSettingsModifier positionerSettingsModifier;
-
-  @override
-  State<_PositionerEditorCard> createState() => _PositionerEditorCardState();
-}
-
-class _PositionerEditorCardState extends State<_PositionerEditorCard> {
-  @override
-  Widget build(BuildContext context) {
-    return Card.outlined(
-      margin: const EdgeInsets.symmetric(horizontal: 25),
-      child: Padding(
-          padding: const EdgeInsets.fromLTRB(25, 0, 15, 5),
-          child: ListenableBuilder(
-              listenable: widget.positionerSettingsModifier,
-              builder: (BuildContext context, _) {
-                final positionerSettingsList = widget
-                    .positionerSettingsModifier.mapping.positionerSettingsList;
-                final selectedName = positionerSettingsList[
-                        widget.positionerSettingsModifier.positionerIndex]
-                    .name;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(top: 10),
-                      child: Text(
-                        'Positioner',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16.0,
-                        ),
-                      ),
-                    ),
-                    ListTile(
-                      title: const Text('Preset'),
-                      subtitle: DropdownButton(
-                        items: positionerSettingsList
-                            .map((PositionerSetting setting) =>
-                                DropdownMenuItem<String>(
-                                  value: setting.name,
-                                  child: Text(setting.name),
-                                ))
-                            .toList(),
-                        value: selectedName,
-                        isExpanded: true,
-                        focusColor: Colors.transparent,
-                        onChanged: (String? value) {
-                          setState(() {
-                            widget.positionerSettingsModifier.setSelectedIndex(
-                              positionerSettingsList.indexWhere(
-                                  (setting) => setting.name == value),
-                            );
-                          });
-                        },
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: TextButton(
-                          child: const Text('CUSTOM PRESET'),
-                          onPressed: () async {
-                            final settings = await customPositionerDialog(
-                              context,
-                              positionerSettingsList.last,
-                            );
-                            if (settings != null) {
-                              setState(() {
-                                final pos = positionerSettingsList.length - 1;
-                                widget.positionerSettingsModifier
-                                    .setAtIndex(settings, pos);
-                                widget.positionerSettingsModifier
-                                    .setSelectedIndex(pos);
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                );
-              })),
     );
   }
 }

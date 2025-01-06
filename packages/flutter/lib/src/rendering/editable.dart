@@ -2550,6 +2550,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         super.paint,
         Offset.zero,
       );
+    } else if (selection!.isCollapsed) {
+      context.pushLayer(
+        LeaderLayer(link: endHandleLayerLink, offset: startPoint + offset),
+        super.paint,
+        Offset.zero,
+      );
     }
   }
 

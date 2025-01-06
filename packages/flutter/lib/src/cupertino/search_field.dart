@@ -133,6 +133,11 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.onTap,
     this.autocorrect = true,
     this.enabled,
+    this.cursorWidth = 2.0,
+    this.cursorHeight,
+    this.cursorRadius = const Radius.circular(2.0),
+    this.cursorOpacityAnimates = true,
+    this.cursorColor,
   })  : assert(
           !((decoration != null) && (backgroundColor != null)),
           'Cannot provide both a background color and a decoration\n'
@@ -327,6 +332,21 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// respond to touch events including the [prefixIcon] and [suffixIcon] button.
   final bool? enabled;
 
+  /// {@macro flutter.widgets.editableText.cursorWidth}
+  final double cursorWidth;
+
+  /// {@macro flutter.widgets.editableText.cursorHeight}
+  final double? cursorHeight;
+
+  /// {@macro flutter.widgets.editableText.cursorRadius}
+  final Radius cursorRadius;
+
+  /// {@macro flutter.widgets.editableText.cursorOpacityAnimates}
+  final bool cursorOpacityAnimates;
+
+  /// The color to use when painting the cursor.
+  final Color? cursorColor;
+
   @override
   State<StatefulWidget> createState() => _CupertinoSearchTextFieldState();
 }
@@ -514,6 +534,11 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       keyboardType: widget.keyboardType,
       onTap: widget.onTap,
       enabled: widget.enabled ?? true,
+      cursorWidth: widget.cursorWidth,
+      cursorHeight: widget.cursorHeight,
+      cursorRadius: widget.cursorRadius,
+      cursorOpacityAnimates: widget.cursorOpacityAnimates,
+      cursorColor: widget.cursorColor,
       suffixMode: widget.suffixMode,
       placeholder: placeholder,
       placeholderStyle: placeholderStyle,

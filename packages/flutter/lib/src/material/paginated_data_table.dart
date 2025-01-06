@@ -331,6 +331,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   int _selectedRowCount = 0;
   final Map<int, DataRow?> _rows = <int, DataRow?>{};
 
+  @protected
   @override
   void initState() {
     super.initState();
@@ -339,6 +340,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     _handleDataSourceChanged();
   }
 
+  @protected
   @override
   void didUpdateWidget(PaginatedDataTable oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -349,6 +351,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     }
   }
 
+  @protected
   @override
   void reassemble() {
     super.reassemble();
@@ -366,6 +369,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     _updateCaches();
   }
 
+  @protected
   @override
   void dispose() {
     widget.source.removeListener(_handleDataSourceChanged);
@@ -468,6 +472,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
 
   final GlobalKey _tableKey = GlobalKey();
 
+  @protected
   @override
   Widget build(BuildContext context) {
     // TODO(ianh): This whole build function doesn't handle RTL yet.

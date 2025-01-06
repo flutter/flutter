@@ -2304,7 +2304,7 @@ void main() {
     expect(material.color, backgroundColor);
   });
 
-  testWidgets('Default iconAlignment', (WidgetTester tester) async {
+  testWidgets('Default TextButton icon alignment', (WidgetTester tester) async {
     Widget buildWidget({ required TextDirection textDirection }) {
       return MaterialApp(
         home: Directionality(
@@ -2339,7 +2339,7 @@ void main() {
     expect(buttonTopRight.dx, iconTopRight.dx + 12.0); // 12.0 - padding between icon and button edge.
   });
 
-  testWidgets('iconAlignment can be customized', (WidgetTester tester) async {
+  testWidgets('TextButton icon alignment can be customized', (WidgetTester tester) async {
     Widget buildWidget({
       required TextDirection textDirection,
       required IconAlignment iconAlignment,
@@ -2416,6 +2416,35 @@ void main() {
     expect(buttonTopLeft.dx, iconTopLeft.dx - 16.0); // 16.0 - padding between icon and button edge.
   });
 
+  testWidgets('TextButton icon alignment respects ButtonStyle.iconAlignment', (WidgetTester tester) async {
+    Widget buildButton({ IconAlignment? iconAlignment }) {
+      return MaterialApp(
+        home: Center(
+          child: TextButton.icon(
+            style: ButtonStyle(iconAlignment: iconAlignment),
+            onPressed: () {},
+            icon: const Icon(Icons.add),
+            label: const Text('button'),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildButton());
+
+    final Offset buttonTopLeft = tester.getTopLeft(find.byType(Material).last);
+    final Offset iconTopLeft = tester.getTopLeft(find.byIcon(Icons.add));
+
+    expect(buttonTopLeft.dx, iconTopLeft.dx - 12.0);
+
+    await tester.pumpWidget(buildButton(iconAlignment: IconAlignment.end));
+
+    final Offset buttonTopRight = tester.getTopRight(find.byType(Material).last);
+    final Offset iconTopRight = tester.getTopRight(find.byIcon(Icons.add));
+
+    expect(buttonTopRight.dx, iconTopRight.dx + 16.0);
+  });
+
   testWidgets('treats a hovering stylus like a mouse', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
@@ -2476,6 +2505,7 @@ void main() {
               style: TextButton.styleFrom(
                 iconColor: iconColor,
                 iconSize: iconSize,
+                iconAlignment: IconAlignment.end,
                 disabledIconColor: disabledIconColor,
               ),
               onPressed: enabled ? () {} : null,
@@ -2495,5 +2525,9 @@ void main() {
     // Test disabled button.
     await tester.pumpWidget(buildButton(enabled: false));
     expect(iconStyle(tester, Icons.add).color, disabledIconColor);
+
+    final Offset buttonTopRight = tester.getTopRight(find.byType(Material).last);
+    final Offset iconTopRight = tester.getTopRight(find.byIcon(Icons.add));
+    expect(buttonTopRight.dx, iconTopRight.dx + 16.0);
   });
 }

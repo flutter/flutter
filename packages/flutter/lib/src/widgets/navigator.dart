@@ -225,7 +225,9 @@ abstract class Route<T> extends _RoutePlaceholder {
   void _updateSettings(RouteSettings newSettings) {
     if (_settings != newSettings) {
       _settings = newSettings;
-      changedInternalState();
+      if (_navigator != null) {
+        changedInternalState();
+      }
     }
   }
 
@@ -3101,10 +3103,6 @@ class _RouteEntry extends RouteTransitionRecord {
   void handleAdd({ required NavigatorState navigator, required Route<dynamic>? previousPresent }) {
     assert(currentState == _RouteLifecycle.add);
     assert(navigator._debugLocked);
-    assert(route._navigator == null);
-    route._navigator = navigator;
-    route.install();
-    assert(route.overlayEntries.isNotEmpty);
     currentState = _RouteLifecycle.adding;
     navigator._observedRouteAdditions.add(
       _NavigatorPushObservation(route, previousPresent),
@@ -3229,6 +3227,10 @@ class _RouteEntry extends RouteTransitionRecord {
   }
 
   void didAdd({ required NavigatorState navigator, required bool isNewFirst}) {
+    assert(route._navigator == null);
+    route._navigator = navigator;
+    route.install();
+    assert(route.overlayEntries.isNotEmpty);
     route.didAdd();
     currentState = _RouteLifecycle.idle;
     if (isNewFirst) {
@@ -3704,6 +3706,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return true;
   }
 
+  @protected
   @override
   void initState() {
     super.initState();
@@ -3740,6 +3743,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   int get _nextPagelessRestorationScopeId => _rawNextPagelessRestorationScopeId.value++;
 
+  @protected
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_rawNextPagelessRestorationScopeId, 'id');
@@ -3808,6 +3812,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     assert(() { _debugLocked = false; return true; }());
   }
 
+  @protected
   @override
   void didToggleBucket(RestorationBucket? oldBucket) {
     super.didToggleBucket(oldBucket);
@@ -3820,12 +3825,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   String? get restorationId => widget.restorationScopeId;
 
+  @protected
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _updateHeroController(HeroControllerScope.maybeOf(context));
     for (final _RouteEntry entry in _history) {
-      entry.route.changedExternalState();
+      if (entry.route.navigator == this) {
+        entry.route.changedExternalState();
+      }
     }
   }
 
@@ -3911,6 +3919,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
   }
 
+  @protected
   @override
   void didUpdateWidget(Navigator oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -3945,7 +3954,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
 
     for (final _RouteEntry entry in _history) {
-      entry.route.changedExternalState();
+      if (entry.route.navigator == this) {
+        entry.route.changedExternalState();
+      }
     }
   }
 
@@ -3963,6 +3974,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
   }
 
+  @protected
   @override
   void deactivate() {
     for (final NavigatorObserver observer in _effectiveObservers) {
@@ -3972,6 +3984,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     super.deactivate();
   }
 
+  @protected
   @override
   void activate() {
     super.activate();
@@ -3982,6 +3995,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
   }
 
+  @protected
   @override
   void dispose() {
     assert(!_debugLocked);
@@ -5640,6 +5654,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return result;
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(!_debugLocked);

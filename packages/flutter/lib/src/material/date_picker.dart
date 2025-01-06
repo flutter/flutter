@@ -334,6 +334,7 @@ class DatePickerDialog extends StatefulWidget {
     this.onDatePickerModeChange,
     this.switchToInputEntryModeIcon,
     this.switchToCalendarEntryModeIcon,
+    this.insetPadding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
   }) : initialDate = initialDate == null ? null : DateUtils.dateOnly(initialDate),
        firstDate = DateUtils.dateOnly(firstDate),
        lastDate = DateUtils.dateOnly(lastDate),
@@ -436,7 +437,6 @@ class DatePickerDialog extends StatefulWidget {
   ///    Flutter.
   final String? restorationId;
 
-
   /// Called when the [DatePickerDialog] is toggled between
   /// [DatePickerEntryMode.calendar],[DatePickerEntryMode.input].
   ///
@@ -450,6 +450,13 @@ class DatePickerDialog extends StatefulWidget {
 
   /// {@macro flutter.material.date_picker.switchToCalendarEntryModeIcon}
   final Icon? switchToCalendarEntryModeIcon;
+
+  /// The amount of padding added to [MediaQueryData.viewInsets] on the outside
+  /// of the dialog. This defines the minimum space between the screen's edges
+  /// and the dialog.
+  ///
+  /// Defaults to `EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0)`.
+  final EdgeInsets insetPadding;
 
   @override
   State<DatePickerDialog> createState() => _DatePickerDialogState();
@@ -520,9 +527,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
   }
 
   void _handleDateChanged(DateTime date) {
-    setState(() {
-      _selectedDate.value = date;
-    });
+    setState(() => _selectedDate.value = date);
   }
 
   Size _dialogSize(BuildContext context) {
@@ -725,7 +730,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
       shape: useMaterial3
         ? datePickerTheme.shape ?? defaults.shape
         : datePickerTheme.shape ?? dialogTheme.shape ?? defaults.shape,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+      insetPadding: widget.insetPadding,
       clipBehavior: Clip.antiAlias,
       child: AnimatedContainer(
         width: dialogSize.width,

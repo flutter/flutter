@@ -20,6 +20,7 @@ import 'debug.dart';
 import 'divider.dart';
 import 'icon_button.dart';
 import 'icons.dart';
+import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
@@ -43,7 +44,7 @@ const double _subHeaderHeight = 52.0;
 const double _monthNavButtonsWidth = 108.0;
 
 // 3.0 is the maximum scale factor on mobile phones. As of 07/30/24, iOS goes up
-// to a max of 3.0 text sxale factor, and Android goes up to 2.0. This is the
+// to a max of 3.0 text scale factor, and Android goes up to 2.0. This is the
 // default used for non-range date pickers. This default is changed to a lower
 // value at different parts of the date pickers depending on content, and device
 // orientation.
@@ -1056,7 +1057,7 @@ class _Day extends StatefulWidget {
   final bool isSelectedDay;
   final bool isToday;
   final ValueChanged<DateTime> onChanged;
-  final FocusNode? focusNode;
+  final FocusNode focusNode;
 
   @override
   State<_Day> createState() => _DayState();
@@ -1111,7 +1112,7 @@ class _DayState extends State<_Day> {
           shape: dayShape,
         );
 
-    Widget dayWidget = DecoratedBox(
+    Widget dayWidget = Ink(
       decoration: decoration,
       child: Center(
         child: Text(localizations.formatDecimal(widget.day.day), style: dayStyle?.apply(color: dayForegroundColor)),

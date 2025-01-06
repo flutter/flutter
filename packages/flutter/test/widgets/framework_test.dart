@@ -2424,11 +2424,11 @@ class _DummyMultiChildWidget extends Widget {
 
   final List<Widget> children;
   @override
-  Element createElement() => _DummyMuitiChildElement(this);
+  Element createElement() => _DummyMultiChildElement(this);
 }
 
-class _DummyMuitiChildElement extends Element {
-  _DummyMuitiChildElement(super.widget);
+class _DummyMultiChildElement extends Element {
+  _DummyMultiChildElement(super.widget);
 
   @override
   bool get debugDoingBuild => throw UnimplementedError();

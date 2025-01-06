@@ -2429,6 +2429,13 @@ void main() {
     expect(tester.getTopLeft(find.text('-item0-')).dx, 8);
   });
 
+  Finder findInputDecoratorBorderPainter() {
+    return find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_BorderContainer'),
+      matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
+    );
+  }
+
   testWidgets('DropdownButton can be focused, and has focusColor', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final UniqueKey buttonKey = UniqueKey();
@@ -2451,14 +2458,136 @@ void main() {
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButtonFormField');
     addTearDown(focusNode.dispose);
 
-    await tester.pumpWidget(buildFrame(isFormField: true, buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, autofocus: true));
-    await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
-    expect(focusNode.hasPrimaryFocus, isTrue);
-    expect(find.byType(Material), paints ..rect(rect: const Rect.fromLTRB(0.0, 268.0, 800.0, 332.0), color: const Color(0x1f000000)));
+    await tester.pumpWidget(buildFrame(
+      isFormField: true,
+      buttonKey: buttonKey,
+      onChanged: onChanged,
+      focusNode: focusNode,
+      autofocus: true,
+      decoration: const InputDecoration(filled: true),
+    ));
 
-    await tester.pumpWidget(buildFrame(isFormField: true, buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, focusColor: const Color(0xff00ff00)));
-    await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
-    expect(find.byType(Material), paints ..rect(rect: const Rect.fromLTRB(0.0, 268.0, 800.0, 332.0), color: const Color(0x1f00ff00)));
+    await tester.pump(); // Pump a frame for autofocus to take effect.
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    // Default focus Color from InputDecorator defaults.
+    final ThemeData theme = Theme.of(tester.element(find.byType(InputDecorator)));
+    expect(findInputDecoratorBorderPainter(), paints
+      ..path(
+        style: PaintingStyle.fill,
+        color: theme.colorScheme.surfaceContainerHighest,
+      ),
+    );
+
+    // Focus color from Decoration.
+    await tester.pumpWidget(buildFrame(
+      isFormField: true,
+      buttonKey: buttonKey,
+      onChanged: onChanged,
+      focusNode: focusNode,
+      decoration: const InputDecoration(
+        filled: true,
+        focusColor: Color(0xff00ffff),
+      ),
+    ));
+
+    expect(findInputDecoratorBorderPainter(), paints
+      ..path(
+        style: PaintingStyle.fill,
+        color: const Color(0xff00ffff),
+      ),
+    );
+
+    // Focus color from focusColor property.
+    await tester.pumpWidget(buildFrame(
+      isFormField: true,
+      buttonKey: buttonKey,
+      onChanged: onChanged,
+      focusNode: focusNode,
+      decoration: const InputDecoration(
+        filled: true,
+        focusColor: Color(0xff00ffff),
+      ),
+      focusColor: const Color(0xff00ff00),
+    ));
+
+    expect(findInputDecoratorBorderPainter(), paints
+      ..path(
+        style: PaintingStyle.fill,
+        color: const Color(0xff00ff00),
+      ),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/147069.
+  testWidgets('DropdownButtonFormField can be hovered', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final UniqueKey buttonKey = UniqueKey();
+
+    await tester.pumpWidget(buildFrame(
+      isFormField: true,
+      buttonKey: buttonKey,
+      onChanged: onChanged,
+    ));
+    await tester.pump();
+
+    // Check inputDecorator.isHovering value because DropdownButtonFormField
+    // delegates to the InputDecorator which manages hover overlay.
+    InputDecorator inputDecorator = tester.widget(find.byType(InputDecorator));
+    expect(inputDecorator.isHovering, false);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.moveTo(tester.getCenter(find.byKey(buttonKey)));
+    await tester.pump();
+
+    inputDecorator = tester.widget(find.byType(InputDecorator));
+    expect(inputDecorator.isHovering, true);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/151460.
+  testWidgets('DropdownButtonFormField has hover color', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final UniqueKey buttonKey = UniqueKey();
+
+    await tester.pumpWidget(buildFrame(
+      isFormField: true,
+      buttonKey: buttonKey,
+      onChanged: onChanged,
+      // Setting InputDecoration.filled to true is required to get overlay showing.
+      decoration: const InputDecoration(filled: true),
+    ));
+    await tester.pump();
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.moveTo(tester.getCenter(find.byKey(buttonKey)));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 15)); // Hover animation.
+
+    // Default hover color.
+    final ThemeData theme = Theme.of(tester.element(find.byType(InputDecorator)));
+    expect(findInputDecoratorBorderPainter(), paints
+      ..path(
+        style: PaintingStyle.fill,
+        color: Color.alphaBlend(theme.hoverColor, theme.colorScheme.surfaceContainerHighest),
+      ),
+    );
+
+    // Custom hover color.
+    const Color hoverColor = Color(0xaa00ff00);
+    await tester.pumpWidget(buildFrame(
+      isFormField: true,
+      buttonKey: buttonKey,
+      onChanged: onChanged,
+      decoration: const InputDecoration(
+        filled: true,
+        hoverColor: hoverColor),
+    ));
+    expect(findInputDecoratorBorderPainter(), paints
+      ..path(
+        style: PaintingStyle.fill,
+        color: Color.alphaBlend(hoverColor, theme.colorScheme.surfaceContainerHighest),
+      ),
+    );
   });
 
   testWidgets("DropdownButton won't be focused if not enabled", (WidgetTester tester) async {
@@ -4023,7 +4152,7 @@ void main() {
     });
   });
 
-  testWidgets('BorderRadius property clips dropdown button and dropdown menu', (WidgetTester tester) async {
+  testWidgets('BorderRadius property clips dropdown menu', (WidgetTester tester) async {
     const double radius = 20.0;
 
     await tester.pumpWidget(
@@ -4046,14 +4175,6 @@ void main() {
         ),
       ),
     );
-
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    await gesture.moveTo(tester.getCenter(find.byType(DropdownButtonFormField<String>)));
-    await tester.pumpAndSettle();
-
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paints..rrect(rrect: RRect.fromLTRBR(0.0, 276.0, 800.0, 324.0, const Radius.circular(radius))));
 
     await tester.tap(find.text('One'));
     await tester.pumpAndSettle();

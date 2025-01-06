@@ -202,7 +202,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     canvas.save();
     canvas.scale(1.0 / devicePixelRatio, 1.0 / devicePixelRatio);
     if (rootNode != null) {
-      _paint(canvas, rootNode, _findDepth(rootNode));
+      _paint(canvas, rootNode, _findDepth(rootNode), 0, 0);
     }
     if (pointerPosition != null) {
       final Paint paint = Paint();
@@ -332,14 +332,14 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     return childrenDepth + 1;
   }
 
-  void _paint(Canvas canvas, SemanticsNode node, int rank) {
+  void _paint(Canvas canvas, SemanticsNode node, int rank, int indexInParent, int level) {
     canvas.save();
     if (node.transform != null) {
       canvas.transform(node.transform!.storage);
     }
     final Rect rect = node.rect;
     if (!rect.isEmpty) {
-      final Color lineColor = Color(0xFF000000 + math.Random(node.id).nextInt(0xFFFFFF));
+      final Color lineColor = _colorForNode(indexInParent, level);
       final Rect innerRect = rect.deflate(rank * 1.0);
       if (innerRect.isEmpty) {
         final Paint fill = Paint()
@@ -361,12 +361,30 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     }
     if (!node.mergeAllDescendantsIntoThisNode) {
       final int childRank = rank - 1;
+      final int childLevel = level + 1;
+      int childIndex = 0;
       node.visitChildren((SemanticsNode child) {
-        _paint(canvas, child, childRank);
+        _paint(canvas, child, childRank, childIndex, childLevel);
+        childIndex += 1;
         return true;
       });
     }
     canvas.restore();
+  }
+
+  static Color _colorForNode(int index, int level) {
+    return HSLColor.fromAHSL(
+      1.0,
+      // Use custom hash to ensure stable value regardless of Dart changes
+      360.0 * math.Random(_getColorSeed(index, level)).nextDouble(),
+      1.0,
+      0.7,
+    ).toColor();
+  }
+
+  static int _getColorSeed(int level, int index) {
+    // Should be no collision as long as children number < 10000.
+    return level * 10000 + index;
   }
 }
 

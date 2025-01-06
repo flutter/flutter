@@ -15,7 +15,7 @@ void main() {
     final double itemHeight = tester.getSize(find.widgetWithText(Card, 'Item 0.15')).height;
 
     // The scroll view is 600 pixels high and the big orange
-    // "AlignedItem" is precedeed by 15 regular items. Scroll up enough
+    // "AlignedItem" is preceded by 15 regular items. Scroll up enough
     // to make it partially visible.
     await tester.drag(find.byType(CustomScrollView), Offset(0, 600 - 15.5 * itemHeight));
     await tester.pumpAndSettle();

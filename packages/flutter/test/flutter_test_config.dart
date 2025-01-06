@@ -44,6 +44,10 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   if (_isLeakTrackingEnabled()) {
     LeakTesting.enable();
     LeakTracking.warnForUnsupportedPlatforms = false;
+    // Customized link to documentation on how to troubleshoot leaks,
+    // to print in the error message.
+    LeakTracking.troubleshootingDocumentationLink =
+        'https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Leak-tracking.md';
     LeakTesting.settings = LeakTesting.settings.withIgnored(
       createdByTestHelpers: true,
     );

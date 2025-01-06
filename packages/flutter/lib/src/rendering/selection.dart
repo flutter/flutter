@@ -90,6 +90,11 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   /// Return `null` if nothing is selected.
   SelectedContent? getSelectedContent();
 
+  /// Gets the [SelectedContentRange] representing the selected range in this object.
+  ///
+  /// When nothing is selected, subclasses should return `null`.
+  SelectedContentRange? getSelection();
+
   /// Handles the [SelectionEvent] sent to this object.
   ///
   /// The subclasses need to update their selections or delegate the
@@ -102,19 +107,113 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   /// See also:
   ///  * [SelectionEventType], which contains all of the possible types.
   SelectionResult dispatchSelectionEvent(SelectionEvent event);
+
+  /// The length of the content in this object.
+  int get contentLength;
+}
+
+/// This class stores the range information of the selection under a [Selectable]
+/// or [SelectionHandler].
+///
+/// The [SelectedContentRange] for a given [Selectable] or [SelectionHandler]
+/// can be retrieved by calling [SelectionHandler.getSelection].
+@immutable
+class SelectedContentRange with Diagnosticable {
+  /// Creates a [SelectedContentRange] with the given values.
+  const SelectedContentRange({
+    required this.startOffset,
+    required this.endOffset,
+  }) : assert((startOffset >= 0 && endOffset >= 0));
+
+  /// The start of the selection relative to the start of the content.
+  ///
+  /// {@template flutter.rendering.selection.SelectedContentRange.selectionOffsets}
+  /// For example a [Text] widget's content is in the format of an [TextSpan] tree.
+  ///
+  /// Take the [Text] widget and [TextSpan] tree below:
+  ///
+  /// {@tool snippet}
+  /// ```dart
+  /// const Text.rich(
+  ///   TextSpan(
+  ///     text: 'Hello world, ',
+  ///     children: <InlineSpan>[
+  ///       WidgetSpan(
+  ///         child: Text('how are you today? '),
+  ///       ),
+  ///       TextSpan(
+  ///         text: 'Good, thanks for asking.',
+  ///       ),
+  ///     ],
+  ///   ),
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// If we select from the beginning of 'world' to the end of the '.'
+  /// at the end of the [TextSpan] tree, the [SelectedContentRange] from
+  /// [SelectionHandler.getSelection] will be relative to the text of the
+  /// [TextSpan] tree, with [WidgetSpan] content being flattened. The [startOffset]
+  /// will be 6, and [endOffset] will be 56. This takes into account the
+  /// length of the content in the [WidgetSpan], which is 19, making the overall
+  /// length of the content 56.
+  /// {@endtemplate}
+  final int startOffset;
+
+  /// The end of the selection relative to the start of the content.
+  ///
+  /// {@macro flutter.rendering.selection.SelectedContentRange.selectionOffsets}
+  final int endOffset;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is SelectedContentRange
+        && other.startOffset == startOffset
+        && other.endOffset == endOffset;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      startOffset,
+      endOffset,
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IntProperty('startOffset', startOffset));
+    properties.add(IntProperty('endOffset', endOffset));
+  }
 }
 
 /// The selected content in a [Selectable] or [SelectionHandler].
 // TODO(chunhtai): Add more support for rich content.
 // https://github.com/flutter/flutter/issues/104206.
-class SelectedContent {
+@immutable
+class SelectedContent with Diagnosticable {
   /// Creates a selected content object.
   ///
   /// Only supports plain text.
-  const SelectedContent({required this.plainText});
+  const SelectedContent({
+    required this.plainText,
+  });
 
   /// The selected content in plain text format.
   final String plainText;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('plainText', plainText));
+  }
 }
 
 /// A mixin that can be selected by users when under a [SelectionArea] widget.
@@ -138,7 +237,7 @@ class SelectedContent {
 /// {@macro flutter.rendering.SelectionHandler}
 ///
 /// See also:
-///  * [SelectionArea], which provides an overview of selection system.
+///  * [SelectableRegion], which provides an overview of selection system.
 mixin Selectable implements SelectionHandler {
   /// {@macro flutter.rendering.RenderObject.getTransformTo}
   Matrix4 getTransformTo(RenderObject? ancestor);
@@ -628,7 +727,7 @@ enum SelectionStatus {
 /// The positions in geometry are in local coordinates of the [SelectionHandler]
 /// or [Selectable].
 @immutable
-class SelectionGeometry {
+class SelectionGeometry with Diagnosticable {
   /// Creates a selection geometry object.
   ///
   /// If any of the [startSelectionPoint] and [endSelectionPoint] is not null,
@@ -727,6 +826,16 @@ class SelectionGeometry {
       status,
       hasContent,
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<SelectionPoint>('startSelectionPoint', startSelectionPoint));
+    properties.add(DiagnosticsProperty<SelectionPoint>('endSelectionPoint', endSelectionPoint));
+    properties.add(IterableProperty<Rect>('selectionRects', selectionRects));
+    properties.add(EnumProperty<SelectionStatus>('status', status));
+    properties.add(DiagnosticsProperty<bool>('hasContent', hasContent));
   }
 }
 

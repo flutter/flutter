@@ -611,7 +611,7 @@ abstract final class CupertinoColors {
     highContrastColor: Color.fromARGB(94, 60, 60, 67),
     darkHighContrastColor: Color.fromARGB(173, 84, 84, 88),
     elevatedColor: Color.fromARGB(73, 60, 60, 67),
-    darkElevatedColor: Color.fromARGB(153, 84, 84, 88),
+    darkElevatedColor: Color.fromARGB(153, 210, 210, 210),
     highContrastElevatedColor: Color.fromARGB(94, 60, 60, 67),
     darkHighContrastElevatedColor: Color.fromARGB(173, 84, 84, 88),
   );
@@ -1148,6 +1148,11 @@ class CupertinoDynamicColor with Diagnosticable implements Color {
 
   @override
   int get value => _effectiveColor.value;
+
+  @override
+  // TODO(matanl): Remove once https://github.com/flutter/engine/pull/56329 lands in the framework.
+  // ignore: override_on_non_overriding_member, public_member_api_docs
+  int toARGB32() => value;
 
   @override
   int get alpha => _effectiveColor.alpha;

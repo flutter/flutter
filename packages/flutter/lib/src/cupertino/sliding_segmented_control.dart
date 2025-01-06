@@ -1280,7 +1280,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
 
     for (int index = 0; index < children.length; index += 2) {
       // Children contains both segment and separator and the order is segment ->
-      // separator -> segment. So to paint separators, indes should start from 0 and
+      // separator -> segment. So to paint separators, index should start from 0 and
       // the step should be 2.
       _paintChild(context, offset, children[index]);
     }

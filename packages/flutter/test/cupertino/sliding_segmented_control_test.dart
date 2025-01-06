@@ -400,7 +400,7 @@ void main() {
     expect(getHighlightedIndex(tester), null);
   });
 
-  testWidgets('Disabled segment can be selected programmtically', (WidgetTester tester) async {
+  testWidgets('Disabled segment can be selected programmatically', (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('Child 1'),
       1: Text('Child 2'),

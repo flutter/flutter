@@ -81,6 +81,7 @@ class _TransformationControllerExampleState extends State<TransformationControll
   @override
   void dispose() {
     _controllerReset.dispose();
+    _transformationController.dispose();
     super.dispose();
   }
 

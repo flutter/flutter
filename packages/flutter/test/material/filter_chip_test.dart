@@ -10,6 +10,8 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/feedback_tester.dart';
@@ -1323,5 +1325,79 @@ void main() {
     ));
 
     expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
+  });
+
+  testWidgets('FilterChip mouse cursor behavior', (WidgetTester tester) async {
+    const SystemMouseCursor customCursor = SystemMouseCursors.grab;
+
+    await tester.pumpWidget(wrapForChip(
+      child:  Center(
+        child: FilterChip(
+          mouseCursor: customCursor,
+          label: const Text('Chip'),
+          onSelected: (bool value) {},
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+   );
+
+    final Offset chip = tester.getCenter(find.text('Chip'));
+    await gesture.moveTo(chip);
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      customCursor,
+    );
+  });
+
+  testWidgets('Mouse cursor resolves in focused/unfocused/disabled states', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Chip');
+    addTearDown(focusNode.dispose);
+
+    Widget buildChip({ required bool enabled }) {
+      return wrapForChip(
+        child: Center(
+          child: FilterChip(
+            mouseCursor: const WidgetStateMouseCursor.fromMap(
+              <WidgetStatesConstraint, MouseCursor>{
+                WidgetState.disabled: SystemMouseCursors.forbidden,
+                WidgetState.focused: SystemMouseCursors.grab,
+                WidgetState.selected: SystemMouseCursors.click,
+                WidgetState.any: SystemMouseCursors.basic,
+              },
+            ),
+            focusNode: focusNode,
+            label: const Text('Chip'),
+            onSelected: enabled ? (bool value) {} : null,
+          ),
+        ),
+      );
+    }
+
+    // Unfocused case.
+    await tester.pumpWidget(buildChip(enabled: true));
+    final TestGesture gesture1 = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    addTearDown(gesture1.removePointer);
+    await gesture1.addPointer(location: tester.getCenter(find.text('Chip')));
+    await tester.pump();
+    await gesture1.moveTo(tester.getCenter(find.text('Chip')));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Focused case.
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+
+    // Disabled case.
+    await tester.pumpWidget(buildChip(enabled: false));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
   });
 }

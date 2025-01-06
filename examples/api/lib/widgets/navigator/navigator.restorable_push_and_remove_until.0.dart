@@ -13,8 +13,12 @@ class RestorablePushAndRemoveUntilExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: RestorablePushAndRemoveUntilExample(),
+    return const RootRestorationScope(
+      restorationId: 'app',
+      child: MaterialApp(
+        restorationScopeId: 'app',
+        home: RestorablePushAndRemoveUntilExample(),
+      ),
     );
   }
 }

@@ -82,10 +82,10 @@ void main() {
   }
 
   ShapeDecoration? findDayDecoration(WidgetTester tester, String day) {
-    return tester.widget<DecoratedBox>(
+    return tester.widget<Ink>(
       find.ancestor(
         of: find.text(day),
-        matching: find.byType(DecoratedBox)
+        matching: find.byType(Ink)
       ),
     ).decoration as ShapeDecoration?;
   }
@@ -756,7 +756,6 @@ void main() {
           datePickerTheme: DatePickerThemeData(
             dayOverlayColor: dayOverlayColor,
           ),
-          useMaterial3: true,
         ),
         home: Directionality(
           textDirection: TextDirection.ltr,
@@ -776,17 +775,25 @@ void main() {
       ),
     );
 
+    MaterialInkController findDayGridMaterial(WidgetTester tester) {
+      // All days are painted on the same Material widget.
+      // Use an arbitrary day to find this Material.
+      return Material.of(tester.element(find.text('17')));
+    }
+
     // Test the hover overlay color.
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     final TestGesture gesture = await tester.createGesture(
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.text('20')));
     await tester.pumpAndSettle();
+
     expect(
-      inkFeatures,
+      findDayGridMaterial(tester),
       paints
+        ..circle() // Today decoration.
+        ..circle() // Selected day decoration.
         ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered})),
     );
 
@@ -796,16 +803,20 @@ void main() {
     if (kIsWeb) {
       // An extra circle is painted on the web for the hovered state.
       expect(
-        inkFeatures,
+        findDayGridMaterial(tester),
         paints
+          ..circle() // Today decoration.
+          ..circle() // Selected day decoration.
           ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
           ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
           ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
       );
     } else {
       expect(
-        inkFeatures,
+        findDayGridMaterial(tester),
         paints
+          ..circle() // Today decoration.
+          ..circle() // Selected day decoration.
           ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
           ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
       );
@@ -822,8 +833,10 @@ void main() {
 
     // Test the focused overlay color.
     expect(
-      inkFeatures,
+      findDayGridMaterial(tester),
       paints
+        ..circle() // Today decoration.
+        ..circle() // Selected day decoration.
         ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.focused})),
     );
   });

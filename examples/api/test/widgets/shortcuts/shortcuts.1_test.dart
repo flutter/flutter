@@ -55,7 +55,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/156806.
-  testWidgets('SingleActivator is used instead of LogiccalKeySet', (WidgetTester tester) async {
+  testWidgets('SingleActivator is used instead of LogicalKeySet', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ShortcutsExampleApp(),
     );

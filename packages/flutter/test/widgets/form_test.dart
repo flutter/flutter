@@ -139,44 +139,52 @@ void main() {
     await checkErrorText('');
   });
 
-  testWidgets('Should announce error text when validate returns error', (WidgetTester tester) async {
-    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
-              child: Material(
-                child: Form(
-                  key: formKey,
-                  child: TextFormField(
-                    validator: (_)=> 'error',
-                  ),
+  testWidgets('Should announce only the first error message when validate returns errors', (WidgetTester tester) async {
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  await tester.pumpWidget(
+    MaterialApp(
+      home: MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Material(
+              child: Form(
+                key: formKey,
+                child: Column(
+                  children: <Widget>[
+                    TextFormField(
+                      validator: (_) => 'First error message',
+                    ),
+                    TextFormField(
+                      validator: (_) => 'Second error message',
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ),
       ),
-    );
-    formKey.currentState!.reset();
-    await tester.enterText(find.byType(TextFormField), '');
-    await tester.pump();
+    ),
+  );
+  formKey.currentState!.reset();
+  await tester.enterText(find.byType(TextFormField).first, '');
+  await tester.pump();
 
-    // Manually validate.
-    expect(find.text('error'), findsNothing);
-    formKey.currentState!.validate();
-    await tester.pump();
-    expect(find.text('error'), findsOneWidget);
+  // Manually validate.
+  expect(find.text('First error message'), findsNothing);
+  expect(find.text('Second error message'), findsNothing);
+  formKey.currentState!.validate();
+  await tester.pump();
+  expect(find.text('First error message'), findsOneWidget);
+  expect(find.text('Second error message'), findsOneWidget);
 
-    final CapturedAccessibilityAnnouncement announcement = tester.takeAnnouncements().single;
-    expect(announcement.message, 'error');
-    expect(announcement.textDirection, TextDirection.ltr);
-    expect(announcement.assertiveness, Assertiveness.assertive);
-
-  });
+  final CapturedAccessibilityAnnouncement announcement = tester.takeAnnouncements().single;
+  expect(announcement.message, 'First error message');
+  expect(announcement.textDirection, TextDirection.ltr);
+  expect(announcement.assertiveness, Assertiveness.assertive);
+});
 
   testWidgets('isValid returns true when a field is valid', (WidgetTester tester) async {
     final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
@@ -1456,5 +1464,45 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(focusNode2.hasFocus, isTrue);
+  });
+
+  testWidgets('AutovalidateMode.always should validate on second build', (WidgetTester tester) async {
+    String errorText(String? value) => '$value/error';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(),
+        home: Center(
+          child: Form(
+            autovalidateMode: AutovalidateMode.always,
+            child: Material(
+              child: Column(
+                children: <Widget>[
+                  TextFormField(
+                    initialValue: 'foo',
+                    validator: errorText,
+                  ),
+                  TextFormField(
+                    initialValue: 'bar',
+                    validator: errorText,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The validation happens in a post frame callback, so the error
+    // doesn't show up until the second frame.
+    expect(find.text(errorText('foo')), findsNothing);
+    expect(find.text(errorText('bar')), findsNothing);
+
+    await tester.pump();
+
+    // The error shows up on the second frame.
+    expect(find.text(errorText('foo')), findsOneWidget);
+    expect(find.text(errorText('bar')), findsOneWidget);
   });
 }

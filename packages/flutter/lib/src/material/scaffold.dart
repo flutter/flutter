@@ -197,6 +197,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   Timer? _snackBarTimer;
   bool? _accessibleNavigation;
 
+  @protected
   @override
   void didChangeDependencies() {
     final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
@@ -604,6 +605,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     hideCurrentMaterialBanner();
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
@@ -632,6 +634,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     );
   }
 
+  @protected
   @override
   void dispose() {
     _materialBannerController?.dispose();
@@ -1087,17 +1090,21 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     if (hasChild(_ScaffoldSlot.body)) {
       double bodyMaxHeight = math.max(0.0, contentBottom - contentTop);
 
-      if (extendBody) {
+      // When extendBody is true, the body is visible underneath the bottom widgets.
+      // This does not apply when the area is obscured by the device keyboard.
+      if (extendBody && minInsets.bottom <= bottomWidgetsHeight) {
         bodyMaxHeight += bottomWidgetsHeight;
         bodyMaxHeight = clampDouble(bodyMaxHeight, 0.0, looseConstraints.maxHeight - contentTop);
         assert(bodyMaxHeight <= math.max(0.0, looseConstraints.maxHeight - contentTop));
+      } else {
+        bottomWidgetsHeight = 0.0;
       }
 
       final BoxConstraints bodyConstraints = _BodyBoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
         maxHeight: bodyMaxHeight,
         materialBannerHeight: materialBannerSize.height,
-        bottomWidgetsHeight: extendBody ? bottomWidgetsHeight : 0.0,
+        bottomWidgetsHeight: bottomWidgetsHeight,
         appBarHeight: appBarHeight,
       );
       layoutChild(_ScaffoldSlot.body, bodyConstraints);
@@ -2112,6 +2119,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   @override
   String? get restorationId => widget.restorationId;
 
+  @protected
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_drawerOpened, 'drawer_open');
@@ -2672,6 +2680,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     return widget.resizeToAvoidBottomInset ?? true;
   }
 
+  @protected
   @override
   void initState() {
     super.initState();
@@ -2691,6 +2700,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     );
   }
 
+  @protected
   @override
   void didUpdateWidget(Scaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -2728,6 +2738,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     }
   }
 
+  @protected
   @override
   void didChangeDependencies() {
     // Using maybeOf is valid here since both the Scaffold and ScaffoldMessenger
@@ -2746,6 +2757,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     super.didChangeDependencies();
   }
 
+  @protected
   @override
   void dispose() {
     _geometryNotifier.dispose();
@@ -2860,6 +2872,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     });
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
@@ -3086,9 +3099,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       bottom: _resizeToAvoidBottomInset && MediaQuery.viewInsetsOf(context).bottom != 0.0 ? 0.0 : null,
     );
 
-    // extendBody locked when keyboard is open
-    final bool extendBody = minInsets.bottom <= 0 && widget.extendBody;
-
     return _ScaffoldScope(
       hasDrawer: hasDrawer,
       geometryNotifier: _geometryNotifier,
@@ -3102,7 +3112,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
               },
               child: CustomMultiChildLayout(
                 delegate: _ScaffoldLayout(
-                  extendBody: extendBody,
+                  extendBody: widget.extendBody,
                   extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
                   minInsets: minInsets,
                   minViewPadding: minViewPadding,

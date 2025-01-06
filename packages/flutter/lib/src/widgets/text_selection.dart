@@ -696,6 +696,9 @@ class TextSelectionOverlay {
   // corresponds to, in global coordinates.
   late double _endHandleDragTarget;
 
+  // The initial selection when a selection handle drag has started.
+  TextSelection? _dragStartSelection;
+
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
     if (!renderObject.attached) {
       return;
@@ -721,6 +724,7 @@ class TextSelectionOverlay {
         centerOfLineGlobal,
       ),
     );
+    _dragStartSelection ??= _selection;
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -760,6 +764,7 @@ class TextSelectionOverlay {
     if (!renderObject.attached) {
       return;
     }
+    assert(_dragStartSelection != null);
 
     // This is NOT the same as details.localPosition. That is relative to the
     // selection handle, whereas this is relative to the RenderEditable.
@@ -780,7 +785,7 @@ class TextSelectionOverlay {
 
     final TextPosition position = renderObject.getPositionForPoint(handleTargetGlobal);
 
-    if (_selection.isCollapsed) {
+    if (_dragStartSelection!.isCollapsed) {
       _selectionOverlay.updateMagnifier(_buildMagnifier(
         currentTextPosition: position,
         globalGesturePosition: details.globalPosition,
@@ -797,13 +802,15 @@ class TextSelectionOverlay {
       // On Apple platforms, dragging the base handle makes it the extent.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
+        // Use this instead of _dragStartSelection.isNormalized because TextRange.isNormalized
+        // always returns true for a TextSelection.
+        final bool dragStartSelectionNormalized = _dragStartSelection!.extentOffset >= _dragStartSelection!.baseOffset;
         newSelection = TextSelection(
+          baseOffset: dragStartSelectionNormalized
+                      ? _dragStartSelection!.baseOffset
+                      : _dragStartSelection!.extentOffset,
           extentOffset: position.offset,
-          baseOffset: _selection.start,
         );
-        if (position.offset <= _selection.start) {
-          return; // Don't allow order swapping.
-        }
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -859,6 +866,7 @@ class TextSelectionOverlay {
         centerOfLineGlobal,
       ),
     );
+    _dragStartSelection ??= _selection;
 
     _selectionOverlay.showMagnifier(
       _buildMagnifier(
@@ -873,6 +881,7 @@ class TextSelectionOverlay {
     if (!renderObject.attached) {
       return;
     }
+    assert(_dragStartSelection != null);
 
     // This is NOT the same as details.localPosition. That is relative to the
     // selection handle, whereas this is relative to the RenderEditable.
@@ -890,7 +899,7 @@ class TextSelectionOverlay {
     );
     final TextPosition position = renderObject.getPositionForPoint(handleTargetGlobal);
 
-    if (_selection.isCollapsed) {
+    if (_dragStartSelection!.isCollapsed) {
       _selectionOverlay.updateMagnifier(_buildMagnifier(
         currentTextPosition: position,
         globalGesturePosition: details.globalPosition,
@@ -907,13 +916,15 @@ class TextSelectionOverlay {
       // On Apple platforms, dragging the base handle makes it the extent.
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
+        // Use this instead of _dragStartSelection.isNormalized because TextRange.isNormalized
+        // always returns true for a TextSelection.
+        final bool dragStartSelectionNormalized = _dragStartSelection!.extentOffset >= _dragStartSelection!.baseOffset;
         newSelection = TextSelection(
+          baseOffset: dragStartSelectionNormalized
+                      ? _dragStartSelection!.extentOffset
+                      : _dragStartSelection!.baseOffset,
           extentOffset: position.offset,
-          baseOffset: _selection.end,
         );
-        if (newSelection.extentOffset >= _selection.end) {
-          return; // Don't allow order swapping.
-        }
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -940,6 +951,7 @@ class TextSelectionOverlay {
     if (!context.mounted) {
       return;
     }
+    _dragStartSelection = null;
     if (selectionControls is! TextSelectionHandleControls) {
       _selectionOverlay.hideMagnifier();
       if (!_selection.isCollapsed) {
@@ -1603,7 +1615,10 @@ class SelectionOverlay {
   Widget _buildStartHandle(BuildContext context) {
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
-    if (selectionControls == null) {
+    if (selectionControls == null
+        || (_startHandleType == TextSelectionHandleType.collapsed && _isDraggingEndHandle)) {
+      // Hide the start handle when dragging the end handle and collapsing
+      // the selection.
       handle = const SizedBox.shrink();
     } else {
       handle = _SelectionHandleOverlay(
@@ -1629,8 +1644,11 @@ class SelectionOverlay {
   Widget _buildEndHandle(BuildContext context) {
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
-    if (selectionControls == null || _startHandleType == TextSelectionHandleType.collapsed) {
-      // Hide the second handle when collapsed.
+    if (selectionControls == null
+        || (_endHandleType == TextSelectionHandleType.collapsed && _isDraggingStartHandle)
+        || (_endHandleType == TextSelectionHandleType.collapsed && !_isDraggingStartHandle && !_isDraggingEndHandle)) {
+      // Hide the end handle when dragging the start handle and collapsing the selection
+      // or when the selection is collapsed and no handle is being dragged.
       handle = const SizedBox.shrink();
     } else {
       handle = _SelectionHandleOverlay(
@@ -1857,6 +1875,24 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
     }
   }
 
+  /// Returns the bounding [Rect] of the text selection handle in local
+  /// coordinates.
+  ///
+  /// When interacting with a text selection handle through a touch event, the
+  /// interactive area should be at least [kMinInteractiveDimension] square,
+  /// which this method does not consider.
+  Rect _getHandleRect(TextSelectionHandleType type, double preferredLineHeight) {
+    final Size handleSize = widget.selectionControls.getHandleSize(
+      preferredLineHeight,
+    );
+    return Rect.fromLTWH(
+      0.0,
+      0.0,
+      handleSize.width,
+      handleSize.height,
+    );
+  }
+
   @override
   void didUpdateWidget(_SelectionHandleOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -1874,19 +1910,9 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
 
   @override
   Widget build(BuildContext context) {
-    final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
+    final Rect handleRect = _getHandleRect(
       widget.type,
       widget.preferredLineHeight,
-    );
-    final Size handleSize = widget.selectionControls.getHandleSize(
-      widget.preferredLineHeight,
-    );
-
-    final Rect handleRect = Rect.fromLTWH(
-      -handleAnchor.dx,
-      -handleAnchor.dy,
-      handleSize.width,
-      handleSize.height,
     );
 
     // Make sure the GestureDetector is big enough to be easily interactive.
@@ -1900,6 +1926,11 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
       math.max((interactiveRect.height - handleRect.height) / 2, 0),
     );
 
+    final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
+      widget.type,
+      widget.preferredLineHeight,
+    );
+
     // Make sure a drag is eagerly accepted. This is used on iOS to match the
     // behavior where a drag directly on a collapse handle will always win against
     // other drag gestures.
@@ -1907,7 +1938,8 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
 
     return CompositedTransformFollower(
       link: widget.handleLayerLink,
-      offset: interactiveRect.topLeft,
+      // Put the handle's anchor point on the leader's anchor point.
+      offset: -handleAnchor - Offset(padding.left, padding.top),
       showWhenUnlinked: false,
       child: FadeTransition(
         opacity: _opacity,
@@ -2246,6 +2278,7 @@ class TextSelectionGestureDetectorBuilder {
     if (!delegate.selectionEnabled) {
       return;
     }
+
     // TODO(Renzo-Olivares): Migrate text selection gestures away from saving state
     // in renderEditable. The gesture callbacks can use the details objects directly
     // in callbacks variants that provide them [TapGestureRecognizer.onSecondaryTap]
@@ -2270,6 +2303,22 @@ class TextSelectionGestureDetectorBuilder {
     final bool isShiftPressedValid = _isShiftPressed && renderEditable.selection?.baseOffset != null;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
+        if (editableText.widget.stylusHandwritingEnabled) {
+          final bool stylusEnabled = switch (kind) {
+            PointerDeviceKind.stylus
+            || PointerDeviceKind.invertedStylus =>
+              editableText.widget.stylusHandwritingEnabled,
+            _ => false,
+          };
+          if (stylusEnabled) {
+            Scribe.isFeatureAvailable().then((bool isAvailable) {
+              if (isAvailable) {
+                renderEditable.selectPosition(cause: SelectionChangedCause.scribble);
+                Scribe.startStylusHandwriting();
+              }
+            });
+          }
+        }
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
         // On mobile platforms the selection is set on tap up.

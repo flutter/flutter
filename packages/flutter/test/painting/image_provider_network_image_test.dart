@@ -242,7 +242,7 @@ void main() {
 
     const NetworkImage provider = NetworkImage(url);
 
-    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, noOpDecoderBufferCallback) as MultiFrameImageStreamCompleter;
+    final ImageStreamCompleter completer = provider.loadBuffer(provider, noOpDecoderBufferCallback);
 
     expect(completer.debugLabel, url);
   });

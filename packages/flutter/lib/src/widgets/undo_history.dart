@@ -225,6 +225,7 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
     }
   }
 
+  @protected
   @override
   void initState() {
     super.initState();
@@ -243,6 +244,7 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
     _effectiveController.onRedo.addListener(redo);
   }
 
+  @protected
   @override
   void didUpdateWidget(UndoHistory<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -265,6 +267,7 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
     }
   }
 
+  @protected
   @override
   void dispose() {
     if (UndoManager.client == this) {
@@ -280,6 +283,7 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
     super.dispose();
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     return Actions(

@@ -25,7 +25,6 @@ class NestedScrollViewStateExample extends StatelessWidget {
   const NestedScrollViewStateExample({super.key});
 
   @override
-  @override
   Widget build(BuildContext context) {
     return NestedScrollView(
       key: globalKey,
@@ -40,6 +39,10 @@ class NestedScrollViewStateExample extends StatelessWidget {
           // Body slivers go here!
           ),
     );
+  }
+
+  ScrollController get outerController {
+    return globalKey.currentState!.outerController;
   }
 
   ScrollController get innerController {

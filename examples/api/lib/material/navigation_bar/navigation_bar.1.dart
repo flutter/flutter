@@ -63,6 +63,8 @@ class _NavigationExampleState extends State<NavigationExample> {
             const SizedBox(height: 10),
             OverflowBar(
               spacing: 10.0,
+              overflowAlignment: OverflowBarAlignment.center,
+              overflowSpacing: 10.0,
               children: <Widget>[
                 ElevatedButton(
                   onPressed: () {

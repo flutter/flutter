@@ -1405,6 +1405,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   Map<Type, GestureRecognizer>? _recognizers = const <Type, GestureRecognizer>{};
   SemanticsGestureDelegate? _semantics;
 
+  @protected
   @override
   void initState() {
     super.initState();
@@ -1412,6 +1413,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     _syncAll(widget.gestures);
   }
 
+  @protected
   @override
   void didUpdateWidget(RawGestureDetector oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -1486,6 +1488,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     semanticsGestureHandler!.validActions = actions; // will call _markNeedsSemanticsUpdate(), if required.
   }
 
+  @protected
   @override
   void dispose() {
     for (final GestureRecognizer recognizer in _recognizers!.values) {
@@ -1538,6 +1541,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     _semantics!.assignSemantics(renderObject);
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     Widget result = Listener(
@@ -1556,6 +1560,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     return result;
   }
 
+  @protected
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);

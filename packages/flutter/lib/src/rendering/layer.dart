@@ -2193,6 +2193,28 @@ class ShaderMaskLayer extends ContainerLayer {
   }
 }
 
+/// A backdrop key uniquely identifies the backdrop that a [BackdropFilterLayer]
+/// samples from.
+///
+/// When multiple backdrop filters share the same key, the Flutter engine can
+/// more efficiently perform the backdrop operations.
+///
+/// Instead of using a backdrop key directly, consider using a [BackdropGroup]
+/// and the [BackdropFilter.grouped] constructor. The framework will
+/// automatically group child backdrop filters that use the `.grouped`
+/// constructor when they are placed as children of a [BackdropGroup].
+///
+/// For more information, see [BackdropFilter].
+@immutable
+final class BackdropKey {
+  /// Create a new [BackdropKey].
+  BackdropKey() : _key = _nextKey++;
+
+  static int _nextKey = 0;
+
+  final int _key;
+}
+
 /// A composited layer that applies a filter to the existing contents of the scene.
 class BackdropFilterLayer extends ContainerLayer {
   /// Creates a backdrop filter layer.
@@ -2237,6 +2259,22 @@ class BackdropFilterLayer extends ContainerLayer {
     }
   }
 
+  /// The backdrop key that identifies the [BackdropGroup] this filter will apply to.
+  ///
+  /// The default value for the backdrop key is `null`, meaning that it's not
+  /// part of a [BackdropGroup].
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
+  BackdropKey? get backdropKey => _backdropKey;
+  BackdropKey? _backdropKey;
+  set backdropKey(BackdropKey? value) {
+    if (value != _backdropKey) {
+      _backdropKey = value;
+      markNeedsAddToScene();
+    }
+  }
+
   @override
   void addToScene(ui.SceneBuilder builder) {
     assert(filter != null);
@@ -2244,6 +2282,7 @@ class BackdropFilterLayer extends ContainerLayer {
       filter!,
       blendMode: blendMode,
       oldLayer: _engineLayer as ui.BackdropFilterEngineLayer?,
+      backdropId: _backdropKey?._key
     );
     addChildrenToScene(builder);
     builder.pop();
@@ -2254,6 +2293,7 @@ class BackdropFilterLayer extends ContainerLayer {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ui.ImageFilter>('filter', filter));
     properties.add(EnumProperty<BlendMode>('blendMode', blendMode));
+    properties.add(IntProperty('backdropKey', _backdropKey?._key));
   }
 }
 

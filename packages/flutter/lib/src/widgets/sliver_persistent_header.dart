@@ -286,6 +286,8 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
     final SliverPersistentHeaderDelegate oldDelegate = oldWidget.delegate;
     if (newDelegate != oldDelegate &&
         (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate))) {
+      final _RenderSliverPersistentHeaderForWidgetsMixin renderObject = this.renderObject;
+      _updateChild(newDelegate, renderObject.lastShrinkOffset, renderObject.lastOverlapsContent);
       renderObject.triggerRebuild();
     }
   }
@@ -298,20 +300,19 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   Element? child;
 
+  void _updateChild(SliverPersistentHeaderDelegate delegate, double shrinkOffset, bool overlapsContent) {
+    final Widget newWidget = delegate.build(this, shrinkOffset, overlapsContent);
+    child = updateChild(
+      child,
+      floating ? _FloatingHeader(child: newWidget) : newWidget,
+      null,
+    );
+  }
+
   void _build(double shrinkOffset, bool overlapsContent) {
     owner!.buildScope(this, () {
       final _SliverPersistentHeaderRenderObjectWidget sliverPersistentHeaderRenderObjectWidget = widget as _SliverPersistentHeaderRenderObjectWidget;
-      child = updateChild(
-        child,
-        floating
-          ? _FloatingHeader(child: sliverPersistentHeaderRenderObjectWidget.delegate.build(
-            this,
-            shrinkOffset,
-            overlapsContent
-          ))
-          : sliverPersistentHeaderRenderObjectWidget.delegate.build(this, shrinkOffset, overlapsContent),
-        null,
-      );
+      _updateChild(sliverPersistentHeaderRenderObjectWidget.delegate, shrinkOffset, overlapsContent);
     });
   }
 

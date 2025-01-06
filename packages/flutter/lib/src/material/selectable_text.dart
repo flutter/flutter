@@ -190,6 +190,7 @@ class SelectableText extends StatefulWidget {
     this.selectionControls,
     this.onTap,
     this.scrollPhysics,
+    this.scrollBehavior,
     this.semanticsLabel,
     this.textHeightBehavior,
     this.textWidthBasis,
@@ -247,6 +248,7 @@ class SelectableText extends StatefulWidget {
     this.selectionControls,
     this.onTap,
     this.scrollPhysics,
+    this.scrollBehavior,
     this.semanticsLabel,
     this.textHeightBehavior,
     this.textWidthBasis,
@@ -412,6 +414,9 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.scrollPhysics}
   final ScrollPhysics? scrollPhysics;
 
+  /// {@macro flutter.widgets.editableText.scrollBehavior}
+  final ScrollBehavior? scrollBehavior;
+
   /// {@macro flutter.widgets.Text.semanticsLabel}
   final String? semanticsLabel;
 
@@ -467,6 +472,7 @@ class SelectableText extends StatefulWidget {
     properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
     properties.add(DiagnosticsProperty<TextSelectionControls>('selectionControls', selectionControls, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
+    properties.add(DiagnosticsProperty<ScrollBehavior>('scrollBehavior', scrollBehavior, defaultValue: null));
     properties.add(DiagnosticsProperty<TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
   }
 }
@@ -738,6 +744,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
         dragStartBehavior: widget.dragStartBehavior,
         scrollPhysics: widget.scrollPhysics,
+        scrollBehavior: widget.scrollBehavior,
         autofillHints: null,
         contextMenuBuilder: widget.contextMenuBuilder,
       ),

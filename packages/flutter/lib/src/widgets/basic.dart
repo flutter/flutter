@@ -36,6 +36,7 @@ export 'package:flutter/rendering.dart' show
   AlignmentGeometryTween,
   AlignmentTween,
   Axis,
+  BackdropKey,
   BoxConstraints,
   BoxConstraintsTransform,
   CrossAxisAlignment,
@@ -301,7 +302,6 @@ class Directionality extends _UbiquitousInheritedWidget {
 ///   colorBlendMode: BlendMode.modulate
 /// )
 /// ```
-///
 /// {@end-tool}
 ///
 /// Directly drawing an [Image] or [Color] with opacity is faster than using
@@ -466,6 +466,34 @@ class ShaderMask extends SingleChildRenderObjectWidget {
   }
 }
 
+/// A widget that establishes a shared backdrop layer for all child [BackdropFilter]
+/// widgets that opt into using it.
+///
+/// Sharing a backdrop filter layer will improve the performance of multiple
+/// backdrop filters. To opt into using a shared [BackdropGroup], the special
+/// [BackdropFilter.grouped] constructor must be used.
+class BackdropGroup extends InheritedWidget {
+  /// Create a new [BackdropGroup] widget.
+  BackdropGroup({
+    super.key,
+    required super.child,
+    BackdropKey? backdropKey,
+  }) : backdropKey = backdropKey ?? BackdropKey();
+
+  /// The backdrop key this backdrop group will use with shared child layers.
+  final BackdropKey backdropKey;
+
+  @override
+  bool updateShouldNotify(covariant BackdropGroup oldWidget) {
+    return oldWidget.backdropKey != backdropKey;
+  }
+
+  /// Look up the nearest [BackdropGroup], or `null` if there is not one.
+  static BackdropGroup? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<BackdropGroup>();
+  }
+}
+
 /// A widget that applies a filter to the existing painted content and then
 /// paints [child].
 ///
@@ -480,14 +508,55 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// [BlendMode.srcOver] which works well for most scenes. But that value may
 /// produce surprising results when a parent of the [BackdropFilter] uses a
 /// temporary buffer, or save layer, as does an [Opacity] widget. In that
-/// situation, a value of [BlendMode.src] can produce more pleasing results,
-/// but at the cost of incompatibility with some platforms, most notably the
-/// html renderer for web applications.
+/// situation, a value of [BlendMode.src] can produce more pleasing results.
 /// {@endtemplate}
+///
+/// Multiple backdrop filters can be combined into a single rendering operation
+/// by the Flutter engine if these backdrop filters widgets all share a common
+/// [BackdropKey]. The backdrop key uniquely identifies the input for a backdrop
+/// filter, and when shared, indicates the filtering can be performed once. This
+/// can significantly reduce the overhead of using multiple backdrop filters in
+/// a scene. The key can either be provided manually via the `backdropKey`
+/// constructor parameter or looked up from a [BackdropGroup] inherited widget
+/// via the `.grouped` constructor.
+///
+/// Backdrop filters that overlap with each other should not use the same
+/// backdrop key, otherwise the results may look as if only one filter is
+/// applied in the overlapping regions.
+///
+/// The following snippet demonstrates how to use the backdrop key to allow each
+/// list item to have an efficient blur. The engine will perform only one
+/// backdrop blur but the results will be visually identical to multiple blurs.
+///
+/// ```dart
+///  Widget build(BuildContext context) {
+///    return BackdropGroup(
+///      child: ListView.builder(
+///        itemCount: 60,
+///        itemBuilder: (BuildContext context, int index) {
+///          return ClipRect(
+///            child: BackdropFilter.grouped(
+///              filter: ui.ImageFilter.blur(
+///                sigmaX: 40,
+///                sigmaY: 40,
+///              ),
+///              child: Container(
+///                color: Colors.black.withOpacity(0.2),
+///                height: 200,
+///                child: const Text('Blur item'),
+///              ),
+///            ),
+///          );
+///       }
+///     ),
+///   );
+/// }
+/// ```
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=dYRs7Q1vfYI}
 ///
 /// {@tool snippet}
+///
 /// If the [BackdropFilter] needs to be applied to an area that exactly matches
 /// its child, wraps the [BackdropFilter] with a clip widget that clips exactly
 /// to that child.
@@ -551,6 +620,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// ```
 /// {@end-tool}
 /// {@tool snippet}
+///
 /// Instead consider the following approach which directly applies a blur
 /// to the child widget.
 ///
@@ -562,7 +632,6 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///    );
 ///  }
 /// ```
-///
 /// {@end-tool}
 ///
 /// See also:
@@ -582,7 +651,26 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
     super.child,
     this.blendMode = BlendMode.srcOver,
     this.enabled = true,
-  });
+    this.backdropGroupKey,
+  }) : _useSharedKey = false;
+
+  /// Creates a backdrop filter that groups itself with the nearest parent
+  /// [BackdropGroup].
+  ///
+  /// The [blendMode] argument will default to [BlendMode.srcOver] and must not be
+  /// null if provided.
+  ///
+  /// This constructor will automatically look up the nearest [BackdropGroup]
+  /// and will share the backdrop input with sibling and child [BackdropFilter]
+  /// widgets.
+  const BackdropFilter.grouped({
+    super.key,
+    required this.filter,
+    super.child,
+    this.blendMode = BlendMode.srcOver,
+    this.enabled = true,
+  }) : backdropGroupKey = null,
+       _useSharedKey = true;
 
   /// The image filter to apply to the existing painted content before painting the child.
   ///
@@ -603,9 +691,24 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// type for performance reasons.
   final bool enabled;
 
+  /// The [BackdropKey] that identifies the backdrop this filter will apply to.
+  ///
+  /// The default value for the backdrop key is `null`.
+  final BackdropKey? backdropGroupKey;
+
+  // Whether to look up the [backdropKey] from a parent [BackdropGroup].
+  final bool _useSharedKey;
+
+  BackdropKey? _getBackdropGroupKey(BuildContext context) {
+    if (_useSharedKey) {
+      return BackdropGroup.of(context)?.backdropKey;
+    }
+    return backdropGroupKey;
+  }
+
   @override
   RenderBackdropFilter createRenderObject(BuildContext context) {
-    return RenderBackdropFilter(filter: filter, blendMode: blendMode, enabled: enabled);
+    return RenderBackdropFilter(filter: filter, blendMode: blendMode, enabled: enabled, backdropKey: _getBackdropGroupKey(context));
   }
 
   @override
@@ -613,7 +716,8 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
     renderObject
       ..filter = filter
       ..enabled = enabled
-      ..blendMode = blendMode;
+      ..blendMode = blendMode
+      ..backdropKey = _getBackdropGroupKey(context);
   }
 }
 
@@ -2026,6 +2130,7 @@ class Padding extends SingleChildRenderObjectWidget {
 /// the width of this widget will always be twice its child's width.
 ///
 /// {@tool snippet}
+///
 /// The [Align] widget in this example uses one of the defined constants from
 /// [Alignment], [Alignment.topRight]. This places the [FlutterLogo] in the top
 /// right corner of the parent blue [Container].
@@ -2057,6 +2162,7 @@ class Padding extends SingleChildRenderObjectWidget {
 /// each other.
 ///
 /// {@tool snippet}
+///
 /// The [Alignment] used in the following example defines two points:
 ///
 ///   * (0.2 * width of [FlutterLogo]/2 + width of [FlutterLogo]/2, 0.6 * height
@@ -2093,6 +2199,7 @@ class Padding extends SingleChildRenderObjectWidget {
 /// {@end-tool}
 ///
 /// {@tool snippet}
+///
 /// The [FractionalOffset] used in the following example defines two points:
 ///
 ///   * (0.2 * width of [FlutterLogo], 0.6 * height of [FlutterLogo]) = (12.0, 36.0)
@@ -2585,6 +2692,7 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// vertically:
 ///
 /// {@tool snippet}
+///
 /// In the following snippet, the [Card] is guaranteed to be at least as tall as
 /// its "natural" height. Unlike [UnconstrainedBox], it will become taller if
 /// its "natural" height is smaller than 40 px. If the [Container] isn't high
@@ -5249,10 +5357,10 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 
   /// The flex factor to use for this child.
   ///
-  /// If null or zero, the child is inflexible and determines its own size. If
-  /// non-zero, the amount of space the child can occupy in the main axis is
-  /// determined by dividing the free space (after placing the inflexible
-  /// children) according to the flex factors of the flexible children.
+  /// If zero, the child is inflexible and determines its own size. If non-zero,
+  /// the amount of space the child can occupy in the main axis is determined by
+  /// dividing the free space (after placing the inflexible children) according
+  /// to the flex factors of the flexible children.
   final int flex;
 
   /// How a flexible child is inscribed into the available space.
@@ -7434,6 +7542,7 @@ class Semantics extends SingleChildRenderObjectWidget {
 /// the user would not be able to be sure that they were related.
 ///
 /// {@tool snippet}
+///
 /// This snippet shows how to use [MergeSemantics] to merge the semantics of
 /// a [Checkbox] and [Text] widget.
 ///

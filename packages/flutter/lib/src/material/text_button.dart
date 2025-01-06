@@ -93,7 +93,6 @@ class TextButton extends ButtonStyleButton {
     super.statesController,
     super.isSemanticButton,
     required Widget super.child,
-    super.iconAlignment,
   });
 
   /// Create a text button from a pair of widgets that serve as the button's
@@ -119,7 +118,7 @@ class TextButton extends ButtonStyleButton {
     MaterialStatesController? statesController,
     Widget? icon,
     required Widget label,
-    IconAlignment iconAlignment = IconAlignment.start,
+    IconAlignment? iconAlignment,
   }) {
      if (icon == null) {
       return TextButton(
@@ -204,6 +203,7 @@ class TextButton extends ButtonStyleButton {
     Color? surfaceTintColor,
     Color? iconColor,
     double? iconSize,
+    IconAlignment? iconAlignment,
     Color? disabledIconColor,
     Color? overlayColor,
     double? elevation,
@@ -254,6 +254,7 @@ class TextButton extends ButtonStyleButton {
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
       iconColor: iconColorProp,
       iconSize: ButtonStyleButton.allOrNull<double>(iconSize),
+      iconAlignment: iconAlignment,
       elevation: ButtonStyleButton.allOrNull<double>(elevation),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       minimumSize: ButtonStyleButton.allOrNull<Size>(minimumSize),
@@ -456,7 +457,7 @@ class _TextButtonWithIcon extends TextButton {
     super.statesController,
     required Widget icon,
     required Widget label,
-    super.iconAlignment,
+    IconAlignment? iconAlignment,
   }) : super(
          autofocus: autofocus ?? false,
          child: _TextButtonWithIconChild(
@@ -496,16 +497,21 @@ class _TextButtonWithIconChild extends StatelessWidget {
   final Widget label;
   final Widget icon;
   final ButtonStyle? buttonStyle;
-  final IconAlignment iconAlignment;
+  final IconAlignment? iconAlignment;
 
   @override
   Widget build(BuildContext context) {
     final double defaultFontSize = buttonStyle?.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
     final double scale = clampDouble(MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0, 1.0, 2.0) - 1.0;
     final double gap = lerpDouble(8, 4, scale)!;
+    final TextButtonThemeData textButtonTheme = TextButtonTheme.of(context);
+    final IconAlignment effectiveIconAlignment = iconAlignment
+      ?? textButtonTheme.style?.iconAlignment
+      ?? buttonStyle?.iconAlignment
+      ?? IconAlignment.start;
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: iconAlignment == IconAlignment.start
+      children: effectiveIconAlignment == IconAlignment.start
         ? <Widget>[icon, SizedBox(width: gap), Flexible(child: label)]
         : <Widget>[Flexible(child: label), SizedBox(width: gap), icon],
     );

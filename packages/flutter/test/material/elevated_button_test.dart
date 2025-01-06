@@ -2295,7 +2295,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgets('Default iconAlignment', (WidgetTester tester) async {
+  testWidgets('Default ElevatedButton icon alignment', (WidgetTester tester) async {
     Widget buildWidget({ required TextDirection textDirection }) {
       return MaterialApp(
         home: Directionality(
@@ -2330,7 +2330,7 @@ void main() {
     expect(buttonTopRight.dx, iconTopRight.dx + 16.0); // 16.0 - padding between icon and button edge.
   });
 
-  testWidgets('iconAlignment can be customized', (WidgetTester tester) async {
+  testWidgets('ElevatedButton icon alignment can be customized', (WidgetTester tester) async {
     Widget buildWidget({
       required TextDirection textDirection,
       required IconAlignment iconAlignment,
@@ -2407,6 +2407,35 @@ void main() {
     expect(buttonTopLeft.dx, iconTopLeft.dx - 24.0); // 24.0 - padding between icon and button edge.
   });
 
+  testWidgets('ElevatedButton icon alignment respects ButtonStyle.iconAlignment', (WidgetTester tester) async {
+    Widget buildButton({ IconAlignment? iconAlignment }) {
+      return MaterialApp(
+        home: Center(
+          child: ElevatedButton.icon(
+            style: ButtonStyle(iconAlignment: iconAlignment),
+            onPressed: () {},
+            icon: const Icon(Icons.add),
+            label: const Text('button'),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildButton());
+
+    final Offset buttonTopLeft = tester.getTopLeft(find.byType(Material).last);
+    final Offset iconTopLeft = tester.getTopLeft(find.byIcon(Icons.add));
+
+    expect(buttonTopLeft.dx, iconTopLeft.dx - 16.0);
+
+    await tester.pumpWidget(buildButton(iconAlignment: IconAlignment.end));
+
+    final Offset buttonTopRight = tester.getTopRight(find.byType(Material).last);
+    final Offset iconTopRight = tester.getTopRight(find.byIcon(Icons.add));
+
+    expect(buttonTopRight.dx, iconTopRight.dx + 24.0);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/154798.
   testWidgets('ElevatedButton.styleFrom can customize the button icon', (WidgetTester tester) async {
     const Color iconColor = Color(0xFFF000FF);
@@ -2415,15 +2444,18 @@ void main() {
     Widget buildButton({ bool enabled = true }) {
       return MaterialApp(
         home: Material(
-          child: ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              iconColor: iconColor,
-              iconSize: iconSize,
-              disabledIconColor: disabledIconColor,
+          child: Center(
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                iconColor: iconColor,
+                iconSize: iconSize,
+                iconAlignment: IconAlignment.end,
+                disabledIconColor: disabledIconColor,
+              ),
+              onPressed: enabled ? () {} : null,
+              icon: const Icon(Icons.add),
+              label: const Text('Button'),
             ),
-            onPressed: enabled ? () {} : null,
-            icon: const Icon(Icons.add),
-            label: const Text('Button'),
           ),
         ),
       );
@@ -2437,5 +2469,9 @@ void main() {
     // Test disabled button.
     await tester.pumpWidget(buildButton(enabled: false));
     expect(iconStyle(tester, Icons.add).color, disabledIconColor);
+
+    final Offset buttonTopRight = tester.getTopRight(find.byType(Material).last);
+    final Offset iconTopRight = tester.getTopRight(find.byIcon(Icons.add));
+    expect(buttonTopRight.dx, iconTopRight.dx + 24.0);
   });
 }

@@ -49,6 +49,10 @@ typedef SetSelectionHandler = void Function(TextSelection selection);
 /// current text with the input `text`.
 typedef SetTextHandler = void Function(String text);
 
+/// Signature for the [SemanticsAction.scrollToOffset] handlers to scroll the
+/// scrollable container to the given `targetOffset`.
+typedef ScrollToOffsetHandler = void Function(Offset targetOffset);
+
 /// Signature for a handler of a [SemanticsAction].
 ///
 /// Returned by [SemanticsConfiguration.getActionHandler].
@@ -1698,7 +1702,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// * Buttons must respond to tap/click events produced via keyboard shortcuts.
   /// * Text fields must become focused and editable, showing an on-screen
   ///   keyboard, if necessary.
-  /// * Checkboxes, switches, and radio buttons must become togglable using
+  /// * Checkboxes, switches, and radio buttons must become toggleable using
   ///   keyboard shortcuts.
   ///
   /// Focus behavior is specific to the platform and to the assistive technology
@@ -2092,8 +2096,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// Visits the immediate children of this node.
   ///
   /// This function calls visitor for each immediate child until visitor returns
-  /// false. Returns true if all the visitor calls returned true, otherwise
-  /// returns false.
+  /// false.
   void visitChildren(SemanticsNodeVisitor visitor) {
     if (_children != null) {
       for (final SemanticsNode child in _children!) {
@@ -3919,6 +3922,29 @@ class SemanticsConfiguration {
   set onScrollDown(VoidCallback? value) {
     _addArgumentlessAction(SemanticsAction.scrollDown, value!);
     _onScrollDown = value;
+  }
+
+  /// The handler for [SemanticsAction.scrollToOffset].
+  ///
+  /// This handler is only called on iOS by UIKit, when the iOS focus engine
+  /// switches its focus to an item too close to a scrollable edge of a
+  /// scrollable container, to make sure the focused item is always fully
+  /// visible.
+  ///
+  /// The callback, if not `null`, should typically set the scroll offset of
+  /// the associated scrollable container to the given `targetOffset` without
+  /// animation as it is already animated by the caller: the iOS focus engine
+  /// invokes [onScrollToOffset] every frame during the scroll animation with
+  /// animated scroll offset values.
+  ScrollToOffsetHandler? get onScrollToOffset => _onScrollToOffset;
+  ScrollToOffsetHandler? _onScrollToOffset;
+  set onScrollToOffset(ScrollToOffsetHandler? value) {
+    assert(value != null);
+    _addAction(SemanticsAction.scrollToOffset, (Object? args) {
+      final Float64List list = args! as Float64List;
+      value!(Offset(list[0], list[1]));
+    });
+    _onScrollToOffset = value;
   }
 
   /// The handler for [SemanticsAction.increase].

@@ -1180,6 +1180,38 @@ void main() {
     );
   });
 
+  testWidgets('NavigationBar.labelPadding overrides NavigationDestination.label padding', (WidgetTester tester) async {
+    const EdgeInsetsGeometry labelPadding = EdgeInsets.all(8);
+    Widget buildNavigationBar({ EdgeInsetsGeometry? labelPadding }) {
+      return MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: NavigationBar(
+            labelPadding: labelPadding,
+            destinations: const <Widget>[
+              NavigationDestination(
+                icon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.settings),
+                label: 'Settings',
+              ),
+            ],
+            onDestinationSelected: (int i) { },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildNavigationBar());
+    expect(_getLabelPadding(tester, 'Home'), const EdgeInsets.only(top: 4));
+    expect(_getLabelPadding(tester, 'Settings'), const EdgeInsets.only(top: 4));
+
+    await tester.pumpWidget(buildNavigationBar(labelPadding: labelPadding));
+    expect(_getLabelPadding(tester, 'Home'), labelPadding);
+    expect(_getLabelPadding(tester, 'Settings'), labelPadding);
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
@@ -1533,6 +1565,111 @@ void main() {
       expect(icon.color, initialColor);
     });
   });
+
+  testWidgets('NavigationBar.labelPadding overrides NavigationDestination.label padding', (WidgetTester tester) async {
+    const String selectedText = 'Home';
+    const String unselectedText = 'Settings';
+    const EdgeInsetsGeometry labelPadding = EdgeInsets.all(8);
+    Widget buildNavigationBar({ EdgeInsetsGeometry? labelPadding }) {
+      return MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: NavigationBar(
+            labelPadding: labelPadding,
+            destinations: const <Widget>[
+              NavigationDestination(
+                icon: Icon(Icons.home),
+                label: selectedText,
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.settings),
+                label: unselectedText,
+              ),
+            ],
+            onDestinationSelected: (int i) { },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildNavigationBar());
+    expect(_getLabelPadding(tester, selectedText), const EdgeInsets.only(top: 4));
+    expect(_getLabelPadding(tester, unselectedText), const EdgeInsets.only(top: 4));
+
+    await tester.pumpWidget(buildNavigationBar(labelPadding: labelPadding));
+    expect(_getLabelPadding(tester, selectedText), labelPadding);
+    expect(_getLabelPadding(tester, unselectedText), labelPadding);
+  });
+
+  testWidgets('NavigationBar.labelTextStyle overrides NavigationDestination.label text style', (WidgetTester tester) async {
+    const String selectedText = 'Home';
+    const String unselectedText = 'Settings';
+    const String disabledText = 'Bookmark';
+    final ThemeData theme = ThemeData();
+    Widget buildNavigationBar({ WidgetStateProperty<TextStyle?>? labelTextStyle }) {
+      return MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          bottomNavigationBar: NavigationBar(
+            labelTextStyle: labelTextStyle,
+            destinations: const <Widget>[
+              NavigationDestination(
+                icon: Icon(Icons.home),
+                label: selectedText,
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.settings),
+                label: unselectedText,
+              ),
+              NavigationDestination(
+                enabled: false,
+                icon: Icon(Icons.bookmark),
+                label: disabledText,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildNavigationBar());
+
+    // Test selected label text style.
+    expect(_getLabelStyle(tester, selectedText).fontSize, equals(12.0));
+    expect(_getLabelStyle(tester, selectedText).color, equals(theme.colorScheme.onSurface));
+
+    // Test unselected label text style.
+    expect(_getLabelStyle(tester, unselectedText).fontSize, equals(12.0));
+    expect(_getLabelStyle(tester, unselectedText).color, equals(theme.colorScheme.onSurfaceVariant));
+
+    // Test disabled label text style.
+    expect(_getLabelStyle(tester, disabledText).fontSize, equals(12.0));
+    expect(_getLabelStyle(tester, disabledText).color, equals(theme.colorScheme.onSurfaceVariant.withOpacity(0.38)));
+
+    const TextStyle selectedTextStyle = TextStyle(fontSize: 15, color: Color(0xFF00FF00));
+    const TextStyle unselectedTextStyle = TextStyle(fontSize: 15, color: Color(0xFF0000FF));
+    const TextStyle disabledTextStyle = TextStyle(fontSize: 16, color: Color(0xFFFF0000));
+    await tester.pumpWidget(buildNavigationBar(
+      labelTextStyle: const WidgetStateProperty<TextStyle?>.fromMap(
+        <WidgetStatesConstraint, TextStyle?>{
+          WidgetState.disabled: disabledTextStyle,
+          WidgetState.selected: selectedTextStyle,
+          WidgetState.any:      unselectedTextStyle,
+        },
+      ),
+    ));
+
+    // Test selected label text style.
+    expect(_getLabelStyle(tester, selectedText).fontSize, equals(selectedTextStyle.fontSize));
+    expect(_getLabelStyle(tester, selectedText).color, equals(selectedTextStyle.color));
+
+    // Test unselected label text style.
+    expect(_getLabelStyle(tester, unselectedText).fontSize, equals(unselectedTextStyle.fontSize));
+    expect(_getLabelStyle(tester, unselectedText).color, equals(unselectedTextStyle.color));
+
+    // Test disabled label text style.
+    expect(_getLabelStyle(tester, disabledText).fontSize, equals(disabledTextStyle.fontSize));
+    expect(_getLabelStyle(tester, disabledText).color, equals(disabledTextStyle.color));
+  });
 }
 
 Widget _buildWidget(Widget child, { bool? useMaterial3 }) {
@@ -1576,4 +1713,22 @@ class IconWithRandomColor extends StatelessWidget {
 
 bool _sizeAlmostEqual(Size a, Size b, {double maxDiff=0.05}) {
   return (a.width - b.width).abs() <= maxDiff && (a.height - b.height).abs() <= maxDiff;
+}
+
+EdgeInsetsGeometry _getLabelPadding(WidgetTester tester, String text) {
+  return tester.widget<Padding>(
+    find.ancestor(
+      of: find.text(text),
+      matching: find.byType(Padding),
+    ).first,
+  ).padding;
+}
+
+TextStyle _getLabelStyle(WidgetTester tester, String text) {
+  return tester.widget<RichText>(
+    find.descendant(
+      of: find.text(text),
+      matching: find.byType(RichText),
+    ),
+  ).text.style!;
 }
