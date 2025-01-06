@@ -16,7 +16,8 @@ Depending on the platform you are making changes for, you may be interested in a
 
 ## General Compilation Tips
 
-- Consider using the `et`, the engine tool, located at
+- Instead of compiling manually as described in this file, it's recommended to use `et`,
+  the engine tool, located at
   https://github.com/flutter/flutter/blob/master/engine/src/flutter/tools/engine_tool.
 - For local development and testing, it's generally preferable to use `--unopt` builds.
   These builds will have additional logging and checks enabled, and generally use build
