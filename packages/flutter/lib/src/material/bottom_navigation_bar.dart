@@ -893,7 +893,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       _controllers[oldWidget.currentIndex].reverse();
       _controllers[widget.currentIndex].forward();
     } else {
-        switch (_effectiveType) {
+      switch (_effectiveType) {
         case BottomNavigationBarType.fixed:
           break;
         case BottomNavigationBarType.shifting:
