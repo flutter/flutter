@@ -406,12 +406,12 @@ class Image extends StatefulWidget {
   /// and
   /// [CORS errors](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors).
   ///
-  /// If it's not possible to configure the host, such as when images
-  /// are hosted on a CDN or from arbitrary URLs, the app can set the
-  /// `useImgElement` parameter of [Image.network] to display the image
-  /// in an HTML `<img>` element, which bypasses the same-origin policy.
+  /// If it's not possible to configure the host, such as when images are hosted
+  /// on a CDN or from arbitrary URLs, the app can set the
+  /// `webHtmlElementStrategy` parameter of [Image.network] to display the image
+  /// in an HTML element, which bypasses the same-origin policy.
   ///
-  /// The `<img>` element is placed in a platform view, and therefore has the
+  /// The HTML element is placed in a platform view, and therefore has the
   /// following drawbacks:
   ///
   ///  * Suboptimal performance.
@@ -420,7 +420,7 @@ class Image extends StatefulWidget {
   ///  * Some image options are ignored, including [opacity], [colorBlendMode],
   ///    [repeat], filtering, and blurring.
   ///
-  /// By default, this feature is turned off ([WebImgElementStrategy.never]).
+  /// By default, this feature is turned off ([WebHtmlElementStrategy.never]).
   Image.network(
     String src, {
     super.key,
@@ -446,11 +446,11 @@ class Image extends StatefulWidget {
     Map<String, String>? headers,
     int? cacheWidth,
     int? cacheHeight,
-    WebImgElementStrategy useImgElement = WebImgElementStrategy.never,
+    WebHtmlElementStrategy webHtmlElementStrategy = WebHtmlElementStrategy.never,
   }) : image = ResizeImage.resizeIfNeeded(
          cacheWidth,
          cacheHeight,
-         NetworkImage(src, scale: scale, headers: headers, useImgElement: useImgElement),
+         NetworkImage(src, scale: scale, headers: headers, webHtmlElementStrategy: webHtmlElementStrategy),
        ),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0);

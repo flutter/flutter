@@ -1469,30 +1469,32 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 }
 
 /// The strategy for [Image.network] and [NetworkImage] to decide whether to
-/// display images in `<img>` elements in a platform view instead of fetching
-/// bytes.
+/// display images in HTML elements contained in a platform view instead of
+/// fetching bytes.
 ///
 /// See [Image.network] for more explanation on the impact.
 ///
 /// This option is only effective on the Web platform. Other platforms always
 /// display network images by fetching bytes.
-enum WebImgElementStrategy {
-  /// Never use `<img>` elements.
-  ///
-  /// Fetch errors, including CORS errors, are reported.
+enum WebHtmlElementStrategy {
+  /// Only show images by fetching bytes, and report errors if the fetch
+  /// encounters errors.
   never,
 
-  /// Use `<img>` elements when fetching bytes is not available.
+  /// Prefer fetching bytes to display images, and fall back to HTML elements
+  /// when fetching bytes is not available.
   ///
-  /// This strategy uses `<img>` elements if `headers` is empty and the fetch
-  /// encounters errors.
-  whenNecessary,
+  /// This strategy uses HTML elements only if `headers` is empty and the fetch
+  /// encounters errors. Errors may still be reported if neither approach works.
+  fallback,
 
-  /// Always use `<img>` elements as long as `headers` is empty.
+  /// Prefer HTML elements to display images, and fall back to fetching bytes
+  /// when HTML elements do not work.
   ///
-  /// This strategy still fetches bytes if `headers` is not empty, since `<img>`
-  /// elements do not support headers.
-  always,
+  /// This strategy fetches bytes only if `headers` is not empty, since HTML
+  /// elements do not support headers. Errors may still be reported if neither
+  /// approach works.
+  prefer,
 }
 
 /// Fetches the given URL from the network, associating it with the given scale.
@@ -1500,11 +1502,11 @@ enum WebImgElementStrategy {
 /// The image will be cached regardless of cache headers from the server.
 ///
 /// Typically this class resolves to an image stream that ultimately produces
-/// [dart:ui.Image]s. On the Web platform, the [useImgElement] parameter
-/// can be used to make the image stream ultimately produce an [WebImageInfo]
-/// instead, which makes [Image.network] display the image as an HTML `<img>`
-/// element in a platform view. The feature is by default turned off
-/// ([WebImgElementStrategy.never]). See [Image.network] for more explanation.
+/// [dart:ui.Image]s. On the Web platform, the [webHtmlElementStrategy]
+/// parameter can be used to make the image stream ultimately produce an
+/// [WebImageInfo] instead, which makes [Image.network] display the image as an
+/// HTML element in a platform view. The feature is by default turned off
+/// ([WebHtmlElementStrategy.never]). See [Image.network] for more explanation.
 ///
 /// See also:
 ///
@@ -1520,12 +1522,12 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
   /// The [scale] argument is the linear scale factor for drawing this image at
   /// its intended size. See [ImageInfo.scale] for more information.
   ///
-  /// The [useImgElement] is by default [WebImgElementStrategy.never].
+  /// The [webHtmlElementStrategy] is by default [WebHtmlElementStrategy.never].
   const factory NetworkImage(
     String url, {
       double scale,
       Map<String, String>? headers,
-      WebImgElementStrategy useImgElement,
+      WebHtmlElementStrategy webHtmlElementStrategy,
     }) = network_image.NetworkImage;
 
   /// The URL from which the image will be fetched.
@@ -1541,14 +1543,14 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
 
   /// On the Web platform, specifies when the image is loaded as a
   /// [WebImageInfo], which causes [Image.network] to display the image in an
-  /// HTML `<img>` tag in a platform view.
+  /// HTML element in a platform view.
   ///
   /// See [Image.network] for more explanation.
   ///
-  /// Defaults to [WebImgElementStrategy.never].
+  /// Defaults to [WebHtmlElementStrategy.never].
   ///
   /// Has no effect on other platforms, which always fetch bytes.
-  WebImgElementStrategy get useImgElement;
+  WebHtmlElementStrategy get webHtmlElementStrategy;
 
   @override
   ImageStreamCompleter loadBuffer(NetworkImage key, DecoderBufferCallback decode);

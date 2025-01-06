@@ -17,9 +17,9 @@ import 'basic.dart';
 import 'framework.dart';
 import 'platform_view.dart';
 
-/// Displays an `<img>` element with `src` set to [src].
+/// Displays an HTML element with `src` set to [src].
 class ImgElementPlatformView extends StatelessWidget {
-  /// Creates a platform view backed with an `<img>` element.
+  /// Creates a platform view backed with an HTML element.
   ImgElementPlatformView(this.src, {super.key}) {
     if (!_registered) {
       _register();
@@ -42,7 +42,7 @@ class ImgElementPlatformView extends StatelessWidget {
     });
   }
 
-  /// The `src` URL for the `<img>` tag.
+  /// The `src` URL for the HTML tag.
   final String? src;
 
   @override
@@ -54,7 +54,8 @@ class ImgElementPlatformView extends StatelessWidget {
   }
 }
 
-/// A widget which displays and lays out an underlying `<img>` platform view.
+/// A widget which displays and lays out an underlying HTML element in a
+/// platform view.
 class RawWebImage extends SingleChildRenderObjectWidget {
   /// Creates a [RawWebImage].
   RawWebImage({
@@ -68,7 +69,7 @@ class RawWebImage extends SingleChildRenderObjectWidget {
     this.matchTextDirection = false,
   }) : super(child: ImgElementPlatformView(image.htmlImage.src));
 
-  /// The underlying `<img>` element to be displayed.
+  /// The underlying HTML element to be displayed.
   final WebImageInfo image;
 
   /// A debug label explaining the image.
@@ -80,7 +81,7 @@ class RawWebImage extends SingleChildRenderObjectWidget {
   /// The requested height for this widget.
   final double? height;
 
-  /// How the `<img>` should be inscribed in the box constraining it.
+  /// How the HTML element should be inscribed in the box constraining it.
   final BoxFit? fit;
 
   /// How the image should be aligned in the box constraining it.
@@ -117,7 +118,7 @@ class RawWebImage extends SingleChildRenderObjectWidget {
   }
 }
 
-/// Lays out and positions the child `<img>` element similarly to [RenderImage].
+/// Lays out and positions the child HTML element similarly to [RenderImage].
 class RenderWebImage extends RenderShiftedBox {
   /// Creates a new [RenderWebImage].
   RenderWebImage({

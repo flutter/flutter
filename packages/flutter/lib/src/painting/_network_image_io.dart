@@ -25,7 +25,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     this.url, {
     this.scale = 1.0,
     this.headers,
-    this.useImgElement = image_provider.WebImgElementStrategy.never,
+    this.webHtmlElementStrategy = image_provider.WebHtmlElementStrategy.never,
   });
 
   @override
@@ -38,7 +38,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   final Map<String, String>? headers;
 
   @override
-  final image_provider.WebImgElementStrategy useImgElement;
+  final image_provider.WebHtmlElementStrategy webHtmlElementStrategy;
 
   @override
   Future<NetworkImage> obtainKey(image_provider.ImageConfiguration configuration) {

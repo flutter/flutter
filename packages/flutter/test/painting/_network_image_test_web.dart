@@ -134,7 +134,7 @@ void runTests() {
     expect(imageInfo, isNull);
   }, skip: !isSkiaWeb);
 
-  testWidgets('When strategy is .whenNecessary, emits a WebImageInfo if the image is cross-origin',
+  testWidgets('When strategy is .fallback, emits a WebImageInfo if the image is cross-origin',
       (WidgetTester tester) async {
     final TestHttpRequest failingRequest = TestHttpRequest()
       ..status = 500
@@ -152,7 +152,7 @@ void runTests() {
 
     const NetworkImage networkImage = NetworkImage(
       'https://www.example.com/images/frame5.png',
-      useImgElement: WebImgElementStrategy.whenNecessary,
+      webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
     );
     ImageInfo? imageInfo;
     Object? recordedError;
@@ -184,7 +184,7 @@ void runTests() {
     expect(webImageInfo.htmlImage.src, equals('https://www.example.com/images/frame5.png'));
   }, skip: !isSkiaWeb);
 
-  testWidgets('When strategy is .whenNecessary, emits an error if the image is cross-origin but fails to decode',
+  testWidgets('When strategy is .fallback, emits an error if the image is cross-origin but fails to decode',
       (WidgetTester tester) async {
     final TestHttpRequest failingRequest = TestHttpRequest()
       ..status = 500
@@ -202,7 +202,7 @@ void runTests() {
 
     const NetworkImage networkImage = NetworkImage(
       'https://www.example.com/images/frame6.png',
-      useImgElement: WebImgElementStrategy.whenNecessary,
+      webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
     );
     ImageInfo? imageInfo;
     Object? recordedError;
@@ -249,7 +249,7 @@ void runTests() {
 
     const NetworkImage networkImage = NetworkImage(
       'https://www.example.com/images/frame7.png',
-      useImgElement: WebImgElementStrategy.always,
+      webHtmlElementStrategy: WebHtmlElementStrategy.always,
     );
     ImageInfo? imageInfo;
     Object? recordedError;
@@ -294,7 +294,7 @@ void runTests() {
 
     const NetworkImage networkImage = NetworkImage(
       'https://www.example.com/images/frame8.png',
-      useImgElement: WebImgElementStrategy.always,
+      webHtmlElementStrategy: WebHtmlElementStrategy.always,
       headers: <String, String>{
         'flutter': 'flutter',
         'second': 'second',

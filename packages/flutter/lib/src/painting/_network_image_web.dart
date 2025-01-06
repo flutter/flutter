@@ -18,9 +18,9 @@ import 'image_stream.dart';
 /// used for testing purposes.
 typedef HttpRequestFactory = web.XMLHttpRequest Function();
 
-/// The type for an overridable factory function for creating `<img>` elements,
-/// used for testing purposes.
-typedef ImgElementFactory = web.HTMLImageElement Function();
+/// The type for an overridable factory function for creating HTML elements to
+/// display images, used for testing purposes.
+typedef HtmlElementFactory = web.HTMLImageElement Function();
 
 // Method signature for _loadAsync decode callbacks.
 typedef _SimpleDecoderCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buffer);
@@ -40,17 +40,17 @@ void debugRestoreHttpRequestFactory() {
   httpRequestFactory = _httpClient;
 }
 
-/// The default `<img>` element factory.
+/// The default HTML element factory.
 web.HTMLImageElement _imgElementFactory() {
   return web.document.createElement('img') as web.HTMLImageElement;
 }
 
-/// The factory function that creates `<img>` elements, can be overridden for
+/// The factory function that creates HTML elements, can be overridden for
 /// tests.
 @visibleForTesting
-ImgElementFactory imgElementFactory = _imgElementFactory;
+HtmlElementFactory imgElementFactory = _imgElementFactory;
 
-/// Restores the default `<img>` element factory.
+/// Restores the default HTML element factory.
 @visibleForTesting
 void debugRestoreImgElementFactory() {
   imgElementFactory = _imgElementFactory;
@@ -67,7 +67,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     this.url, {
     this.scale = 1.0,
     this.headers,
-    this.useImgElement = image_provider.WebImgElementStrategy.never,
+    this.webHtmlElementStrategy = image_provider.WebHtmlElementStrategy.never,
   });
 
   @override
@@ -80,7 +80,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   final Map<String, String>? headers;
 
   @override
-  final image_provider.WebImgElementStrategy useImgElement;
+  final image_provider.WebHtmlElementStrategy webHtmlElementStrategy;
 
   @override
   Future<NetworkImage> obtainKey(image_provider.ImageConfiguration configuration) {
@@ -219,12 +219,12 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       );
     }
 
-    switch (useImgElement) {
-      case image_provider.WebImgElementStrategy.never:
+    switch (webHtmlElementStrategy) {
+      case image_provider.WebHtmlElementStrategy.never:
         return loadViaDecode();
-      case image_provider.WebImgElementStrategy.always:
+      case image_provider.WebHtmlElementStrategy.always:
         return loadViaImgElement();
-      case image_provider.WebImgElementStrategy.whenNecessary:
+      case image_provider.WebHtmlElementStrategy.fallback:
         try {
           // Await here so that errors occurred during the asynchronous process
           // of `loadViaDecode` are caught and triggers `loadViaImgElement`.
