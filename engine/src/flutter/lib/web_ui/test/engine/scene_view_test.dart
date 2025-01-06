@@ -20,27 +20,24 @@ void main() {
 }
 
 class StubPictureRenderer implements PictureRenderer {
-  final DomCanvasElement scratchCanvasElement =
-      createDomCanvasElement(width: 500, height: 500);
+  final DomCanvasElement scratchCanvasElement = createDomCanvasElement(width: 500, height: 500);
 
   @override
   Future<RenderResult> renderPictures(List<ScenePicture> pictures) async {
     renderedPictures.addAll(pictures);
-    final List<DomImageBitmap> bitmaps = await Future.wait(pictures.map((ScenePicture picture) {
-      final ui.Rect cullRect = picture.cullRect;
-      final Future<DomImageBitmap> bitmap = createImageBitmap(scratchCanvasElement as JSObject, (
-        x: 0,
-        y: 0,
-        width: cullRect.width.toInt(),
-        height: cullRect.height.toInt(),
-      ));
-      return bitmap;
-    }));
-    return (
-      imageBitmaps: bitmaps,
-      rasterStartMicros: 0,
-      rasterEndMicros: 0,
+    final List<DomImageBitmap> bitmaps = await Future.wait(
+      pictures.map((ScenePicture picture) {
+        final ui.Rect cullRect = picture.cullRect;
+        final Future<DomImageBitmap> bitmap = createImageBitmap(scratchCanvasElement as JSObject, (
+          x: 0,
+          y: 0,
+          width: cullRect.width.toInt(),
+          height: cullRect.height.toInt(),
+        ));
+        return bitmap;
+      }),
     );
+    return (imageBitmaps: bitmaps, rasterStartMicros: 0, rasterEndMicros: 0);
   }
 
   @override
@@ -83,15 +80,13 @@ class StubFlutterView implements EngineFlutterView {
   EnginePlatformDispatcher get platformDispatcher => throw UnimplementedError();
 
   @override
-  void render(ui.Scene scene, {ui.Size? size}) {
-  }
+  void render(ui.Scene scene, {ui.Size? size}) {}
 
   @override
   ViewPadding get systemGestureInsets => throw UnimplementedError();
 
   @override
-  void updateSemantics(ui.SemanticsUpdate update) {
-  }
+  void updateSemantics(ui.SemanticsUpdate update) {}
 
   @override
   int get viewId => throw UnimplementedError();
@@ -164,12 +159,7 @@ void testMain() {
   test('SceneView places canvas according to device-pixel ratio', () async {
     debugOverrideDevicePixelRatio(2.0);
 
-    final StubPicture picture = StubPicture(const ui.Rect.fromLTWH(
-      50,
-      80,
-      100,
-      120,
-    ));
+    final StubPicture picture = StubPicture(const ui.Rect.fromLTWH(50, 80, 100, 120));
     final EngineRootLayer rootLayer = EngineRootLayer();
     rootLayer.slices.add(LayerSlice(picture, <PlatformView>[]));
     final EngineScene scene = EngineScene(rootLayer);
@@ -182,8 +172,7 @@ void testMain() {
     final DomElement containerElement = children.first;
     expect(containerElement.tagName, equalsIgnoringCase('flt-canvas-container'));
 
-    final List<DomElement> containerChildren =
-        containerElement.children.toList();
+    final List<DomElement> containerChildren = containerElement.children.toList();
     expect(containerChildren.length, 1);
     final DomElement canvasElement = containerChildren.first;
     final DomCSSStyleDeclaration style = canvasElement.style;
@@ -195,14 +184,14 @@ void testMain() {
     debugOverrideDevicePixelRatio(null);
   });
 
-  test('SceneView places platform view according to device-pixel ratio',
-      () async {
+  test('SceneView places platform view according to device-pixel ratio', () async {
     debugOverrideDevicePixelRatio(2.0);
 
     final PlatformView platformView = PlatformView(
-        1,
-        const ui.Rect.fromLTWH(50, 80, 100, 120),
-        const PlatformViewStyling());
+      1,
+      const ui.Rect.fromLTWH(50, 80, 100, 120),
+      const PlatformViewStyling(),
+    );
     final EngineRootLayer rootLayer = EngineRootLayer();
     rootLayer.slices.add(LayerSlice(StubPicture(ui.Rect.zero), <PlatformView>[platformView]));
     final EngineScene scene = EngineScene(rootLayer);
@@ -231,18 +220,11 @@ void testMain() {
     debugOverrideDevicePixelRatio(null);
   });
 
-  test(
-      'SceneView always renders most recent picture and skips intermediate pictures',
-      () async {
+  test('SceneView always renders most recent picture and skips intermediate pictures', () async {
     final List<StubPicture> pictures = <StubPicture>[];
     final List<Future<void>> renderFutures = <Future<void>>[];
     for (int i = 1; i < 20; i++) {
-      final StubPicture picture = StubPicture(const ui.Rect.fromLTWH(
-        50,
-        80,
-        100,
-        120,
-      ));
+      final StubPicture picture = StubPicture(const ui.Rect.fromLTWH(50, 80, 100, 120));
       pictures.add(picture);
       final EngineRootLayer rootLayer = EngineRootLayer();
       rootLayer.slices.add(LayerSlice(picture, <PlatformView>[]));
@@ -258,41 +240,36 @@ void testMain() {
   });
 
   test('SceneView clips pictures that are outside the window screen', () async {
-      final StubPicture picture = StubPicture(const ui.Rect.fromLTWH(
-        -50,
-        -50,
-        100,
-        120,
-      ));
+    final StubPicture picture = StubPicture(const ui.Rect.fromLTWH(-50, -50, 100, 120));
 
-      final EngineRootLayer rootLayer = EngineRootLayer();
-      rootLayer.slices.add(LayerSlice(picture, <PlatformView>[]));
-      final EngineScene scene = EngineScene(rootLayer);
-      await sceneView.renderScene(scene, null);
+    final EngineRootLayer rootLayer = EngineRootLayer();
+    rootLayer.slices.add(LayerSlice(picture, <PlatformView>[]));
+    final EngineScene scene = EngineScene(rootLayer);
+    await sceneView.renderScene(scene, null);
 
-      expect(stubPictureRenderer.renderedPictures.length, 1);
-      expect(stubPictureRenderer.clipRequests.containsKey(picture), true);
+    expect(stubPictureRenderer.renderedPictures.length, 1);
+    expect(stubPictureRenderer.clipRequests.containsKey(picture), true);
   });
 
   test('SceneView places platform view contents in the DOM', () async {
     const int expectedPlatformViewId = 1234;
 
     int? injectedViewId;
-    final DomManager stubDomManager = StubDomManager()
-      ..injectPlatformViewOverride = (int viewId) {
-        injectedViewId = viewId;
-      };
-    sceneView = EngineSceneView(
-      stubPictureRenderer,
-      StubFlutterView()..dom = stubDomManager,
+    final DomManager stubDomManager =
+        StubDomManager()
+          ..injectPlatformViewOverride = (int viewId) {
+            injectedViewId = viewId;
+          };
+    sceneView = EngineSceneView(stubPictureRenderer, StubFlutterView()..dom = stubDomManager);
+
+    final PlatformView platformView = PlatformView(
+      expectedPlatformViewId,
+      const ui.Rect.fromLTWH(50, 80, 100, 120),
+      const PlatformViewStyling(),
     );
 
-    final PlatformView platformView = PlatformView(expectedPlatformViewId,
-        const ui.Rect.fromLTWH(50, 80, 100, 120), const PlatformViewStyling());
-
     final EngineRootLayer rootLayer = EngineRootLayer();
-    rootLayer.slices.add(
-        LayerSlice(StubPicture(ui.Rect.zero), <PlatformView>[platformView]));
+    rootLayer.slices.add(LayerSlice(StubPicture(ui.Rect.zero), <PlatformView>[platformView]));
     final EngineScene scene = EngineScene(rootLayer);
     await sceneView.renderScene(scene, null);
 

@@ -19,10 +19,7 @@ class AnalyzeCommand extends Command<bool> with ArgUtils<bool> {
 
   @override
   FutureOr<bool> run() async {
-    final Pipeline buildPipeline = Pipeline(steps: <PipelineStep>[
-      PubGetStep(),
-      AnalyzeStep(),
-    ]);
+    final Pipeline buildPipeline = Pipeline(steps: <PipelineStep>[PubGetStep(), AnalyzeStep()]);
     await buildPipeline.run();
     return true;
   }
@@ -39,11 +36,10 @@ class PubGetStep extends ProcessStep {
   @override
   Future<ProcessManager> createProcess() {
     print('Running `dart pub get`...');
-    return startProcess(
-      environment.dartExecutable,
-      <String>['pub', 'get'],
-      workingDirectory: environment.webUiRootDir.path,
-    );
+    return startProcess(environment.dartExecutable, <String>[
+      'pub',
+      'get',
+    ], workingDirectory: environment.webUiRootDir.path);
   }
 }
 
@@ -58,10 +54,9 @@ class AnalyzeStep extends ProcessStep {
   @override
   Future<ProcessManager> createProcess() {
     print('Running `dart analyze`...');
-    return startProcess(
-      environment.dartExecutable,
-      <String>['analyze', '--fatal-infos'],
-      workingDirectory: environment.webUiRootDir.path,
-    );
+    return startProcess(environment.dartExecutable, <String>[
+      'analyze',
+      '--fatal-infos',
+    ], workingDirectory: environment.webUiRootDir.path);
   }
 }
