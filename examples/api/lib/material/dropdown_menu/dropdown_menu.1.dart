@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 /// Flutter code sample for [DropdownMenu].
@@ -35,12 +34,7 @@ class DropdownMenuExample extends StatefulWidget {
   State<DropdownMenuExample> createState() => _DropdownMenuExampleState();
 }
 
-typedef MenuEntry  = DropdownMenuEntry<String>;
-
 class _DropdownMenuExampleState extends State<DropdownMenuExample> {
-  static final List<MenuEntry> menuEntries = UnmodifiableListView<MenuEntry>(
-    list.map<MenuEntry>((String name) => MenuEntry(value: name, label: name)),
-  );
   String dropdownValue = list.first;
 
   @override
@@ -53,7 +47,12 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
           dropdownValue = value!;
         });
       },
-      dropdownMenuEntries: menuEntries,
+      dropdownMenuEntries: list.map<DropdownMenuEntry<String>>((String value) {
+        return DropdownMenuEntry<String>(
+          value: value,
+          label: value
+        );
+      }).toList(),
     );
   }
 }
