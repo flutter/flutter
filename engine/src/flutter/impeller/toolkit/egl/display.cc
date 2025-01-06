@@ -6,6 +6,7 @@
 
 #include <vector>
 
+#include "flutter/fml/logging.h"
 #include "impeller/toolkit/egl/context.h"
 #include "impeller/toolkit/egl/surface.h"
 
@@ -161,7 +162,7 @@ std::unique_ptr<Config> Display::ChooseConfig(ConfigDescriptor config) const {
     return nullptr;
   }
 
-  if (config_count_out < 1u) {
+  if (config_count_out < 1) {
     FML_LOG(ERROR) << "`eglChooseConfig` responded with zero configs.";
     return nullptr;
   }
