@@ -163,7 +163,6 @@ std::unique_ptr<Config> Display::ChooseConfig(ConfigDescriptor config) const {
   }
 
   if (config_count_out < 1) {
-    FML_LOG(ERROR) << "`eglChooseConfig` responded with zero configs.";
     return nullptr;
   }
 
