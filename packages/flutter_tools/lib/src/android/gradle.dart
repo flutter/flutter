@@ -700,7 +700,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       'packages',
       'flutter_tools',
       'gradle',
-      'aar_init_script.gradle',
+      'aar_init_script.gradle.kts',
     );
     final List<String> command = <String>[
       _gradleUtils.getExecutable(project),
