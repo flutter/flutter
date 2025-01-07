@@ -1708,7 +1708,7 @@ class CompileTest {
 
   Future<TaskResult> run() async {
     return inDirectory<TaskResult>(testDirectory, () async {
-      // await flutter('packages', options: <String>['get']);
+      await flutter('packages', options: <String>['get']);
 
       // "initial" compile required downloading and creating the `android/.gradle` directory while "full"
       // compiles only run `flutter clean` between runs.
