@@ -152,7 +152,7 @@ class _ErrorsInFileMatcher extends Matcher {
 
   final File file;
 
-  static final RegExp expectationMatcher = RegExp(r'//( ERROR: (?<expectation>.+))+$');
+  static final RegExp expectationMatcher = RegExp(r'// ERROR: (?<expectations>.+)$');
 
   static bool mismatch(String mismatchDescription, Map<dynamic, dynamic> matchState) {
     return _ErrorMatcher.mismatch(mismatchDescription, matchState);
@@ -161,11 +161,9 @@ class _ErrorsInFileMatcher extends Matcher {
   List<(int, String)> _expectedErrorMessagesFromFile(Map<dynamic, dynamic> matchState) {
     final List<(int, String)> returnValue = <(int, String)>[];
     for (final (int index, String line) in file.readAsLinesSync().indexed) {
-      final Iterable<String> expectations =
-          expectationMatcher
-              .allMatches(line)
-              .map((RegExpMatch m) => m.namedGroup('expectation'))
-              .whereType<String>();
+      final List<String> expectations =
+          expectationMatcher.firstMatch(line)?.namedGroup('expectations')?.split(' // ERROR: ') ??
+          <String>[];
       for (final String expectation in expectations) {
         returnValue.add((index + 1, expectation));
       }

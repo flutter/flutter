@@ -54,6 +54,20 @@ void main() {
   );
   final String testGenDefaultsPath = path.join('test', 'analyze-gen-defaults');
 
+  test('matchesErrorsInFile matcher basic test', () async {
+    final String result = await capture(() async {
+      foundError(<String>[
+        'meta.dart:5: error #1',
+        'meta.dart:5: error #2',
+        'meta.dart:6: error #3',
+        '',
+        'Error summary',
+      ]);
+    }, shouldHaveErrors: true);
+    final File fixture = File(path.join(testRootPath, 'packages', 'foo', 'meta.dart'));
+    expect(result, matchesErrorsInFile(fixture, endsWith: <String>['', 'Error summary']));
+  });
+
   test('analyze.dart - verifyDeprecations', () async {
     final String result = await capture(
       () => verifyDeprecations(testRootPath, minimumMatches: 2),
