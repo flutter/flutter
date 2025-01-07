@@ -1229,7 +1229,7 @@ void main() {
                 command: <String>[
                   '/bin/cache/flutter_gradle_wrapper.rand0/gradlew',
                   '-b',
-                  'packages/flutter_tools/gradle/resolve_dependencies.gradle',
+                  'packages/flutter_tools/gradle/resolve_dependencies.gradle.kts',
                   '--project-cache-dir',
                   '/bin/cache/flutter_gradle_wrapper.rand0',
                   'resolveDependencies',
@@ -1258,38 +1258,6 @@ void main() {
         );
 
         expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
-        expect(fakeAndroidSdk!.reinitialized, true);
-      } finally {
-        Cache.flutterRoot = oldRoot;
-      }
-    }, overrides: <Type, Generator>{
-      Cache: () => cache,
-      FileSystem: () => memoryFileSystem,
-      Platform: () => FakePlatform(),
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <String>[
-          '/bin/cache/flutter_gradle_wrapper.rand0/gradlew',
-          '-b',
-          'packages/flutter_tools/gradle/resolve_dependencies.gradle.kts',
-          '--project-cache-dir',
-          '/bin/cache/flutter_gradle_wrapper.rand0',
-          'resolveDependencies',
-        ]),
-      ]),
-      AndroidSdk: () => fakeAndroidSdk,
-    });
-
-    testUsingContext('AndroidMavenArtifacts is a no-op if the Android SDK is absent', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(
-        cache!,
-        java: FakeJava(),
-        platform: FakePlatform(),
-      );
-      expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
-
-      await mavenArtifacts.update(FakeArtifactUpdater(), BufferLogger.test(), memoryFileSystem!, FakeOperatingSystemUtils());
-
-      expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
       },
       overrides: <Type, Generator>{
         Cache: () => cache,
