@@ -218,7 +218,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
 
     final loader.FlutterPlatform platform = loader.installHook(
       testWrapper: testWrapper,
-      shellPath: flutterTesterBinPath,
+      flutterTesterBinPath: flutterTesterBinPath,
       debuggingOptions: debuggingOptions,
       watcher: watcher,
       enableVmService: enableVmService,
