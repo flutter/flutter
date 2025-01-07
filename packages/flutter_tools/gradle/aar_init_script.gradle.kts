@@ -35,12 +35,12 @@ fun configureProject(project: Project, outputDir: String) {
     }
 
     // Configure Maven publishing repository
-    publishing {
-        repositories {
-            maven {
-                url = uri("file://$outputDir/outputs/repo")
+    project.extensions.configure<PublishingExtension> {
+    repositories {
+        maven {
+            url = uri("file://$outputDir/outputs/repo")
             }
-        }
+                }
     }
 
     // Handle Flutter plugin-specific logic
