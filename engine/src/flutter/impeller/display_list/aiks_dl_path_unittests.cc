@@ -464,11 +464,15 @@ TEST_P(AiksTest, CanRenderClips) {
 TEST_P(AiksTest, FatStrokeArc) {
   DlScalar stroke_width = 300;
   DlScalar aspect = 1.0;
+  DlScalar start_angle = 0;
+  DlScalar end_angle = 90;
   auto callback = [&]() -> sk_sp<DisplayList> {
     if (AiksTest::ImGuiBegin("Controls", nullptr,
                              ImGuiWindowFlags_AlwaysAutoResize)) {
       ImGui::SliderFloat("Stroke Width", &stroke_width, 1, 300);
       ImGui::SliderFloat("Aspect", &aspect, 0.5, 2.0);
+      ImGui::SliderFloat("Start Angle", &start_angle, 0, 360);
+      ImGui::SliderFloat("End Angle", &end_angle, 0, 360);
       ImGui::End();
     }
 
@@ -482,7 +486,7 @@ TEST_P(AiksTest, FatStrokeArc) {
 
     Rect rect = Rect::MakeXYWH(100, 100, 100, aspect * 100);
     builder.DrawRect(rect, red_paint);
-    builder.DrawArc(rect, 0, 90,
+    builder.DrawArc(rect, start_angle, end_angle,
                     /*use_center=*/false, white_paint);
     DlScalar frontier = rect.GetRight() + stroke_width / 2.0;
     builder.DrawLine(Point(frontier, 0), Point(frontier, 150), red_paint);
