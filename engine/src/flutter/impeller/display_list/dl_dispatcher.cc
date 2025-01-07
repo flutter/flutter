@@ -644,6 +644,9 @@ void DlDispatcherBase::drawArc(const DlRect& oval_bounds,
 
   if (paint_.stroke_width >
       std::max(oval_bounds.GetWidth(), oval_bounds.GetHeight())) {
+    // This is a special case for rendering arcs whose stroke width is so large
+    // you are effectively drawing a sector of a circle.
+    // https://github.com/flutter/flutter/issues/158567
     DlRect expanded_rect = oval_bounds.Expand(Size(paint_.stroke_width / 2));
     PathBuilder builder;
     Paint fill_paint = paint_;
