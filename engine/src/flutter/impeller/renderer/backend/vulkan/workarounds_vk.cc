@@ -6,7 +6,7 @@
 
 namespace impeller {
 
-WorkaroundsVK GetWorkarounds(DriverInfoVK& driver_info) {
+WorkaroundsVK GetWorkaroundsFromDriverInfo(DriverInfoVK& driver_info) {
   WorkaroundsVK workarounds;
 
   const auto& adreno_gpu = driver_info.GetAdrenoGPUInfo();
@@ -15,6 +15,7 @@ WorkaroundsVK GetWorkarounds(DriverInfoVK& driver_info) {
   workarounds.batch_submit_command_buffer_timeout = true;
   if (adreno_gpu.has_value()) {
     workarounds.slow_primitive_restart_performance = true;
+    workarounds.broken_mipmap_generation = true;
 
     if (adreno_gpu.value() >= AdrenoGPU::kAdreno702) {
       workarounds.batch_submit_command_buffer_timeout = false;
