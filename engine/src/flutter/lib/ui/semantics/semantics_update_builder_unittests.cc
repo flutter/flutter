@@ -95,7 +95,7 @@ TEST_F(SemanticsUpdateBuilderTest, CanHandleSemanticsRole) {
     auto handle = Dart_GetNativeArgument(args, 0);
     intptr_t peer = 0;
     Dart_Handle result = Dart_GetNativeInstanceField(
-            handle, tonic::DartWrappable::kPeerIndex, &peer);
+        handle, tonic::DartWrappable::kPeerIndex, &peer);
     ASSERT_FALSE(Dart_IsError(result));
     SemanticsUpdate* update = reinterpret_cast<SemanticsUpdate*>(peer);
     SemanticsNodeUpdates nodes = update->takeNodes();
@@ -120,7 +120,7 @@ TEST_F(SemanticsUpdateBuilderTest, CanHandleSemanticsRole) {
     ASSERT_EQ(node.hintAttributes[0]->end, 1);
     ASSERT_EQ(node.hintAttributes[0]->type, StringAttributeType::kLocale);
     auto local_attribute =
-            std::static_pointer_cast<LocaleStringAttribute>(node.hintAttributes[0]);
+        std::static_pointer_cast<LocaleStringAttribute>(node.hintAttributes[0]);
     ASSERT_EQ(local_attribute->locale, "en-MX");
 
     ASSERT_EQ(node.increasedValue, "increasedValue");
@@ -157,7 +157,7 @@ TEST_F(SemanticsUpdateBuilderTest, CanHandleSemanticsRole) {
   configuration.SetEntrypoint("sendSemanticsUpdate");
 
   shell->RunEngine(std::move(configuration), [](auto result) {
-      ASSERT_EQ(result, Engine::RunStatus::Success);
+    ASSERT_EQ(result, Engine::RunStatus::Success);
   });
 
   message_latch->Wait();
