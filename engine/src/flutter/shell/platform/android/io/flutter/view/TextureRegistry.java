@@ -141,16 +141,16 @@ public interface TextureRegistry {
       }
 
       /**
-       * Invoked when a {@link Surface} returned by {@link SurfaceProducer#getSurface()} is invalid.
+       * Invoked when a {@link Surface} returned by {@link SurfaceProducer#getSurface()} is about
+       * to become invalid.
        *
        * <p>In a low memory environment, the Android OS will signal to Flutter to release resources,
        * such as surfaces, that are not currently in use, such as when the application is in the
        * background, and this method is subsequently called to notify a plugin author to stop using
        * or rendering to the last surface.
        *
-       * @deprecated Override and use {@link Callback#onSurfaceCleanup()} instead. This method is
-       *     called after the surface has already been destroyed, which is often too late to tell a
-       *     dependency (which might have already scheduled a render) to stop.
+       * @deprecated Override and use {@link Callback#onSurfaceCleanup()} instead.
+       *
        * @see <a href="https://github.com/flutter/flutter/issues/160933">#160933</a>.
        */
       @Deprecated(since = "Flutter 3.28", forRemoval = true)
@@ -183,7 +183,7 @@ public interface TextureRegistry {
        * }
        * </pre>
        */
-      default void onSurfaceCleanup() {}
+      default void onSurfaceCleanup() { onSurfaceDestroyed(); }
     }
 
     /** This method is not officially part of the public API surface and will be deprecated. */
