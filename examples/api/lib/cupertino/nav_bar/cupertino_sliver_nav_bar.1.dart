@@ -124,19 +124,22 @@ class _NextPageState extends State<NextPage> {
                         child: Text('This is a search view', textAlign: TextAlign.center),
                       ),
                     )
-                    : const Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        Text('Drag me up', textAlign: TextAlign.center),
-                        Text(
-                          'Tap on the search field to open the search view',
-                          textAlign: TextAlign.center,
-                        ),
-                        Text(
-                          'Tap on the leading button to navigate back',
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                    : const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Text('Drag me up', textAlign: TextAlign.center),
+                          Text(
+                            'Tap on the search field to open the search view',
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            'Tap on the leading button to navigate back',
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
                     ),
           ),
         ],
