@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:android_driver_extensions/native_driver.dart';
+import 'package:android_driver_extensions/skia_gold.dart';
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:native_driver/native_driver.dart';
-import 'package:native_driver/skia_gold.dart';
 import 'package:test/test.dart';
 
 import '_luci_skia_gold_prelude.dart';
