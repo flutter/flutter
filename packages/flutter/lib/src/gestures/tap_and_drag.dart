@@ -9,8 +9,7 @@ library;
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart'
-    show DiagnosticPropertiesBuilder, Diagnosticable, DiagnosticsProperty, VoidCallback;
+import 'package:flutter/foundation.dart';
 
 import 'constants.dart';
 import 'details_with_positions.dart';
@@ -81,7 +80,7 @@ typedef GestureTapDragDownCallback = void Function(TapDragDownDetails details);
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
-class TapDragDownDetails extends GestureDetailsWithPositions with Diagnosticable {
+class TapDragDownDetails extends GestureDetailsWithPositions {
   /// Creates details for a [GestureTapDragDownCallback].
   TapDragDownDetails({
     required super.globalPosition,
@@ -100,8 +99,8 @@ class TapDragDownDetails extends GestureDetailsWithPositions with Diagnosticable
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
-    properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
+    properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(IntProperty('consecutiveTapCount', consecutiveTapCount));
   }
 }
 
@@ -124,7 +123,7 @@ typedef GestureTapDragUpCallback = void Function(TapDragUpDetails details);
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
-class TapDragUpDetails extends GestureDetailsWithPositions with Diagnosticable {
+class TapDragUpDetails extends GestureDetailsWithPositions {
   /// Creates details for a [GestureTapDragUpCallback].
   TapDragUpDetails({
     required super.globalPosition,
@@ -143,8 +142,8 @@ class TapDragUpDetails extends GestureDetailsWithPositions with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
-    properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
+    properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(IntProperty('consecutiveTapCount', consecutiveTapCount));
   }
 }
 
@@ -167,7 +166,7 @@ typedef GestureTapDragStartCallback = void Function(TapDragStartDetails details)
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
-class TapDragStartDetails extends GestureDetailsWithPositions with Diagnosticable {
+class TapDragStartDetails extends GestureDetailsWithPositions {
   /// Creates details for a [GestureTapDragStartCallback].
   TapDragStartDetails({
     required super.globalPosition,
@@ -194,8 +193,8 @@ class TapDragStartDetails extends GestureDetailsWithPositions with Diagnosticabl
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
-    properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
-    properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
+    properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(IntProperty('consecutiveTapCount', consecutiveTapCount));
   }
 }
 
@@ -218,7 +217,7 @@ typedef GestureTapDragUpdateCallback = void Function(TapDragUpdateDetails detail
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
-class TapDragUpdateDetails extends GestureDetailsWithPositions with Diagnosticable {
+class TapDragUpdateDetails extends GestureDetailsWithPositions {
   /// Creates details for a [GestureTapDragUpdateCallback].
   ///
   /// If [primaryDelta] is non-null, then its value must match one of the
@@ -296,11 +295,11 @@ class TapDragUpdateDetails extends GestureDetailsWithPositions with Diagnosticab
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
     properties.add(DiagnosticsProperty<Offset>('delta', delta));
-    properties.add(DiagnosticsProperty<double?>('primaryDelta', primaryDelta));
-    properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(DoubleProperty('primaryDelta', primaryDelta));
+    properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
     properties.add(DiagnosticsProperty<Offset>('offsetFromOrigin', offsetFromOrigin));
     properties.add(DiagnosticsProperty<Offset>('localOffsetFromOrigin', localOffsetFromOrigin));
-    properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
+    properties.add(IntProperty('consecutiveTapCount', consecutiveTapCount));
   }
 }
 
@@ -362,8 +361,8 @@ class TapDragEndDetails extends GestureDetailsWithPositions {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Velocity>('velocity', velocity));
-    properties.add(DiagnosticsProperty<double?>('primaryVelocity', primaryVelocity));
-    properties.add(DiagnosticsProperty<int>('consecutiveTapCount', consecutiveTapCount));
+    properties.add(DoubleProperty('primaryVelocity', primaryVelocity));
+    properties.add(IntProperty('consecutiveTapCount', consecutiveTapCount));
   }
 }
 

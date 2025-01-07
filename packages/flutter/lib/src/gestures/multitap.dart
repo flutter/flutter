@@ -7,7 +7,7 @@ library;
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show Diagnosticable, DiagnosticsProperty;
+import 'package:flutter/foundation.dart';
 
 import 'arena.dart';
 import 'binding.dart';
@@ -655,9 +655,9 @@ class SerialTapDownDetails extends GestureDetailsWithPositions {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<PointerDeviceKind>('kind', kind));
-    properties.add(DiagnosticsProperty<int>('buttons', buttons));
-    properties.add(DiagnosticsProperty<int>('count', count));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
+    properties.add(IntProperty('buttons', buttons));
+    properties.add(IntProperty('count', count));
   }
 }
 
@@ -690,7 +690,7 @@ class SerialTapCancelDetails with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<int>('count', count));
+    properties.add(IntProperty('count', count));
   }
 }
 
@@ -730,8 +730,8 @@ class SerialTapUpDetails extends GestureDetailsWithPositions {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
-    properties.add(DiagnosticsProperty<int>('count', count));
+    properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(IntProperty('count', count));
   }
 }
 

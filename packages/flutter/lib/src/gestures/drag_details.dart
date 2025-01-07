@@ -5,7 +5,7 @@
 /// @docImport 'monodrag.dart';
 library;
 
-import 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder, DiagnosticsProperty;
+import 'package:flutter/foundation.dart';
 
 import 'details_with_positions.dart';
 import 'velocity_tracker.dart';
@@ -69,7 +69,7 @@ class DragStartDetails extends GestureDetailsWithPositions {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
-    properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
   }
 }
 
@@ -142,7 +142,7 @@ class DragUpdateDetails extends GestureDetailsWithPositions {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
     properties.add(DiagnosticsProperty<Offset>('delta', delta));
-    properties.add(DiagnosticsProperty<double?>('primaryDelta', primaryDelta));
+    properties.add(DoubleProperty('primaryDelta', primaryDelta));
   }
 }
 
@@ -203,6 +203,6 @@ class DragEndDetails extends GestureDetailsWithPositions {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Velocity>('velocity', velocity));
-    properties.add(DiagnosticsProperty<double?>('primaryVelocity', primaryVelocity));
+    properties.add(DoubleProperty('primaryVelocity', primaryVelocity));
   }
 }

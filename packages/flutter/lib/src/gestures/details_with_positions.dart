@@ -39,7 +39,9 @@ abstract class GestureDetailsWithPositions with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(
+      DiagnosticsProperty<Offset>('globalPosition', globalPosition, defaultValue: Offset.zero),
+    );
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
   }
 }

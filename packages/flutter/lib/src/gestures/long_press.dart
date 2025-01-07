@@ -5,7 +5,7 @@
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
-import 'package:flutter/foundation.dart' show DiagnosticsProperty;
+import 'package:flutter/foundation.dart';
 
 import 'constants.dart';
 import 'details_with_positions.dart';
@@ -123,7 +123,7 @@ class LongPressDownDetails extends GestureDetailsWithPositions {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
   }
 }
 
