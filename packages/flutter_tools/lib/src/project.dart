@@ -16,6 +16,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
+import 'base/yaml.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
 import 'dart/package_map.dart';
@@ -317,9 +318,7 @@ class FlutterProject {
   /// sets [manifest] to the [updated] manifest.
   void replacePubspec(FlutterManifest updated) {
     final YamlMap updatedPubspecContents = updated.toYaml();
-    final YamlEditor editor = YamlEditor('');
-    editor.update(const <String>[], updatedPubspecContents);
-    pubspecFile.writeAsStringSync(editor.toString());
+    pubspecFile.writeAsStringSync(encodeYamlAsString(updatedPubspecContents));
     _manifest = updated;
   }
 
