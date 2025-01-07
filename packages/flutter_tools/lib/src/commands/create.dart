@@ -1156,8 +1156,7 @@ String getIncompatibleJavaGradleAgpMessageHeader(
 The configured version of Java detected may conflict with the $incompatibleDependency version in your new Flutter $projectType.
 
 To keep the default AGP version $incompatibleDependencyVersion, download a compatible Java version
-(Java 17 <= $validJavaRangeMessage Java version < Java 21). Configure this Java version
-globally for Flutter by running:
+$validJavaRangeMessage. Configure this Java version globally for Flutter by running:
 
   flutter config --jdk-dir=<JDK_DIRECTORY>
 ''';
