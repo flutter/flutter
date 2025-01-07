@@ -824,12 +824,13 @@ public class FlutterRendererTest {
   @SuppressWarnings({"deprecation", "removal"})
   public void ImageReaderSurfaceProducerSignalsCleanupCallsDestroy() throws Exception {
     CountDownLatch latch = new CountDownLatch(1);
-    TextureRegistry.SurfaceProducer.Callback callback = new TextureRegistry.SurfaceProducer.Callback() {
-      @Override
-      public void onSurfaceDestroyed() {
-        latch.countDown();
-      }
-    };
+    TextureRegistry.SurfaceProducer.Callback callback =
+        new TextureRegistry.SurfaceProducer.Callback() {
+          @Override
+          public void onSurfaceDestroyed() {
+            latch.countDown();
+          }
+        };
 
     // Tests that cleanup, if not provided, just calls destroyed.
     callback.onSurfaceCleanup();
