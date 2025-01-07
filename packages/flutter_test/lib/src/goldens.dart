@@ -218,7 +218,7 @@ GoldenFileComparator goldenFileComparator = const TrivialComparator._();
 ///  * [matchesGoldenFile], the function that invokes the comparator.
 @Deprecated(
   'Use GoldenFileComparator instead. '
-  'This class was deprecated after v3.28.0-0.1.pre.',
+  'This feature was deprecated after v3.28.0-0.1.pre.',
 )
 abstract class WebGoldenComparator {
   /// Compares the rendered pixels of size [width]x[height] that is being

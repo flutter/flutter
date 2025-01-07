@@ -38,7 +38,7 @@ Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
 /// Implements [GoldenFileComparator] by proxying calls to an HTTP service `/flutter_goldens`.
 final class HttpProxyGoldenComparator extends GoldenFileComparator {
   /// Creates a comparator with the given test file being executed.
-  /// 
+  ///
   /// Golden file keys will be interpreted as file paths relative to the
   /// directory in which this file resides.
   HttpProxyGoldenComparator(this._testUri);
@@ -87,7 +87,7 @@ final class HttpProxyGoldenComparator extends GoldenFileComparator {
 ///   * [matchesGoldenFile], the function that invokes the comparator.
 @Deprecated(
   'Use goldenFileComparator instead. '
-  'This class was deprecated after v3.28.0-0.1.pre.',
+  'This feature was deprecated after v3.28.0-0.1.pre.',
 )
 class DefaultWebGoldenComparator extends WebGoldenComparator {
   /// Creates a new [DefaultWebGoldenComparator] for the specified [testUri].
