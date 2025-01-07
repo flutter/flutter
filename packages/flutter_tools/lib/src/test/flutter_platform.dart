@@ -656,11 +656,14 @@ class FlutterPlatform extends PlatformPlugin {
             flutterProject,
             testTimeRecorder: testTimeRecorder,
           );
-          mainDart = await compiler!.compile(globals.fs.file(mainDart).uri);
-
-          if (mainDart == null) {
-            testHarnessChannel.sink.addError('Compilation failed for testPath=$testPath');
-            return null;
+          switch (await compiler!.compile(globals.fs.file(mainDart).uri)) {
+            case TestCompilerComplete(:final String outputPath):
+              mainDart = outputPath;
+            case TestCompilerFailure(:final String? error):
+              testHarnessChannel.sink.addError(
+                'Compilation failed for testPath=$testPath: $error.',
+              );
+              return null;
           }
         } else {
           // For integration tests, we may still need to set up expression compilation service.
