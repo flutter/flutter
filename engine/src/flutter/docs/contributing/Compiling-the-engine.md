@@ -36,6 +36,15 @@ Depending on the platform you are making changes for, you may be interested in a
   artifacts are generated. This is also generally true for all of the directories outside
   of the `engine/src/flutter` directory.
 
+## Updating the engine
+Before compiling, you should typically make sure that your engine code is up to date with the latest `master`:
+
+```sh
+git fetch upstream master
+git rebase upstream/master
+gclient sync -D
+```
+
 ## Using a custom Dart SDK
 
 When targeting the host and desktop, on CI we use a pre-built Dart SDK vended by the Dart team.
@@ -48,11 +57,9 @@ These steps build the engine used by `flutter run` for Android devices.
 
 Run the following steps from the `engine/src` directory in your local checkout. See [Setting up the Engine development environment](Setting-up-the-Engine-development-environment.md).
 
-1. Make sure your branch is up to date. Run `git pull upstream master` if needed.
+1. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/master/engine/src/flutter/docs/contributing/Compiling-the-engine.md#updating-the-engine).
 
-2. `gclient sync -D` to update dependencies.
-
-3. Prepare your build files
+2. Prepare your build files
     * `./flutter/tools/gn --android --unoptimized` for device-side executables.
     * `./flutter/tools/gn --android --android-cpu arm64 --unoptimized` for newer 64-bit Android devices.
     * `./flutter/tools/gn --android --android-cpu x86 --unoptimized` for x86 emulators.
@@ -66,7 +73,7 @@ Run the following steps from the `engine/src` directory in your local checkout. 
 > which may be slower. See [Developing with Flutter on Apple Silicon](https://github.com/flutter/flutter/blob/master/docs/platforms/desktop/macos/Developing-with-Flutter-on-Apple-Silicon.md)
 > for more information.
 
-4. Build your executables
+3. Build your executables
     * `ninja -C out/android_debug_unopt` for device-side executables.
     * `ninja -C out/android_debug_unopt_arm64` for newer 64-bit Android devices.
     * `ninja -C out/android_debug_unopt_x86` for x86 emulators.
@@ -101,11 +108,11 @@ The following script will update all the builds that matter if you're developing
 set -ex
 
 cd ~/dev/flutter
-git fetch upstream
+git fetch upstream master
 git rebase upstream/master
-cd engine/src/flutter
+cd engine
 gclient sync -D
-cd ..
+cd src
 
 flutter/tools/gn --unoptimized --runtime-mode=debug
 flutter/tools/gn --android --unoptimized --runtime-mode=debug
@@ -123,19 +130,17 @@ These steps build the engine used by `flutter run` for iOS devices.
 
 Run the following steps, from the `engine/src` directory:
 
-1. `git pull upstream master` to update the Flutter repo.
+1. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/master/engine/src/flutter/docs/contributing/Compiling-the-engine.md#updating-the-engine).
 
-2. `gclient sync -D` to update dependencies.
-
-3. `./flutter/tools/gn --ios --unoptimized` to prepare build files for device-side executables (or `--ios --simulator --unoptimized` for simulator).
+2. `./flutter/tools/gn --ios --unoptimized` to prepare build files for device-side executables (or `--ios --simulator --unoptimized` for simulator).
    * This also produces an Xcode project for working with the engine source code at `out/ios_debug_unopt/flutter_engine.xcodeproj`
    * For a discussion on the various flags and modes, see [Flutter's modes](../Flutter's-modes.md).
    * Add the `--simulator-cpu=arm64` argument for an arm64 Mac simulator to output to `out/ios_debug_sim_unopt_arm64`.
 
-4. `./flutter/tools/gn --unoptimized` to prepare the build files for host-side executables.
+3. `./flutter/tools/gn --unoptimized` to prepare the build files for host-side executables.
    * On Apple Silicon ("M" chips), add `--mac-cpu arm64` to avoid using emulation. This will generate `host_debug_unopt_arm64`.
 
-5. `ninja -C out/ios_debug_unopt && ninja -C out/host_debug_unopt` to build all artifacts (use `out/ios_debug_sim_unopt` for Simulator).
+4. `ninja -C out/ios_debug_unopt && ninja -C out/host_debug_unopt` to build all artifacts (use `out/ios_debug_sim_unopt` for Simulator).
 
 See [The flutter tool](https://github.com/flutter/flutter/blob/master/docs/tool/README.md) for instructions on how to use the `flutter` tool with a local engine.
 You will typically use the `ios_debug_unopt` build to debug the engine on a device, and
@@ -149,14 +154,12 @@ See also [instructions for debugging the engine in a Flutter app in Xcode](../De
 
 These steps build the desktop embedding, and the engine used by `flutter test` on a host workstation.
 
-1. `git pull upstream master` to update the Flutter repo.
+1. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/master/engine/src/flutter/docs/contributing/Compiling-the-engine.md#updating-the-engine).
 
-2. `gclient sync -D` to update your dependencies.
-
-3. `./flutter/tools/gn --unoptimized` to prepare your build files.
+2. `./flutter/tools/gn --unoptimized` to prepare your build files.
    * `--unoptimized` disables C++ compiler optimizations. On macOS, binaries are emitted unstripped; on Linux, unstripped binaries are emitted to an `exe.unstripped` subdirectory of the build.
 
-4. `ninja -C out/host_debug_unopt` to build a desktop unoptimized binary.
+3. `ninja -C out/host_debug_unopt` to build a desktop unoptimized binary.
     * If you skipped `--unoptimized`, use `ninja -C out/host_debug` instead.
 
 See [The flutter tool](https://github.com/flutter/flutter/blob/master/docs/tool/README.md) for instructions on how to use the `flutter` tool with a local engine.
@@ -174,7 +177,7 @@ On Windows, ensure that the engine checkout is not deeply nested. This avoid the
 
 1. Make sure you have Visual Studio installed (non-Googlers only). [Debugging Tools for Windows 10](https://docs.microsoft.com/en-us/windows-hardware/drivers/debugger/debugger-download-tools#small-classic-windbg-preview-logo-debugging-tools-for-windows-10-windbg) must be installed.
 
-2. `git pull upstream master` to update the Flutter repo.
+2. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/master/engine/src/flutter/docs/contributing/Compiling-the-engine.md#updating-the-engine).
 
 3. Ensure long path support is enabled on your machine. Launch PowerShell as an administrator and run:
 ```
@@ -189,14 +192,12 @@ WINDOWSSDKDIR="C:\Program Files (x86)\Windows Kits\10" # (or your location for W
 ```
 Also, be sure that Python27 is before any other python in your Path.
 
-5. `gclient sync -D` to update your dependencies.
+5. switch to `engine/src/` directory.
 
-6. switch to `engine/src/` directory.
-
-7. `python .\flutter\tools\gn --unoptimized` to prepare your build files.
+6. `python .\flutter\tools\gn --unoptimized` to prepare your build files.
    * If you are only building `gen_snapshot`: `python .\flutter\tools\gn [--unoptimized] --runtime-mode=[debug|profile|release] [--android]`.
 
-8. `ninja -C .\out\<dir created by previous step>` to build.
+7. `ninja -C .\out\<dir created by previous step>` to build.
    * If you used a non-debug configuration, use `ninja -C .\out\<dir created by previous step> gen_snapshot`.
      Release and profile are not yet supported for the desktop shell.
 
@@ -286,8 +287,7 @@ Compiling the web engine might take a few extra steps on Windows. Use cmd.exe an
 2. Make sure, depot_tools, ninja and python are installed and added to the path. Also set the following environment variable for depot tools:
    * `DEPOT_TOOLS_WIN_TOOLCHAIN = 0`
    * Tip: if you get a python error try to use Python 2 instead of 3
-3. `git pull upstream master` to update the Flutter repo.
-4. `gclient sync` to update your dependencies.
+3. Make sure your engine code is [up to date](https://github.com/flutter/flutter/blob/master/engine/src/flutter/docs/contributing/Compiling-the-engine.md#updating-the-engine).
    * Tip: If you get a git authentication errors on this step try Git Bash instead
 5. `python .\flutter\tools\gn --unoptimized --full-dart-sdk` to prepare your build files.
 6. `ninja -C .\out\<dir created by previous step>` to build.
