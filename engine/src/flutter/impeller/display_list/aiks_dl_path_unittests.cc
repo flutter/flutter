@@ -461,6 +461,37 @@ TEST_P(AiksTest, CanRenderClips) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, FatStrokeArc) {
+  DlScalar stroke_width = 300;
+  DlScalar aspect = 1.0;
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("Stroke Width", &stroke_width, 1, 300);
+      ImGui::SliderFloat("Aspect", &aspect, 0.5, 2.0);
+      ImGui::End();
+    }
+
+    DisplayListBuilder builder;
+    DlPaint white_paint;
+    white_paint.setColor(DlColor::kWhite());
+    white_paint.setStrokeWidth(stroke_width);
+    white_paint.setDrawStyle(DlDrawStyle::kStroke);
+    DlPaint red_paint;
+    red_paint.setColor(DlColor::kRed());
+
+    Rect rect = Rect::MakeXYWH(100, 100, 100, aspect * 100);
+    builder.DrawRect(rect, red_paint);
+    builder.DrawArc(rect, 0, 90,
+                    /*use_center=*/false, white_paint);
+    DlScalar frontier = rect.GetRight() + stroke_width / 2.0;
+    builder.DrawLine(Point(frontier, 0), Point(frontier, 150), red_paint);
+
+    return builder.Build();
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(AiksTest, CanRenderOverlappingMultiContourPath) {
   DisplayListBuilder builder;
 
