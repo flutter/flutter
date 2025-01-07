@@ -2177,6 +2177,7 @@ void main() {
   });
 
   group('Material2 - BottomNavigationBar same item shifting backgroundColor with transition', () {
+    // Regression test for https://github.com/flutter/flutter/issues/160428.
     Widget runTest() {
       int currentIndex = 0;
       Color backgroundColor = Colors.red;
@@ -2235,6 +2236,7 @@ void main() {
   });
 
   group('Material3 - BottomNavigationBar same item shifting backgroundColor with transition', () {
+    // Regression test for https://github.com/flutter/flutter/issues/160428.
     Widget runTest() {
       int currentIndex = 0;
       Color backgroundColor = Colors.red;
