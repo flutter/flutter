@@ -1745,12 +1745,16 @@ class RRect {
 
 /// An immutable rounded superellipse.
 ///
-/// A rounded superellipse is a superellipse (also known as Lamé curve) with its
-/// four rounded corners replaced by circular arcs. A rounded superellipse
-/// resembles the `RoundedRectangle` shape in SwiftUI with corner style
-/// `.continuous`. The corner radius parameters used in this class corresponds
-/// to SwiftUI's `cornerRadius` parameter, which is close to, but not exactly
-/// equals to, the radius of the corner circles.
+/// A rounded superellipse is a shape similar to a typical rounded rectangle
+/// ([RRect]), but with smoother transitions between the straight sides and the
+/// rounded corners. It resembles the `RoundedRectangle` shape in SwiftUI with
+/// the `.continuous` corner style. Technically, it is created by replacing the
+/// four corners of a superellipse (also known as a Lamé curve) with circular
+/// arcs.
+///
+/// The corner radius parameters used in this class corresponds to SwiftUI's
+/// `cornerRadius` parameter, which is close to, but not exactly equals to, the
+/// radius of the corner circles.
 class RSuperellipse {
   /// Construct a rounded superellipse from its bounding box and a corner radius
   /// that is the same in each corner.

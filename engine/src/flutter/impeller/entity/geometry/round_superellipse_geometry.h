@@ -11,10 +11,12 @@ namespace impeller {
 
 /// Geometry class that can generate vertices for a rounded superellipse.
 ///
-/// A rounded superellipse is a superellipse (also known as Lamé curve) with its
-/// four rounded corners replaced by circular arcs. A rounded superellipse
-/// resembles the `RoundedRectangle` shape in SwiftUI with corner style
-/// `.continuous`.
+/// A rounded superellipse is a shape similar to a typical rounded rectangle
+/// (`RoundRect`), but with smoother transitions between the straight sides and
+/// the rounded corners. It resembles the `RoundedRectangle` shape in SwiftUI
+/// with the `.continuous` corner style. Technically, it is created by replacing
+/// the four corners of a superellipse (also known as a Lamé curve) with
+/// circular arcs.
 ///
 /// The `bounds` defines the position and size of the shape. The `corner_radius`
 /// corresponds to SwiftUI's `cornerRadius` parameter, which is close to, but
