@@ -119,8 +119,6 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
   using VS = RRectBlurPipeline::VertexShader;
   using FS = RRectBlurPipeline::FragmentShader;
 
-  VertexBufferBuilder<VS::PerVertexData> vtx_builder;
-
   Matrix basis_invert = entity.GetTransform().Basis().Invert();
   Vector2 max_sigmas =
       Vector2((basis_invert * Vector2(500.f, 0.f)).GetLength(),
