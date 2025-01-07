@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service_io.dart';
 
 import 'cocoon.dart';
 import 'devices.dart';
@@ -73,7 +74,9 @@ Future<void> runTasks(
       } else {
         section('Flaky status for "$taskName"');
         if (failureCount > 0) {
-          print('Total ${failureCount+1} executions: $failureCount failures and 1 false positive.');
+          print(
+            'Total ${failureCount + 1} executions: $failureCount failures and 1 false positive.',
+          );
           print('flaky: true');
           // TODO(ianh): stop ignoring this failure. We should set exitCode=1, and quit
           // if exitOnFirstTestFailure is true.
@@ -196,17 +199,16 @@ Future<TaskResult> runTask(
       taskExecutable,
       ...?taskArgs,
     ],
-    environment: <String, String>{
-      if (deviceId != null)
-        DeviceIdEnvName: deviceId,
-    },
+    environment: <String, String>{if (deviceId != null) DeviceIdEnvName: deviceId},
   );
 
   bool runnerFinished = false;
 
-  unawaited(runner.exitCode.whenComplete(() {
-    runnerFinished = true;
-  }));
+  unawaited(
+    runner.exitCode.whenComplete(() {
+      runnerFinished = true;
+    }),
+  );
 
   final Completer<Uri> uri = Completer<Uri>();
 
@@ -214,34 +216,44 @@ Future<TaskResult> runTask(
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
       .listen((String line) {
-    if (!uri.isCompleted) {
-      final Uri? serviceUri = parseServiceUri(line, prefix: RegExp('The Dart VM service is listening on '));
-      if (serviceUri != null) {
-        uri.complete(serviceUri);
-      }
-    }
-    if (!silent) {
-      stdout.writeln('[${DateTime.now()}] [STDOUT] $line');
-    }
-  });
+        if (!uri.isCompleted) {
+          final Uri? serviceUri = parseServiceUri(
+            line,
+            prefix: RegExp('The Dart VM service is listening on '),
+          );
+          if (serviceUri != null) {
+            uri.complete(serviceUri);
+          }
+        }
+        if (!silent) {
+          stdout.writeln('[${DateTime.now()}] [STDOUT] $line');
+        }
+      });
 
   final StreamSubscription<String> stderrSub = runner.stderr
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
       .listen((String line) {
-    stderr.writeln('[${DateTime.now()}] [STDERR] $line');
-  });
+        stderr.writeln('[${DateTime.now()}] [STDERR] $line');
+      });
 
   try {
     final ConnectionResult result = await _connectToRunnerIsolate(await uri.future);
     print('[$taskName] Connected to VM server.');
-    isolateParams = isolateParams == null ? <String, String>{} : Map<String, String>.of(isolateParams);
+    isolateParams =
+        isolateParams == null ? <String, String>{} : Map<String, String>.of(isolateParams);
     isolateParams['runProcessCleanup'] = terminateStrayDartProcesses.toString();
-    final Map<String, dynamic> taskResultJson = (await result.vmService.callServiceExtension(
-      'ext.cocoonRunTask',
-      args: isolateParams,
-      isolateId: result.isolate.id,
-    )).json!;
+    final VmService service = result.vmService;
+    final String isolateId = result.isolate.id!;
+    final Map<String, dynamic> taskResultJson =
+        (await service.callServiceExtension(
+          'ext.cocoonRunTask',
+          args: isolateParams,
+          isolateId: isolateId,
+        )).json!;
+    // Notify the task process that the task result has been received and it
+    // can proceed to shutdown.
+    await _acknowledgeTaskResultReceived(service: service, isolateId: isolateId);
     final TaskResult taskResult = TaskResult.fromJson(taskResultJson);
     final int exitCode = await runner.exitCode;
     print('[$taskName] Process terminated with exit code $exitCode.');
@@ -270,9 +282,6 @@ Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
 
   while (true) {
     try {
-      // Make sure VM server is up by successfully opening and closing a socket.
-      await (await WebSocket.connect(url)).close();
-
       // Look up the isolate.
       final VmService client = await vmServiceConnectUri(url);
       VM vm = await client.getVM();
@@ -281,8 +290,12 @@ Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
         vm = await client.getVM();
       }
       final IsolateRef isolate = vm.isolates!.first;
-      final Response response = await client.callServiceExtension('ext.cocoonRunnerReady', isolateId: isolate.id);
-      if (response.json!['response'] != 'ready') {
+      // Sanity check to ensure we're talking with the main isolate.
+      final Response response = await client.callServiceExtension(
+        'ext.cocoonRunnerReady',
+        isolateId: isolate.id,
+      );
+      if (response.json!['result'] != 'success') {
         throw 'not ready yet';
       }
       return ConnectionResult(client, isolate);
@@ -301,37 +314,20 @@ Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
   }
 }
 
+Future<void> _acknowledgeTaskResultReceived({
+  required VmService service,
+  required String isolateId,
+}) async {
+  try {
+    await service.callServiceExtension('ext.cocoonTaskResultReceived', isolateId: isolateId);
+  } on RPCError {
+    // The target VM may shutdown before the response is received.
+  }
+}
+
 class ConnectionResult {
   ConnectionResult(this.vmService, this.isolate);
 
   final VmService vmService;
   final IsolateRef isolate;
-}
-
-/// The cocoon client sends an invalid VM service response, we need to intercept it.
-Future<VmService> vmServiceConnectUri(String wsUri, {Log? log}) async {
-  final WebSocket socket = await WebSocket.connect(wsUri);
-  final StreamController<dynamic> controller = StreamController<dynamic>();
-  final Completer<dynamic> streamClosedCompleter = Completer<dynamic>();
-  socket.listen(
-    (dynamic data) {
-      final Map<String, dynamic> rawData = json.decode(data as String) as Map<String, dynamic> ;
-      if (rawData['result'] == 'ready') {
-        rawData['result'] = <String, dynamic>{'response': 'ready'};
-        controller.add(json.encode(rawData));
-      } else {
-        controller.add(data);
-      }
-    },
-    onError: (Object err, StackTrace stackTrace) => controller.addError(err, stackTrace),
-    onDone: () => streamClosedCompleter.complete(),
-  );
-
-  return VmService(
-    controller.stream,
-    (String message) => socket.add(message),
-    log: log,
-    disposeHandler: () => socket.close(),
-    streamClosed: streamClosedCompleter.future,
-  );
 }

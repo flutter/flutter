@@ -23,6 +23,7 @@ void main() async {
     flutterDriver = await FlutterDriver.connect();
     nativeDriver = await AndroidNativeDriver.connect(flutterDriver);
     await nativeDriver.configureForScreenshotTesting();
+    await flutterDriver.waitUntilFirstFrameRasterized();
   });
 
   tearDownAll(() async {
@@ -34,9 +35,7 @@ void main() async {
     await flutterDriver.waitFor(find.byType('AndroidView'));
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile(
-        'platform_view_blue_orange_gradient_portrait.android.png',
-      ),
+      matchesGoldenFile('platform_view_blue_orange_gradient_portrait.android.png'),
     );
   }, timeout: Timeout.none);
 
@@ -45,17 +44,13 @@ void main() async {
     await nativeDriver.rotateToLandscape();
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile(
-        'platform_view_blue_orange_gradient_landscape.android.png',
-      ),
+      matchesGoldenFile('platform_view_blue_orange_gradient_landscape.android.png'),
     );
 
     await nativeDriver.rotateResetDefault();
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile(
-        'platform_view_blue_orange_gradient_portrait_post_rotation.android.png',
-      ),
+      matchesGoldenFile('platform_view_blue_orange_gradient_portrait_post_rotation.android.png'),
     );
   }, timeout: Timeout.none);
 }

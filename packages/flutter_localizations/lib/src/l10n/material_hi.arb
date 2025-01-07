@@ -1,6 +1,6 @@
 {
   "scriptCategory": "dense",
-  "timeOfDayFormat": "ah:mm",
+  "timeOfDayFormat": "h:mm a",
   "openAppDrawerTooltip": "नेविगेशन मेन्यू खोलें",
   "backButtonTooltip": "वापस जाएं",
   "closeButtonTooltip": "बंद करें",

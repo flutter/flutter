@@ -15,6 +15,7 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.Plugin
 import org.gradle.api.Task
+import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.LogLevel
@@ -26,6 +27,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
 
@@ -61,7 +63,7 @@ class FlutterExtension {
      * Chosen as default version of the AGP version below as found in
      * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp.
      */
-    public final String ndkVersion = "26.1.10909125"
+    public final String ndkVersion = "26.3.11579264"
 
     /**
      * Specifies the relative directory to the Flutter project directory.
@@ -79,7 +81,7 @@ class FlutterExtension {
     public String flutterVersionName = null
 
     /** Returns flutterVersionCode as an integer with error handling. */
-    public Integer getVersionCode() {
+    Integer getVersionCode() {
         if (flutterVersionCode == null) {
             throw new GradleException("flutterVersionCode must not be null.")
         }
@@ -92,7 +94,7 @@ class FlutterExtension {
     }
 
     /** Returns flutterVersionName with error handling. */
-    public String getVersionName() {
+    String getVersionName() {
         if (flutterVersionName == null) {
             throw new GradleException("flutterVersionName must not be null.")
         }
@@ -271,19 +273,14 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        Object flutterVersionCode = localProperties.getProperty("flutter.versionCode")
-        if (flutterVersionCode == null) {
-            flutterVersionCode = "1"
-        }
-        extension.flutterVersionCode = flutterVersionCode
+        String flutterVersionCode = localProperties.getProperty("flutter.versionCode")
+        extension.flutterVersionCode = flutterVersionCode ?: "1"
 
-        Object flutterVersionName = localProperties.getProperty("flutter.versionName")
-        if (flutterVersionName == null) {
-            flutterVersionName = "1.0"
-        }
-        extension.flutterVersionName = flutterVersionName
+        String flutterVersionName = localProperties.getProperty("flutter.versionName")
+        extension.flutterVersionName = flutterVersionName ?: "1.0"
 
         this.addFlutterTasks(project)
+        forceNdkDownload(project, flutterRootPath)
 
         // By default, assembling APKs generates fat APKs if multiple platforms are passed.
         // Configuring split per ABI allows to generate separate APKs for each abi.
@@ -439,9 +436,10 @@ class FlutterPlugin implements Plugin<Project> {
     private static void addApiDependencies(Project project, String variantName, Object dependency, Closure config = null) {
         String configuration
         // `compile` dependencies are now `api` dependencies.
-        if (project.getConfigurations().findByName("api")) {
+        try{
+            project.getConfigurations().named("api")
             configuration = "${variantName}Api"
-        } else {
+        } catch(UnknownTaskException ignored) {
             configuration = "${variantName}Compile"
         }
         project.dependencies.add(configuration, dependency, config)
@@ -638,11 +636,6 @@ class FlutterPlugin implements Plugin<Project> {
                     "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
         }
         List<String> platforms = getTargetPlatforms().collect()
-        // Debug mode includes x86 and x64, which are commonly used in emulators.
-        if (flutterBuildMode == "debug" && !useLocalEngine()) {
-            platforms.add("android-x86")
-            platforms.add("android-x64")
-        }
         platforms.each { platform ->
             String arch = PLATFORM_ARCH_MAP[platform].replace("-", "_")
             // Add the `libflutter.so` dependency.
@@ -687,12 +680,21 @@ class FlutterPlugin implements Plugin<Project> {
      */
     private void configureLegacyPluginEachProjects(Project project) {
         try {
-            if (!settingsGradleFile(project).text.contains("'.flutter-plugins'")) {
+            // Read the contents of the settings.gradle file.
+            // Remove block/line comments
+            String settingsText = settingsGradleFile(project).text
+            settingsText = settingsText.replaceAll(/(?s)\/\*.*?\*\//, '').replaceAll(/(?m)\/\/.*$/, '')
+
+            if (!settingsText.contains("'.flutter-plugins'")) {
                 return
             }
         } catch (FileNotFoundException ignored) {
             throw new GradleException("settings.gradle/settings.gradle.kts does not exist: ${settingsGradleFile(project).absolutePath}")
         }
+        // TODO(matanlurey): https://github.com/flutter/flutter/issues/48918.
+        project.logger.quiet("Warning: This project is still reading the deprecated '.flutter-plugins. file.")
+        project.logger.quiet("In an upcoming stable release support for this file will be completely removed and your build will fail.")
+        project.logger.quiet("See https:/flutter.dev/to/flutter-plugins-configuration.")
         List<Map<String, Object>> deps = getPluginDependencies(project)
         List<String> plugins = getPluginList(project).collect { it.name as String }
         deps.removeIf { plugins.contains(it.name) }
@@ -717,7 +719,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Returns `true` if the given project is a plugin project having an `android` directory
      * containing a `build.gradle` or `build.gradle.kts` file.
      */
-    private Boolean pluginSupportsAndroidPlatform(Project project) {
+    private static Boolean pluginSupportsAndroidPlatform(Project project) {
         File buildGradle = new File(project.projectDir.parentFile, "android" + File.separator + "build.gradle")
         File buildGradleKts = new File(project.projectDir.parentFile, "android" + File.separator + "build.gradle.kts")
         return buildGradle.exists() || buildGradleKts.exists()
@@ -728,7 +730,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Kotlin variants exist, then Groovy (build.gradle) is preferred over
      * Kotlin (build.gradle.kts). This is the same behavior as Gradle 8.5.
      */
-    private File buildGradleFile(Project project) {
+    private static File buildGradleFile(Project project) {
         File buildGradle = new File(project.projectDir.parentFile, "app" + File.separator + "build.gradle")
         File buildGradleKts = new File(project.projectDir.parentFile, "app" + File.separator + "build.gradle.kts")
         if (buildGradle.exists() && buildGradleKts.exists()) {
@@ -746,7 +748,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Kotlin variants exist, then Groovy (settings.gradle) is preferred over
      * Kotlin (settings.gradle.kts). This is the same behavior as Gradle 8.5.
      */
-    private File settingsGradleFile(Project project) {
+    private static File settingsGradleFile(Project project) {
         File settingsGradle = new File(project.projectDir.parentFile, "settings.gradle")
         File settingsGradleKts = new File(project.projectDir.parentFile, "settings.gradle.kts")
         if (settingsGradle.exists() && settingsGradleKts.exists()) {
@@ -769,10 +771,18 @@ class FlutterPlugin implements Plugin<Project> {
         // Apply the "flutter" Gradle extension to plugins so that they can use it's vended
         // compile/target/min sdk values.
         pluginProject.extensions.create("flutter", FlutterExtension)
+
         // Add plugin dependency to the app project.
-        project.dependencies {
-            api(pluginProject)
+        project.android.buildTypes.each { buildType ->
+            String flutterBuildMode = buildModeFor(buildType)
+            if (flutterBuildMode != "release" || !pluginObject.dev_dependency) {
+                // Only add dependency on dev dependencies in non-release builds.
+                project.dependencies {
+                    api(pluginProject)
+                }
+            }
         }
+
         Closure addEmbeddingDependencyToPlugin = { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
             // In AGP 3.5, the embedding must be added as an API implementation,
@@ -782,6 +792,12 @@ class FlutterPlugin implements Plugin<Project> {
                 return
             }
             if (!pluginProject.hasProperty("android")) {
+                return
+            }
+            if (flutterBuildMode == "release" && pluginObject.dev_dependency) {
+                // This plugin is a dev dependency and will not be included in
+                // the release build,  so no need to add the embedding
+                // dependency to it.
                 return
             }
             // Copy build types from the app to the plugin.
@@ -845,6 +861,36 @@ class FlutterPlugin implements Plugin<Project> {
         return version2
     }
 
+    private void forceNdkDownload(Project gradleProject, String flutterSdkRootPath) {
+        // If the project is already configuring a native build, we don't need to do anything.
+        Boolean forcingNotRequired = gradleProject.android.externalNativeBuild.cmake.path != null
+        if (forcingNotRequired) {
+            return
+        }
+
+        // Otherwise, point to an empty CMakeLists.txt, and ignore associated warnings.
+        gradleProject.android {
+            externalNativeBuild {
+                cmake {
+                    // Respect the existing configuration if it exists - the NDK will already be
+                    // downloaded in this case.
+                    path = flutterSdkRootPath + "/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+                }
+            }
+
+            defaultConfig {
+                externalNativeBuild {
+                    cmake {
+                        // CMake will print warnings when you try to build an empty project.
+                        // These arguments silence the warnings - our project is intentionally
+                        // empty.
+                        arguments("-Wno-dev", "--no-warn-unused-cli")
+                    }
+                }
+            }
+        }
+    }
+
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
     private void detectLowCompileSdkVersionOrNdkVersion() {
         project.afterEvaluate {
@@ -892,7 +938,7 @@ class FlutterPlugin implements Plugin<Project> {
                         if (maxPluginCompileSdkVersion > projectCompileSdkVersion) {
                             project.logger.error("Your project is configured to compile against Android SDK $projectCompileSdkVersion, but the following plugin(s) require to be compiled against a higher Android SDK version:")
                             for (Tuple2<String, String> pluginToCompileSdkVersion : pluginsWithHigherSdkVersion) {
-                                project.logger.error("- ${pluginToCompileSdkVersion.first} compiles against Android SDK ${pluginToCompileSdkVersion.second}")
+                                project.logger.error("- ${pluginToCompileSdkVersion.v1} compiles against Android SDK ${pluginToCompileSdkVersion.v2}")
                             }
                             project.logger.error("""\
                                 Fix this issue by compiling against the highest Android SDK version (they are backward compatible).
@@ -907,7 +953,7 @@ class FlutterPlugin implements Plugin<Project> {
                         if (maxPluginNdkVersion != projectNdkVersion) {
                             project.logger.error("Your project is configured with Android NDK $projectNdkVersion, but the following plugin(s) depend on a different Android NDK version:")
                             for (Tuple2<String, String> pluginToNdkVersion : pluginsWithDifferentNdkVersion) {
-                                project.logger.error("- ${pluginToNdkVersion.first} requires Android NDK ${pluginToNdkVersion.second}")
+                                project.logger.error("- ${pluginToNdkVersion.v1} requires Android NDK ${pluginToNdkVersion.v2}")
                             }
                             project.logger.error("""\
                                 Fix this issue by using the highest Android NDK version (they are backward compatible).
@@ -929,7 +975,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Returns the portion of the compileSdkVersion string that corresponds to either the numeric
      * or string version.
      */
-    private String getCompileSdkFromProject(Project gradleProject) {
+    private static String getCompileSdkFromProject(Project gradleProject) {
         return gradleProject.android.compileSdkVersion.substring(8)
     }
 
@@ -944,20 +990,29 @@ class FlutterPlugin implements Plugin<Project> {
         if (pluginProject == null) {
             return
         }
-        def dependencies = pluginObject.dependencies
-        assert(dependencies instanceof List<String>)
-        dependencies.each { pluginDependencyName ->
-            if (pluginDependencyName.empty) {
+
+        project.android.buildTypes.each { buildType ->
+            String flutterBuildMode = buildModeFor(buildType)
+            if (flutterBuildMode == "release" && pluginObject.dev_dependency) {
+                // This plugin is a dev dependency will not be included in the
+                // release build, so no need to add its dependencies.
                 return
             }
-            Project dependencyProject = project.rootProject.findProject(":$pluginDependencyName")
-            if (dependencyProject == null) {
-                return
-            }
-            // Wait for the Android plugin to load and add the dependency to the plugin project.
-            pluginProject.afterEvaluate {
-                pluginProject.dependencies {
-                    implementation(dependencyProject)
+            def dependencies = pluginObject.dependencies
+            assert(dependencies instanceof List<String>)
+            dependencies.each { pluginDependencyName ->
+                if (pluginDependencyName.empty) {
+                    return
+                }
+                Project dependencyProject = project.rootProject.findProject(":$pluginDependencyName")
+                if (dependencyProject == null) {
+                    return
+                }
+                // Wait for the Android plugin to load and add the dependency to the plugin project.
+                pluginProject.afterEvaluate {
+                    pluginProject.dependencies {
+                        implementation(dependencyProject)
+                    }
                 }
             }
         }
@@ -997,17 +1052,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (localProperties == null) {
             localProperties = readPropertiesIfExist(new File(project.projectDir.parentFile, "local.properties"))
         }
-        String result
-        if (project.hasProperty(name)) {
-            result = project.property(name)
-        }
-        if (result == null) {
-            result = localProperties.getProperty(name)
-        }
-        if (result == null) {
-            result = defaultValue
-        }
-        return result
+        String result = project.hasProperty(name) ? project.property(name) : null
+        result = result ?: localProperties?.getProperty(name)
+        return result ?: defaultValue
     }
 
     private List<String> getTargetPlatforms() {
@@ -1071,10 +1118,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Gets the target file. This is typically `lib/main.dart`.
      */
     private String getFlutterTarget() {
-        String target = project.flutter.target
-        if (target == null) {
-            target = "lib/main.dart"
-        }
+        String target = project.flutter.target ?: "lib/main.dart"
         final String propTarget = "target"
         if (project.hasProperty(propTarget)) {
             target = project.property(propTarget)
@@ -1135,7 +1179,7 @@ class FlutterPlugin implements Plugin<Project> {
         return false
     }
 
-    private Task getAssembleTask(variant) {
+    private static Task getAssembleTask(variant) {
         // `assemble` became `assembleProvider` in AGP 3.3.0.
         return variant.hasProperty("assembleProvider") ? variant.assembleProvider.get() : variant.assemble
     }
@@ -1247,8 +1291,18 @@ class FlutterPlugin implements Plugin<Project> {
             boolean isBuildingAar = project.hasProperty("is-plugin")
             // In add to app scenarios, a Gradle project contains a `:flutter` and `:app` project.
             // `:flutter` is used as a subproject when these tasks exists and the build isn't building an AAR.
-            Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
-            Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
+            Task packageAssets
+            Task cleanPackageAssets
+            try {
+                packageAssets = project.tasks.named("package${variant.name.capitalize()}Assets").get()
+            } catch (UnknownTaskException ignored) {
+                packageAssets = null
+            }
+            try {
+                cleanPackageAssets = project.tasks.named("cleanPackage${variant.name.capitalize()}Assets").get()
+            } catch (UnknownTaskException ignored) {
+                cleanPackageAssets = null
+            }
             boolean isUsedAsSubproject = packageAssets && cleanPackageAssets && !isBuildingAar
 
             String variantBuildMode = buildModeFor(variant.buildType)
@@ -1260,7 +1314,7 @@ class FlutterPlugin implements Plugin<Project> {
             // original value. You either need to hoist the value
             // into a separate variable `verbose verboseValue` or prefix with
             // `this` (`verbose this.isVerbose()`).
-            FlutterTask compileTask = project.tasks.create(name: taskName, type: FlutterTask) {
+            TaskProvider<FlutterTask> compileTaskProvider = project.tasks.register(taskName , FlutterTask) {
                 flutterRoot(this.flutterRoot)
                 flutterExecutable(this.flutterExecutable)
                 buildMode(variantBuildMode)
@@ -1291,8 +1345,9 @@ class FlutterPlugin implements Plugin<Project> {
                 validateDeferredComponents(validateDeferredComponentsValue)
                 flavor(flavorValue)
             }
+            Task compileTask = compileTaskProvider.get();
             File libJar = project.file(project.layout.buildDirectory.dir("$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar"))
-            Task packJniLibsTask = project.tasks.create(name: "packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
+            TaskProvider<Jar> packJniLibsTaskProvider = project.tasks.register("packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", Jar) {
                 destinationDirectory = libJar.parentFile
                 archiveFileName = libJar.name
                 dependsOn compileTask
@@ -1306,7 +1361,7 @@ class FlutterPlugin implements Plugin<Project> {
                         }
                     }
                     // Copy the native assets created by build.dart and placed in build/native_assets by flutter assemble.
-                    // The `$project.buildDir` is '.android/Flutter/build/' instead of 'build/'.
+                    // The `$project.layout.buildDirectory` is '.android/Flutter/build/' instead of 'build/'.
                     String buildDir = "${getFlutterSourceDirectory()}/build"
                     String nativeAssetsDir = "${buildDir}/native_assets/android/jniLibs/lib"
                     from("${nativeAssetsDir}/${abi}") {
@@ -1317,12 +1372,12 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
+            Task packJniLibsTask = packJniLibsTaskProvider.get();
             addApiDependencies(project, variant.name, project.files {
                 packJniLibsTask
             })
-            Task copyFlutterAssetsTask = project.tasks.create(
-                name: "copyFlutterAssets${variant.name.capitalize()}",
-                type: Copy,
+            TaskProvider<Copy> copyFlutterAssetsTaskProvider = project.tasks.register(
+            "copyFlutterAssets${variant.name.capitalize()}" , Copy
             ) {
                 dependsOn(compileTask)
                 with(compileTask.assets)
@@ -1356,6 +1411,7 @@ class FlutterPlugin implements Plugin<Project> {
                 mergeAssets.mustRunAfter("clean${mergeAssets.name.capitalize()}")
                 into(mergeAssets.outputDir)
             }
+            Task copyFlutterAssetsTask = copyFlutterAssetsTaskProvider.get();
             if (!isUsedAsSubproject) {
                 def variantOutput = variant.outputs.first()
                 def processResources = variantOutput.hasProperty(propProcessResourcesProvider) ?
@@ -1365,24 +1421,21 @@ class FlutterPlugin implements Plugin<Project> {
             // The following tasks use the output of copyFlutterAssetsTask,
             // so it's necessary to declare it as an dependency since Gradle 8.
             // See https://docs.gradle.org/8.1/userguide/validation_problems.html#implicit_dependency.
-            def compressAssetsTask = project.tasks.findByName("compress${variant.name.capitalize()}Assets")
-            if (compressAssetsTask) {
-                compressAssetsTask.dependsOn(copyFlutterAssetsTask)
+            def tasksToCheck = [
+                    "compress${variant.name.capitalize()}Assets",
+                    "bundle${variant.name.capitalize()}Aar",
+                    "bundle${variant.name.capitalize()}LocalLintAar"
+            ]
+            tasksToCheck.each { taskTocheck ->
+                try {
+                    project.tasks.named(taskTocheck).configure { task ->
+                        task.dependsOn(copyFlutterAssetsTask)
+                    }
+                } catch (UnknownTaskException ignored) {
+                }
             }
-
-            def bundleAarTask = project.tasks.findByName("bundle${variant.name.capitalize()}Aar")
-            if (bundleAarTask) {
-                bundleAarTask.dependsOn(copyFlutterAssetsTask)
-            }
-
-            def bundleAarTaskWithLint = project.tasks.findByName("bundle${variant.name.capitalize()}LocalLintAar")
-            if (bundleAarTaskWithLint) {
-                bundleAarTaskWithLint.dependsOn(copyFlutterAssetsTask)
-            }
-
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
-
         if (isFlutterAppProject()) {
             project.android.applicationVariants.all { variant ->
                 Task assembleTask = getAssembleTask(variant)
@@ -1431,10 +1484,13 @@ class FlutterPlugin implements Plugin<Project> {
                         }
                     }
                 }
-                // Copy the native assets created by build.dart and placed here by flutter assemble.
-                String nativeAssetsDir = "${project.layout.buildDirectory.dir("../native_assets/android/jniLibs/lib").get()}/"
-                project.android.sourceSets.main.jniLibs.srcDir(nativeAssetsDir)
             }
+            // Copy the native assets created by build.dart and placed here by flutter assemble.
+            // This path is not flavor specific and must only be added once.
+            // If support for flavors is added to native assets, then they must only be added
+            // once per flavor; see https://github.com/dart-lang/native/issues/1359.
+            String nativeAssetsDir = "${project.layout.buildDirectory.get()}/../native_assets/android/jniLibs/lib/"
+            project.android.sourceSets.main.jniLibs.srcDir(nativeAssetsDir)
             configurePlugins(project)
             detectLowCompileSdkVersionOrNdkVersion()
             return
@@ -1476,9 +1532,7 @@ class FlutterPlugin implements Plugin<Project> {
                     if (buildModeFor(appProjectVariant.buildType) != variantBuildMode) {
                         return
                     }
-                    if (copyFlutterAssetsTask == null) {
-                        copyFlutterAssetsTask = addFlutterDeps(libraryVariant)
-                    }
+                    copyFlutterAssetsTask = copyFlutterAssetsTask ?: addFlutterDeps(libraryVariant)
                     Task mergeAssets = project
                         .tasks
                         .findByPath(":${hostAppProjectName}:merge${appProjectVariant.name.capitalize()}Assets")
@@ -1798,7 +1852,7 @@ class FlutterTask extends BaseFlutterTask {
             //   <target> <files>: <source> <files> <separated> <by> <non-escaped space>
             String depText = dependenciesFile.text
             // So we split list of files by non-escaped(by backslash) space,
-            def matcher = depText.split(": ")[inputs ? 1 : 0] =~ /(\\ |[^\s])+/
+            def matcher = depText.split(": ")[inputs ? 1 : 0] =~ /(\\ |\S)+/
             // then we replace all escaped spaces with regular spaces
             def depList = matcher.collect{ it[0].replaceAll("\\\\ ", " ") }
             return project.files(depList)

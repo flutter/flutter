@@ -5,9 +5,12 @@
 import 'template.dart';
 
 class SearchViewTemplate extends TokenTemplate {
-  const SearchViewTemplate(super.blockName, super.fileName, super.tokens, {
+  const SearchViewTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
-    super.textThemePrefix = '_textTheme.'
+    super.textThemePrefix = '_textTheme.',
   });
 
   @override
@@ -46,6 +49,12 @@ class _${blockName}DefaultsM3 extends ${blockName}ThemeData {
 
   @override
   BoxConstraints get constraints => const BoxConstraints(minWidth: 360.0, minHeight: 240.0);
+
+  @override
+  EdgeInsetsGeometry? get barPadding => const EdgeInsets.symmetric(horizontal: 8.0);
+
+  @override
+  bool get shrinkWrap => false;
 
   @override
   Color? get dividerColor => ${componentColor('md.comp.search-view.divider')};

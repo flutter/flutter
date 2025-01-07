@@ -17,7 +17,8 @@ Future<List<double>> runBuildBenchmark() async {
 
   // We control the framePolicy below to prevent us from scheduling frames in
   // the engine, so that the engine does not interfere with our timings.
-  final LiveTestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as LiveTestWidgetsFlutterBinding;
+  final LiveTestWidgetsFlutterBinding binding =
+      TestWidgetsFlutterBinding.ensureInitialized() as LiveTestWidgetsFlutterBinding;
 
   final Stopwatch watch = Stopwatch();
   int iterations = 0;
@@ -64,4 +65,11 @@ Future<void> execute() async {
     name: 'stock_build_iteration',
   );
   printer.printToStdout();
+}
+
+//
+//  Note that the benchmark is normally run by benchmark_collection.dart.
+//
+Future<void> main() async {
+  return execute();
 }
