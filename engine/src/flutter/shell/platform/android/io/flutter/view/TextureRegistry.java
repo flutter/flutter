@@ -116,6 +116,8 @@ public interface TextureRegistry {
       /**
        * Invoked when an Android application is resumed after {@link Callback#onSurfaceDestroyed()}.
        *
+       * <p>When this method is overridden, {@link Callback#onSurfaceCreated()} is not called.
+       *
        * <p>Applications should now call {@link SurfaceProducer#getSurface()} to get a new
        * {@link Surface}, as the previous one was destroyed and released as a result of a low memory
        * event from the Android OS.
@@ -141,16 +143,9 @@ public interface TextureRegistry {
       }
 
       /**
-       * Invoked when a {@link Surface} returned by {@link SurfaceProducer#getSurface()} is about to
-       * become invalid.
-       *
-       * <p>In a low memory environment, the Android OS will signal to Flutter to release resources,
-       * such as surfaces, that are not currently in use, such as when the application is in the
-       * background, and this method is subsequently called to notify a plugin author to stop using
-       * or rendering to the last surface.
+       * An alias for {@link Callback#onSurfaceCleanup()} with a less accurate name.
        *
        * @deprecated Override and use {@link Callback#onSurfaceCleanup()} instead.
-       * @see <a href="https://github.com/flutter/flutter/issues/160933">#160933</a>.
        */
       @Deprecated(since = "Flutter 3.28", forRemoval = true)
       default void onSurfaceDestroyed() {}
@@ -158,6 +153,8 @@ public interface TextureRegistry {
       /**
        * Invoked when a {@link Surface} returned by {@link SurfaceProducer#getSurface()} is about
        * to become invalid.
+       *
+       * <p>When this method is overridden, {@link Callback#onSurfaceDestroyed()} is not called.
        *
        * <p>In a low memory environment, the Android OS will signal to Flutter to release resources,
        * such as surfaces, that are not currently in use, such as when the application is in the
