@@ -39,7 +39,13 @@ import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
 
 List<String> _xattrArgs(FlutterProject flutterProject) {
-  return <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', flutterProject.directory.path];
+  return <String>[
+    'xattr',
+    '-r',
+    '-d',
+    'com.apple.FinderInfo',
+    flutterProject.directory.path
+  ];
 }
 
 const List<String> kRunReleaseArgs = <String>[
@@ -55,6 +61,8 @@ const List<String> kRunReleaseArgs = <String>[
   'BUILD_DIR=/build/ios',
   '-sdk',
   'iphoneos',
+  '-allowProvisioningUpdates',
+  '-allowProvisioningDeviceRegistration',
   '-destination',
   'id=123',
   'ONLY_ACTIVE_ARCH=YES',
@@ -111,10 +119,16 @@ void main() {
       logger = BufferLogger.test();
       fileSystem = MemoryFileSystem.test();
       processManager = FakeProcessManager.empty();
-      projectInfo = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>[
+      projectInfo = XcodeProjectInfo(<String>[
+        'Runner'
+      ], <String>[
+        'Debug',
+        'Release'
+      ], <String>[
         'Runner',
       ], logger);
-      fakeXcodeProjectInterpreter = FakeXcodeProjectInterpreter(projectInfo: projectInfo);
+      fakeXcodeProjectInterpreter =
+          FakeXcodeProjectInterpreter(projectInfo: projectInfo);
       xcode = Xcode.test(
         processManager: FakeProcessManager.any(),
         xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
@@ -144,7 +158,8 @@ void main() {
           'My Super Awesome App',
         );
 
-        processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
+        processManager
+            .addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
         processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
 
         final LaunchResult launchResult = await iosDevice.startApp(
@@ -156,7 +171,8 @@ void main() {
         expect(launchResult.started, false);
         expect(
           logger.errorText,
-          contains('Xcode build is missing expected TARGET_BUILD_DIR build setting'),
+          contains(
+              'Xcode build is missing expected TARGET_BUILD_DIR build setting'),
         );
         expect(processManager, hasNoRemainingExpectations);
         expect(
@@ -175,8 +191,7 @@ void main() {
         Logger: () => logger,
         OperatingSystemUtils: () => os,
         Platform: () => macPlatform,
-        XcodeProjectInterpreter:
-            () => FakeXcodeProjectInterpreter(
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(
               buildSettings: const <String, String>{
                 'WRAPPER_NAME': 'My Super Awesome App.app',
                 'DEVELOPMENT_TEAM': '3333CCCC33',
@@ -248,7 +263,8 @@ void main() {
             .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
             .createSync(recursive: true);
 
-        processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
+        processManager
+            .addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
         processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
         processManager.addCommand(
           const FakeCommand(
@@ -325,7 +341,8 @@ void main() {
             .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
             .createSync(recursive: true);
 
-        processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
+        processManager
+            .addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
         processManager.addCommand(
           const FakeCommand(
             command: <String>[
@@ -341,6 +358,8 @@ void main() {
               'BUILD_DIR=/build/ios',
               '-sdk',
               'iphoneos',
+              '-allowProvisioningUpdates',
+              '-allowProvisioningDeviceRegistration',
               '-destination',
               'id=123',
               'ONLY_ACTIVE_ARCH=NO',
@@ -398,7 +417,8 @@ void main() {
         ProcessManager: () => processManager,
         FileSystem: () => fileSystem,
         Logger: () => logger,
-        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+        OperatingSystemUtils: () =>
+            FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
         Pub: () => fakePubBecauseRefreshPluginsList,
         Platform: () => macPlatform,
         XcodeProjectInterpreter: () => fakeXcodeProjectInterpreter,
@@ -425,7 +445,8 @@ void main() {
           'My Super Awesome App',
         );
 
-        processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
+        processManager
+            .addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
         // The first xcrun call should fail with a
         // concurrent build exception.
         processManager.addCommand(
@@ -468,7 +489,8 @@ void main() {
             expectAsync1((LaunchResult launchResult) {
               expect(
                 logger.statusText,
-                contains('Xcode build failed due to concurrent builds, will retry in 2 seconds'),
+                contains(
+                    'Xcode build failed due to concurrent builds, will retry in 2 seconds'),
               );
               expect(launchResult.started, true);
               expect(processManager, hasNoRemainingExpectations);
@@ -485,8 +507,8 @@ void main() {
         ProcessManager: () => processManager,
         FileSystem: () => fileSystem,
         Logger: () => logger,
-        OperatingSystemUtils:
-            () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+        OperatingSystemUtils: () =>
+            FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         Platform: () => macPlatform,
         Pub: () => fakePubBecauseRefreshPluginsList,
         XcodeProjectInterpreter: () => fakeXcodeProjectInterpreter,
@@ -507,10 +529,16 @@ void main() {
       logger = BufferLogger.test();
       fileSystem = MemoryFileSystem.test();
       processManager = FakeProcessManager.empty();
-      projectInfo = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>[
+      projectInfo = XcodeProjectInfo(<String>[
+        'Runner'
+      ], <String>[
+        'Debug',
+        'Release'
+      ], <String>[
         'Runner',
       ], logger);
-      fakeXcodeProjectInterpreter = FakeXcodeProjectInterpreter(projectInfo: projectInfo);
+      fakeXcodeProjectInterpreter =
+          FakeXcodeProjectInterpreter(projectInfo: projectInfo);
       xcode = Xcode.test(
         processManager: FakeProcessManager.any(),
         xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
@@ -659,7 +687,8 @@ void main() {
       testUsingContext(
         'ensure arguments passed to launch',
         () async {
-          final FakeIOSCoreDeviceControl coreDeviceControl = FakeIOSCoreDeviceControl();
+          final FakeIOSCoreDeviceControl coreDeviceControl =
+              FakeIOSCoreDeviceControl();
           final IOSDevice iosDevice = setUpIOSDevice(
             fileSystem: fileSystem,
             processManager: FakeProcessManager.any(),
@@ -691,7 +720,8 @@ void main() {
           expect(launchResult.started, true);
           expect(processManager, hasNoRemainingExpectations);
           expect(coreDeviceControl.argumentsUsedForLaunch, isNotNull);
-          expect(coreDeviceControl.argumentsUsedForLaunch, contains('--enable-dart-profiling'));
+          expect(coreDeviceControl.argumentsUsedForLaunch,
+              contains('--enable-dart-profiling'));
         },
         overrides: <Type, Generator>{
           ProcessManager: () => FakeProcessManager.any(),
@@ -750,7 +780,8 @@ void main() {
           // Start writing messages to the log reader.
           Timer.run(() {
             deviceLogReader.addLine('Foo');
-            deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
+            deviceLogReader.addLine(
+                'The Dart VM service is listening on http://127.0.0.1:456');
           });
 
           final LaunchResult launchResult = await iosDevice.startApp(
@@ -793,7 +824,8 @@ void main() {
             <String>['Runner', 'free'],
             logger,
           );
-          fakeXcodeProjectInterpreter = FakeXcodeProjectInterpreter(projectInfo: projectInfo);
+          fakeXcodeProjectInterpreter =
+              FakeXcodeProjectInterpreter(projectInfo: projectInfo);
           xcode = Xcode.test(
             processManager: FakeProcessManager.any(),
             xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
@@ -813,7 +845,8 @@ void main() {
               xcodeDebug: FakeXcodeDebug(
                 expectedProject: XcodeDebugProject(
                   scheme: 'free',
-                  xcodeWorkspace: fileSystem.directory('/ios/Runner.xcworkspace'),
+                  xcodeWorkspace:
+                      fileSystem.directory('/ios/Runner.xcworkspace'),
                   xcodeProject: fileSystem.directory('/ios/Runner.xcodeproj'),
                   hostAppProjectName: 'Runner',
                 ),
@@ -834,7 +867,8 @@ void main() {
               'My Super Awesome App',
             );
             fileSystem
-                .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
+                .directory(
+                    'build/ios/Release-iphoneos/My Super Awesome App.app')
                 .createSync(recursive: true);
 
             final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
@@ -845,7 +879,8 @@ void main() {
             // Start writing messages to the log reader.
             Timer.run(() {
               deviceLogReader.addLine('Foo');
-              deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
+              deviceLogReader.addLine(
+                  'The Dart VM service is listening on http://127.0.0.1:456');
             });
 
             final LaunchResult launchResult = await iosDevice.startApp(
@@ -929,7 +964,8 @@ void main() {
           // Start writing messages to the log reader.
           Timer.run(() {
             deviceLogReader.addLine('Foo');
-            deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
+            deviceLogReader.addLine(
+                'The Dart VM service is listening on http://127.0.0.1:456');
           });
 
           final Future<LaunchResult> futureLaunchResult = iosDevice.startApp(
@@ -950,11 +986,14 @@ void main() {
           await debugStartedCompleter.future;
 
           // Validate CoreDevice build settings were used
-          final File config = fileSystem.directory('ios').childFile('Flutter/Generated.xcconfig');
+          final File config = fileSystem
+              .directory('ios')
+              .childFile('Flutter/Generated.xcconfig');
           expect(config.existsSync(), isTrue);
 
           String contents = config.readAsStringSync();
-          expect(contents, contains('CONFIGURATION_BUILD_DIR=/build/ios/iphoneos'));
+          expect(contents,
+              contains('CONFIGURATION_BUILD_DIR=/build/ios/iphoneos'));
 
           debugEndedCompleter.complete();
 
@@ -1117,7 +1156,8 @@ void main() {
           // Start writing messages to the log reader.
           Timer.run(() {
             deviceLogReader.addLine('Foo');
-            deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
+            deviceLogReader.addLine(
+                'The Dart VM service is listening on http://127.0.0.1:456');
           });
 
           expect(
@@ -1153,14 +1193,21 @@ void main() {
 
 void setUpIOSProject(FileSystem fileSystem, {bool createWorkspace = true}) {
   fileSystem.file('pubspec.yaml').createSync();
-  fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
+  fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
   fileSystem.directory('ios').createSync();
   if (createWorkspace) {
     fileSystem.directory('ios/Runner.xcworkspace').createSync();
   }
-  fileSystem.file('ios/Runner.xcodeproj/project.pbxproj').createSync(recursive: true);
+  fileSystem
+      .file('ios/Runner.xcodeproj/project.pbxproj')
+      .createSync(recursive: true);
   // This is the expected output directory.
-  fileSystem.directory('build/ios/iphoneos/My Super Awesome App.app').createSync(recursive: true);
+  fileSystem
+      .directory('build/ios/iphoneos/My Super Awesome App.app')
+      .createSync(recursive: true);
 }
 
 IOSDevice setUpIOSDevice({
@@ -1187,7 +1234,9 @@ IOSDevice setUpIOSDevice({
     sdkVersion: sdkVersion,
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     platform: macPlatform,
-    iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
+    iProxy: IProxy.test(
+        logger: logger,
+        processManager: processManager ?? FakeProcessManager.any()),
     logger: logger,
     iosDeploy: IOSDeploy(
       logger: logger,
@@ -1213,7 +1262,8 @@ IOSDevice setUpIOSDevice({
   );
 }
 
-class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
+class FakeXcodeProjectInterpreter extends Fake
+    implements XcodeProjectInterpreter {
   FakeXcodeProjectInterpreter({
     this.projectInfo,
     this.buildSettings = const <String, String>{
@@ -1239,7 +1289,8 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   List<String> xcrunCommand() => <String>['xcrun'];
 
   @override
-  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async =>
+  Future<XcodeProjectInfo?> getInfo(String projectPath,
+          {String? projectFilename}) async =>
       projectInfo;
 
   @override
@@ -1247,7 +1298,8 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
     String projectPath, {
     required XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
-  }) async => buildSettings;
+  }) async =>
+      buildSettings;
 }
 
 class FakeXcodeDebug extends Fake implements XcodeDebug {
@@ -1256,7 +1308,8 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
     this.expectedProject,
     this.expectedDeviceId,
     this.expectedLaunchArguments,
-    this.expectedSchemeFilePath = '/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme',
+    this.expectedSchemeFilePath =
+        '/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme',
     this.debugStartedCompleter,
     this.debugEndedCompleter,
   });
@@ -1300,7 +1353,8 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
 }
 
 class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
-  FakeIOSCoreDeviceControl({this.installSuccess = true, this.launchSuccess = true});
+  FakeIOSCoreDeviceControl(
+      {this.installSuccess = true, this.launchSuccess = true});
 
   final bool installSuccess;
   final bool launchSuccess;
@@ -1309,7 +1363,8 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   List<String>? get argumentsUsedForLaunch => _launchArguments;
 
   @override
-  Future<bool> installApp({required String deviceId, required String bundlePath}) async {
+  Future<bool> installApp(
+      {required String deviceId, required String bundlePath}) async {
     return installSuccess;
   }
 
