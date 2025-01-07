@@ -22,6 +22,10 @@ struct WorkaroundsVK {
   /// requires the renderer to split up command buffers that could
   /// be logically combined.
   bool batch_submit_command_buffer_timeout = false;
+
+  /// On older 600 Series Adreno the input attachment / self dependency
+  /// cycle for programmable blending is broken.
+  bool input_attachment_self_dependency_broken = false;
 };
 WorkaroundsVK GetWorkarounds(DriverInfoVK& driver_info);
 
