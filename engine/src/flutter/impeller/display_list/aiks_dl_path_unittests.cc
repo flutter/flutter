@@ -487,7 +487,7 @@ TEST_P(AiksTest, FatStrokeArc) {
     Rect rect = Rect::MakeXYWH(100, 100, 100, aspect * 100);
     builder.DrawRect(rect, red_paint);
     builder.DrawArc(rect, start_angle, end_angle,
-                    /*use_center=*/false, white_paint);
+                    /*useCenter=*/false, white_paint);
     DlScalar frontier = rect.GetRight() + stroke_width / 2.0;
     builder.DrawLine(Point(frontier, 0), Point(frontier, 150), red_paint);
 
