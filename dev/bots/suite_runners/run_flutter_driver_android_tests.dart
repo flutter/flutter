@@ -21,7 +21,7 @@ import '../utils.dart';
 /// ```
 ///
 /// For debugging, you need to instead run and launch these tests
-/// individually _in_ the `dev/integration_tests/native_driver_test` directory.
+/// individually _in_ the `dev/integration_tests/android_engine_test` directory.
 /// Comparisons against goldens cant happen locally.
 Future<void> runFlutterDriverAndroidTests() async {
   print('Running Flutter Driver Android tests...');
