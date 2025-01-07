@@ -35,10 +35,10 @@ fun configureProject(project: Project, outputDir: String) {
     }
 
     // Configure Maven publishing repository
-    project.extensions.configure<PublishingExtension> {
+    publishing {
         repositories {
             maven {
-                url = uri("file://${outputDir}/outputs/repo")
+                url = uri("file://$outputDir/outputs/repo")
             }
         }
     }
