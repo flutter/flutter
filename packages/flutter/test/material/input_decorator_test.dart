@@ -5482,6 +5482,27 @@ void main() {
         },
       );
 
+      testWidgets('Helper height is correct when helperMaxLines is null', (WidgetTester tester) async {
+        const int numberOfLines = 3;
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(
+              labelText: 'label',
+              helperText: threeLines,
+              helperMaxLines: null,
+              filled: true,
+            ),
+          ),
+        );
+
+        final Rect helperRect = tester.getRect(find.text(threeLines));
+        expect(helperRect.height, closeTo(helperHeight * numberOfLines, 0.25));
+        expect(
+          getDecoratorRect(tester).height,
+          closeTo(containerHeight + helperGap + helperHeight * numberOfLines, 0.25),
+        );
+      });
+
       testWidgets('Helper height is not limited by default', (WidgetTester tester) async {
         const int numberOfLines = 3;
         await tester.pumpWidget(
