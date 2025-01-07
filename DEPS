@@ -64,7 +64,7 @@ vars = {
   'dart_boringssl_rev': 'ee0c13ad1808379cf16b371a051ac3951f8a09c1',
   'dart_core_rev': '7f9f597e64fa52faebd3c0a2214f61a7b081174d',
   'dart_devtools_rev': '3e5327a02693b1405359dc5322d7f0a40151b9b7',
-  'dart_http_rev': '79470d014b467f01b0e7c5b63ab6c86b22dec8db',
+  'dart_http_rev': 'c27d6c780bae0207e938f09596c2cf8d9bb4a963',
   'dart_libprotobuf_rev': '24487dd1045c7f3d64a21f38a3f0c06cc4cf2edb',
   'dart_perfetto_rev': '13ce0c9e13b0940d2476cd0cff2301708a9a2e2b',
   'dart_protobuf_gn_rev': 'ca669f79945418f6229e4fef89b666b2a88cbb10',
@@ -165,7 +165,6 @@ vars = {
   "upstream_googletest": "https://github.com/google/googletest.git",
   "upstream_gtest-parallel": "https://github.com/google/gtest-parallel.git",
   "upstream_harfbuzz": "https://github.com/harfbuzz/harfbuzz.git",
-  "upstream_http_multi_server": "https://github.com/dart-lang/http_multi_server.git",
   "upstream_http": "https://github.com/dart-lang/http.git",
   "upstream_icu": "https://github.com/unicode-org/icu.git",
   "upstream_intl": "https://github.com/dart-lang/intl.git",
@@ -336,9 +335,6 @@ deps = {
 
   'engine/src/flutter/third_party/dart/third_party/pkg/http':
    Var('dart_git') + '/http.git' + '@' + Var('dart_http_rev'),
-
-  'engine/src/flutter/third_party/dart/third_party/pkg/http_multi_server':
-   Var('dart_git') + '/http_multi_server.git@f6a748819139b8cbf513d5fc36b10676b0cb066f',
 
   'engine/src/flutter/third_party/dart/third_party/pkg/intl':
    Var('dart_git') + '/intl.git@5d65e3808ce40e6282e40881492607df4e35669f',
