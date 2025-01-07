@@ -51,7 +51,7 @@ Future<void> run(List<String> args) async {
   final ArgParser parser =
       ArgParser()
         ..addOption(_kOptionPackages, help: 'The .packages file')
-        ..addOption(_kOptionShell, help: 'The Flutter shell binary')
+        ..addOption(_kOptionShell, help: 'The flutter_tester binary')
         ..addOption(_kOptionTestDirectory, help: 'Directory containing the tests')
         ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
         ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
@@ -83,9 +83,10 @@ Future<void> run(List<String> args) async {
   try {
     Cache.flutterRoot = tempDir.path;
 
-    final String shellPath = globals.fs.file(argResults[_kOptionShell]).resolveSymbolicLinksSync();
-    if (!globals.fs.isFileSync(shellPath)) {
-      throwToolExit('Cannot find Flutter shell at $shellPath');
+    final String flutterTesterBinPath =
+        globals.fs.file(argResults[_kOptionShell]).resolveSymbolicLinksSync();
+    if (!globals.fs.isFileSync(flutterTesterBinPath)) {
+      throwToolExit('Cannot find Flutter shell at $flutterTesterBinPath');
     }
 
     final Directory sdkRootSrc = globals.fs.directory(argResults[_kOptionSdkRoot]);
@@ -106,7 +107,7 @@ Future<void> run(List<String> args) async {
     final Artifacts artifacts = globals.artifacts!;
     final Link testerDestLink = globals.fs.link(artifacts.getArtifactPath(Artifact.flutterTester));
     testerDestLink.parent.createSync(recursive: true);
-    testerDestLink.createSync(globals.fs.path.absolute(shellPath));
+    testerDestLink.createSync(globals.fs.path.absolute(flutterTesterBinPath));
 
     final Directory sdkRootDest = globals.fs.directory(
       artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
@@ -151,19 +152,19 @@ Future<void> run(List<String> args) async {
     }
 
     // TODO(dnfield): This should be injected.
+    final BuildInfo buildInfo = BuildInfo(
+      BuildMode.debug,
+      '',
+      treeShakeIcons: false,
+      packageConfigPath: globals.fs.path.normalize(
+        globals.fs.path.absolute(argResults[_kOptionPackages] as String),
+      ),
+    );
     exitCode = await const FlutterTestRunner().runTests(
       const TestWrapper(),
       tests.keys.map(Uri.file).toList(),
-      debuggingOptions: DebuggingOptions.enabled(
-        BuildInfo(
-          BuildMode.debug,
-          '',
-          treeShakeIcons: false,
-          packageConfigPath: globals.fs.path.normalize(
-            globals.fs.path.absolute(argResults[_kOptionPackages] as String),
-          ),
-        ),
-      ),
+      debuggingOptions: DebuggingOptions.enabled(buildInfo),
+      buildInfo: buildInfo,
       watcher: collector,
       enableVmService: collector != null,
       precompiledDillFiles: tests,
