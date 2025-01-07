@@ -63,7 +63,7 @@ abstract class FlutterTestRunner {
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-    BuildInfo? buildInfo,
+    required BuildInfo buildInfo,
   });
 
   /// Runs tests using the experimental strategy of spawning each test in a
@@ -130,7 +130,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-    BuildInfo? buildInfo,
+    required BuildInfo buildInfo,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String flutterTesterBinPath = globals.artifacts!.getArtifactPath(Artifact.flutterTester);
@@ -218,7 +218,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
 
     final loader.FlutterPlatform platform = loader.installHook(
       testWrapper: testWrapper,
-      shellPath: flutterTesterBinPath,
+      flutterTesterBinPath: flutterTesterBinPath,
       debuggingOptions: debuggingOptions,
       watcher: watcher,
       enableVmService: enableVmService,
@@ -236,6 +236,9 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       testTimeRecorder: testTimeRecorder,
       nativeAssetsBuilder: nativeAssetsBuilder,
       buildInfo: buildInfo,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
     );
 
     try {
