@@ -150,11 +150,11 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
       SystemContextMenuItemLookUp() => SystemContextMenuItemDataLookUp(
         title: item.title ?? localizations.lookUpButtonLabel,
       ),
-      SystemContextMenuItemShare() => SystemContextMenuItemDataShare(
-        title: item.title ?? localizations.shareButtonLabel,
-      ),
       SystemContextMenuItemSearchWeb() => SystemContextMenuItemDataSearchWeb(
         title: item.title ?? localizations.searchWebButtonLabel,
+      ),
+      SystemContextMenuItemShare() => SystemContextMenuItemDataShare(
+        title: item.title ?? localizations.shareButtonLabel,
       ),
       SystemContextMenuItemCustom() => SystemContextMenuItemDataCustom(
         title: item.title!,
