@@ -390,7 +390,7 @@ bool DisplayListMatrixClipState::rsuperellipse_covers_cull(
   if (content.IsCircle()) {
     // TODO(dkwingsmt): RSEs might degenerates to ovals instead of mere circles
     // once asymmetrical radius is supported.
-    // https://github.com/flutter/flutter/issues/139321#issuecomment-2547050922
+    // https://github.com/flutter/flutter/issues/161207
     return oval_covers_cull(content.GetBounds());
   }
   DlPoint corners[4];

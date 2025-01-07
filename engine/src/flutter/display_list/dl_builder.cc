@@ -1038,7 +1038,7 @@ void DisplayListBuilder::ClipRoundSuperellipse(const DlRoundSuperellipse& rse,
   if (rse.IsCircle()) {
     // TODO(dkwingsmt): RSEs might degenerates to ovals instead of mere circles
     // once asymmetrical radius is supported.
-    // https://github.com/flutter/flutter/issues/139321#issuecomment-2547050922
+    // https://github.com/flutter/flutter/issues/161207
     ClipOval(rse.GetBounds(), clip_op, is_aa);
     return;
   }
@@ -1268,7 +1268,7 @@ void DisplayListBuilder::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
   } else if (rse.IsCircle()) {
     // TODO(dkwingsmt): RSEs might degenerates to ovals instead of mere circles
     // once asymmetrical radius is supported.
-    // https://github.com/flutter/flutter/issues/139321#issuecomment-2547050922
+    // https://github.com/flutter/flutter/issues/161207
     drawCircle(rse.GetBounds().GetCenter(), rse.GetCornerRadius());
   } else {
     DisplayListAttributeFlags flags = kDrawRSuperellipseFlags;
