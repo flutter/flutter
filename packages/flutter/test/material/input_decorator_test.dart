@@ -5489,7 +5489,6 @@ void main() {
             decoration: const InputDecoration(
               labelText: 'label',
               helperText: threeLines,
-              helperMaxLines: null,
               filled: true,
             ),
           ),
