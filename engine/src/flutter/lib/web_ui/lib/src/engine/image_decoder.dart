@@ -114,6 +114,12 @@ abstract class BrowserImageDecoder implements ui.Codec {
           // Flutter doesn't give the developer a way to customize this, so if this
           // is an animated image we should prefer the animated track.
           preferAnimation: true.toJS,
+
+          // Workaround for https://github.com/flutter/flutter/issues/91093
+          // Both `desiredWidth` and `desiredHeight` must be smaller than the final
+          // displayed size, but also at least 1.
+          desiredWidth: 1.toJS,
+          desiredHeight: 1.toJS,
         ),
       );
 
