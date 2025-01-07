@@ -330,7 +330,7 @@ void main() {
             '--use-test-fonts',
             '--disable-asset-fonts',
             '--packages=.dart_tool/package_config.json',
-            '',
+            'path_to_output.dill',
           ],
           exitCode: -9,
           completer: testCompleter,
@@ -400,8 +400,7 @@ void main() {
               'flutter_tester',
               '--disable-vm-service',
               '--non-interactive',
-              '--packages=.dart_tool/package_config.json',
-              '',
+              'path_to_output.dill',
             ],
             stdout: '{"success": true}\n',
           ),
@@ -530,7 +529,9 @@ class _FakeVmService extends Fake implements VmService {
 
 class _FakeTestCompiler extends Fake implements TestCompiler {
   @override
-  Future<String?> compile(Uri mainDart) async => '';
+  Future<TestCompilerResult> compile(Uri mainUri) async {
+    return TestCompilerComplete(outputPath: 'path_to_output.dill', mainUri: mainUri);
+  }
 }
 
 class _UnstartableDevice extends Fake implements Device {

@@ -464,7 +464,7 @@ public class FlutterRenderer implements TextureRegistry {
     private boolean createNewReader = true;
 
     /**
-     * Stores whether {@link Callback#onSurfaceDestroyed()} was previously invoked.
+     * Stores whether {@link Callback#onSurfaceCleanup()} ()} was previously invoked.
      *
      * <p>Used to avoid signaling {@link Callback#onSurfaceAvailable()} unnecessarily.
      */
@@ -704,6 +704,7 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
+    @SuppressWarnings({"deprecation", "removal"})
     public void onTrimMemory(int level) {
       if (!trimOnMemoryPressure) {
         return;
@@ -713,6 +714,10 @@ public class FlutterRenderer implements TextureRegistry {
       }
       synchronized (lock) {
         numTrims++;
+      }
+      if (this.callback != null) {
+        notifiedDestroy = true;
+        this.callback.onSurfaceCleanup();
       }
       cleanup();
       createNewReader = true;
