@@ -1556,6 +1556,7 @@ class CarouselController extends ScrollController {
   @override
   void attach(ScrollPosition position) {
     super.attach(position);
+    assert(_carouselState != null);
     final _CarouselPosition carouselPosition = position as _CarouselPosition;
     carouselPosition.flexWeights = _carouselState!._flexWeights;
     carouselPosition.itemExtent = _carouselState!._itemExtent;
