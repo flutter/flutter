@@ -6,8 +6,9 @@
 // not migrated to the declarative apply of the Flutter Gradle Plugin.
 // The old (imperative) apply of this plugin is not possible anymore.
 
-throw new GradleException("You are applying Flutter's main Gradle plugin imperatively using \
-the apply script method, which is not possible anymore. \
-Migrate to applying Gradle plugins with the declarative plugins block: \
-https://flutter.dev/to/flutter-gradle-plugin-apply\n\
-")
+throw GradleException(
+    "You are applying Flutter's main Gradle plugin imperatively using " +
+    "the apply script method, which is not possible anymore. " +
+    "Migrate to applying Gradle plugins with the declarative plugins block: " +
+    "https://flutter.dev/to/flutter-gradle-plugin-apply\n"
+)
