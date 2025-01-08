@@ -23,6 +23,10 @@ struct WorkaroundsVK {
   /// be logically combined.
   bool batch_submit_command_buffer_timeout = false;
 
+  /// On older 600 Series Adreno the input attachment / self dependency
+  /// cycle for programmable blending is broken.
+  bool input_attachment_self_dependency_broken = false;
+
   /// Almost all Adreno series GPU (from 600 up to 800) have problems
   /// generating mipmaps, resulting in corruption of the mip levels.
   /// See:
