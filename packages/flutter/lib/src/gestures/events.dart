@@ -674,7 +674,7 @@ mixin _PointerEventDescription on PointerEvent {
     properties.add(EnumProperty<PointerDeviceKind>('kind', kind, level: DiagnosticLevel.debug));
     properties.add(IntProperty('device', device, defaultValue: 0, level: DiagnosticLevel.debug));
     properties.add(IntProperty('buttons', buttons, defaultValue: 0, level: DiagnosticLevel.debug));
-    properties.add(FlagProperty('down', value: down, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<bool>('down', down, level: DiagnosticLevel.debug));
     properties.add(
       DoubleProperty('pressure', pressure, defaultValue: 1.0, level: DiagnosticLevel.debug),
     );
