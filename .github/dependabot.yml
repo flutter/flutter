@@ -3,39 +3,20 @@
 
 version: 2
 updates:
-  - package-ecosystem: "bundler"
-    directory: "/dev/ci/mac"
-    schedule:
-      interval: "weekly"
-    reviewers:
-      - "christopherfujino"
-      - "jmagman"
-      - "keyonghan"
-    labels:
-      - "team"
-      - "team-infra"
-      - "autosubmit"
-  - package-ecosystem: "docker"
-    directory: "/dev/ci/docker_linux"
-    schedule:
-      interval: "weekly"
-    reviewers:
-      - "christopherfujino"
-      - "jmagman"
-      - "keyonghan"
-    labels:
-      - "team"
-      - "team-infra"
-      - "autosubmit"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    groups:
+      all-github-actions:
+        patterns: [ "*" ]
     reviewers:
       - "christopherfujino"
       - "jmagman"
-      - "keyonghan"
     labels:
       - "team"
       - "team-infra"
       - "autosubmit"
+    ignore:
+      - dependency-name: "codecov/codecov-action"
+        update-types: ["version-update:semver-patch"]

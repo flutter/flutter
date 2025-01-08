@@ -22,7 +22,9 @@ Future<void> processPodsIfNeeded(
 
   // When using Swift Package Manager, the Podfile may not exist so if there
   // isn't a Podfile, skip processing pods.
-  if (project.usesSwiftPackageManager && !xcodeProject.podfile.existsSync() && !forceCocoaPodsOnly) {
+  if (xcodeProject.usesSwiftPackageManager &&
+      !xcodeProject.podfile.existsSync() &&
+      !forceCocoaPodsOnly) {
     return;
   }
   // Ensure that the plugin list is up to date, since hasPlugins relies on it.
@@ -36,7 +38,8 @@ Future<void> processPodsIfNeeded(
     //  file being generated. A better long-term fix would be not to have a call to refreshPluginsList
     //  at all, and instead have it implicitly run by the FlutterCommand instead. See
     //  https://github.com/flutter/flutter/issues/157391 for details.
-    writeLegacyPluginsList: false,
+    determineDevDependencies: false,
+    generateLegacyPlugins: false,
   );
 
   // If there are no plugins and if the project is a not module with an existing
@@ -47,10 +50,11 @@ Future<void> processPodsIfNeeded(
 
   // If forcing the use of only CocoaPods, but the project is using Swift
   // Package Manager, print a warning that CocoaPods will be used.
-  if (forceCocoaPodsOnly && project.usesSwiftPackageManager) {
+  if (forceCocoaPodsOnly && xcodeProject.usesSwiftPackageManager) {
     globals.logger.printWarning(
-        'Swift Package Manager does not yet support this command. '
-        'CocoaPods will be used instead.');
+      'Swift Package Manager does not yet support this command. '
+      'CocoaPods will be used instead.',
+    );
 
     // If CocoaPods has been deintegrated, add it back.
     if (!xcodeProject.podfile.existsSync()) {
@@ -58,9 +62,7 @@ Future<void> processPodsIfNeeded(
     }
 
     // Delete Swift Package Manager manifest to invalidate fingerprinter
-    ErrorHandlingFileSystem.deleteIfExists(
-      xcodeProject.flutterPluginSwiftPackageManifest,
-    );
+    ErrorHandlingFileSystem.deleteIfExists(xcodeProject.flutterPluginSwiftPackageManifest);
   }
 
   // If the Xcode project, Podfile, generated plugin Swift Package, or podhelper
@@ -72,23 +74,19 @@ Future<void> processPodsIfNeeded(
       xcodeProject.podfile.path,
       if (xcodeProject.flutterPluginSwiftPackageManifest.existsSync())
         xcodeProject.flutterPluginSwiftPackageManifest.path,
-      globals.fs.path.join(
-        Cache.flutterRoot!,
-        'packages',
-        'flutter_tools',
-        'bin',
-        'podhelper.rb',
-      ),
+      globals.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'bin', 'podhelper.rb'),
     ],
     fileSystem: globals.fs,
     logger: globals.logger,
   );
 
-  final bool didPodInstall = await globals.cocoaPods?.processPods(
-    xcodeProject: xcodeProject,
-    buildMode: buildMode,
-    dependenciesChanged: !fingerprinter.doesFingerprintMatch(),
-  ) ?? false;
+  final bool didPodInstall =
+      await globals.cocoaPods?.processPods(
+        xcodeProject: xcodeProject,
+        buildMode: buildMode,
+        dependenciesChanged: !fingerprinter.doesFingerprintMatch(),
+      ) ??
+      false;
   if (didPodInstall) {
     fingerprinter.writeFingerprint();
   }

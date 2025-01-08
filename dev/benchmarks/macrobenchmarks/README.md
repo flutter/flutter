@@ -111,7 +111,7 @@ in `lib/web_benchmarks.dart`.
 ### How to run a web benchmark
 
 Web benchmarks can be run using `flutter run` in debug, profile, and release
-modes, using either the HTML or the CanvasKit rendering backend. Note, however,
+modes, using either the CanvasKit or the Skwasm rendering backend. Note, however,
 that running in debug mode will result in worse numbers. Profile mode is useful
 for profiling in Chrome DevTools because the numbers are close to release mode
 and the profile contains unobfuscated names.
@@ -121,9 +121,6 @@ Example:
 ```sh
 cd dev/benchmarks/macrobenchmarks
 
-# Runs in profile mode using the HTML renderer
-flutter run --web-renderer=html --profile -d web-server lib/web_benchmarks.dart
-
 # Runs in profile mode using the CanvasKit renderer
 flutter run --web-renderer=canvaskit --profile -d web-server lib/web_benchmarks.dart
 ```
@@ -132,9 +129,6 @@ You can also run all benchmarks exactly as the devicelab runs them:
 
 ```sh
 cd dev/devicelab
-
-# Runs using the HTML renderer
-../../bin/cache/dart-sdk/bin/dart bin/run.dart -t bin/tasks/web_benchmarks_html.dart
 
 # Runs using the CanvasKit renderer
 ../../bin/cache/dart-sdk/bin/dart bin/run.dart -t bin/tasks/web_benchmarks_canvaskit.dart
