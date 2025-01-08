@@ -182,9 +182,7 @@ vars = {
   "upstream_markdown": "https://github.com/dart-lang/markdown.git",
   "upstream_mockito": "https://github.com/dart-lang/mockito.git",
   "upstream_ocmock": "https://github.com/erikdoe/ocmock.git",
-  "upstream_package_config": "https://github.com/dart-lang/package_config.git",
   "upstream_packages": "https://github.com/flutter/packages.git",
-  "upstream_pool": "https://github.com/dart-lang/pool.git",
   "upstream_process_runner": "https://github.com/google/process_runner.git",
   "upstream_process": "https://github.com/google/process.dart.git",
   "upstream_protobuf": "https://github.com/google/protobuf.dart.git",
@@ -197,17 +195,13 @@ vars = {
   "upstream_shaderc": "https://github.com/google/shaderc.git",
   "upstream_shelf": "https://github.com/dart-lang/shelf.git",
   "upstream_skia": "https://skia.googlesource.com/skia.git",
-  "upstream_source_maps": "https://github.com/dart-lang/source_maps.git",
-  "upstream_source_span": "https://github.com/dart-lang/source_span.git",
   "upstream_sqlite": "https://github.com/sqlite/sqlite.git",
-  "upstream_sse": "https://github.com/dart-lang/sse.git",
   "upstream_stack_trace": "https://github.com/dart-lang/stack_trace.git",
   "upstream_stream_channel": "https://github.com/dart-lang/stream_channel.git",
   "upstream_string_scanner": "https://github.com/dart-lang/string_scanner.git",
   "upstream_SwiftShader": "https://swiftshader.googlesource.com/SwiftShader.git",
   "upstream_tar": "https://github.com/simolus3/tar.git",
   "upstream_term_glyph": "https://github.com/dart-lang/term_glyph.git",
-  "upstream_test_reflective_loader": "https://github.com/dart-lang/test_reflective_loader.git",
   "upstream_test": "https://github.com/dart-lang/test.git",
   "upstream_usage": "https://github.com/dart-lang/usage.git",
   "upstream_vector_math": "https://github.com/google/vector_math.dart.git",
@@ -348,32 +342,14 @@ deps = {
   'engine/src/flutter/third_party/dart/third_party/pkg/native':
    Var('dart_git') + '/native.git@4d81ce6c5e17164ef63d8a3f5144e5def0702207',
 
-  'engine/src/flutter/third_party/dart/third_party/pkg/package_config':
-   Var('dart_git') + '/package_config.git@76f2f6c245451da1fa24d7bbb00251b909e729a5',
-
-  'engine/src/flutter/third_party/dart/third_party/pkg/pool':
-   Var('dart_git') + '/pool.git@f85209d83cb0aa3c5612ed80de32df51ba580abd',
-
   'engine/src/flutter/third_party/dart/third_party/pkg/protobuf':
    Var('dart_git') + '/protobuf.git' + '@' + Var('dart_protobuf_rev'),
 
   'engine/src/flutter/third_party/dart/third_party/pkg/pub':
    Var('dart_git') + '/pub.git' + '@' + Var('dart_pub_rev'),
 
-  'engine/src/flutter/third_party/dart/third_party/pkg/pub_semver':
-   Var('dart_git') + '/pub_semver.git@8e9fcb9d3f89f06022387f906da4d380688f935c',
-
   'engine/src/flutter/third_party/dart/third_party/pkg/shelf':
    Var('dart_git') + '/shelf.git@2b5b683e78f5cc84e479a43297fd7b5489d7db02',
-
-  'engine/src/flutter/third_party/dart/third_party/pkg/source_maps':
-   Var('dart_git') + '/source_maps.git@198d32bbde2f5736c04dfbab306a17096fd1648b',
-
-  'engine/src/flutter/third_party/dart/third_party/pkg/source_span':
-   Var('dart_git') + '/source_span.git@22a243eb50d926935a8a1300a49af6d2988c3ae6',
-
-  'engine/src/flutter/third_party/dart/third_party/pkg/sse':
-   Var('dart_git') + '/sse.git@b97dc3ad9a58a454dc5ffe5b3ec814dadc389e32',
 
   'engine/src/flutter/third_party/dart/third_party/pkg/stack_trace':
    Var('dart_git') + '/stack_trace.git@b660cfa444d46bcceb3a0eacbd6a2a7829da11de',
@@ -392,9 +368,6 @@ deps = {
 
   'engine/src/flutter/third_party/dart/third_party/pkg/test':
    Var('dart_git') + '/test.git@dc0f8ea4d09aabb0fed16daea3d4653c8f967b02',
-
-  'engine/src/flutter/third_party/dart/third_party/pkg/test_reflective_loader':
-   Var('dart_git') + '/test_reflective_loader.git@faade6299d1823f0d062eb5e98f3b440ddcea7c6',
 
   'engine/src/flutter/third_party/dart/third_party/pkg/tools':
    Var('dart_git') + '/tools.git' + '@' + Var('dart_tools_rev'),
