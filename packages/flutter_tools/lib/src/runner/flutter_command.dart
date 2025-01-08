@@ -1908,7 +1908,8 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         allowedPlugins = PreviewDevice.supportedPubPlugins;
       }
 
-      final bool isExplicitPackageDependenciesEnabled = argResults?.wasParsed('explicit-package-dependencies') ?? false;
+      final bool isExplicitPackageDependenciesEnabled =
+          argResults?.wasParsed('explicit-package-dependencies') ?? false;
       await project.regeneratePlatformSpecificTooling(
         allowedPlugins: allowedPlugins,
         releaseMode: isExplicitPackageDependenciesEnabled && getBuildMode().isRelease,
