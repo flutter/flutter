@@ -362,6 +362,7 @@ targets:
   # are intentionally running it in the devicelab to ensure that it does not
   # run on a VM in order to avoid noisy results from the benchmark.
   - name: Linux analyzer_benchmark
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/161306
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
