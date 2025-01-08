@@ -15,10 +15,7 @@ class CupertinoSheetApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const CupertinoApp(
-      title: 'Cupertino Sheet',
-      home: HomePage(),
-    );
+    return const CupertinoApp(title: 'Cupertino Sheet', home: HomePage());
   }
 }
 
@@ -58,16 +55,12 @@ class _SheetScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const CupertinoPageScaffold(
-      child: _SheetBody(title: 'CupertinoSheetRoute')
-    );
+    return const CupertinoPageScaffold(child: _SheetBody(title: 'CupertinoSheetRoute'));
   }
 }
 
 class _SheetBody extends StatelessWidget {
-  const _SheetBody({
-    required this.title,
-  });
+  const _SheetBody({required this.title});
 
   final String title;
 
@@ -93,7 +86,7 @@ class _SheetBody extends StatelessWidget {
           CupertinoButton.filled(
             onPressed: () {
               Navigator.of(context).push(
-                CupertinoPageRoute<void>(builder: (BuildContext context) => const _SheetNextPage())
+                CupertinoPageRoute<void>(builder: (BuildContext context) => const _SheetNextPage()),
               );
             },
             child: const Text('Push Nested Page'),
@@ -121,7 +114,7 @@ class _SheetNextPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const CupertinoPageScaffold(
       backgroundColor: CupertinoColors.activeOrange,
-      child: _SheetBody(title: 'Next Page')
+      child: _SheetBody(title: 'Next Page'),
     );
   }
 }

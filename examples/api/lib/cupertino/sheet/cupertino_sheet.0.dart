@@ -15,10 +15,7 @@ class CupertinoSheetApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const CupertinoApp(
-      title: 'Cupertino Sheet',
-      home: HomePage(),
-    );
+    return const CupertinoApp(title: 'Cupertino Sheet', home: HomePage());
   }
 }
 
@@ -38,9 +35,11 @@ class HomePage extends StatelessWidget {
           children: <Widget>[
             CupertinoButton.filled(
               onPressed: () {
-                Navigator.of(context).push(CupertinoSheetRoute<void>(
-                  builder: (BuildContext context) => const _SheetScaffold()
-                ));
+                Navigator.of(context).push(
+                  CupertinoSheetRoute<void>(
+                    builder: (BuildContext context) => const _SheetScaffold(),
+                  ),
+                );
               },
               child: const Text('Open Bottom Sheet'),
             ),
@@ -52,7 +51,7 @@ class HomePage extends StatelessWidget {
 }
 
 class _SheetScaffold extends StatelessWidget {
-  const _SheetScaffold({super.key});
+  const _SheetScaffold();
 
   @override
   Widget build(BuildContext context) {
@@ -70,15 +69,17 @@ class _SheetScaffold extends StatelessWidget {
             ),
             CupertinoButton.filled(
               onPressed: () {
-                Navigator.of(context).push(CupertinoSheetRoute<void>(
-                  builder: (BuildContext context) => const _SheetScaffold()
-                ));
+                Navigator.of(context).push(
+                  CupertinoSheetRoute<void>(
+                    builder: (BuildContext context) => const _SheetScaffold(),
+                  ),
+                );
               },
               child: const Text('Push Another Sheet'),
             ),
           ],
         ),
-      )
+      ),
     );
   }
 }

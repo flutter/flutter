@@ -8,9 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Tap on button displays cupertino sheet', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.RestorableSheetExampleApp(),
-    );
+    await tester.pumpWidget(const example.RestorableSheetExampleApp());
 
     final Finder dialogTitle = find.text('Current Count: 0');
     expect(dialogTitle, findsNothing);
@@ -24,10 +22,10 @@ void main() {
     expect(dialogTitle, findsNothing);
   });
 
-  testWidgets('State restoration keeps the counter at the right value', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.RestorableSheetExampleApp(),
-    );
+  testWidgets('State restoration keeps the counter at the right value', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.RestorableSheetExampleApp());
 
     await tester.tap(find.byType(CupertinoButton));
     await tester.pumpAndSettle();

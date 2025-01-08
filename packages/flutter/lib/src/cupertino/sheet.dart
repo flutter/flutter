@@ -125,8 +125,8 @@ Future<T?> showCupertinoSheet<T>({
                     },
                     child: pageBuilder(context),
                   );
-                }
-              )
+                },
+              ),
             ];
           },
         ),
@@ -134,9 +134,10 @@ Future<T?> showCupertinoSheet<T>({
     };
   }
 
-  return Navigator.of(context, rootNavigator: true).push<T>(CupertinoSheetRoute<T>(
-    builder: builder,
-  ));
+  return Navigator.of(
+    context,
+    rootNavigator: true,
+  ).push<T>(CupertinoSheetRoute<T>(builder: builder));
 }
 
 /// Provides an iOS style sheet transition.
@@ -170,7 +171,13 @@ class CupertinoSheetTransition extends StatefulWidget {
   ///
   /// If a [CupertinoSheetRoute] already exists in the stack, then it will
   /// slide the previous sheet upwards instead.
-  static Widget delegateTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child) {
+  static Widget delegateTransition(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    bool allowSnapshotting,
+    Widget? child,
+  ) {
     if (CupertinoSheetRoute.hasParentSheet(context)) {
       return _delegatedCoverSheetSecondaryTransition(secondaryAnimation, child);
     }
@@ -180,7 +187,7 @@ class CupertinoSheetTransition extends StatefulWidget {
     final CurvedAnimation curvedAnimation = CurvedAnimation(
       curve: curve,
       reverseCurve: reverseCurve,
-      parent: secondaryAnimation
+      parent: secondaryAnimation,
     );
     final double deviceCornerRadius = MediaQuery.maybeViewPaddingOf(context)?.top ?? 0;
 
@@ -206,23 +213,23 @@ class CupertinoSheetTransition extends StatefulWidget {
           animation: radiusAnimation,
           child: child,
           builder: (BuildContext context, Widget? child) {
-            return ClipRRect(
-              borderRadius: radiusAnimation.value,
-              child: child
-            );
-          }
-        )
+            return ClipRRect(borderRadius: radiusAnimation.value, child: child);
+          },
+        ),
       ),
     );
   }
 
-  static Widget _delegatedCoverSheetSecondaryTransition(Animation<double> secondaryAnimation, Widget? child) {
+  static Widget _delegatedCoverSheetSecondaryTransition(
+    Animation<double> secondaryAnimation,
+    Widget? child,
+  ) {
     const Curve curve = Curves.linearToEaseOut;
     const Curve reverseCurve = Curves.easeInToLinear;
     final CurvedAnimation curvedAnimation = CurvedAnimation(
       curve: curve,
       reverseCurve: reverseCurve,
-      parent: secondaryAnimation
+      parent: secondaryAnimation,
     );
 
     final Animation<Offset> slideAnimation = curvedAnimation.drive(_kMidUpTween);
@@ -249,7 +256,6 @@ class CupertinoSheetTransition extends StatefulWidget {
 }
 
 class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
-
   // When this page is coming in to cover a non-sheet page.
   late Animation<Offset> _primaryPositionAnimation;
   // When this page is coming in to cover another sheet.
@@ -272,8 +278,8 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
   @override
   void didUpdateWidget(covariant CupertinoSheetTransition oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.primaryRouteAnimation != widget.primaryRouteAnimation
-    || oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation) {
+    if (oldWidget.primaryRouteAnimation != widget.primaryRouteAnimation ||
+        oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation) {
       _disposeCurve();
       _setupAnimation();
     }
@@ -294,10 +300,12 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
     _secondaryPositionCurve = CurvedAnimation(
       curve: Curves.linearToEaseOut,
       reverseCurve: Curves.easeInToLinear,
-      parent: widget.secondaryRouteAnimation
+      parent: widget.secondaryRouteAnimation,
     );
-     _primaryPositionAnimation = _primaryPositionCurve!.drive(_kBottomUpTween);
-    _primaryPositionAnimationWhenCoveringOtherSheet = _primaryPositionCurve!.drive(_kBottomUpTweenWhenCoveringOtherSheet);
+    _primaryPositionAnimation = _primaryPositionCurve!.drive(_kBottomUpTween);
+    _primaryPositionAnimationWhenCoveringOtherSheet = _primaryPositionCurve!.drive(
+      _kBottomUpTweenWhenCoveringOtherSheet,
+    );
     _secondaryPositionAnimation = _secondaryPositionCurve!.drive(_kMidUpTween);
     _secondaryScaleAnimation = _secondaryPositionCurve!.drive(_kScaleTween);
   }
@@ -309,16 +317,17 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
     _secondaryPositionCurve = null;
   }
 
-  Widget _coverSheetPrimaryTransition(BuildContext context, Animation<double> animation, Widget? child) {
+  Widget _coverSheetPrimaryTransition(
+    BuildContext context,
+    Animation<double> animation,
+    Widget? child,
+  ) {
     final Animation<Offset> offsetAnimation =
-      CupertinoSheetRoute.hasParentSheet(context) ?
-      _primaryPositionAnimationWhenCoveringOtherSheet :
-      _primaryPositionAnimation;
+        CupertinoSheetRoute.hasParentSheet(context)
+            ? _primaryPositionAnimationWhenCoveringOtherSheet
+            : _primaryPositionAnimation;
 
-    return SlideTransition(
-      position: offsetAnimation,
-      child: child,
-    );
+    return SlideTransition(position: offsetAnimation, child: child);
   }
 
   Widget _coverSheetSecondaryTransition(Animation<double> secondaryAnimation, Widget? child) {
@@ -389,18 +398,14 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
 ///     `CupertinoSheetRoute`, with optional nested navigation built in.
 class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTransitionMixin<T> {
   /// Creates a page route that displays an iOS styled sheet.
-  CupertinoSheetRoute({
-    required this.builder,
-  });
+  CupertinoSheetRoute({required this.builder});
 
   /// Builds the primary contents of the sheet route.
   final WidgetBuilder builder;
 
   @override
   Widget buildContent(BuildContext context) {
-    return _CupertinoSheetScope(
-      child: builder(context),
-    );
+    return _CupertinoSheetScope(child: builder(context));
   }
 
   /// Checks if a Cupertino sheet view exists in the widget tree above the current
@@ -439,9 +444,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
 // Internally used to see if another sheet is in the tree already.
 class _CupertinoSheetScope extends InheritedWidget {
-  const _CupertinoSheetScope({
-    required super.child,
-  });
+  const _CupertinoSheetScope({required super.child});
 
   static _CupertinoSheetScope? maybeOf(BuildContext context) {
     return context.getInheritedWidgetOfExactType<_CupertinoSheetScope>();
@@ -466,10 +469,15 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
   Duration get transitionDuration => const Duration(milliseconds: 500);
 
   @override
-  DelegatedTransitionBuilder? get delegatedTransition => CupertinoSheetTransition.delegateTransition;
+  DelegatedTransitionBuilder? get delegatedTransition =>
+      CupertinoSheetTransition.delegateTransition;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
     return buildContent(context);
   }
 
@@ -494,7 +502,12 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
     return buildPageTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
 }

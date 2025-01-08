@@ -8,9 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Tap on button displays cupertino sheet', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.CupertinoSheetApp(),
-    );
+    await tester.pumpWidget(const example.CupertinoSheetApp());
 
     final Finder dialogTitle = find.text('CupertinoSheetRoute');
     final Finder nextPageTitle = find.text('Next Page');
