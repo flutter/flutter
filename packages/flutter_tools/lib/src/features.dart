@@ -52,7 +52,7 @@ abstract class FeatureFlags {
   bool get isPreviewDeviceEnabled => true;
 
   /// Whether Swift Package Manager dependency management is enabled.
-  bool get isSwiftPackageManagerEnabled => true;
+  bool get isSwiftPackageManagerEnabled => false;
 
   /// Whether apps are automatically migrated to add Swift Package Manager
   /// integration. Requires [isSwiftPackageManagerEnabled].
@@ -174,10 +174,13 @@ const Feature previewDevice = Feature(
 );
 
 /// Enable Swift Package Manager as a darwin dependency manager.
-const Feature swiftPackageManager = Feature.fullyEnabled(
+const Feature swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
   configSetting: 'enable-swift-package-manager',
   environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER',
+  master: FeatureChannelSetting(available: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
 );
 
 /// Enable migrating iOS and macOS apps to add Swift Package Manager integration.
