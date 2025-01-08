@@ -1650,8 +1650,8 @@
 ../../../flutter/third_party/dart/sdk/lib/_internal/vm/OWNERS
 ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/OWNERS
 ../../../flutter/third_party/dart/sdk/lib/_wasm/OWNERS
-../../../flutter/third_party/dart/sdk/lib/html/doc
 ../../../flutter/third_party/dart/sdk/lib/html/dart2js
+../../../flutter/third_party/dart/sdk/lib/html/doc
 ../../../flutter/third_party/dart/sdk/lib/libraries.json
 ../../../flutter/third_party/dart/sdk/lib/libraries.yaml
 ../../../flutter/third_party/dart/sdk/lib/svg/dart2js
