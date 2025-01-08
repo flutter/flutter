@@ -26,8 +26,17 @@ struct WorkaroundsVK {
   /// On older 600 Series Adreno the input attachment / self dependency
   /// cycle for programmable blending is broken.
   bool input_attachment_self_dependency_broken = false;
+
+  /// Almost all Adreno series GPU (from 600 up to 800) have problems
+  /// generating mipmaps, resulting in corruption of the mip levels.
+  /// See:
+  ///      * https://github.com/flutter/flutter/issues/160441
+  ///      * https://github.com/flutter/flutter/issues/159876
+  ///      * https://github.com/flutter/flutter/issues/160587
+  bool broken_mipmap_generation = false;
 };
-WorkaroundsVK GetWorkarounds(DriverInfoVK& driver_info);
+
+WorkaroundsVK GetWorkaroundsFromDriverInfo(DriverInfoVK& driver_info);
 
 }  // namespace impeller
 
