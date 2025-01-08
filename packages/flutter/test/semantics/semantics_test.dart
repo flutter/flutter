@@ -286,7 +286,7 @@ void main() {
             equals(
               'Invisible SemanticsNodes should not be added to the tree.\n'
               'The following invisible SemanticsNodes were added to the tree:\n'
-              'SemanticsNode#0(dirty, merge boundary ⛔️, Rect.fromLTRB(0.0, 0.0, 0.0, 10.0), invisible, role: none)\n'
+              'SemanticsNode#0(dirty, merge boundary ⛔️, Rect.fromLTRB(0.0, 0.0, 0.0, 10.0), invisible)\n'
               'which was added as the root SemanticsNode\n'
               'An invisible SemanticsNode is one whose rect is not on screen hence not reachable for users, and its semantic information is not merged into a visible parent.\n'
               'An invisible SemanticsNode makes the accessibility experience confusing, as it does not provide any visual indication when the user selects it via accessibility technologies.\n'
@@ -482,19 +482,16 @@ void main() {
       ' │ STALE\n'
       ' │ owner: null\n'
       ' │ Rect.fromLTRB(0.0, 0.0, 10.0, 5.0)\n'
-      ' │ role: none\n'
       ' │\n'
       ' ├─SemanticsNode#1\n'
       ' │   STALE\n'
       ' │   owner: null\n'
       ' │   Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n'
-      ' │   role: none\n'
       ' │\n'
       ' └─SemanticsNode#2\n'
       '     STALE\n'
       '     owner: null\n'
-      '     Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n'
-      '     role: none\n',
+      '     Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n',
     );
   });
 
@@ -807,8 +804,7 @@ void main() {
         '   owner: null\n'
         '   Rect.fromLTRB(60.0, 20.0, 80.0, 50.0)\n'
         '   actions: didGainAccessibilityFocus, longPress🚫️, scrollUp🚫️,\n'
-        '     showOnScreen🚫️\n'
-        '   role: none\n',
+        '     showOnScreen🚫️\n',
       ),
     );
   });
@@ -848,7 +844,6 @@ void main() {
       '   hint: ""\n'
       '   tooltip: ""\n'
       '   textDirection: null\n'
-      '   role: none\n'
       '   sortKey: null\n'
       '   platformViewId: null\n'
       '   maxValueLength: null\n'

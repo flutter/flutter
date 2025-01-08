@@ -7288,7 +7288,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     VoidCallback? onDidLoseAccessibilityFocus,
     VoidCallback? onFocus,
     Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
-    ui.SemanticsRole role = ui.SemanticsRole.none,
+    ui.SemanticsRole? role,
   }) : this.fromProperties(
          key: key,
          child: child,

@@ -1033,7 +1033,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onFocus,
     this.onDismiss,
     this.customSemanticsActions,
-    this.role = SemanticsRole.none,
+    this.role,
   }) : assert(
          label == null || attributedLabel == null,
          'Only one of label or attributedLabel should be provided',
@@ -1810,7 +1810,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// {@template flutter.semantics.SemanticsProperties.role}
   /// A enum to describe what role the subtree represents.
   /// {@endtemplate}
-  final SemanticsRole role;
+  final SemanticsRole? role;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -3230,7 +3230,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
     properties.add(
       EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null),
     );
-    properties.add(EnumProperty<SemanticsRole>('role', _role, defaultValue: null));
+    if (_role != SemanticsRole.none) {
+      properties.add(EnumProperty<SemanticsRole>('role', _role));
+    }
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
     if (_textSelection?.isValid ?? false) {
       properties.add(
