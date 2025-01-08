@@ -911,17 +911,7 @@ class MatrixHtmlColorFilter extends EngineHtmlColorFilter {
 
   @override
   DomElement? makeSvgFilter(DomNode? filterElement) {
-    /// Flutter documentation says the translation column of the color matrix
-    /// is specified in unnormalized 0..255 space. `feColorMatrix` expects the
-    /// translation values to be normalized to 0..1 space.
-    ///
-    /// See [https://api.flutter.dev/flutter/dart-ui/ColorFilter/ColorFilter.matrix.html]
-    final normalizedMatrix = List<double>.generate(
-      matrix.length,
-      (int i) => (i % 5 == 4) ? matrix[i] / 255.0 : matrix[i],
-      growable: false,
-    );
-    final SvgFilter svgFilter = svgFilterFromColorMatrix(normalizedMatrix);
+    final SvgFilter svgFilter = svgFilterFromColorMatrix(matrix);
     ResourceManager.instance.addResource(svgFilter.element);
     filterId = svgFilter.id;
     return svgFilter.element;
