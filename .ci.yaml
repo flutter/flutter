@@ -5031,7 +5031,7 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery_ios__start_up
 
-  - name: Mac_ios flutter_view_ios__start_up
+  - name: Mac flutter_view_ios__start_up
     recipe: devicelab/devicelab_drone
 #    presubmit: false
     timeout: 60
