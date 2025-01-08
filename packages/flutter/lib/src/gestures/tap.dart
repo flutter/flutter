@@ -7,7 +7,7 @@
 /// @docImport 'multitap.dart';
 library;
 
-import 'package:flutter/foundation.dart' show DiagnosticsProperty, FlagProperty, protected;
+import 'package:flutter/foundation.dart';
 
 import 'arena.dart';
 import 'constants.dart';
@@ -39,7 +39,7 @@ class TapDownDetails extends GestureDetailsWithPositions {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
   }
 }
 
@@ -73,7 +73,7 @@ class TapUpDetails extends GestureDetailsWithPositions {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<PointerDeviceKind>('kind', kind));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
   }
 }
 
@@ -339,7 +339,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
         defaultValue: _up?.position,
       ),
     );
-    properties.add(DiagnosticsProperty<int>('button', _down?.buttons, defaultValue: null));
+    properties.add(IntProperty('button', _down?.buttons, defaultValue: null));
     properties.add(FlagProperty('sentTapDown', value: _sentTapDown, ifTrue: 'sent tap down'));
   }
 }

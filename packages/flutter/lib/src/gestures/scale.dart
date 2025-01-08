@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show Diagnosticable, DiagnosticsProperty;
+import 'package:flutter/foundation.dart';
 
 import 'constants.dart';
 import 'events.dart';
@@ -141,7 +141,7 @@ class ScaleStartDetails with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Offset>('focalPoint', focalPoint));
     properties.add(DiagnosticsProperty<Offset>('localFocalPoint', localFocalPoint));
-    properties.add(DiagnosticsProperty<int>('pointerCount', pointerCount));
+    properties.add(IntProperty('pointerCount', pointerCount));
     properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
   }
 }
@@ -252,11 +252,11 @@ class ScaleUpdateDetails with Diagnosticable {
     properties.add(DiagnosticsProperty<Offset>('focalPointDelta', focalPointDelta));
     properties.add(DiagnosticsProperty<Offset>('focalPoint', focalPoint));
     properties.add(DiagnosticsProperty<Offset>('localFocalPoint', localFocalPoint));
-    properties.add(DiagnosticsProperty<double>('scale', scale));
-    properties.add(DiagnosticsProperty<double>('horizontalScale', horizontalScale));
-    properties.add(DiagnosticsProperty<double>('verticalScale', verticalScale));
-    properties.add(DiagnosticsProperty<double>('rotation', rotation));
-    properties.add(DiagnosticsProperty<int>('pointerCount', pointerCount));
+    properties.add(DoubleProperty('scale', scale));
+    properties.add(DoubleProperty('horizontalScale', horizontalScale));
+    properties.add(DoubleProperty('verticalScale', verticalScale));
+    properties.add(DoubleProperty('rotation', rotation));
+    properties.add(IntProperty('pointerCount', pointerCount));
     properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
   }
 }
@@ -286,8 +286,8 @@ class ScaleEndDetails with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Velocity>('velocity', velocity));
-    properties.add(DiagnosticsProperty<double>('scaleVelocity', scaleVelocity));
-    properties.add(DiagnosticsProperty<int>('pointerCount', pointerCount));
+    properties.add(DoubleProperty('scaleVelocity', scaleVelocity));
+    properties.add(IntProperty('pointerCount', pointerCount));
   }
 }
 
