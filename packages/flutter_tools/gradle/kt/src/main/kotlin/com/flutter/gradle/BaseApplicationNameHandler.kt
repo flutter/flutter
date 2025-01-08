@@ -11,8 +11,10 @@ class BaseApplicationNameHandler {
         internal const val GRADLE_BASE_APPLICATION_NAME_PROPERTY: String = "base-application-name"
 
         @JvmStatic fun setBaseName(project: Project) {
-            val androidComponentsExtension: ApplicationExtension = project.extensions.getByType(ApplicationExtension::class.java)
-            androidComponentsExtension.defaultConfig.applicationId
+            // Only set the base application name for apps, skip otherwise (LibraryExtension, DynamicFeatureExtension).
+            val androidComponentsExtension: ApplicationExtension =
+                project.extensions.findByType(ApplicationExtension::class.java)
+                    ?: return
 
             // Setting to android.app.Application is the same as omitting the attribute.
             var baseApplicationName: String = DEFAULT_BASE_APPLICATION_NAME
