@@ -31,7 +31,7 @@ class AnimationStyle with Diagnosticable {
   const AnimationStyle({this.curve, this.duration, this.reverseCurve, this.reverseDuration});
 
   /// Creates an instance of Animation Style class with no animation.
-  static AnimationStyle noAnimation = AnimationStyle(
+  static const AnimationStyle noAnimation = AnimationStyle(
     duration: Duration.zero,
     reverseDuration: Duration.zero,
   );
