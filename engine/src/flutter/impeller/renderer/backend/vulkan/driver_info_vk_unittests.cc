@@ -209,7 +209,7 @@ bool CanUseFramebufferFetch(std::string_view driver_name, bool qc = true) {
                 prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
               })
           .Build();
-  return !GetWorkarounds(*context->GetDriverInfo())
+  return !GetWorkaroundsFromDriverInfo(*context->GetDriverInfo())
               .input_attachment_self_dependency_broken;
 }
 
