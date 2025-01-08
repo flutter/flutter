@@ -58,7 +58,6 @@ Future<void> main() async {
                 'app-$buildMode.apk',
               ),
             );
-
             if (!apk.existsSync()) {
               throw TaskResult.failure("Expected ${apk.path} to exist, but it doesn't.");
             }
