@@ -50,7 +50,7 @@ void main() {
     );
 
     delegate.query = '';
-    expect(textField.controller!.selection, TextSelection.collapsed(offset: 0));
+    expect(textField.controller!.selection, const TextSelection.collapsed(offset: 0));
   });
 
   testWidgets('Can open and close search', (WidgetTester tester) async {
