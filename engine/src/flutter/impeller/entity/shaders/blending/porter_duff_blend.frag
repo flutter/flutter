@@ -29,7 +29,7 @@ frag_info;
 in vec2 v_texture_coords;
 in f16vec4 v_color;
 
-out f16vec4 frag_color;
+out vec4 frag_color;
 
 f16vec4 Sample(f16sampler2D texture_sampler,
                vec2 texture_coords,
@@ -46,8 +46,8 @@ void main() {
                        frag_info.tmy) *
                 frag_info.input_alpha;
   f16vec4 src = v_color;
-  frag_color = src * (src_coeff + dst.a * src_coeff_dst_alpha) +
-               dst * (dst_coeff + src.a * dst_coeff_src_alpha +
-                      src * dst_coeff_src_color);
+  frag_color = f16vec4(src * (src_coeff + dst.a * src_coeff_dst_alpha) +
+                       dst * (dst_coeff + src.a * dst_coeff_src_alpha +
+                              src * dst_coeff_src_color));
   frag_color *= frag_info.output_alpha;
 }
