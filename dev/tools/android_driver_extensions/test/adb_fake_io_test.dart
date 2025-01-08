@@ -4,7 +4,7 @@
 
 import 'dart:typed_data';
 
-import 'package:native_driver/src/backend/android/adb.dart';
+import 'package:android_driver_extensions/src/backend/android/adb.dart';
 import 'package:process/process.dart';
 import 'package:test/test.dart';
 
