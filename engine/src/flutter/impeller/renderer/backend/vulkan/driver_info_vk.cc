@@ -340,7 +340,7 @@ bool DriverInfoVK::IsKnownBadDriver() const {
     //
     // https://github.com/flutter/flutter/issues/155185
     // Unknown crashes but device is not easily acquirable.
-    if (adreno < AdrenoGPU::kAdreno630) {
+    if (adreno <= AdrenoGPU::kAdreno630) {
       return true;
     }
   }
