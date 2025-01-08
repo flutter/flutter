@@ -194,4 +194,33 @@ TEST(DriverInfoVKTest, EnabledDevicesAdreno) {
   EXPECT_FALSE(IsBadVersionTest("Adreno (TM) 702"));
 }
 
+bool CanUseFramebufferFetch(std::string_view driver_name, bool qc = true) {
+  auto const context =
+      MockVulkanContextBuilder()
+          .SetPhysicalPropertiesCallback(
+              [&driver_name, qc](VkPhysicalDevice device,
+                                 VkPhysicalDeviceProperties* prop) {
+                if (qc) {
+                  prop->vendorID = 0x168C;  // Qualcomm
+                } else {
+                  prop->vendorID = 0x13B5;  // ARM
+                }
+                driver_name.copy(prop->deviceName, driver_name.size());
+                prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
+              })
+          .Build();
+  return !GetWorkaroundsFromDriverInfo(*context->GetDriverInfo())
+              .input_attachment_self_dependency_broken;
+}
+
+TEST(DriverInfoVKTest, CanUseFramebufferFetch) {
+  // Adreno no primitive restart on models as or older than 630.
+  EXPECT_FALSE(CanUseFramebufferFetch("Adreno (TM) 540", true));
+  EXPECT_FALSE(CanUseFramebufferFetch("Adreno (TM) 630", true));
+
+  EXPECT_TRUE(CanUseFramebufferFetch("Adreno (TM) 640", true));
+  EXPECT_TRUE(CanUseFramebufferFetch("Adreno (TM) 750", true));
+  EXPECT_TRUE(CanUseFramebufferFetch("Mali-G51", false));
+}
+
 }  // namespace impeller::testing
