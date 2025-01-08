@@ -271,7 +271,6 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases. This property can
   /// be set from a listener added to this [TextEditingController].
-  @visibleForTesting
   set text(String newText) {
     value = value.copyWith(
       text: newText,
