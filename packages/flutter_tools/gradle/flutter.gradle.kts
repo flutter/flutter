@@ -8,7 +8,7 @@
 
 throw GradleException(
     "You are applying Flutter's main Gradle plugin imperatively using " +
-    "the apply script method, which is not possible anymore. " +
-    "Migrate to applying Gradle plugins with the declarative plugins block: " +
-    "https://flutter.dev/to/flutter-gradle-plugin-apply\n"
+        "the apply script method, which is not possible anymore. " +
+        "Migrate to applying Gradle plugins with the declarative plugins block: " +
+        "https://flutter.dev/to/flutter-gradle-plugin-apply\n"
 )
