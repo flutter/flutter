@@ -5,7 +5,7 @@
 import 'dart:io' as io;
 import 'dart:typed_data';
 
-import 'package:native_driver/native_driver.dart';
+import 'package:android_driver_extensions/native_driver.dart';
 import 'package:test/test.dart';
 
 import 'src/fake_adb.dart';

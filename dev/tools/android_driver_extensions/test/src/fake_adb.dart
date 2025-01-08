@@ -4,7 +4,7 @@
 
 import 'dart:typed_data';
 
-import 'package:native_driver/src/backend/android.dart';
+import 'package:android_driver_extensions/src/backend/android.dart';
 
 /// A stub of [Adb] that allows overriding its methods.
 ///
