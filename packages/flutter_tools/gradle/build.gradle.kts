@@ -28,7 +28,6 @@ gradlePlugin {
 dependencies {
     // When bumping, also update:
     //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/groovy/flutter.groovy
-    //  * AGP version in the buildscript block in packages/flutter_tools/gradle/src/main/groovy/flutter.groovy
     //  * AGP version in the buildscript block in packages/flutter_tools/gradle/src/main/kotlin/dependency_version_checker.gradle.kts
     //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
     implementation(project("kt"))
