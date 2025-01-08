@@ -321,7 +321,7 @@ SvgFilter svgFilterFromColorMatrix(List<double> matrix) {
   final normalizedMatrix = List<double>.generate(
     matrix.length,
     (int i) => (i % 5 == 4) ? matrix[i] / 255.0 : matrix[i],
-     growable: false,
+    growable: false,
   );
   builder.setFeColorMatrix(normalizedMatrix, result: 'comp');
   return builder.build();
