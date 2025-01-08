@@ -5,7 +5,6 @@
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
-import 'package:yaml_edit/yaml_edit.dart';
 
 import '../src/convert.dart';
 import 'android/android_builder.dart';
