@@ -101,7 +101,6 @@ void main() {
     expect(emittedLines, const <String>['W/flutter($appPid): Hello there!']);
   });
 
-
   testWithoutContext('AdbLogReader calls adb logcat with expected flags apiVersion 21', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(

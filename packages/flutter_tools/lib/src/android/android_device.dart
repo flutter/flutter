@@ -1156,16 +1156,10 @@ class AdbLogReader extends DeviceLogReader {
     // E/SurfaceSyncer(22636): Failed to find sync for id=9
     // Some versions of Android spew this out. It is inactionable to the end user
     // and causes no problems for the application.
-    RegExp(
-      r'^E/SurfaceSyncer\(\s*\d+\): Failed to find sync for id=\d+',
-    ),
+    RegExp(r'^E/SurfaceSyncer\(\s*\d+\): Failed to find sync for id=\d+'),
     // See https://github.com/flutter/flutter/issues/160598
-    RegExp(
-      r'ViewPostIme pointer'
-    ),
-    RegExp(
-      r'mali.instrumentation.graph.work'
-    )
+    RegExp(r'ViewPostIme pointer'),
+    RegExp(r'mali.instrumentation.graph.work'),
   ];
 
   // 'F/libc(pid): Fatal signal 11'
