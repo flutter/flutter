@@ -9,6 +9,7 @@ precision mediump float;
 #include <impeller/texture.glsl>
 #include <impeller/types.glsl>
 
+// see GetPorterDuffSpecConstants in content_context.cc for actual constants
 layout(constant_id = 0) const float supports_decal = 1.0;
 layout(constant_id = 1) const float src_coeff = 1.0;
 layout(constant_id = 2) const float src_coeff_dst_alpha = 1.0;

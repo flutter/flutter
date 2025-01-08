@@ -11,7 +11,6 @@
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
-#include "impeller/entity/contents/filters/blend_filter_contents.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/render_target_cache.h"

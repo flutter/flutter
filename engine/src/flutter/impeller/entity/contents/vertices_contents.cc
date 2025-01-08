@@ -153,8 +153,8 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
     options.primitive_type = geometry_result.type;
     auto inverted_blend_mode =
         InvertPorterDuffBlend(blend_mode).value_or(BlendMode::kSource);
-    pass.SetPipeline(renderer.GetPorterDuffPipeline(inverted_blend_mode,
-                                                    OptionsFromPass(pass)));
+    pass.SetPipeline(
+        renderer.GetPorterDuffPipeline(inverted_blend_mode, options));
 
     FS::BindTextureSamplerDst(pass, texture, dst_sampler);
 
