@@ -916,8 +916,10 @@ class MatrixHtmlColorFilter extends EngineHtmlColorFilter {
     /// translation values to be normalized to 0..1 space.
     ///
     /// See [https://api.flutter.dev/flutter/dart-ui/ColorFilter/ColorFilter.matrix.html]
-    final List<double> normalizedMatrix = matrix.mapIndexed(
-      (int index, double value) => (i % 5 == 4) ? value / 255.0 : value,
+    final normalizedMatrix = List<double>.generate(
+      matrix.length,
+      (int i) => (i % 5 == 4) ? matrix[i] / 255.0 : matrix[i],
+      growable: false,
     );
     final SvgFilter svgFilter = svgFilterFromColorMatrix(normalizedMatrix);
     ResourceManager.instance.addResource(svgFilter.element);
