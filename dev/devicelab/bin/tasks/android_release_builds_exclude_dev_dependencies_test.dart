@@ -28,7 +28,6 @@ Future<void> main() async {
         await flutterProject.addPlugin('dev_dependency_plugin', options: <String>['--path', path.join(tempDir.path, 'dev_dependency_plugin')]);
 
         final List<String> buildModesToTest = <String>['debug', 'profile', 'release'];
-        // final List<String> buildModesToTest = <String>['release'];
         for (final String buildMode in buildModesToTest) {
           section('APK does contain methods from dev dependency in $buildMode mode');
 
@@ -40,7 +39,7 @@ Future<void> main() async {
               '--target-platform=android-arm',
             ]);
 
-            final File apk = File(path.join(flutterProject.rootPath, 'build', 'app', 'outputs', 'flutter-apk', 'app-$buildMode.apk')); //?
+            final File apk = File(path.join(flutterProject.rootPath, 'build', 'app', 'outputs', 'flutter-apk', 'app-$buildMode.apk'));
             if (!apk.existsSync()) {
               throw TaskResult.failure("Expected ${apk.path} to exist, but it doesn't.");
             }

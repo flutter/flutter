@@ -651,7 +651,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Finally, the project's `settings.gradle` loads each plugin's android directory as a subproject.
      */
     private void configurePlugins(Project project) {
-        // configureLegacyPluginEachProjects(project)
+        configureLegacyPluginEachProjects(project)
         getPluginList(project).each(this.&configurePluginProject)
         getPluginList(project).each(this.&configurePluginDependencies)
     }
@@ -781,7 +781,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        // Add plugin dependencies. We only want to add dependency on dev dependencies in
+        // Add plugin dependency. We only want to add dependency for dev dependencies in
         // non-release builds.
         project.dependencies {
             debugApi(pluginProject)
@@ -805,13 +805,11 @@ class FlutterPlugin implements Plugin<Project> {
             if (!pluginProject.hasProperty("android")) {
                 return
             }
-
             // Copy build types from the app to the plugin.
             // This allows to build apps with plugins and custom build types or flavors.
             pluginProject.android.buildTypes {
                 "${buildType.name}" {}
             }
-
             // The embedding is API dependency of the plugin, so the AGP is able to desugar
             // default method implementations when the interface is implemented by a plugin.
             //

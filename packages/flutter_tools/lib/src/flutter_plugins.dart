@@ -395,7 +395,6 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
     globals.fs.file(registryPath),
     globals.templateRenderer,
   );
-  print(globals.fs.file(registryPath).readAsStringSync());
 }
 
 const String _objcPluginRegistryHeaderTemplate = '''
