@@ -410,12 +410,12 @@ void main() {
 
     group('Swift Package Manager feature', () {
       testWithoutContext('availability and default enabled', () {
-        expect(swiftPackageManager.master.enabledByDefault, isTrue);
-        expect(swiftPackageManager.master.available, isTrue);
-        expect(swiftPackageManager.beta.enabledByDefault, isTrue);
-        expect(swiftPackageManager.beta.available, isTrue);
-        expect(swiftPackageManager.stable.enabledByDefault, isTrue);
-        expect(swiftPackageManager.stable.available, isTrue);
+        expect(swiftPackageManager.master.enabledByDefault, false);
+        expect(swiftPackageManager.master.available, true);
+        expect(swiftPackageManager.beta.enabledByDefault, false);
+        expect(swiftPackageManager.beta.available, true);
+        expect(swiftPackageManager.stable.enabledByDefault, false);
+        expect(swiftPackageManager.stable.available, true);
       });
 
       testWithoutContext('can be enabled', () {
@@ -427,12 +427,12 @@ void main() {
 
     group('Swift Package Manager app migration feature', () {
       testWithoutContext('availability and default enabled', () {
-        expect(swiftPackageManagerMigration.master.enabledByDefault, isFalse);
-        expect(swiftPackageManagerMigration.master.available, isTrue);
-        expect(swiftPackageManagerMigration.beta.enabledByDefault, isFalse);
-        expect(swiftPackageManagerMigration.beta.available, isTrue);
-        expect(swiftPackageManagerMigration.stable.enabledByDefault, isFalse);
-        expect(swiftPackageManagerMigration.stable.available, isTrue);
+        expect(swiftPackageManagerMigration.master.enabledByDefault, false);
+        expect(swiftPackageManagerMigration.master.available, true);
+        expect(swiftPackageManagerMigration.beta.enabledByDefault, false);
+        expect(swiftPackageManagerMigration.beta.available, true);
+        expect(swiftPackageManagerMigration.stable.enabledByDefault, false);
+        expect(swiftPackageManagerMigration.stable.available, true);
       });
 
       testWithoutContext('requires Swift Package Manager feature', () {
