@@ -228,7 +228,7 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
     required Int32List additionalActions,
     int headingLevel = 0,
     String? linkUrl,
-    ui.SemanticsRole role = SemanticsRole.none,
+    ui.SemanticsRole role = ui.SemanticsRole.none,
   }) {
     // Makes sure we don't send the same id twice.
     assert(!observations.containsKey(id));
