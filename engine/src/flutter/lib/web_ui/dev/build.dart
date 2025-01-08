@@ -73,6 +73,21 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
   List<String> get targets => argResults?.rest ?? <String>[];
   bool get embedDwarf => boolArg('dwarf');
 
+  RuntimeMode get runtimeMode {
+    final bool isProfile = boolArg('profile');
+    final bool isDebug = boolArg('debug');
+    if (isProfile && isDebug) {
+      throw ToolExit('Cannot specify both --profile and --debug at the same time.');
+    }
+    if (isProfile) {
+      return RuntimeMode.profile;
+    } else if (isDebug) {
+      return RuntimeMode.debug;
+    } else {
+      return RuntimeMode.release;
+    }
+  }
+
   @override
   FutureOr<bool> run() async {
     if (embedDwarf && runtimeMode != RuntimeMode.debug) {
