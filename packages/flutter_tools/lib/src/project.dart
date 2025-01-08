@@ -544,7 +544,7 @@ class AndroidProject extends FlutterProjectPlatform {
         // This syntax corresponds to applying the Flutter Gradle Plugin with a
         // script.
         // See https://docs.gradle.org/current/userguide/plugins.html#sec:script_plugins.
-        final bool fileBasedApply = line.contains(RegExp(r'apply from: .*/flutter.gradle'));
+        final bool fileBasedApply = line.contains(RegExp(r'apply from: .*/flutter.gradle.kts'));
 
         // This syntax corresponds to applying the Flutter Gradle Plugin using
         // the declarative "plugins {}" block after including it in the
