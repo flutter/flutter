@@ -97,7 +97,7 @@ void main() {
 
         fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
           ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle.kts');
 
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fileSystem.currentDirectory,
@@ -196,7 +196,7 @@ void main() {
 
         fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
           ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle.kts');
 
         fileSystem
             .directory('build')
@@ -277,7 +277,7 @@ void main() {
 
         fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
           ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle.kts');
 
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fileSystem.currentDirectory,
@@ -373,7 +373,7 @@ void main() {
 
         fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
           ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle.kts');
 
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fileSystem.currentDirectory,
@@ -465,7 +465,7 @@ void main() {
 
         fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
           ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle.kts');
 
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fileSystem.currentDirectory,
@@ -549,7 +549,7 @@ void main() {
 
         fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
           ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle.kts');
 
         fileSystem
             .directory('build')
@@ -640,7 +640,7 @@ void main() {
 
         fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
           ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle.kts');
 
         final Archive archive =
             Archive()
@@ -739,7 +739,7 @@ void main() {
 
         fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
           ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle.kts');
 
         fileSystem
             .directory('build')
@@ -817,7 +817,7 @@ void main() {
 
         fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
           ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle.kts');
 
         fileSystem
             .directory('build')
@@ -876,7 +876,7 @@ void main() {
           .childFile('build.gradle')
         ..createSync(recursive: true)
         ..writeAsStringSync('''
-apply from: irrelevant/flutter.gradle
+apply from: irrelevant/flutter.gradle.kts
 
 android {
     namespace 'com.example.foo'
@@ -1349,7 +1349,7 @@ Gradle Crashed
         fileSystem.file('android/build.gradle').createSync(recursive: true);
         fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
           ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle.kts');
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fileSystem.currentDirectory,
         );
@@ -1446,7 +1446,7 @@ Gradle Crashed
         fileSystem.file('android/build.gradle').createSync(recursive: true);
         fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
           ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle.kts');
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fileSystem.currentDirectory,
         );
@@ -1543,7 +1543,7 @@ Gradle Crashed
         fileSystem.file('android/build.gradle').createSync(recursive: true);
         fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
           ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle.kts');
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fileSystem.currentDirectory,
         );
@@ -1641,7 +1641,7 @@ Gradle Crashed
         fileSystem.file('android/build.gradle').createSync(recursive: true);
         fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
           ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle.kts');
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fileSystem.currentDirectory,
         );
@@ -1707,7 +1707,7 @@ Gradle Crashed
         fileSystem.file('android/build.gradle').createSync(recursive: true);
         fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
           ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle.kts');
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fileSystem.currentDirectory,
         );
