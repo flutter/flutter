@@ -1379,7 +1379,6 @@ class DebuggingOptions {
         google3WorkspaceRoot: json['google3WorkspaceRoot'] as String?,
         printDtd: (json['printDtd'] as bool?) ?? false,
       );
->>>>>>> foundation
 }
 
 class LaunchResult {
