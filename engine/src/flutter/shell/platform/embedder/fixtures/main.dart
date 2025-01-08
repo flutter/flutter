@@ -310,7 +310,7 @@ Future<void> a11y_main() async {
         )
         ..updateCustomAction(id: 21, label: 'Archive', hint: 'archive message');
 
-  PlatformDispatcher.instance.views.first.setSemanticsTreeEnabled(true);
+  PlatformDispatcher.instance.setSemanticsTreeEnabled(true);
   PlatformDispatcher.instance.views.first.updateSemantics(builder.build());
 
   signalNativeTest();
@@ -398,7 +398,7 @@ Future<void> a11y_string_attributes() async {
         controlsNodes: null,
       );
 
-  PlatformDispatcher.instance.views.first.setSemanticsTreeEnabled(true);
+  PlatformDispatcher.instance.setSemanticsTreeEnabled(true);
   PlatformDispatcher.instance.views.first.updateSemantics(builder.build());
   signalNativeTest();
 }
