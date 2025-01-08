@@ -15,6 +15,10 @@ Future<void> main() async {
   await task(() async {
     try {
       await runProjectTest((FlutterProject flutterProject) async {
+            await flutter('config', options: <String>[
+              '--explicit-package-dependencies',
+            ]);
+
         // Create dev_dependency plugin to use for test.
         final Directory tempDir = Directory.systemTemp.createTempSync('android_release_builds_exclude_dev_dependencies_test.');
         const String devDependencyPluginOrg = 'com.example.dev_dependency_plugin';
@@ -24,6 +28,7 @@ Future<void> main() async {
         await flutterProject.addPlugin('dev_dependency_plugin', options: <String>['--path', path.join(tempDir.path, 'dev_dependency_plugin')]);
 
         final List<String> buildModesToTest = <String>['debug', 'profile', 'release'];
+        // final List<String> buildModesToTest = <String>['release'];
         for (final String buildMode in buildModesToTest) {
           section('APK does contain methods from dev dependency in $buildMode mode');
 
@@ -35,7 +40,7 @@ Future<void> main() async {
               '--target-platform=android-arm',
             ]);
 
-            final File apk = File(path.join(flutterProject.rootPath, 'build', 'app', 'outputs', 'flutter-apk', 'app-debug.apk'));
+            final File apk = File(path.join(flutterProject.rootPath, 'build', 'app', 'outputs', 'flutter-apk', 'app-$buildMode.apk')); //?
             if (!apk.existsSync()) {
               throw TaskResult.failure("Expected ${apk.path} to exist, but it doesn't.");
             }
@@ -45,7 +50,7 @@ Future<void> main() async {
             final bool apkIncludesDevDependency = await checkApkContainsMethodsFromLibrary(apk, devDependencyPluginOrg);
             final bool apkIncludesDevDependencyAsExpected = isTestingReleaseMode ? !apkIncludesDevDependency : apkIncludesDevDependency;
             if (!apkIncludesDevDependencyAsExpected) {
-              return TaskResult.failure('Expected to${isTestingReleaseMode ? ' not' : ''} find dev_dependency_plugin in APK built with debug mode but did${isTestingReleaseMode ? '' : ' not'}.');
+              throw TaskResult.failure('Expected to${isTestingReleaseMode ? ' not' : ''} find dev_dependency_plugin in APK built with debug mode but did${isTestingReleaseMode ? '' : ' not'}.');
             }
           });
         }

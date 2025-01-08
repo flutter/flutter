@@ -402,7 +402,6 @@ class FlutterProject {
     if (webPlatform) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
-    print('>>> releaseMode: $releaseMode');
     await injectPlugins(
       this,
       androidPlatform: androidPlatform,
