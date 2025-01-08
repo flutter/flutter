@@ -305,6 +305,7 @@ class _GenericWindow extends StatefulWidget {
   _GenericWindow(
       {this.onDestroyed,
       this.onError,
+      super.key,
       required this.createFuture,
       required this.controller,
       required this.child});
@@ -415,6 +416,11 @@ class RegularWindow extends StatelessWidget {
   const RegularWindow(
       {this.controller,
       this.onDestroyed,
+      this.onError,
+      super.key,
+      required this.preferredSize,
+      required this.child});
+
   final RegularWindowController? controller;
 
   /// Called when the window backing this widget is destroyed.
