@@ -12,7 +12,7 @@ void main() {
       const example.RestorableSheetExampleApp(),
     );
 
-    final Finder dialogTitle = find.text('Current Count');
+    final Finder dialogTitle = find.text('Current Count: 0');
     expect(dialogTitle, findsNothing);
 
     await tester.tap(find.byType(CupertinoButton));
@@ -22,5 +22,28 @@ void main() {
     await tester.tap(find.text('Pop Sheet'));
     await tester.pumpAndSettle();
     expect(dialogTitle, findsNothing);
+  });
+
+  testWidgets('State restoration keeps the counter at the right value', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.RestorableSheetExampleApp(),
+    );
+
+    await tester.tap(find.byType(CupertinoButton));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Current Count: 0'), findsOneWidget);
+
+    await tester.tap(find.text('Increase'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Increase'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Current Count: 2'), findsOneWidget);
+
+    await tester.restartAndRestore();
+
+    expect(find.text('Current Count: 2'), findsOneWidget);
   });
 }

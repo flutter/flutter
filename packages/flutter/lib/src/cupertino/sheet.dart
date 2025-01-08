@@ -23,7 +23,7 @@ final Animatable<Offset> _kBottomUpTweenWhenCoveringOtherSheet = Tween<Offset>(
   end: const Offset(0.0, -0.02),
 );
 
-// Tween that animates a sheet slightly up when it is covered by a new sheet..
+// Tween that animates a sheet slightly up when it is covered by a new sheet.
 final Animatable<Offset> _kMidUpTween = Tween<Offset>(
   begin: Offset.zero,
   end: const Offset(0.0, -0.005),
@@ -39,12 +39,12 @@ final Animatable<Offset> _kTopDownTween = Tween<Offset>(
 // Amount the sheet in the background scales down. Found by measuring the width
 // of the sheet in the background and comparing against the screen width on the
 // iOS simulator showing an iPhone 16 pro running iOS 16.0. The scale transition
-//will go from a default of 1.0 to 1.0 - _kSheetScaleFactor.
+// will go from a default of 1.0 to 1.0 - _kSheetScaleFactor.
 const double _kSheetScaleFactor = 0.0835;
 
 final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kSheetScaleFactor);
 
-/// Shows a Cupertino style sheet widget that slides up from the bottom of the
+/// Shows a Cupertino-style sheet widget that slides up from the bottom of the
 /// screen and stacks the previous route behind the new sheet.
 ///
 /// This is a convenience method for displaying [CupertinoSheetRoute] for common,
@@ -69,7 +69,7 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 /// iOS sheet widgets are generally designed to be tightly coupled to the context
 /// of the widget that opened the sheet. As such, it is not recommended to push
 /// a non-sheet route that covers the sheet without first popping the sheet. If
-/// necessary however, it can be done by pushing to the root Navigator.
+/// necessary however, it can be done by pushing to the root [Navigator].
 ///
 /// If `useNestedNavigation` is `false` (the default), then a [CupertinoSheetRoute]
 /// will be shown with no [Navigator] widget. Multiple calls to `showCupertinoSheet`
@@ -92,6 +92,7 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 ///
 ///  * [CupertinoSheetRoute] the basic route version of the sheet view.
 ///  * [showCupertinoDialog] which displays an iOS-styled dialog.
+///  * <https://developer.apple.com/design/human-interface-guidelines/sheets>
 Future<T?> showCupertinoSheet<T>({
   required BuildContext context,
   required WidgetBuilder pageBuilder,
@@ -253,9 +254,9 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
   late Animation<Offset> _primaryPositionAnimation;
   // When this page is coming in to cover another sheet.
   late Animation<Offset> _primaryPositionAnimationWhenCoveringOtherSheet;
-  // The offset animation when this page is becoming covered by another sheet.
+  // The offset animation when this page is being covered by another sheet.
   late Animation<Offset> _secondaryPositionAnimation;
-  // The scale animation when this page is becoming covered by another sheet.
+  // The scale animation when this page is being covered by another sheet.
   late Animation<double> _secondaryScaleAnimation;
   // Curve of primary page which is coming in to cover another route.
   CurvedAnimation? _primaryPositionCurve;

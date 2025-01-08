@@ -41,7 +41,7 @@ class HomePage extends StatelessWidget {
                 showCupertinoSheet<void>(
                   context: context,
                   useNestedNavigation: true,
-                  pageBuilder: (BuildContext context) => const SheetScaffold(),
+                  pageBuilder: (BuildContext context) => const _SheetScaffold(),
                 );
               },
               child: const Text('Open Bottom Sheet'),
@@ -53,20 +53,19 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class SheetScaffold extends StatelessWidget {
-  const SheetScaffold({super.key});
+class _SheetScaffold extends StatelessWidget {
+  const _SheetScaffold();
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoPageScaffold(
-      child: SheetBody(title: 'CupertinoSheetRoute')
+      child: _SheetBody(title: 'CupertinoSheetRoute')
     );
   }
 }
 
-class SheetBody extends StatelessWidget {
-  const SheetBody({
-    super.key,
+class _SheetBody extends StatelessWidget {
+  const _SheetBody({
     required this.title,
   });
 
@@ -94,7 +93,7 @@ class SheetBody extends StatelessWidget {
           CupertinoButton.filled(
             onPressed: () {
               Navigator.of(context).push(
-                CupertinoPageRoute<void>(builder: (BuildContext context) => const SheetNextPage())
+                CupertinoPageRoute<void>(builder: (BuildContext context) => const _SheetNextPage())
               );
             },
             child: const Text('Push Nested Page'),
@@ -104,7 +103,7 @@ class SheetBody extends StatelessWidget {
               showCupertinoSheet<void>(
                 context: context,
                 useNestedNavigation: true,
-                pageBuilder: (BuildContext context) => const SheetScaffold(),
+                pageBuilder: (BuildContext context) => const _SheetScaffold(),
               );
             },
             child: const Text('Push Another Sheet'),
@@ -115,14 +114,14 @@ class SheetBody extends StatelessWidget {
   }
 }
 
-class SheetNextPage extends StatelessWidget {
-  const SheetNextPage({super.key});
+class _SheetNextPage extends StatelessWidget {
+  const _SheetNextPage();
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoPageScaffold(
       backgroundColor: CupertinoColors.activeOrange,
-      child: SheetBody(title: 'Next Page')
+      child: _SheetBody(title: 'Next Page')
     );
   }
 }

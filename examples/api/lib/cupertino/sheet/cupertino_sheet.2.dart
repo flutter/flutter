@@ -30,6 +30,7 @@ class RestorableSheet extends StatefulWidget {
   State<RestorableSheet> createState() => _RestorableSheetState();
 }
 
+@pragma('vm:entry-point')
 class _RestorableSheetState extends State<RestorableSheet>
     with RestorationMixin {
 
@@ -146,7 +147,6 @@ class CounterSheetScaffold extends StatefulWidget  {
 }
 
 class _CounterSheetScaffoldState extends State<CounterSheetScaffold> with RestorationMixin {
-  // late final RestorableInt _counter = RestorableInt(widget.counter);
   late RestorableInt _counter;
   late RestorableRouteFuture<int?> _multiplicationRouteFuture;
 
@@ -213,8 +213,7 @@ class _CounterSheetScaffoldState extends State<CounterSheetScaffold> with Restor
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text('Current Count'),
-            Text(_counter.value.toString()),
+            Text('Current Count: ${_counter.value}'),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[

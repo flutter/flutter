@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/navigator_utils.dart';
 
 void main() {
-
   testWidgets('Sheet route does not cover the whole screen', (WidgetTester tester) async {
     final GlobalKey scaffoldKey = GlobalKey();
 
@@ -437,29 +436,29 @@ void main() {
         children: <Widget>[
           const Text('Page 2'),
           CupertinoButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              CupertinoPageRoute<void>(
-                builder: (BuildContext context) {
-                  return CupertinoPageScaffold(
-                    child: Column(
-                      children: <Widget>[
-                        const Text('Page 3'),
-                        CupertinoButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text('Go back'),
-                        )
-                      ],
-                    )
-                  );
-                }
-              )
-            );
-          },
-          child: const Text('Push Page 3'),
-        ),
+            onPressed: () {
+              Navigator.of(context).push(
+                CupertinoPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return CupertinoPageScaffold(
+                      child: Column(
+                        children: <Widget>[
+                          const Text('Page 3'),
+                          CupertinoButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Go back'),
+                          )
+                        ],
+                      )
+                    );
+                  }
+                )
+              );
+            },
+            child: const Text('Push Page 3'),
+          ),
         ],
       );
     }

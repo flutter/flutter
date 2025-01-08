@@ -13,13 +13,32 @@ void main() {
     );
 
     final Finder dialogTitle = find.text('CupertinoSheetRoute');
+    final Finder nextPageTitle = find.text('Next Page');
     expect(dialogTitle, findsNothing);
+    expect(nextPageTitle, findsNothing);
 
     await tester.tap(find.byType(CupertinoButton));
     await tester.pumpAndSettle();
     expect(dialogTitle, findsOneWidget);
+    expect(nextPageTitle, findsNothing);
 
-    await tester.tap(find.text('Go Back'));
+    await tester.tap(find.text('Push Nested Page'));
+    await tester.pumpAndSettle();
+    expect(dialogTitle, findsNothing);
+    expect(nextPageTitle, findsOneWidget);
+
+    await tester.tap(find.text('Push Another Sheet'));
+    await tester.pumpAndSettle();
+    // Both titles are on the screen, though one is covered by the second sheet.
+    expect(dialogTitle, findsOneWidget);
+    expect(nextPageTitle, findsOneWidget);
+
+    await tester.tap(find.text('Pop Whole Sheet').last);
+    await tester.pumpAndSettle();
+    expect(dialogTitle, findsNothing);
+    expect(nextPageTitle, findsOneWidget);
+
+    await tester.tap(find.text('Pop Whole Sheet'));
     await tester.pumpAndSettle();
     expect(dialogTitle, findsNothing);
   });
