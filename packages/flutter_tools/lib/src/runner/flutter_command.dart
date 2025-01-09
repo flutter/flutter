@@ -1907,12 +1907,10 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         // The preview device does not currently support any plugins.
         allowedPlugins = PreviewDevice.supportedPubPlugins;
       }
-
-      final bool isExplicitPackageDependenciesEnabled =
-          argResults?.wasParsed('explicit-package-dependencies') ?? false;
       await project.regeneratePlatformSpecificTooling(
         allowedPlugins: allowedPlugins,
-        releaseMode: isExplicitPackageDependenciesEnabled && getBuildMode().isRelease,
+        releaseMode:
+            featureFlags.isExplicitPackageDependenciesEnabled ? getBuildMode().isRelease : false,
       );
       if (reportNullSafety) {
         await _sendNullSafetyAnalyticsEvents(project);
