@@ -29,7 +29,7 @@ final class MainApp extends StatelessWidget {
       // - The Android SDK version is >= 23 (the test driver checks)
       // - This view does NOT use a SurfaceView
       //
-      // See https://github.com/flutter/flutter/blob/master/docs/platforms/android/Android-Platform-Views.md.
+      // See https://github.com/flutter/flutter/blob/main/docs/platforms/android/Android-Platform-Views.md.
       home: AndroidView(viewType: 'blue_orange_gradient_platform_view'),
     );
   }

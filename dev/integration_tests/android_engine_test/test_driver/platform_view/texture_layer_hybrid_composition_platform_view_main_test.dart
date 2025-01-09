@@ -28,7 +28,7 @@ void main() async {
     await flutterDriver.waitUntilFirstFrameRasterized();
 
     // Double check that we are really probably testing using TLHC.
-    // See https://github.com/flutter/flutter/blob/master/docs/platforms/android/Android-Platform-Views.md.
+    // See https://github.com/flutter/flutter/blob/main/docs/platforms/android/Android-Platform-Views.md.
     if (await nativeDriver.sdkVersion case final int version when version < 23) {
       fail('Requires SDK >= 23, got $version');
     }
