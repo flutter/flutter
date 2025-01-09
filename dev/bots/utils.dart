@@ -426,20 +426,8 @@ Future<void> runDartTest(
   List<String>? tags,
   bool runSkipped = false,
 }) async {
-  int? cpus;
-  final String? cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
-  if (cpuVariable != null) {
-    cpus = int.tryParse(cpuVariable, radix: 10);
-    if (cpus == null) {
-      foundError(<String>[
-        '${red}The CPU environment variable, if set, must be set to the integer number of available cores.$reset',
-        'Actual value: "$cpuVariable"',
-      ]);
-      return;
-    }
-  } else {
-    cpus = 2; // Don't default to 1, otherwise we won't catch race conditions.
-  }
+  int cpus = Platform.numberOfProcessors;
+
   // Integration tests that depend on external processes like chrome
   // can get stuck if there are multiple instances running at once.
   if (forceSingleCore) {
