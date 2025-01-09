@@ -446,12 +446,19 @@ class _CarouselViewState extends State<CarouselView> {
     );
   }
 
-  Widget _buildSliverCarousel(ThemeData theme) {
+  Widget _buildSliverCarousel(ThemeData theme, BoxConstraints constraints) {
+    final bool hasZeroMaxWidthOrHeight =
+        constraints.maxWidth == 0 || constraints.maxHeight == 0;
+
     if (_itemExtent != null) {
       return _SliverFixedExtentCarousel(
         itemExtent: _itemExtent!,
         minExtent: widget.shrinkExtent,
         delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+          if (hasZeroMaxWidthOrHeight) {
+            return const SizedBox();
+          }
+
           return _buildCarouselItem(theme, index);
         }, childCount: widget.children.length),
       );
@@ -466,6 +473,10 @@ class _CarouselViewState extends State<CarouselView> {
       shrinkExtent: widget.shrinkExtent,
       weights: _flexWeights!,
       delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+        if (hasZeroMaxWidthOrHeight) {
+          return const SizedBox();
+        }
+
         return _buildCarouselItem(theme, index);
       }, childCount: widget.children.length),
     );
@@ -482,10 +493,6 @@ class _CarouselViewState extends State<CarouselView> {
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        if (constraints.maxWidth == 0 || constraints.maxHeight == 0) {
-          return const SizedBox();
-        }
-
         final double mainAxisExtent = switch (widget.scrollDirection) {
           Axis.horizontal => constraints.maxWidth,
           Axis.vertical => constraints.maxHeight,
@@ -504,7 +511,7 @@ class _CarouselViewState extends State<CarouselView> {
               axisDirection: axisDirection,
               offset: position,
               clipBehavior: Clip.antiAlias,
-              slivers: <Widget>[_buildSliverCarousel(theme)],
+              slivers: <Widget>[_buildSliverCarousel(theme, constraints)],
             );
           },
         );

@@ -1414,6 +1414,7 @@ void main() {
     },
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/160679
   testWidgets('CarouselView does not crash if layout constraints are zero', (
     WidgetTester tester,
   ) async {
