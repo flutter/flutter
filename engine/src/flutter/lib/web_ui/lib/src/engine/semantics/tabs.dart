@@ -14,18 +14,15 @@ import 'semantics.dart';
 class SemanticTab extends SemanticRole {
   SemanticTab(SemanticsObject semanticsObject)
     : super.withBasics(
-        SemanticRoleKind.tab,
+        EngineSemanticsRole.tab,
         semanticsObject,
         preferredLabelRepresentation: LabelRepresentation.ariaLabel,
-      );
-  @override
-  bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
-
-  @override
-  void update() {
-    super.update();
+      ) {
     setAriaRole('tab');
   }
+
+  @override
+  bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
 }
 
 /// Indicates the main display for a tab when activated.
@@ -36,18 +33,15 @@ class SemanticTab extends SemanticRole {
 class SemanticTabPanel extends SemanticRole {
   SemanticTabPanel(SemanticsObject semanticsObject)
     : super.withBasics(
-        SemanticRoleKind.tabPanel,
+        EngineSemanticsRole.tabPanel,
         semanticsObject,
         preferredLabelRepresentation: LabelRepresentation.ariaLabel,
-      );
-  @override
-  bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
-
-  @override
-  void update() {
-    super.update();
+      ) {
     setAriaRole('tabpanel');
   }
+
+  @override
+  bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
 }
 
 /// Indicates a container that contains multiple tabs.
@@ -58,16 +52,13 @@ class SemanticTabPanel extends SemanticRole {
 class SemanticTabList extends SemanticRole {
   SemanticTabList(SemanticsObject semanticsObject)
     : super.withBasics(
-        SemanticRoleKind.tabList,
+        EngineSemanticsRole.tabList,
         semanticsObject,
         preferredLabelRepresentation: LabelRepresentation.ariaLabel,
-      );
-  @override
-  bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
-
-  @override
-  void update() {
-    super.update();
+      ) {
     setAriaRole('tablist');
   }
+
+  @override
+  bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
 }

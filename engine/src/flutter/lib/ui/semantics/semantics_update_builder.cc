@@ -124,7 +124,7 @@ void SemanticsUpdateBuilder::updateNode(
 
   node.headingLevel = headingLevel;
   node.linkUrl = std::move(linkUrl);
-  node.role = (SemanticsRole)role;
+  node.role = static_cast<SemanticsRole>(role);
 }
 
 void SemanticsUpdateBuilder::updateCustomAction(int id,

@@ -740,7 +740,7 @@ class SemanticsData with Diagnosticable {
   ///  * [CustomSemanticsAction], for an explanation of custom actions.
   final List<int>? customSemanticsActionIds;
 
-  /// {@macro flutter.semantics.SemanticsNode.identifier}
+  /// {@macro flutter.semantics.SemanticsNode.role}
   final SemanticsRole role;
 
   /// Whether [flags] contains the given flag.
