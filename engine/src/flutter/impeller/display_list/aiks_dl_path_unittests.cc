@@ -477,6 +477,10 @@ TEST_P(AiksTest, FatStrokeArc) {
     }
 
     DisplayListBuilder builder;
+    DlPaint grey_paint;
+    grey_paint.setColor(DlColor(0xff111111));
+    builder.DrawPaint(grey_paint);
+
     DlPaint white_paint;
     white_paint.setColor(DlColor::kWhite());
     white_paint.setStrokeWidth(stroke_width);
