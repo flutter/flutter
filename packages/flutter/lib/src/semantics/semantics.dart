@@ -1809,6 +1809,14 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// {@template flutter.semantics.SemanticsProperties.role}
   /// A enum to describe what role the subtree represents.
+  ///
+  /// Setting the role for a widget subtree helps assistive technologies, such
+  /// as screen readers, understand and interact with the UI correctly.
+  ///
+  /// Defaults to [SemanticsRole.none] if not set, which means the subtree does
+  /// not represent any complex ui or controls.
+  ///
+  /// For a list of available roles, see [SemanticsRole].
   /// {@endtemplate}
   final SemanticsRole? role;
 
@@ -2725,6 +2733,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   /// {@template flutter.semantics.SemanticsNode.role}
   /// The role this node represents
+  ///
+  /// A semantics node's role helps assistive technologies, such as screen
+  /// readers, understand and interact with the UI correctly.
+  ///
+  /// For a list of possible roles, see [SemanticsRole].
   /// {@endtemplate}
   SemanticsRole get role => _role;
   SemanticsRole _role = _kEmptyConfig.role;

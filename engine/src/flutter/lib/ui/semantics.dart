@@ -349,12 +349,14 @@ enum SemanticsRole {
   /// A tab button.
   ///
   /// see also:
+  ///
   ///  * [tabBar], which is the role for containers of tab buttons.
   tab,
 
   /// Contains tab buttons.
   ///
   /// see also:
+  ///
   ///  * [tab], which is the role for tab buttons.
   tabBar,
 
@@ -982,6 +984,9 @@ abstract class SemanticsUpdateBuilder {
   ///
   /// The `linkUrl` describes the URI that this node links to. If the node is
   /// not a link, this should be an empty string.
+  ///
+  /// The `role` describes the role of this node. Defaults to
+  /// [SemanticsRole.none] if not set.
   ///
   /// See also:
   ///
