@@ -78,7 +78,7 @@ class CupertinoButton extends StatefulWidget {
     this.disabledColor = CupertinoColors.quaternarySystemFill,
     @Deprecated(
       'Use minWidth and minHeight instead. '
-      'This feature was deprecated after v3.28.0-0.2.pre.',
+      'This feature was deprecated after v3.28.0-3.0.pre',
     )
     double? minSize,
     double? minWidth,
@@ -115,7 +115,7 @@ class CupertinoButton extends StatefulWidget {
     this.disabledColor = CupertinoColors.tertiarySystemFill,
     @Deprecated(
       'Use minWidth and minHeight instead. '
-      'This feature was deprecated after v3.28.0-0.2.pre.',
+      'This feature was deprecated after v3.28.0-3.0.pre',
     )
     double? minSize,
     double? minWidth,
@@ -147,7 +147,7 @@ class CupertinoButton extends StatefulWidget {
     this.disabledColor = CupertinoColors.tertiarySystemFill,
     @Deprecated(
       'Use minWidth and minHeight instead. '
-      'This feature was deprecated after v3.28.0-0.2.pre.',
+      'This feature was deprecated after v3.28.0-3.0.pre',
     )
     double? minSize,
     double? minWidth,
