@@ -1545,7 +1545,7 @@ targets:
     bringup: true
     timeout: 60
     properties:
-      shard: flutter_engine_android_openlges
+      shard: flutter_engine_android_opengles
       tags: >
          ["framework", "hostonly", "shard", "linux"]
       dependencies: >-
