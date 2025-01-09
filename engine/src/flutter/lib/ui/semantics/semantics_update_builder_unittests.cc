@@ -130,32 +130,6 @@ TEST_F(SemanticsUpdateBuilderTest, CanHandleSemanticsRole) {
   message_latch->Wait();
   DestroyShell(std::move(shell), task_runners);
 }
-};
-
-Settings settings = CreateSettingsForFixture();
-TaskRunners task_runners("test",                  // label
-                         GetCurrentTaskRunner(),  // platform
-                         CreateNewThread(),       // raster
-                         CreateNewThread(),       // ui
-                         CreateNewThread()        // io
-);
-
-AddNativeCallback("SemanticsUpdate",
-                  CREATE_NATIVE_ENTRY(nativeSemanticsUpdate));
-
-std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
-
-ASSERT_TRUE(shell->IsSetup());
-auto configuration = RunConfiguration::InferFromSettings(settings);
-configuration.SetEntrypoint("sendSemanticsUpdate");
-
-shell->RunEngine(std::move(configuration), [](auto result) {
-  ASSERT_EQ(result, Engine::RunStatus::Success);
-});
-
-message_latch->Wait();
-DestroyShell(std::move(shell), task_runners);
-}
 
 }  // namespace testing
 }  // namespace flutter
