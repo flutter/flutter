@@ -5110,7 +5110,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: integration_test_test_ios
+      task_name: imitation_game_flutter__compile
 
   - name: Mac_ios integration_ui_ios_driver
     recipe: devicelab/devicelab_drone
@@ -5248,7 +5248,7 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
-      task_name: imitation_game_flutter__compile
+      task_name: native_assets_ios_simulator
 
   - name: Mac_ios native_assets_ios
     recipe: devicelab/devicelab_drone
