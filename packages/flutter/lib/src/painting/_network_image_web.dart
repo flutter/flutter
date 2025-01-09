@@ -168,12 +168,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       // to avoid double reporting the error.
       await imageElement.decode().toDart;
       return OneFrameImageStreamCompleter(
-        Future<ImageInfo>.value(
-          WebImageInfo(
-            imageElement,
-            debugLabel: key.url,
-          ),
-        ),
+        Future<ImageInfo>.value(WebImageInfo(imageElement, debugLabel: key.url)),
         informationCollector: _imageStreamInformationCollector(key),
       )..debugLabel = key.url;
     }

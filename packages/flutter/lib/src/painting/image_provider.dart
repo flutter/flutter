@@ -1526,10 +1526,10 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
   /// [WebHtmlElementStrategy.never].
   const factory NetworkImage(
     String url, {
-      double scale,
-      Map<String, String>? headers,
-      WebHtmlElementStrategy webHtmlElementStrategy,
-    }) = network_image.NetworkImage;
+    double scale,
+    Map<String, String>? headers,
+    WebHtmlElementStrategy webHtmlElementStrategy,
+  }) = network_image.NetworkImage;
 
   /// The URL from which the image will be fetched.
   String get url;

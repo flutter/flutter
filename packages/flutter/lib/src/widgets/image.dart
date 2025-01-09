@@ -450,7 +450,12 @@ class Image extends StatefulWidget {
   }) : image = ResizeImage.resizeIfNeeded(
          cacheWidth,
          cacheHeight,
-         NetworkImage(src, scale: scale, headers: headers, webHtmlElementStrategy: webHtmlElementStrategy),
+         NetworkImage(
+           src,
+           scale: scale,
+           headers: headers,
+           webHtmlElementStrategy: webHtmlElementStrategy,
+         ),
        ),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0);
