@@ -1298,11 +1298,14 @@ any code that operates on all of them should operate on them in the
 same order (unless the order matters).
 
 
-### Prefer a maximum line length of 80 characters for comments and docs
+### Prefer a maximum line length of 100 characters for comments and docs
 
-Aim for a maximum line length of roughly 80 characters for comments and docs.
+Aim for a maximum line length of roughly 100 characters for comments and docs. Existing docs may use a
+line length of 80 characters and should not be reflowed to a maximum line length of 100 to simplify
+reviewing docs in PRs.
 
-Line length for code is automatically handled by `dart format`.
+Line length for code is automatically handled by `dart format`, which is configured to use a maximum
+line length of 100.
 
 
 ### Consider using `=>` for short functions and methods
