@@ -5,11 +5,14 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
+import 'interface_level.dart';
 import 'route.dart';
 
 // Tween for animating a Cupertino sheet onto the screen.
 //
-// Begins fully offscreen below the screen and ends onscreen with a small gap at the top of the screen.
+// Begins fully offscreen below the screen and ends onscreen with a small gap at
+// the top of the screen. Values found from eyeballing a simulator running iOS 18.0.
 final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
   begin: const Offset(0.0, 1.0),
   end: const Offset(0.0, 0.08),
@@ -18,27 +21,34 @@ final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
 // Offset change for when a new sheet covers another sheet. '0.0' represents the
 // top of the space available for the new sheet, but because the previous sheet
 // was lowered slightly, the new sheet needs to go slightly higher than that.
+// Values found from eyeballing a simulator running iOS 18.0.
 final Animatable<Offset> _kBottomUpTweenWhenCoveringOtherSheet = Tween<Offset>(
   begin: const Offset(0.0, 1.0),
   end: const Offset(0.0, -0.02),
 );
 
 // Tween that animates a sheet slightly up when it is covered by a new sheet.
+// Values found from eyeballing a simulator running iOS 18.0.
 final Animatable<Offset> _kMidUpTween = Tween<Offset>(
   begin: Offset.zero,
   end: const Offset(0.0, -0.005),
 );
 
 // Offset from top of screen to slightly down when a fullscreen page is covered
-// by a sheet.
+// by a sheet. Values found from eyeballing a simulator running iOS 18.0.
 final Animatable<Offset> _kTopDownTween = Tween<Offset>(
   begin: Offset.zero,
   end: const Offset(0.0, 0.07),
 );
 
+// Opacity of the overlay color put over the sheet as it moves into the background.
+// Used to distinguish the sheet from the background. Value derived from eyeballing
+// a simulator running iOS 18.0.
+final Animatable<double> _kOpacityTween = Tween<double>(begin: 0.0, end: 0.10);
+
 // Amount the sheet in the background scales down. Found by measuring the width
 // of the sheet in the background and comparing against the screen width on the
-// iOS simulator showing an iPhone 16 pro running iOS 16.0. The scale transition
+// iOS simulator showing an iPhone 16 pro running iOS 18.0. The scale transition
 // will go from a default of 1.0 to 1.0 - _kSheetScaleFactor.
 const double _kSheetScaleFactor = 0.0835;
 
@@ -140,7 +150,7 @@ Future<T?> showCupertinoSheet<T>({
   ).push<T>(CupertinoSheetRoute<T>(builder: builder));
 }
 
-/// Provides an iOS style sheet transition.
+/// Provides an iOS-style sheet transition.
 ///
 /// The page slides up and stops below the top of the screen. When covered by
 /// another sheet view, it will slide slightly up and scale down to appear
@@ -197,11 +207,28 @@ class CupertinoSheetTransition extends StatefulWidget {
     );
 
     final Animation<BorderRadiusGeometry> radiusAnimation = curvedAnimation.drive(decorationTween);
+    final Animation<double> opacityAnimation = curvedAnimation.drive(_kOpacityTween);
     final Animation<Offset> slideAnimation = curvedAnimation.drive(_kTopDownTween);
     final Animation<double> scaleAnimation = curvedAnimation.drive(_kScaleTween);
     curvedAnimation.dispose();
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
+
+    final bool isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
+    final Color overlayColor = isDarkMode ? const Color(0xFFc8c8c8) : const Color(0xFF000000);
+
+    final Widget? contrastedChild =
+        child != null && !secondaryAnimation.isDismissed
+            ? Stack(
+              children: <Widget>[
+                child,
+                FadeTransition(
+                  opacity: opacityAnimation,
+                  child: ColoredBox(color: overlayColor, child: const SizedBox.expand()),
+                ),
+              ],
+            )
+            : child;
 
     return SlideTransition(
       position: slideAnimation,
@@ -213,7 +240,7 @@ class CupertinoSheetTransition extends StatefulWidget {
           animation: radiusAnimation,
           child: child,
           builder: (BuildContext context, Widget? child) {
-            return ClipRRect(borderRadius: radiusAnimation.value, child: child);
+            return ClipRRect(borderRadius: radiusAnimation.value, child: contrastedChild);
           },
         ),
       ),
@@ -405,7 +432,10 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
   @override
   Widget buildContent(BuildContext context) {
-    return _CupertinoSheetScope(child: builder(context));
+    return CupertinoUserInterfaceLevel(
+      data: CupertinoUserInterfaceLevelData.elevated,
+      child: _CupertinoSheetScope(child: builder(context)),
+    );
   }
 
   /// Checks if a Cupertino sheet view exists in the widget tree above the current
@@ -424,10 +454,8 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
     }
   }
 
-  // Slightly darkens the sheet behind. Eyeballed from a simulator running iOS 18.0
-  // TODO(mitchgoodwin): Adjust with darkmode logic.
   @override
-  Color? get barrierColor => const Color(0x20000000);
+  Color? get barrierColor => CupertinoColors.transparent;
 
   @override
   bool get barrierDismissible => false;
