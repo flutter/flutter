@@ -426,7 +426,9 @@ Future<void> runDartTest(
   List<String>? tags,
   bool runSkipped = false,
 }) async {
-  int cpus = Platform.numberOfProcessors;
+  // TODO(matanlurey): Consider Platform.numberOfProcessors instead.
+  // See https://github.com/flutter/flutter/issues/161399.
+  int cpus = 2;
 
   // Integration tests that depend on external processes like chrome
   // can get stuck if there are multiple instances running at once.
