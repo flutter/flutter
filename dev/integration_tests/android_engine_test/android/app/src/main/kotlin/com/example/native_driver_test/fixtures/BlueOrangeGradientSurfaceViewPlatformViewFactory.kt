@@ -54,7 +54,12 @@ private class GradientSurfaceViewPlatformView(
         }
     }
 
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+    override fun surfaceChanged(
+        holder: SurfaceHolder,
+        format: Int,
+        width: Int,
+        height: Int
+    ) {
         val canvas = holder.lockCanvas()
         if (canvas != null) {
             drawGradient(canvas)
