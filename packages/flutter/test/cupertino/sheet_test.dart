@@ -608,4 +608,199 @@ void main() {
     );
     expect(find.text('Page 2'), findsNothing);
   });
+
+  group('drag dismiss gesture', () {
+    Widget dragGestureApp(GlobalKey homeScaffoldKey, GlobalKey sheetScaffoldKey) {
+      return CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: homeScaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    showCupertinoSheet<void>(
+                      context: homeScaffoldKey.currentContext!,
+                      pageBuilder: (BuildContext context) {
+                        return CupertinoPageScaffold(
+                          key: sheetScaffoldKey,
+                          child: const Center(child: Text('Page 2')),
+                        );
+                      },
+                    );
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('partial drag and drop does not pop the sheet', (WidgetTester tester) async {
+      final GlobalKey homeKey = GlobalKey();
+      final GlobalKey sheetKey = GlobalKey();
+
+      await tester.pumpWidget(dragGestureApp(homeKey, sheetKey));
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 2'), findsOneWidget);
+
+      RenderBox box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      final double initialPosition = box.localToGlobal(Offset.zero).dy;
+
+      final TestGesture gesture = await tester.startGesture(const Offset(100, 200));
+      // Partial drag down
+      await gesture.moveBy(const Offset(0, 200));
+      await tester.pump();
+
+      box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      final double middlePosition = box.localToGlobal(Offset.zero).dy;
+      expect(middlePosition, greaterThan(initialPosition));
+
+      // Release gesture. Sheet should not pop and slide back up.
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 2'), findsOneWidget);
+
+      box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      final double finalPosition = box.localToGlobal(Offset.zero).dy;
+
+      expect(finalPosition, lessThan(middlePosition));
+      expect(finalPosition, equals(initialPosition));
+    });
+
+    testWidgets('dropping the drag further down the page pops the sheet', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey homeKey = GlobalKey();
+      final GlobalKey sheetKey = GlobalKey();
+
+      await tester.pumpWidget(dragGestureApp(homeKey, sheetKey));
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 2'), findsOneWidget);
+
+      final TestGesture gesture = await tester.startGesture(const Offset(100, 200));
+      await gesture.moveBy(const Offset(0, 350));
+      await tester.pump();
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 2'), findsNothing);
+    });
+
+    testWidgets('dismissing with a drag pops all nested routes', (WidgetTester tester) async {
+      final GlobalKey homeKey = GlobalKey();
+      final GlobalKey sheetKey = GlobalKey();
+
+      Widget sheetScaffoldContent(BuildContext context) {
+        return Column(
+          children: <Widget>[
+            const Text('Page 2'),
+            CupertinoButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  CupertinoPageRoute<void>(
+                    builder: (BuildContext context) {
+                      return const CupertinoPageScaffold(child: Center(child: Text('Page 3')));
+                    },
+                  ),
+                );
+              },
+              child: const Text('Push Page 3'),
+            ),
+          ],
+        );
+      }
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            key: homeKey,
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  const Text('Page 1'),
+                  CupertinoButton(
+                    onPressed: () {
+                      showCupertinoSheet<void>(
+                        context: homeKey.currentContext!,
+                        pageBuilder: (BuildContext context) {
+                          return CupertinoPageScaffold(
+                            key: sheetKey,
+                            child: sheetScaffoldContent(context),
+                          );
+                        },
+                      );
+                    },
+                    child: const Text('Push Page 2'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 2'), findsOneWidget);
+
+      await tester.tap(find.text('Push Page 3'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 3'), findsOneWidget);
+
+      final TestGesture gesture = await tester.startGesture(const Offset(100, 200));
+      await gesture.moveBy(const Offset(0, 350));
+      await tester.pump();
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 2'), findsNothing);
+    });
+
+    testWidgets('Popping the sheet during drag should not crash', (WidgetTester tester) async {
+      final GlobalKey homeKey = GlobalKey();
+      final GlobalKey sheetKey = GlobalKey();
+
+      await tester.pumpWidget(dragGestureApp(homeKey, sheetKey));
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      final TestGesture gesture = await tester.createGesture();
+
+      await gesture.down(const Offset(100, 200));
+
+      // Need 2 events to form a valid drag
+      await tester.pump(const Duration(milliseconds: 100));
+      await gesture.moveTo(const Offset(100, 300), timeStamp: const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 200));
+      await gesture.moveTo(const Offset(100, 500), timeStamp: const Duration(milliseconds: 200));
+
+      Navigator.of(homeKey.currentContext!).pop();
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 1'), findsOneWidget);
+      expect(find.text('Page 2'), findsNothing);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 1'), findsOneWidget);
+    });
+  });
 }

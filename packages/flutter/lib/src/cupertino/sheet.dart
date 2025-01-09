@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -45,6 +46,14 @@ final Animatable<Offset> _kTopDownTween = Tween<Offset>(
 // Used to distinguish the sheet from the background. Value derived from eyeballing
 // a simulator running iOS 18.0.
 final Animatable<double> _kOpacityTween = Tween<double>(begin: 0.0, end: 0.10);
+
+// The minimum velocity needed for a drag downwards to dismiss the sheet. Eyeballed
+// from a comparison against a simulator running iOS 18.0.
+const double _kMinFlingVelocity = 2.0; // Screen heights per second.
+
+// The duration for a page to animate when the user releases it mid-swipe. Eyeballed
+// from a comparison against a simulator running iOS 18.0.
+const Duration _kDroppedSheetDragAnimationDuration = Duration(milliseconds: 300);
 
 // Amount the sheet in the background scales down. Found by measuring the width
 // of the sheet in the background and comparing against the screen width on the
@@ -162,6 +171,7 @@ class CupertinoSheetTransition extends StatefulWidget {
     required this.primaryRouteAnimation,
     required this.secondaryRouteAnimation,
     required this.child,
+    required this.linearTransition,
   });
 
   /// `primaryRouteAnimation` is a linear route animation from 0.0 to 1.0 when
@@ -174,6 +184,11 @@ class CupertinoSheetTransition extends StatefulWidget {
 
   /// The widget below this widget in the tree.
   final Widget child;
+
+  /// Whether to perform the transition linearly.
+  ///
+  /// Used to respond to a drag gesture.
+  final bool linearTransition;
 
   /// The primary delegated transition. Will slide a non [CupertinoSheetRoute] page down.
   ///
@@ -191,9 +206,10 @@ class CupertinoSheetTransition extends StatefulWidget {
     if (CupertinoSheetRoute.hasParentSheet(context)) {
       return _delegatedCoverSheetSecondaryTransition(secondaryAnimation, child);
     }
+    final bool linear = Navigator.of(context).userGestureInProgress;
 
-    const Curve curve = Curves.linearToEaseOut;
-    const Curve reverseCurve = Curves.easeInToLinear;
+    final Curve curve = linear ? Curves.linear : Curves.linearToEaseOut;
+    final Curve reverseCurve = linear ? Curves.linear : Curves.easeInToLinear;
     final CurvedAnimation curvedAnimation = CurvedAnimation(
       curve: curve,
       reverseCurve: reverseCurve,
@@ -283,10 +299,6 @@ class CupertinoSheetTransition extends StatefulWidget {
 }
 
 class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
-  // When this page is coming in to cover a non-sheet page.
-  late Animation<Offset> _primaryPositionAnimation;
-  // When this page is coming in to cover another sheet.
-  late Animation<Offset> _primaryPositionAnimationWhenCoveringOtherSheet;
   // The offset animation when this page is being covered by another sheet.
   late Animation<Offset> _secondaryPositionAnimation;
   // The scale animation when this page is being covered by another sheet.
@@ -329,10 +341,6 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
       reverseCurve: Curves.easeInToLinear,
       parent: widget.secondaryRouteAnimation,
     );
-    _primaryPositionAnimation = _primaryPositionCurve!.drive(_kBottomUpTween);
-    _primaryPositionAnimationWhenCoveringOtherSheet = _primaryPositionCurve!.drive(
-      _kBottomUpTweenWhenCoveringOtherSheet,
-    );
     _secondaryPositionAnimation = _secondaryPositionCurve!.drive(_kMidUpTween);
     _secondaryScaleAnimation = _secondaryPositionCurve!.drive(_kScaleTween);
   }
@@ -347,14 +355,25 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
   Widget _coverSheetPrimaryTransition(
     BuildContext context,
     Animation<double> animation,
+    bool linearTransition,
     Widget? child,
   ) {
-    final Animation<Offset> offsetAnimation =
+    final Animatable<Offset> offsetTween =
         CupertinoSheetRoute.hasParentSheet(context)
-            ? _primaryPositionAnimationWhenCoveringOtherSheet
-            : _primaryPositionAnimation;
+            ? _kBottomUpTweenWhenCoveringOtherSheet
+            : _kBottomUpTween;
 
-    return SlideTransition(position: offsetAnimation, child: child);
+    final CurvedAnimation curvedAnimation = CurvedAnimation(
+      parent: animation,
+      curve: linearTransition ? Curves.linear : Curves.fastEaseInToSlowEaseOut,
+      reverseCurve: linearTransition ? Curves.linear : Curves.fastEaseInToSlowEaseOut.flipped,
+    );
+
+    final Animation<Offset> positionAnimation = curvedAnimation.drive(offsetTween);
+
+    curvedAnimation.dispose();
+
+    return SlideTransition(position: positionAnimation, child: child);
   }
 
   Widget _coverSheetSecondaryTransition(Animation<double> secondaryAnimation, Widget? child) {
@@ -381,6 +400,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
         _coverSheetPrimaryTransition(
           context,
           widget.primaryRouteAnimation,
+          widget.linearTransition,
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
             child: widget.child,
@@ -509,6 +529,15 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
     return buildContent(context);
   }
 
+  static _CupertinoDownGestureController<T> _startPopGesture<T>(ModalRoute<T> route) {
+    return _CupertinoDownGestureController<T>(
+      navigator: route.navigator!,
+      getIsCurrent: () => route.isCurrent,
+      getIsActive: () => route.isActive,
+      controller: route.controller!, // protected access
+    );
+  }
+
   /// Returns a [CupertinoSheetTransition].
   static Widget buildPageTransitions<T>(
     ModalRoute<T> route,
@@ -517,10 +546,16 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
+    final bool linearTransition = route.popGestureInProgress;
     return CupertinoSheetTransition(
       primaryRouteAnimation: animation,
       secondaryRouteAnimation: secondaryAnimation,
-      child: child,
+      linearTransition: linearTransition,
+      child: _CupertinoDownGestureDetector<T>(
+        enabledCallback: () => true,
+        onStartPopGesture: () => _startPopGesture<T>(route),
+        child: child,
+      ),
     );
   }
 
@@ -537,5 +572,195 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
     Widget child,
   ) {
     return buildPageTransitions<T>(this, context, animation, secondaryAnimation, child);
+  }
+}
+
+class _CupertinoDownGestureDetector<T> extends StatefulWidget {
+  const _CupertinoDownGestureDetector({
+    super.key,
+    required this.enabledCallback,
+    required this.onStartPopGesture,
+    required this.child,
+  });
+
+  final Widget child;
+
+  final ValueGetter<bool> enabledCallback;
+
+  final ValueGetter<_CupertinoDownGestureController<T>> onStartPopGesture;
+
+  @override
+  _CupertinoDownGestureDetectorState<T> createState() => _CupertinoDownGestureDetectorState<T>();
+}
+
+class _CupertinoDownGestureDetectorState<T> extends State<_CupertinoDownGestureDetector<T>> {
+  _CupertinoDownGestureController<T>? _downGestureController;
+
+  late VerticalDragGestureRecognizer _recognizer;
+
+  @override
+  void initState() {
+    super.initState();
+    _recognizer =
+        VerticalDragGestureRecognizer(debugOwner: this)
+          ..onStart = _handleDragStart
+          ..onUpdate = _handleDragUpdate
+          ..onEnd = _handleDragEnd
+          ..onCancel = _handleDragCancel;
+  }
+
+  @override
+  void dispose() {
+    _recognizer.dispose();
+
+    // If this is disposed during a drag, call navigator.didStopUserGesture.
+    if (_downGestureController != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_downGestureController?.navigator.mounted ?? false) {
+          _downGestureController?.navigator.didStopUserGesture();
+        }
+        _downGestureController = null;
+      });
+    }
+    super.dispose();
+  }
+
+  void _handleDragStart(DragStartDetails details) {
+    assert(mounted);
+    assert(_downGestureController == null);
+    _downGestureController = widget.onStartPopGesture();
+  }
+
+  void _handleDragUpdate(DragUpdateDetails details) {
+    assert(mounted);
+    assert(_downGestureController != null);
+    _downGestureController!.dragUpdate(
+      // Devide by size of the sheet. The gap between the top of the sheet and
+      // top of the screen is 0.08.
+      details.primaryDelta! / (context.size!.height - (context.size!.height * 0.08)),
+    );
+  }
+
+  void _handleDragEnd(DragEndDetails details) {
+    assert(mounted);
+    assert(_downGestureController != null);
+    _downGestureController!.dragEnd(details.velocity.pixelsPerSecond.dy / context.size!.height);
+    _downGestureController = null;
+  }
+
+  void _handleDragCancel() {
+    assert(mounted);
+    // This can be called even if start is not called, paired with the "down" event
+    // that we don't consider here.
+    _downGestureController?.dragEnd(0.0);
+    _downGestureController = null;
+  }
+
+  void _handlePointerDown(PointerDownEvent event) {
+    if (widget.enabledCallback()) {
+      _recognizer.addPointer(event);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.passthrough,
+      children: <Widget>[
+        widget.child,
+        Listener(onPointerDown: _handlePointerDown, behavior: HitTestBehavior.translucent),
+      ],
+    );
+  }
+}
+
+class _CupertinoDownGestureController<T> {
+  /// Creates a controller for an iOS-style back gesture.
+  _CupertinoDownGestureController({
+    required this.navigator,
+    required this.controller,
+    required this.getIsActive,
+    required this.getIsCurrent,
+  }) {
+    navigator.didStartUserGesture();
+  }
+
+  final AnimationController controller;
+  final NavigatorState navigator;
+  final ValueGetter<bool> getIsActive;
+  final ValueGetter<bool> getIsCurrent;
+
+  /// The drag gesture has changed by [delta]. The total range of the drag
+  /// should be 0.0 to 1.0.
+  void dragUpdate(double delta) {
+    controller.value -= delta;
+  }
+
+  /// The drag gesture has ended with a vertical motion of [velocity] as a
+  /// fraction of screen height per second.
+  void dragEnd(double velocity) {
+    // Fling in the appropriate direction.
+    //
+    // This curve has been determined through rigorously eyeballing native iOS
+    // animations on a simulator running iOS 18.0.
+    const Curve animationCurve = Curves.easeOut;
+    final bool isCurrent = getIsCurrent();
+    final bool animateForward;
+
+    if (!isCurrent) {
+      // If the page has already been navigated away from, then the animation
+      // direction depends on whether or not it's still in the navigation stack,
+      // regardless of velocity or drag position. For example, if a route is
+      // being slowly dragged back by just a few pixels, but then a programmatic
+      // pop occurs, the route should still be animated off the screen.
+      // See https://github.com/flutter/flutter/issues/141268.
+      animateForward = getIsActive();
+    } else if (velocity.abs() >= _kMinFlingVelocity) {
+      // If the user releases the page before mid screen with sufficient velocity,
+      // or after mid screen, we should animate the page out. Otherwise, the page
+      // should be animated back in.
+      animateForward = velocity <= 0;
+    } else {
+      // If the drag is dropped with low velocity, the sheet will pop if the
+      // the drag goes a little past the halfway point on the screen. This is
+      // eyeballed on a simulator running iOS 18.0.
+      animateForward = controller.value > 0.52;
+    }
+
+    if (animateForward) {
+      controller.animateTo(
+        1.0,
+        duration: _kDroppedSheetDragAnimationDuration,
+        curve: animationCurve,
+      );
+    } else {
+      if (isCurrent) {
+        // This route is destined to pop at this point. Reuse navigator's pop.
+        final NavigatorState rootNavigator = Navigator.of(navigator.context, rootNavigator: true);
+        rootNavigator.pop();
+      }
+
+      if (controller.isAnimating) {
+        controller.animateBack(
+          0.0,
+          duration: _kDroppedSheetDragAnimationDuration,
+          curve: animationCurve,
+        );
+      }
+    }
+
+    if (controller.isAnimating) {
+      // Keep the userGestureInProgress in true state so we don't change the
+      // curve of the page transition mid-flight since CupertinoPageTransition
+      // depends on userGestureInProgress.
+      late AnimationStatusListener animationStatusCallback;
+      animationStatusCallback = (AnimationStatus status) {
+        navigator.didStopUserGesture();
+        controller.removeStatusListener(animationStatusCallback);
+      };
+      controller.addStatusListener(animationStatusCallback);
+    } else {
+      navigator.didStopUserGesture();
+    }
   }
 }

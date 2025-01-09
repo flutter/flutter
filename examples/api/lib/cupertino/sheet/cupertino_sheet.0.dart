@@ -67,6 +67,7 @@ class _SheetScaffold extends StatelessWidget {
               },
               child: const Text('Go Back'),
             ),
+            const Text('You can also close this sheet by dragging downwards'),
             CupertinoButton.filled(
               onPressed: () {
                 Navigator.of(context).push(
