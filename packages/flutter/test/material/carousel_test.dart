@@ -1418,7 +1418,7 @@ void main() {
   testWidgets('CarouselView does not crash if layout constraints are zero', (
     WidgetTester tester,
   ) async {
-    Widget buildCarouselApp({double width = 0, double height = 0}) {
+    Widget buildCarouselApp({required Axis scrollDirection, double width = 0, double height = 0}) {
       return MaterialApp(
         home: Scaffold(
           body: SizedBox(
@@ -1433,13 +1433,22 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildCarouselApp(width: 100));
+    await tester.pumpWidget(buildCarouselApp(scrollDirection: Axis.horizontal, width: 100));
     expect(tester.takeException(), isNull);
 
-    await tester.pumpWidget(buildCarouselApp(height: 100));
+    await tester.pumpWidget(buildCarouselApp(scrollDirection: Axis.horizontal, height: 100));
     expect(tester.takeException(), isNull);
 
-    await tester.pumpWidget(buildCarouselApp());
+    await tester.pumpWidget(buildCarouselApp(scrollDirection: Axis.horizontal));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(buildCarouselApp(scrollDirection: Axis.vertical, width: 100));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(buildCarouselApp(scrollDirection: Axis.vertical, height: 100));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(buildCarouselApp(scrollDirection: Axis.vertical));
     expect(tester.takeException(), isNull);
   });
 }
