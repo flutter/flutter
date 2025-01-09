@@ -11,11 +11,8 @@ plugins {
     `java-gradle-plugin`
     groovy
     `kotlin-dsl`
-<<<<<<< HEAD
-    kotlin("jvm") version "1.9.20"
-=======
-    kotlin("plugin.serialization") version "1.8.0"
->>>>>>> 1376a55838 (fighting with native_plugin_loader. Converted to Kotlin but failing to compile)
+    id("org.jetbrains.kotlin.jvm") version "1.9.20"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.0"
 }
 
 group = "dev.flutter.plugin"
