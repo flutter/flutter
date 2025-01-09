@@ -14,6 +14,7 @@ import com.example.android_engine_test.extensions.NativeDriverSupportPlugin
 import com.example.android_engine_test.fixtures.BlueOrangeGradientPlatformViewFactory
 import com.example.android_engine_test.fixtures.ChangingColorButtonPlatformViewFactory
 import com.example.android_engine_test.fixtures.SmileyFaceTexturePlugin
+import com.example.android_engine_test.fixtures.OtherFaceTexturePlugin
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 
@@ -25,6 +26,7 @@ class MainActivity : FlutterActivity() {
             .plugins
             .apply {
                 add(SmileyFaceTexturePlugin())
+                add(OtherFaceTexturePlugin())
                 add(NativeDriverSupportPlugin())
             }
 
