@@ -7,10 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
-import 'src/allow_list_devices.dart';
+import '../src/allow_list_devices.dart';
 
 void main() async {
-  ensureAndroidOrIosDevice();
+  ensureAndroidDevice();
   enableFlutterDriverExtension(commands: <CommandExtension>[nativeDriverCommands]);
 
   // Run on full screen.
@@ -25,7 +25,12 @@ final class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: AndroidView(viewType: 'blue_orange_gradient_platform_view'),
+      // It is assumed:
+      // - The Android SDK version is >= 23 (the test driver checks)
+      // - This view DOES use a SurfaceView
+      //
+      // See https://github.com/flutter/flutter/blob/master/docs/platforms/android/Android-Platform-Views.md.
+      home: AndroidView(viewType: 'blue_orange_gradient_surface_view_platform_view'),
     );
   }
 }

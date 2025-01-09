@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.android_engine_test.extensions.NativeDriverSupportPlugin
 import com.example.android_engine_test.fixtures.BlueOrangeGradientPlatformViewFactory
+import com.example.android_engine_test.fixtures.BlueOrangeGradientSurfaceViewPlatformViewFactory
 import com.example.android_engine_test.fixtures.ChangingColorButtonPlatformViewFactory
 import com.example.android_engine_test.fixtures.SmileyFaceTexturePlugin
 import io.flutter.embedding.android.FlutterActivity
@@ -33,6 +34,7 @@ class MainActivity : FlutterActivity() {
             .registry
             .apply {
                 registerViewFactory("blue_orange_gradient_platform_view", BlueOrangeGradientPlatformViewFactory())
+                registerViewFactory("blue_orange_gradient_surface_view_platform_view", BlueOrangeGradientSurfaceViewPlatformViewFactory())
                 registerViewFactory("changing_color_button_platform_view", ChangingColorButtonPlatformViewFactory())
             }
     }
