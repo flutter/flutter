@@ -164,7 +164,7 @@
         "templates/module/android/host_app_common/app.tmpl/src/main/res/mipmap-hdpi/ic_launcher.png",
         "templates/module/android/host_app_common/app.tmpl/src/main/res/values/styles.xml",
         "templates/module/android/host_app_editable/settings.gradle.copy.tmpl",
-        "templates/module/android/host_app_ephemeral/settings.gradle.copy.tmpl",
+        "templates/module/android/host_app_ephemeral/settings.gradle.tmpl",
         "templates/module/android/library/Flutter.tmpl/build.gradle.tmpl",
         "templates/module/android/library/Flutter.tmpl/flutter.iml.copy.tmpl",
         "templates/module/android/library/Flutter.tmpl/src/main/AndroidManifest.xml.tmpl",
