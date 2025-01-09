@@ -28,6 +28,7 @@ ResidentDevtoolsHandler createDefaultHandler(
 ) {
   return FlutterResidentDevtoolsHandler(launcher, runner, logger, chromiumLauncher);
 }
+
 /// Helper class to manage the life-cycle of devtools and its interaction with
 /// the resident runner.
 abstract class ResidentDevtoolsHandler {
@@ -191,12 +192,10 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 
       _chromiumLauncher.launch(devToolsUrl).catchError((Object e) {
         _logger.printError('Failed to launch web browser: $e');
-        throw ProcessException(
-          'Chrome',
-          <String>[devToolsUrl],
-          'Failed to launch browser for dev tools',
-        );
-			}).ignore();
+        throw ProcessException('Chrome', <String>[
+          devToolsUrl,
+        ], 'Failed to launch browser for dev tools');
+      }).ignore();
     }
     launchedInBrowser = true;
   }
