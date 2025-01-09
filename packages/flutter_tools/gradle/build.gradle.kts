@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -8,7 +11,11 @@ plugins {
     `java-gradle-plugin`
     groovy
     `kotlin-dsl`
+<<<<<<< HEAD
     kotlin("jvm") version "1.9.20"
+=======
+    kotlin("plugin.serialization") version "1.8.0"
+>>>>>>> 1376a55838 (fighting with native_plugin_loader. Converted to Kotlin but failing to compile)
 }
 
 group = "dev.flutter.plugin"
@@ -68,4 +75,5 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("com.android.tools.build:gradle:8.7.3")
     testImplementation("org.mockito:mockito-core:4.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
 }
