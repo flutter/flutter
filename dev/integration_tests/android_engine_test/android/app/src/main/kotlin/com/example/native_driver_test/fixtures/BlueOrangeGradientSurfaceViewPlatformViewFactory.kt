@@ -30,7 +30,8 @@ class BlueOrangeGradientSurfaceViewPlatformViewFactory : PlatformViewFactory(nul
 private class GradientSurfaceViewPlatformView(
     context: Context
 ) : SurfaceView(context),
-    PlatformView, SurfaceHolder.Callback {
+    PlatformView,
+    SurfaceHolder.Callback {
     val paint = Paint()
 
     init {
