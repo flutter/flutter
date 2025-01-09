@@ -13,8 +13,7 @@ class BaseApplicationNameHandler {
         @JvmStatic fun setBaseName(project: Project) {
             // Only set the base application name for apps, skip otherwise (LibraryExtension, DynamicFeatureExtension).
             val androidComponentsExtension: ApplicationExtension =
-                project.extensions.findByType(ApplicationExtension::class.java)
-                    ?: return
+                project.extensions.findByType(ApplicationExtension::class.java) ?: return
 
             // Setting to android.app.Application is the same as omitting the attribute.
             var baseApplicationName: String = DEFAULT_BASE_APPLICATION_NAME

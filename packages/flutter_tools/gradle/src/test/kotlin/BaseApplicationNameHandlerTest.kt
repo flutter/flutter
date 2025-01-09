@@ -24,7 +24,7 @@ class BaseApplicationNameHandlerTest {
         Mockito.`when`(mockProject.property(GRADLE_BASE_APPLICATION_NAME_PROPERTY)).thenReturn(baseApplicationNamePassedByFlutterTool)
 
         Mockito.`when`(mockProject.extensions).thenReturn(mockExtensionContainer)
-        Mockito.`when`(mockExtensionContainer.getByType(ApplicationExtension::class.java)).thenReturn(mockAndroidComponentsExtension)
+        Mockito.`when`(mockExtensionContainer.findByType(ApplicationExtension::class.java)).thenReturn(mockAndroidComponentsExtension)
         Mockito.`when`(mockAndroidComponentsExtension.defaultConfig).thenReturn(mockDefaultConfig)
         Mockito.`when`(mockDefaultConfig.manifestPlaceholders).thenReturn(mockManifestPlaceholders)
 
@@ -47,7 +47,7 @@ class BaseApplicationNameHandlerTest {
         Mockito.`when`(mockProject.hasProperty(GRADLE_BASE_APPLICATION_NAME_PROPERTY)).thenReturn(false)
 
         Mockito.`when`(mockProject.extensions).thenReturn(mockExtensionContainer)
-        Mockito.`when`(mockExtensionContainer.getByType(ApplicationExtension::class.java)).thenReturn(mockAndroidComponentsExtension)
+        Mockito.`when`(mockExtensionContainer.findByType(ApplicationExtension::class.java)).thenReturn(mockAndroidComponentsExtension)
         Mockito.`when`(mockAndroidComponentsExtension.defaultConfig).thenReturn(mockDefaultConfig)
         Mockito.`when`(mockDefaultConfig.manifestPlaceholders).thenReturn(mockManifestPlaceholders)
 
