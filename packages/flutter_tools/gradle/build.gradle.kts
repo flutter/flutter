@@ -72,5 +72,5 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("com.android.tools.build:gradle:8.7.3")
     testImplementation("org.mockito:mockito-core:4.8.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 }
