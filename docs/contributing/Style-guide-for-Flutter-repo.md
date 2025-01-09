@@ -1545,7 +1545,7 @@ documenting why exactly you are importing particularly libraries and
 can be used more generally when importing large libraries for very
 narrow purposes.
 
-By convention, `dart:ui` is imported using `import 'dart:ui' show ...;` for 
+By convention, `dart:ui` is imported using `import 'dart:ui' show ...;` for
 common APIs (this isn't usually necessary because a lower
 level will have done it for you), and as `import 'dart:ui' as ui show ...;`
 for low-level APIs, in both cases listing all the identifiers being imported.
