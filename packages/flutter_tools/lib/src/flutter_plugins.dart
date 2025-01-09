@@ -363,13 +363,24 @@ List<Map<String, Object?>> _extractPlatformMaps(Iterable<Plugin> plugins, String
   ];
 }
 
-Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins, {required bool releaseMode}) async {
-  Iterable<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(plugins, AndroidPlugin.kConfigKey);
+Future<void> _writeAndroidPluginRegistrant(
+  FlutterProject project,
+  List<Plugin> plugins, {
+  required bool releaseMode,
+}) async {
+  Iterable<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
+    plugins,
+    AndroidPlugin.kConfigKey,
+  );
+  // TODO(camsim99): Remove dev dependencies from release builds for all platforms. See https://github.com/flutter/flutter/issues/161348.
   if (releaseMode) {
     methodChannelPlugins = methodChannelPlugins.where((Plugin p) => !p.isDevDependency);
   }
 
-  final List<Map<String, Object?>> androidPlugins = _extractPlatformMaps(methodChannelPlugins, AndroidPlugin.kConfigKey);
+  final List<Map<String, Object?>> androidPlugins = _extractPlatformMaps(
+    methodChannelPlugins,
+    AndroidPlugin.kConfigKey,
+  );
 
   final Map<String, Object> templateContext = <String, Object>{
     'methodChannelPlugins': androidPlugins,
@@ -1221,7 +1232,11 @@ Future<void> injectPlugins(
   );
 
   if (androidPlatform) {
-    await _writeAndroidPluginRegistrant(project, pluginsByPlatform[AndroidPlugin.kConfigKey]!, releaseMode: releaseMode ?? false);
+    await _writeAndroidPluginRegistrant(
+      project,
+      pluginsByPlatform[AndroidPlugin.kConfigKey]!,
+      releaseMode: releaseMode ?? false,
+    );
   }
   if (iosPlatform) {
     await _writeIOSPluginRegistrant(project, pluginsByPlatform[IOSPlugin.kConfigKey]!);
