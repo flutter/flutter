@@ -323,11 +323,13 @@ class FlutterPlugin implements Plugin<Project> {
         String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
                 "gradle", "flutter_proguard_rules.pro")
         project.android.buildTypes {
-            // Add profile build type.
-            profile {
-                initWith(debug)
-                if (it.hasProperty("matchingFallbacks")) {
-                    matchingFallbacks = ["debug", "release"]
+            // Add profile build type if it does not already exist.
+            if (!project.android.buildTypes.hasProperty('profile')) {
+                profile {
+                    initWith(debug)
+                    if (it.hasProperty("matchingFallbacks")) {
+                        matchingFallbacks = ["debug", "release"]
+                    }
                 }
             }
             // TODO(garyq): Shrinking is only false for multi apk split aot builds, where shrinking is not allowed yet.
@@ -737,12 +739,14 @@ class FlutterPlugin implements Plugin<Project> {
         // compile/target/min sdk values.
         pluginProject.extensions.create("flutter", FlutterExtension)
 
-        project.android.buildTypes {
-            // Add profile build type since it may not already exist.
-            profile {
-                initWith(debug)
-                if (it.hasProperty("matchingFallbacks")) {
-                    matchingFallbacks = ["debug", "release"]
+        // Add profile build type if it does not already exist.
+        if (!project.android.buildTypes.hasProperty('profile')) {
+            project.android.buildTypes {
+                profile {
+                    initWith(debug)
+                    if (it.hasProperty("matchingFallbacks")) {
+                        matchingFallbacks = ["debug", "release"]
+                    }
                 }
             }
         }
@@ -752,10 +756,8 @@ class FlutterPlugin implements Plugin<Project> {
         project.dependencies {
             debugApi(pluginProject)
             profileApi(pluginProject)
-        }
 
-        if (!pluginObject.dev_dependency) {
-            project.dependencies {
+            if (!pluginObject.dev_dependency) {
                 releaseApi(pluginProject)
             }
         }
