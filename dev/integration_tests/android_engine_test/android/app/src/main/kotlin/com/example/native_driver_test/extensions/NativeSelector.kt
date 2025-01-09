@@ -14,7 +14,7 @@ import androidx.core.view.children
 sealed class NativeSelector {
     // / Finds a native view by a {@code contentDescription} attribute.
     data class ByContentDescription(
-        val contentDescription: String
+        val contentDescription: String,
     ) : NativeSelector() {
         override fun find(root: View): View? {
             val found = ArrayList<View>()
@@ -30,7 +30,7 @@ sealed class NativeSelector {
 
         private fun findRecursive(
             parent: View,
-            found: ArrayList<View>
+            found: ArrayList<View>,
         ) {
             if (contentDescription == parent.contentDescription) {
                 found.add(parent)
@@ -45,7 +45,7 @@ sealed class NativeSelector {
 
     // / Finds a native view by a {@code id} attribute.
     data class ByViewId(
-        val id: Int
+        val id: Int,
     ) : NativeSelector() {
         override fun find(root: View): View? = root.findViewById(id)
     }

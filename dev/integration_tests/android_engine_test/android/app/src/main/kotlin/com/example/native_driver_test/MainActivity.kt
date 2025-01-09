@@ -13,8 +13,8 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.example.android_engine_test.extensions.NativeDriverSupportPlugin
 import com.example.android_engine_test.fixtures.BlueOrangeGradientPlatformViewFactory
 import com.example.android_engine_test.fixtures.ChangingColorButtonPlatformViewFactory
-import com.example.android_engine_test.fixtures.SmileyFaceTexturePlugin
 import com.example.android_engine_test.fixtures.OtherFaceTexturePlugin
+import com.example.android_engine_test.fixtures.SmileyFaceTexturePlugin
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 

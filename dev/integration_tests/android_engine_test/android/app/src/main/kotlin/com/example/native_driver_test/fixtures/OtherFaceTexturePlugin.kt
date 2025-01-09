@@ -10,7 +10,6 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.os.Build
 import android.view.Surface
-import io.flutter.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
 import io.flutter.plugin.common.MethodCall
@@ -32,7 +31,7 @@ class OtherFaceTexturePlugin :
         this.binding = binding
         channel = MethodChannel(binding.binaryMessenger, "other_face_texture")
         channel.setMethodCallHandler(this)
-        surfaceTextureEntry = binding.textureRegistry.createSurfaceTexture();
+        surfaceTextureEntry = binding.textureRegistry.createSurfaceTexture()
     }
 
     override fun onDetachedFromEngine(binding: FlutterPluginBinding) {
@@ -42,7 +41,7 @@ class OtherFaceTexturePlugin :
 
     override fun onMethodCall(
         call: MethodCall,
-        result: MethodChannel.Result
+        result: MethodChannel.Result,
     ) {
         if (call.method == "initTexture") {
             val height = call.argument<Int>("height") ?: 1
@@ -57,7 +56,7 @@ class OtherFaceTexturePlugin :
     private fun updateTexture(): Long {
         var surface = this.surface
         if (surface == null) {
-            surface = Surface(surfaceTextureEntry.surfaceTexture());
+            surface = Surface(surfaceTextureEntry.surfaceTexture())
             this.surface = surface
         }
         drawOnSurface(surface!!)
