@@ -120,11 +120,11 @@ void SemanticsUpdateBuilder::updateNode(
   node.customAccessibilityActions = std::vector<int32_t>(
       localContextActions.data(),
       localContextActions.data() + localContextActions.num_elements());
-  nodes_[id] = node;
-
   node.headingLevel = headingLevel;
   node.linkUrl = std::move(linkUrl);
   node.role = static_cast<SemanticsRole>(role);
+
+  nodes_[id] = node;
 }
 
 void SemanticsUpdateBuilder::updateCustomAction(int id,

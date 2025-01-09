@@ -100,8 +100,9 @@ TEST_F(SemanticsUpdateBuilderTest, CanHandleSemanticsRole) {
     SemanticsUpdate* update = reinterpret_cast<SemanticsUpdate*>(peer);
     SemanticsNodeUpdates nodes = update->takeNodes();
     ASSERT_EQ(nodes.size(), (size_t)1);
-    //          auto node = nodes.find(0)->second;
+    auto node = nodes.find(0)->second;
     // Should match the updateNode in ui_test.dart.
+    ASSERT_EQ(node.role, SemanticsRole::kTab);
     message_latch->Signal();
   };
 
@@ -120,7 +121,7 @@ TEST_F(SemanticsUpdateBuilderTest, CanHandleSemanticsRole) {
 
   ASSERT_TRUE(shell->IsSetup());
   auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("sendSemanticsUpdate");
+  configuration.SetEntrypoint("sendSemanticsUpdateWithRole");
 
   shell->RunEngine(std::move(configuration), [](auto result) {
     ASSERT_EQ(result, Engine::RunStatus::Success);
