@@ -19,12 +19,12 @@ class ChangingColorButtonPlatformViewFactory : PlatformViewFactory(null) {
     override fun create(
         context: Context,
         viewId: Int,
-        args: Any?,
+        args: Any?
     ): PlatformView = ChangingColorButtonPlatformView(context)
 }
 
 private class ChangingColorButtonPlatformView(
-    context: Context,
+    context: Context
 ) : View(context),
     PlatformView {
     private val paintRed =
@@ -44,7 +44,7 @@ private class ChangingColorButtonPlatformView(
         layoutParams =
             ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
             )
 
         contentDescription = "Change color"

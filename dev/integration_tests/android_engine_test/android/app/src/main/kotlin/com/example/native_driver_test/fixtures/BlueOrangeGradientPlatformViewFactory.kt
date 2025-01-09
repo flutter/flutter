@@ -21,12 +21,12 @@ class BlueOrangeGradientPlatformViewFactory : PlatformViewFactory(null) {
     override fun create(
         context: Context,
         viewId: Int,
-        args: Any?,
+        args: Any?
     ): PlatformView = GradientPlatformView(context)
 }
 
 private class GradientPlatformView(
-    context: Context,
+    context: Context
 ) : View(context),
     PlatformView {
     val paint = Paint()
@@ -35,7 +35,7 @@ private class GradientPlatformView(
         layoutParams =
             ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
             )
     }
 
@@ -52,7 +52,7 @@ private class GradientPlatformView(
         w: Int,
         h: Int,
         oldw: Int,
-        oldh: Int,
+        oldh: Int
     ) {
         paint.shader =
             LinearGradient(
@@ -62,10 +62,10 @@ private class GradientPlatformView(
                 h.toFloat(),
                 intArrayOf(
                     Color.rgb(0x41, 0x69, 0xE1),
-                    Color.rgb(0xFF, 0xA5, 0x00),
+                    Color.rgb(0xFF, 0xA5, 0x00)
                 ),
                 null,
-                Shader.TileMode.CLAMP,
+                Shader.TileMode.CLAMP
             )
         super.onSizeChanged(w, h, oldw, oldh)
     }
