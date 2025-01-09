@@ -751,8 +751,8 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        // Add plugin dependency. We only want to add dependency for dev dependencies in
-        // non-release builds.
+        // Add plugin dependency to the app project. We only want to add dependency
+        // for dev dependencies in non-release builds.
         project.dependencies {
             debugApi(pluginProject)
             profileApi(pluginProject)
