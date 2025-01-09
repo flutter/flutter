@@ -1432,6 +1432,44 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/160679
+  testWidgets('CarouselView does not crash if layout constraints are zero', (
+    WidgetTester tester,
+  ) async {
+    Widget buildCarouselApp({required Axis scrollDirection, double width = 0, double height = 0}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: width,
+            height: height,
+            child: CarouselView(
+              itemExtent: 100,
+              children: <Widget>[Container(color: Colors.red, width: 100, height: 100)],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildCarouselApp(scrollDirection: Axis.horizontal, width: 100));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(buildCarouselApp(scrollDirection: Axis.horizontal, height: 100));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(buildCarouselApp(scrollDirection: Axis.horizontal));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(buildCarouselApp(scrollDirection: Axis.vertical, width: 100));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(buildCarouselApp(scrollDirection: Axis.vertical, height: 100));
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(buildCarouselApp(scrollDirection: Axis.vertical));
+    expect(tester.takeException(), isNull);
+  });
 }
 
 Finder getItem(int index) {

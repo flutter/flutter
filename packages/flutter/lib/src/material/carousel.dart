@@ -500,7 +500,7 @@ class _CarouselViewState extends State<CarouselView> {
               axisDirection: axisDirection,
               offset: position,
               clipBehavior: Clip.antiAlias,
-              slivers: <Widget>[_buildSliverCarousel(theme)],
+              slivers: <Widget>[if (mainAxisExtent > 0.0) _buildSliverCarousel(theme)],
             );
           },
         );
