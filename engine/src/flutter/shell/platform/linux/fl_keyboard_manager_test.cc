@@ -196,17 +196,12 @@ static void flush_channel_messages() {
 // the first unexpected redispatch.
 int redispatch_events_and_clear(FlKeyboardManager* manager, GPtrArray* events) {
   guint event_count = events->len;
-  int first_error = -1;
   for (guint event_id = 0; event_id < event_count; event_id += 1) {
     FlKeyEvent* event = FL_KEY_EVENT(g_ptr_array_index(events, event_id));
-    bool handled = fl_keyboard_manager_handle_event(manager, event);
-    EXPECT_FALSE(handled);
-    if (handled) {
-      first_error = first_error == -1 ? event_id : first_error;
-    }
+    EXPECT_FALSE(fl_keyboard_manager_handle_event(manager, event));
   }
   g_ptr_array_set_size(events, 0);
-  return first_error < 0 ? event_count : -first_error;
+  return event_count;
 }
 
 // Make sure that the keyboard can be disposed without crashes when there are
