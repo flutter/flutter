@@ -10,7 +10,7 @@ import kotlin.test.Test
 
 class BaseApplicationNameHandlerTest {
     @Test
-    fun setBaseName_respectsFlutterToolProperty() {
+    fun `setBaseName respects Flutter tool property`() {
         val baseApplicationNamePassedByFlutterTool = "toolSetBaseApplicationName"
 
         // Set up mocks.
@@ -36,7 +36,7 @@ class BaseApplicationNameHandlerTest {
     }
 
     @Test
-    fun setBaseName_defaultsToCorrectValue() {
+    fun `setBaseName defaults to correct value`() {
         // Set up mocks.
         val mockProject: Project = Mockito.mock(Project::class.java)
         val mockAndroidComponentsExtension: ApplicationExtension = Mockito.mock(ApplicationExtension::class.java)
