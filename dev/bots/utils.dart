@@ -69,7 +69,6 @@ final bool runningInDartHHHBot =
 const String kShardKey = 'SHARD';
 const String kSubshardKey = 'SUBSHARD';
 const String kTestHarnessShardName = 'test_harness_tests';
-const String CIRRUS_TASK_NAME = 'CIRRUS_TASK_NAME';
 
 /// Environment variables to override the local engine when running `pub test`,
 /// if such flags are provided to `test.dart`.
@@ -711,12 +710,7 @@ Future<void> _runFromList(
   int positionInTaskName,
 ) async {
   try {
-    String? item = Platform.environment[key];
-    if (item == null && Platform.environment.containsKey(CIRRUS_TASK_NAME)) {
-      final List<String> parts = Platform.environment[CIRRUS_TASK_NAME]!.split('-');
-      assert(positionInTaskName < parts.length);
-      item = parts[positionInTaskName];
-    }
+    final String? item = Platform.environment[key];
     if (item == null) {
       for (final String currentItem in items.keys) {
         printProgress('$bold$key=$currentItem$reset');
