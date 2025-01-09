@@ -1733,36 +1733,42 @@ void main() {
   });
 
   testWidgets('ExpansionTile uses childrenPaddingColor Color', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Material(
-        child: ExpansionTile(
-          initiallyExpanded: true,
-          childrenPaddingColor: Colors.amber,
-          tilePadding: EdgeInsets.zero,
-          title: Text('Title'),
-          children: <Widget>[Text('Tile 1')],
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            initiallyExpanded: true,
+            childrenPaddingColor: Colors.amber,
+            tilePadding: EdgeInsets.zero,
+            title: Text('Title'),
+            children: <Widget>[Text('Tile 1')],
+          ),
         ),
       ),
-    ));
+    );
 
     final Color childrenPaddingColor = tester.widget<ColoredBox>(find.byType(ColoredBox)).color;
     expect(childrenPaddingColor, Colors.amber);
   });
 
-  testWidgets('ExpansionTile without using childrenPaddingColor Color', (WidgetTester tester) async {
+  testWidgets('ExpansionTile without using childrenPaddingColor Color', (
+    WidgetTester tester,
+  ) async {
     const Color backgroundColor = Colors.red;
-    await tester.pumpWidget(const MaterialApp(
-      home: Material(
-        child: Center(
-          child: ExpansionTile(
-            initiallyExpanded: true,
-            backgroundColor: backgroundColor,
-            title: TestText('Expanded Tile'),
-            children: <Widget>[Text('Tile 1')],
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: ExpansionTile(
+              initiallyExpanded: true,
+              backgroundColor: backgroundColor,
+              title: TestText('Expanded Tile'),
+              children: <Widget>[Text('Tile 1')],
+            ),
           ),
         ),
       ),
-    ));
+    );
     final Color childrenPaddingColor = tester.widget<ColoredBox>(find.byType(ColoredBox)).color;
     expect(childrenPaddingColor, backgroundColor);
   });

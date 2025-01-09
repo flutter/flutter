@@ -780,14 +780,12 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           ),
           ClipRect(
             child: Align(
-              alignment: widget.expandedAlignment ??
+              alignment:
+                  widget.expandedAlignment ??
                   expansionTileTheme.expandedAlignment ??
                   Alignment.center,
               heightFactor: _heightFactor.value,
-              child: ColoredBox(
-                color: childrenPaddingColor,
-                child: child,
-              ),
+              child: ColoredBox(color: childrenPaddingColor, child: child),
             ),
           ),
         ],
