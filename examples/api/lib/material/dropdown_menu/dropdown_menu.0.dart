@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 // Flutter code sample for [DropdownMenu]s. The first dropdown menu
@@ -15,8 +14,6 @@ void main() {
   runApp(const DropdownMenuExample());
 }
 
-typedef ColorEntry = DropdownMenuEntry<ColorLabel>;
-
 // DropdownMenuEntry labels and values for the first dropdown menu.
 enum ColorLabel {
   blue('Blue', Colors.blue),
@@ -28,43 +25,21 @@ enum ColorLabel {
   const ColorLabel(this.label, this.color);
   final String label;
   final Color color;
-
-  static final List<ColorEntry> entries = UnmodifiableListView<ColorEntry>(
-    values.map<ColorEntry>(
-      (ColorLabel color) => ColorEntry(
-        value: color,
-        label: color.label,
-        enabled: color.label != 'Grey',
-        style: MenuItemButton.styleFrom(
-          foregroundColor: color.color,
-        ),
-      ),
-    ),
-  );
 }
-
-typedef IconEntry  = DropdownMenuEntry<IconLabel>;
 
 // DropdownMenuEntry labels and values for the second dropdown menu.
 enum IconLabel {
   smile('Smile', Icons.sentiment_satisfied_outlined),
-  cloud('Cloud', Icons.cloud_outlined),
+  cloud(
+    'Cloud',
+    Icons.cloud_outlined,
+  ),
   brush('Brush', Icons.brush_outlined),
   heart('Heart', Icons.favorite);
 
   const IconLabel(this.label, this.icon);
   final String label;
   final IconData icon;
-
-  static final List<IconEntry> entries = UnmodifiableListView<IconEntry>(
-    values.map<IconEntry>(
-      (IconLabel icon) => IconEntry(
-        value: icon,
-        label: icon.label,
-        leadingIcon: Icon(icon.icon),
-      ),
-    ),
-  );
 }
 
 class DropdownMenuExample extends StatefulWidget {
@@ -110,7 +85,18 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                           selectedColor = color;
                         });
                       },
-                      dropdownMenuEntries: ColorLabel.entries,
+                      dropdownMenuEntries: ColorLabel.values.map<DropdownMenuEntry<ColorLabel>>(
+                        (ColorLabel color) {
+                          return DropdownMenuEntry<ColorLabel>(
+                            value: color,
+                            label: color.label,
+                            enabled: color.label != 'Grey',
+                            style: MenuItemButton.styleFrom(
+                              foregroundColor: color.color,
+                            ),
+                          );
+                        }
+                      ).toList(),
                     ),
                     const SizedBox(width: 24),
                     DropdownMenu<IconLabel>(
@@ -128,7 +114,15 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                           selectedIcon = icon;
                         });
                       },
-                      dropdownMenuEntries: IconLabel.entries,
+                      dropdownMenuEntries: IconLabel.values.map<DropdownMenuEntry<IconLabel>>(
+                        (IconLabel icon) {
+                          return DropdownMenuEntry<IconLabel>(
+                            value: icon,
+                            label: icon.label,
+                            leadingIcon: Icon(icon.icon),
+                          );
+                        },
+                      ).toList(),
                     ),
                   ],
                 ),
