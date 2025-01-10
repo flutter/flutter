@@ -1,7 +1,7 @@
 package com.flutter.gradle
 import com.android.build.api.dsl.ApplicationDefaultConfig
 import com.android.build.api.dsl.ApplicationExtension
-import com.flutter.gradle.BaseApplicationNameHandler.Companion.GRADLE_BASE_APPLICATION_NAME_PROPERTY
+import com.flutter.gradle.BaseApplicationNameHandler.GRADLE_BASE_APPLICATION_NAME_PROPERTY
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionContainer
 import org.junit.jupiter.api.Assertions.assertEquals
