@@ -32,6 +32,10 @@ ResidentDevtoolsHandler createDefaultHandler(
 /// Helper class to manage the life-cycle of devtools and its interaction with
 /// the resident runner.
 abstract class ResidentDevtoolsHandler {
+  /// The current devtools server, or null if one is not running.
+  DevToolsServerAddress? get activeDevToolsServer;
+
+  /// The Dart Tooling Daemon (DTD) URI for the DTD instance being hosted by
   /// DevTools server.
   ///
   /// This will be null if the DevTools server is not served through Flutter
