@@ -16,7 +16,16 @@ part of '../native_driver.dart';
 ///
 /// When this is `true`, [matchesGoldenFile] will always report a successful
 /// match, because the bytes being tested implicitly become the new golden.
-bool autoUpdateGoldenFiles = false;
+///
+/// Defaults to `true` if the environment variable `UPDATE_GOLDENS` is either
+/// `true` or `1` (case insensitive).
+bool autoUpdateGoldenFiles = () {
+  final String? updateGoldens = io.Platform.environment['UPDATE_GOLDENS'];
+  return switch (updateGoldens?.toLowerCase()) {
+    '1' || 'true' => true,
+    _ => false,
+  };
+}();
 
 /// Compares pixels against those of a golden image file.
 ///

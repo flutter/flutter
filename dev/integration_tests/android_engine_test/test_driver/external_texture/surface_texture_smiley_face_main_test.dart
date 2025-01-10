@@ -7,11 +7,11 @@ import 'package:android_driver_extensions/skia_gold.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 
-import '_luci_skia_gold_prelude.dart';
+import '../_luci_skia_gold_prelude.dart';
 
 void main() async {
   // To test the golden file generation locally, comment out the following line.
-  // autoUpdateGoldenFiles = true;
+  autoUpdateGoldenFiles = true;
 
   const String appName = 'com.example.android_engine_test';
   late final FlutterDriver flutterDriver;
@@ -48,7 +48,7 @@ void main() async {
 
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('external_texture_smiley_face.android.png'),
+      matchesGoldenFile('external_texture_other_face.android.png'),
     );
   }, timeout: Timeout.none);
 }
