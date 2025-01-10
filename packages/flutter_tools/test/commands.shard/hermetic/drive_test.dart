@@ -10,6 +10,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -488,6 +489,43 @@ void main() {
   );
 
   testUsingContext(
+    'environment variables propogate to the driver script',
+    () async {
+      platform = FakePlatform(environment: <String, String>{'FOO': 'BAR'});
+
+      fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+
+      final Uri vmServiceUri = Uri.parse('http://localhost:1234');
+      fakeDeviceManager.addAttachedDevice(SuccessfulDeviceWithVmService(vmServiceUri));
+
+      final EnvironmentCapturingFakeFlutterDriverService driverService =
+          EnvironmentCapturingFakeFlutterDriverService();
+
+      final DriveCommand command = DriveCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        signals: signals,
+        flutterDriverFactory: CannedFakeFlutterDriverFactory(driverService),
+      );
+      await createTestCommandRunner(command).run(<String>['drive']);
+
+      expect(driverService.capturedStartTestEnvironment, <String, String>{'FOO': 'BAR'});
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.empty()),
+      FileSystem: () => fileSystem,
+      Platform: () => platform,
+      Pub: FakePub.new,
+      ProcessManager: () => FakeProcessManager.empty(),
+      DeviceManager: () => fakeDeviceManager,
+    },
+  );
+
+  testUsingContext(
     'Port publication not disabled for wireless device',
     () async {
       final DriveCommand command = DriveCommand(
@@ -655,6 +693,58 @@ class ScreenshotDevice extends Fake implements Device {
   }
 }
 
+class SuccessfulDeviceWithVmService extends Fake implements Device {
+  SuccessfulDeviceWithVmService(this._vmServiceUri);
+  final Uri _vmServiceUri;
+
+  @override
+  final String name = 'FakeDevice';
+
+  @override
+  final Category category = Category.mobile;
+
+  @override
+  final String id = 'fake_device';
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android;
+
+  @override
+  bool supportsScreenshot = true;
+
+  @override
+  bool get isConnected => true;
+
+  @override
+  Future<LaunchResult> startApp(
+    ApplicationPackage? package, {
+    String? mainPath,
+    String? route,
+    DebuggingOptions? debuggingOptions,
+    Map<String, dynamic>? platformArgs,
+    bool prebuiltApplication = false,
+    bool usesTerminalUi = true,
+    bool ipv6 = false,
+    String? userIdentifier,
+  }) async => LaunchResult.succeeded(vmServiceUri: _vmServiceUri);
+
+  @override
+  DartDevelopmentService get dds => FakeDartDevelopmentService(_vmServiceUri);
+}
+
+class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
+  FakeDartDevelopmentService(this.uri);
+
+  @override
+  final Uri uri;
+
+  @override
+  Future<void> startDartDevelopmentServiceFromDebuggingOptions(
+    Uri vmServiceUri, {
+    required DebuggingOptions debuggingOptions,
+  }) async {}
+}
+
 class FakePub extends Fake implements Pub {
   @override
   Future<void> get({
@@ -744,6 +834,52 @@ class FailingFakeDriverService extends Fake implements DriverService {
     List<String>? browserDimension,
     String? profileMemory,
   }) async => 1;
+}
+
+class CannedFakeFlutterDriverFactory extends Fake implements FlutterDriverFactory {
+  CannedFakeFlutterDriverFactory(this._driverService);
+  final DriverService _driverService;
+
+  @override
+  DriverService createDriverService(bool web) => _driverService;
+}
+
+class EnvironmentCapturingFakeFlutterDriverService extends Fake implements DriverService {
+  Map<String, String>? capturedStartTestEnvironment;
+
+  @override
+  Future<void> start(
+    BuildInfo buildInfo,
+    Device device,
+    DebuggingOptions debuggingOptions, {
+    File? applicationBinary,
+    String? route,
+    String? userIdentifier,
+    String? mainPath,
+    Map<String, Object> platformArgs = const <String, Object>{},
+  }) async {}
+
+  @override
+  Future<void> stop({File? writeSkslOnExit, String? userIdentifier}) async {}
+
+  @override
+  Future<int> startTest(
+    String testFile,
+    List<String> arguments,
+    Map<String, String> environment,
+    PackageConfig packageConfig, {
+    bool? headless,
+    String? chromeBinary,
+    String? browserName,
+    bool? androidEmulator,
+    int? driverPort,
+    List<String> webBrowserFlags = const <String>[],
+    List<String>? browserDimension,
+    String? profileMemory,
+  }) async {
+    capturedStartTestEnvironment = environment;
+    return 0;
+  }
 }
 
 class FakeProcessSignal extends Fake implements io.ProcessSignal {
