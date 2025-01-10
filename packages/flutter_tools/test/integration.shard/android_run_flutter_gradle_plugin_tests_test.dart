@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
-import 'bash_entrypoint_test.dart';
 import 'test_utils.dart';
 
 void main() {
@@ -27,4 +26,9 @@ void main() {
     final RunResult runResult = await globals.processUtils.run(<String>[gradleExecutable, 'test'], workingDirectory: flutterGradlePluginDirectory.path);
     expect(runResult.exitCode, 0);
   });
+}
+
+void makeExecutable(File file) {
+  final ProcessResult result = processManager.runSync(<String>['chmod', '+x', file.path]);
+  expect(result, const ProcessResultMatcher());
 }
