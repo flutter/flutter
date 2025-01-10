@@ -3908,7 +3908,7 @@ void main() {
                             SemanticsFlag.isSelected,
                             SemanticsFlag.isFocusable,
                           ],
-                          label: 'TAB #0\nTab 1 of 2',
+                          label: 'TAB #0\n${kIsWeb ? '' : 'Tab 1 of 2'}',
                           rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                           role: SemanticsRole.tab,
                           transform: Matrix4.translationValues(0.0, 276.0, 0.0),
@@ -3920,7 +3920,7 @@ void main() {
                             SemanticsFlag.isFocusable,
                           ],
                           actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                          label: 'TAB #1\nTab 2 of 2',
+                          label: 'TAB #1\n${kIsWeb ? '' : 'Tab 2 of 2'}',
                           rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                           role: SemanticsRole.tab,
                           transform: Matrix4.translationValues(116.0, 276.0, 0.0),
@@ -3962,8 +3962,8 @@ void main() {
       ),
     );
 
-    const String tab0title = 'This is a very wide tab #0\nTab 1 of 20';
-    const String tab10title = 'This is a very wide tab #10\nTab 11 of 20';
+    const String tab0title = 'This is a very wide tab #0\n${kIsWeb ? '' : 'Tab 1 of 20'}';
+    const String tab10title = 'This is a very wide tab #10\n${kIsWeb ? '' : 'Tab 11 of 20'}';
 
     const List<SemanticsFlag> hiddenFlags = <SemanticsFlag>[
       SemanticsFlag.isHidden,
@@ -4185,7 +4185,7 @@ void main() {
                             SemanticsFlag.isFocusable,
                           ],
                           actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                          label: 'Semantics override 0\nTab 1 of 2',
+                          label: 'Semantics override 0\n${kIsWeb ? '' : 'Tab 1 of 2'}',
                           rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                           role: SemanticsRole.tab,
                           transform: Matrix4.translationValues(0.0, 276.0, 0.0),
@@ -4197,7 +4197,7 @@ void main() {
                             SemanticsFlag.isFocusable,
                           ],
                           actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                          label: 'Semantics override 1\nTab 2 of 2',
+                          label: 'Semantics override 1\n${kIsWeb ? '' : 'Tab 2 of 2'}',
                           rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                           role: SemanticsRole.tab,
                           transform: Matrix4.translationValues(116.0, 276.0, 0.0),
@@ -6003,7 +6003,7 @@ void main() {
           role: SemanticsRole.tabBar,
           children: <TestSemantics>[
             TestSemantics(
-              label: 'TAB1\nTab 1 of 2',
+              label: 'TAB1\n${kIsWeb ? '' : 'Tab 1 of 2'}',
               flags: <SemanticsFlag>[
                 SemanticsFlag.isFocusable,
                 SemanticsFlag.isSelected,
@@ -6015,7 +6015,7 @@ void main() {
               role: SemanticsRole.tab,
             ),
             TestSemantics(
-              label: 'TAB2\nTab 2 of 2',
+              label: 'TAB2\n${kIsWeb ? '' : 'Tab 2 of 2'}',
               flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.hasSelectedState],
               id: 3,
               rect: TestSemantics.fullScreen,
