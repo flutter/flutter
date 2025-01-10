@@ -58,11 +58,6 @@ const Color kCupertinoModalBarrierColor = CupertinoDynamicColor.withBrightness(
 // The duration of the transition used when a modal popup is shown.
 const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
 
-/// The duration of the page transition used for [CupertinoPageRoute].
-///
-/// A relatively rigorous eyeball estimation.
-const Duration kCupertinoPageTransitionDuration = Duration(milliseconds: 500);
-
 // Offset from offscreen to the right to fully on screen.
 final Animatable<Offset> _kRightMiddleTween = Tween<Offset>(
   begin: const Offset(1.0, 0.0),
@@ -153,8 +148,13 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
     super.didChangePrevious(previousRoute);
   }
 
+  /// The duration of the page transition.
+  ///
+  /// A relatively rigorous eyeball estimation.
+  static const Duration kTransitionDuration = Duration(milliseconds: 500);
+
   @override
-  Duration get transitionDuration => kCupertinoPageTransitionDuration;
+  Duration get transitionDuration => kTransitionDuration;
 
   @override
   Color? get barrierColor => fullscreenDialog ? null : _kCupertinoPageTransitionBarrierColor;
