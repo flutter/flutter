@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'interface_level.dart';
 import 'route.dart';
+import 'theme.dart';
 
 // Tween for animating a Cupertino sheet onto the screen.
 //
@@ -230,7 +231,7 @@ class CupertinoSheetTransition extends StatefulWidget {
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
 
-    final bool isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
+    final bool isDarkMode = CupertinoTheme.brightnessOf(context) == Brightness.dark;
     final Color overlayColor = isDarkMode ? const Color(0xFFc8c8c8) : const Color(0xFF000000);
 
     final Widget? contrastedChild =
