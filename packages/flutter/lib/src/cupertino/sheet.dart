@@ -634,10 +634,11 @@ class _CupertinoDownGestureDetectorState<T> extends State<_CupertinoDownGestureD
   void _handleDragUpdate(DragUpdateDetails details) {
     assert(mounted);
     assert(_downGestureController != null);
+    final double topGapRatio = (_kBottomUpTween as Tween<Offset>).end?.dy ?? 0.08;
     _downGestureController!.dragUpdate(
       // Devide by size of the sheet. The gap between the top of the sheet and
       // top of the screen is 0.08.
-      details.primaryDelta! / (context.size!.height - (context.size!.height * 0.08)),
+      details.primaryDelta! / (context.size!.height - (context.size!.height * topGapRatio)),
     );
   }
 
