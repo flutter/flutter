@@ -15,12 +15,13 @@ import '../../src/context.dart';
 
 void main() {
   testUsingContext('Flutter Gradle Plugin unit tests pass', () async {
+    final String gradleExecutable = Platform.isWindows ? r'.\gradlew.bat' : './gradlew';
     final Directory flutterGradlePluginDirectory = fileSystem.directory(getFlutterRoot())
         .childDirectory('packages')
         .childDirectory('flutter_tools')
         .childDirectory('gradle');
     gradleUtils?.injectGradleWrapperIfNeeded(flutterGradlePluginDirectory);
-    final RunResult runResult = await processUtils.run(['./gradlew', 'test'], workingDirectory: flutterGradlePluginDirectory.path);
+    final RunResult runResult = await processUtils.run([gradleExecutable, 'test'], workingDirectory: flutterGradlePluginDirectory.path);
     expect(runResult.exitCode, 0);
   });
 }
