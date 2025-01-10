@@ -14,7 +14,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
-  testUsingContext('AdbLogReader ignores spam from SurfaceSyncer', () async {
+  testUsingContext('Flutter Gradle Plugin unit tests pass', () async {
     final Directory flutterGradlePluginDirectory = fileSystem.directory(getFlutterRoot())
         .childDirectory('packages')
         .childDirectory('flutter_tools')
