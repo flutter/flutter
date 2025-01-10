@@ -50,7 +50,11 @@ final class NativeDriverCommandExtension implements CommandExtension {
       return const _MethodChannelResult(<String, Object?>{});
     }
     if (result is! Map<Object?, Object?>) {
-      throw ArgumentError.value(result, 'result', 'Expected a Map<String, Object?>, got ${result.runtimeType}');
+      throw ArgumentError.value(
+        result,
+        'result',
+        'Expected a Map<String, Object?>, got ${result.runtimeType}',
+      );
     }
     return _MethodChannelResult(result.cast());
   }
