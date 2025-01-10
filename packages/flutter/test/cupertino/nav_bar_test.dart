@@ -2407,9 +2407,6 @@ void main() {
                   largeTitle: const Text('Large title'),
                   middle: const Text('middle'),
                   bottomMode: NavigationBarBottomMode.always,
-                  searchField: CupertinoSearchTextField(
-                    placeholder: isFocused ? 'Enter search text' : 'Search',
-                  ),
                 ),
                 SliverFillRemaining(
                   child: Container(color: isFocused ? focusedColor : unfocusedColor),
@@ -2438,7 +2435,7 @@ void main() {
 
     // Search field and 'Cancel' button should be visible.
     expect(isFocused, true);
-    expect(find.widgetWithText(CupertinoSearchTextField, 'Enter search text'), findsOneWidget);
+    expect(find.widgetWithText(CupertinoSearchTextField, 'Search'), findsOneWidget);
     expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
     expect(
       find.byWidgetPredicate((Widget widget) {

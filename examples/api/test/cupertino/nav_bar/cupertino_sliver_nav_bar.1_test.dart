@@ -110,7 +110,7 @@ void main() {
     await tester.tap(find.byType(CupertinoSearchTextField), warnIfMissed: false);
     await tester.pumpAndSettle();
 
-    expect(find.widgetWithText(CupertinoSearchTextField, 'Enter search text'), findsOneWidget);
+    expect(find.widgetWithText(CupertinoSearchTextField, 'Search'), findsOneWidget);
     expect(find.text('Tap on the search field to open the search view'), findsNothing);
     expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
     expect(find.text('This is a search view'), findsOneWidget);

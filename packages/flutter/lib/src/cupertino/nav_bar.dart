@@ -917,7 +917,6 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
          'A bottomMode was provided without a corresponding bottom.',
        ),
        onSearchActiveChanged = null,
-       searchField = null,
        _searchable = false;
 
   /// Create a navigation bar for scrolling lists with [bottom] set to a
@@ -946,7 +945,6 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.stretch = false,
     this.bottomMode = NavigationBarBottomMode.automatic,
     this.onSearchActiveChanged,
-    this.searchField = const CupertinoSearchTextField(),
   }) : assert(
          automaticallyImplyTitle || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
@@ -1084,11 +1082,6 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// True if the [CupertinoSliverNavigationBar.search] constructor is used.
   final bool _searchable;
 
-  /// The search field used in [CupertinoSliverNavigationBar.search].
-  ///
-  /// Defaults to a [CupertinoSearchTextField].
-  final Widget? searchField;
-
   @override
   State<CupertinoSliverNavigationBar> createState() => _CupertinoSliverNavigationBarState();
 }
@@ -1105,6 +1098,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   late AnimationController _fadeController;
   late Animation<double> persistentHeightAnimation;
   late Animation<double> largeTitleHeightAnimation;
+  final Widget searchField = const CupertinoSearchTextField();
   bool expanded = true;
 
   @override
@@ -1125,7 +1119,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     );
     largeTitleHeightAnimation = largeTitleHeightTween.animate(_animationController);
     if (widget._searchable) {
-      preferredSizeSearchField = _NavigationBarSearchField(searchField: widget.searchField!);
+      preferredSizeSearchField = _NavigationBarSearchField(searchField: searchField);
     }
   }
 
@@ -1274,7 +1268,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                             fadeController: _fadeController,
                             animationController: _animationController,
                             animation: persistentHeightAnimation,
-                            searchField: widget.searchField,
+                            searchField: searchField,
                             onSearchFieldTap: _onSearchFieldTap,
                           ))
                       : widget.bottom) ??
