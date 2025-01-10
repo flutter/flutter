@@ -7,12 +7,12 @@ import 'dart:io';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/process.dart';
-import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
-import '../../integration.shard/bash_entrypoint_test.dart';
-import '../../integration.shard/test_utils.dart';
-import '../../src/common.dart';
-import '../../src/context.dart';
+import 'bash_entrypoint_test.dart';
+import 'test_utils.dart';
+import '../src/common.dart';
+import '../src/context.dart';
 
 void main() {
   testUsingContext('Flutter Gradle Plugin unit tests pass', () async {
@@ -22,9 +22,9 @@ void main() {
         .childDirectory('packages')
         .childDirectory('flutter_tools')
         .childDirectory('gradle');
-    gradleUtils?.injectGradleWrapperIfNeeded(flutterGradlePluginDirectory);
+    globals.gradleUtils?.injectGradleWrapperIfNeeded(flutterGradlePluginDirectory);
     makeExecutable(flutterGradlePluginDirectory.childFile(gradleFileName));
-    final RunResult runResult = await processUtils.run(<String>[gradleExecutable, 'test'], workingDirectory: flutterGradlePluginDirectory.path);
+    final RunResult runResult = await globals.processUtils.run(<String>[gradleExecutable, 'test'], workingDirectory: flutterGradlePluginDirectory.path);
     expect(runResult.exitCode, 0);
   });
 }
