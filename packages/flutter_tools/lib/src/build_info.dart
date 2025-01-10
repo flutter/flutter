@@ -396,6 +396,8 @@ class AndroidBuildInfo {
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
 
+  bool get containsX86Target => targetArchs.contains(AndroidArch.x86);
+
   /// Whether to bootstrap an empty application.
   final bool fastStart;
 }
@@ -788,9 +790,23 @@ AndroidArch getAndroidArchForName(String platform) {
   };
 }
 
+DarwinArch getCurrentDarwinArch() {
+  return switch (globals.os.hostPlatform) {
+    HostPlatform.darwin_arm64 => DarwinArch.arm64,
+    HostPlatform.darwin_x64 => DarwinArch.x86_64,
+    final HostPlatform unsupported => throw Exception(
+      'Unsupported Darwin host platform "$unsupported"',
+    ),
+  };
+}
+
 HostPlatform getCurrentHostPlatform() {
   if (globals.platform.isMacOS) {
-    return HostPlatform.darwin_x64;
+    return switch (getCurrentDarwinArch()) {
+      DarwinArch.arm64 => HostPlatform.darwin_arm64,
+      DarwinArch.x86_64 => HostPlatform.darwin_x64,
+      DarwinArch.armv7 => throw Exception('Unsupported macOS arch "amv7"'),
+    };
   }
   if (globals.platform.isLinux) {
     // support x64 and arm64 architecture.

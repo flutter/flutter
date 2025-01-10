@@ -62,7 +62,7 @@ abstract class Project {
     writeFile(fileSystem.path.join(dir.path, 'web', 'index.html'), indexHtml);
     writeFile(fileSystem.path.join(dir.path, 'web', 'flutter.js'), '');
     writeFile(fileSystem.path.join(dir.path, 'web', 'flutter_service_worker.js'), '');
-    writePackages(dir.path);
+    writePackageConfig(dir.path);
     await getPackages(dir.path);
   }
 

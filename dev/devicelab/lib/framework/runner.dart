@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service_io.dart';
 
 import 'cocoon.dart';
 import 'devices.dart';
@@ -187,7 +188,6 @@ Future<TaskResult> runTask(
   final Process runner = await startProcess(
     dartBin,
     <String>[
-      '--disable-dart-dev',
       '--enable-vm-service=0', // zero causes the system to choose a free port
       '--no-pause-isolates-on-exit',
       if (localEngine != null) '-DlocalEngine=$localEngine',
@@ -238,11 +238,19 @@ Future<TaskResult> runTask(
     print('[$taskName] Connected to VM server.');
     isolateParams = isolateParams == null ? <String, String>{} : Map<String, String>.of(isolateParams);
     isolateParams['runProcessCleanup'] = terminateStrayDartProcesses.toString();
-    final Map<String, dynamic> taskResultJson = (await result.vmService.callServiceExtension(
+    final VmService service = result.vmService;
+    final String isolateId = result.isolate.id!;
+    final Map<String, dynamic> taskResultJson = (await service.callServiceExtension(
       'ext.cocoonRunTask',
       args: isolateParams,
-      isolateId: result.isolate.id,
+      isolateId: isolateId,
     )).json!;
+    // Notify the task process that the task result has been received and it
+    // can proceed to shutdown.
+    await _acknowledgeTaskResultReceived(
+      service: service,
+      isolateId: isolateId,
+    );
     final TaskResult taskResult = TaskResult.fromJson(taskResultJson);
     final int exitCode = await runner.exitCode;
     print('[$taskName] Process terminated with exit code $exitCode.');
@@ -271,9 +279,6 @@ Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
 
   while (true) {
     try {
-      // Make sure VM server is up by successfully opening and closing a socket.
-      await (await WebSocket.connect(url)).close();
-
       // Look up the isolate.
       final VmService client = await vmServiceConnectUri(url);
       VM vm = await client.getVM();
@@ -282,8 +287,9 @@ Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
         vm = await client.getVM();
       }
       final IsolateRef isolate = vm.isolates!.first;
+      // Sanity check to ensure we're talking with the main isolate.
       final Response response = await client.callServiceExtension('ext.cocoonRunnerReady', isolateId: isolate.id);
-      if (response.json!['response'] != 'ready') {
+      if (response.json!['result'] != 'success') {
         throw 'not ready yet';
       }
       return ConnectionResult(client, isolate);
@@ -302,37 +308,23 @@ Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
   }
 }
 
+Future<void> _acknowledgeTaskResultReceived({
+    required VmService service,
+    required String isolateId,
+  }) async {
+  try {
+    await service.callServiceExtension(
+      'ext.cocoonTaskResultReceived',
+      isolateId: isolateId,
+    );
+  } on RPCError {
+    // The target VM may shutdown before the response is received.
+  }
+}
+
 class ConnectionResult {
   ConnectionResult(this.vmService, this.isolate);
 
   final VmService vmService;
   final IsolateRef isolate;
-}
-
-/// The cocoon client sends an invalid VM service response, we need to intercept it.
-Future<VmService> vmServiceConnectUri(String wsUri, {Log? log}) async {
-  final WebSocket socket = await WebSocket.connect(wsUri);
-  final StreamController<dynamic> controller = StreamController<dynamic>();
-  final Completer<dynamic> streamClosedCompleter = Completer<dynamic>();
-  socket.listen(
-    (dynamic data) {
-      final Map<String, dynamic> rawData = json.decode(data as String) as Map<String, dynamic> ;
-      if (rawData['result'] == 'ready') {
-        rawData['result'] = <String, dynamic>{'response': 'ready'};
-        controller.add(json.encode(rawData));
-      } else {
-        controller.add(data);
-      }
-    },
-    onError: (Object err, StackTrace stackTrace) => controller.addError(err, stackTrace),
-    onDone: () => streamClosedCompleter.complete(),
-  );
-
-  return VmService(
-    controller.stream,
-    (String message) => socket.add(message),
-    log: log,
-    disposeHandler: () => socket.close(),
-    streamClosed: streamClosedCompleter.future,
-  );
 }

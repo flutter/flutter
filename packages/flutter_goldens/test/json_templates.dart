@@ -17,7 +17,7 @@ String authTemplate({
 }
 
 /// Json response template for Skia Gold image request:
-/// https://flutter-gold.skia.org/img/images/[imageHash].png
+/// https://flutter-gold.skia.org/img/images/{imageHash}.png
 List<List<int>> imageResponseTemplate() {
   return <List<int>>[
     <int>[

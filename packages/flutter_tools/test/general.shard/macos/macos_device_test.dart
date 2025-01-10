@@ -173,7 +173,6 @@ void main() {
     );
 
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
     fileSystem.directory('macos').createSync();
     final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
@@ -217,7 +216,6 @@ void main() {
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
     final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
     expect(device.isSupportedForProject(flutterProject), false);

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'color_scheme.dart';
+/// @docImport 'drawer.dart';
+/// @docImport 'list_tile.dart';
+/// @docImport 'popup_menu.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'divider_theme.dart';

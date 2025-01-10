@@ -42,7 +42,7 @@ void main() {
       end: const BoxDecoration(color: Color(0xFFFFFF00)),
     );
     final BoxDecoration result = tween.lerp(0.25) as BoxDecoration;
-    expect(result.color, const Color(0xFF3FFF00));
+    expect(result.color, isSameColorAs(const Color(0xFF3FFF00)));
   });
 
   testWidgets('EdgeInsetsTween control test', (WidgetTester tester) async {

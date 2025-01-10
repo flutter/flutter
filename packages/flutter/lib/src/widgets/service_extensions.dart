@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:developer';
+/// @docImport 'package:flutter/foundation.dart';
+/// @docImport 'package:flutter/rendering.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'binding.dart';
+/// @docImport 'debug.dart';
+/// @docImport 'framework.dart';
+/// @docImport 'widget_inspector.dart';
+library;
+
 /// Service extension constants for the widgets library.
 ///
 /// These constants will be used when registering service extensions in the

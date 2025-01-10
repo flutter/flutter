@@ -9,6 +9,7 @@
 /// @docImport 'package:flutter/scheduler.dart';
 /// @docImport 'package:flutter/services.dart';
 /// @docImport 'package:flutter/widgets.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
 library;
 
 import 'dart:async';

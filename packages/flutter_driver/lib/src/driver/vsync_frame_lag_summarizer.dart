@@ -14,7 +14,7 @@ const Set<String> kVsyncTimelineEventNames = <String>{
   _kPlatformVsyncEvent,
 };
 
-/// Summarizes [TimelineEvents]s corresponding to [kVsyncTimelineEventNames] events.
+/// Summarizes [TimelineEvent]s corresponding to [kVsyncTimelineEventNames] events.
 ///
 /// `VsyncFrameLag` is the time between when a platform vsync event is received to
 /// when the frame starts getting processed by the Flutter Engine. This delay is

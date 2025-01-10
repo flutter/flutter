@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'app.dart';
+/// @docImport 'app_bar.dart';
+/// @docImport 'app_bar_theme.dart';
+/// @docImport 'color_scheme.dart';
+/// @docImport 'data_table.dart';
+/// @docImport 'expand_icon.dart';
+/// @docImport 'theme.dart';
+/// @docImport 'theme_data.dart';
+/// @docImport 'typography.dart';
+library;
+
 import 'package:flutter/painting.dart';
 
 /// Defines a single color as well a color swatch with ten shades of the color.

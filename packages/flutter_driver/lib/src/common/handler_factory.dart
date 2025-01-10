@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter_driver/flutter_driver.dart';
+library;
+
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
@@ -91,15 +94,10 @@ mixin CreateFinderFactory {
   }
 
   Finder _createPageBackFinder() {
-    return find.byElementPredicate((Element element) {
-      final Widget widget = element.widget;
-      if (widget is Tooltip) {
-        return widget.message == 'Back';
-      }
-      if (widget is CupertinoNavigationBarBackButton) {
-        return true;
-      }
-      return false;
+    return find.byElementPredicate((Element element) => switch (element.widget) {
+      Tooltip(message: 'Back') => true,
+      CupertinoNavigationBarBackButton() => true,
+      _ => false,
     }, description: 'Material or Cupertino back button');
   }
 

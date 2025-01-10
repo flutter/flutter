@@ -29,7 +29,7 @@ Future<List<double>> runBuildBenchmark() async {
     await tester.pump(const Duration(seconds: 1)); // Complete startup animation
     await tester.tapAt(const Offset(20.0, 40.0)); // Open drawer
     await tester.pump(); // Start drawer animation
-    await tester.pump(const Duration(seconds: 1)); // Complete drawer animation
+    await tester.pumpAndSettle(const Duration(seconds: 1)); // Complete drawer animation
 
     final Element appState = tester.element(find.byType(stocks.StocksApp));
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
@@ -55,7 +55,7 @@ Future<List<double>> runBuildBenchmark() async {
   return values;
 }
 
-Future<void> main() async {
+Future<void> execute() async {
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   printer.addResultStatistics(
     description: 'Stock build',
@@ -64,4 +64,11 @@ Future<void> main() async {
     name: 'stock_build_iteration',
   );
   printer.printToStdout();
+}
+
+//
+//  Note that the benchmark is normally run by benchmark_collection.dart.
+//
+Future<void> main() async {
+  return execute();
 }

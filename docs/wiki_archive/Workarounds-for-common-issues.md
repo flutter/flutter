@@ -103,7 +103,7 @@ To fix this package delete `///Users/someuser/.pub-cache/hosted/pub.dartlang.org
 
 In a network where the Internet can only be reached through a proxy and Flutter commands fail.
 
-#### Symtoms
+#### Symptoms
 
 // TODO
 

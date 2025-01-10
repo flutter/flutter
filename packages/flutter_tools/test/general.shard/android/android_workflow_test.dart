@@ -152,6 +152,29 @@ void main() {
     expect(licenseStatus, LicensesAccepted.unknown);
   });
 
+  testWithoutContext('licensesAccepted returns LicensesAccepted.unknown if cannot write to sdkmanager', () async {
+    sdk.sdkManagerPath = '/foo/bar/sdkmanager';
+    processManager.addCommand(
+      FakeCommand(
+        command: <String>[sdk.sdkManagerPath!, '--licenses'],
+        stdin: IOSink(ClosedStdinController()),
+      ),
+    );
+    final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
+      java: FakeJava(),
+      androidSdk: sdk,
+      processManager: processManager,
+      platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+      stdio: stdio,
+      logger: BufferLogger.test(),
+      userMessages: UserMessages(),
+    );
+    final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
+
+    expect(licenseStatus, LicensesAccepted.unknown);
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
   testWithoutContext('licensesAccepted handles garbage/no output', () async {
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     processManager.addCommand(const FakeCommand(

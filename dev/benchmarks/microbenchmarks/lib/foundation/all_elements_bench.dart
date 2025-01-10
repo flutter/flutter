@@ -11,8 +11,7 @@ import '../common.dart';
 
 const int _kNumIters = 10000;
 
-Future<void> main() async {
-  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
+Future<void> execute() async {
   runApp(MaterialApp(
     home: Scaffold(
       body: GridView.count(

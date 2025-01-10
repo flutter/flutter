@@ -8,6 +8,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -2414,6 +2415,50 @@ void main() {
 
     expect(find.byType(CupertinoPickerDefaultSelectionOverlay), findsExactly(4));
   });
+
+  testWidgets('CupertinoDatePicker accommodates widest text using table codepoints', (WidgetTester tester) async {
+    // |---------|
+    // |  0x2002 | // EN SPACE - 1/2 Advance
+    // |  0x2005 | // FOUR-PER-EM SPACE - 1/4 Advance
+    // |---------|
+    final List<String> testWords = <String>[
+      '\u2002' * 10, // Output: 10 * 1/2 = 5
+      '\u2005' * 20, // Output: 20 * 1/4 = 5
+    ];
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoDatePicker(
+            onDateTimeChanged: (DateTime date) {},
+            initialDateTime: DateTime(2018, 9, 15),
+          ),
+        ),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.byType(CupertinoDatePicker));
+
+    const TextStyle textStyle = TextStyle(
+      fontSize: 21,
+      letterSpacing: 0.4,
+      fontWeight: FontWeight.normal,
+      color: CupertinoColors.label,
+    );
+
+    final List<double> widths = testWords.map((String word) => getColumnWidth(word, textStyle, context)).toList();
+
+    final double largestWidth = widths.reduce(math.max);
+
+    final double testWidth = CupertinoDatePicker.getColumnWidth(
+      texts: testWords,
+      context: context,
+      textStyle: textStyle,
+    );
+
+    expect(testWidth, equals(largestWidth));
+    expect(widths.indexOf(largestWidth), equals(1));
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 }
 
 Widget _buildPicker({
@@ -2436,5 +2481,15 @@ Widget _buildPicker({
         );
       }),
     ),
+  );
+}
+
+double getColumnWidth(String text, TextStyle textStyle, BuildContext context) {
+  return TextPainter.computeMaxIntrinsicWidth(
+    text: TextSpan(
+      text: text,
+      style: textStyle,
+    ),
+    textDirection: Directionality.of(context),
   );
 }

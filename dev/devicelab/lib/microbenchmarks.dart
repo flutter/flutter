@@ -9,11 +9,16 @@ import 'dart:io';
 /// Reads through the print commands from [process] waiting for the magic phase
 /// that contains microbenchmarks results as defined in
 /// `dev/benchmarks/microbenchmarks/lib/common.dart`.
+///
+/// If you are using this outside of microbenchmarks, ensure you print a single
+/// line with `╡ ••• Done ••• ╞` to signal the end of collection.
 Future<Map<String, double>> readJsonResults(Process process) {
   // IMPORTANT: keep these values in sync with dev/benchmarks/microbenchmarks/lib/common.dart
   const String jsonStart = '================ RESULTS ================';
   const String jsonEnd = '================ FORMATTED ==============';
   const String jsonPrefix = ':::JSON:::';
+  const String testComplete = '╡ ••• Done ••• ╞';
+
   bool jsonStarted = false;
   final StringBuffer jsonBuf = StringBuffer();
   final Completer<Map<String, double>> completer = Completer<Map<String, double>>();
@@ -25,8 +30,9 @@ Future<Map<String, double>> readJsonResults(Process process) {
         stderr.writeln('[STDERR] $line');
       });
 
+  final List<String> collectedJson = <String>[];
+
   bool processWasKilledIntentionally = false;
-  bool resultsHaveBeenParsed = false;
   final StreamSubscription<String> stdoutSub = process.stdout
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
@@ -38,46 +44,38 @@ Future<Map<String, double>> readJsonResults(Process process) {
       return;
     }
 
-    if (jsonStarted && line.contains(jsonEnd)) {
-      final String jsonOutput = jsonBuf.toString();
-
-      // If we end up here and have already parsed the results, it suggests that
-      // we have received output from another test because our `flutter run`
-      // process did not terminate correctly.
-      // https://github.com/flutter/flutter/issues/19096#issuecomment-402756549
-      if (resultsHaveBeenParsed) {
-        throw 'Additional JSON was received after results has already been '
-              'processed. This suggests the `flutter run` process may have lived '
-              'past the end of our test and collected additional output from the '
-              'next test.\n\n'
-              'The JSON below contains all collected output, including both from '
-              'the original test and what followed.\n\n'
-              '$jsonOutput';
-      }
-
-      jsonStarted = false;
+    if (line.contains(testComplete)) {
       processWasKilledIntentionally = true;
-      resultsHaveBeenParsed = true;
       // Sending a SIGINT/SIGTERM to the process here isn't reliable because [process] is
       // the shell (flutter is a shell script) and doesn't pass the signal on.
       // Sending a `q` is an instruction to quit using the console runner.
       // See https://github.com/flutter/flutter/issues/19208
       process.stdin.write('q');
       await process.stdin.flush();
-
       // Give the process a couple of seconds to exit and run shutdown hooks
       // before sending kill signal.
       // TODO(fujino): https://github.com/flutter/flutter/issues/134566
       await Future<void>.delayed(const Duration(seconds: 2));
-
       // Also send a kill signal in case the `q` above didn't work.
       process.kill(ProcessSignal.sigint);
       try {
-        completer.complete(Map<String, double>.from(json.decode(jsonOutput) as Map<String, dynamic>));
+        final Map<String, double> results =
+            Map<String, double>.from(<String, dynamic>{
+          for (final String data in collectedJson)
+            ...json.decode(data) as Map<String, dynamic>
+        });
+        completer.complete(results);
       } catch (ex) {
-        completer.completeError('Decoding JSON failed ($ex). JSON string was: $jsonOutput');
+        completer.completeError(
+            'Decoding JSON failed ($ex). JSON strings where: $collectedJson');
       }
       return;
+    }
+
+    if (jsonStarted && line.contains(jsonEnd)) {
+      collectedJson.add(jsonBuf.toString().trim());
+      jsonBuf.clear();
+      jsonStarted = false;
     }
 
     if (jsonStarted && line.contains(jsonPrefix)) {

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:io';
+library;
+
 import 'dart:async' show FutureOr;
 import 'dart:io' as io show HttpClient, OSError, SocketException;
 
@@ -35,7 +38,7 @@ bool _isMainBranch(String? branch) {
 
 /// Main method that can be used in a `flutter_test_config.dart` file to set
 /// [goldenFileComparator] to an instance of [FlutterGoldenFileComparator] that
-/// works for the current test. _Which_ FlutterGoldenFileComparator is
+/// works for the current test. _Which_ [FlutterGoldenFileComparator] is
 /// instantiated is based on the current testing environment.
 ///
 /// When set, the `namePrefix` is prepended to the names of all gold images.
@@ -45,6 +48,12 @@ bool _isMainBranch(String? branch) {
 /// tests using `flutter test`. This should not be called when running a test
 /// using `flutter run`, as in that environment, the [goldenFileComparator] is a
 /// [TrivialComparator].
+///
+/// An [HttpClient] is created when this method is called. That client is used
+/// to communicate with the Skia Gold servers. Any [HttpOverrides] set in this
+/// will affect whether this is effective or not. For example, if the current
+/// override provides a mock client that always fails, then all calls to gold
+/// comparison functions will fail.
 Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePrefix}) async {
   assert(
     goldenFileComparator is LocalFileComparator,
@@ -190,7 +199,7 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   ///
   /// The optional [suffix] argument is used by the
   /// [FlutterPostSubmitFileComparator] and the [FlutterPreSubmitFileComparator].
-  /// These [FlutterGoldenFileComparators] randomize their base directories to
+  /// These [FlutterGoldenFileComparator]s randomize their base directories to
   /// maintain thread safety while using the `goldctl` tool.
   @protected
   @visibleForTesting
@@ -201,27 +210,15 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
     required FileSystem fs,
   }) {
     final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
-    Directory comparisonRoot;
+    final Directory comparisonRoot = switch (suffix) {
+      null => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'skia_goldens')),
+      _    => fs.systemTempDirectory.createTempSync(suffix),
+    };
 
-    if (suffix != null) {
-      comparisonRoot = fs.systemTempDirectory.createTempSync(suffix);
-    } else {
-      comparisonRoot = flutterRoot.childDirectory(
-        fs.path.join(
-          'bin',
-          'cache',
-          'pkg',
-          'skia_goldens',
-        )
-      );
-    }
-
-    final Directory testDirectory = fs.directory(defaultComparator.basedir);
-    final String testDirectoryRelativePath = fs.path.relative(
-      testDirectory.path,
-      from: flutterRoot.path,
+    final String testPath = fs.directory(defaultComparator.basedir).path;
+    return comparisonRoot.childDirectory(
+      fs.path.relative(testPath, from: flutterRoot.path),
     );
-    return comparisonRoot.childDirectory(testDirectoryRelativePath);
   }
 
   /// Returns the golden [File] identified by the given [Uri].
@@ -535,7 +532,7 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
 ///
 /// This comparator utilizes the [SkiaGoldClient] to request baseline images for
 /// the given device under test for comparison. This comparator is initialized
-/// when conditions for all other [FlutterGoldenFileComparators] have not been
+/// when conditions for all other [FlutterGoldenFileComparator]s have not been
 /// met, see the `isForEnvironment` method for each one listed below.
 ///
 /// The [FlutterLocalFileComparator] is intended to run on local machines and

@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'layout_builder.dart';
+/// @docImport 'page_storage.dart';
+/// @docImport 'page_view.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -271,7 +276,7 @@ class SingleChildScrollView extends StatelessWidget {
         child: scrollable,
         onNotification: (ScrollUpdateNotification notification) {
           final FocusScopeNode currentScope = FocusScope.of(context);
-          if (notification.dragDetails != null && !currentScope.hasPrimaryFocus && currentScope.hasFocus) {
+          if (!currentScope.hasPrimaryFocus && currentScope.hasFocus) {
             FocusManager.instance.primaryFocus?.unfocus();
           }
           return false;

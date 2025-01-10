@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'basic.dart';
+/// @docImport 'single_child_scroll_view.dart';
+/// @docImport 'sliver_layout_builder.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -153,7 +158,10 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
 
   @override
   void markNeedsBuild() {
-    super.markNeedsBuild();
+    // Calling super.markNeedsBuild is not needed. This Element does not need
+    // to performRebuild since this call already does what performRebuild does,
+    // So the element is clean as soon as this method returns and does not have
+    // to be added to the dirty list or marked as dirty.
     renderObject.markNeedsLayout();
     _needsBuild = true;
   }

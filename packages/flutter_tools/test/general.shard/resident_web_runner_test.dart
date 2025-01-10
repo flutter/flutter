@@ -127,7 +127,10 @@ void main() {
       .._devFS = webDevFS
       ..device = mockDevice
       ..generator = residentCompiler;
-    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem
+      .directory('.dart_tool')
+      .childFile('package_config.json')
+      .createSync(recursive: true);
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: test_fakes.FakeFlutterVersion(),
@@ -162,7 +165,6 @@ void main() {
       flutterProject:
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
@@ -195,7 +197,6 @@ void main() {
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions:
           DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
@@ -215,7 +216,6 @@ void main() {
       flutterProject:
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
@@ -229,7 +229,6 @@ void main() {
       flutterProject:
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
@@ -362,13 +361,13 @@ void main() {
       flutterProject:
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      ipv6: true,
       stayResident: false,
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       systemClock: globals.systemClock,
+      devtoolsHandler: createNoOpHandler,
     );
 
     expect(await residentWebRunner.run(), 0);
@@ -389,13 +388,13 @@ void main() {
       flutterProject:
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      ipv6: true,
       stayResident: false,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       systemClock: globals.systemClock,
+      devtoolsHandler: createNoOpHandler,
     );
 
     expect(await residentWebRunner.run(), 0);
@@ -591,12 +590,12 @@ void main() {
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions:
           DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       systemClock: globals.systemClock,
+      devtoolsHandler: createNoOpHandler,
     );
     fakeVmServiceHost =
         FakeVmServiceHost(requests: kAttachExpectations.toList());
@@ -1012,7 +1011,7 @@ void main() {
   testUsingContext('cleanup of resources is safe to call multiple times',
       () async {
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
-    mockDevice.dds = DartDevelopmentService();
+    mockDevice.dds = DartDevelopmentService(logger: test_fakes.FakeLogger());
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
     ]);
@@ -1115,12 +1114,12 @@ void main() {
       flutterProject:
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       systemClock: globals.systemClock,
+      devtoolsHandler: createNoOpHandler,
     );
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter =
@@ -1164,12 +1163,12 @@ void main() {
       flutterProject:
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       systemClock: globals.systemClock,
+      devtoolsHandler: createNoOpHandler,
     );
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter =
@@ -1206,13 +1205,13 @@ void main() {
       flutterProject:
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      ipv6: true,
       stayResident: false,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       systemClock: globals.systemClock,
+      devtoolsHandler: createNoOpHandler,
     );
 
     // Create necessary files.
@@ -1463,7 +1462,6 @@ ResidentRunner setUpResidentRunner(
         FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
     debuggingOptions:
         debuggingOptions ?? DebuggingOptions.enabled(BuildInfo.debug),
-    ipv6: true,
     usage: globals.flutterUsage,
     analytics: globals.analytics,
     systemClock: systemClock ?? SystemClock.fixed(DateTime.now()),
@@ -1760,7 +1758,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Future<void> stopEchoingDeviceLog() async {}
 
   @override
-  Future<void> initLogReader() async {}
+  Future<void> tryInitLogReader() async {}
 
   @override
   Future<Uri?> setupDevFS(String fsName, Directory rootDirectory) async {
@@ -1779,13 +1777,11 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     GetSkSLMethod? getSkSLMethod,
     FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+    required DebuggingOptions debuggingOptions,
     int? hostVmServicePort,
-    int? ddsPort,
-    bool disableServiceAuthCodes = false,
-    bool enableDds = true,
-    bool cacheStartupProfile = false,
-    required bool allowExistingDdsInstance,
     bool? ipv6 = false,
+    bool enableDevTools = false,
+    bool allowExistingDdsInstance = false,
   }) async {}
 
   @override

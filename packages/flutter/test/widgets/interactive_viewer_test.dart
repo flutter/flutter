@@ -1443,6 +1443,7 @@ void main() {
           home: Scaffold(
             body: Center(
               child: SizedBox(
+                key: const Key('outer box'),
                 height: 50.0,
                 child: InteractiveViewer.builder(
                   transformationController: transformationController,
@@ -1488,7 +1489,7 @@ void main() {
       }
 
       // Drag to pan down past the first child.
-      final Offset childOffset = tester.getTopLeft(find.byType(SizedBox));
+      final Offset childOffset = tester.getTopLeft(find.byKey(const Key('outer box')));
       const double translationY = 15.0;
       final Offset childInterior = Offset(
         childOffset.dx,

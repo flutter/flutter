@@ -59,7 +59,7 @@ class AndroidDevice extends Device {
     this.productID,
     required this.modelID,
     this.deviceCodeName,
-    required Logger logger,
+    required super.logger,
     required ProcessManager processManager,
     required Platform platform,
     required AndroidSdk androidSdk,

@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../common.dart';
 import 'build_bench.dart';
 
-Future<void> main() async {
+Future<void> execute() async {
   debugProfileBuildsEnabledUserWidgets = true;
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   printer.addResultStatistics(

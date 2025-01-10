@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/preview_device.dart';
@@ -498,7 +497,6 @@ void main() {
     }, overrides: <Type, Generator>{
       AndroidWorkflow: () => FakeAndroidWorkflow(),
       IOSWorkflow: () => FakeIOSWorkflow(),
-      FuchsiaWorkflow: () => FakeFuchsiaWorkflow(),
       WindowsWorkflow: () => FakeWindowsWorkflow(),
     });
 
@@ -701,7 +699,8 @@ void main() {
       final DaemonMessage startResponse = await broadcastOutput.firstWhere(_notEvent);
       expect(startResponse.data['id'], 0);
       expect(startResponse.data['error'], isNull);
-      final String? ddsUri = startResponse.data['result'] as String?;
+      final Map<String, Object?>? result = startResponse.data['result'] as Map<String, Object?>?;
+      final String? ddsUri = result!['ddsUri'] as String?;
       expect(ddsUri, fakeDdsUri.toString());
       expect(device.dds.startCalled, true);
       expect(device.dds.startDisableServiceAuthCodes, false);
@@ -1108,13 +1107,6 @@ class FakeWindowsWorkflow extends Fake implements WindowsWorkflow {
   final bool canListDevices;
 }
 
-class FakeFuchsiaWorkflow extends Fake implements FuchsiaWorkflow {
-  FakeFuchsiaWorkflow({ this.canListDevices = true });
-
-  @override
-  final bool canListDevices;
-}
-
 class FakeAndroidWorkflow extends Fake implements AndroidWorkflow {
   FakeAndroidWorkflow({ this.canListDevices = true });
 
@@ -1246,11 +1238,14 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
-    required Logger logger,
-    int? hostPort,
+    int? ddsPort,
+    FlutterDevice? device,
     bool? ipv6,
     bool? disableServiceAuthCodes,
+    bool enableDevTools = false,
     bool cacheStartupProfile = false,
+    String? google3WorkspaceRoot,
+    Uri? devToolsServerAddress,
   }) async {
     startCalled = true;
     startVMServiceUri = vmServiceUri;

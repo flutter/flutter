@@ -74,7 +74,7 @@ void main() {
       );
     });
 
-    testWithoutContext('logs to client when sendLogsToClient=true', () async {
+    testWithoutContext('logs stdout to client when sendLogsToClient=true', () async {
       final BasicProject project = BasicProject();
       await project.setUpIn(tempDir);
 
@@ -104,6 +104,35 @@ void main() {
           startsWith('==> [Flutter] [{"id":1,"method":"app.stop"'),
           startsWith('<== [Flutter] [{"id":1,"result":true}]'),
         ]),
+      );
+    });
+
+    testWithoutContext('logs stderr to client when sendLogsToClient=true', () async {
+      final BasicProject project = BasicProject();
+      await project.setUpIn(tempDir);
+
+      // Capture all log events.
+      final Future<List<Event>> logEventsFuture = dap.client.events('dart.log').toList();
+
+      // Launch the app and wait for it to terminate (because of the error).
+      await Future.wait(<Future<void>>[
+        dap.client.event('terminated'),
+        dap.client.start(
+          launch: () => dap.client.launch(
+            cwd: project.dir.path,
+            noDebug: true,
+            toolArgs: <String>['--not-a-valid-flag'],
+            sendLogsToClient: true,
+          ),
+        ),
+      ], eagerError: true);
+
+      // Ensure logs contain the expected error message.
+      final List<Event> logEvents = await logEventsFuture;
+      final List<String> logMessages = logEvents.map((Event l) => (l.body! as Map<String, Object?>)['message']! as String).toList();
+      expect(
+        logMessages,
+        contains(startsWith('<== [Flutter] [stderr] Could not find an option named "not-a-valid-flag"')),
       );
     });
 

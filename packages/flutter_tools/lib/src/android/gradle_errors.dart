@@ -10,7 +10,6 @@ import '../base/process.dart';
 import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../reporting/reporting.dart';
 import 'gradle_utils.dart';
 
 typedef GradleErrorTest = bool Function(String);
@@ -68,19 +67,21 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   networkErrorHandler,
   permissionDeniedErrorHandler,
   flavorUndefinedHandler,
-  r8FailureHandler,
+  r8DexingBugInAgp73Handler,
   minSdkVersionHandler,
   transformInputIssueHandler,
   lockFileDepMissingHandler,
-  incompatibleKotlinVersionHandler,
   minCompileSdkVersionHandler,
-  jvm11RequiredHandler,
+  incompatibleJavaAndAgpVersionsHandler,
   outdatedGradleHandler,
   sslExceptionHandler,
   zipExceptionHandler,
   incompatibleJavaAndGradleVersionsHandler,
   remoteTerminatedHandshakeHandler,
   couldNotOpenCacheDirectoryHandler,
+  incompatibleCompileSdk35AndAgpVersionHandler,
+  jlinkErrorWithJava21AndSourceCompatibility,
+  incompatibleKotlinVersionHandler, // This handler should always be last, as its key log output is sometimes in error messages with other root causes.
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -196,28 +197,6 @@ final GradleHandledError zipExceptionHandler = GradleHandledError(
     return GradleBuildStatus.retry;
   },
   eventLabel: 'zip-exception',
-);
-
-// R8 failure.
-@visibleForTesting
-final GradleHandledError r8FailureHandler = GradleHandledError(
-  test: _lineMatcher(const <String>[
-    'com.android.tools.r8',
-  ]),
-  handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-  }) async {
-    globals.printBox(
-      '${globals.logger.terminal.warningMark} The shrinker may have failed to optimize the Java bytecode.\n'
-      'To disable the shrinker, pass the `--no-shrink` flag to this command.\n'
-      'To learn more, see: https://developer.android.com/studio/build/shrink-code',
-      title: _boxTitle,
-    );
-    return GradleBuildStatus.exit;
-  },
-  eventLabel: 'r8',
 );
 
 /// Handle Gradle error thrown when Gradle needs to download additional
@@ -429,7 +408,8 @@ final GradleHandledError lockFileDepMissingHandler = GradleHandledError(
   eventLabel: 'lock-dep-issue',
 );
 
-@visibleForTesting
+// This handler is made visible in other files so that we can uniquely set it
+// to be the lowest priority error.
 final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
   test: _lineMatcher(const <String>[
     'was compiled with an incompatible version of Kotlin',
@@ -524,25 +504,38 @@ final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
   eventLabel: 'min-compile-sdk-version',
 );
 
+final RegExp _agpJavaError = RegExp(r'Android Gradle plugin requires Java (\d+\.?\d*) to run');
+
+// If an incompatible Java and Android Gradle Plugin error is caught,
+// Android Gradle Plugin throws the required Java version to fix the error.
+// Android Gradle Plugin handles the error here: http://shortn/_SgUWyRdywL.
+
+// If we ever need to reference or check the thrown requirements,
+// we can find the Java and Android Gradle Plugin compatability here:
+// 'https://developer.android.com/build/releases/past-releases'
 @visibleForTesting
-final GradleHandledError jvm11RequiredHandler = GradleHandledError(
+final GradleHandledError incompatibleJavaAndAgpVersionsHandler= GradleHandledError(
   test: (String line) {
-    return line.contains('Android Gradle plugin requires Java 11 to run');
+    return _agpJavaError.hasMatch(line);
   },
   handler: ({
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
   }) async {
+    final String helpfulGradleError = line.trim().substring(2);
+
     globals.printBox(
-      '${globals.logger.terminal.warningMark} You need Java 11 or higher to build your app with this version of Gradle.\n\n'
-      'To get Java 11, update to the latest version of Android Studio on https://developer.android.com/studio/install.\n\n'
-      'To check the Java version used by Flutter, run `flutter doctor -v`.',
+      '${globals.logger.terminal.warningMark} $helpfulGradleError\n\n'
+      'To fix this issue, try updating to the latest Android SDK and Android Studio on: ${AndroidProject.installAndroidStudioUrl}\n'
+      'If that does not work, you can set the Java version used by Flutter by \n'
+      'running `flutter config --jdk-dir=“</path/to/jdk>“`\n\n'
+      'To check the Java version used by Flutter, run `flutter doctor --verbose`',
       title: _boxTitle,
     );
     return GradleBuildStatus.exit;
   },
-  eventLabel: 'java11-required',
+  eventLabel: 'incompatible-java-agp-version',
 );
 
 /// Handles SSL exceptions: https://github.com/flutter/flutter/issues/104628
@@ -592,7 +585,7 @@ final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandle
       "${globals.logger.terminal.warningMark} Your project's Gradle version "
           'is incompatible with the Java version that Flutter is using for Gradle.\n\n'
           'If you recently upgraded Android Studio, consult the migration guide '
-          'at https://flutter.dev/to/to/java-gradle-incompatibility.\n\n'
+          'at https://flutter.dev/to/java-gradle-incompatibility.\n\n'
           'Otherwise, to fix this issue, first, check the Java version used by Flutter by '
           'running `flutter doctor --verbose`.\n\n'
           'Then, update the Gradle version specified in ${gradlePropertiesFile.path} '
@@ -640,4 +633,84 @@ final GradleHandledError couldNotOpenCacheDirectoryHandler = GradleHandledError(
     return GradleBuildStatus.retry;
   },
   eventLabel: 'could-not-open-cache-directory',
+);
+
+String _getAgpLocation(FlutterProject project) {
+  return '''
+ The version of AGP that your project uses is likely defined in:
+${project.android.settingsGradleFile.path},
+in the 'plugins' closure (by the number following "com.android.application").
+ Alternatively, if your project was created with an older version of the templates, it is likely
+in the buildscript.dependencies closure of the top-level build.gradle:
+${project.android.hostAppGradleFile.path},
+as the number following "com.android.tools.build:gradle:".''';
+}
+
+@visibleForTesting
+final GradleHandledError incompatibleCompileSdk35AndAgpVersionHandler = GradleHandledError(
+  test: (String line) => line.contains('RES_TABLE_TYPE_TYPE entry offsets overlap actual entry data'),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+  }) async {
+    globals.printBox(
+      '${globals.logger.terminal.warningMark} Using compileSdk 35 requires Android Gradle Plugin (AGP) 8.1.0 or higher.'
+          ' \n Please upgrade to a newer AGP version.${_getAgpLocation(project)}\n\n Finally, if you have a'
+          ' strong reason to avoid upgrading AGP, you can temporarily lower the compileSdk version in the following file:\n${project.android.appGradleFile.path}',
+      title: _boxTitle,
+    );
+
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'incompatible-compile-sdk-and-agp',
+);
+
+@visibleForTesting
+final GradleHandledError r8DexingBugInAgp73Handler = GradleHandledError(
+  test: (String line) => line.contains('com.android.tools.r8.internal') && line.contains(': Unused argument with users'),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+  }) async {
+    globals.printBox('''
+${globals.logger.terminal.warningMark} Version 7.3 of the Android Gradle Plugin (AGP) uses a version of R8 that contains a bug which causes this error (see more info at https://issuetracker.google.com/issues/242308990).
+To fix this error, update to a newer version of AGP (at least 7.4.0).
+
+${_getAgpLocation(project)}''',
+        title: _boxTitle,
+    );
+
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'r8-dexing-bug-in-AGP-7.3'
+);
+
+@visibleForTesting
+const String jlinkErrorMessage = '> Error while executing process';
+
+@visibleForTesting
+final GradleHandledError jlinkErrorWithJava21AndSourceCompatibility = GradleHandledError(
+    test: (String line) => line.contains('> Error while executing process')&& line.contains('jlink'),
+    handler: ({
+      required String line,
+      required FlutterProject project,
+      required bool usesAndroidX,
+    }) async {
+      globals.printBox('''
+${globals.logger.terminal.warningMark} This is likely due to a known bug in Android Gradle Plugin (AGP) versions less than 8.2.1, when
+  1. setting a value for SourceCompatibility and
+  2. using Java 21 or above.
+To fix this error, please upgrade your AGP version to at least 8.2.1.${_getAgpLocation(project)}
+
+For more information, see:
+https://issuetracker.google.com/issues/294137077
+https://github.com/flutter/flutter/issues/156304''',
+        title: _boxTitle,
+      );
+
+      return GradleBuildStatus.exit;
+    },
+    eventLabel: 'java21-and-source-compatibility'
 );

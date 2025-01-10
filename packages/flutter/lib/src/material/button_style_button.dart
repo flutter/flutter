@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'elevated_button_theme.dart';
+/// @docImport 'menu_anchor.dart';
+/// @docImport 'text_button_theme.dart';
+/// @docImport 'text_theme.dart';
+/// @docImport 'theme.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -19,6 +26,7 @@ import 'material_state.dart';
 import 'outlined_button.dart';
 import 'text_button.dart';
 import 'theme_data.dart';
+import 'tooltip.dart';
 
 /// {@template flutter.material.ButtonStyleButton.iconAlignment}
 /// Determines the alignment of the icon within the widgets such as:
@@ -78,8 +86,9 @@ abstract class ButtonStyleButton extends StatefulWidget {
     required this.clipBehavior,
     this.statesController,
     this.isSemanticButton = true,
-    required this.child,
     this.iconAlignment = IconAlignment.start,
+    this.tooltip,
+    required this.child,
   });
 
   /// Called when the button is tapped or otherwise activated.
@@ -116,9 +125,9 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// Customizes this button's appearance.
   ///
   /// Non-null properties of this style override the corresponding
-  /// properties in [themeStyleOf] and [defaultStyleOf]. [MaterialStateProperty]s
+  /// properties in [themeStyleOf] and [defaultStyleOf]. [WidgetStateProperty]s
   /// that resolve to non-null values will similarly override the corresponding
-  /// [MaterialStateProperty]s in [themeStyleOf] and [defaultStyleOf].
+  /// [WidgetStateProperty]s in [themeStyleOf] and [defaultStyleOf].
   ///
   /// Null by default.
   final ButtonStyle? style;
@@ -148,30 +157,56 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// Defaults to true.
   final bool? isSemanticButton;
 
+  /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
+  final IconAlignment iconAlignment;
+
+  /// Text that describes the action that will occur when the button is pressed or
+  /// hovered over.
+  ///
+  /// This text is displayed when the user long-presses or hovers over the button
+  /// in a tooltip. This string is also used for accessibility.
+  ///
+  /// If null, the button will not display a tooltip.
+  final String? tooltip;
+
   /// Typically the button's label.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
-  /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
-  final IconAlignment iconAlignment;
-
-  /// Returns a non-null [ButtonStyle] that's based primarily on the [Theme]'s
-  /// [ThemeData.textTheme] and [ThemeData.colorScheme].
+  /// Returns a [ButtonStyle] that's based primarily on the [Theme]'s
+  /// [ThemeData.textTheme] and [ThemeData.colorScheme], but has most values
+  /// filled out (non-null).
   ///
-  /// The returned style can be overridden by the [style] parameter and
-  /// by the style returned by [themeStyleOf]. For example the default
-  /// style of the [TextButton] subclass can be overridden with its
-  /// [TextButton.style] constructor parameter, or with a
-  /// [TextButtonTheme].
+  /// The returned style can be overridden by the [style] parameter and by the
+  /// style returned by [themeStyleOf] that some button-specific themes like
+  /// [TextButtonTheme] or [ElevatedButtonTheme] override. For example the
+  /// default style of the [TextButton] subclass can be overridden with its
+  /// [TextButton.style] constructor parameter, or with a [TextButtonTheme].
   ///
-  /// Concrete button subclasses should return a ButtonStyle that
-  /// has no null properties, and where all of the [MaterialStateProperty]
-  /// properties resolve to non-null values.
+  /// Concrete button subclasses should return a [ButtonStyle] with as many
+  /// non-null properties as possible, where all of the non-null
+  /// [WidgetStateProperty] properties resolve to non-null values.
+  ///
+  /// ## Properties that can be null
+  ///
+  /// Some properties, like [ButtonStyle.fixedSize] would override other values
+  /// in the same [ButtonStyle] if set, so they are allowed to be null.  Here is
+  /// a summary of properties that are allowed to be null when returned in the
+  /// [ButtonStyle] returned by this function, an why:
+  ///
+  /// - [ButtonStyle.fixedSize] because it would override other values in the
+  ///   same [ButtonStyle], like [ButtonStyle.maximumSize].
+  /// - [ButtonStyle.side] because null is a valid value for a button that has
+  ///   no side. [OutlinedButton] returns a non-null default for this, however.
+  /// - [ButtonStyle.backgroundBuilder] and [ButtonStyle.foregroundBuilder]
+  ///   because they would override the [ButtonStyle.foregroundColor] and
+  ///   [ButtonStyle.backgroundColor] of the same [ButtonStyle].
   ///
   /// See also:
   ///
-  ///  * [themeStyleOf], Returns the ButtonStyle of this button's component theme.
+  /// * [themeStyleOf], returns the ButtonStyle of this button's component
+  ///   theme.
   @protected
   ButtonStyle defaultStyleOf(BuildContext context);
 
@@ -206,10 +241,27 @@ abstract class ButtonStyleButton extends StatefulWidget {
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
   }
 
-  /// Returns null if [value] is null, otherwise `MaterialStatePropertyAll<T>(value)`.
+  /// Returns null if [value] is null, otherwise `WidgetStatePropertyAll<T>(value)`.
   ///
   /// A convenience method for subclasses.
   static MaterialStateProperty<T>? allOrNull<T>(T? value) => value == null ? null : MaterialStatePropertyAll<T>(value);
+
+  /// Returns null if [enabled] and [disabled] are null.
+  /// Otherwise, returns a [WidgetStateProperty] that resolves to [disabled]
+  /// when [WidgetState.disabled] is active, and [enabled] otherwise.
+  ///
+  /// A convenience method for subclasses.
+  static WidgetStateProperty<Color?>? defaultColor(Color? enabled, Color? disabled) {
+    if ((enabled ?? disabled) == null) {
+      return null;
+    }
+    return WidgetStateProperty<Color?>.fromMap(
+      <WidgetStatesConstraint, Color?>{
+        WidgetState.disabled: disabled,
+        WidgetState.any: enabled,
+      },
+    );
+  }
 
   /// A convenience method used by subclasses in the framework, that returns an
   /// interpolated value based on the [fontSizeMultiplier] parameter:
@@ -445,6 +497,13 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       effectiveChild = resolvedBackgroundBuilder(context, statesController.value, effectiveChild);
     }
 
+    if (widget.tooltip != null) {
+      effectiveChild = Tooltip(
+        message: widget.tooltip,
+        child: effectiveChild,
+      );
+    }
+
     final Widget result = ConstrainedBox(
       constraints: effectiveConstraints,
       child: Material(
@@ -473,7 +532,10 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
           customBorder: resolvedShape.copyWith(side: resolvedSide),
           statesController: statesController,
           child: IconTheme.merge(
-            data: IconThemeData(color: resolvedIconColor ?? resolvedForegroundColor, size: resolvedIconSize),
+            data: IconThemeData(
+              color: resolvedIconColor ?? resolvedForegroundColor,
+              size: resolvedIconSize,
+            ),
             child: effectiveChild,
           ),
         ),

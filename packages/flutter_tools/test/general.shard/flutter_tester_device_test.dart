@@ -4,14 +4,16 @@
 
 import 'dart:async';
 
-import 'package:dds/dds.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/native_assets.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/flutter_tester_device.dart';
 import 'package:flutter_tools/src/test/font_config_manager.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -21,6 +23,7 @@ import 'package:test/fake.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
+import '../src/fakes.dart';
 
 void main() {
   late FakePlatform platform;
@@ -41,6 +44,7 @@ void main() {
     List<String> dartEntrypointArgs = const <String>[],
     bool enableVmService = false,
     bool enableImpeller = false,
+    FlutterProject?  flutterProject ,
   }) =>
     TestFlutterTesterDevice(
       platform: platform,
@@ -48,8 +52,8 @@ void main() {
       processManager: processManager,
       enableVmService: enableVmService,
       dartEntrypointArgs: dartEntrypointArgs,
-      uriConverter: (String input) => '$input/converted',
       enableImpeller: enableImpeller,
+      flutterProject: flutterProject,
     );
 
   testUsingContext('Missing dir error caught for FontConfigManger.dispose', () async {
@@ -86,6 +90,47 @@ void main() {
         'SERVER_PORT': '0',
         'APP_NAME': '',
         'FLUTTER_TEST_IMPELLER': 'true',
+      }));
+
+    await device.start('example.dill');
+
+    expect(processManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  testUsingContext('The PATH environment variable contains native assets build dir on Windows', () async {
+    platform = FakePlatform(
+      environment: <String, String>{'PATH': r'C:\existing\path'},
+      operatingSystem: 'windows',
+    );
+    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    device = createDevice(
+      enableImpeller: true,
+      flutterProject: project,
+    );
+    processManager.addCommand(FakeCommand(command: const <String>[
+        '/',
+        '--disable-vm-service',
+        '--ipv6',
+        '--enable-checked-mode',
+        '--verify-entry-points',
+        '--enable-impeller',
+        '--enable-dart-profiling',
+        '--non-interactive',
+        '--use-test-fonts',
+        '--disable-asset-fonts',
+        '--packages=.dart_tool/package_config.json',
+        'example.dill',
+      ], environment: <String, String>{
+        'FLUTTER_TEST': 'true',
+        'FONTCONFIG_FILE': device.fontConfigManager.fontConfigFile.path,
+        'SERVER_PORT': '0',
+        'APP_NAME': '',
+        'FLUTTER_TEST_IMPELLER': 'true',
+        'PATH': '${device.nativeAssetsBuilder!.windowsBuildDirectory(project)};${platform.environment['PATH']}',
       }));
 
     await device.start('example.dill');
@@ -198,6 +243,7 @@ void main() {
   });
 
   group('DDS', () {
+    late DDSLauncherCallback originalDdsLauncher;
     setUp(() {
       processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
@@ -221,26 +267,32 @@ void main() {
         ),
       ]);
       device = createDevice(enableVmService: true);
+      originalDdsLauncher = ddsLauncherCallback;
+      ddsLauncherCallback = ({
+        required Uri remoteVmServiceUri,
+        Uri? serviceUri,
+        bool enableAuthCodes = true,
+        bool serveDevTools = false,
+        Uri? devToolsServerAddress,
+        bool enableServicePortFallback = false,
+        List<String> cachedUserTags = const <String>[],
+        String? dartExecutable,
+        String? google3WorkspaceRoot,
+      }) async {
+        return FakeDartDevelopmentServiceLauncher(uri: Uri.parse('http://localhost:1234'));
+      };
+    });
+
+    tearDown(() {
+      ddsLauncherCallback = originalDdsLauncher;
     });
 
     testUsingContext('skips setting VM Service port and uses the input port for DDS instead', () async {
       await device.start('example.dill');
       await device.vmServiceUri;
 
-      final Uri uri = await (device as TestFlutterTesterDevice).ddsServiceUriFuture();
-      expect(uri.port, 1234);
-    });
-
-    testUsingContext('sets up UriConverter from context', () async {
-      await device.start('example.dill');
-      await device.vmServiceUri;
-
-      final FakeDartDevelopmentService dds = (device as TestFlutterTesterDevice).dds
-      as FakeDartDevelopmentService;
-      final String? result = dds
-          .uriConverter
-          ?.call('test');
-      expect(result, 'test/converted');
+      final Uri? uri = await (device as TestFlutterTesterDevice).vmServiceUri;
+      expect(uri!.port, 1234);
     });
   });
 }
@@ -255,8 +307,8 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     required super.processManager,
     required super.enableVmService,
     required List<String> dartEntrypointArgs,
-    required UriConverter uriConverter,
     required bool enableImpeller,
+    super.flutterProject,
   }) : super(
     id: 999,
     shellPath: '/',
@@ -275,31 +327,11 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     machine: false,
     host: InternetAddress.loopbackIPv6,
     testAssetDirectory: null,
-    flutterProject: null,
     icudtlPath: null,
     compileExpression: null,
     fontConfigManager: FontConfigManager(),
-    uriConverter: uriConverter,
+    nativeAssetsBuilder: FakeNativeAssetsBuilder(),
   );
-  late DartDevelopmentService dds;
-
-  final Completer<Uri> _ddsServiceUriCompleter = Completer<Uri>();
-
-  Future<Uri> ddsServiceUriFuture() => _ddsServiceUriCompleter.future;
-
-  @override
-  Future<DartDevelopmentService> startDds(
-    Uri uri, {
-    UriConverter? uriConverter,
-  }) async {
-    _ddsServiceUriCompleter.complete(uri);
-    dds = FakeDartDevelopmentService(
-      Uri.parse('http://localhost:${debuggingOptions.hostVmServicePort}'),
-      Uri.parse('http://localhost:8080'),
-      uriConverter: uriConverter,
-    );
-    return dds;
-  }
 
   @override
   Future<FlutterVmService> connectToVmServiceImpl(
@@ -319,19 +351,13 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
   Future<StreamChannel<String>> get remoteChannel async => StreamChannelController<String>().foreign;
 }
 
-class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
-  FakeDartDevelopmentService(this.uri, this.original, {this.uriConverter});
-
-  final Uri original;
-  final UriConverter? uriConverter;
-
-  @override
-  final Uri uri;
-
-  @override
-  Uri get remoteVmServiceUri => original;
-}
 class FakeHttpServer extends Fake implements HttpServer {
   @override
   int get port => 0;
+}
+
+class FakeNativeAssetsBuilder extends Fake implements TestCompilerNativeAssetsBuilder {
+  @override
+  String windowsBuildDirectory(FlutterProject project) =>
+      r'C:\native_assets\path';
 }

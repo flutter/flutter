@@ -69,8 +69,8 @@ void main() {
       description,
       equalsIgnoringHashCodes(<String>[
         'mouseCursor: WidgetStatePropertyAll(SystemMouseCursor(click))',
-        'fillColor: WidgetStatePropertyAll(Color(0xfffffff0))',
-        'overlayColor: WidgetStatePropertyAll(Color(0xfffffff1))',
+        'fillColor: WidgetStatePropertyAll(${const Color(0xfffffff0)})',
+        'overlayColor: WidgetStatePropertyAll(${const Color(0xfffffff1)})',
         'splashRadius: 1.0',
         'materialTapTargetSize: MaterialTapTargetSize.shrinkWrap',
         'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)',

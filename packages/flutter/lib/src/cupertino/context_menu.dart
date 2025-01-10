@@ -16,14 +16,20 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'localizations.dart';
+import 'scrollbar.dart';
 
 // The scale of the child at the time that the CupertinoContextMenu opens.
 // This value was eyeballed from a physical device running iOS 13.1.2.
 const double _kOpenScale = 1.15;
 
+// The smallest possible scale of the child, used if opening the
+// CupertinoContextMenu would cause it to go outside the safe area. This value
+// was eyeballed from the Xcode iPhone simulator running iOS 16.1.
+const double _kMinScaleFactor = 1.02;
+
 // The ratio for the borderRadius of the context menu preview image. This value
 // was eyeballed by overlapping the CupertinoContextMenu with a context menu
-// from iOS 16.0 in the XCode iPhone simulator.
+// from iOS 16.0 in the Xcode iPhone simulator.
 const double _previewBorderRadiusRatio = 12.0;
 
 // The duration of the transition used when a modal popup is shown. Eyeballed
@@ -31,7 +37,7 @@ const double _previewBorderRadiusRatio = 12.0;
 const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
 
 // The duration it takes for the CupertinoContextMenu to open.
-// This value was eyeballed from the XCode simulator running iOS 16.0.
+// This value was eyeballed from the Xcode simulator running iOS 16.0.
 const Duration _previewLongPressTimeout = Duration(milliseconds: 800);
 
 // The total length of the combined animations until the menu is fully open.
@@ -39,7 +45,7 @@ final int _animationDuration =
   _previewLongPressTimeout.inMilliseconds + _kModalPopupTransitionDuration.inMilliseconds;
 
 // The final box shadow for the opening child widget.
-// This value was eyeballed from the XCode simulator running iOS 16.0.
+// This value was eyeballed from the Xcode simulator running iOS 16.0.
 const List<BoxShadow> _endBoxShadow = <BoxShadow>[
   BoxShadow(
     color: Color(0x40000000),
@@ -51,6 +57,11 @@ const List<BoxShadow> _endBoxShadow = <BoxShadow>[
 const Color _borderColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFA9A9AF),
   darkColor: Color(0xFF57585A),
+);
+
+const Color _kBackgroundColor = CupertinoDynamicColor.withBrightness(
+   color: Color(0xFFF1F1F1),
+   darkColor: Color(0xFF212122),
 );
 
 typedef _DismissCallback = void Function(
@@ -228,6 +239,10 @@ class CupertinoContextMenu extends StatefulWidget {
   static final double animationOpensAt =
       _previewLongPressTimeout.inMilliseconds / _animationDuration;
 
+  /// The background color of a [CupertinoContextMenuAction] and a
+  /// [CupertinoContextMenu] sheet.
+  static const Color kBackgroundColor = _kBackgroundColor;
+
   /// A function that returns a widget to be used alternatively from [child].
   ///
   /// The widget returned by the function will be shown at all times: when the
@@ -369,6 +384,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   // Animates the child while it's opening.
   late AnimationController _openController;
   Rect? _decoyChildEndRect;
+  late double _scaleFactor;
   OverlayEntry? _lastOverlayEntry;
   _ContextMenuRoute<void>? _route;
   final double _midpoint = CupertinoContextMenu.animationOpensAt / 2;
@@ -428,9 +444,22 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     return _ContextMenuLocation.left;
   }
 
+  // Constrain the size of the expanded child so that it does not go outside the
+  // safe area. See https://github.com/flutter/flutter/issues/122951.
+  static double _computeScaleFactor(Rect childRect, EdgeInsets padding, Size size) {
+    final double leftMaxScale = 2 * (childRect.center.dx - padding.left) / childRect.width;
+    final double topMaxScale = 2 * (childRect.center.dy - padding.top) / childRect.height;
+    final double rightMaxScale = 2 * (size.width - padding.right - childRect.center.dx) / childRect.width;
+    final double bottomMaxScale = 2 * (size.height - padding.bottom - childRect.center.dy) / childRect.height;
+    final double minWidth = math.min(leftMaxScale, rightMaxScale);
+    final double minHeight = math.min(topMaxScale, bottomMaxScale);
+    // Return the smallest scale factor that keeps the child mostly onscreen.
+    return clampDouble(math.min(minWidth, minHeight), _kMinScaleFactor, _kOpenScale);
+  }
+
   /// The default preview builder if none is provided. It makes a rectangle
   /// around the child widget with rounded borders, matching the iOS 16 opened
-  /// context menu eyeballed on the XCode iOS simulator.
+  /// context menu eyeballed on the Xcode iOS simulator.
   static Widget _defaultPreviewBuilder(BuildContext context, Animation<double> animation, Widget child) {
     return FittedBox(
       fit: BoxFit.cover,
@@ -456,6 +485,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       ),
       contextMenuLocation: _contextMenuLocation,
       previousChildRect: _decoyChildEndRect!,
+      scaleFactor: _scaleFactor,
       builder: (BuildContext context, Animation<double> animation) {
         if (widget.child == null) {
           final Animation<double> localAnimation = Tween<double>(begin: CupertinoContextMenu.animationOpensAt, end: 1).animate(animation);
@@ -545,10 +575,13 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     });
 
     final Rect childRect = _getRect(_childGlobalKey);
+    final EdgeInsets safeAreaPadding = MediaQuery.paddingOf(context);
+    final Size screenSize = MediaQuery.sizeOf(context);
+    _scaleFactor = _computeScaleFactor(childRect, safeAreaPadding, screenSize);
     _decoyChildEndRect = Rect.fromCenter(
       center: childRect.center,
-      width: childRect.width * _kOpenScale,
-      height: childRect.height * _kOpenScale,
+      width: childRect.width * _scaleFactor,
+      height: childRect.height * _scaleFactor,
     );
 
     // Create a decoy child in an overlay directly on top of the original child.
@@ -641,7 +674,7 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
     final double endPause =
       ((totalOpenAnimationLength * _animationDuration) / _previewLongPressTimeout.inMilliseconds) - totalOpenAnimationLength;
 
-    // The timing on the animation was eyeballed from the XCode iOS simulator
+    // The timing on the animation was eyeballed from the Xcode iOS simulator
     // running iOS 16.0.
     // Because the animation no longer goes from 0.0 to 1.0, but to a number
     // depending on the ratio between the press animation time and the opening
@@ -734,12 +767,14 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     CupertinoContextMenuBuilder? builder,
     super.filter,
     required Rect previousChildRect,
+    required double scaleFactor,
     super.settings,
   }) : assert(actions.isNotEmpty),
        _actions = actions,
        _builder = builder,
        _contextMenuLocation = contextMenuLocation,
-       _previousChildRect = previousChildRect;
+       _previousChildRect = previousChildRect,
+       _scaleFactor = scaleFactor;
 
   // Barrier color for a Cupertino modal barrier.
   static const Color _kModalBarrierColor = Color(0x6604040F);
@@ -750,6 +785,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   final _ContextMenuLocation _contextMenuLocation;
   bool _externalOffstage = false;
   bool _internalOffstage = false;
+  final double _scaleFactor;
   Orientation? _lastOrientation;
   // The Rect of the child at the moment that the CupertinoContextMenu opens.
   final Rect _previousChildRect;
@@ -876,8 +912,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     // to the original position before the bounce.
     final Rect childRectOriginal = Rect.fromCenter(
       center: _previousChildRect.center,
-      width: _previousChildRect.width / _kOpenScale,
-      height: _previousChildRect.height / _kOpenScale,
+      width: _previousChildRect.width / _scaleFactor,
+      height: _previousChildRect.height / _scaleFactor,
     );
 
     final Rect sheetRect = _getRect(_sheetGlobalKey);
@@ -1343,21 +1379,36 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
 
 // The menu that displays when CupertinoContextMenu is open. It consists of a
 // list of actions that are typically CupertinoContextMenuActions.
-class _ContextMenuSheet extends StatelessWidget {
+class _ContextMenuSheet extends StatefulWidget {
   _ContextMenuSheet({
     super.key,
     required this.actions,
-    required _ContextMenuLocation contextMenuLocation,
-    required Orientation orientation,
-  }) : assert(actions.isNotEmpty),
-       _contextMenuLocation = contextMenuLocation,
-       _orientation = orientation;
+    required this.contextMenuLocation,
+    required this.orientation,
+  }) : assert(actions.isNotEmpty);
 
   final List<Widget> actions;
-  final _ContextMenuLocation _contextMenuLocation;
-  final Orientation _orientation;
+  final _ContextMenuLocation contextMenuLocation;
+  final Orientation orientation;
 
+  @override
+  State<_ContextMenuSheet> createState() => _ContextMenuSheetState();
+}
+
+class _ContextMenuSheetState extends State<_ContextMenuSheet> {
+  late final ScrollController _controller;
   static const double _kMenuWidth = 250.0;
+  // Eyeballed on a context menu on an iOS 15 simulator running iOS 17.5.
+  static const double _kScrollbarMainAxisMargin = 13.0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Link the scrollbar to the scroll view by providing both the same scroll
+    // controller. Using SingleChildScrollview.primary might conflict with users
+    // already using the PrimaryScrollController.
+    _controller = ScrollController();
+  }
 
   // Get the children, whose order depends on orientation and
   // contextMenuLocation.
@@ -1367,38 +1418,57 @@ class _ContextMenuSheet extends StatelessWidget {
       child: IntrinsicHeight(
         child: ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(13.0)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              actions.first,
-              for (final Widget action in actions.skip(1))
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(
-                        color: CupertinoDynamicColor.resolve(
-                          _borderColor,
-                          context,
+          child: ColoredBox(
+            color: CupertinoDynamicColor.resolve(CupertinoContextMenu.kBackgroundColor, context),
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+              child: CupertinoScrollbar(
+                mainAxisMargin: _kScrollbarMainAxisMargin,
+                controller: _controller,
+                child: SingleChildScrollView(
+                  controller: _controller,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      widget.actions.first,
+                      for (final Widget action in widget.actions.skip(1))
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            border: Border(
+                              top: BorderSide(
+                                color: CupertinoDynamicColor.resolve(
+                                  _borderColor,
+                                  context,
+                                ),
+                                width: 0.4,
+                              ),
+                            ),
+                          ),
+                          position: DecorationPosition.foreground,
+                          child: action,
                         ),
-                        width: 0.4,
-                      ),
-                    ),
+                    ],
                   ),
-                  position: DecorationPosition.foreground,
-                  child: action,
                 ),
-            ],
+              ),
+            ),
           ),
         ),
       ),
     );
 
-    return switch (_contextMenuLocation) {
-      _ContextMenuLocation.center when _orientation == Orientation.portrait => <Widget>[const Spacer(), menu, const Spacer()],
+    return switch (widget.contextMenuLocation) {
+      _ContextMenuLocation.center when widget.orientation == Orientation.portrait => <Widget>[const Spacer(), menu, const Spacer()],
       _ContextMenuLocation.center => <Widget>[menu, const Spacer()],
       _ContextMenuLocation.right  => <Widget>[const Spacer(), menu],
       _ContextMenuLocation.left   => <Widget>[menu, const Spacer()],
     };
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override

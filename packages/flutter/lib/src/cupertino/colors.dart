@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:flutter/widgets.dart';
+/// @docImport 'package:flutter/material.dart';
 ///
 /// @docImport 'button.dart';
 /// @docImport 'nav_bar.dart';
 library;
 
-import 'dart:ui' show Brightness, Color;
+import 'dart:ui' show Brightness, Color, ColorSpace;
 
 import '../../foundation.dart';
 import '../widgets/basic.dart';
@@ -68,7 +68,7 @@ abstract final class CupertinoColors {
   ///
   /// See also:
   ///
-  ///  * [material.Colors.white], the same color, in the Material Design palette.
+  ///  * [Colors.white], the same color, in the Material Design palette.
   ///  * [black], opaque black in the [CupertinoColors] palette.
   static const Color white = Color(0xFFFFFFFF);
 
@@ -78,7 +78,7 @@ abstract final class CupertinoColors {
   ///
   /// See also:
   ///
-  ///  * [material.Colors.black], the same color, in the Material Design palette.
+  ///  * [Colors.black], the same color, in the Material Design palette.
   ///  * [white], opaque white in the [CupertinoColors] palette.
   static const Color black = Color(0xFF000000);
 
@@ -86,7 +86,7 @@ abstract final class CupertinoColors {
   ///
   /// See also:
   ///
-  ///  * [material.Colors.transparent], the same color, in the Material Design palette.
+  ///  * [Colors.transparent], the same color, in the Material Design palette.
   static const Color transparent = Color(0x00000000);
 
   /// Used in iOS 10 for light background fills such as the chat bubble background.
@@ -748,7 +748,7 @@ abstract final class CupertinoColors {
 ///  * [CupertinoTheme.of], a static method that retrieves the ambient [CupertinoThemeData],
 ///    and then resolves [CupertinoDynamicColor]s used in the retrieved data.
 @immutable
-class CupertinoDynamicColor extends Color with Diagnosticable {
+class CupertinoDynamicColor with Diagnosticable implements Color {
   /// Creates an adaptive [Color] that changes its effective color based on the
   /// [BuildContext] given. The default effective color is [color].
   const CupertinoDynamicColor({
@@ -828,19 +828,13 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
     this.darkHighContrastElevatedColor,
     this._debugResolveContext,
     this._debugLabel,
-  ) : // The super constructor has to be called with a dummy value in order to mark
-      // this constructor const.
-      // The field `value` is overridden in the class implementation.
-      super(0);
+  );
 
   /// The current effective color.
   ///
   /// Defaults to [color] if this [CupertinoDynamicColor] has never been
   /// resolved.
   final Color _effectiveColor;
-
-  @override
-  int get value => _effectiveColor.value;
 
   final String? _debugLabel;
 
@@ -1151,6 +1145,71 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
       properties.add(DiagnosticsProperty<Element>('last resolved', _debugResolveContext));
     }
   }
+
+  @override
+  int get value => _effectiveColor.value;
+
+  @override
+  int get alpha => _effectiveColor.alpha;
+
+  @override
+  int get blue => _effectiveColor.blue;
+
+  @override
+  double computeLuminance() => _effectiveColor.computeLuminance();
+
+  @override
+  int get green => _effectiveColor.green;
+
+  @override
+  double get opacity => _effectiveColor.opacity;
+
+  @override
+  int get red => _effectiveColor.red;
+
+  @override
+  Color withAlpha(int a) => _effectiveColor.withAlpha(a);
+
+  @override
+  Color withBlue(int b) => _effectiveColor.withBlue(b);
+
+  @override
+  Color withGreen(int g) => _effectiveColor.withGreen(g);
+
+  @override
+  Color withOpacity(double opacity) => _effectiveColor.withOpacity(opacity);
+
+  @override
+  Color withRed(int r) => _effectiveColor.withRed(r);
+
+  @override
+  double get a => _effectiveColor.a;
+
+  @override
+  double get r => _effectiveColor.r;
+
+  @override
+  double get g => _effectiveColor.g;
+
+  @override
+  double get b => _effectiveColor.b;
+
+  @override
+  ColorSpace get colorSpace => _effectiveColor.colorSpace;
+
+  @override
+  Color withValues(
+          {double? alpha,
+          double? red,
+          double? green,
+          double? blue,
+          ColorSpace? colorSpace}) =>
+      _effectiveColor.withValues(
+          alpha: alpha,
+          red: red,
+          green: green,
+          blue: blue,
+          colorSpace: colorSpace);
 }
 
 /// Creates a diagnostics property for [CupertinoDynamicColor].

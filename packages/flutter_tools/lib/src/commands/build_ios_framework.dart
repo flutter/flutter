@@ -150,7 +150,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         ...framework.parent
             .listSync()
             .where((FileSystemEntity entity) =>
-        entity.basename.endsWith('dSYM'))
+        entity.basename.endsWith('dSYM') && !entity.basename.startsWith('Flutter'))
             .map((FileSystemEntity entity) => <String>['-debug-symbols', entity.path])
             .expand<String>((List<String> parameter) => parameter),
       ],
@@ -435,6 +435,7 @@ end
         frameworks.add(outputBuildDirectory.childDirectory(appFrameworkName));
         final Environment environment = Environment(
           projectDir: globals.fs.currentDirectory,
+          packageConfigPath: packageConfigPath(),
           outputDir: outputBuildDirectory,
           buildDir: project.dartTool.childDirectory('flutter_build'),
           cacheDir: globals.cache.getRoot(),

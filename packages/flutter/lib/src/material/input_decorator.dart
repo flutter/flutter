@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+///
+/// @docImport 'dropdown.dart';
+/// @docImport 'ink_well.dart';
+/// @docImport 'text_field.dart';
+/// @docImport 'text_form_field.dart';
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
@@ -912,12 +920,18 @@ class _RenderDecoration extends RenderBox
     }
   }
 
+<<<<<<< HEAD
   static double _minWidth(RenderBox? box, double height) =>
       box?.getMinIntrinsicWidth(height) ?? 0.0;
   static double _maxWidth(RenderBox? box, double height) =>
       box?.getMaxIntrinsicWidth(height) ?? 0.0;
   static double _minHeight(RenderBox? box, double width) =>
       box?.getMinIntrinsicHeight(width) ?? 0.0;
+=======
+  static double _minWidth(RenderBox? box, double height) => box?.getMinIntrinsicWidth(height) ?? 0.0;
+  static double _maxWidth(RenderBox? box, double height) => box?.getMaxIntrinsicWidth(height) ?? 0.0;
+  static double _minHeight(RenderBox? box, double width) => box?.getMinIntrinsicHeight(width) ?? 0.0;
+>>>>>>> 17025dd88227cd9532c33fa78f5250d548d87e9a
   static Size _boxSize(RenderBox? box) => box?.size ?? Size.zero;
   static double _getBaseline(RenderBox box, BoxConstraints boxConstraints) {
     return ChildLayoutHelper.getBaseline(
@@ -941,16 +955,10 @@ class _RenderDecoration extends RenderBox
     required ChildLayouter layoutChild,
     required _ChildBaselineGetter getBaseline,
   }) {
-    final RenderBox? counter = this.counter;
-    Size counterSize;
-    final double counterAscent;
-    if (counter != null) {
-      counterSize = layoutChild(counter, constraints);
-      counterAscent = getBaseline(counter, constraints);
-    } else {
-      counterSize = Size.zero;
-      counterAscent = 0.0;
-    }
+    final (Size counterSize, double counterAscent) = switch (counter) {
+      final RenderBox box => (layoutChild(box, constraints), getBaseline(box, constraints)),
+      null => (Size.zero, 0.0),
+    };
 
     final BoxConstraints helperErrorConstraints =
         constraints.deflate(EdgeInsets.only(left: counterSize.width));
@@ -2051,6 +2059,7 @@ class _InputDecoratorState extends State<InputDecorator>
     _floatingLabelAnimation.dispose();
     _shakingLabelController.dispose();
     _borderGap.dispose();
+    _curvedAnimation?.dispose();
     super.dispose();
   }
 
@@ -2231,10 +2240,17 @@ class _InputDecoratorState extends State<InputDecorator>
             MaterialStateProperty.resolveAs(
                 themeData.inputDecorationTheme.hintStyle, materialState);
 
+<<<<<<< HEAD
     return themeData.textTheme.titleMedium!
         .merge(widget.baseStyle)
         .merge(defaultStyle)
         .merge(style);
+=======
+    return (themeData.useMaterial3 ? themeData.textTheme.bodyLarge! : themeData.textTheme.titleMedium!)
+      .merge(widget.baseStyle)
+      .merge(defaultStyle)
+      .merge(style);
+>>>>>>> 17025dd88227cd9532c33fa78f5250d548d87e9a
   }
 
   TextStyle _getFloatingLabelStyle(
@@ -2324,6 +2340,23 @@ class _InputDecoratorState extends State<InputDecorator>
     }
   }
 
+  CurvedAnimation? _curvedAnimation;
+
+  FadeTransition _buildTransition(Widget child, Animation<double> animation) {
+    if (_curvedAnimation?.parent != animation) {
+      _curvedAnimation?.dispose();
+      _curvedAnimation = CurvedAnimation(
+              parent: animation,
+              curve: _kTransitionCurve,
+            );
+    }
+
+    return FadeTransition(
+      opacity: _curvedAnimation!,
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
@@ -2339,6 +2372,7 @@ class _InputDecoratorState extends State<InputDecorator>
 
     final TextStyle hintStyle = _getInlineHintStyle(themeData, defaults);
     final String? hintText = decoration.hintText;
+<<<<<<< HEAD
     final Widget? hint = hintText == null
         ? null
         : AnimatedOpacity(
@@ -2359,6 +2393,31 @@ class _InputDecoratorState extends State<InputDecorator>
             ),
           );
 
+=======
+    final bool maintainHintHeight = decoration.maintainHintHeight;
+    Widget? hint;
+    if (hintText != null) {
+      final bool showHint = isEmpty && !_hasInlineLabel;
+      final Text hintTextWidget = Text(
+        hintText,
+        style: hintStyle,
+        textDirection: decoration.hintTextDirection,
+        overflow: hintStyle.overflow ?? (decoration.hintMaxLines == null ? null : TextOverflow.ellipsis),
+        textAlign: textAlign,
+        maxLines: decoration.hintMaxLines,
+      );
+      hint = maintainHintHeight ? AnimatedOpacity(
+        opacity: showHint ? 1.0 : 0.0,
+        duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
+        curve: _kTransitionCurve,
+        child: hintTextWidget,
+      ) : AnimatedSwitcher(
+        duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
+        transitionBuilder: _buildTransition,
+        child: showHint ? hintTextWidget : const SizedBox.shrink(),
+      );
+    }
+>>>>>>> 17025dd88227cd9532c33fa78f5250d548d87e9a
     InputBorder? border;
     if (!decoration.enabled) {
       border = _hasError ? decoration.errorBorder : decoration.disabledBorder;
@@ -2739,14 +2798,14 @@ class _InputDecoratorState extends State<InputDecorator>
 ///
 /// {@tool dartpad}
 /// This sample shows how to style a `TextField` with a prefixIcon that changes color
-/// based on the `MaterialState`. The color defaults to gray and is green while focused.
+/// based on the `WidgetState`. The color defaults to gray and is green while focused.
 ///
 /// ** See code in examples/api/lib/material/input_decorator/input_decoration.widget_state.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
 /// This sample shows how to style a `TextField` with a prefixIcon that changes color
-/// based on the `MaterialState` through the use of `ThemeData`. The color defaults
+/// based on the `WidgetState` through the use of `ThemeData`. The color defaults
 /// to gray, be blue while focused and red if in an error state.
 ///
 /// ** See code in examples/api/lib/material/input_decorator/input_decoration.widget_state.1.dart **
@@ -2789,6 +2848,7 @@ class InputDecoration {
     this.hintTextDirection,
     this.hintMaxLines,
     this.hintFadeDuration,
+    this.maintainHintHeight = true,
     this.error,
     this.errorText,
     this.errorStyle,
@@ -2842,19 +2902,35 @@ class InputDecoration {
   ///
   /// This type of input decoration does not include a border by default.
   ///
+  /// A collapsed decoration cannot have [labelText], [errorText], [counter],
+  /// [icon], prefixes, and suffixes.
+  ///
   /// Sets the [isCollapsed] property to true.
+  /// Sets the [contentPadding] property to [EdgeInsets.zero].
   const InputDecoration.collapsed({
     required this.hintText,
-    this.floatingLabelBehavior,
-    this.floatingLabelAlignment,
+    @Deprecated(
+      'Invalid parameter because a collapsed decoration has no label. '
+      'This feature was deprecated after v3.24.0-0.1.pre.',
+    )
+    FloatingLabelBehavior? floatingLabelBehavior,
+    @Deprecated(
+      'Invalid parameter because a collapsed decoration has no label. '
+      'This feature was deprecated after v3.24.0-0.1.pre.',
+    )
+    FloatingLabelAlignment? floatingLabelAlignment,
     this.hintStyle,
     this.hintTextDirection,
+    this.hintMaxLines,
+    this.hintFadeDuration,
+    this.maintainHintHeight = true,
     this.filled = false,
     this.fillColor,
     this.focusColor,
     this.hoverColor,
     this.border = InputBorder.none,
     this.enabled = true,
+<<<<<<< HEAD
   })  : icon = null,
         iconColor = null,
         label = null,
@@ -2897,6 +2973,52 @@ class InputDecoration {
         semanticCounterText = null,
         alignLabelWithHint = false,
         constraints = null;
+=======
+    this.constraints,
+  }) : icon = null,
+       iconColor = null,
+       label = null,
+       labelText = null,
+       labelStyle = null,
+       floatingLabelStyle = null,
+       helper = null,
+       helperText = null,
+       helperStyle = null,
+       helperMaxLines = null,
+       error = null,
+       errorText = null,
+       errorStyle = null,
+       errorMaxLines = null,
+       isDense = false,
+       contentPadding = EdgeInsets.zero,
+       isCollapsed = true,
+       prefixIcon = null,
+       prefix = null,
+       prefixText = null,
+       prefixStyle = null,
+       prefixIconColor = null,
+       prefixIconConstraints = null,
+       suffix = null,
+       suffixIcon = null,
+       suffixText = null,
+       suffixStyle = null,
+       suffixIconColor = null,
+       suffixIconConstraints = null,
+       counter = null,
+       counterText = null,
+       counterStyle = null,
+       errorBorder = null,
+       focusedBorder = null,
+       focusedErrorBorder = null,
+       disabledBorder = null,
+       enabledBorder = null,
+       semanticCounterText = null,
+       // ignore: prefer_initializing_formals, (can't use initializing formals for a deprecated parameter).
+       floatingLabelBehavior = floatingLabelBehavior,
+       // ignore: prefer_initializing_formals, (can't use initializing formals for a deprecated parameter).
+       floatingLabelAlignment = floatingLabelAlignment,
+       alignLabelWithHint = false;
+>>>>>>> 17025dd88227cd9532c33fa78f5250d548d87e9a
 
   /// An icon to show before the input field and outside of the decoration's
   /// container.
@@ -2917,8 +3039,8 @@ class InputDecoration {
 
   /// The color of the [icon].
   ///
-  /// If [iconColor] is a [MaterialStateColor], then the effective
-  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// If [iconColor] is a [WidgetStateColor], then the effective
+  /// color can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   final Color? iconColor;
 
@@ -2958,8 +3080,8 @@ class InputDecoration {
   /// The style to use for [InputDecoration.labelText] when the label is on top
   /// of the input field.
   ///
-  /// If [labelStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [labelStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// When the [InputDecoration.labelText] is above (i.e., vertically adjacent to)
@@ -2976,7 +3098,7 @@ class InputDecoration {
   /// It's possible to override the label style for just the error state, or
   /// just the default state, or both.
   ///
-  /// In this example the [labelStyle] is specified with a [MaterialStateProperty]
+  /// In this example the [labelStyle] is specified with a [WidgetStateProperty]
   /// which resolves to a text style whose color depends on the decorator's
   /// error state.
   ///
@@ -2992,8 +3114,8 @@ class InputDecoration {
   /// When the [InputDecoration.labelText] is on top of the input field, the
   /// text uses the [labelStyle] instead.
   ///
-  /// If [floatingLabelStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [floatingLabelStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to [labelStyle].
@@ -3002,12 +3124,15 @@ class InputDecoration {
   /// of [InputDecoration] that changes the color of the label to the
   /// [InputDecoration.errorStyle] color or [ColorScheme.error].
   ///
+  /// When the input field receives focus, the font size of [InputDecoration.label] is
+  /// scaled down by 75%.
+  ///
   /// {@tool dartpad}
   /// It's possible to override the label style for just the error state, or
   /// just the default state, or both.
   ///
   /// In this example the [floatingLabelStyle] is specified with a
-  /// [MaterialStateProperty] which resolves to a text style whose color depends
+  /// [WidgetStateProperty] which resolves to a text style whose color depends
   /// on the decorator's error state.
   ///
   /// ** See code in examples/api/lib/material/input_decorator/input_decoration.floating_label_style_error.0.dart **
@@ -3045,8 +3170,8 @@ class InputDecoration {
 
   /// The style to use for the [helperText].
   ///
-  /// If [helperStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [helperStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   final TextStyle? helperStyle;
 
@@ -3065,15 +3190,15 @@ class InputDecoration {
   /// Text that suggests what sort of input the field accepts.
   ///
   /// Displayed on top of the [InputDecorator.child] (i.e., at the same location
-  /// on the screen where text may be entered in the [InputDecorator.child])
-  /// when the input [isEmpty] and either (a) [labelText] is null or (b) the
-  /// input has the focus.
+  /// on the screen where text may be entered in the [InputDecorator.child]),
+  /// when [InputDecorator.isEmpty] is true and either (a) [labelText] is null
+  /// or (b) the input has the focus.
   final String? hintText;
 
   /// The style to use for the [hintText].
   ///
-  /// If [hintStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [hintStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// Also used for the [labelText] when the [labelText] is displayed on
@@ -3104,6 +3229,15 @@ class InputDecoration {
   /// If null, defaults to [InputDecorationTheme.hintFadeDuration].
   /// If [InputDecorationTheme.hintFadeDuration] is null defaults to 20ms.
   final Duration? hintFadeDuration;
+
+  /// Whether the input field's height should always be greater than or equal to
+  /// the height of the [hintText], even if the [hintText] is not visible.
+  ///
+  /// The [InputDecorator] widget ignores [hintText] during layout when
+  /// it's not visible, if this flag is set to false.
+  ///
+  /// Defaults to true.
+  final bool maintainHintHeight;
 
   /// Optional widget that appears below the [InputDecorator.child] and the border.
   ///
@@ -3239,7 +3373,8 @@ class InputDecoration {
 
   /// Whether the decoration is the same size as the input field.
   ///
-  /// A collapsed decoration cannot have [labelText], [errorText], an [icon].
+  /// A collapsed decoration cannot have [labelText], [errorText], [counter],
+  /// [icon], prefixes, and suffixes.
   ///
   /// To create a collapsed input decoration, use [InputDecoration.collapsed].
   final bool? isCollapsed;
@@ -3292,9 +3427,10 @@ class InputDecoration {
   /// This can be used to modify the [BoxConstraints] surrounding [prefixIcon].
   ///
   /// This property is particularly useful for getting the decoration's height
-  /// less than 48px. This can be achieved by setting [isDense] to true and
-  /// setting the constraints' minimum height and width to a value lower than
-  /// 48px.
+  /// less than the minimum tappable height (which is 48px when the visual
+  /// density is set to [VisualDensity.standard]). This can be achieved by
+  /// setting [isDense] to true and setting the constraints' minimum height
+  /// and width to a value lower than the minimum tappable size.
   ///
   /// {@tool dartpad}
   /// This example shows the differences between two `TextField` widgets when
@@ -3343,8 +3479,8 @@ class InputDecoration {
 
   /// The style to use for the [prefixText].
   ///
-  /// If [prefixStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [prefixStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
@@ -3358,8 +3494,8 @@ class InputDecoration {
   ///
   /// Defaults to [iconColor]
   ///
-  /// If [prefixIconColor] is a [MaterialStateColor], then the effective
-  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// If [prefixIconColor] is a [WidgetStateColor], then the effective
+  /// color can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   final Color? prefixIconColor;
 
@@ -3441,8 +3577,8 @@ class InputDecoration {
 
   /// The style to use for the [suffixText].
   ///
-  /// If [suffixStyle] is a [MaterialStateTextStyle], then the effective text
-  /// style can depend on the [MaterialState.focused] state, i.e. if the
+  /// If [suffixStyle] is a [WidgetStateTextStyle], then the effective text
+  /// style can depend on the [WidgetState.focused] state, i.e. if the
   /// [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
@@ -3456,8 +3592,8 @@ class InputDecoration {
   ///
   /// Defaults to [iconColor]
   ///
-  /// If [suffixIconColor] is a [MaterialStateColor], then the effective
-  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// If [suffixIconColor] is a [WidgetStateColor], then the effective
+  /// color can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   final Color? suffixIconColor;
 
@@ -3466,9 +3602,10 @@ class InputDecoration {
   /// This can be used to modify the [BoxConstraints] surrounding [suffixIcon].
   ///
   /// This property is particularly useful for getting the decoration's height
-  /// less than 48px. This can be achieved by setting [isDense] to true and
-  /// setting the constraints' minimum height and width to a value lower than
-  /// 48px.
+  /// less than the minimum tappable height (which is 48px when the visual
+  /// density is set to [VisualDensity.standard]). This can be achieved by
+  /// setting [isDense] to true and setting the constraints' minimum height
+  /// and width to a value lower than the minimum tappable size.
   ///
   /// If null, a [BoxConstraints] with a minimum width and height of 48px is
   /// used.
@@ -3505,8 +3642,8 @@ class InputDecoration {
 
   /// The style to use for the [counterText].
   ///
-  /// If [counterStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [counterStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [helperStyle].
@@ -3688,7 +3825,7 @@ class InputDecoration {
   ///
   /// If [border] is a [MaterialStateUnderlineInputBorder]
   /// or [MaterialStateOutlineInputBorder], then the effective border can depend on
-  /// the [MaterialState.focused] state, i.e. if the [TextField] is focused or not.
+  /// the [WidgetState.focused] state, i.e. if the [TextField] is focused or not.
   ///
   /// If [border] derives from [InputBorder] the border's [InputBorder.borderSide],
   /// i.e. the border's color and width, will be overridden to reflect the input
@@ -3776,6 +3913,7 @@ class InputDecoration {
     TextDirection? hintTextDirection,
     Duration? hintFadeDuration,
     int? hintMaxLines,
+    bool? maintainHintHeight,
     Widget? error,
     String? errorText,
     TextStyle? errorStyle,
@@ -3831,6 +3969,7 @@ class InputDecoration {
       hintTextDirection: hintTextDirection ?? this.hintTextDirection,
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
       hintFadeDuration: hintFadeDuration ?? this.hintFadeDuration,
+      maintainHintHeight: maintainHintHeight ?? this.maintainHintHeight,
       error: error ?? this.error,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
@@ -3901,8 +4040,10 @@ class InputDecoration {
       iconColor: iconColor ?? theme.iconColor,
       prefixStyle: prefixStyle ?? theme.prefixStyle,
       prefixIconColor: prefixIconColor ?? theme.prefixIconColor,
+      prefixIconConstraints: prefixIconConstraints ?? theme.prefixIconConstraints,
       suffixStyle: suffixStyle ?? theme.suffixStyle,
       suffixIconColor: suffixIconColor ?? theme.suffixIconColor,
+      suffixIconConstraints: suffixIconConstraints ?? theme.suffixIconConstraints,
       counterStyle: counterStyle ?? theme.counterStyle,
       filled: filled ?? theme.filled,
       fillColor: fillColor ?? theme.fillColor,
@@ -3927,6 +4068,7 @@ class InputDecoration {
     if (other.runtimeType != runtimeType) {
       return false;
     }
+<<<<<<< HEAD
     return other is InputDecoration &&
         other.icon == icon &&
         other.iconColor == iconColor &&
@@ -3981,6 +4123,63 @@ class InputDecoration {
         other.semanticCounterText == semanticCounterText &&
         other.alignLabelWithHint == alignLabelWithHint &&
         other.constraints == constraints;
+=======
+    return other is InputDecoration
+        && other.icon == icon
+        && other.iconColor == iconColor
+        && other.label == label
+        && other.labelText == labelText
+        && other.labelStyle == labelStyle
+        && other.floatingLabelStyle == floatingLabelStyle
+        && other.helper == helper
+        && other.helperText == helperText
+        && other.helperStyle == helperStyle
+        && other.helperMaxLines == helperMaxLines
+        && other.hintText == hintText
+        && other.hintStyle == hintStyle
+        && other.hintTextDirection == hintTextDirection
+        && other.hintMaxLines == hintMaxLines
+        && other.hintFadeDuration == hintFadeDuration
+        && other.maintainHintHeight == maintainHintHeight
+        && other.error == error
+        && other.errorText == errorText
+        && other.errorStyle == errorStyle
+        && other.errorMaxLines == errorMaxLines
+        && other.floatingLabelBehavior == floatingLabelBehavior
+        && other.floatingLabelAlignment == floatingLabelAlignment
+        && other.isDense == isDense
+        && other.contentPadding == contentPadding
+        && other.isCollapsed == isCollapsed
+        && other.prefixIcon == prefixIcon
+        && other.prefixIconColor == prefixIconColor
+        && other.prefix == prefix
+        && other.prefixText == prefixText
+        && other.prefixStyle == prefixStyle
+        && other.prefixIconConstraints == prefixIconConstraints
+        && other.suffixIcon == suffixIcon
+        && other.suffixIconColor == suffixIconColor
+        && other.suffix == suffix
+        && other.suffixText == suffixText
+        && other.suffixStyle == suffixStyle
+        && other.suffixIconConstraints == suffixIconConstraints
+        && other.counter == counter
+        && other.counterText == counterText
+        && other.counterStyle == counterStyle
+        && other.filled == filled
+        && other.fillColor == fillColor
+        && other.focusColor == focusColor
+        && other.hoverColor == hoverColor
+        && other.errorBorder == errorBorder
+        && other.focusedBorder == focusedBorder
+        && other.focusedErrorBorder == focusedErrorBorder
+        && other.disabledBorder == disabledBorder
+        && other.enabledBorder == enabledBorder
+        && other.border == border
+        && other.enabled == enabled
+        && other.semanticCounterText == semanticCounterText
+        && other.alignLabelWithHint == alignLabelWithHint
+        && other.constraints == constraints;
+>>>>>>> 17025dd88227cd9532c33fa78f5250d548d87e9a
   }
 
   @override
@@ -4001,6 +4200,7 @@ class InputDecoration {
       hintTextDirection,
       hintMaxLines,
       hintFadeDuration,
+      maintainHintHeight,
       error,
       errorText,
       errorStyle,
@@ -4058,6 +4258,7 @@ class InputDecoration {
       if (hintText != null) 'hintText: "$hintText"',
       if (hintMaxLines != null) 'hintMaxLines: "$hintMaxLines"',
       if (hintFadeDuration != null) 'hintFadeDuration: "$hintFadeDuration"',
+      if (!maintainHintHeight) 'maintainHintHeight: false',
       if (error != null) 'error: "$error"',
       if (errorText != null) 'errorText: "$errorText"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',
@@ -4113,7 +4314,7 @@ class InputDecoration {
 /// the current input decoration theme to initialize null [InputDecoration]
 /// properties.
 ///
-/// The [InputDecoration.applyDefaults] method is used to combine a input
+/// The [InputDecoration.applyDefaults] method is used to combine an input
 /// decoration theme with an [InputDecoration] object.
 @immutable
 class InputDecorationTheme with Diagnosticable {
@@ -4136,8 +4337,10 @@ class InputDecorationTheme with Diagnosticable {
     this.iconColor,
     this.prefixStyle,
     this.prefixIconColor,
+    this.prefixIconConstraints,
     this.suffixStyle,
     this.suffixIconColor,
+    this.suffixIconConstraints,
     this.counterStyle,
     this.filled = false,
     this.fillColor,
@@ -4163,8 +4366,8 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The style to use for [InputDecoration.helperText].
   ///
-  /// If [helperStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [helperStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   final TextStyle? helperStyle;
 
@@ -4183,8 +4386,8 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The style to use for the [InputDecoration.hintText].
   ///
-  /// If [hintStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [hintStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// Also used for the [InputDecoration.labelText] when the
@@ -4253,8 +4456,8 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The Color to use for the [InputDecoration.icon].
   ///
-  /// If [iconColor] is a [MaterialStateColor], then the effective
-  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// If [iconColor] is a [WidgetStateColor], then the effective
+  /// color can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [ColorScheme.primary].
@@ -4262,8 +4465,8 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The style to use for the [InputDecoration.prefixText].
   ///
-  /// If [prefixStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [prefixStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
@@ -4271,17 +4474,32 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The Color to use for the [InputDecoration.prefixIcon].
   ///
-  /// If [prefixIconColor] is a [MaterialStateColor], then the effective
-  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// If [prefixIconColor] is a [WidgetStateColor], then the effective
+  /// color can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [ColorScheme.primary].
   final Color? prefixIconColor;
 
+  /// The constraints to use for [InputDecoration.prefixIconConstraints].
+  ///
+  /// This can be used to modify the [BoxConstraints] surrounding
+  /// [InputDecoration.prefixIcon].
+  ///
+  /// This property is particularly useful for getting the decoration's height
+  /// less than the minimum tappable height (which is 48px when the visual
+  /// density is set to [VisualDensity.standard]). This can be achieved by
+  /// setting [isDense] to true and setting the constraints' minimum height
+  /// and width to a value lower than the minimum tappable size.
+  ///
+  /// If null, [BoxConstraints] with a minimum width and height of 48px is
+  /// used.
+  final BoxConstraints? prefixIconConstraints;
+
   /// The style to use for the [InputDecoration.suffixText].
   ///
-  /// If [suffixStyle] is a [MaterialStateTextStyle], then the effective
-  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// If [suffixStyle] is a [WidgetStateTextStyle], then the effective
+  /// color can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
@@ -4289,17 +4507,32 @@ class InputDecorationTheme with Diagnosticable {
 
   /// The Color to use for the [InputDecoration.suffixIcon].
   ///
-  /// If [suffixIconColor] is a [MaterialStateColor], then the effective
-  /// color can depend on the [MaterialState.focused] state, i.e.
+  /// If [suffixIconColor] is a [WidgetStateColor], then the effective
+  /// color can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [ColorScheme.primary].
   final Color? suffixIconColor;
 
+  /// The constraints to use for [InputDecoration.suffixIconConstraints].
+  ///
+  /// This can be used to modify the [BoxConstraints] surrounding
+  /// [InputDecoration.suffixIcon].
+  ///
+  /// This property is particularly useful for getting the decoration's height
+  /// less than the minimum tappable height (which is 48px when the visual
+  /// density is set to [VisualDensity.standard]). This can be achieved by
+  /// setting [isDense] to true and setting the constraints' minimum height
+  /// and width to a value lower than the minimum tappable size.
+  ///
+  /// If null, [BoxConstraints] with a minimum width and height of 48px is
+  /// used.
+  final BoxConstraints? suffixIconConstraints;
+
   /// The style to use for the [InputDecoration.counterText].
   ///
-  /// If [counterStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
+  /// If [counterStyle] is a [WidgetStateTextStyle], then the effective
+  /// text style can depend on the [WidgetState.focused] state, i.e.
   /// if the [TextField] is focused or not.
   ///
   /// If null, defaults to the [helperStyle].
@@ -4476,7 +4709,7 @@ class InputDecorationTheme with Diagnosticable {
   ///
   /// If [border] is a [MaterialStateUnderlineInputBorder]
   /// or [MaterialStateOutlineInputBorder], then the effective border can depend on
-  /// the [MaterialState.focused] state, i.e. if the [TextField] is focused or not.
+  /// the [WidgetState.focused] state, i.e. if the [TextField] is focused or not.
   ///
   /// The decoration's container is the area which is filled if [filled] is
   /// true and bordered per the [border]. It's the area adjacent to
@@ -4547,8 +4780,10 @@ class InputDecorationTheme with Diagnosticable {
     Color? iconColor,
     TextStyle? prefixStyle,
     Color? prefixIconColor,
+    BoxConstraints? prefixIconConstraints,
     TextStyle? suffixStyle,
     Color? suffixIconColor,
+    BoxConstraints? suffixIconConstraints,
     TextStyle? counterStyle,
     bool? filled,
     Color? fillColor,
@@ -4584,8 +4819,10 @@ class InputDecorationTheme with Diagnosticable {
       isCollapsed: isCollapsed ?? this.isCollapsed,
       prefixStyle: prefixStyle ?? this.prefixStyle,
       prefixIconColor: prefixIconColor ?? this.prefixIconColor,
+      prefixIconConstraints: prefixIconConstraints ?? this.prefixIconConstraints,
       suffixStyle: suffixStyle ?? this.suffixStyle,
       suffixIconColor: suffixIconColor ?? this.suffixIconColor,
+      suffixIconConstraints: suffixIconConstraints ?? this.suffixIconConstraints,
       counterStyle: counterStyle ?? this.counterStyle,
       filled: filled ?? this.filled,
       fillColor: fillColor ?? this.fillColor,
@@ -4633,8 +4870,10 @@ class InputDecorationTheme with Diagnosticable {
       iconColor: iconColor ?? inputDecorationTheme.iconColor,
       prefixStyle: prefixStyle ?? inputDecorationTheme.prefixStyle,
       prefixIconColor: prefixIconColor ?? inputDecorationTheme.prefixIconColor,
+      prefixIconConstraints: prefixIconConstraints ?? inputDecorationTheme.prefixIconConstraints,
       suffixStyle: suffixStyle ?? inputDecorationTheme.suffixStyle,
       suffixIconColor: suffixIconColor ?? inputDecorationTheme.suffixIconColor,
+      suffixIconConstraints: suffixIconConstraints ?? inputDecorationTheme.suffixIconConstraints,
       counterStyle: counterStyle ?? inputDecorationTheme.counterStyle,
       fillColor: fillColor ?? inputDecorationTheme.fillColor,
       activeIndicatorBorder:
@@ -4655,6 +4894,7 @@ class InputDecorationTheme with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
+<<<<<<< HEAD
         labelStyle,
         floatingLabelStyle,
         helperStyle,
@@ -4691,6 +4931,46 @@ class InputDecorationTheme with Diagnosticable {
           hintFadeDuration,
         ),
       );
+=======
+    labelStyle,
+    floatingLabelStyle,
+    helperStyle,
+    helperMaxLines,
+    hintStyle,
+    errorStyle,
+    errorMaxLines,
+    floatingLabelBehavior,
+    floatingLabelAlignment,
+    isDense,
+    contentPadding,
+    isCollapsed,
+    iconColor,
+    prefixStyle,
+    prefixIconColor,
+    prefixIconConstraints,
+    suffixStyle,
+    suffixIconColor,
+    suffixIconConstraints,
+    Object.hash(
+      counterStyle,
+      filled,
+      fillColor,
+      activeIndicatorBorder,
+      outlineBorder,
+      focusColor,
+      hoverColor,
+      errorBorder,
+      focusedBorder,
+      focusedErrorBorder,
+      disabledBorder,
+      enabledBorder,
+      border,
+      alignLabelWithHint,
+      constraints,
+      hintFadeDuration,
+    ),
+  );
+>>>>>>> 17025dd88227cd9532c33fa78f5250d548d87e9a
 
   @override
   bool operator ==(Object other) {
@@ -4700,6 +4980,7 @@ class InputDecorationTheme with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
+<<<<<<< HEAD
     return other is InputDecorationTheme &&
         other.labelStyle == labelStyle &&
         other.floatingLabelStyle == floatingLabelStyle &&
@@ -4735,12 +5016,52 @@ class InputDecorationTheme with Diagnosticable {
         other.alignLabelWithHint == alignLabelWithHint &&
         other.constraints == constraints &&
         other.disabledBorder == disabledBorder;
+=======
+    return other is InputDecorationTheme
+        && other.labelStyle == labelStyle
+        && other.floatingLabelStyle == floatingLabelStyle
+        && other.helperStyle == helperStyle
+        && other.helperMaxLines == helperMaxLines
+        && other.hintStyle == hintStyle
+        && other.hintFadeDuration == hintFadeDuration
+        && other.errorStyle == errorStyle
+        && other.errorMaxLines == errorMaxLines
+        && other.isDense == isDense
+        && other.contentPadding == contentPadding
+        && other.isCollapsed == isCollapsed
+        && other.iconColor == iconColor
+        && other.prefixStyle == prefixStyle
+        && other.prefixIconColor == prefixIconColor
+        && other.prefixIconConstraints == prefixIconConstraints
+        && other.suffixStyle == suffixStyle
+        && other.suffixIconColor == suffixIconColor
+        && other.suffixIconConstraints == suffixIconConstraints
+        && other.counterStyle == counterStyle
+        && other.floatingLabelBehavior == floatingLabelBehavior
+        && other.floatingLabelAlignment == floatingLabelAlignment
+        && other.filled == filled
+        && other.fillColor == fillColor
+        && other.activeIndicatorBorder == activeIndicatorBorder
+        && other.outlineBorder == outlineBorder
+        && other.focusColor == focusColor
+        && other.hoverColor == hoverColor
+        && other.errorBorder == errorBorder
+        && other.focusedBorder == focusedBorder
+        && other.focusedErrorBorder == focusedErrorBorder
+        && other.disabledBorder == disabledBorder
+        && other.enabledBorder == enabledBorder
+        && other.border == border
+        && other.alignLabelWithHint == alignLabelWithHint
+        && other.constraints == constraints
+        && other.disabledBorder == disabledBorder;
+>>>>>>> 17025dd88227cd9532c33fa78f5250d548d87e9a
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     const InputDecorationTheme defaultTheme = InputDecorationTheme();
+<<<<<<< HEAD
     properties.add(DiagnosticsProperty<TextStyle>('labelStyle', labelStyle,
         defaultValue: defaultTheme.labelStyle));
     properties.add(DiagnosticsProperty<TextStyle>(
@@ -4822,6 +5143,43 @@ class InputDecorationTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<BoxConstraints>(
         'constraints', constraints,
         defaultValue: defaultTheme.constraints));
+=======
+    properties.add(DiagnosticsProperty<TextStyle>('labelStyle', labelStyle, defaultValue: defaultTheme.labelStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('floatingLabelStyle', floatingLabelStyle, defaultValue: defaultTheme.floatingLabelStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('helperStyle', helperStyle, defaultValue: defaultTheme.helperStyle));
+    properties.add(IntProperty('helperMaxLines', helperMaxLines, defaultValue: defaultTheme.helperMaxLines));
+    properties.add(DiagnosticsProperty<TextStyle>('hintStyle', hintStyle, defaultValue: defaultTheme.hintStyle));
+    properties.add(DiagnosticsProperty<Duration>('hintFadeDuration', hintFadeDuration, defaultValue: defaultTheme.hintFadeDuration));
+    properties.add(DiagnosticsProperty<TextStyle>('errorStyle', errorStyle, defaultValue: defaultTheme.errorStyle));
+    properties.add(IntProperty('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
+    properties.add(DiagnosticsProperty<FloatingLabelBehavior>('floatingLabelBehavior', floatingLabelBehavior, defaultValue: defaultTheme.floatingLabelBehavior));
+    properties.add(DiagnosticsProperty<FloatingLabelAlignment>('floatingLabelAlignment', floatingLabelAlignment, defaultValue: defaultTheme.floatingLabelAlignment));
+    properties.add(DiagnosticsProperty<bool>('isDense', isDense, defaultValue: defaultTheme.isDense));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('contentPadding', contentPadding, defaultValue: defaultTheme.contentPadding));
+    properties.add(DiagnosticsProperty<bool>('isCollapsed', isCollapsed, defaultValue: defaultTheme.isCollapsed));
+    properties.add(DiagnosticsProperty<Color>('iconColor', iconColor, defaultValue: defaultTheme.iconColor));
+    properties.add(DiagnosticsProperty<Color>('prefixIconColor', prefixIconColor, defaultValue: defaultTheme.prefixIconColor));
+    properties.add(DiagnosticsProperty<BoxConstraints>('prefixIconConstraints', prefixIconConstraints, defaultValue: defaultTheme.prefixIconConstraints));
+    properties.add(DiagnosticsProperty<TextStyle>('prefixStyle', prefixStyle, defaultValue: defaultTheme.prefixStyle));
+    properties.add(DiagnosticsProperty<Color>('suffixIconColor', suffixIconColor, defaultValue: defaultTheme.suffixIconColor));
+    properties.add(DiagnosticsProperty<BoxConstraints>('suffixIconConstraints', suffixIconConstraints, defaultValue: defaultTheme.suffixIconConstraints));
+    properties.add(DiagnosticsProperty<TextStyle>('suffixStyle', suffixStyle, defaultValue: defaultTheme.suffixStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('counterStyle', counterStyle, defaultValue: defaultTheme.counterStyle));
+    properties.add(DiagnosticsProperty<bool>('filled', filled, defaultValue: defaultTheme.filled));
+    properties.add(ColorProperty('fillColor', fillColor, defaultValue: defaultTheme.fillColor));
+    properties.add(DiagnosticsProperty<BorderSide>('activeIndicatorBorder', activeIndicatorBorder, defaultValue: defaultTheme.activeIndicatorBorder));
+    properties.add(DiagnosticsProperty<BorderSide>('outlineBorder', outlineBorder, defaultValue: defaultTheme.outlineBorder));
+    properties.add(ColorProperty('focusColor', focusColor, defaultValue: defaultTheme.focusColor));
+    properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: defaultTheme.hoverColor));
+    properties.add(DiagnosticsProperty<InputBorder>('errorBorder', errorBorder, defaultValue: defaultTheme.errorBorder));
+    properties.add(DiagnosticsProperty<InputBorder>('focusedBorder', focusedBorder, defaultValue: defaultTheme.focusedErrorBorder));
+    properties.add(DiagnosticsProperty<InputBorder>('focusedErrorBorder', focusedErrorBorder, defaultValue: defaultTheme.focusedErrorBorder));
+    properties.add(DiagnosticsProperty<InputBorder>('disabledBorder', disabledBorder, defaultValue: defaultTheme.disabledBorder));
+    properties.add(DiagnosticsProperty<InputBorder>('enabledBorder', enabledBorder, defaultValue: defaultTheme.enabledBorder));
+    properties.add(DiagnosticsProperty<InputBorder>('border', border, defaultValue: defaultTheme.border));
+    properties.add(DiagnosticsProperty<bool>('alignLabelWithHint', alignLabelWithHint, defaultValue: defaultTheme.alignLabelWithHint));
+    properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: defaultTheme.constraints));
+>>>>>>> 17025dd88227cd9532c33fa78f5250d548d87e9a
   }
 }
 

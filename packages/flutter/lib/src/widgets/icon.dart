@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'image_icon.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -80,6 +86,10 @@ class Icon extends StatelessWidget {
     this.semanticLabel,
     this.textDirection,
     this.applyTextScaling,
+<<<<<<< HEAD
+=======
+    this.blendMode,
+>>>>>>> 17025dd88227cd9532c33fa78f5250d548d87e9a
   })  : assert(fill == null || (0.0 <= fill && fill <= 1.0)),
         assert(weight == null || (0.0 < weight)),
         assert(opticalSize == null || (0.0 < opticalSize));
@@ -209,7 +219,7 @@ class Icon extends StatelessWidget {
 
   /// Semantic label for the icon.
   ///
-  /// Announced in accessibility modes (e.g TalkBack/VoiceOver).
+  /// Announced by assistive technologies (e.g TalkBack/VoiceOver).
   /// This label does not show in the UI.
   ///
   ///  * [SemanticsProperties.label], which is set to [semanticLabel] in the
@@ -240,6 +250,11 @@ class Icon extends StatelessWidget {
   /// Defaults to the nearest [IconTheme]'s
   /// [IconThemeData.applyTextScaling].
   final bool? applyTextScaling;
+
+  /// The [BlendMode] to apply to the foreground of the icon.
+  ///
+  /// Defaults to [BlendMode.srcOver]
+  final BlendMode? blendMode;
 
   @override
   Widget build(BuildContext context) {
@@ -277,9 +292,17 @@ class Icon extends StatelessWidget {
     }
 
     final double iconOpacity = iconTheme.opacity ?? 1.0;
-    Color iconColor = color ?? iconTheme.color!;
+    Color? iconColor = color ?? iconTheme.color!;
+    Paint? foreground;
     if (iconOpacity != 1.0) {
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
+    }
+    if (blendMode != null) {
+      foreground = Paint()
+        ..blendMode = blendMode!
+        ..color = iconColor;
+      // Cannot provide both a color and a foreground.
+      iconColor = null;
     }
 
     final TextStyle fontStyle = TextStyle(
@@ -296,9 +319,14 @@ class Icon extends StatelessWidget {
       package: icon.fontPackage,
       fontFamilyFallback: icon.fontFamilyFallback,
       shadows: iconShadows,
+<<<<<<< HEAD
       height:
           1.0, // Makes sure the font's body is vertically centered within the iconSize x iconSize square.
+=======
+      height: 1.0, // Makes sure the font's body is vertically centered within the iconSize x iconSize square.
+>>>>>>> 17025dd88227cd9532c33fa78f5250d548d87e9a
       leadingDistribution: TextLeadingDistribution.even,
+      foreground: foreground,
     );
 
     Widget iconWidget = RichText(
