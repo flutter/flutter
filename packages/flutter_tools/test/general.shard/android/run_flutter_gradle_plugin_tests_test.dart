@@ -9,18 +9,21 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/globals.dart';
 
+import '../../integration.shard/bash_entrypoint_test.dart';
 import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
   testUsingContext('Flutter Gradle Plugin unit tests pass', () async {
-    final String gradleExecutable = Platform.isWindows ? r'.\gradlew.bat' : './gradlew';
+    final String gradleFileName = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
+    final String gradleExecutable = Platform.isWindows ? '.\\$gradleFileName' : './$gradleFileName';
     final Directory flutterGradlePluginDirectory = fileSystem.directory(getFlutterRoot())
         .childDirectory('packages')
         .childDirectory('flutter_tools')
         .childDirectory('gradle');
     gradleUtils?.injectGradleWrapperIfNeeded(flutterGradlePluginDirectory);
+    makeExecutable(flutterGradlePluginDirectory.childFile(gradleFileName));
     final RunResult runResult = await processUtils.run([gradleExecutable, 'test'], workingDirectory: flutterGradlePluginDirectory.path);
     expect(runResult.exitCode, 0);
   });
