@@ -24,7 +24,7 @@ void main() {
         .childDirectory('gradle');
     gradleUtils?.injectGradleWrapperIfNeeded(flutterGradlePluginDirectory);
     makeExecutable(flutterGradlePluginDirectory.childFile(gradleFileName));
-    final RunResult runResult = await processUtils.run([gradleExecutable, 'test'], workingDirectory: flutterGradlePluginDirectory.path);
+    final RunResult runResult = await processUtils.run(<String>[gradleExecutable, 'test'], workingDirectory: flutterGradlePluginDirectory.path);
     expect(runResult.exitCode, 0);
   });
 }
