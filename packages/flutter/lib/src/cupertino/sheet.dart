@@ -301,10 +301,13 @@ class CupertinoSheetTransition extends StatefulWidget {
 class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
   // The offset animation when this page is being covered by another sheet.
   late Animation<Offset> _secondaryPositionAnimation;
+
   // The scale animation when this page is being covered by another sheet.
   late Animation<double> _secondaryScaleAnimation;
+
   // Curve of primary page which is coming in to cover another route.
   CurvedAnimation? _primaryPositionCurve;
+
   // Curve of secondary page which is becoming covered by another sheet.
   CurvedAnimation? _secondaryPositionCurve;
 
