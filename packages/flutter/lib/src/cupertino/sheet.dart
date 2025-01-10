@@ -421,7 +421,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
 ///
 /// Typically called by [showCupertinoSheet], which provides some boilerplate for
 /// pushing the `CupertinoSheetRoute` to the root navigator and providing simple
-/// nested naviagation.
+/// nested navigation.
 ///
 /// The sheet will be dismissed by dragging downwards on the screen, or a call to
 /// [CupertinoSheetRoute.popSheet].
@@ -466,7 +466,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
   /// Pops the entire [CupertinoSheetRoute], if a sheet route exists in the stack.
   ///
-  /// Used if to pop an entire sheet at once, if there is nested naviagtion within
+  /// Used if to pop an entire sheet at once, if there is nested navigtion within
   /// that sheet.
   static void popSheet(BuildContext context) {
     if (hasParentSheet(context)) {

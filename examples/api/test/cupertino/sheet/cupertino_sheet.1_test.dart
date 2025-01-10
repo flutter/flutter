@@ -39,5 +39,6 @@ void main() {
     await tester.tap(find.text('Pop Whole Sheet'));
     await tester.pumpAndSettle();
     expect(dialogTitle, findsNothing);
+    expect(nextPageTitle, findsNothing);
   });
 }
