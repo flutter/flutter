@@ -753,11 +753,12 @@ class _CupertinoDownGestureController<T> {
       // Keep the userGestureInProgress in true state so we don't change the
       // curve of the page transition mid-flight since CupertinoPageTransition
       // depends on userGestureInProgress.
-      late AnimationStatusListener animationStatusCallback;
-      animationStatusCallback = (AnimationStatus status) {
+      // late AnimationStatusListener animationStatusCallback;
+      void animationStatusCallback(AnimationStatus status) {
         navigator.didStopUserGesture();
         controller.removeStatusListener(animationStatusCallback);
-      };
+      }
+
       controller.addStatusListener(animationStatusCallback);
     } else {
       navigator.didStopUserGesture();

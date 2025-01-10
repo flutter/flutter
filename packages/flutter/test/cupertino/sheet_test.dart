@@ -734,6 +734,7 @@ void main() {
                     onPressed: () {
                       showCupertinoSheet<void>(
                         context: homeKey.currentContext!,
+                        useNestedNavigation: true,
                         pageBuilder: (BuildContext context) {
                           return CupertinoPageScaffold(
                             key: sheetKey,
@@ -769,6 +770,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Page 2'), findsNothing);
+      expect(find.text('Page 3'), findsNothing);
     });
 
     testWidgets('Popping the sheet during drag should not crash', (WidgetTester tester) async {
