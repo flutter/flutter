@@ -7,11 +7,13 @@ import 'package:android_driver_extensions/skia_gold.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 
-import '_luci_skia_gold_prelude.dart';
+import '../_luci_skia_gold_prelude.dart';
 
 void main() async {
   // To test the golden file generation locally, comment out the following line.
   // autoUpdateGoldenFiles = true;
+
+  const String goldenPrefix = 'virtual_display_platform_view';
 
   late final FlutterDriver flutterDriver;
   late final NativeDriver nativeDriver;
@@ -24,6 +26,12 @@ void main() async {
     nativeDriver = await AndroidNativeDriver.connect(flutterDriver);
     await nativeDriver.configureForScreenshotTesting();
     await flutterDriver.waitUntilFirstFrameRasterized();
+
+    // Double check that we are really probably testing using Virtual Display.
+    // See https://github.com/flutter/flutter/blob/main/docs/platforms/android/Android-Platform-Views.md.
+    if (await nativeDriver.sdkVersion case final int version when version < 23) {
+      fail('Requires SDK >= 23, got $version');
+    }
   });
 
   tearDownAll(() async {
@@ -35,7 +43,7 @@ void main() async {
     await flutterDriver.waitFor(find.byType('AndroidView'));
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('platform_view_blue_orange_gradient_portrait.android.png'),
+      matchesGoldenFile('$goldenPrefix.blue_orange_gradient_portrait.android.png'),
     );
   }, timeout: Timeout.none);
 
@@ -44,13 +52,13 @@ void main() async {
     await nativeDriver.rotateToLandscape();
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('platform_view_blue_orange_gradient_landscape.android.png'),
+      matchesGoldenFile('$goldenPrefix.blue_orange_gradient_landscape_rotated.android.png'),
     );
 
     await nativeDriver.rotateResetDefault();
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('platform_view_blue_orange_gradient_portrait_post_rotation.android.png'),
+      matchesGoldenFile('$goldenPrefix.blue_orange_gradient_portait_rotated_back.android.png'),
     );
   }, timeout: Timeout.none);
 }
