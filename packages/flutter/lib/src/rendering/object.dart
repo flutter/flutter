@@ -1375,12 +1375,12 @@ class PipelineOwner with DiagnosticableTreeMixin {
       _nodesNeedingSemantics.clear();
       for (final RenderObject node in nodesToProcess) {
         if (node._needsSemanticsUpdate && node.owner == this) {
-          node._updateSemantics();
+          node._updateSemantics(); // BARTEK: 0
         }
       }
       _semanticsOwner!.sendSemanticsUpdate();
       for (final PipelineOwner child in _children) {
-        child.flushSemantics();
+        child.flushSemantics(); // BARTEK: 0??
       }
       assert(
         _nodesNeedingSemantics.isEmpty,
@@ -3798,7 +3798,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   }
 
   /// Updates the semantic information of the render object.
-  void _updateSemantics() {
+  void _updateSemantics() {  // BARTEK: 2
     assert(_semanticsConfiguration.isSemanticBoundary || semanticsParent == null);
     if (_needsLayout) {
       // There's not enough information in this subtree to compute semantics.
@@ -3841,7 +3841,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   }
 
   /// Returns the semantics that this node would like to add to its parent.
-  _SemanticsFragment _getSemanticsForParent({
+  _SemanticsFragment _getSemanticsForParent({ // BARTEK: 4
     required bool mergeIntoParent,
     required bool blockUserActions,
   }) {
