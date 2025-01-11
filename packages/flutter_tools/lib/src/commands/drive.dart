@@ -294,6 +294,7 @@ class DriveCommand extends RunCommandBase {
     _flutterDriverFactory ??= FlutterDriverFactory(
       applicationPackageFactory: ApplicationPackageFactory.instance!,
       logger: _logger,
+      platform: _platform,
       processUtils: globals.processUtils,
       dartSdkPath: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
       devtoolsLauncher: DevtoolsLauncher.instance!,
@@ -338,7 +339,6 @@ class DriveCommand extends RunCommandBase {
       final Future<int> testResultFuture = driverService.startTest(
         testFile,
         stringsArg('test-arguments'),
-        _platform.environment,
         packageConfig,
         chromeBinary: stringArg('chrome-binary'),
         headless: boolArg('headless'),
