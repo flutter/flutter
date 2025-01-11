@@ -7,17 +7,34 @@ import 'dart:ui' show Offset;
 import 'package:flutter/foundation.dart'
     show DiagnosticPropertiesBuilder, Diagnosticable, DiagnosticsProperty;
 
-/// Details that contain positions at which the single pointer interacts
-/// with the screen.
+/// An abstract class representing gesture details that include
+/// positional information.
+///
+/// This class serve as a common interface for gesture details that involve
+/// positional data, such as dragging and tapping.
+/// It simplifies gesture handling by enabling the use of shared logic across
+/// multiple gesture types, users can create a method to handle gesture details
+/// with this position information. For example:
+///
+/// ```dart
+/// void handleGesture(GestureDetailsWithPositions details) {
+///   final Offset globalPosition = details.globalPosition;
+///
+///   if (details is TapDownDetails) {
+///     // Handles specific detail cases.
+///   }
+///
+///   final Offset localPosition = details.localPosition;
+///
+///   // Rest of business logic.
+/// }
+/// ```
 abstract class GestureDetailsWithPositions with Diagnosticable {
   /// Creates details with positions.
   const GestureDetailsWithPositions({this.globalPosition = Offset.zero, Offset? localPosition})
     : localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer interacts with the screen.
-  ///  * For *start details, interact means contacting the screen.
-  ///  * For *update details, interact means moving on the screen.
-  ///  * For *end details, interact means lifted from the screen.
   ///
   /// Defaults to the origin if not specified in the constructor.
   ///
