@@ -32,6 +32,11 @@ void main() {
 }
 
 void makeExecutable(File file) {
+  if (Platform.isWindows) {
+    // no op.
+    return;
+  }
+
   final ProcessResult result = processManager.runSync(<String>['chmod', '+x', file.path]);
   expect(result, const ProcessResultMatcher());
 }
