@@ -15,7 +15,7 @@ final class _AssetTransformationTestProject extends Project {
   final String pubspec = '''
 name: test
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.7.0-0
 dependencies:
   flutter:
     sdk: flutter
@@ -67,14 +67,11 @@ Future<void> main() async {
         ..createSync(recursive: true)
         ..writeAsStringSync('abc');
 
-      final ProcessResult result = await processManager.run(
-        <String>[
-          flutterBin,
-          'build',
-          'web',
-        ],
-        workingDirectory: tempProjectDirectory.path,
-      );
+      final ProcessResult result = await processManager.run(<String>[
+        flutterBin,
+        'build',
+        'web',
+      ], workingDirectory: tempProjectDirectory.path);
 
       expect(result.exitCode, 0, reason: result.stderr as String);
 
@@ -95,9 +92,9 @@ Future<void> main() async {
         asset.readAsStringSync(),
         equals('ABC'),
         reason:
-          "The original contents of the asset (which should be 'abc') should "
-          "have been transformed to 'ABC' by the capitalizer_transformer as "
-          'configured in the pubspec.',
+            "The original contents of the asset (which should be 'abc') should "
+            "have been transformed to 'ABC' by the capitalizer_transformer as "
+            'configured in the pubspec.',
       );
     } finally {
       tryToDelete(tempProjectDirectory);
@@ -116,7 +113,7 @@ name: capitalizer_transformer
 version: 1.0.0
 
 environment:
-  sdk: '>=3.2.0-0 <4.0.0'
+  sdk: ^3.7.0-0
 
 dependencies:
   args: ^2.4.2

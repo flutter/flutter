@@ -4,25 +4,44 @@
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/ios/core_devices.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
-class LocalFileSystemFake extends LocalFileSystem {
-  LocalFileSystemFake.test({required super.signals}) : super.test();
-
+class LocalFileSystemFake extends Fake implements LocalFileSystem {
   MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
 
   @override
   Directory get systemTempDirectory => memoryFileSystem.systemTempDirectory;
+
+  @override
+  Directory directory(dynamic path) => memoryFileSystem.directory(path);
+
+  @override
+  File file(dynamic path) => memoryFileSystem.file(path);
+
+  @override
+  Context get path => memoryFileSystem.path;
+
+  @override
+  Future<void> dispose() async {
+    _disposed = true;
+  }
+
+  @override
+  bool get disposed => _disposed;
+
+  bool _disposed = false;
 }
 
 void main() {
@@ -66,21 +85,30 @@ void main() {
       });
 
       testWithoutContext('fails to install app', () async {
-        final bool status = await deviceControl.installApp(deviceId: 'device-id', bundlePath: '/path/to/bundle');
+        final bool status = await deviceControl.installApp(
+          deviceId: 'device-id',
+          bundlePath: '/path/to/bundle',
+        );
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(logger.errorText, contains('devicectl is not installed.'));
         expect(status, isFalse);
       });
 
       testWithoutContext('fails to launch app', () async {
-        final bool status = await deviceControl.launchApp(deviceId: 'device-id', bundleId: 'com.example.flutterApp');
+        final bool status = await deviceControl.launchApp(
+          deviceId: 'device-id',
+          bundleId: 'com.example.flutterApp',
+        );
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(logger.errorText, contains('devicectl is not installed.'));
         expect(status, isFalse);
       });
 
       testWithoutContext('fails to check if app is installed', () async {
-        final bool status = await deviceControl.isAppInstalled(deviceId: 'device-id', bundleId: 'com.example.flutterApp');
+        final bool status = await deviceControl.isAppInstalled(
+          deviceId: 'device-id',
+          bundleId: 'com.example.flutterApp',
+        );
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(logger.errorText, contains('devicectl is not installed.'));
         expect(status, isFalse);
@@ -153,24 +181,26 @@ void main() {
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('install_results.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'device',
-            'install',
-            'app',
-            '--device',
-            deviceId,
-            bundlePath,
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'install',
+              'app',
+              '--device',
+              deviceId,
+              bundlePath,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
 
         final bool status = await deviceControl.installApp(
           deviceId: deviceId,
@@ -228,31 +258,33 @@ void main() {
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('install_results.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'device',
-            'install',
-            'app',
-            '--device',
-            deviceId,
-            bundlePath,
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-          exitCode: 1,
-          stderr: '''
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'install',
+              'app',
+              '--device',
+              deviceId,
+              bundlePath,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+            exitCode: 1,
+            stderr: '''
 ERROR: Could not obtain access to one or more requested file system resources because CoreDevice was unable to create bookmark data. (com.apple.dt.CoreDeviceError error 1005.)
          NSURL = file:///path/to/app
 --------------------------------------------------------------------------------
 ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDomain error 260.)
-'''
-        ));
+''',
+          ),
+        );
 
         final bool status = await deviceControl.installApp(
           deviceId: deviceId,
@@ -260,7 +292,10 @@ ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDo
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText, contains('ERROR: Could not obtain access to one or more requested file system'));
+        expect(
+          logger.errorText,
+          contains('ERROR: Could not obtain access to one or more requested file system'),
+        );
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
@@ -274,24 +309,26 @@ ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDo
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('install_results.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'device',
-            'install',
-            'app',
-            '--device',
-            deviceId,
-            bundlePath,
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'install',
+              'app',
+              '--device',
+              deviceId,
+              bundlePath,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
 
         final bool status = await deviceControl.installApp(
           deviceId: deviceId,
@@ -311,24 +348,26 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('install_results.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'device',
-            'install',
-            'app',
-            '--device',
-            deviceId,
-            bundlePath,
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'install',
+              'app',
+              '--device',
+              deviceId,
+              bundlePath,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
 
         final bool status = await deviceControl.installApp(
           deviceId: deviceId,
@@ -382,24 +421,26 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('uninstall_results.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'device',
-            'uninstall',
-            'app',
-            '--device',
-            deviceId,
-            bundleId,
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'uninstall',
+              'app',
+              '--device',
+              deviceId,
+              bundleId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
 
         final bool status = await deviceControl.uninstallApp(
           deviceId: deviceId,
@@ -457,31 +498,33 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('uninstall_results.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'device',
-            'uninstall',
-            'app',
-            '--device',
-            deviceId,
-            bundleId,
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-          exitCode: 1,
-          stderr: '''
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'uninstall',
+              'app',
+              '--device',
+              deviceId,
+              bundleId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+            exitCode: 1,
+            stderr: '''
 ERROR: Could not obtain access to one or more requested file system resources because CoreDevice was unable to create bookmark data. (com.apple.dt.CoreDeviceError error 1005.)
          NSURL = file:///path/to/app
 --------------------------------------------------------------------------------
 ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDomain error 260.)
-'''
-        ));
+''',
+          ),
+        );
 
         final bool status = await deviceControl.uninstallApp(
           deviceId: deviceId,
@@ -489,7 +532,10 @@ ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDo
         );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(logger.errorText, contains('ERROR: Could not obtain access to one or more requested file system'));
+        expect(
+          logger.errorText,
+          contains('ERROR: Could not obtain access to one or more requested file system'),
+        );
         expect(tempFile, isNot(exists));
         expect(status, false);
       });
@@ -503,24 +549,26 @@ ERROR: The file couldn’t be opened because it doesn’t exist. (NSCocoaErrorDo
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('uninstall_results.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'device',
-            'uninstall',
-            'app',
-            '--device',
-            deviceId,
-            bundleId,
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'uninstall',
+              'app',
+              '--device',
+              deviceId,
+              bundleId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
 
         final bool status = await deviceControl.uninstallApp(
           deviceId: deviceId,
@@ -540,24 +588,26 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('uninstall_results.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'device',
-            'uninstall',
-            'app',
-            '--device',
-            deviceId,
-            bundleId,
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'uninstall',
+              'app',
+              '--device',
+              deviceId,
+              bundleId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
 
         final bool status = await deviceControl.uninstallApp(
           deviceId: deviceId,
@@ -630,29 +680,28 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('launch_results.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'device',
-            'process',
-            'launch',
-            '--device',
-            deviceId,
-            bundleId,
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
-
-        final bool status = await deviceControl.launchApp(
-          deviceId: deviceId,
-          bundleId: bundleId,
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'process',
+              'launch',
+              '--device',
+              deviceId,
+              bundleId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
         );
+
+        final bool status = await deviceControl.launchApp(deviceId: deviceId, bundleId: bundleId);
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(logger.errorText, isEmpty);
@@ -717,26 +766,28 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('launch_results.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'device',
-            'process',
-            'launch',
-            '--device',
-            deviceId,
-            bundleId,
-            '--arg1',
-            '--arg2',
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'process',
+              'launch',
+              '--device',
+              deviceId,
+              bundleId,
+              '--arg1',
+              '--arg2',
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
 
         final bool status = await deviceControl.launchApp(
           deviceId: deviceId,
@@ -789,35 +840,34 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('launch_results.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'device',
-            'process',
-            'launch',
-            '--device',
-            deviceId,
-            bundleId,
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-          exitCode: 1,
-          stderr: '''
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'process',
+              'launch',
+              '--device',
+              deviceId,
+              bundleId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+            exitCode: 1,
+            stderr: '''
 ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatusErrorDomain error -10814.)
     _LSFunction = runEvaluator
     _LSLine = 1608
-'''
-        ));
-
-        final bool status = await deviceControl.launchApp(
-          deviceId: deviceId,
-          bundleId: bundleId,
+''',
+          ),
         );
+
+        final bool status = await deviceControl.launchApp(deviceId: deviceId, bundleId: bundleId);
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(logger.errorText, contains('ERROR: The operation couldn?t be completed.'));
@@ -834,30 +884,28 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('launch_results.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'device',
-            'process',
-            'launch',
-            '--device',
-            deviceId,
-            bundleId,
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
-
-
-        final bool status = await deviceControl.launchApp(
-          deviceId: deviceId,
-          bundleId: bundleId,
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'process',
+              'launch',
+              '--device',
+              deviceId,
+              bundleId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
         );
+
+        final bool status = await deviceControl.launchApp(deviceId: deviceId, bundleId: bundleId);
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(logger.errorText, contains('devicectl returned unexpected JSON response'));
@@ -872,29 +920,28 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('launch_results.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'device',
-            'process',
-            'launch',
-            '--device',
-            deviceId,
-            bundleId,
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
-
-        final bool status = await deviceControl.launchApp(
-          deviceId: deviceId,
-          bundleId: bundleId,
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'process',
+              'launch',
+              '--device',
+              deviceId,
+              bundleId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
         );
+
+        final bool status = await deviceControl.launchApp(deviceId: deviceId, bundleId: bundleId);
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(logger.errorText, contains('devicectl returned non-JSON response'));
@@ -972,25 +1019,27 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('core_device_app_list.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'device',
-            'info',
-            'apps',
-            '--device',
-            deviceId,
-            '--bundle-id',
-            bundleId,
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'info',
+              'apps',
+              '--device',
+              deviceId,
+              '--bundle-id',
+              bundleId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
 
         final List<IOSCoreDeviceInstalledApp> apps = await deviceControl.getInstalledApps(
           deviceId: deviceId,
@@ -1011,7 +1060,10 @@ invalid JSON
         expect(apps[0].internalApp, isFalse);
         expect(apps[0].name, 'Bundle');
         expect(apps[0].removable, isTrue);
-        expect(apps[0].url, 'file:///private/var/containers/Bundle/Application/12345E6A-7F89-0C12-345E-F6A7E890CFF1/Runner.app/');
+        expect(
+          apps[0].url,
+          'file:///private/var/containers/Bundle/Application/12345E6A-7F89-0C12-345E-F6A7E890CFF1/Runner.app/',
+        );
         expect(apps[0].version, '1.0.0');
 
         expect(apps[1].appClip, isTrue);
@@ -1023,10 +1075,12 @@ invalid JSON
         expect(apps[1].internalApp, isTrue);
         expect(apps[1].name, 'Bundle 2');
         expect(apps[1].removable, isFalse);
-        expect(apps[1].url, 'file:///private/var/containers/Bundle/Application/12345E6A-7F89-0C12-345E-F6A7E890CFF1/Runner.app/');
+        expect(
+          apps[1].url,
+          'file:///private/var/containers/Bundle/Application/12345E6A-7F89-0C12-345E-F6A7E890CFF1/Runner.app/',
+        );
         expect(apps[1].version, '1.0.0');
       });
-
 
       testWithoutContext('Successfully find installed app', () async {
         const String deviceControlOutput = '''
@@ -1080,25 +1134,27 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('core_device_app_list.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'device',
-            'info',
-            'apps',
-            '--device',
-            deviceId,
-            '--bundle-id',
-            bundleId,
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'info',
+              'apps',
+              '--device',
+              deviceId,
+              '--bundle-id',
+              bundleId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
 
         final bool status = await deviceControl.isAppInstalled(
           deviceId: deviceId,
@@ -1150,25 +1206,27 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('core_device_app_list.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'device',
-            'info',
-            'apps',
-            '--device',
-            deviceId,
-            '--bundle-id',
-            bundleId,
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'info',
+              'apps',
+              '--device',
+              deviceId,
+              '--bundle-id',
+              bundleId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
 
         final bool status = await deviceControl.isAppInstalled(
           deviceId: deviceId,
@@ -1218,29 +1276,31 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('core_device_app_list.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'device',
-            'info',
-            'apps',
-            '--device',
-            deviceId,
-            '--bundle-id',
-            bundleId,
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-          exitCode: 1,
-          stderr: '''
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'info',
+              'apps',
+              '--device',
+              deviceId,
+              '--bundle-id',
+              bundleId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+            exitCode: 1,
+            stderr: '''
 ERROR: The specified device was not found. (com.apple.dt.CoreDeviceError error 1000.)
-'''
-        ));
+''',
+          ),
+        );
 
         final bool status = await deviceControl.isAppInstalled(
           deviceId: deviceId,
@@ -1262,26 +1322,27 @@ ERROR: The specified device was not found. (com.apple.dt.CoreDeviceError error 1
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('core_device_app_list.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'device',
-            'info',
-            'apps',
-            '--device',
-            deviceId,
-            '--bundle-id',
-            bundleId,
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
-
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'info',
+              'apps',
+              '--device',
+              deviceId,
+              '--bundle-id',
+              bundleId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
 
         final bool status = await deviceControl.isAppInstalled(
           deviceId: deviceId,
@@ -1301,25 +1362,27 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('core_device_app_list.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'device',
-            'info',
-            'apps',
-            '--device',
-            deviceId,
-            '--bundle-id',
-            bundleId,
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'info',
+              'apps',
+              '--device',
+              deviceId,
+              '--bundle-id',
+              bundleId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
 
         final bool status = await deviceControl.isAppInstalled(
           deviceId: deviceId,
@@ -1335,8 +1398,9 @@ invalid JSON
 
     group('list devices', () {
       testWithoutContext('Handles FileSystemException deleting temp directory', () async {
-        final Directory tempDir = fileSystem.systemTempDirectory
-            .childDirectory('core_devices.rand0');
+        final Directory tempDir = fileSystem.systemTempDirectory.childDirectory(
+          'core_devices.rand0',
+        );
         final File tempFile = tempDir.childFile('core_device_list.json');
         final List<String> args = <String>[
           'xcrun',
@@ -1348,17 +1412,19 @@ invalid JSON
           '--json-output',
           tempFile.path,
         ];
-        fakeProcessManager.addCommand(FakeCommand(
-          command: args,
-          onRun: (_) {
-            // Simulate that this command threw and simultaneously the OS
-            // deleted the temp directory
-            expect(tempFile, exists);
-            tempDir.deleteSync(recursive: true);
-            expect(tempFile, isNot(exists));
-            throw ProcessException(args.first, args.sublist(1));
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: args,
+            onRun: (_) {
+              // Simulate that this command threw and simultaneously the OS
+              // deleted the temp directory
+              expect(tempFile, exists);
+              tempDir.deleteSync(recursive: true);
+              expect(tempFile, isNot(exists));
+              throw ProcessException(args.first, args.sublist(1));
+            },
+          ),
+        );
 
         await deviceControl.getCoreDevices();
         expect(logger.errorText, contains('Error executing devicectl: ProcessException'));
@@ -1366,8 +1432,9 @@ invalid JSON
       });
 
       testWithoutContext('Handles json file mysteriously disappearing', () async {
-        final Directory tempDir = fileSystem.systemTempDirectory
-            .childDirectory('core_devices.rand0');
+        final Directory tempDir = fileSystem.systemTempDirectory.childDirectory(
+          'core_devices.rand0',
+        );
         final File tempFile = tempDir.childFile('core_device_list.json');
         final List<String> args = <String>[
           'xcrun',
@@ -1379,16 +1446,18 @@ invalid JSON
           '--json-output',
           tempFile.path,
         ];
-        fakeProcessManager.addCommand(FakeCommand(
-          command: args,
-          onRun: (_) {
-            // Simulate that this command deleted tempFile, did not create a
-            // new one, and exited successfully
-            expect(tempFile, exists);
-            tempFile.deleteSync();
-            expect(tempFile, isNot(exists));
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: args,
+            onRun: (_) {
+              // Simulate that this command deleted tempFile, did not create a
+              // new one, and exited successfully
+              expect(tempFile, exists);
+              tempFile.deleteSync();
+              expect(tempFile, isNot(exists));
+            },
+          ),
+        );
 
         await expectLater(
           () => deviceControl.getCoreDevices(),
@@ -1402,7 +1471,8 @@ invalid JSON
         );
         expect(
           logger.errorText,
-          contains('After running the command xcrun devicectl list devices '
+          contains(
+            'After running the command xcrun devicectl list devices '
             '--timeout 5 --json-output ${tempFile.path} the file\n'
             '${tempFile.path} was expected to exist, but it did not',
           ),
@@ -1411,15 +1481,18 @@ invalid JSON
       });
 
       testWithoutContext('Handles file system disposal', () async {
-        final LocalFileSystem localFs = LocalFileSystemFake.test(signals: Signals.test());
+        final LocalFileSystem localFs = LocalFileSystemFake();
+        final ErrorHandlingFileSystem fs = ErrorHandlingFileSystem(
+          delegate: localFs,
+          platform: FakePlatform(),
+        );
         deviceControl = IOSCoreDeviceControl(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
-          fileSystem: localFs,
+          fileSystem: fs,
         );
-        final Directory tempDir = localFs.systemTempDirectory
-            .childDirectory('core_devices.rand0');
+        final Directory tempDir = localFs.systemTempDirectory.childDirectory('core_devices.rand0');
         final File tempFile = tempDir.childFile('core_device_list.json');
         final List<String> args = <String>[
           'xcrun',
@@ -1431,23 +1504,26 @@ invalid JSON
           '--json-output',
           tempFile.path,
         ];
-        fakeProcessManager.addCommand(FakeCommand(
-          command: args,
-          onRun: (_) {
-            // Simulate that the tool started shutting down and disposed the
-            // file system, causing the temp directory to be deleted before
-            // this program invocation returns a result.
-            localFs.dispose();
-            expect(localFs.disposed, true);
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: args,
+            onRun: (_) {
+              // Simulate that the tool started shutting down and disposed the
+              // file system, causing the temp directory to be deleted before
+              // this program invocation returns a result.
+              localFs.dispose();
+              expect(localFs.disposed, true);
+            },
+          ),
+        );
 
         final List<IOSCoreDevice> coreDevices = await deviceControl.getCoreDevices();
         expect(coreDevices, isEmpty);
         expect(
           logger.errorText,
           isNot(
-            contains('After running the command xcrun devicectl list devices '
+            contains(
+              'After running the command xcrun devicectl list devices '
               '--timeout 5 --json-output ${tempFile.path} the file\n'
               '${tempFile.path} was expected to exist, but it did not',
             ),
@@ -1455,7 +1531,6 @@ invalid JSON
         );
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
-
 
       testWithoutContext('No devices', () async {
         const String deviceControlOutput = '''
@@ -1486,22 +1561,24 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('core_device_list.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'list',
-            'devices',
-            '--timeout',
-            '5',
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'list',
+              'devices',
+              '--timeout',
+              '5',
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
 
         final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
         expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -1548,22 +1625,24 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('core_device_list.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'list',
-            'devices',
-            '--timeout',
-            '5',
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'list',
+              'devices',
+              '--timeout',
+              '5',
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
 
         final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
         expect(devices.length, 1);
@@ -1611,22 +1690,24 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('core_device_list.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'list',
-            'devices',
-            '--timeout',
-            '5',
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'list',
+              'devices',
+              '--timeout',
+              '5',
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
 
         final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
         expect(devices.length, 1);
@@ -1667,30 +1748,38 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('core_device_list.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'list',
-            'devices',
-            '--timeout',
-            '5',
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'list',
+              'devices',
+              '--timeout',
+              '5',
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
 
         final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
         expect(devices.length, 1);
 
         expect(devices[0].capabilities.length, 2);
-        expect(devices[0].capabilities[0].featureIdentifier, 'com.apple.coredevice.feature.spawnexecutable');
+        expect(
+          devices[0].capabilities[0].featureIdentifier,
+          'com.apple.coredevice.feature.spawnexecutable',
+        );
         expect(devices[0].capabilities[0].name, 'Spawn Executable');
-        expect(devices[0].capabilities[1].featureIdentifier, 'com.apple.coredevice.feature.launchapplication');
+        expect(
+          devices[0].capabilities[1].featureIdentifier,
+          'com.apple.coredevice.feature.launchapplication',
+        );
         expect(devices[0].capabilities[1].name, 'Launch Application');
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -1731,22 +1820,24 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('core_device_list.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'list',
-            'devices',
-            '--timeout',
-            '5',
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'list',
+              'devices',
+              '--timeout',
+              '5',
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
 
         final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
         expect(devices.length, 1);
@@ -1754,14 +1845,11 @@ invalid JSON
         expect(devices[0].connectionProperties?.authenticationType, 'manualPairing');
         expect(devices[0].connectionProperties?.isMobileDeviceOnly, false);
         expect(devices[0].connectionProperties?.lastConnectionDate, '2023-06-15T15:29:00.082Z');
-        expect(
-          devices[0].connectionProperties?.localHostnames,
-          <String>[
-            'Victorias-iPad.coredevice.local',
-            '00001234-0001234A3C03401E.coredevice.local',
-            '123456BB5-AEDE-7A22-B890-1234567890DD.coredevice.local',
-          ],
-        );
+        expect(devices[0].connectionProperties?.localHostnames, <String>[
+          'Victorias-iPad.coredevice.local',
+          '00001234-0001234A3C03401E.coredevice.local',
+          '123456BB5-AEDE-7A22-B890-1234567890DD.coredevice.local',
+        ]);
         expect(devices[0].connectionProperties?.pairingState, 'paired');
         expect(devices[0].connectionProperties?.potentialHostnames, <String>[
           '00001234-0001234A3C03401E.coredevice.local',
@@ -1804,22 +1892,24 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('core_device_list.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'list',
-            'devices',
-            '--timeout',
-            '5',
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'list',
+              'devices',
+              '--timeout',
+              '5',
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
 
         final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
         expect(devices.length, 1);
@@ -1834,7 +1924,10 @@ invalid JSON
         expect(devices[0].deviceProperties?.osBuildUpdate, '21A5248v');
         expect(devices[0].deviceProperties?.osVersionNumber, '17.0');
         expect(devices[0].deviceProperties?.rootFileSystemIsWritable, false);
-        expect(devices[0].deviceProperties?.screenViewingURL, 'coredevice-devices:/viewDeviceByUUID?uuid=123456BB5-AEDE-7A22-B890-1234567890DD');
+        expect(
+          devices[0].deviceProperties?.screenViewingURL,
+          'coredevice-devices:/viewDeviceByUUID?uuid=123456BB5-AEDE-7A22-B890-1234567890DD',
+        );
 
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(tempFile, isNot(exists));
@@ -1888,22 +1981,24 @@ invalid JSON
         final File tempFile = fileSystem.systemTempDirectory
             .childDirectory('core_devices.rand0')
             .childFile('core_device_list.json');
-        fakeProcessManager.addCommand(FakeCommand(
-          command: <String>[
-            'xcrun',
-            'devicectl',
-            'list',
-            'devices',
-            '--timeout',
-            '5',
-            '--json-output',
-            tempFile.path,
-          ],
-          onRun: (_) {
-            expect(tempFile, exists);
-            tempFile.writeAsStringSync(deviceControlOutput);
-          },
-        ));
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'list',
+              'devices',
+              '--timeout',
+              '5',
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              expect(tempFile, exists);
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
 
         final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
         expect(devices.length, 1);
@@ -1916,7 +2011,10 @@ invalid JSON
         expect(devices[0].hardwareProperties?.ecid, 12345678903408542);
         expect(devices[0].hardwareProperties?.hardwareModel, 'J617AP');
         expect(devices[0].hardwareProperties?.internalStorageCapacity, 128000000000);
-        expect(devices[0].hardwareProperties?.marketingName, 'iPad Pro (11-inch) (4th generation)"');
+        expect(
+          devices[0].hardwareProperties?.marketingName,
+          'iPad Pro (11-inch) (4th generation)"',
+        );
         expect(devices[0].hardwareProperties?.platform, 'iOS');
         expect(devices[0].hardwareProperties?.productType, 'iPad14,3');
         expect(devices[0].hardwareProperties?.serialNumber, 'HC123DHCQV');
@@ -1943,22 +2041,24 @@ invalid JSON
           final File tempFile = fileSystem.systemTempDirectory
               .childDirectory('core_devices.rand0')
               .childFile('core_device_list.json');
-          fakeProcessManager.addCommand(FakeCommand(
-            command: <String>[
-              'xcrun',
-              'devicectl',
-              'list',
-              'devices',
-              '--timeout',
-              '5',
-              '--json-output',
-              tempFile.path,
-            ],
-            onRun: (_) {
-              expect(tempFile, exists);
-              tempFile.writeAsStringSync(deviceControlOutput);
-            },
-          ));
+          fakeProcessManager.addCommand(
+            FakeCommand(
+              command: <String>[
+                'xcrun',
+                'devicectl',
+                'list',
+                'devices',
+                '--timeout',
+                '5',
+                '--json-output',
+                tempFile.path,
+              ],
+              onRun: (_) {
+                expect(tempFile, exists);
+                tempFile.writeAsStringSync(deviceControlOutput);
+              },
+            ),
+          );
 
           final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
           expect(devices.isEmpty, isTrue);
@@ -1993,22 +2093,24 @@ invalid JSON
           final File tempFile = fileSystem.systemTempDirectory
               .childDirectory('core_devices.rand0')
               .childFile('core_device_list.json');
-          fakeProcessManager.addCommand(FakeCommand(
-            command: <String>[
-              'xcrun',
-              'devicectl',
-              'list',
-              'devices',
-              '--timeout',
-              '5',
-              '--json-output',
-              tempFile.path,
-            ],
-            onRun: (_) {
-              expect(tempFile, exists);
-              tempFile.writeAsStringSync(deviceControlOutput);
-            },
-          ));
+          fakeProcessManager.addCommand(
+            FakeCommand(
+              command: <String>[
+                'xcrun',
+                'devicectl',
+                'list',
+                'devices',
+                '--timeout',
+                '5',
+                '--json-output',
+                tempFile.path,
+              ],
+              onRun: (_) {
+                expect(tempFile, exists);
+                tempFile.writeAsStringSync(deviceControlOutput);
+              },
+            ),
+          );
 
           final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices();
           expect(devices.isEmpty, isTrue);
@@ -2048,22 +2150,24 @@ invalid JSON
           final File tempFile = fileSystem.systemTempDirectory
               .childDirectory('core_devices.rand0')
               .childFile('core_device_list.json');
-          fakeProcessManager.addCommand(FakeCommand(
-            command: <String>[
-              'xcrun',
-              'devicectl',
-              'list',
-              'devices',
-              '--timeout',
-              '5',
-              '--json-output',
-              tempFile.path,
-            ],
-            onRun: (_) {
-              expect(tempFile, exists);
-              tempFile.writeAsStringSync(deviceControlOutput);
-            },
-          ));
+          fakeProcessManager.addCommand(
+            FakeCommand(
+              command: <String>[
+                'xcrun',
+                'devicectl',
+                'list',
+                'devices',
+                '--timeout',
+                '5',
+                '--json-output',
+                tempFile.path,
+              ],
+              onRun: (_) {
+                expect(tempFile, exists);
+                tempFile.writeAsStringSync(deviceControlOutput);
+              },
+            ),
+          );
 
           final List<IOSCoreDevice> devices = await deviceControl.getCoreDevices(
             timeout: const Duration(seconds: 2),
@@ -2072,13 +2176,13 @@ invalid JSON
           expect(fakeProcessManager, hasNoRemainingExpectations);
           expect(
             logger.errorText,
-            contains('Timeout of 2 seconds is below the minimum timeout value '
-                'for devicectl. Changing the timeout to the minimum value of 5.'),
+            contains(
+              'Timeout of 2 seconds is below the minimum timeout value '
+              'for devicectl. Changing the timeout to the minimum value of 5.',
+            ),
           );
         });
       });
     });
-
-
   });
 }
