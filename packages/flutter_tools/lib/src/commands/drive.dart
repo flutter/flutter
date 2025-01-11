@@ -287,7 +287,7 @@ class DriveCommand extends RunCommandBase {
       throwToolExit(null);
     }
     if (screenshot != null && !device.supportsScreenshot) {
-      _logger.printError('Screenshot not supported for ${device.name}.');
+      _logger.printError('Screenshot not supported for ${device.displayName}.');
     }
 
     final bool web = device is WebServerDevice || device is ChromiumDevice;
