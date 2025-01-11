@@ -1616,7 +1616,7 @@ void main() {
   testGesture('Drag details', (GestureTester tester) {
     expect(const DragDownDetails(), hasOneLineDescription);
     expect(const DragStartDetails(), hasOneLineDescription);
-    expect(DragUpdateDetails(), hasOneLineDescription);
+    expect(DragUpdateDetails(globalPosition: Offset.zero), hasOneLineDescription);
     expect(DragEndDetails(), hasOneLineDescription);
   });
 

@@ -97,7 +97,7 @@ class DragUpdateDetails extends GestureDetailsWithPositions {
   /// If [primaryDelta] is non-null, then its value must match one of the
   /// coordinates of [delta] and the other coordinate must be zero.
   DragUpdateDetails({
-    super.globalPosition,
+    required super.globalPosition,
     super.localPosition,
     this.sourceTimeStamp,
     this.delta = Offset.zero,
