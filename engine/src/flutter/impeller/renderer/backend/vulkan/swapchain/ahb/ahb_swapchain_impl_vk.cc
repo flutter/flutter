@@ -198,7 +198,7 @@ void AHBSwapchainImplVK::AddFinalCommandBuffer(
   if (!context) {
     return;
   }
-  context->GetCommandQueue()->Submit({cmd_buffer});
+  context->GetCommandQueue()->Submit({std::move(cmd_buffer)});
 }
 
 std::shared_ptr<ExternalFenceVK>
