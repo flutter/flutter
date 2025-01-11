@@ -11,7 +11,7 @@ import '../_luci_skia_gold_prelude.dart';
 
 void main() async {
   // To test the golden file generation locally, comment out the following line.
-  autoUpdateGoldenFiles = true;
+  // autoUpdateGoldenFiles = true;
 
   const String appName = 'com.example.android_engine_test';
   late final FlutterDriver flutterDriver;

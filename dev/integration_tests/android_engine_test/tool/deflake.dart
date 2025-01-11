@@ -30,7 +30,15 @@ void main(List<String> args) async {
 }
 
 final ArgParser _argParser =
-    ArgParser()..addFlag('help', abbr: 'h', help: 'Display usage information.', negatable: false);
+    ArgParser()
+      ..addFlag('help', abbr: 'h', help: 'Display usage information.', negatable: false)
+      ..addFlag(
+        'generate-initial-golden',
+        help:
+            'Whether an initial run (not part of "runs") should generate the '
+            'base golden file. If false, it is assumed the golden file wasl already generated.',
+      )
+      ..addOption('runs', abbr: 'n', help: 'How many times to run the test.', defaultsTo: '50');
 
 void _printUsage() {
   io.stdout.writeln('Usage: dart tool/deflake.dart lib/<path-to-main>.dart');

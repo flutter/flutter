@@ -6,6 +6,3 @@ import 'dart:io' as io;
 
 /// Whether the current environment is LUCI.
 bool get isLuci => io.Platform.environment['LUCI_CI'] == 'True';
-
-/// Whether, via environment variable, golden-file updates were requested.
-bool get updateGoldens => io.Platform.environment['UPDATE_GOLDENS'] == 'True';
