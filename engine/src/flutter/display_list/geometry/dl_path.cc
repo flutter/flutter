@@ -63,36 +63,41 @@ DlPath DlPath::MakeRoundRectXY(const DlRect& rect,
 }
 
 const SkPath& DlPath::GetSkPath() const {
-  if (data_->sk_path.has_value()) {
-    return data_->sk_path.value();
+  auto& sk_path = data_->sk_path;
+  auto& path = data_->path;
+  if (sk_path.has_value()) {
+    return sk_path.value();
   }
-  if (data_->path.has_value()) {
-    data_->sk_path.emplace(ConvertToSkiaPath(data_->path.value()));
+  if (path.has_value()) {
+    sk_path.emplace(ConvertToSkiaPath(path.value()));
     if (data_->render_count >= kMaxVolatileUses) {
-      data_->sk_path.value().setIsVolatile(false);
+      sk_path.value().setIsVolatile(false);
     }
-    return data_->sk_path.value();
+    return sk_path.value();
   }
-  data_->sk_path.emplace();
-  return data_->sk_path.value();
+  sk_path.emplace();
+  return sk_path.value();
 }
 
 Path DlPath::GetPath() const {
-  if (data_->path.has_value()) {
-    return data_->path.value();
+  auto& sk_path = data_->sk_path;
+  auto& path = data_->path;
+  if (path.has_value()) {
+    return path.value();
   }
-  if (data_->sk_path.has_value()) {
-    data_->path.emplace(ConvertToImpellerPath(data_->sk_path.value()));
-    return data_->path.value();
+  if (sk_path.has_value()) {
+    path.emplace(ConvertToImpellerPath(sk_path.value()));
+    return path.value();
   }
-  data_->path.emplace();
-  return data_->path.value();
+  path.emplace();
+  return path.value();
 }
 
 void DlPath::WillRenderSkPath() const {
   if (data_->render_count >= kMaxVolatileUses) {
-    if (data_->sk_path.has_value()) {
-      data_->sk_path.value().setIsVolatile(false);
+    auto& sk_path = data_->sk_path;
+    if (sk_path.has_value()) {
+      sk_path.value().setIsVolatile(false);
     }
   } else {
     data_->render_count++;
@@ -106,14 +111,16 @@ void DlPath::WillRenderSkPath() const {
   if (!offset.IsFinite()) {
     return DlPath();
   }
-  if (data_->path.has_value()) {
+  auto& path = data_->path;
+  if (path.has_value()) {
     PathBuilder builder;
-    builder.AddPath(data_->path.value());
+    builder.AddPath(path.value());
     builder.Shift(offset);
     return DlPath(builder.TakePath());
   }
-  if (data_->sk_path.has_value()) {
-    SkPath path = data_->sk_path.value();
+  auto& sk_path = data_->sk_path;
+  if (sk_path.has_value()) {
+    SkPath path = sk_path.value();
     path = path.offset(offset.x, offset.y);
     return DlPath(path);
   }
@@ -121,20 +128,22 @@ void DlPath::WillRenderSkPath() const {
 }
 
 [[nodiscard]] DlPath DlPath::WithFillType(DlPathFillType type) const {
-  if (data_->path.has_value()) {
-    if (data_->path.value().GetFillType() == type) {
+  auto& path = data_->path;
+  if (path.has_value()) {
+    if (path.value().GetFillType() == type) {
       return *this;
     }
     PathBuilder builder;
-    builder.AddPath(data_->path.value());
+    builder.AddPath(path.value());
     return DlPath(builder.TakePath(type));
   }
-  if (data_->sk_path.has_value()) {
+  auto& sk_path = data_->sk_path;
+  if (sk_path.has_value()) {
     SkPathFillType sk_type = ToSkFillType(type);
-    if (data_->sk_path.value().getFillType() == sk_type) {
+    if (sk_path.value().getFillType() == sk_type) {
       return *this;
     }
-    SkPath path = data_->sk_path.value();
+    SkPath path = sk_path.value();
     path.setFillType(sk_type);
     return DlPath(path);
   }
@@ -179,8 +188,9 @@ SkRect DlPath::GetSkBounds() const {
 }
 
 DlRect DlPath::GetBounds() const {
-  if (data_->path.has_value()) {
-    return data_->path.value().GetBoundingBox().value_or(DlRect());
+  auto& path = data_->path;
+  if (path.has_value()) {
+    return path.value().GetBoundingBox().value_or(DlRect());
   }
   return ToDlRect(GetSkPath().getBounds());
 }
