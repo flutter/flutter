@@ -176,6 +176,8 @@ void main() {
     expect(m3.headerForegroundColor, colorScheme.onSurfaceVariant);
     expect(m3.headerHeadlineStyle, textTheme.headlineLarge);
     expect(m3.headerHelpStyle, textTheme.labelLarge);
+    expect(m3.headerTextColor, colorScheme.onSurfaceVariant);
+    expect(m3.headerNavigationButtonColor, colorScheme.primary);
     expect(m3.weekdayStyle, textTheme.bodyLarge?.apply(color: colorScheme.onSurface));
     expect(m3.dayStyle, textTheme.bodyLarge);
     expect(m3.dayForegroundColor?.resolve(<MaterialState>{}), colorScheme.onSurface);
@@ -332,6 +334,8 @@ void main() {
     expect(m2.headerForegroundColor, colorScheme.onPrimary);
     expect(m2.headerHeadlineStyle, textTheme.headlineSmall);
     expect(m2.headerHelpStyle, textTheme.labelSmall);
+    expect(m2.headerTextColor, colorScheme.onPrimary);
+    expect(m2.headerNavigationButtonColor, colorScheme.onPrimary);
     expect(
       m2.weekdayStyle,
       textTheme.bodySmall?.apply(color: colorScheme.onSurface.withOpacity(0.60)),

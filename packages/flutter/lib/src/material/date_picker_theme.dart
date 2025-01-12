@@ -850,6 +850,8 @@ class DatePickerThemeData with Diagnosticable {
       ),
     );
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
+    properties.add(ColorProperty('headerTextColor', headerTextColor, defaultValue: null));
+    properties.add(ColorProperty('headerNavigationButtonColor', headerNavigationButtonColor, defaultValue: null));
   }
 }
 
@@ -983,6 +985,12 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
 
   @override
   TextStyle? get headerHelpStyle => _textTheme.labelSmall;
+
+  @override
+  Color? get headerTextColor => _colors.onPrimary;
+
+  @override
+  Color? get headerNavigationButtonColor => _isDark ? _colors.onSurface : _colors.onPrimary;
 
   @override
   TextStyle? get weekdayStyle =>
@@ -1165,6 +1173,12 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
 
   @override
   TextStyle? get headerHelpStyle => _textTheme.labelLarge;
+
+  @override
+  Color? get headerTextColor => _colors.onSurfaceVariant;
+
+  @override
+  Color? get headerNavigationButtonColor => _colors.primary;
 
   @override
   TextStyle? get weekdayStyle => _textTheme.bodyLarge?.apply(
