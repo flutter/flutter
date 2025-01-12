@@ -383,6 +383,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// A [ui.SemanticsUpdate] is produced by a [SemanticsOwner] during the
   /// [EnginePhase.flushSemantics] phase.
   void updateSemantics(ui.SemanticsUpdate update) {
+    print('RenderView.updateSemantics($update)');
     _view.updateSemantics(update);
   }
 

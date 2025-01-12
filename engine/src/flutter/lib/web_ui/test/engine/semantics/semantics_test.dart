@@ -125,6 +125,7 @@ void runSemanticsTests() {
 }
 
 void _testSemanticRole() {
+  // This should work too with an input
   test('Sets id and flt-semantics-identifier on the element', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
@@ -1244,6 +1245,7 @@ void _testContainer() {
     semantics().semanticsEnabled = false;
   });
 
+  // BARTEK: this seems suspicious
   test('container can be opaque if it is a text field', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
@@ -1258,6 +1260,8 @@ void _testContainer() {
     );
     updateNode(builder, id: 1);
     updateNode(builder, id: 2);
+
+    // FIXME: bartekpacia: Why is there no <sem> around <input>?
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''

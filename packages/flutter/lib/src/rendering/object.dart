@@ -1357,6 +1357,8 @@ class PipelineOwner with DiagnosticableTreeMixin {
   ///
   /// See [RendererBinding] for an example of how this function is used.
   void flushSemantics() {
+    print('BARTEK: flushSemantics()');
+
     if (_semanticsOwner == null) {
       return;
     }
@@ -3726,6 +3728,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// [RenderObject] as annotated by [describeSemanticsConfiguration] changes in
   /// any way to update the semantics tree.
   void markNeedsSemanticsUpdate() {
+    print('RenderObject.markNeedsSemanticsUpdate()');
+
     assert(!_debugDisposed);
     assert(!attached || !owner!._debugDoingSemantics);
     if (!attached || owner!._semanticsOwner == null) {
@@ -3799,7 +3803,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 
   /// Updates the semantic information of the render object.
   void _updateSemantics() {  // BARTEK: 2
-    assert(_semanticsConfiguration.isSemanticBoundary || semanticsParent == null);
+    print('RenderObject._updateSemantics()');
+    assert(_semanticsConfiguration.isSemanticBoundary || semanticsParent == null); 
+
     if (_needsLayout) {
       // There's not enough information in this subtree to compute semantics.
       // The subtree is probably being kept alive by a viewport but not laid out.
@@ -4034,8 +4040,13 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     SemanticsConfiguration config,
     Iterable<SemanticsNode> children,
   ) {
+    SemanticsNode? root = node;
+    while (root?.parent != null) {
+      root = root?.parent;
+    }
     assert(node == _semantics);
     // TODO(a14n): remove the following cast by updating type of parameter in either updateWith or assembleSemanticsNode
+    print('BARTEK: RenderObject.assembleSemanticsNode()');
     node.updateWith(config: config, childrenInInversePaintOrder: children as List<SemanticsNode>);
   }
 
