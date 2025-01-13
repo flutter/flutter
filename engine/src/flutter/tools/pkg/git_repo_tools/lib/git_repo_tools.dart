@@ -87,6 +87,7 @@ final class GitRepo {
       'diff',
       '--name-only',
       '--diff-filter=ACMRT',
+      '--relative',
       mergeBase,
     ]);
     return _gitOutputToList(masterResult);
@@ -111,6 +112,7 @@ final class GitRepo {
       '--no-commit-id',
       '--name-only',
       '--diff-filter=ACMRT', // Added, copied, modified, renamed, or type-changed.
+      '--relative',
       '-r',
       'HEAD',
     ]);
