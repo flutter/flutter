@@ -13,6 +13,15 @@ and compare the screenshots against golden images.
 >
 > Please take extra care when updating the test suite to also update the REAMDE.
 
+## How it runs on CI (LUCI)
+
+See [`dev/bots/suite_runners/run_android_engine_tests.dart`](../../bots/suite_runners/run_android_engine_tests.dart), but tl;dr:
+
+```sh
+# TIP: If golden-files do not exist locally, this command will fail locally.
+SHARD=android_engine_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
+```
+
 ## Running the apps and tests
 
 Each `lib/{prefix}_main.dart` file is a standalone Flutter app that you can run
@@ -63,7 +72,7 @@ $ flutter drive lib/external_texture/surface_producer_smiley_face_main.dart
 Files of significance:
 
 - [Entrypoint](lib/external_texture/surface_producer_smiley_face_main.dart)
-- [Test](test_driver/external_texture./surface_producer_smiley_face_main_test.dart)
+- [Test](test_driver/external_texture/surface_producer_smiley_face_main_test.dart)
 
 ### `external_texture/surface_texture_smiley_face`
 
@@ -81,15 +90,79 @@ $ flutter drive lib/external_texture/surface_texture_smiley_face_main.dart
 Files of significance:
 
 - [Entrypoint](lib/external_texture/surface_producer_smiley_face_main.dart)
-- [Test](test_driver/external_texture./surface_producer_smiley_face_main_test.dart)
+- [Test](test_driver/external_texture/surface_producer_smiley_face_main_test.dart)
 
 ### `platform_view/hybrid_composition_platform_view`
 
+This app displays a blue orange gradient, the app is backgrounded, and then
+resumed. It tests the [Hybrid Composition](../../../docs/platforms/android/Android-Platform-Views.md#hybrid-composition) implementation.
+
+```sh
+# Run the app
+$ flutter run lib/platform_view/hybrid_composition_platform_view_main.dart
+
+# Run the test
+$ flutter drive lib/platform_view/hybrid_composition_platform_view_main.dart
+```
+
+Files of significance:
+
+- [Entrypoint](lib/platform_view/hybrid_composition_platform_view_main.dart)
+- [Test](test_driver/platform_view/hybrid_composition_platform_view_main_test.dart)
+
 ### `platform_view/texture_layer_hybrid_composition_platform_view`
+
+This app displays a blue orange gradient, the app is backgrounded, and then
+resumed. It tests the [Texture Layer Hybrid Composition](../../../docs/platforms/android/Android-Platform-Views.md#texture-layer-hybrid-composition) implementation.
+
+```sh
+# Run the app
+$ flutter run lib/platform_view/texture_layer_hybrid_composition_platform_view_main.dart
+
+# Run the test
+$ flutter drive lib/platform_view/texture_layer_hybrid_composition_platform_view_main.dart
+```
+
+Files of significance:
+
+- [Entrypoint](lib/platform_view/texture_layer_hybrid_composition_platform_view_main.dart)
+- [Test](test_driver/platform_view/texture_layer_hybrid_composition_platform_view_main_test.dart)
 
 ### `platform_view/virtual_display_platform_view`
 
+This app displays a blue orange gradient, the app is backgrounded, and then
+resumed. It tests the [Virtual Display](../../../docs/platforms/android/Android-Platform-Views.md#virtual-display) implementation.
+
+```sh
+# Run the app
+$ flutter run lib/platform_view/virtual_display_platform_view_main.dart
+
+# Run the test
+$ flutter drive lib/platform_view/virtual_display_platform_view_main.dart
+```
+
+Files of significance:
+
+- [Entrypoint](lib/platform_view/virtual_display_platform_view_main.dart)
+- [Test](test_driver/platform_view/virtual_display_platform_view_main_test.dart)
+
 ### `platform_view_tap_color_change`
+
+This app displays a blue rectangle, using platform views, which upon
+being tapped (natively, not by Flutter), changes from blue to red.
+
+```sh
+# Run the app
+$ flutter run lib/platform_view_tap_color_change_main.dart
+
+# Run the test
+$ flutter drive lib/platform_view_tap_color_change_main_test.dart
+```
+
+Files of significance:
+
+- [Entrypoint](lib/platform_view_tap_color_change_main.dart)
+- [Test](test_driver/platform_view_tap_color_change_main_test.dart)
 
 ## Debugging tips
 
