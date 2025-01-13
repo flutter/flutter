@@ -44,7 +44,7 @@ Future<void> testMain() async {
 
   for (final String testFile in testFiles!) {
     test('can detect image type of $testFile', () async {
-      final HttpFetchResponse response = await httpFetch('$testFile');
+      final HttpFetchResponse response = await httpFetch(testFile);
 
       if (!response.hasPayload) {
         throw Exception('Unable to fetch() image test file "$testFile"');
