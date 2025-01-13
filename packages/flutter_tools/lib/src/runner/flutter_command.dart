@@ -1577,7 +1577,7 @@ abstract class FlutterCommand extends Command<void> {
 
   @override
   void printUsage() {
-    globals.printStatus(usage);
+    globals.logger.printStatus(usage);
   }
 
   @visibleForOverriding

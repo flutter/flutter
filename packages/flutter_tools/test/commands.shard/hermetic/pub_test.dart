@@ -55,9 +55,7 @@ void main() {
 
   testUsingContext('pub shows help', () async {
     Object? usage;
-    final PackagesCommand command = PackagesCommand(
-      usagePrintFn: (Object? object) => usage = object,
-    );
+    final PackagesCommand command = PackagesCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['pub']);
 
