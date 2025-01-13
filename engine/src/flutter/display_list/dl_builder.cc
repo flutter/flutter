@@ -914,7 +914,7 @@ void DisplayListBuilder::TransformReset() {
     // became singular while we were accumulating the current layer.
     // In either case, we should no longer be accumulating any
     // contents so we set the layer tracking transform to a singular one.
-    layer_local_state().setTransform(SkMatrix::Scale(0.0f, 0.0f));
+    layer_local_state().setTransform(DlMatrix::MakeScale({0.0f, 0.0f, 0.0f}));
   }
 
   global_state().setIdentity();
@@ -1050,8 +1050,8 @@ void DisplayListBuilder::ClipPath(const DlPath& path,
       return;
     }
   }
-  global_state().clipPath(path.GetSkPath(), clip_op, is_aa);
-  layer_local_state().clipPath(path.GetSkPath(), clip_op, is_aa);
+  global_state().clipPath(path, clip_op, is_aa);
+  layer_local_state().clipPath(path, clip_op, is_aa);
   if (global_state().is_cull_rect_empty() ||
       layer_local_state().is_cull_rect_empty()) {
     current_info().is_nop = true;
@@ -1488,7 +1488,7 @@ void DisplayListBuilder::drawAtlas(const sk_sp<DlImage> atlas,
     const DlRect& src = tex[i];
     xform[i].toQuad(src.GetWidth(), src.GetHeight(), quad);
     for (int j = 0; j < 4; j++) {
-      accumulator.accumulate(quad[j]);
+      accumulator.accumulate(ToDlPoint(quad[j]));
     }
   }
   if (accumulator.is_empty() ||
