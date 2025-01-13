@@ -15,8 +15,6 @@ Future<ProcessResult> runGit(List<String> args, {String? processWorkingDir}) asy
 
 Future<List<String>> getGitLog() async {
   final String gitRoot = p.absolute('../..');
-  // Somehow gitDir.currentBranch() doesn't work in Cirrus with "fatal: 'HEAD' -
-  // not a valid ref". Therefore, we use "git log" to get the revision manually.
   final ProcessResult logResult = await runGit(<String>[
     'log',
     '--pretty=format:%H %ct',
