@@ -1575,6 +1575,11 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  @override
+  void printUsage() {
+    globals.printStatus(usage);
+  }
+
   @visibleForOverriding
   String get deprecationWarning {
     return '${globals.logger.terminal.warningMark} The "$name" command is '
