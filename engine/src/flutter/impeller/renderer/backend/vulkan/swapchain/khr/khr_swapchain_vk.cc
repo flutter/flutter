@@ -45,6 +45,11 @@ void KHRSwapchainVK::AddFinalCommandBuffer(
 }
 
 std::unique_ptr<Surface> KHRSwapchainVK::AcquireNextDrawable() {
+  return AcquireNextDrawable(0u);
+}
+
+std::unique_ptr<Surface> KHRSwapchainVK::AcquireNextDrawable(
+    size_t resize_retry_count) {
   if (!IsValid()) {
     return nullptr;
   }
@@ -56,7 +61,18 @@ std::unique_ptr<Surface> KHRSwapchainVK::AcquireNextDrawable() {
     return std::move(result.surface);
   }
 
+  constexpr const size_t kMaxResizeAttempts = 3u;
+  if (resize_retry_count == kMaxResizeAttempts) {
+    VALIDATION_LOG << "Attempted to resize the swapchain" << kMaxResizeAttempts
+                   << " time unsuccessfully. This platform likely doesn't "
+                      "support returning the current swapchain extents and "
+                      "must recreate the swapchain using the actual size.";
+    return nullptr;
+  }
+
   TRACE_EVENT0("impeller", "RecreateSwapchain");
+
+  size_ = impl_->GetCurrentUnderlyingSurfaceSize().value_or(size_);
 
   // This swapchain implementation indicates that it is out of date. Tear it
   // down and make a new one.
@@ -81,7 +97,7 @@ std::unique_ptr<Surface> KHRSwapchainVK::AcquireNextDrawable() {
   //----------------------------------------------------------------------------
   /// We managed to recreate the swapchain in the new configuration. Try again.
   ///
-  return AcquireNextDrawable();
+  return AcquireNextDrawable(resize_retry_count + 1);
 }
 
 vk::Format KHRSwapchainVK::GetSurfaceFormat() const {
