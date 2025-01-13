@@ -32,10 +32,6 @@ class RuntimeDelegate;
 class View;
 class Window;
 
-namespace testing {
-class RuntimeControllerTester;
-}
-
 //------------------------------------------------------------------------------
 /// Represents an instance of a running root isolate with window bindings. In
 /// normal operation, a single instance of this object is owned by the engine
@@ -645,6 +641,12 @@ class RuntimeController : public PlatformConfigurationClient,
   // |PlatformConfigurationClient|
   std::shared_ptr<const fml::Mapping> GetPersistentIsolateData() override;
 
+  // |PlatformConfigurationClient|
+  void UpdateSemantics(SemanticsUpdate* update) override;
+
+  // |PlatformConfigurationClient|
+  void SetSemanticsTreeEnabled(bool enabled) override;
+
   const fml::WeakPtr<IOManager>& GetIOManager() const {
     return context_.io_manager;
   }
@@ -772,12 +774,6 @@ class RuntimeController : public PlatformConfigurationClient,
               double height) override;
 
   // |PlatformConfigurationClient|
-  void UpdateSemantics(SemanticsUpdate* update) override;
-
-  // |PlatformConfigurationClient|
-  void SetSemanticsTreeEnabled(bool enabled) override;
-
-  // |PlatformConfigurationClient|
   void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) override;
 
   // |PlatformConfigurationClient|
@@ -803,11 +799,9 @@ class RuntimeController : public PlatformConfigurationClient,
   // |PlatformConfigurationClient|
   double GetScaledFontSize(double unscaled_font_size,
                            int configuration_id) const override;
-
+  
   // |PlatformConfigurationClient|
   void RequestViewFocusChange(const ViewFocusChangeRequest& request) override;
-
-  friend class testing::RuntimeControllerTester;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RuntimeController);
 };
