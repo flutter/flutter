@@ -6,6 +6,7 @@
 ///
 /// @docImport 'package:flutter/material.dart';
 /// @docImport 'package:flutter/rendering.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
 library;
 
 import 'dart:math' as math;
@@ -15,6 +16,7 @@ import 'dart:ui'
         Rect,
         SemanticsAction,
         SemanticsFlag,
+        SemanticsRole,
         SemanticsUpdate,
         SemanticsUpdateBuilder,
         StringAttribute,
@@ -480,6 +482,7 @@ class SemanticsData with Diagnosticable {
     required this.currentValueLength,
     required this.headingLevel,
     required this.linkUrl,
+    required this.role,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -737,6 +740,9 @@ class SemanticsData with Diagnosticable {
   ///  * [CustomSemanticsAction], for an explanation of custom actions.
   final List<int>? customSemanticsActionIds;
 
+  /// {@macro flutter.semantics.SemanticsNode.role}
+  final SemanticsRole role;
+
   /// Whether [flags] contains the given flag.
   bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
 
@@ -825,6 +831,7 @@ class SemanticsData with Diagnosticable {
         other.thickness == thickness &&
         other.headingLevel == headingLevel &&
         other.linkUrl == linkUrl &&
+        other.role == role &&
         _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds);
   }
 
@@ -858,6 +865,7 @@ class SemanticsData with Diagnosticable {
       headingLevel,
       linkUrl,
       customSemanticsActionIds == null ? null : Object.hashAll(customSemanticsActionIds!),
+      role,
     ),
   );
 
@@ -1025,6 +1033,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onFocus,
     this.onDismiss,
     this.customSemanticsActions,
+    this.role,
   }) : assert(
          label == null || attributedLabel == null,
          'Only one of label or attributedLabel should be provided',
@@ -1798,6 +1807,19 @@ class SemanticsProperties extends DiagnosticableTree {
   ///  * [CustomSemanticsAction], for an explanation of custom actions.
   final Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions;
 
+  /// {@template flutter.semantics.SemanticsProperties.role}
+  /// A enum to describe what role the subtree represents.
+  ///
+  /// Setting the role for a widget subtree helps assistive technologies, such
+  /// as screen readers, understand and interact with the UI correctly.
+  ///
+  /// Defaults to [SemanticsRole.none] if not set, which means the subtree does
+  /// not represent any complex ui or controls.
+  ///
+  /// For a list of available roles, see [SemanticsRole].
+  /// {@endtemplate}
+  final SemanticsRole? role;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -1834,6 +1856,7 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(AttributedStringProperty('attributedHint', attributedHint, defaultValue: null));
     properties.add(StringProperty('tooltip', tooltip, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(EnumProperty<SemanticsRole>('role', role, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
     properties.add(
       DiagnosticsProperty<SemanticsHintOverrides>(
@@ -2391,6 +2414,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants ||
         _areUserActionsBlocked != config.isBlockingUserActions ||
         _headingLevel != config._headingLevel ||
+        _linkUrl != config._linkUrl ||
         _linkUrl != config._linkUrl;
   }
 
@@ -2707,6 +2731,17 @@ class SemanticsNode with DiagnosticableTreeMixin {
   Uri? get linkUrl => _linkUrl;
   Uri? _linkUrl = _kEmptyConfig._linkUrl;
 
+  /// {@template flutter.semantics.SemanticsNode.role}
+  /// The role this node represents
+  ///
+  /// A semantics node's role helps assistive technologies, such as screen
+  /// readers, understand and interact with the UI correctly.
+  ///
+  /// For a list of possible roles, see [SemanticsRole].
+  /// {@endtemplate}
+  SemanticsRole get role => _role;
+  SemanticsRole _role = _kEmptyConfig.role;
+
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
   static final SemanticsConfiguration _kEmptyConfig = SemanticsConfiguration();
@@ -2772,6 +2807,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _areUserActionsBlocked = config.isBlockingUserActions;
     _headingLevel = config._headingLevel;
     _linkUrl = config._linkUrl;
+    _role = config._role;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     if (mergeAllDescendantsIntoThisNodeValueChanged) {
@@ -2820,6 +2856,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     final double elevation = _elevation;
     double thickness = _thickness;
     Uri? linkUrl = _linkUrl;
+    SemanticsRole role = _role;
     final Set<int> customSemanticsActionIds = <int>{};
     for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -2874,6 +2911,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
         }
         if (attributedDecreasedValue.string == '') {
           attributedDecreasedValue = node._attributedDecreasedValue;
+        }
+        if (role == SemanticsRole.none) {
+          role = node._role;
         }
         if (tooltip == '') {
           tooltip = node._tooltip;
@@ -2948,6 +2988,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       customSemanticsActionIds: customSemanticsActionIds.toList()..sort(),
       headingLevel: headingLevel,
       linkUrl: linkUrl,
+      role: role,
     );
   }
 
@@ -3025,6 +3066,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
       headingLevel: data.headingLevel,
       linkUrl: data.linkUrl?.toString() ?? '',
+      role: data.role,
     );
     _dirty = false;
   }
@@ -3201,6 +3243,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
     properties.add(
       EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null),
     );
+    if (_role != SemanticsRole.none) {
+      properties.add(EnumProperty<SemanticsRole>('role', _role));
+    }
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
     if (_textSelection?.isValid ?? false) {
       properties.add(
@@ -4559,6 +4604,14 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// {@macro flutter.semantics.SemanticsProperties.role}
+  SemanticsRole get role => _role;
+  SemanticsRole _role = SemanticsRole.none;
+  set role(SemanticsRole value) {
+    _role = value;
+    _hasBeenAnnotated = true;
+  }
+
   /// A textual description of the owning [RenderObject].
   ///
   /// Setting this attribute will override the [attributedLabel].
@@ -5312,6 +5365,9 @@ class SemanticsConfiguration {
     if (_attributedDecreasedValue.string == '') {
       _attributedDecreasedValue = child._attributedDecreasedValue;
     }
+    if (_role == SemanticsRole.none) {
+      _role = child._role;
+    }
     _attributedHint = _concatAttributedString(
       thisAttributedString: _attributedHint,
       thisTextDirection: textDirection,
@@ -5364,7 +5420,8 @@ class SemanticsConfiguration {
       .._customSemanticsActions.addAll(_customSemanticsActions)
       ..isBlockingUserActions = isBlockingUserActions
       .._headingLevel = _headingLevel
-      .._linkUrl = _linkUrl;
+      .._linkUrl = _linkUrl
+      .._role = _role;
   }
 }
 
