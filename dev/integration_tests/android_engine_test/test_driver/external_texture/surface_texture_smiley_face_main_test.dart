@@ -41,8 +41,6 @@ void main() async {
   });
 
   test('should screenshot and match a smiley face texture using the trampoline', () async {
-    await flutterDriver.waitFor(find.byType('Texture'));
-
     await expectLater(
       nativeDriver.screenshot(),
       matchesGoldenFile('external_texture_surface_texture_smiley_face.png'),

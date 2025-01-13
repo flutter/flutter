@@ -42,8 +42,6 @@ void main() async {
   });
 
   test('should screenshot and match an external smiley face texture', () async {
-    await flutterDriver.waitFor(find.byType('Texture'));
-
     // On Android: Background the app, trim memory, and restore the app.
     if (nativeDriver case final AndroidNativeDriver nativeDriver) {
       print('Backgrounding the app, trimming memory, and resuming the app.');

@@ -50,7 +50,6 @@ void main() async {
   });
 
   test('should screenshot and match a blue -> orange gradient', () async {
-    await flutterDriver.waitFor(find.byType('AndroidView'));
     await expectLater(
       nativeDriver.screenshot(),
       matchesGoldenFile('$goldenPrefix.blue_orange_gradient_portrait.png'),
@@ -58,7 +57,6 @@ void main() async {
   }, timeout: Timeout.none);
 
   test('should rotate landscape and screenshot the gradient', () async {
-    await flutterDriver.waitFor(find.byType('AndroidView'));
     await nativeDriver.rotateToLandscape();
     await expectLater(
       nativeDriver.screenshot(),

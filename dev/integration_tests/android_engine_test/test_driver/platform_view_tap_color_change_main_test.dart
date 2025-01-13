@@ -41,7 +41,6 @@ void main() async {
   });
 
   test('should screenshot a rectangle that becomes blue after a tap', () async {
-    await flutterDriver.waitFor(find.byType('AndroidView'));
     await expectLater(
       nativeDriver.screenshot(),
       matchesGoldenFile('platform_view_tap_color_change_initial.png'),
