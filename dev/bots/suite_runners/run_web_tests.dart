@@ -691,7 +691,7 @@ class WebTestsSuite {
     // The last shard also runs the flutter_web_plugins tests.
     //
     // We make sure the last shard ends in _last so it's easier to catch mismatches
-    // between `.cirrus.yml` and `test.dart`.
+    // between `.ci.yaml` and `test.dart`.
     subshards['${webShardCount - 1}_last'] = () async {
       await _runFlutterWebTest(
         webRenderer,
