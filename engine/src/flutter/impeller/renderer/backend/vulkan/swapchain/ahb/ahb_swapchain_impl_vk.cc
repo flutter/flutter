@@ -192,6 +192,15 @@ bool AHBSwapchainImplVK::Present(
   });
 }
 
+void AHBSwapchainImplVK::AddFinalCommandBuffer(
+    std::shared_ptr<CommandBuffer> cmd_buffer) {
+  auto context = transients_->GetContext().lock();
+  if (!context) {
+    return;
+  }
+  context->GetCommandQueue()->Submit({std::move(cmd_buffer)});
+}
+
 std::shared_ptr<ExternalFenceVK>
 AHBSwapchainImplVK::SubmitSignalForPresentReady(
     const std::shared_ptr<AHBTextureSourceVK>& texture) const {
