@@ -6,14 +6,12 @@
 
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
-#include "impeller/renderer/backend/vulkan/barrier_vk.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
-#include "impeller/renderer/backend/vulkan/fence_waiter_vk.h"
-#include "impeller/renderer/backend/vulkan/gpu_tracer_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_formats.h"
 #include "impeller/renderer/backend/vulkan/swapchain/surface_vk.h"
 #include "impeller/toolkit/android/surface_transaction.h"
 #include "impeller/toolkit/android/surface_transaction_stats.h"
+#include "vulkan/vulkan_handles.hpp"
 #include "vulkan/vulkan_to_string.hpp"
 
 namespace impeller {
@@ -96,6 +94,7 @@ std::unique_ptr<Surface> AHBSwapchainImplVK::AcquireNextDrawable() {
     }
   }
 
+  frame_index_ = (frame_index_ + 1) % kMaxPendingPresents;
   AutoSemaSignaler auto_sema_signaler =
       std::make_shared<fml::ScopedCleanupClosure>(
           [sema = pending_presents_]() { sema->Signal(); });
@@ -111,8 +110,8 @@ std::unique_ptr<Surface> AHBSwapchainImplVK::AcquireNextDrawable() {
     return nullptr;
   }
 
-  // Ask the GPU to wait for the render ready semaphore to be signaled before
-  // performing rendering operations.
+  // Import the render ready semaphore that will block onscreen rendering until
+  // it is ready.
   if (!SubmitWaitForRenderReady(pool_entry.render_ready_fence,
                                 pool_entry.texture)) {
     VALIDATION_LOG << "Could wait on render ready fence.";
@@ -194,11 +193,7 @@ bool AHBSwapchainImplVK::Present(
 
 void AHBSwapchainImplVK::AddFinalCommandBuffer(
     std::shared_ptr<CommandBuffer> cmd_buffer) {
-  auto context = transients_->GetContext().lock();
-  if (!context) {
-    return;
-  }
-  context->GetCommandQueue()->Submit({std::move(cmd_buffer)});
+  frame_data_[frame_index_].command_buffer = std::move(cmd_buffer);
 }
 
 std::shared_ptr<ExternalFenceVK>
@@ -213,27 +208,12 @@ AHBSwapchainImplVK::SubmitSignalForPresentReady(
     return nullptr;
   }
 
-  auto command_buffer = context->CreateCommandBuffer();
+  auto command_buffer = frame_data_[frame_index_].command_buffer;
   if (!command_buffer) {
     return nullptr;
   }
-  command_buffer->SetLabel("AHBSubmitSignalForPresentReadyCB");
   CommandBufferVK& command_buffer_vk = CommandBufferVK::Cast(*command_buffer);
-
   const auto command_encoder_vk = command_buffer_vk.GetCommandBuffer();
-
-  BarrierVK barrier;
-  barrier.cmd_buffer = command_encoder_vk;
-  barrier.new_layout = vk::ImageLayout::eGeneral;
-  barrier.src_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-  barrier.src_access = vk::AccessFlagBits::eColorAttachmentWrite;
-  barrier.dst_stage = vk::PipelineStageFlagBits::eBottomOfPipe;
-  barrier.dst_access = {};
-
-  if (!texture->SetLayout(barrier).ok()) {
-    return nullptr;
-  }
-
   command_buffer_vk.Track(fence->GetSharedHandle());
 
   if (!command_buffer_vk.EndCommandBuffer()) {
@@ -241,6 +221,10 @@ AHBSwapchainImplVK::SubmitSignalForPresentReady(
   }
 
   vk::SubmitInfo submit_info;
+  if (frame_data_[frame_index_].semaphore) {
+    submit_info.setPWaitSemaphores(&frame_data_[frame_index_].semaphore.get());
+    submit_info.setWaitSemaphoreCount(1);
+  }
   submit_info.setCommandBuffers(command_encoder_vk);
 
   auto result = ContextVK::Cast(*context).GetGraphicsQueue()->Submit(
@@ -251,7 +235,7 @@ AHBSwapchainImplVK::SubmitSignalForPresentReady(
   return fence;
 }
 
-vk::UniqueFence AHBSwapchainImplVK::CreateRenderReadyFence(
+vk::UniqueSemaphore AHBSwapchainImplVK::CreateRenderReadySemaphore(
     const std::shared_ptr<fml::UniqueFD>& fd) const {
   if (!fd->is_valid()) {
     return {};
@@ -265,22 +249,22 @@ vk::UniqueFence AHBSwapchainImplVK::CreateRenderReadyFence(
   const auto& context_vk = ContextVK::Cast(*context);
   const auto& device = context_vk.GetDevice();
 
-  auto signal_wait = device.createFenceUnique({});
+  auto signal_wait = device.createSemaphoreUnique({});
 
   if (signal_wait.result != vk::Result::eSuccess) {
     return {};
   }
 
-  context_vk.SetDebugName(*signal_wait.value, "AHBRenderReadyFence");
+  context_vk.SetDebugName(*signal_wait.value, "AHBRenderReadySemaphore");
 
-  vk::ImportFenceFdInfoKHR import_info;
-  import_info.fence = *signal_wait.value;
+  vk::ImportSemaphoreFdInfoKHR import_info;
+  import_info.semaphore = *signal_wait.value;
   import_info.fd = fd->get();
-  import_info.handleType = vk::ExternalFenceHandleTypeFlagBits::eSyncFd;
+  import_info.handleType = vk::ExternalSemaphoreHandleTypeFlagBits::eSyncFd;
   // From the spec: Sync FDs can only be imported temporarily.
-  import_info.flags = vk::FenceImportFlagBitsKHR::eTemporary;
+  import_info.flags = vk::SemaphoreImportFlagBitsKHR::eTemporary;
 
-  const auto import_result = device.importFenceFdKHR(import_info);
+  const auto import_result = device.importSemaphoreFdKHR(import_info);
 
   if (import_result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not import semaphore FD: "
@@ -299,7 +283,7 @@ vk::UniqueFence AHBSwapchainImplVK::CreateRenderReadyFence(
 
 bool AHBSwapchainImplVK::SubmitWaitForRenderReady(
     const std::shared_ptr<fml::UniqueFD>& render_ready_fence,
-    const std::shared_ptr<AHBTextureSourceVK>& texture) const {
+    const std::shared_ptr<AHBTextureSourceVK>& texture) {
   // If there is no render ready fence, we are already ready to render into
   // the texture. There is nothing more to do.
   if (!render_ready_fence || !render_ready_fence->is_valid()) {
@@ -311,20 +295,13 @@ bool AHBSwapchainImplVK::SubmitWaitForRenderReady(
     return false;
   }
 
-  auto fence = CreateRenderReadyFence(render_ready_fence);
-
-  auto result = ContextVK::Cast(*context).GetDevice().waitForFences(
-      *fence,                               // fence
-      true,                                 // wait all
-      std::numeric_limits<uint64_t>::max()  // timeout (ns)
-  );
-
-  if (!(result == vk::Result::eSuccess || result == vk::Result::eTimeout)) {
-    VALIDATION_LOG << "Encountered error while waiting on swapchain image: "
-                   << vk::to_string(result);
+  auto semaphore = CreateRenderReadySemaphore(render_ready_fence);
+  if (!semaphore) {
     return false;
   }
-
+  // This semaphore will be later used to block the onscreen render pass
+  // from starting until the system is done reading the onscreen.
+  frame_data_[frame_index_].semaphore = std::move(semaphore);
   return true;
 }
 

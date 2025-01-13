@@ -19,6 +19,11 @@ AHBTexturePoolVK::AHBTexturePoolVK(std::weak_ptr<Context> context,
   for (auto i = 0u; i < max_entries_; i++) {
     pool_.emplace_back(CreateTexture());
   }
+  for (auto i = 0u; i < max_entries_; i++) {
+    if (!pool_[i].IsValid()) {
+      return;
+    }
+  }
   is_valid_ = true;
 }
 
