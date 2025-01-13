@@ -412,7 +412,7 @@ class LayerStateStack {
 
   class Delegate {
    protected:
-    using ClipOp = DlCanvas::ClipOp;
+    using ClipOp = ClipOp;
 
    public:
     virtual ~Delegate() = default;

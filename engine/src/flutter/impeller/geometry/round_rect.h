@@ -72,32 +72,33 @@ struct RoundingRadii {
 struct RoundRect {
   RoundRect() = default;
 
-  constexpr static RoundRect MakeRect(const Rect& rect) {
+  static RoundRect MakeRect(const Rect& rect) {
     return MakeRectRadii(rect, RoundingRadii());
   }
 
-  constexpr static RoundRect MakeOval(const Rect& rect) {
+  static RoundRect MakeOval(const Rect& rect) {
     return MakeRectRadii(rect, RoundingRadii::MakeRadii(rect.GetSize() * 0.5f));
   }
 
-  constexpr static RoundRect MakeRectRadius(const Rect& rect, Scalar radius) {
+  static RoundRect MakeRectRadius(const Rect& rect, Scalar radius) {
     return MakeRectRadii(rect, RoundingRadii::MakeRadius(radius));
   }
 
-  constexpr static RoundRect MakeRectXY(const Rect& rect,
+  static RoundRect MakeRectXY(const Rect& rect,
                                         Scalar x_radius,
                                         Scalar y_radius) {
     return MakeRectRadii(rect,
                          RoundingRadii::MakeRadii(Size(x_radius, y_radius)));
   }
 
-  constexpr static RoundRect MakeRectXY(const Rect& rect, Size corner_radii) {
+  static RoundRect MakeRectXY(const Rect& rect, Size corner_radii) {
     return MakeRectRadii(rect, RoundingRadii::MakeRadii(corner_radii));
   }
 
   static RoundRect MakeRectRadii(const Rect& rect, const RoundingRadii& radii);
 
   constexpr const Rect& GetBounds() const { return bounds_; }
+
   constexpr const RoundingRadii& GetRadii() const { return radii_; }
 
   [[nodiscard]] constexpr bool IsFinite() const {
@@ -132,7 +133,7 @@ struct RoundRect {
   [[nodiscard]] bool Contains(const Point& p) const;
 
   /// @brief  Returns a new round rectangle translated by the given offset.
-  [[nodiscard]] constexpr RoundRect Shift(Scalar dx, Scalar dy) const {
+  [[nodiscard]] RoundRect Shift(Scalar dx, Scalar dy) const {
     // Just in case, use the factory rather than the internal constructor
     // as shifting the rectangle may increase/decrease its bit precision
     // so we should re-validate the radii to the newly located rectangle.
@@ -141,7 +142,7 @@ struct RoundRect {
 
   /// @brief  Returns a round rectangle with expanded edges. Negative expansion
   ///         results in shrinking.
-  [[nodiscard]] constexpr RoundRect Expand(Scalar left,
+  [[nodiscard]] RoundRect Expand(Scalar left,
                                            Scalar top,
                                            Scalar right,
                                            Scalar bottom) const {
@@ -153,7 +154,7 @@ struct RoundRect {
 
   /// @brief  Returns a round rectangle with expanded edges. Negative expansion
   ///         results in shrinking.
-  [[nodiscard]] constexpr RoundRect Expand(Scalar horizontal,
+  [[nodiscard]] RoundRect Expand(Scalar horizontal,
                                            Scalar vertical) const {
     // Use the factory rather than the internal constructor as the changing
     // size of the rectangle requires that we re-validate the radii to the
@@ -163,7 +164,7 @@ struct RoundRect {
 
   /// @brief  Returns a round rectangle with expanded edges. Negative expansion
   ///         results in shrinking.
-  [[nodiscard]] constexpr RoundRect Expand(Scalar amount) const {
+  [[nodiscard]] RoundRect Expand(Scalar amount) const {
     // Use the factory rather than the internal constructor as the changing
     // size of the rectangle requires that we re-validate the radii to the
     // newly sized rectangle.

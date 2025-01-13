@@ -480,19 +480,19 @@ TEST(DisplayListMatrixClipState, ClipDifference) {
                                    const std::string& label) {
     {
       DisplayListMatrixClipState state(cull_rect, SkMatrix::I());
-      state.clipRect(diff_rect, DlCanvas::ClipOp::kDifference, false);
+      state.clipRect(diff_rect, ClipOp::kDifference, false);
       EXPECT_EQ(state.device_cull_rect(), cull_rect) << label;
     }
     {
       DisplayListMatrixClipState state(cull_rect, SkMatrix::I());
       const SkRRect diff_rrect = SkRRect::MakeRect(diff_rect);
-      state.clipRRect(diff_rrect, DlCanvas::ClipOp::kDifference, false);
+      state.clipRRect(diff_rrect, ClipOp::kDifference, false);
       EXPECT_EQ(state.device_cull_rect(), cull_rect) << label << " (RRect)";
     }
     {
       DisplayListMatrixClipState state(cull_rect, SkMatrix::I());
       const SkPath diff_path = SkPath().addRect(diff_rect);
-      state.clipPath(diff_path, DlCanvas::ClipOp::kDifference, false);
+      state.clipPath(diff_path, ClipOp::kDifference, false);
       EXPECT_EQ(state.device_cull_rect(), cull_rect) << label << " (RRect)";
     }
   };
@@ -503,19 +503,19 @@ TEST(DisplayListMatrixClipState, ClipDifference) {
     EXPECT_TRUE(result_rect.isEmpty() || cull_rect.contains(result_rect));
     {
       DisplayListMatrixClipState state(cull_rect, SkMatrix::I());
-      state.clipRect(diff_rect, DlCanvas::ClipOp::kDifference, false);
+      state.clipRect(diff_rect, ClipOp::kDifference, false);
       EXPECT_EQ(state.device_cull_rect(), result_rect) << label;
     }
     {
       DisplayListMatrixClipState state(cull_rect, SkMatrix::I());
       const SkRRect diff_rrect = SkRRect::MakeRect(diff_rect);
-      state.clipRRect(diff_rrect, DlCanvas::ClipOp::kDifference, false);
+      state.clipRRect(diff_rrect, ClipOp::kDifference, false);
       EXPECT_EQ(state.device_cull_rect(), result_rect) << label << " (RRect)";
     }
     {
       DisplayListMatrixClipState state(cull_rect, SkMatrix::I());
       const SkPath diff_path = SkPath().addRect(diff_rect);
-      state.clipPath(diff_path, DlCanvas::ClipOp::kDifference, false);
+      state.clipPath(diff_path, ClipOp::kDifference, false);
       EXPECT_EQ(state.device_cull_rect(), result_rect) << label << " (RRect)";
     }
   };
@@ -579,7 +579,7 @@ TEST(DisplayListMatrixClipState, ClipPathWithInvertFillType) {
   DisplayListMatrixClipState state(cull_rect, SkMatrix::I());
   SkPath clip = SkPath().addCircle(10.2, 11.3, 2).addCircle(20.4, 25.7, 2);
   clip.setFillType(SkPathFillType::kInverseWinding);
-  state.clipPath(clip, DlCanvas::ClipOp::kIntersect, false);
+  state.clipPath(clip, ClipOp::kIntersect, false);
 
   EXPECT_EQ(state.local_cull_rect(), cull_rect);
   EXPECT_EQ(state.device_cull_rect(), cull_rect);
@@ -592,7 +592,7 @@ TEST(DisplayListMatrixClipState, DiffClipPathWithInvertFillType) {
   SkPath clip = SkPath().addCircle(10.2, 11.3, 2).addCircle(20.4, 25.7, 2);
   clip.setFillType(SkPathFillType::kInverseWinding);
   SkRect clip_bounds = SkRect::MakeLTRB(8.2, 9.3, 22.4, 27.7);
-  state.clipPath(clip, DlCanvas::ClipOp::kDifference, false);
+  state.clipPath(clip, ClipOp::kDifference, false);
 
   EXPECT_EQ(state.local_cull_rect(), clip_bounds);
   EXPECT_EQ(state.device_cull_rect(), clip_bounds);

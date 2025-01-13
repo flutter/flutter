@@ -936,8 +936,7 @@ void DisplayListBuilder::ClipRect(const DlRect& rect,
   if (current_info().is_nop) {
     return;
   }
-  if (current_info().has_valid_clip &&
-      clip_op == DlCanvas::ClipOp::kIntersect &&
+  if (current_info().has_valid_clip && clip_op == ClipOp::kIntersect &&
       layer_local_state().rect_covers_cull(rect)) {
     return;
   }
@@ -968,8 +967,7 @@ void DisplayListBuilder::ClipOval(const DlRect& bounds,
   if (current_info().is_nop) {
     return;
   }
-  if (current_info().has_valid_clip &&
-      clip_op == DlCanvas::ClipOp::kIntersect &&
+  if (current_info().has_valid_clip && clip_op == ClipOp::kIntersect &&
       layer_local_state().oval_covers_cull(bounds)) {
     return;
   }
@@ -1005,8 +1003,7 @@ void DisplayListBuilder::ClipRoundRect(const DlRoundRect& rrect,
   if (current_info().is_nop) {
     return;
   }
-  if (current_info().has_valid_clip &&
-      clip_op == DlCanvas::ClipOp::kIntersect &&
+  if (current_info().has_valid_clip && clip_op == ClipOp::kIntersect &&
       layer_local_state().rrect_covers_cull(rrect)) {
     return;
   }
@@ -1271,7 +1268,7 @@ void DisplayListBuilder::DrawArc(const DlRect& bounds,
 DisplayListAttributeFlags DisplayListBuilder::FlagsForPointMode(
     PointMode mode) {
   switch (mode) {
-    case DlCanvas::PointMode::kPoints:
+    case PointMode::kPoints:
       return kDrawPointsAsPointsFlags;
     case PointMode::kLines:
       return kDrawPointsAsLinesFlags;

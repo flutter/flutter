@@ -13,7 +13,7 @@ namespace {
 // X and Y directions.
 constexpr static Scalar kPrecision = 4;
 
-constexpr Scalar length(Point n) {
+inline Scalar length(Point n) {
   Point nn = n * n;
   return std::sqrt(nn.x + nn.y);
 }

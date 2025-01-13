@@ -9,6 +9,7 @@
 
 #include "flutter/fml/log_level.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/build_config.h"
 
 namespace fml {
 
@@ -60,7 +61,25 @@ int GetVlogVerbosity();
 // kLogFatal and above is always true.
 bool ShouldCreateLogMessage(LogSeverity severity);
 
+constexpr bool ShouldCreateLogMessage2(LogSeverity severity, bool true_arg) {
+  if (true_arg) {
+    return ShouldCreateLogMessage(severity);
+  }
+  return false;
+}
+
 [[noreturn]] void KillProcess();
+
+[[noreturn]] constexpr void KillProcess2(bool true_arg) {
+  if (true_arg) {
+    KillProcess();
+  }
+#if defined(_MSC_VER) && !defined(__clang__)
+    __assume(false);
+#else
+    __builtin_unreachable();
+#endif
+}
 
 }  // namespace fml
 
@@ -77,7 +96,7 @@ bool ShouldCreateLogMessage(LogSeverity severity);
             ::fml::LogMessage(::fml::kLogFatal, 0, 0, nullptr).stream()
 
 #define FML_LOG_IS_ON(severity) \
-  (::fml::ShouldCreateLogMessage(::fml::LOG_##severity))
+  (::fml::ShouldCreateLogMessage2(::fml::LOG_##severity, true))
 
 #define FML_LOG(severity) \
   FML_LAZY_STREAM(FML_LOG_STREAM(severity), FML_LOG_IS_ON(severity))
@@ -109,7 +128,7 @@ bool ShouldCreateLogMessage(LogSeverity severity);
 #define FML_UNREACHABLE()                          \
   {                                                \
     FML_LOG(ERROR) << "Reached unreachable code."; \
-    ::fml::KillProcess();                          \
+    ::fml::KillProcess2(true);             \
   }
 
 #endif  // FLUTTER_FML_LOGGING_H_

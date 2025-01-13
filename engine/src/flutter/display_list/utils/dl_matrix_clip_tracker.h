@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "flutter/display_list/dl_canvas.h"
+#include "flutter/display_list/dl_types.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/logging.h"
 
@@ -21,9 +22,6 @@
 namespace flutter {
 
 class DisplayListMatrixClipState {
- private:
-  using ClipOp = DlCanvas::ClipOp;
-
  public:
   explicit DisplayListMatrixClipState(const DlRect& cull_rect,
                                       const DlMatrix& matrix = DlMatrix());

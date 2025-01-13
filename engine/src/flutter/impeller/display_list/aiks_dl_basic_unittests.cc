@@ -825,7 +825,7 @@ TEST_P(AiksTest, CanRenderClippedBackdropFilter) {
 
   // Draw a clipped SaveLayer, where the clip coverage and SaveLayer size are
   // the same.
-  builder.ClipRRect(clip_rrect, DlCanvas::ClipOp::kIntersect);
+  builder.ClipRRect(clip_rrect, ClipOp::kIntersect);
 
   DlPaint save_paint;
   auto backdrop_filter = DlImageFilter::MakeColorFilter(
@@ -853,7 +853,7 @@ TEST_P(AiksTest, CanDrawPerspectiveTransformWithClips) {
         paint.setColor(DlColor::kGreen());
         builder.DrawPaint(paint);
         builder.ClipRect(SkRect::MakeLTRB(-180, -180, 180, 180),
-                         DlCanvas::ClipOp::kDifference);
+                         ClipOp::kDifference);
 
         paint.setColor(DlColor::kBlack());
         builder.DrawPaint(paint);

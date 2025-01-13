@@ -414,8 +414,7 @@ class ClipRectEntry : public LayerStateStack::StateEntry {
       : clip_rect_(clip_rect), is_aa_(is_aa) {}
 
   void apply(LayerStateStack* stack) const override {
-    stack->delegate_->clipRect(clip_rect_, DlCanvas::ClipOp::kIntersect,
-                               is_aa_);
+    stack->delegate_->clipRect(clip_rect_, ClipOp::kIntersect, is_aa_);
   }
   void update_mutators(MutatorsStack* mutators_stack) const override {
     mutators_stack->PushClipRect(ToSkRect(clip_rect_));
@@ -434,8 +433,7 @@ class ClipRRectEntry : public LayerStateStack::StateEntry {
       : clip_rrect_(clip_rrect), is_aa_(is_aa) {}
 
   void apply(LayerStateStack* stack) const override {
-    stack->delegate_->clipRRect(clip_rrect_, DlCanvas::ClipOp::kIntersect,
-                                is_aa_);
+    stack->delegate_->clipRRect(clip_rrect_, ClipOp::kIntersect, is_aa_);
   }
   void update_mutators(MutatorsStack* mutators_stack) const override {
     mutators_stack->PushClipRRect(ToSkRRect(clip_rrect_));
@@ -455,8 +453,7 @@ class ClipPathEntry : public LayerStateStack::StateEntry {
   ~ClipPathEntry() override = default;
 
   void apply(LayerStateStack* stack) const override {
-    stack->delegate_->clipPath(clip_path_, DlCanvas::ClipOp::kIntersect,
-                               is_aa_);
+    stack->delegate_->clipPath(clip_path_, ClipOp::kIntersect, is_aa_);
   }
   void update_mutators(MutatorsStack* mutators_stack) const override {
     mutators_stack->PushClipPath(clip_path_.GetSkPath());

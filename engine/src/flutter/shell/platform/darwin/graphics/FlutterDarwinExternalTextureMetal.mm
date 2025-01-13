@@ -66,12 +66,12 @@ FLUTTER_ASSERT_ARC
   }
 
   if (_externalImage) {
-    context.canvas->DrawImageRect(_externalImage,                                // image
-                                  SkRect::Make(_externalImage->bounds()),        // source rect
-                                  bounds,                                        // destination rect
-                                  sampling,                                      // sampling
-                                  context.paint,                                 // paint
-                                  flutter::DlCanvas::SrcRectConstraint::kStrict  // enforce edges
+    context.canvas->DrawImageRect(_externalImage,                          // image
+                                  SkRect::Make(_externalImage->bounds()),  // source rect
+                                  bounds,                                  // destination rect
+                                  sampling,                                // sampling
+                                  context.paint,                           // paint
+                                  flutter::SrcRectConstraint::kStrict      // enforce edges
     );
   }
 }

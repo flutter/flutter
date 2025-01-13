@@ -82,7 +82,7 @@ constexpr flutter::DlColor ToDisplayListType(Color color) {
   );
 }
 
-constexpr SkMatrix ToSkMatrix(const Matrix& matrix) {
+inline SkMatrix ToSkMatrix(const Matrix& matrix) {
   return SkM44::ColMajor(matrix.m).asM33();
 }
 
@@ -274,14 +274,14 @@ constexpr FillType ToImpellerType(ImpellerFillType type) {
   return FillType::kNonZero;
 }
 
-constexpr flutter::DlCanvas::ClipOp ToImpellerType(ImpellerClipOperation op) {
+constexpr flutter::ClipOp ToImpellerType(ImpellerClipOperation op) {
   switch (op) {
     case kImpellerClipOperationDifference:
-      return flutter::DlCanvas::ClipOp::kDifference;
+      return flutter::ClipOp::kDifference;
     case kImpellerClipOperationIntersect:
-      return flutter::DlCanvas::ClipOp::kIntersect;
+      return flutter::ClipOp::kIntersect;
   }
-  return flutter::DlCanvas::ClipOp::kDifference;
+  return flutter::ClipOp::kDifference;
 }
 
 constexpr Color ToImpellerType(const ImpellerColor& color) {

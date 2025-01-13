@@ -16,7 +16,7 @@ namespace testing {
 
 using PlatformViewLayerTest = LayerTest;
 
-using ClipOp = DlCanvas::ClipOp;
+using ClipOp = ClipOp;
 
 TEST_F(PlatformViewLayerTest, NullViewEmbedderDoesntPrerollCompositeOrPaint) {
   const DlPoint layer_offset = DlPoint();

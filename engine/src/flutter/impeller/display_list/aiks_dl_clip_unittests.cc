@@ -48,13 +48,13 @@ TEST_P(AiksTest, CanRenderDifferenceClips) {
   builder.Save();
 
   // Cut away eyes/mouth using difference clips.
-  builder.ClipPath(CreateCircle(-100, -50, 30), DlCanvas::ClipOp::kDifference);
-  builder.ClipPath(CreateCircle(100, -50, 30), DlCanvas::ClipOp::kDifference);
+  builder.ClipPath(CreateCircle(-100, -50, 30), ClipOp::kDifference);
+  builder.ClipPath(CreateCircle(100, -50, 30), ClipOp::kDifference);
 
   SkPath path;
   path.moveTo(-100, 50);
   path.quadTo(0, 150, 100, 50);
-  builder.ClipPath(path, DlCanvas::ClipOp::kDifference);
+  builder.ClipPath(path, ClipOp::kDifference);
 
   // Draw a huge yellow rectangle to prove the clipping works.
   DlPaint paint;
@@ -127,7 +127,7 @@ TEST_P(AiksTest, FramebufferBlendsRespectClips) {
   paint.setColor(DlColor::kWhite());
   builder.DrawPaint(paint);
 
-  builder.ClipPath(SkPath::Circle(150, 150, 50), DlCanvas::ClipOp::kIntersect);
+  builder.ClipPath(SkPath::Circle(150, 150, 50), ClipOp::kIntersect);
 
   // Draw a red rectangle that should not show through the circle clip.
   paint.setColor(DlColor::kRed());

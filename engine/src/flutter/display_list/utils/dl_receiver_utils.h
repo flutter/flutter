@@ -7,6 +7,7 @@
 
 #include "flutter/display_list/dl_op_receiver.h"
 #include "flutter/fml/logging.h"
+#include "flutter/third_party/skia/include/core/SkTextBlob.h"
 
 // This file contains various utility classes to ease implementing
 // a Flutter DisplayList DlOpReceiver, including:
@@ -41,18 +42,12 @@ class IgnoreAttributeDispatchHelper : public virtual DlOpReceiver {
 // A utility class that will ignore all DlOpReceiver methods relating
 // to setting a clip.
 class IgnoreClipDispatchHelper : public virtual DlOpReceiver {
-  void clipRect(const DlRect& rect,
-                DlCanvas::ClipOp clip_op,
-                bool is_aa) override {}
-  void clipOval(const DlRect& bounds,
-                DlCanvas::ClipOp clip_op,
-                bool is_aa) override {}
+  void clipRect(const DlRect& rect, ClipOp clip_op, bool is_aa) override {}
+  void clipOval(const DlRect& bounds, ClipOp clip_op, bool is_aa) override {}
   void clipRoundRect(const DlRoundRect& rrect,
-                     DlCanvas::ClipOp clip_op,
+                     ClipOp clip_op,
                      bool is_aa) override {}
-  void clipPath(const DlPath& path,
-                DlCanvas::ClipOp clip_op,
-                bool is_aa) override {}
+  void clipPath(const DlPath& path, ClipOp clip_op, bool is_aa) override {}
 };
 
 // A utility class that will ignore all DlOpReceiver methods relating
@@ -103,7 +98,7 @@ class IgnoreDrawDispatchHelper : public virtual DlOpReceiver {
                DlScalar start_degrees,
                DlScalar sweep_degrees,
                bool use_center) override {}
-  void drawPoints(DlCanvas::PointMode mode,
+  void drawPoints(PointMode mode,
                   uint32_t count,
                   const DlPoint points[]) override {}
   void drawVertices(const std::shared_ptr<DlVertices>& vertices,

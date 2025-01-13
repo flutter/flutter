@@ -64,7 +64,7 @@ void BM_DrawPath(benchmark::State& state,
 void BM_DrawPoints(benchmark::State& state,
                    BackendType backend_type,
                    unsigned attributes,
-                   DlCanvas::PointMode mode);
+                   PointMode mode);
 void BM_DrawVertices(benchmark::State& state,
                      BackendType backend_type,
                      unsigned attributes,
@@ -78,7 +78,7 @@ void BM_DrawImageRect(benchmark::State& state,
                       BackendType backend_type,
                       unsigned attributes,
                       DlImageSampling options,
-                      DlCanvas::SrcRectConstraint constraint,
+                      SrcRectConstraint constraint,
                       bool upload_bitmap);
 void BM_DrawImageNine(benchmark::State& state,
                       BackendType backend_type,
@@ -200,7 +200,7 @@ void BM_SaveLayer(benchmark::State& state,
   BENCHMARK_CAPTURE(BM_DrawPoints, Points/BACKEND,                      \
                     BackendType::k##BACKEND##Backend,                  \
                     ATTRIBUTES,                                         \
-                    DlCanvas::PointMode::kPoints)                       \
+                    PointMode::kPoints)                       \
       ->RangeMultiplier(2)                                              \
       ->Range(1024, 32768)                                              \
       ->UseRealTime()                                                   \
@@ -209,7 +209,7 @@ void BM_SaveLayer(benchmark::State& state,
   BENCHMARK_CAPTURE(BM_DrawPoints, Lines/BACKEND,                       \
                     BackendType::k##BACKEND##Backend,                  \
                     ATTRIBUTES,                                         \
-                    DlCanvas::PointMode::kLines)                        \
+                    PointMode::kLines)                        \
       ->RangeMultiplier(2)                                              \
       ->Range(1024, 32768)                                              \
       ->UseRealTime()                                                   \
@@ -218,7 +218,7 @@ void BM_SaveLayer(benchmark::State& state,
   BENCHMARK_CAPTURE(BM_DrawPoints, Polygon/BACKEND,                     \
                     BackendType::k##BACKEND##Backend,                  \
                     ATTRIBUTES,                                         \
-                    DlCanvas::PointMode::kPolygon)                      \
+                    PointMode::kPolygon)                      \
       ->RangeMultiplier(2)                                              \
       ->Range(1024, 32768)                                              \
       ->UseRealTime()                                                   \
@@ -344,7 +344,7 @@ void BM_SaveLayer(benchmark::State& state,
       BackendType::k##BACKEND##Backend,                                \
       ATTRIBUTES,                                                       \
       DlImageSampling::kNearestNeighbor,                                \
-      DlCanvas::SrcRectConstraint::kStrict, false)                      \
+      SrcRectConstraint::kStrict, false)                      \
       ->RangeMultiplier(2)                                              \
       ->Range(32, 256)                                                  \
       ->UseRealTime()                                                   \
@@ -355,7 +355,7 @@ void BM_SaveLayer(benchmark::State& state,
       BackendType::k##BACKEND##Backend,                                \
       ATTRIBUTES,                                                       \
       DlImageSampling::kNearestNeighbor,                                \
-      DlCanvas::SrcRectConstraint::kFast, false)                        \
+      SrcRectConstraint::kFast, false)                        \
       ->RangeMultiplier(2)                                              \
       ->Range(32, 256)                                                  \
       ->UseRealTime()                                                   \
@@ -366,7 +366,7 @@ void BM_SaveLayer(benchmark::State& state,
       BackendType::k##BACKEND##Backend,                                \
       ATTRIBUTES,                                                       \
       DlImageSampling::kNearestNeighbor,                                \
-      DlCanvas::SrcRectConstraint::kStrict, true)                       \
+      SrcRectConstraint::kStrict, true)                       \
       ->RangeMultiplier(2)                                              \
       ->Range(32, 256)                                                  \
       ->UseRealTime()                                                   \
@@ -377,7 +377,7 @@ void BM_SaveLayer(benchmark::State& state,
       BackendType::k##BACKEND##Backend,                                \
       ATTRIBUTES,                                                       \
       DlImageSampling::kNearestNeighbor,                                \
-      DlCanvas::SrcRectConstraint::kFast, true)                         \
+      SrcRectConstraint::kFast, true)                         \
       ->RangeMultiplier(2)                                              \
       ->Range(32, 256)                                                  \
       ->UseRealTime()                                                   \

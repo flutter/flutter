@@ -307,7 +307,7 @@ struct Matrix {
 
   bool IsInvertible() const { return GetDeterminant() != 0; }
 
-  constexpr Scalar GetMaxBasisLengthXY() const {
+  Scalar GetMaxBasisLengthXY() const {
     // The full basis computation requires computing the squared scaling factor
     // for translate/scale only matrices. This substantially limits the range of
     // precision for small and large scales. Instead, check for the common cases
@@ -325,17 +325,17 @@ struct Matrix {
 
   constexpr Vector3 GetBasisZ() const { return Vector3(m[8], m[9], m[10]); }
 
-  constexpr Vector3 GetScale() const {
+  Vector3 GetScale() const {
     return Vector3(GetBasisX().GetLength(), GetBasisY().GetLength(),
                    GetBasisZ().GetLength());
   }
 
-  constexpr Scalar GetDirectionScale(Vector3 direction) const {
+  Scalar GetDirectionScale(Vector3 direction) const {
     return 1.0f / (this->Basis().Invert() * direction.Normalize()).GetLength() *
            direction.GetLength();
   }
 
-  constexpr bool IsFinite() const {
+  bool IsFinite() const {
     return vec[0].IsFinite() && vec[1].IsFinite() && vec[2].IsFinite() &&
            vec[3].IsFinite();
   }
@@ -559,7 +559,7 @@ struct Matrix {
     return translate * scale;
   }
 
-  static constexpr Matrix MakePerspective(Radians fov_y,
+  static Matrix MakePerspective(Radians fov_y,
                                           Scalar aspect_ratio,
                                           Scalar z_near,
                                           Scalar z_far) {
@@ -585,7 +585,7 @@ struct Matrix {
                            z_near, z_far);
   }
 
-  static constexpr Matrix MakeLookAt(Vector3 position,
+  static Matrix MakeLookAt(Vector3 position,
                                      Vector3 target,
                                      Vector3 up) {
     Vector3 forward = (target - position).Normalize();
@@ -603,7 +603,7 @@ struct Matrix {
   }
 
  private:
-  static constexpr Vector2 CosSin(Radians radians) {
+  static Vector2 CosSin(Radians radians) {
     // The precision of a float around 1.0 is much lower than it is
     // around 0.0, so we end up with cases on quadrant rotations where
     // we get a +/-1.0 for one of the values and a non-zero value for

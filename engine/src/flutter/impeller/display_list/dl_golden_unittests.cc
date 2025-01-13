@@ -76,7 +76,7 @@ TEST_P(DlGoldenTest, Bug147807) {
     {
       canvas->ClipRRect(
           SkRRect::MakeOval(SkRect::MakeLTRB(201.25, 10, 361.25, 170)),
-          DlCanvas::ClipOp::kIntersect, true);
+          ClipOp::kIntersect, true);
       SkRect save_layer_bounds = SkRect::MakeLTRB(201.25, 10, 361.25, 170);
       auto backdrop =
           DlImageFilter::MakeMatrix(DlMatrix::MakeRow(3, 0, 0.0, -280,  //

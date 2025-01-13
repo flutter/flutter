@@ -21,7 +21,7 @@ namespace testing {
 
 using ClipPathLayerTest = LayerTest;
 
-using ClipOp = DlCanvas::ClipOp;
+using ClipOp = ClipOp;
 
 #ifndef NDEBUG
 TEST_F(ClipPathLayerTest, ClipNoneBehaviorDies) {

@@ -8,6 +8,7 @@
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_paint.h"
+#include "flutter/display_list/dl_types.h"
 #include "flutter/display_list/dl_vertices.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/display_list/geometry/dl_path.h"
@@ -39,22 +40,6 @@ namespace flutter {
 ///            used throughout the engine.
 class DlCanvas {
  public:
-  enum class ClipOp {
-    kDifference,
-    kIntersect,
-  };
-
-  enum class PointMode {
-    kPoints,   //!< draw each point separately
-    kLines,    //!< draw each separate pair of points as a line segment
-    kPolygon,  //!< draw each pair of overlapping points as a line segment
-  };
-
-  enum class SrcRectConstraint {
-    kStrict,
-    kFast,
-  };
-
   virtual ~DlCanvas() = default;
 
   virtual DlISize GetBaseLayerDimensions() const = 0;

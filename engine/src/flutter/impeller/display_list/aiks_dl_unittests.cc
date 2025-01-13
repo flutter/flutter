@@ -430,10 +430,10 @@ TEST_P(AiksTest, CanDrawPoints) {
   builder.DrawPaint(background);
   builder.Translate(200, 200);
 
-  builder.DrawPoints(DlCanvas::PointMode::kPoints, points.size(), points.data(),
+  builder.DrawPoints(PointMode::kPoints, points.size(), points.data(),
                      paint_round);
   builder.Translate(150, 0);
-  builder.DrawPoints(DlCanvas::PointMode::kPoints, points.size(), points.data(),
+  builder.DrawPoints(PointMode::kPoints, points.size(), points.data(),
                      paint_square);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -470,10 +470,10 @@ TEST_P(AiksTest, CanDrawPointsWithTextureMap) {
   DisplayListBuilder builder(GetCullRect(GetWindowSize()));
   builder.Translate(200, 200);
 
-  builder.DrawPoints(DlCanvas::PointMode::kPoints, points.size(), points.data(),
+  builder.DrawPoints(PointMode::kPoints, points.size(), points.data(),
                      paint_round);
   builder.Translate(150, 0);
-  builder.DrawPoints(DlCanvas::PointMode::kPoints, points.size(), points.data(),
+  builder.DrawPoints(PointMode::kPoints, points.size(), points.data(),
                      paint_square);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -832,8 +832,7 @@ TEST_P(AiksTest, CanDrawScaledPointsSmallScaleLargeRadius) {
   builder.Translate(200, 200);
   builder.Scale(0.000001, 0.000001);
 
-  builder.DrawPoints(DlCanvas::PointMode::kPoints, point.size(), point.data(),
-                     paint);
+  builder.DrawPoints(PointMode::kPoints, point.size(), point.data(), paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -853,8 +852,7 @@ TEST_P(AiksTest, CanDrawScaledPointsLargeScaleSmallRadius) {
   builder.Translate(200, 200);
   builder.Scale(1000000, 1000000);
 
-  builder.DrawPoints(DlCanvas::PointMode::kPoints, point.size(), point.data(),
-                     paint);
+  builder.DrawPoints(PointMode::kPoints, point.size(), point.data(), paint);
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
@@ -907,8 +905,7 @@ TEST_P(AiksTest, BackdropRestoreUsesCorrectCoverageForFirstRestoredClip) {
 
   DlPaint paint;
   // Add a difference clip that cuts out the bottom right corner
-  builder.ClipRect(SkRect::MakeLTRB(50, 50, 100, 100),
-                   DlCanvas::ClipOp::kDifference);
+  builder.ClipRect(SkRect::MakeLTRB(50, 50, 100, 100), ClipOp::kDifference);
 
   // Draw a red rectangle that's going to be completely covered by green later.
   paint.setColor(DlColor::kRed());
@@ -1006,8 +1003,7 @@ TEST_P(AiksTest, DepthValuesForLineMode) {
       DlPoint::MakeXY(0, 100),  DlPoint::MakeXY(400, 500),
       DlPoint::MakeXY(0, 150),  DlPoint::MakeXY(400, 600)};
 
-  builder.DrawPoints(DisplayListBuilder::PointMode::kLines, points.size(),
-                     points.data(),
+  builder.DrawPoints(PointMode::kLines, points.size(), points.data(),
                      DlPaint().setColor(DlColor::kBlue()).setStrokeWidth(10));
   builder.Restore();
 
@@ -1035,8 +1031,7 @@ TEST_P(AiksTest, DepthValuesForPolygonMode) {
       DlPoint::MakeXY(0, 100),  DlPoint::MakeXY(400, 500),
       DlPoint::MakeXY(0, 150),  DlPoint::MakeXY(400, 600)};
 
-  builder.DrawPoints(DisplayListBuilder::PointMode::kPolygon, points.size(),
-                     points.data(),
+  builder.DrawPoints(PointMode::kPolygon, points.size(), points.data(),
                      DlPaint().setColor(DlColor::kBlue()).setStrokeWidth(10));
   builder.Restore();
 

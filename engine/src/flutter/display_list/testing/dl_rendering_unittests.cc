@@ -44,8 +44,8 @@
 namespace flutter {
 namespace testing {
 
-using ClipOp = DlCanvas::ClipOp;
-using PointMode = DlCanvas::PointMode;
+using ClipOp = ClipOp;
+using PointMode = PointMode;
 
 constexpr int kTestWidth = 200;
 constexpr int kTestHeight = 200;
@@ -3492,9 +3492,9 @@ TEST_F(DisplayListRendering, DrawImageRectNearest) {
                 &ctx.paint, SkCanvas::kFast_SrcRectConstraint);
           },
           [=](const DlRenderContext& ctx) {
-            ctx.canvas->DrawImageRect(
-                ctx.image, src, dst, DlImageSampling::kNearestNeighbor,
-                &ctx.paint, DlCanvas::SrcRectConstraint::kFast);
+            ctx.canvas->DrawImageRect(ctx.image, src, dst,
+                                      DlImageSampling::kNearestNeighbor,
+                                      &ctx.paint, SrcRectConstraint::kFast);
           },
           kDrawImageRectWithPaintFlags));
 }
@@ -3510,9 +3510,9 @@ TEST_F(DisplayListRendering, DrawImageRectNearestNoPaint) {
                 nullptr, SkCanvas::kFast_SrcRectConstraint);
           },
           [=](const DlRenderContext& ctx) {
-            ctx.canvas->DrawImageRect(
-                ctx.image, src, dst, DlImageSampling::kNearestNeighbor,  //
-                nullptr, DlCanvas::SrcRectConstraint::kFast);
+            ctx.canvas->DrawImageRect(ctx.image, src, dst,
+                                      DlImageSampling::kNearestNeighbor,  //
+                                      nullptr, SrcRectConstraint::kFast);
           },
           kDrawImageRectFlags));
 }
@@ -3528,9 +3528,9 @@ TEST_F(DisplayListRendering, DrawImageRectLinear) {
                 &ctx.paint, SkCanvas::kFast_SrcRectConstraint);
           },
           [=](const DlRenderContext& ctx) {  //
-            ctx.canvas->DrawImageRect(
-                ctx.image, src, dst, DlImageSampling::kLinear,  //
-                &ctx.paint, DlCanvas::SrcRectConstraint::kFast);
+            ctx.canvas->DrawImageRect(ctx.image, src, dst,
+                                      DlImageSampling::kLinear,  //
+                                      &ctx.paint, SrcRectConstraint::kFast);
           },
           kDrawImageRectWithPaintFlags));
 }

@@ -683,7 +683,7 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
     // correctly.
     if (add_clip) {
       builder.ClipRect(SkRect::MakeLTRB(0, 0, 99999, 99999),
-                       flutter::DlCanvas::ClipOp::kIntersect, true);
+                       flutter::ClipOp::kIntersect, true);
     }
 
     builder.DrawImage(DlImageImpeller::Make(texture), SkPoint::Make(200, 200),
@@ -822,12 +822,11 @@ TEST_P(DisplayListTest, CanDrawPoints) {
   for (auto cap : caps) {
     paint.setStrokeCap(cap);
     builder.Save();
-    builder.DrawPoints(flutter::DlCanvas::PointMode::kPoints, 7, points, paint);
+    builder.DrawPoints(flutter::PointMode::kPoints, 7, points, paint);
     builder.Translate(150, 0);
-    builder.DrawPoints(flutter::DlCanvas::PointMode::kLines, 5, points, paint);
+    builder.DrawPoints(flutter::PointMode::kLines, 5, points, paint);
     builder.Translate(150, 0);
-    builder.DrawPoints(flutter::DlCanvas::PointMode::kPolygon, 5, points,
-                       paint);
+    builder.DrawPoints(flutter::PointMode::kPolygon, 5, points, paint);
     builder.Restore();
     builder.Translate(0, 150);
   }
@@ -1126,7 +1125,7 @@ TEST_P(DisplayListTest, CanDrawPaintWithColorSource) {
   auto clip_bounds = SkRect::MakeWH(300.0, 300.0);
   builder.Save();
   builder.Translate(100, 100);
-  builder.ClipRect(clip_bounds, flutter::DlCanvas::ClipOp::kIntersect, false);
+  builder.ClipRect(clip_bounds, flutter::ClipOp::kIntersect, false);
   auto linear =
       flutter::DlColorSource::MakeLinear({0.0, 0.0}, {100.0, 100.0}, 2, colors,
                                          stops, flutter::DlTileMode::kRepeat);
@@ -1136,7 +1135,7 @@ TEST_P(DisplayListTest, CanDrawPaintWithColorSource) {
 
   builder.Save();
   builder.Translate(500, 100);
-  builder.ClipRect(clip_bounds, flutter::DlCanvas::ClipOp::kIntersect, false);
+  builder.ClipRect(clip_bounds, flutter::ClipOp::kIntersect, false);
   auto radial = flutter::DlColorSource::MakeRadial(
       {100.0, 100.0}, 100.0, 2, colors, stops, flutter::DlTileMode::kRepeat);
   paint.setColorSource(radial);
@@ -1145,7 +1144,7 @@ TEST_P(DisplayListTest, CanDrawPaintWithColorSource) {
 
   builder.Save();
   builder.Translate(100, 500);
-  builder.ClipRect(clip_bounds, flutter::DlCanvas::ClipOp::kIntersect, false);
+  builder.ClipRect(clip_bounds, flutter::ClipOp::kIntersect, false);
   auto sweep =
       flutter::DlColorSource::MakeSweep({100.0, 100.0}, 180.0, 270.0, 2, colors,
                                         stops, flutter::DlTileMode::kRepeat);
@@ -1155,7 +1154,7 @@ TEST_P(DisplayListTest, CanDrawPaintWithColorSource) {
 
   builder.Save();
   builder.Translate(500, 500);
-  builder.ClipRect(clip_bounds, flutter::DlCanvas::ClipOp::kIntersect, false);
+  builder.ClipRect(clip_bounds, flutter::ClipOp::kIntersect, false);
   auto texture = CreateTextureForFixture("table_mountain_nx.png");
   auto image = flutter::DlColorSource::MakeImage(DlImageImpeller::Make(texture),
                                                  flutter::DlTileMode::kRepeat,

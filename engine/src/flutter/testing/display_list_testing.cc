@@ -8,9 +8,12 @@
 #include <iomanip>
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/display_list/dl_canvas.h"
+#include "flutter/display_list/dl_types.h"
 #include "flutter/display_list/effects/dl_color_filters.h"
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
+#include "flutter/third_party/skia/include/core/SkRSXform.h"
 
 namespace flutter::testing {
 
@@ -213,18 +216,18 @@ static std::ostream& operator<<(std::ostream& os, const SkRSXform& xform) {
             << "ty: " << xform.fTy << ")";
 }
 
-std::ostream& operator<<(std::ostream& os, const DlCanvas::ClipOp& op) {
+std::ostream& operator<<(std::ostream& os, const flutter::ClipOp& op) {
   switch (op) {
-    case DlCanvas::ClipOp::kDifference: return os << "ClipOp::kDifference";
-    case DlCanvas::ClipOp::kIntersect:  return os << "ClipOp::kIntersect";
+    case flutter::ClipOp::kDifference: return os << "ClipOp::kDifference";
+    case flutter::ClipOp::kIntersect:  return os << "ClipOp::kIntersect";
   }
 }
 
-std::ostream& operator<<(std::ostream& os, const DlCanvas::SrcRectConstraint& constraint) {
+std::ostream& operator<<(std::ostream& os, const flutter::SrcRectConstraint& constraint) {
   switch (constraint) {
-    case DlCanvas::SrcRectConstraint::kFast:
+    case flutter::SrcRectConstraint::kFast:
       return os << "SrcRectConstraint::kFast";
-    case DlCanvas::SrcRectConstraint::kStrict:
+    case flutter::SrcRectConstraint::kStrict:
       return os << "SrcRectConstraint::kStrict";
   }
 }
@@ -262,11 +265,11 @@ std::ostream& operator<<(std::ostream& os, const DlBlurStyle& style) {
   }
 }
 
-std::ostream& operator<<(std::ostream& os, const DlCanvas::PointMode& mode) {
+std::ostream& operator<<(std::ostream& os, const flutter::PointMode& mode) {
   switch (mode) {
-    case DlCanvas::PointMode::kPoints:  return os << "PointMode::kPoints";
-    case DlCanvas::PointMode::kLines:   return os << "PointMode::kLines";
-    case DlCanvas::PointMode::kPolygon: return os << "PointMode::kPolygon";
+    case flutter::PointMode::kPoints:  return os << "PointMode::kPoints";
+    case flutter::PointMode::kLines:   return os << "PointMode::kLines";
+    case flutter::PointMode::kPolygon: return os << "PointMode::kPolygon";
   }
 }
 

@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "flutter/display_list/dl_op_receiver.h"
+#include "flutter/display_list/dl_types.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/display_list/utils/dl_receiver_utils.h"
@@ -124,18 +125,24 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
   void transformReset() override;
 
   // |flutter::DlOpReceiver|
-  void clipRect(const DlRect& rect, ClipOp clip_op, bool is_aa) override;
+  void clipRect(const DlRect& rect,
+                flutter::ClipOp clip_op,
+                bool is_aa) override;
 
   // |flutter::DlOpReceiver|
-  void clipOval(const DlRect& bounds, ClipOp clip_op, bool is_aa) override;
+  void clipOval(const DlRect& bounds,
+                flutter::ClipOp clip_op,
+                bool is_aa) override;
 
   // |flutter::DlOpReceiver|
   void clipRoundRect(const DlRoundRect& rrect,
-                     ClipOp clip_op,
+                     flutter::ClipOp clip_op,
                      bool is_aa) override;
 
   // |flutter::DlOpReceiver|
-  void clipPath(const DlPath& path, ClipOp clip_op, bool is_aa) override;
+  void clipPath(const DlPath& path,
+                flutter::ClipOp clip_op,
+                bool is_aa) override;
 
   // |flutter::DlOpReceiver|
   void drawColor(flutter::DlColor color, flutter::DlBlendMode mode) override;
@@ -178,7 +185,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
                bool use_center) override;
 
   // |flutter::DlOpReceiver|
-  void drawPoints(PointMode mode,
+  void drawPoints(flutter::PointMode mode,
                   uint32_t count,
                   const DlPoint points[]) override;
 
@@ -198,7 +205,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
                      const DlRect& dst,
                      flutter::DlImageSampling sampling,
                      bool render_with_attributes,
-                     SrcRectConstraint constraint) override;
+                     flutter::SrcRectConstraint constraint) override;
 
   // |flutter::DlOpReceiver|
   void drawImageNine(const sk_sp<flutter::DlImage> image,

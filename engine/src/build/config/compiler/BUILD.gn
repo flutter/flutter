@@ -69,6 +69,14 @@ config("compiler") {
   ldflags = []
   defines = []
 
+  if (is_qnx) {
+    defines += [
+      "_XOPEN_SOURCE=700",
+      "_QNX_SOURCE",
+      "SKNX_NO_SIMD",
+    ]
+  }
+
   # In general, Windows is totally different, but all the other builds share
   # some common GCC configuration. This section sets up Windows and the common
   # GCC flags, and then we handle the other non-Windows platforms specifically
@@ -97,7 +105,7 @@ config("compiler") {
     # Stack protection.
     if (is_mac) {
       cflags += [ "-fstack-protector-all" ]
-    } else if (!is_ios && !is_wasm) {
+    } else if (!is_ios && !is_wasm && !is_qnx) {
       cflags += [
         "-fstack-protector",
         # 8 is the default, but make this explicit here so that we don't have to
@@ -332,11 +340,16 @@ config("compiler") {
 
   # Linux/Android common flags setup.
   # ---------------------------------
-  if (is_linux || is_android) {
+  if (is_linux || is_android || is_qnx) {
     cflags += [
       "-fPIC",
-      "-pipe",  # Use pipes for communicating between sub-processes. Faster.
     ]
+
+    if (!is_qnx) {
+      cflags += [
+        "-pipe",  # Use pipes for communicating between sub-processes. Faster.
+      ]
+    }
 
     ldflags += [
       "-fPIC",
@@ -347,6 +360,20 @@ config("compiler") {
     if (!using_sanitizer) {
       ldflags += [ "-Wl,-z,defs" ]
     }
+  }
+
+  if (is_qnx) {
+    qnx_arch_flags = []
+    if (target_cpu == "arm64") {
+      qnx_arch_flags += [
+        "-V",
+        "gcc_ntoaarch64le"
+      ]
+    } else {
+      assert(false, "Unknown QNX architecture")
+    }
+    cflags += qnx_arch_flags
+    ldflags += qnx_arch_flags
   }
 
   # Linux-specific compiler flags setup.
@@ -393,12 +420,12 @@ config("compiler") {
     # to say that it does. Define them here instead.
     defines += [ "HAVE_SYS_UIO_H" ]
 
-    # When Android requires new flags consider also editing the flags in 
-    # the following locations. 
+    # When Android requires new flags consider also editing the flags in
+    # the following locations.
     # Framework plugin_ffi template: packages/flutter_tools/templates/plugin_ffi/src.tmpl/CMakeLists.txt.tmpl
     # Example PR: https://github.com/flutter/flutter/pull/155508
-    # Dart Lang JNI package: pkgs/jni/src/CMakeLists.txt 
-    # Example PR: https://github.com/dart-lang/native/pull/1615 
+    # Dart Lang JNI package: pkgs/jni/src/CMakeLists.txt
+    # Example PR: https://github.com/dart-lang/native/pull/1615
     ldflags += [
       "-Wl,--no-undefined",
       "-Wl,--exclude-libs,ALL",
@@ -596,6 +623,9 @@ config("runtime_library") {
 
 default_warning_flags = []
 default_warning_flags_cc = []
+if (is_qnx) {
+  default_warning_flags_cc += [ "-fpermissive" ]
+}
 if (is_win) {
   default_warning_flags += [
     # Permanent.
@@ -636,12 +666,17 @@ if (is_win) {
   default_warning_flags += [
     # Enables.
     "-Wendif-labels",  # Weird old-style text after an #endif.
-    "-Werror",  # Warnings as errors.
 
     # Disables.
     "-Wno-missing-field-initializers",  # "struct foo f = {0};"
     "-Wno-unused-parameter",  # Unused function parameters.
   ]
+
+  if (!is_qnx) {
+    default_warning_flags += [
+      "-Werror",  # Warnings as errors.
+    ]
+  }
 
   if (is_wasm) {
     default_warning_flags += [
@@ -657,27 +692,32 @@ if (is_win) {
   default_warning_flags += [
     "-Wno-unused-but-set-parameter",
     "-Wno-unused-but-set-variable",
-    "-Wno-implicit-int-float-conversion",
-    "-Wno-deprecated-copy",
 
     # Needed for compiling Skia with clang-12
     "-Wno-psabi",
   ]
 
-  if (!is_android) {
+  if (is_clang) {
+    default_warning_flags += [
+      "-Wno-implicit-int-float-conversion",
+      "-Wno-deprecated-copy",
+    ]
+  }
+
+  if (!is_android && is_clang) {
     default_warning_flags += [
       # Needed for nlohmann/json.
       "-Wno-deprecated-literal-operator",
     ]
   }
 
-  if (!is_wasm) {
+  if (!is_wasm && is_clang) {
     default_warning_flags += [
       # Unqualified std::move is pretty common.
       "-Wno-unqualified-std-cast-call",
     ]
   }
-  if (!is_fuchsia) {
+  if (!is_fuchsia && is_clang) {
     default_warning_flags += [
       "-Wno-non-c-typedef-for-linkage",
       "-Wno-range-loop-construct",
@@ -705,10 +745,14 @@ config("chromium_code") {
   if (is_win || is_wasm) {
     cflags = []
   } else {
-    cflags = [
-      "-Wall",
-      "-Wextra",
-    ]
+    cflags = []
+
+    if (!is_qnx) {
+      cflags = [
+        "-Wall",
+        "-Wextra",
+      ]
+    }
 
     # In Chromium code, we define __STDC_foo_MACROS in order to get the
     # C99 macros on Mac and Linux.

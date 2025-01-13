@@ -49,8 +49,8 @@ namespace testing {
 static std::vector<testing::DisplayListInvocationGroup> allGroups =
     CreateAllGroups();
 
-using ClipOp = DlCanvas::ClipOp;
-using PointMode = DlCanvas::PointMode;
+using ClipOp = ClipOp;
+using PointMode = PointMode;
 
 template <typename BaseT>
 class DisplayListTestBase : public BaseT {
@@ -1271,11 +1271,11 @@ TEST_F(DisplayListTest, SingleOpsMightSupportGroupOpacityBlendMode) {
       , true);
   RUN_TESTS(canvas.DrawImageRect(TestImage1, SkIRect{10, 10, 20, 20},
                                  {0, 0, 10, 10}, kNearestSampling, &paint,
-                                 DlCanvas::SrcRectConstraint::kFast););
-  RUN_TESTS2(canvas.DrawImageRect(TestImage1, SkIRect{10, 10, 20, 20},
-                                  {0, 0, 10, 10}, kNearestSampling, nullptr,
-                                  DlCanvas::SrcRectConstraint::kFast);
-             , true);
+                                 SrcRectConstraint::kFast););
+  RUN_TESTS2(
+      canvas.DrawImageRect(TestImage1, SkIRect{10, 10, 20, 20}, {0, 0, 10, 10},
+                           kNearestSampling, nullptr, SrcRectConstraint::kFast);
+      , true);
   RUN_TESTS(canvas.DrawImageNine(TestImage2, SkIRect{20, 20, 30, 30},
                                  SkRect{0, 0, 20, 20}, DlFilterMode::kLinear,
                                  &paint););
@@ -3425,7 +3425,7 @@ TEST_F(DisplayListTest, DrawSaveDrawCannotInheritOpacity) {
   DisplayListBuilder builder;
   builder.DrawCircle(SkPoint{10, 10}, 5, DlPaint());
   builder.Save();
-  builder.ClipRect(SkRect{0, 0, 20, 20}, DlCanvas::ClipOp::kIntersect, false);
+  builder.ClipRect(SkRect{0, 0, 20, 20}, ClipOp::kIntersect, false);
   builder.DrawRect(SkRect{5, 5, 15, 15}, DlPaint());
   builder.Restore();
   auto display_list = builder.Build();
@@ -4677,24 +4677,18 @@ class ClipExpector : public virtual DlOpReceiver,
     return addExpectation(DlPath(path), clip_op, is_aa);
   }
 
-  void clipRect(const DlRect& rect,
-                DlCanvas::ClipOp clip_op,
-                bool is_aa) override {
+  void clipRect(const DlRect& rect, ClipOp clip_op, bool is_aa) override {
     check(rect, clip_op, is_aa);
   }
-  void clipOval(const DlRect& bounds,
-                DlCanvas::ClipOp clip_op,
-                bool is_aa) override {
+  void clipOval(const DlRect& bounds, ClipOp clip_op, bool is_aa) override {
     check(bounds, clip_op, is_aa, true);
   }
   void clipRoundRect(const DlRoundRect& rrect,
-                     DlCanvas::ClipOp clip_op,
+                     ClipOp clip_op,
                      bool is_aa) override {
     check(rrect, clip_op, is_aa);
   }
-  void clipPath(const DlPath& path,
-                DlCanvas::ClipOp clip_op,
-                bool is_aa) override {
+  void clipPath(const DlPath& path, ClipOp clip_op, bool is_aa) override {
     check(path, clip_op, is_aa);
   }
 

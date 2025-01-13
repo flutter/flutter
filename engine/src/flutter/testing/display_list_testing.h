@@ -46,12 +46,10 @@ extern std::ostream& operator<<(std::ostream& os,
                                 const flutter::DlPaint& paint);
 extern std::ostream& operator<<(std::ostream& os,
                                 const flutter::DlBlendMode& mode);
+extern std::ostream& operator<<(std::ostream& os, const flutter::ClipOp& op);
+extern std::ostream& operator<<(std::ostream& os, const flutter::PointMode& op);
 extern std::ostream& operator<<(std::ostream& os,
-                                const flutter::DlCanvas::ClipOp& op);
-extern std::ostream& operator<<(std::ostream& os,
-                                const flutter::DlCanvas::PointMode& op);
-extern std::ostream& operator<<(std::ostream& os,
-                                const flutter::DlCanvas::SrcRectConstraint& op);
+                                const flutter::SrcRectConstraint& op);
 extern std::ostream& operator<<(std::ostream& os,
                                 const flutter::DlStrokeCap& cap);
 extern std::ostream& operator<<(std::ostream& os,
@@ -351,50 +349,44 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
     RecordByType(DisplayListOpType::kTransformReset);
   }
 
-  void clipRect(const DlRect& rect,
-                DlCanvas::ClipOp clip_op,
-                bool is_aa) override {
+  void clipRect(const DlRect& rect, ClipOp clip_op, bool is_aa) override {
     switch (clip_op) {
-      case DlCanvas::ClipOp::kIntersect:
+      case ClipOp::kIntersect:
         RecordByType(DisplayListOpType::kClipIntersectRect);
         break;
-      case DlCanvas::ClipOp::kDifference:
+      case ClipOp::kDifference:
         RecordByType(DisplayListOpType::kClipDifferenceRect);
         break;
     }
   }
-  void clipOval(const DlRect& bounds,
-                DlCanvas::ClipOp clip_op,
-                bool is_aa) override {
+  void clipOval(const DlRect& bounds, ClipOp clip_op, bool is_aa) override {
     switch (clip_op) {
-      case DlCanvas::ClipOp::kIntersect:
+      case ClipOp::kIntersect:
         RecordByType(DisplayListOpType::kClipIntersectOval);
         break;
-      case DlCanvas::ClipOp::kDifference:
+      case ClipOp::kDifference:
         RecordByType(DisplayListOpType::kClipDifferenceOval);
         break;
     }
   }
   void clipRoundRect(const DlRoundRect& rrect,
-                     DlCanvas::ClipOp clip_op,
+                     ClipOp clip_op,
                      bool is_aa) override {
     switch (clip_op) {
-      case DlCanvas::ClipOp::kIntersect:
+      case ClipOp::kIntersect:
         RecordByType(DisplayListOpType::kClipIntersectRoundRect);
         break;
-      case DlCanvas::ClipOp::kDifference:
+      case ClipOp::kDifference:
         RecordByType(DisplayListOpType::kClipDifferenceRoundRect);
         break;
     }
   }
-  void clipPath(const DlPath& path,
-                DlCanvas::ClipOp clip_op,
-                bool is_aa) override {
+  void clipPath(const DlPath& path, ClipOp clip_op, bool is_aa) override {
     switch (clip_op) {
-      case DlCanvas::ClipOp::kIntersect:
+      case ClipOp::kIntersect:
         RecordByType(DisplayListOpType::kClipIntersectPath);
         break;
-      case DlCanvas::ClipOp::kDifference:
+      case ClipOp::kDifference:
         RecordByType(DisplayListOpType::kClipDifferencePath);
         break;
     }
@@ -451,17 +443,17 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
                bool use_center) override {
     RecordByType(DisplayListOpType::kDrawArc);
   }
-  void drawPoints(DlCanvas::PointMode mode,
+  void drawPoints(PointMode mode,
                   uint32_t count,
                   const DlPoint points[]) override {
     switch (mode) {
-      case DlCanvas::PointMode::kPoints:
+      case PointMode::kPoints:
         RecordByType(DisplayListOpType::kDrawPoints);
         break;
-      case DlCanvas::PointMode::kLines:
+      case PointMode::kLines:
         RecordByType(DisplayListOpType::kDrawLines);
         break;
-      case DlCanvas::PointMode::kPolygon:
+      case PointMode::kPolygon:
         RecordByType(DisplayListOpType::kDrawPolygon);
         break;
     }

@@ -63,16 +63,15 @@ inline SkSamplingOptions ToSk(DlImageSampling sampling) {
   }
 }
 
-inline SkCanvas::SrcRectConstraint ToSk(
-    DlCanvas::SrcRectConstraint constraint) {
+inline SkCanvas::SrcRectConstraint ToSk(SrcRectConstraint constraint) {
   return static_cast<SkCanvas::SrcRectConstraint>(constraint);
 }
 
-inline SkClipOp ToSk(DlCanvas::ClipOp op) {
+inline SkClipOp ToSk(ClipOp op) {
   return static_cast<SkClipOp>(op);
 }
 
-inline SkCanvas::PointMode ToSk(DlCanvas::PointMode mode) {
+inline SkCanvas::PointMode ToSk(PointMode mode) {
   return static_cast<SkCanvas::PointMode>(mode);
 }
 

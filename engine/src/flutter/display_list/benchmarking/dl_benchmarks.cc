@@ -854,13 +854,13 @@ std::vector<SkPoint> GetTestPoints(size_t count, SkISize canvas_size) {
   return points;
 }
 
-std::string PointModeToString(DlCanvas::PointMode mode) {
+std::string PointModeToString(PointMode mode) {
   switch (mode) {
-    case DlCanvas::PointMode::kLines:
+    case PointMode::kLines:
       return "Lines";
-    case DlCanvas::PointMode::kPolygon:
+    case PointMode::kPolygon:
       return "Polygon";
-    case DlCanvas::PointMode::kPoints:
+    case PointMode::kPoints:
     default:
       return "Points";
   }
@@ -875,21 +875,21 @@ std::string PointModeToString(DlCanvas::PointMode mode) {
 void BM_DrawPoints(benchmark::State& state,
                    BackendType backend_type,
                    unsigned attributes,
-                   DlCanvas::PointMode mode) {
+                   PointMode mode) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;
   DlPaint paint = GetPaintForRun(attributes);
 
   switch (mode) {
-    case DlCanvas::PointMode::kPoints:
+    case PointMode::kPoints:
       AnnotateAttributes(attributes, state,
                          DisplayListOpFlags::kDrawPointsAsPointsFlags);
       break;
-    case DlCanvas::PointMode::kLines:
+    case PointMode::kLines:
       AnnotateAttributes(attributes, state,
                          DisplayListOpFlags::kDrawPointsAsLinesFlags);
       break;
-    case DlCanvas::PointMode::kPolygon:
+    case PointMode::kPolygon:
       AnnotateAttributes(attributes, state,
                          DisplayListOpFlags::kDrawPointsAsPolygonFlags);
       break;
@@ -1000,11 +1000,11 @@ void BM_DrawImage(benchmark::State& state,
   surface_provider->Snapshot(filename);
 }
 
-std::string ConstraintToString(DlCanvas::SrcRectConstraint constraint) {
+std::string ConstraintToString(SrcRectConstraint constraint) {
   switch (constraint) {
-    case DlCanvas::SrcRectConstraint::kStrict:
+    case SrcRectConstraint::kStrict:
       return "Strict";
-    case DlCanvas::SrcRectConstraint::kFast:
+    case SrcRectConstraint::kFast:
       return "Fast";
     default:
       return "Unknown";
@@ -1019,7 +1019,7 @@ void BM_DrawImageRect(benchmark::State& state,
                       BackendType backend_type,
                       unsigned attributes,
                       DlImageSampling options,
-                      DlCanvas::SrcRectConstraint constraint,
+                      SrcRectConstraint constraint,
                       bool upload_bitmap) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
   DisplayListBuilder builder;

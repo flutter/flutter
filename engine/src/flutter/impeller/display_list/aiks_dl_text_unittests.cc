@@ -505,7 +505,7 @@ TEST_P(AiksTest, DifferenceClipsMustRenderIdenticallyAcrossBackends) {
   builder.DrawRect(frame, paint);
 
   builder.Save();
-  builder.ClipRect(frame, DlCanvas::ClipOp::kIntersect);
+  builder.ClipRect(frame, ClipOp::kIntersect);
 
   DlMatrix rect_xform = {
       0.8241262, 0.56640625, 0.0, 0.0, -0.56640625, 0.8241262, 0.0, 0.0,
@@ -521,7 +521,7 @@ TEST_P(AiksTest, DifferenceClipsMustRenderIdenticallyAcrossBackends) {
   builder.DrawRoundRect(rrect, paint);
 
   builder.Save();
-  builder.ClipRect(rect, DlCanvas::ClipOp::kIntersect);
+  builder.ClipRect(rect, ClipOp::kIntersect);
   builder.Restore();
 
   builder.Restore();

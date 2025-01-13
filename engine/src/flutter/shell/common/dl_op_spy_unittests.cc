@@ -348,7 +348,7 @@ TEST(DlOpSpy, DrawPoints) {
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kBlack());
     const SkPoint points[] = {SkPoint::Make(5, 4)};
-    builder.DrawPoints(DlCanvas::PointMode::kPoints, 1, points, paint);
+    builder.DrawPoints(PointMode::kPoints, 1, points, paint);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
@@ -358,7 +358,7 @@ TEST(DlOpSpy, DrawPoints) {
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kTransparent());
     const SkPoint points[] = {SkPoint::Make(5, 4)};
-    builder.DrawPoints(DlCanvas::PointMode::kPoints, 1, points, paint);
+    builder.DrawPoints(PointMode::kPoints, 1, points, paint);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);

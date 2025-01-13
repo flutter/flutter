@@ -93,10 +93,10 @@ void DisplayListMatrixClipState::clipOval(const DlRect& bounds,
     return;
   }
   switch (op) {
-    case DlCanvas::ClipOp::kIntersect:
+    case ClipOp::kIntersect:
       adjustCullRect(bounds, op, is_aa);
       break;
-    case DlCanvas::ClipOp::kDifference:
+    case ClipOp::kDifference:
       if (oval_covers_cull(bounds)) {
         cull_rect_ = DlRect();
       }
