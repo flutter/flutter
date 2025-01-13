@@ -17,7 +17,7 @@ import 'package:flutter/foundation.dart'
 /// with this position information. For example:
 ///
 /// ```dart
-/// void handleGesture(GestureDetailsWithPositions details) {
+/// void handleGesture(PositionedGestureDetails details) {
 ///   final Offset globalPosition = details.globalPosition;
 ///
 ///   if (details is TapDownDetails) {
