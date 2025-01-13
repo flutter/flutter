@@ -645,6 +645,9 @@ class ScreenshotDevice extends Fake implements Device {
   final String name = 'FakeDevice';
 
   @override
+  String get displayName => name;
+
+  @override
   final Category category = Category.mobile;
 
   @override
