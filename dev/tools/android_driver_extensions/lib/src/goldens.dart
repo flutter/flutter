@@ -103,7 +103,17 @@ final class NaiveLocalFileComparator extends GoldenFileComparator {
     try {
       goldenBytes = await goldenFile.readAsBytes();
     } on io.PathNotFoundException {
-      throw TestFailure('Golden file not found: ${goldenFile.path}');
+      throw TestFailure(
+        'Golden file not found: ${path.relative(goldenFile.path)}.\n'
+        '\n'
+        'For local development, you must establish a local baseline image before '
+        'running tests, otherwise the test will always fail. Use UPDATE_GOLDENS=1 '
+        'when running "flutter drive" to establish a baseline, and then subequent '
+        '"flutter drive" instances will be tested against that (local) golden.\n'
+        '\n'
+        'See the documentation at dev/tools/android_engine_test/README.md for '
+        'details.',
+      );
     }
 
     if (goldenBytes.length != imageBytes.length) {

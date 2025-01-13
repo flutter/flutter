@@ -9,10 +9,20 @@ import 'package:test/test.dart';
 
 import '_luci_skia_gold_prelude.dart';
 
+/// For local debugging, a (local) golden-file is required as a baseline:
+///
+/// ```sh
+/// # Checkout HEAD, i.e. *before* changes you want to test.
+/// UPDATE_GOLDENS=1 flutter drive lib/platform_view_tap_color_change_main.dart
+///
+/// # Make your changes.
+///
+/// # Run the test against baseline.
+/// flutter drive lib/platform_view_tap_color_change_main.dart
+/// ```
+///
+/// For a convenient way to deflake a test, see `tool/deflake.dart`.
 void main() async {
-  // To test the golden file generation locally, comment out the following line.
-  // autoUpdateGoldenFiles = true;
-
   late final FlutterDriver flutterDriver;
   late final NativeDriver nativeDriver;
 
