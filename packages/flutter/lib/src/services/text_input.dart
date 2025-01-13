@@ -1101,6 +1101,16 @@ enum SelectionChangedCause {
   ///
   /// Currently, this is only supported on iPadOS 14+ via the Scribble feature,
   /// or on Android API 34+ via the Scribe feature.
+  @Deprecated(
+    'Use stylusHandwriting instead. '
+    'This feature was deprecated after v3.28.0-0.1.pre.'
+  )
+  scribble,
+
+  /// The user used stylus handwriting to change the selection.
+  ///
+  /// Currently, this is only supported on iPadOS 14+ via the Scribble feature,
+  /// or on Android API 34+ via the Scribe feature.
   stylusHandwriting,
 }
 
