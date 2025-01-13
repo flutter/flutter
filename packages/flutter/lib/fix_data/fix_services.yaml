@@ -84,7 +84,7 @@ transforms:
         kind: 'fragment'
         value: 'arguments[0]'
 
-  # Change
+  # Changes made in https://github.com/flutter/flutter/pull/161518
   - title: "Migrate 'SelectionChangedCause.scribble' to 'SelectionChangedCause.stylusHandwriting'"
     date: 2025-01-13
     element:
