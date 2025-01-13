@@ -5,14 +5,7 @@
         "The only builds in this file should be the builds necessary to produce ",
         "release artifacts. ",
         "Tests to run on linux hosts should go in one of the other linux_ build ",
-        "definition files.",
-        "",
-        "**NOTE**: This file is in the process of moving tests: [ ... ] to the ",
-        "linux_host_engine_test.json file. Once done and bringup: true is removed ",
-        "it will be renamed linux_host_engine_build.json and the tests: [ ... ] ",
-        "below will be removed.",
-        "",
-        "See https://github.com/flutter/flutter/issues/161406."
+        "definition files."
     ],
     "builds": [
         {
