@@ -2249,48 +2249,39 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final String? hintText = decoration.hintText;
     final bool maintainHintHeight = decoration.maintainHintHeight;
     Widget? hint;
-    if (hintText != null) {
-      final bool showHint = isEmpty && !_hasInlineLabel;
-      final Text hintTextWidget = Text(
-        hintText,
-        style: hintStyle,
-        textDirection: decoration.hintTextDirection,
-        overflow:
-            hintStyle.overflow ?? (decoration.hintMaxLines == null ? null : TextOverflow.ellipsis),
-        textAlign: textAlign,
-        maxLines: decoration.hintMaxLines,
-      );
-      hint =
-          maintainHintHeight
-              ? AnimatedOpacity(
-                opacity: showHint ? 1.0 : 0.0,
-                duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
-                curve: _kTransitionCurve,
-                child: hintTextWidget,
-              )
-              : AnimatedSwitcher(
-                duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
-                transitionBuilder: _buildTransition,
-                child: showHint ? hintTextWidget : const SizedBox.shrink(),
-              );
+    Widget? hintTextWidget;
+    if(decoration.hint!=null) {
+      hintTextWidget = decoration.hint;
+    }else if(hintText != null) {
+      hintTextWidget = Text(
+              hintText,
+              style: hintStyle,
+              textDirection: decoration.hintTextDirection,
+              overflow: hintStyle.overflow ??
+                  (decoration.hintMaxLines == null
+                      ? null
+                      : TextOverflow.ellipsis),
+              textAlign: textAlign,
+              maxLines: decoration.hintMaxLines,
+            );
+    } else{
+      hintTextWidget = const SizedBox.shrink();
     }
-    if(decoration.hint != null) {
-      final Widget? hintTextWidget = decoration.hint;
-      final bool showHint = isEmpty && !_hasInlineLabel;
-       hint =
-          maintainHintHeight
-              ? AnimatedOpacity(
-                opacity: showHint ? 1.0 : 0.0,
-                duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
-                curve: _kTransitionCurve,
-                child: hintTextWidget,
-              )
-              : AnimatedSwitcher(
-                duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
-                transitionBuilder: _buildTransition,
-                child: showHint ? hintTextWidget : const SizedBox.shrink(),
-              );
-    }
+    
+    final bool showHint = isEmpty && !_hasInlineLabel;
+    hint =
+        maintainHintHeight
+            ? AnimatedOpacity(
+              opacity: showHint ? 1.0 : 0.0,
+              duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
+              curve: _kTransitionCurve,
+              child: hintTextWidget,
+            )
+            : AnimatedSwitcher(
+              duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
+              transitionBuilder: _buildTransition,
+              child: showHint ? hintTextWidget : const SizedBox.shrink(),
+            );
 
     InputBorder? border;
     if (!decoration.enabled) {
@@ -2763,7 +2754,7 @@ class InputDecoration {
        ),
        assert(
          !(hintText != null && hint != null),
-         'Declaring both hintText and hint is not supported.',
+         'Declaring both hint and hintText is not supported.',
        ),
        assert(
          !(helper != null && helperText != null),
