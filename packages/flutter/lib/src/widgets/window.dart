@@ -373,6 +373,8 @@ class _GenericWindowState extends State<_GenericWindow> {
 
   @override
   Future<void> dispose() async {
+    super.dispose();
+
     if (_listener != null) {
       assert(_app != null);
       _app!._unregisterListener(_listener!);
@@ -387,8 +389,6 @@ class _GenericWindowState extends State<_GenericWindow> {
         await destroyWindow(_viewId!);
       } on ArgumentError {}
     }
-
-    super.dispose();
   }
 
   @override
