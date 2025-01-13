@@ -3655,8 +3655,8 @@ class InputDecoration {
 
   /// The shape of the border to draw around the decoration's container.
   ///
-  /// If [border] is a [MaterialStateUnderlineInputBorder]
-  /// or [MaterialStateOutlineInputBorder], then the effective border is resolved in the following states:
+  /// If [border] is a [WidgetStateInputBorder] then the effective border is resolved
+  /// in the following states:
   ///  * [WidgetState.disabled].
   ///  * [WidgetState.error].
   ///  * [WidgetState.focused].
