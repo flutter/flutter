@@ -819,8 +819,8 @@ void DisplayListBuilder::Rotate(DlScalar degrees) {
   if (SkScalarMod(degrees, 360.0) != 0.0) {
     checkForDeferredSave();
     Push<RotateOp>(0, degrees);
-    global_state().rotate(degrees);
-    layer_local_state().rotate(degrees);
+    global_state().rotate(DlDegrees(degrees));
+    layer_local_state().rotate(DlDegrees(degrees));
   }
 }
 void DisplayListBuilder::Skew(DlScalar sx, DlScalar sy) {

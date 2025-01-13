@@ -59,8 +59,8 @@ class DisplayListMatrixClipState {
   void skew(DlScalar skx, DlScalar sky) {
     matrix_ = matrix_ * DlMatrix::MakeSkew(skx, sky);
   }
-  void rotate(DlScalar degrees) {
-    matrix_ = matrix_ * DlMatrix::MakeRotationZ(DlDegrees(degrees));
+  void rotate(DlRadians angle) {
+    matrix_ = matrix_ * DlMatrix::MakeRotationZ(angle);
   }
   void transform(const DlMatrix& matrix) { matrix_ = matrix_ * matrix; }
   // clang-format off

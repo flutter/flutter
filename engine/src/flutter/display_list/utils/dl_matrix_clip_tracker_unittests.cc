@@ -118,7 +118,7 @@ TEST(DisplayListMatrixClipState, Rotate) {
   const DlRect local_cull_rect = DlRect::MakeLTRB(10, -15, 20, -5);
 
   DisplayListMatrixClipState state(cull_rect, matrix);
-  state.rotate(90);
+  state.rotate(DlDegrees(90));
 
   EXPECT_FALSE(state.using_4x4_matrix());
   EXPECT_EQ(state.GetDeviceCullCoverage(), cull_rect);
@@ -532,7 +532,7 @@ TEST(DisplayListMatrixClipState, RectCoverageUnderRotation) {
 
   for (int i = 0; i <= 360; i++) {
     DisplayListMatrixClipState state(cull);
-    state.rotate(i);
+    state.rotate(DlDegrees(i));
     EXPECT_TRUE(state.rect_covers_cull(test_true))
         << "  testing " << test_true << std::endl
         << "    contains " << state.GetLocalCullCoverage() << std::endl
@@ -611,7 +611,7 @@ TEST(DisplayListMatrixClipState, OvalCoverageUnderRotation) {
 
   for (int i = 0; i <= 360; i++) {
     DisplayListMatrixClipState state(cull);
-    state.rotate(i);
+    state.rotate(DlDegrees(i));
     EXPECT_TRUE(state.oval_covers_cull(test_true))
         << "  testing " << test_true << std::endl
         << "    contains " << state.GetLocalCullCoverage() << std::endl
