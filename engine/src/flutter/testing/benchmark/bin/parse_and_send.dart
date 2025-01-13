@@ -92,9 +92,7 @@ Future<void> main(List<String> args) async {
 
   // The data will be sent to the Datastore of the GCP project specified through
   // environment variable BENCHMARK_GCP_CREDENTIALS, or TOKEN_PATH/GCP_PROJECT.
-  // The engine Cirrus job has currently configured the GCP project to
-  // flutter-cirrus for test. We'll eventually migrate to flutter-infra project
-  // once the test is done.
+  // The engine LUCI job writes it to the `flutter-infra` project.
   final FlutterDestination destination = await connectFlutterDestination();
   await destination.update(
     pointsAndDate.points,
