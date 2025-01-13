@@ -1020,9 +1020,6 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
   const CupertinoPageTransitionsBuilder();
 
   @override
-  Duration get transitionDuration => CupertinoRouteTransitionMixin.kTransitionDuration;
-
-  @override
   DelegatedTransitionBuilder? get delegatedTransition =>
       CupertinoPageTransition.delegatedTransition;
 
