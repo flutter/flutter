@@ -292,6 +292,7 @@ class _GifHeaderReader {
       // application extension).
       final bool isSpecialPurposeBlock = _checkForSpecialPurposeBlock();
       if (isSpecialPurposeBlock) {
+        print('GOT SPECIAL PURPOSE BLOCK!');
         _skipSpecialPurposeBlock();
         continue;
       }
@@ -303,6 +304,7 @@ class _GifHeaderReader {
         // We've found multiple frames, this is an animated GIF.
         return true;
       }
+      print('READING GRAPHIC BLOCK!');
       _skipGraphicBlock();
       framesFound++;
     }
@@ -325,12 +327,15 @@ class _GifHeaderReader {
   /// Returns [true] if the next block is a Special-Purpose Block (either a
   /// Comment Extension or an Application Extension).
   bool _checkForSpecialPurposeBlock() {
+    print('CHECKING FOR SPECIAL PURPOSE BLOCK!');
     final int extensionIntroducer = bytes.getUint8(_position);
+    print('EXTENSION INTRODUCER = ${extensionIntroducer.toRadixString(16)}');
     if (extensionIntroducer != 0x21) {
       return false;
     }
 
     final int extensionLabel = bytes.getUint8(_position + 1);
+    print('EXTENSION LABEL = ${extensionLabel.toRadixString(16)}');
 
     // The Comment Extension label is 0xFE, the Application Extension Label is
     // 0xFF.
@@ -366,16 +371,21 @@ class _GifHeaderReader {
   void _skipGraphicBlock() {
     // Check for the optional Graphic Control Extension.
     if (_checkForGraphicControlExtension()) {
+      print('SKIPPING GRAPHIC CONTROL EXTENSION!');
       _skipGraphicControlExtension();
     }
 
     // Check if the Graphic Block is a Plain Text Extension.
     if (_checkForPlainTextExtension()) {
+      print('SKIPPING PLAIN TEXT EXTENSION!');
       _skipPlainTextExtension();
       return;
     }
 
     // This is a Table-Based Image block.
+    print('EXTENSION INTRODUCER AND LABEL');
+    print(bytes.getUint8(_position).toRadixString(16));
+    print(bytes.getUint8(_position + 1).toRadixString(16));
     assert(bytes.getUint8(_position) == 0x2c);
 
     // Skip to the packed fields to check if there is a local color table.
