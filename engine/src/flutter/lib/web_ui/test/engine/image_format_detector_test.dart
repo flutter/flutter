@@ -21,7 +21,11 @@ Future<void> testMain() async {
 
   Future<List<String>> createTestFiles() async {
     final HttpFetchResponse listingResponse = await httpFetch('/test_images/');
-    final List<String> testFiles = (await listingResponse.json() as List<dynamic>).cast<String>();
+    List<String> testFiles = (await listingResponse.json() as List<dynamic>).cast<String>();
+    testFiles = testFiles.map((String baseName) => '/test_images/$baseName').toList();
+
+    // Also add a nonstandard GIF (regression test for #161376).
+    testFiles.add('/test/ui/image/sample_image2.gif');
 
     // Sanity-check the test file list. If suddenly test files are moved or
     // deleted, and the test server returns an empty list, or is missing some
@@ -40,7 +44,7 @@ Future<void> testMain() async {
 
   for (final String testFile in testFiles!) {
     test('can detect image type of $testFile', () async {
-      final HttpFetchResponse response = await httpFetch('/test_images/$testFile');
+      final HttpFetchResponse response = await httpFetch('$testFile');
 
       if (!response.hasPayload) {
         throw Exception('Unable to fetch() image test file "$testFile"');
@@ -50,23 +54,24 @@ Future<void> testMain() async {
 
       // WebP files which are known to be animated.
       const List<String> animatedWebpFiles = <String>[
-        'blendBG.webp',
-        'required.webp',
-        'stoplight_h.webp',
-        'stoplight.webp',
+        '/test_images/blendBG.webp',
+        '/test_images/required.webp',
+        '/test_images/stoplight_h.webp',
+        '/test_images/stoplight.webp',
       ];
 
       // GIF files which are known to be animated.
       const List<String> animatedGifFiles = <String>[
-        'alphabetAnim.gif',
-        'colorTables.gif',
-        'flightAnim.gif',
-        'gif-transparent-index.gif',
-        'randPixelsAnim.gif',
-        'randPixelsAnim2.gif',
-        'required.gif',
-        'test640x479.gif',
-        'xOffsetTooBig.gif',
+        '/test_images/alphabetAnim.gif',
+        '/test_images/colorTables.gif',
+        '/test_images/flightAnim.gif',
+        '/test_images/gif-transparent-index.gif',
+        '/test_images/randPixelsAnim.gif',
+        '/test_images/randPixelsAnim2.gif',
+        '/test_images/required.gif',
+        '/test_images/test640x479.gif',
+        '/test_images/xOffsetTooBig.gif',
+        '/test/ui/image/sample_image2.gif',
       ];
 
       final String testFileExtension = testFile.substring(testFile.lastIndexOf('.') + 1);

@@ -282,6 +282,7 @@ class _GifHeaderReader {
     int framesFound = 0;
     // Read the GIF until we either find 2 frames or reach the end of the GIF.
     while (true) {
+      _maybeSkipSpecialPurposeBlocks();
       final bool isTrailer = _checkForTrailer();
       if (isTrailer) {
         return framesFound > 1;
@@ -290,12 +291,7 @@ class _GifHeaderReader {
       // If we haven't reached the end, then the next block must either be a
       // graphic block or a special-purpose block (comment extension or
       // application extension).
-      final bool isSpecialPurposeBlock = _checkForSpecialPurposeBlock();
-      if (isSpecialPurposeBlock) {
-        print('GOT SPECIAL PURPOSE BLOCK!');
-        _skipSpecialPurposeBlock();
-        continue;
-      }
+      _maybeSkipSpecialPurposeBlocks();
 
       // If the next block isn't a special-purpose block, it must be a graphic
       // block. Increase the frame count, skip the graphic block, and keep
@@ -304,7 +300,6 @@ class _GifHeaderReader {
         // We've found multiple frames, this is an animated GIF.
         return true;
       }
-      print('READING GRAPHIC BLOCK!');
       _skipGraphicBlock();
       framesFound++;
     }
@@ -324,22 +319,26 @@ class _GifHeaderReader {
     return nextByte == 0x3b;
   }
 
-  /// Returns [true] if the next block is a Special-Purpose Block (either a
-  /// Comment Extension or an Application Extension).
+  /// Skip Special Purpose Blocks (they do not effect decoding).
+  void _maybeSkipSpecialPurposeBlocks() {
+    while (_checkForSpecialPurposeBlock()) {
+      _skipSpecialPurposeBlock();
+    }
+  }
+
+  /// Returns [true] if the next block is a Special-Purpose Block (extension
+  /// label between 0xFA and 0xFF).
   bool _checkForSpecialPurposeBlock() {
-    print('CHECKING FOR SPECIAL PURPOSE BLOCK!');
     final int extensionIntroducer = bytes.getUint8(_position);
-    print('EXTENSION INTRODUCER = ${extensionIntroducer.toRadixString(16)}');
     if (extensionIntroducer != 0x21) {
       return false;
     }
 
     final int extensionLabel = bytes.getUint8(_position + 1);
-    print('EXTENSION LABEL = ${extensionLabel.toRadixString(16)}');
 
     // The Comment Extension label is 0xFE, the Application Extension Label is
     // 0xFF.
-    return extensionLabel == 0xfe || extensionLabel == 0xff;
+    return extensionLabel >= 0xfa && extensionLabel <= 0xff;
   }
 
   /// Skips past the current control block.
@@ -369,23 +368,22 @@ class _GifHeaderReader {
 
   /// Skip past the graphic block.
   void _skipGraphicBlock() {
+    _maybeSkipSpecialPurposeBlocks();
     // Check for the optional Graphic Control Extension.
     if (_checkForGraphicControlExtension()) {
-      print('SKIPPING GRAPHIC CONTROL EXTENSION!');
       _skipGraphicControlExtension();
     }
 
+    _maybeSkipSpecialPurposeBlocks();
     // Check if the Graphic Block is a Plain Text Extension.
     if (_checkForPlainTextExtension()) {
-      print('SKIPPING PLAIN TEXT EXTENSION!');
       _skipPlainTextExtension();
       return;
     }
 
+    _maybeSkipSpecialPurposeBlocks();
+
     // This is a Table-Based Image block.
-    print('EXTENSION INTRODUCER AND LABEL');
-    print(bytes.getUint8(_position).toRadixString(16));
-    print(bytes.getUint8(_position + 1).toRadixString(16));
     assert(bytes.getUint8(_position) == 0x2c);
 
     // Skip to the packed fields to check if there is a local color table.
