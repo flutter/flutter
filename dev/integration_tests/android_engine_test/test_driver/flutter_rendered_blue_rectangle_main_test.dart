@@ -34,7 +34,7 @@ void main() async {
     await flutterDriver.waitFor(find.byType('DecoratedBox'));
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('fluttered_rendered_blue_rectangle.android.png'),
+      matchesGoldenFile('fluttered_rendered_blue_rectangle.png'),
     );
   }, timeout: Timeout.none);
 }

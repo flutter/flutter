@@ -34,7 +34,7 @@ void main() async {
 
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('external_texture_other_face.android.png'),
+      matchesGoldenFile('external_texture_surface_texture_smiley_face.png'),
     );
   }, timeout: Timeout.none);
 }

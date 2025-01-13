@@ -37,7 +37,7 @@ void main() async {
     await flutterDriver.waitFor(find.byType('AndroidView'));
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('$goldenPrefix.blue_orange_gradient_portrait.android.png'),
+      matchesGoldenFile('$goldenPrefix.blue_orange_gradient_portrait.png'),
     );
   }, timeout: Timeout.none);
 
@@ -46,13 +46,13 @@ void main() async {
     await nativeDriver.rotateToLandscape();
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('$goldenPrefix.blue_orange_gradient_landscape_rotated.android.png'),
+      matchesGoldenFile('$goldenPrefix.blue_orange_gradient_landscape_rotated.png'),
     );
 
     await nativeDriver.rotateResetDefault();
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('$goldenPrefix.blue_orange_gradient_portait_rotated_back.android.png'),
+      matchesGoldenFile('$goldenPrefix.blue_orange_gradient_portait_rotated_back.png'),
     );
   }, timeout: Timeout.none);
 }
