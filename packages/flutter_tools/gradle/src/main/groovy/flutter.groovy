@@ -323,15 +323,14 @@ class FlutterPlugin implements Plugin<Project> {
         String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
                 "gradle", "flutter_proguard_rules.pro")
         project.android.buildTypes {
-            // Add profile build type if it does not already exist.
-            if (!project.android.buildTypes.hasProperty('profile')) {
-                profile {
-                    initWith(debug)
-                    if (it.hasProperty("matchingFallbacks")) {
-                        matchingFallbacks = ["debug", "release"]
-                    }
+            // Add profile build type.
+            profile {
+                initWith(debug)
+                if (it.hasProperty("matchingFallbacks")) {
+                    matchingFallbacks = ["debug", "release"]
                 }
             }
+
             // TODO(garyq): Shrinking is only false for multi apk split aot builds, where shrinking is not allowed yet.
             // This limitation has been removed experimentally in gradle plugin version 4.2, so we can remove
             // this check when we upgrade to 4.2+ gradle. Currently, deferred components apps may see
@@ -739,26 +738,13 @@ class FlutterPlugin implements Plugin<Project> {
         // compile/target/min sdk values.
         pluginProject.extensions.create("flutter", FlutterExtension)
 
-        // Add profile build type if it does not already exist.
-        if (!project.android.buildTypes.hasProperty('profile')) {
-            project.android.buildTypes {
-                profile {
-                    initWith(debug)
-                    if (it.hasProperty("matchingFallbacks")) {
-                        matchingFallbacks = ["debug", "release"]
-                    }
-                }
-            }
-        }
-
         // Add plugin dependency to the app project. We only want to add dependency
         // for dev dependencies in non-release builds.
-        project.dependencies {
-            debugApi(pluginProject)
-            profileApi(pluginProject)
-
-            if (!pluginObject.dev_dependency) {
-                releaseApi(pluginProject)
+        project.afterEvaluate {
+            project.android.buildTypes.all { buildType ->
+                if (!pluginObject.dev_dependency || buildType.name != 'release') {
+                    project.dependencies.add("${buildType.name}Api", pluginProject)
+                }
             }
         }
 
