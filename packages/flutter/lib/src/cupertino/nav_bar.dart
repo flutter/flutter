@@ -1405,6 +1405,7 @@ class _LargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDeleg
                           top: false,
                           bottom: false,
                           child: AnimatedOpacity(
+                            // Fade the large title as the search field animates from its expanded to its collapsed state.
                             opacity: showLargeTitle && !controller.isForwardOrCompleted ? 1.0 : 0.0,
                             duration: _kNavBarTitleFadeDuration,
                             child: Semantics(
@@ -2177,6 +2178,8 @@ class _CancelButton extends StatelessWidget {
         child: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: onPressed,
+          // TODO(victorsanni): Localize this string.
+          // See https://github.com/flutter/flutter/issues/48616.
           child: const Text('Cancel', maxLines: 1, overflow: TextOverflow.clip),
         ),
       ),
