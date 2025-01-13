@@ -1533,7 +1533,7 @@ targets:
     bringup: true
     timeout: 60
     properties:
-      shard: flutter_driver_android
+      shard: android_engine_tests
       tags: >
          ["framework", "hostonly", "shard", "linux"]
       dependencies: >-
@@ -1546,7 +1546,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      shard: flutter_driver_android
+      shard: android_engine_tests
       tags: >
          ["framework", "hostonly", "shard", "linux"]
       dependencies: >-
