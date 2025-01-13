@@ -43,7 +43,7 @@ void main() {
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: <SystemUiOverlay>[]);
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, error: '');
 
-  // Change
+  // Changes made in https://github.com/flutter/flutter/pull/161518
   final cause = SelectionChangedCause.stylusHandwriting;
   print(cause);
 }
