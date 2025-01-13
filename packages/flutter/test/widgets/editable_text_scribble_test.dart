@@ -173,7 +173,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(selectionCause, SelectionChangedCause.scribble);
+      expect(selectionCause, SelectionChangedCause.stylusHandwriting);
 
       await tester.testTextInput.finishScribbleInteraction();
     },
