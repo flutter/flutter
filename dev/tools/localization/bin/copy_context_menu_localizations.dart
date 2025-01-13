@@ -111,6 +111,33 @@ void updateMissingResources(
     fileMap[widgetsEntity] = materialEntity;
   }
 
+  for (final MapEntry<FileSystemEntity, FileSystemEntity> entry in fileMap.entries) {
+    final FileSystemEntity widgetsEntity = entry.key;
+    final FileSystemEntity materialEntity = entry.value;
+    final File materialFile = File(materialEntity.path);
+    final Map<String, dynamic> materialBundle = loadBundle(materialFile);
+
+    final File widgetsFile = File(widgetsEntity.path);
+    final Map<String, dynamic> widgetsBundle = loadBundle(widgetsFile);
+
+    for (final String key in keys) {
+      if (materialBundle[key] == null) {
+        print('justin missing value for $key in ${materialEntity.path}');
+        continue;
+      }
+      final String materialString = materialBundle[key] as String;
+      assert(materialString != '');
+      if (widgetsBundle[key] != null) {
+        print('justin already done $key in ${widgetsEntity.path} and it is ${widgetsBundle[key]}');
+        // This is just the english file that I did manually already.
+        continue;
+      }
+      widgetsBundle[key] = materialString;
+    }
+
+    //writeBundle(widgetsFile, widgetsBundle);
+  }
+
   return;
   /*
   final Set<String> requiredKeys = resourceKeys(englishBundle);
