@@ -581,6 +581,8 @@ enum GestureRecognizerState {
   defunct,
 }
 
+const _defaultTouchSlop = kTouchSlop;
+
 /// A base class for gesture recognizers that track a single primary pointer.
 ///
 /// Gestures based on this class will stop tracking the gesture if the primary
@@ -595,8 +597,8 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   PrimaryPointerGestureRecognizer({
     this.deadline,
-    this.preAcceptSlopTolerance = kTouchSlop,
-    this.postAcceptSlopTolerance = kTouchSlop,
+    this.preAcceptSlopTolerance = _defaultTouchSlop,
+    this.postAcceptSlopTolerance = _defaultTouchSlop,
     super.debugOwner,
     super.supportedDevices,
     super.allowedButtonsFilter,
@@ -622,8 +624,11 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// Drifting past the allowed slop amount causes the gesture to be rejected.
   ///
   /// Can be null to indicate that the gesture can drift for any distance.
-  /// Defaults to 18 logical pixels.
+  /// Defaults to touch slop from [gestureSettings] (18 logical pixels).
   final double? preAcceptSlopTolerance;
+
+  double _preAcceptSlopTolerance =>
+    preAcceptSlopTolerance == _defaultTouchSlop ? gestureSettings.touchSlop : preAcceptSlopTolerance;
 
   /// The maximum distance in logical pixels the gesture is allowed to drift
   /// after the gesture has been accepted.
@@ -632,8 +637,11 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// and signaling subsequent callbacks.
   ///
   /// Can be null to indicate that the gesture can drift for any distance.
-  /// Defaults to 18 logical pixels.
+  /// Defaults to touch slop from [gestureSettings] (18 logical pixels).
   final double? postAcceptSlopTolerance;
+
+  double _postAcceptSlopTolerance =>
+    postAcceptSlopTolerance == _defaultTouchSlop ? gestureSettings.touchSlop : postAcceptSlopTolerance;
 
   /// The current state of the recognizer.
   ///
@@ -692,11 +700,11 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
       final bool isPreAcceptSlopPastTolerance =
           !_gestureAccepted &&
           preAcceptSlopTolerance != null &&
-          _getGlobalDistance(event) > preAcceptSlopTolerance!;
+          _getGlobalDistance(event) > _preAcceptSlopTolerance!;
       final bool isPostAcceptSlopPastTolerance =
           _gestureAccepted &&
           postAcceptSlopTolerance != null &&
-          _getGlobalDistance(event) > postAcceptSlopTolerance!;
+          _getGlobalDistance(event) > _postAcceptSlopTolerance!;
 
       if (event is PointerMoveEvent &&
           (isPreAcceptSlopPastTolerance || isPostAcceptSlopPastTolerance)) {
