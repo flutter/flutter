@@ -86,8 +86,8 @@ final class GitRepo {
       'git',
       'diff',
       '--name-only',
-      '--diff-filter=ACMRT',
-      '--relative',
+      '--diff-filter=ACMRT', // Added, copied, modified, renamed, or type-changed.
+      '--relative',  // _gitOutputToList will prepend the CWD so we don't want duplicate sub-paths
       mergeBase,
     ]);
     return _gitOutputToList(masterResult);
@@ -112,7 +112,7 @@ final class GitRepo {
       '--no-commit-id',
       '--name-only',
       '--diff-filter=ACMRT', // Added, copied, modified, renamed, or type-changed.
-      '--relative',
+      '--relative',  // _gitOutputToList will prepend the CWD so we don't want duplicate sub-paths
       '-r',
       'HEAD',
     ]);
