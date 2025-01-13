@@ -16,7 +16,7 @@
             },
             "gn": [
                 "--target-dir",
-                "ci/host_debug",
+                "ci/host_debug_test",
                 "--runtime-mode",
                 "debug",
                 "--prebuilt-dart-sdk",
@@ -24,10 +24,10 @@
                 "--rbe",
                 "--no-goma"
             ],
-            "name": "ci/host_debug_unit_tests",
+            "name": "ci/host_debug_test",
             "description": "Builds host-side unit tests for Linux.",
             "ninja": {
-                "config": "ci/host_debug_unit_tests",
+                "config": "ci/host_debug_test",
                 "targets": [
                     "flutter:unittests"
                 ]
@@ -39,7 +39,7 @@
                     "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
-                        "ci/host_debug",
+                        "ci/host_debug_test",
                         "--type",
                         "dart,dart-host",
                         "--engine-capture-core-dump"
@@ -59,7 +59,7 @@
             },
             "gn": [
                 "--target-dir",
-                "ci/host_profile",
+                "ci/host_profile_test",
                 "--runtime-mode",
                 "profile",
                 "--no-lto",
@@ -68,10 +68,10 @@
                 "--rbe",
                 "--no-goma"
             ],
-            "name": "ci/host_profile_unit_tests",
+            "name": "ci/host_profile_test",
             "description": "Builds host-side unit tests for Linux.",
             "ninja": {
-                "config": "ci/host_profile_unit_tests",
+                "config": "ci/host_profile_test",
                 "targets": [
                     "flutter:unittests"
                 ]
@@ -95,7 +95,7 @@
             },
             "gn": [
                 "--target-dir",
-                "ci/host_release",
+                "ci/host_release_test",
                 "--runtime-mode",
                 "release",
                 "--prebuilt-dart-sdk",
@@ -103,11 +103,13 @@
                 "--rbe",
                 "--no-goma"
             ],
-            "name": "ci/host_release_unit_tests",
+            "name": "ci/host_release_test",
             "description": "Builds host-side unit tests and benchmarks for Linux.",
             "ninja": {
-                "config": "ci/host_release_unit_tests",
+                "config": "ci/host_release_test",
                 "targets": [
+                    "flutter:unittests",
+                    "flutter/build/archives:flutter_patched_sdk",
                     "flutter/display_list:display_list_benchmarks",
                     "flutter/display_list:display_list_builder_benchmarks",
                     "flutter/display_list:display_list_region_benchmarks",
@@ -116,8 +118,7 @@
                     "flutter/impeller/geometry:geometry_benchmarks",
                     "flutter/lib/ui:ui_benchmarks",
                     "flutter/shell/common:shell_benchmarks",
-                    "flutter/third_party/txt:txt_benchmarks",
-                    "flutter/build/archives:flutter_patched_sdk"
+                    "flutter/third_party/txt:txt_benchmarks"
                 ]
             },
             "tests": [
@@ -127,7 +128,7 @@
                     "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
-                        "ci/host_release",
+                        "ci/host_release_test",
                         "--type",
                         "dart,dart-host,engine,benchmarks",
                         "--engine-capture-core-dump"
@@ -138,7 +139,7 @@
                     "name": "Generate metrics test",
                     "script": "flutter/testing/benchmark/generate_metrics.sh",
                     "parameters": [
-                        "ci/host_release"
+                        "ci/host_release_test"
                     ]
                 },
                 {
@@ -146,7 +147,7 @@
                     "name": "Upload metrics dry-run",
                     "script": "flutter/testing/benchmark/upload_metrics.sh",
                     "parameters": [
-                        "ci/host_release",
+                        "ci/host_release_test",
                         "--no-upload"
                     ]
                 }
