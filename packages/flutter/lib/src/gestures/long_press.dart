@@ -115,7 +115,7 @@ class LongPressDownDetails extends GestureDetailsWithPositions {
   ///
   /// If the `localPosition` argument is not specified, it will default to the
   /// global position.
-  const LongPressDownDetails({super.globalPosition, super.localPosition, this.kind});
+  const LongPressDownDetails({super.globalPosition = Offset.zero, super.localPosition, this.kind});
 
   /// The kind of the device that initiated the event.
   final PointerDeviceKind? kind;
@@ -136,7 +136,7 @@ class LongPressDownDetails extends GestureDetailsWithPositions {
 ///  * [LongPressEndDetails], the details for [GestureLongPressEndCallback].
 class LongPressStartDetails extends GestureDetailsWithPositions {
   /// Creates the details for a [GestureLongPressStartCallback].
-  const LongPressStartDetails({super.globalPosition, super.localPosition});
+  const LongPressStartDetails({super.globalPosition = Offset.zero, super.localPosition});
 }
 
 /// Details for callbacks that use [GestureLongPressMoveUpdateCallback].
@@ -149,7 +149,7 @@ class LongPressStartDetails extends GestureDetailsWithPositions {
 class LongPressMoveUpdateDetails extends GestureDetailsWithPositions {
   /// Creates the details for a [GestureLongPressMoveUpdateCallback].
   const LongPressMoveUpdateDetails({
-    super.globalPosition,
+    super.globalPosition = Offset.zero,
     super.localPosition,
     this.offsetFromOrigin = Offset.zero,
     Offset? localOffsetFromOrigin,
@@ -183,7 +183,7 @@ class LongPressMoveUpdateDetails extends GestureDetailsWithPositions {
 class LongPressEndDetails extends GestureDetailsWithPositions {
   /// Creates the details for a [GestureLongPressEndCallback].
   const LongPressEndDetails({
-    super.globalPosition,
+    super.globalPosition = Offset.zero,
     super.localPosition,
     this.velocity = Velocity.zero,
   });
@@ -243,6 +243,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   bool _longPressAccepted = false;
   OffsetPair? _longPressOrigin;
+
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
   // different set of buttons, the gesture is canceled.
   int? _initialButtons;

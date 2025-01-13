@@ -31,7 +31,7 @@ import 'package:flutter/foundation.dart'
 /// ```
 abstract class GestureDetailsWithPositions with Diagnosticable {
   /// Creates details with positions.
-  const GestureDetailsWithPositions({this.globalPosition = Offset.zero, Offset? localPosition})
+  const GestureDetailsWithPositions({required this.globalPosition, Offset? localPosition})
     : localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer interacts with the screen.
@@ -56,9 +56,7 @@ abstract class GestureDetailsWithPositions with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(
-      DiagnosticsProperty<Offset>('globalPosition', globalPosition, defaultValue: Offset.zero),
-    );
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
   }
 }

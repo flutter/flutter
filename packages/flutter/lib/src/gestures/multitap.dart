@@ -623,7 +623,7 @@ class SerialTapDownDetails extends GestureDetailsWithPositions {
   ///
   /// The `count` argument must be greater than zero.
   const SerialTapDownDetails({
-    super.globalPosition,
+    super.globalPosition = Offset.zero,
     super.localPosition,
     required this.kind,
     this.buttons = 0,
@@ -709,8 +709,12 @@ class SerialTapUpDetails extends GestureDetailsWithPositions {
   /// Creates details for a [GestureSerialTapUpCallback].
   ///
   /// The `count` argument must be greater than zero.
-  const SerialTapUpDetails({super.globalPosition, super.localPosition, this.kind, this.count = 1})
-    : assert(count > 0);
+  const SerialTapUpDetails({
+    super.globalPosition = Offset.zero,
+    super.localPosition,
+    this.kind,
+    this.count = 1,
+  }) : assert(count > 0);
 
   /// The kind of the device that initiated the event.
   final PointerDeviceKind? kind;

@@ -24,7 +24,7 @@ export 'velocity_tracker.dart' show Velocity;
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
 class DragDownDetails extends GestureDetailsWithPositions {
   /// Creates details for a [GestureDragDownCallback].
-  const DragDownDetails({super.globalPosition, super.localPosition});
+  const DragDownDetails({super.globalPosition = Offset.zero, super.localPosition});
 }
 
 /// Signature for when a pointer has contacted the screen and might begin to
@@ -46,7 +46,7 @@ typedef GestureDragDownCallback = void Function(DragDownDetails details);
 class DragStartDetails extends GestureDetailsWithPositions {
   /// Creates details for a [GestureDragStartCallback].
   const DragStartDetails({
-    super.globalPosition,
+    super.globalPosition = Offset.zero,
     super.localPosition,
     this.sourceTimeStamp,
     this.kind,
@@ -172,7 +172,7 @@ class DragEndDetails extends GestureDetailsWithPositions {
   /// coordinates of `velocity.pixelsPerSecond` and the other coordinate
   /// must be zero.
   DragEndDetails({
-    super.globalPosition,
+    super.globalPosition = Offset.zero,
     super.localPosition,
     this.velocity = Velocity.zero,
     this.primaryVelocity,

@@ -82,7 +82,7 @@ typedef GestureTapDragDownCallback = void Function(TapDragDownDetails details);
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
 class TapDragDownDetails extends GestureDetailsWithPositions {
   /// Creates details for a [GestureTapDragDownCallback].
-  TapDragDownDetails({
+  const TapDragDownDetails({
     required super.globalPosition,
     required super.localPosition,
     this.kind,
@@ -325,7 +325,7 @@ typedef GestureTapDragEndCallback = void Function(TapDragEndDetails endDetails);
 class TapDragEndDetails extends GestureDetailsWithPositions {
   /// Creates details for a [GestureTapDragEndCallback].
   TapDragEndDetails({
-    super.globalPosition,
+    super.globalPosition = Offset.zero,
     super.localPosition,
     this.velocity = Velocity.zero,
     this.primaryVelocity,
