@@ -26,7 +26,8 @@ void main() {
           }
 
           // Succeed calling "git diff --name-only --diff-filter=ACMRT fake-sha-hash".
-          if (command.join(' ') == 'git diff --name-only --diff-filter=ACMRT --relative $fakeShaHash') {
+          if (command.join(' ') ==
+              'git diff --name-only --diff-filter=ACMRT --relative $fakeShaHash') {
             return FakeProcess(stdout: 'file1\nfile2');
           }
 
@@ -62,7 +63,8 @@ void main() {
             return FakeProcess();
           }
 
-          if (command.join(' ') == 'git diff --name-only --diff-filter=ACMRT --relative $fakeShaHash') {
+          if (command.join(' ') ==
+              'git diff --name-only --diff-filter=ACMRT --relative $fakeShaHash') {
             return FakeProcess(stdout: 'file1\nfile2');
           }
 
@@ -164,7 +166,8 @@ void main() {
             return FakeProcess();
           }
 
-          if (command.join(' ') == 'git diff --name-only --diff-filter=ACMRT --relative $fakeShaHash') {
+          if (command.join(' ') ==
+              'git diff --name-only --diff-filter=ACMRT --relative $fakeShaHash') {
             return FakeProcess(stdout: 'file1\nfile2');
           }
 
