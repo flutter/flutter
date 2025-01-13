@@ -135,7 +135,7 @@ void updateMissingResources(
       widgetsBundle[key] = materialString;
     }
 
-    //writeBundle(widgetsFile, widgetsBundle);
+    writeBundle(widgetsFile, widgetsBundle);
   }
 
   return;
