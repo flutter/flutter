@@ -1095,7 +1095,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   ScrollableState? _scrollableState;
   _NavigationBarSearchField? preferredSizeSearchField;
   late AnimationController _animationController;
-  late AnimationController _fadeController;
   late Animation<double> persistentHeightAnimation;
   late Animation<double> largeTitleHeightAnimation;
   final Widget searchField = const CupertinoSearchTextField();
@@ -1106,7 +1105,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     super.initState();
     keys = _NavigationBarStaticComponentsKeys();
     _animationController = AnimationController(vsync: this, duration: _kNavBarSearchDuration);
-    _fadeController = AnimationController(vsync: this, duration: _kNavBarTitleFadeDuration);
     final Tween<double> persistentHeightTween = Tween<double>(
       begin: _kNavBarPersistentHeight,
       end: 0.0,
@@ -1137,7 +1135,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       _scrollableState?.position.isScrollingNotifier.removeListener(_handleScrollChange);
     }
     _animationController.dispose();
-    _fadeController.dispose();
     super.dispose();
   }
 
@@ -1201,7 +1198,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       widget.onSearchActiveChanged!(expanded);
     }
     _animationController.toggle();
-    _fadeController.toggle();
   }
 
   @override
@@ -1217,13 +1213,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       userMiddle: _animationController.isAnimating ? const Text('') : widget.middle,
       userTrailing:
           widget.trailing != null ? Visibility(visible: expanded, child: widget.trailing!) : null,
-      userLargeTitle:
-          _animationController.isAnimating
-              ? FadeTransition(
-                opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_fadeController),
-                child: widget.largeTitle,
-              )
-              : widget.largeTitle,
+      userLargeTitle: widget.largeTitle,
       padding: widget.padding,
       large: true,
       staticBar: false, // This one scrolls.
@@ -1265,7 +1255,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                             onSearchFieldTap: _onSearchFieldTap,
                           )
                           : _CollapsedSearchableBottom(
-                            fadeController: _fadeController,
                             animationController: _animationController,
                             animation: persistentHeightAnimation,
                             searchField: searchField,
@@ -1278,6 +1267,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                       ? widget.bottomMode ?? NavigationBarBottomMode.automatic
                       : NavigationBarBottomMode.always,
               bottomHeight: _bottomHeight(),
+              controller: _animationController,
             ),
           );
         },
@@ -1308,6 +1298,7 @@ class _LargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDeleg
     required this.bottom,
     required this.bottomMode,
     required this.bottomHeight,
+    required this.controller,
   });
 
   final _NavigationBarStaticComponentsKeys keys;
@@ -1328,6 +1319,7 @@ class _LargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDeleg
   final Widget bottom;
   final NavigationBarBottomMode bottomMode;
   final double bottomHeight;
+  final AnimationController controller;
 
   @override
   double get minExtent =>
@@ -1413,7 +1405,7 @@ class _LargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDeleg
                           top: false,
                           bottom: false,
                           child: AnimatedOpacity(
-                            opacity: showLargeTitle ? 1.0 : 0.0,
+                            opacity: showLargeTitle && !controller.isForwardOrCompleted ? 1.0 : 0.0,
                             duration: _kNavBarTitleFadeDuration,
                             child: Semantics(
                               header: true,
@@ -1494,7 +1486,8 @@ class _LargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDeleg
         enableBackgroundFilterBlur != oldDelegate.enableBackgroundFilterBlur ||
         bottom != oldDelegate.bottom ||
         bottomMode != oldDelegate.bottomMode ||
-        bottomHeight != oldDelegate.bottomHeight;
+        bottomHeight != oldDelegate.bottomHeight ||
+        controller != oldDelegate.controller;
   }
 }
 
@@ -2242,14 +2235,12 @@ class _ExpandedSearchableBottom extends StatelessWidget {
 /// The bottom of a [CupertinoSliverNavigationBar.search] in its collapsed state.
 class _CollapsedSearchableBottom extends StatelessWidget {
   const _CollapsedSearchableBottom({
-    required this.fadeController,
     required this.animationController,
     required this.searchField,
     required this.animation,
     required this.onSearchFieldTap,
   });
 
-  final AnimationController fadeController;
   final AnimationController animationController;
   final Widget? searchField;
   final Animation<double> animation;
@@ -2266,7 +2257,7 @@ class _CollapsedSearchableBottom extends StatelessWidget {
           AnimatedBuilder(
             animation: animation,
             child: FadeTransition(
-              opacity: Tween<double>(begin: 0.0, end: 1.0).animate(fadeController),
+              opacity: Tween<double>(begin: 0.0, end: 1.0).animate(animationController),
               child: _CancelButton(onPressed: onSearchFieldTap),
             ),
             builder: (BuildContext context, Widget? child) {
