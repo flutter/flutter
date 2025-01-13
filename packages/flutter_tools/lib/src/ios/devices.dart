@@ -314,8 +314,7 @@ class IOSDevice extends Device {
   /// to connect, wireless devices will have an interface of `usb`/`attached`.
   /// This may change after waiting for the device to connect in
   /// `waitForDeviceToConnect`.
-  DeviceConnectionInterface
-  connectionInterface;
+  DeviceConnectionInterface connectionInterface;
 
   @override
   bool isConnected;
@@ -573,6 +572,10 @@ class IOSDevice extends Device {
         // If debugging with a wireless device and the timeout is reached, remind the
         // user to allow local network permissions.
         if (isWirelesslyConnected) {
+          _logger.printError(
+            '\nYour debugging device seems wirelessly connected. '
+            'Consider plugging it in and trying again.',
+          );
           _logger.printError(
             '\nClick "Allow" to the prompt asking if you would like to find and connect devices on your local network. '
             'This is required for wireless debugging. If you selected "Don\'t Allow", '
@@ -1149,7 +1152,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
       iMobileDevice,
       device.majorSdkVersion,
       device.id,
-      device.name,
+      device.displayName,
       device.isWirelesslyConnected,
       device.isCoreDevice,
       appName,
