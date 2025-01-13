@@ -8,8 +8,8 @@ library;
 import 'package:flutter/foundation.dart';
 
 import 'constants.dart';
-import 'details_with_positions.dart';
 import 'events.dart';
+import 'positioned_details.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
 
@@ -110,7 +110,7 @@ typedef GestureLongPressEndCallback = void Function(LongPressEndDetails details)
 ///    passes these details.
 ///  * [LongPressGestureRecognizer.onTertiaryLongPressDown], whose callback
 ///    passes these details.
-class LongPressDownDetails extends GestureDetailsWithPositions {
+class LongPressDownDetails extends PositionedGestureDetails {
   /// Creates the details for a [GestureLongPressDownCallback].
   ///
   /// If the `localPosition` argument is not specified, it will default to the
@@ -134,7 +134,7 @@ class LongPressDownDetails extends GestureDetailsWithPositions {
 ///  * [LongPressGestureRecognizer.onLongPressStart], which uses [GestureLongPressStartCallback].
 ///  * [LongPressMoveUpdateDetails], the details for [GestureLongPressMoveUpdateCallback]
 ///  * [LongPressEndDetails], the details for [GestureLongPressEndCallback].
-class LongPressStartDetails extends GestureDetailsWithPositions {
+class LongPressStartDetails extends PositionedGestureDetails {
   /// Creates the details for a [GestureLongPressStartCallback].
   const LongPressStartDetails({super.globalPosition = Offset.zero, super.localPosition});
 }
@@ -146,7 +146,7 @@ class LongPressStartDetails extends GestureDetailsWithPositions {
 ///  * [LongPressGestureRecognizer.onLongPressMoveUpdate], which uses [GestureLongPressMoveUpdateCallback].
 ///  * [LongPressEndDetails], the details for [GestureLongPressEndCallback]
 ///  * [LongPressStartDetails], the details for [GestureLongPressStartCallback].
-class LongPressMoveUpdateDetails extends GestureDetailsWithPositions {
+class LongPressMoveUpdateDetails extends PositionedGestureDetails {
   /// Creates the details for a [GestureLongPressMoveUpdateCallback].
   const LongPressMoveUpdateDetails({
     super.globalPosition = Offset.zero,
@@ -180,7 +180,7 @@ class LongPressMoveUpdateDetails extends GestureDetailsWithPositions {
 ///  * [LongPressGestureRecognizer.onLongPressEnd], which uses [GestureLongPressEndCallback].
 ///  * [LongPressMoveUpdateDetails], the details for [GestureLongPressMoveUpdateCallback].
 ///  * [LongPressStartDetails], the details for [GestureLongPressStartCallback].
-class LongPressEndDetails extends GestureDetailsWithPositions {
+class LongPressEndDetails extends PositionedGestureDetails {
   /// Creates the details for a [GestureLongPressEndCallback].
   const LongPressEndDetails({
     super.globalPosition = Offset.zero,

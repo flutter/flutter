@@ -29,9 +29,9 @@ import 'package:flutter/foundation.dart'
 ///   // Rest of business logic.
 /// }
 /// ```
-abstract class GestureDetailsWithPositions with Diagnosticable {
+abstract class PositionedGestureDetails with Diagnosticable {
   /// Creates details with positions.
-  const GestureDetailsWithPositions({required this.globalPosition, Offset? localPosition})
+  const PositionedGestureDetails({required this.globalPosition, Offset? localPosition})
     : localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer interacts with the screen.

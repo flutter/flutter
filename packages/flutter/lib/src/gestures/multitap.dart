@@ -12,9 +12,9 @@ import 'package:flutter/foundation.dart';
 import 'arena.dart';
 import 'binding.dart';
 import 'constants.dart';
-import 'details_with_positions.dart';
 import 'events.dart';
 import 'pointer_router.dart';
+import 'positioned_details.dart';
 import 'recognizer.dart';
 import 'tap.dart';
 
@@ -618,7 +618,7 @@ typedef GestureSerialTapDownCallback = void Function(SerialTapDownDetails detail
 ///
 ///  * [SerialTapGestureRecognizer], which passes this information to its
 ///    [SerialTapGestureRecognizer.onSerialTapDown] callback.
-class SerialTapDownDetails extends GestureDetailsWithPositions {
+class SerialTapDownDetails extends PositionedGestureDetails {
   /// Creates details for a [GestureSerialTapDownCallback].
   ///
   /// The `count` argument must be greater than zero.
@@ -705,7 +705,7 @@ typedef GestureSerialTapUpCallback = void Function(SerialTapUpDetails details);
 ///
 ///  * [SerialTapGestureRecognizer], which passes this information to its
 ///    [SerialTapGestureRecognizer.onSerialTapUp] callback.
-class SerialTapUpDetails extends GestureDetailsWithPositions {
+class SerialTapUpDetails extends PositionedGestureDetails {
   /// Creates details for a [GestureSerialTapUpCallback].
   ///
   /// The `count` argument must be greater than zero.

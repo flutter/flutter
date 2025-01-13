@@ -7,7 +7,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 
-import 'details_with_positions.dart';
+import 'positioned_details.dart';
 import 'velocity_tracker.dart';
 
 export 'dart:ui' show Offset, PointerDeviceKind;
@@ -22,7 +22,7 @@ export 'velocity_tracker.dart' show Velocity;
 ///  * [DragStartDetails], the details for [GestureDragStartCallback].
 ///  * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
-class DragDownDetails extends GestureDetailsWithPositions {
+class DragDownDetails extends PositionedGestureDetails {
   /// Creates details for a [GestureDragDownCallback].
   const DragDownDetails({super.globalPosition = Offset.zero, super.localPosition});
 }
@@ -43,7 +43,7 @@ typedef GestureDragDownCallback = void Function(DragDownDetails details);
 ///  * [DragDownDetails], the details for [GestureDragDownCallback].
 ///  * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
-class DragStartDetails extends GestureDetailsWithPositions {
+class DragStartDetails extends PositionedGestureDetails {
   /// Creates details for a [GestureDragStartCallback].
   const DragStartDetails({
     super.globalPosition = Offset.zero,
@@ -91,7 +91,7 @@ typedef GestureDragStartCallback = void Function(DragStartDetails details);
 ///  * [DragDownDetails], the details for [GestureDragDownCallback].
 ///  * [DragStartDetails], the details for [GestureDragStartCallback].
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
-class DragUpdateDetails extends GestureDetailsWithPositions {
+class DragUpdateDetails extends PositionedGestureDetails {
   /// Creates details for a [GestureDragUpdateCallback].
   ///
   /// If [primaryDelta] is non-null, then its value must match one of the
@@ -165,7 +165,7 @@ typedef GestureDragUpdateCallback = void Function(DragUpdateDetails details);
 ///  * [DragDownDetails], the details for [GestureDragDownCallback].
 ///  * [DragStartDetails], the details for [GestureDragStartCallback].
 ///  * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
-class DragEndDetails extends GestureDetailsWithPositions {
+class DragEndDetails extends PositionedGestureDetails {
   /// Creates details for a [GestureDragEndCallback].
   ///
   /// If [primaryVelocity] is non-null, its value must match one of the

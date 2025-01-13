@@ -11,8 +11,8 @@ import 'package:flutter/foundation.dart';
 
 import 'arena.dart';
 import 'constants.dart';
-import 'details_with_positions.dart';
 import 'events.dart';
+import 'positioned_details.dart';
 import 'recognizer.dart';
 
 export 'dart:ui' show Offset, PointerDeviceKind;
@@ -29,7 +29,7 @@ export 'events.dart' show PointerCancelEvent, PointerDownEvent, PointerEvent, Po
 ///
 ///  * [GestureDetector.onTapDown], which receives this information.
 ///  * [TapGestureRecognizer], which passes this information to one of its callbacks.
-class TapDownDetails extends GestureDetailsWithPositions {
+class TapDownDetails extends PositionedGestureDetails {
   /// Creates details for a [GestureTapDownCallback].
   const TapDownDetails({super.globalPosition = Offset.zero, super.localPosition, this.kind});
 
@@ -63,7 +63,7 @@ typedef GestureTapDownCallback = void Function(TapDownDetails details);
 ///
 ///  * [GestureDetector.onTapUp], which receives this information.
 ///  * [TapGestureRecognizer], which passes this information to one of its callbacks.
-class TapUpDetails extends GestureDetailsWithPositions {
+class TapUpDetails extends PositionedGestureDetails {
   /// Creates a [TapUpDetails] data object.
   const TapUpDetails({required this.kind, super.globalPosition = Offset.zero, super.localPosition});
 

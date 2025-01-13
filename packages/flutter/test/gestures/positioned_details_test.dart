@@ -5,11 +5,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-typedef _Create<T extends GestureDetailsWithPositions> =
+typedef _Create<T extends PositionedGestureDetails> =
     T Function(Offset globalPosition, {Offset? localPosition});
 
 void main() {
-  test('GestureDetailsWithPositions is correctly extended by other gestures', () {
+  test('PositionedGestureDetails is correctly extended by other gestures', () {
     final Set<_Create> creates = <_Create>{
       (Offset globalPosition, {Offset? localPosition}) =>
           DragDownDetails(globalPosition: globalPosition, localPosition: localPosition),
@@ -77,15 +77,15 @@ void main() {
     };
 
     for (final _Create create in creates) {
-      final GestureDetailsWithPositions gesture1 = create(const Offset(0, 100));
-      expect(gesture1.globalPosition, const Offset(0, 100));
-      expect(gesture1.localPosition, const Offset(0, 100));
-      final GestureDetailsWithPositions gesture2 = create(
+      final PositionedGestureDetails details1 = create(const Offset(0, 100));
+      expect(details1.globalPosition, const Offset(0, 100));
+      expect(details1.localPosition, const Offset(0, 100));
+      final PositionedGestureDetails details2 = create(
         const Offset(0, 100),
         localPosition: const Offset(0, 200),
       );
-      expect(gesture2.globalPosition, const Offset(0, 100));
-      expect(gesture2.localPosition, const Offset(0, 200));
+      expect(details2.globalPosition, const Offset(0, 100));
+      expect(details2.localPosition, const Offset(0, 200));
     }
   });
 }

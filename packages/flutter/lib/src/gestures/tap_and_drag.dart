@@ -12,9 +12,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import 'constants.dart';
-import 'details_with_positions.dart';
 import 'events.dart';
 import 'monodrag.dart';
+import 'positioned_details.dart';
 import 'recognizer.dart';
 import 'scale.dart';
 import 'tap.dart';
@@ -80,7 +80,7 @@ typedef GestureTapDragDownCallback = void Function(TapDragDownDetails details);
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
-class TapDragDownDetails extends GestureDetailsWithPositions {
+class TapDragDownDetails extends PositionedGestureDetails {
   /// Creates details for a [GestureTapDragDownCallback].
   const TapDragDownDetails({
     required super.globalPosition,
@@ -123,7 +123,7 @@ typedef GestureTapDragUpCallback = void Function(TapDragUpDetails details);
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
-class TapDragUpDetails extends GestureDetailsWithPositions {
+class TapDragUpDetails extends PositionedGestureDetails {
   /// Creates details for a [GestureTapDragUpCallback].
   TapDragUpDetails({
     required super.globalPosition,
@@ -166,7 +166,7 @@ typedef GestureTapDragStartCallback = void Function(TapDragStartDetails details)
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
-class TapDragStartDetails extends GestureDetailsWithPositions {
+class TapDragStartDetails extends PositionedGestureDetails {
   /// Creates details for a [GestureTapDragStartCallback].
   TapDragStartDetails({
     required super.globalPosition,
@@ -217,7 +217,7 @@ typedef GestureTapDragUpdateCallback = void Function(TapDragUpdateDetails detail
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
-class TapDragUpdateDetails extends GestureDetailsWithPositions {
+class TapDragUpdateDetails extends PositionedGestureDetails {
   /// Creates details for a [GestureTapDragUpdateCallback].
   ///
   /// If [primaryDelta] is non-null, then its value must match one of the
@@ -322,7 +322,7 @@ typedef GestureTapDragEndCallback = void Function(TapDragEndDetails endDetails);
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
-class TapDragEndDetails extends GestureDetailsWithPositions {
+class TapDragEndDetails extends PositionedGestureDetails {
   /// Creates details for a [GestureTapDragEndCallback].
   TapDragEndDetails({
     super.globalPosition = Offset.zero,

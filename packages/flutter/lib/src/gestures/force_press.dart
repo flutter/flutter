@@ -4,8 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'details_with_positions.dart';
 import 'events.dart';
+import 'positioned_details.dart';
 import 'recognizer.dart';
 
 export 'dart:ui' show Offset, PointerDeviceKind;
@@ -44,7 +44,7 @@ enum _ForceState {
 ///  * [ForcePressGestureRecognizer.onStart], [ForcePressGestureRecognizer.onPeak],
 ///    [ForcePressGestureRecognizer.onEnd], and [ForcePressGestureRecognizer.onUpdate]
 ///    which use [ForcePressDetails].
-class ForcePressDetails extends GestureDetailsWithPositions {
+class ForcePressDetails extends PositionedGestureDetails {
   /// Creates details for a [GestureForcePressStartCallback],
   /// [GestureForcePressPeakCallback] or [GestureForcePressEndCallback].
   const ForcePressDetails({
