@@ -12,8 +12,6 @@ import '../_luci_skia_gold_prelude.dart';
 void main() async {
   // To test the golden file generation locally, comment out the following line.
   // autoUpdateGoldenFiles = true;
-
-  const String appName = 'com.example.android_engine_test';
   late final FlutterDriver flutterDriver;
   late final NativeDriver nativeDriver;
 
@@ -31,20 +29,8 @@ void main() async {
     await flutterDriver.close();
   });
 
-  test('should screenshot and match an external smiley face texture', () async {
+  test('should screenshot and match a smiley face texture using the trampoline', () async {
     await flutterDriver.waitFor(find.byType('Texture'));
-
-    // On Android: Background the app, trim memory, and restore the app.
-    if (nativeDriver case final AndroidNativeDriver nativeDriver) {
-      print('Backgrounding the app, trimming memory, and resuming the app.');
-      await nativeDriver.backgroundApp();
-
-      print('Trimming memory.');
-      await nativeDriver.simulateLowMemory(appName: appName);
-
-      print('Resuming the app.');
-      await nativeDriver.resumeApp(appName: appName);
-    }
 
     await expectLater(
       nativeDriver.screenshot(),
