@@ -330,7 +330,6 @@ class FlutterPlugin implements Plugin<Project> {
                     matchingFallbacks = ["debug", "release"]
                 }
             }
-
             // TODO(garyq): Shrinking is only false for multi apk split aot builds, where shrinking is not allowed yet.
             // This limitation has been removed experimentally in gradle plugin version 4.2, so we can remove
             // this check when we upgrade to 4.2+ gradle. Currently, deferred components apps may see
