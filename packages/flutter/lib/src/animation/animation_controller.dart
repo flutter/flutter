@@ -352,7 +352,6 @@ class AnimationController extends Animation<double>
   }
 
   Simulation? _simulation;
-
   Duration? _skipDuration;
 
   /// The current value of the animation.
@@ -473,6 +472,10 @@ class AnimationController extends Animation<double>
   /// If [from] is non-null, it will be set as the current [value] before running
   /// the animation.
   ///
+  /// [skipDuration] is the duration to skip before starting the animation. If the
+  /// animation duration is 1000 milliseconds and [skipDuration] is 200 milliseconds,
+  /// the animation will start from the 200-millisecond mark and end after 800 milliseconds.
+  ///
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
@@ -509,6 +512,10 @@ class AnimationController extends Animation<double>
   ///
   /// If [from] is non-null, it will be set as the current [value] before running
   /// the animation.
+  ///
+  /// [skipDuration] is the duration to skip before starting the animation. If the
+  /// animation duration is 1000 milliseconds and [skipDuration] is 200 milliseconds,
+  /// the animation will start from the 200-millisecond mark and end after 800 milliseconds.
   ///
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
@@ -548,6 +555,10 @@ class AnimationController extends Animation<double>
   ///
   /// If [from] is non-null, it will be set as the current [value] before running
   /// the animation.
+  ///
+  /// [skipDuration] is the duration to skip before starting the animation. If the
+  /// animation duration is 1000 milliseconds and [skipDuration] is 200 milliseconds,
+  /// the animation will start from the 200-millisecond mark and end after 800 milliseconds.
   ///
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
@@ -598,6 +609,10 @@ class AnimationController extends Animation<double>
   /// If the `target` argument is the same as the current [value] of the
   /// animation, then this won't animate, and the returned [TickerFuture] will
   /// be already complete.
+  ///
+  /// [skipDuration] is the duration to skip before starting the animation. If the
+  /// animation duration is 1000 milliseconds and [skipDuration] is 200 milliseconds,
+  /// the animation will start from the 200-millisecond mark and end after 800 milliseconds.
   TickerFuture animateTo(
     double target, {
     Duration? duration,
@@ -640,6 +655,10 @@ class AnimationController extends Animation<double>
   /// If the `target` argument is the same as the current [value] of the
   /// animation, then this won't animate, and the returned [TickerFuture] will
   /// be already complete.
+  ///
+  /// [skipDuration] is the duration to skip before starting the animation. If the
+  /// animation duration is 1000 milliseconds and [skipDuration] is 200 milliseconds,
+  /// the animation will start from the 200-millisecond mark and end after 800 milliseconds.
   TickerFuture animateBack(
     double target, {
     Duration? duration,
@@ -799,6 +818,10 @@ class AnimationController extends Animation<double>
   /// is used. See [SpringDescription.withDampingRatio] for how to create a
   /// suitable [SpringDescription].
   ///
+  /// [skipDuration] is the duration to skip before starting the animation. If the
+  /// animation duration is 1000 milliseconds and [skipDuration] is 200 milliseconds,
+  /// the animation will start from the 200-millisecond mark and end after 800 milliseconds.
+  ///
   /// The resulting spring simulation cannot be of type [SpringType.underDamped];
   /// such a spring would oscillate rather than fling.
   ///
@@ -849,6 +872,10 @@ class AnimationController extends Animation<double>
   /// [upperBound]. To avoid this, consider creating the [AnimationController]
   /// using the [AnimationController.unbounded] constructor.
   ///
+  /// [skipDuration] is the duration to skip before starting the animation. If the
+  /// animation duration is 1000 milliseconds and [skipDuration] is 200 milliseconds,
+  /// the animation will start from the 200-millisecond mark and end after 800 milliseconds.
+  ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
   ///
   /// The most recently returned [TickerFuture], if any, is marked as having been
@@ -878,6 +905,10 @@ class AnimationController extends Animation<double>
   /// [AnimationStatus.reverse].
   ///
   /// {@macro flutter.animation.AnimationController.animateWith}
+  ///
+  /// [skipDuration] is the duration to skip before starting the animation. If the
+  /// animation duration is 1000 milliseconds and [skipDuration] is 200 milliseconds,
+  /// the animation will start from the 200-millisecond mark and end after 800 milliseconds.
   ///
   /// The [status] is always [AnimationStatus.reverse] for the entire duration
   /// of the simulation.
