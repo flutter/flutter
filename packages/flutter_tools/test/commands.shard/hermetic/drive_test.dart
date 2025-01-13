@@ -619,6 +619,9 @@ class ScreenshotDevice extends Fake implements Device {
   final String name = 'FakeDevice';
 
   @override
+  String get displayName => name;
+
+  @override
   final Category category = Category.mobile;
 
   @override
@@ -699,7 +702,6 @@ class NeverEndingDriverService extends Fake implements DriverService {
   Future<int> startTest(
     String testFile,
     List<String> arguments,
-    Map<String, String> environment,
     PackageConfig packageConfig, {
     bool? headless,
     String? chromeBinary,
@@ -733,7 +735,6 @@ class FailingFakeDriverService extends Fake implements DriverService {
   Future<int> startTest(
     String testFile,
     List<String> arguments,
-    Map<String, String> environment,
     PackageConfig packageConfig, {
     bool? headless,
     String? chromeBinary,
