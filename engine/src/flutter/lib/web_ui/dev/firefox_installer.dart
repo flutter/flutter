@@ -29,8 +29,6 @@ Future<BrowserInstallation> getOrInstallFirefox(
   String requestedVersion, {
   StringSink? infoLog,
 }) async {
-  // These tests are aimed to run only on the Linux containers on LUCI.
-  // Therefore Firefox installation is implemented only for Linux/MacOS now.
   if (!io.Platform.isLinux && !io.Platform.isMacOS) {
     throw UnimplementedError(
       'Firefox Installer is only supported on Linux '
