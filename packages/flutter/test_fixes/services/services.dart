@@ -42,4 +42,8 @@ void main() {
   ]);
   await SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[]);
   await SystemChrome.setEnabledSystemUIOverlays(error: '');
+
+  // Change
+  final cause = SelectionChangedCause.scribble;
+  print(cause);
 }
