@@ -42,4 +42,8 @@ void main() {
   ]);
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: <SystemUiOverlay>[]);
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, error: '');
+
+  // Change
+  final cause = SelectionChangedCause.stylusHandwriting;
+  print(cause);
 }
