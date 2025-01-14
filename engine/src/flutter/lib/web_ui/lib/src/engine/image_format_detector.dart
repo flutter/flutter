@@ -336,8 +336,7 @@ class _GifHeaderReader {
 
     final int extensionLabel = bytes.getUint8(_position + 1);
 
-    // The Comment Extension label is 0xFE, the Application Extension Label is
-    // 0xFF.
+    // A Special Purpose Block has a label between 0xFA and 0xFF.
     return extensionLabel >= 0xfa && extensionLabel <= 0xff;
   }
 
