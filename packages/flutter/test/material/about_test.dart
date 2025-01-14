@@ -1851,6 +1851,43 @@ void main() {
       expect(find.byType(AlertDialog), findsNothing);
     }
   });
+
+  testWidgets('showLicensePage inherits ambient Theme', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      colorScheme: ColorScheme.fromSeed(seedColor: const Color(0XFFFF0000)),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Theme(
+          data: theme,
+          child: Builder(
+            builder:
+                (BuildContext context) => ElevatedButton(
+                  onPressed: () {
+                    showAboutDialog(
+                      context: context,
+                      applicationName: 'Sample Test',
+                      applicationVersion: 'v1.0.0', // Version of the app
+                    );
+                  },
+                  child: const Text('Show About Dialog'),
+                ),
+          ),
+        ),
+      ),
+    );
+
+    // Open the dialog.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('View licenses'));
+    await tester.pumpAndSettle();
+
+    final ThemeData licensePageTheme = Theme.of(tester.element(find.text('Powered by Flutter')));
+    expect(theme.colorScheme.primary, licensePageTheme.colorScheme.primary);
+  });
 }
 
 class FakeLicenseEntry extends LicenseEntry {
