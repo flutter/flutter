@@ -438,27 +438,31 @@ class NavigationDestination extends StatelessWidget {
           child: icon,
         );
 
-        return Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            NavigationIndicator(
-              animation: animation,
-              color:
-                  info.indicatorColor ??
-                  navigationBarTheme.indicatorColor ??
-                  defaults.indicatorColor!,
-              shape:
-                  info.indicatorShape ??
-                  navigationBarTheme.indicatorShape ??
-                  defaults.indicatorShape!,
-            ),
-            _StatusTransitionWidgetBuilder(
-              animation: animation,
-              builder: (BuildContext context, Widget? child) {
-                return animation.isForwardOrCompleted ? selectedIconWidget : unselectedIconWidget;
-              },
-            ),
-          ],
+        return Semantics(
+          focusable: true,
+          container: true,
+          child: Stack(
+            alignment: Alignment.center,
+            children: <Widget>[
+              NavigationIndicator(
+                animation: animation,
+                color:
+                    info.indicatorColor ??
+                    navigationBarTheme.indicatorColor ??
+                    defaults.indicatorColor!,
+                shape:
+                    info.indicatorShape ??
+                    navigationBarTheme.indicatorShape ??
+                    defaults.indicatorShape!,
+              ),
+              _StatusTransitionWidgetBuilder(
+                animation: animation,
+                builder: (BuildContext context, Widget? child) {
+                  return animation.isForwardOrCompleted ? selectedIconWidget : unselectedIconWidget;
+                },
+              ),
+            ],
+          ),
         );
       },
       buildLabel: (BuildContext context) {

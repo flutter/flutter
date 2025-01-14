@@ -460,6 +460,7 @@ void main() {
           destinations: const <Widget>[
             NavigationDestination(icon: Icon(Icons.ac_unit), label: 'AC'),
             NavigationDestination(icon: Icon(Icons.access_alarm), label: 'Alarm'),
+            NavigationDestination(icon: Icon(Icons.abc), label: 'ABC'),
           ],
         ),
       );
@@ -470,7 +471,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 2',
+        label: 'AC\nTab 1 of 3',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
@@ -481,7 +482,17 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 2',
+        label: 'Alarm\nTab 2 of 3',
+        textDirection: TextDirection.ltr,
+        isFocusable: true,
+        hasTapAction: true,
+        hasFocusAction: true,
+      ),
+    );
+    expect(
+      tester.getSemantics(find.text('ABC')),
+      matchesSemantics(
+        label: 'ABC\nTab 3 of 3',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
@@ -494,7 +505,7 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 2',
+        label: 'AC\nTab 1 of 3',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         hasTapAction: true,
@@ -504,10 +515,20 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 2',
+        label: 'Alarm\nTab 2 of 3',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
+        hasTapAction: true,
+        hasFocusAction: true,
+      ),
+    );
+    expect(
+      tester.getSemantics(find.text('ABC')),
+      matchesSemantics(
+        label: 'ABC\nTab 3 of 3',
+        textDirection: TextDirection.ltr,
+        isFocusable: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
