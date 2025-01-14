@@ -61,7 +61,7 @@ void main() {
       null,
       FakeResidentRunner(),
       BufferLogger.test(),
-      _ThrowingChromiumLauncher(),
+      _FakeChromiumLauncher(),
     );
 
     await handler.serveAndAnnounceDevTools(flutterDevices: <FlutterDevice>[]);
@@ -76,7 +76,7 @@ void main() {
         FakeDevtoolsLauncher(),
         FakeResidentRunner()..supportsServiceProtocol = false,
         BufferLogger.test(),
-        _ThrowingChromiumLauncher(),
+        _FakeChromiumLauncher(),
       );
       await handler.serveAndAnnounceDevTools(flutterDevices: <FlutterDevice>[]);
 
@@ -98,7 +98,7 @@ void main() {
       launcher,
       FakeResidentRunner(),
       BufferLogger.test(),
-      _ThrowingChromiumLauncher(),
+      _FakeChromiumLauncher(),
     );
 
     await handler.serveAndAnnounceDevTools(
@@ -119,7 +119,7 @@ void main() {
           ..devToolsUrl = Uri.parse('http://localhost:8080'),
         FakeResidentRunner(),
         BufferLogger.test(),
-        _ThrowingChromiumLauncher(),
+        _FakeChromiumLauncher(),
       );
 
       // VM Service is intentionally null
@@ -138,7 +138,7 @@ void main() {
           ..devToolsUrl = Uri.parse('http://localhost:8080'),
         FakeResidentRunner(),
         BufferLogger.test(),
-        _ThrowingChromiumLauncher(),
+        _FakeChromiumLauncher(),
       );
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
@@ -177,7 +177,7 @@ void main() {
       FakeDevtoolsLauncher()..activeDevToolsServer = null,
       FakeResidentRunner(),
       BufferLogger.test(),
-      _ThrowingChromiumLauncher(),
+      _FakeChromiumLauncher(),
     );
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[],
@@ -196,7 +196,7 @@ void main() {
         ..devToolsUrl = Uri.parse('http://localhost:8080'),
       FakeResidentRunner(),
       BufferLogger.test(),
-      _ThrowingChromiumLauncher(),
+      _FakeChromiumLauncher(),
     );
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
@@ -237,6 +237,7 @@ void main() {
         FakeDevtoolsLauncher()..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
         FakeResidentRunner(),
         BufferLogger.test(),
+        _FakeChromiumLauncher(),
       );
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
@@ -267,6 +268,7 @@ void main() {
           ..devToolsUrl = Uri.parse('http://localhost:8080'),
         FakeResidentRunner(),
         BufferLogger.test(),
+        _FakeChromiumLauncher(),
       );
 
       final FakeVmServiceHost vmServiceHost = FakeVmServiceHost(
@@ -323,7 +325,7 @@ void main() {
       null,
       FakeResidentRunner(),
       BufferLogger.test(),
-      _ThrowingChromiumLauncher(),
+      _FakeChromiumLauncher(),
     );
 
     handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]);
@@ -338,7 +340,7 @@ void main() {
         FakeDevtoolsLauncher(),
         FakeResidentRunner()..supportsServiceProtocol = false,
         BufferLogger.test(),
-        _ThrowingChromiumLauncher(),
+        _FakeChromiumLauncher(),
       );
 
       handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]);
@@ -360,7 +362,7 @@ void main() {
           ..readyCompleter = completer,
         FakeResidentRunner(),
         BufferLogger.test(),
-        _ThrowingChromiumLauncher(),
+        _FakeChromiumLauncher(),
       );
 
       expect(handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]), isTrue);
@@ -381,7 +383,7 @@ void main() {
         ..activeDevToolsServer = DevToolsServerAddress('localhost', 8080),
       FakeResidentRunner(),
       BufferLogger.test(),
-      _ThrowingChromiumLauncher(),
+      _FakeChromiumLauncher(),
     );
 
     expect(handler.launchDevToolsInBrowser(flutterDevices: <FlutterDevice>[]), isTrue);
@@ -484,3 +486,5 @@ class _ThrowingChromiumLauncher extends Fake implements ChromiumLauncher {
     throw ProcessException('ChromiumLauncher', <String>[url]);
   }
 }
+
+class _FakeChromiumLauncher extends Fake implements ChromiumLauncher {}
