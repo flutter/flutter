@@ -2,15 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/impeller/renderer/testing/mocks.h"
 #include "flutter/testing/testing.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "third_party/googletest/googletest/include/gtest/gtest.h"
-
 #include "txt/platform.h"
 
 namespace impeller {
 namespace testing {
+
+using ::testing::Return;
 
 std::shared_ptr<TextFrame> MakeTextFrame(const std::string& text,
                                          const std::string_view& font_fixture,
@@ -35,7 +38,21 @@ TEST(TextContentsTest, SimpleComputeVertexData) {
 
   std::shared_ptr<TextFrame> text_frame =
       MakeTextFrame("A", "Roboto-Regular.ttf", /*font_size=*/50);
-  std::shared_ptr<GlyphAtlas> atlas;
+
+  TextureDescriptor texture_descriptor;
+  texture_descriptor.size = ISize(1024, 1024);
+  std::shared_ptr<MockTexture> mock_texture =
+      std::make_shared<MockTexture>(texture_descriptor);
+  EXPECT_CALL(*mock_texture, GetSize())
+      .WillOnce(Return(texture_descriptor.size));
+  std::shared_ptr<GlyphAtlas> atlas =
+      std::make_shared<GlyphAtlas>(GlyphAtlas::Type::kAlphaBitmap, 0);
+  atlas->SetTexture(mock_texture);
+
+  text_frame->SetPerFrameData(/*scale=*/1.0, /*offset=*/Vector2(0, 0),
+                              /*glyph_properties=*/std::nullopt);
+
+  TypographerContextSkia::CollectNewGlyphs(atlas, {text_frame});
 
   TextContents::ComputeVertexData(
       data, text_frame, /*scale=*/1.0, /*entity_transform=*/Matrix(),
