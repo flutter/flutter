@@ -75,7 +75,7 @@
                 "config": "ci/host_profile_test",
                 "targets": [
                     "flutter:unittests",
-                    "flutter/build/archives:flutter_patched_sdk",
+                    "flutter/build/archives:flutter_patched_sdk"
                 ]
             }
         },
