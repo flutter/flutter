@@ -146,10 +146,12 @@ class TestImgElement {
       };
     }
     _callbacksAssigned = true;
-    return JSPromise<JSAny?>((JSFunction resolveFunc, JSFunction rejectFunc) {
-      _resolveFunc = resolveFunc;
-      _rejectFunc = rejectFunc;
-    }.toJS);
+    return JSPromise<JSAny?>(
+      (JSFunction resolveFunc, JSFunction rejectFunc) {
+        _resolveFunc = resolveFunc;
+        _rejectFunc = rejectFunc;
+      }.toJS,
+    );
   }
 
   void decodeSuccess() {
