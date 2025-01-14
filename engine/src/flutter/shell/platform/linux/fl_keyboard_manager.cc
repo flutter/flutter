@@ -592,11 +592,6 @@ void fl_keyboard_manager_set_lookup_key_handler(
   self->lookup_key_handler_user_data = user_data;
 }
 
-void fl_keyboard_manager_notify_layout_changed(FlKeyboardManager* self) {
-  g_return_if_fail(FL_IS_KEYBOARD_MANAGER(self));
-  keymap_keys_changed_cb(self);
-}
-
 void fl_keyboard_manager_set_redispatch_handler(
     FlKeyboardManager* self,
     FlKeyboardManagerRedispatchEventHandler redispatch_handler,
