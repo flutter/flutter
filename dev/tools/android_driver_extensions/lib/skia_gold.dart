@@ -129,7 +129,6 @@ final class _GoldenFileComparator extends GoldenFileComparator {
     return Uri.parse(
       <String>[
         if (namePrefix != null) namePrefix!,
-        baseDir.pathSegments[baseDir.pathSegments.length - 2],
         golden.toString(),
       ].join('.'),
     );
