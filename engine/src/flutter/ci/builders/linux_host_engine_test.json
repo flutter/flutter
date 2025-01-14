@@ -30,7 +30,7 @@
                 "config": "ci/host_debug_test",
                 "targets": [
                     "flutter:unittests",
-                    "flutter/build/archives:flutter_patched_sdk"
+                    "flutter/build/dart:copy_dart_sdk"
                 ]
             },
             "tests": [
@@ -75,7 +75,7 @@
                 "config": "ci/host_profile_test",
                 "targets": [
                     "flutter:unittests",
-                    "flutter/build/archives:flutter_patched_sdk"
+                    "flutter/build/dart:copy_dart_sdk"
                 ]
             }
         },
@@ -111,7 +111,7 @@
                 "config": "ci/host_release_test",
                 "targets": [
                     "flutter:unittests",
-                    "flutter/build/archives:flutter_patched_sdk",
+                    "flutter/build/dart:copy_dart_sdk",
                     "flutter/display_list:display_list_benchmarks",
                     "flutter/display_list:display_list_builder_benchmarks",
                     "flutter/display_list:display_list_region_benchmarks",
