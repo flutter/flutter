@@ -219,9 +219,12 @@ AHBSwapchainImplVK::SubmitSignalForPresentReady(
   }
 
   vk::SubmitInfo submit_info;
+  vk::PipelineStageFlags wait_stage =
+      vk::PipelineStageFlagBits::eColorAttachmentOutput;
   if (frame_data_[frame_index_].semaphore) {
     submit_info.setPWaitSemaphores(&frame_data_[frame_index_].semaphore.get());
     submit_info.setWaitSemaphoreCount(1);
+    submit_info.setWaitDstStageMask(wait_stage);
   }
   submit_info.setCommandBuffers(command_encoder_vk);
 
@@ -285,6 +288,7 @@ bool AHBSwapchainImplVK::SubmitWaitForRenderReady(
   // If there is no render ready fence, we are already ready to render into
   // the texture. There is nothing more to do.
   if (!render_ready_fence || !render_ready_fence->is_valid()) {
+    frame_data_[frame_index_].semaphore = {};
     return true;
   }
 
