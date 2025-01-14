@@ -185,7 +185,6 @@ void main() {
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
       Analytics: () => fakeAnalytics,
-      ProcessInfo: () => processInfo,
     });
   });
 
