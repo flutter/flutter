@@ -341,7 +341,11 @@ class XcodeProjectInterpreter {
     ], workingDirectory: _fileSystem.currentDirectory.path);
   }
 
-  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo?> getInfo(String projectPath, {
+    String? projectFilename,
+    Duration timeout = const Duration(minutes: 1),
+    int timeoutRetries = 1,
+  }) async {
     // The exit code returned by 'xcodebuild -list' when either:
     // * -project is passed and the given project isn't there, or
     // * no -project is passed and there isn't a project.
@@ -349,6 +353,10 @@ class XcodeProjectInterpreter {
     // The exit code returned by 'xcodebuild -list' when the project is corrupted.
     const int corruptedProjectExitCode = 74;
     bool allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
+    // The -list is reported to occasionally timeout.
+    // Locally it usually takes < 1 sec, in LUCI bots ~ < 2 sec.
+    // By default, we set the timeout to 1 min and retry once.
+    // If all retries fail we throw an exception.
     final RunResult result = await _processUtils.run(
       <String>[
         ...xcrunCommand(),
@@ -359,6 +367,8 @@ class XcodeProjectInterpreter {
       throwOnError: true,
       allowedFailures: allowedFailures,
       workingDirectory: projectPath,
+      timeout: timeout,
+      timeoutRetries: timeoutRetries,
     );
     if (allowedFailures(result.exitCode)) {
       // User configuration error, tool exit instead of crashing.

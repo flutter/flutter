@@ -383,7 +383,12 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   Future<void> cleanWorkspace(String workspacePath, String scheme, {bool verbose = false}) async {}
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo> getInfo(
+    String projectPath, {
+    String? projectFilename,
+    Duration timeout = const Duration(minutes: 1),
+    int timeoutRetries = 1,
+  }) async {
     return XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>[
       'Runner',
     ], BufferLogger.test());
