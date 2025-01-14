@@ -98,13 +98,13 @@ Uint8List _createTestGif({
   int numFrames = 2,
   bool includeManyCommentBlocks = true,
 }) {
-  List<int> bytes = <int>[];
+  final List<int> bytes = <int>[];
   // Generate header.
   bytes.addAll('GIF'.codeUnits);
   bytes.addAll('89a'.codeUnits);
 
   // Generate logical screen.
-  List<int> _padInt(int x) {
+  List<int> padInt(int x) {
     assert(x >= 0 && x.bitLength <= 16);
     if (x.bitLength > 8) {
       return <int>[x >> 8, x & 0xff];
@@ -112,19 +112,19 @@ Uint8List _createTestGif({
     return <int>[0, x];
   }
 
-  bytes.addAll(_padInt(width));
-  bytes.addAll(_padInt(height));
+  bytes.addAll(padInt(width));
+  bytes.addAll(padInt(height));
   // Indicate there is no Global Color Table.
   bytes.add(0x70);
   bytes.add(0);
   bytes.add(0);
 
   // Generate data.
-  List<int> _generateCommentBlock() {
-    List<int> comment = <int>[];
+  List<int> generateCommentBlock() {
+    final List<int> comment = <int>[];
     comment.add(0x21);
     comment.add(0xfe);
-    String commentString = 'This is a comment';
+    const String commentString = 'This is a comment';
     comment.add(commentString.codeUnits.length);
     comment.addAll(commentString.codeUnits);
     comment.add(0);
@@ -133,7 +133,7 @@ Uint8List _createTestGif({
 
   for (int i = 0; i < numFrames; i++) {
     if (includeManyCommentBlocks) {
-      bytes.addAll(_generateCommentBlock());
+      bytes.addAll(generateCommentBlock());
     }
     // Add a Graphic Control Extension block.
     bytes.add(0x21);
@@ -147,7 +147,7 @@ Uint8List _createTestGif({
     bytes.add(0);
 
     if (includeManyCommentBlocks) {
-      bytes.addAll(_generateCommentBlock());
+      bytes.addAll(generateCommentBlock());
     }
 
     // Add a Table-Based Image.
@@ -156,19 +156,19 @@ Uint8List _createTestGif({
     bytes.add(0);
     bytes.add(0);
     bytes.add(0);
-    bytes.addAll(_padInt(width));
-    bytes.addAll(_padInt(height));
+    bytes.addAll(padInt(width));
+    bytes.addAll(padInt(height));
     bytes.add(0);
 
     bytes.add(0);
-    String fakeImageData = 'This is an image';
+    const String fakeImageData = 'This is an image';
     bytes.add(fakeImageData.codeUnits.length);
     bytes.addAll(fakeImageData.codeUnits);
     bytes.add(0);
   }
 
   if (includeManyCommentBlocks) {
-    bytes.addAll(_generateCommentBlock());
+    bytes.addAll(generateCommentBlock());
   }
 
   // Generate trailer.
