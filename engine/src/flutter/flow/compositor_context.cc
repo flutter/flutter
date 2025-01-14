@@ -185,10 +185,6 @@ void CompositorContext::ScopedFrame::PaintLayerTreeImpeller(
     flutter::LayerTree& layer_tree,
     std::optional<DlRect> clip_rect,
     bool ignore_raster_cache) {
-  if (canvas() && clip_rect) {
-    canvas()->Translate(-clip_rect->GetX(), -clip_rect->GetY());
-  }
-
   layer_tree.Paint(*this, ignore_raster_cache);
 }
 

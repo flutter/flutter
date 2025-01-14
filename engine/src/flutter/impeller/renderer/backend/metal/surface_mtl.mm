@@ -51,20 +51,8 @@ static std::optional<RenderTarget> WrapTextureWithRenderTarget(
     id<MTLTexture> texture,
     bool requires_blit,
     std::optional<IRect> clip_rect) {
-  // compositor_context.cc will offset the rendering by the clip origin. Here we
-  // shrink to the size of the clip. This has the same effect as clipping the
-  // rendering but also creates smaller intermediate passes.
-  ISize root_size;
-  if (requires_blit) {
-    if (!clip_rect.has_value()) {
-      VALIDATION_LOG << "Missing clip rectangle.";
-      return std::nullopt;
-    }
-    root_size = ISize(clip_rect->GetWidth(), clip_rect->GetHeight());
-  } else {
-    root_size = {static_cast<ISize::Type>(texture.width),
-                 static_cast<ISize::Type>(texture.height)};
-  }
+  ISize root_size = {static_cast<ISize::Type>(texture.width),
+                     static_cast<ISize::Type>(texture.height)};
 
   TextureDescriptor resolve_tex_desc;
   resolve_tex_desc.format = FromMTLPixelFormat(texture.pixelFormat);
@@ -251,7 +239,7 @@ bool SurfaceMTL::PreparePresent() const {
       VALIDATION_LOG << "Missing clip rectangle.";
       return false;
     }
-    blit_pass->AddCopy(source_texture_, destination_texture_, std::nullopt,
+    blit_pass->AddCopy(source_texture_, destination_texture_, clip_rect_,
                        clip_rect_->GetOrigin());
     blit_pass->EncodeCommands();
     if (!context->GetCommandQueue()->Submit({blit_command_buffer}).ok()) {
