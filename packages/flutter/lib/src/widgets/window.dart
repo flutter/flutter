@@ -323,7 +323,6 @@ class _GenericWindow extends StatefulWidget {
 class _GenericWindowState extends State<_GenericWindow> {
   _WindowListener? _listener;
   Future<WindowCreationResult>? _future;
-  _WindowingAppState? _app;
   int? _viewId;
   bool _hasBeenDestroyed = false;
 
@@ -354,21 +353,21 @@ class _GenericWindowState extends State<_GenericWindow> {
             if (properties.size != null) {
               widget.controller!.size = properties.size;
             }
-
-            if (properties.parentViewId != null) {
-              widget.controller!.parentViewId = properties.parentViewId;
-            }
-          },
-          onDestroyed: () {
-            widget.onDestroyed?.call();
-            _hasBeenDestroyed = true;
-          });
-      _app = windowingAppContext!.windowingApp;
-      _app!._registerListener(_listener!);
-    }).catchError((Object? error) {
-      print(error.toString());
-      widget.onError?.call(error.toString());
-    });
+              if (properties.parentViewId != null) {
+                widget.controller!.parentViewId = properties.parentViewId;
+              }
+            },
+            onDestroyed: () {
+              widget.controller?.view = null;
+              widget.onDestroyed?.call();
+              _hasBeenDestroyed = true;
+            },
+          );
+          _WindowingAppGlobalData.instance()._registerListener(_listener!);
+        })
+        .catchError((Object? error) {
+          widget.onError?.call(error.toString());
+        });
   }
 
   @override
@@ -376,8 +375,7 @@ class _GenericWindowState extends State<_GenericWindow> {
     super.dispose();
 
     if (_listener != null) {
-      assert(_app != null);
-      _app!._unregisterListener(_listener!);
+      _WindowingAppGlobalData.instance()._unregisterListener(_listener!);
     }
 
     // In the event that we're being disposed before we've been destroyed
@@ -483,10 +481,14 @@ class PopupWindow extends StatelessWidget {
   /// The content rendered into this window.
   final Widget child;
 
+  FlutterView _getParent(BuildContext context) {
+    return View.maybeOf(context)
+      ?? WidgetsBinding.instance.platformDispatcher.implicitView!;
+  }
+
   Rect _clampRectToSize(BuildContext context, Rect anchorRect) {
     final double dpr = MediaQuery.of(context).devicePixelRatio;
-    final WindowContext windowContext = WindowContext.of(context)!;
-    final Size size = windowContext.view.physicalSize / dpr;
+    final Size size = _getParent(context).physicalSize / dpr;
 
     final double left = anchorRect.left.clamp(0, size.width);
     final double top = anchorRect.top.clamp(0, size.height);
@@ -497,15 +499,13 @@ class PopupWindow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final WindowContext? windowContext = WindowContext.of(context);
-    assert(windowContext != null, 'A PopupWindow must have a parent');
-
     return _GenericWindow(
-        onDestroyed: onDestroyed,
-        onError: onError,
-        key: key,
-        createFuture: () => createPopup(
-            parentViewId: windowContext!.viewId,
+      onDestroyed: onDestroyed,
+      onError: onError,
+      key: key,
+      createFuture:
+          () => createPopup(
+            parentViewId: _getParent(context).viewId,
             size: _preferredSize,
             anchorRect: _anchorRect == null ? null : _clampRectToSize(context, _anchorRect),
             positioner: _positioner),
@@ -649,25 +649,16 @@ class _WindowListener {
   void Function()? onDestroyed;
 }
 
-/// Declares that an application will create multiple windows.
-class WindowingApp extends StatefulWidget {
-  /// Creates a new windowing app with the provided child windows.
-  const WindowingApp({super.key, required this.children});
-
-  /// A list of initial windows to render. These windows will be placed inside
-  /// of a [ViewCollection].
-  final List<Widget> children;
-
-  @override
-  State<WindowingApp> createState() => _WindowingAppState();
-}
-
-class _WindowingAppState extends State<WindowingApp> {
+class _WindowingAppGlobalData {
   final List<_WindowListener> _listeners = <_WindowListener>[];
+  static _WindowingAppGlobalData? _instance;
 
-  @override
-  void initState() {
-    super.initState();
+  static _WindowingAppGlobalData instance() {
+    _instance ??= _WindowingAppGlobalData();
+    return _instance!;
+  }
+
+  _WindowingAppGlobalData() {
     WidgetsFlutterBinding.ensureInitialized();
     SystemChannels.windowing.setMethodCallHandler(_methodCallHandler);
   }
@@ -721,7 +712,22 @@ class _WindowingAppState extends State<WindowingApp> {
   void _unregisterListener(_WindowListener listener) {
     _listeners.remove(listener);
   }
+}
 
+/// Declares that an application will create multiple windows.
+class WindowingApp extends StatefulWidget {
+  /// Creates a new windowing app with the provided child windows.
+  const WindowingApp({super.key, required this.children});
+
+  /// A list of initial windows to render. These windows will be placed inside
+  /// of a [ViewCollection].
+  final List<Widget> children;
+
+  @override
+  State<WindowingApp> createState() => _WindowingAppState();
+}
+
+class _WindowingAppState extends State<WindowingApp> {
   @override
   Widget build(BuildContext context) {
     return _WindowingAppContext(windowingApp: this, child: ViewCollection(views: widget.children));
