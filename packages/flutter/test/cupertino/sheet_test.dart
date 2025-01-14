@@ -609,6 +609,46 @@ void main() {
     expect(find.text('Page 2'), findsNothing);
   });
 
+  testWidgets('sheet has route settings', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        initialRoute: '/',
+        onGenerateRoute: (RouteSettings settings) {
+          if (settings.name == '/') {
+            return PageRouteBuilder<void>(
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) {
+                return CupertinoPageScaffold(
+                  navigationBar: const CupertinoNavigationBar(middle: Text('Page 1')),
+                  child: Container(),
+                );
+              },
+            );
+          }
+          return CupertinoSheetRoute<void>(
+            builder: (BuildContext context) {
+              return CupertinoPageScaffold(
+                navigationBar: CupertinoNavigationBar(middle: Text('Page: ${settings.name}')),
+                child: Container(),
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Page: /next'), findsOneWidget);
+  });
+
   group('drag dismiss gesture', () {
     Widget dragGestureApp(GlobalKey homeScaffoldKey, GlobalKey sheetScaffoldKey) {
       return CupertinoApp(
