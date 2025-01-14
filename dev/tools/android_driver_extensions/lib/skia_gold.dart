@@ -46,6 +46,12 @@ Future<void> enableSkiaGoldComparator({String? namePrefix}) async {
       'Set it to use Skia Gold.',
     );
   }
+  if (namePrefix != null) {
+    assert(
+      !namePrefix.endsWith('.'),
+      'The namePrefix automatically has a suffix of ".", so remove the last character from "$namePrefix".',
+    );
+  }
   final io.Directory tmpDir = io.Directory.systemTemp.createTempSync('android_driver_test');
   final bool isPresubmit = io.Platform.environment.containsKey(_kGoldctlPresubmitKey);
   io.stderr.writeln(
