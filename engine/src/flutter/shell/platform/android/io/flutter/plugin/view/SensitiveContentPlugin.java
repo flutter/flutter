@@ -33,20 +33,20 @@ public class SensitiveContentPlugin
 
   /**
    * Sets content sensitivity level of the Android {@code View} with the specified {@code
-   * flutterViewId} to the level specified by {@contentSensitivity}.
+   * flutterViewId} to the level specified by {@requestedContentSensitivity}.
    */
   @Override
   public void setContentSensitivity(
       @NonNull int flutterViewId,
-      @NonNull int contentSensitivity,
+      @NonNull int requestedContentSensitivity,
       @NonNull MethodChannel.Result result) {
     final View flutterView = mflutterActivity.findViewById(flutterViewId);
     if (flutterView == null) {
-      result.error("error", "Requested Flutter View to set content sensitivty of not found.", null);
+      result.error("error", "Requested Flutter View with ID " + flutterViewId + " to set content sensitivty of was not found.", null);
     }
 
-    // Set contentSensitivity on the requested View.
-    flutterView.setContentSensitivity(contentSensitivity);
+    // Set requestedContentSensitivity on the requested View.
+    flutterView.setContentSensitivity(requestedContentSensitivity);
 
     // Invalidate the View to force a redraw if we require that the screen
     // become unobscured, which is the case where the View was previously
@@ -54,7 +54,7 @@ public class SensitiveContentPlugin
     final int currentContentSensitivity = flutterView.getContentSensitivity();
     final boolean shouldInvalidateView =
         currentContentSensitivity == View.CONTENT_SENSITIVITY_SENSITIVE
-            && contentSensitivity != View.CONTENT_SENSITIVITY_SENSITIVE;
+            && requestedContentSensitivity != View.CONTENT_SENSITIVITY_SENSITIVE;
     if (shouldInvalidateView) {
       flutterView.invalidate();
     }

@@ -218,8 +218,9 @@ import java.util.List;
     // TODO(mattcarroll): the PlatformPlugin needs to be reimagined because it implicitly takes
     //                    control of the entire window. This is unacceptable for non-fullscreen
     //                    use-cases.
-    platformPlugin = host.providePlatformPlugin(host.getActivity(), flutterEngine);
-    sensitiveContentPlugin = host.provideSensitiveContentPlugin(host.getActivity(), flutterEngine);
+    final Activity hostActivity = host.getActivity();
+    platformPlugin = host.providePlatformPlugin(hostActivity, flutterEngine);
+    sensitiveContentPlugin = host.provideSensitiveContentPlugin(hostActivity, flutterEngine);
 
     host.configureFlutterEngine(flutterEngine);
     isAttached = true;

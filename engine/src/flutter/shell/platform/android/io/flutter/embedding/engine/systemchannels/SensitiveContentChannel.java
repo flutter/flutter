@@ -29,9 +29,7 @@ public class SensitiveContentChannel {
         @Override
         public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
           if (sensitiveContentMethodHandler == null) {
-            Log.v(
-                TAG,
-                "No SensitiveContentChannel registered, call not forwarded to sensitive content API.");
+            // No SensitiveContentChannel registered, call not forwarded to sensitive content API.");
             return;
           }
           String method = call.method;
@@ -50,6 +48,9 @@ public class SensitiveContentChannel {
               }
               break;
             default:
+                Log.v(
+                TAG,
+                "Method " method + " is not implemented for the SensitiveContentChannel.");
               result.notImplemented();
               break;
           }
@@ -74,11 +75,11 @@ public class SensitiveContentChannel {
   public interface SensitiveContentMethodHandler {
     /**
      * Requests that the native Flutter Android {@code View} whose ID matches {@code flutterViewId}
-     * sets its contentsensitivity level to {@code contentSensitivity}.
+     * sets its contentsensitivity level to {@code requestedContentSensitivity}.
      */
     void setContentSensitivity(
         @NonNull int flutterViewId,
-        @NonNull int contentSensitivity,
+        @NonNull int requestedContentSensitivity,
         @NonNull MethodChannel.Result result);
   }
 }
