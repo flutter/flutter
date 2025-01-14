@@ -555,11 +555,11 @@ void main() {
         onGenerateRoute: (_) {
           return PageRouteBuilder<dynamic>(
             pageBuilder:
-                (_, __, ___) => Navigator(
+                (_, _, _) => Navigator(
                   observers: <NavigatorObserver>[nestedObserver],
                   onGenerateRoute: (RouteSettings settings) {
                     return PageRouteBuilder<dynamic>(
-                      pageBuilder: (BuildContext context, _, __) {
+                      pageBuilder: (BuildContext context, _, _) {
                         return ElevatedButton(
                           onPressed: () {
                             showLicensePage(context: context, applicationName: 'A');
@@ -595,11 +595,11 @@ void main() {
         onGenerateRoute: (_) {
           return PageRouteBuilder<dynamic>(
             pageBuilder:
-                (_, __, ___) => Navigator(
+                (_, _, _) => Navigator(
                   observers: <NavigatorObserver>[nestedObserver],
                   onGenerateRoute: (RouteSettings settings) {
                     return PageRouteBuilder<dynamic>(
-                      pageBuilder: (BuildContext context, _, __) {
+                      pageBuilder: (BuildContext context, _, _) {
                         return ElevatedButton(
                           onPressed: () {
                             showLicensePage(

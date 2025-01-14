@@ -304,7 +304,7 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
         if (_disposed) {
           // Add a listener since the delegate completer won't dispose if it never
           // had a listener.
-          value.addListener(ImageStreamListener((_, __) {}));
+          value.addListener(ImageStreamListener((_, _) {}));
           value.maybeDispose();
           return;
         }
