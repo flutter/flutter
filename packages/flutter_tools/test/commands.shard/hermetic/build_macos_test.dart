@@ -33,7 +33,12 @@ import '../../src/test_flutter_command_runner.dart';
 
 class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter {
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo> getInfo(
+    String projectPath, {
+    String? projectFilename,
+    Duration timeout = const Duration(minutes: 1),
+    int timeoutRetries = 1
+  }) async {
     return XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Profile', 'Release'], <String>[
       'Runner',
     ], BufferLogger.test());

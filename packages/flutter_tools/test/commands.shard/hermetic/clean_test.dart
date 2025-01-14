@@ -306,7 +306,12 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   Version version = Version(0, 0, 0);
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo> getInfo(
+    String projectPath, {
+    String? projectFilename,
+    Duration timeout = const Duration(minutes: 1),
+    int timeoutRetries = 1
+  }) async {
     return XcodeProjectInfo(const <String>[], const <String>[], <String>[
       'Runner',
       'custom-scheme',

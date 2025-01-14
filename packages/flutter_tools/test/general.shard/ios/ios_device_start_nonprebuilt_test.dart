@@ -1239,7 +1239,12 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   List<String> xcrunCommand() => <String>['xcrun'];
 
   @override
-  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async =>
+  Future<XcodeProjectInfo?> getInfo(
+    String projectPath, {
+    String? projectFilename,
+    Duration timeout = const Duration(minutes: 1),
+    int timeoutRetries = 1
+  }) async =>
       projectInfo;
 
   @override

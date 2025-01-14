@@ -3299,7 +3299,12 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   final bool throwErrorOnGetInfo;
 
   @override
-  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo?> getInfo(
+    String projectPath, {
+    String? projectFilename,
+    Duration timeout = const Duration(minutes: 1),
+    int timeoutRetries = 1
+  }) async {
     if (throwErrorOnGetInfo) {
       throwToolExit('Unable to get Xcode project information');
     }

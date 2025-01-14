@@ -387,7 +387,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
     String projectPath, {
     String? projectFilename,
     Duration timeout = const Duration(minutes: 1),
-    int timeoutRetries = 1,
+    int timeoutRetries = 1
   }) async {
     return XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>[
       'Runner',
