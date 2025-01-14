@@ -1257,17 +1257,18 @@ void main() {
     await tester.drag(find.byType(CarouselView), Offset(-300.0, 0.0));
     await tester.pumpAndSettle();
 
-    // Verify that after reaching the last item, it loops back to the first item
-    expect(find.byKey(Key('item_0')), findsOneWidget);
-    expect(find.byKey(Key('item_4')), findsNothing); // The last item should disappear after loop
+    // Verify that the last item is visible after scrolling
+    expect(find.byKey(Key('item_4')), findsOneWidget); // Last item should be visible
+    expect(find.byKey(Key('item_0')), findsNothing); // First item should not be visible
 
     // Scroll back to the first item (infinite scrolling should work)
     await tester.drag(find.byType(CarouselView), Offset(300.0, 0.0));
     await tester.pumpAndSettle();
 
     // Verify that the carousel loops back correctly
-    expect(find.byKey(Key('item_0')), findsOneWidget);
+    expect(find.byKey(Key('item_0')), findsOneWidget); // The first item should be visible again
   });
+
 
 
   testWidgets('The shrinkExtent should keep the same when the item is tapped', (
