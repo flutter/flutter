@@ -25,6 +25,7 @@ Future<void> main() async {
       final List<TaskResult> testResults = <TaskResult>[
         await _testInstallDebugPaidFlavor(projectDir),
         await _testInstallBogusFlavor(),
+        await _testFlavorsWhenBuildStartsWithXcode(projectDir),
       ];
 
       final TaskResult? firstInstallFailure = testResults.firstWhereOrNull(
@@ -94,6 +95,51 @@ Future<TaskResult> _testInstallBogusFlavor() async {
     print(stderrString);
     return TaskResult.failure('Should not succeed with bogus flavor');
   }
+
+  return TaskResult.success(null);
+}
+
+Future<TaskResult> _testFlavorsWhenBuildStartsWithXcode(String projectDir) async {
+  final String iosDirPath = '$projectDir/ios';
+
+  // Prebuild with --config-only to make sure that Cocoapods dependencies are installed.
+  await flutter('build', options: <String>['ios', '--config-only', '--flavor', 'paid']);
+
+  await inDirectory(iosDirPath, () async {
+    await exec('xcodebuild', <String>[
+      'clean',
+      'build',
+      '-workspace',
+      'Runner.xcworkspace',
+      '-scheme paid',
+      '-derivedDataPath',
+      'build',
+      '-destination',
+      '"generic/platform=iOS Simulator"',
+      'CODE_SIGNING_ALLOWED=NO',
+      'CODE_SIGNING_REQUIRED=NO',
+      'CODE_SIGNING_IDENTITY=""',
+    ]);
+  });
+
+  final String appPath = '$iosDirPath/build/Build/Products/Debug-Paid-iphonesimulator/Paid App.app';
+
+  // Verify app exists before proceeding
+  if (!File(appPath).existsSync()) {
+    return TaskResult.failure('Built app not found at expected path: $appPath');
+  }
+
+  final Device device = await devices.workingDevice;
+  await device.unlock();
+  await flutter(
+    'drive',
+    options: <String>[
+      '--use-application-binary="$appPath"',
+      '--driver=test_driver/main_test.dart',
+      '--device-id',
+      device.deviceId,
+    ],
+  );
 
   return TaskResult.success(null);
 }

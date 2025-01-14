@@ -285,6 +285,16 @@ class AssembleCommand extends FlutterCommand {
 
     final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
     final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
+    if (results.containsKey(kFlavor) && results[kFlavor]!.isNotEmpty) {
+      final String flavorName = results[kFlavor]!.trim().toLowerCase();
+      // Use "insert" at the beginning of the list instead of "add" at the end to avoid issues
+      // with empty definitions in Xcode builds that can corrupt the encoded string and prevent
+      // FLAVOR from being properly defined.
+      dartDefines.insert(
+        0,
+        utf8.encoder.fuse(base64.encoder).convert('FLUTTER_APP_FLAVOR=$flavorName'),
+      );
+    }
     if (dartDefines.isNotEmpty) {
       results[kDartDefines] = dartDefines.join(',');
     }
