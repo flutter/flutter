@@ -1161,7 +1161,6 @@ class _DayState extends State<_Day> {
 
     return dayWidget;
   }
-
   @override
   void dispose() {
     _statesController.dispose();
