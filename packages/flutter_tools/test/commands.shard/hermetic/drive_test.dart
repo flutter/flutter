@@ -588,6 +588,32 @@ void main() {
       DeviceManager: () => fakeDeviceManager,
     },
   );
+
+  testUsingContext('flutter drive --help explains how to use the command', () async {
+    final DriveCommand command = DriveCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      signals: signals,
+    );
+
+    // TODO(matanlurey): https://github.com/flutter/flutter/issues/158532.
+    final StringBuffer printOutput = StringBuffer();
+    final Zone capturePrintZone = Zone.current.fork(
+      specification: ZoneSpecification(
+        print: (_, _, _, String line) {
+          printOutput.writeln(line);
+        },
+      ),
+    );
+    await capturePrintZone.run(() async {
+      await createTestCommandRunner(command).run(<String>['drive', '--help']);
+    });
+    expect(
+      printOutput.toString(),
+      stringContainsInOrder(<String>['flutter drive', '--target', '--driver']),
+    );
+  });
 }
 
 class ThrowingScreenshotDevice extends ScreenshotDevice {
@@ -617,6 +643,9 @@ class ScreenshotDevice extends Fake implements Device {
 
   @override
   final String name = 'FakeDevice';
+
+  @override
+  String get displayName => name;
 
   @override
   final Category category = Category.mobile;
@@ -699,7 +728,6 @@ class NeverEndingDriverService extends Fake implements DriverService {
   Future<int> startTest(
     String testFile,
     List<String> arguments,
-    Map<String, String> environment,
     PackageConfig packageConfig, {
     bool? headless,
     String? chromeBinary,
@@ -733,7 +761,6 @@ class FailingFakeDriverService extends Fake implements DriverService {
   Future<int> startTest(
     String testFile,
     List<String> arguments,
-    Map<String, String> environment,
     PackageConfig packageConfig, {
     bool? headless,
     String? chromeBinary,
