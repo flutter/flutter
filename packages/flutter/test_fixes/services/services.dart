@@ -44,6 +44,6 @@ void main() {
   await SystemChrome.setEnabledSystemUIOverlays(error: '');
 
   // https://github.com/flutter/flutter/pull/161518
-  final cause = SelectionChangedCause.scribble;
+  final SelectionChangedCause cause = SelectionChangedCause.scribble;
   print(cause);
 }
