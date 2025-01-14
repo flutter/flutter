@@ -267,5 +267,6 @@ impeller_component("entity_unittests") {
     "../playground:playground_test",
     "//flutter/display_list/testing:display_list_testing",
     "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
+    "//flutter/third_party/txt",
   ]
 }
