@@ -1341,7 +1341,8 @@ class _TextFieldState extends State<TextField>
       return false;
     }
 
-    if (cause == SelectionChangedCause.longPress || cause == SelectionChangedCause.stylusHandwriting) {
+    if (cause == SelectionChangedCause.longPress ||
+        cause == SelectionChangedCause.stylusHandwriting) {
       return true;
     }
 
