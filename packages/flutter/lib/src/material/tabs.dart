@@ -649,7 +649,7 @@ class _IndicatorPainter extends CustomPainter {
 
     final double index = controller.index.toDouble();
     final double value = controller.animation!.value;
-    late double tabChangeProgress;
+    final double tabChangeProgress;
 
     if (controller.indexIsChanging) {
       double progressLeft = (index - value).abs();
