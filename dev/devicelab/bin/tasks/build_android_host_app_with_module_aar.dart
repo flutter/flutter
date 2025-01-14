@@ -41,6 +41,8 @@ class ModuleTest {
 
   static const String buildTarget = 'module-gradle';
   final String gradleVersion;
+  final StringBuffer stdout = StringBuffer();
+  final StringBuffer stderr = StringBuffer();
 
   Future<TaskResult> call() async {
     section('Running: $buildTarget-$gradleVersion');
@@ -61,6 +63,8 @@ class ModuleTest {
         await flutter(
           'create',
           options: <String>['--org', 'io.flutter.devicelab', '--template=module', 'hello'],
+          output: stdout,
+          stderr: stderr,
         );
       });
 
@@ -69,6 +73,8 @@ class ModuleTest {
       await flutter(
         'config',
         options: <String>['--enable-native-assets'],
+        output: stdout,
+        stderr: stderr,
       );
 
       const String ffiPackageName = 'ffi_package';
@@ -87,6 +93,8 @@ class ModuleTest {
         await flutter(
           'packages',
           options: <String>['get'],
+          output: stdout,
+          stderr: stderr,
         );
       });
 
@@ -127,6 +135,8 @@ class ModuleTest {
         await flutter(
           'packages',
           options: <String>['get'],
+          output: stdout,
+          stderr: stderr,
         );
       });
 
@@ -162,6 +172,8 @@ class ModuleTest {
         await flutter(
           'build',
           options: <String>['apk'],
+          output: stdout,
+          stderr: stderr,
         );
       });
 
@@ -182,7 +194,11 @@ class ModuleTest {
       section('Clean build');
 
       await inDirectory(projectDir, () async {
-        await flutter('clean');
+        await flutter(
+          'clean',
+          output: stdout,
+          stderr: stderr,
+        );
       });
 
       section('Make Android host app editable');
@@ -191,6 +207,8 @@ class ModuleTest {
         await flutter(
           'make-host-app-editable',
           options: <String>['android'],
+          output: stdout,
+          stderr: stderr,
         );
       });
 
@@ -200,6 +218,8 @@ class ModuleTest {
         await flutter(
           'build',
           options: <String>['apk'],
+          output: stdout,
+          stderr: stderr,
         );
       });
 
@@ -433,6 +453,12 @@ class ModuleTest {
       print('\nread-only.txt file access modes = $modes');
       if (modes.compareTo(fileReadWriteMode) != 0) {
         return TaskResult.failure('Failed to make assets user-readable and writable');
+      }
+
+      section('Check for specific log errors.');
+      final String finalStderr = stderr.toString();
+      if (finalStderr.contains("You are applying Flutter's main Gradle plugin imperatively")) {
+        return TaskResult.failure('Applied the Flutter Gradle Plugin imperatively');
       }
 
       return TaskResult.success(null);
