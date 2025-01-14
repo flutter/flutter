@@ -11,7 +11,6 @@
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/sampler_descriptor.h"
-#include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/point.h"
@@ -75,15 +74,15 @@ void TextContents::SetTextProperties(Color color,
   }
 }
 
-namespace {
-void Foo(VS::PerVertexData* vtx_contents,
-         const std::shared_ptr<TextFrame>& frame,
-         Scalar scale,
-         const Matrix& entity_transform,
-         const Matrix& basis_transform,
-         Vector2 offset,
-         std::optional<GlyphProperties> glyph_properties,
-         const std::shared_ptr<GlyphAtlas>& atlas) {
+void TextContents::ComputeVertexData(
+    VS::PerVertexData* vtx_contents,
+    const std::shared_ptr<TextFrame>& frame,
+    Scalar scale,
+    const Matrix& entity_transform,
+    const Matrix& basis_transform,
+    Vector2 offset,
+    std::optional<GlyphProperties> glyph_properties,
+    const std::shared_ptr<GlyphAtlas>& atlas) {
   // Common vertex information for all glyphs.
   // All glyphs are given the same vertex information in the form of a
   // unit-sized quad. The size of the glyph is specified in per instance data
@@ -197,7 +196,6 @@ void Foo(VS::PerVertexData* vtx_contents,
     }
   }
 }
-}  // namespace
 
 bool TextContents::Render(const ContentContext& renderer,
                           const Entity& entity,
@@ -282,9 +280,10 @@ bool TextContents::Render(const ContentContext& renderer,
       [&](uint8_t* contents) {
         VS::PerVertexData* vtx_contents =
             reinterpret_cast<VS::PerVertexData*>(contents);
-        Foo(vtx_contents, frame_, scale_, /*entity_transform=*/entity_transform,
-            /*basis_transform=*/basis_transform, offset_, GetGlyphProperties(),
-            atlas);
+        ComputeVertexData(vtx_contents, frame_, scale_,
+                          /*entity_transform=*/entity_transform,
+                          /*basis_transform=*/basis_transform, offset_,
+                          GetGlyphProperties(), atlas);
       });
 
   pass.SetVertexBuffer(std::move(buffer_view));
