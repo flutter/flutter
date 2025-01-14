@@ -11,40 +11,40 @@ import 'system_channels.dart';
 
 /// The level of sensitivity that content in a particular Flutter view
 /// contains.
-/// 
+///
 /// * See [SensitiveContent] for how to set a [ContentSensitivity] level
 ///   in order for sensitive content to be obscured when the Flutter screen
-///   is shared. 
+///   is shared.
 enum ContentSensitivity {
   /// Content sensitivity is auto-detected by the native framework.
-  /// 
+  ///
   /// When this level is set via a [SensitiveContent] widget, the window
-  /// hosting the screen will only be marked as secure if other [SensitiveContent]
-  /// widgets with the [sensitive] level are present in the widget tree.
-  /// 
-  /// For Android, the sensitive content is unable to be auto-detected by the
+  /// hosting the screen will only be marked as sensitive if other [SensitiveContent]
+  /// widgets in the Flutter app with the [sensitive] level are present in the widget tree.
+  ///
+  /// The sensitive content is unable to be auto-detected by the
   /// native framework.
   // TODO(camsim99): Implement `autoSensitive` mode that matches the behavior
   // of `CONTENT_SENSITIVITY_AUTO` on Android that has implemented based on autofill hints.
   // See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_AUTO.
   autoSensitive,
-  
+
   /// The view displays sensitive content.
-  /// 
-  /// When this level is set via a [SensitiveContent] widget, the window
-  /// hosting the screen will be marked as secure during an active media
+  ///
+  /// When this level is set via a [SensitiveContent] widget, the windowx
+  /// hosting the screen will be marked as sensitive during an active media
   /// projection session.
-  /// 
-  /// For Android, see https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_NOT_SENSITIVE.
+  ///
+  /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_SENSITIVE.
   sensitive,
 
   /// The view does not display sensitive content.
-  /// 
+  ///
   /// When this level is set via a [SensitiveContent] widget, the window
-  /// hosting the screen will only be marked as secure if other [SensitiveContent]
-  /// widgets with the [sensitive] level are present in the widget tree.
-  /// 
-  /// For Android, see https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_NOT_SENSITIVE.
+  /// hosting the screen will only be marked as sensitive if other [SensitiveContent]
+  /// widgets in the Flutter app with the [sensitive] level are present in the widget tree.
+  ///
+  /// See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_NOT_SENSITIVE.
   notSensitive,
 }
 
@@ -73,7 +73,7 @@ class SensitiveContentService {
       // Content sensitivity failed to be set.
       throw FlutterError(
         'Content sensitivity failed to be set. Please ensure that the '
-        'flutterViewId set corresponds to a valid Android Flutter view '
+        'flutterViewId $flutterViewId corresponds to a valid Android Flutter view '
         'or Fragment.'
       );
     }

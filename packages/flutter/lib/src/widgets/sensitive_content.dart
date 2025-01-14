@@ -15,7 +15,7 @@ class ViewContentSensitivityState {
 
   /// The current [ContentSensitivity] level set for the Flutter view that this
   /// state represents.
-  /// 
+  ///
   /// By default, this level is [ContentSensitivity.autoSensitive] because this
   /// is the default level on Android and this feature is currently only
   /// supported for Android.
@@ -35,7 +35,7 @@ class ViewContentSensitivityState {
   }
 
   /// Decreases the count of [SensitiveContent] widgets with [sensitivityLevel] set.
-  void removeWidgetWithContentSensitivity(ContentSensitivity sensitivityLevel) { 
+  void removeWidgetWithContentSensitivity(ContentSensitivity sensitivityLevel) {
     contentSensitivityCounts[sensitivityLevel] = contentSensitivityCounts[sensitivityLevel]! - 1;
   }
 
@@ -70,7 +70,6 @@ class SensitiveContentSetting {
     final ViewContentSensitivityState contentSensitivityStateForView = _contentSensitivityStates[viewId]!;
     contentSensitivityStateForView.addWidgetWithContentSensitivity(desiredSensitivityLevel);
 
-
     // If only one SensitiveContent widget in the relevant view sets a
     // ContentSensitivity level, then we can immediately set
     // desiredSensitivityLevel for the view.
@@ -82,7 +81,7 @@ class SensitiveContentSetting {
     }
 
     // Verify that desiredSensitivityLevel should be set in order for sensitive
-    // content in the view to remain secure.
+    // content in the view to remain obscured.
     if (!shouldSetContentSensitivity(currentSensitivityLevel: contentSensitivityStateForView.currentContentSensitivitySetting, desiredSensitivityLevel: desiredSensitivityLevel)) {
       return;
     }
@@ -183,7 +182,7 @@ class SensitiveContent extends StatefulWidget {
   });
 
   /// The ID of the Flutter view that [sensitivityLevel] should be set for.
-  /// 
+  ///
   /// By default, this is 0. On Android, this is the the ID of the native
   /// `View` that is created by the default `FlutterActivity`, which is used by
   /// default in Flutter Android apps.
@@ -197,7 +196,7 @@ class SensitiveContent extends StatefulWidget {
   /// If the [sensitivityLevel] is set to [ContentSensitivity.sensitive], then
   /// the entire screen will be obscured when the screen is projected regardless
   /// of the parent/child widgets.
-  /// 
+  ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
