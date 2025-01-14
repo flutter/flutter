@@ -49,9 +49,9 @@ class ForcePressDetails extends PositionedGestureDetails {
   /// [GestureForcePressPeakCallback] or [GestureForcePressEndCallback].
   const ForcePressDetails({
     required super.globalPosition,
-    super.localPosition,
+    Offset? localPosition,
     required this.pressure,
-  });
+  }) : super(localPosition: localPosition ?? globalPosition);
 
   /// The pressure of the pointer on the screen.
   final double pressure;

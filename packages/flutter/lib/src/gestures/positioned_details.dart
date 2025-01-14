@@ -31,12 +31,9 @@ import 'package:flutter/foundation.dart'
 /// ```
 abstract class PositionedGestureDetails with Diagnosticable {
   /// Creates details with positions.
-  const PositionedGestureDetails({required this.globalPosition, Offset? localPosition})
-    : localPosition = localPosition ?? globalPosition;
+  const PositionedGestureDetails({required this.globalPosition, required this.localPosition});
 
   /// The global position at which the pointer interacts with the screen.
-  ///
-  /// Defaults to the origin if not specified in the constructor.
   ///
   /// See also:
   ///
@@ -46,11 +43,6 @@ abstract class PositionedGestureDetails with Diagnosticable {
 
   /// The local position in the coordinate system of the event receiver at
   /// which the pointer interacts with the screen.
-  ///  * For *start details, interact means contacting the screen.
-  ///  * For *update details, interact means moving on the screen.
-  ///  * For *end details, interact means lifted from the screen.
-  ///
-  /// Defaults to [globalPosition] if not specified in the constructor.
   final Offset localPosition;
 
   @override

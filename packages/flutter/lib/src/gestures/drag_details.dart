@@ -24,7 +24,8 @@ export 'velocity_tracker.dart' show Velocity;
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
 class DragDownDetails extends PositionedGestureDetails {
   /// Creates details for a [GestureDragDownCallback].
-  const DragDownDetails({super.globalPosition = Offset.zero, super.localPosition});
+  const DragDownDetails({super.globalPosition = Offset.zero, Offset? localPosition})
+    : super(localPosition: localPosition ?? globalPosition);
 }
 
 /// Signature for when a pointer has contacted the screen and might begin to
@@ -47,10 +48,10 @@ class DragStartDetails extends PositionedGestureDetails {
   /// Creates details for a [GestureDragStartCallback].
   const DragStartDetails({
     super.globalPosition = Offset.zero,
-    super.localPosition,
+    Offset? localPosition,
     this.sourceTimeStamp,
     this.kind,
-  });
+  }) : super(localPosition: localPosition ?? globalPosition);
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -98,7 +99,7 @@ class DragUpdateDetails extends PositionedGestureDetails {
   /// coordinates of [delta] and the other coordinate must be zero.
   DragUpdateDetails({
     required super.globalPosition,
-    super.localPosition,
+    Offset? localPosition,
     this.sourceTimeStamp,
     this.delta = Offset.zero,
     this.primaryDelta,
@@ -106,7 +107,8 @@ class DragUpdateDetails extends PositionedGestureDetails {
          primaryDelta == null ||
              (primaryDelta == delta.dx && delta.dy == 0.0) ||
              (primaryDelta == delta.dy && delta.dx == 0.0),
-       );
+       ),
+       super(localPosition: localPosition ?? globalPosition);
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -173,14 +175,15 @@ class DragEndDetails extends PositionedGestureDetails {
   /// must be zero.
   DragEndDetails({
     super.globalPosition = Offset.zero,
-    super.localPosition,
+    Offset? localPosition,
     this.velocity = Velocity.zero,
     this.primaryVelocity,
   }) : assert(
          primaryVelocity == null ||
              (primaryVelocity == velocity.pixelsPerSecond.dx && velocity.pixelsPerSecond.dy == 0) ||
              (primaryVelocity == velocity.pixelsPerSecond.dy && velocity.pixelsPerSecond.dx == 0),
-       );
+       ),
+       super(localPosition: localPosition ?? globalPosition);
 
   /// The velocity the pointer was moving when it stopped contacting the screen.
   ///

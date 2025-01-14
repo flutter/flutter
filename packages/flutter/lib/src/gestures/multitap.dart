@@ -624,11 +624,12 @@ class SerialTapDownDetails extends PositionedGestureDetails {
   /// The `count` argument must be greater than zero.
   const SerialTapDownDetails({
     super.globalPosition = Offset.zero,
-    super.localPosition,
+    Offset? localPosition,
     required this.kind,
     this.buttons = 0,
     this.count = 1,
-  }) : assert(count > 0);
+  }) : assert(count > 0),
+       super(localPosition: localPosition ?? globalPosition);
 
   /// The kind of the device that initiated the event.
   final PointerDeviceKind kind;
@@ -711,10 +712,11 @@ class SerialTapUpDetails extends PositionedGestureDetails {
   /// The `count` argument must be greater than zero.
   const SerialTapUpDetails({
     super.globalPosition = Offset.zero,
-    super.localPosition,
+    Offset? localPosition,
     this.kind,
     this.count = 1,
-  }) : assert(count > 0);
+  }) : assert(count > 0),
+       super(localPosition: localPosition ?? globalPosition);
 
   /// The kind of the device that initiated the event.
   final PointerDeviceKind? kind;

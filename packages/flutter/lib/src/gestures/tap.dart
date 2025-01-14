@@ -31,7 +31,8 @@ export 'events.dart' show PointerCancelEvent, PointerDownEvent, PointerEvent, Po
 ///  * [TapGestureRecognizer], which passes this information to one of its callbacks.
 class TapDownDetails extends PositionedGestureDetails {
   /// Creates details for a [GestureTapDownCallback].
-  const TapDownDetails({super.globalPosition = Offset.zero, super.localPosition, this.kind});
+  const TapDownDetails({super.globalPosition = Offset.zero, Offset? localPosition, this.kind})
+    : super(localPosition: localPosition ?? globalPosition);
 
   /// The kind of the device that initiated the event.
   final PointerDeviceKind? kind;
@@ -65,7 +66,11 @@ typedef GestureTapDownCallback = void Function(TapDownDetails details);
 ///  * [TapGestureRecognizer], which passes this information to one of its callbacks.
 class TapUpDetails extends PositionedGestureDetails {
   /// Creates a [TapUpDetails] data object.
-  const TapUpDetails({required this.kind, super.globalPosition = Offset.zero, super.localPosition});
+  const TapUpDetails({
+    required this.kind,
+    super.globalPosition = Offset.zero,
+    Offset? localPosition,
+  }) : super(localPosition: localPosition ?? globalPosition);
 
   /// The kind of the device that initiated the event.
   final PointerDeviceKind kind;

@@ -326,7 +326,7 @@ class TapDragEndDetails extends PositionedGestureDetails {
   /// Creates details for a [GestureTapDragEndCallback].
   TapDragEndDetails({
     super.globalPosition = Offset.zero,
-    super.localPosition,
+    Offset? localPosition,
     this.velocity = Velocity.zero,
     this.primaryVelocity,
     required this.consecutiveTapCount,
@@ -334,7 +334,8 @@ class TapDragEndDetails extends PositionedGestureDetails {
          primaryVelocity == null ||
              primaryVelocity == velocity.pixelsPerSecond.dx ||
              primaryVelocity == velocity.pixelsPerSecond.dy,
-       );
+       ),
+       super(localPosition: localPosition ?? globalPosition);
 
   /// The velocity the pointer was moving when it stopped contacting the screen.
   ///

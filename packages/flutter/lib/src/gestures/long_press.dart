@@ -115,7 +115,8 @@ class LongPressDownDetails extends PositionedGestureDetails {
   ///
   /// If the `localPosition` argument is not specified, it will default to the
   /// global position.
-  const LongPressDownDetails({super.globalPosition = Offset.zero, super.localPosition, this.kind});
+  const LongPressDownDetails({super.globalPosition = Offset.zero, Offset? localPosition, this.kind})
+    : super(localPosition: localPosition ?? globalPosition);
 
   /// The kind of the device that initiated the event.
   final PointerDeviceKind? kind;
@@ -136,7 +137,8 @@ class LongPressDownDetails extends PositionedGestureDetails {
 ///  * [LongPressEndDetails], the details for [GestureLongPressEndCallback].
 class LongPressStartDetails extends PositionedGestureDetails {
   /// Creates the details for a [GestureLongPressStartCallback].
-  const LongPressStartDetails({super.globalPosition = Offset.zero, super.localPosition});
+  const LongPressStartDetails({super.globalPosition = Offset.zero, Offset? localPosition})
+    : super(localPosition: localPosition ?? globalPosition);
 }
 
 /// Details for callbacks that use [GestureLongPressMoveUpdateCallback].
@@ -150,10 +152,11 @@ class LongPressMoveUpdateDetails extends PositionedGestureDetails {
   /// Creates the details for a [GestureLongPressMoveUpdateCallback].
   const LongPressMoveUpdateDetails({
     super.globalPosition = Offset.zero,
-    super.localPosition,
+    Offset? localPosition,
     this.offsetFromOrigin = Offset.zero,
     Offset? localOffsetFromOrigin,
-  }) : localOffsetFromOrigin = localOffsetFromOrigin ?? offsetFromOrigin;
+  }) : localOffsetFromOrigin = localOffsetFromOrigin ?? offsetFromOrigin,
+       super(localPosition: localPosition ?? globalPosition);
 
   /// A delta offset from the point where the long press drag initially contacted
   /// the screen to the point where the pointer is currently located (the
@@ -184,9 +187,9 @@ class LongPressEndDetails extends PositionedGestureDetails {
   /// Creates the details for a [GestureLongPressEndCallback].
   const LongPressEndDetails({
     super.globalPosition = Offset.zero,
-    super.localPosition,
+    Offset? localPosition,
     this.velocity = Velocity.zero,
-  });
+  }) : super(localPosition: localPosition ?? globalPosition);
 
   /// The pointer's velocity when it stopped contacting the screen.
   ///
