@@ -5000,7 +5000,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           (parentData?.mergeIntoParent ?? false) ||
           configProvider.effective.isMergingSemanticsOfDescendants,
       blocksUserActions: blocksUserAction,
-      explicitChildNodes: explicitChildNodesForChildren,
+      // It is possible the childConfigurationsDelegate may produce Incomplete
+      // fragments, in that case we can't force them to form a node.
+      explicitChildNodes: explicitChildNodesForChildren && !hasChildConfigurationsDelegate,
       tagsForChildren: tagsForChildren,
     );
     for (final _RenderObjectSemantics childSemantics in _getNonBlockedChildren()) {
@@ -5025,7 +5027,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     }
     _containsIncompleteFragment = false;
     assert(childConfigurationsDelegate != null || configToFragment.isEmpty);
-    if (!explicitChildNodesForChildren && hasChildConfigurationsDelegate) {
+    if (hasChildConfigurationsDelegate) {
       final ChildSemanticsConfigurationsResult result = childConfigurationsDelegate(
         childConfigurations,
       );
@@ -5537,7 +5539,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return _childrenAndElevationAdjustments.keys
+    return _getNonBlockedChildren()
         .map<DiagnosticsNode>((_RenderObjectSemantics child) => child.toDiagnosticsNode())
         .toList();
   }
