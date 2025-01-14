@@ -449,7 +449,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
 ///     `CupertinoSheetRoute`, with optional nested navigation built in.
 class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTransitionMixin<T> {
   /// Creates a page route that displays an iOS styled sheet.
-  CupertinoSheetRoute({required this.builder});
+  CupertinoSheetRoute({super.settings, required this.builder});
 
   /// Builds the primary contents of the sheet route.
   final WidgetBuilder builder;
