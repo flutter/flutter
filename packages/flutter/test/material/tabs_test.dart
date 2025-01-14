@@ -6347,7 +6347,7 @@ void main() {
                             : null,
                   ),
                   body: LayoutBuilder(
-                    builder: (_, __) {
+                    builder: (_, _) {
                       return tabTextContent.isNotEmpty
                           ? TabBarView(
                             children:

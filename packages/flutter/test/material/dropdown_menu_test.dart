@@ -2858,7 +2858,7 @@ void main() {
     ); // Because "Unread" contains "read".
 
     // Test custom search algorithm.
-    await tester.pumpWidget(dropdownMenu(searchCallback: (_, __) => 0));
+    await tester.pumpWidget(dropdownMenu(searchCallback: (_, _) => 0));
     await tester.pump();
     await tester.enterText(find.byType(TextField), 'read');
     await tester.pump();

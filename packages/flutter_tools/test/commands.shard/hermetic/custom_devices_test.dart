@@ -923,7 +923,7 @@ void main() {
       config.add(CustomDeviceConfig.exampleUnix.copyWith(id: 'testid'));
 
       final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-        config: (_, __) => config,
+        config: (_, _) => config,
         fileSystem: fs,
         featureEnabled: true,
       );
