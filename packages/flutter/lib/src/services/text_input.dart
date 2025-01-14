@@ -1103,7 +1103,7 @@ enum SelectionChangedCause {
   /// or on Android API 34+ via the Scribe feature.
   @Deprecated(
     'Use stylusHandwriting instead. '
-    'This feature was deprecated after v3.28.0-0.1.pre.'
+    'This feature was deprecated after v3.28.0-0.1.pre.',
   )
   scribble,
 
