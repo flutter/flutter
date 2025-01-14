@@ -37,7 +37,7 @@ TEST(TextContentsTest, SimpleComputeVertexData) {
   GlyphAtlasPipeline::VertexShader::PerVertexData data[6];
 
   std::shared_ptr<TextFrame> text_frame =
-      MakeTextFrame("A", "Roboto-Regular.ttf", /*font_size=*/50);
+      MakeTextFrame("1", "ahem.ttf", /*font_size=*/50);
 
   TextureDescriptor texture_descriptor;
   texture_descriptor.size = ISize(1024, 1024);
@@ -58,6 +58,36 @@ TEST(TextContentsTest, SimpleComputeVertexData) {
       data, text_frame, /*scale=*/1.0, /*entity_transform=*/Matrix(),
       /*basis_transform=*/Matrix(), /*offset=*/Vector2(0, 0),
       /*glyph_properties=*/std::nullopt, atlas);
+
+  EXPECT_NEAR(data[0].uv.x * texture_descriptor.size.width, -0.5, 0.001);
+  EXPECT_NEAR(data[0].uv.y * texture_descriptor.size.height, -0.5, 0.001);
+  EXPECT_NEAR(data[0].position.x, -1.0, 0.001);
+  EXPECT_NEAR(data[0].position.y, -41.0, 0.001);
+
+  EXPECT_NEAR(data[1].uv.x * texture_descriptor.size.width, 0.5, 0.001);
+  EXPECT_NEAR(data[1].uv.y * texture_descriptor.size.height, -0.5, 0.001);
+  EXPECT_NEAR(data[1].position.x, 51.0, 0.001);
+  EXPECT_NEAR(data[1].position.y, -41.0, 0.001);
+
+  EXPECT_NEAR(data[2].uv.x * texture_descriptor.size.width, -0.5, 0.001);
+  EXPECT_NEAR(data[2].uv.y * texture_descriptor.size.height, 0.5, 0.001);
+  EXPECT_NEAR(data[2].position.x, -1.0, 0.001);
+  EXPECT_NEAR(data[2].position.y, 11.0, 0.001);
+
+  EXPECT_NEAR(data[3].uv.x * texture_descriptor.size.width, 0.5, 0.001);
+  EXPECT_NEAR(data[3].uv.y * texture_descriptor.size.height, -0.5, 0.001);
+  EXPECT_NEAR(data[3].position.x, 51.0, 0.001);
+  EXPECT_NEAR(data[3].position.y, -41.0, 0.001);
+
+  EXPECT_NEAR(data[4].uv.x * texture_descriptor.size.width, -0.5, 0.001);
+  EXPECT_NEAR(data[4].uv.y * texture_descriptor.size.height, 0.5, 0.001);
+  EXPECT_NEAR(data[4].position.x, -1.0, 0.001);
+  EXPECT_NEAR(data[4].position.y, 11.0, 0.001);
+
+  EXPECT_NEAR(data[5].uv.x * texture_descriptor.size.width, 0.5, 0.001);
+  EXPECT_NEAR(data[5].uv.y * texture_descriptor.size.height, 0.5, 0.001);
+  EXPECT_NEAR(data[5].position.x, 51.0, 0.001);
+  EXPECT_NEAR(data[5].position.y, 11.0, 0.001);
 }
 
 }  // namespace testing
