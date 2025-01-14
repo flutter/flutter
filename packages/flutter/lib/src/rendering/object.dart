@@ -4702,6 +4702,9 @@ class _IncompleteSemanticsFragment extends _SemanticsFragment {
   }
 }
 
+typedef _MergeUpAndSiblingMergeGroups =
+    (List<_SemanticsFragment> mergeUp, List<List<_SemanticsFragment>> siblingMergeGroups);
+
 /// A wrapper class for a [RenderObject] that provides semantics related
 /// properties and compilations.
 ///
@@ -4983,13 +4986,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         // propagate to children if this node doesn't
         // contribute to semantics tree
         (!contributesToSemanticsTree && (parentData?.explicitChildNodes ?? true));
-    final List<SemanticsConfiguration> childConfigurations = <SemanticsConfiguration>[];
-    final ChildSemanticsConfigurationsDelegate? childConfigurationsDelegate =
-        configProvider.effective.childConfigurationsDelegate;
-    final bool hasChildConfigurationsDelegate = childConfigurationsDelegate != null;
-    final Map<SemanticsConfiguration, _SemanticsFragment> configToFragment =
-        <SemanticsConfiguration, _SemanticsFragment>{};
-    final List<_SemanticsFragment> children = <_SemanticsFragment>[];
+
     final bool blocksUserAction =
         (parentData?.blocksUserActions ?? false) || configProvider.effective.isBlockingUserActions;
     siblingMergeGroups.clear();
@@ -5000,62 +4997,17 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           (parentData?.mergeIntoParent ?? false) ||
           configProvider.effective.isMergingSemanticsOfDescendants,
       blocksUserActions: blocksUserAction,
-      // It is possible the childConfigurationsDelegate may produce Incomplete
-      // fragments, in that case we can't force them to form a node.
-      explicitChildNodes: explicitChildNodesForChildren && !hasChildConfigurationsDelegate,
+      explicitChildNodes: explicitChildNodesForChildren,
       tagsForChildren: tagsForChildren,
     );
-    for (final _RenderObjectSemantics childSemantics in _getNonBlockedChildren()) {
-      assert(!childSemantics.renderObject._needsLayout);
-      childSemantics._didUpdateParentData(childParentData);
-      for (final _SemanticsFragment fragment in childSemantics.mergeUp) {
-        if (hasChildConfigurationsDelegate && fragment.configToMergeUp != null) {
-          // This fragment need to go through delegate to determine whether it
-          // merge up or not.
-          childConfigurations.add(fragment.configToMergeUp!);
-          configToFragment[fragment.configToMergeUp!] = fragment;
-        } else {
-          children.add(fragment);
-        }
-      }
 
-      if (!childSemantics.contributesToSemanticsTree) {
-        // This child semantics needs to propagate sibling merge group to be
-        // compiled by parent that contributes to semantics tree.
-        siblingMergeGroups.addAll(childSemantics.siblingMergeGroups);
-      }
-    }
-    _containsIncompleteFragment = false;
-    assert(childConfigurationsDelegate != null || configToFragment.isEmpty);
-    if (hasChildConfigurationsDelegate) {
-      final ChildSemanticsConfigurationsResult result = childConfigurationsDelegate(
-        childConfigurations,
-      );
-      children.addAll(
-        result.mergeUp.map<_SemanticsFragment>((SemanticsConfiguration config) {
-          final _SemanticsFragment? fragment = configToFragment[config];
-          if (fragment != null) {
-            return fragment;
-          }
-          _containsIncompleteFragment = true;
-          return _IncompleteSemanticsFragment(config, this);
-        }),
-      );
-      for (final Iterable<SemanticsConfiguration> group in result.siblingMergeGroups) {
-        siblingMergeGroups.add(
-          group.map<_SemanticsFragment>((SemanticsConfiguration config) {
-            final _SemanticsFragment? fragment = configToFragment[config];
-            if (fragment != null) {
-              return fragment;
-            }
-            _containsIncompleteFragment = true;
-            return _IncompleteSemanticsFragment(config, this);
-          }).toList(),
-        );
-      }
-    }
+    final _MergeUpAndSiblingMergeGroups result = _collectChildMergeUpAndSiblingGroup(
+      childParentData,
+    );
 
-    mergeUp.addAll(children);
+    mergeUp.addAll(result.$1);
+    siblingMergeGroups.addAll(result.$2);
+
     if (contributesToSemanticsTree) {
       _marksConflictsInMergeGroup(mergeUp, isMergeUp: true);
       siblingMergeGroups.forEach(_marksConflictsInMergeGroup);
@@ -5072,7 +5024,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       mergeUp.clear();
       mergeUp.add(this);
       for (final _RenderObjectSemantics childSemantics
-          in children.whereType<_RenderObjectSemantics>()) {
+          in result.$1.whereType<_RenderObjectSemantics>()) {
         assert(childSemantics.contributesToSemanticsTree);
         if (childSemantics.shouldFormSemanticsNode) {
           _childrenAndElevationAdjustments[childSemantics] = 0.0;
@@ -5132,6 +5084,119 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       }
     }
     return result;
+  }
+
+  _MergeUpAndSiblingMergeGroups _collectChildMergeUpAndSiblingGroup(
+    _SemanticsParentData childParentData,
+  ) {
+    final List<_SemanticsFragment> mergeUp = <_SemanticsFragment>[];
+    final List<List<_SemanticsFragment>> siblingMergeGroups = <List<_SemanticsFragment>>[];
+
+    final List<SemanticsConfiguration> childConfigurations = <SemanticsConfiguration>[];
+    final ChildSemanticsConfigurationsDelegate? childConfigurationsDelegate =
+        configProvider.effective.childConfigurationsDelegate;
+    final bool hasChildConfigurationsDelegate = childConfigurationsDelegate != null;
+    final Map<SemanticsConfiguration, _SemanticsFragment> configToFragment =
+        <SemanticsConfiguration, _SemanticsFragment>{};
+
+    // It is possible the childConfigurationsDelegate may produce incomplete
+    // fragments. In this case this render object semantics need to absorb all
+    // the mergeUp from children before present itself to the parent to avoid
+    // the parent forcing incomplete fragments to form a node. This is done by
+    // _containsIncompleteFragment which in turns flips the
+    // contributesToSemanticsTree.
+    //
+    // The problem is we won't know whether it will generate incomplete
+    // fragments until it runs, but we have to decide whether to propagate the
+    // parent's explicitChildNodes before we collect child fragments.
+    //
+    // Therefore, we have to make an assumption now to assume it will generate
+    // incomplete fragment and not propagate explicitChildNodes.
+    final bool needsToMakeIncompleteFragmentAssumption =
+        hasChildConfigurationsDelegate && childParentData.explicitChildNodes;
+
+    final _SemanticsParentData effectiveChildParentData;
+    if (needsToMakeIncompleteFragmentAssumption) {
+      effectiveChildParentData = _SemanticsParentData(
+        mergeIntoParent: childParentData.mergeIntoParent,
+        blocksUserActions: childParentData.blocksUserActions,
+        // It is possible the childConfigurationsDelegate may produce Incomplete
+        // fragments, in that case we can't force them to form a node.
+        explicitChildNodes: false,
+        tagsForChildren: childParentData.tagsForChildren,
+      );
+    } else {
+      effectiveChildParentData = childParentData;
+    }
+    for (final _RenderObjectSemantics childSemantics in _getNonBlockedChildren()) {
+      assert(!childSemantics.renderObject._needsLayout);
+      childSemantics._didUpdateParentData(effectiveChildParentData);
+      for (final _SemanticsFragment fragment in childSemantics.mergeUp) {
+        if (hasChildConfigurationsDelegate && fragment.configToMergeUp != null) {
+          // This fragment need to go through delegate to determine whether it
+          // merge up or not.
+          childConfigurations.add(fragment.configToMergeUp!);
+          configToFragment[fragment.configToMergeUp!] = fragment;
+        } else {
+          mergeUp.add(fragment);
+        }
+      }
+
+      if (!childSemantics.contributesToSemanticsTree) {
+        // This child semantics needs to propagate sibling merge group to be
+        // compiled by parent that contributes to semantics tree.
+        siblingMergeGroups.addAll(childSemantics.siblingMergeGroups);
+      }
+    }
+    _containsIncompleteFragment = false;
+    assert(childConfigurationsDelegate != null || configToFragment.isEmpty);
+    if (hasChildConfigurationsDelegate) {
+      final ChildSemanticsConfigurationsResult result = childConfigurationsDelegate(
+        childConfigurations,
+      );
+      mergeUp.addAll(
+        result.mergeUp.map<_SemanticsFragment>((SemanticsConfiguration config) {
+          final _SemanticsFragment? fragment = configToFragment[config];
+          if (fragment != null) {
+            return fragment;
+          }
+          _containsIncompleteFragment = true;
+          return _IncompleteSemanticsFragment(config, this);
+        }),
+      );
+      for (final Iterable<SemanticsConfiguration> group in result.siblingMergeGroups) {
+        siblingMergeGroups.add(
+          group.map<_SemanticsFragment>((SemanticsConfiguration config) {
+            final _SemanticsFragment? fragment = configToFragment[config];
+            if (fragment != null) {
+              return fragment;
+            }
+            _containsIncompleteFragment = true;
+            return _IncompleteSemanticsFragment(config, this);
+          }).toList(),
+        );
+      }
+    }
+
+    if (!_containsIncompleteFragment && needsToMakeIncompleteFragmentAssumption) {
+      // Assumption was wrong, we have to re-update the child.
+      mergeUp.clear();
+      siblingMergeGroups.clear();
+
+      for (final _RenderObjectSemantics childSemantics in _getNonBlockedChildren()) {
+        assert(childParentData.explicitChildNodes);
+        childSemantics._didUpdateParentData(childParentData);
+        mergeUp.addAll(childSemantics.mergeUp);
+
+        if (!childSemantics.contributesToSemanticsTree) {
+          // This child semantics needs to propagate sibling merge group to be
+          // compiled by parent that contributes to semantics tree.
+          siblingMergeGroups.addAll(childSemantics.siblingMergeGroups);
+        }
+      }
+    }
+
+    return (mergeUp, siblingMergeGroups);
   }
 
   /// Makes whether this fragment has a sibling fragment with conflicting
