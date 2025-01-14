@@ -29,7 +29,8 @@
             "ninja": {
                 "config": "ci/host_debug_test",
                 "targets": [
-                    "flutter:unittests"
+                    "flutter:unittests",
+                    "flutter/build/archives:flutter_patched_sdk"
                 ]
             },
             "tests": [
@@ -73,7 +74,8 @@
             "ninja": {
                 "config": "ci/host_profile_test",
                 "targets": [
-                    "flutter:unittests"
+                    "flutter:unittests",
+                    "flutter/build/archives:flutter_patched_sdk",
                 ]
             }
         },
