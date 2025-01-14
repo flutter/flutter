@@ -50,11 +50,6 @@ $ flutter run lib/flutter_rendered_blue_rectangle_main.dart
 $ flutter drive lib/flutter_rendered_blue_rectangle_main.dart
 ```
 
-See also:
-
-- [Application](lib/flutter_rendered_blue_rectangle_main.dart)
-- [Test](test_driver/flutter_rendered_blue_rectangle_main_test.dart)
-
 ### `external_texture/surface_producer_smiley_face`
 
 This app displays a full screen rectangular deformed smiley face with a yellow
@@ -69,11 +64,6 @@ $ flutter run lib/external_texture/surface_producer_smiley_face_main.dart
 $ flutter drive lib/external_texture/surface_producer_smiley_face_main.dart
 ```
 
-Files of significance:
-
-- [Entrypoint](lib/external_texture/surface_producer_smiley_face_main.dart)
-- [Test](test_driver/external_texture/surface_producer_smiley_face_main_test.dart)
-
 ### `external_texture/surface_texture_smiley_face`
 
 This app displays a full screen rectangular deformed smiley face with a yellow
@@ -86,11 +76,6 @@ $ flutter run lib/external_texture/surface_texture_smiley_face_main.dart
 # Run the test
 $ flutter drive lib/external_texture/surface_texture_smiley_face_main.dart
 ```
-
-Files of significance:
-
-- [Entrypoint](lib/external_texture/surface_producer_smiley_face_main.dart)
-- [Test](test_driver/external_texture/surface_producer_smiley_face_main_test.dart)
 
 ### `platform_view/hybrid_composition_platform_view`
 
@@ -105,11 +90,6 @@ $ flutter run lib/platform_view/hybrid_composition_platform_view_main.dart
 $ flutter drive lib/platform_view/hybrid_composition_platform_view_main.dart
 ```
 
-Files of significance:
-
-- [Entrypoint](lib/platform_view/hybrid_composition_platform_view_main.dart)
-- [Test](test_driver/platform_view/hybrid_composition_platform_view_main_test.dart)
-
 ### `platform_view/texture_layer_hybrid_composition_platform_view`
 
 This app displays a blue orange gradient, the app is backgrounded, and then
@@ -122,11 +102,6 @@ $ flutter run lib/platform_view/texture_layer_hybrid_composition_platform_view_m
 # Run the test
 $ flutter drive lib/platform_view/texture_layer_hybrid_composition_platform_view_main.dart
 ```
-
-Files of significance:
-
-- [Entrypoint](lib/platform_view/texture_layer_hybrid_composition_platform_view_main.dart)
-- [Test](test_driver/platform_view/texture_layer_hybrid_composition_platform_view_main_test.dart)
 
 ### `platform_view/virtual_display_platform_view`
 
@@ -141,11 +116,6 @@ $ flutter run lib/platform_view/virtual_display_platform_view_main.dart
 $ flutter drive lib/platform_view/virtual_display_platform_view_main.dart
 ```
 
-Files of significance:
-
-- [Entrypoint](lib/platform_view/virtual_display_platform_view_main.dart)
-- [Test](test_driver/platform_view/virtual_display_platform_view_main_test.dart)
-
 ### `platform_view_tap_color_change`
 
 This app displays a blue rectangle, using platform views, which upon
@@ -159,13 +129,18 @@ $ flutter run lib/platform_view_tap_color_change_main.dart
 $ flutter drive lib/platform_view_tap_color_change_main_test.dart
 ```
 
-Files of significance:
+## Deflaking
 
-- [Entrypoint](lib/platform_view_tap_color_change_main.dart)
-- [Test](test_driver/platform_view_tap_color_change_main_test.dart)
+Use `tool/deflake.dart <path/to/lib/main.dart>` to, in 1-command:
 
-## Debugging tips
+- Build an APK.
+- Establish a baseline set of golden-files locally.
+- Run N tests (by default, 10) in the same state, asserting the same output.
 
-- Use `flutter drive --keep-app-running` to keep the app running after the test.
-- USe `flutter run` followed by `flutter drive --use-existing-app` for faster
-  test iterations.
+For example:
+
+```sh
+dart tool/deflake.dart lib/flutter_rendered_blue_rectangle_main.dart
+```
+
+For more options, see `dart tool/deflake.dart --help`.
