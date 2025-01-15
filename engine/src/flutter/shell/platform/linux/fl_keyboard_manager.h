@@ -49,8 +49,20 @@ FlKeyboardManager* fl_keyboard_manager_new(
     FlKeyboardViewDelegate* view_delegate);
 
 /**
+ * fl_keyboard_manager_is_redispatched:
+ * @manager: an #FlKeyboardManager.
+ * @event: an event received from the system.
+ *
+ * Checks if an event was redispacthed from this manager.
+ *
+ * Returns: %TRUE if the event is redispatched.
+ */
+gboolean fl_keyboard_manager_is_redispatched(FlKeyboardManager* manager,
+                                             FlKeyEvent* event);
+
+/**
  * fl_keyboard_manager_handle_event:
- * @manager: the #FlKeyboardManager self.
+ * @manager: an #FlKeyboardManager.
  * @event: the event to be dispatched. It is usually a wrap of a GdkEventKey.
  * This event will be managed and released by #FlKeyboardManager.
  * @cancellable: (allow-none): a #GCancellable or %NULL.
@@ -62,11 +74,11 @@ FlKeyboardManager* fl_keyboard_manager_new(
  * messages to the framework, trigger text input effects, or redispatch the
  * event back to the system.
  */
-gboolean fl_keyboard_manager_handle_event(FlKeyboardManager* manager,
-                                          FlKeyEvent* event,
-                                          GCancellable* cancellable,
-                                          GAsyncReadyCallback callback,
-                                          gpointer user_data);
+void fl_keyboard_manager_handle_event(FlKeyboardManager* manager,
+                                      FlKeyEvent* event,
+                                      GCancellable* cancellable,
+                                      GAsyncReadyCallback callback,
+                                      gpointer user_data);
 
 /**
  * fl_keyboard_manager_handle_event_finish:

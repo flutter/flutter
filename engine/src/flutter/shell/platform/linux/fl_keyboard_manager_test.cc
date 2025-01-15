@@ -198,8 +198,7 @@ int redispatch_events_and_clear(FlKeyboardManager* manager, GPtrArray* events) {
   guint event_count = events->len;
   for (guint event_id = 0; event_id < event_count; event_id += 1) {
     FlKeyEvent* event = FL_KEY_EVENT(g_ptr_array_index(events, event_id));
-    EXPECT_FALSE(fl_keyboard_manager_handle_event(manager, event, nullptr,
-                                                  nullptr, nullptr));
+    EXPECT_TRUE(fl_keyboard_manager_is_redispatched(manager, event));
   }
   g_ptr_array_set_size(events, 0);
   return event_count;
@@ -294,8 +293,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   // Dispatch a key event
   g_autoptr(FlKeyEvent) event1 = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event1, nullptr,
-                                               nullptr, nullptr));
+  fl_keyboard_manager_handle_event(manager, event1, nullptr, nullptr, nullptr);
   flush_channel_messages();
   EXPECT_EQ(redispatched->len, 0u);
   EXPECT_EQ(call_records->len, 1u);
@@ -313,8 +311,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   /// Test 2: Two events that are unhandled by the framework
   g_autoptr(FlKeyEvent) event2 = fl_key_event_new(
       0, FALSE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event2, nullptr,
-                                               nullptr, nullptr));
+  fl_keyboard_manager_handle_event(manager, event2, nullptr, nullptr, nullptr);
   flush_channel_messages();
   EXPECT_EQ(redispatched->len, 0u);
   EXPECT_EQ(call_records->len, 1u);
@@ -325,8 +322,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   // Dispatch another key event
   g_autoptr(FlKeyEvent) event3 = fl_key_event_new(
       0, TRUE, kKeyCodeKeyB, GDK_KEY_b, static_cast<GdkModifierType>(0), 0);
-  EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event3, nullptr,
-                                               nullptr, nullptr));
+  fl_keyboard_manager_handle_event(manager, event3, nullptr, nullptr, nullptr);
   flush_channel_messages();
   EXPECT_EQ(redispatched->len, 0u);
   EXPECT_EQ(call_records->len, 2u);
@@ -362,8 +358,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithAsyncResponds) {
   /// redispatching only works once.
   g_autoptr(FlKeyEvent) event4 = fl_key_event_new(
       0, FALSE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event4, nullptr,
-                                               nullptr, nullptr));
+  fl_keyboard_manager_handle_event(manager, event4, nullptr, nullptr, nullptr);
   flush_channel_messages();
   EXPECT_EQ(redispatched->len, 0u);
   EXPECT_EQ(call_records->len, 1u);
@@ -424,8 +419,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
   // Dispatch a key event
   g_autoptr(FlKeyEvent) event1 = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event1, nullptr,
-                                               nullptr, nullptr));
+  fl_keyboard_manager_handle_event(manager, event1, nullptr, nullptr, nullptr);
   flush_channel_messages();
   EXPECT_EQ(call_records->len, 1u);
   EXPECT_KEY_EVENT(static_cast<CallRecord*>(g_ptr_array_index(call_records, 0)),
@@ -450,8 +444,7 @@ TEST(FlKeyboardManagerTest, SingleDelegateWithSyncResponds) {
       call_records);
   g_autoptr(FlKeyEvent) event2 = fl_key_event_new(
       0, FALSE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event2, nullptr,
-                                               nullptr, nullptr));
+  fl_keyboard_manager_handle_event(manager, event2, nullptr, nullptr, nullptr);
   flush_channel_messages();
   EXPECT_EQ(call_records->len, 1u);
   EXPECT_KEY_EVENT(static_cast<CallRecord*>(g_ptr_array_index(call_records, 0)),
@@ -528,8 +521,7 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
 
   g_autoptr(FlKeyEvent) event1 = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event1, nullptr,
-                                               nullptr, nullptr));
+  fl_keyboard_manager_handle_event(manager, event1, nullptr, nullptr, nullptr);
 
   EXPECT_EQ(redispatched->len, 0u);
   EXPECT_EQ(embedder_call_records->len, 1u);
@@ -551,8 +543,7 @@ TEST(FlKeyboardManagerTest, WithTwoAsyncDelegates) {
   /// Test 2: All delegates respond false
   g_autoptr(FlKeyEvent) event2 = fl_key_event_new(
       0, FALSE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event2, nullptr,
-                                               nullptr, nullptr));
+  fl_keyboard_manager_handle_event(manager, event2, nullptr, nullptr, nullptr);
 
   EXPECT_EQ(redispatched->len, 0u);
   EXPECT_EQ(embedder_call_records->len, 1u);
@@ -617,8 +608,7 @@ TEST(FlKeyboardManagerTest, TextInputHandlerReturnsFalse) {
       nullptr);
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event, nullptr, nullptr,
-                                               nullptr));
+  fl_keyboard_manager_handle_event(manager, event, nullptr, nullptr, nullptr);
   flush_channel_messages();
   // The event was redispatched because no one handles it.
   EXPECT_TRUE(redispatched);
@@ -663,8 +653,7 @@ TEST(FlKeyboardManagerTest, TextInputHandlerReturnsTrue) {
       nullptr);
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
-  EXPECT_TRUE(fl_keyboard_manager_handle_event(manager, event, nullptr, nullptr,
-                                               nullptr));
+  fl_keyboard_manager_handle_event(manager, event, nullptr, nullptr, nullptr);
   flush_channel_messages();
   // The event was not redispatched because handler handles it.
   EXPECT_FALSE(redispatched);

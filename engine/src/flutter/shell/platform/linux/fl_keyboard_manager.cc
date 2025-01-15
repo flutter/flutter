@@ -152,25 +152,6 @@ static gboolean compare_pending_by_hash(gconstpointer a, gconstpointer b) {
   return fl_keyboard_pending_event_get_hash(pending) == hash;
 }
 
-// Try to remove a pending event from `pending_redispatches` with the target
-// hash.
-//
-// Returns true if the event is found and removed.
-static bool fl_keyboard_manager_remove_redispatched(FlKeyboardManager* self,
-                                                    uint64_t hash) {
-  guint result_index;
-  gboolean found = g_ptr_array_find_with_equal_func1(
-      self->pending_redispatches, static_cast<const uint64_t*>(&hash),
-      compare_pending_by_hash, &result_index);
-  if (found) {
-    // The removed object is freed due to `pending_redispatches`'s free_func.
-    g_ptr_array_remove_index_fast(self->pending_redispatches, result_index);
-    return TRUE;
-  } else {
-    return FALSE;
-  }
-}
-
 // The callback used by a responder after the event was dispatched.
 static void responder_handle_event_callback(FlKeyboardManager* self,
                                             FlKeyboardPendingEvent* pending) {
@@ -465,23 +446,37 @@ FlKeyboardManager* fl_keyboard_manager_new(
   return self;
 }
 
-gboolean fl_keyboard_manager_handle_event(FlKeyboardManager* self,
-                                          FlKeyEvent* event,
-                                          GCancellable* cancellable,
-                                          GAsyncReadyCallback callback,
-                                          gpointer user_data) {
+gboolean fl_keyboard_manager_is_redispatched(FlKeyboardManager* self,
+                                             FlKeyEvent* event) {
   g_return_val_if_fail(FL_IS_KEYBOARD_MANAGER(self), FALSE);
-  g_return_val_if_fail(event != nullptr, FALSE);
+
+  uint64_t hash = fl_key_event_hash(event);
+
+  guint result_index;
+  gboolean found = g_ptr_array_find_with_equal_func1(
+      self->pending_redispatches, static_cast<const uint64_t*>(&hash),
+      compare_pending_by_hash, &result_index);
+  if (found) {
+    // The removed object is freed due to `pending_redispatches`'s free_func.
+    g_ptr_array_remove_index_fast(self->pending_redispatches, result_index);
+    return TRUE;
+  } else {
+    return FALSE;
+  }
+}
+
+void fl_keyboard_manager_handle_event(FlKeyboardManager* self,
+                                      FlKeyEvent* event,
+                                      GCancellable* cancellable,
+                                      GAsyncReadyCallback callback,
+                                      gpointer user_data) {
+  g_return_if_fail(FL_IS_KEYBOARD_MANAGER(self));
+  g_return_if_fail(event != nullptr);
+
+  g_autoptr(GTask) task = g_task_new(self, cancellable, callback, user_data);
 
   guarantee_layout(self, event);
 
-  // FIXME: This breaks the async pattern, split out into a separate function
-  uint64_t incoming_hash = fl_key_event_hash(event);
-  if (fl_keyboard_manager_remove_redispatched(self, incoming_hash)) {
-    return FALSE;
-  }
-
-  g_autoptr(GTask) task = g_task_new(self, cancellable, callback, user_data);
   FlKeyboardPendingEvent* pending = fl_keyboard_pending_event_new(event);
   g_ptr_array_add(self->pending_responds, pending);
   g_task_set_task_data(task, g_object_ref(pending), g_object_unref);
@@ -495,8 +490,6 @@ gboolean fl_keyboard_manager_handle_event(FlKeyboardManager* self,
   fl_key_channel_responder_handle_event(
       self->key_channel_responder, event, specified_logical_key,
       self->cancellable, responder_handle_channel_event_cb, g_object_ref(task));
-
-  return TRUE;
 }
 
 gboolean fl_keyboard_manager_handle_event_finish(FlKeyboardManager* self,
