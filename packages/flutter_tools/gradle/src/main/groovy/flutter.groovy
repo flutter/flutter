@@ -832,11 +832,9 @@ class FlutterPlugin implements Plugin<Project> {
      * Compares semantic versions ignoring labels.
      *
      * If the versions are equal (ignoring labels), returns one of the two strings arbitrarily.
-     *
      * If minor or patch are omitted (non-conformant to semantic versioning), they are considered zero.
      * If the provided versions in both are equal, the longest version string is returned.
      * For example, "2.8.0" vs "2.8" will always consider "2.8.0" to be the most recent version.
-     * TODO: Remove this or compareVersionStrings. This does not handle strings like "8.6-rc-2".
      */
    static String mostRecentSemanticVersion(String version1, String version2) {
         def v1Parts = version1.tokenize('.-')
