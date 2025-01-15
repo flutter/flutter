@@ -341,10 +341,11 @@ class XcodeProjectInterpreter {
     ], workingDirectory: _fileSystem.currentDirectory.path);
   }
 
-  Future<XcodeProjectInfo?> getInfo(String projectPath, {
+  Future<XcodeProjectInfo?> getInfo(
+    String projectPath, {
     String? projectFilename,
     Duration timeout = const Duration(minutes: 1),
-    int timeoutRetries = 1
+    int timeoutRetries = 1,
   }) async {
     // The exit code returned by 'xcodebuild -list' when either:
     // * -project is passed and the given project isn't there, or

@@ -37,7 +37,7 @@ class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter
     String projectPath, {
     String? projectFilename,
     Duration timeout = const Duration(minutes: 1),
-    int timeoutRetries = 1
+    int timeoutRetries = 1,
   }) async {
     return XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Profile', 'Release'], <String>[
       'Runner',
