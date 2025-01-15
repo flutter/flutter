@@ -374,13 +374,13 @@ abstract class ScrollView extends StatelessWidget {
   final DragStartBehavior dragStartBehavior;
 
   /// {@template flutter.widgets.scroll_view.keyboardDismissBehavior}
-  /// [ScrollViewKeyboardDismissBehavior] defines how this [ScrollView] will
+  /// The [ScrollViewKeyboardDismissBehavior] defines how this [ScrollView] will
   /// dismiss the keyboard automatically.
   /// {@endtemplate}
   ///
   /// If [keyboardDismissBehavior] is null then it will fallback to
-  /// [scrollBehavior] or to the closest [ScrollConfiguration] provided
-  /// by the context.
+  /// [scrollBehavior]. If that is also null, the inherited 
+  /// [ScrollBehavior.keyboardDismissBehavior] will be used.
   final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
 
   /// {@macro flutter.widgets.scrollable.restorationId}

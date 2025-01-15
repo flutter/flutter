@@ -235,8 +235,8 @@ class SingleChildScrollView extends StatelessWidget {
 
   /// {@macro flutter.widgets.scroll_view.keyboardDismissBehavior}
   ///
-  /// If [keyboardDismissBehavior] is null then it will fallback to the closest
-  /// [ScrollConfiguration] provided by the context.
+  /// If [keyboardDismissBehavior] is null then it will fallback to the inherited
+  /// [ScrollBehavior.keyboardDismissBehavior].
   final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
 
   AxisDirection _getDirection(BuildContext context) {

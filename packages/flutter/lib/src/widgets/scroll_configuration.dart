@@ -267,11 +267,9 @@ class ScrollBehavior {
   /// method returns false, the rebuilds might be optimized away.
   bool shouldNotify(covariant ScrollBehavior oldDelegate) => false;
 
-  /// {@template flutter.widgets.scrollBehavior.getKeyboardDismissBehavior}
-  /// The default keyboard dismissal behavior for [Scrollable] widgets.
+  /// The default keyboard dismissal behavior for [ScrollView] widgets.
   ///
   /// Defaults to [ScrollViewKeyboardDismissBehavior.manual].
-  /// {@endtemplate}
   ScrollViewKeyboardDismissBehavior getKeyboardDismissBehavior(BuildContext context) =>
       ScrollViewKeyboardDismissBehavior.manual;
 
