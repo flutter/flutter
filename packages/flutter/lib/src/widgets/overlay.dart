@@ -1782,6 +1782,7 @@ class _OverlayPortalVisibilityCustom extends OverlayPortalVisibility {
     controller._isNeedsUpdate = false;
     return controller._zOrderIndex;
   }
+
   @override
   bool get _isNeedsUpdate => controller._isNeedsUpdate;
 }
@@ -1879,7 +1880,7 @@ class OverlayPortal extends StatefulWidget {
     this.child,
   }) : _targetRootOverlay = false,
        assert(
-         ((controller == null) != (visibility == null)),
+         (controller == null) != (visibility == null),
          'Either controller or visibility should be set, but not both.',
        );
 
@@ -1894,7 +1895,7 @@ class OverlayPortal extends StatefulWidget {
     this.child,
   }) : _targetRootOverlay = true,
        assert(
-         ((controller == null) != (visibility == null)),
+         (controller == null) != (visibility == null),
          'Either controller or visibility should be set, but not both.',
        );
 
