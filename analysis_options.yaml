@@ -8,7 +8,6 @@
 # which should be kept in sync with this file:
 #
 #   - analysis_options.yaml (this file)
-#   - engine/src/flutter/analysis_options.yaml
 #   - https://github.com/flutter/packages/blob/main/analysis_options.yaml
 #
 # This file contains the analysis options used for code in the flutter/flutter
