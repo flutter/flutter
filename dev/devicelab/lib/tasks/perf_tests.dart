@@ -288,7 +288,6 @@ TaskFunction createImitationGameFlutterTest() {
   return CompileTest('${flutterDirectory.path}/examples/imitation_game_flutter', reportPackageContentSizes: true).run;
 }
 
-
 TaskFunction createWebCompileTest() {
   return const WebCompileTest().run;
 }
