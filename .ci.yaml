@@ -361,21 +361,18 @@ targets:
   # This is a benchmark that does not require an attached device. However, we
   # are intentionally running it in the devicelab to ensure that it does not
   # run on a VM in order to avoid noisy results from the benchmark.
-  - name: Linux analyzer_benchmark
+  - name: Mac_arm64 analyzer_benchmark
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/161306
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      os: Linux
-      device_type: "mokey"
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:35v1"},
-          {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "curl", "version": "version:7.64.0"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
-        ["devicelab", "android", "linux", "mokey"]
+        ["devicelab", "hostonly", "mac", "arm64"]
       task_name: analyzer_benchmark
 
   - name: Linux coverage
@@ -392,7 +389,6 @@ targets:
   - name: Linux packages_autoroller
     presubmit: false
     recipe: pub_autoroller/pub_autoroller
-    bringup: true # https://github.com/flutter/flutter/issues/160473
     # This takes a while because we need to fetch network dependencies and run
     # Gradle for every android app in the repo
     timeout: 45
@@ -1110,7 +1106,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     presubmit: false
-    bringup: true
     properties:
       xvfb: "1"
       dependencies: >-
@@ -1533,7 +1528,7 @@ targets:
     bringup: true
     timeout: 60
     properties:
-      shard: flutter_driver_android
+      shard: android_engine_tests
       tags: >
          ["framework", "hostonly", "shard", "linux"]
       dependencies: >-
@@ -1546,7 +1541,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      shard: flutter_driver_android
+      shard: android_engine_tests
       tags: >
          ["framework", "hostonly", "shard", "linux"]
       dependencies: >-
@@ -3708,7 +3703,6 @@ targets:
         ["framework","hostonly","shard","linux"]
 
   - name: Mac_benchmark animated_complex_opacity_perf_macos__e2e_summary
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/157423
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -3930,7 +3924,6 @@ targets:
       task_name: complex_layout_macos__start_up
 
   - name: Mac_benchmark complex_layout_scroll_perf_macos__timeline_summary
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/158251
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -3986,6 +3979,7 @@ targets:
       task_name: flavors_test_macos
 
   - name: Mac_benchmark flutter_gallery_macos__compile
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/160495
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -4201,7 +4195,6 @@ targets:
       - DEPS
 
   - name: Mac_benchmark hello_world_macos__compile
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/159542
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -4209,7 +4202,6 @@ targets:
       task_name: hello_world_macos__compile
 
   - name: Mac integration_ui_test_test_macos
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/152212
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4816,6 +4808,7 @@ targets:
   - name: Mac_mokey microbenchmarks
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # Flaky: codefu
     timeout: 60
     properties:
       tags: >
@@ -5046,7 +5039,6 @@ targets:
       task_name: hello_world_ios__compile
 
   - name: Mac_x64 hot_mode_dev_cycle_macos_target__benchmark
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/158568
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
