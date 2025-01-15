@@ -681,7 +681,8 @@ static gboolean fl_view_key_press_event(GtkWidget* widget,
   GdkEvent* event = reinterpret_cast<GdkEvent*>(key_event);
   return fl_keyboard_manager_handle_event(
       self->keyboard_manager,
-      fl_key_event_new_from_gdk_event(gdk_event_copy(event)));
+      fl_key_event_new_from_gdk_event(gdk_event_copy(event)), self->cancellable,
+      nullptr, nullptr);
 }
 
 // Implements GtkWidget::key_release_event.
@@ -691,7 +692,8 @@ static gboolean fl_view_key_release_event(GtkWidget* widget,
   GdkEvent* event = reinterpret_cast<GdkEvent*>(key_event);
   return fl_keyboard_manager_handle_event(
       self->keyboard_manager,
-      fl_key_event_new_from_gdk_event(gdk_event_copy(event)));
+      fl_key_event_new_from_gdk_event(gdk_event_copy(event)), self->cancellable,
+      nullptr, nullptr);
 }
 
 static void fl_view_class_init(FlViewClass* klass) {

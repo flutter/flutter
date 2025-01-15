@@ -20,16 +20,6 @@
 // is used in unit tests.
 #define DEBUG_PRINT_LAYOUT
 
-/* Declarations of private classes */
-
-G_DECLARE_FINAL_TYPE(FlKeyboardManagerData,
-                     fl_keyboard_manager_data,
-                     FL,
-                     KEYBOARD_MANAGER_DATA,
-                     GObject);
-
-/* End declarations */
-
 namespace {
 
 static bool is_eascii(uint16_t character) {
@@ -62,55 +52,6 @@ void debug_format_layout_data(std::string& debug_layout_data,
 #endif
 
 }  // namespace
-
-/* Define FlKeyboardManagerData */
-
-/**
- * FlKeyboardManagerData:
- * The user_data used when #FlKeyboardManager sends event to
- * responders.
- */
-
-struct _FlKeyboardManagerData {
-  GObject parent_instance;
-
-  // The owner manager.
-  GWeakRef manager;
-
-  FlKeyboardPendingEvent* pending;
-};
-
-G_DEFINE_TYPE(FlKeyboardManagerData, fl_keyboard_manager_data, G_TYPE_OBJECT)
-
-static void fl_keyboard_manager_data_dispose(GObject* object) {
-  g_return_if_fail(FL_IS_KEYBOARD_MANAGER_DATA(object));
-  FlKeyboardManagerData* self = FL_KEYBOARD_MANAGER_DATA(object);
-
-  g_weak_ref_clear(&self->manager);
-
-  G_OBJECT_CLASS(fl_keyboard_manager_data_parent_class)->dispose(object);
-}
-
-static void fl_keyboard_manager_data_class_init(
-    FlKeyboardManagerDataClass* klass) {
-  G_OBJECT_CLASS(klass)->dispose = fl_keyboard_manager_data_dispose;
-}
-
-static void fl_keyboard_manager_data_init(FlKeyboardManagerData* self) {}
-
-// Creates a new FlKeyboardManagerData private class with all information.
-static FlKeyboardManagerData* fl_keyboard_manager_data_new(
-    FlKeyboardManager* manager,
-    FlKeyboardPendingEvent* pending) {
-  FlKeyboardManagerData* self = FL_KEYBOARD_MANAGER_DATA(
-      g_object_new(fl_keyboard_manager_data_get_type(), nullptr));
-
-  g_weak_ref_init(&self->manager, manager);
-  self->pending = FL_KEYBOARD_PENDING_EVENT(g_object_ref(pending));
-  return self;
-}
-
-/* Define FlKeyboardManager */
 
 struct _FlKeyboardManager {
   GObject parent_instance;
@@ -262,25 +203,33 @@ static void responder_handle_event_callback(FlKeyboardManager* self,
   }
 }
 
+static void complete_handle_event(FlKeyboardManager* self, GTask* task) {
+  FlKeyboardPendingEvent* pending =
+      FL_KEYBOARD_PENDING_EVENT(g_task_get_task_data(task));
+
+  if (fl_keyboard_pending_event_is_complete(pending)) {
+    g_task_return_boolean(task, TRUE);
+  }
+}
+
 static void responder_handle_embedder_event_callback(bool handled,
                                                      gpointer user_data) {
-  g_autoptr(FlKeyboardManagerData) data = FL_KEYBOARD_MANAGER_DATA(user_data);
+  g_autoptr(GTask) task = G_TASK(user_data);
+  FlKeyboardManager* self = FL_KEYBOARD_MANAGER(g_task_get_source_object(task));
 
-  fl_keyboard_pending_event_mark_embedder_replied(data->pending, handled);
+  FlKeyboardPendingEvent* pending =
+      FL_KEYBOARD_PENDING_EVENT(g_task_get_task_data(task));
+  fl_keyboard_pending_event_mark_embedder_replied(pending, handled);
+  responder_handle_event_callback(self, pending);
 
-  g_autoptr(FlKeyboardManager) self =
-      FL_KEYBOARD_MANAGER(g_weak_ref_get(&data->manager));
-  if (self == nullptr) {
-    return;
-  }
-
-  responder_handle_event_callback(self, data->pending);
+  complete_handle_event(self, task);
 }
 
 static void responder_handle_channel_event_cb(GObject* object,
                                               GAsyncResult* result,
                                               gpointer user_data) {
-  g_autoptr(FlKeyboardManagerData) data = FL_KEYBOARD_MANAGER_DATA(user_data);
+  g_autoptr(GTask) task = G_TASK(user_data);
+  FlKeyboardManager* self = FL_KEYBOARD_MANAGER(g_task_get_source_object(task));
 
   g_autoptr(GError) error = nullptr;
   gboolean handled;
@@ -289,18 +238,15 @@ static void responder_handle_channel_event_cb(GObject* object,
     if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
       g_warning("Failed to handle key event in platform: %s", error->message);
     }
-    return;
+    handled = FALSE;
   }
 
-  g_autoptr(FlKeyboardManager) self =
-      FL_KEYBOARD_MANAGER(g_weak_ref_get(&data->manager));
-  if (self == nullptr) {
-    return;
-  }
+  FlKeyboardPendingEvent* pending =
+      FL_KEYBOARD_PENDING_EVENT(g_task_get_task_data(task));
+  fl_keyboard_pending_event_mark_channel_replied(pending, handled);
+  responder_handle_event_callback(self, pending);
 
-  fl_keyboard_pending_event_mark_channel_replied(data->pending, handled);
-
-  responder_handle_event_callback(self, data->pending);
+  complete_handle_event(self, task);
 }
 
 static uint16_t convert_key_to_char(FlKeyboardManager* self,
@@ -520,33 +466,45 @@ FlKeyboardManager* fl_keyboard_manager_new(
 }
 
 gboolean fl_keyboard_manager_handle_event(FlKeyboardManager* self,
-                                          FlKeyEvent* event) {
+                                          FlKeyEvent* event,
+                                          GCancellable* cancellable,
+                                          GAsyncReadyCallback callback,
+                                          gpointer user_data) {
   g_return_val_if_fail(FL_IS_KEYBOARD_MANAGER(self), FALSE);
   g_return_val_if_fail(event != nullptr, FALSE);
 
   guarantee_layout(self, event);
 
+  // FIXME: This breaks the async pattern, split out into a separate function
   uint64_t incoming_hash = fl_key_event_hash(event);
   if (fl_keyboard_manager_remove_redispatched(self, incoming_hash)) {
     return FALSE;
   }
 
+  g_autoptr(GTask) task = g_task_new(self, cancellable, callback, user_data);
   FlKeyboardPendingEvent* pending = fl_keyboard_pending_event_new(event);
-
   g_ptr_array_add(self->pending_responds, pending);
-  g_autoptr(FlKeyboardManagerData) data =
-      fl_keyboard_manager_data_new(self, pending);
+  g_task_set_task_data(task, g_object_ref(pending), g_object_unref);
+
   uint64_t specified_logical_key = fl_keyboard_layout_get_logical_key(
       self->derived_layout, fl_key_event_get_group(event),
       fl_key_event_get_keycode(event));
   fl_key_embedder_responder_handle_event(
       self->key_embedder_responder, event, specified_logical_key,
-      responder_handle_embedder_event_callback, g_object_ref(data));
+      responder_handle_embedder_event_callback, g_object_ref(task));
   fl_key_channel_responder_handle_event(
       self->key_channel_responder, event, specified_logical_key,
-      self->cancellable, responder_handle_channel_event_cb, g_object_ref(data));
+      self->cancellable, responder_handle_channel_event_cb, g_object_ref(task));
 
   return TRUE;
+}
+
+gboolean fl_keyboard_manager_handle_event_finish(FlKeyboardManager* self,
+                                                 GAsyncResult* result,
+                                                 GError** error) {
+  g_return_val_if_fail(FL_IS_KEYBOARD_MANAGER(self), FALSE);
+  g_return_val_if_fail(g_task_is_valid(result, self), FALSE);
+  return g_task_propagate_boolean(G_TASK(result), error);
 }
 
 gboolean fl_keyboard_manager_is_state_clear(FlKeyboardManager* self) {
