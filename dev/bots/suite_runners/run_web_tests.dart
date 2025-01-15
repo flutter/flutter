@@ -184,7 +184,7 @@ class WebTestsSuite {
         renderer: 'canvaskit',
       ),
       () => _runWebE2eTest(
-        'capabilities_integration_html',
+        'capabilities_integration_canvaskit',
         buildMode: 'release',
         renderer: 'canvaskit',
       ),
