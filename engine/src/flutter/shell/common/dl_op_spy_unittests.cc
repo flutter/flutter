@@ -7,7 +7,6 @@
 #include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/shell/common/dl_op_spy.h"
 #include "flutter/testing/testing.h"
-#include "third_party/skia/include/core/SkRSXform.h"
 
 namespace flutter {
 namespace testing {
@@ -456,7 +455,9 @@ TEST(DlOpSpy, Images) {
   {  // DrawAtlas
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kBlack());
-    const SkRSXform xform[] = {SkRSXform::Make(1, 0, 0, 0)};
+    const DlRSTransform xform[] = {
+        DlRSTransform::Make({0, 0}, 1.0f, DlDegrees(0)),
+    };
     const DlRect tex[] = {DlRect::MakeXYWH(10, 10, 10, 10)};
     DlRect cull_rect = DlRect::MakeWH(5, 5);
     builder.DrawAtlas(kTestImage1, xform, tex, nullptr, 1, DlBlendMode::kSrc,

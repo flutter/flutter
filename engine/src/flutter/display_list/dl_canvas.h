@@ -17,7 +17,6 @@
 #include "third_party/skia/include/core/SkMatrix.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkRRect.h"
-#include "third_party/skia/include/core/SkRSXform.h"
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 
@@ -189,7 +188,7 @@ class DlCanvas {
                              DlFilterMode filter,
                              const DlPaint* paint = nullptr) = 0;
   virtual void DrawAtlas(const sk_sp<DlImage>& atlas,
-                         const SkRSXform xform[],
+                         const DlRSTransform xform[],
                          const DlRect tex[],
                          const DlColor colors[],
                          int count,
@@ -372,18 +371,6 @@ class DlCanvas {
                      DlFilterMode filter,
                      const DlPaint* paint = nullptr) {
     DrawImageNine(image, ToDlIRect(center), ToDlRect(dst), filter, paint);
-  }
-  void DrawAtlas(const sk_sp<DlImage>& atlas,
-                 const SkRSXform xform[],
-                 const SkRect tex[],
-                 const DlColor colors[],
-                 int count,
-                 DlBlendMode mode,
-                 DlImageSampling sampling,
-                 const SkRect* cullRect,
-                 const DlPaint* paint = nullptr) {
-    DrawAtlas(atlas, xform, ToDlRects(tex), colors, count, mode, sampling,
-              ToDlRect(cullRect), paint);
   }
   void DrawShadow(const SkPath& path,
                   const DlColor color,

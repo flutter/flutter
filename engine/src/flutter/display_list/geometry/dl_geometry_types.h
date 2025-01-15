@@ -9,6 +9,7 @@
 #include "flutter/impeller/geometry/path.h"
 #include "flutter/impeller/geometry/rect.h"
 #include "flutter/impeller/geometry/round_rect.h"
+#include "flutter/impeller/geometry/rstransform.h"
 #include "flutter/impeller/geometry/scalar.h"
 
 #include "flutter/third_party/skia/include/core/SkM44.h"
@@ -34,6 +35,7 @@ using DlRoundRect = impeller::RoundRect;
 using DlRoundingRadii = impeller::RoundingRadii;
 using DlMatrix = impeller::Matrix;
 using DlQuad = impeller::Quad;
+using DlRSTransform = impeller::RSTransform;
 
 static_assert(sizeof(SkPoint) == sizeof(DlPoint));
 static_assert(sizeof(SkIPoint) == sizeof(DlIPoint));

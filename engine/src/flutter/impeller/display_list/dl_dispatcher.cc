@@ -774,7 +774,7 @@ void DlDispatcherBase::drawImageNine(const sk_sp<flutter::DlImage> image,
 
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::drawAtlas(const sk_sp<flutter::DlImage> atlas,
-                                 const SkRSXform xform[],
+                                 const RSTransform xform[],
                                  const DlRect tex[],
                                  const flutter::DlColor colors[],
                                  int count,

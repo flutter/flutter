@@ -1201,7 +1201,10 @@ TEST_F(DisplayListTest, SingleOpsMightSupportGroupOpacityBlendMode) {
       kTestImage2, DlIRect::MakeLTRB(20, 20, 30, 30),
       DlRect::MakeLTRB(0, 0, 20, 20), DlFilterMode::kLinear, nullptr);
              , true);
-  static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
+  static DlRSTransform xforms[] = {
+      DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(0)),
+      DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(90)),
+  };
   static DlRect texs[] = {
       DlRect::MakeLTRB(10, 10, 20, 20),
       DlRect::MakeLTRB(20, 20, 30, 30),
@@ -3502,7 +3505,10 @@ TEST_F(DisplayListTest, NopOperationsOmittedFromRecords) {
           builder.DrawImageNine(kTestImage1, DlIRect::MakeLTRB(10, 10, 20, 20),
                                 DlRect::MakeLTRB(10, 10, 100, 100),
                                 DlFilterMode::kLinear, &paint);
-          SkRSXform xforms[] = {{1, 0, 10, 10}, {0, 1, 10, 10}};
+          DlRSTransform xforms[] = {
+              DlRSTransform::Make({10.0f, 10.0f}, 1.0f, DlDegrees(0)),
+              DlRSTransform::Make({10.0f, 10.0f}, 1.0f, DlDegrees(90)),
+          };
           DlRect rects[] = {
               DlRect::MakeLTRB(10, 10, 20, 20),
               DlRect::MakeLTRB(10, 20, 30, 20),

@@ -1467,7 +1467,7 @@ void DisplayListBuilder::DrawImageNine(const sk_sp<DlImage>& image,
   }
 }
 void DisplayListBuilder::drawAtlas(const sk_sp<DlImage> atlas,
-                                   const SkRSXform xform[],
+                                   const DlRSTransform xform[],
                                    const DlRect tex[],
                                    const DlColor colors[],
                                    int count,
@@ -1482,19 +1482,20 @@ void DisplayListBuilder::drawAtlas(const sk_sp<DlImage> atlas,
   if (result == OpResult::kNoEffect) {
     return;
   }
-  SkPoint quad[4];
+  DlQuad quad;
   AccumulationRect accumulator;
   for (int i = 0; i < count; i++) {
     const DlRect& src = tex[i];
-    xform[i].toQuad(src.GetWidth(), src.GetHeight(), quad);
+    xform[i].GetQuad(src.GetWidth(), src.GetHeight(), quad);
     for (int j = 0; j < 4; j++) {
-      accumulator.accumulate(ToDlPoint(quad[j]));
+      accumulator.accumulate(quad[j]);
     }
   }
   if (accumulator.is_empty() ||
       !AccumulateOpBounds(accumulator.GetBounds(), flags)) {
     return;
   }
+
   // Accumulating the bounds might not trip the overlap condition if the
   // whole atlas operation is separated from other rendering calls, but
   // since each atlas op is treated as an independent operation, we have
@@ -1509,7 +1510,7 @@ void DisplayListBuilder::drawAtlas(const sk_sp<DlImage> atlas,
     current_layer().layer_local_accumulator.record_overlapping_bounds();
   }
 
-  int bytes = count * (sizeof(SkRSXform) + sizeof(SkRect));
+  int bytes = count * (sizeof(DlRSTransform) + sizeof(DlRect));
   void* data_ptr;
   if (colors != nullptr) {
     bytes += count * sizeof(DlColor);
@@ -1541,7 +1542,7 @@ void DisplayListBuilder::drawAtlas(const sk_sp<DlImage> atlas,
   is_ui_thread_safe_ = is_ui_thread_safe_ && atlas->isUIThreadSafe();
 }
 void DisplayListBuilder::DrawAtlas(const sk_sp<DlImage>& atlas,
-                                   const SkRSXform xform[],
+                                   const DlRSTransform xform[],
                                    const DlRect tex[],
                                    const DlColor colors[],
                                    int count,
