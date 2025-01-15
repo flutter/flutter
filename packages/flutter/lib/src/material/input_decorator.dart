@@ -3696,7 +3696,7 @@ class InputDecoration {
   ///    rounded rectangle around the input decorator's container.
   final InputBorder? border;
 
-  /// If false [helperText],[errorText], and [counterText] are not displayed,
+  /// If false [helperText],[errorText], and [counterText] are still displayed,
   /// and the opacity of the remaining visual elements is reduced.
   ///
   /// This property is true by default.
