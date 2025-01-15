@@ -84,7 +84,7 @@ class SystemContextMenu extends StatefulWidget {
   /// current [TextInputConnection].
   ///
   /// Built-in items will only be shown when relevant. For example, if
-  /// [SystemContextMenuItem.copy] is passed, the copy button will only be shown
+  /// [SystemContextMenuItemCopy] is passed, the copy button will only be shown
   /// when there is a non-empty selection and not when the selection is
   /// collapsed. It's not necessary to manually add and remove these items based
   /// on the state of the field.
@@ -321,7 +321,7 @@ class SystemContextMenuItemSelectAll extends SystemContextMenuItem {
 ///
 ///  * [SystemContextMenu], a widget that can be used to display the system
 ///    context menu.
-///  * [SystemContextMenuItemDataLookup], which specifies the data to be sent to
+///  * [SystemContextMenuItemDataLookUp], which specifies the data to be sent to
 ///    the platform for this same button.
 class SystemContextMenuItemLookUp extends SystemContextMenuItem {
   /// Creates an instance of [SystemContextMenuItemLookUp].
@@ -343,7 +343,7 @@ class SystemContextMenuItemLookUp extends SystemContextMenuItem {
 ///
 /// The [title] is optional, but it must be specified before being sent to the
 /// platform. Typically it should be set to
-/// [WidgetsLocalizations.searchWebButtonlabel].
+/// [WidgetsLocalizations.searchWebButtonLabel].
 ///
 /// The action is handled by the platform.
 ///

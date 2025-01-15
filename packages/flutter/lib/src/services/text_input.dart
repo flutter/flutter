@@ -2593,7 +2593,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// specifying custom `items`.
   ///
   /// Built-in menu items will only be shown when relevant. For example, if
-  /// [SystemContextMenuDataItem.copy] is passed, the copy button will only be
+  /// [SystemContextMenuItemDataCopy] is passed, the copy button will only be
   /// shown when there is something to copy (a non-empty selection). It's not
   /// necessary to manually add and remove these items based on the state of the
   /// field.
@@ -2766,7 +2766,7 @@ sealed class SystemContextMenuItemData {
   }
 }
 
-/// A [SystemContextMenuButtonItemData] for the system's built-in copy button.
+/// A [SystemContextMenuItemData] for the system's built-in copy button.
 ///
 /// The title and action are both handled by the platform.
 ///
@@ -2781,7 +2781,7 @@ class SystemContextMenuItemDataCopy extends SystemContextMenuItemData {
   const SystemContextMenuItemDataCopy();
 }
 
-/// A [SystemContextMenuButtonItemData] for the system's built-in cut button.
+/// A [SystemContextMenuItemData] for the system's built-in cut button.
 ///
 /// The title and action are both handled by the platform.
 ///
@@ -2796,7 +2796,7 @@ class SystemContextMenuItemDataCut extends SystemContextMenuItemData {
   const SystemContextMenuItemDataCut();
 }
 
-/// A [SystemContextMenuButtonItemData] for the system's built-in paste button.
+/// A [SystemContextMenuItemData] for the system's built-in paste button.
 ///
 /// The title and action are both handled by the platform.
 ///
@@ -2811,7 +2811,7 @@ class SystemContextMenuItemDataPaste extends SystemContextMenuItemData {
   const SystemContextMenuItemDataPaste();
 }
 
-/// A [SystemContextMenuButtonItemData] for the system's built-in select all
+/// A [SystemContextMenuItemData] for the system's built-in select all
 /// button.
 ///
 /// The title and action are both handled by the platform.
@@ -2827,7 +2827,7 @@ class SystemContextMenuItemDataSelectAll extends SystemContextMenuItemData {
   const SystemContextMenuItemDataSelectAll();
 }
 
-/// A [SystemContextMenuButtonItemData] for the system's built-in look up
+/// A [SystemContextMenuItemData] for the system's built-in look up
 /// button.
 ///
 /// Must specify a [title], typically [WidgetsLocalizations.lookUpButtonLabel].
@@ -2854,7 +2854,7 @@ class SystemContextMenuItemDataLookUp extends SystemContextMenuItemData {
   }
 }
 
-/// A [SystemContextMenuButtonItemData] for the system's built-in search web
+/// A [SystemContextMenuItemData] for the system's built-in search web
 /// button.
 ///
 /// Must specify a [title], typically
@@ -2882,7 +2882,7 @@ class SystemContextMenuItemDataSearchWeb extends SystemContextMenuItemData {
   }
 }
 
-/// A [SystemContextMenuButtonItemData] for the system's built-in share button.
+/// A [SystemContextMenuItemData] for the system's built-in share button.
 ///
 /// Must specify a [title], typically
 /// [WidgetsLocalizations.shareButtonLabel].
@@ -2911,7 +2911,7 @@ class SystemContextMenuItemDataShare extends SystemContextMenuItemData {
 
 // TODO(justinmc): Support the "custom" type.
 // https://github.com/flutter/flutter/issues/103163
-/// A [SystemContextMenuButtonItemData] for a custom button whose title and
+/// A [SystemContextMenuItemData] for a custom button whose title and
 /// callback are defined by the app developer.
 ///
 /// Must specify a [title] and [onPressed].
