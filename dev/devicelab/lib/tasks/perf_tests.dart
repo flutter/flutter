@@ -1804,8 +1804,6 @@ class CompileTest {
     }
     final Map<String, dynamic> metrics = <String, dynamic>{};
 
-    // final Map<String, dynamic> test = await CompileTest('${flutterDirectory.path}/examples/hello_world_flutter', reportPackageContentSizes: true)._compileApp(deleteGradleCache: false);
-    // metrics.addAll(test);
     metrics.addAll(<String, dynamic>{
       'release_swiftui_compile_millis': watch.elapsedMilliseconds,
       'release_swiftui_size_bytes': releaseSizeInBytes,
@@ -1813,8 +1811,7 @@ class CompileTest {
     return TaskResult.success(metrics);
     });
   }
-
-
+  
   Future<Map<String, dynamic>> _compileApp({required bool deleteGradleCache}) async {
     await flutter('clean');
     if (deleteGradleCache) {
