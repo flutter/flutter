@@ -347,10 +347,11 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       onInvoke: _highlightNextPageOption,
       isEnabledCallback: () => _canShowOptionsView,
     ),
-    AutocompletePreviousPageOptionIntent: _AutocompleteCallbackAction<AutocompletePreviousPageOptionIntent>(
-      onInvoke: _highlightPreviousPageOption,
-      isEnabledCallback: () => _canShowOptionsView,
-    ),
+    AutocompletePreviousPageOptionIntent:
+        _AutocompleteCallbackAction<AutocompletePreviousPageOptionIntent>(
+          onInvoke: _highlightPreviousPageOption,
+          isEnabledCallback: () => _canShowOptionsView,
+        ),
     DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideOptions),
   };
 
@@ -380,7 +381,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   static Map<ShortcutActivator, Intent> get _shortcuts => <ShortcutActivator, Intent>{
     ..._commonShortcuts,
-    ...switch(defaultTargetPlatform) {
+    ...switch (defaultTargetPlatform) {
       TargetPlatform.iOS => _appleShortcuts,
       TargetPlatform.macOS => _appleShortcuts,
       TargetPlatform.android => _nonAppleShortcuts,
@@ -455,9 +456,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   }
 
   void _updateHighlight(int nextIndex) {
-    _highlightedOptionIndex.value = _options.isEmpty
-        ? 0
-        : nextIndex.clamp(0, _options.length - 1);
+    _highlightedOptionIndex.value = _options.isEmpty ? 0 : nextIndex.clamp(0, _options.length - 1);
   }
 
   void _highlightPreviousOption(AutocompletePreviousOptionIntent intent) {

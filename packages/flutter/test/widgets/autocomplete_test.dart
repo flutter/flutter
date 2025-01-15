@@ -1184,7 +1184,12 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (
+              BuildContext context,
+              TextEditingController fieldTextEditingController,
+              FocusNode fieldFocusNode,
+              VoidCallback onFieldSubmitted,
+            ) {
               focusNode = fieldFocusNode;
               textEditingController = fieldTextEditingController;
               return TextFormField(
@@ -1196,7 +1201,11 @@ void main() {
                 },
               );
             },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            optionsViewBuilder: (
+              BuildContext context,
+              AutocompleteOnSelected<String> onSelected,
+              Iterable<String> options,
+            ) {
               lastHighlighted = AutocompleteHighlightedOption.of(context);
               lastOptions = options;
               return Container(key: optionsKey);
@@ -1266,7 +1275,12 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (
+              BuildContext context,
+              TextEditingController fieldTextEditingController,
+              FocusNode fieldFocusNode,
+              VoidCallback onFieldSubmitted,
+            ) {
               focusNode = fieldFocusNode;
               textEditingController = fieldTextEditingController;
               return TextFormField(
@@ -1278,7 +1292,11 @@ void main() {
                 },
               );
             },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            optionsViewBuilder: (
+              BuildContext context,
+              AutocompleteOnSelected<String> onSelected,
+              Iterable<String> options,
+            ) {
               lastHighlighted = AutocompleteHighlightedOption.of(context);
               lastOptions = options;
               return Container(key: optionsKey);

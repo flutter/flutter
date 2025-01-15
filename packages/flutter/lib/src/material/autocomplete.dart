@@ -248,14 +248,10 @@ class _AutocompleteOptionsListState<T extends Object> extends State<_Autocomplet
             widget.highlightedIndex == 0 ? 0.0 : _scrollController.position.maxScrollExtent,
           );
         } else {
-          Scrollable.ensureVisible(
-            highlightedContext,
-            alignment: 0.5,
-          );
+          Scrollable.ensureVisible(highlightedContext, alignment: 0.5);
         }
       }, debugLabel: 'AutocompleteOptions.ensureVisible');
     }
-
   }
 
   @override
@@ -288,7 +284,7 @@ class _AutocompleteOptionsListState<T extends Object> extends State<_Autocomplet
                 padding: const EdgeInsets.all(16.0),
                 child: Text(widget.displayStringForOption(option)),
               );
-            }
+            },
           ),
         );
       },

@@ -600,9 +600,7 @@ void main() {
     const Color highlightColor = Color(0xFF112233);
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(
-          focusColor: highlightColor,
-        ),
+        theme: ThemeData.light().copyWith(focusColor: highlightColor),
         home: Scaffold(
           body: Autocomplete<String>(
             optionsBuilder: (TextEditingValue textEditingValue) {
@@ -622,7 +620,10 @@ void main() {
     expect(list.semanticChildCount, kOptions.length);
 
     Finder optionFinder(int index) {
-      return find.ancestor(matching: find.byType(Container), of: find.text(kOptions.elementAt(index)));
+      return find.ancestor(
+        matching: find.byType(Container),
+        of: find.text(kOptions.elementAt(index)),
+      );
     }
 
     expect(optionFinder(0), findsOneWidget);
