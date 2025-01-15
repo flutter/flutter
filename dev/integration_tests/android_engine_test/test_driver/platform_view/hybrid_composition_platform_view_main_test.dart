@@ -13,17 +13,17 @@ import '../_luci_skia_gold_prelude.dart';
 ///
 /// ```sh
 /// # Checkout HEAD, i.e. *before* changes you want to test.
-/// UPDATE_GOLDENS=1 flutter drive lib/platform_view/virtual_display_platform_view_main.dart
+/// UPDATE_GOLDENS=1 flutter drive lib/platform_view/hybrid_compoisition_platform_view_main.dart
 ///
 /// # Make your changes.
 ///
 /// # Run the test against baseline.
-/// flutter drive lib/platform_view/virtual_display_platform_view_main.dart
+/// flutter drive lib/platform_view/hybrid_compoisition_platform_view_main.dart
 /// ```
 ///
 /// For a convenient way to deflake a test, see `tool/deflake.dart`.
 void main() async {
-  const String goldenPrefix = 'virtual_display_platform_view';
+  const String goldenPrefix = 'hybrid_composition_platform_view';
 
   late final FlutterDriver flutterDriver;
   late final NativeDriver nativeDriver;
@@ -36,12 +36,6 @@ void main() async {
     nativeDriver = await AndroidNativeDriver.connect(flutterDriver);
     await nativeDriver.configureForScreenshotTesting();
     await flutterDriver.waitUntilFirstFrameRasterized();
-
-    // Double check that we are really probably testing using Virtual Display.
-    // See https://github.com/flutter/flutter/blob/main/docs/platforms/android/Android-Platform-Views.md.
-    if (await nativeDriver.sdkVersion case final int version when version < 23) {
-      fail('Requires SDK >= 23, got $version');
-    }
   });
 
   tearDownAll(() async {
