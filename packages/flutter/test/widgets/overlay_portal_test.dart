@@ -2793,6 +2793,121 @@ void main() {
       );
     });
   });
+
+  group('use visibility', () {
+    testWidgets('visibility works', (WidgetTester tester) async {
+      late OverlayEntry overlayEntry;
+      StateSetter? setState;
+      final OverlayPortalVisibilityController controller = OverlayPortalVisibilityController();
+      const Widget target = SizedBox();
+      Future<void> pumpWith(OverlayPortalVisibility visibility) async {
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Overlay(
+              initialEntries: <OverlayEntry>[
+                overlayEntry = OverlayEntry(
+                  builder: (BuildContext context) {
+                    return StatefulBuilder(
+                      builder: (BuildContext context, StateSetter stateSetter) {
+                        setState = stateSetter;
+                        return OverlayPortal(
+                          overlayChildBuilder: (BuildContext context) => target,
+                          visibility: visibility,
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      Future<void> reset() async {
+        await tester.pumpWidget(const SizedBox());
+        overlayEntry.remove();
+        overlayEntry.dispose();
+      }
+
+      await pumpWith(OverlayPortalVisibility.hide());
+      expect(find.byWidget(target), findsNothing);
+
+      await reset();
+      await pumpWith(OverlayPortalVisibility.show());
+      expect(find.byWidget(target), findsOneWidget);
+
+      await reset();
+      controller.hide();
+      await pumpWith(OverlayPortalVisibility.custom(controller));
+      expect(find.byWidget(target), findsNothing);
+
+      setState!(() {
+        controller.show();
+      });
+      await tester.pump();
+      expect(find.byWidget(target), findsOneWidget);
+
+      setState!(() {
+        controller.hide();
+      });
+      await tester.pump();
+      expect(find.byWidget(target), findsNothing);
+      await reset();
+      setState = null;
+    });
+
+    testWidgets('OverlayPortalVisibilityController can work during the build phase.', (
+      WidgetTester tester,
+    ) async {
+      late OverlayEntry overlayEntry;
+      StateSetter? setState;
+      VoidCallback? didBuildCallback;
+      final OverlayPortalVisibilityController controller = OverlayPortalVisibilityController();
+      const Widget target = SizedBox();
+      Future<void> pumpWith(OverlayPortalVisibility visibility) async {
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Overlay(
+              initialEntries: <OverlayEntry>[
+                overlayEntry = OverlayEntry(
+                  builder: (BuildContext context) {
+                    return StatefulBuilder(
+                      builder: (BuildContext context, StateSetter stateSetter) {
+                        setState = stateSetter;
+                        didBuildCallback?.call();
+                        return OverlayPortal(
+                          overlayChildBuilder: (BuildContext context) => target,
+                          visibility: visibility,
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      await pumpWith(OverlayPortalVisibility.custom(controller));
+      expect(find.byWidget(target), findsNothing);
+      didBuildCallback = () => controller.show();
+      setState!(() {});
+      await tester.pump();
+      expect(find.byWidget(target), findsOneWidget);
+
+      didBuildCallback = () => controller.hide();
+      setState!(() {});
+      await tester.pump();
+      expect(find.byWidget(target), findsNothing);
+      overlayEntry.remove();
+      overlayEntry.dispose();
+      setState = null;
+    });
+  });
 }
 
 class OverlayStatefulEntry extends OverlayEntry {

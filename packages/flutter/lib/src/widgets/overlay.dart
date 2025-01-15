@@ -1570,6 +1570,11 @@ class _RenderTheater extends RenderBox
   }
 }
 
+int _wallTime =
+    kIsWeb
+        ? -9007199254740992 // -2^53
+        : -1 << 63;
+
 // * OverlayPortal Implementation
 //  OverlayPortal is inspired by the
 //  [flutter_portal](https://pub.dev/packages/flutter_portal) package.
@@ -1619,11 +1624,6 @@ class OverlayPortalController {
   // variable will be set to null.
   int? _zOrderIndex;
   final String? _debugLabel;
-
-  static int _wallTime =
-      kIsWeb
-          ? -9007199254740992 // -2^53
-          : -1 << 63;
 
   // Returns a unique and monotonically increasing timestamp that represents
   // now.
@@ -1697,10 +1697,103 @@ class OverlayPortalController {
   }
 }
 
+/// Used to control the visibility of the `OverlayChild` of an [OverlayPortal].
+/// Unlike the [OverlayPortalController], [show] and [hide] only mark its
+/// visibility, and the visibility will be updated to the marked value when
+/// the `OverlayPortal` is built. [show] and [hide] are allowed to be called
+/// during the build phase.
+class OverlayPortalVisibilityController {
+  int? _zOrderIndex;
+  bool _isNeedsUpdate = true;
+
+  /// Mark visibility to hidden.
+  void hide() {
+    if (_zOrderIndex != null) {
+      _zOrderIndex = null;
+      _isNeedsUpdate = true;
+    }
+  }
+
+  /// Mark visibility to visible.
+  ///
+  /// When there are more than one [OverlayPortal]s target the same [Overlay],
+  /// the overlay child of the last [OverlayPortal] to call [show]
+  /// will be marked as the topmost visible.
+  void show() {
+    _zOrderIndex = _now();
+    _isNeedsUpdate = true;
+  }
+
+  /// Whether the currently marked visibility is in the visible state.
+  bool get isShowing => _zOrderIndex != null;
+
+  int _now() {
+    final int now = _wallTime += 1;
+    assert(_zOrderIndex == null || _zOrderIndex! < now);
+    return now;
+  }
+}
+
+/// Used to set the visibility of its overlay child when creating
+/// an [OverlayPortal].
+sealed class OverlayPortalVisibility {
+  const OverlayPortalVisibility();
+
+  /// Overlay child is currently visible. When updated to this state
+  /// from another state, the overlay child will be at the topmost.
+  factory OverlayPortalVisibility.show() => const _OverlayPortalVisibilityShow();
+
+  /// Overlay child is currently hidden.
+  factory OverlayPortalVisibility.hide() => const _OverlayPortalVisibilityHide();
+
+  /// When [visible] is true, use [OverlayPortalVisibility.show]; otherwise,
+  /// use [OverlayPortalVisibility.hide].
+  factory OverlayPortalVisibility.showWhen(bool visible) =>
+      visible ? OverlayPortalVisibility.show() : OverlayPortalVisibility.hide();
+
+  /// The visibility of overlay child will be controlled by the [controller].
+  factory OverlayPortalVisibility.custom(OverlayPortalVisibilityController controller) =
+      _OverlayPortalVisibilityCustom;
+  int? get _zOrderIndex;
+  bool get _isNeedsUpdate;
+}
+
+class _OverlayPortalVisibilityShow extends OverlayPortalVisibility {
+  const _OverlayPortalVisibilityShow();
+  @override
+  int? get _zOrderIndex => _wallTime += 1;
+  @override
+  bool get _isNeedsUpdate => false;
+}
+
+class _OverlayPortalVisibilityHide extends OverlayPortalVisibility {
+  const _OverlayPortalVisibilityHide();
+  @override
+  int? get _zOrderIndex => null;
+  @override
+  bool get _isNeedsUpdate => false;
+}
+
+class _OverlayPortalVisibilityCustom extends OverlayPortalVisibility {
+  _OverlayPortalVisibilityCustom(this.controller);
+  final OverlayPortalVisibilityController controller;
+  @override
+  int? get _zOrderIndex {
+    controller._isNeedsUpdate = false;
+    return controller._zOrderIndex;
+  }
+  @override
+  bool get _isNeedsUpdate => controller._isNeedsUpdate;
+}
+
 /// A widget that renders its overlay child on an [Overlay].
 ///
-/// The overlay child is initially hidden until [OverlayPortalController.show]
-/// is called on the associated [controller]. The [OverlayPortal] uses
+/// Use either [OverlayPortalController] (imperative) or [OverlayPortalVisibility]
+/// (declarative) to control the visibility of the overlay child. When using
+/// [OverlayPortalController], The overlay child is initially hidden until
+/// [OverlayPortalController.show] is called on the associated [controller].
+/// When using [OverlayPortalVisibility], [OverlayPortal] always updates the
+/// visibility of its overlay child during the build phase.The [OverlayPortal] uses
 /// [overlayChildBuilder] to build its overlay child and renders it on the
 /// specified [Overlay] as if it was inserted using an [OverlayEntry], while it
 /// can depend on the same set of [InheritedWidget]s (such as [Theme]) that this
@@ -1711,7 +1804,7 @@ class OverlayPortalController {
 /// ancestor, not by the widget itself. This allows the overlay child to float
 /// above other widgets, independent of its position in the widget tree.
 ///
-/// When [OverlayPortalController.hide] is called, the widget built using
+/// When the overlay child is not visible, the widget built using
 /// [overlayChildBuilder] will be removed from the widget tree the next time the
 /// widget rebuilds. Stateful descendants in the overlay child subtree may lose
 /// states as a result.
@@ -1780,23 +1873,38 @@ class OverlayPortal extends StatefulWidget {
   /// called.
   const OverlayPortal({
     super.key,
-    required this.controller,
+    this.controller,
+    this.visibility,
     required this.overlayChildBuilder,
     this.child,
-  }) : _targetRootOverlay = false;
+  }) : _targetRootOverlay = false,
+       assert(
+         ((controller == null) != (visibility == null)),
+         'Either controller or visibility should be set, but not both.',
+       );
 
   /// Creates an [OverlayPortal] that renders the widget [overlayChildBuilder]
   /// builds on the root [Overlay] when [OverlayPortalController.show] is
   /// called.
   const OverlayPortal.targetsRootOverlay({
     super.key,
-    required this.controller,
+    this.controller,
+    this.visibility,
     required this.overlayChildBuilder,
     this.child,
-  }) : _targetRootOverlay = true;
+  }) : _targetRootOverlay = true,
+       assert(
+         ((controller == null) != (visibility == null)),
+         'Either controller or visibility should be set, but not both.',
+       );
 
   /// The controller to show, hide and bring to top the overlay child.
-  final OverlayPortalController controller;
+  /// When setting this, the [visibility] should not be set.
+  final OverlayPortalController? controller;
+
+  /// Whether the overlay child is visible. When setting this,
+  /// the [controller] should not be set.
+  final OverlayPortalVisibility? visibility;
 
   /// A [WidgetBuilder] used to build a widget below this widget in the tree,
   /// that renders on the closest [Overlay].
@@ -1874,21 +1982,35 @@ class _OverlayPortalState extends State<OverlayPortal> {
   void initState() {
     super.initState();
     _setupController(widget.controller);
+    _setupVisibility(widget.visibility);
   }
 
-  void _setupController(OverlayPortalController controller) {
-    assert(
-      controller._attachTarget == null || controller._attachTarget == this,
-      'Failed to attach $controller to $this. It is already attached to ${controller._attachTarget}.',
-    );
-    final int? controllerZOrderIndex = controller._zOrderIndex;
-    final int? zOrderIndex = _zOrderIndex;
-    if (zOrderIndex == null ||
-        (controllerZOrderIndex != null && controllerZOrderIndex > zOrderIndex)) {
-      _zOrderIndex = controllerZOrderIndex;
+  void _setupController(OverlayPortalController? controller) {
+    if (controller != null) {
+      assert(
+        controller._attachTarget == null || controller._attachTarget == this,
+        'Failed to attach $controller to $this. It is already attached to ${controller._attachTarget}.',
+      );
+      final int? controllerZOrderIndex = controller._zOrderIndex;
+      final int? zOrderIndex = _zOrderIndex;
+      if (zOrderIndex == null ||
+          (controllerZOrderIndex != null && controllerZOrderIndex > zOrderIndex)) {
+        _zOrderIndex = controllerZOrderIndex;
+      }
+      controller._zOrderIndex = null;
+      controller._attachTarget = this;
     }
-    controller._zOrderIndex = null;
-    controller._attachTarget = this;
+  }
+
+  void _setupVisibility(OverlayPortalVisibility? visibility) {
+    if (visibility != null) {
+      final int? visibilityZOrderIndex = visibility._zOrderIndex;
+      if (visibilityZOrderIndex != _zOrderIndex) {
+        _zOrderIndex = visibilityZOrderIndex;
+        _locationCache?._debugMarkLocationInvalid();
+        _locationCache = null;
+      }
+    }
   }
 
   @override
@@ -1903,15 +2025,18 @@ class _OverlayPortalState extends State<OverlayPortal> {
     _childModelMayHaveChanged =
         _childModelMayHaveChanged || oldWidget._targetRootOverlay != widget._targetRootOverlay;
     if (oldWidget.controller != widget.controller) {
-      oldWidget.controller._attachTarget = null;
+      oldWidget.controller?._attachTarget = null;
       _setupController(widget.controller);
+    }
+    if (oldWidget.visibility != widget.visibility || (widget.visibility?._isNeedsUpdate ?? false)) {
+      _setupVisibility(widget.visibility);
     }
   }
 
   @override
   void dispose() {
-    assert(widget.controller._attachTarget == this);
-    widget.controller._attachTarget = null;
+    assert(widget.controller == null || widget.controller?._attachTarget == this);
+    widget.controller?._attachTarget = null;
     _locationCache?._debugMarkLocationInvalid();
     _locationCache = null;
     super.dispose();
