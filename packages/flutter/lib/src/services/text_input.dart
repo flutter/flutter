@@ -2581,6 +2581,9 @@ class SystemContextMenuController with SystemContextMenuClient {
 
   /// Shows the system context menu anchored on the given [Rect].
   ///
+  /// Currently only supported on iOS 16.0 and later. Check
+  /// [MeqiaQuery.maybeSupportsShowingSystemContextMenu] before calling this.
+  ///
   /// The [Rect] represents what the context menu is pointing to. For example,
   /// for some text selection, this would be the selection [Rect].
   ///
@@ -2601,8 +2604,6 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// There can only be one system context menu visible at a time. Calling this
   /// while another system context menu is already visible will remove the old
   /// menu before showing the new menu.
-  ///
-  /// This is only supported on iOS 16.0 and later.
   ///
   /// See also:
   ///
