@@ -2049,10 +2049,10 @@ class Image {
   /// If asserts are disabled, this method always returns null.
   List<StackTrace>? debugGetOpenHandleStackTraces() {
     List<StackTrace>? stacks;
-    // assert(() {
-    //   stacks = _image._handles.map((Image handle) => handle._debugStack!).toList();
-    //   return true;
-    // }());
+    assert(() {
+      stacks = _image._handles.map((Image handle) => handle._debugStack!).toList();
+      return true;
+    }());
     return stacks;
   }
 
