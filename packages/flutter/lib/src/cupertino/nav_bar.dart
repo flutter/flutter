@@ -2288,6 +2288,32 @@ class _CollapsedSearchableBottom extends StatelessWidget {
   }
 }
 
+/// The search field used in the expanded state of a
+/// [CupertinoSliverNavigationBar.search].
+class _NavigationBarSearchField extends StatelessWidget implements PreferredSizeWidget {
+  const _NavigationBarSearchField({required this.searchField});
+
+  static const double verticalPadding = 8.0;
+  static const double searchFieldHeight = 35.0;
+  final Widget searchField;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: _kNavBarEdgePadding,
+          vertical: verticalPadding,
+        ),
+        child: SizedBox(height: searchFieldHeight, child: searchField),
+      ),
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(searchFieldHeight + verticalPadding * 2);
+}
+
 /// This should always be the first child of Hero widgets.
 ///
 /// This class helps each Hero transition obtain the start or end navigation
@@ -3139,30 +3165,4 @@ Widget _navBarHeroFlightShuttleBuilder(
         topNavBar: fromNavBar,
       );
   }
-}
-
-/// The search field used in the expanded state of a
-/// [CupertinoSliverNavigationBar.search].
-class _NavigationBarSearchField extends StatelessWidget implements PreferredSizeWidget {
-  const _NavigationBarSearchField({required this.searchField});
-
-  static const double verticalPadding = 8.0;
-  static const double searchFieldHeight = 35.0;
-  final Widget searchField;
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: _kNavBarEdgePadding,
-          vertical: verticalPadding,
-        ),
-        child: SizedBox(height: searchFieldHeight, child: searchField),
-      ),
-    );
-  }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(searchFieldHeight + verticalPadding * 2);
 }
