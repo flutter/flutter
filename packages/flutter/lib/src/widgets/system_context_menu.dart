@@ -5,7 +5,6 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
@@ -160,19 +159,6 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
         title: item.title!,
         onPressed: item.onPressed!,
       ),
-    };
-  }
-
-  bool _include(SystemContextMenuItem item, EditableTextState editableTextState) {
-    return switch (item) {
-      SystemContextMenuItemCopy() => editableTextState.copyEnabled,
-      SystemContextMenuItemCut() => editableTextState.cutEnabled,
-      SystemContextMenuItemPaste() => editableTextState.pasteEnabled,
-      SystemContextMenuItemSelectAll() => editableTextState.selectAllEnabled,
-      SystemContextMenuItemLookUp() => editableTextState.lookUpEnabled,
-      SystemContextMenuItemSearchWeb() => editableTextState.searchWebEnabled,
-      SystemContextMenuItemShare() => editableTextState.shareEnabled,
-      SystemContextMenuItemCustom() => true,
     };
   }
 
