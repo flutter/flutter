@@ -82,7 +82,7 @@ void fl_keyboard_manager_handle_event(FlKeyboardManager* manager,
 
 /**
  * fl_keyboard_manager_handle_event_finish:
- * @engine: an #FlEngine.
+ * @manager: an #FlKeyboardManager.
  * @result: a #GAsyncResult.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
  * to ignore.
@@ -91,7 +91,7 @@ void fl_keyboard_manager_handle_event(FlKeyboardManager* manager,
  *
  * Returns: %TRUE on success.
  */
-gboolean fl_keyboard_manager_handle_event_finish(FlEngine* engine,
+gboolean fl_keyboard_manager_handle_event_finish(FlKeyboardManager* manager,
                                                  GAsyncResult* result,
                                                  GError** error);
 

@@ -681,8 +681,18 @@ static gboolean handle_key_event(FlView* self, GdkEventKey* key_event) {
     return FALSE;
   }
 
-  fl_keyboard_manager_handle_event(self->keyboard_manager, event,
-                                   self->cancellable, nullptr, nullptr);
+  fl_keyboard_manager_handle_event(
+      self->keyboard_manager, event, self->cancellable,
+      [](GObject* object, GAsyncResult* result, gpointer user_data) {
+        g_autoptr(GError) error = nullptr;
+        if (!fl_keyboard_manager_handle_event_finish(
+                FL_KEYBOARD_MANAGER(object), result, &error)) {
+          if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+            g_warning("Failed to handle key event: %s", error->message);
+          }
+        }
+      },
+      nullptr);
 
   return TRUE;
 }
