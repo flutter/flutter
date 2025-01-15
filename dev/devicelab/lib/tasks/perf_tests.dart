@@ -1811,7 +1811,7 @@ class CompileTest {
     return TaskResult.success(metrics);
     });
   }
-  
+
   Future<Map<String, dynamic>> _compileApp({required bool deleteGradleCache}) async {
     await flutter('clean');
     if (deleteGradleCache) {
