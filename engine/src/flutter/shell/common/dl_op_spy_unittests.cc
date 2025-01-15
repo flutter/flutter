@@ -456,7 +456,7 @@ TEST(DlOpSpy, Images) {
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kBlack());
     const DlRSTransform xform[] = {
-        DlRSTransform::Make({0, 0}, 0.0f, DlDegrees(0)),
+        DlRSTransform::Make({0, 0}, 1.0f, DlDegrees(0)),
     };
     const DlRect tex[] = {DlRect::MakeXYWH(10, 10, 10, 10)};
     DlRect cull_rect = DlRect::MakeWH(5, 5);
