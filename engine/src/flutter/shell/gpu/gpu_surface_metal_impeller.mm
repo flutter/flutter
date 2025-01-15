@@ -37,8 +37,10 @@ GPUSurfaceMetalImpeller::GPUSurfaceMetalImpeller(
   if (disablePartialRepaint != nil) {
     disable_partial_repaint_ = disablePartialRepaint.boolValue;
   }
-  swapchain_transients_ = std::make_shared<impeller::SwapchainTransientsMTL>(
-      aiks_context_->GetContext()->GetResourceAllocator());
+  if (aiks_context_) {
+    swapchain_transients_ = std::make_shared<impeller::SwapchainTransientsMTL>(
+        aiks_context_->GetContext()->GetResourceAllocator());
+  }
 }
 
 GPUSurfaceMetalImpeller::~GPUSurfaceMetalImpeller() = default;
