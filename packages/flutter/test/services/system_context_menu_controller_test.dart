@@ -320,7 +320,8 @@ void main() {
       connection.close();
     });
 
-    final List<List<SystemContextMenuItemData>> itemsReceived = <List<SystemContextMenuItemData>>[];
+    final List<List<IOSSystemContextMenuItemData>> itemsReceived =
+        <List<IOSSystemContextMenuItemData>>[];
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       (MethodCall methodCall) async {
@@ -328,7 +329,7 @@ void main() {
           case 'ContextMenu.showSystemContextMenu':
             final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
             final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-            final List<SystemContextMenuItemData> lastItems =
+            final List<IOSSystemContextMenuItemData> lastItems =
                 untypedItems.map((dynamic value) {
                   final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
                   return systemContextMenuItemDataFromJson(itemJson);
@@ -354,12 +355,12 @@ void main() {
 
     // Showing calls the platform.
     const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
-    final List<SystemContextMenuItemData> items1 = <SystemContextMenuItemData>[
-      const SystemContextMenuItemDataCut(),
-      const SystemContextMenuItemDataCopy(),
-      const SystemContextMenuItemDataPaste(),
-      const SystemContextMenuItemDataSelectAll(),
-      const SystemContextMenuItemDataSearchWeb(title: 'Special Search'),
+    final List<IOSSystemContextMenuItemData> items1 = <IOSSystemContextMenuItemData>[
+      const IOSSystemContextMenuItemDataCut(),
+      const IOSSystemContextMenuItemDataCopy(),
+      const IOSSystemContextMenuItemDataPaste(),
+      const IOSSystemContextMenuItemDataSelectAll(),
+      const IOSSystemContextMenuItemDataSearchWeb(title: 'Special Search'),
       // TODO(justinmc): Support the "custom" item type.
       // https://github.com/flutter/flutter/issues/103163
     ];
@@ -376,8 +377,8 @@ void main() {
     expect(itemsReceived, hasLength(1));
 
     // Showing new items calls the platform.
-    final List<SystemContextMenuItemData> items2 = <SystemContextMenuItemData>[
-      const SystemContextMenuItemDataCut(),
+    final List<IOSSystemContextMenuItemData> items2 = <IOSSystemContextMenuItemData>[
+      const IOSSystemContextMenuItemDataCut(),
     ];
     controller.show(rect, items2);
     expect(controller.isVisible, isTrue);

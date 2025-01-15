@@ -5,21 +5,21 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-/// Returns a [SystemContextMenuItemData] of the correct subclass given its
+/// Returns a [IOSSystemContextMenuItemData] of the correct subclass given its
 /// json data.
-SystemContextMenuItemData systemContextMenuItemDataFromJson(Map<String, dynamic> json) {
+IOSSystemContextMenuItemData systemContextMenuItemDataFromJson(Map<String, dynamic> json) {
   final String? type = json['type'] as String?;
   final String? title = json['title'] as String?;
   final VoidCallback? onPressed = json['onPressed'] as VoidCallback?;
   return switch (type) {
-    'copy' => const SystemContextMenuItemDataCopy(),
-    'cut' => const SystemContextMenuItemDataCut(),
-    'paste' => const SystemContextMenuItemDataPaste(),
-    'selectAll' => const SystemContextMenuItemDataSelectAll(),
-    'searchWeb' => SystemContextMenuItemDataSearchWeb(title: title!),
-    'share' => SystemContextMenuItemDataShare(title: title!),
-    'lookUp' => SystemContextMenuItemDataLookUp(title: title!),
-    'custom' => SystemContextMenuItemDataCustom(title: title!, onPressed: onPressed!),
-    _ => throw FlutterError('Invalid json for SystemContextMenuItemData.type $type.'),
+    'copy' => const IOSSystemContextMenuItemDataCopy(),
+    'cut' => const IOSSystemContextMenuItemDataCut(),
+    'paste' => const IOSSystemContextMenuItemDataPaste(),
+    'selectAll' => const IOSSystemContextMenuItemDataSelectAll(),
+    'searchWeb' => IOSSystemContextMenuItemDataSearchWeb(title: title!),
+    'share' => IOSSystemContextMenuItemDataShare(title: title!),
+    'lookUp' => IOSSystemContextMenuItemDataLookUp(title: title!),
+    'custom' => IOSSystemContextMenuItemDataCustom(title: title!, onPressed: onPressed!),
+    _ => throw FlutterError('Invalid json for IOSSystemContextMenuItemData.type $type.'),
   };
 }

@@ -59,7 +59,7 @@ enum ContextMenuButtonType {
 ///  * [AdaptiveTextSelectionToolbar], which can take a list of
 ///    ContextMenuButtonItems and create a platform-specific context menu with
 ///    the indicated buttons.
-///  * [SystemContextMenuItem], which serves a similar role but for system-drawn
+///  * [IOSSystemContextMenuItem], which serves a similar role but for system-drawn
 ///    context menu items.
 @immutable
 class ContextMenuButtonItem {

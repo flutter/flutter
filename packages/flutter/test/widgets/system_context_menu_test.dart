@@ -145,8 +145,8 @@ void main() {
   testWidgets(
     'can customize the menu items',
     (WidgetTester tester) async {
-      final List<List<SystemContextMenuItemData>> itemsReceived =
-          <List<SystemContextMenuItemData>>[];
+      final List<List<IOSSystemContextMenuItemData>> itemsReceived =
+          <List<IOSSystemContextMenuItemData>>[];
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
         (MethodCall methodCall) async {
@@ -154,7 +154,7 @@ void main() {
             case 'ContextMenu.showSystemContextMenu':
               final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
               final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-              final List<SystemContextMenuItemData> lastItems =
+              final List<IOSSystemContextMenuItemData> lastItems =
                   untypedItems.map((dynamic value) {
                     final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
                     return systemContextMenuItemDataFromJson(itemJson);
@@ -171,9 +171,9 @@ void main() {
         );
       });
 
-      const List<SystemContextMenuItem> items1 = <SystemContextMenuItem>[
-        SystemContextMenuItemCopy(),
-        SystemContextMenuItemShare(title: 'My Share Title'),
+      const List<IOSSystemContextMenuItem> items1 = <IOSSystemContextMenuItem>[
+        IOSSystemContextMenuItemCopy(),
+        IOSSystemContextMenuItemShare(title: 'My Share Title'),
       ];
       final TextEditingController controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
@@ -217,10 +217,10 @@ void main() {
 
       expect(itemsReceived, hasLength(1));
       expect(itemsReceived.last, hasLength(items1.length));
-      expect(itemsReceived.last[0], equals(const SystemContextMenuItemDataCopy()));
+      expect(itemsReceived.last[0], equals(const IOSSystemContextMenuItemDataCopy()));
       expect(
         itemsReceived.last[1],
-        equals(const SystemContextMenuItemDataShare(title: 'My Share Title')),
+        equals(const IOSSystemContextMenuItemDataShare(title: 'My Share Title')),
       );
 
       state.hideToolbar();
