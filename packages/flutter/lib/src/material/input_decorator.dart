@@ -2267,7 +2267,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     } else{
       hintTextWidget = const SizedBox.shrink();
     }
-    
     final bool showHint = isEmpty && !_hasInlineLabel;
     hint =
         maintainHintHeight
