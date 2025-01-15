@@ -2176,10 +2176,10 @@ void main() {
     }
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/160428.
   testWidgets(
     'Material2 - BottomNavigationBar same item shifting backgroundColor with transition',
     (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/160428.
       final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
         frameSize: const Size(800, 600),
       );
@@ -2240,10 +2240,10 @@ void main() {
     skip: isBrowser, // https://github.com/flutter/flutter/issues/56001
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/160428.
   testWidgets(
     'Material3 - BottomNavigationBar same item shifting backgroundColor with transition',
     (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/160428.
       final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
         frameSize: const Size(800, 600),
       );
