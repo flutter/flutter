@@ -12,7 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
 
-import 'html_element_view_test.dart';
+import 'web_platform_view_registry_utils.dart';
 
 extension on web.HTMLCollection {
   Iterable<web.Element?> get iterable =>
