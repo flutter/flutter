@@ -77,9 +77,9 @@ void main() {
       indicatorRRect = arguments[0] as RRect;
       return true;
     }));
-    expect(indicatorRRect.left, closeTo(51.0, 0.1));
+    expect(indicatorRRect.left, closeTo(76.7, 0.1));
     expect(indicatorRRect.top, equals(45.0));
-    expect(indicatorRRect.right, closeTo(221.4, 0.1));
+    expect(indicatorRRect.right, closeTo(423.1, 0.1));
     expect(indicatorRRect.bottom, equals(48.0));
   });
 }
