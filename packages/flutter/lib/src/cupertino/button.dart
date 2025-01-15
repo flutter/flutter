@@ -370,7 +370,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
               : widget.color?.opacity ?? 1.0,
         );
     final Color foregroundColor =
-        widget._style == _CupertinoButtonStyle.filled
+        widget._style == _CupertinoButtonStyle.filled || backgroundColor != null
             ? themeData.primaryContrastingColor
             : enabled
             ? primaryColor
