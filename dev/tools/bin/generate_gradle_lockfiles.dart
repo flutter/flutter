@@ -304,7 +304,10 @@ distributionUrl=https\://services.gradle.org/distributions/gradle-8.10.2-all.zip
 
 Iterable<Directory> discoverAndroidDirectories(Directory repoRoot) {
   return repoRoot
-      .listSync(recursive: true)
+      .listSync()
+      .whereType<Directory>()
+      .where((Directory directory) => directory.basename != 'engine')
+      .expand((Directory d) => d.listSync(recursive: true))
       .whereType<Directory>()
       .where((FileSystemEntity entity) => entity.basename == 'android');
 }
