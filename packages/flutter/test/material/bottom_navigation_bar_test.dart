@@ -2237,7 +2237,7 @@ void main() {
         matchesGoldenFile('m2_bottom_navigation_bar.same_item_shifting_transition.png'),
       );
     },
-    skip: isBrowser,
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/56001
   );
 
   testWidgets(
@@ -2300,7 +2300,7 @@ void main() {
         matchesGoldenFile('m3_bottom_navigation_bar.same_item_shifting_transition.png'),
       );
     },
-    skip: isBrowser,
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/56001
   );
 
   testWidgets('BottomNavigationBar item label should not be nullable', (WidgetTester tester) async {
