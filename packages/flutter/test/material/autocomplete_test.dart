@@ -592,7 +592,6 @@ void main() {
 
       await tester.tap(find.byType(RawAutocomplete<String>));
       await tester.enterText(find.byType(RawAutocomplete<String>), 'a');
-      await tester.pump();
       expect(find.text('aa').hitTestable(), findsOneWidget);
     });
   });
