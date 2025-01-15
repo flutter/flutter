@@ -281,7 +281,7 @@ class ReorderableList extends StatefulWidget {
   /// {@macro flutter.widgets.scroll_view.keyboardDismissBehavior}
   ///
   /// If [keyboardDismissBehavior] is null then it will fallback to the inherited
-  /// [ScrollBehavior.keyboardDismissBehavior].
+  /// [ScrollBehavior.getKeyboardDismissBehavior].
   final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
 
   /// {@macro flutter.widgets.scrollable.restorationId}

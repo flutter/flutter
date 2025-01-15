@@ -380,7 +380,7 @@ abstract class ScrollView extends StatelessWidget {
   ///
   /// If [keyboardDismissBehavior] is null then it will fallback to
   /// [scrollBehavior]. If that is also null, the inherited 
-  /// [ScrollBehavior.keyboardDismissBehavior] will be used.
+  /// [ScrollBehavior.getKeyboardDismissBehavior] will be used.
   final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
 
   /// {@macro flutter.widgets.scrollable.restorationId}
