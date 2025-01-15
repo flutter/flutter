@@ -52,6 +52,7 @@ class SensitiveContentSetting {
 
   final Map<int, ViewContentSensitivityState> _contentSensitivityStates = <int, ViewContentSensitivityState> {};
   final SensitiveContentService _sensitiveContentService = SensitiveContentService();
+  final ContentSensitivity _defaultContentSensitivitySetting = ContentSensitivity.autoSensitive;
 
   static final SensitiveContentSetting _instance = SensitiveContentSetting._();
 
@@ -106,7 +107,7 @@ class SensitiveContentSetting {
     if (contentSensitivityStateForView.getTotalNumberOfWidgets() == 0) {
       // There is no longer sensitive content in the view. Reset to the default
       // mode.
-      _sensitiveContentService.setContentSensitivity(viewId, ContentSensitivity.autoSensitive);
+      _sensitiveContentService.setContentSensitivity(viewId, _defaultContentSensitivitySetting);
       return;
     }
 
