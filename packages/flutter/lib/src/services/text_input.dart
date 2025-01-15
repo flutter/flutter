@@ -2582,7 +2582,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// Shows the system context menu anchored on the given [Rect].
   ///
   /// Currently only supported on iOS 16.0 and later. Check
-  /// [MeqiaQuery.maybeSupportsShowingSystemContextMenu] before calling this.
+  /// [MediaQuery.maybeSupportsShowingSystemContextMenu] before calling this.
   ///
   /// The [Rect] represents what the context menu is pointing to. For example,
   /// for some text selection, this would be the selection [Rect].
