@@ -379,7 +379,7 @@ abstract class ScrollView extends StatelessWidget {
   /// {@endtemplate}
   ///
   /// If [keyboardDismissBehavior] is null then it will fallback to
-  /// [scrollBehavior]. If that is also null, the inherited 
+  /// [scrollBehavior]. If that is also null, the inherited
   /// [ScrollBehavior.getKeyboardDismissBehavior] will be used.
   final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
 
