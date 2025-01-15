@@ -674,8 +674,7 @@ static void fl_view_realize(GtkWidget* widget) {
 }
 
 static gboolean handle_key_event(FlView* self, GdkEventKey* key_event) {
-  // FIXME: autoptr
-  FlKeyEvent* event = fl_key_event_new_from_gdk_event(
+  g_autoptr(FlKeyEvent) event = fl_key_event_new_from_gdk_event(
       gdk_event_copy(reinterpret_cast<GdkEvent*>(key_event)));
 
   if (fl_keyboard_manager_is_redispatched(self->keyboard_manager, event)) {
