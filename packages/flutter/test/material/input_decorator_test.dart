@@ -13705,27 +13705,23 @@ void main() {
       },
     );
 
-    group('test hint and hintText',(){
+    group('test hint and hintText', () {
       testWidgets('InputDecorator throws Assertion Error when hint and hintText are provided', (
-          WidgetTester tester,
-        ) async {
-          expect(() {
-            buildInputDecorator(
-              decoration: InputDecoration(
-                hintText: 'Enter text here',
-                hint: const Text('Enter text here', style: TextStyle(fontSize: 20.0)),
-              ),
-            );
-          }, throwsAssertionError);
-        });
+        WidgetTester tester,
+      ) async {
+        expect(() {
+          buildInputDecorator(
+            decoration: InputDecoration(
+              hintText: 'Enter text here',
+              hint: const Text('Enter text here', style: TextStyle(fontSize: 20.0)),
+            ),
+          );
+        }, throwsAssertionError);
+      });
 
       testWidgets('InputDecorator shows hint widget', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecorator(
-            decoration: const InputDecoration(
-              hint: Text('hint'),
-            ),
-          ),
+          buildInputDecorator(decoration: const InputDecoration(hint: Text('hint'))),
         );
         expect(find.text('hint'), findsOneWidget);
       });

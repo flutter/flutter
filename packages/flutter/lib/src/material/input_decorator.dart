@@ -2250,21 +2250,19 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final bool maintainHintHeight = decoration.maintainHintHeight;
     Widget? hint;
     Widget? hintTextWidget;
-    if(decoration.hint!=null) {
+    if (decoration.hint != null) {
       hintTextWidget = decoration.hint;
-    }else if(hintText != null) {
+    } else if (hintText != null) {
       hintTextWidget = Text(
-              hintText,
-              style: hintStyle,
-              textDirection: decoration.hintTextDirection,
-              overflow: hintStyle.overflow ??
-                  (decoration.hintMaxLines == null
-                      ? null
-                      : TextOverflow.ellipsis),
-              textAlign: textAlign,
-              maxLines: decoration.hintMaxLines,
-            );
-    } else{
+        hintText,
+        style: hintStyle,
+        textDirection: decoration.hintTextDirection,
+        overflow:
+            hintStyle.overflow ?? (decoration.hintMaxLines == null ? null : TextOverflow.ellipsis),
+        textAlign: textAlign,
+        maxLines: decoration.hintMaxLines,
+      );
+    } else {
       hintTextWidget = const SizedBox.shrink();
     }
     final bool showHint = isEmpty && !_hasInlineLabel;
