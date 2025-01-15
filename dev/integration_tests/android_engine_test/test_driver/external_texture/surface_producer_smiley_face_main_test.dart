@@ -7,19 +7,29 @@ import 'package:android_driver_extensions/skia_gold.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 
-import '_luci_skia_gold_prelude.dart';
+import '../_luci_skia_gold_prelude.dart';
 
+/// For local debugging, a (local) golden-file is required as a baseline:
+///
+/// ```sh
+/// # Checkout HEAD, i.e. *before* changes you want to test.
+/// UPDATE_GOLDENS=1 flutter drive lib/external_texture/surface_producer_smiley_face_main.dart
+///
+/// # Make your changes.
+///
+/// # Run the test against baseline.
+/// flutter drive lib/external_texture/surface_producer_smiley_face_main.dart
+/// ```
+///
+/// For a convenient way to deflake a test, see `tool/deflake.dart`.
 void main() async {
-  // To test the golden file generation locally, comment out the following line.
-  // autoUpdateGoldenFiles = true;
-
   const String appName = 'com.example.android_engine_test';
   late final FlutterDriver flutterDriver;
   late final NativeDriver nativeDriver;
 
   setUpAll(() async {
     if (isLuci) {
-      await enableSkiaGoldComparator();
+      await enableSkiaGoldComparator(namePrefix: 'android_engine_test');
     }
     flutterDriver = await FlutterDriver.connect();
     nativeDriver = await AndroidNativeDriver.connect(flutterDriver);
@@ -32,8 +42,6 @@ void main() async {
   });
 
   test('should screenshot and match an external smiley face texture', () async {
-    await flutterDriver.waitFor(find.byType('Texture'));
-
     // On Android: Background the app, trim memory, and restore the app.
     if (nativeDriver case final AndroidNativeDriver nativeDriver) {
       print('Backgrounding the app, trimming memory, and resuming the app.');
@@ -48,7 +56,7 @@ void main() async {
 
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('external_texture_smiley_face.android.png'),
+      matchesGoldenFile('external_texture_surface_producer_smiley_face.png'),
     );
   }, timeout: Timeout.none);
 }
