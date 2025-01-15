@@ -15,18 +15,31 @@
 
 namespace impeller {
 
+/// @brief A cache for the onscreen texture attachments used in surface_mtl.
+///
+/// Typically the onscreen resolve texture is created from a Metal drawable and
+/// this cache is only used for the MSAA texture and the depth+stencil
+/// attachment. When partial repaint is active, this class also provides a cache
+/// for an offscreen resolve texture that is blitted to the real onscreen during
+/// present.
 class SwapchainTransientsMTL {
  public:
   explicit SwapchainTransientsMTL(const std::shared_ptr<Allocator>& allocator);
 
   ~SwapchainTransientsMTL();
 
+  /// @brief Update the size and pixel format of the onscreens.
+  ///
+  /// Note: this will invalidate any cached textures if either property changes.
   void SetSizeAndFormat(ISize size, PixelFormat format);
 
+  /// @brief Retrieve the resolve texture, creating one if needed.
   std::shared_ptr<Texture> GetResolveTexture();
 
+  /// @brief Retrieve the MSAA texture, creating one if needed.
   std::shared_ptr<Texture> GetMSAATexture();
 
+  /// @brief Retrieve the depth+stencil texture, creating one if needed.
   std::shared_ptr<Texture> GetDepthStencilTexture();
 
  private:
