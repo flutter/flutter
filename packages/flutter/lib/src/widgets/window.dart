@@ -488,7 +488,9 @@ class PopupWindow extends StatelessWidget {
   final Widget child;
 
   FlutterView _getParent(BuildContext context) {
-    return View.maybeOf(context) ?? WidgetsBinding.instance.platformDispatcher.implicitView!;
+    final FlutterView? view = WindowContext.of(context)?.view;
+    assert(view != null);
+    return view!;
   }
 
   Rect _clampRectToSize(BuildContext context, Rect anchorRect) {
