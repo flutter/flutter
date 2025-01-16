@@ -102,7 +102,6 @@ void main() {
 
     expect(find.widgetWithText(CupertinoSearchTextField, 'Search'), findsOneWidget);
     expect(find.text('Tap on the search field to open the search view'), findsOneWidget);
-    expect(find.text('This is a search view'), findsNothing);
     // A decoy 'Cancel' button used in the animation.
     expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
 
@@ -110,10 +109,14 @@ void main() {
     await tester.tap(find.byType(CupertinoSearchTextField), warnIfMissed: false);
     await tester.pumpAndSettle();
 
-    expect(find.widgetWithText(CupertinoSearchTextField, 'Search'), findsOneWidget);
+    expect(find.widgetWithText(CupertinoSearchTextField, 'Enter search text'), findsOneWidget);
     expect(find.text('Tap on the search field to open the search view'), findsNothing);
     expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
-    expect(find.text('This is a search view'), findsOneWidget);
+
+    await tester.enterText(find.byType(CupertinoSearchTextField), 'a');
+    await tester.pumpAndSettle();
+
+    expect(find.text('The text has changed to: a'), findsOneWidget);
 
     // Tap on the 'Cancel' button to close the search view.
     await tester.tap(find.widgetWithText(CupertinoButton, 'Cancel'));
@@ -121,7 +124,6 @@ void main() {
 
     expect(find.widgetWithText(CupertinoSearchTextField, 'Search'), findsOneWidget);
     expect(find.text('Tap on the search field to open the search view'), findsOneWidget);
-    expect(find.text('This is a search view'), findsNothing);
     // A decoy 'Cancel' button used in the animation.
     expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
   });

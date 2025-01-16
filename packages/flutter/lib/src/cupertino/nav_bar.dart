@@ -918,6 +918,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
          'A bottomMode was provided without a corresponding bottom.',
        ),
        onSearchActiveChanged = null,
+       searchField = null,
        _searchable = false;
 
   /// Create a navigation bar for scrolling lists with [bottom] set to a
@@ -946,6 +947,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.stretch = false,
     this.bottomMode = NavigationBarBottomMode.automatic,
     this.onSearchActiveChanged,
+    this.searchField = const CupertinoSearchTextField(),
   }) : assert(
          automaticallyImplyTitle || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
@@ -1080,6 +1082,11 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// Defaults to `false`.
   final bool stretch;
 
+  /// The search field used in [CupertinoSliverNavigationBar.search].
+  ///
+  /// Defaults to a [CupertinoSearchTextField].
+  final Widget? searchField;
+
   /// True if the [CupertinoSliverNavigationBar.search] constructor is used.
   final bool _searchable;
 
@@ -1098,7 +1105,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   late AnimationController _animationController;
   late Animation<double> persistentHeightAnimation;
   late Animation<double> largeTitleHeightAnimation;
-  final Widget searchField = const CupertinoSearchTextField();
   bool expanded = true;
 
   @override
@@ -1118,7 +1124,8 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     );
     largeTitleHeightAnimation = largeTitleHeightTween.animate(_animationController);
     if (widget._searchable) {
-      preferredSizeSearchField = _NavigationBarSearchField(searchField: searchField);
+      assert(widget.searchField != null);
+      preferredSizeSearchField = _NavigationBarSearchField(searchField: widget.searchField!);
     }
   }
 
@@ -1227,7 +1234,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                   : _CollapsedSearchableBottom(
                     animationController: _animationController,
                     animation: persistentHeightAnimation,
-                    searchField: searchField,
+                    searchField: widget.searchField,
                     onSearchFieldTap: _onSearchFieldTap,
                   ))
               : widget.bottom),
