@@ -94,15 +94,16 @@ TEST_P(TextContentsTest, SimpleComputeVertexData) {
   std::shared_ptr<TextFrame> text_frame =
       MakeTextFrame("1", "ahem.ttf", /*font_size=*/50);
 
-  auto context = TypographerContextSkia::Make();
-  auto atlas_context =
+  std::shared_ptr<TypographerContext> context = TypographerContextSkia::Make();
+  std::shared_ptr<GlyphAtlasContext> atlas_context =
       context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
-  auto host_buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                        GetContext()->GetIdleWaiter());
+  std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter());
   ASSERT_TRUE(context && context->IsValid());
-  auto atlas = CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
-                                GlyphAtlas::Type::kAlphaBitmap, /*scale=*/1.0f,
-                                atlas_context, text_frame);
+  std::shared_ptr<GlyphAtlas> atlas =
+      CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
+                       GlyphAtlas::Type::kAlphaBitmap, /*scale=*/1.0f,
+                       atlas_context, text_frame);
 
   ISize texture_size = atlas->GetTexture()->GetSize();
   TextContents::ComputeVertexData(
