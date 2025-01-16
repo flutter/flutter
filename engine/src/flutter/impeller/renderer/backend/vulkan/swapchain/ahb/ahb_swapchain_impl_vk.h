@@ -13,6 +13,7 @@
 #include "impeller/renderer/backend/vulkan/android/ahb_texture_source_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_texture_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/external_fence_vk.h"
+#include "impeller/renderer/backend/vulkan/swapchain/ahb/external_semaphore_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/swapchain_transients_vk.h"
 #include "impeller/renderer/surface.h"
 #include "impeller/toolkit/android/hardware_buffer.h"
@@ -20,6 +21,47 @@
 #include "vulkan/vulkan_handles.hpp"
 
 namespace impeller {
+
+static constexpr const size_t kMaxPendingPresents = 2u;
+
+struct AHBFrameSynchronizerVK {
+  vk::UniqueFence acquire;
+  vk::UniqueSemaphore render_ready = {};
+  std::shared_ptr<ExternalSemaphoreVK> present_ready;
+  std::shared_ptr<CommandBuffer> final_cmd_buffer;
+  bool is_valid = false;
+
+  explicit AHBFrameSynchronizerVK(const vk::Device& device) {
+    auto acquire_res = device.createFenceUnique(
+        vk::FenceCreateInfo{vk::FenceCreateFlagBits::eSignaled});
+    if (acquire_res.result != vk::Result::eSuccess) {
+      VALIDATION_LOG << "Could not create synchronizer.";
+      return;
+    }
+    acquire = std::move(acquire_res.value);
+    is_valid = true;
+  }
+
+  ~AHBFrameSynchronizerVK() = default;
+
+  bool WaitForFence(const vk::Device& device) {
+    if (auto result = device.waitForFences(
+            *acquire,                             // fence
+            true,                                 // wait all
+            std::numeric_limits<uint64_t>::max()  // timeout (ns)
+        );
+        result != vk::Result::eSuccess) {
+      VALIDATION_LOG << "Fence wait failed: " << vk::to_string(result);
+      return false;
+    }
+    if (auto result = device.resetFences(*acquire);
+        result != vk::Result::eSuccess) {
+      VALIDATION_LOG << "Could not reset fence: " << vk::to_string(result);
+      return false;
+    }
+    return true;
+  }
+};
 
 //------------------------------------------------------------------------------
 /// @brief      The implementation of a swapchain at a specific size. Resizes to
@@ -99,19 +141,14 @@ class AHBSwapchainImplVK final
   android::HardwareBufferDescriptor desc_;
   std::shared_ptr<AHBTexturePoolVK> pool_;
   std::shared_ptr<SwapchainTransientsVK> transients_;
+
   // In C++20, this mutex can be replaced by the shared pointer specialization
   // of std::atomic.
   Mutex currently_displayed_texture_mutex_;
   std::shared_ptr<AHBTextureSourceVK> currently_displayed_texture_
       IPLR_GUARDED_BY(currently_displayed_texture_mutex_);
-  std::shared_ptr<fml::Semaphore> pending_presents_;
 
-  struct FrameData {
-    std::shared_ptr<CommandBuffer> command_buffer;
-    vk::UniqueSemaphore semaphore;
-  };
-
-  std::array<FrameData, 3> frame_data_;
+  std::vector<std::unique_ptr<AHBFrameSynchronizerVK>> frame_data_;
   size_t frame_index_ = 0;
   bool is_valid_ = false;
 
@@ -122,8 +159,7 @@ class AHBSwapchainImplVK final
       bool enable_msaa,
       size_t swapchain_image_count);
 
-  bool Present(const AutoSemaSignaler& signaler,
-               const std::shared_ptr<AHBTextureSourceVK>& texture);
+  bool Present(const std::shared_ptr<AHBTextureSourceVK>& texture);
 
   vk::UniqueSemaphore CreateRenderReadySemaphore(
       const std::shared_ptr<fml::UniqueFD>& fd) const;
@@ -132,11 +168,10 @@ class AHBSwapchainImplVK final
       const std::shared_ptr<fml::UniqueFD>& render_ready_fence,
       const std::shared_ptr<AHBTextureSourceVK>& texture);
 
-  std::shared_ptr<ExternalFenceVK> SubmitSignalForPresentReady(
+  std::shared_ptr<ExternalSemaphoreVK> SubmitSignalForPresentReady(
       const std::shared_ptr<AHBTextureSourceVK>& texture) const;
 
   void OnTextureUpdatedOnSurfaceControl(
-      const AutoSemaSignaler& signaler,
       std::shared_ptr<AHBTextureSourceVK> texture,
       ASurfaceTransactionStats* stats);
 };
