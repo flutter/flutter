@@ -895,7 +895,7 @@ void main() {
 
       await gesture.down(const Offset(100, 100));
 
-      // Need 2 events to form a valid drag
+      // Need 2 events to form a valid drag.
       await tester.pump(const Duration(milliseconds: 100));
       await gesture.moveTo(const Offset(100, 80), timeStamp: const Duration(milliseconds: 100));
       await tester.pump(const Duration(milliseconds: 200));
@@ -907,6 +907,9 @@ void main() {
 
       // Final position should be higher.
       expect(endPosition, lessThan(startPosition));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
     });
   });
 }
