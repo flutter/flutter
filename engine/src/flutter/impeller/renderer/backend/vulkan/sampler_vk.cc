@@ -37,22 +37,19 @@ static vk::UniqueSampler CreateSampler(
   sampler_info.borderColor = vk::BorderColor::eFloatTransparentBlack;
   sampler_info.maxLod = VK_LOD_CLAMP_NONE;
 
-  sampler_info.mipmapMode = vk::SamplerMipmapMode::eNearest;
-  sampler_info.minLod = sampler_info.maxLod = 0.0f;
-  // //
   // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSamplerCreateInfo.html#_description
-  // switch (desc.mip_filter) {
-  //   case MipFilter::kBase:
-  //     sampler_info.mipmapMode = vk::SamplerMipmapMode::eNearest;
-  //     sampler_info.minLod = sampler_info.maxLod = 0.0f;
-  //     break;
-  //   case MipFilter::kNearest:
-  //     sampler_info.mipmapMode = vk::SamplerMipmapMode::eNearest;
-  //     break;
-  //   case MipFilter::kLinear:
-  //     sampler_info.mipmapMode = vk::SamplerMipmapMode::eLinear;
-  //     break;
-  // }
+  switch (desc.mip_filter) {
+    case MipFilter::kBase:
+      sampler_info.mipmapMode = vk::SamplerMipmapMode::eNearest;
+      sampler_info.minLod = sampler_info.maxLod = 0.0f;
+      break;
+    case MipFilter::kNearest:
+      sampler_info.mipmapMode = vk::SamplerMipmapMode::eNearest;
+      break;
+    case MipFilter::kLinear:
+      sampler_info.mipmapMode = vk::SamplerMipmapMode::eLinear;
+      break;
+  }
 
   if (yuv_conversion && yuv_conversion->IsValid()) {
     sampler_chain.get<vk::SamplerYcbcrConversionInfo>().conversion =
