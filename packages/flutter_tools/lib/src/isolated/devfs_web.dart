@@ -1031,7 +1031,7 @@ class WebDevFS implements DevFS {
               entrypoint: entrypoint,
               nullAssertions: nullAssertions,
               nativeNullAssertions: nativeNullAssertions,
-          loaderRootDirectory: _baseUri.toString(),
+              loaderRootDirectory: _baseUri.toString(),
             ),
       );
       // TODO(zanderso): refactor the asset code in this and the regular devfs to
