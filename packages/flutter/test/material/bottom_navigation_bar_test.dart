@@ -2181,7 +2181,7 @@ void main() {
     'Material2 - BottomNavigationBar same item shifting backgroundColor with transition',
     (WidgetTester tester) async {
       final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
-        frameSize: const Size(800, 600),
+        frameSize: const Size(300, 60),
       );
       addTearDown(animationSheet.dispose);
 
@@ -2245,7 +2245,7 @@ void main() {
     'Material3 - BottomNavigationBar same item shifting backgroundColor with transition',
     (WidgetTester tester) async {
       final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
-        frameSize: const Size(800, 600),
+        frameSize: const Size(300, 60),
       );
       addTearDown(animationSheet.dispose);
 
