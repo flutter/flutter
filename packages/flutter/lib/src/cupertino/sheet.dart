@@ -669,12 +669,10 @@ class _CupertinoDownGestureDetectorState<T> extends State<_CupertinoDownGestureD
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.passthrough,
-      children: <Widget>[
-        widget.child,
-        Listener(onPointerDown: _handlePointerDown, behavior: HitTestBehavior.translucent),
-      ],
+    return Listener(
+      onPointerDown: _handlePointerDown,
+      behavior: HitTestBehavior.translucent,
+      child: widget.child,
     );
   }
 }

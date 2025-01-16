@@ -844,5 +844,72 @@ void main() {
 
       expect(find.text('Page 1'), findsOneWidget);
     });
+
+    testWidgets('Sheet should not block nested scroll', (WidgetTester tester) async {
+      final GlobalKey homeKey = GlobalKey();
+
+      Widget sheetScaffoldContent(BuildContext context) {
+        return ListView(
+          children: const <Widget>[
+            Text('Top of Scroll'),
+            SizedBox(width: double.infinity, height: 100),
+            Text('Middle of Scroll'),
+            SizedBox(width: double.infinity, height: 100),
+          ],
+        );
+      }
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            key: homeKey,
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  const Text('Page 1'),
+                  CupertinoButton(
+                    onPressed: () {
+                      showCupertinoSheet<void>(
+                        context: homeKey.currentContext!,
+                        pageBuilder: (BuildContext context) {
+                          return CupertinoPageScaffold(child: sheetScaffoldContent(context));
+                        },
+                      );
+                    },
+                    child: const Text('Push Page 2'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Top of Scroll'), findsOneWidget);
+      final double startPosition = tester.getTopLeft(find.text('Middle of Scroll')).dy;
+
+      final TestGesture gesture = await tester.createGesture();
+
+      await gesture.down(const Offset(100, 100));
+
+      // Need 2 events to form a valid drag.
+      await tester.pump(const Duration(milliseconds: 100));
+      await gesture.moveTo(const Offset(100, 80), timeStamp: const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 200));
+      await gesture.moveTo(const Offset(100, 50), timeStamp: const Duration(milliseconds: 200));
+
+      await tester.pumpAndSettle();
+
+      final double endPosition = tester.getTopLeft(find.text('Middle of Scroll')).dy;
+
+      // Final position should be higher.
+      expect(endPosition, lessThan(startPosition));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    });
   });
 }
