@@ -31,7 +31,8 @@
                 "targets": [
                     "flutter:unittests",
                     "flutter/build/dart:copy_dart_sdk",
-                    "flutter/shell/testing"
+                    "flutter/shell/testing",
+                    "flutter/tools/path_ops"
                 ]
             },
             "tests": [
@@ -77,7 +78,8 @@
                 "targets": [
                     "flutter:unittests",
                     "flutter/build/dart:copy_dart_sdk",
-                    "flutter/shell/testing"
+                    "flutter/shell/testing",
+                    "flutter/tools/path_ops"
                 ]
             },
              "tests": [
@@ -137,6 +139,7 @@
                     "flutter/lib/ui:ui_benchmarks",
                     "flutter/shell/common:shell_benchmarks",
                     "flutter/shell/testing",
+                    "flutter/tools/path_ops",
                     "flutter/third_party/txt:txt_benchmarks"
                 ]
             },
