@@ -21,27 +21,41 @@ class ViewContentSensitivityState {
   /// supported for Android.
   ContentSensitivity currentContentSensitivitySetting = ContentSensitivity.autoSensitive;
 
-  /// A map that contains the number of [SensitiveContent] widgets that have
-  /// each of the different [ContentSensitivity] levels.
-  final Map<ContentSensitivity, int> contentSensitivityCounts = <ContentSensitivity, int> {
-    ContentSensitivity.sensitive: 0,
-    ContentSensitivity.autoSensitive: 0,
-    ContentSensitivity.notSensitive: 0,
-  };
+  /// The number of [SensitiveContent] widgets that have sensitivity level [ContentSensitivity.sensitive].
+  int sensitiveWidgetCount = 0;
+
+  /// The number of [SensitiveContent] widgets that have sensitivity level [ContentSensitivity.autoSensitive].
+  int autoSensitiveWidgetCount = 0;
+
+  /// The number of [SensitiveContent] widgets that have sensitivity level [ContentSensitivity.notSensitive].
+  int notSensitiveWigetCount = 0;
 
   /// Increases the count of [SensitiveContent] widgets with [sensitivityLevel] set.
   void addWidgetWithContentSensitivity(ContentSensitivity sensitivityLevel) {
-    contentSensitivityCounts[sensitivityLevel] = contentSensitivityCounts[sensitivityLevel]! + 1;
+    switch (sensitivityLevel) {
+      case ContentSensitivity.sensitive:
+        sensitiveWidgetCount++;
+      case ContentSensitivity.autoSensitive:
+        autoSensitiveWidgetCount++;
+      case ContentSensitivity.notSensitive:
+        notSensitiveWigetCount++;
+    }
   }
 
   /// Decreases the count of [SensitiveContent] widgets with [sensitivityLevel] set.
   void removeWidgetWithContentSensitivity(ContentSensitivity sensitivityLevel) {
-    contentSensitivityCounts[sensitivityLevel] = contentSensitivityCounts[sensitivityLevel]! - 1;
-  }
+    switch (sensitivityLevel) {
+      case ContentSensitivity.sensitive:
+        sensitiveWidgetCount--;
+      case ContentSensitivity.autoSensitive:
+        autoSensitiveWidgetCount--;
+      case ContentSensitivity.notSensitive:
+        notSensitiveWigetCount--;
+    }  }
 
-  /// Returns the number of [SenstiveContent] widgets represented by this state.
+  /// Returns the number of [SensitiveContent] widgets represented by this state.
   int getTotalNumberOfWidgets() {
-    return contentSensitivityCounts.values.reduce((int sum, int value) => sum + value);
+    return sensitiveWidgetCount + autoSensitiveWidgetCount + notSensitiveWigetCount;
   }
 }
 
@@ -71,19 +85,9 @@ class SensitiveContentSetting {
     final ViewContentSensitivityState contentSensitivityStateForView = _contentSensitivityStates[viewId]!;
     contentSensitivityStateForView.addWidgetWithContentSensitivity(desiredSensitivityLevel);
 
-    // If only one SensitiveContent widget in the relevant view sets a
-    // ContentSensitivity level, then we can immediately set
-    // desiredSensitivityLevel for the view.
-    if (contentSensitivityStateForView.getTotalNumberOfWidgets() == 1) {
-      // Set content sensitivity level for view as desiredSensitivityLevel and update stored data.
-      _sensitiveContentService.setContentSensitivity(viewId, desiredSensitivityLevel);
-      contentSensitivityStateForView.currentContentSensitivitySetting = desiredSensitivityLevel;
-      return;
-    }
-
     // Verify that desiredSensitivityLevel should be set in order for sensitive
     // content in the view to remain obscured.
-    if (!shouldSetContentSensitivity(currentSensitivityLevel: contentSensitivityStateForView.currentContentSensitivitySetting, desiredSensitivityLevel: desiredSensitivityLevel)) {
+    if (!shouldSetContentSensitivity(contentSensitivityStateForView, desiredSensitivityLevel)) {
       return;
     }
 
@@ -104,59 +108,37 @@ class SensitiveContentSetting {
     final ViewContentSensitivityState contentSensitivityStateForView = _contentSensitivityStates[viewId]!;
     contentSensitivityStateForView.removeWidgetWithContentSensitivity(widgetSensitivityLevel);
 
-    if (contentSensitivityStateForView.getTotalNumberOfWidgets() == 0) {
-      // There is no longer sensitive content in the view. Reset to the default
-      // mode.
-      _sensitiveContentService.setContentSensitivity(viewId, _defaultContentSensitivitySetting);
-      return;
-    }
-
-    final ContentSensitivity currentSensitivityLevelForView = contentSensitivityStateForView.currentContentSensitivitySetting;
-    final Map<ContentSensitivity, int> contentSensitivityCountsForView = contentSensitivityStateForView.contentSensitivityCounts;
-    final int numWidgetsWithWidgetSensitivityLevel = contentSensitivityCountsForView[widgetSensitivityLevel]!;
-
-    if (widgetSensitivityLevel != currentSensitivityLevelForView
-      || numWidgetsWithWidgetSensitivityLevel > 0) {
-      // Either another SensitiveContent widget has set a more severe ContentSensitivity
-      // level for the view or there are other widgets that have requested the same level
-      // in the view.
-      return;
-    }
-
-    // If the SensitiveContent widget being unregistered had the most severe
-    // ContentSensitivity level, find the SensitiveContent widget in the view
-    // with the next most severe level and set this level for the view.
-    ContentSensitivity? sensitivityLevelToSet;
+    // Determine if another sensitivity level needs to be restored.
+    ContentSensitivity sensitivityLevelToSet = _defaultContentSensitivitySetting;
     switch (widgetSensitivityLevel) {
       case ContentSensitivity.sensitive:
-        if (contentSensitivityCountsForView[ContentSensitivity.autoSensitive]! > 0) {
-          sensitivityLevelToSet = ContentSensitivity.autoSensitive;
-          break;
-        }
-        continue auto;
+      if (shouldSetContentSensitivity(contentSensitivityStateForView, ContentSensitivity.sensitive)) {
+        sensitivityLevelToSet = ContentSensitivity.sensitive;
+      }
+      continue auto;
       auto:
       case ContentSensitivity.autoSensitive:
-        if (contentSensitivityCountsForView[ContentSensitivity.notSensitive]! > 0) {
-          sensitivityLevelToSet = ContentSensitivity.notSensitive;
-          break;
-        }
-        continue not;
+      if (shouldSetContentSensitivity(contentSensitivityStateForView, ContentSensitivity.autoSensitive)) {
+        sensitivityLevelToSet = ContentSensitivity.autoSensitive;
+      }
+      continue not;
       not:
       case ContentSensitivity.notSensitive:
-        throw StateError('The SensitiveContentSetting has gotten out of sync with the SensitiveContent widgets in the Flutter view with ID $viewId.');
+      if (shouldSetContentSensitivity(contentSensitivityStateForView, ContentSensitivity.notSensitive)) {
+        sensitivityLevelToSet = ContentSensitivity.autoSensitive;
+      }
     }
 
     _sensitiveContentService.setContentSensitivity(viewId, sensitivityLevelToSet);
   }
 
   /// Return whether or not [desiredSensitivityLevel] should be set as the new
-  /// [ContentSensitivity] level for a Flutter view that currently has
-  /// [currentSensitivityLevel] set.
+  /// [ContentSensitivity] level for a Flutter view.
   ///
   /// [desiredSensitivityLevel] should be set only if it is striclty less
   /// severe than any of the other registered [SensitiveContent] widgets in the view.
-  bool shouldSetContentSensitivity({required ContentSensitivity currentSensitivityLevel, required ContentSensitivity desiredSensitivityLevel}) {
-    if (currentSensitivityLevel == desiredSensitivityLevel) {
+  bool shouldSetContentSensitivity(ViewContentSensitivityState contentSensitivityStateForView, ContentSensitivity desiredSensitivityLevel) {
+    if (contentSensitivityStateForView.currentContentSensitivitySetting == desiredSensitivityLevel) {
       return false;
     }
 
@@ -164,9 +146,9 @@ class SensitiveContentSetting {
       case ContentSensitivity.sensitive:
         return true;
       case ContentSensitivity.autoSensitive:
-        return currentSensitivityLevel != ContentSensitivity.sensitive;
+        return contentSensitivityStateForView.sensitiveWidgetCount == 0;
       case ContentSensitivity.notSensitive:
-        return currentSensitivityLevel == ContentSensitivity.notSensitive;
+        return contentSensitivityStateForView.sensitiveWidgetCount + contentSensitivityStateForView.autoSensitiveWidgetCount == 0;
     }
   }
 }

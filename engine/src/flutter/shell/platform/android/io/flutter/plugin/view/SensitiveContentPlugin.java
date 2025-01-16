@@ -4,8 +4,11 @@
 
 package io.flutter.plugin.view;
 
+import static io.flutter.Build.API_LEVELS;
+
 import android.app.Activity;
 import android.view.View;
+import android.os.Build;
 import androidx.annotation.NonNull;
 import io.flutter.embedding.engine.systemchannels.SensitiveContentChannel;
 import io.flutter.plugin.common.MethodChannel;
@@ -40,6 +43,11 @@ public class SensitiveContentPlugin
       @NonNull int flutterViewId,
       @NonNull int requestedContentSensitivity,
       @NonNull MethodChannel.Result result) {
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_35) {
+      // This feature is only available on > API 35.
+      return;
+    }
+
     final View flutterView = mflutterActivity.findViewById(flutterViewId);
     if (flutterView == null) {
       result.error("error", "Requested Flutter View with ID " + flutterViewId + " to set content sensitivty of was not found.", null);
