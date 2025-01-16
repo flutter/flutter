@@ -1024,8 +1024,12 @@ class _RenderDecoration extends RenderBox
     final double hintBaseline =
         hint == null ? 0.0 : getBaseline(hint, boxConstraints.tighten(width: inputWidth));
 
-    // The field can be occupied by a hint or by the input itself
-    final double inputHeight = math.max(hintSize.height, inputSize.height);
+    // The field can be occupied by a hint or by the input itself.
+    // If the hint is not visible do not use it to compute height.
+    final double inputHeight = math.max(
+      decoration.isEmpty ? hintSize.height : 0.0,
+      inputSize.height,
+    );
     final double inputInternalBaseline = math.max(inputBaseline, hintBaseline);
 
     final double prefixBaseline = prefix == null ? 0.0 : getBaseline(prefix, contentConstraints);
@@ -1238,7 +1242,10 @@ class _RenderDecoration extends RenderBox
       width - prefixWidth - suffixWidth - prefixIconWidth - suffixIconWidth,
       0.0,
     );
-    final double inputHeight = _lineHeight(availableInputWidth, <RenderBox?>[input, hint]);
+    final double inputHeight = _lineHeight(availableInputWidth, <RenderBox?>[
+      input,
+      if (decoration.isEmpty) hint,
+    ]);
     final double inputMaxHeight = <double>[
       inputHeight,
       prefixHeight,
@@ -1578,7 +1585,9 @@ class _RenderDecoration extends RenderBox
     doPaint(suffix);
     doPaint(prefixIcon);
     doPaint(suffixIcon);
-    doPaint(hint);
+    if (decoration.isEmpty) {
+      doPaint(hint);
+    }
     doPaint(input);
     doPaint(helperError);
     doPaint(counter);
