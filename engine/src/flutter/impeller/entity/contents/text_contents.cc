@@ -79,7 +79,6 @@ void TextContents::ComputeVertexData(
     const std::shared_ptr<TextFrame>& frame,
     Scalar scale,
     const Matrix& entity_transform,
-    const Matrix& basis_transform,
     Vector2 offset,
     std::optional<GlyphProperties> glyph_properties,
     const std::shared_ptr<GlyphAtlas>& atlas) {
@@ -96,6 +95,8 @@ void TextContents::ComputeVertexData(
 
   ISize atlas_size = atlas->GetTexture()->GetSize();
   bool is_translation_scale = entity_transform.IsTranslationScaleOnly();
+  Matrix basis_transform = entity_transform.Basis();
+
   VS::PerVertexData vtx;
   size_t i = 0u;
   size_t bounds_offset = 0u;
@@ -231,7 +232,6 @@ bool TextContents::Render(const ContentContext& renderer,
       Entity::GetShaderTransform(entity.GetShaderClipDepth(), pass, Matrix());
   bool is_translation_scale = entity.GetTransform().IsTranslationScaleOnly();
   Matrix entity_transform = entity.GetTransform();
-  Matrix basis_transform = entity_transform.Basis();
 
   VS::BindFrameInfo(pass,
                     renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
@@ -281,8 +281,7 @@ bool TextContents::Render(const ContentContext& renderer,
         VS::PerVertexData* vtx_contents =
             reinterpret_cast<VS::PerVertexData*>(contents);
         ComputeVertexData(vtx_contents, frame_, scale_,
-                          /*entity_transform=*/entity_transform,
-                          /*basis_transform=*/basis_transform, offset_,
+                          /*entity_transform=*/entity_transform, offset_,
                           GetGlyphProperties(), atlas);
       });
 

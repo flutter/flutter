@@ -67,7 +67,6 @@ class TextContents final : public Contents {
       const std::shared_ptr<TextFrame>& frame,
       Scalar scale,
       const Matrix& entity_transform,
-      const Matrix& basis_transform,
       Vector2 offset,
       std::optional<GlyphProperties> glyph_properties,
       const std::shared_ptr<GlyphAtlas>& atlas);
