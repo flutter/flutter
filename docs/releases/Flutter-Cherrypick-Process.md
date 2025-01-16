@@ -24,7 +24,7 @@ If the automated cherry-pick process fails, you will have to create the cherry-p
 2. Prepend the title of the cherry-pick request with [beta] or [stable].
 3. Fill out the PR description with the following fields:
   - Impacted Users (Approximately who will hit this issue (ex. all Flutter devs, Windows developers, all end-customers, apps using X framework feature)?).
-  - Impact Description (What is the impact (ex. visual jank on Samsung phones, app crash, cannot ship an iOS app)? Does it impact development (ex. flutter doctor crashes when Android Studio is installed), or the shipping production app (the app crashes on launch)).
+  - Impact Description (What is the impact? ex. visual jank on Samsung phones, app crash, cannot ship an iOS app. Does it impact development? ex. flutter doctor crashes when Android Studio is installed. Or shipping a production app? ex. the app crashes on launch).
   - Workaround (Is there a workaround for this issue?)
   - Risk (What is the risk level of this cherry-pick?)
   - Test Coverage (Are you confident that your fix is well-tested by automated tests?)
