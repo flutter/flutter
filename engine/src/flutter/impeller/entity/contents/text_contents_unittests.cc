@@ -106,15 +106,45 @@ TEST_P(TextContentsTest, SimpleComputeVertexData) {
                        atlas_context, text_frame);
 
   ISize texture_size = atlas->GetTexture()->GetSize();
-  TextContents::ComputeVertexData(
-      data, text_frame, /*scale=*/1.0, /*entity_transform=*/Matrix(),
-      /*basis_transform=*/Matrix(), /*offset=*/Vector2(0, 0),
-      /*glyph_properties=*/std::nullopt, atlas);
+  TextContents::ComputeVertexData(data, text_frame, /*scale=*/1.0,
+                                  /*entity_transform=*/Matrix(),
+                                  /*offset=*/Vector2(0, 0),
+                                  /*glyph_properties=*/std::nullopt, atlas);
 
   Rect position_rect = PerVertexDataPositionToRect(data);
   Rect uv_rect = PerVertexDataUVToRect(data, texture_size);
   EXPECT_RECT_NEAR(position_rect, Rect::MakeXYWH(-1, -41, 52, 52));
   EXPECT_RECT_NEAR(uv_rect, Rect::MakeXYWH(0.5, 0.5, 53, 53));
+}
+
+TEST_P(TextContentsTest, SimpleComputeVertexData2x) {
+  GlyphAtlasPipeline::VertexShader::PerVertexData data[6];
+
+  std::shared_ptr<TextFrame> text_frame =
+      MakeTextFrame("1", "ahem.ttf", /*font_size=*/50);
+
+  std::shared_ptr<TypographerContext> context = TypographerContextSkia::Make();
+  std::shared_ptr<GlyphAtlasContext> atlas_context =
+      context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
+  std::shared_ptr<HostBuffer> host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter());
+  ASSERT_TRUE(context && context->IsValid());
+  Scalar font_scale = 2.f;
+  std::shared_ptr<GlyphAtlas> atlas = CreateGlyphAtlas(
+      *GetContext(), context.get(), *host_buffer,
+      GlyphAtlas::Type::kAlphaBitmap, font_scale, atlas_context, text_frame);
+
+  ISize texture_size = atlas->GetTexture()->GetSize();
+  TextContents::ComputeVertexData(
+      data, text_frame, font_scale,
+      /*entity_transform=*/Matrix::MakeScale({font_scale, font_scale, 1}),
+      /*offset=*/Vector2(0, 0),
+      /*glyph_properties=*/std::nullopt, atlas);
+
+  Rect position_rect = PerVertexDataPositionToRect(data);
+  Rect uv_rect = PerVertexDataUVToRect(data, texture_size);
+  EXPECT_RECT_NEAR(position_rect, Rect::MakeXYWH(-1, -81, 102, 102));
+  EXPECT_RECT_NEAR(uv_rect, Rect::MakeXYWH(0.5, 0.5, 103, 103));
 }
 
 }  // namespace testing
