@@ -113,7 +113,13 @@ TEST_P(TextContentsTest, SimpleComputeVertexData) {
 
   Rect position_rect = PerVertexDataPositionToRect(data);
   Rect uv_rect = PerVertexDataUVToRect(data, texture_size);
+  // The -1 offset comes from Skia in `ComputeGlyphSize`. So since the font size
+  // is 50, the math appears to be to get back a 50x50 rect and apply 1 pixel
+  // of padding.
   EXPECT_RECT_NEAR(position_rect, Rect::MakeXYWH(-1, -41, 52, 52));
+  // (0.5, 0.5) gets us sampling from the exact middle of the first pixel, the
+  // extra width takes us 0.5 past the end of the glyph too to sample fully the
+  // last pixel.
   EXPECT_RECT_NEAR(uv_rect, Rect::MakeXYWH(0.5, 0.5, 53, 53));
 }
 
