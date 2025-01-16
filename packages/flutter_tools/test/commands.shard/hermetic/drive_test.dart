@@ -589,31 +589,25 @@ void main() {
     },
   );
 
-  testUsingContext('flutter drive --help explains how to use the command', () async {
-    final DriveCommand command = DriveCommand(
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: platform,
-      signals: signals,
-    );
+  testUsingContext(
+    'flutter drive --help explains how to use the command',
+    () async {
+      final DriveCommand command = DriveCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        signals: signals,
+      );
 
-    // TODO(matanlurey): https://github.com/flutter/flutter/issues/158532.
-    final StringBuffer printOutput = StringBuffer();
-    final Zone capturePrintZone = Zone.current.fork(
-      specification: ZoneSpecification(
-        print: (_, _, _, String line) {
-          printOutput.writeln(line);
-        },
-      ),
-    );
-    await capturePrintZone.run(() async {
       await createTestCommandRunner(command).run(<String>['drive', '--help']);
-    });
-    expect(
-      printOutput.toString(),
-      stringContainsInOrder(<String>['flutter drive', '--target', '--driver']),
-    );
-  });
+
+      expect(
+        logger.statusText,
+        stringContainsInOrder(<String>['flutter drive', '--target', '--driver']),
+      );
+    },
+    overrides: <Type, Generator>{Logger: () => logger},
+  );
 }
 
 class ThrowingScreenshotDevice extends ScreenshotDevice {
