@@ -246,6 +246,9 @@ class WindowPositioner {
 abstract class WindowController with ChangeNotifier {
   FlutterView? _view;
 
+  /// Returns true when the window associated with the controller has been created.
+  bool get isShowing => _view != null;
+
   /// The ID of the view used for this window, which is unique to each window.
   FlutterView? get view => _view;
   set view(FlutterView? value) {
@@ -330,6 +333,10 @@ class _GenericWindowState extends State<_GenericWindow> {
   @override
   void initState() {
     super.initState();
+    create();
+  }
+
+  void create() {
     setState(() {
       _future = widget.createFuture();
     });
@@ -343,7 +350,7 @@ class _GenericWindowState extends State<_GenericWindow> {
             widget.controller!.size = metadata.size;
           }
 
-          final _WindowingAppContext? windowingAppContext = _WindowingAppContext.of(context);
+          final WindowingAppContext? windowingAppContext = WindowingAppContext.of(context);
           assert(windowingAppContext != null);
           _listener = _WindowListener(
             viewId: metadata.view.viewId,
@@ -756,22 +763,28 @@ class WindowingApp extends StatefulWidget {
 class _WindowingAppState extends State<WindowingApp> {
   @override
   Widget build(BuildContext context) {
-    return _WindowingAppContext(windowingApp: this, child: ViewCollection(views: widget.children));
+    return WindowingAppContext._(windowingApp: this, child: ViewCollection(views: widget.children));
   }
 }
 
-class _WindowingAppContext extends InheritedWidget {
-  const _WindowingAppContext({super.key, required super.child, required this.windowingApp});
+/// This context is only available when a widget tree includes the [WindowingApp]
+/// widget. Other widgets may use the presence of this context to check whether
+/// or not the user has specified this application has a window application. In
+/// that case, they may opt to perform a different behavior, such as opening
+/// a window where they were previously using an overlay.
+class WindowingAppContext extends InheritedWidget {
+  const WindowingAppContext._({required super.child, required _WindowingAppState windowingApp})
+    : _windowingApp = windowingApp;
 
-  final _WindowingAppState windowingApp;
+  final _WindowingAppState _windowingApp;
 
   /// Returns the [MultiWindowAppContext] if any
-  static _WindowingAppContext? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_WindowingAppContext>();
+  static WindowingAppContext? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<WindowingAppContext>();
   }
 
   @override
-  bool updateShouldNotify(_WindowingAppContext oldWidget) {
-    return windowingApp != oldWidget.windowingApp;
+  bool updateShouldNotify(WindowingAppContext oldWidget) {
+    return _windowingApp != oldWidget._windowingApp;
   }
 }

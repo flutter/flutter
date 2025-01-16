@@ -313,6 +313,57 @@ class MenuAnchor extends StatefulWidget {
   }
 }
 
+class _MenuAnchorStateController {
+  _MenuAnchorStateController({required this.anchor});
+
+  final _MenuAnchorState anchor;
+  OverlayPortalController? _overlayPortalController;
+  PopupWindowController? _popupWindowController;
+
+  bool get isShowing {
+    assert(_isInitialized);
+    if (_overlayPortalController != null) {
+      return _overlayPortalController!.isShowing;
+    } else {
+      return _popupWindowController!.isShowing;
+    }
+  }
+
+  bool get _isInitialized => _overlayPortalController != null || _popupWindowController != null;
+
+  void initialize(bool isWindowingApp) {
+    if (isWindowingApp) {
+      _popupWindowController ??= PopupWindowController();
+      assert(_popupWindowController != null);
+      assert(_overlayPortalController == null);
+    } else {
+      _overlayPortalController ??= OverlayPortalController(
+        debugLabel: kReleaseMode ? null : 'MenuAnchor controller',
+      );
+      assert(_overlayPortalController != null);
+      assert(_popupWindowController == null);
+    }
+  }
+
+  void show() {
+    assert(_isInitialized);
+    if (_overlayPortalController != null) {
+      _overlayPortalController!.show();
+    } else {
+      anchor.showPopup();
+    }
+  }
+
+  Future<void> hide() async {
+    assert(_isInitialized);
+    if (_overlayPortalController != null) {
+      _overlayPortalController!.hide();
+    } else {
+      await _popupWindowController!.destroy();
+    }
+  }
+}
+
 class _MenuAnchorState extends State<MenuAnchor> {
   // This is the global key that is used later to determine the bounding rect
   // for the anchor's region that the CustomSingleChildLayout's delegate
@@ -322,13 +373,14 @@ class _MenuAnchorState extends State<MenuAnchor> {
     debugLabel: kReleaseMode ? null : 'MenuAnchor',
   );
   _MenuAnchorState? _parent;
+  bool _popupShown = false;
   late final FocusScopeNode _menuScopeNode;
   MenuController? _internalMenuController;
   final List<_MenuAnchorState> _anchorChildren = <_MenuAnchorState>[];
   ScrollPosition? _scrollPosition;
   Size? _viewSize;
-  final OverlayPortalController _overlayController = OverlayPortalController(
-    debugLabel: kReleaseMode ? null : 'MenuAnchor controller',
+  late final _MenuAnchorStateController _overlayController = _MenuAnchorStateController(
+    anchor: this,
   );
   Offset? _menuPosition;
   Axis get _orientation => Axis.vertical;
@@ -408,22 +460,33 @@ class _MenuAnchorState extends State<MenuAnchor> {
       contents = CompositedTransformTarget(link: widget.layerLink!, child: contents);
     }
 
-    Widget child = OverlayPortal(
-      controller: _overlayController,
-      overlayChildBuilder: (BuildContext context) {
-        return _Submenu(
-          anchor: this,
-          layerLink: widget.layerLink,
-          menuStyle: widget.style,
-          alignmentOffset: widget.alignmentOffset ?? Offset.zero,
-          menuPosition: _menuPosition,
-          clipBehavior: widget.clipBehavior,
-          menuChildren: widget.menuChildren,
-          crossAxisUnconstrained: widget.crossAxisUnconstrained,
-        );
-      },
-      child: contents,
-    );
+    if (WindowingAppContext.of(context) != null) {
+      _overlayController.initialize(true);
+    } else {
+      _overlayController.initialize(false);
+    }
+
+    Widget child;
+    if (_overlayController._overlayPortalController != null) {
+      child = OverlayPortal(
+        controller: _overlayController._overlayPortalController!,
+        overlayChildBuilder: (BuildContext context) {
+          return _Submenu(
+            anchor: this,
+            layerLink: widget.layerLink,
+            menuStyle: widget.style,
+            alignmentOffset: widget.alignmentOffset ?? Offset.zero,
+            menuPosition: _menuPosition,
+            clipBehavior: widget.clipBehavior,
+            menuChildren: widget.menuChildren,
+            crossAxisUnconstrained: widget.crossAxisUnconstrained,
+          );
+        },
+        child: contents,
+      );
+    } else {
+      child = ViewAnchor(view: _buildPopupView(), child: contents);
+    }
 
     if (!widget.anchorTapClosesMenu) {
       child = TapRegion(
@@ -463,6 +526,61 @@ class _MenuAnchorState extends State<MenuAnchor> {
         },
       ),
     );
+  }
+
+  Widget? _buildPopupView() {
+    if (!_popupShown) {
+      return null;
+    }
+
+    final BuildContext anchorContext = _anchorKey.currentContext!;
+    final RenderBox box = anchorContext.findRenderObject()! as RenderBox;
+    final Offset position = box.localToGlobal(Offset.zero);
+    final WindowPositioner positioner;
+    if (_parent != null) {
+      positioner = WindowPositioner(
+        parentAnchor: WindowPositionerAnchor.topRight,
+        childAnchor: WindowPositionerAnchor.topLeft,
+        offset: widget.alignmentOffset ?? Offset.zero,
+      );
+    } else {
+      positioner = WindowPositioner(
+        parentAnchor: WindowPositionerAnchor.bottomLeft,
+        childAnchor: WindowPositionerAnchor.topLeft,
+        offset: widget.alignmentOffset ?? Offset.zero,
+      );
+    }
+
+    return PopupWindow(
+      controller: _overlayController._popupWindowController,
+      preferredSize: const Size(200, 400), // TODO: Get a real size
+      onDestroyed: hidePopup,
+      onError: (String? error) => hidePopup(),
+      anchorRect: Rect.fromPoints(
+        position,
+        Offset(position.dx + box.size.width, position.dy + box.size.height),
+      ),
+      positioner: positioner,
+      child: FocusScope(
+        node: _menuScopeNode,
+        skipTraversal: true,
+        child:_MenuPanel(
+          orientation: _orientation,
+          menuStyle: widget.style,
+          clipBehavior: widget.clipBehavior,
+          crossAxisUnconstrained: widget.crossAxisUnconstrained,
+          children: widget.menuChildren,
+        )
+      ),
+    );
+  }
+
+  void showPopup() {
+    setState(() => _popupShown = true);
+  }
+
+  void hidePopup() {
+    setState(() => _popupShown = false);
   }
 
   // Returns the first focusable item in the submenu, where "first" is

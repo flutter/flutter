@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 
@@ -4786,6 +4787,119 @@ void main() {
     await tester.tap(find.text(TestMenu.subMenu00.label));
     await tester.pump();
     expect(find.byIcon(disabledIcon), findsOneWidget);
+  });
+
+  group('WindowingApp', () {
+    Future<Object?>? Function(MethodCall)? _createWindowMethodCallHandler(WidgetTester tester) {
+      return (MethodCall call) async {
+        final Map<Object?, Object?> args = call.arguments as Map<Object?, Object?>;
+        if (call.method == 'createWindow') {
+          final List<Object?> size = args['size']! as List<Object?>;
+
+          await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+            SystemChannels.windowing.name,
+            SystemChannels.windowing.codec.encodeMethodCall(
+              MethodCall('onWindowCreated', <String, Object?>{
+                'viewId': tester.view.viewId,
+                'parentViewId': null,
+              }),
+            ),
+            (ByteData? data) {},
+          );
+
+          return <String, Object?>{
+            'viewId': tester.view.viewId,
+            'archetype': WindowArchetype.regular.index,
+            'size': size,
+            'parentViewId': null,
+          };
+        } else if (call.method == 'destroyWindow') {
+          await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+            SystemChannels.windowing.name,
+            SystemChannels.windowing.codec.encodeMethodCall(
+              MethodCall('onWindowDestroyed', <String, Object?>{'viewId': tester.view.viewId}),
+            ),
+            (ByteData? data) {},
+          );
+
+          return null;
+        }
+
+        throw Exception('Unsupported method call: ${call.method}');
+      };
+    }
+
+    testWidgets('ViewAnchor of a newly created MenuAnchor can be found but contains a null view', (
+      WidgetTester tester,
+    ) async {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.windowing,
+        _createWindowMethodCallHandler(tester),
+      );
+
+      final RegularWindowController controller = RegularWindowController();
+      await tester.pumpWidget(
+        wrapWithView: false,
+        Builder(
+          builder: (BuildContext context) {
+            return WindowingApp(
+              children: <Widget>[
+                RegularWindow(
+                  controller: controller,
+                  preferredSize: const Size(640, 480),
+                  child: buildTestApp(),
+                ),
+              ],
+            );
+          },
+        ),
+      );
+
+      await tester.pump();
+
+      final Finder viewAnchorFinder = find.byType(ViewAnchor);
+      expect(viewAnchorFinder, findsOneWidget);
+
+      final ViewAnchor viewAnchor = tester.widget<ViewAnchor>(viewAnchorFinder);
+      expect(viewAnchor.view, isNull);
+    });
+
+    testWidgets('ViewAnchor of an opened MenuAnchor can be found AND contains a view', (
+      WidgetTester tester,
+    ) async {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.windowing,
+        _createWindowMethodCallHandler(tester),
+      );
+
+      final RegularWindowController controller = RegularWindowController();
+      await tester.pumpWidget(
+        wrapWithView: false,
+        Builder(
+          builder: (BuildContext context) {
+            return WindowingApp(
+              children: <Widget>[
+                RegularWindow(
+                  controller: controller,
+                  preferredSize: const Size(640, 480),
+                  child: buildTestApp(),
+                ),
+              ],
+            );
+          },
+        ),
+      );
+
+      await tester.pump();
+      await tester.tap(find.text(TestMenu.anchorButton.label));
+      await tester.pump();
+
+      final Finder viewAnchorFinder = find.byType(ViewAnchor);
+      expect(viewAnchorFinder, findsOneWidget);
+
+      final ViewAnchor viewAnchor = tester.widget<ViewAnchor>(viewAnchorFinder);
+      expect(viewAnchor.view, isNotNull);
+    });
   });
 }
 
