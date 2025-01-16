@@ -89,7 +89,7 @@
                     "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
-                        "ci/host_profile",
+                        "ci/host_profile_test",
                         "--type",
                         "dart,dart-host,engine",
                         "--engine-capture-core-dump"
