@@ -943,7 +943,10 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
        {
            {1, 48 + 32 + 8, 1,
             [](DlOpReceiver& r) {
-              static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
+              static DlRSTransform xforms[] = {
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(0)),
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(90)),
+              };
               static DlRect texs[] = {DlRect::MakeLTRB(10, 10, 20, 20),
                                       DlRect::MakeLTRB(20, 20, 30, 30)};
               r.drawAtlas(kTestImage1, xforms, texs, nullptr, 2,
@@ -952,7 +955,10 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             }},
            {1, 48 + 32 + 8, 1,
             [](DlOpReceiver& r) {
-              static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
+              static DlRSTransform xforms[] = {
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(0)),
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(90)),
+              };
               static DlRect texs[] = {DlRect::MakeLTRB(10, 10, 20, 20),
                                       DlRect::MakeLTRB(20, 20, 30, 30)};
               r.drawAtlas(kTestImage1, xforms, texs, nullptr, 2,
@@ -960,7 +966,10 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             }},
            {1, 48 + 32 + 8, 1,
             [](DlOpReceiver& r) {
-              static SkRSXform xforms[] = {{0, 1, 0, 0}, {0, 1, 0, 0}};
+              static DlRSTransform xforms[] = {
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(0)),
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(45)),
+              };
               static DlRect texs[] = {DlRect::MakeLTRB(10, 10, 20, 20),
                                       DlRect::MakeLTRB(20, 20, 30, 30)};
               r.drawAtlas(kTestImage1, xforms, texs, nullptr, 2,
@@ -969,7 +978,10 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             }},
            {1, 48 + 32 + 8, 1,
             [](DlOpReceiver& r) {
-              static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
+              static DlRSTransform xforms[] = {
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(0)),
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(90)),
+              };
               static DlRect texs[] = {DlRect::MakeLTRB(10, 10, 20, 20),
                                       DlRect::MakeLTRB(20, 25, 30, 30)};
               r.drawAtlas(kTestImage1, xforms, texs, nullptr, 2,
@@ -978,7 +990,10 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             }},
            {1, 48 + 32 + 8, 1,
             [](DlOpReceiver& r) {
-              static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
+              static DlRSTransform xforms[] = {
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(0)),
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(90)),
+              };
               static DlRect texs[] = {DlRect::MakeLTRB(10, 10, 20, 20),
                                       DlRect::MakeLTRB(20, 20, 30, 30)};
               r.drawAtlas(kTestImage1, xforms, texs, nullptr, 2,
@@ -986,7 +1001,10 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             }},
            {1, 48 + 32 + 8, 1,
             [](DlOpReceiver& r) {
-              static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
+              static DlRSTransform xforms[] = {
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(0)),
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(90)),
+              };
               static DlRect texs[] = {DlRect::MakeLTRB(10, 10, 20, 20),
                                       DlRect::MakeLTRB(20, 20, 30, 30)};
               r.drawAtlas(kTestImage1, xforms, texs, nullptr, 2,
@@ -995,7 +1013,10 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             }},
            {1, 64 + 32 + 8, 1,
             [](DlOpReceiver& r) {
-              static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
+              static DlRSTransform xforms[] = {
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(0)),
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(90)),
+              };
               static DlRect texs[] = {DlRect::MakeLTRB(10, 10, 20, 20),
                                       DlRect::MakeLTRB(20, 20, 30, 30)};
               static DlRect cull_rect = DlRect::MakeLTRB(0, 0, 200, 200);
@@ -1005,7 +1026,10 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             }},
            {1, 128, 1,
             [](DlOpReceiver& r) {
-              static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
+              static DlRSTransform xforms[] = {
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(0)),
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(90)),
+              };
               static DlRect texs[] = {DlRect::MakeLTRB(10, 10, 20, 20),
                                       DlRect::MakeLTRB(20, 20, 30, 30)};
               static DlColor colors[] = {DlColor::kBlue(), DlColor::kGreen()};
@@ -1015,7 +1039,10 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             }},
            {1, 144, 1,
             [](DlOpReceiver& r) {
-              static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
+              static DlRSTransform xforms[] = {
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(0)),
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(90)),
+              };
               static DlRect texs[] = {DlRect::MakeLTRB(10, 10, 20, 20),
                                       DlRect::MakeLTRB(20, 20, 30, 30)};
               static DlColor colors[] = {DlColor::kBlue(), DlColor::kGreen()};
@@ -1027,7 +1054,10 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
            {1, 48 + 32 + 8, 1,
             [](DlOpReceiver& r) {
               auto dl_image = DlImage::Make(kTestSkImage);
-              static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
+              static DlRSTransform xforms[] = {
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(0)),
+                  DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(90)),
+              };
               static DlRect texs[] = {DlRect::MakeLTRB(10, 10, 20, 20),
                                       DlRect::MakeLTRB(20, 20, 30, 30)};
               r.drawAtlas(dl_image, xforms, texs, nullptr, 2,
