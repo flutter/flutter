@@ -134,7 +134,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
               onSelected: onSelected,
               options: options,
               openDirection: optionsViewOpenDirection,
-              optionsMaxHeight: optionsMaxHeight,
+              maxOptionsHeight: optionsMaxHeight,
             );
           },
       onSelected: onSelected,
@@ -176,7 +176,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
     required this.onSelected,
     required this.openDirection,
     required this.options,
-    required this.optionsMaxHeight,
+    required this.maxOptionsHeight,
   });
 
   final AutocompleteOptionToString<T> displayStringForOption;
@@ -185,7 +185,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
   final OptionsViewOpenDirection openDirection;
 
   final Iterable<T> options;
-  final double optionsMaxHeight;
+  final double maxOptionsHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -198,7 +198,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
       child: Material(
         elevation: 4.0,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: optionsMaxHeight),
+          constraints: BoxConstraints(maxHeight: maxOptionsHeight),
           child: ListView.builder(
             padding: EdgeInsets.zero,
             shrinkWrap: true,
