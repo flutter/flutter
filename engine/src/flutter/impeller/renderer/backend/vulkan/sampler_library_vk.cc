@@ -15,7 +15,7 @@ SamplerLibraryVK::SamplerLibraryVK(
 
 SamplerLibraryVK::~SamplerLibraryVK() = default;
 
-void SamplerLibraryVK::SetWorkarounds(const WorkaroundsVK& workarounds) {
+void SamplerLibraryVK::ApplyWorkarounds(const WorkaroundsVK& workarounds) {
   mips_disabled_workaround_ = workarounds.broken_mipmap_generation;
 }
 

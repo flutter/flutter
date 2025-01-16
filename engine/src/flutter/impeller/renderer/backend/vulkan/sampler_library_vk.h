@@ -23,7 +23,7 @@ class SamplerLibraryVK final
 
   explicit SamplerLibraryVK(const std::weak_ptr<DeviceHolderVK>& device_holder);
 
-  void SetWorkarounds(const WorkaroundsVK& workarounds);
+  void ApplyWorkarounds(const WorkaroundsVK& workarounds);
 
  private:
   friend class ContextVK;
