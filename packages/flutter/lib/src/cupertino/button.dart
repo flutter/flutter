@@ -128,6 +128,7 @@ class CupertinoButton extends StatefulWidget {
     required this.child,
     this.sizeStyle = CupertinoButtonSize.large,
     this.padding,
+    this.color,
     this.disabledColor = CupertinoColors.tertiarySystemFill,
     this.minSize,
     this.pressedOpacity = 0.4,
@@ -140,7 +141,6 @@ class CupertinoButton extends StatefulWidget {
     this.onLongPress,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
-       color = null,
        _style = _CupertinoButtonStyle.filled;
 
   /// The widget below this widget in the tree.
@@ -370,7 +370,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
               : widget.color?.opacity ?? 1.0,
         );
     final Color foregroundColor =
-        widget._style == _CupertinoButtonStyle.filled || backgroundColor != null
+        widget._style == _CupertinoButtonStyle.filled
             ? themeData.primaryContrastingColor
             : enabled
             ? primaryColor
