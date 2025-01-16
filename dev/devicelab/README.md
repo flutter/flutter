@@ -61,7 +61,7 @@ Running DeviceLab tests locally will do things to your environment.
 Notably:
 
 - It will automatically start and stop Gradle on your machine
-- It will automatically reboot your target Android or iOS device after a certain amount of tests before running any additional tests on it
+- It will automatically reboot your target Android or iOS device after a certain amount of tests before running any additional tests on it. See the `checkForRebootRequired()` in `flutter/dev/devicelab/lib/framework/framework.dart` and `device.reboot()` in `flutter/dev/devicelab/lib/framework/devices.dart` for more.
 
 ### Running tests in `test/...`
 
