@@ -540,9 +540,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
             shortcuts: _shortcuts,
             child: Actions(
               actions: _actionMap,
-              child: widget.optionsLayerLink != null
-                  ? fieldView
-                  : CompositedTransformTarget(link: _optionsLayerLink, child: fieldView),
+              child:
+                  widget.optionsLayerLink != null
+                      ? fieldView
+                      : CompositedTransformTarget(link: _optionsLayerLink, child: fieldView),
             ),
           ),
         ),

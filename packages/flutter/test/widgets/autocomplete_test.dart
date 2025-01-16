@@ -1784,31 +1784,42 @@ void main() {
   });
 
   testWidgets('optionsLayerLink: open upward', (WidgetTester tester) async {
-      final LayerLink optionsLayerLink = LayerLink();
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: CompositedTransformTarget(
-                link: optionsLayerLink,
-                child: RawAutocomplete<String>(
-                  optionsViewOpenDirection: OptionsViewOpenDirection.up,
-                  optionsLayerLink: optionsLayerLink,
-                  optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
-                  fieldViewBuilder: (BuildContext context, TextEditingController controller, FocusNode focusNode, VoidCallback onFieldSubmitted) {
-                    return TextField(controller: controller, focusNode: focusNode);
-                  },
-                  optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
-                    return const Text('a');
-                  },
-                ),
+    final LayerLink optionsLayerLink = LayerLink();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: CompositedTransformTarget(
+              link: optionsLayerLink,
+              child: RawAutocomplete<String>(
+                optionsViewOpenDirection: OptionsViewOpenDirection.up,
+                optionsLayerLink: optionsLayerLink,
+                optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
+                fieldViewBuilder: (
+                  BuildContext context,
+                  TextEditingController controller,
+                  FocusNode focusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  return TextField(controller: controller, focusNode: focusNode);
+                },
+                optionsViewBuilder: (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  return const Text('a');
+                },
               ),
             ),
           ),
         ),
-      );
-      await tester.showKeyboard(find.byType(TextField));
-      expect(tester.getTopLeft(find.byType(TextField)),
-        offsetMoreOrLessEquals(tester.getBottomLeft(find.text('a'))));
-    });
+      ),
+    );
+    await tester.showKeyboard(find.byType(TextField));
+    expect(
+      tester.getTopLeft(find.byType(TextField)),
+      offsetMoreOrLessEquals(tester.getBottomLeft(find.text('a'))),
+    );
+  });
 }
