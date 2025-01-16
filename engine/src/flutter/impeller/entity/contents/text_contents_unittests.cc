@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/impeller/geometry/geometry_asserts.h"
 #include "flutter/impeller/renderer/testing/mocks.h"
 #include "flutter/testing/testing.h"
 #include "impeller/entity/contents/text_contents.h"
@@ -51,6 +52,40 @@ std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
   return typographer_context->CreateGlyphAtlas(context, type, host_buffer,
                                                atlas_context, {frame});
 }
+
+Rect PerVertexDataPositionToRect(
+    GlyphAtlasPipeline::VertexShader::PerVertexData data[6]) {
+  Scalar right = FLT_MIN;
+  Scalar left = FLT_MAX;
+  Scalar top = FLT_MAX;
+  Scalar bottom = FLT_MIN;
+  for (int i = 0; i < 6; ++i) {
+    right = std::max(right, data[i].position.x);
+    left = std::min(left, data[i].position.x);
+    top = std::min(top, data[i].position.y);
+    bottom = std::max(bottom, data[i].position.y);
+  }
+
+  return Rect::MakeLTRB(left, top, right, bottom);
+}
+
+Rect PerVertexDataUVToRect(
+    GlyphAtlasPipeline::VertexShader::PerVertexData data[6],
+    ISize texture_size) {
+  Scalar right = FLT_MIN;
+  Scalar left = FLT_MAX;
+  Scalar top = FLT_MAX;
+  Scalar bottom = FLT_MIN;
+  for (int i = 0; i < 6; ++i) {
+    right = std::max(right, data[i].uv.x * texture_size.width);
+    left = std::min(left, data[i].uv.x * texture_size.width);
+    top = std::min(top, data[i].uv.y * texture_size.height);
+    bottom = std::max(bottom, data[i].uv.y * texture_size.height);
+  }
+
+  return Rect::MakeLTRB(left, top, right, bottom);
+}
+
 }  // namespace
 
 TEST_P(TextContentsTest, SimpleComputeVertexData) {
@@ -75,35 +110,10 @@ TEST_P(TextContentsTest, SimpleComputeVertexData) {
       /*basis_transform=*/Matrix(), /*offset=*/Vector2(0, 0),
       /*glyph_properties=*/std::nullopt, atlas);
 
-  EXPECT_NEAR(data[0].uv.x * texture_size.width, 0.5, 0.001);
-  EXPECT_NEAR(data[0].uv.y * texture_size.height, 0.5, 0.001);
-  EXPECT_NEAR(data[0].position.x, -1.0, 0.001);
-  EXPECT_NEAR(data[0].position.y, -41.0, 0.001);
-
-  EXPECT_NEAR(data[1].uv.x * texture_size.width, 53.5, 0.001);
-  EXPECT_NEAR(data[1].uv.y * texture_size.height, 0.5, 0.001);
-  EXPECT_NEAR(data[1].position.x, 51.0, 0.001);
-  EXPECT_NEAR(data[1].position.y, -41.0, 0.001);
-
-  EXPECT_NEAR(data[2].uv.x * texture_size.width, 0.5, 0.001);
-  EXPECT_NEAR(data[2].uv.y * texture_size.height, 53.5, 0.001);
-  EXPECT_NEAR(data[2].position.x, -1.0, 0.001);
-  EXPECT_NEAR(data[2].position.y, 11.0, 0.001);
-
-  EXPECT_NEAR(data[3].uv.x * texture_size.width, 53.5, 0.001);
-  EXPECT_NEAR(data[3].uv.y * texture_size.height, 0.5, 0.001);
-  EXPECT_NEAR(data[3].position.x, 51.0, 0.001);
-  EXPECT_NEAR(data[3].position.y, -41.0, 0.001);
-
-  EXPECT_NEAR(data[4].uv.x * texture_size.width, 0.5, 0.001);
-  EXPECT_NEAR(data[4].uv.y * texture_size.height, 53.5, 0.001);
-  EXPECT_NEAR(data[4].position.x, -1.0, 0.001);
-  EXPECT_NEAR(data[4].position.y, 11.0, 0.001);
-
-  EXPECT_NEAR(data[5].uv.x * texture_size.width, 53.5, 0.001);
-  EXPECT_NEAR(data[5].uv.y * texture_size.height, 53.5, 0.001);
-  EXPECT_NEAR(data[5].position.x, 51.0, 0.001);
-  EXPECT_NEAR(data[5].position.y, 11.0, 0.001);
+  Rect position_rect = PerVertexDataPositionToRect(data);
+  Rect uv_rect = PerVertexDataUVToRect(data, texture_size);
+  EXPECT_RECT_NEAR(position_rect, Rect::MakeXYWH(-1, -41, 52, 52));
+  EXPECT_RECT_NEAR(uv_rect, Rect::MakeXYWH(0.5, 0.5, 53, 53));
 }
 
 }  // namespace testing
