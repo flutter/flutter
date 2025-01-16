@@ -4,7 +4,6 @@
 
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_swapchain_impl_vk.h"
 
-#include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_formats.h"
@@ -27,6 +26,37 @@ static TextureDescriptor ToSwapchainTextureDescriptor(
   desc.sample_count = SampleCount::kCount1;
   desc.compression_type = CompressionType::kLossless;
   return desc;
+}
+
+AHBFrameSynchronizerVK::AHBFrameSynchronizerVK(const vk::Device& device) {
+  auto acquire_res = device.createFenceUnique(
+      vk::FenceCreateInfo{vk::FenceCreateFlagBits::eSignaled});
+  if (acquire_res.result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not create synchronizer.";
+    return;
+  }
+  acquire = std::move(acquire_res.value);
+  is_valid = true;
+}
+
+AHBFrameSynchronizerVK::~AHBFrameSynchronizerVK() = default;
+
+bool AHBFrameSynchronizerVK::WaitForFence(const vk::Device& device) {
+  if (auto result = device.waitForFences(
+          *acquire,                             // fence
+          true,                                 // wait all
+          std::numeric_limits<uint64_t>::max()  // timeout (ns)
+      );
+      result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Fence wait failed: " << vk::to_string(result);
+    return false;
+  }
+  if (auto result = device.resetFences(*acquire);
+      result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not reset fence: " << vk::to_string(result);
+    return false;
+  }
+  return true;
 }
 
 std::shared_ptr<AHBSwapchainImplVK> AHBSwapchainImplVK::Create(
@@ -83,13 +113,15 @@ const android::HardwareBufferDescriptor& AHBSwapchainImplVK::GetDescriptor()
 
 std::unique_ptr<Surface> AHBSwapchainImplVK::AcquireNextDrawable() {
   auto context = transients_->GetContext().lock();
+  if (!context) {
+    return nullptr;
+  }
+
   frame_index_ = (frame_index_ + 1) % kMaxPendingPresents;
 
-  {
-    if (!frame_data_[frame_index_]->WaitForFence(
-            ContextVK::Cast(*context).GetDevice())) {
-      return nullptr;
-    }
+  if (!frame_data_[frame_index_]->WaitForFence(
+          ContextVK::Cast(*context).GetDevice())) {
+    return nullptr;
   }
 
   if (!is_valid_) {
@@ -105,8 +137,7 @@ std::unique_ptr<Surface> AHBSwapchainImplVK::AcquireNextDrawable() {
 
   // Import the render ready semaphore that will block onscreen rendering until
   // it is ready.
-  if (!SubmitWaitForRenderReady(pool_entry.render_ready_fence,
-                                pool_entry.texture)) {
+  if (!ImportRenderReady(pool_entry.render_ready_fence, pool_entry.texture)) {
     VALIDATION_LOG << "Could wait on render ready fence.";
     return nullptr;
   }
@@ -277,7 +308,7 @@ vk::UniqueSemaphore AHBSwapchainImplVK::CreateRenderReadySemaphore(
   return std::move(signal_wait.value);
 }
 
-bool AHBSwapchainImplVK::SubmitWaitForRenderReady(
+bool AHBSwapchainImplVK::ImportRenderReady(
     const std::shared_ptr<fml::UniqueFD>& render_ready_fence,
     const std::shared_ptr<AHBTextureSourceVK>& texture) {
   auto context = transients_->GetContext().lock();
