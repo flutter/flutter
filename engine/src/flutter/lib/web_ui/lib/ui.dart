@@ -21,7 +21,6 @@ part 'canvas.dart';
 part 'channel_buffers.dart';
 part 'compositing.dart';
 part 'geometry.dart';
-part 'initialization.dart';
 part 'key.dart';
 part 'lerp.dart';
 part 'math.dart';
