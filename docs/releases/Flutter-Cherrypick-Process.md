@@ -23,7 +23,7 @@ If the automated cherry-pick process fails, you will have to create the cherry-p
 1. Create a cherry-pick pull request to the intended branch. (you can find [beta](https://github.com/flutter/flutter/blob/beta/bin/internal/release-candidate-branch.version) and [stable](https://github.com/flutter/flutter/blob/stable/bin/internal/release-candidate-branch.version) candidate branch info by following the respective links).
 2. Prepend the title of the cherry-pick request with [beta] or [stable].
 3. Fill out the PR description with the following fields:
-  - Impacted Users (Approximately who will hit this issue (ex. all Flutter devs, Windows developers, all end-customers, apps using X framework feature)?).
+  - Impacted Users (Approximately who will hit this issue, ex. all Flutter devs, Windows developers, all end-customers, apps using X framework feature).
   - Impact Description (What is the impact? ex. visual jank on Samsung phones, app crash, cannot ship an iOS app. Does it impact development? ex. flutter doctor crashes when Android Studio is installed. Or shipping a production app? ex. the app crashes on launch).
   - Workaround (Is there a workaround for this issue?)
   - Risk (What is the risk level of this cherry-pick?)
