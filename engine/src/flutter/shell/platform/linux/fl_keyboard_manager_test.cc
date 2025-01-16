@@ -100,7 +100,6 @@ using ::flutter::testing::keycodes::kPhysicalMetaLeft;
 using ::flutter::testing::keycodes::kPhysicalShiftLeft;
 
 constexpr guint16 kKeyCodeKeyA = 0x26u;
-// constexpr guint16 kKeyCodeKeyB = 0x38u;
 constexpr guint16 kKeyCodeKeyM = 0x3au;
 constexpr guint16 kKeyCodeDigit1 = 0x0au;
 constexpr guint16 kKeyCodeMinus = 0x14u;
