@@ -2268,6 +2268,40 @@ void main() {
     },
   );
 
+  testWidgets('Text field content reflects changes in initalSelection corresponding entry label', (
+    WidgetTester tester,
+  ) async {
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    String selectionLabel = 'Initial label';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: DropdownMenu<TestMenu>(
+                initialSelection: TestMenu.mainMenu0,
+                dropdownMenuEntries: <DropdownMenuEntry<TestMenu>>[
+                  DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: selectionLabel),
+                ],
+                controller: controller,
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () => setState(() => selectionLabel = 'Updated label'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+
+    expect(controller.text, 'Updated label');
+  });
+
   testWidgets('The default text input field should not be focused on mobile platforms '
       'when it is tapped', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();

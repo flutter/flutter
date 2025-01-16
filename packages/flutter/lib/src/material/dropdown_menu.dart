@@ -520,6 +520,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   bool _menuHasEnabledItem = false;
   TextEditingController? _localTextEditingController;
   final FocusNode _internalFocudeNode = FocusNode();
+  T? _currentSelection;
 
   @override
   void initState() {
@@ -529,6 +530,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     } else {
       _localTextEditingController = TextEditingController();
     }
+    _currentSelection = widget.initialSelection;
     _enableSearch = widget.enableSearch;
     filteredEntries = widget.dropdownMenuEntries;
     buttonItemKeys = List<GlobalKey>.generate(filteredEntries.length, (int index) => GlobalKey());
@@ -584,14 +586,15 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     if (oldWidget.leadingIcon != widget.leadingIcon) {
       refreshLeadingPadding();
     }
-    if (oldWidget.initialSelection != widget.initialSelection) {
-      final int index = filteredEntries.indexWhere(
-        (DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection,
+    if (_currentSelection != null) {
+      final int selectionIndex = filteredEntries.indexWhere(
+        (entry) => entry.value == _currentSelection,
       );
-      if (index != -1) {
+      if (selectionIndex != -1 &&
+          _localTextEditingController?.value.text != filteredEntries[selectionIndex].label) {
         _localTextEditingController?.value = TextEditingValue(
-          text: filteredEntries[index].label,
-          selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
+          text: filteredEntries[selectionIndex].label,
+          selection: TextSelection.collapsed(offset: filteredEntries[selectionIndex].label.length),
         );
       }
     }
@@ -786,6 +789,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           onPressed:
               entry.enabled && widget.enabled
                   ? () {
+                    _currentSelection = entry.value;
                     _localTextEditingController?.value = TextEditingValue(
                       text: entry.label,
                       selection: TextSelection.collapsed(offset: entry.label.length),
