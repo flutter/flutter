@@ -41,6 +41,10 @@ AHBFrameSynchronizerVK::AHBFrameSynchronizerVK(const vk::Device& device) {
 
 AHBFrameSynchronizerVK::~AHBFrameSynchronizerVK() = default;
 
+bool AHBFrameSynchronizerVK::IsValid() const {
+  return is_valid;
+}
+
 bool AHBFrameSynchronizerVK::WaitForFence(const vk::Device& device) {
   if (auto result = device.waitForFences(
           *acquire,                             // fence
@@ -87,13 +91,17 @@ AHBSwapchainImplVK::AHBSwapchainImplVK(
   transients_ = std::make_shared<SwapchainTransientsVK>(
       context, ToSwapchainTextureDescriptor(desc_), enable_msaa);
 
+  for (auto i = 0u; i < kMaxPendingPresents; i++) {
+    auto sync = std::make_unique<AHBFrameSynchronizerVK>(
+        ContextVK::Cast(*context.lock()).GetDeviceHolder()->GetDevice());
+    if (!sync->IsValid()) {
+      return;
+    }
+    frame_data_.push_back(std::move(sync));
+  }
+
   auto control = surface_control_.lock();
   is_valid_ = control && control->IsValid();
-
-  for (auto i = 0u; i < kMaxPendingPresents; i++) {
-    frame_data_.push_back(std::make_unique<AHBFrameSynchronizerVK>(
-        ContextVK::Cast(*context.lock()).GetDeviceHolder()->GetDevice()));
-  }
 }
 
 AHBSwapchainImplVK::~AHBSwapchainImplVK() = default;
@@ -277,7 +285,6 @@ vk::UniqueSemaphore AHBSwapchainImplVK::CreateRenderReadySemaphore(
   const auto& device = context_vk.GetDevice();
 
   auto signal_wait = device.createSemaphoreUnique({});
-
   if (signal_wait.result != vk::Result::eSuccess) {
     return {};
   }

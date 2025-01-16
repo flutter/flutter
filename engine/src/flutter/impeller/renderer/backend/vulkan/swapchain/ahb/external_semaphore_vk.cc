@@ -30,7 +30,7 @@ ExternalSemaphoreVK::ExternalSemaphoreVK(
     return;
   }
 
-  context_vk.SetDebugName(semaphore.get(), "ExternalFenceSyncFD");
+  context_vk.SetDebugName(semaphore.get(), "ExternalSemaphoreSyncFD");
 
   semaphore_ = MakeSharedVK(std::move(semaphore));
 }

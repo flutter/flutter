@@ -33,6 +33,8 @@ struct AHBFrameSynchronizerVK {
 
   ~AHBFrameSynchronizerVK();
 
+  bool IsValid() const;
+
   bool WaitForFence(const vk::Device& device);
 };
 

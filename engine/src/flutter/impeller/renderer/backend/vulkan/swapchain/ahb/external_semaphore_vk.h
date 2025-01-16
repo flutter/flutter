@@ -14,23 +14,21 @@
 namespace impeller {
 
 //------------------------------------------------------------------------------
-/// @brief      A Vulkan fence that can be exported as a platform specific file
-///             descriptor.
+/// @brief      A Vulkan semaphore that can be exported as a platform specific
+///             file descriptor.
 ///
-///             The fences are exported as sync file descriptors.
+///             The semaphore are exported as sync file descriptors.
 ///
-/// @warning    Only fences that have been signaled or have a single operation
-///             pending can be exported. Make sure to submit a fence signalling
-///             operation to a queue before attempted to obtain a file
-///             descriptor for the fence. See
-///             VUID-VkFenceGetFdInfoKHR-handleType-01454 for additional details
-///             on the implementation.
+/// @warning    Only semaphore that have been signaled or have a single
+///             operation pending can be exported. Make sure to submit a fence
+///             signalling operation to a queue before attempted to obtain a
+///             file descriptor for the fence.
 ///
 class ExternalSemaphoreVK {
  public:
   //----------------------------------------------------------------------------
-  /// @brief      Create a new un-signaled fence that can be exported as a sync
-  ///             file descriptor.
+  /// @brief      Create a new un-signaled semaphore that can be exported as a
+  ///             sync file descriptor.
   ///
   /// @param[in]  context  The device context.
   ///
@@ -50,16 +48,18 @@ class ExternalSemaphoreVK {
   bool IsValid() const;
 
   //----------------------------------------------------------------------------
-  /// @brief      Create a new sync file descriptor for the underlying fence.
-  ///             The fence must already be signaled or have a signal operation
-  ///             pending in a queue. There are no checks for this in the
-  ///             implementation and only Vulkan validation will catch such a
-  ///             misuse and undefined behavior.
+  /// @brief      Create a new sync file descriptor for the underlying
+  ///             semaphore.
+  ///
+  ///             The semaphore must already be signaled or have a signal
+  ///             operation pending in a queue. There are no checks for this in
+  ///             the implementation and only Vulkan validation will catch such
+  ///             a misuse and undefined behavior.
   ///
   /// @warning    Implementations are also allowed to return invalid file
-  ///             descriptors in case a fence has already been signaled. So it
-  ///             is not necessary an error to obtain an invalid descriptor from
-  ///             this call. For APIs that are meant to consume such
+  ///             descriptors in case a semaphore has already been signaled. So
+  ///             it is not necessary an error to obtain an invalid descriptor
+  ///             from this call. For APIs that are meant to consume such
   ///             descriptors, pass -1 as the file handle.
   ///
   ///             Since this call can return an invalid FD even in case of
