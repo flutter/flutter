@@ -6,7 +6,9 @@ import { createWasmInstantiator } from "./instantiate_wasm.js";
 import { resolveUrlWithSegments } from "./utils.js";
 
 export const loadSkwasm = async (deps, config, browserEnvironment, baseUrl) => {
-  const fileStem = (browserEnvironment.crossOriginIsolated && !config.forceSingleThreadedSkwasm) ? "skwasm" : "skwasm_st";
+  const canRunMultithreaded = (browserEnvironment.crossOriginIsolated && !config.forceSingleThreadedSkwasm);
+  const needsHeavy = (!browserEnvironment.hasImageCodecs || !browserEnvironment.hasChromiumBreakIterators)
+  const fileStem = `skwasm${needsHeavy ? '_heavy' : ''}${canRunMultithreaded ? '' : '_st'}`;
   const rawSkwasmUrl = resolveUrlWithSegments(baseUrl, `${fileStem}.js`)
   let skwasmUrl = rawSkwasmUrl;
   if (deps.flutterTT.policy) {

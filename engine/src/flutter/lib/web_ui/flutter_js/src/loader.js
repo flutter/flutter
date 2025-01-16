@@ -55,7 +55,7 @@ export class FlutterLoader {
    *   Settings for the service worker to be loaded. Can pass `undefined` or
    *   `null` to not launch a service worker at all.
    * @param {import("/.types".OnEntryPointLoadedCallback)} options.onEntrypointLoaded
-   *   An optional callback to invoke 
+   *   An optional callback to invoke
    * @param {string} options.nonce
    *   A nonce to be applied to the main JS script when loading it, which may
    *   be required by the sites Content-Security-Policy.
@@ -79,9 +79,7 @@ export class FlutterLoader {
     const rendererIsCompatible = (renderer) => {
       switch (renderer) {
         case "skwasm":
-          return browserEnvironment.hasChromiumBreakIterators
-            && browserEnvironment.hasImageCodecs
-            && browserEnvironment.supportsWasmGC;
+          return browserEnvironment.supportsWasmGC;
         default:
           return true;
       }

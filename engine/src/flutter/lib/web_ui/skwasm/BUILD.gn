@@ -74,6 +74,12 @@ template("skwasm_variant") {
       inputs += [ rebase_path("library_skwasm_single_threaded.js") ]
     }
 
+    if (invoker.is_heavy) {
+      sources += [ "text/paragraph_builder_builtin_icu.cpp"]
+    } else {
+      sources += [ "text/paragraph_builder_client_icu.cpp" ]
+    }
+
     if (is_debug) {
       ldflags += [
         "-sDEMANGLE_SUPPORT=1",
@@ -94,8 +100,20 @@ template("skwasm_variant") {
 
 skwasm_variant("skwasm") {
   multi_threaded = true
+  is_heavy = false
 }
 
 skwasm_variant("skwasm_st") {
   multi_threaded = false
+  is_heavy = false
+}
+
+skwasm_variant("skwasm_heavy") {
+  multi_threaded = true
+  is_heavy = true
+}
+
+skwasm_variant("skwasm_heavy_st") {
+  multi_threaded = false
+  is_heavy = true
 }
