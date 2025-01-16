@@ -17,6 +17,8 @@ import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
+import '../widget_preview/preview_code_generator.dart';
+import '../widget_preview/preview_detector.dart';
 import 'create_base.dart';
 
 class WidgetPreviewCommand extends FlutterCommand {
@@ -83,6 +85,13 @@ class WidgetPreviewStartCommand extends FlutterCommand
   @override
   String get name => 'start';
 
+  late final PreviewDetector _previewDetector = PreviewDetector(
+    logger: globals.logger,
+    onChangeDetected: onChangeDetected,
+  );
+
+  late final PreviewCodeGenerator _previewCodeGenerator;
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject rootProject = getRootProject();
@@ -112,7 +121,22 @@ class WidgetPreviewStartCommand extends FlutterCommand
       );
       await _populatePreviewPubspec(rootProject: rootProject);
     }
+
+    _previewCodeGenerator = PreviewCodeGenerator(
+      widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject,
+      fs: globals.fs,
+    );
+
+    final PreviewMapping previews = _previewDetector.findPreviewFunctions(rootProject.directory);
+
+    _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(previews);
+
+    await _previewDetector.dispose();
     return FlutterCommandResult.success();
+  }
+
+  void onChangeDetected(PreviewMapping previews) {
+    // TODO(bkonyi): perform hot reload
   }
 
   @visibleForTesting
