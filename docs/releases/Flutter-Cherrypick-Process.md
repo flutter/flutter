@@ -56,16 +56,15 @@ While we attempt to address every cherry-pick requests, there are various reason
 ### Lifecycle of a cherry-pick
 
 1. The cherry-pick requester opens a cherry-pick pull request to the [beta](https://github.com/flutter/flutter/blob/beta/bin/internal/release-candidate-branch.version) or [stable](https://github.com/flutter/flutter/blob/stable/bin/internal/release-candidate-branch.version) **candidate** branch (follow the respective link to find the branch name)
-2. A cherry-pick issue is filled out completely and created utilizing the [cherry-pick template](https://github.com/flutter/flutter/issues/new?template=7_cherry_pick.yml) in the [flutter/flutter](https://github.com/flutter/flutter) repository.
-3. The release engineering team is notified that a cherry-pick request is in queue and assigns an appropriate reviewer who is an expert in the area who will review the cherry-pick issue and associated cherry-pick pull request.
-4. The release engineering team applies the `merge-to-beta` or `merge-to-stable` label.
-5. The cherry-pick request then enters one of the following states.
+2. The release engineering team is notified that a cherry-pick request is in queue and assigns an appropriate reviewer who is an expert in the area who will review the cherry-pick issue and associated cherry-pick pull request.
+3. The release engineering team applies the `merge-to-beta` or `merge-to-stable` label.
+4. The cherry-pick request then enters one of the following states.
    1. Approved: The reviewer has approved the cherry-pick and cherry-pick pull request.
 The release engineering team will merge the cherry-pick pull request and apply the `cp: merged` label to the cherry-pick issue.
    2. Denied: The reviewer will comment on the cherry-pick issue why the cherry-pick is denied.
 The release engineering team will close the cherry-pick issue and associated cherry-pick pull request.
-6. The cherry-pick is picked up in the next release period.
-7. Once the cherry-pick has been added to a release, the release engineering team will close the cherry-pick issue.
+5. The cherry-pick is picked up in the next release period.
+6. Once the cherry-pick has been added to a release, the release engineering team will close the cherry-pick issue.
 
 ### This is my first cherry-pick, how do I do it?
 
