@@ -174,6 +174,7 @@
 ../../../flutter/impeller/geometry/path_unittests.cc
 ../../../flutter/impeller/geometry/rect_unittests.cc
 ../../../flutter/impeller/geometry/round_rect_unittests.cc
+../../../flutter/impeller/geometry/rstransform_unittests.cc
 ../../../flutter/impeller/geometry/saturated_math_unittests.cc
 ../../../flutter/impeller/geometry/size_unittests.cc
 ../../../flutter/impeller/geometry/trig_unittests.cc
@@ -1504,7 +1505,6 @@
 ../../../flutter/third_party/dart/runtime/vm/bit_vector_test.cc
 ../../../flutter/third_party/dart/runtime/vm/bitfield_test.cc
 ../../../flutter/third_party/dart/runtime/vm/bitmap_test.cc
-../../../flutter/third_party/dart/runtime/vm/boolfield_test.cc
 ../../../flutter/third_party/dart/runtime/vm/catch_entry_moves_test.cc
 ../../../flutter/third_party/dart/runtime/vm/class_finalizer_test.cc
 ../../../flutter/third_party/dart/runtime/vm/code_descriptors_test.cc
@@ -1650,6 +1650,7 @@
 ../../../flutter/third_party/dart/sdk/lib/_internal/vm/OWNERS
 ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/OWNERS
 ../../../flutter/third_party/dart/sdk/lib/_wasm/OWNERS
+../../../flutter/third_party/dart/sdk/lib/html/dart2js
 ../../../flutter/third_party/dart/sdk/lib/html/doc
 ../../../flutter/third_party/dart/sdk/lib/libraries.json
 ../../../flutter/third_party/dart/sdk/lib/libraries.yaml

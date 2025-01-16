@@ -17,6 +17,7 @@
 #include "impeller/renderer/surface.h"
 #include "impeller/toolkit/android/hardware_buffer.h"
 #include "impeller/toolkit/android/surface_control.h"
+#include "vulkan/vulkan_handles.hpp"
 
 namespace impeller {
 
@@ -89,6 +90,8 @@ class AHBSwapchainImplVK final
   ///
   std::unique_ptr<Surface> AcquireNextDrawable();
 
+  void AddFinalCommandBuffer(std::shared_ptr<CommandBuffer> cmd_buffer);
+
  private:
   using AutoSemaSignaler = std::shared_ptr<fml::ScopedCleanupClosure>;
 
@@ -102,6 +105,14 @@ class AHBSwapchainImplVK final
   std::shared_ptr<AHBTextureSourceVK> currently_displayed_texture_
       IPLR_GUARDED_BY(currently_displayed_texture_mutex_);
   std::shared_ptr<fml::Semaphore> pending_presents_;
+
+  struct FrameData {
+    std::shared_ptr<CommandBuffer> command_buffer;
+    vk::UniqueSemaphore semaphore;
+  };
+
+  std::array<FrameData, 3> frame_data_;
+  size_t frame_index_ = 0;
   bool is_valid_ = false;
 
   explicit AHBSwapchainImplVK(
@@ -114,12 +125,12 @@ class AHBSwapchainImplVK final
   bool Present(const AutoSemaSignaler& signaler,
                const std::shared_ptr<AHBTextureSourceVK>& texture);
 
-  vk::UniqueFence CreateRenderReadyFence(
+  vk::UniqueSemaphore CreateRenderReadySemaphore(
       const std::shared_ptr<fml::UniqueFD>& fd) const;
 
   bool SubmitWaitForRenderReady(
       const std::shared_ptr<fml::UniqueFD>& render_ready_fence,
-      const std::shared_ptr<AHBTextureSourceVK>& texture) const;
+      const std::shared_ptr<AHBTextureSourceVK>& texture);
 
   std::shared_ptr<ExternalFenceVK> SubmitSignalForPresentReady(
       const std::shared_ptr<AHBTextureSourceVK>& texture) const;

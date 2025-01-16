@@ -642,10 +642,26 @@ void DlDispatcherBase::drawArc(const DlRect& oval_bounds,
                                bool use_center) {
   AUTO_DEPTH_WATCHER(1u);
 
-  PathBuilder builder;
-  builder.AddArc(oval_bounds, Degrees(start_degrees), Degrees(sweep_degrees),
-                 use_center);
-  GetCanvas().DrawPath(builder.TakePath(), paint_);
+  if (paint_.stroke_width >
+      std::max(oval_bounds.GetWidth(), oval_bounds.GetHeight())) {
+    // This is a special case for rendering arcs whose stroke width is so large
+    // you are effectively drawing a sector of a circle.
+    // https://github.com/flutter/flutter/issues/158567
+    DlRect expanded_rect = oval_bounds.Expand(Size(paint_.stroke_width / 2));
+    PathBuilder builder;
+    Paint fill_paint = paint_;
+    fill_paint.style = Paint::Style::kFill;
+    fill_paint.stroke_width = 1;
+    builder.AddArc(expanded_rect, Degrees(start_degrees),
+                   Degrees(sweep_degrees),
+                   /*use_center=*/true);
+    GetCanvas().DrawPath(builder.TakePath(), fill_paint);
+  } else {
+    PathBuilder builder;
+    builder.AddArc(oval_bounds, Degrees(start_degrees), Degrees(sweep_degrees),
+                   use_center);
+    GetCanvas().DrawPath(builder.TakePath(), paint_);
+  }
 }
 
 // |flutter::DlOpReceiver|
@@ -758,7 +774,7 @@ void DlDispatcherBase::drawImageNine(const sk_sp<flutter::DlImage> image,
 
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::drawAtlas(const sk_sp<flutter::DlImage> atlas,
-                                 const SkRSXform xform[],
+                                 const RSTransform xform[],
                                  const DlRect tex[],
                                  const flutter::DlColor colors[],
                                  int count,
@@ -947,11 +963,13 @@ static bool RequiresReadbackForBlends(
 
 CanvasDlDispatcher::CanvasDlDispatcher(ContentContext& renderer,
                                        RenderTarget& render_target,
+                                       bool is_onscreen,
                                        bool has_root_backdrop_filter,
                                        flutter::DlBlendMode max_root_blend_mode,
                                        IRect cull_rect)
     : canvas_(renderer,
               render_target,
+              is_onscreen,
               has_root_backdrop_filter ||
                   RequiresReadbackForBlends(renderer, max_root_blend_mode),
               cull_rect),
@@ -1270,6 +1288,7 @@ std::shared_ptr<Texture> DisplayListToTexture(
   impeller::CanvasDlDispatcher impeller_dispatcher(
       context.GetContentContext(),               //
       target,                                    //
+      /*is_onscreen=*/false,                     //
       display_list->root_has_backdrop_filter(),  //
       display_list->max_root_blend_mode(),       //
       impeller::IRect::MakeSize(size)            //
@@ -1288,11 +1307,12 @@ std::shared_ptr<Texture> DisplayListToTexture(
   return target.GetRenderTargetTexture();
 }
 
-bool RenderToOnscreen(ContentContext& context,
-                      RenderTarget render_target,
-                      const sk_sp<flutter::DisplayList>& display_list,
-                      SkIRect cull_rect,
-                      bool reset_host_buffer) {
+bool RenderToTarget(ContentContext& context,
+                    RenderTarget render_target,
+                    const sk_sp<flutter::DisplayList>& display_list,
+                    SkIRect cull_rect,
+                    bool reset_host_buffer,
+                    bool is_onscreen) {
   Rect ip_cull_rect = Rect::MakeLTRB(cull_rect.left(), cull_rect.top(),
                                      cull_rect.right(), cull_rect.bottom());
   FirstPassDispatcher collector(context, impeller::Matrix(), ip_cull_rect);
@@ -1301,6 +1321,7 @@ bool RenderToOnscreen(ContentContext& context,
   impeller::CanvasDlDispatcher impeller_dispatcher(
       context,                                   //
       render_target,                             //
+      /*is_onscreen=*/is_onscreen,               //
       display_list->root_has_backdrop_filter(),  //
       display_list->max_root_blend_mode(),       //
       IRect::RoundOut(ip_cull_rect)              //
