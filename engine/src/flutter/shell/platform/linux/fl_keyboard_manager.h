@@ -159,15 +159,6 @@ void fl_keyboard_manager_set_lookup_key_handler(
     FlKeyboardManagerLookupKeyHandler lookup_key_handler,
     gpointer user_data);
 
-/**
- * fl_keyboard_manager_notify_layout_changed:
- * @manager: the #FlKeyboardManager self.
- *
- * Notify the manager the keyboard layout has changed, for testing purposes
- * only.
- */
-void fl_keyboard_manager_notify_layout_changed(FlKeyboardManager* manager);
-
 typedef void (*FlKeyboardManagerRedispatchEventHandler)(FlKeyEvent* event,
                                                         gpointer user_data);
 
