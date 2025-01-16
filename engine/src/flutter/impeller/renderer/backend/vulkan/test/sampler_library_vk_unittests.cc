@@ -16,9 +16,6 @@ namespace impeller {
 namespace testing {
 
 TEST(SamplerLibraryVK, WorkaroundsCanDisableReadingFromMipLevels) {
-  // In a typical app, there is a single ContextVK per app, shared b/w threads.
-  //
-  // This test ensures that the (mock) ContextVK is thread-safe.
   auto const context = MockVulkanContextBuilder().Build();
 
   auto library_vk =
@@ -32,7 +29,7 @@ TEST(SamplerLibraryVK, WorkaroundsCanDisableReadingFromMipLevels) {
   EXPECT_EQ(sampler->GetDescriptor().mip_filter, MipFilter::kLinear);
 
   // Apply mips disabled workaround.
-  library_vk->SetWorkarounds(WorkaroundsVK{.broken_mipmap_generation = true});
+  library_vk->ApplyWorkarounds(WorkaroundsVK{.broken_mipmap_generation = true});
 
   sampler = library->GetSampler(desc);
   EXPECT_EQ(sampler->GetDescriptor().mip_filter, MipFilter::kBase);
