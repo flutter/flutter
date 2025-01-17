@@ -22,6 +22,14 @@ class DeeplinkTest {
         assertFalse { deeplink1 == deeplink2 }
     }
 
+    @Test
+    fun `equals should return false for other of different type`() {
+        val deeplink1 = Deeplink("scheme1", "host1", "path1", null)
+        val notADeeplink = 5
+
+        assertFalse { deeplink1.equals(notADeeplink) }
+    }
+
     @Suppress("UnusedEquals")
     @Test
     fun `equals should throw NullPointerException for null other`() {
