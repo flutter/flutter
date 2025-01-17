@@ -1,0 +1,31 @@
+name: Generate Changed Files JSON
+
+on:
+  pull_request:
+    types:
+      - opened
+
+jobs:
+  generate-json:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "changed_files=$CHANGED_FILES" >> $GITHUB_OUTPUT
+
+      - name: Generate JSON
+        run: |
+          echo '{"changed_files": [' >> changed_files.json
+          echo "${{ steps.changed-files.outputs.changed_files }}" | tr ' ' '\n' | awk -v ORS=',' -F '/' '{print "\""$NF"\""}' | sed 's/,$//' >> changed_files.json
+          echo ']}' >> changed_files.json
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: changed-files
+          path: changed_files.json
