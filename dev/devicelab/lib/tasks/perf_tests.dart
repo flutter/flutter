@@ -1636,69 +1636,6 @@ class WebCompileTest {
 
 /// Measures how long it takes to compile a Flutter app and how big the compiled
 /// code is.
-class CompileSwiftUICompileTest {
-  const CompileSwiftUICompileTest(this.testDirectory, { this.reportPackageContentSizes = false });
-
-  final String testDirectory;
-  final bool reportPackageContentSizes;
-
-  Future<TaskResult> run() async {
-    await Process.run('xcodebuild', <String>[
-      'clean',
-      '-allTargets'
-    ]);
-    final Stopwatch watch = Stopwatch();
-    int releaseSizeInBytes = 0;
-    watch.start();
-    await Process.run(workingDirectory: testDirectory ,'xcodebuild', <String>[
-      '-scheme',
-      'hello_world_swiftui',
-      '-target',
-      'hello_world_swiftui',
-      '-sdk',
-      'iphoneos',
-      '-configuration',
-      'Release',
-      'CODE_SIGNING_ALLOWED=NO',
-      'CODE_SIGNING_REQUIRED=NO',
-      'CODE_SIGN_IDENTITY=-',
-      'EXPANDED_CODE_SIGN_IDENTITY=-',
-      '-archivePath',
-      '$testDirectory/hello_world_swiftui',
-      'archive'
-    ]).then((ProcessResult results) {
-      print(results.stdout);
-      if (results.exitCode != 0) {
-        print(results.stderr);
-      }
-    });
-    watch.stop();
-
-    final String path = '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
-    final Directory appBundle =  dir(path);
-    try {
-      for (final FileSystemEntity entity in appBundle.listSync(recursive: true)) {
-        if (entity is File) {
-          releaseSizeInBytes += entity.lengthSync();
-        }
-      }
-    } catch (e) {
-      print('Error calculating size: $e at $path');
-    }
-    // final Map<String, dynamic> test = await CompileTest('${flutterDirectory.path}/examples/hello_world_flutter', reportPackageContentSizes: true)._compileApp(deleteGradleCache: false);
-
-    final Map<String, dynamic> metrics = <String, dynamic>{};
-    // metrics.addAll(test);
-    metrics.addAll(<String, dynamic>{
-      'release_swiftui_compile_millis': watch.elapsedMilliseconds,
-      'release_swiftui_size_bytes': releaseSizeInBytes,
-    });
-    return TaskResult.success(metrics);
-  }
-}
-
-/// Measures how long it takes to compile a Flutter app and how big the compiled
-/// code is.
 class CompileTest {
   const CompileTest(this.testDirectory, {this.reportPackageContentSizes = false});
 
@@ -1776,10 +1713,6 @@ class CompileTest {
       'iphoneos',
       '-configuration',
       'Release',
-      'CODE_SIGNING_ALLOWED=NO',
-      'CODE_SIGNING_REQUIRED=NO',
-      'CODE_SIGN_IDENTITY=-',
-      'EXPANDED_CODE_SIGN_IDENTITY=-',
       '-archivePath',
       '$testDirectory/hello_world_swiftui',
       'archive'
@@ -1791,22 +1724,17 @@ class CompileTest {
     });
     watch.stop();
 
-    final String path = '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
-    final Directory appBundle =  dir(path);
-    try {
-      for (final FileSystemEntity entity in appBundle.listSync(recursive: true)) {
-        if (entity is File) {
-          releaseSizeInBytes += entity.lengthSync();
-        }
-      }
-    } catch (e) {
-      print('Error calculating size: $e at $path');
-    }
+    final String testPath = '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
+
+    // Zip up the .app file to get an approximation of the .ipa size.
+    await exec('tar', <String>['-zcf', 'app.tar.gz', testPath]);
+
     final Map<String, dynamic> metrics = <String, dynamic>{};
+    releaseSizeInBytes = await file('$testDirectory/app.tar.gz').length();
 
     metrics.addAll(<String, dynamic>{
       'release_swiftui_compile_millis': watch.elapsedMilliseconds,
-      'release_swiftui_size_bytes': releaseSizeInBytes,
+      'release_swiftui_size_bytes': releaseSizeInBytes
     });
     return TaskResult.success(metrics);
     });

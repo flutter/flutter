@@ -17,14 +17,14 @@
 		<key>CFBundleVersion</key>
 		<string>1</string>
 		<key>SigningIdentity</key>
-		<string></string>
+		<string>Apple Development: Louise Hsu (M3DVD2KV2K)</string>
 		<key>Team</key>
-		<string></string>
+		<string>S8QB4VV633</string>
 	</dict>
 	<key>ArchiveVersion</key>
 	<integer>2</integer>
 	<key>CreationDate</key>
-	<date>2025-01-14T23:23:25Z</date>
+	<date>2025-01-17T23:44:35Z</date>
 	<key>Name</key>
 	<string>hello_world_swiftui</string>
 	<key>SchemeName</key>
