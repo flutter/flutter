@@ -161,12 +161,18 @@ void main() {
     await tester.tap(find.byType(CupertinoListTile));
     await tester.pump();
 
-    // Container inside CupertinoListTile is the second one in row.
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(CupertinoListTile)),
+    );
+    await tester.pump();
+
     container = tester.widgetList<Container>(find.byType(Container)).elementAt(1);
     expect(container.color, backgroundColorActivated);
 
-    // Pump the rest of the frames to complete the test.
+    await gesture.up();
     await tester.pumpAndSettle();
+    container = tester.widgetList<Container>(find.byType(Container)).elementAt(1);
+    expect(container.color, backgroundColor);
   });
 
   testWidgets('does not contain GestureDetector if onTap is not provided', (
