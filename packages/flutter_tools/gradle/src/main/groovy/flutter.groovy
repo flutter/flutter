@@ -5,6 +5,8 @@
 
 import com.android.build.OutputFile
 import com.flutter.gradle.BaseApplicationNameHandler
+import com.flutter.gradle.Deeplink
+import com.flutter.gradle.IntentFilterCheck
 import groovy.json.JsonGenerator
 import groovy.xml.QName
 import java.nio.file.Paths
@@ -30,9 +32,6 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
-
-import com.flutter.gradle.Deeplink
-import com.flutter.gradle.IntentFilterCheck
 
 /**
  * For apps only. Provides the flutter extension used in the app-level Gradle
