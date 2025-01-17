@@ -44,6 +44,5 @@ void main() {
   await SystemChrome.setEnabledSystemUIOverlays(error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/161518
-  final SelectionChangedCause cause = SelectionChangedCause.scribble;
-  print(cause);
+  const CopySelectionTextIntent.cut(SelectionChangedCause.scribble);
 }
