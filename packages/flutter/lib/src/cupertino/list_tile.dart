@@ -377,7 +377,7 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
             _tapped = false;
           }),
       onTap: () async {
-        await widget.onTap!();
+        widget.onTap!();
         if (mounted) {
           setState(() {
             _tapped = false;
