@@ -44,6 +44,5 @@ void main() {
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, error: '');
 
   // Changes made in https://github.com/flutter/flutter/pull/161518
-  final SelectionChangedCause cause = SelectionChangedCause.stylusHandwriting;
-  print(cause);
+  const CopySelectionTextIntent.cut(SelectionChangedCause.stylusHandwriting);
 }
