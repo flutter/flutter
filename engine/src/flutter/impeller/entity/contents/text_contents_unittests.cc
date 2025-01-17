@@ -89,6 +89,10 @@ Rect PerVertexDataUVToRect(
 }  // namespace
 
 TEST_P(TextContentsTest, SimpleComputeVertexData) {
+#ifndef FML_OS_MACOSX
+  GTEST_SKIP() << "Results aren't stable across linux and macos.";
+#endif
+
   GlyphAtlasPipeline::VertexShader::PerVertexData data[6];
 
   std::shared_ptr<TextFrame> text_frame =
@@ -124,6 +128,10 @@ TEST_P(TextContentsTest, SimpleComputeVertexData) {
 }
 
 TEST_P(TextContentsTest, SimpleComputeVertexData2x) {
+#ifndef FML_OS_MACOSX
+  GTEST_SKIP() << "Results aren't stable across linux and macos.";
+#endif
+
   GlyphAtlasPipeline::VertexShader::PerVertexData data[6];
 
   std::shared_ptr<TextFrame> text_frame =
