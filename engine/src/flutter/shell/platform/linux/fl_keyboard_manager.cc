@@ -13,7 +13,6 @@
 #include "flutter/shell/platform/linux/fl_key_channel_responder.h"
 #include "flutter/shell/platform/linux/fl_key_embedder_responder.h"
 #include "flutter/shell/platform/linux/fl_keyboard_layout.h"
-#include "flutter/shell/platform/linux/fl_keyboard_pending_event.h"
 #include "flutter/shell/platform/linux/key_mapping.h"
 
 // Turn on this flag to print complete layout data when switching IMEs. The data
@@ -53,6 +52,35 @@ void debug_format_layout_data(std::string& debug_layout_data,
 
 }  // namespace
 
+typedef struct {
+  // Event being handled.
+  FlKeyEvent* event;
+
+  // TRUE if the embedder has responded.
+  gboolean embedder_responded;
+
+  // TRUE if the channel has responded.
+  gboolean channel_responded;
+
+  // TRUE if this event is to be redispatched;
+  gboolean redispatch;
+
+  // TRUE if either the embedder of channel handled this event (or both).
+  gboolean handled;
+} HandleEventData;
+
+static HandleEventData* handle_event_data_new(FlKeyEvent* event) {
+  HandleEventData* data =
+      static_cast<HandleEventData*>(g_new0(HandleEventData, 1));
+  data->event = FL_KEY_EVENT(g_object_ref(event));
+  return data;
+}
+
+static void handle_event_data_free(HandleEventData* data) {
+  g_object_unref(data->event);
+  g_free(data);
+}
+
 struct _FlKeyboardManager {
   GObject parent_instance;
 
@@ -66,9 +94,6 @@ struct _FlKeyboardManager {
   FlKeyboardManagerLookupKeyHandler lookup_key_handler;
   gpointer lookup_key_handler_user_data;
 
-  FlKeyboardManagerRedispatchEventHandler redispatch_handler;
-  gpointer redispatch_handler_user_data;
-
   FlKeyboardManagerGetPressedStateHandler get_pressed_state_handler;
   gpointer get_pressed_state_handler_user_data;
 
@@ -76,16 +101,7 @@ struct _FlKeyboardManager {
 
   FlKeyChannelResponder* key_channel_responder;
 
-  // An array of #FlKeyboardPendingEvent.
-  //
-  // Its elements are *not* unreferenced when removed. When FlKeyboardManager is
-  // disposed, this array will be set with a free_func so that the elements are
-  // unreferenced when removed.
-  GPtrArray* pending_responds;
-
-  // An array of #FlKeyboardPendingEvent.
-  //
-  // Its elements are unreferenced when removed.
+  // Events in the process of being redispatched.
   GPtrArray* pending_redispatches;
 
   // Record the derived layout.
@@ -120,77 +136,31 @@ static void keymap_keys_changed_cb(FlKeyboardManager* self) {
   self->derived_layout = fl_keyboard_layout_new();
 }
 
-// This is an exact copy of g_ptr_array_find_with_equal_func.  Somehow CI
-// reports that can not find symbol g_ptr_array_find_with_equal_func, despite
-// the fact that it runs well locally.
-static gboolean g_ptr_array_find_with_equal_func1(GPtrArray* haystack,
-                                                  gconstpointer needle,
-                                                  GEqualFunc equal_func,
-                                                  guint* index_) {
-  guint i;
-  g_return_val_if_fail(haystack != NULL, FALSE);
-  if (equal_func == NULL) {
-    equal_func = g_direct_equal;
-  }
-  for (i = 0; i < haystack->len; i++) {
-    if (equal_func(g_ptr_array_index(haystack, i), needle)) {
-      if (index_ != NULL) {
-        *index_ = i;
-      }
-      return TRUE;
-    }
-  }
+static void complete_handle_event(FlKeyboardManager* self, GTask* task) {
+  HandleEventData* data =
+      static_cast<HandleEventData*>(g_task_get_task_data(task));
 
-  return FALSE;
-}
-
-// Compare a #FlKeyboardPendingEvent with the given hash.
-static gboolean compare_pending_by_hash(gconstpointer a, gconstpointer b) {
-  FlKeyboardPendingEvent* pending =
-      FL_KEYBOARD_PENDING_EVENT(const_cast<gpointer>(a));
-  uint64_t hash = *reinterpret_cast<const uint64_t*>(b);
-  return fl_keyboard_pending_event_get_hash(pending) == hash;
-}
-
-// The callback used by a responder after the event was dispatched.
-static void responder_handle_event_callback(FlKeyboardManager* self,
-                                            FlKeyboardPendingEvent* pending) {
-  g_autoptr(FlKeyboardViewDelegate) view_delegate =
-      FL_KEYBOARD_VIEW_DELEGATE(g_weak_ref_get(&self->view_delegate));
-  if (view_delegate == nullptr) {
+  // Waiting for responses.
+  if (!data->embedder_responded || !data->channel_responded) {
     return;
   }
 
-  // All responders have replied.
-  if (fl_keyboard_pending_event_is_complete(pending)) {
-    g_ptr_array_remove(self->pending_responds, pending);
-    bool should_redispatch =
-        !fl_keyboard_pending_event_get_any_handled(pending) &&
-        !fl_keyboard_view_delegate_text_filter_key_press(
-            view_delegate, fl_keyboard_pending_event_get_event(pending));
-    if (should_redispatch) {
-      g_ptr_array_add(self->pending_redispatches, g_object_ref(pending));
-      FlKeyEvent* event = fl_keyboard_pending_event_get_event(pending);
-      if (self->redispatch_handler != nullptr) {
-        self->redispatch_handler(event, self->redispatch_handler_user_data);
-      } else {
-        GdkEventType event_type =
-            gdk_event_get_event_type(fl_key_event_get_origin(event));
-        g_return_if_fail(event_type == GDK_KEY_PRESS ||
-                         event_type == GDK_KEY_RELEASE);
-        gdk_event_put(fl_key_event_get_origin(event));
-      }
+  // Redispatch if needed.
+  if (!data->handled) {
+    gboolean filtered = FALSE;
+    g_autoptr(FlKeyboardViewDelegate) view_delegate =
+        FL_KEYBOARD_VIEW_DELEGATE(g_weak_ref_get(&self->view_delegate));
+    if (view_delegate != nullptr) {
+      filtered = fl_keyboard_view_delegate_text_filter_key_press(view_delegate,
+                                                                 data->event);
+    }
+    data->redispatch = !filtered;
+    if (data->redispatch) {
+      g_ptr_array_add(self->pending_redispatches, g_object_ref(data->event));
     }
   }
-}
 
-static void complete_handle_event(FlKeyboardManager* self, GTask* task) {
-  FlKeyboardPendingEvent* pending =
-      FL_KEYBOARD_PENDING_EVENT(g_task_get_task_data(task));
-
-  if (fl_keyboard_pending_event_is_complete(pending)) {
-    g_task_return_boolean(task, TRUE);
-  }
+  g_task_return_boolean(task, TRUE);
 }
 
 static void responder_handle_embedder_event_callback(bool handled,
@@ -198,10 +168,12 @@ static void responder_handle_embedder_event_callback(bool handled,
   g_autoptr(GTask) task = G_TASK(user_data);
   FlKeyboardManager* self = FL_KEYBOARD_MANAGER(g_task_get_source_object(task));
 
-  FlKeyboardPendingEvent* pending =
-      FL_KEYBOARD_PENDING_EVENT(g_task_get_task_data(task));
-  fl_keyboard_pending_event_mark_embedder_replied(pending, handled);
-  responder_handle_event_callback(self, pending);
+  HandleEventData* data =
+      static_cast<HandleEventData*>(g_task_get_task_data(G_TASK(task)));
+  data->embedder_responded = TRUE;
+  if (handled) {
+    data->handled = TRUE;
+  }
 
   complete_handle_event(self, task);
 }
@@ -212,6 +184,10 @@ static void responder_handle_channel_event_cb(GObject* object,
   g_autoptr(GTask) task = G_TASK(user_data);
   FlKeyboardManager* self = FL_KEYBOARD_MANAGER(g_task_get_source_object(task));
 
+  HandleEventData* data =
+      static_cast<HandleEventData*>(g_task_get_task_data(G_TASK(task)));
+  data->channel_responded = TRUE;
+
   g_autoptr(GError) error = nullptr;
   gboolean handled;
   if (!fl_key_channel_responder_handle_event_finish(
@@ -221,11 +197,9 @@ static void responder_handle_channel_event_cb(GObject* object,
     }
     handled = FALSE;
   }
-
-  FlKeyboardPendingEvent* pending =
-      FL_KEYBOARD_PENDING_EVENT(g_task_get_task_data(task));
-  fl_keyboard_pending_event_mark_channel_replied(pending, handled);
-  responder_handle_event_callback(self, pending);
+  if (handled) {
+    data->handled = TRUE;
+  }
 
   complete_handle_event(self, task);
 }
@@ -346,8 +320,6 @@ static void fl_keyboard_manager_dispose(GObject* object) {
 
   g_clear_object(&self->key_embedder_responder);
   g_clear_object(&self->key_channel_responder);
-  g_ptr_array_set_free_func(self->pending_responds, g_object_unref);
-  g_ptr_array_free(self->pending_responds, TRUE);
   g_ptr_array_free(self->pending_redispatches, TRUE);
   g_clear_object(&self->derived_layout);
   if (self->keymap_keys_changed_cb_id != 0) {
@@ -377,7 +349,6 @@ static void fl_keyboard_manager_init(FlKeyboardManager* self) {
     }
   }
 
-  self->pending_responds = g_ptr_array_new();
   self->pending_redispatches = g_ptr_array_new_with_free_func(g_object_unref);
 
   self->keymap = gdk_keymap_get_for_display(gdk_display_get_default());
@@ -450,19 +421,21 @@ gboolean fl_keyboard_manager_is_redispatched(FlKeyboardManager* self,
                                              FlKeyEvent* event) {
   g_return_val_if_fail(FL_IS_KEYBOARD_MANAGER(self), FALSE);
 
-  uint64_t hash = fl_key_event_hash(event);
-
-  guint result_index;
-  gboolean found = g_ptr_array_find_with_equal_func1(
-      self->pending_redispatches, static_cast<const uint64_t*>(&hash),
-      compare_pending_by_hash, &result_index);
-  if (found) {
-    // The removed object is freed due to `pending_redispatches`'s free_func.
-    g_ptr_array_remove_index_fast(self->pending_redispatches, result_index);
-    return TRUE;
-  } else {
-    return FALSE;
+  guint32 time = fl_key_event_get_time(event);
+  gboolean is_press = !!fl_key_event_get_is_press(event);
+  guint16 keycode = fl_key_event_get_keycode(event);
+  for (guint i = 0; i < self->pending_redispatches->len; i++) {
+    FlKeyEvent* e =
+        FL_KEY_EVENT(g_ptr_array_index(self->pending_redispatches, i));
+    if (fl_key_event_get_time(e) == time &&
+        !!fl_key_event_get_is_press(e) == is_press &&
+        fl_key_event_get_keycode(e) == keycode) {
+      g_ptr_array_remove_index(self->pending_redispatches, i);
+      return TRUE;
+    }
   }
+
+  return FALSE;
 }
 
 void fl_keyboard_manager_handle_event(FlKeyboardManager* self,
@@ -477,9 +450,9 @@ void fl_keyboard_manager_handle_event(FlKeyboardManager* self,
 
   guarantee_layout(self, event);
 
-  FlKeyboardPendingEvent* pending = fl_keyboard_pending_event_new(event);
-  g_ptr_array_add(self->pending_responds, pending);
-  g_task_set_task_data(task, g_object_ref(pending), g_object_unref);
+  g_task_set_task_data(
+      task, handle_event_data_new(event),
+      reinterpret_cast<GDestroyNotify>(handle_event_data_free));
 
   uint64_t specified_logical_key = fl_keyboard_layout_get_logical_key(
       self->derived_layout, fl_key_event_get_group(event),
@@ -492,18 +465,21 @@ void fl_keyboard_manager_handle_event(FlKeyboardManager* self,
       self->cancellable, responder_handle_channel_event_cb, g_object_ref(task));
 }
 
-gboolean fl_keyboard_manager_handle_event_finish(FlKeyboardManager* self,
-                                                 GAsyncResult* result,
-                                                 GError** error) {
+gboolean fl_keyboard_manager_handle_event_finish(
+    FlKeyboardManager* self,
+    GAsyncResult* result,
+    FlKeyEvent** redispatched_event,
+    GError** error) {
   g_return_val_if_fail(FL_IS_KEYBOARD_MANAGER(self), FALSE);
   g_return_val_if_fail(g_task_is_valid(result, self), FALSE);
-  return g_task_propagate_boolean(G_TASK(result), error);
-}
 
-gboolean fl_keyboard_manager_is_state_clear(FlKeyboardManager* self) {
-  g_return_val_if_fail(FL_IS_KEYBOARD_MANAGER(self), FALSE);
-  return self->pending_responds->len == 0 &&
-         self->pending_redispatches->len == 0;
+  HandleEventData* data =
+      static_cast<HandleEventData*>(g_task_get_task_data(G_TASK(result)));
+  if (redispatched_event != nullptr && data->redispatch) {
+    *redispatched_event = FL_KEY_EVENT(g_object_ref(data->event));
+  }
+
+  return g_task_propagate_boolean(G_TASK(result), error);
 }
 
 void fl_keyboard_manager_sync_modifier_if_needed(FlKeyboardManager* self,
@@ -541,15 +517,6 @@ void fl_keyboard_manager_set_lookup_key_handler(
   g_return_if_fail(FL_IS_KEYBOARD_MANAGER(self));
   self->lookup_key_handler = lookup_key_handler;
   self->lookup_key_handler_user_data = user_data;
-}
-
-void fl_keyboard_manager_set_redispatch_handler(
-    FlKeyboardManager* self,
-    FlKeyboardManagerRedispatchEventHandler redispatch_handler,
-    gpointer user_data) {
-  g_return_if_fail(FL_IS_KEYBOARD_MANAGER(self));
-  self->redispatch_handler = redispatch_handler;
-  self->redispatch_handler_user_data = user_data;
 }
 
 void fl_keyboard_manager_set_get_pressed_state_handler(
