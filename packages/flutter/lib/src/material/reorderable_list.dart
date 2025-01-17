@@ -103,7 +103,6 @@ class ReorderableListView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.autoScrollerVelocityScalar,
     this.dragBoundaryProvider,
-    this.mouseCursor,
   }) : assert(
          (itemExtent == null && prototypeItem == null) ||
              (itemExtent == null && itemExtentBuilder == null) ||
@@ -174,7 +173,6 @@ class ReorderableListView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.autoScrollerVelocityScalar,
     this.dragBoundaryProvider,
-    this.mouseCursor,
   }) : assert(itemCount >= 0),
        assert(
          (itemExtent == null && prototypeItem == null) ||
@@ -300,18 +298,6 @@ class ReorderableListView extends StatefulWidget {
   /// {@macro flutter.widgets.reorderable_list.dragBoundaryProvider}
   final ReorderDragBoundaryProvider? dragBoundaryProvider;
 
-  /// The cursor for a mouse pointer when it enters or is hovering over the drag
-  /// handle.
-  ///
-  /// If [mouseCursor] is a [WidgetStateMouseCursor],
-  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
-  ///
-  ///  * [WidgetState.dragged].
-  ///
-  /// If this property is null, [SystemMouseCursors.grab] will be used when
-  ///  hovering, and [SystemMouseCursors.grabbing] when dragging.
-  final MouseCursor? mouseCursor;
-
   @override
   State<ReorderableListView> createState() => _ReorderableListViewState();
 }
@@ -335,21 +321,6 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         case TargetPlatform.linux:
         case TargetPlatform.windows:
         case TargetPlatform.macOS:
-          final ListenableBuilder dragHandle = ListenableBuilder(
-            listenable: _dragging,
-            builder: (BuildContext context, Widget? child) {
-              final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
-                widget.mouseCursor ??
-                    const WidgetStateMouseCursor.fromMap(<WidgetStatesConstraint, MouseCursor>{
-                      WidgetState.dragged: SystemMouseCursors.grabbing,
-                      WidgetState.any: SystemMouseCursors.grab,
-                    }),
-                <WidgetState>{if (_dragging.value) WidgetState.dragged},
-              );
-              return MouseRegion(cursor: effectiveMouseCursor, child: child);
-            },
-            child: const Icon(Icons.drag_handle),
-          );
           switch (widget.scrollDirection) {
             case Axis.horizontal:
               return Stack(
@@ -363,7 +334,10 @@ class _ReorderableListViewState extends State<ReorderableListView> {
                     bottom: 8,
                     child: Align(
                       alignment: AlignmentDirectional.bottomCenter,
-                      child: ReorderableDragStartListener(index: index, child: dragHandle),
+                      child: ReorderableDragStartListener(
+                        index: index,
+                        child: const Icon(Icons.drag_handle),
+                      ),
                     ),
                   ),
                 ],
@@ -380,7 +354,10 @@ class _ReorderableListViewState extends State<ReorderableListView> {
                     end: 8,
                     child: Align(
                       alignment: AlignmentDirectional.centerEnd,
-                      child: ReorderableDragStartListener(index: index, child: dragHandle),
+                      child: ReorderableDragStartListener(
+                        index: index,
+                        child: const Icon(Icons.drag_handle),
+                      ),
                     ),
                   ),
                 ],
@@ -407,12 +384,6 @@ class _ReorderableListViewState extends State<ReorderableListView> {
       },
       child: child,
     );
-  }
-
-  @override
-  void dispose() {
-    _dragging.dispose();
-    super.dispose();
   }
 
   @override
@@ -472,14 +443,8 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             prototypeItem: widget.prototypeItem,
             itemCount: widget.itemCount,
             onReorder: widget.onReorder,
-            onReorderStart: (int index) {
-              _dragging.value = true;
-              widget.onReorderStart?.call(index);
-            },
-            onReorderEnd: (int index) {
-              _dragging.value = false;
-              widget.onReorderEnd?.call(index);
-            },
+            onReorderStart: widget.onReorderStart,
+            onReorderEnd: widget.onReorderEnd,
             proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
             autoScrollerVelocityScalar: widget.autoScrollerVelocityScalar,
             dragBoundaryProvider: widget.dragBoundaryProvider,
