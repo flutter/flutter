@@ -84,6 +84,7 @@ void fl_keyboard_manager_handle_event(FlKeyboardManager* manager,
  * fl_keyboard_manager_handle_event_finish:
  * @manager: an #FlKeyboardManager.
  * @result: a #GAsyncResult.
+ * @redispatched_event: FIXME
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
  * to ignore.
  *
@@ -91,20 +92,11 @@ void fl_keyboard_manager_handle_event(FlKeyboardManager* manager,
  *
  * Returns: %TRUE on success.
  */
-gboolean fl_keyboard_manager_handle_event_finish(FlKeyboardManager* manager,
-                                                 GAsyncResult* result,
-                                                 GError** error);
-
-/**
- * fl_keyboard_manager_is_state_clear:
- * @manager: the #FlKeyboardManager self.
- *
- * A debug-only method that queries whether the manager's various states are
- * cleared, i.e. no pending events for redispatching or for responding.
- *
- * Returns: true if the manager's various states are cleared.
- */
-gboolean fl_keyboard_manager_is_state_clear(FlKeyboardManager* manager);
+gboolean fl_keyboard_manager_handle_event_finish(
+    FlKeyboardManager* manager,
+    GAsyncResult* result,
+    FlKeyEvent** redispatched_event,
+    GError** error);
 
 /**
  * fl_keyboard_manager_sync_modifier_if_needed:
@@ -157,20 +149,6 @@ typedef guint (*FlKeyboardManagerLookupKeyHandler)(const GdkKeymapKey* key,
 void fl_keyboard_manager_set_lookup_key_handler(
     FlKeyboardManager* manager,
     FlKeyboardManagerLookupKeyHandler lookup_key_handler,
-    gpointer user_data);
-
-typedef void (*FlKeyboardManagerRedispatchEventHandler)(FlKeyEvent* event,
-                                                        gpointer user_data);
-
-/**
- * fl_keyboard_manager_set_redispatch_handler:
- * @manager: the #FlKeyboardManager self.
- *
- * Set the handler for redispatches, for testing purposes only.
- */
-void fl_keyboard_manager_set_redispatch_handler(
-    FlKeyboardManager* manager,
-    FlKeyboardManagerRedispatchEventHandler redispatch_handler,
     gpointer user_data);
 
 typedef GHashTable* (*FlKeyboardManagerGetPressedStateHandler)(
