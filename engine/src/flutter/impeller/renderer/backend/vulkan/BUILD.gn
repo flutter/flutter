@@ -142,8 +142,8 @@ impeller_component("vulkan") {
       "swapchain/ahb/ahb_swapchain_vk.h",
       "swapchain/ahb/ahb_texture_pool_vk.cc",
       "swapchain/ahb/ahb_texture_pool_vk.h",
-      "swapchain/ahb/external_fence_vk.cc",
-      "swapchain/ahb/external_fence_vk.h",
+      "swapchain/ahb/external_semaphore_vk.cc",
+      "swapchain/ahb/external_semaphore_vk.h",
     ]
   }
 
