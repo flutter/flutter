@@ -263,6 +263,7 @@ class CupertinoListTile extends StatefulWidget {
 
   /// The horizontal space between [leading] widget and [title].
   final double leadingToTitle;
+
   @override
   State<CupertinoListTile> createState() => _CupertinoListTileState();
 }

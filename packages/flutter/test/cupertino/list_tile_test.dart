@@ -166,10 +166,12 @@ void main() {
     );
     await tester.pump();
 
+    // Container inside CupertinoListTile is the second one in row.
     container = tester.widgetList<Container>(find.byType(Container)).elementAt(1);
     expect(container.color, backgroundColorActivated);
 
     await gesture.up();
+    // Pump the rest of the frames to complete the test.
     await tester.pumpAndSettle();
     container = tester.widgetList<Container>(find.byType(Container)).elementAt(1);
     expect(container.color, backgroundColor);
