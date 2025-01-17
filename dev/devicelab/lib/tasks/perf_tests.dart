@@ -1701,8 +1701,10 @@ class CompileTest {
       'clean',
       '-allTargets'
     ]);
-    final Stopwatch watch = Stopwatch();
+
     int releaseSizeInBytes = 0;
+    final Stopwatch watch = Stopwatch();
+
     watch.start();
     await Process.run(workingDirectory: testDirectory ,'xcodebuild', <String>[
       '-scheme',
@@ -1722,16 +1724,16 @@ class CompileTest {
         print(results.stderr);
       }
     });
+
     watch.stop();
 
-    final String testPath = '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
+    final String appPath = '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
 
     // Zip up the .app file to get an approximation of the .ipa size.
-    await exec('tar', <String>['-zcf', 'app.tar.gz', testPath]);
-
-    final Map<String, dynamic> metrics = <String, dynamic>{};
+    await exec('tar', <String>['-zcf', 'app.tar.gz', appPath]);
     releaseSizeInBytes = await file('$testDirectory/app.tar.gz').length();
 
+    final Map<String, dynamic> metrics = <String, dynamic>{};
     metrics.addAll(<String, dynamic>{
       'release_swiftui_compile_millis': watch.elapsedMilliseconds,
       'release_swiftui_size_bytes': releaseSizeInBytes
