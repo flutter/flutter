@@ -27,3 +27,6 @@ Alternatively, you can run all the tests in one file by passing in the fully qua
 e.g. `./gradlew test --tests com.flutter.gradle.BaseApplicationNameHandlerTest`, or one test in 
 one file by passing in the fully qualified class name followed by the method name, 
 e.g `./gradlew test --tests "com.flutter.gradle.BaseApplicationNameHandlerTest.setBaseName respects Flutter tool property"`.
+
+Sometimes changing a test name and then running it will cause an IDE error. To get Android Studio back
+to a good state on Mac, run `Help > "Repair IDE"`, and then in the popup window `"Rescan project indexes > Everything works now."`
