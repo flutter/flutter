@@ -4,6 +4,7 @@
 // found in the LICENSE file.
 
 import com.android.build.OutputFile
+import com.flutter.gradle.BaseApplicationNameHandler
 import groovy.json.JsonGenerator
 import groovy.xml.QName
 import java.nio.file.Paths
@@ -62,7 +63,7 @@ class FlutterExtension {
      * Chosen as default version of the AGP version below as found in
      * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp.
      */
-    public final String ndkVersion = "26.1.10909125"
+    public final String ndkVersion = "26.3.11579264"
 
     /**
      * Specifies the relative directory to the Flutter project directory.
@@ -101,40 +102,6 @@ class FlutterExtension {
         return flutterVersionName
     }
 }
-
-// This buildscript block supplies dependencies for this file's own import
-// declarations above. It exists solely for compatibility with projects that
-// have not migrated to declaratively apply the Flutter Gradle Plugin;
-// for those that have, FGP's `build.gradle.kts`  takes care of this.
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        // When bumping, also update:
-        //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/groovy/flutter.groovy
-        //  * AGP version in the buildscript block in packages/flutter_tools/gradle/src/main/kotlin/dependency_version_checker.gradle.kts
-        //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
-        //  * AGP version in dependencies block in packages/flutter_tools/gradle/build.gradle.kts
-        classpath("com.android.tools.build:gradle:7.3.0")
-    }
-}
-
-/**
- * Some apps don't set default compile options.
- * Apps can change these values in the app-level Gradle build file
- * (android/app/build.gradle or android/app/build.gradle.kts).
- * This just ensures that default values are set.
- */
-android {
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-}
-
-apply plugin: FlutterPlugin
 
 class FlutterPlugin implements Plugin<Project> {
 
@@ -279,6 +246,7 @@ class FlutterPlugin implements Plugin<Project> {
         extension.flutterVersionName = flutterVersionName ?: "1.0"
 
         this.addFlutterTasks(project)
+        forceNdkDownload(project, flutterRootPath)
 
         // By default, assembling APKs generates fat APKs if multiple platforms are passed.
         // Configuring split per ABI allows to generate separate APKs for each abi.
@@ -332,7 +300,7 @@ class FlutterPlugin implements Plugin<Project> {
         if (!shouldSkipDependencyChecks) {
             try {
                 final String dependencyCheckerPluginPath = Paths.get(flutterRoot.absolutePath,
-                        "packages", "flutter_tools", "gradle", "src", "main", "kotlin",
+                        "packages", "flutter_tools", "gradle", "src", "main", "kotlin_scripts",
                         "dependency_version_checker.gradle.kts")
                 project.apply from: dependencyCheckerPluginPath
             } catch (Exception e) {
@@ -350,8 +318,8 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        // Use Kotlin DSL to handle baseApplicationName logic due to Groovy dynamic dispatch bug.
-        project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "kotlin", "flutter.gradle.kts")
+        // Use Kotlin source to handle baseApplicationName logic due to Groovy dynamic dispatch bug.
+        BaseApplicationNameHandler.setBaseName(project)
 
         String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
                 "gradle", "flutter_proguard_rules.pro")
@@ -770,13 +738,12 @@ class FlutterPlugin implements Plugin<Project> {
         // compile/target/min sdk values.
         pluginProject.extensions.create("flutter", FlutterExtension)
 
-        // Add plugin dependency to the app project.
-        project.android.buildTypes.each { buildType ->
-            String flutterBuildMode = buildModeFor(buildType)
-            if (flutterBuildMode != "release" || !pluginObject.dev_dependency) {
-                // Only add dependency on dev dependencies in non-release builds.
-                project.dependencies {
-                    api(pluginProject)
+        // Add plugin dependency to the app project. We only want to add dependency
+        // for dev dependencies in non-release builds.
+        project.afterEvaluate {
+            project.android.buildTypes.all { buildType ->
+                if (!pluginObject.dev_dependency || buildType.name != 'release') {
+                    project.dependencies.add("${buildType.name}Api", pluginProject)
                 }
             }
         }
@@ -790,12 +757,6 @@ class FlutterPlugin implements Plugin<Project> {
                 return
             }
             if (!pluginProject.hasProperty("android")) {
-                return
-            }
-            if (flutterBuildMode == "release" && pluginObject.dev_dependency) {
-                // This plugin is a dev dependency and will not be included in
-                // the release build,  so no need to add the embedding
-                // dependency to it.
                 return
             }
             // Copy build types from the app to the plugin.
@@ -857,6 +818,36 @@ class FlutterPlugin implements Plugin<Project> {
             return version1
         }
         return version2
+    }
+
+    private void forceNdkDownload(Project gradleProject, String flutterSdkRootPath) {
+        // If the project is already configuring a native build, we don't need to do anything.
+        Boolean forcingNotRequired = gradleProject.android.externalNativeBuild.cmake.path != null
+        if (forcingNotRequired) {
+            return
+        }
+
+        // Otherwise, point to an empty CMakeLists.txt, and ignore associated warnings.
+        gradleProject.android {
+            externalNativeBuild {
+                cmake {
+                    // Respect the existing configuration if it exists - the NDK will already be
+                    // downloaded in this case.
+                    path = flutterSdkRootPath + "/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+                }
+            }
+
+            defaultConfig {
+                externalNativeBuild {
+                    cmake {
+                        // CMake will print warnings when you try to build an empty project.
+                        // These arguments silence the warnings - our project is intentionally
+                        // empty.
+                        arguments("-Wno-dev", "--no-warn-unused-cli")
+                    }
+                }
+            }
+        }
     }
 
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
@@ -1259,8 +1250,18 @@ class FlutterPlugin implements Plugin<Project> {
             boolean isBuildingAar = project.hasProperty("is-plugin")
             // In add to app scenarios, a Gradle project contains a `:flutter` and `:app` project.
             // `:flutter` is used as a subproject when these tasks exists and the build isn't building an AAR.
-            Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
-            Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
+            Task packageAssets
+            Task cleanPackageAssets
+            try {
+                packageAssets = project.tasks.named("package${variant.name.capitalize()}Assets").get()
+            } catch (UnknownTaskException ignored) {
+                packageAssets = null
+            }
+            try {
+                cleanPackageAssets = project.tasks.named("cleanPackage${variant.name.capitalize()}Assets").get()
+            } catch (UnknownTaskException ignored) {
+                cleanPackageAssets = null
+            }
             boolean isUsedAsSubproject = packageAssets && cleanPackageAssets && !isBuildingAar
 
             String variantBuildMode = buildModeFor(variant.buildType)

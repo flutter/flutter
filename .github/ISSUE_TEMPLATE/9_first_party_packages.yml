@@ -45,6 +45,7 @@ body:
         - flutter_template_images
         - go_router
         - go_router_builder
+        - google_adsense
         - google_identity_services_web
         - google_maps_flutter
         - google_sign_in

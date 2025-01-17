@@ -361,22 +361,18 @@ targets:
   # This is a benchmark that does not require an attached device. However, we
   # are intentionally running it in the devicelab to ensure that it does not
   # run on a VM in order to avoid noisy results from the benchmark.
-  - name: Linux analyzer_benchmark
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/158243
+  - name: Mac_arm64 analyzer_benchmark
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/161306
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      os: Linux
-      device_type: "mokey"
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:35v1"},
-          {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "curl", "version": "version:7.64.0"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
-        ["devicelab", "android", "linux", "mokey"]
+        ["devicelab", "hostonly", "mac", "arm64"]
       task_name: analyzer_benchmark
 
   - name: Linux coverage
@@ -447,6 +443,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux build_tests_1_5
     recipe: flutter/flutter_drone
@@ -552,6 +550,8 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
     runIf:
       - .ci.yaml
+      - DEPS
+      - engine/**
 
   - name: Linux customer_testing
     # This really just runs dev/bots/customer_testing/ci.sh,
@@ -616,6 +616,8 @@ targets:
       - packages/flutter_web_plugins/**
       - packages/integration_test/**
       - .ci.yaml
+      - engine/**
+      - DEPS
       - dartdoc_options.yaml
 
   - name: Linux engine_dependency_proxy_test
@@ -635,10 +637,11 @@ targets:
       - dev/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux firebase_release_smoke_test
     recipe: firebaselab/firebaselab
-    bringup: true # https://github.com/flutter/flutter/issues/147335
     timeout: 60
     properties:
       dependencies: >-
@@ -679,6 +682,8 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
     runIf:
       - .ci.yaml
+      - engine/**
+      - DEPS
       - dev/bots/**
 
   - name: Linux flutter_plugins
@@ -716,6 +721,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux framework_tests_slow
     recipe: flutter/flutter_drone
@@ -742,6 +749,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux framework_tests_misc
     recipe: flutter/flutter_drone
@@ -773,6 +782,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux framework_tests_widgets
     recipe: flutter/flutter_drone
@@ -798,16 +809,20 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux fuchsia_precache
     recipe: flutter/flutter_drone
     timeout: 60
+    presubmit: false
     properties:
       shard: fuchsia_precache
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - bin/internal/engine.version
+      - engine/**
+      - DEPS
       - .ci.yaml
 
   - name: Linux gradle_desugar_classes_test
@@ -827,6 +842,8 @@ targets:
       - dev/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux gradle_java8_compile_test
     recipe: devicelab/devicelab_drone
@@ -845,6 +862,8 @@ targets:
       - dev/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux gradle_plugin_bundle_test
     recipe: devicelab/devicelab_drone
@@ -863,6 +882,8 @@ targets:
       - dev/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux gradle_plugin_fat_apk_test
     recipe: devicelab/devicelab_drone
@@ -882,6 +903,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux gradle_plugin_light_apk_test
     recipe: devicelab/devicelab_drone
@@ -901,6 +924,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux module_custom_host_app_name_test
     recipe: devicelab/devicelab_drone
@@ -920,6 +945,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux module_host_with_custom_build_test
     recipe: devicelab/devicelab_drone
@@ -939,6 +966,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux build_android_host_app_with_module_aar
     recipe: devicelab/devicelab_drone
@@ -958,10 +987,13 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux build_android_host_app_with_module_source
     recipe: devicelab/devicelab_drone
     timeout: 60
+    presubmit: false
     properties:
       dependencies: >-
         [
@@ -977,6 +1009,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux plugin_dependencies_test
     recipe: devicelab/devicelab_drone
@@ -996,6 +1030,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux plugin_test
     recipe: devicelab/devicelab_drone
@@ -1019,6 +1055,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux plugin_test_linux
     recipe: devicelab/devicelab_drone
@@ -1039,6 +1077,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux run_debug_test_linux
     recipe: devicelab/devicelab_drone
@@ -1059,12 +1099,13 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux linux_desktop_impeller
     recipe: devicelab/devicelab_drone
     timeout: 60
     presubmit: false
-    bringup: true
     properties:
       xvfb: "1"
       dependencies: >-
@@ -1080,7 +1121,6 @@ targets:
   - name: Linux android_release_builds_exclude_dev_dependencies_test
     recipe: devicelab/devicelab_drone
     timeout: 60
-    bringup: true
     properties:
       dependencies: >-
         [
@@ -1095,6 +1135,8 @@ targets:
       - dev/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux run_release_test_linux
     recipe: devicelab/devicelab_drone
@@ -1115,6 +1157,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux skp_generator
     enabled_branches:
@@ -1133,6 +1177,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux technical_debt__cost
     recipe: devicelab/devicelab_drone
@@ -1157,8 +1203,11 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - bin/internal/engine.version
+      - engine/**
+      - DEPS
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux tool_integration_tests_1_6
     recipe: flutter/flutter_drone
@@ -1185,6 +1234,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux tool_integration_tests_2_6
     recipe: flutter/flutter_drone
@@ -1211,6 +1262,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux tool_integration_tests_3_6
     recipe: flutter/flutter_drone
@@ -1237,6 +1290,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux tool_integration_tests_4_6
     recipe: flutter/flutter_drone
@@ -1263,6 +1318,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux tool_integration_tests_5_6
     recipe: flutter/flutter_drone
@@ -1289,6 +1346,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux tool_integration_tests_6_6
     recipe: flutter/flutter_drone
@@ -1315,6 +1374,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux android_preview_tool_integration_tests
     recipe: flutter/flutter_drone
@@ -1344,6 +1405,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux android_java11_tool_integration_tests
     recipe: flutter/flutter_drone
@@ -1369,6 +1432,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux android_java11_dependency_smoke_tests
     recipe: devicelab/devicelab_drone
@@ -1388,6 +1453,8 @@ targets:
     runIf:
       - packages/flutter_tools/templates/**
       - .ci.yaml
+      - engine/**
+      - DEPS
       - dev/devicelab/bin/tasks/android_java11_dependency_smoke_tests.dart
 
   - name: Linux android_java17_dependency_smoke_tests
@@ -1408,6 +1475,8 @@ targets:
     runIf:
       - packages/flutter_tools/templates/**
       - .ci.yaml
+      - engine/**
+      - DEPS
       - dev/devicelab/bin/tasks/android_java17_dependency_smoke_tests.dart
 
   - name: Linux tool_tests_commands
@@ -1429,6 +1498,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux tool_tests_general
     recipe: flutter/flutter_drone
@@ -1449,13 +1520,15 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux_android_emu flutter_driver_android_test
     recipe: flutter/flutter_drone
     bringup: true
     timeout: 60
     properties:
-      shard: flutter_driver_android
+      shard: android_engine_tests
       tags: >
          ["framework", "hostonly", "shard", "linux"]
       dependencies: >-
@@ -1468,27 +1541,13 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      shard: flutter_driver_android
+      shard: android_engine_tests
       tags: >
          ["framework", "hostonly", "shard", "linux"]
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
-
-  - name: Linux realm_checker
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      shard: realm_checker
-      tags: >
-        ["framework", "hostonly", "shard", "linux"]
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
 
   - name: Linux web_benchmarks_canvaskit
     recipe: devicelab/devicelab_drone
@@ -1521,6 +1580,8 @@ targets:
       - dev/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_benchmarks_skwasm_st
     recipe: devicelab/devicelab_drone
@@ -1539,6 +1600,8 @@ targets:
       - dev/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_long_running_tests_1_5
     recipe: flutter/flutter_drone
@@ -1561,6 +1624,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_long_running_tests_2_5
     recipe: flutter/flutter_drone
@@ -1583,6 +1648,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_long_running_tests_3_5
     recipe: flutter/flutter_drone
@@ -1605,6 +1672,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_long_running_tests_4_5
     recipe: flutter/flutter_drone
@@ -1627,6 +1696,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_long_running_tests_5_5
     recipe: flutter/flutter_drone
@@ -1649,6 +1720,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_tests_0
     recipe: flutter/flutter_drone
@@ -1671,6 +1744,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_tests_1
     recipe: flutter/flutter_drone
@@ -1693,6 +1768,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_tests_2
     recipe: flutter/flutter_drone
@@ -1715,6 +1792,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_tests_3
     recipe: flutter/flutter_drone
@@ -1737,6 +1816,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_tests_4
     recipe: flutter/flutter_drone
@@ -1759,6 +1840,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_tests_5
     recipe: flutter/flutter_drone
@@ -1781,6 +1864,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_tests_6
     recipe: flutter/flutter_drone
@@ -1803,6 +1888,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_tests_7_last
     recipe: flutter/flutter_drone
@@ -1825,6 +1912,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_canvaskit_tests_0
     recipe: flutter/flutter_drone
@@ -1847,6 +1936,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_canvaskit_tests_1
     recipe: flutter/flutter_drone
@@ -1869,6 +1960,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_canvaskit_tests_2
     recipe: flutter/flutter_drone
@@ -1891,6 +1984,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_canvaskit_tests_3
     recipe: flutter/flutter_drone
@@ -1913,6 +2008,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_canvaskit_tests_4
     recipe: flutter/flutter_drone
@@ -1935,6 +2032,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_canvaskit_tests_5
     recipe: flutter/flutter_drone
@@ -1957,6 +2056,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_canvaskit_tests_6
     recipe: flutter/flutter_drone
@@ -1979,6 +2080,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_canvaskit_tests_7_last
     recipe: flutter/flutter_drone
@@ -2001,6 +2104,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_skwasm_tests_0
     recipe: flutter/flutter_drone
@@ -2023,6 +2128,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_skwasm_tests_1
     recipe: flutter/flutter_drone
@@ -2045,6 +2152,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_skwasm_tests_2
     recipe: flutter/flutter_drone
@@ -2067,6 +2176,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_skwasm_tests_3
     recipe: flutter/flutter_drone
@@ -2089,6 +2200,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_skwasm_tests_4
     recipe: flutter/flutter_drone
@@ -2111,6 +2224,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - DEPS
+      - engine/**
 
   - name: Linux web_skwasm_tests_5
     recipe: flutter/flutter_drone
@@ -2133,6 +2248,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_skwasm_tests_6
     recipe: flutter/flutter_drone
@@ -2155,6 +2272,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_skwasm_tests_7_last
     recipe: flutter/flutter_drone
@@ -2177,6 +2296,8 @@ targets:
       - packages/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux web_tool_tests
     recipe: flutter/flutter_drone
@@ -2200,10 +2321,11 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Linux_android_emu android_defines_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2230,7 +2352,7 @@ targets:
 
   - name: Linux_pixel_7pro android_semantics_integration_test
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/124636
+    bringup: true # Failing: https://github.com/flutter/flutter/issues/153594
     presubmit: false
     timeout: 60
     properties:
@@ -2622,7 +2744,8 @@ targets:
     # presubmit during engine rolls. This test is the *only* automated e2e
     # test for external textures for the engine, it should never break.
     runIf:
-      - bin/internal/engine.version
+      - engine/**
+      - DEPS
       - .ci.yaml
     properties:
       tags: >
@@ -2637,7 +2760,8 @@ targets:
     # presubmit during engine rolls. This test is the *only* automated e2e
     # test for external textures for the engine, it should never break.
     runIf:
-      - bin/internal/engine.version
+      - engine/**
+      - DEPS
       - .ci.yaml
     properties:
       tags: >
@@ -2863,6 +2987,8 @@ targets:
     runIf:
       - .ci.yaml
       - dev/**
+      - DEPS
+      - engine/**
 
   # linux mokey test
   - name: Linux_mokey hybrid_android_views_integration_test
@@ -3577,7 +3703,6 @@ targets:
         ["framework","hostonly","shard","linux"]
 
   - name: Mac_benchmark animated_complex_opacity_perf_macos__e2e_summary
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/157423
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -3614,6 +3739,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac_arm64 build_ios_framework_module_test
     recipe: devicelab/devicelab_drone
@@ -3632,6 +3759,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac_x64 build_tests_1_4
     recipe: flutter/flutter_drone
@@ -3795,7 +3924,6 @@ targets:
       task_name: complex_layout_macos__start_up
 
   - name: Mac_benchmark complex_layout_scroll_perf_macos__timeline_summary
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/158251
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -3834,9 +3962,10 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac flavors_test_macos
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/156943
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -3850,6 +3979,7 @@ targets:
       task_name: flavors_test_macos
 
   - name: Mac_benchmark flutter_gallery_macos__compile
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/160495
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -3871,6 +4001,8 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
     runIf:
       - .ci.yaml
+      - engine/**
+      - DEPS
       - dev/bots/**
 
   - name: Mac_arm64 flutter_packaging_test
@@ -3884,6 +4016,8 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
     runIf:
       - .ci.yaml
+      - engine/**
+      - DEPS
       - dev/bots/**
 
   - name: Mac_benchmark flutter_view_macos__start_up
@@ -3919,6 +4053,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac framework_tests_impeller
     recipe: flutter/flutter_drone
@@ -3945,6 +4081,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac_x64 framework_tests_misc
     recipe: flutter/flutter_drone
@@ -3974,6 +4112,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac_arm64 framework_tests_misc
     recipe: flutter/flutter_drone
@@ -4004,6 +4144,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac framework_tests_widgets
     recipe: flutter/flutter_drone
@@ -4030,6 +4172,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac gradle_plugin_bundle_test
     recipe: devicelab/devicelab_drone
@@ -4047,9 +4191,10 @@ targets:
       - dev/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac_benchmark hello_world_macos__compile
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/159542
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -4057,7 +4202,6 @@ targets:
       task_name: hello_world_macos__compile
 
   - name: Mac integration_ui_test_test_macos
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/152212
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4087,6 +4231,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac module_host_with_custom_build_test
     recipe: devicelab/devicelab_drone
@@ -4105,6 +4251,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac build_android_host_app_with_module_aar
     recipe: devicelab/devicelab_drone
@@ -4123,10 +4271,13 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac build_android_host_app_with_module_source
     recipe: devicelab/devicelab_drone
     timeout: 60
+    presubmit: false
     properties:
       dependencies: >-
         [
@@ -4141,6 +4292,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac_arm64 module_test_ios
     recipe: devicelab/devicelab_drone
@@ -4160,6 +4313,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac_benchmark platform_view_macos__start_up
     presubmit: false
@@ -4169,7 +4324,6 @@ targets:
       task_name: platform_view_macos__start_up
 
   - name: Mac platform_channel_sample_test_macos
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/151883
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4196,6 +4350,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac_x64 plugin_lint_mac
     recipe: devicelab/devicelab_drone
@@ -4214,6 +4370,8 @@ targets:
       - packages/integration_test/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac_arm64 plugin_lint_mac
     recipe: devicelab/devicelab_drone
@@ -4233,6 +4391,8 @@ targets:
       - packages/integration_test/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac plugin_test
     recipe: devicelab/devicelab_drone
@@ -4251,6 +4411,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac plugin_test_ios
     recipe: devicelab/devicelab_drone
@@ -4271,6 +4433,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac plugin_test_macos
     recipe: devicelab/devicelab_drone
@@ -4288,6 +4452,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac_x64 tool_host_cross_arch_tests
     recipe: flutter/flutter_drone
@@ -4306,6 +4472,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac_arm64 tool_host_cross_arch_tests
     recipe: flutter/flutter_drone
@@ -4324,6 +4492,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac tool_integration_tests_1_5
     recipe: flutter/flutter_drone
@@ -4349,6 +4519,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac tool_integration_tests_2_5
     recipe: flutter/flutter_drone
@@ -4374,6 +4546,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac tool_integration_tests_3_5
     recipe: flutter/flutter_drone
@@ -4399,6 +4573,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac tool_integration_tests_4_5
     recipe: flutter/flutter_drone
@@ -4424,6 +4600,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac tool_integration_tests_5_5
     recipe: flutter/flutter_drone
@@ -4449,6 +4627,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac_x64 tool_tests_commands
     recipe: flutter/flutter_drone
@@ -4499,6 +4679,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac_x64 verify_binaries_codesigned
     enabled_branches:
@@ -4542,6 +4724,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   # mac mokey test
   - name: Mac_arm64_mokey entrypoint_dart_registrant
@@ -4557,6 +4741,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   # mac mokey benchmark
   - name: Mac_mokey hello_world_android__compile
@@ -4622,6 +4808,7 @@ targets:
   - name: Mac_mokey microbenchmarks
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true # Flaky: codefu
     timeout: 60
     properties:
       tags: >
@@ -4645,6 +4832,8 @@ targets:
     runIf:
       - .ci.yaml
       - dev/**
+      - DEPS
+      - engine/**
     timeout: 60
     properties:
       tags: >
@@ -4657,6 +4846,8 @@ targets:
     presubmit: false
     runIf:
       - .ci.yaml
+      - engine/**
+      - DEPS
       - dev/**
     timeout: 60
     properties:
@@ -4671,6 +4862,8 @@ targets:
     presubmit: false
     runIf:
       - .ci.yaml
+      - engine/**
+      - DEPS
       - dev/**
     timeout: 60
     properties:
@@ -4684,6 +4877,8 @@ targets:
     presubmit: false
     runIf:
       - .ci.yaml
+      - engine/**
+      - DEPS
       - dev/**
     timeout: 60
     properties:
@@ -4844,7 +5039,6 @@ targets:
       task_name: hello_world_ios__compile
 
   - name: Mac_x64 hot_mode_dev_cycle_macos_target__benchmark
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/158568
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -4858,6 +5052,8 @@ targets:
     runIf:
       - dev/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac_arm64 hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
@@ -4873,6 +5069,8 @@ targets:
       task_name: hot_mode_dev_cycle_macos_target__benchmark
     runIf:
       - .ci.yaml
+      - engine/**
+      - DEPS
       - dev/**
 
   - name: Mac_x64_ios integration_test_test_ios
@@ -5288,6 +5486,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac_arm64 native_ui_tests_macos
     recipe: devicelab/devicelab_drone
@@ -5305,6 +5505,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac channels_integration_test
     recipe: devicelab/devicelab_drone
@@ -5322,6 +5524,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac run_debug_test_macos
     recipe: devicelab/devicelab_drone
@@ -5339,6 +5543,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac_arm64 run_debug_test_macos
     recipe: devicelab/devicelab_drone
@@ -5356,6 +5562,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac_arm64 run_release_test_macos
     recipe: devicelab/devicelab_drone
@@ -5374,6 +5582,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Mac_arm64 mac_desktop_impeller
     recipe: devicelab/devicelab_drone
@@ -5503,7 +5713,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "android_sdk", "version": "version:35v1"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
@@ -5521,7 +5731,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "android_sdk", "version": "version:35v1"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
@@ -5539,7 +5749,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "android_sdk", "version": "version:35v1"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
@@ -5586,6 +5796,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows framework_tests_libraries_leak_tracking
     recipe: flutter/flutter_drone
@@ -5617,6 +5829,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows framework_tests_misc
     recipe: flutter/flutter_drone
@@ -5646,6 +5860,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows framework_tests_widgets
     recipe: flutter/flutter_drone
@@ -5671,6 +5887,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows framework_tests_widgets_leak_tracking
     recipe: flutter/flutter_drone
@@ -5702,6 +5920,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows gradle_plugin_bundle_test
     recipe: devicelab/devicelab_drone
@@ -5720,6 +5940,8 @@ targets:
       - dev/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows hot_mode_dev_cycle_win_target__benchmark
     recipe: devicelab/devicelab_drone
@@ -5765,6 +5987,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows module_host_with_custom_build_test
     recipe: devicelab/devicelab_drone
@@ -5784,6 +6008,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows build_android_host_app_with_module_aar
     recipe: devicelab/devicelab_drone
@@ -5803,10 +6029,13 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows build_android_host_app_with_module_source
     recipe: devicelab/devicelab_drone
     timeout: 60
+    presubmit: false
     properties:
       dependencies: >-
         [
@@ -5822,6 +6051,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows platform_channel_sample_test_windows
     recipe: devicelab/devicelab_drone
@@ -5867,6 +6098,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows plugin_test
     bringup: true # Flaky https://github.com/flutter/flutter/issues/148834
@@ -5887,6 +6120,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows plugin_test_windows
     recipe: devicelab/devicelab_drone
@@ -5904,6 +6139,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows_arm64 plugin_test_windows
     recipe: devicelab/devicelab_drone
@@ -5923,6 +6160,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows run_debug_test_windows
     recipe: devicelab/devicelab_drone
@@ -5941,6 +6180,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows_arm64 run_debug_test_windows
     recipe: devicelab/devicelab_drone
@@ -5959,6 +6200,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows run_release_test_windows
     recipe: devicelab/devicelab_drone
@@ -5977,6 +6220,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows_arm64 run_release_test_windows
     recipe: devicelab/devicelab_drone
@@ -5995,6 +6240,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows tool_integration_tests_1_9
     recipe: flutter/flutter_drone
@@ -6019,6 +6266,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows tool_integration_tests_2_9
     recipe: flutter/flutter_drone
@@ -6043,6 +6292,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows tool_integration_tests_3_9
     recipe: flutter/flutter_drone
@@ -6067,6 +6318,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows tool_integration_tests_4_9
     recipe: flutter/flutter_drone
@@ -6091,6 +6344,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows tool_integration_tests_5_9
     recipe: flutter/flutter_drone
@@ -6115,6 +6370,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows tool_integration_tests_6_9
     recipe: flutter/flutter_drone
@@ -6139,6 +6396,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows tool_integration_tests_7_9
     recipe: flutter/flutter_drone
@@ -6163,6 +6422,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows tool_integration_tests_8_9
     recipe: flutter/flutter_drone
@@ -6187,6 +6448,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows tool_integration_tests_9_9
     recipe: flutter/flutter_drone
@@ -6211,6 +6474,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows tool_tests_commands
     recipe: flutter/flutter_drone
@@ -6231,6 +6496,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows tool_tests_general
     recipe: flutter/flutter_drone
@@ -6251,6 +6518,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows web_tool_tests_1_2
     recipe: flutter/flutter_drone
@@ -6273,6 +6542,8 @@ targets:
       - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
+      - engine/**
+      - DEPS
 
   - name: Windows web_tool_tests_2_2
     recipe: flutter/flutter_drone
@@ -6294,6 +6565,8 @@ targets:
     - packages/flutter_tools/**
     - bin/**
     - .ci.yaml
+    - engine/**
+    - DEPS
 
   - name: Windows windows_home_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -6573,6 +6846,8 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
     runIf:
       - .ci.yaml
+      - engine/**
+      - DEPS
       - dev/bots/**
 
   - name: Windows windows_startup_test
