@@ -84,3 +84,9 @@ const Map<CupertinoButtonSize, double> kCupertinoButtonMinSize = <CupertinoButto
   CupertinoButtonSize.medium: 32,
   CupertinoButtonSize.large: 44,
 };
+
+/// The distance a button needs to be moved after being pressed for its opacity to change.
+///
+/// The opacity changes when the position moved is this distance away from the button.
+/// This variable is effective on mobile platforms. For desktop platforms, a distance of 0 is used.
+const double kCupertinoButtonTapMoveOpacityChangeDistance = 70.0;

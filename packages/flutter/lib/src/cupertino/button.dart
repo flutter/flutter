@@ -6,6 +6,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 
@@ -302,11 +303,35 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       _buttonHeldDown = false;
       _animate();
     }
+    final RenderBox rb = context.findRenderObject()! as RenderBox;
+    final Offset localPosition = rb.globalToLocal(event.globalPosition);
+    if (localPosition.dx >= 0.0 &&
+        localPosition.dy >= 0.0 &&
+        localPosition.dx <= rb.size.width &&
+        localPosition.dy <= rb.size.height) {
+      _handleTap();
+    }
   }
 
   void _handleTapCancel() {
     if (_buttonHeldDown) {
       _buttonHeldDown = false;
+      _animate();
+    }
+  }
+
+  void _handTapMove(TapMoveDetails event) {
+    final double distance = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS ||
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia => kCupertinoButtonTapMoveOpacityChangeDistance,
+      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => 0.0,
+    };
+    final RenderBox rb = context.findRenderObject()! as RenderBox;
+    final Offset localPosition = rb.globalToLocal(event.globalPosition);
+    final bool buttonShouldHeldDown = rb.paintBounds.inflate(distance).contains(localPosition);
+    if (buttonShouldHeldDown != _buttonHeldDown) {
+      _buttonHeldDown = buttonShouldHeldDown;
       _animate();
     }
   }
@@ -396,7 +421,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       size:
           textStyle.fontSize != null ? textStyle.fontSize! * 1.2 : kCupertinoButtonDefaultIconSize,
     );
-
+    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
     return MouseRegion(
       cursor: enabled && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
       child: FocusableActionDetector(
@@ -406,13 +431,29 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
         onFocusChange: widget.onFocusChange,
         onShowFocusHighlight: _onShowFocusHighlight,
         enabled: enabled,
-        child: GestureDetector(
+        child: RawGestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTapDown: enabled ? _handleTapDown : null,
-          onTapUp: enabled ? _handleTapUp : null,
-          onTapCancel: enabled ? _handleTapCancel : null,
-          onTap: widget.onPressed,
-          onLongPress: widget.onLongPress,
+          gestures: <Type, GestureRecognizerFactory>{
+            TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+              () => TapGestureRecognizer(postAcceptSlopTolerance: null),
+              (TapGestureRecognizer instance) {
+                instance.onTapDown = enabled ? _handleTapDown : null;
+                instance.onTapUp = enabled ? _handleTapUp : null;
+                instance.onTapCancel = enabled ? _handleTapCancel : null;
+                instance.onTapMove = enabled ? _handTapMove : null;
+                instance.gestureSettings = gestureSettings;
+              },
+            ),
+            if (widget.onLongPress != null)
+              LongPressGestureRecognizer:
+                  GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+                    () => LongPressGestureRecognizer(),
+                    (LongPressGestureRecognizer instance) {
+                      instance.onLongPress = widget.onLongPress;
+                      instance.gestureSettings = gestureSettings;
+                    },
+                  ),
+          },
           child: Semantics(
             button: true,
             child: ConstrainedBox(

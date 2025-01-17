@@ -847,6 +847,58 @@ void main() {
     await tester.pump();
     expect(value, isTrue);
   });
+
+  testWidgets('Press and move on button and animation works', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerplate(child: CupertinoButton(onPressed: () {}, child: const Text('Tap me'))),
+    );
+    final TestGesture gesture = await tester.startGesture(
+      tester.getTopLeft(find.byType(CupertinoButton)),
+    );
+    // Check opacity
+    final FadeTransition opacity = tester.widget(
+      find.descendant(of: find.byType(CupertinoButton), matching: find.byType(FadeTransition)),
+    );
+    await tester.pumpAndSettle();
+    final double moveDistance = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS ||
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia => kCupertinoButtonTapMoveOpacityChangeDistance,
+      TargetPlatform.macOS || TargetPlatform.windows || TargetPlatform.linux => 0.0,
+    };
+    expect(opacity.opacity.value, 0.4);
+    await gesture.moveBy(Offset(0, -moveDistance - 1));
+    await tester.pumpAndSettle();
+    expect(opacity.opacity.value, 1.0);
+    await gesture.moveBy(const Offset(0, 1));
+    await tester.pumpAndSettle();
+    expect(opacity.opacity.value, 0.4);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets(
+    'When lifting up outside the button after moving, onPressed should not be triggered.',
+    (WidgetTester tester) async {
+      bool value = false;
+      await tester.pumpWidget(
+        boilerplate(
+          child: CupertinoButton(
+            onPressed: () {
+              value = true;
+            },
+            child: const Text('Tap me'),
+          ),
+        ),
+      );
+      final TestGesture gesture = await tester.startGesture(
+        tester.getTopLeft(find.byType(CupertinoButton)),
+      );
+      await gesture.moveTo(
+        tester.getBottomRight(find.byType(CupertinoButton)) + const Offset(0, 1),
+      );
+      await gesture.up();
+      expect(value, isFalse);
+    },
+  );
 }
 
 Widget boilerplate({required Widget child}) {
