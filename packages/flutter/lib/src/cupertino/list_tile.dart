@@ -263,7 +263,6 @@ class CupertinoListTile extends StatefulWidget {
 
   /// The horizontal space between [leading] widget and [title].
   final double leadingToTitle;
-
   @override
   State<CupertinoListTile> createState() => _CupertinoListTileState();
 }
@@ -376,13 +375,12 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
           () => setState(() {
             _tapped = false;
           }),
-      onTap: () async {
-        widget.onTap!();
-        if (mounted) {
-          setState(() {
+      onTapUp:
+          (_) => setState(() {
             _tapped = false;
-          });
-        }
+          }),
+      onTap: () async {
+        await widget.onTap!();
       },
       behavior: HitTestBehavior.opaque,
       child: child,
