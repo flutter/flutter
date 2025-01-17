@@ -1560,31 +1560,6 @@ class AppLinkSettings {
 
 }
 
-//class IntentFilterCheck {
-//
-//    boolean hasAutoVerify
-//    boolean hasActionView
-//    boolean hasDefaultCategory
-//    boolean hasBrowsableCategory
-//
-//}
-//
-//class Deeplink {
-//    String scheme, host, path
-//    IntentFilterCheck intentFilterCheck
-//    boolean equals(o) {
-//        if (o == null) {
-//            throw new NullPointerException()
-//        }
-//        if (o.getClass() != getClass()) {
-//            return false
-//        }
-//        return scheme == o.scheme &&
-//                host == o.host &&
-//                path == o.path
-//    }
-//}
-
 abstract class BaseFlutterTask extends DefaultTask {
 
     @Internal
