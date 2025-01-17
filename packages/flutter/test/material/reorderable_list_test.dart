@@ -2256,7 +2256,7 @@ void main() {
         duration: const Duration(milliseconds: 600),
         interval: Duration(milliseconds: (1000 / autoScrollerVelocityScalar).round()),
       );
-      drag.up();
+      await drag.up();
 
       return scrollController.offset;
     }
