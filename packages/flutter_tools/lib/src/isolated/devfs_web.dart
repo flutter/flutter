@@ -50,10 +50,12 @@ typedef DwdsLauncher =
       required ToolConfiguration toolConfiguration,
     });
 
-// A minimal index for projects that do not yet support web.
+// A minimal index for projects that do not yet support web. A meta tag is used
+// to ensure loaded scripts are always parsed as UTF-8.
 const String _kDefaultIndex = '''
 <html>
     <head>
+        <meta charset='utf-8'>
         <base href="/">
     </head>
     <body>
@@ -125,10 +127,17 @@ class WebAssetServer implements AssetReader {
     this._modules,
     this._digests,
     this._nullSafetyMode,
-    this._ddcModuleSystem, {
+    this._ddcModuleSystem,
+    this._canaryFeatures, {
     required this.webRenderer,
     required this.useLocalCanvasKit,
-  }) : basePath = _getWebTemplate('index.html', _kDefaultIndex).getBaseHref();
+  }) : basePath = _getWebTemplate('index.html', _kDefaultIndex).getBaseHref() {
+    // TODO(srujzs): Remove this assertion when the library bundle format is
+    // supported without canary mode.
+    if (_ddcModuleSystem) {
+      assert(_canaryFeatures);
+    }
+  }
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
@@ -188,7 +197,13 @@ class WebAssetServer implements AssetReader {
     DwdsLauncher dwdsLauncher = Dwds.start,
     // TODO(markzipan): Make sure this default value aligns with that in the debugger options.
     bool ddcModuleSystem = false,
+    bool canaryFeatures = false,
   }) async {
+    // TODO(srujzs): Remove this assertion when the library bundle format is
+    // supported without canary mode.
+    if (ddcModuleSystem) {
+      assert(canaryFeatures);
+    }
     InternetAddress address;
     if (hostname == 'any') {
       address = InternetAddress.anyIPv4;
@@ -236,6 +251,7 @@ class WebAssetServer implements AssetReader {
       digests,
       nullSafetyMode,
       ddcModuleSystem,
+      canaryFeatures,
       webRenderer: webRenderer,
       useLocalCanvasKit: useLocalCanvasKit,
     );
@@ -300,7 +316,7 @@ class WebAssetServer implements AssetReader {
       toolConfiguration: ToolConfiguration(
         loadStrategy:
             ddcModuleSystem
-                ? FrontendServerDdcStrategyProvider(
+                ? FrontendServerDdcLibraryBundleStrategyProvider(
                   ReloadConfiguration.none,
                   server,
                   PackageUriMapper(packageConfig),
@@ -356,6 +372,7 @@ class WebAssetServer implements AssetReader {
 
   final NullSafetyMode _nullSafetyMode;
   final bool _ddcModuleSystem;
+  final bool _canaryFeatures;
   final HttpServer _httpServer;
   final WebMemoryFS _webMemoryFS = WebMemoryFS();
   final PackageConfig _packages;
@@ -674,7 +691,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
 
   File get _resolveDartSdkJsFile {
     final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> dartSdkArtifactMap =
-        _ddcModuleSystem ? kDdcDartSdkJsArtifactMap : kAmdDartSdkJsArtifactMap;
+        _ddcModuleSystem ? kDdcLibraryBundleDartSdkJsArtifactMap : kAmdDartSdkJsArtifactMap;
     return globals.fs.file(
       globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]![_nullSafetyMode]!),
     );
@@ -682,7 +699,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
 
   File get _resolveDartSdkJsMapFile {
     final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> dartSdkArtifactMap =
-        _ddcModuleSystem ? kDdcDartSdkJsMapArtifactMap : kAmdDartSdkJsMapArtifactMap;
+        _ddcModuleSystem ? kDdcLibraryBundleDartSdkJsMapArtifactMap : kAmdDartSdkJsMapArtifactMap;
     return globals.fs.file(
       globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]![_nullSafetyMode]!),
     );
@@ -762,12 +779,19 @@ class WebDevFS implements DevFS {
     required this.nativeNullAssertions,
     required this.nullSafetyMode,
     required this.ddcModuleSystem,
+    required this.canaryFeatures,
     required this.webRenderer,
     required this.isWasm,
     required this.useLocalCanvasKit,
     required this.rootDirectory,
     this.testMode = false,
-  }) : _port = port;
+  }) : _port = port {
+    // TODO(srujzs): Remove this assertion when the library bundle format is
+    // supported without canary mode.
+    if (ddcModuleSystem) {
+      assert(canaryFeatures);
+    }
+  }
 
   final Uri entrypoint;
   final String hostname;
@@ -782,6 +806,7 @@ class WebDevFS implements DevFS {
   final Map<String, String> extraHeaders;
   final bool testMode;
   final bool ddcModuleSystem;
+  final bool canaryFeatures;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
   final bool nullAssertions;
@@ -894,6 +919,7 @@ class WebDevFS implements DevFS {
       useLocalCanvasKit: useLocalCanvasKit,
       testMode: testMode,
       ddcModuleSystem: ddcModuleSystem,
+      canaryFeatures: canaryFeatures,
     );
 
     final int selectedPort = webAssetServer.selectedPort;
@@ -983,7 +1009,7 @@ class WebDevFS implements DevFS {
       webAssetServer.writeFile(
         'main.dart.js',
         ddcModuleSystem
-            ? generateDDCBootstrapScript(
+            ? generateDDCLibraryBundleBootstrapScript(
               entrypoint: entrypoint,
               ddcModuleLoaderUrl: 'ddc_module_loader.js',
               mapperUrl: 'stack_trace_mapper.js',
@@ -998,16 +1024,16 @@ class WebDevFS implements DevFS {
       webAssetServer.writeFile(
         'main_module.bootstrap.js',
         ddcModuleSystem
-            ? generateDDCMainModule(
+            ? generateDDCLibraryBundleMainModule(
               entrypoint: entrypoint,
               nullAssertions: nullAssertions,
               nativeNullAssertions: nativeNullAssertions,
-              exportedMain: pathToJSIdentifier(entrypoint.split('.')[0]),
             )
             : generateMainModule(
               entrypoint: entrypoint,
               nullAssertions: nullAssertions,
               nativeNullAssertions: nativeNullAssertions,
+              loaderRootDirectory: _baseUri.toString(),
             ),
       );
       // TODO(zanderso): refactor the asset code in this and the regular devfs to

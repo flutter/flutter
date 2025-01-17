@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/services.dart';
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
@@ -488,7 +491,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
 
   void _closeView(String? selectedText) {
     if (selectedText != null) {
-      _searchController.text = selectedText;
+      _searchController.value = TextEditingValue(text: selectedText);
     }
     Navigator.of(context).pop();
   }
