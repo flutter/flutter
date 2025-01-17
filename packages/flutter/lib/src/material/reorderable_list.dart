@@ -303,8 +303,6 @@ class ReorderableListView extends StatefulWidget {
 }
 
 class _ReorderableListViewState extends State<ReorderableListView> {
-  final ValueNotifier<bool> _dragging = ValueNotifier<bool>(false);
-
   Widget _itemBuilder(BuildContext context, int index) {
     final Widget item = widget.itemBuilder(context, index);
     assert(() {
