@@ -159,8 +159,8 @@ class _SnackBarActionState extends State<SnackBarAction> {
   Widget build(BuildContext context) {
     final SnackBarThemeData defaults =
         Theme.of(context).useMaterial3
-            ? _SnackbarDefaultsM3(context)
-            : _SnackbarDefaultsM2(context);
+            ? _SnackBarDefaultsM3(context)
+            : _SnackBarDefaultsM2(context);
     final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
 
     MaterialStateColor resolveForegroundColor() {
@@ -611,7 +611,7 @@ class _SnackBarState extends State<SnackBar> {
     final bool isThemeDark = theme.brightness == Brightness.dark;
     final Color buttonColor = isThemeDark ? colorScheme.primary : colorScheme.secondary;
     final SnackBarThemeData defaults =
-        theme.useMaterial3 ? _SnackbarDefaultsM3(context) : _SnackbarDefaultsM2(context);
+        theme.useMaterial3 ? _SnackBarDefaultsM3(context) : _SnackBarDefaultsM2(context);
 
     // SnackBar uses a theme that is the opposite brightness from
     // the surrounding theme.
@@ -867,8 +867,8 @@ class _SnackBarState extends State<SnackBar> {
 }
 
 // Hand coded defaults based on Material Design 2.
-class _SnackbarDefaultsM2 extends SnackBarThemeData {
-  _SnackbarDefaultsM2(BuildContext context)
+class _SnackBarDefaultsM2 extends SnackBarThemeData {
+  _SnackBarDefaultsM2(BuildContext context)
     : _theme = Theme.of(context),
       _colors = Theme.of(context).colorScheme,
       super(elevation: 6.0);
@@ -916,7 +916,7 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
   double get actionOverflowThreshold => 0.25;
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES - Snackbar
+// BEGIN GENERATED TOKEN PROPERTIES - SnackBar
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
 // "END GENERATED" comments are generated from data in the Material
@@ -924,8 +924,8 @@ class _SnackbarDefaultsM2 extends SnackBarThemeData {
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 // dart format off
-class _SnackbarDefaultsM3 extends SnackBarThemeData {
-    _SnackbarDefaultsM3(this.context);
+class _SnackBarDefaultsM3 extends SnackBarThemeData {
+  _SnackBarDefaultsM3(this.context);
 
   final BuildContext context;
   late final ThemeData _theme = Theme.of(context);
@@ -985,4 +985,4 @@ class _SnackbarDefaultsM3 extends SnackBarThemeData {
 }
 // dart format on
 
-// END GENERATED TOKEN PROPERTIES - Snackbar
+// END GENERATED TOKEN PROPERTIES - SnackBar
