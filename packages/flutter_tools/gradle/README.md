@@ -22,3 +22,8 @@ Tests can be run in Android Studio, or directly with Gradle: `./gradle test`
 (note that this directory does not contain a version controlled Gradle file. You can find one in 
 the engines `third_party` directory at 
 `<flutter_root>/engine/src/flutter/third_party/gradle/bin/gradle`).
+
+Alternatively, you can run all the tests in one file by passing in the fully qualified class name, 
+e.g. `./gradlew test --tests com.flutter.gradle.BaseApplicationNameHandlerTest`, or one test in 
+one file by passing in the fully qualified class name followed by the method name, 
+e.g `./gradlew test --tests "com.flutter.gradle.BaseApplicationNameHandlerTest.setBaseName respects Flutter tool property"`.
