@@ -237,7 +237,7 @@ bool FlutterMain::Register(JNIEnv* env) {
 static bool IsEmulator() {
   char product_model[PROP_VALUE_MAX];
   __system_property_get("ro.product.model", product_model);
-  return std::string(product_model).find("gphone") != std::string::npos) {
+  return std::string(product_model).find("gphone") != std::string::npos;
 }
 
 // static
