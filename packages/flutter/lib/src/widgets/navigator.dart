@@ -1105,12 +1105,11 @@ abstract class TransitionDelegate<T> {
   /// route requires explicit decision on how it should transition off the
   /// Navigator. To make a decision for a removed route, call
   /// [RouteTransitionRecord.markForPop],
-  /// [RouteTransitionRecord.markForComplete].
-  /// It is possible that decisions are not required for routes in the
-  /// `locationToExitingPageRoute`. This can happen if the routes have already
-  /// been popped in earlier page updates and are still waiting for popping
-  /// animations to finish. In such case, those routes are still included in the
-  /// `locationToExitingPageRoute` with their
+  /// [RouteTransitionRecord.markForComplete]. It is possible that decisions are
+  /// not required for routes in the `locationToExitingPageRoute`. This can
+  /// happen if the routes have already been popped in earlier page updates and
+  /// are still waiting for popping animations to finish. In such case, those
+  /// routes are still included in the `locationToExitingPageRoute` with their
   /// [RouteTransitionRecord.isWaitingForExitingDecision] set to false and no
   /// decisions are required.
   ///
