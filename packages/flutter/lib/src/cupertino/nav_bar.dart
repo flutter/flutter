@@ -2851,8 +2851,10 @@ class _NavigationBarComponentsTransition {
   Widget? get bottomNavBarBottom {
     final KeyedSubtree? bottomNavBarBottom =
         bottomComponents.navBarBottomKey.currentWidget as KeyedSubtree?;
+    final KeyedSubtree? topNavBarBottom =
+        topComponents.navBarBottomKey.currentWidget as KeyedSubtree?;
 
-    if (bottomNavBarBottom != null) {
+    if (bottomNavBarBottom != null && topNavBarBottom != null) {
       return slideFromLeadingEdge(
         fromKey: bottomComponents.navBarBottomKey,
         fromNavBarBox: bottomNavBarBox,
