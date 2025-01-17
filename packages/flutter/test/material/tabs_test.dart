@@ -7430,6 +7430,7 @@ void main() {
       ),
     );
   });
+
   testWidgets('Elastic Tab animation with various size tabs - LTR', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(
       frameSize: const Size(800, 100),
