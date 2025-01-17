@@ -2815,7 +2815,7 @@ class Navigator extends StatefulWidget {
   /// This method is used, for example, to instantly dismiss dropdown menus that
   /// are up when the screen's orientation changes.
   @optionalTypeArgs
-  static void removeRoute<T extends Object?>(BuildContext context, Route<T> route, [ T? result ]) {
+  static void removeRoute<T extends Object?>(BuildContext context, Route<T> route, [T? result]) {
     return Navigator.of(context).removeRoute<T>(route, result);
   }
 
@@ -2848,7 +2848,11 @@ class Navigator extends StatefulWidget {
   /// Ongoing gestures within the current route are canceled.
   /// {@endtemplate}
   @optionalTypeArgs
-  static void removeRouteBelow<T extends Object?>(BuildContext context, Route<T> anchorRoute, [ T? result ]) {
+  static void removeRouteBelow<T extends Object?>(
+    BuildContext context,
+    Route<T> anchorRoute, [
+    T? result,
+  ]) {
     return Navigator.of(context).removeRouteBelow<T>(anchorRoute, result);
   }
 
@@ -5617,7 +5621,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.removeRoute}
   @optionalTypeArgs
-  void removeRoute<T extends Object?>(Route<T> route, [ T? result ]) {
+  void removeRoute<T extends Object?>(Route<T> route, [T? result]) {
     assert(!_debugLocked);
     assert(() {
       _debugLocked = true;
@@ -5642,7 +5646,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.removeRouteBelow}
   @optionalTypeArgs
-  void removeRouteBelow<T extends Object?>(Route<T> anchorRoute, [ T? result ]) {
+  void removeRouteBelow<T extends Object?>(Route<T> anchorRoute, [T? result]) {
     assert(!_debugLocked);
     assert(() {
       _debugLocked = true;
