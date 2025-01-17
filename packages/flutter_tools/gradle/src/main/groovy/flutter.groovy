@@ -593,11 +593,12 @@ class FlutterPlugin implements Plugin<Project> {
         }
         // The embedding is set as an API dependency in a Flutter plugin.
         // Therefore, don't make the app project depend on the embedding if there are Flutter
-        // plugins.
+        // plugin dependencies. In release mode, dev dependencies are stripped, so we do not
+        // consider those in the check.
         // This prevents duplicated classes when using custom build types. That is, a custom build
         // type like profile is used, and the plugin and app projects have API dependencies on the
         // embedding.
-        if (!isFlutterAppProject() || getPluginList(project).size() == 0) {
+        if (!isFlutterAppProject() || getPluginListWithoutDevDependencies(project).size() == 0) {
             addApiDependencies(project, buildType.name,
                     "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
         }
@@ -990,6 +991,28 @@ class FlutterPlugin implements Plugin<Project> {
         }
         return pluginList
     }
+
+
+    /**
+     * Gets the list of plugins (as map) that support the Android platform and are dependencies of the
+     * Android project (excludes dev dependencies).
+     *
+     * The map value contains either the plugins `name` (String),
+     * its `path` (String), or its `dependencies` (List<String>).
+     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
+     */
+    private List<Map<String, Object>> getPluginListWithoutDevDependencies(Project project) {
+        List<Map<String, Object>> allPluginsList = getPluginList(project)
+        List<Map<String, Object>> pluginListWithoutDevDependencies = []
+        for (Map<String, Object> plugin in allPluginsList) {
+            if (!plugin.dev_dependency) {
+                pluginListWithoutDevDependencies += plugin
+            }
+        }
+        return pluginListWithoutDevDependencies
+    }
+
+
 
     // TODO(54566, 48918): Remove in favor of [getPluginList] only, see also
     //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
