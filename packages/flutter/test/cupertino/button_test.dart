@@ -584,7 +584,34 @@ void main() {
                 .decoration
             as BoxDecoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoButton.filled(
+          color: CupertinoColors.systemRed,
+          onPressed: () {},
+          child: Builder(
+            builder: (BuildContext context) {
+              textStyle = DefaultTextStyle.of(context).style;
+              return const Placeholder();
+            },
+          ),
+        ),
+      ),
+    );
+
+    decoration = tester
+        .widget<DecoratedBox>(
+          find.descendant(
+            of: find.byType(CupertinoButton),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .decoration as BoxDecoration;
+
+    expect(decoration.color, isSameColorAs(CupertinoColors.systemRed));
   });
+
 
   testWidgets("All CupertinoButton const maps keys' match the available style sizes", (
     WidgetTester tester,
