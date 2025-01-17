@@ -947,13 +947,6 @@ abstract class RouteTransitionRecord {
   /// route to indicate that the route should be completed with the provided
   /// result and removed from the [Navigator] without an animated transition.
   void markForComplete([dynamic result]);
-
-  /// Marks the [route] to be removed without transition.
-  ///
-  /// During [TransitionDelegate.resolve], this can be called on an exiting
-  /// route to indicate that the route should be removed from the [Navigator]
-  /// without completing and without an animated transition.
-  void markForRemove();
 }
 
 /// The delegate that decides how pages added and removed from [Navigator.pages]
@@ -988,11 +981,11 @@ abstract class RouteTransitionRecord {
 ///     }
 ///     for (final RouteTransitionRecord exitingPageRoute in locationToExitingPageRoute.values) {
 ///       if (exitingPageRoute.isWaitingForExitingDecision) {
-///        exitingPageRoute.markForRemove();
+///        exitingPageRoute.markForComplete();
 ///        final List<RouteTransitionRecord>? pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
 ///        if (pagelessRoutes != null) {
 ///          for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
-///             pagelessRoute.markForRemove();
+///             pagelessRoute.markForComplete();
 ///           }
 ///        }
 ///       }
@@ -1114,12 +1107,12 @@ abstract class TransitionDelegate<T> {
   /// route requires explicit decision on how it should transition off the
   /// Navigator. To make a decision for a removed route, call
   /// [RouteTransitionRecord.markForPop],
-  /// [RouteTransitionRecord.markForComplete] or
-  /// [RouteTransitionRecord.markForRemove]. It is possible that decisions are
-  /// not required for routes in the `locationToExitingPageRoute`. This can
-  /// happen if the routes have already been popped in earlier page updates and
-  /// are still waiting for popping animations to finish. In such case, those
-  /// routes are still included in the `locationToExitingPageRoute` with their
+  /// [RouteTransitionRecord.markForComplete].
+  /// It is possible that decisions are not required for routes in the
+  /// `locationToExitingPageRoute`. This can happen if the routes have already
+  /// been popped in earlier page updates and are still waiting for popping
+  /// animations to finish. In such case, those routes are still included in the
+  /// `locationToExitingPageRoute` with their
   /// [RouteTransitionRecord.isWaitingForExitingDecision] set to false and no
   /// decisions are required.
   ///
@@ -1161,8 +1154,6 @@ abstract class TransitionDelegate<T> {
   ///    without an animated transition.
   ///  * [RouteTransitionRecord.markForPop], which makes route exit the screen
   ///    with an animated transition.
-  ///  * [RouteTransitionRecord.markForRemove], which does not complete the
-  ///    route and makes it exit the screen without an animated transition.
   ///  * [RouteTransitionRecord.markForComplete], which completes the route and
   ///    makes it exit the screen without an animated transition.
   ///  * [DefaultTransitionDelegate.resolve], which implements the default way
@@ -3260,21 +3251,6 @@ class _RouteEntry extends RouteTransitionRecord {
 
   bool _reportRemovalToObserver = true;
 
-  // Route is removed without being completed.
-  void remove({ bool isReplaced = false }) {
-    assert(
-      !pageBased || isWaitingForExitingDecision,
-      'A page-based route cannot be completed using imperative api, provide a '
-      'new list without the corresponding Page to Navigator.pages instead. ',
-    );
-    if (currentState.index >= _RouteLifecycle.remove.index) {
-      return;
-    }
-    assert(isPresent);
-    _reportRemovalToObserver = !isReplaced;
-    currentState = _RouteLifecycle.remove;
-  }
-
   // Route completes with `result` and is removed.
   void complete<T>(T result, { bool isReplaced = false }) {
     assert(
@@ -3474,18 +3450,6 @@ class _RouteEntry extends RouteTransitionRecord {
       'out.',
     );
     complete<dynamic>(result);
-    _isWaitingForExitingDecision = false;
-  }
-
-  @override
-  void markForRemove() {
-    assert(
-      !isWaitingForEnteringDecision && isWaitingForExitingDecision && isPresent,
-      'This route cannot be marked for remove. Either a decision has already '
-      'been made or it does not require an explicit decision on how to transition '
-      'out.',
-    );
-    remove();
     _isWaitingForExitingDecision = false;
   }
 

@@ -5895,11 +5895,11 @@ class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
       final RouteTransitionRecord exitingPageRoute = locationToExitingPageRoute[location]!;
       if (exitingPageRoute.isWaitingForExitingDecision) {
         final bool hasPagelessRoute = pageRouteToPagelessRoutes.containsKey(exitingPageRoute);
-        exitingPageRoute.markForRemove();
+        exitingPageRoute.markForComplete();
         if (hasPagelessRoute) {
           final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute]!;
           for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
-            pagelessRoute.markForRemove();
+            pagelessRoute.markForComplete();
           }
         }
       }
