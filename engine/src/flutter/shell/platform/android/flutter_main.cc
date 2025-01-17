@@ -5,7 +5,6 @@
 #define FML_USED_ON_EMBEDDER
 
 #include <android/log.h>
-#include <cpu-features.h>
 #include <sys/system_properties.h>
 #include <optional>
 #include <string>
@@ -235,16 +234,10 @@ bool FlutterMain::Register(JNIEnv* env) {
 
 // Prevent known emulators or other x86 devices from using Vulkan,
 // unless a specific rendering backend was requested for testing.
-static bool IsEmulatorOrx86() {
+static bool IsEmulator() {
   char product_model[PROP_VALUE_MAX];
   __system_property_get("ro.product.model", product_model);
-  if (std::string(product_model).find("gphone") != std::string::npos) {
-    return true;
-  }
-  if (android_getCpuFamily() == ANDROID_CPU_FAMILY_X86) {
-    return true;
-  }
-  return false;
+  return std::string(product_model).find("gphone") != std::string::npos) {
 }
 
 // static
@@ -283,7 +276,7 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     if (api_level < kMinimumAndroidApiLevelForVulkan) {
       return kVulkanUnsupportedFallback;
     }
-    if (IsEmulatorOrx86()) {
+    if (IsEmulator()) {
       return kVulkanUnsupportedFallback;
     }
     // Determine if Vulkan is supported by creating a Vulkan context and
