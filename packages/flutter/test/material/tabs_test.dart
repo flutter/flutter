@@ -7733,5 +7733,4 @@ void main() {
       matchesGoldenFile('tab_indicator.elastic_animation.skipping_tabs.png'),
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
->>>>>>> 2b34d78c23 (Fix `TabBar` glitchy elastic `Tab`  animation (#161514))
 }
