@@ -31,6 +31,9 @@ import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
 
+import com.flutter.gradle.Deeplink
+import com.flutter.gradle.IntentFilterCheck
+
 /**
  * For apps only. Provides the flutter extension used in the app-level Gradle
  * build file (app/build.gradle or app/build.gradle.kts).
@@ -549,7 +552,7 @@ class FlutterPlugin implements Plugin<Project> {
                                     schemes.each { scheme ->
                                         hosts.each { host ->
                                             paths.each { path ->
-                                                appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: path, intentFilterCheck: intentFilterCheck))
+                                                appLinkSettings.deeplinks.add(new Deeplink(scheme, host, path, intentFilterCheck))
                                             }
                                         }
                                     }
@@ -1557,30 +1560,30 @@ class AppLinkSettings {
 
 }
 
-class IntentFilterCheck {
-
-    boolean hasAutoVerify
-    boolean hasActionView
-    boolean hasDefaultCategory
-    boolean hasBrowsableCategory
-
-}
-
-class Deeplink {
-    String scheme, host, path
-    IntentFilterCheck intentFilterCheck
-    boolean equals(o) {
-        if (o == null) {
-            throw new NullPointerException()
-        }
-        if (o.getClass() != getClass()) {
-            return false
-        }
-        return scheme == o.scheme &&
-                host == o.host &&
-                path == o.path
-    }
-}
+//class IntentFilterCheck {
+//
+//    boolean hasAutoVerify
+//    boolean hasActionView
+//    boolean hasDefaultCategory
+//    boolean hasBrowsableCategory
+//
+//}
+//
+//class Deeplink {
+//    String scheme, host, path
+//    IntentFilterCheck intentFilterCheck
+//    boolean equals(o) {
+//        if (o == null) {
+//            throw new NullPointerException()
+//        }
+//        if (o.getClass() != getClass()) {
+//            return false
+//        }
+//        return scheme == o.scheme &&
+//                host == o.host &&
+//                path == o.path
+//    }
+//}
 
 abstract class BaseFlutterTask extends DefaultTask {
 
