@@ -458,6 +458,7 @@ String generateMainModule({
   required bool nullAssertions,
   required bool nativeNullAssertions,
   String bootstrapModule = 'main_module.bootstrap',
+  String loaderRootDirectory = '',
 }) {
   // The typo below in "EXTENTION" is load-bearing, package:build depends on it.
   return '''
@@ -481,7 +482,7 @@ define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) 
   child.main();
 
   window.\$dartLoader = {};
-  window.\$dartLoader.rootDirectories = [];
+  window.\$dartLoader.rootDirectories = ["$loaderRootDirectory"];
   if (window.\$requireLoader) {
     window.\$requireLoader.getModuleLibraries = dart_sdk.dart.getModuleLibraries;
   }
