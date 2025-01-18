@@ -222,7 +222,7 @@ TEST(DriverInfoVKTest, CanUseFramebufferFetch) {
   EXPECT_TRUE(CanUseFramebufferFetch("Mali-G51", false));
 }
 
-TEST(DriverInfoVKTest, AllPoweVRDisabled) {
+TEST(DriverInfoVKTest, AllPowerVRDisabled) {
   auto const context =
       MockVulkanContextBuilder()
           .SetPhysicalPropertiesCallback(
