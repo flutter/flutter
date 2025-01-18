@@ -122,6 +122,20 @@ class DatePickerDelegate {
     // and the day corresponding to the first of the month.
     return (weekdayFromMonday - firstDayOfWeekIndex) % 7;
   }
+
+  /// Returns the number of days in a month, according to the proleptic
+  /// Gregorian calendar.
+  ///
+  /// This applies the leap year logic introduced by the Gregorian reforms of
+  /// 1582. It will not give valid results for dates prior to that time.
+  int getDaysInMonth(int year, int month) {
+    if (month == DateTime.february) {
+      final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) || (year % 400 == 0);
+      return isLeapYear ? 29 : 28;
+    }
+    const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    return daysInMonth[month - 1];
+  }
 }
 
 /// Utility functions for working with dates.
@@ -239,14 +253,14 @@ abstract final class DateUtils {
   ///
   /// This applies the leap year logic introduced by the Gregorian reforms of
   /// 1582. It will not give valid results for dates prior to that time.
-  static int getDaysInMonth(int year, int month) {
-    if (month == DateTime.february) {
-      final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) || (year % 400 == 0);
-      return isLeapYear ? 29 : 28;
-    }
-    const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    return daysInMonth[month - 1];
-  }
+  // static int getDaysInMonth(int year, int month) {
+  //   if (month == DateTime.february) {
+  //     final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) || (year % 400 == 0);
+  //     return isLeapYear ? 29 : 28;
+  //   }
+  //   const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  //   return daysInMonth[month - 1];
+  // }
 }
 
 /// Mode of date entry method for the date picker dialog.

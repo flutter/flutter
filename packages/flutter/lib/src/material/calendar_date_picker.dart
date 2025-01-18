@@ -263,7 +263,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
   void _handleYearChanged(DateTime value) {
     _vibrate();
 
-    final int daysInMonth = DateUtils.getDaysInMonth(value.year, value.month);
+    final int daysInMonth = widget.delegate.getDaysInMonth(value.year, value.month);
     final int preferredDay = math.min(_selectedDate?.day ?? 1, daysInMonth);
     value = value.copyWith(day: preferredDay);
 
@@ -634,7 +634,7 @@ class _MonthPickerState extends State<_MonthPicker> {
   /// otherwise the first selectable day in the month will be returned. If
   /// no dates are selectable in the month, then it will return null.
   DateTime? _focusableDayForMonth(DateTime month, int preferredDay) {
-    final int daysInMonth = DateUtils.getDaysInMonth(month.year, month.month);
+    final int daysInMonth = widget.delegate.getDaysInMonth(month.year, month.month);
 
     // Can we use the preferred day in this month?
     if (preferredDay <= daysInMonth) {
@@ -931,7 +931,7 @@ class _DayPickerState extends State<_DayPicker> {
   @override
   void initState() {
     super.initState();
-    final int daysInMonth = DateUtils.getDaysInMonth(
+    final int daysInMonth = widget.delegate.getDaysInMonth(
       widget.displayedMonth.year,
       widget.displayedMonth.month,
     );
@@ -1002,7 +1002,7 @@ class _DayPickerState extends State<_DayPicker> {
     final int year = widget.displayedMonth.year;
     final int month = widget.displayedMonth.month;
 
-    final int daysInMonth = DateUtils.getDaysInMonth(year, month);
+    final int daysInMonth = widget.delegate.getDaysInMonth(year, month);
     final int dayOffset = widget.delegate.firstDayOffset(year, month, localizations);
 
     final List<Widget> dayItems = _dayHeaders(weekdayStyle, localizations);

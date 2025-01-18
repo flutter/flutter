@@ -2543,7 +2543,7 @@ class _MonthItemState extends State<_MonthItem> {
   @override
   void initState() {
     super.initState();
-    final int daysInMonth = DateUtils.getDaysInMonth(
+    final int daysInMonth = widget.delegate.getDaysInMonth(
       widget.displayedMonth.year,
       widget.displayedMonth.month,
     );
@@ -2656,7 +2656,7 @@ class _MonthItemState extends State<_MonthItem> {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final int year = widget.displayedMonth.year;
     final int month = widget.displayedMonth.month;
-    final int daysInMonth = DateUtils.getDaysInMonth(year, month);
+    final int daysInMonth = widget.delegate.getDaysInMonth(year, month);
     final int dayOffset = widget.delegate.firstDayOffset(year, month, localizations);
     final int weeks = ((daysInMonth + dayOffset) / DateTime.daysPerWeek).ceil();
     final double gridHeight =
