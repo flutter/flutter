@@ -520,7 +520,7 @@ sealed class _RawMenuAnchor extends StatefulWidget {
     super.key,
     this.childFocusNode,
     required this.consumeOutsideTaps,
-    this.controller,
+    required this.controller,
   });
 
   final FocusNode? childFocusNode;
@@ -701,16 +701,16 @@ sealed class _RawMenuAnchorState<T extends _RawMenuAnchor> extends State<T> {
 
 class _RawMenuAnchorOverlay extends _RawMenuAnchor {
   const _RawMenuAnchorOverlay({
-    this.onOpen,
-    this.onClose,
+    required this.onOpen,
+    required this.onClose,
     required this.hasExternalFocusScope,
     required this.useRootOverlay,
     required this.overlayBuilder,
-    this.builder,
-    this.child,
-    this.padding,
-    super.controller,
-    super.childFocusNode,
+    required this.builder,
+    required this.child,
+    required this.padding,
+    required super.controller,
+    required super.childFocusNode,
     required super.consumeOutsideTaps,
   });
 
@@ -1474,8 +1474,8 @@ class _MenuOverlay extends StatelessWidget {
     required this.menuAlignment,
     required this.position,
     required this.padding,
-    this.semanticLabel,
-    this.consumeOutsideTaps = true,
+    required this.semanticLabel,
+    required this.consumeOutsideTaps,
     required this.child,
   });
 
