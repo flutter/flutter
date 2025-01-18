@@ -3711,6 +3711,33 @@ void main() {
     expect(focus, orderedEquals(<bool?>[null, false, null, null, null, null]));
     clear();
   });
+
+  testWidgets('When there is no focused node, the focus can be set to the FocusScopeNode.', (
+    WidgetTester tester,
+  ) async {
+    final FocusScopeNode scope = FocusScopeNode();
+    final FocusScopeNode childScope = FocusScopeNode();
+    final FocusNode nodeA = FocusNode();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: FocusScope(
+          node: scope,
+          child: FocusScope(
+            node: childScope,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Focus(focusNode: nodeA, child: const Text('A')),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(scope.focusInDirection(TraversalDirection.down), isTrue);
+    await tester.pump();
+    expect(childScope.hasFocus, isTrue);
+    expect(nodeA.hasFocus, isFalse);
+  });
 }
 
 class TestRoute extends PageRouteBuilder<void> {
