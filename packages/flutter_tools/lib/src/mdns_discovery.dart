@@ -215,6 +215,10 @@ class MDnsVmServiceDiscovery {
     required Duration timeout,
     bool quitOnFind = false,
   }) async {
+    // macOS blocks mDNS unless the app has Local Network permissions.
+    // Since the mDNS client does not handle exceptions from the socket's
+    // stream, socket exceptions get routed to the current zone. Create an
+    // error zone to catch the exception.
     final Completer<List<MDnsVmServiceDiscoveryResult>> completer =
         Completer<List<MDnsVmServiceDiscoveryResult>>();
     unawaited(
