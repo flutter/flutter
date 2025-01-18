@@ -37,10 +37,10 @@ class _SimpleMenuExampleState extends State<SimpleMenuExample> {
             controller: controller,
             padding: const EdgeInsets.symmetric(vertical: 5),
             alignmentOffset: const Offset(0, 6),
-            panel: RawMenuPanel(
+            menuPanel: RawMenuPanel(
               decoration: RawMenuPanel.lightSurfaceDecoration,
               constraints: const BoxConstraints(minWidth: 120),
-              menuChildren: <Widget>[
+              children: <Widget>[
                 MenuItemButton(
                   onPressed: () {
                     _handlePressed('Cut');

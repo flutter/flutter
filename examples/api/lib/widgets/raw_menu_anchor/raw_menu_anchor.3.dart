@@ -84,11 +84,11 @@ class _MenuNodeExampleState extends State<MenuNodeExample> {
     return RawMenuAnchor(
       padding: padding,
       alignmentOffset: depth == 0 ? const Offset(0, 5) : const Offset(-4, 0),
-      panel: RawMenuPanel(
+      menuPanel: RawMenuPanel(
         padding: padding,
         constraints: const BoxConstraints(minWidth: 180),
         decoration: RawMenuPanel.lightSurfaceDecoration,
-        menuChildren: <Widget>[
+        children: <Widget>[
           for (final MenuItem child in option.children!)
             if (child.children != null)
               _buildSubmenu(child, depth: depth + 1)
@@ -147,7 +147,7 @@ class _MenuNodeExampleState extends State<MenuNodeExample> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           if (_selected != null) Text('Selected: ${_selected!.label}', style: titleStyle),
-          RawMenuAnchor.node(
+          RawMenuAnchorGroup(
             controller: rootController,
             child: Row(
               mainAxisSize: MainAxisSize.min,

@@ -112,11 +112,11 @@ class _ContextMenuExampleState extends State<ContextMenuExample> {
           const Divider(thickness: 0.0, indent: 12, endIndent: 12),
           RawMenuAnchor(
             padding: const EdgeInsetsDirectional.symmetric(vertical: 5),
-            panel: RawMenuPanel(
+            menuPanel: RawMenuPanel(
               padding: const EdgeInsetsDirectional.symmetric(vertical: 5),
               constraints: const BoxConstraints(minWidth: 180),
               decoration: RawMenuPanel.lightSurfaceDecoration,
-              menuChildren: <Widget>[
+              children: <Widget>[
                 MenuItemButton(
                   onPressed: () {
                     _handlePressed('Bold');

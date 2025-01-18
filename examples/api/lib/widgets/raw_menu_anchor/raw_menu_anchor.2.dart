@@ -52,9 +52,9 @@ class _MenuOverlayBuilderExampleState extends State<MenuOverlayBuilderExample> {
       children: <Widget>[
         Text('Favorite Animal:', style: theme.textTheme.titleMedium),
         const SizedBox(width: 8),
-        RawMenuAnchor.overlayBuilder(
+        RawMenuAnchor.withOverlayBuilder(
           controller: controller,
-          overlayBuilder: (BuildContext context, RawMenuAnchorOverlayPosition position) {
+          overlayBuilder: (BuildContext context, RawMenuOverlayInfo position) {
             return ShiftingMenuOverlay(
               position: position,
               itemExtent: MenuOverlayBuilderExample.menuItemExtent,

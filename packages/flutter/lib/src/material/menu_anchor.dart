@@ -377,7 +377,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
   Widget build(BuildContext context) {
     final Widget child = _MenuAnchorScope(
       state: this,
-      child: RawMenuAnchor.overlayBuilder(
+      child: RawMenuAnchor.withOverlayBuilder(
         useRootOverlay: widget.useRootOverlay,
         onOpen: widget.onOpen,
         onClose: widget.onClose,
@@ -397,7 +397,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     return CompositedTransformTarget(link: widget.layerLink!, child: child);
   }
 
-  Widget _buildOverlay(BuildContext context, RawMenuAnchorOverlayPosition position) {
+  Widget _buildOverlay(BuildContext context, RawMenuOverlayInfo position) {
     return _Submenu(
       layerLink: widget.layerLink,
       consumeOutsideTaps: widget.consumeOutsideTap,
@@ -2323,7 +2323,7 @@ class _MenuBarAnchorState extends _MenuAnchorState {
   Widget build(BuildContext context) {
     return _MenuAnchorScope(
       state: this,
-      child: RawMenuAnchor.node(
+      child: RawMenuAnchorGroup(
         controller: _menuController,
         builder: _buildMenuBar,
         // Actions, Shortcuts, and _MenuPanel are not reliant on
@@ -3301,7 +3301,7 @@ class _Submenu extends StatelessWidget {
   });
 
   final FocusScopeNode menuScopeNode;
-  final RawMenuAnchorOverlayPosition menuPosition;
+  final RawMenuOverlayInfo menuPosition;
   final _MenuAnchorState anchor;
   final LayerLink? layerLink;
   final MenuStyle? menuStyle;
