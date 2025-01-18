@@ -70,11 +70,9 @@ class MenuNodeExample extends StatefulWidget {
 }
 
 class _MenuNodeExampleState extends State<MenuNodeExample> {
+
   final MenuController rootController = MenuController();
-  static const WidgetStatePropertyAll<Color> menuButtonHoverColor = WidgetStatePropertyAll<Color>(
-    Color(0x0D1A1A1A),
-  );
-  static const EdgeInsets padding = EdgeInsets.symmetric(vertical: 5);
+
   MenuItem? _selected;
 
   ButtonStyle? get menuButtonStyle => Theme.of(context).menuButtonTheme.style;
@@ -82,10 +80,9 @@ class _MenuNodeExampleState extends State<MenuNodeExample> {
 
   RawMenuAnchor _buildSubmenu(MenuItem option, {double depth = 0}) {
     return RawMenuAnchor(
-      padding: padding,
+      padding: const EdgeInsets.symmetric(vertical: 5),
       alignmentOffset: depth == 0 ? const Offset(0, 5) : const Offset(-4, 0),
       menuPanel: RawMenuPanel(
-        padding: padding,
         constraints: const BoxConstraints(minWidth: 180),
         decoration: RawMenuPanel.lightSurfaceDecoration,
         children: <Widget>[
@@ -112,7 +109,7 @@ class _MenuNodeExampleState extends State<MenuNodeExample> {
             child: MenuItemButton(
               style:
                   controller.isOpen
-                      ? menuButtonStyle?.copyWith(backgroundColor: menuButtonHoverColor)
+                      ? menuButtonStyle?.copyWith(backgroundColor: const WidgetStatePropertyAll<Color>(Color(0x0D1A1A1A)))
                       : menuButtonStyle,
               onHover: (bool value) {
                 if (rootController.isOpen) {
