@@ -917,7 +917,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
          bottomMode == null || bottom != null,
          'A bottomMode was provided without a corresponding bottom.',
        ),
-       onSearchActiveChanged = null,
+       onSearchableBottomTap = null,
        searchField = null,
        _searchable = false;
 
@@ -946,7 +946,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.heroTag = _defaultHeroTag,
     this.stretch = false,
     this.bottomMode = NavigationBarBottomMode.automatic,
-    this.onSearchActiveChanged,
+    this.onSearchableBottomTap,
     this.searchField = const CupertinoSearchTextField(),
   }) : assert(
          automaticallyImplyTitle || largeTitle != null,
@@ -1063,9 +1063,9 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// Defaults to [NavigationBarBottomMode.automatic] if this is null and a [bottom] is provided.
   final NavigationBarBottomMode? bottomMode;
 
-  /// Callback called when the search field in [CupertinoSliverNavigationBar.search]
-  /// is active or inactive by being focused or unfocused respectively.
-  final ValueChanged<bool>? onSearchActiveChanged;
+  /// Called when the search field in [CupertinoSliverNavigationBar.search]
+  /// is tapped, toggling the search state between active and inactive.
+  final ValueChanged<bool>? onSearchableBottomTap;
 
   /// True if the navigation bar's background color has no transparency.
   bool get opaque => backgroundColor?.alpha == 0xFF;
@@ -1105,7 +1105,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   late AnimationController _animationController;
   late Animation<double> persistentHeightAnimation;
   late Animation<double> largeTitleHeightAnimation;
-  bool expanded = true;
+  bool searchIsActive = false;
 
   @override
   void initState() {
@@ -1195,15 +1195,15 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       case AnimationStatus.dismissed:
         setState(() {});
       case AnimationStatus.forward:
-        expanded = false;
+        searchIsActive = true;
       case AnimationStatus.reverse:
-        expanded = true;
+        searchIsActive = false;
     }
   }
 
   void _onSearchFieldTap() {
-    if (widget.onSearchActiveChanged != null) {
-      widget.onSearchActiveChanged!(expanded);
+    if (widget.onSearchableBottomTap != null) {
+      widget.onSearchableBottomTap!(!searchIsActive);
     }
     _animationController.toggle();
   }
@@ -1214,29 +1214,33 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       keys: keys,
       route: ModalRoute.of(context),
       userLeading:
-          widget.leading != null ? Visibility(visible: expanded, child: widget.leading!) : null,
+          widget.leading != null
+              ? Visibility(visible: !searchIsActive, child: widget.leading!)
+              : null,
       automaticallyImplyLeading: widget.automaticallyImplyLeading,
       automaticallyImplyTitle: widget.automaticallyImplyTitle,
       previousPageTitle: widget.previousPageTitle,
       userMiddle: _animationController.isAnimating ? const Text('') : widget.middle,
       userTrailing:
-          widget.trailing != null ? Visibility(visible: expanded, child: widget.trailing!) : null,
+          widget.trailing != null
+              ? Visibility(visible: !searchIsActive, child: widget.trailing!)
+              : null,
       userLargeTitle: widget.largeTitle,
       userBottom:
           (widget._searchable
-              ? (expanded
-                  ? _ExpandedSearchableBottom(
+              ? searchIsActive
+                  ? _ActiveSearchableBottom(
+                    animationController: _animationController,
+                    animation: persistentHeightAnimation,
+                    searchField: widget.searchField,
+                    onSearchFieldTap: _onSearchFieldTap,
+                  )
+                  : _InactiveSearchableBottom(
                     animationController: _animationController,
                     animation: persistentHeightAnimation,
                     searchField: preferredSizeSearchField,
                     onSearchFieldTap: _onSearchFieldTap,
                   )
-                  : _CollapsedSearchableBottom(
-                    animationController: _animationController,
-                    animation: persistentHeightAnimation,
-                    searchField: widget.searchField,
-                    onSearchFieldTap: _onSearchFieldTap,
-                  ))
               : widget.bottom),
       padding: widget.padding,
       large: true,
@@ -1267,12 +1271,12 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
               largeTitleHeight: largeTitleHeightAnimation.value,
               alwaysShowMiddle: widget.alwaysShowMiddle && widget.middle != null,
               stretchConfiguration:
-                  expanded && widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
+                  widget.stretch && !searchIsActive ? OverScrollHeaderStretchConfiguration() : null,
               enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
               bottomMode:
-                  expanded
-                      ? widget.bottomMode ?? NavigationBarBottomMode.automatic
-                      : NavigationBarBottomMode.always,
+                  searchIsActive
+                      ? NavigationBarBottomMode.always
+                      : widget.bottomMode ?? NavigationBarBottomMode.automatic,
               bottomHeight: _bottomHeight(),
               controller: _animationController,
             ),
@@ -2206,9 +2210,10 @@ class _CancelButton extends StatelessWidget {
   }
 }
 
-/// The bottom of a [CupertinoSliverNavigationBar.search] in its expanded state.
-class _ExpandedSearchableBottom extends StatelessWidget {
-  const _ExpandedSearchableBottom({
+/// The bottom of a [CupertinoSliverNavigationBar.search] when the search field
+/// is inactive.
+class _InactiveSearchableBottom extends StatelessWidget {
+  const _InactiveSearchableBottom({
     required this.animationController,
     required this.searchField,
     required this.onSearchFieldTap,
@@ -2254,9 +2259,10 @@ class _ExpandedSearchableBottom extends StatelessWidget {
   }
 }
 
-/// The bottom of a [CupertinoSliverNavigationBar.search] in its collapsed state.
-class _CollapsedSearchableBottom extends StatelessWidget {
-  const _CollapsedSearchableBottom({
+/// The bottom of a [CupertinoSliverNavigationBar.search] when the search field
+/// is active.
+class _ActiveSearchableBottom extends StatelessWidget {
+  const _ActiveSearchableBottom({
     required this.animationController,
     required this.searchField,
     required this.animation,

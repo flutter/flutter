@@ -86,7 +86,7 @@ class NextPage extends StatefulWidget {
 }
 
 class _NextPageState extends State<NextPage> {
-  bool isFocused = false;
+  bool searchIsActive = false;
   String text = '';
 
   @override
@@ -107,23 +107,23 @@ class _NextPageState extends State<NextPage> {
             largeTitle: const Text('Family'),
             bottomMode: widget.bottomMode,
             searchField: CupertinoSearchTextField(
-              autofocus: isFocused,
-              placeholder: isFocused ? 'Enter search text' : 'Search',
+              autofocus: searchIsActive,
+              placeholder: searchIsActive ? 'Enter search text' : 'Search',
               onChanged: (String value) {
                 setState(() {
                   text = 'The text has changed to: $value';
                 });
               },
             ),
-            onSearchActiveChanged: (bool value) {
+            onSearchableBottomTap: (bool value) {
               setState(() {
-                isFocused = value;
+                searchIsActive = value;
               });
             },
           ),
           SliverFillRemaining(
             child:
-                isFocused
+                searchIsActive
                     ? ColoredBox(
                       color: CupertinoColors.extraLightBackgroundGray,
                       child: Center(child: Text(text, textAlign: TextAlign.center)),

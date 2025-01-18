@@ -2388,10 +2388,10 @@ void main() {
     expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
   });
 
-  testWidgets('isSearchActiveChanged callback', (WidgetTester tester) async {
-    bool isFocused = false;
-    const Color focusedColor = Color(0x0000000A);
-    const Color unfocusedColor = Color(0x0000000B);
+  testWidgets('onSearchableBottomTap callback', (WidgetTester tester) async {
+    bool isSearchActive = false;
+    const Color activeSearchColor = Color(0x0000000A);
+    const Color inactiveSearchColor = Color(0x0000000B);
     await tester.pumpWidget(
       CupertinoApp(
         home: StatefulBuilder(
@@ -2399,9 +2399,9 @@ void main() {
             return CustomScrollView(
               slivers: <Widget>[
                 CupertinoSliverNavigationBar.search(
-                  onSearchActiveChanged: (bool value) {
+                  onSearchableBottomTap: (bool value) {
                     setState(() {
-                      isFocused = value;
+                      isSearchActive = value;
                     });
                   },
                   largeTitle: const Text('Large title'),
@@ -2409,7 +2409,7 @@ void main() {
                   bottomMode: NavigationBarBottomMode.always,
                 ),
                 SliverFillRemaining(
-                  child: Container(color: isFocused ? focusedColor : unfocusedColor),
+                  child: Container(color: isSearchActive ? activeSearchColor : inactiveSearchColor),
                 ),
               ],
             );
@@ -2424,7 +2424,7 @@ void main() {
     expect(find.widgetWithText(CupertinoSearchTextField, 'Search'), findsOneWidget);
     expect(
       find.byWidgetPredicate((Widget widget) {
-        return widget is Container && widget.color == unfocusedColor;
+        return widget is Container && widget.color == inactiveSearchColor;
       }),
       findsOneWidget,
     );
@@ -2434,12 +2434,12 @@ void main() {
     await tester.pumpAndSettle();
 
     // Search field and 'Cancel' button should be visible.
-    expect(isFocused, true);
+    expect(isSearchActive, true);
     expect(find.widgetWithText(CupertinoSearchTextField, 'Search'), findsOneWidget);
     expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
     expect(
       find.byWidgetPredicate((Widget widget) {
-        return widget is Container && widget.color == focusedColor;
+        return widget is Container && widget.color == activeSearchColor;
       }),
       findsOneWidget,
     );
