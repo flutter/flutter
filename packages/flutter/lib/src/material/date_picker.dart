@@ -2010,7 +2010,7 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
     // divide the list of months into two `SliverList`s.
     final DateTime initialDate = widget.initialStartDate ?? widget.currentDate;
     if (!initialDate.isBefore(widget.firstDate) && !initialDate.isAfter(widget.lastDate)) {
-      _initialMonthIndex = DateUtils.monthDelta(widget.firstDate, initialDate);
+      _initialMonthIndex = widget.delegate.monthDelta(widget.firstDate, initialDate);
     }
 
     _showWeekBottomDivider = _initialMonthIndex != 0;
@@ -2034,7 +2034,7 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
     }
   }
 
-  int get _numberOfMonths => DateUtils.monthDelta(widget.firstDate, widget.lastDate) + 1;
+  int get _numberOfMonths => widget.delegate.monthDelta(widget.firstDate, widget.lastDate) + 1;
 
   void _vibrate() {
     switch (Theme.of(context).platform) {

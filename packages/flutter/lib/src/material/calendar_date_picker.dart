@@ -568,7 +568,7 @@ class _MonthPickerState extends State<_MonthPicker> {
     super.initState();
     _currentMonth = widget.initialMonth;
     _pageController = PageController(
-      initialPage: DateUtils.monthDelta(widget.firstDate, _currentMonth),
+      initialPage: widget.delegate.monthDelta(widget.firstDate, _currentMonth),
     );
     _shortcutMap = const <ShortcutActivator, Intent>{
       SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(
@@ -670,7 +670,7 @@ class _MonthPickerState extends State<_MonthPicker> {
 
   /// Navigate to the given month.
   void _showMonth(DateTime month, {bool jump = false}) {
-    final int monthPage = DateUtils.monthDelta(widget.firstDate, month);
+    final int monthPage = widget.delegate.monthDelta(widget.firstDate, month);
     if (jump) {
       _pageController.jumpToPage(monthPage);
     } else {
@@ -835,7 +835,7 @@ class _MonthPickerState extends State<_MonthPicker> {
                   key: _pageViewKey,
                   controller: _pageController,
                   itemBuilder: _buildItems,
-                  itemCount: DateUtils.monthDelta(widget.firstDate, widget.lastDate) + 1,
+                  itemCount: widget.delegate.monthDelta(widget.firstDate, widget.lastDate) + 1,
                   onPageChanged: _handleMonthPageChanged,
                 ),
               ),

@@ -41,6 +41,21 @@ class DatePickerDelegate {
   bool isSameMonth(DateTime? dateA, DateTime? dateB) {
     return dateA?.year == dateB?.year && dateA?.month == dateB?.month;
   }
+
+  /// Determines the number of months between two [DateTime] objects.
+  ///
+  /// For example:
+  ///
+  /// ```dart
+  /// DateTime date1 = DateTime(2019, 6, 15);
+  /// DateTime date2 = DateTime(2020, 1, 15);
+  /// int delta = DateUtils.monthDelta(date1, date2);
+  /// ```
+  ///
+  /// The value for `delta` would be `7`.
+  int monthDelta(DateTime startDate, DateTime endDate) {
+    return (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
+  }
 }
 
 /// Utility functions for working with dates.
@@ -83,9 +98,9 @@ abstract final class DateUtils {
   /// ```
   ///
   /// The value for `delta` would be `7`.
-  static int monthDelta(DateTime startDate, DateTime endDate) {
-    return (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
-  }
+  // static int monthDelta(DateTime startDate, DateTime endDate) {
+  //   return (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
+  // }
 
   /// Returns a [DateTime] that is [monthDate] with the added number
   /// of months and the day set to 1 and time set to midnight.
