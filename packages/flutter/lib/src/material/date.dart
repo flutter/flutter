@@ -35,6 +35,12 @@ class DatePickerDelegate {
   bool isSameDay(DateTime? dateA, DateTime? dateB) {
     return dateA?.year == dateB?.year && dateA?.month == dateB?.month && dateA?.day == dateB?.day;
   }
+
+  /// Returns true if the two [DateTime] objects have the same month and
+  /// year, or are both null.
+  bool isSameMonth(DateTime? dateA, DateTime? dateB) {
+    return dateA?.year == dateB?.year && dateA?.month == dateB?.month;
+  }
 }
 
 /// Utility functions for working with dates.
@@ -62,9 +68,9 @@ abstract final class DateUtils {
 
   /// Returns true if the two [DateTime] objects have the same month and
   /// year, or are both null.
-  static bool isSameMonth(DateTime? dateA, DateTime? dateB) {
-    return dateA?.year == dateB?.year && dateA?.month == dateB?.month;
-  }
+  // static bool isSameMonth(DateTime? dateA, DateTime? dateB) {
+  //   return dateA?.year == dateB?.year && dateA?.month == dateB?.month;
+  // }
 
   /// Determines the number of months between two [DateTime] objects.
   ///

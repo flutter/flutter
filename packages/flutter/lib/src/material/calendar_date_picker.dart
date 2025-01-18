@@ -614,10 +614,10 @@ class _MonthPickerState extends State<_MonthPicker> {
   void _handleMonthPageChanged(int monthPage) {
     setState(() {
       final DateTime monthDate = DateUtils.addMonthsToMonthDate(widget.firstDate, monthPage);
-      if (!DateUtils.isSameMonth(_currentMonth, monthDate)) {
+      if (!widget.delegate.isSameMonth(_currentMonth, monthDate)) {
         _currentMonth = DateTime(monthDate.year, monthDate.month);
         widget.onDisplayedMonthChanged(_currentMonth);
-        if (_focusedDay != null && !DateUtils.isSameMonth(_focusedDay, _currentMonth)) {
+        if (_focusedDay != null && !widget.delegate.isSameMonth(_focusedDay, _currentMonth)) {
           // We have navigated to a new month with the grid focused, but the
           // focused day is not in this month. Choose a new one trying to keep
           // the same day of the month.
@@ -692,9 +692,9 @@ class _MonthPickerState extends State<_MonthPicker> {
   void _handleGridFocusChange(bool focused) {
     setState(() {
       if (focused && _focusedDay == null) {
-        if (DateUtils.isSameMonth(widget.selectedDate, _currentMonth)) {
+        if (widget.delegate.isSameMonth(widget.selectedDate, _currentMonth)) {
           _focusedDay = widget.selectedDate;
-        } else if (DateUtils.isSameMonth(widget.currentDate, _currentMonth)) {
+        } else if (widget.delegate.isSameMonth(widget.currentDate, _currentMonth)) {
           _focusedDay = _focusableDayForMonth(_currentMonth, widget.currentDate.day);
         } else {
           _focusedDay = _focusableDayForMonth(_currentMonth, 1);
@@ -730,7 +730,7 @@ class _MonthPickerState extends State<_MonthPicker> {
       final DateTime? nextDate = _nextDateInDirection(_focusedDay!, intent.direction);
       if (nextDate != null) {
         _focusedDay = nextDate;
-        if (!DateUtils.isSameMonth(_focusedDay, _currentMonth)) {
+        if (!widget.delegate.isSameMonth(_focusedDay, _currentMonth)) {
           _showMonth(_focusedDay!);
         }
       }
@@ -943,7 +943,7 @@ class _DayPickerState extends State<_DayPicker> {
     super.didChangeDependencies();
     // Check to see if the focused date is in this month, if so focus it.
     final DateTime? focusedDate = _FocusedDate.maybeOf(context);
-    if (focusedDate != null && DateUtils.isSameMonth(widget.displayedMonth, focusedDate)) {
+    if (focusedDate != null && widget.delegate.isSameMonth(widget.displayedMonth, focusedDate)) {
       _dayFocusNodes[focusedDate.day - 1].requestFocus();
     }
   }
