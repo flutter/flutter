@@ -371,7 +371,7 @@ class SearchAnchor extends StatefulWidget {
   /// of the search view.
   final ValueChanged<String>? viewOnSubmitted;
 
-  /// Called when the view is disposed.
+  /// Called when the search view is closed.
   final VoidCallback? viewOnClose;
 
   /// Called to create a widget which can open a search view route when it is tapped.
