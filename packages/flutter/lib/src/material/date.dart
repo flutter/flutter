@@ -56,6 +56,22 @@ class DatePickerDelegate {
   int monthDelta(DateTime startDate, DateTime endDate) {
     return (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
   }
+
+  /// Returns a [DateTime] that is [monthDate] with the added number
+  /// of months and the day set to 1 and time set to midnight.
+  ///
+  /// For example:
+  ///
+  /// ```dart
+  /// DateTime date = DateTime(2019, 1, 15);
+  /// DateTime futureDate = DateUtils.addMonthsToMonthDate(date, 3);
+  /// ```
+  ///
+  /// `date` would be January 15, 2019.
+  /// `futureDate` would be April 1, 2019 since it adds 3 months.
+  DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
+    return DateTime(monthDate.year, monthDate.month + monthsToAdd);
+  }
 }
 
 /// Utility functions for working with dates.
@@ -114,9 +130,9 @@ abstract final class DateUtils {
   ///
   /// `date` would be January 15, 2019.
   /// `futureDate` would be April 1, 2019 since it adds 3 months.
-  static DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
-    return DateTime(monthDate.year, monthDate.month + monthsToAdd);
-  }
+  // static DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
+  //   return DateTime(monthDate.year, monthDate.month + monthsToAdd);
+  // }
 
   /// Returns a [DateTime] with the added number of days and time set to
   /// midnight.

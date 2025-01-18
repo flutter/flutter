@@ -2078,7 +2078,7 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
   Widget _buildMonthItem(BuildContext context, int index, bool beforeInitialMonth) {
     final int monthIndex =
         beforeInitialMonth ? _initialMonthIndex - index - 1 : _initialMonthIndex + index;
-    final DateTime month = DateUtils.addMonthsToMonthDate(widget.firstDate, monthIndex);
+    final DateTime month = widget.delegate.addMonthsToMonthDate(widget.firstDate, monthIndex);
     return _MonthItem(
       delegate: widget.delegate,
       selectedDateStart: _startDate,
