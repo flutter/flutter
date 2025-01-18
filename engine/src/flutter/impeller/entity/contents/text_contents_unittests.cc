@@ -12,6 +12,8 @@
 #include "third_party/googletest/googletest/include/gtest/gtest.h"
 #include "txt/platform.h"
 
+#pragma GCC diagnostic ignored "-Wunreachable-code"
+
 namespace impeller {
 namespace testing {
 
