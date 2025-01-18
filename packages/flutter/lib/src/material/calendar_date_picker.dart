@@ -1003,7 +1003,7 @@ class _DayPickerState extends State<_DayPicker> {
     final int month = widget.displayedMonth.month;
 
     final int daysInMonth = DateUtils.getDaysInMonth(year, month);
-    final int dayOffset = DateUtils.firstDayOffset(year, month, localizations);
+    final int dayOffset = widget.delegate.firstDayOffset(year, month, localizations);
 
     final List<Widget> dayItems = _dayHeaders(weekdayStyle, localizations);
     // 1-based day of month, e.g. 1-31 for January, and 1-29 for February on

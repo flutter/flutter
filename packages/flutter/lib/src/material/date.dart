@@ -78,6 +78,50 @@ class DatePickerDelegate {
   DateTime addDaysToDate(DateTime date, int days) {
     return DateTime(date.year, date.month, date.day + days);
   }
+
+  /// Computes the offset from the first day of the week that the first day of
+  /// the [month] falls on.
+  ///
+  /// For example, September 1, 2017 falls on a Friday, which in the calendar
+  /// localized for United States English appears as:
+  ///
+  ///     S M T W T F S
+  ///     _ _ _ _ _ 1 2
+  ///
+  /// The offset for the first day of the months is the number of leading blanks
+  /// in the calendar, i.e. 5.
+  ///
+  /// The same date localized for the Russian calendar has a different offset,
+  /// because the first day of week is Monday rather than Sunday:
+  ///
+  ///     M T W T F S S
+  ///     _ _ _ _ 1 2 3
+  ///
+  /// So the offset is 4, rather than 5.
+  ///
+  /// This code consolidates the following:
+  ///
+  /// - [DateTime.weekday] provides a 1-based index into days of week, with 1
+  ///   falling on Monday.
+  /// - [MaterialLocalizations.firstDayOfWeekIndex] provides a 0-based index
+  ///   into the [MaterialLocalizations.narrowWeekdays] list.
+  /// - [MaterialLocalizations.narrowWeekdays] list provides localized names of
+  ///   days of week, always starting with Sunday and ending with Saturday.
+  int firstDayOffset(int year, int month, MaterialLocalizations localizations) {
+    // 0-based day of week for the month and year, with 0 representing Monday.
+    final int weekdayFromMonday = DateTime(year, month).weekday - 1;
+
+    // 0-based start of week depending on the locale, with 0 representing Sunday.
+    int firstDayOfWeekIndex = localizations.firstDayOfWeekIndex;
+
+    // firstDayOfWeekIndex recomputed to be Monday-based, in order to compare with
+    // weekdayFromMonday.
+    firstDayOfWeekIndex = (firstDayOfWeekIndex - 1) % 7;
+
+    // Number of days between the first day of week appearing on the calendar,
+    // and the day corresponding to the first of the month.
+    return (weekdayFromMonday - firstDayOfWeekIndex) % 7;
+  }
 }
 
 /// Utility functions for working with dates.
@@ -174,21 +218,21 @@ abstract final class DateUtils {
   ///   into the [MaterialLocalizations.narrowWeekdays] list.
   /// - [MaterialLocalizations.narrowWeekdays] list provides localized names of
   ///   days of week, always starting with Sunday and ending with Saturday.
-  static int firstDayOffset(int year, int month, MaterialLocalizations localizations) {
-    // 0-based day of week for the month and year, with 0 representing Monday.
-    final int weekdayFromMonday = DateTime(year, month).weekday - 1;
+  // static int firstDayOffset(int year, int month, MaterialLocalizations localizations) {
+  //   // 0-based day of week for the month and year, with 0 representing Monday.
+  //   final int weekdayFromMonday = DateTime(year, month).weekday - 1;
 
-    // 0-based start of week depending on the locale, with 0 representing Sunday.
-    int firstDayOfWeekIndex = localizations.firstDayOfWeekIndex;
+  //   // 0-based start of week depending on the locale, with 0 representing Sunday.
+  //   int firstDayOfWeekIndex = localizations.firstDayOfWeekIndex;
 
-    // firstDayOfWeekIndex recomputed to be Monday-based, in order to compare with
-    // weekdayFromMonday.
-    firstDayOfWeekIndex = (firstDayOfWeekIndex - 1) % 7;
+  //   // firstDayOfWeekIndex recomputed to be Monday-based, in order to compare with
+  //   // weekdayFromMonday.
+  //   firstDayOfWeekIndex = (firstDayOfWeekIndex - 1) % 7;
 
-    // Number of days between the first day of week appearing on the calendar,
-    // and the day corresponding to the first of the month.
-    return (weekdayFromMonday - firstDayOfWeekIndex) % 7;
-  }
+  //   // Number of days between the first day of week appearing on the calendar,
+  //   // and the day corresponding to the first of the month.
+  //   return (weekdayFromMonday - firstDayOfWeekIndex) % 7;
+  // }
 
   /// Returns the number of days in a month, according to the proleptic
   /// Gregorian calendar.

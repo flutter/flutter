@@ -2657,7 +2657,7 @@ class _MonthItemState extends State<_MonthItem> {
     final int year = widget.displayedMonth.year;
     final int month = widget.displayedMonth.month;
     final int daysInMonth = DateUtils.getDaysInMonth(year, month);
-    final int dayOffset = DateUtils.firstDayOffset(year, month, localizations);
+    final int dayOffset = widget.delegate.firstDayOffset(year, month, localizations);
     final int weeks = ((daysInMonth + dayOffset) / DateTime.daysPerWeek).ceil();
     final double gridHeight =
         weeks * _monthItemRowHeight + (weeks - 1) * _monthItemSpaceBetweenRows;
