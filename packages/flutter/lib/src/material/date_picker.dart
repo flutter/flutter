@@ -2251,7 +2251,7 @@ class _CalendarKeyboardNavigatorState extends State<_CalendarKeyboardNavigator> 
 
   DateTime? _nextDateInDirection(DateTime date, TraversalDirection direction) {
     final TextDirection textDirection = Directionality.of(context);
-    final DateTime nextDate = DateUtils.addDaysToDate(
+    final DateTime nextDate = widget.delegate.addDaysToDate(
       date,
       _dayDirectionOffset(direction, textDirection),
     );

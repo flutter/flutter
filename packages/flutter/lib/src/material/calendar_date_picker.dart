@@ -758,7 +758,7 @@ class _MonthPickerState extends State<_MonthPicker> {
 
   DateTime? _nextDateInDirection(DateTime date, TraversalDirection direction) {
     final TextDirection textDirection = Directionality.of(context);
-    DateTime nextDate = DateUtils.addDaysToDate(
+    DateTime nextDate = widget.delegate.addDaysToDate(
       date,
       _dayDirectionOffset(direction, textDirection),
     );
@@ -766,7 +766,10 @@ class _MonthPickerState extends State<_MonthPicker> {
       if (_isSelectable(nextDate)) {
         return nextDate;
       }
-      nextDate = DateUtils.addDaysToDate(nextDate, _dayDirectionOffset(direction, textDirection));
+      nextDate = widget.delegate.addDaysToDate(
+        nextDate,
+        _dayDirectionOffset(direction, textDirection),
+      );
     }
     return null;
   }
