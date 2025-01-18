@@ -31,7 +31,7 @@ jobs:
 
       - name: Write changed files to a JSON file
         run: |
-          ./bin/dart run dev/tools/bin/get_files_changed.dart --since="${{ github.event.pull_request.base.sha }}" >> changed_files.json
+          ./bin/dart run dev/tools/bin/get_files_changed.dart --since="${{ github.event.pull_request.base.sha }}" > changed_files.json
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

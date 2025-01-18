@@ -25,7 +25,7 @@ set -e
 # file an issue if you have workflow needs.
 if [ -n "${FLUTTER_ENGINE_VERSION}" ]; then
   ENGINE_VERSION="${FLUTTER_ENGINE_VERSION}"
-  echo "[Unstable] Override: Setting engine SHA to $ENGINE_VERSION"
+  echo "[Unstable] Override: Setting engine SHA to $ENGINE_VERSION" 1>&2
 fi
 
 FLUTTER_ROOT="$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"
