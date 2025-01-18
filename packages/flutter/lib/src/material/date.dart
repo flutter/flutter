@@ -8,14 +8,16 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import 'material_localizations.dart';
 
-/// Utility functions for working with dates.
-abstract final class DateUtils {
+class DatePickerDelegate {
+  const DatePickerDelegate();
+
   /// Returns a [DateTime] with the date of the original, but time set to
   /// midnight.
-  static DateTime dateOnly(DateTime date) {
+  DateTime dateOnly(DateTime date) {
     return DateTime(date.year, date.month, date.day);
   }
 
@@ -24,12 +26,52 @@ abstract final class DateUtils {
   ///
   /// See also:
   ///  * [dateOnly], which does the same thing for a single date.
-  static DateTimeRange datesOnly(DateTimeRange range) {
+  DateTimeRange datesOnly(DateTimeRange range) {
     return DateTimeRange(start: dateOnly(range.start), end: dateOnly(range.end));
   }
+}
+
+class DatePickerDelegateScope extends InheritedWidget {
+  const DatePickerDelegateScope({required super.child, required this.delegate});
+
+  final DatePickerDelegate delegate;
+
+  static DatePickerDelegate of(BuildContext context) {
+    final DatePickerDelegate? delegate = maybeOf(context);
+    assert(delegate != null, 'No DatePickerDelegate found in context');
+    return delegate!;
+  }
+
+  static DatePickerDelegate? maybeOf(BuildContext context) {
+    final DatePickerDelegateScope? scope = context.getInheritedWidgetOfExactType();
+    return scope?.delegate;
+  }
+
+  @override
+  bool updateShouldNotify(DatePickerDelegateScope oldWidget) {
+    return delegate != oldWidget.delegate;
+  }
+}
+
+/// Utility functions for working with dates.
+abstract final class DateUtils {
+  // /// Returns a [DateTime] with the date of the original, but time set to
+  // /// midnight.
+  // static DateTime dateOnly(DateTime date) {
+  //   return DateTime(date.year, date.month, date.day);
+  // }
+
+  /// Returns a [DateTimeRange] with the dates of the original, but with times
+  /// set to midnight.
+  ///
+  /// See also:
+  ///  * [dateOnly], which does the same thing for a single date.
+  // static DateTimeRange datesOnly(DateTimeRange range) {
+  //   return DateTimeRange(start: dateOnly(range.start), end: dateOnly(range.end));
+  // }
 
   /// Returns true if the two [DateTime] objects have the same day, month, and
-  /// year, or are both null.
+  /// year, or are both null.InheritedWidget
   static bool isSameDay(DateTime? dateA, DateTime? dateB) {
     return dateA?.year == dateB?.year && dateA?.month == dateB?.month && dateA?.day == dateB?.day;
   }

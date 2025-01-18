@@ -221,10 +221,11 @@ Future<DateTime?> showDatePicker({
   final ValueChanged<DatePickerEntryMode>? onDatePickerModeChange,
   final Icon? switchToInputEntryModeIcon,
   final Icon? switchToCalendarEntryModeIcon,
+  DatePickerDelegate delegate = const DatePickerDelegate(),
 }) async {
-  initialDate = initialDate == null ? null : DateUtils.dateOnly(initialDate);
-  firstDate = DateUtils.dateOnly(firstDate);
-  lastDate = DateUtils.dateOnly(lastDate);
+  initialDate = initialDate == null ? null : delegate.dateOnly(initialDate);
+  firstDate = delegate.dateOnly(firstDate);
+  lastDate = delegate.dateOnly(lastDate);
   assert(
     !lastDate.isBefore(firstDate),
     'lastDate $lastDate must be on or after firstDate $firstDate.',
@@ -328,10 +329,11 @@ class DatePickerDialog extends StatefulWidget {
     this.switchToInputEntryModeIcon,
     this.switchToCalendarEntryModeIcon,
     this.insetPadding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-  }) : initialDate = initialDate == null ? null : DateUtils.dateOnly(initialDate),
-       firstDate = DateUtils.dateOnly(firstDate),
-       lastDate = DateUtils.dateOnly(lastDate),
-       currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now()) {
+    this.delegate = const DatePickerDelegate(),
+  }) : initialDate = initialDate == null ? null : delegate.dateOnly(initialDate),
+       firstDate = delegate.dateOnly(firstDate),
+       lastDate = delegate.dateOnly(lastDate),
+       currentDate = delegate.dateOnly(currentDate ?? DateTime.now()) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
       'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.',
@@ -452,6 +454,8 @@ class DatePickerDialog extends StatefulWidget {
   ///
   /// Defaults to `EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0)`.
   final EdgeInsets insetPadding;
+
+  final DatePickerDelegate delegate;
 
   @override
   State<DatePickerDialog> createState() => _DatePickerDialogState();
@@ -1173,10 +1177,11 @@ Future<DateTimeRange?> showDateRangePicker({
   final Icon? switchToInputEntryModeIcon,
   final Icon? switchToCalendarEntryModeIcon,
   SelectableDayForRangePredicate? selectableDayPredicate,
+  DatePickerDelegate delegate = const DatePickerDelegate(),
 }) async {
-  initialDateRange = initialDateRange == null ? null : DateUtils.datesOnly(initialDateRange);
-  firstDate = DateUtils.dateOnly(firstDate);
-  lastDate = DateUtils.dateOnly(lastDate);
+  initialDateRange = initialDateRange == null ? null : delegate.datesOnly(initialDateRange);
+  firstDate = delegate.dateOnly(firstDate);
+  lastDate = delegate.dateOnly(lastDate);
   assert(
     !lastDate.isBefore(firstDate),
     'lastDate $lastDate must be on or after firstDate $firstDate.',
@@ -1213,7 +1218,7 @@ Future<DateTimeRange?> showDateRangePicker({
         selectableDayPredicate(initialDateRange.end, initialDateRange.start, initialDateRange.end),
     "initialDateRange's end date must be selectable.",
   );
-  currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now());
+  currentDate = delegate.dateOnly(currentDate ?? DateTime.now());
   assert(debugCheckHasMaterialLocalizations(context));
 
   Widget dialog = DateRangePickerDialog(
@@ -1333,6 +1338,7 @@ class DateRangePickerDialog extends StatefulWidget {
     this.switchToInputEntryModeIcon,
     this.switchToCalendarEntryModeIcon,
     this.selectableDayPredicate,
+    this.delegate = const DatePickerDelegate(),
   });
 
   /// The date range that the date range picker starts with when it opens.
@@ -1463,6 +1469,8 @@ class DateRangePickerDialog extends StatefulWidget {
 
   /// Function to provide full control over which [DateTime] can be selected.
   final SelectableDayForRangePredicate? selectableDayPredicate;
+
+  final DatePickerDelegate delegate;
 
   @override
   State<DateRangePickerDialog> createState() => _DateRangePickerDialogState();
@@ -1598,6 +1606,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
       case DatePickerEntryMode.calendarOnly:
         contents = _CalendarRangePickerDialog(
           key: _calendarPickerKey,
+          delegate: widget.delegate,
           selectedStartDate: _selectedStart.value,
           selectedEndDate: _selectedEnd.value,
           firstDate: widget.firstDate,
@@ -1656,6 +1665,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
                   const Spacer(),
                   _InputDateRangePicker(
                     key: _inputPickerKey,
+                    delegate: widget.delegate,
                     initialStartDate: _selectedStart.value,
                     initialEndDate: _selectedEnd.value,
                     firstDate: widget.firstDate,
@@ -1763,6 +1773,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
     required this.confirmText,
     required this.helpText,
     required this.selectableDayPredicate,
+    required this.delegate,
     this.entryModeButton,
   });
 
@@ -1778,6 +1789,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
   final VoidCallback? onCancel;
   final String confirmText;
   final String helpText;
+  final DatePickerDelegate delegate;
   final Widget? entryModeButton;
 
   @override
@@ -1902,6 +1914,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
           onStartDateChanged: onStartDateChanged,
           onEndDateChanged: onEndDateChanged,
           selectableDayPredicate: selectableDayPredicate,
+          delegate: delegate,
         ),
       ),
     );
@@ -1931,11 +1944,12 @@ class _CalendarDateRangePicker extends StatefulWidget {
     DateTime? currentDate,
     required this.onStartDateChanged,
     required this.onEndDateChanged,
-  }) : initialStartDate = initialStartDate != null ? DateUtils.dateOnly(initialStartDate) : null,
-       initialEndDate = initialEndDate != null ? DateUtils.dateOnly(initialEndDate) : null,
-       firstDate = DateUtils.dateOnly(firstDate),
-       lastDate = DateUtils.dateOnly(lastDate),
-       currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now()) {
+    required this.delegate,
+  }) : initialStartDate = initialStartDate != null ? delegate.dateOnly(initialStartDate) : null,
+       initialEndDate = initialEndDate != null ? delegate.dateOnly(initialEndDate) : null,
+       firstDate = delegate.dateOnly(firstDate),
+       lastDate = delegate.dateOnly(lastDate),
+       currentDate = delegate.dateOnly(currentDate ?? DateTime.now()) {
     assert(
       this.initialStartDate == null ||
           this.initialEndDate == null ||
@@ -1968,6 +1982,8 @@ class _CalendarDateRangePicker extends StatefulWidget {
 
   /// Called when the user changes the end date of the selected range.
   final ValueChanged<DateTime?>? onEndDateChanged;
+
+  final DatePickerDelegate delegate;
 
   @override
   State<_CalendarDateRangePicker> createState() => _CalendarDateRangePickerState();
@@ -3149,6 +3165,7 @@ class _InputDateRangePicker extends StatefulWidget {
     required this.onStartDateChanged,
     required this.onEndDateChanged,
     required this.selectableDayPredicate,
+    required this.delegate,
     this.helpText,
     this.errorFormatText,
     this.errorInvalidText,
@@ -3160,10 +3177,10 @@ class _InputDateRangePicker extends StatefulWidget {
     this.autofocus = false,
     this.autovalidate = false,
     this.keyboardType = TextInputType.datetime,
-  }) : initialStartDate = initialStartDate == null ? null : DateUtils.dateOnly(initialStartDate),
-       initialEndDate = initialEndDate == null ? null : DateUtils.dateOnly(initialEndDate),
-       firstDate = DateUtils.dateOnly(firstDate),
-       lastDate = DateUtils.dateOnly(lastDate);
+  }) : initialStartDate = initialStartDate == null ? null : delegate.dateOnly(initialStartDate),
+       initialEndDate = initialEndDate == null ? null : delegate.dateOnly(initialEndDate),
+       firstDate = delegate.dateOnly(firstDate),
+       lastDate = delegate.dateOnly(lastDate);
 
   /// The [DateTime] that represents the start of the initial date range selection.
   final DateTime? initialStartDate;
@@ -3223,6 +3240,8 @@ class _InputDateRangePicker extends StatefulWidget {
   final TextInputType keyboardType;
 
   final SelectableDayForRangePredicate? selectableDayPredicate;
+
+  final DatePickerDelegate delegate;
 
   @override
   _InputDateRangePickerState createState() => _InputDateRangePickerState();

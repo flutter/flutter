@@ -117,10 +117,11 @@ class CalendarDatePicker extends StatefulWidget {
     this.onDisplayedMonthChanged,
     this.initialCalendarMode = DatePickerMode.day,
     this.selectableDayPredicate,
-  }) : initialDate = initialDate == null ? null : DateUtils.dateOnly(initialDate),
-       firstDate = DateUtils.dateOnly(firstDate),
-       lastDate = DateUtils.dateOnly(lastDate),
-       currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now()) {
+    this.delegate = const DatePickerDelegate(),
+  }) : initialDate = initialDate == null ? null : delegate.dateOnly(initialDate),
+       firstDate = delegate.dateOnly(firstDate),
+       lastDate = delegate.dateOnly(lastDate),
+       currentDate = delegate.dateOnly(currentDate ?? DateTime.now()) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
       'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.',
@@ -174,6 +175,8 @@ class CalendarDatePicker extends StatefulWidget {
 
   /// Function to provide full control over which dates in the calendar can be selected.
   final SelectableDayPredicate? selectableDayPredicate;
+
+  final DatePickerDelegate delegate;
 
   @override
   State<CalendarDatePicker> createState() => _CalendarDatePickerState();
@@ -1232,8 +1235,9 @@ class YearPicker extends StatefulWidget {
     required this.selectedDate,
     required this.onChanged,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.delegate = const DatePickerDelegate(),
   }) : assert(!firstDate.isAfter(lastDate)),
-       currentDate = DateUtils.dateOnly(currentDate ?? DateTime.now());
+       currentDate = delegate.dateOnly(currentDate ?? DateTime.now());
 
   /// The current date.
   ///
@@ -1256,6 +1260,8 @@ class YearPicker extends StatefulWidget {
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
+
+  final DatePickerDelegate delegate;
 
   @override
   State<YearPicker> createState() => _YearPickerState();

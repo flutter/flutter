@@ -62,9 +62,10 @@ class InputDatePickerFormField extends StatefulWidget {
     this.autofocus = false,
     this.acceptEmptyDate = false,
     this.focusNode,
-  }) : initialDate = initialDate != null ? DateUtils.dateOnly(initialDate) : null,
-       firstDate = DateUtils.dateOnly(firstDate),
-       lastDate = DateUtils.dateOnly(lastDate) {
+    this.delegate = const DatePickerDelegate(),
+  }) : initialDate = initialDate != null ? delegate.dateOnly(initialDate) : null,
+       firstDate = delegate.dateOnly(firstDate),
+       lastDate = delegate.dateOnly(lastDate) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
       'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.',
@@ -145,6 +146,8 @@ class InputDatePickerFormField extends StatefulWidget {
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
+
+  final DatePickerDelegate delegate;
 
   @override
   State<InputDatePickerFormField> createState() => _InputDatePickerFormFieldState();
