@@ -3718,6 +3718,11 @@ void main() {
     final FocusScopeNode scope = FocusScopeNode();
     final FocusScopeNode childScope = FocusScopeNode();
     final FocusNode nodeA = FocusNode();
+    addTearDown(() {
+      scope.dispose();
+      childScope.dispose();
+      nodeA.dispose();
+    });
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
