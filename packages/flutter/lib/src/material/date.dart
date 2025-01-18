@@ -29,27 +29,11 @@ class DatePickerDelegate {
   DateTimeRange datesOnly(DateTimeRange range) {
     return DateTimeRange(start: dateOnly(range.start), end: dateOnly(range.end));
   }
-}
 
-class DatePickerDelegateScope extends InheritedWidget {
-  const DatePickerDelegateScope({required super.child, required this.delegate});
-
-  final DatePickerDelegate delegate;
-
-  static DatePickerDelegate of(BuildContext context) {
-    final DatePickerDelegate? delegate = maybeOf(context);
-    assert(delegate != null, 'No DatePickerDelegate found in context');
-    return delegate!;
-  }
-
-  static DatePickerDelegate? maybeOf(BuildContext context) {
-    final DatePickerDelegateScope? scope = context.getInheritedWidgetOfExactType();
-    return scope?.delegate;
-  }
-
-  @override
-  bool updateShouldNotify(DatePickerDelegateScope oldWidget) {
-    return delegate != oldWidget.delegate;
+  /// Returns true if the two [DateTime] objects have the same day, month, and
+  /// year, or are both null.InheritedWidget
+  bool isSameDay(DateTime? dateA, DateTime? dateB) {
+    return dateA?.year == dateB?.year && dateA?.month == dateB?.month && dateA?.day == dateB?.day;
   }
 }
 
@@ -72,9 +56,9 @@ abstract final class DateUtils {
 
   /// Returns true if the two [DateTime] objects have the same day, month, and
   /// year, or are both null.InheritedWidget
-  static bool isSameDay(DateTime? dateA, DateTime? dateB) {
-    return dateA?.year == dateB?.year && dateA?.month == dateB?.month && dateA?.day == dateB?.day;
-  }
+  // static bool isSameDay(DateTime? dateA, DateTime? dateB) {
+  //   return dateA?.year == dateB?.year && dateA?.month == dateB?.month && dateA?.day == dateB?.day;
+  // }
 
   /// Returns true if the two [DateTime] objects have the same month and
   /// year, or are both null.

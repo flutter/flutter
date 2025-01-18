@@ -214,7 +214,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     if (!_announcedInitialDate && widget.initialDate != null) {
       assert(_selectedDate != null);
       _announcedInitialDate = true;
-      final bool isToday = DateUtils.isSameDay(widget.currentDate, _selectedDate);
+      final bool isToday = widget.delegate.isSameDay(widget.currentDate, _selectedDate);
       final String semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
       SemanticsService.announce(
         '${_localizations.formatFullDate(_selectedDate!)}$semanticLabelSuffix',
@@ -293,7 +293,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
-          final bool isToday = DateUtils.isSameDay(widget.currentDate, _selectedDate);
+          final bool isToday = widget.delegate.isSameDay(widget.currentDate, _selectedDate);
           final String semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
           SemanticsService.announce(
             '${_localizations.selectedDateLabel} ${_localizations.formatFullDate(_selectedDate!)}$semanticLabelSuffix',
@@ -316,6 +316,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
       case DatePickerMode.day:
         return _MonthPicker(
           key: _monthPickerKey,
+          delegate: widget.delegate,
           initialMonth: _currentDisplayedMonthDate,
           currentDate: widget.currentDate,
           firstDate: widget.firstDate,
@@ -502,6 +503,7 @@ class _MonthPicker extends StatefulWidget {
     required this.selectedDate,
     required this.onChanged,
     required this.onDisplayedMonthChanged,
+    required this.delegate,
     this.selectableDayPredicate,
   }) : assert(!firstDate.isAfter(lastDate)),
        assert(selectedDate == null || !selectedDate.isBefore(firstDate)),
@@ -543,6 +545,8 @@ class _MonthPicker extends StatefulWidget {
 
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate? selectableDayPredicate;
+
+  final DatePickerDelegate delegate;
 
   @override
   _MonthPickerState createState() => _MonthPickerState();
@@ -775,6 +779,7 @@ class _MonthPickerState extends State<_MonthPicker> {
     final DateTime month = DateUtils.addMonthsToMonthDate(widget.firstDate, index);
     return _DayPicker(
       key: ValueKey<DateTime>(month),
+      delegate: widget.delegate,
       selectedDate: widget.selectedDate,
       currentDate: widget.currentDate,
       onChanged: _handleDateSelected,
@@ -824,6 +829,7 @@ class _MonthPickerState extends State<_MonthPicker> {
               focusNode: _dayGridFocus,
               onFocusChange: _handleGridFocusChange,
               child: _FocusedDate(
+                delegate: widget.delegate,
                 date: _dayGridFocus.hasFocus ? _focusedDay : null,
                 child: PageView.builder(
                   key: _pageViewKey,
@@ -846,13 +852,14 @@ class _MonthPickerState extends State<_MonthPicker> {
 /// This is used by the [_MonthPicker] to let its children [_DayPicker]s know
 /// what the currently focused date (if any) should be.
 class _FocusedDate extends InheritedWidget {
-  const _FocusedDate({required super.child, this.date});
+  const _FocusedDate({required super.child, required this.delegate, this.date});
 
+  final DatePickerDelegate delegate;
   final DateTime? date;
 
   @override
   bool updateShouldNotify(_FocusedDate oldWidget) {
-    return !DateUtils.isSameDay(date, oldWidget.date);
+    return !delegate.isSameDay(date, oldWidget.date);
   }
 
   static DateTime? maybeOf(BuildContext context) {
@@ -875,6 +882,7 @@ class _DayPicker extends StatefulWidget {
     required this.lastDate,
     required this.selectedDate,
     required this.onChanged,
+    required this.delegate,
     this.selectableDayPredicate,
   }) : assert(!firstDate.isAfter(lastDate)),
        assert(selectedDate == null || !selectedDate.isBefore(firstDate)),
@@ -906,6 +914,8 @@ class _DayPicker extends StatefulWidget {
 
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate? selectableDayPredicate;
+
+  final DatePickerDelegate delegate;
 
   @override
   _DayPickerState createState() => _DayPickerState();
@@ -1006,8 +1016,8 @@ class _DayPickerState extends State<_DayPicker> {
             dayToBuild.isAfter(widget.lastDate) ||
             dayToBuild.isBefore(widget.firstDate) ||
             (widget.selectableDayPredicate != null && !widget.selectableDayPredicate!(dayToBuild));
-        final bool isSelectedDay = DateUtils.isSameDay(widget.selectedDate, dayToBuild);
-        final bool isToday = DateUtils.isSameDay(widget.currentDate, dayToBuild);
+        final bool isSelectedDay = widget.delegate.isSameDay(widget.selectedDate, dayToBuild);
+        final bool isToday = widget.delegate.isSameDay(widget.currentDate, dayToBuild);
 
         dayItems.add(
           _Day(

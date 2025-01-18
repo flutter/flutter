@@ -2080,6 +2080,7 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
         beforeInitialMonth ? _initialMonthIndex - index - 1 : _initialMonthIndex + index;
     final DateTime month = DateUtils.addMonthsToMonthDate(widget.firstDate, monthIndex);
     return _MonthItem(
+      delegate: widget.delegate,
       selectedDateStart: _startDate,
       selectedDateEnd: _endDate,
       currentDate: widget.currentDate,
@@ -2101,6 +2102,7 @@ class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
         if (_showWeekBottomDivider) const Divider(height: 0),
         Expanded(
           child: _CalendarKeyboardNavigator(
+            delegate: widget.delegate,
             firstDate: widget.firstDate,
             lastDate: widget.lastDate,
             initialFocusedDay: _startDate ?? widget.initialStartDate ?? widget.currentDate,
@@ -2141,12 +2143,14 @@ class _CalendarKeyboardNavigator extends StatefulWidget {
     required this.firstDate,
     required this.lastDate,
     required this.initialFocusedDay,
+    required this.delegate,
   });
 
   final Widget child;
   final DateTime firstDate;
   final DateTime lastDate;
   final DateTime initialFocusedDay;
+  final DatePickerDelegate delegate;
 
   @override
   _CalendarKeyboardNavigatorState createState() => _CalendarKeyboardNavigatorState();
@@ -2265,6 +2269,7 @@ class _CalendarKeyboardNavigatorState extends State<_CalendarKeyboardNavigator> 
       focusNode: _dayGridFocus,
       onFocusChange: _handleGridFocusChange,
       child: _FocusedDate(
+        delegate: widget.delegate,
         date: _dayGridFocus.hasFocus ? _focusedDay : null,
         scrollDirection: _dayGridFocus.hasFocus ? _dayTraversalDirection : null,
         child: widget.child,
@@ -2276,14 +2281,20 @@ class _CalendarKeyboardNavigatorState extends State<_CalendarKeyboardNavigator> 
 /// InheritedWidget indicating what the current focused date is for its children.
 // See also: _FocusedDate in calendar_date_picker.dart
 class _FocusedDate extends InheritedWidget {
-  const _FocusedDate({required super.child, this.date, this.scrollDirection});
+  const _FocusedDate({
+    required super.child,
+    required this.delegate,
+    this.date,
+    this.scrollDirection,
+  });
 
+  final DatePickerDelegate delegate;
   final DateTime? date;
   final TraversalDirection? scrollDirection;
 
   @override
   bool updateShouldNotify(_FocusedDate oldWidget) {
-    return !DateUtils.isSameDay(date, oldWidget.date) ||
+    return !delegate.isSameDay(date, oldWidget.date) ||
         scrollDirection != oldWidget.scrollDirection;
   }
 
@@ -2480,6 +2491,7 @@ class _MonthItem extends StatefulWidget {
     required this.lastDate,
     required this.displayedMonth,
     required this.selectableDayPredicate,
+    required this.delegate,
   }) : assert(!firstDate.isAfter(lastDate)),
        assert(selectedDateStart == null || !selectedDateStart.isBefore(firstDate)),
        assert(selectedDateEnd == null || !selectedDateEnd.isBefore(firstDate)),
@@ -2517,6 +2529,8 @@ class _MonthItem extends StatefulWidget {
   final DateTime displayedMonth;
 
   final SelectableDayForRangePredicate? selectableDayPredicate;
+
+  final DatePickerDelegate delegate;
 
   @override
   _MonthItemState createState() => _MonthItemState();
@@ -2612,7 +2626,7 @@ class _MonthItemState extends State<_MonthItem> {
         dayToBuild.isBefore(widget.selectedDateEnd!);
     final bool isOneDayRange =
         isRangeSelected && widget.selectedDateStart == widget.selectedDateEnd;
-    final bool isToday = DateUtils.isSameDay(widget.currentDate, dayToBuild);
+    final bool isToday = widget.delegate.isSameDay(widget.currentDate, dayToBuild);
 
     return _DayItem(
       day: dayToBuild,
