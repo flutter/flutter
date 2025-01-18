@@ -2372,12 +2372,93 @@ abstract class WidgetController {
     Duration duration = const Duration(milliseconds: 50),
   }) {
     return TestAsyncUtils.guard<void>(() async {
+      TestGesture? gesture;
       while (maxIteration > 0 && finder.evaluate().isEmpty) {
-        await drag(view, moveStep);
+        gesture ??= await startGesture(getCenter(view, warnIfMissed: true));
+        await _dragFrom(gesture, moveStep);
         await pump(duration);
         maxIteration -= 1;
       }
+      await gesture?.up();
       await Scrollable.ensureVisible(element(finder));
+    });
+  }
+
+  Future<void> _dragFrom(
+    TestGesture gesture,
+    Offset offset, {
+    double touchSlopX = kDragSlopDefault,
+    double touchSlopY = kDragSlopDefault,
+  }) {
+    assert(kDragSlopDefault > kTouchSlop);
+    return TestAsyncUtils.guard<void>(() async {
+      final double xSign = offset.dx.sign;
+      final double ySign = offset.dy.sign;
+
+      final double offsetX = offset.dx;
+      final double offsetY = offset.dy;
+
+      final bool separateX = offset.dx.abs() > touchSlopX && touchSlopX > 0;
+      final bool separateY = offset.dy.abs() > touchSlopY && touchSlopY > 0;
+
+      if (separateY || separateX) {
+        final double offsetSlope = offsetY / offsetX;
+        final double inverseOffsetSlope = offsetX / offsetY;
+        final double slopSlope = touchSlopY / touchSlopX;
+        final double absoluteOffsetSlope = offsetSlope.abs();
+        final double signedSlopX = touchSlopX * xSign;
+        final double signedSlopY = touchSlopY * ySign;
+        if (absoluteOffsetSlope != slopSlope) {
+          // The drag goes through one or both of the extents of the edges of the box.
+          if (absoluteOffsetSlope < slopSlope) {
+            assert(offsetX.abs() > touchSlopX);
+            // The drag goes through the vertical edge of the box.
+            // It is guaranteed that the |offsetX| > touchSlopX.
+            final double diffY = offsetSlope.abs() * touchSlopX * ySign;
+
+            // The vector from the origin to the vertical edge.
+            await gesture.moveBy(Offset(signedSlopX, diffY));
+            if (offsetY.abs() <= touchSlopY) {
+              // The drag ends on or before getting to the horizontal extension of the horizontal edge.
+              await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY));
+            } else {
+              final double diffY2 = signedSlopY - diffY;
+              final double diffX2 = inverseOffsetSlope * diffY2;
+
+              // The vector from the edge of the box to the horizontal extension of the horizontal edge.
+              await gesture.moveBy(Offset(diffX2, diffY2));
+              await gesture.moveBy(Offset(offsetX - diffX2 - signedSlopX, offsetY - signedSlopY));
+            }
+          } else {
+            assert(offsetY.abs() > touchSlopY);
+            // The drag goes through the horizontal edge of the box.
+            // It is guaranteed that the |offsetY| > touchSlopY.
+            final double diffX = inverseOffsetSlope.abs() * touchSlopY * xSign;
+
+            // The vector from the origin to the vertical edge.
+            await gesture.moveBy(Offset(diffX, signedSlopY));
+            if (offsetX.abs() <= touchSlopX) {
+              // The drag ends on or before getting to the vertical extension of the vertical edge.
+              await gesture.moveBy(Offset(offsetX - diffX, offsetY - signedSlopY));
+            } else {
+              final double diffX2 = signedSlopX - diffX;
+              final double diffY2 = offsetSlope * diffX2;
+
+              // The vector from the edge of the box to the vertical extension of the vertical edge.
+              await gesture.moveBy(Offset(diffX2, diffY2));
+              await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY2 - signedSlopY));
+            }
+          }
+        } else {
+          // The drag goes through the corner of the box.
+          await gesture.moveBy(Offset(signedSlopX, signedSlopY));
+          await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - signedSlopY));
+        }
+      } else {
+        // The drag ends inside the box.
+        await gesture.moveBy(offset);
+      }
+      // await gesture.up();
     });
   }
 }
