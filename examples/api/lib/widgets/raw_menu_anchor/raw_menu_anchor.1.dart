@@ -67,11 +67,11 @@ class _ContextMenuExampleState extends State<ContextMenuExample> {
     return RawMenuAnchor(
       controller: controller,
       alignmentOffset: const Offset(0, 6),
-      panel: RawMenuPanel(
+      menuPanel: RawMenuPanel(
         constraints: const BoxConstraints(minWidth: 180),
         padding: const EdgeInsets.symmetric(vertical: 5),
         decoration: RawMenuPanel.lightSurfaceDecoration,
-        menuChildren: <Widget>[
+        children: <Widget>[
           MenuItemButton(
             autofocus: true,
             onPressed: () {

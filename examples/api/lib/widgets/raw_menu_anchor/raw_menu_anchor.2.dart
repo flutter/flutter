@@ -56,7 +56,7 @@ class _MenuOverlayBuilderExampleState extends State<MenuOverlayBuilderExample> {
           controller: controller,
           overlayBuilder: (BuildContext context, RawMenuOverlayInfo position) {
             return ShiftingMenuOverlay(
-              position: position,
+              info: position,
               itemExtent: MenuOverlayBuilderExample.menuItemExtent,
               padding: const EdgeInsets.symmetric(vertical: 6),
               constraints: const BoxConstraints(minWidth: 172),
@@ -103,7 +103,7 @@ class ShiftingMenuOverlay extends StatelessWidget {
   const ShiftingMenuOverlay({
     super.key,
     required this.selectedIndex,
-    required this.position,
+    required this.info,
     required this.children,
     required this.itemExtent,
     this.padding = EdgeInsets.zero,
@@ -112,7 +112,7 @@ class ShiftingMenuOverlay extends StatelessWidget {
 
   final int selectedIndex;
   final double itemExtent;
-  final RawMenuAnchorOverlayPosition position;
+  final RawMenuOverlayInfo info;
   final List<Widget> children;
   final EdgeInsets padding;
   final BoxConstraints constraints;
@@ -131,7 +131,7 @@ class ShiftingMenuOverlay extends StatelessWidget {
     final double bias = (selectedIndex / lastDivisibleIndex) * 2 - 1;
     final Alignment alignment = Alignment(0, bias);
     final Color color = Theme.of(context).colorScheme.surface;
-    final ui.Rect(:double height, :ui.Offset topCenter) = position.anchorRect;
+    final ui.Rect(:double height, :ui.Offset topCenter) = info.anchorRect;
     final double verticalOffset =
         selectedIndex * itemExtent + padding.top + (itemExtent - height) / 2;
     return TweenAnimationBuilder<double>(
@@ -159,7 +159,7 @@ class ShiftingMenuOverlay extends StatelessWidget {
           explicitChildNodes: true,
           properties: const SemanticsProperties(scopesRoute: true),
           child: TapRegion(
-            groupId: position.tapRegionGroupId,
+            groupId: info.tapRegionGroupId,
             consumeOutsideTaps: true,
             onTapOutside: (PointerDownEvent event) {
               MenuController.maybeOf(context)?.close();
