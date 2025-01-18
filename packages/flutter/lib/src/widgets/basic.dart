@@ -4198,7 +4198,7 @@ class IndexedStack extends StatelessWidget {
     this.textDirection,
     this.clipBehavior = Clip.hardEdge,
     this.sizing = StackFit.loose,
-    this.maintainFocusability = true,
+    this.maintainInteractivity = true,
     this.index = 0,
     this.children = const <Widget>[],
   });
@@ -4228,10 +4228,10 @@ class IndexedStack extends StatelessWidget {
   /// See [Stack.fit] for more information.
   final StackFit sizing;
 
-  /// If hidden [children] should be able to receive focus.
+  /// Wether or not [children] in the stack that are not visible should be able to receive focus.
   ///
   /// Defaults to true.
-  final bool maintainFocusability;
+  final bool maintainInteractivity;
 
   /// The index of the child to show.
   ///
@@ -4250,7 +4250,7 @@ class IndexedStack extends StatelessWidget {
     final List<Widget> wrappedChildren = List<Widget>.generate(children.length, (int i) {
       return Visibility(
         visible: i == index,
-        maintainInteractivity: maintainFocusability,
+        maintainInteractivity: maintainInteractivity,
         maintainSize: true,
         maintainState: true,
         maintainAnimation: true,
