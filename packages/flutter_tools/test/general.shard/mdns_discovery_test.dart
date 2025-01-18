@@ -329,7 +329,7 @@ void main() {
           flutterUsage: TestUsage(),
           analytics: const NoOpAnalytics(),
         );
-        expect(() async => portDiscovery.queryForAttach(), throwsException);
+        expect(portDiscovery.queryForAttach(), throwsException);
       });
 
       testWithoutContext('Correctly builds VM Service URI with hostVmservicePort == 0', () async {
@@ -630,10 +630,14 @@ void main() {
             portDiscovery.firstMatchingVmService(client),
             throwsToolExit(
               message:
-                  'You might be having a permissions issue with your IDE. '
-                  'Please try going to '
-                  'System Settings -> Privacy & Security -> Local Network -> '
-                  '[Find your IDE] -> Toggle ON, then restart your phone.',
+                  'Flutter could not connect to the Dart VM service.\n'
+                  '\n'
+                  'Please ensure your IDE or terminal app has permission to access '
+                  'devices on the local network. This allows Flutter to connect to '
+                  'the Dart VM.\n'
+                  '\n'
+                  'You can grant this permission in System Settings > Privacy & '
+                  'Security > Local Network.\n',
             ),
           );
         },
