@@ -455,6 +455,7 @@ class DatePickerDialog extends StatefulWidget {
   /// Defaults to `EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0)`.
   final EdgeInsets insetPadding;
 
+  /// The delegate that controls the logic and localization.
   final DatePickerDelegate delegate;
 
   @override
@@ -1150,9 +1151,9 @@ typedef SelectableDayForRangePredicate =
 ///  * [DateTimeRange], which is used to describe a date range.
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
-Future<DateTimeRange?> showDateRangePicker({
+Future<DateTimeRange<DateTime>?> showDateRangePicker({
   required BuildContext context,
-  DateTimeRange? initialDateRange,
+  DateTimeRange<DateTime>? initialDateRange,
   required DateTime firstDate,
   required DateTime lastDate,
   DateTime? currentDate,
@@ -1357,7 +1358,7 @@ class DateRangePickerDialog extends StatefulWidget {
   /// If [initialDateRange] is non-null, then it will be used as the initially
   /// selected date range. If it is provided, `initialDateRange.start` must be
   /// before or on `initialDateRange.end`.
-  final DateTimeRange? initialDateRange;
+  final DateTimeRange<DateTime>? initialDateRange;
 
   /// The earliest allowable date on the date range.
   final DateTime firstDate;
@@ -1476,6 +1477,7 @@ class DateRangePickerDialog extends StatefulWidget {
   /// Function to provide full control over which [DateTime] can be selected.
   final SelectableDayForRangePredicate? selectableDayPredicate;
 
+  /// The delegate that controls the calendar's logic and localization.
   final DatePickerDelegate delegate;
 
   @override
@@ -1993,6 +1995,7 @@ class CalendarDateRangePicker extends StatefulWidget {
   /// Called when the user changes the end date of the selected range.
   final ValueChanged<DateTime?>? onEndDateChanged;
 
+  /// The delegate that controls the calendar's logic and localization.
   final DatePickerDelegate delegate;
 
   @override

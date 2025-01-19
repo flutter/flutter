@@ -176,6 +176,7 @@ class CalendarDatePicker extends StatefulWidget {
   /// Function to provide full control over which dates in the calendar can be selected.
   final SelectableDayPredicate? selectableDayPredicate;
 
+  /// The delegate that controls the calendar picker's logic and localization.
   final DatePickerDelegate delegate;
 
   @override
@@ -1285,6 +1286,7 @@ class YearPicker extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  /// The delegate that controls the localization.
   final DatePickerDelegate delegate;
 
   @override
