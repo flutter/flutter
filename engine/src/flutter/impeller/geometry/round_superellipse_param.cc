@@ -23,6 +23,10 @@ namespace {
 // `CalculateGap` in round_superellipse_geometry.cc.
 constexpr Scalar kGapFactor = 0.2924066406;
 
+inline constexpr Scalar Sign(Scalar i) {
+  return std::signbit(i) ? -1 : 1;
+}
+
 // A look up table with precomputed variables.
 //
 // The columns represent the following variabls respectively:
@@ -79,6 +83,9 @@ Scalar LerpPrecomputedVariable(size_t column, Scalar ratio) {
 // Return the value that splits the range from `left` to `right` into two
 // portions whose ratio equals to `ratio_left` : `ratio_right`.
 Scalar Split(Scalar left, Scalar right, Scalar ratio_left, Scalar ratio_right) {
+  if (ratio_left == 0 && ratio_right == 0) {
+    return (left + right) / 2;
+  }
   return (left * ratio_right + right * ratio_left) / (ratio_left + ratio_right);
 }
 
@@ -110,14 +117,14 @@ Point FindCircleCenter(Point a, Point b, Scalar r) {
 RoundSuperellipseParam::Octant ComputeOctant(Point center,
                                              Scalar size,
                                              Scalar radius) {
-  Scalar ratio = {std::min(size / radius, kMaxRatio)};
+  Scalar ratio = radius == 0 ? kMaxRatio : std::min(size / radius, kMaxRatio);
   Scalar a = ratio * radius / 2;
   Scalar s = size / 2 - a;
   Scalar g = kGapFactor * radius;
 
   Scalar n = LerpPrecomputedVariable(1, ratio);
   Scalar d = LerpPrecomputedVariable(2, ratio) * a;
-  Scalar thetaJ = LerpPrecomputedVariable(3, ratio);
+  Scalar thetaJ = radius == 0 ? 0 : LerpPrecomputedVariable(3, ratio);
 
   Scalar R = (a - d - g) * sqrt(2);
 
@@ -127,9 +134,15 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
   Point pointJ =
       Point{pow(abs(sinf(thetaJ)), 2 / n), pow(abs(cosf(thetaJ)), 2 / n)} * a +
       pointS;
-  Point circle_center = FindCircleCenter(pointA, pointM, R);
+  Point circle_center =
+      radius == 0 ? pointM : FindCircleCenter(pointJ, pointM, R);
+  Radians circle_max_angle =
+      radius == 0 ? Radians(0)
+                  : (pointM - circle_center).AngleTo(pointJ - circle_center);
 
   return RoundSuperellipseParam::Octant{
+      .offset = center,
+
       .start = pointA,
 
       .se_center = pointS,
@@ -139,8 +152,7 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
 
       .circle_start = pointJ,
       .circle_center = circle_center,
-      .circle_max_angle =
-          (pointJ - circle_center).AngleTo(pointM - circle_center),
+      .circle_max_angle = circle_max_angle,
   };
 }
 
@@ -152,38 +164,26 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
 RoundSuperellipseParam::Quadrant ComputeQuadrant(Point center,
                                                  Point corner,
                                                  Size radii) {
-  Point full_half_size = corner - center;
-  if (radii.width == 0 || radii.height == 0) {
-    Point abs_full_half_size = full_half_size.Abs();
-    RoundSuperellipseParam::Octant empty{
-        .start = abs_full_half_size,
+  Point corner_vector = corner - center;
 
-        .se_center = abs_full_half_size,
-        .se_a = 0,
-        .se_n = 2,
-        .se_max_theta = 0,
-
-        .circle_start = abs_full_half_size,
-        .circle_center = abs_full_half_size,
-        .circle_max_angle = Radians(0),
-    };
-    return RoundSuperellipseParam::Quadrant{
-        .center = center,
-        .signed_scale = full_half_size / abs_full_half_size,
-        .norm_radius = 0,
-        .top = empty,
-        .right = empty,
-    };
-  }
-  // Normalize sizes and radii into symmetrical radius by scaling the longer of
-  // `radii` to the shorter. For example, to draw a RSE with size (200, 300)
-  // and radii (20, 10), this function draws one with size (100, 300) and radii
-  // (10, 10) and then scales it by (2x, 1x).
+  // Normalization refers to the process of transforming the sizes and radii by
+  // scaling the longer of `radii` to the shorter so that the radius is
+  // symmetrical . For example, to draw a RSE with size (200, 300) and radii
+  // (20, 10), this function draws one with size (100, 300) and radii (10, 10)
+  // and then scales it by (2x, 1x).
   Scalar norm_radius = radii.MinDimension();
-  Size radius_scale = radii / norm_radius;
-  Point signed_size = full_half_size * 2;
-  Point norm_size = signed_size.Abs() / radius_scale;
-  Point signed_scale = signed_size / norm_size;
+  Point signed_scale;
+  Point norm_size;
+
+  if (radii.width == 0 || radii.height == 0) {
+    signed_scale = {Sign(corner_vector.x), Sign(corner_vector.y)};
+    norm_size = corner_vector.Abs() * 2;
+  } else {
+    Size radius_scale = radii / norm_radius;
+    Point signed_size = corner_vector * 2;
+    norm_size = signed_size.Abs() / radius_scale;
+    signed_scale = signed_size / norm_size;
+  }
 
   // Each quadrant curve is composed of two octant curves, each of which belongs
   // to a square-like rounded rectangle. The centers these two square-like
@@ -194,7 +194,6 @@ RoundSuperellipseParam::Quadrant ComputeQuadrant(Point center,
   return RoundSuperellipseParam::Quadrant{
       .center = center,
       .signed_scale = signed_scale,
-      .norm_radius = norm_radius,
       .top = ComputeOctant(Point{0, -eccentric}, norm_size.x, norm_radius),
       .right = ComputeOctant(Point{eccentric, 0}, norm_size.y, norm_radius),
   };

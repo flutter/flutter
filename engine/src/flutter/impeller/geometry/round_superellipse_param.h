@@ -14,6 +14,8 @@ namespace impeller {
 
 struct RoundSuperellipseParam {
   struct Octant {
+    Point offset;
+
     //
     Point start;
 
@@ -53,7 +55,7 @@ struct RoundSuperellipseParam {
     // All parameters below describe the shape after normalization.
 
     // The symmetrical radius after normalization.
-    Scalar norm_radius;
+    // Scalar norm_radius;
 
     // Half of height and width.
     //
@@ -61,10 +63,10 @@ struct RoundSuperellipseParam {
     // Point half_size;
 
     // The width and the height of the straight segments.
-    Point stretch;
+    // Point stretch;
 
     // The offset of the center of the octants from the `stretch` point.
-    Scalar octant_eccentric;
+    // Scalar octant_eccentric;
 
     Octant top;
     Octant right;

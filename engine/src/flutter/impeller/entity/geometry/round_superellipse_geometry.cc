@@ -287,11 +287,12 @@ size_t DrawCircularArc(Point* output,
 // Returns the number of points generated.
 size_t DrawOctantSquareLikeSquircle(Point* output,
                                     const RoundSuperellipseParam::Octant& param,
-                                    Scalar radius,
                                     bool reverse_and_flip,
                                     const Matrix& external_transform) {
-  Matrix transform =
-      reverse_and_flip ? external_transform * kFlip : external_transform;
+  Matrix transform = external_transform * Matrix::MakeTranslation(param.offset);
+  if (reverse_and_flip) {
+    transform = transform * kFlip;
+  }
 
   /* The following figure shows the first quadrant of a square-like rounded
    * superellipse. The target arc consists of the "stretch" (AB), a
@@ -385,10 +386,10 @@ static size_t DrawQuadrant(Point* output,
   Point* next = output;
   auto transform = Matrix::MakeTranslateScale(param.signed_scale, param.center);
 
-  next += DrawOctantSquareLikeSquircle(next, param.top, param.norm_radius,
+  next += DrawOctantSquareLikeSquircle(next, param.top,
                                        /*reverse_and_flip=*/false, transform);
 
-  next += DrawOctantSquareLikeSquircle(next, param.right, param.norm_radius,
+  next += DrawOctantSquareLikeSquircle(next, param.right,
                                        /*reverse_and_flip=*/true, transform);
 
   return next - output;
@@ -427,7 +428,7 @@ GeometryResult RoundSuperellipseGeometry::GetPositionBuffer(
 
   if (radii_.AreAllCornersSame()) {
     auto param = RoundSuperellipseParam::MakeBoundsRadii(
-        Rect::MakeOriginSize(Point(), bounds_.GetSize()), radii_);
+        bounds_.Shift(-bounds_.GetCenter()), radii_);
     rearranger_holder.emplace<MirroredQuadrantRearranger>(bounds_.GetCenter(),
                                                           cache);
     auto& t = std::get<MirroredQuadrantRearranger>(rearranger_holder);
@@ -442,10 +443,10 @@ GeometryResult RoundSuperellipseGeometry::GetPositionBuffer(
     auto& t = std::get<UnevenQuadrantsRearranger>(rearranger_holder);
     rearranger = &t;
 
-    t.QuadSize(0) = DrawQuadrant(cache, param.top_right);
-    t.QuadSize(1) = DrawQuadrant(cache, param.bottom_right);
-    t.QuadSize(2) = DrawQuadrant(cache, param.bottom_left);
-    t.QuadSize(3) = DrawQuadrant(cache, param.top_left);
+    t.QuadSize(0) = DrawQuadrant(t.QuadCache(0), param.top_right);
+    t.QuadSize(1) = DrawQuadrant(t.QuadCache(1), param.bottom_right);
+    t.QuadSize(2) = DrawQuadrant(t.QuadCache(2), param.bottom_left);
+    t.QuadSize(3) = DrawQuadrant(t.QuadCache(3), param.top_left);
   }
 
   size_t contour_length = rearranger->ContourLength();
