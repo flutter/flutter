@@ -119,6 +119,17 @@ abstract class DatePickerDelegate {
 
   String formatShortDate(covariant DateTime date, MaterialLocalizations localizations);
 
+  /// Formats day of week, month, day of month and year in a long-width format.
+  ///
+  /// Does not abbreviate names. Appears in spoken announcements of the date
+  /// picker invoked using [showDatePicker], when accessibility mode is on.
+  ///
+  /// Examples:
+  ///
+  /// - US English: Wednesday, September 27, 2017
+  /// - Russian: Среда, Сентябрь 27, 2017
+  String formatFullDate(covariant DateTime date, MaterialLocalizations localizations);
+
   DateTime? parseCompactDate(String? inputString, MaterialLocalizations localizations);
 }
 
@@ -219,6 +230,11 @@ class GregorianDatePickerDelegate extends DatePickerDelegate {
   @override
   String formatShortDate(DateTime date, MaterialLocalizations localizations) {
     return localizations.formatShortDate(date);
+  }
+
+  @override
+  String formatFullDate(DateTime date, MaterialLocalizations localizations) {
+    return localizations.formatFullDate(date);
   }
 
   @override

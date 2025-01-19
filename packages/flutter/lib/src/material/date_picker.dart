@@ -2639,6 +2639,7 @@ class _MonthItemState extends State<_MonthItem> {
     final bool isToday = widget.delegate.isSameDay(widget.currentDate, dayToBuild);
 
     return _DayItem(
+      delegate: widget.delegate,
       day: dayToBuild,
       focusNode: _dayFocusNodes[day - 1],
       onChanged: widget.onChanged,
@@ -2779,6 +2780,7 @@ class _DayItem extends StatefulWidget {
     required this.isInRange,
     required this.isOneDayRange,
     required this.isToday,
+    required this.delegate,
   });
 
   final DateTime day;
@@ -2804,6 +2806,8 @@ class _DayItem extends StatefulWidget {
   final bool isOneDayRange;
 
   final bool isToday;
+
+  final DatePickerDelegate delegate;
 
   @override
   State<_DayItem> createState() => _DayItemState();
@@ -2920,7 +2924,7 @@ class _DayItemState extends State<_DayItem> {
     // formatted full date.
     final String semanticLabelSuffix = widget.isToday ? ', ${localizations.currentDateLabel}' : '';
     String semanticLabel =
-        '$dayText, ${localizations.formatFullDate(widget.day)}$semanticLabelSuffix';
+        '$dayText, ${widget.delegate.formatFullDate(widget.day, localizations)}$semanticLabelSuffix';
     if (widget.isSelectedDayStart) {
       semanticLabel = localizations.dateRangeStartDateSemanticLabel(semanticLabel);
     } else if (widget.isSelectedDayEnd) {
@@ -3092,7 +3096,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     );
     final String semanticDateText =
         selectedStartDate != null && selectedEndDate != null
-            ? '${localizations.formatMediumDate(selectedStartDate!)} – ${localizations.formatMediumDate(selectedEndDate!)}'
+            ? '${delegate.formatMediumDate(selectedStartDate!, localizations)} – ${delegate.formatMediumDate(selectedEndDate!, localizations)}'
             : '';
 
     final Widget header = _DatePickerHeader(
