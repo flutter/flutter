@@ -121,7 +121,7 @@ class CalendarDatePicker extends StatefulWidget {
   }) : initialDate = initialDate == null ? null : delegate.dateOnly(initialDate),
        firstDate = delegate.dateOnly(firstDate),
        lastDate = delegate.dateOnly(lastDate),
-       currentDate = delegate.dateOnly(currentDate ?? DateTime.now()) {
+       currentDate = delegate.dateOnly(currentDate ?? delegate.now()) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
       'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.',

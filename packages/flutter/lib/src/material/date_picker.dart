@@ -2674,7 +2674,7 @@ class _MonthItemState extends State<_MonthItem> {
       if (day < 1) {
         dayItems.add(const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()));
       } else {
-        final DateTime dayToBuild = DateTime(year, month, day);
+        final DateTime dayToBuild = widget.delegate.getDay(year, month, day);
         final Widget dayItem = _buildDayItem(context, dayToBuild, dayOffset, daysInMonth);
         dayItems.add(dayItem);
       }
@@ -2688,7 +2688,11 @@ class _MonthItemState extends State<_MonthItem> {
       final int end = math.min(start + DateTime.daysPerWeek, dayItems.length);
       final List<Widget> weekList = dayItems.sublist(start, end);
 
-      final DateTime dateAfterLeadingPadding = DateTime(year, month, start - dayOffset + 1);
+      final DateTime dateAfterLeadingPadding = widget.delegate.getDay(
+        year,
+        month,
+        start - dayOffset + 1,
+      );
       // Only color the edge container if it is after the start date and
       // on/before the end date.
       final bool isLeadingInRange =
@@ -2703,7 +2707,11 @@ class _MonthItemState extends State<_MonthItem> {
       // partial week.
       if (end < dayItems.length ||
           (end == dayItems.length && dayItems.length % DateTime.daysPerWeek == 0)) {
-        final DateTime dateBeforeTrailingPadding = DateTime(year, month, end - dayOffset);
+        final DateTime dateBeforeTrailingPadding = widget.delegate.getDay(
+          year,
+          month,
+          end - dayOffset,
+        );
         // Only color the edge container if it is on/after the start date and
         // before the end date.
         final bool isTrailingInRange =
