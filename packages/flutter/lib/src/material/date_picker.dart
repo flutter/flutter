@@ -722,7 +722,9 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
               ? localizations.datePickerHelpText
               : localizations.datePickerHelpText.toUpperCase()),
       titleText:
-          _selectedDate.value == null ? '' : localizations.formatMediumDate(_selectedDate.value!),
+          _selectedDate.value == null
+              ? ''
+              : widget.delegate.formatMediumDate(_selectedDate.value!, localizations),
       titleStyle: headlineStyle,
       orientation: orientation,
       isShort: orientation == Orientation.landscape,

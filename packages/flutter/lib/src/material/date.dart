@@ -108,6 +108,12 @@ abstract class DatePickerDelegate {
   DateTime getMonth(int year, int month);
 
   DateTime getDay(int year, int month, int day);
+
+  String formatMonthYear(covariant DateTime date, MaterialLocalizations localizations);
+
+  String formatYear(int year, MaterialLocalizations localizations);
+
+  String formatMediumDate(covariant DateTime date, MaterialLocalizations localizations);
 }
 
 class GregorianDatePickerDelegate extends DatePickerDelegate {
@@ -183,6 +189,21 @@ class GregorianDatePickerDelegate extends DatePickerDelegate {
 
   @override
   DateTime getDay(int year, int month, int day) => DateTime(year, month, day);
+
+  @override
+  String formatMonthYear(DateTime date, MaterialLocalizations localizations) {
+    return localizations.formatMonthYear(date);
+  }
+
+  @override
+  String formatYear(int year, MaterialLocalizations localizations) {
+    return localizations.formatYear(DateTime(year));
+  }
+
+  @override
+  String formatMediumDate(DateTime date, MaterialLocalizations localizations) {
+    return localizations.formatMediumDate(date);
+  }
 }
 
 /// Utility functions for working with dates.

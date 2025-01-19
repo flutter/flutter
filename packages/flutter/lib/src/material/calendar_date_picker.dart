@@ -245,8 +245,8 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
       _mode = mode;
       if (_selectedDate case final DateTime selected) {
         final String message = switch (mode) {
-          DatePickerMode.day => _localizations.formatMonthYear(selected),
-          DatePickerMode.year => _localizations.formatYear(selected),
+          DatePickerMode.day => widget.delegate.formatMonthYear(selected, _localizations),
+          DatePickerMode.year => widget.delegate.formatYear(selected.year, _localizations),
         };
         SemanticsService.announce(message, _textDirection);
       }
@@ -268,7 +268,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
 
     final int daysInMonth = widget.delegate.getDaysInMonth(value.year, value.month);
     final int preferredDay = math.min(_selectedDate?.day ?? 1, daysInMonth);
-    value = value.copyWith(day: preferredDay);
+    value = widget.delegate.getDay(value.year, value.month, preferredDay);
 
     if (value.isBefore(widget.firstDate)) {
       value = widget.firstDate;
@@ -371,7 +371,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
           maxScaleFactor: _kModeToggleButtonMaxScaleFactor,
           child: _DatePickerModeToggleButton(
             mode: _mode,
-            title: _localizations.formatMonthYear(_currentDisplayedMonthDate),
+            title: widget.delegate.formatMonthYear(_currentDisplayedMonthDate, _localizations),
             onTitlePressed:
                 () => _handleModeChanged(switch (_mode) {
                   DatePickerMode.day => DatePickerMode.year,
@@ -627,7 +627,10 @@ class _MonthPickerState extends State<_MonthPicker> {
           // the same day of the month.
           _focusedDay = _focusableDayForMonth(_currentMonth, _focusedDay!.day);
         }
-        SemanticsService.announce(_localizations.formatMonthYear(_currentMonth), _textDirection);
+        SemanticsService.announce(
+          widget.delegate.formatMonthYear(_currentMonth, _localizations),
+          _textDirection,
+        );
       }
     });
   }
@@ -1392,6 +1395,7 @@ class _YearPickerState extends State<YearPicker> {
     final TextStyle? itemStyle = (datePickerTheme.yearStyle ?? defaults.yearStyle)?.apply(
       color: textColor,
     );
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     Widget yearItem = Center(
       child: Container(
         decoration: decoration,
@@ -1401,7 +1405,7 @@ class _YearPickerState extends State<YearPicker> {
         child: Semantics(
           selected: isSelected,
           button: true,
-          child: Text(year.toString(), style: itemStyle),
+          child: Text(widget.delegate.formatYear(year, localizations), style: itemStyle),
         ),
       ),
     );
