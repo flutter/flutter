@@ -3351,7 +3351,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
 
   DateTime? _parseDate(String? text) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    return localizations.parseCompactDate(text);
+    return widget.delegate.parseCompactDate(text, localizations);
   }
 
   String? _validateDate(DateTime? date) {
