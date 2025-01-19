@@ -720,7 +720,7 @@ void main() {
               child: DateRangePickerDialog(
                 firstDate: DateTime(2023),
                 lastDate: DateTime(2023, DateTime.january, 31),
-                initialDateRange: DateTimeRange(
+                initialDateRange: DateTimeRange<DateTime>(
                   start: DateTime(2023, DateTime.january, 17),
                   end: DateTime(2023, DateTime.january, 20),
                 ),
@@ -789,7 +789,7 @@ void main() {
               child: DateRangePickerDialog(
                 firstDate: DateTime(2023),
                 lastDate: DateTime(2023, DateTime.january, 31),
-                initialDateRange: DateTimeRange(
+                initialDateRange: DateTimeRange<DateTime>(
                   start: DateTime(2023, DateTime.january, 17),
                   end: DateTime(2023, DateTime.january, 20),
                 ),
@@ -1155,7 +1155,7 @@ void main() {
               child: DateRangePickerDialog(
                 firstDate: DateTime(2023),
                 lastDate: DateTime(2023, DateTime.january, 31),
-                initialDateRange: DateTimeRange(
+                initialDateRange: DateTimeRange<DateTime>(
                   start: DateTime(2023, DateTime.january, 17),
                   end: DateTime(2023, DateTime.january, 20),
                 ),
