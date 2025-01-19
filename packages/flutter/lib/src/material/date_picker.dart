@@ -1222,7 +1222,7 @@ Future<DateTimeRange?> showDateRangePicker({
         selectableDayPredicate(initialDateRange.end, initialDateRange.start, initialDateRange.end),
     "initialDateRange's end date must be selectable.",
   );
-  currentDate = delegate.dateOnly(currentDate ?? DateTime.now());
+  currentDate = delegate.dateOnly(currentDate ?? delegate.now());
   assert(debugCheckHasMaterialLocalizations(context));
 
   Widget dialog = DateRangePickerDialog(
@@ -1256,7 +1256,7 @@ Future<DateTimeRange?> showDateRangePicker({
     dialog = Localizations.override(context: context, locale: locale, child: dialog);
   }
 
-  return showDialog<DateTimeRange>(
+  return showDialog<DateTimeRange<DateTime>>(
     context: context,
     barrierDismissible: barrierDismissible,
     barrierColor: barrierColor,
@@ -1279,14 +1279,15 @@ Future<DateTimeRange?> showDateRangePicker({
 /// (i.e. 'Jan 21, 2020').
 String _formatRangeStartDate(
   MaterialLocalizations localizations,
+  DatePickerDelegate delegate,
   DateTime? startDate,
   DateTime? endDate,
 ) {
   return startDate == null
       ? localizations.dateRangeStartLabel
       : (endDate == null || startDate.year == endDate.year)
-      ? localizations.formatShortMonthDay(startDate)
-      : localizations.formatShortDate(startDate);
+      ? delegate.formatShortMonthDay(startDate, localizations)
+      : delegate.formatShortDate(startDate, localizations);
 }
 
 /// Returns an locale-appropriate string to describe the end of a date range.
@@ -1297,6 +1298,7 @@ String _formatRangeStartDate(
 /// include the year (i.e. 'Jan 21, 2020').
 String _formatRangeEndDate(
   MaterialLocalizations localizations,
+  DatePickerDelegate delegate,
   DateTime? startDate,
   DateTime? endDate,
   DateTime currentDate,
@@ -1304,8 +1306,8 @@ String _formatRangeEndDate(
   return endDate == null
       ? localizations.dateRangeEndLabel
       : (startDate != null && startDate.year == endDate.year && startDate.year == currentDate.year)
-      ? localizations.formatShortMonthDay(endDate)
-      : localizations.formatShortDate(endDate);
+      ? delegate.formatShortMonthDay(endDate, localizations)
+      : delegate.formatShortDate(endDate, localizations);
 }
 
 /// A Material-style date range picker dialog.
@@ -1524,9 +1526,9 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
         return;
       }
     }
-    final DateTimeRange? selectedRange =
+    final DateTimeRange<DateTime>? selectedRange =
         _hasSelectedDateRange
-            ? DateTimeRange(start: _selectedStart.value!, end: _selectedEnd.value!)
+            ? DateTimeRange<DateTime>(start: _selectedStart.value!, end: _selectedEnd.value!)
             : null;
 
     Navigator.pop(context, selectedRange);
@@ -1654,6 +1656,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
       case DatePickerEntryMode.input:
       case DatePickerEntryMode.inputOnly:
         contents = _InputDateRangePickerDialog(
+          delegate: widget.delegate,
           selectedStartDate: _selectedStart.value,
           selectedEndDate: _selectedEnd.value,
           currentDate: widget.currentDate,
@@ -1818,14 +1821,16 @@ class _CalendarRangePickerDialog extends StatelessWidget {
         ?.apply(color: headerForeground);
     final String startDateText = _formatRangeStartDate(
       localizations,
+      delegate,
       selectedStartDate,
       selectedEndDate,
     );
     final String endDateText = _formatRangeEndDate(
       localizations,
+      delegate,
       selectedStartDate,
       selectedEndDate,
-      DateTime.now(),
+      delegate.now(),
     );
     final TextStyle? startDateStyle = headlineStyle?.apply(
       color: selectedStartDate != null ? headerForeground : headerDisabledForeground,
@@ -2739,7 +2744,7 @@ class _MonthItemState extends State<_MonthItem> {
               alignment: AlignmentDirectional.centerStart,
               child: ExcludeSemantics(
                 child: Text(
-                  localizations.formatMonthYear(widget.displayedMonth),
+                  widget.delegate.formatMonthYear(widget.displayedMonth, localizations),
                   style: textTheme.bodyMedium!.apply(color: themeData.colorScheme.onSurface),
                 ),
               ),
@@ -3030,6 +3035,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     required this.cancelText,
     required this.helpText,
     required this.entryModeButton,
+    required this.delegate,
   });
 
   final DateTime? selectedStartDate;
@@ -3042,11 +3048,12 @@ class _InputDateRangePickerDialog extends StatelessWidget {
   final String? cancelText;
   final String? helpText;
   final Widget? entryModeButton;
+  final DatePickerDelegate delegate;
 
   String _formatDateRange(BuildContext context, DateTime? start, DateTime? end, DateTime now) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String startText = _formatRangeStartDate(localizations, start, end);
-    final String endText = _formatRangeEndDate(localizations, start, end, now);
+    final String startText = _formatRangeStartDate(localizations, delegate, start, end);
+    final String endText = _formatRangeEndDate(localizations, delegate, start, end, now);
     if (start == null || end == null) {
       return localizations.unspecifiedDateRange;
     }

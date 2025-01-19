@@ -115,6 +115,10 @@ abstract class DatePickerDelegate {
 
   String formatMediumDate(covariant DateTime date, MaterialLocalizations localizations);
 
+  String formatShortMonthDay(covariant DateTime date, MaterialLocalizations localizations);
+
+  String formatShortDate(covariant DateTime date, MaterialLocalizations localizations);
+
   DateTime? parseCompactDate(String? inputString, MaterialLocalizations localizations);
 }
 
@@ -205,6 +209,16 @@ class GregorianDatePickerDelegate extends DatePickerDelegate {
   @override
   String formatMediumDate(DateTime date, MaterialLocalizations localizations) {
     return localizations.formatMediumDate(date);
+  }
+
+  @override
+  String formatShortMonthDay(DateTime date, MaterialLocalizations localizations) {
+    return localizations.formatShortMonthDay(date);
+  }
+
+  @override
+  String formatShortDate(DateTime date, MaterialLocalizations localizations) {
+    return localizations.formatShortDate(date);
   }
 
   @override
