@@ -211,8 +211,14 @@ TEST_P(DlGoldenTest, FastVsGeneralGaussianMaskBlur) {
       } else {
         path_builder.LineTo(corner + relative_from);
       }
-      path_builder.CubicCurveTo(corner + relative_from * (1.0 - magic),
-                                corner + relative_to * (1.0 - magic),
+      // These fractions should be (1 - magic) to make a proper rrect
+      // path, but historically these equations were as written here.
+      // On the plus side, they ensure that we will not optimize this
+      // path as "Hey, look, it's an RRect", but the DrawPath gaussians
+      // will otherwise not be identical to the versions drawn with
+      // DrawRoundRect
+      path_builder.CubicCurveTo(corner + relative_from * magic,
+                                corner + relative_to * magic,
                                 corner + relative_to);
     };
 

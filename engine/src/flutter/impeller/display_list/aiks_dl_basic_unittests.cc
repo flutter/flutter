@@ -1220,9 +1220,7 @@ TEST_P(AiksTest, FilledRoundRectPathsRenderCorrectly) {
 
   auto draw_rrect_as_path = [&builder](const DlRect& rect, Scalar x, Scalar y,
                                        const DlPaint& paint) {
-    DlPathBuilder path_builder;
-    path_builder.AddRoundRect(RoundRect::MakeRectXY(rect, x, y));
-    builder.DrawPath(DlPath(path_builder), paint);
+    builder.DrawPath(DlPath::MakeRoundRectXY(rect, x, y), paint);
   };
 
   int c_index = 0;
