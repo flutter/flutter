@@ -117,7 +117,7 @@ class CalendarDatePicker extends StatefulWidget {
     this.onDisplayedMonthChanged,
     this.initialCalendarMode = DatePickerMode.day,
     this.selectableDayPredicate,
-    this.delegate = const DatePickerDelegate(),
+    this.delegate = const GregorianDatePickerDelegate(),
   }) : initialDate = initialDate == null ? null : delegate.dateOnly(initialDate),
        firstDate = delegate.dateOnly(firstDate),
        lastDate = delegate.dateOnly(lastDate),
@@ -1248,7 +1248,7 @@ class YearPicker extends StatefulWidget {
     required this.selectedDate,
     required this.onChanged,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.delegate = const DatePickerDelegate(),
+    this.delegate = const GregorianDatePickerDelegate(),
   }) : assert(!firstDate.isAfter(lastDate)),
        currentDate = delegate.dateOnly(currentDate ?? DateTime.now());
 

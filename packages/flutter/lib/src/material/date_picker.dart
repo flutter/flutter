@@ -221,7 +221,7 @@ Future<DateTime?> showDatePicker({
   final ValueChanged<DatePickerEntryMode>? onDatePickerModeChange,
   final Icon? switchToInputEntryModeIcon,
   final Icon? switchToCalendarEntryModeIcon,
-  DatePickerDelegate delegate = const DatePickerDelegate(),
+  DatePickerDelegate delegate = const GregorianDatePickerDelegate(),
 }) async {
   initialDate = initialDate == null ? null : delegate.dateOnly(initialDate);
   firstDate = delegate.dateOnly(firstDate);
@@ -329,7 +329,7 @@ class DatePickerDialog extends StatefulWidget {
     this.switchToInputEntryModeIcon,
     this.switchToCalendarEntryModeIcon,
     this.insetPadding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-    this.delegate = const DatePickerDelegate(),
+    this.delegate = const GregorianDatePickerDelegate(),
   }) : initialDate = initialDate == null ? null : delegate.dateOnly(initialDate),
        firstDate = delegate.dateOnly(firstDate),
        lastDate = delegate.dateOnly(lastDate),
@@ -1177,7 +1177,7 @@ Future<DateTimeRange?> showDateRangePicker({
   final Icon? switchToInputEntryModeIcon,
   final Icon? switchToCalendarEntryModeIcon,
   SelectableDayForRangePredicate? selectableDayPredicate,
-  DatePickerDelegate delegate = const DatePickerDelegate(),
+  DatePickerDelegate delegate = const GregorianDatePickerDelegate(),
 }) async {
   initialDateRange = initialDateRange == null ? null : delegate.datesOnly(initialDateRange);
   firstDate = delegate.dateOnly(firstDate);
@@ -1338,7 +1338,7 @@ class DateRangePickerDialog extends StatefulWidget {
     this.switchToInputEntryModeIcon,
     this.switchToCalendarEntryModeIcon,
     this.selectableDayPredicate,
-    this.delegate = const DatePickerDelegate(),
+    this.delegate = const GregorianDatePickerDelegate(),
   });
 
   /// The date range that the date range picker starts with when it opens.

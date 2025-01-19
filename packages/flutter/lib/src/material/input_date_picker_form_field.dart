@@ -62,7 +62,7 @@ class InputDatePickerFormField extends StatefulWidget {
     this.autofocus = false,
     this.acceptEmptyDate = false,
     this.focusNode,
-    this.delegate = const DatePickerDelegate(),
+    this.delegate = const GregorianDatePickerDelegate(),
   }) : initialDate = initialDate != null ? delegate.dateOnly(initialDate) : null,
        firstDate = delegate.dateOnly(firstDate),
        lastDate = delegate.dateOnly(lastDate) {
