@@ -197,7 +197,10 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     super.initState();
     _mode = widget.initialCalendarMode;
     final DateTime currentDisplayedDate = widget.initialDate ?? widget.currentDate;
-    _currentDisplayedMonthDate = DateTime(currentDisplayedDate.year, currentDisplayedDate.month);
+    _currentDisplayedMonthDate = widget.delegate.getMonth(
+      currentDisplayedDate.year,
+      currentDisplayedDate.month,
+    );
     if (widget.initialDate != null) {
       _selectedDate = widget.initialDate;
     }
@@ -254,7 +257,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     setState(() {
       if (_currentDisplayedMonthDate.year != date.year ||
           _currentDisplayedMonthDate.month != date.month) {
-        _currentDisplayedMonthDate = DateTime(date.year, date.month);
+        _currentDisplayedMonthDate = widget.delegate.getMonth(date.year, date.month);
         widget.onDisplayedMonthChanged?.call(_currentDisplayedMonthDate);
       }
     });
@@ -331,6 +334,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
           padding: const EdgeInsets.only(top: _subHeaderHeight),
           child: YearPicker(
             key: _yearPickerKey,
+            delegate: widget.delegate,
             currentDate: widget.currentDate,
             firstDate: widget.firstDate,
             lastDate: widget.lastDate,
@@ -615,7 +619,7 @@ class _MonthPickerState extends State<_MonthPicker> {
     setState(() {
       final DateTime monthDate = widget.delegate.addMonthsToMonthDate(widget.firstDate, monthPage);
       if (!widget.delegate.isSameMonth(_currentMonth, monthDate)) {
-        _currentMonth = DateTime(monthDate.year, monthDate.month);
+        _currentMonth = widget.delegate.getMonth(monthDate.year, monthDate.month);
         widget.onDisplayedMonthChanged(_currentMonth);
         if (_focusedDay != null && !widget.delegate.isSameMonth(_focusedDay, _currentMonth)) {
           // We have navigated to a new month with the grid focused, but the
@@ -638,7 +642,7 @@ class _MonthPickerState extends State<_MonthPicker> {
 
     // Can we use the preferred day in this month?
     if (preferredDay <= daysInMonth) {
-      final DateTime newFocus = DateTime(month.year, month.month, preferredDay);
+      final DateTime newFocus = widget.delegate.getDay(month.year, month.month, preferredDay);
       if (_isSelectable(newFocus)) {
         return newFocus;
       }
@@ -646,7 +650,7 @@ class _MonthPickerState extends State<_MonthPicker> {
 
     // Start at the 1st and take the first selectable date.
     for (int day = 1; day <= daysInMonth; day++) {
-      final DateTime newFocus = DateTime(month.year, month.month, day);
+      final DateTime newFocus = widget.delegate.getDay(month.year, month.month, day);
       if (_isSelectable(newFocus)) {
         return newFocus;
       }
@@ -680,12 +684,16 @@ class _MonthPickerState extends State<_MonthPicker> {
 
   /// True if the earliest allowable month is displayed.
   bool get _isDisplayingFirstMonth {
-    return !_currentMonth.isAfter(DateTime(widget.firstDate.year, widget.firstDate.month));
+    return !_currentMonth.isAfter(
+      widget.delegate.getMonth(widget.firstDate.year, widget.firstDate.month),
+    );
   }
 
   /// True if the latest allowable month is displayed.
   bool get _isDisplayingLastMonth {
-    return !_currentMonth.isBefore(DateTime(widget.lastDate.year, widget.lastDate.month));
+    return !_currentMonth.isBefore(
+      widget.delegate.getMonth(widget.lastDate.year, widget.lastDate.month),
+    );
   }
 
   /// Handler for when the overall day grid obtains or loses focus.
@@ -1014,7 +1022,7 @@ class _DayPickerState extends State<_DayPicker> {
       if (day < 1) {
         dayItems.add(const SizedBox.shrink());
       } else {
-        final DateTime dayToBuild = DateTime(year, month, day);
+        final DateTime dayToBuild = widget.delegate.getDay(year, month, day);
         final bool isDisabled =
             dayToBuild.isAfter(widget.lastDate) ||
             dayToBuild.isBefore(widget.firstDate) ||
@@ -1401,15 +1409,18 @@ class _YearPickerState extends State<YearPicker> {
     if (isDisabled) {
       yearItem = ExcludeSemantics(child: yearItem);
     } else {
-      DateTime date = DateTime(year, widget.selectedDate?.month ?? DateTime.january);
-      if (date.isBefore(DateTime(widget.firstDate.year, widget.firstDate.month))) {
+      DateTime date = widget.delegate.getMonth(
+        year,
+        widget.selectedDate?.month ?? DateTime.january,
+      );
+      if (date.isBefore(widget.delegate.getMonth(widget.firstDate.year, widget.firstDate.month))) {
         // Ignore firstDate.day because we're just working in years and months here.
         assert(date.year == widget.firstDate.year);
-        date = DateTime(year, widget.firstDate.month);
+        date = widget.delegate.getMonth(year, widget.firstDate.month);
       } else if (date.isAfter(widget.lastDate)) {
         // No need to ignore the day here because it can only be bigger than what we care about.
         assert(date.year == widget.lastDate.year);
-        date = DateTime(year, widget.lastDate.month);
+        date = widget.delegate.getMonth(year, widget.lastDate.month);
       }
       _statesController.value = states;
       yearItem = InkWell(

@@ -12,7 +12,7 @@ import 'package:flutter/widgets.dart';
 
 import 'material_localizations.dart';
 
-abstract interface class DatePickerDelegate {
+abstract class DatePickerDelegate {
   const DatePickerDelegate();
 
   /// Returns a [DateTime] representing the current date and time.
@@ -20,22 +20,22 @@ abstract interface class DatePickerDelegate {
 
   /// Returns a [T] with the date of the original, but time set to
   /// midnight.
-  DateTime dateOnly(DateTime date);
+  DateTime dateOnly(covariant DateTime date);
 
   /// Returns a [DateTimeRange] with the dates of the original, but with times
   /// set to midnight.
   ///
   /// See also:
   ///  * [dateOnly], which does the same thing for a single date.
-  DateTimeRange<DateTime> datesOnly(DateTimeRange<DateTime> range);
+  DateTimeRange<DateTime> datesOnly(covariant DateTimeRange<DateTime> range);
 
   /// Returns true if the two [DateTime] objects have the same day, month, and
   /// year, or are both null.InheritedWidget
-  bool isSameDay(DateTime? dateA, DateTime? dateB);
+  bool isSameDay(covariant DateTime? dateA, covariant DateTime? dateB);
 
   /// Returns true if the two [DateTime] objects have the same month and
   /// year, or are both null.
-  bool isSameMonth(DateTime? dateA, DateTime? dateB);
+  bool isSameMonth(covariant DateTime? dateA, covariant DateTime? dateB);
 
   /// Determines the number of months between two [T] objects.
   ///
@@ -48,7 +48,7 @@ abstract interface class DatePickerDelegate {
   /// ```
   ///
   /// The value for `delta` would be `7`.
-  int monthDelta(DateTime startDate, DateTime endDate);
+  int monthDelta(covariant DateTime startDate, covariant DateTime endDate);
 
   /// Returns a [DateTime] that is [monthDate] with the added number
   /// of months and the day set to 1 and time set to midnight.
@@ -62,11 +62,11 @@ abstract interface class DatePickerDelegate {
   ///
   /// `date` would be January 15, 2019.
   /// `futureDate` would be April 1, 2019 since it adds 3 months.
-  DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd);
+  DateTime addMonthsToMonthDate(covariant DateTime monthDate, int monthsToAdd);
 
   /// Returns a [DateTime] with the added number of days and time set to
   /// midnight.
-  DateTime addDaysToDate(DateTime date, int days);
+  DateTime addDaysToDate(covariant DateTime date, int days);
 
   /// Computes the offset from the first day of the week that the first day of
   /// the [month] falls on.
@@ -104,6 +104,10 @@ abstract interface class DatePickerDelegate {
   /// This applies the leap year logic introduced by the Gregorian reforms of
   /// 1582. It will not give valid results for dates prior to that time.
   int getDaysInMonth(int year, int month);
+
+  DateTime getMonth(int year, int month);
+
+  DateTime getDay(int year, int month, int day);
 }
 
 class GregorianDatePickerDelegate extends DatePickerDelegate {
@@ -173,6 +177,12 @@ class GregorianDatePickerDelegate extends DatePickerDelegate {
     const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     return daysInMonth[month - 1];
   }
+
+  @override
+  DateTime getMonth(int year, int month) => DateTime(year, month);
+
+  @override
+  DateTime getDay(int year, int month, int day) => DateTime(year, month, day);
 }
 
 /// Utility functions for working with dates.

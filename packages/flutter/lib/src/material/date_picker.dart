@@ -221,8 +221,8 @@ Future<DateTime?> showDatePicker({
   final ValueChanged<DatePickerEntryMode>? onDatePickerModeChange,
   final Icon? switchToInputEntryModeIcon,
   final Icon? switchToCalendarEntryModeIcon,
-  DatePickerDelegate delegate = const GregorianDatePickerDelegate(),
 }) async {
+  const GregorianDatePickerDelegate delegate = GregorianDatePickerDelegate();
   initialDate = initialDate == null ? null : delegate.dateOnly(initialDate);
   firstDate = delegate.dateOnly(firstDate);
   lastDate = delegate.dateOnly(lastDate);
@@ -333,7 +333,7 @@ class DatePickerDialog extends StatefulWidget {
   }) : initialDate = initialDate == null ? null : delegate.dateOnly(initialDate),
        firstDate = delegate.dateOnly(firstDate),
        lastDate = delegate.dateOnly(lastDate),
-       currentDate = delegate.dateOnly(currentDate ?? DateTime.now()) {
+       currentDate = delegate.dateOnly(currentDate ?? delegate.now()) {
     assert(
       !this.lastDate.isBefore(this.firstDate),
       'lastDate ${this.lastDate} must be on or after firstDate ${this.firstDate}.',
@@ -627,6 +627,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
     CalendarDatePicker calendarDatePicker() {
       return CalendarDatePicker(
+        delegate: widget.delegate,
         key: _calendarPickerKey,
         initialDate: _selectedDate.value,
         firstDate: widget.firstDate,
@@ -658,6 +659,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
                     child: MediaQuery.withClampedTextScaling(
                       maxScaleFactor: 2.0,
                       child: InputDatePickerFormField(
+                        delegate: widget.delegate,
                         initialDate: _selectedDate.value,
                         firstDate: widget.firstDate,
                         lastDate: widget.lastDate,
