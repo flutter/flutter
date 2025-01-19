@@ -31,6 +31,8 @@ impeller_component("geometry") {
     "rect.h",
     "round_rect.cc",
     "round_rect.h",
+    "round_superellipse_param.cc",
+    "round_superellipse_param.h",
     "rounding_radii.cc",
     "rounding_radii.h",
     "saturated_math.h",
