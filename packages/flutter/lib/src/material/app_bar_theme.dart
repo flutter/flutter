@@ -42,6 +42,7 @@ class AppBarTheme with Diagnosticable {
     this.actionsIconTheme,
     this.centerTitle,
     this.titleSpacing,
+    this.leadingWidth,
     this.toolbarHeight,
     this.toolbarTextStyle,
     this.titleTextStyle,
@@ -122,6 +123,10 @@ class AppBarTheme with Diagnosticable {
   ///
   /// If null, [AppBar] uses default value of [NavigationToolbar.kMiddleSpacing].
   final double? titleSpacing;
+
+  /// Overrides the default value of the [AppBar.leadingWidth]
+  /// property in all descendant [AppBar] widgets.
+  final double? leadingWidth;
 
   /// Overrides the default value of the [AppBar.toolbarHeight]
   /// property in all descendant [AppBar] widgets.
