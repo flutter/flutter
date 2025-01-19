@@ -174,73 +174,46 @@ abstract class DatePickerDelegate {
   DateTime? parseCompactDate(String? inputString, MaterialLocalizations localizations);
 }
 
+/// A [DatePickerDelegate] that uses the Gregorian calendar and the
+/// conventions of the current [MaterialLocalizations].
 class GregorianDatePickerDelegate extends DatePickerDelegate {
+  /// Creates a date picker delegate that uses the Gregorian calendar and the
+  /// conventions of the current [MaterialLocalizations].
   const GregorianDatePickerDelegate();
 
   @override
   DateTime now() => DateTime.now();
 
   @override
-  DateTime dateOnly(DateTime date) {
-    return DateTime(date.year, date.month, date.day);
-  }
+  DateTime dateOnly(DateTime date) => DateUtils.dateOnly(date);
 
   @override
-  DateTimeRange<DateTime> datesOnly(DateTimeRange<DateTime> range) {
-    return DateTimeRange<DateTime>(start: dateOnly(range.start), end: dateOnly(range.end));
-  }
+  DateTimeRange<DateTime> datesOnly(DateTimeRange<DateTime> range) => DateUtils.datesOnly(range);
 
   @override
-  bool isSameDay(DateTime? dateA, DateTime? dateB) {
-    return dateA?.year == dateB?.year && dateA?.month == dateB?.month && dateA?.day == dateB?.day;
-  }
+  bool isSameDay(DateTime? dateA, DateTime? dateB) => DateUtils.isSameDay(dateA, dateB);
 
   @override
-  bool isSameMonth(DateTime? dateA, DateTime? dateB) {
-    return dateA?.year == dateB?.year && dateA?.month == dateB?.month;
-  }
+  bool isSameMonth(DateTime? dateA, DateTime? dateB) => DateUtils.isSameMonth(dateA, dateB);
 
   @override
-  int monthDelta(DateTime startDate, DateTime endDate) {
-    return (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
-  }
+  int monthDelta(DateTime startDate, DateTime endDate) => DateUtils.monthDelta(startDate, endDate);
 
   @override
   DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
-    return DateTime(monthDate.year, monthDate.month + monthsToAdd);
+    return DateUtils.addMonthsToMonthDate(monthDate, monthsToAdd);
   }
 
   @override
-  DateTime addDaysToDate(DateTime date, int days) {
-    return DateTime(date.year, date.month, date.day + days);
-  }
+  DateTime addDaysToDate(DateTime date, int days) => DateUtils.addDaysToDate(date, days);
 
   @override
   int firstDayOffset(int year, int month, MaterialLocalizations localizations) {
-    // 0-based day of week for the month and year, with 0 representing Monday.
-    final int weekdayFromMonday = DateTime(year, month).weekday - 1;
-
-    // 0-based start of week depending on the locale, with 0 representing Sunday.
-    int firstDayOfWeekIndex = localizations.firstDayOfWeekIndex;
-
-    // firstDayOfWeekIndex recomputed to be Monday-based, in order to compare with
-    // weekdayFromMonday.
-    firstDayOfWeekIndex = (firstDayOfWeekIndex - 1) % 7;
-
-    // Number of days between the first day of week appearing on the calendar,
-    // and the day corresponding to the first of the month.
-    return (weekdayFromMonday - firstDayOfWeekIndex) % 7;
+    return DateUtils.firstDayOffset(year, month, localizations);
   }
 
   @override
-  int getDaysInMonth(int year, int month) {
-    if (month == DateTime.february) {
-      final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) || (year % 400 == 0);
-      return isLeapYear ? 29 : 28;
-    }
-    const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    return daysInMonth[month - 1];
-  }
+  int getDaysInMonth(int year, int month) => DateUtils.getDaysInMonth(year, month);
 
   @override
   DateTime getMonth(int year, int month) => DateTime(year, month);
@@ -286,32 +259,32 @@ class GregorianDatePickerDelegate extends DatePickerDelegate {
 
 /// Utility functions for working with dates.
 abstract final class DateUtils {
-  // /// Returns a [DateTime] with the date of the original, but time set to
-  // /// midnight.
-  // static DateTime dateOnly(DateTime date) {
-  //   return DateTime(date.year, date.month, date.day);
-  // }
+  /// Returns a [DateTime] with the date of the original, but time set to
+  /// midnight.
+  static DateTime dateOnly(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
 
   /// Returns a [DateTimeRange] with the dates of the original, but with times
   /// set to midnight.
   ///
   /// See also:
   ///  * [dateOnly], which does the same thing for a single date.
-  // static DateTimeRange datesOnly(DateTimeRange range) {
-  //   return DateTimeRange(start: dateOnly(range.start), end: dateOnly(range.end));
-  // }
+  static DateTimeRange<DateTime> datesOnly(DateTimeRange<DateTime> range) {
+    return DateTimeRange<DateTime>(start: dateOnly(range.start), end: dateOnly(range.end));
+  }
 
   /// Returns true if the two [DateTime] objects have the same day, month, and
   /// year, or are both null.InheritedWidget
-  // static bool isSameDay(DateTime? dateA, DateTime? dateB) {
-  //   return dateA?.year == dateB?.year && dateA?.month == dateB?.month && dateA?.day == dateB?.day;
-  // }
+  static bool isSameDay(DateTime? dateA, DateTime? dateB) {
+    return dateA?.year == dateB?.year && dateA?.month == dateB?.month && dateA?.day == dateB?.day;
+  }
 
   /// Returns true if the two [DateTime] objects have the same month and
   /// year, or are both null.
-  // static bool isSameMonth(DateTime? dateA, DateTime? dateB) {
-  //   return dateA?.year == dateB?.year && dateA?.month == dateB?.month;
-  // }
+  static bool isSameMonth(DateTime? dateA, DateTime? dateB) {
+    return dateA?.year == dateB?.year && dateA?.month == dateB?.month;
+  }
 
   /// Determines the number of months between two [DateTime] objects.
   ///
@@ -324,9 +297,9 @@ abstract final class DateUtils {
   /// ```
   ///
   /// The value for `delta` would be `7`.
-  // static int monthDelta(DateTime startDate, DateTime endDate) {
-  //   return (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
-  // }
+  static int monthDelta(DateTime startDate, DateTime endDate) {
+    return (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
+  }
 
   /// Returns a [DateTime] that is [monthDate] with the added number
   /// of months and the day set to 1 and time set to midnight.
@@ -340,15 +313,15 @@ abstract final class DateUtils {
   ///
   /// `date` would be January 15, 2019.
   /// `futureDate` would be April 1, 2019 since it adds 3 months.
-  // static DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
-  //   return DateTime(monthDate.year, monthDate.month + monthsToAdd);
-  // }
+  static DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
+    return DateTime(monthDate.year, monthDate.month + monthsToAdd);
+  }
 
   /// Returns a [DateTime] with the added number of days and time set to
   /// midnight.
-  // static DateTime addDaysToDate(DateTime date, int days) {
-  //   return DateTime(date.year, date.month, date.day + days);
-  // }
+  static DateTime addDaysToDate(DateTime date, int days) {
+    return DateTime(date.year, date.month, date.day + days);
+  }
 
   /// Computes the offset from the first day of the week that the first day of
   /// the [month] falls on.
@@ -378,35 +351,35 @@ abstract final class DateUtils {
   ///   into the [MaterialLocalizations.narrowWeekdays] list.
   /// - [MaterialLocalizations.narrowWeekdays] list provides localized names of
   ///   days of week, always starting with Sunday and ending with Saturday.
-  // static int firstDayOffset(int year, int month, MaterialLocalizations localizations) {
-  //   // 0-based day of week for the month and year, with 0 representing Monday.
-  //   final int weekdayFromMonday = DateTime(year, month).weekday - 1;
+  static int firstDayOffset(int year, int month, MaterialLocalizations localizations) {
+    // 0-based day of week for the month and year, with 0 representing Monday.
+    final int weekdayFromMonday = DateTime(year, month).weekday - 1;
 
-  //   // 0-based start of week depending on the locale, with 0 representing Sunday.
-  //   int firstDayOfWeekIndex = localizations.firstDayOfWeekIndex;
+    // 0-based start of week depending on the locale, with 0 representing Sunday.
+    int firstDayOfWeekIndex = localizations.firstDayOfWeekIndex;
 
-  //   // firstDayOfWeekIndex recomputed to be Monday-based, in order to compare with
-  //   // weekdayFromMonday.
-  //   firstDayOfWeekIndex = (firstDayOfWeekIndex - 1) % 7;
+    // firstDayOfWeekIndex recomputed to be Monday-based, in order to compare with
+    // weekdayFromMonday.
+    firstDayOfWeekIndex = (firstDayOfWeekIndex - 1) % 7;
 
-  //   // Number of days between the first day of week appearing on the calendar,
-  //   // and the day corresponding to the first of the month.
-  //   return (weekdayFromMonday - firstDayOfWeekIndex) % 7;
-  // }
+    // Number of days between the first day of week appearing on the calendar,
+    // and the day corresponding to the first of the month.
+    return (weekdayFromMonday - firstDayOfWeekIndex) % 7;
+  }
 
   /// Returns the number of days in a month, according to the proleptic
   /// Gregorian calendar.
   ///
   /// This applies the leap year logic introduced by the Gregorian reforms of
   /// 1582. It will not give valid results for dates prior to that time.
-  // static int getDaysInMonth(int year, int month) {
-  //   if (month == DateTime.february) {
-  //     final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) || (year % 400 == 0);
-  //     return isLeapYear ? 29 : 28;
-  //   }
-  //   const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  //   return daysInMonth[month - 1];
-  // }
+  static int getDaysInMonth(int year, int month) {
+    if (month == DateTime.february) {
+      final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) || (year % 400 == 0);
+      return isLeapYear ? 29 : 28;
+    }
+    const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    return daysInMonth[month - 1];
+  }
 }
 
 /// Mode of date entry method for the date picker dialog.
