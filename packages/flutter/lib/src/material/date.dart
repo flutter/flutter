@@ -12,13 +12,16 @@ import 'package:flutter/widgets.dart';
 
 import 'material_localizations.dart';
 
+/// A delegate that supplies localized strings and other values for the
+/// date picker.
 abstract class DatePickerDelegate {
+  /// Creates a date picker delegate.
   const DatePickerDelegate();
 
   /// Returns a [DateTime] representing the current date and time.
   DateTime now();
 
-  /// Returns a [T] with the date of the original, but time set to
+  /// Returns a [DateTime] with the date of the original, but time set to
   /// midnight.
   DateTime dateOnly(covariant DateTime date);
 
@@ -105,18 +108,48 @@ abstract class DatePickerDelegate {
   /// 1582. It will not give valid results for dates prior to that time.
   int getDaysInMonth(int year, int month);
 
+  /// Returns a [DateTime] with the given [year] and [month].
   DateTime getMonth(int year, int month);
 
+  /// Returns a [DateTime] with the given [year], [month], and [day].
   DateTime getDay(int year, int month, int day);
 
+  /// Formats the month and the year of the given [date].
+  ///
+  /// The returned string does not contain the day of the month. This appears
+  /// in the date picker invoked using [showDatePicker].
   String formatMonthYear(covariant DateTime date, MaterialLocalizations localizations);
 
+  /// Full unabbreviated year format, e.g. 2017 rather than 17.
   String formatYear(int year, MaterialLocalizations localizations);
 
+  /// Formats the date using a medium-width format.
+  ///
+  /// Abbreviates month and days of week. This appears in the header of the date
+  /// picker invoked using [showDatePicker].
+  ///
+  /// Examples:
+  ///
+  /// - US English: Wed, Sep 27
+  /// - Russian: ср, сент. 27
   String formatMediumDate(covariant DateTime date, MaterialLocalizations localizations);
 
+  /// Formats the month and day of the given [date].
+  ///
+  /// Examples:
+  ///
+  /// - US English: Feb 21
+  /// - Russian: 21 февр.
   String formatShortMonthDay(covariant DateTime date, MaterialLocalizations localizations);
 
+  /// Formats the date using a short-width format.
+  ///
+  /// Includes the abbreviation of the month, the day and year.
+  ///
+  /// Examples:
+  ///
+  /// - US English: Feb 21, 2019
+  /// - Russian: 21 февр. 2019 г.
   String formatShortDate(covariant DateTime date, MaterialLocalizations localizations);
 
   /// Formats day of week, month, day of month and year in a long-width format.
@@ -130,6 +163,14 @@ abstract class DatePickerDelegate {
   /// - Russian: Среда, Сентябрь 27, 2017
   String formatFullDate(covariant DateTime date, MaterialLocalizations localizations);
 
+  /// Converts the given compact date formatted string into a [DateTime].
+  ///
+  /// The format of the string must be a valid compact date format for the
+  /// given locale. If the text doesn't represent a valid date, `null` will be
+  /// returned.
+  ///
+  /// See also:
+  ///   * [formatCompactDate], which will convert a [DateTime] into a string in the compact format.
   DateTime? parseCompactDate(String? inputString, MaterialLocalizations localizations);
 }
 
