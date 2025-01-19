@@ -1909,7 +1909,7 @@ class _CalendarRangePickerDialog extends StatelessWidget {
           ),
         ),
         backgroundColor: dialogBackground,
-        body: _CalendarDateRangePicker(
+        body: CalendarDateRangePicker(
           initialStartDate: selectedStartDate,
           initialEndDate: selectedEndDate,
           firstDate: firstDate,
@@ -1937,9 +1937,10 @@ const double _maxCalendarWidthPortrait = 480.0;
 
 /// Displays a scrollable calendar grid that allows a user to select a range
 /// of dates.
-class _CalendarDateRangePicker extends StatefulWidget {
+class CalendarDateRangePicker extends StatefulWidget {
   /// Creates a scrollable calendar grid for picking date ranges.
-  _CalendarDateRangePicker({
+  CalendarDateRangePicker({
+    super.key,
     DateTime? initialStartDate,
     DateTime? initialEndDate,
     required DateTime firstDate,
@@ -1953,7 +1954,7 @@ class _CalendarDateRangePicker extends StatefulWidget {
        initialEndDate = initialEndDate != null ? delegate.dateOnly(initialEndDate) : null,
        firstDate = delegate.dateOnly(firstDate),
        lastDate = delegate.dateOnly(lastDate),
-       currentDate = delegate.dateOnly(currentDate ?? DateTime.now()) {
+       currentDate = delegate.dateOnly(currentDate ?? delegate.now()) {
     assert(
       this.initialStartDate == null ||
           this.initialEndDate == null ||
@@ -1990,10 +1991,10 @@ class _CalendarDateRangePicker extends StatefulWidget {
   final DatePickerDelegate delegate;
 
   @override
-  State<_CalendarDateRangePicker> createState() => _CalendarDateRangePickerState();
+  State<CalendarDateRangePicker> createState() => _CalendarDateRangePickerState();
 }
 
-class _CalendarDateRangePickerState extends State<_CalendarDateRangePicker> {
+class _CalendarDateRangePickerState extends State<CalendarDateRangePicker> {
   final GlobalKey _scrollViewKey = GlobalKey();
   DateTime? _startDate;
   DateTime? _endDate;

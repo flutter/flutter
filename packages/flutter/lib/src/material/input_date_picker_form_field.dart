@@ -212,7 +212,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
 
   DateTime? _parseDate(String? text) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    return localizations.parseCompactDate(text);
+    return widget.delegate.parseCompactDate(text, localizations);
   }
 
   bool _isValidAcceptableDate(DateTime? date) {

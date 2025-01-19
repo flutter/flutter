@@ -114,6 +114,8 @@ abstract class DatePickerDelegate {
   String formatYear(int year, MaterialLocalizations localizations);
 
   String formatMediumDate(covariant DateTime date, MaterialLocalizations localizations);
+
+  DateTime? parseCompactDate(String? inputString, MaterialLocalizations localizations);
 }
 
 class GregorianDatePickerDelegate extends DatePickerDelegate {
@@ -203,6 +205,11 @@ class GregorianDatePickerDelegate extends DatePickerDelegate {
   @override
   String formatMediumDate(DateTime date, MaterialLocalizations localizations) {
     return localizations.formatMediumDate(date);
+  }
+
+  @override
+  DateTime? parseCompactDate(String? inputString, MaterialLocalizations localizations) {
+    return localizations.parseCompactDate(inputString);
   }
 }
 
