@@ -4432,8 +4432,8 @@ void main() {
           transitionDelegate: transitionDelegate,
         ),
       );
-      // The pageless route of initial page route should be removed without complete.
-      expect(initialPageless1Completed, false);
+      // The pageless route of initial page route should be removed and completed.
+      expect(initialPageless1Completed, true);
       expect(secondPageless1Completed, false);
       expect(secondPageless2Completed, false);
       expect(thirdPageless1Completed, false);
@@ -4449,9 +4449,9 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(initialPageless1Completed, false);
-      expect(secondPageless1Completed, false);
-      expect(secondPageless2Completed, false);
+      expect(initialPageless1Completed, true);
+      expect(secondPageless1Completed, true);
+      expect(secondPageless2Completed, true);
       expect(thirdPageless1Completed, false);
 
       myPages = <TestPage>[const TestPage(key: ValueKey<String>('4'), name: 'forth')];
@@ -4465,10 +4465,10 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(initialPageless1Completed, false);
-      expect(secondPageless1Completed, false);
-      expect(secondPageless2Completed, false);
-      expect(thirdPageless1Completed, false);
+      expect(initialPageless1Completed, true);
+      expect(secondPageless1Completed, true);
+      expect(secondPageless2Completed, true);
+      expect(thirdPageless1Completed, true);
       expect(find.text('forth'), findsOneWidget);
     });
 
