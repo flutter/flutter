@@ -17510,42 +17510,54 @@ void main() {
   testWidgets(
     'The behavior of the left arrow and right arrow in an RTL text field should be reversed.',
     (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+      final TextEditingController controller = TextEditingController();
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: TextField(
-            controller: controller,
-            textAlign: TextAlign.right,
-            textDirection: TextDirection.rtl,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TextField(
+              controller: controller,
+              textAlign: TextAlign.right,
+              textDirection: TextDirection.rtl,
+            ),
           ),
         ),
-      )
-    );
+      );
 
-    await tester.showKeyboard(find.byType(TextField));
+      await tester.showKeyboard(find.byType(TextField));
 
-    const String testValue = 'RTL Test';
-    tester.testTextInput.updateEditingValue(
-      const TextEditingValue(
-        text: testValue,
-        selection: TextSelection.collapsed(offset: 3)
-      ),
-    );
-    await tester.pump();
+      const String testValue = 'RTL-test';
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(text: testValue, selection: TextSelection.collapsed(offset: 3)),
+      );
+      await tester.pump();
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
 
-    expect(controller.selection.base.offset, 4);
+      expect(controller.selection.base.offset, 4);
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-    await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
 
-    expect(controller.selection.base.offset, 3);
-  });
+      expect(controller.selection.base.offset, 3);
 
+      // Shift
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+
+      expect(controller.selection.base.offset, 3);
+      expect(controller.selection.extent.offset, 4);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+
+      expect(controller.selection.base.offset, 3);
+      expect(controller.selection.extent.offset, 3);
+    },
+  );
 }
 
 /// A Simple widget for testing the obscure text.
