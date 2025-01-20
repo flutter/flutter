@@ -193,14 +193,12 @@ abstract interface class FlutterNativeAssetsBuildRunner {
 /// Uses `package:native_assets_builder` for its implementation.
 class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunner {
   FlutterNativeAssetsBuildRunnerImpl(
-    this.projectUri,
     this.packageConfigPath,
     this.packageConfig,
     this.fileSystem,
     this.logger,
   );
 
-  final Uri projectUri;
   final String packageConfigPath;
   final PackageConfig packageConfig;
   final FileSystem fileSystem;
@@ -235,13 +233,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     logger: _logger,
     dartExecutable: _dartExecutable,
     fileSystem: fileSystem,
-    hookEnvironment: filteredEnvironment(NativeAssetsBuildRunner.hookEnvironmentVariablesFilter),
   );
-
-  static Map<String, String> filteredEnvironment(Set<String> allowList) => <String, String>{
-    for (final MapEntry<String, String> entry in const LocalPlatform().environment.entries)
-      if (allowList.contains(entry.key.toUpperCase())) entry.key: entry.value,
-  };
 
   @override
   Future<bool> hasPackageConfig() {
