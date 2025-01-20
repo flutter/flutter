@@ -51,7 +51,8 @@ void main() {
       previewDetector = PreviewDetector(logger: logger, onChangeDetected: onChangeDetectedRoot);
     });
 
-    tearDown(() {
+    tearDown(() async {
+      await previewDetector.dispose();
       projectRoot.deleteSync(recursive: true);
       onChangeDetected = null;
     });
