@@ -62,9 +62,6 @@ void runSemanticsTests() {
   group('Roles', () {
     _testRoleLifecycle();
   });
-  group('Text', () {
-    _testText();
-  });
   group('labels', () {
     _testLabels();
   });
@@ -121,6 +118,9 @@ void runSemanticsTests() {
   });
   group('link', () {
     _testLink();
+  });
+  group('tabs', () {
+    _testTabs();
   });
 }
 
@@ -198,7 +198,7 @@ void _testRoleLifecycle() {
       tester.expectSemantics('<sem role="button"></sem>');
 
       final SemanticsObject node = owner().debugSemanticsTree![0]!;
-      expect(node.semanticRole?.kind, SemanticRoleKind.button);
+      expect(node.semanticRole?.kind, EngineSemanticsRole.button);
       expect(
         node.semanticRole?.debugSemanticBehaviorTypes,
         containsAll(<Type>[Focusable, Tappable, LabelAndValue]),
@@ -221,7 +221,7 @@ void _testRoleLifecycle() {
       tester.expectSemantics('<sem role="button">a label</sem>');
 
       final SemanticsObject node = owner().debugSemanticsTree![0]!;
-      expect(node.semanticRole?.kind, SemanticRoleKind.button);
+      expect(node.semanticRole?.kind, EngineSemanticsRole.button);
       expect(
         node.semanticRole?.debugSemanticBehaviorTypes,
         containsAll(<Type>[Focusable, Tappable, LabelAndValue]),
@@ -653,7 +653,7 @@ void _testEngineSemanticsOwner() {
     );
 
     // Rudely replace the role with a mock, and trigger an update.
-    final MockRole mockRole = MockRole(SemanticRoleKind.generic, semanticsObject);
+    final MockRole mockRole = MockRole(EngineSemanticsRole.generic, semanticsObject);
     semanticsObject.semanticRole = mockRole;
 
     pumpSemantics(label: 'World');
@@ -853,58 +853,6 @@ void _testLongestIncreasingSubsequence() {
     for (int count = 1; count < 100; count += 1) {
       expectLis(List<int>.generate(count, (int i) => 10 * (count - i)), <int>[count - 1]);
     }
-  });
-}
-
-void _testText() {
-  test('renders a piece of plain text', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
-
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    updateNode(builder, label: 'plain text', rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
-    owner().updateSemantics(builder.build());
-
-    expectSemanticsTree(owner(), '''<sem><span>plain text</span></sem>''');
-
-    final SemanticsObject node = owner().debugSemanticsTree![0]!;
-    expect(node.semanticRole?.kind, SemanticRoleKind.generic);
-    expect(node.semanticRole!.behaviors!.map((m) => m.runtimeType).toList(), <Type>[
-      Focusable,
-      LiveRegion,
-      RouteName,
-      LabelAndValue,
-    ]);
-    semantics().semanticsEnabled = false;
-  });
-
-  test('renders a tappable piece of text', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
-
-    final SemanticsTester tester = SemanticsTester(owner());
-    tester.updateNode(
-      id: 0,
-      hasTap: true,
-      label: 'tappable text',
-      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-    );
-    tester.apply();
-
-    expectSemanticsTree(owner(), '''<sem flt-tappable=""><span>tappable text</span></sem>''');
-
-    final SemanticsObject node = owner().debugSemanticsTree![0]!;
-    expect(node.semanticRole?.kind, SemanticRoleKind.generic);
-    expect(node.semanticRole!.behaviors!.map((m) => m.runtimeType).toList(), <Type>[
-      Focusable,
-      LiveRegion,
-      RouteName,
-      LabelAndValue,
-      Tappable,
-    ]);
-    semantics().semanticsEnabled = false;
   });
 }
 
@@ -1686,7 +1634,7 @@ void _testIncrementables() {
 </sem>''');
 
     final SemanticsObject node = owner().debugSemanticsTree![0]!;
-    expect(node.semanticRole?.kind, SemanticRoleKind.incrementable);
+    expect(node.semanticRole?.kind, EngineSemanticsRole.incrementable);
     expect(
       reason: 'Incrementables use custom focus management',
       node.semanticRole!.debugSemanticBehaviorTypes,
@@ -1881,7 +1829,7 @@ void _testTextField() {
     //                https://github.com/flutter/flutter/issues/147200
     expect(inputElement.value, '');
 
-    expect(node.semanticRole?.kind, SemanticRoleKind.textField);
+    expect(node.semanticRole?.kind, EngineSemanticsRole.textField);
     expect(
       reason: 'Text fields use custom focus management',
       node.semanticRole!.debugSemanticBehaviorTypes,
@@ -1920,7 +1868,7 @@ void _testCheckables() {
 ''');
 
     final SemanticsObject node = owner().debugSemanticsTree![0]!;
-    expect(node.semanticRole?.kind, SemanticRoleKind.checkable);
+    expect(node.semanticRole?.kind, EngineSemanticsRole.checkable);
     expect(
       reason: 'Checkables use generic semantic behaviors',
       node.semanticRole!.debugSemanticBehaviorTypes,
@@ -2294,7 +2242,7 @@ void _testSelectables() {
     expectSemanticsTree(owner(), '<sem flt-tappable role="checkbox" aria-checked="true"></sem>');
 
     final node = owner().debugSemanticsTree![0]!;
-    expect(node.semanticRole!.kind, SemanticRoleKind.checkable);
+    expect(node.semanticRole!.kind, EngineSemanticsRole.checkable);
     expect(node.semanticRole!.debugSemanticBehaviorTypes, isNot(contains(Selectable)));
     expect(node.element.getAttribute('aria-selected'), isNull);
 
@@ -2303,7 +2251,7 @@ void _testSelectables() {
 }
 
 void _testTappable() {
-  test('renders an enabled tappable widget', () async {
+  test('renders an enabled button', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -2325,28 +2273,30 @@ void _testTappable() {
 ''');
 
     final SemanticsObject node = owner().debugSemanticsTree![0]!;
-    expect(node.semanticRole?.kind, SemanticRoleKind.button);
+    expect(node.semanticRole?.kind, EngineSemanticsRole.button);
     expect(node.semanticRole?.debugSemanticBehaviorTypes, containsAll(<Type>[Focusable, Tappable]));
     expect(tester.getSemanticsObject(0).element.tabIndex, 0);
 
     semantics().semanticsEnabled = false;
   });
 
-  test('renders a disabled tappable widget', () async {
+  test('renders a disabled button', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    updateNode(
-      builder,
-      actions: 0 | ui.SemanticsAction.tap.index,
-      flags: 0 | ui.SemanticsFlag.hasEnabledState.index | ui.SemanticsFlag.isButton.index,
-      transform: Matrix4.identity().toFloat64(),
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      isFocusable: true,
+      hasTap: true,
+      hasEnabledState: true,
+      isEnabled: false,
+      isButton: true,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
+    tester.apply();
 
-    owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
 <sem role="button" aria-disabled="true"></sem>
 ''');
@@ -2354,7 +2304,40 @@ void _testTappable() {
     semantics().semanticsEnabled = false;
   });
 
-  test('can switch tappable between enabled and disabled', () async {
+  test('tappable leaf node is a button', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      isFocusable: true,
+      hasEnabledState: true,
+      isEnabled: true,
+
+      // Not a button
+      isButton: false,
+
+      // But has a tap action and no children
+      hasTap: true,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem role="button" flt-tappable></sem>
+''');
+
+    final SemanticsObject node = owner().debugSemanticsTree![0]!;
+    expect(node.semanticRole?.kind, EngineSemanticsRole.button);
+    expect(node.semanticRole?.debugSemanticBehaviorTypes, containsAll(<Type>[Focusable, Tappable]));
+    expect(tester.getSemanticsObject(0).element.tabIndex, 0);
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('can switch a button between enabled and disabled', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -2387,7 +2370,7 @@ void _testTappable() {
     semantics().semanticsEnabled = false;
   });
 
-  test('focuses on tappable after element has been attached', () async {
+  test('focuses on a button after element has been attached', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -3010,7 +2993,7 @@ void _testRoute() {
       <sem role="dialog" aria-label="this is a route label"><sem-c><sem></sem></sem-c></sem>
     ''');
 
-    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, SemanticRoleKind.route);
+    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
 
     semantics().semanticsEnabled = false;
   });
@@ -3049,7 +3032,7 @@ void _testRoute() {
       <sem role="dialog" aria-label=""><sem-c><sem></sem></sem-c></sem>
     ''');
 
-    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, SemanticRoleKind.route);
+    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
 
     semantics().semanticsEnabled = false;
   });
@@ -3091,8 +3074,8 @@ void _testRoute() {
 
     pumpSemantics(label: 'Route label');
 
-    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, SemanticRoleKind.route);
-    expect(owner().debugSemanticsTree![2]!.semanticRole?.kind, SemanticRoleKind.generic);
+    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
+    expect(owner().debugSemanticsTree![2]!.semanticRole?.kind, EngineSemanticsRole.generic);
     expect(
       owner().debugSemanticsTree![2]!.semanticRole?.debugSemanticBehaviorTypes,
       contains(RouteName),
@@ -3116,7 +3099,7 @@ void _testRoute() {
       <sem role="dialog"></sem>
     ''');
 
-    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, SemanticRoleKind.route);
+    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
     expect(owner().debugSemanticsTree![0]!.semanticRole?.behaviors, isNot(contains(RouteName)));
 
     semantics().semanticsEnabled = false;
@@ -3154,7 +3137,7 @@ void _testRoute() {
       </sem>
     ''');
 
-    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, SemanticRoleKind.generic);
+    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.generic);
     expect(
       owner().debugSemanticsTree![2]!.semanticRole?.debugSemanticBehaviorTypes,
       contains(RouteName),
@@ -3516,7 +3499,7 @@ void _testFocusable() {
 
     final SemanticsObject node = owner().debugSemanticsTree![1]!;
     expect(node.isFocusable, isTrue);
-    expect(node.semanticRole?.kind, SemanticRoleKind.generic);
+    expect(node.semanticRole?.kind, EngineSemanticsRole.generic);
     expect(node.semanticRole?.debugSemanticBehaviorTypes, contains(Focusable));
 
     final DomElement element = node.element;
@@ -3578,6 +3561,71 @@ void _testLink() {
     final SemanticsObject object = pumpSemantics();
     expect(object.element.tagName.toLowerCase(), 'a');
     expect(object.element.getAttribute('href'), 'https://flutter.dev');
+  });
+}
+
+void _testTabs() {
+  test('nodes with tab role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.tab,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.tab);
+    expect(object.element.getAttribute('role'), 'tab');
+  });
+
+  test('nodes with tab panel role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.tabPanel,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.tabPanel);
+    expect(object.element.getAttribute('role'), 'tabpanel');
+  });
+
+  test('nodes with tab bar role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.tabBar,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.tabList);
+    expect(object.element.getAttribute('role'), 'tablist');
   });
 }
 
