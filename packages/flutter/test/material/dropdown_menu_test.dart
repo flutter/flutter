@@ -3901,6 +3901,40 @@ void main() {
     },
     variant: TargetPlatformVariant.all(),
   );
+
+  // Regression test for https://github.com/flutter/flutter/pull/161903
+  testWidgets('DropdownMenu passes maxLines to TextField', (WidgetTester tester) async {
+    // default
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SafeArea(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+            ),
+          ),
+        ),
+      ),
+    );
+    TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.maxLines, null);
+
+    // custom
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SafeArea(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              maxLines: 2,
+            ),
+          ),
+        ),
+      ),
+    );
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.maxLines, 2);
+  });
 }
 
 enum TestMenu {
