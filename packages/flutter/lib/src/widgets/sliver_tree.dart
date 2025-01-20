@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'viewport.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -31,7 +34,7 @@ class TreeSliverNode<T> {
     T content, {
     List<TreeSliverNode<T>>? children,
     bool expanded = false,
-  }) : _expanded = children != null && children.isNotEmpty && expanded,
+  }) : _expanded = (children?.isNotEmpty ?? false) && expanded,
        _content = content,
        _children = children ?? <TreeSliverNode<T>>[];
 
@@ -867,6 +870,15 @@ class _TreeSliverState<T> extends State<TreeSliver<T>> with TickerProviderStateM
       if (_currentAnimationForParent[node] != null) {
         // Dispose of the old animation if this node was already animating.
         _currentAnimationForParent[node]!.animation.dispose();
+      }
+
+      // If animation is disabled or the duration is zero, we skip the animation
+      // and immediately update the active nodes. This prevents the app from freezing
+      // due to the tree being incorrectly updated when the animation duration is zero.
+      // This is because, in this case, the node's children are no longer active.
+      if (widget.toggleAnimationStyle == AnimationStyle.noAnimation || widget.toggleAnimationStyle?.duration == Duration.zero) {
+        _unpackActiveNodes();
+        return;
       }
 
       final AnimationController controller = _currentAnimationForParent[node]?.controller

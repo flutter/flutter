@@ -10,7 +10,7 @@ Future<void> pumpsUseCase(WidgetTester tester, UseCase useCase) async {
   await tester.pumpWidget(MaterialApp(
     home: Builder(
       builder: (BuildContext context) {
-        return useCase.build(context);
+        return useCase.buildWithTitle(context);
       },
     ),
   ));

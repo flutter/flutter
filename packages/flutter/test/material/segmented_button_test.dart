@@ -4,6 +4,8 @@
 
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
+@Tags(<String>['reduced-test-set'])
+library;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -14,16 +16,23 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-Widget boilerplate({required Widget child}) {
-  return Directionality(
-    textDirection: TextDirection.ltr,
-    child: Center(child: child),
-  );
-}
-
 void main() {
   RenderObject getOverlayColor(WidgetTester tester) {
     return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+  }
+
+  Widget boilerplate({required Widget child}) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(child: child),
+    );
+  }
+
+  TextStyle iconStyle(WidgetTester tester, IconData icon) {
+    final RichText iconRichText = tester.widget<RichText>(
+      find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+    );
+    return iconRichText.text.style!;
   }
 
   testWidgets('SegmentsButton when compositing does not crash', (WidgetTester tester) async {
@@ -1122,6 +1131,132 @@ void main() {
         ),
     );
   }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+
+  testWidgets('SegmentedButton vertical aligned children', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(
+                  value: 0,
+                  label: Text('Option 0'),
+                ),
+                ButtonSegment<int>(
+                  value: 1,
+                  label: Text('Option 1'),
+                ),
+                ButtonSegment<int>(
+                  value: 2,
+                  label: Text('Option 2'),
+                ),
+                ButtonSegment<int>(
+                  value: 3,
+                  label: Text('Option 3'),
+                ),
+              ],
+              onSelectionChanged: (Set<int> selected) {},
+              selected: const <int>{-1}, // Prevent any of ButtonSegment to be selected
+              direction: Axis.vertical,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Rect? previewsChildRect;
+    for (int i = 0; i <= 3; i++) {
+      final Rect currentChildRect = tester.getRect(find.widgetWithText(TextButton, 'Option $i'));
+      if (previewsChildRect != null) {
+        expect(currentChildRect.left, previewsChildRect.left);
+        expect(currentChildRect.right, previewsChildRect.right);
+        expect(currentChildRect.top, previewsChildRect.top + previewsChildRect.height);
+      }
+      previewsChildRect = currentChildRect;
+    }
+  });
+
+
+  testWidgets('SegmentedButton vertical aligned golden image', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: RepaintBoundary(
+              key: key,
+              child: SegmentedButton<int>(
+                segments: const <ButtonSegment<int>>[
+                  ButtonSegment<int>(
+                    value: 0,
+                    label: Text('Option 0'),
+                  ),
+                  ButtonSegment<int>(
+                    value: 1,
+                    label: Text('Option 1'),
+                  ),
+                ],
+                selected: const <int>{0}, // Prevent any of ButtonSegment to be selected
+                direction: Axis.vertical,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('segmented_button_test_vertical.png'),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/154798.
+  testWidgets('SegmentedButton.styleFrom can customize the button icon', (WidgetTester tester) async {
+    const Color iconColor = Color(0xFFF000FF);
+    const double iconSize = 32.0;
+    const Color disabledIconColor = Color(0xFFFFF000);
+    Widget buildButton({ bool enabled = true }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: SegmentedButton<int>(
+              style: SegmentedButton.styleFrom(
+                iconColor: iconColor,
+                iconSize: iconSize,
+                disabledIconColor: disabledIconColor,
+              ),
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(
+                  value: 0,
+                  label: Text('Add'),
+                  icon: Icon(Icons.add),
+                ),
+                ButtonSegment<int>(
+                  value: 1,
+                  label: Text('Subtract'),
+                  icon: Icon(Icons.remove),
+                ),
+              ],
+              showSelectedIcon: false,
+              onSelectionChanged: enabled ? (Set<int> selected) {} : null,
+              selected: const <int>{0},
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test enabled button.
+    await tester.pumpWidget(buildButton());
+    expect(tester.getSize(find.byIcon(Icons.add)), const Size(iconSize, iconSize));
+    expect(iconStyle(tester, Icons.add).color, iconColor);
+
+    // Test disabled button.
+    await tester.pumpWidget(buildButton(enabled: false));
+    expect(iconStyle(tester, Icons.add).color, disabledIconColor);
+  });
 }
 
 Set<MaterialState> enabled = const <MaterialState>{};

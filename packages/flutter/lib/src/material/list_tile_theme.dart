@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'checkbox_list_tile.dart';
+/// @docImport 'drawer.dart';
+/// @docImport 'expansion_tile.dart';
+/// @docImport 'radio_list_tile.dart';
+/// @docImport 'switch_list_tile.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -65,6 +72,7 @@ class ListTileThemeData with Diagnosticable {
     this.visualDensity,
     this.minTileHeight,
     this.titleAlignment,
+    this.controlAffinity,
   });
 
   /// Overrides the default value of [ListTile.dense].
@@ -127,6 +135,10 @@ class ListTileThemeData with Diagnosticable {
   /// If specified, overrides the default value of [ListTile.titleAlignment].
   final ListTileTitleAlignment? titleAlignment;
 
+  /// If specified, overrides the default value of [CheckboxListTile.controlAffinity]
+  /// or [ExpansionTile.controlAffinity] or [SwitchListTile.controlAffinity] or [RadioListTile.controlAffinity].
+  final ListTileControlAffinity? controlAffinity;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   ListTileThemeData copyWith({
@@ -151,6 +163,7 @@ class ListTileThemeData with Diagnosticable {
     bool? isThreeLine,
     VisualDensity? visualDensity,
     ListTileTitleAlignment? titleAlignment,
+    ListTileControlAffinity? controlAffinity,
   }) {
     return ListTileThemeData(
       dense: dense ?? this.dense,
@@ -173,6 +186,7 @@ class ListTileThemeData with Diagnosticable {
       mouseCursor: mouseCursor ?? this.mouseCursor,
       visualDensity: visualDensity ?? this.visualDensity,
       titleAlignment: titleAlignment ?? this.titleAlignment,
+      controlAffinity: controlAffinity ?? this.controlAffinity,
     );
   }
 
@@ -202,32 +216,36 @@ class ListTileThemeData with Diagnosticable {
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
       titleAlignment: t < 0.5 ? a?.titleAlignment : b?.titleAlignment,
+      controlAffinity: t < 0.5 ? a?.controlAffinity : b?.controlAffinity,
     );
   }
 
   @override
-  int get hashCode => Object.hash(
-    dense,
-    shape,
-    style,
-    selectedColor,
-    iconColor,
-    textColor,
-    titleTextStyle,
-    subtitleTextStyle,
-    leadingAndTrailingTextStyle,
-    contentPadding,
-    tileColor,
-    selectedTileColor,
-    horizontalTitleGap,
-    minVerticalPadding,
-    minLeadingWidth,
-    minTileHeight,
-    enableFeedback,
-    mouseCursor,
-    visualDensity,
-    titleAlignment,
-  );
+  int get hashCode => Object.hashAll(
+        <Object?>[
+          dense,
+          shape,
+          style,
+          selectedColor,
+          iconColor,
+          textColor,
+          titleTextStyle,
+          subtitleTextStyle,
+          leadingAndTrailingTextStyle,
+          contentPadding,
+          tileColor,
+          selectedTileColor,
+          horizontalTitleGap,
+          minVerticalPadding,
+          minLeadingWidth,
+          minTileHeight,
+          enableFeedback,
+          mouseCursor,
+          visualDensity,
+          titleAlignment,
+          controlAffinity,
+        ],
+      );
 
   @override
   bool operator ==(Object other) {
@@ -257,7 +275,8 @@ class ListTileThemeData with Diagnosticable {
       && other.enableFeedback == enableFeedback
       && other.mouseCursor == mouseCursor
       && other.visualDensity == visualDensity
-      && other.titleAlignment == titleAlignment;
+      && other.titleAlignment == titleAlignment
+      && other.controlAffinity == controlAffinity;
   }
 
   @override
@@ -283,6 +302,7 @@ class ListTileThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
     properties.add(DiagnosticsProperty<ListTileTitleAlignment>('titleAlignment', titleAlignment, defaultValue: null));
+    properties.add(DiagnosticsProperty<ListTileControlAffinity>('controlAffinity', controlAffinity, defaultValue: null));
   }
 }
 
@@ -317,6 +337,7 @@ class ListTileTheme extends InheritedTheme {
     double? horizontalTitleGap,
     double? minVerticalPadding,
     double? minLeadingWidth,
+    ListTileControlAffinity? controlAffinity,
     required super.child,
   }) : assert(
          data == null ||
@@ -331,7 +352,8 @@ class ListTileTheme extends InheritedTheme {
           mouseCursor ??
           horizontalTitleGap ??
           minVerticalPadding ??
-          minLeadingWidth) == null),
+          minLeadingWidth ??
+          controlAffinity) == null),
        _data = data,
        _dense = dense,
        _shape = shape,
@@ -346,7 +368,8 @@ class ListTileTheme extends InheritedTheme {
        _mouseCursor = mouseCursor,
        _horizontalTitleGap = horizontalTitleGap,
        _minVerticalPadding = minVerticalPadding,
-       _minLeadingWidth = minLeadingWidth;
+       _minLeadingWidth = minLeadingWidth,
+      _controlAffinity = controlAffinity;
 
   final ListTileThemeData? _data;
   final bool? _dense;
@@ -363,6 +386,7 @@ class ListTileTheme extends InheritedTheme {
   final double? _minLeadingWidth;
   final bool? _enableFeedback;
   final MaterialStateProperty<MouseCursor?>? _mouseCursor;
+  final ListTileControlAffinity? _controlAffinity;
 
   /// The configuration of this theme.
   ListTileThemeData get data {
@@ -381,6 +405,7 @@ class ListTileTheme extends InheritedTheme {
       horizontalTitleGap: _horizontalTitleGap,
       minVerticalPadding: _minVerticalPadding,
       minLeadingWidth: _minLeadingWidth,
+      controlAffinity: _controlAffinity,
     );
   }
 
@@ -462,6 +487,13 @@ class ListTileTheme extends InheritedTheme {
   /// [ListTileThemeData.enableFeedback] property instead.
   bool? get enableFeedback => _data != null ? _data.enableFeedback : _enableFeedback;
 
+  /// Overrides the default value of [CheckboxListTile.controlAffinity]
+  /// or [ExpansionTile.controlAffinity] or [SwitchListTile.controlAffinity] or [RadioListTile.controlAffinity]
+  ///
+  /// This property is obsolete: please use the
+  /// [ListTileThemeData.controlAffinity] property instead.
+  ListTileControlAffinity? get controlAffinity => _data != null ? _data.controlAffinity : _controlAffinity;
+
   /// The [data] property of the closest instance of this class that
   /// encloses the given context.
   ///
@@ -502,6 +534,7 @@ class ListTileTheme extends InheritedTheme {
     ListTileTitleAlignment? titleAlignment,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
     VisualDensity? visualDensity,
+    ListTileControlAffinity? controlAffinity,
     required Widget child,
   }) {
     return Builder(
@@ -530,6 +563,7 @@ class ListTileTheme extends InheritedTheme {
             titleAlignment: titleAlignment ?? parent.titleAlignment,
             mouseCursor: mouseCursor ?? parent.mouseCursor,
             visualDensity: visualDensity ?? parent.visualDensity,
+            controlAffinity: controlAffinity ?? parent.controlAffinity,
           ),
           child: child,
         );

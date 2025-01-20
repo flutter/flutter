@@ -2,9 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'material.dart';
+/// @docImport 'outlined_button.dart';
+/// @docImport 'text_button.dart';
+/// @docImport 'theme.dart';
+/// @docImport 'theme_data.dart';
+library;
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+
+import 'theme.dart';
 import 'typography.dart';
 
 /// Material design text theme.
@@ -13,8 +22,9 @@ import 'typography.dart';
 /// (e.g., labelLarge, bodySmall). Rather than creating a [TextTheme] directly,
 /// you can obtain an instance as [Typography.black] or [Typography.white].
 ///
-/// To obtain the current text theme, call [Theme.of] with the current
-/// [BuildContext] and read the [ThemeData.textTheme] property.
+/// To obtain the current text theme, call [TextTheme.of] with the current
+/// [BuildContext]. This is equivalent to calling [Theme.of] and reading
+/// the [ThemeData.textTheme] property.
 ///
 /// The names of the TextTheme properties match this table from the
 /// [Material Design spec](https://m3.material.io/styles/typography/tokens).
@@ -25,6 +35,28 @@ import 'typography.dart';
 /// current (2021) version of the specification
 /// ([https://m3.material.io/styles/typography/tokens](https://m3.material.io/styles/typography/tokens)).
 ///
+/// The **2021** spec has fifteen text styles:
+///
+/// | NAME           | SIZE |  HEIGHT |  WEIGHT |  SPACING |             |
+/// |----------------|------|---------|---------|----------|-------------|
+/// | displayLarge   | 57.0 |   64.0  | regular | -0.25    |             |
+/// | displayMedium  | 45.0 |   52.0  | regular |  0.0     |             |
+/// | displaySmall   | 36.0 |   44.0  | regular |  0.0     |             |
+/// | headlineLarge  | 32.0 |   40.0  | regular |  0.0     |             |
+/// | headlineMedium | 28.0 |   36.0  | regular |  0.0     |             |
+/// | headlineSmall  | 24.0 |   32.0  | regular |  0.0     |             |
+/// | titleLarge     | 22.0 |   28.0  | regular |  0.0     |             |
+/// | titleMedium    | 16.0 |   24.0  | medium  |  0.15    |             |
+/// | titleSmall     | 14.0 |   20.0  | medium  |  0.1     |             |
+/// | bodyLarge      | 16.0 |   24.0  | regular |  0.5     |             |
+/// | bodyMedium     | 14.0 |   20.0  | regular |  0.25    |             |
+/// | bodySmall      | 12.0 |   16.0  | regular |  0.4     |             |
+/// | labelLarge     | 14.0 |   20.0  | medium  |  0.1     |             |
+/// | labelMedium    | 12.0 |   16.0  | medium  |  0.5     |             |
+/// | labelSmall     | 11.0 |   16.0  | medium  |  0.5     |             |
+///
+/// ...where "regular" is `FontWeight.w400` and "medium" is `FontWeight.w500`.
+///
 /// The names of the 2018 TextTheme properties match this table from the
 /// [Material Design spec](https://material.io/design/typography/the-type-system.html#type-scale)
 /// with a few exceptions: the styles called H1-H6 in the spec are
@@ -32,7 +64,7 @@ import 'typography.dart';
 /// bodyLarge and bodyMedium, caption is now bodySmall, button is labelLarge,
 /// and overline is now labelSmall.
 ///
-/// The 2018 spec has thirteen text styles:
+/// The **2018** spec has thirteen text styles:
 ///
 /// | NAME           | SIZE |  WEIGHT |  SPACING |             |
 /// |----------------|------|---------|----------|-------------|
@@ -564,6 +596,25 @@ class TextTheme with Diagnosticable {
       labelSmall: TextStyle.lerp(a?.labelSmall, b?.labelSmall, t),
     );
   }
+
+  /// The [ThemeData.textTheme] property of the ambient [Theme].
+  ///
+  /// Equivalent to `Theme.of(context).textTheme`.
+  ///
+  /// See also:
+  /// * [TextTheme.primaryOf], which returns the [ThemeData.primaryTextTheme] property of
+  ///   the ambient [Theme] instead.
+  static TextTheme of(BuildContext context) => Theme.of(context).textTheme;
+
+  /// The [ThemeData.primaryTextTheme] property of the ambient [Theme].
+  ///
+  ///
+  /// Equivalent to `Theme.of(context).primaryTextTheme`.
+  ///
+  /// See also:
+  /// * [TextTheme.of], which returns the [ThemeData.textTheme] property of the ambient
+  ///   [Theme] instead.
+  static TextTheme primaryOf(BuildContext context) => Theme.of(context).primaryTextTheme;
 
   @override
   bool operator ==(Object other) {

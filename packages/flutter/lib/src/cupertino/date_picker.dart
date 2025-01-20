@@ -487,54 +487,38 @@ class CupertinoDatePicker extends StatefulWidget {
     bool showDayOfWeek, {
     bool standaloneMonth = false,
   }) {
-    String longestText = '';
+    final List<String> longTexts = <String>[];
 
     switch (columnType) {
       case _PickerColumnType.date:
-        // Measuring the length of all possible date is impossible, so here
-        // just some dates are measured.
         for (int i = 1; i <= 12; i++) {
-          // An arbitrary date.
-          final String date =
-              localizations.datePickerMediumDate(DateTime(2018, i, 25));
-          if (longestText.length < date.length) {
-            longestText = date;
-          }
+          final String date = localizations.datePickerMediumDate(DateTime(2018, i, 25));
+          longTexts.add(date);
         }
       case _PickerColumnType.hour:
         for (int i = 0; i < 24; i++) {
           final String hour = localizations.datePickerHour(i);
-          if (longestText.length < hour.length) {
-            longestText = hour;
-          }
+          longTexts.add(hour);
         }
       case _PickerColumnType.minute:
         for (int i = 0; i < 60; i++) {
           final String minute = localizations.datePickerMinute(i);
-          if (longestText.length < minute.length) {
-            longestText = minute;
-          }
+          longTexts.add(minute);
         }
       case _PickerColumnType.dayPeriod:
-        longestText =
-          localizations.anteMeridiemAbbreviation.length > localizations.postMeridiemAbbreviation.length
-            ? localizations.anteMeridiemAbbreviation
-            : localizations.postMeridiemAbbreviation;
+        longTexts.add(localizations.anteMeridiemAbbreviation);
+        longTexts.add(localizations.postMeridiemAbbreviation);
       case _PickerColumnType.dayOfMonth:
         int longestDayOfMonth = 1;
-        for (int i = 1; i <=31; i++) {
+        for (int i = 1; i <= 31; i++) {
           final String dayOfMonth = localizations.datePickerDayOfMonth(i);
-          if (longestText.length < dayOfMonth.length) {
-            longestText = dayOfMonth;
-            longestDayOfMonth = i;
-          }
+          longTexts.add(dayOfMonth);
+          longestDayOfMonth = i;
         }
         if (showDayOfWeek) {
           for (int wd = 1; wd < DateTime.daysPerWeek; wd++) {
             final String dayOfMonth = localizations.datePickerDayOfMonth(longestDayOfMonth, wd);
-            if (longestText.length < dayOfMonth.length) {
-              longestText = dayOfMonth;
-            }
+            longTexts.add(dayOfMonth);
           }
         }
       case _PickerColumnType.month:
@@ -542,23 +526,35 @@ class CupertinoDatePicker extends StatefulWidget {
           final String month = standaloneMonth
               ? localizations.datePickerStandaloneMonth(i)
               : localizations.datePickerMonth(i);
-          if (longestText.length < month.length) {
-            longestText = month;
-          }
+          longTexts.add(month);
         }
       case _PickerColumnType.year:
-        longestText = localizations.datePickerYear(2018);
+        longTexts.add(localizations.datePickerYear(2018));
     }
 
-    assert(longestText != '', 'column type is not appropriate');
+    assert(longTexts.isNotEmpty && longTexts.every((String text) => text.isNotEmpty), 'column type is not appropriate');
 
-    return TextPainter.computeMaxIntrinsicWidth(
-      text: TextSpan(
-        style: _themeTextStyle(context),
-        text: longestText,
-      ),
-      textDirection: Directionality.of(context),
-    );
+    return getColumnWidth(texts: longTexts, context: context);
+  }
+
+  /// Returns the width of column in the picker.
+  ///
+  /// This method is intended for testing only. It calculates the width of the
+  /// widest column in the picker based on the provided list of texts and the
+  /// given [BuildContext].
+  @visibleForTesting
+  static double getColumnWidth({
+    required List<String> texts,
+    required BuildContext context,
+    TextStyle? textStyle,
+  }) {
+    return texts.map((String text) => TextPainter.computeMaxIntrinsicWidth(
+        text: TextSpan(
+          style: textStyle ?? _themeTextStyle(context),
+          text: text,
+        ),
+        textDirection: Directionality.of(context),
+      )).reduce(math.max);
   }
 }
 

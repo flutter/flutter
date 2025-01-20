@@ -2,7 +2,7 @@
   "scriptCategory": "tall",
   "timeOfDayFormat": "H:mm",
   "selectedRowCountTitleOne": "۱ مورد انتخاب شد",
-  "openAppDrawerTooltip": "باز کردن منوی پیمایش",
+  "openAppDrawerTooltip": "باز کردن منو پیمایش",
   "backButtonTooltip": "برگشت",
   "closeButtonTooltip": "بستن",
   "deleteButtonTooltip": "حذف",
@@ -135,8 +135,8 @@
   "bottomSheetLabel": "برگ زیرین",
   "scrimOnTapHint": "بستن $modalRouteContentName",
   "keyboardKeyShift": "کلید تبدیل",
-  "expansionTileExpandedHint": "برای جمع کردن، دوضربه بزنید",
-  "expansionTileCollapsedHint": "برای ازهم بازکردن، دوضربه بزنید",
+  "expansionTileExpandedHint": "برای جمع کردن، دو تک‌ضرب بزنید",
+  "expansionTileCollapsedHint": "برای ازهم بازکردن، دو تک‌ضرب بزنید",
   "expansionTileExpandedTapHint": "جمع کردن",
   "expansionTileCollapsedTapHint": "ازهم بازکردن برای جزئیات بیشتر",
   "expandedHint": "جمع‌شده",
@@ -144,7 +144,7 @@
   "menuDismissLabel": "بستن منو",
   "lookUpButtonLabel": "جستجو",
   "searchWebButtonLabel": "جستجو در وب",
-  "shareButtonLabel": "هم‌رسانی…",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "هم‌رسانی کردن",
+  "clearButtonTooltip": "پاک کردن نوشتار",
+  "selectedDateLabel": "انتخاب‌شده"
 }

@@ -2,6 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'elevated_button.dart';
+/// @docImport 'elevated_button_theme.dart';
+/// @docImport 'icon_button.dart';
+/// @docImport 'outlined_button.dart';
+/// @docImport 'outlined_button_theme.dart';
+/// @docImport 'text_button.dart';
+/// @docImport 'text_button_theme.dart';
+/// @docImport 'text_theme.dart';
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
@@ -114,7 +124,7 @@ class MaterialButton extends StatelessWidget {
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// Defines the button's base colors, and the defaults for the button's minimum
@@ -132,7 +142,7 @@ class MaterialButton extends StatelessWidget {
   /// The default text color depends on the button theme's text theme,
   /// [ButtonThemeData.textTheme].
   ///
-  /// If [textColor] is a [MaterialStateProperty<Color>], [disabledTextColor]
+  /// If [textColor] is a [WidgetStateProperty<Color>], [disabledTextColor]
   /// will be ignored.
   ///
   /// See also:
@@ -150,7 +160,7 @@ class MaterialButton extends StatelessWidget {
   /// The default value is the theme's disabled color,
   /// [ThemeData.disabledColor].
   ///
-  /// If [textColor] is a [MaterialStateProperty<Color>], [disabledTextColor]
+  /// If [textColor] is a [WidgetStateProperty<Color>], [disabledTextColor]
   /// will be ignored.
   ///
   /// See also:

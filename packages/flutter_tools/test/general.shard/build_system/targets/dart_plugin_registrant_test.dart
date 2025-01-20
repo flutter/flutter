@@ -56,11 +56,6 @@ const String _kSamplePackageJson = '''
 }
 ''';
 
-const String _kSamplePackagesFile = '''
-path_provider_linux:/path_provider_linux/lib/
-path_provider_example:lib/
-''';
-
 const String _kSamplePubspecFile = '''
 name: path_provider_example
 description: Demonstrates how to use the path_provider plugin.
@@ -177,8 +172,6 @@ void main() {
 
       projectDir.childFile('pubspec.yaml').createSync();
 
-      projectDir.childFile('.packages').createSync();
-
       final FlutterProject testProject = FlutterProject.fromDirectoryTest(projectDir);
       await DartPluginRegistrantTarget.test(testProject).build(environment);
 
@@ -210,8 +203,6 @@ void main() {
           ..writeAsStringSync(_kSamplePackageJson);
 
       projectDir.childFile('pubspec.yaml').writeAsStringSync(_kSamplePubspecFile);
-
-      projectDir.childFile('.packages').writeAsStringSync(_kSamplePackagesFile);
 
       projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
@@ -289,8 +280,6 @@ void main() {
 
       final File pubspec = projectDir.childFile('pubspec.yaml')..writeAsStringSync(_kSamplePubspecFile);
 
-      final File packages = projectDir.childFile('.packages')..writeAsStringSync(_kSamplePackagesFile);
-
       environment.fileSystem.currentDirectory
           .childDirectory('path_provider_linux')
           .childFile('pubspec.yaml')
@@ -308,7 +297,6 @@ void main() {
 
       // Simulate a user removing everything from pubspec.yaml.
       pubspec.writeAsStringSync(_kEmptyPubspecFile);
-      packages.writeAsStringSync(_kEmptyPackageJson);
       config.writeAsStringSync(_kEmptyPackageJson);
 
       await DartPluginRegistrantTarget.test(testProject).build(environment);
@@ -336,8 +324,6 @@ void main() {
           ..writeAsStringSync(_kSamplePackageJson);
 
       projectDir.childFile('pubspec.yaml').writeAsStringSync(_kSamplePubspecFile);
-
-      projectDir.childFile('.packages').writeAsStringSync(_kSamplePackagesFile);
 
       projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 

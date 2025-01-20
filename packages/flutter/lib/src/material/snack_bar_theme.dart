@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'bottom_navigation_bar.dart';
+/// @docImport 'color_scheme.dart';
+/// @docImport 'colors.dart';
+/// @docImport 'floating_action_button.dart';
+/// @docImport 'navigation_bar.dart';
+/// @docImport 'scaffold.dart';
+/// @docImport 'snack_bar.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -89,7 +98,7 @@ class SnackBarThemeData with Diagnosticable {
   /// Overrides the default value for [SnackBarAction.textColor].
   ///
   /// If null, [SnackBarAction] defaults to [ColorScheme.secondary] of
-  /// [ThemeData.colorScheme] .
+  /// [ThemeData.colorScheme].
   final Color? actionTextColor;
 
   /// Overrides the default value for [SnackBarAction.disabledTextColor].
@@ -149,6 +158,7 @@ class SnackBarThemeData with Diagnosticable {
   ///
   /// Must be a value between 0 and 1, if present.
   final double? actionOverflowThreshold;
+
   /// Overrides default value for [SnackBarAction.backgroundColor].
   ///
   /// If null, [SnackBarAction] falls back to [Colors.transparent].

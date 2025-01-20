@@ -944,7 +944,7 @@ void main() {
       paragraph.paint(paintingContext, Offset.zero);
       expect(paintingContext.canvas.drawnRect, const Rect.fromLTWH(14.0, 0.0, 56.0, 14.0));
       expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
-      expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
+      expect(paintingContext.canvas.drawnRectPaint!.color, isSameColorAs(selectionColor));
       // Selection highlight is painted before text.
       expect(paintingContext.canvas.drawnItemTypes, <Type>[Rect, ui.Paragraph]);
 
@@ -952,7 +952,7 @@ void main() {
       paragraph.paint(paintingContext, Offset.zero);
       expect(paintingContext.canvas.drawnRect, const Rect.fromLTWH(28.0, 0.0, 28.0, 14.0));
       expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
-      expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
+      expect(paintingContext.canvas.drawnRectPaint!.color, isSameColorAs(selectionColor));
     });
 
 // Regression test for https://github.com/flutter/flutter/issues/126652.
@@ -979,7 +979,7 @@ void main() {
       paragraph.paint(paintingContext, Offset.zero);
       expect(paintingContext.canvas.drawnRect!.isEmpty, false);
       expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
-      expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
+      expect(paintingContext.canvas.drawnRectPaint!.color, isSameColorAs(selectionColor));
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
 
     test('getPositionForOffset works', () async {

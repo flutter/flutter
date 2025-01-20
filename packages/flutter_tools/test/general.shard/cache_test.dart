@@ -992,9 +992,6 @@ void main() {
 
     expect(await pubDependencies.isUpToDate(fileSystem), false); // no package config
 
-    fileSystem.file('packages/flutter_tools/.packages')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('\n');
     fileSystem.file('packages/flutter_tools/.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -1039,7 +1036,7 @@ void main() {
     expect(
       pub.invocations.first,
       predicate<FakePubInvocation>(
-        (FakePubInvocation invocation) => invocation.outputMode == PubOutputMode.none,
+        (FakePubInvocation invocation) => invocation.outputMode == PubOutputMode.failuresOnly,
         'Pub invoked with PubOutputMode.none',
       ),
     );

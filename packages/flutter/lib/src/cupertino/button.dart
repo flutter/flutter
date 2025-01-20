@@ -6,24 +6,38 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'constants.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 
-// Measured against iOS 12 in Xcode.
-const EdgeInsets _kButtonPadding = EdgeInsets.all(16.0);
-const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
-  vertical: 14.0,
-  horizontal: 64.0,
-);
+// Measured against iOS (17) [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/buttons#iOS-iPadOS).
 
-// The relative values needed to transform a color to it's equivalent focus
-// outline color.
-const double _kCupertinoFocusColorOpacity = 0.80;
-const double _kCupertinoFocusColorBrightness = 0.69;
-const double _kCupertinoFocusColorSaturation = 0.835;
+/// The size of a [CupertinoButton].
+/// Based on the iOS (17) [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/buttons#iOS-iPadOS).
+enum CupertinoButtonSize {
+  /// Displays a smaller button with round sides and smaller text (uses [CupertinoTextThemeData.actionSmallTextStyle]).
+  small,
+  /// Displays a medium sized button with round sides and regular-sized text.
+  medium,
+  /// Displays a (classic) large button with rounded edges and regular-sized text.
+  large,
+}
+
+/// The style of a [CupertinoButton] that changes the style of the button's background.
+///
+/// Based on the iOS Human Interface Guidelines (https://developer.apple.com/design/human-interface-guidelines/buttons#iOS-iPadOS).
+enum _CupertinoButtonStyle {
+  /// No background or border, primary foreground color.
+  plain,
+  /// Translucent background, primary foreground color.
+  tinted,
+  /// Solid background, contrasting foreground color.
+  filled,
+}
 
 /// An iOS-style button.
 ///
@@ -54,20 +68,50 @@ class CupertinoButton extends StatefulWidget {
   const CupertinoButton({
     super.key,
     required this.child,
+    this.sizeStyle = CupertinoButtonSize.large,
     this.padding,
     this.color,
     this.disabledColor = CupertinoColors.quaternarySystemFill,
-    this.minSize = kMinInteractiveDimensionCupertino,
+    this.minSize,
     this.pressedOpacity = 0.4,
-    this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
+    this.borderRadius,
     this.alignment = Alignment.center,
     this.focusColor,
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
+    this.onLongPress,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
-       _filled = false;
+       _style = _CupertinoButtonStyle.plain;
+
+  /// Creates an iOS-style button with a tinted background.
+  ///
+  /// The background color is derived from the [CupertinoTheme]'s `primaryColor` + transparency.
+  /// The foreground color is the [CupertinoTheme]'s `primaryColor`.
+  ///
+  /// To specify a custom background color, use the [color] argument of the
+  /// default constructor.
+  ///
+  /// To match the iOS "grey" button style, set [color] to [CupertinoColors.systemGrey].
+  const CupertinoButton.tinted({
+    super.key,
+    required this.child,
+    this.sizeStyle = CupertinoButtonSize.large,
+    this.padding,
+    this.color,
+    this.disabledColor = CupertinoColors.tertiarySystemFill,
+    this.minSize,
+    this.pressedOpacity = 0.4,
+    this.borderRadius,
+    this.alignment = Alignment.center,
+    this.focusColor,
+    this.focusNode,
+    this.onFocusChange,
+    this.autofocus = false,
+    this.onLongPress,
+    required this.onPressed,
+  }) : _style = _CupertinoButtonStyle.tinted;
 
   /// Creates an iOS-style button with a filled background.
   ///
@@ -78,20 +122,22 @@ class CupertinoButton extends StatefulWidget {
   const CupertinoButton.filled({
     super.key,
     required this.child,
+    this.sizeStyle = CupertinoButtonSize.large,
     this.padding,
-    this.disabledColor = CupertinoColors.quaternarySystemFill,
-    this.minSize = kMinInteractiveDimensionCupertino,
+    this.disabledColor = CupertinoColors.tertiarySystemFill,
+    this.minSize,
     this.pressedOpacity = 0.4,
-    this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
+    this.borderRadius,
     this.alignment = Alignment.center,
     this.focusColor,
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
+    this.onLongPress,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        color = null,
-       _filled = true;
+       _style = _CupertinoButtonStyle.filled;
 
   /// The widget below this widget in the tree.
   ///
@@ -121,8 +167,11 @@ class CupertinoButton extends StatefulWidget {
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
-  /// If this is set to null, the button will be disabled.
+  /// If [onPressed] and [onLongPress] callbacks are null, then the button will be disabled.
   final VoidCallback? onPressed;
+
+  /// If [onPressed] and [onLongPress] callbacks are null, then the button will be disabled.
+  final VoidCallback? onLongPress;
 
   /// Minimum size of the button.
   ///
@@ -139,8 +188,13 @@ class CupertinoButton extends StatefulWidget {
 
   /// The radius of the button's corners when it has a background color.
   ///
-  /// Defaults to round corners of 8 logical pixels.
+  /// Defaults to [kCupertinoButtonSizeBorderRadius], based on [sizeStyle].
   final BorderRadius? borderRadius;
+
+  /// The size of the button.
+  ///
+  /// Defaults to [CupertinoButtonSize.large].
+  final CupertinoButtonSize sizeStyle;
 
   /// The alignment of the button's [child].
   ///
@@ -172,11 +226,11 @@ class CupertinoButton extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  final bool _filled;
+  final _CupertinoButtonStyle _style;
 
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
-  /// enable a button, set its [onPressed] property to a non-null value.
-  bool get enabled => onPressed != null;
+  /// enable a button, set [onPressed] or [onLongPress] to a non-null value.
+  bool get enabled => onPressed != null || onLongPress != null;
 
   @override
   State<CupertinoButton> createState() => _CupertinoButtonState();
@@ -253,6 +307,13 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     }
   }
 
+  void _handleTap([Intent? _]) {
+    if (widget.onPressed != null) {
+      widget.onPressed!();
+      context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
+    }
+  }
+
   void _animate() {
     if (_animationController.isAnimating) {
       return;
@@ -274,35 +335,58 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     });
   }
 
+  late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
+    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleTap),
+  };
+
   @override
   Widget build(BuildContext context) {
     final bool enabled = widget.enabled;
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
     final Color primaryColor = themeData.primaryColor;
-    final Color? backgroundColor = widget.color == null
-      ? (widget._filled ? primaryColor : null)
-      : CupertinoDynamicColor.maybeResolve(widget.color, context);
-
-    final Color foregroundColor = backgroundColor != null
+    final Color? backgroundColor = (
+      widget.color == null
+        ? widget._style != _CupertinoButtonStyle.plain
+          ? primaryColor
+          : null
+        : CupertinoDynamicColor.maybeResolve(widget.color, context)
+    )?.withOpacity(
+      widget._style == _CupertinoButtonStyle.tinted
+        ? CupertinoTheme.brightnessOf(context) == Brightness.light
+          ? kCupertinoButtonTintedOpacityLight
+          : kCupertinoButtonTintedOpacityDark
+        : widget.color?.opacity ?? 1.0,
+    );
+    final Color foregroundColor = widget._style == _CupertinoButtonStyle.filled
       ? themeData.primaryContrastingColor
       : enabled
         ? primaryColor
-        : CupertinoDynamicColor.resolve(CupertinoColors.placeholderText, context);
+        : CupertinoDynamicColor.resolve(CupertinoColors.tertiaryLabel, context);
 
     final Color effectiveFocusOutlineColor = widget.focusColor ??
       HSLColor
         .fromColor((backgroundColor ?? CupertinoColors.activeBlue)
-        .withOpacity(_kCupertinoFocusColorOpacity))
-        .withLightness(_kCupertinoFocusColorBrightness)
-        .withSaturation(_kCupertinoFocusColorSaturation)
+          .withOpacity(kCupertinoFocusColorOpacity)
+        ).withLightness(kCupertinoFocusColorBrightness)
+        .withSaturation(kCupertinoFocusColorSaturation)
         .toColor();
 
-    final TextStyle textStyle = themeData.textTheme.textStyle.copyWith(color: foregroundColor);
-    final IconThemeData iconTheme = IconTheme.of(context).copyWith(color: foregroundColor);
+    final TextStyle textStyle = (
+      widget.sizeStyle == CupertinoButtonSize.small
+        ? themeData.textTheme.actionSmallTextStyle
+        : themeData.textTheme.actionTextStyle
+    ).copyWith(color: foregroundColor);
+    final IconThemeData iconTheme = IconTheme.of(context).copyWith(
+      color: foregroundColor,
+      size: textStyle.fontSize != null
+        ? textStyle.fontSize! * 1.2
+        : kCupertinoButtonDefaultIconSize,
+    );
 
     return MouseRegion(
       cursor: enabled && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
       child: FocusableActionDetector(
+        actions: _actionMap,
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         onFocusChange: widget.onFocusChange,
@@ -314,15 +398,14 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
           onTapUp: enabled ? _handleTapUp : null,
           onTapCancel: enabled ? _handleTapCancel : null,
           onTap: widget.onPressed,
+          onLongPress: widget.onLongPress,
           child: Semantics(
             button: true,
             child: ConstrainedBox(
-              constraints: widget.minSize == null
-                ? const BoxConstraints()
-                : BoxConstraints(
-                    minWidth: widget.minSize!,
-                    minHeight: widget.minSize!,
-                  ),
+              constraints: BoxConstraints(
+                minWidth: widget.minSize ?? kCupertinoButtonMinSize[widget.sizeStyle] ?? kMinInteractiveDimensionCupertino,
+                minHeight: widget.minSize ?? kCupertinoButtonMinSize[widget.sizeStyle] ?? kMinInteractiveDimensionCupertino,
+              ),
               child: FadeTransition(
                 opacity: _opacityAnimation,
                 child: DecoratedBox(
@@ -336,15 +419,13 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                           ),
                         )
                       : null,
-                    borderRadius: widget.borderRadius,
+                    borderRadius: widget.borderRadius ?? kCupertinoButtonSizeBorderRadius[widget.sizeStyle],
                     color: backgroundColor != null && !enabled
                       ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
                       : backgroundColor,
                   ),
                   child: Padding(
-                    padding: widget.padding ?? (backgroundColor != null
-                      ? _kBackgroundButtonPadding
-                      : _kButtonPadding),
+                    padding: widget.padding ?? kCupertinoButtonPadding[widget.sizeStyle]!,
                     child: Align(
                       alignment: widget.alignment,
                       widthFactor: 1.0,

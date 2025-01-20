@@ -454,7 +454,11 @@ Future<String> eval(
   return output.toString().trimRight();
 }
 
-List<String> _flutterCommandArgs(String command, List<String> options) {
+List<String> _flutterCommandArgs(
+  String command,
+  List<String> options, {
+  bool driveWithDds = false,
+}) {
   // Commands support the --device-timeout flag.
   final Set<String> supportedDeviceTimeoutCommands = <String>{
     'attach',
@@ -477,6 +481,10 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
         '--device-timeout',
         '5',
       ],
+
+    // DDS should generally be disabled for flutter drive in CI.
+    // See https://github.com/flutter/flutter/issues/152684.
+    if (command == 'drive' && !driveWithDds) '--no-dds',
 
     if (command == 'drive' && hostAgent.dumpDirectory != null) ...<String>[
       '--screenshot',
@@ -501,12 +509,26 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
 Future<int> flutter(String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
+  bool driveWithDds = false,  // `flutter drive` tests should generally have dds disabled.
+                              // The exception is tests that also exercise DevTools, such as
+                              // DevToolsMemoryTest in perf_tests.dart.
   Map<String, String>? environment,
   String? workingDirectory,
+  StringBuffer? output, // if not null, the stdout will be written here
+  StringBuffer? stderr, // if not null, the stderr will be written here
 }) async {
-  final List<String> args = _flutterCommandArgs(command, options);
-  final int exitCode = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-    canFail: canFail, environment: environment, workingDirectory: workingDirectory);
+  final List<String> args = _flutterCommandArgs(
+    command, options, driveWithDds: driveWithDds,
+  );
+  final int exitCode = await exec(
+      path.join(flutterDirectory.path, 'bin', 'flutter'),
+      args,
+      canFail: canFail,
+      environment: environment,
+      workingDirectory: workingDirectory,
+      output: output,
+      stderr: stderr,
+  );
 
   if (exitCode != 0 && !canFail) {
     await _flutterScreenshot(workingDirectory: workingDirectory);
@@ -629,7 +651,7 @@ String get dartBin =>
 String get pubBin =>
     path.join(flutterDirectory.path, 'bin', 'cache', 'dart-sdk', 'bin', 'pub');
 
-Future<int> dart(List<String> args) => exec(dartBin, <String>['--disable-dart-dev', ...args]);
+Future<int> dart(List<String> args) => exec(dartBin, args);
 
 /// Returns a future that completes with a path suitable for JAVA_HOME
 /// or with null, if Java cannot be found.

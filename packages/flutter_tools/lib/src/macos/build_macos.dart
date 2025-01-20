@@ -16,6 +16,7 @@ import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/xcode_build_settings.dart';
 import '../ios/xcodeproj.dart';
+import '../migrations/swift_package_manager_gitignore_migration.dart';
 import '../migrations/swift_package_manager_integration_migration.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
@@ -27,6 +28,8 @@ import 'migrations/flutter_application_migration.dart';
 import 'migrations/macos_deployment_target_migration.dart';
 import 'migrations/nsapplicationmain_deprecation_migration.dart';
 import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
+import 'migrations/secure_restorable_state_migration.dart';
+import 'swift_package_manager.dart';
 
 /// When run in -quiet mode, Xcode should only print from the underlying tasks to stdout.
 /// Passing this regexp to trace moves the stdout output to stderr.
@@ -87,6 +90,7 @@ Future<void> buildMacOS({
     XcodeThinBinaryBuildPhaseInputPathsMigration(flutterProject.macos, globals.logger),
     FlutterApplicationMigration(flutterProject.macos, globals.logger),
     NSApplicationMainDeprecationMigration(flutterProject.macos, globals.logger),
+    SecureRestorableStateMigration(flutterProject.macos, globals.logger),
     if (flutterProject.usesSwiftPackageManager && flutterProject.macos.flutterPluginSwiftPackageManifest.existsSync())
       SwiftPackageManagerIntegrationMigration(
         flutterProject.macos,
@@ -97,6 +101,7 @@ Future<void> buildMacOS({
         fileSystem: globals.fs,
         plistParser: globals.plistParser,
       ),
+      SwiftPackageManagerGitignoreMigration(flutterProject, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -105,29 +110,6 @@ Future<void> buildMacOS({
   final Directory flutterBuildDir = globals.fs.directory(getMacOSBuildDirectory());
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
-  }
-  // Write configuration to an xconfig file in a standard location.
-  await updateGeneratedXcodeProperties(
-    project: flutterProject,
-    buildInfo: buildInfo,
-    targetOverride: targetOverride,
-    useMacOSConfig: true,
-  );
-
-  // TODO(vashworth): Call `SwiftPackageManager.updateMinimumDeployment`
-  // using MACOSX_DEPLOYMENT_TARGET once https://github.com/flutter/flutter/issues/146204
-  // is fixed.
-
-  await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
-  // If the xcfilelists do not exist, create empty version.
-  if (!flutterProject.macos.inputFileList.existsSync()) {
-    flutterProject.macos.inputFileList.createSync(recursive: true);
-  }
-  if (!flutterProject.macos.outputFileList.existsSync()) {
-    flutterProject.macos.outputFileList.createSync(recursive: true);
-  }
-  if (configOnly) {
-    return;
   }
 
   final Directory xcodeProject = flutterProject.macos.xcodeProject;
@@ -148,6 +130,44 @@ Future<void> buildMacOS({
   if (configuration == null) {
     throwToolExit('Unable to find expected configuration in Xcode project.');
   }
+
+  final Map<String, String> buildSettings = await flutterProject.macos.buildSettingsForBuildInfo(
+    buildInfo,
+    scheme: scheme,
+    configuration: configuration,
+  ) ?? <String, String>{};
+
+  // Write configuration to an xconfig file in a standard location.
+  await updateGeneratedXcodeProperties(
+    project: flutterProject,
+    buildInfo: buildInfo,
+    targetOverride: targetOverride,
+    useMacOSConfig: true,
+  );
+
+  if (flutterProject.usesSwiftPackageManager) {
+    final String? macOSDeploymentTarget = buildSettings['MACOSX_DEPLOYMENT_TARGET'];
+    if (macOSDeploymentTarget != null) {
+      SwiftPackageManager.updateMinimumDeployment(
+        platform: SupportedPlatform.macos,
+        project: flutterProject.macos,
+        deploymentTarget: macOSDeploymentTarget,
+      );
+    }
+  }
+
+  await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
+  // If the xcfilelists do not exist, create empty version.
+  if (!flutterProject.macos.inputFileList.existsSync()) {
+    flutterProject.macos.inputFileList.createSync(recursive: true);
+  }
+  if (!flutterProject.macos.outputFileList.existsSync()) {
+    flutterProject.macos.outputFileList.createSync(recursive: true);
+  }
+  if (configOnly) {
+    return;
+  }
+
   // Run the Xcode build.
   final Stopwatch sw = Stopwatch()..start();
   final Status status = globals.logger.startProgress(

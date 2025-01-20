@@ -1591,7 +1591,7 @@ void main() {
     expect(simple.isFiltered(DiagnosticLevel.info), isFalse);
     expect(simple.value, equals(color));
     expect(simple.propertyType, equals(Color));
-    expect(simple.toString(), equals('name: Color(0xffffffff)'));
+    expect(simple.toString(), equals('name: ${const Color(0xffffffff)}'));
     validatePropertyJsonSerialization(simple);
   });
 
@@ -1795,7 +1795,7 @@ void main() {
     expect(objectsProperty.isFiltered(DiagnosticLevel.info), isFalse);
     expect(
       objectsProperty.toString(),
-      equals('objects: Rect.fromLTRB(0.0, 0.0, 20.0, 20.0), Color(0xffffffff)'),
+      equals('objects: Rect.fromLTRB(0.0, 0.0, 20.0, 20.0), ${const Color(0xffffffff)}'),
     );
     validateIterablePropertyJsonSerialization(objectsProperty);
 
@@ -1811,15 +1811,15 @@ void main() {
       equals(
         'objects:\n'
         'Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)\n'
-        'Color(0xffffffff)',
+        '${const Color(0xffffffff)}',
       ),
     );
     expect(
-      multiLineProperty.toStringDeep(),
+      multiLineProperty.toStringDeep(wrapWidth: 100),
       equals(
         'objects:\n'
         '  Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)\n'
-        '  Color(0xffffffff)\n',
+        '  ${const Color(0xffffffff)}\n',
       ),
     );
     validateIterablePropertyJsonSerialization(multiLineProperty);
@@ -1827,12 +1827,12 @@ void main() {
     expect(
       TestTree(
         properties: <DiagnosticsNode>[multiLineProperty],
-      ).toStringDeep(),
+      ).toStringDeep(wrapWidth: 100),
       equalsIgnoringHashCodes(
         'TestTree#00000\n'
         '   objects:\n'
         '     Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)\n'
-        '     Color(0xffffffff)\n',
+        '     ${const Color(0xffffffff)}\n',
       ),
     );
 
@@ -1842,7 +1842,7 @@ void main() {
         style: DiagnosticsTreeStyle.singleLine,
       ).toStringDeep(),
       equalsIgnoringHashCodes(
-        'TestTree#00000(objects: [Rect.fromLTRB(0.0, 0.0, 20.0, 20.0), Color(0xffffffff)], foo: 42)',
+        'TestTree#00000(objects: [Rect.fromLTRB(0.0, 0.0, 20.0, 20.0), ${const Color(0xffffffff)}], foo: 42)',
       ),
     );
 
@@ -1859,21 +1859,21 @@ void main() {
     expect(objectProperty.isFiltered(DiagnosticLevel.info), isFalse);
     expect(
       objectProperty.toString(),
-      equals('object: Color(0xffffffff)'),
+      equals('object: ${const Color(0xffffffff)}'),
     );
     expect(
-      objectProperty.toStringDeep(),
-      equals('object: Color(0xffffffff)\n'),
+      objectProperty.toStringDeep(wrapWidth: 100),
+      equals('object: ${const Color(0xffffffff)}\n'),
     );
     validateIterablePropertyJsonSerialization(objectProperty);
     expect(
       TestTree(
         name: 'root',
         properties: <DiagnosticsNode>[objectProperty],
-      ).toStringDeep(),
+      ).toStringDeep(wrapWidth: 120),
       equalsIgnoringHashCodes(
         'TestTree#00000\n'
-        '   object: Color(0xffffffff)\n',
+        '   object: ${const Color(0xffffffff)}\n',
       ),
     );
   });

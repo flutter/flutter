@@ -9,9 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Tapping FAB increments counter', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: example.ValueListenableBuilderExample(),
-      ),
+      const example.ValueListenableBuilderExampleApp(),
     );
 
     String getCount() {

@@ -105,9 +105,9 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
   }
 
   @override
-  void handleStderr(List<int> data) {
+  void handleStderr(String data) {
     logger?.call('stderr: $data');
-    sendOutput('stderr', utf8.decode(data));
+    sendOutput('stderr', data);
   }
 
   /// Handles stdout from the `flutter test --machine` process, decoding the JSON and calling the appropriate handlers.

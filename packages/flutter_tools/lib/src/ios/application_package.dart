@@ -108,25 +108,25 @@ abstract class IOSApp extends ApplicationPackage {
 }
 
 class BuildableIOSApp extends IOSApp {
-  BuildableIOSApp(this.project, String projectBundleId, String? hostAppBundleName)
-    : _hostAppBundleName = hostAppBundleName,
+  BuildableIOSApp(this.project, String projectBundleId, String? productName)
+    : _appProductName = productName,
       super(projectBundleId: projectBundleId);
 
   static Future<BuildableIOSApp?> fromProject(IosProject project, BuildInfo? buildInfo) async {
-    final String? hostAppBundleName = await project.hostAppBundleName(buildInfo);
+    final String? productName = await project.productName(buildInfo);
     final String? projectBundleId = await project.productBundleIdentifier(buildInfo);
     if (projectBundleId != null) {
-      return BuildableIOSApp(project, projectBundleId, hostAppBundleName);
+      return BuildableIOSApp(project, projectBundleId, productName);
     }
     return null;
   }
 
   final IosProject project;
 
-  final String? _hostAppBundleName;
+  final String? _appProductName;
 
   @override
-  String? get name => _hostAppBundleName;
+  String? get name => _appProductName;
 
   @override
   String get simulatorBundlePath => _buildAppPath('iphonesimulator');
@@ -141,16 +141,15 @@ class BuildableIOSApp extends IOSApp {
   // not a top-level output directory.
   // Specifying `build/ios/archive/Runner` will result in `build/ios/archive/Runner.xcarchive`.
   String get archiveBundlePath => globals.fs.path.join(getIosBuildDirectory(), 'archive',
-      _hostAppBundleName == null ? 'Runner' : globals.fs.path.withoutExtension(_hostAppBundleName));
+      _appProductName ?? 'Runner');
 
   // The output xcarchive bundle path `build/ios/archive/Runner.xcarchive`.
-  String get archiveBundleOutputPath =>
-      globals.fs.path.setExtension(archiveBundlePath, '.xcarchive');
+  String get archiveBundleOutputPath => '$archiveBundlePath.xcarchive';
 
   String get builtInfoPlistPathAfterArchive => globals.fs.path.join(archiveBundleOutputPath,
       'Products',
       'Applications',
-      _hostAppBundleName ?? 'Runner.app',
+      _appProductName != null ? '$_appProductName.app' : 'Runner.app',
       'Info.plist');
 
   String get projectAppIconDirName => _projectImageAssetDirName(_appIconAsset);
@@ -173,7 +172,7 @@ class BuildableIOSApp extends IOSApp {
       globals.fs.path.join(getIosBuildDirectory(), 'ipa');
 
   String _buildAppPath(String type) {
-    return globals.fs.path.join(getIosBuildDirectory(), type, _hostAppBundleName);
+    return globals.fs.path.join(getIosBuildDirectory(), type, '$_appProductName.app');
   }
 
   String _projectImageAssetDirName(String asset)

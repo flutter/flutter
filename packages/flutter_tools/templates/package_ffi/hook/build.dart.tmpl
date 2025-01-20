@@ -2,8 +2,6 @@ import 'package:native_toolchain_c/native_toolchain_c.dart';
 import 'package:logging/logging.dart';
 import 'package:native_assets_cli/native_assets_cli.dart';
 
-const packageName = '{{projectName}}';
-
 void main(List<String> args) async {
   await build(args, (config, output) async {
     final packageName = config.packageName;
@@ -13,11 +11,10 @@ void main(List<String> args) async {
       sources: [
         'src/$packageName.c',
       ],
-      dartBuildFiles: ['hook/build.dart'],
     );
     await cbuilder.run(
-      buildConfig: config,
-      buildOutput: output,
+      config: config,
+      output: output,
       logger: Logger('')
         ..level = Level.ALL
         ..onRecord.listen((record) => print(record.message)),

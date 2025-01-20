@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:developer';
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -106,8 +109,10 @@ class VMServiceFlutterDriver extends FlutterDriver {
       while (true) {
         final vms.Isolate isolate = await client.getIsolate(ref.id!);
         if (isolate.pauseEvent!.kind == vms.EventKind.kNone) {
+          _log('Waiting for isolate ${ref.number} to be runnable.');
           await Future<void>.delayed(_kPauseBetweenIsolateRefresh);
         } else {
+          _log('Isolate ${ref.number} is runnable.');
           return isolate;
         }
       }
@@ -281,7 +286,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
   /// Client connected to the Dart VM running the Flutter application.
   ///
-  /// You can use [VMServiceClient] to check VM version, flags and get
+  /// You can use [vms.VmService] to check VM version, flags and get
   /// notified when a new isolate has been instantiated. That could be
   /// useful if your application spawns multiple isolates that you
   /// would like to instrument.
@@ -297,7 +302,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
   ///
   /// If you used the [registerExtension] API to instrument your application,
   /// you can use this [vms.Isolate] to call these extension methods via
-  /// [invokeExtension].
+  /// [vms.Isolate.invokeExtension].
   final vms.Isolate _appIsolate;
 
   /// Whether to print communication between host and app to `stdout`.
@@ -554,7 +559,7 @@ String _getWebSocketUrl(String url) {
 }
 
 /// Waits for a real Dart VM service to become available, then connects using
-/// the [VMServiceClient].
+/// the [vms.VmService].
 Future<vms.VmService> _waitAndConnect(String url, Map<String, dynamic>? headers) async {
   final String webSocketUrl = _getWebSocketUrl(url);
   int attempts = 0;

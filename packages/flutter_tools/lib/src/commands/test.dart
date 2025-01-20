@@ -16,6 +16,7 @@ import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart';
 import '../test/coverage_collector.dart';
 import '../test/event_printer.dart';
 import '../test/runner.dart';
@@ -355,7 +356,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final List<String> plainNames = stringsArg('plain-name');
     final String? tags = stringArg('tags');
     final String? excludeTags = stringArg('exclude-tags');
-    final BuildInfo buildInfo = await getBuildInfo(forcedBuildMode: BuildMode.debug);
+    final BuildInfo buildInfo = await getBuildInfo(
+      forcedBuildMode: BuildMode.debug,
+      forcedUseLocalCanvasKit: true
+    );
 
     TestTimeRecorder? testTimeRecorder;
     if (verbose) {
@@ -411,8 +415,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       webRenderer: webRenderer,
+      printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
       webUseWasm: useWasm,
-      webUseLocalCanvaskit: true,
     );
 
     String? testAssetDirectory;
@@ -421,6 +425,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         flavor: buildInfo.flavor,
         impellerStatus: debuggingOptions.enableImpeller,
         buildMode: debuggingOptions.buildInfo.mode,
+        packageConfigPath: buildInfo.packageConfigPath,
       );
       testAssetDirectory = globals.fs.path.
         join(flutterProject.directory.path, 'build', 'unit_test_assets');
@@ -527,6 +532,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       throwToolExit('Skwasm renderer requires --wasm');
     }
 
+    if (webRenderer.isDeprecated) {
+      globals.logger.printWarning(webRenderer.deprecationWarning);
+    }
+
     Device? integrationTestDevice;
     if (_isIntegrationTest) {
       integrationTestDevice = await findTargetDevice();
@@ -587,6 +596,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         shardIndex: shardIndex,
         totalShards: totalShards,
         testTimeRecorder: testTimeRecorder,
+        nativeAssetsBuilder: nativeAssetsBuilder,
       );
     } else {
       result = await testRunner.runTests(
@@ -599,7 +609,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         excludeTags: excludeTags,
         watcher: watcher,
         enableVmService: collector != null || startPaused || enableVmService,
-        ipv6: ipv6,
         machine: machine,
         updateGoldens: boolArg('update-goldens'),
         concurrency: jobs,
@@ -618,6 +627,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
         testTimeRecorder: testTimeRecorder,
         nativeAssetsBuilder: nativeAssetsBuilder,
+        buildInfo: buildInfo,
       );
     }
     testTimeRecorder?.stop(TestTimePhases.TestRunner, testRunnerTimeRecorderStopwatch!);
@@ -687,10 +697,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     required String? flavor,
     required ImpellerStatus impellerStatus,
     required BuildMode buildMode,
+    required String packageConfigPath,
   }) async {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     final int build = await assetBundle.build(
-      packagesPath: '.packages',
+      packageConfigPath: packageConfigPath,
       flavor: flavor,
     );
     if (build != 0) {

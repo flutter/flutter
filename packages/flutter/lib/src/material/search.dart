@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'action_buttons.dart';
+/// @docImport 'animated_icons.dart';
+/// @docImport 'icon_button.dart';
+/// @docImport 'list_tile.dart';
+library;
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -42,6 +48,10 @@ import 'theme.dart';
 /// route created by this method is pushed to the nearest navigator to the
 /// given `context`. It can not be `null`.
 ///
+/// The `maintainState` argument is used to determine if the route should remain
+/// in memory when it is inactive (see [ModalRoute.maintainState] for more details].
+/// By default, `maintainState` is `false`.
+///
 /// The transition to the search page triggered by this method looks best if the
 /// screen triggering the transition contains an [AppBar] at the top and the
 /// transition is called from an [IconButton] that's part of [AppBar.actions].
@@ -62,11 +72,13 @@ Future<T?> showSearch<T>({
   required SearchDelegate<T> delegate,
   String? query = '',
   bool useRootNavigator = false,
+  bool maintainState = false,
 }) {
   delegate.query = query ?? delegate.query;
   delegate._currentBody = _SearchBody.suggestions;
   return Navigator.of(context, rootNavigator: useRootNavigator).push(_SearchPageRoute<T>(
     delegate: delegate,
+    maintainState: maintainState
   ));
 }
 
@@ -143,6 +155,8 @@ abstract class SearchDelegate<T> {
     this.searchFieldDecorationTheme,
     this.keyboardType,
     this.textInputAction = TextInputAction.search,
+    this.autocorrect = true,
+    this.enableSuggestions = true,
   }) : assert(searchFieldStyle == null || searchFieldDecorationTheme == null);
 
   /// Suggestions shown in the body of the search page while the user types a
@@ -353,6 +367,12 @@ abstract class SearchDelegate<T> {
   /// Defaults to the default value specified in [TextField].
   final TextInputType? keyboardType;
 
+  /// {@macro flutter.widgets.editableText.autocorrect}
+  final bool autocorrect;
+
+  /// {@macro flutter.services.TextInputConfiguration.enableSuggestions}
+  final bool enableSuggestions;
+
   /// The text input action configuring the soft keyboard to a particular action
   /// button.
   ///
@@ -411,6 +431,7 @@ enum _SearchBody {
 class _SearchPageRoute<T> extends PageRoute<T> {
   _SearchPageRoute({
     required this.delegate,
+    required this.maintainState,
   }) {
     assert(
       delegate._route == null,
@@ -424,6 +445,9 @@ class _SearchPageRoute<T> extends PageRoute<T> {
   final SearchDelegate<T> delegate;
 
   @override
+  final bool maintainState;
+
+  @override
   Color? get barrierColor => null;
 
   @override
@@ -431,9 +455,6 @@ class _SearchPageRoute<T> extends PageRoute<T> {
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 300);
-
-  @override
-  bool get maintainState => false;
 
   @override
   Widget buildTransitions(
@@ -606,6 +627,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
               focusNode: focusNode,
               style: widget.delegate.searchFieldStyle ?? theme.textTheme.titleLarge,
               textInputAction: widget.delegate.textInputAction,
+              autocorrect: widget.delegate.autocorrect,
+              enableSuggestions: widget.delegate.enableSuggestions,
               keyboardType: widget.delegate.keyboardType,
               onSubmitted: (String _) => widget.delegate.showResults(context),
               decoration: InputDecoration(hintText: searchFieldLabel),

@@ -4,10 +4,11 @@
 
 /// @docImport 'button.dart';
 /// @docImport 'nav_bar.dart';
-/// @docImport 'tab_scaffold.dart';
 /// @docImport 'route.dart';
+/// @docImport 'tab_scaffold.dart';
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -107,6 +108,9 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
   Widget build(BuildContext context) {
     Widget paddedContent = widget.child;
 
+    final Color backgroundColor = CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context)
+        ?? CupertinoTheme.of(context).scaffoldBackgroundColor;
+
     final MediaQueryData existingMediaQuery = MediaQuery.of(context);
     if (widget.navigationBar != null) {
       // TODO(xster): Use real size after partial layout instead of preferred size.
@@ -171,39 +175,76 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
       );
     }
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context)
-            ?? CupertinoTheme.of(context).scaffoldBackgroundColor,
-      ),
-      child: Stack(
-        children: <Widget>[
-          // The main content being at the bottom is added to the stack first.
-          paddedContent,
-          if (widget.navigationBar != null)
-            Positioned(
-              top: 0.0,
-              left: 0.0,
-              right: 0.0,
-              child: MediaQuery.withNoTextScaling(
-                child: widget.navigationBar!,
+    return ScrollNotificationObserver(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: backgroundColor,
+        ),
+        child: CupertinoPageScaffoldBackgroundColor(
+          color: backgroundColor,
+          child: Stack(
+            children: <Widget>[
+              // The main content being at the bottom is added to the stack first.
+              paddedContent,
+              if (widget.navigationBar != null)
+                Positioned(
+                  top: 0.0,
+                  left: 0.0,
+                  right: 0.0,
+                  child: MediaQuery.withNoTextScaling(
+                    child: widget.navigationBar!,
+                  ),
+                ),
+              // Add a touch handler the size of the status bar on top of all contents
+              // to handle scroll to top by status bar taps.
+              Positioned(
+                top: 0.0,
+                left: 0.0,
+                right: 0.0,
+                height: existingMediaQuery.padding.top,
+                child: GestureDetector(
+                  excludeFromSemantics: true,
+                  onTap: _handleStatusBarTap,
+                ),
               ),
-            ),
-          // Add a touch handler the size of the status bar on top of all contents
-          // to handle scroll to top by status bar taps.
-          Positioned(
-            top: 0.0,
-            left: 0.0,
-            right: 0.0,
-            height: existingMediaQuery.padding.top,
-            child: GestureDetector(
-              excludeFromSemantics: true,
-              onTap: _handleStatusBarTap,
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
+  }
+}
+
+/// [InheritedWidget] indicating what the current scaffold background color is for its children.
+///
+/// This is used by the [CupertinoNavigationBar] and the [CupertinoSliverNavigationBar] widgets
+/// to paint themselves with the parent page scaffold color when no content is scrolled under.
+class CupertinoPageScaffoldBackgroundColor extends InheritedWidget {
+  /// Constructs a new [CupertinoPageScaffoldBackgroundColor].
+  const CupertinoPageScaffoldBackgroundColor({
+    required super.child,
+    required this.color,
+    super.key,
+  });
+
+  /// The background color defined in [CupertinoPageScaffold].
+  final Color color;
+
+  @override
+  bool updateShouldNotify(CupertinoPageScaffoldBackgroundColor oldWidget) {
+    return color != oldWidget.color;
+  }
+
+  /// Retrieve the [CupertinoPageScaffold] background color from the context.
+  static Color? maybeOf(BuildContext context) {
+    final CupertinoPageScaffoldBackgroundColor? scaffoldBackgroundColor = context.dependOnInheritedWidgetOfExactType<CupertinoPageScaffoldBackgroundColor>();
+    return scaffoldBackgroundColor?.color;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ColorProperty('page scaffold background color', color));
   }
 }
 

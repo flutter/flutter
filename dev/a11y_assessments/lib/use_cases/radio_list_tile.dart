@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class RadioListTileUseCase extends UseCase {
-
   @override
   String get name => 'RadioListTile';
 
@@ -34,10 +33,14 @@ class _MainWidgetState extends State<_MainWidget> {
     });
   }
 
+  String pageTitle = getUseCaseName(RadioListTileUseCase());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Radio button')),
+      appBar: AppBar(
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))
+      ),
       body: ListView(
         children: <Widget>[
           RadioListTile<SingingCharacter>(

@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'chip.dart';
+/// @docImport 'color_scheme.dart';
+/// @docImport 'list_tile.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';

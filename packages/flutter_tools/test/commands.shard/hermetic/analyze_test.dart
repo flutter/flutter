@@ -93,7 +93,6 @@ void main() {
             // artifact paths are from Artifacts.test() and stable
             command: <String>[
               'Artifact.engineDartSdkPath/bin/dart',
-              '--disable-dart-dev',
               'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
@@ -131,7 +130,6 @@ void main() {
             // artifact paths are from Artifacts.test() and stable
             command: const <String>[
               'Artifact.engineDartSdkPath/bin/dart',
-              '--disable-dart-dev',
               'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
@@ -145,7 +143,8 @@ void main() {
         ],
       );
       await runner.run(<String>['analyze', '--flutter-repo']);
-      final Map<String, Object?> setAnalysisRootsCommand = jsonDecode(await streamController.stream.transform(utf8.decoder).elementAt(2)) as Map<String, Object?>;
+      final Map<String, Object?> setAnalysisRootsCommand = jsonDecode(
+          await streamController.stream.transform(utf8.decoder).transform(const LineSplitter()).elementAt(1)) as Map<String, Object?>;
       expect(setAnalysisRootsCommand['method'], 'analysis.setAnalysisRoots');
       final Map<String, Object?> params = setAnalysisRootsCommand['params']! as Map<String, Object?>;
       expect(params['included'], <String?>[Cache.flutterRoot]);

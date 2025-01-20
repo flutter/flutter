@@ -22,7 +22,6 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -71,7 +70,6 @@ final Platform notMacosPlatform = FakePlatform(
 
 void main() {
   late MemoryFileSystem fileSystem;
-  late TestUsage usage;
   late FakeAnalytics fakeAnalytics;
   late BufferLogger logger;
   late FakeProcessManager processManager;
@@ -85,7 +83,6 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     artifacts = Artifacts.test(fileSystem: fileSystem);
-    usage = TestUsage();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: FakeFlutterVersion(),
@@ -101,7 +98,7 @@ void main() {
   // Sets up the minimal mock project files necessary to look like a Flutter project.
   void createCoreMockProjectFiles() {
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
@@ -267,7 +264,7 @@ void main() {
       osUtils: FakeOperatingSystemUtils(),
     );
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.packages').createSync();
+    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
 
@@ -570,9 +567,6 @@ void main() {
 
     expect(logger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
     expect(logger.statusText, contains('dart devtools --appSizeBase='));
-    expect(usage.events, contains(
-      const TestUsageEvent('code-size-analysis', 'ios'),
-    ));
     expect(fakeAnalytics.sentEvents, contains(
       Event.codeSizeAnalysis(platform: 'ios')
     ));
@@ -582,7 +576,6 @@ void main() {
     ProcessManager: () => processManager,
     Platform: () => macosPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
-    Usage: () => usage,
     Analytics: () => fakeAnalytics,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -645,7 +638,6 @@ void main() {
         fileSystem: fileSystem,
         platform: macosPlatform,
       ),
-      Usage: () => usage,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       Analytics: () => fakeAnalytics,
     });
@@ -700,7 +692,6 @@ void main() {
         fileSystem: fileSystem,
         platform: macosPlatform,
       ),
-      Usage: () => usage,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       FlutterProjectFactory: () => FlutterProjectFactory(
         fileSystem: fileSystem,

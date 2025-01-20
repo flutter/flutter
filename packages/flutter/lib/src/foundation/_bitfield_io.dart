@@ -14,7 +14,7 @@ class BitField<T extends dynamic> implements bitfield.BitField<T> {
     : assert(_length <= _smiBits),
       _bits = _allZeros;
 
-  /// The dart:io implementation of [bitfield.Bitfield.filled].
+  /// The dart:io implementation of [bitfield.BitField.filled].
   BitField.filled(this._length, bool value)
     : assert(_length <= _smiBits),
       _bits = value ? _allOnes : _allZeros;
