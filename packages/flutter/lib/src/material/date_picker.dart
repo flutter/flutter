@@ -3322,14 +3322,14 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
     super.didChangeDependencies();
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_startDate != null) {
-      _startInputText = localizations.formatCompactDate(_startDate!);
+      _startInputText = widget.delegate.formatCompactDate(_startDate!, localizations);
       final bool selectText = widget.autofocus && !_autoSelected;
       _updateController(_startController, _startInputText, selectText);
       _autoSelected = selectText;
     }
 
     if (_endDate != null) {
-      _endInputText = localizations.formatCompactDate(_endDate!);
+      _endInputText = widget.delegate.formatCompactDate(_endDate!, localizations);
       _updateController(_endController, _endInputText, false);
     }
   }
@@ -3431,7 +3431,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
             decoration: InputDecoration(
               border: inputBorder,
               filled: inputTheme.filled,
-              hintText: widget.fieldStartHintText ?? localizations.dateHelpText,
+              hintText: widget.fieldStartHintText ?? widget.delegate.dateHelpText(localizations),
               labelText: widget.fieldStartLabelText ?? localizations.dateRangeStartLabel,
               errorText: _startErrorText,
             ),
@@ -3447,7 +3447,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
             decoration: InputDecoration(
               border: inputBorder,
               filled: inputTheme.filled,
-              hintText: widget.fieldEndHintText ?? localizations.dateHelpText,
+              hintText: widget.fieldEndHintText ?? widget.delegate.dateHelpText(localizations),
               labelText: widget.fieldEndLabelText ?? localizations.dateRangeEndLabel,
               errorText: _endErrorText,
             ),

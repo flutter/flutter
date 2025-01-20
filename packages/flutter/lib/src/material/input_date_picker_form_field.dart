@@ -195,7 +195,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
   void _updateValueForSelectedDate() {
     if (_selectedDate != null) {
       final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-      _inputText = localizations.formatCompactDate(_selectedDate!);
+      _inputText = widget.delegate.formatCompactDate(_selectedDate!, localizations);
       TextEditingValue textEditingValue = TextEditingValue(text: _inputText!);
       // Select the new text if we are auto focused and haven't selected the text before.
       if (widget.autofocus && !_autoSelected) {
@@ -269,7 +269,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       container: true,
       child: TextFormField(
         decoration: InputDecoration(
-          hintText: widget.fieldHintText ?? localizations.dateHelpText,
+          hintText: widget.fieldHintText ?? widget.delegate.dateHelpText(localizations),
           labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
         ).applyDefaults(
           inputTheme

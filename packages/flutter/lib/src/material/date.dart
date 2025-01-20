@@ -163,6 +163,19 @@ abstract class DatePickerDelegate {
   /// - Russian: Среда, Сентябрь 27, 2017
   String formatFullDate(covariant DateTime date, MaterialLocalizations localizations);
 
+  /// Formats the date in a compact format.
+  ///
+  /// Usually just the numeric values for the for day, month and year are used.
+  ///
+  /// Examples:
+  ///
+  /// - US English: 02/21/2019
+  /// - Russian: 21.02.2019
+  ///
+  /// See also:
+  ///   * [parseCompactDate], which will convert a compact date string to a [DateTime].
+  String formatCompactDate(covariant DateTime date, MaterialLocalizations localizations);
+
   /// Converts the given compact date formatted string into a [DateTime].
   ///
   /// The format of the string must be a valid compact date format for the
@@ -172,6 +185,10 @@ abstract class DatePickerDelegate {
   /// See also:
   ///   * [formatCompactDate], which will convert a [DateTime] into a string in the compact format.
   DateTime? parseCompactDate(String? inputString, MaterialLocalizations localizations);
+
+  /// The help text used on an empty [InputDatePickerFormField] to indicate
+  /// to the user the date format being asked for.
+  String dateHelpText(MaterialLocalizations localizations);
 }
 
 /// A [DatePickerDelegate] that uses the Gregorian calendar and the
@@ -252,8 +269,18 @@ class GregorianDatePickerDelegate extends DatePickerDelegate {
   }
 
   @override
+  String formatCompactDate(DateTime date, MaterialLocalizations localizations) {
+    return localizations.formatCompactDate(date);
+  }
+
+  @override
   DateTime? parseCompactDate(String? inputString, MaterialLocalizations localizations) {
     return localizations.parseCompactDate(inputString);
+  }
+
+  @override
+  String dateHelpText(MaterialLocalizations localizations) {
+    return localizations.dateHelpText;
   }
 }
 
