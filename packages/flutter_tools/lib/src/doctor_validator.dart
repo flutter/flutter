@@ -170,6 +170,10 @@ class ValidationResult {
 
   /// The time taken to perform the validation, set by [DoctorValidator.validate].
   Duration? get executionTime => _executionTime;
+
+  @visibleForTesting
+  set executionTime(Duration? duration) => _executionTime = duration;
+
   Duration? _executionTime;
 
   String get coloredLeadingBox {

@@ -1406,11 +1406,11 @@ class FakeGroupedDoctor extends Doctor {
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
-    GroupedValidator(<DoctorValidator>[
+    FakeGroupedValidator(<DoctorValidator>[
       PassingGroupedValidator('Category 1'),
       PassingGroupedValidator('Category 1'),
     ]),
-    GroupedValidator(<DoctorValidator>[
+    FakeGroupedValidator(<DoctorValidator>[
       PassingGroupedValidator('Category 2'),
       MissingGroupedValidator('Category 2'),
     ]),
@@ -1446,13 +1446,27 @@ class FakeGroupedValidatorWithCrash extends GroupedValidator {
   List<ValidationResult> get subResults => <ValidationResult>[];
 }
 
+class FakeGroupedValidator extends GroupedValidator {
+  FakeGroupedValidator(super.subValidator);
+
+  @override
+  Future<ValidationResult> validateImpl() async {
+    final ValidationResult result = await super.validateImpl();
+    return ZeroExecutionTimeValidationResult(
+      result.type,
+      result.messages,
+      statusInfo: result.statusInfo,
+    );
+  }
+}
+
 class FakeGroupedDoctorWithStatus extends Doctor {
   FakeGroupedDoctorWithStatus(Logger logger, {super.clock = const SystemClock()})
     : super(logger: logger);
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
-    GroupedValidator(<DoctorValidator>[
+    FakeGroupedValidator(<DoctorValidator>[
       PassingGroupedValidator('First validator title'),
       PassingGroupedValidatorWithStatus('Second validator title'),
     ]),
@@ -1468,7 +1482,7 @@ class FakeSmallGroupDoctor extends Doctor {
     DoctorValidator val2, {
     super.clock = const SystemClock(),
   }) : validators = <DoctorValidator>[
-         GroupedValidator(<DoctorValidator>[val1, val2]),
+         FakeGroupedValidator(<DoctorValidator>[val1, val2]),
        ],
        super(logger: logger);
 
