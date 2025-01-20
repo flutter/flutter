@@ -201,12 +201,12 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     },
 
     // Arrow: Move selection.
-    const SingleActivator(LogicalKeyboardKey.arrowLeft): const ExtendSelectionByCharacterIntent(
-      forward: false,
+    const SingleActivator(LogicalKeyboardKey.arrowLeft): const HorizontalExtendSelectionByCharacterIntent(
+      right: false,
       collapseSelection: true,
     ),
-    const SingleActivator(LogicalKeyboardKey.arrowRight): const ExtendSelectionByCharacterIntent(
-      forward: true,
+    const SingleActivator(LogicalKeyboardKey.arrowRight): const HorizontalExtendSelectionByCharacterIntent(
+      right: true,
       collapseSelection: true,
     ),
     const SingleActivator(
@@ -220,11 +220,11 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(
       LogicalKeyboardKey.arrowLeft,
       shift: true,
-    ): const ExtendSelectionByCharacterIntent(forward: false, collapseSelection: false),
+    ): const HorizontalExtendSelectionByCharacterIntent(right: false, collapseSelection: false),
     const SingleActivator(
       LogicalKeyboardKey.arrowRight,
       shift: true,
-    ): const ExtendSelectionByCharacterIntent(forward: true, collapseSelection: false),
+    ): const HorizontalExtendSelectionByCharacterIntent(right: true, collapseSelection: false),
     const SingleActivator(
       LogicalKeyboardKey.arrowUp,
       shift: true,
