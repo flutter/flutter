@@ -160,7 +160,6 @@ abstract interface class FlutterNativeAssetsBuildRunner {
     required BuildConfigCreator configCreator,
     required BuildValidator buildValidator,
     required ApplicationAssetValidator applicationAssetValidator,
-    required bool includeParentEnvironment,
     required Uri workingDirectory,
     required bool linkingEnabled,
   });
@@ -172,7 +171,6 @@ abstract interface class FlutterNativeAssetsBuildRunner {
     required LinkConfigCreator configCreator,
     required LinkValidator linkValidator,
     required ApplicationAssetValidator applicationAssetValidator,
-    required bool includeParentEnvironment,
     required Uri workingDirectory,
     required BuildResult buildResult,
   });
@@ -257,7 +255,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     required BuildConfigCreator configCreator,
     required BuildValidator buildValidator,
     required ApplicationAssetValidator applicationAssetValidator,
-    required bool includeParentEnvironment,
+
     required Uri workingDirectory,
     required bool linkingEnabled,
   }) {
@@ -285,7 +283,6 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     required LinkConfigCreator configCreator,
     required LinkValidator linkValidator,
     required ApplicationAssetValidator applicationAssetValidator,
-    required bool includeParentEnvironment,
     required Uri workingDirectory,
     required BuildResult buildResult,
   }) {
@@ -646,7 +643,6 @@ Future<DartBuildResult> _runDartBuild({
             ...await validateCodeAssetInApplication(assets),
           ],
       workingDirectory: projectUri,
-      includeParentEnvironment: true,
       linkingEnabled: linkingEnabled,
     );
     if (buildResult == null) {
@@ -680,7 +676,6 @@ Future<DartBuildResult> _runDartBuild({
               ...await validateCodeAssetInApplication(assets),
             ],
         workingDirectory: projectUri,
-        includeParentEnvironment: true,
         buildResult: buildResult,
       );
       if (linkResult == null) {

@@ -41,7 +41,6 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
     required BuildConfigCreator configCreator,
     required BuildValidator buildValidator,
     required ApplicationAssetValidator applicationAssetValidator,
-    required bool includeParentEnvironment,
     required Uri workingDirectory,
     required bool linkingEnabled,
   }) async {
@@ -75,7 +74,6 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
     required LinkConfigValidator configValidator,
     required LinkValidator linkValidator,
     required ApplicationAssetValidator applicationAssetValidator,
-    required bool includeParentEnvironment,
     required Uri workingDirectory,
     required BuildResult buildResult,
   }) async {
