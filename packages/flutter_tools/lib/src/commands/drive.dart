@@ -138,7 +138,8 @@ class DriveCommand extends RunCommandBase {
         defaultsTo: '1600x1024',
         help:
             'The dimension of the browser when running a Flutter Web test. '
-            'This will affect screenshot and all offset-related actions.',
+            'Format is "width x height[@dpr]" where dpr is optional device pixel ratio. '
+            'This will affect screenshot dimensions and all offset-related actions.',
         valueHelp: '1600x1024[@1]',
       )
       ..addFlag(
