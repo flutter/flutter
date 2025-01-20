@@ -46,6 +46,7 @@ void main() {
     double? menuHeight,
     Widget? leadingIcon,
     Widget? label,
+    InputDecorationTheme? decorationTheme,
   }) {
     return MaterialApp(
       theme: themeData,
@@ -56,6 +57,7 @@ void main() {
           width: width,
           menuHeight: menuHeight,
           dropdownMenuEntries: entries,
+          inputDecorationTheme: decorationTheme,
         ),
       ),
     );
@@ -1172,6 +1174,71 @@ void main() {
     expect(iconButton, findsOneWidget);
   });
 
+  testWidgets('Trailing IconButton height respects InputDecorationTheme.suffixIconConstraints', (
+    WidgetTester tester,
+  ) async {
+    final ThemeData themeData = ThemeData();
+
+    // Default suffix icon constraints.
+    await tester.pumpWidget(buildTest(themeData, menuChildren));
+    await tester.pump();
+
+    final Finder iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first;
+    expect(tester.getSize(iconButton), const Size(48, 48));
+
+    // Custom suffix icon constraints.
+    await tester.pumpWidget(
+      buildTest(
+        themeData,
+        menuChildren,
+        decorationTheme: const InputDecorationTheme(
+          suffixIconConstraints: BoxConstraints(minWidth: 66, minHeight: 62),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(tester.getSize(iconButton), const Size(66, 62));
+  });
+
+  testWidgets('InputDecorationTheme.isCollapsed reduces height', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+
+    // Default height.
+    await tester.pumpWidget(buildTest(themeData, menuChildren));
+    await tester.pump();
+
+    final Finder textField = find.byType(TextField).first;
+    expect(tester.getSize(textField).height, 56);
+
+    // Collapsed height.
+    await tester.pumpWidget(
+      buildTest(
+        themeData,
+        menuChildren,
+        decorationTheme: const InputDecorationTheme(isCollapsed: true),
+      ),
+    );
+    await tester.pump();
+
+    expect(tester.getSize(textField).height, 48); // IconButton min height.
+
+    // Collapsed height with custom suffix icon constraints.
+    await tester.pumpWidget(
+      buildTest(
+        themeData,
+        menuChildren,
+        decorationTheme: const InputDecorationTheme(
+          isCollapsed: true,
+          suffixIconConstraints: BoxConstraints(maxWidth: 24, maxHeight: 24),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(tester.getSize(textField).height, 24);
+  });
+
   testWidgets('Do not crash when resize window during menu opening', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
     final ThemeData themeData = ThemeData();
@@ -2174,83 +2241,30 @@ void main() {
     expect(controller.text, isEmpty);
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/155660.
-  testWidgets('Updating the menu entries refreshes the initial selection', (
-    WidgetTester tester,
-  ) async {
-    final TextEditingController controller = TextEditingController();
-    addTearDown(controller.dispose);
-
-    Widget boilerplate(List<DropdownMenuEntry<TestMenu>> entries) {
-      return MaterialApp(
-        home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Scaffold(
-              body: DropdownMenu<TestMenu>(
-                initialSelection: TestMenu.mainMenu3,
-                dropdownMenuEntries: entries,
-                controller: controller,
-              ),
-            );
-          },
-        ),
-      );
-    }
-
-    // The text field should be empty when the initial selection does not match
-    // any menu items.
-    await tester.pumpWidget(boilerplate(menuChildren.getRange(0, 1).toList()));
-    expect(controller.text, '');
-
-    // When the menu entries is updated the initial selection should be rematched.
-    await tester.pumpWidget(boilerplate(menuChildren));
-    expect(controller.text, TestMenu.mainMenu3.label);
-
-    // Update the entries with none matching the initial selection.
-    await tester.pumpWidget(boilerplate(menuChildren.getRange(0, 1).toList()));
-    expect(controller.text, '');
-  });
-
-  // Regression test for https://github.com/flutter/flutter/issues/155660.
   testWidgets(
-    'Updating the menu entries refreshes the initial selection only if the current selection is no more valid',
+    'Text field content is not cleared when the initial selection does not match any menu entries',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
+      final TextEditingController controller = TextEditingController(text: 'Flutter');
       addTearDown(controller.dispose);
 
-      Widget boilerplate(List<DropdownMenuEntry<TestMenu>> entries) {
-        return MaterialApp(
+      await tester.pumpWidget(
+        MaterialApp(
           home: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return Scaffold(
                 body: DropdownMenu<TestMenu>(
                   initialSelection: TestMenu.mainMenu3,
-                  dropdownMenuEntries: entries,
+                  // Use a menu entries which does not contain TestMenu.mainMenu3.
+                  dropdownMenuEntries: menuChildren.getRange(0, 1).toList(),
                   controller: controller,
                 ),
               );
             },
           ),
-        );
-      }
+        ),
+      );
 
-      await tester.pumpWidget(boilerplate(menuChildren));
-      expect(controller.text, TestMenu.mainMenu3.label);
-
-      // Open the menu.
-      await tester.tap(find.byType(DropdownMenu<TestMenu>));
-      await tester.pump();
-
-      // Select another item.
-      final Finder item2 = findMenuItemButton('Item 2');
-      await tester.tap(item2);
-      await tester.pumpAndSettle();
-      expect(controller.text, TestMenu.mainMenu2.label);
-
-      // Update the menu entries with another instance of list containing the
-      // same entries.
-      await tester.pumpWidget(boilerplate(List<DropdownMenuEntry<TestMenu>>.from(menuChildren)));
-      expect(controller.text, TestMenu.mainMenu2.label);
+      expect(controller.text, 'Flutter');
     },
   );
 
@@ -2911,7 +2925,7 @@ void main() {
     ); // Because "Unread" contains "read".
 
     // Test custom search algorithm.
-    await tester.pumpWidget(dropdownMenu(searchCallback: (_, __) => 0));
+    await tester.pumpWidget(dropdownMenu(searchCallback: (_, _) => 0));
     await tester.pump();
     await tester.enterText(find.byType(TextField), 'read');
     await tester.pump();

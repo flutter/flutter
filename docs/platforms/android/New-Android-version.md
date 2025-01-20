@@ -63,12 +63,8 @@ In the framework, update the following `.ci.yaml` entry:
 
 In the engine, you may follow [Upgrading Engine's Android API version](https://github.com/flutter/flutter/blob/main/docs/platforms/android/Upgrading-Engine's-Android-API-version.md) to update the AVD dependency.
 
-Example Framework PR: https://github.com/flutter/flutter/pull/152498, Example Engine PR: https://github.com/flutter/engine/pull/54186
-
-In flutter/packages, modify https://github.com/flutter/packages/blob/main/.cirrus.yml “firebase_test_lab_script”
-Specifically the value for “--device” `./script/tool_runner.sh firebase-test-lab --device model=redfin,version=30 --exclude=script/configs/exclude_integration_Android.yaml`.
-
-Example PR: https://github.com/flutter/packages/pull/4430
+- Example Framework PR: <https://github.com/flutter/flutter/pull/152498>.
+- Example Engine PR: <https://github.com/flutter/engine/pull/54186>.
 
 #### Update documentation
 
@@ -96,7 +92,9 @@ https://github.com/flutter/engine/blob/9289cb6a36aa86990e3ffe0f20324dafa38e7c11/
 - Update buildroot version in DEPS file to consume the changes in the flutter/buildroot steps above
 https://github.com/flutter/engine/blob/9289cb6a36aa86990e3ffe0f20324dafa38e7c11/DEPS#L260
 
-**In flutter/packages:** Set examples to build with the new API.
+**In flutter/packages:**
+- Set examples to build with the new API.
+- Update `create_all_packages` to use new api as compile sdk [source](https://github.com/flutter/packages/blob/3515abab07d0bb2441277f43c2411c9b5e4ecf94/script/tool/lib/src/create_all_packages_app_command.dart#L245-L249).
 
 #### Test “Integration Test” package
 

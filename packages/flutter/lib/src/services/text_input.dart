@@ -7,6 +7,7 @@
 /// @docImport 'package:flutter/rendering.dart';
 ///
 /// @docImport 'live_text.dart';
+/// @docImport 'scribe.dart';
 /// @docImport 'text_formatter.dart';
 library;
 
@@ -202,6 +203,15 @@ class TextInputType {
   /// On Android this is remapped to the [url] keyboard type as it always shows a space bar.
   static const TextInputType webSearch = TextInputType._(11);
 
+  /// Optimized for social media.
+  ///
+  /// Requests a keyboard that includes keys useful for handles and tags.
+  ///
+  /// On iOS, requests a default keyboard with ready access to the "@" and "#" keys.
+  ///
+  /// On Android this is remapped to the [emailAddress] keyboard type as it always shows the "@" key.
+  static const TextInputType twitter = TextInputType._(12);
+
   /// All possible enum values.
   static const List<TextInputType> values = <TextInputType>[
     text,
@@ -216,6 +226,7 @@ class TextInputType {
     streetAddress,
     none,
     webSearch,
+    twitter,
   ];
 
   // Corresponding string name for each of the [values].
@@ -232,6 +243,7 @@ class TextInputType {
     'address',
     'none',
     'webSearch',
+    'twitter',
   ];
 
   // Enum value name, this is what enum.toString() would normally return.
