@@ -122,14 +122,16 @@ class WidgetPreviewStartCommand extends FlutterCommand
       await _populatePreviewPubspec(rootProject: rootProject);
     }
 
+    // WARNING: this needs to happen after we generate the scaffold project as invoking the
+    // widgetPreviewScaffoldProject getter triggers lazy initialization of the preview scaffold's
+    // FlutterManifest before the scaffold project's pubspec has been generated.
     _previewCodeGenerator = PreviewCodeGenerator(
       widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject,
       fs: globals.fs,
     );
 
-    final PreviewMapping previews = _previewDetector.findPreviewFunctions(rootProject.directory);
-
-    _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(previews);
+    final PreviewMapping initialPreviews = await _previewDetector.initialize(rootProject.directory);
+    _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(initialPreviews);
 
     await _previewDetector.dispose();
     return FlutterCommandResult.success();

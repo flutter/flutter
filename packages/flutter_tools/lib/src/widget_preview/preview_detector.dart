@@ -26,45 +26,59 @@ class PreviewDetector {
   final Logger logger;
   final void Function(PreviewMapping) onChangeDetected;
   StreamSubscription<WatchEvent>? _fileWatcher;
-  final PreviewMapping _pathToPreviews = PreviewMapping();
+  late final PreviewMapping _pathToPreviews;
 
-  Future<void> initialize(Directory projectRoot) async {
+  /// Starts listening for changes to Dart sources under [projectRoot] and returns
+  /// the initial [PreviewMapping] for the project.
+  Future<PreviewMapping> initialize(Directory projectRoot) async {
+    // Find the initial set of previews.
+    _pathToPreviews = findPreviewFunctions(projectRoot);
+
     final Watcher watcher = Watcher(projectRoot.path);
     _fileWatcher = watcher.events.listen((WatchEvent event) async {
+      final String eventPath = Uri.file(event.path).toString();
       // Only trigger a reload when changes to Dart sources are detected. We
       // ignore the generated preview file to avoid getting stuck in a loop.
-      if (!event.path.endsWith('.dart') ||
-          event.path.endsWith(PreviewCodeGenerator.generatedPreviewFilePath)) {
+      if (!eventPath.endsWith('.dart') ||
+          eventPath.endsWith(PreviewCodeGenerator.generatedPreviewFilePath)) {
         return;
       }
-      final String eventPath = Uri.file(event.path).toString();
       logger.printStatus('Detected change in $eventPath. Performing reload...');
 
-      final PreviewMapping filePreviewsMapping = findPreviewFunctions(globals.fs.file(event.path));
-      if (filePreviewsMapping.isEmpty) {
-        // No previews found, nothing to do.
+      final PreviewMapping filePreviewsMapping = findPreviewFunctions(
+        globals.fs.file(Uri.file(event.path)),
+      );
+      if (filePreviewsMapping.isEmpty && !_pathToPreviews.containsKey(eventPath)) {
+        // No previews found or removed, nothing to do.
         return;
       }
       if (filePreviewsMapping.length > 1) {
         logger.printWarning('Previews from more than one file were detected!');
         logger.printWarning('Previews: $filePreviewsMapping');
       }
-      final MapEntry<String, List<String>>(key: String uri, value: List<String> filePreviews) =
-          filePreviewsMapping.entries.first;
-      logger.printStatus('Updated previews for $uri: $filePreviews');
-      if (filePreviews.isNotEmpty) {
-        final List<String>? currentPreviewsForFile = _pathToPreviews[uri];
-        if (filePreviews != currentPreviewsForFile) {
-          _pathToPreviews[uri] = filePreviews;
+      if (filePreviewsMapping.isNotEmpty) {
+        // The set of previews has changed, but there are still previews in the file.
+        final MapEntry<String, List<String>>(key: String uri, value: List<String> filePreviews) =
+            filePreviewsMapping.entries.first;
+        assert(uri == eventPath);
+        logger.printStatus('Updated previews for $eventPath: $filePreviews');
+        if (filePreviews.isNotEmpty) {
+          final List<String>? currentPreviewsForFile = _pathToPreviews[eventPath];
+          if (filePreviews != currentPreviewsForFile) {
+            _pathToPreviews[eventPath] = filePreviews;
+          }
         }
       } else {
-        _pathToPreviews.remove(uri);
+        // The file previously had previews that were removed.
+        logger.printStatus('Previews removed from $eventPath');
+        _pathToPreviews.remove(eventPath);
       }
       onChangeDetected(_pathToPreviews);
     });
     // Wait for file watcher to finish initializing, otherwise we might miss changes and cause
     // tests to flake.
     await watcher.ready;
+    return _pathToPreviews;
   }
 
   Future<void> dispose() async {

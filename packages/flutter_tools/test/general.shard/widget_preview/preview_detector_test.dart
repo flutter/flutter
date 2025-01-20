@@ -68,26 +68,40 @@ void main() {
 
     testUsingContext('can detect previews in updated files', () async {
       // Create two files with existing previews and one without.
-      addPreviewContainingFile(projectRoot, 'foo.dart');
-      addPreviewContainingFile(projectRoot, 'src/bar.dart');
-      addNonPreviewContainingFile(projectRoot, 'baz.dart');
+      final PreviewMapping expectedInitialMapping = <String, List<String>>{
+        addPreviewContainingFile(projectRoot, 'foo.dart').uri.toString(): <String>['previews'],
+        addPreviewContainingFile(projectRoot, 'src/bar.dart').uri.toString(): <String>['previews'],
+      };
+      final File nonPreviewContainingFile = addNonPreviewContainingFile(projectRoot, 'baz.dart');
 
-      final Completer<void> completer = Completer<void>();
+      Completer<void> completer = Completer<void>();
       onChangeDetected = (PreviewMapping updated) {
-        expect(updated.length, 1);
-        final MapEntry<String, List<String>>(key: String path, value: List<String> previews) =
-            updated.entries.first;
-        expect(path, endsWith('baz.dart'));
-        expect(previews.length, 1);
-        expect(previews.first, 'previews');
+        // The new preview in baz.dart should be included in the preview mapping.
+        expect(updated, <String, List<String>>{
+          ...expectedInitialMapping,
+          nonPreviewContainingFile.uri.toString(): <String>['previews'],
+        });
         completer.complete();
       };
       // Initialize the file watcher.
-      await previewDetector.initialize(projectRoot);
+      final PreviewMapping initialPreviews = await previewDetector.initialize(projectRoot);
+      expect(initialPreviews, expectedInitialMapping);
 
       // Update the file without an existing preview to include a preview and ensure it triggers
       // the preview detector.
       addPreviewContainingFile(projectRoot, 'baz.dart');
+      await completer.future;
+
+      completer = Completer<void>();
+      onChangeDetected = (PreviewMapping updated) {
+        // The removed preview in baz.dart should not longer be included in the preview mapping.
+        expect(updated, expectedInitialMapping);
+        completer.complete();
+      };
+
+      // Update the file with an existing preview to remove the preview and ensure it triggers
+      // the preview detector.
+      addNonPreviewContainingFile(projectRoot, 'baz.dart');
       await completer.future;
     });
   });
