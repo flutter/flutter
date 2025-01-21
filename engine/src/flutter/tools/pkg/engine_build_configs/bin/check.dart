@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' as io show Directory, File, exitCode, stderr, stdout;
+import 'dart:io' as io;
 
 import 'package:args/args.dart';
 import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:engine_build_configs/src/ci_yaml.dart';
 import 'package:engine_repo_tools/engine_repo_tools.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:platform/platform.dart';
 import 'package:source_span/source_span.dart';
@@ -30,11 +31,30 @@ final _argParser =
       );
 
 void main(List<String> args) {
+  run(
+    args,
+    stderr: io.stderr,
+    stdout: io.stdout,
+    platform: const LocalPlatform(),
+    setExitCode: (exitCode) {
+      io.exitCode = exitCode;
+    },
+  );
+}
+
+@visibleForTesting
+void run(
+  Iterable<String> args, {
+  required Platform platform,
+  required StringSink stderr,
+  required StringSink stdout,
+  required void Function(int) setExitCode,
+}) {
   y.yamlWarningCallback = (String message, [SourceSpan? span]) {};
 
   final argResults = _argParser.parse(args);
   if (argResults.flag('help')) {
-    io.stdout.writeln(_argParser.usage);
+    stdout.writeln(_argParser.usage);
     return;
   }
 
@@ -43,23 +63,22 @@ void main(List<String> args) {
     if (!verbose) {
       return;
     }
-    io.stderr.writeln(output);
+    stderr.writeln(output);
   }
 
   void indentedPrint(Iterable<String> errors) {
     for (final error in errors) {
-      io.stderr.writeln('  $error');
+      stderr.writeln('  $error');
     }
   }
 
-  const platform = LocalPlatform();
   final supportsEmojis = !platform.isWindows || platform.environment.containsKey('WT_SESSION');
   final symbolSuccess = supportsEmojis ? '✅' : '✓';
   final symbolFailure = supportsEmojis ? '❌' : 'X';
   void statusPrint(String describe, {required bool success}) {
-    io.stderr.writeln('${success ? symbolSuccess : symbolFailure} $describe');
+    stderr.writeln('${success ? symbolSuccess : symbolFailure} $describe');
     if (!success) {
-      io.exitCode = 1;
+      setExitCode(1);
     }
   }
 
@@ -75,17 +94,15 @@ void main(List<String> args) {
   // Treat it as an error if no build configs were found. The caller likely
   // expected to find some.
   final Map<String, BuilderConfig> configs = loader.configs;
-  statusPrint(
-    'Found build configs under ${p.relative(buildConfigsDir.path)}',
-    success: configs.isNotEmpty,
-  );
 
   // We can't make further progress if we didn't find any configurations.
+  statusPrint(
+    'Loaded build configs under ${p.relative(buildConfigsDir.path)}',
+    success: configs.isNotEmpty && loader.errors.isEmpty,
+  );
   if (configs.isEmpty) {
     return;
   }
-
-  statusPrint('Loaded build configs without errors', success: loader.errors.isEmpty);
   indentedPrint(loader.errors);
 
   // Find and parse the .ci.yaml configuration (for the engine).
