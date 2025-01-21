@@ -334,6 +334,14 @@ bool DriverInfoVK::IsKnownBadDriver() const {
   if (vendor_ == VendorVK::kHuawei) {
     return true;
   }
+  // https://github.com/flutter/flutter/issues/161122
+  // https://github.com/flutter/flutter/issues/160960
+  // https://github.com/flutter/flutter/issues/160866
+  // https://github.com/flutter/flutter/issues/160804
+  // https://github.com/flutter/flutter/issues/160406
+  if (vendor_ == VendorVK::kImgTec) {
+    return true;
+  }
   return false;
 }
 
