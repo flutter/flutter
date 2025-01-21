@@ -1,6 +1,6 @@
 ## The Flutter Gradle Plugin
 
-This directory contains Gradle code used to by the tool to build Flutter apps for Android,
+This directory contains Gradle code used to by the Flutter tool to build Flutter apps for Android,
 primarily the Flutter Gradle Plugin (FGP) - a Gradle plugin built on top of Gradle and the Android 
 Gradle Plugin (AGP).
 
