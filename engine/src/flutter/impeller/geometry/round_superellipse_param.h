@@ -12,62 +12,77 @@
 
 namespace impeller {
 
+// A utility struct that expands input parameters for a rounded superellipse to
+// drawing variables.
+
 struct RoundSuperellipseParam {
+  // Parameters for drawing a square-like rounded superellipse.
+  //
+  // This structure is used to define an octant of an arbitrary rounded
+  // superellipse.
   struct Octant {
+    // The offset of the square-like rounded superellipse's center from the
+    // origin.
+    //
+    // All other coordinates in this structure are relative to this point.
     Point offset;
 
+    // The coordinate of the midpoint of the top edge, relative to the `offset`
+    // point.
     //
-    Point start;
+    // This is the starting point of the octant curve.
+    Point edge_mid;
 
+    // The coordinate of the superellipse's center, relative to the `offset`
+    // point.
     Point se_center;
-    // Semi-axis of the superellipse.
+    // The semi-axis length of the superellipse.
     Scalar se_a;
-    // Degree of the superellipse.
+    // The degree of the superellipse.
     Scalar se_n;
+    // The range of the parameter "theta" used to define the superellipse curve.
+    //
+    // The "theta" is not the angle of the curve but the implicit parameter
+    // used in the curve's parametric equation.
     Scalar se_max_theta;
 
-    // Start point of the circular_arc.
+    // The coordinate of the top left end of the circular arc, relative to the
+    // `offset` point.
     Point circle_start;
-    // Center of the circle.
+    // The center of the circular arc, relative to the `offset` point.
     Point circle_center;
+    // The angular span of the circular arc, measured in radians.
     Radians circle_max_angle;
   };
 
+  // Parameters for drawing a rounded superellipse with equal radii for all
+  // corners.
+  //
+  // This structure is used to define a quadrant of an arbitrary rounded
+  // superellipse.
   struct Quadrant {
-    // The center of the quadrant.
+    // The offset of the rounded superellipse's center from the origin.
+    //
+    // All other coordinates in this structure are relative to this point.
     Point center;
 
-    // All parameters below describe the shape centered at the origin.
-
-    // The scale in order to transform into the original shape (with
-    // asymmetrical radius size and in the correct quadrant) from the normalized
-    // shape with a symmetrical corner in the first quadrant.
+    // The scaling factor used to transform a normalized rounded superellipse
+    // back to its original, unnormalized shape.
     //
-    // Normalize: If the radius size of this corner is asymmetrical, then the
-    // quadrant shape is normalized by shortening the longer radius to the
-    // shorter one, so that problem is simplified into drawing symmetrical
-    // corners.
+    // Normalization refers to adjusting the original curve, which may have
+    // asymmetrical corner sizes, into a symmetrical one by reducing the longer
+    // radius to match the shorter one. For instance, to draw a rounded
+    // superellipse with size (200, 300) and radii (20, 10), the function first
+    // draws a normalized RSE with size (100, 300) and radii (10, 10), then
+    // scales it by (2x, 1x) to restore the original proportions.
     //
-    // Sign: During the normalization, the shape is also flipped to the first
-    // quadrant (top right).
+    // Normalization also flips the curve to the first quadrant (top right) if
+    // it originally resides in another quadrant. This is reflected as the signs
+    // of `signed_scale`.
     Point signed_scale;
 
-    // All parameters below describe the shape after normalization.
-
-    // The symmetrical radius after normalization.
-    // Scalar norm_radius;
-
-    // Half of height and width.
-    //
-    // Effectively the top right corner of the bounds.
-    // Point half_size;
-
-    // The width and the height of the straight segments.
-    // Point stretch;
-
-    // The offset of the center of the octants from the `stretch` point.
-    // Scalar octant_eccentric;
-
+    // The parameters for the two octants that make up this quadrant after
+    // normalization.
     Octant top;
     Octant right;
   };
@@ -77,6 +92,7 @@ struct RoundSuperellipseParam {
   Quadrant bottom_left;
   Quadrant bottom_right;
 
+  // Create a `RoundSuperellipseParam` from input parameters.
   [[nodiscard]] static RoundSuperellipseParam MakeBoundsRadii(
       const Rect& bounds,
       const RoundingRadii& radii);

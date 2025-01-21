@@ -319,7 +319,7 @@ size_t DrawOctantSquareLikeSquircle(Point* output,
   Point* next = output;
   if (!reverse_and_flip) {
     // Point A
-    *(next++) = transform * param.start;
+    *(next++) = transform * param.edge_mid;
     // Arc [B, J)
     next += DrawSuperellipsoidArc(
         next, param.se_a, param.se_n, param.se_max_theta, reverse_and_flip,
@@ -342,7 +342,7 @@ size_t DrawOctantSquareLikeSquircle(Point* output,
     // Point B
     *(next++) = transform * (param.se_center + Point{0, param.se_a});
     // Point A
-    *(next++) = transform * param.start;
+    *(next++) = transform * param.edge_mid;
   }
   return next - output;
 }

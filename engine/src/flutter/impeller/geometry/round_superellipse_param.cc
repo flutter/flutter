@@ -8,6 +8,20 @@ namespace impeller {
 
 namespace {
 
+// Returns -1 if `i` is negative, and 1 if `i` is non-negative.
+inline constexpr Scalar Sign(Scalar i) {
+  return std::signbit(i) ? -1 : 1;
+}
+
+// Return the value that splits the range from `left` to `right` into two
+// portions whose ratio equals to `ratio_left` : `ratio_right`.
+Scalar Split(Scalar left, Scalar right, Scalar ratio_left, Scalar ratio_right) {
+  if (ratio_left == 0 && ratio_right == 0) {
+    return (left + right) / 2;
+  }
+  return (left * ratio_right + right * ratio_left) / (ratio_left + ratio_right);
+}
+
 // A factor used to calculate the "gap", defined as the distance from the
 // midpoint of the curved corners to the nearest sides of the bounding box.
 //
@@ -22,10 +36,6 @@ namespace {
 // The formula should be kept in sync with a few files, as documented in
 // `CalculateGap` in round_superellipse_geometry.cc.
 constexpr Scalar kGapFactor = 0.2924066406;
-
-inline constexpr Scalar Sign(Scalar i) {
-  return std::signbit(i) ? -1 : 1;
-}
 
 // A look up table with precomputed variables.
 //
@@ -80,15 +90,6 @@ Scalar LerpPrecomputedVariable(size_t column, Scalar ratio) {
          frac * kPrecomputedVariables[left + 1][column];
 }
 
-// Return the value that splits the range from `left` to `right` into two
-// portions whose ratio equals to `ratio_left` : `ratio_right`.
-Scalar Split(Scalar left, Scalar right, Scalar ratio_left, Scalar ratio_right) {
-  if (ratio_left == 0 && ratio_right == 0) {
-    return (left + right) / 2;
-  }
-  return (left * ratio_right + right * ratio_left) / (ratio_left + ratio_right);
-}
-
 // Find the center of the circle that passes the given two points and have the
 // given radius.
 Point FindCircleCenter(Point a, Point b, Scalar r) {
@@ -112,11 +113,34 @@ Point FindCircleCenter(Point a, Point b, Scalar r) {
   return m - distance_cm * c_to_m.Normalize();
 }
 
-// Compute parameters for the first quadrant of a square-like rounded
-// superellipse with a symmetrical radius.
+// Compute parameters for a square-like rounded superellipse with a symmetrical
+// radius.
 RoundSuperellipseParam::Octant ComputeOctant(Point center,
                                              Scalar size,
                                              Scalar radius) {
+  /* The following figure shows the first quadrant of a square-like rounded
+   * superellipse. The target arc consists of the "stretch" (AB), a
+   * superellipsoid arc (BJ), and a circular arc (JM).
+   *
+   *     straight   superelipse
+   *          ↓     ↓
+   *        A    B       J    circular arc
+   *        ---------...._   ↙
+   *        |    |      /  `⟍ M
+   *        |    |     /    ⟋ ⟍
+   *        |    |    /  ⟋     \
+   *        |    |   / ⟋        |
+   *        |    |  ᜱD          |
+   *        |    | /             |
+   *    ↑   +----+ S             |
+   *    s   |    |               |
+   *    ↓   +----+---------------| A'
+   *       O
+   *        ← s →
+   *        ←------ size/2 ------→
+   */
+
+
   Scalar ratio = radius == 0 ? kMaxRatio : std::min(size / radius, kMaxRatio);
   Scalar a = ratio * radius / 2;
   Scalar s = size / 2 - a;
@@ -143,7 +167,7 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
   return RoundSuperellipseParam::Octant{
       .offset = center,
 
-      .start = pointA,
+      .edge_mid = pointA,
 
       .se_center = pointS,
       .se_a = a,
@@ -159,18 +183,14 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
 // Compute parameters for a quadrant of a rounded superellipse with asymmetrical
 // radii.
 //
-// The target quadrant is specified by the direction of `corner` relative to
-// `center`.
+// The `corner` is the coordinate of the corner point in the same coordinate
+// space as `center`, which specifies both the half size of the bounding box and
+// which quadrant the curve should be.
 RoundSuperellipseParam::Quadrant ComputeQuadrant(Point center,
                                                  Point corner,
                                                  Size radii) {
   Point corner_vector = corner - center;
 
-  // Normalization refers to the process of transforming the sizes and radii by
-  // scaling the longer of `radii` to the shorter so that the radius is
-  // symmetrical . For example, to draw a RSE with size (200, 300) and radii
-  // (20, 10), this function draws one with size (100, 300) and radii (10, 10)
-  // and then scales it by (2x, 1x).
   Scalar norm_radius = radii.MinDimension();
   Point signed_scale;
   Point norm_size;
@@ -187,9 +207,9 @@ RoundSuperellipseParam::Quadrant ComputeQuadrant(Point center,
 
   // Each quadrant curve is composed of two octant curves, each of which belongs
   // to a square-like rounded rectangle. The centers these two square-like
-  // rounded rectangle are offset from the origin by the same distance in
-  // different directions. The distance is denoted as `eccentric`.
-  Scalar eccentric = (norm_size.x - norm_size.y) / 2;
+  // rounded rectangle are offset from the quadrant center by the same distance
+  // in different directions. The distance is denoted as `c`.
+  Scalar c = (norm_size.x - norm_size.y) / 2;
 
   return RoundSuperellipseParam::Quadrant{
       .center = center,
