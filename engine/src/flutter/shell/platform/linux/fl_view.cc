@@ -62,13 +62,6 @@ struct _FlView {
   // Manages touch events.
   FlTouchManager* touch_manager;
 
-  // Manages keyboard events.
-  FlKeyboardManager* keyboard_manager;
-
-  // Key events that have been redispatched.
-  // FIXME: Event could move between views - this needs to be in the manager
-  GPtrArray* redispatched_key_events;
-
   // Flutter system channel handlers.
   FlTextInputHandler* text_input_handler;
 
@@ -132,7 +125,6 @@ static void init_keyboard(FlView* self) {
   g_clear_object(&self->text_input_handler);
   self->text_input_handler = fl_text_input_handler_new(
       messenger, im_context, FL_TEXT_INPUT_VIEW_DELEGATE(self));
-  g_ptr_array_set_size(self->redispatched_key_events, 0);
 }
 
 static void init_scrolling(FlView* self) {
@@ -635,7 +627,6 @@ static void fl_view_dispose(GObject* object) {
   g_clear_object(&self->scrolling_manager);
   g_clear_object(&self->pointer_manager);
   g_clear_object(&self->touch_manager);
-  g_clear_pointer(&self->redispatched_key_events, g_ptr_array_unref);
   g_clear_object(&self->view_accessible);
   g_clear_object(&self->cancellable);
 
@@ -652,31 +643,9 @@ static void fl_view_realize(GtkWidget* widget) {
   gtk_widget_realize(GTK_WIDGET(self->gl_area));
 }
 
-static gboolean event_is_redispatched(FlView* self, FlKeyEvent* event) {
-  guint32 time = fl_key_event_get_time(event);
-  gboolean is_press = !!fl_key_event_get_is_press(event);
-  guint16 keycode = fl_key_event_get_keycode(event);
-  for (guint i = 0; i < self->redispatched_key_events->len; i++) {
-    FlKeyEvent* e =
-        FL_KEY_EVENT(g_ptr_array_index(self->redispatched_key_events, i));
-    if (fl_key_event_get_time(e) == time &&
-        !!fl_key_event_get_is_press(e) == is_press &&
-        fl_key_event_get_keycode(e) == keycode) {
-      g_ptr_array_remove_index(self->redispatched_key_events, i);
-      return TRUE;
-    }
-  }
-
-  return FALSE;
-}
-
 static gboolean handle_key_event(FlView* self, GdkEventKey* key_event) {
   g_autoptr(FlKeyEvent) event = fl_key_event_new_from_gdk_event(
       gdk_event_copy(reinterpret_cast<GdkEvent*>(key_event)));
-
-  if (event_is_redispatched(self, event)) {
-    return FALSE;
-  }
 
   fl_keyboard_manager_handle_event(
       fl_engine_get_keyboard_manager(self->engine), event, self->cancellable,
@@ -698,8 +667,8 @@ static gboolean handle_key_event(FlView* self, GdkEventKey* key_event) {
         if (redispatch_event != nullptr) {
           if (!fl_text_input_handler_filter_keypress(self->text_input_handler,
                                                      redispatch_event)) {
-            g_ptr_array_add(self->redispatched_key_events,
-                            g_object_ref(redispatch_event));
+            fl_keyboard_manager_add_redispatched_event(
+                fl_engine_get_keyboard_manager(self->engine), redispatch_event);
             gdk_event_put(fl_key_event_get_origin(redispatch_event));
           }
         }
@@ -751,9 +720,6 @@ static void fl_view_init(FlView* self) {
   GdkRGBA default_background = {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
   self->background_color = gdk_rgba_copy(&default_background);
-
-  self->redispatched_key_events =
-      g_ptr_array_new_with_free_func(g_object_unref);
 
   GtkWidget* event_box = gtk_event_box_new();
   gtk_widget_set_hexpand(event_box, TRUE);
