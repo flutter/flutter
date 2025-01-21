@@ -17543,8 +17543,8 @@ void main() {
       expect(controller.selection.base.offset, 3);
 
       // Shift
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
-      
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pump();
 
