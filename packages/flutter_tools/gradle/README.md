@@ -6,7 +6,7 @@ Gradle Plugin (AGP).
 
 ### Editing in Android Studio
 
-To get full code completion in Android Studio, you must open a new Android Studio window with this 
+To get code completion in Android Studio, you must open a new Android Studio window with this 
 directory as the root. Code completion will unfortunately not work when simply navigating to files 
 in an Android Studio window opened at the root of the entire Flutter repo.
 
