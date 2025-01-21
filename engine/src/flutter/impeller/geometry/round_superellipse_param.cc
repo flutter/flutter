@@ -18,7 +18,7 @@ Scalar Split(Scalar left, Scalar right, Scalar ratio_left, Scalar ratio_right) {
 }
 
 // Return the same Point, but each NaN coordinate is replaced by 1.
-inline Point ReplanceNanWithOne(Point in) {
+inline Point ReplanceNaNWithOne(Point in) {
   return Point{std::isnan(in.x) ? 1 : in.x, std::isnan(in.y) ? 1 : in.y};
 }
 
@@ -193,10 +193,13 @@ RoundSuperellipseParam::Quadrant ComputeQuadrant(Point center,
   Size radii = in_radii.Abs();
 
   // The prefix "norm" is short for "normalized".
+  //
+  // Be extra careful to avoid NaNs in cases that some coordinates of `in_radii`
+  // or `corner_vector` are zero.
   Scalar norm_radius = radii.MinDimension();
   Size forward_scale = norm_radius == 0 ? Size{1, 1} : radii / norm_radius;
   Point norm_half_size = corner_vector.Abs() / forward_scale;
-  Point signed_scale = ReplanceNanWithOne(corner_vector / norm_half_size);
+  Point signed_scale = ReplanceNaNWithOne(corner_vector / norm_half_size);
 
   // Each quadrant curve is composed of two octant curves, each of which belongs
   // to a square-like rounded rectangle. For the two octants to connect at the
@@ -206,7 +209,7 @@ RoundSuperellipseParam::Quadrant ComputeQuadrant(Point center,
   Scalar c = norm_half_size.x - norm_half_size.y;
 
   return RoundSuperellipseParam::Quadrant{
-      .center = center,
+      .offset = center,
       .signed_scale = signed_scale,
       .top = ComputeOctant(Point{0, -c}, norm_half_size.x, norm_radius),
       .right = ComputeOctant(Point{c, 0}, norm_half_size.y, norm_radius),
@@ -214,6 +217,14 @@ RoundSuperellipseParam::Quadrant ComputeQuadrant(Point center,
 }
 
 }  // namespace
+
+RoundSuperellipseParam RoundSuperellipseParam::MakeSizeRadiusForTopRight(
+    const Size& size,
+    const Size& radius) {
+  return RoundSuperellipseParam{
+      .top_right = ComputeQuadrant(Point(), Point(size) / 2, radius),
+  };
+}
 
 RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
     const Rect& bounds_,
@@ -230,16 +241,16 @@ RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
                             radii_.top_left.height, radii_.bottom_left.height);
 
   return RoundSuperellipseParam{
-      .top_left = ComputeQuadrant(Point{top_split, left_split},
-                                  bounds_.GetLeftTop(), radii_.top_left),
       .top_right = ComputeQuadrant(Point{top_split, right_split},
                                    bounds_.GetRightTop(), radii_.top_right),
-      .bottom_left =
-          ComputeQuadrant(Point{bottom_split, left_split},
-                          bounds_.GetLeftBottom(), radii_.bottom_left),
       .bottom_right =
           ComputeQuadrant(Point{bottom_split, right_split},
                           bounds_.GetRightBottom(), radii_.bottom_right),
+      .bottom_left =
+          ComputeQuadrant(Point{bottom_split, left_split},
+                          bounds_.GetLeftBottom(), radii_.bottom_left),
+      .top_left = ComputeQuadrant(Point{top_split, left_split},
+                                  bounds_.GetLeftTop(), radii_.top_left),
 
   };
 }

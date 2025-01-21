@@ -55,8 +55,8 @@ struct RoundSuperellipseParam {
     Radians circle_max_angle;
   };
 
-  // Parameters for drawing a rounded superellipse with equal radii for all
-  // corners.
+  // Parameters for drawing a rounded superellipse with equal radius size for
+  // all corners.
   //
   // This structure is used to define a quadrant of an arbitrary rounded
   // superellipse.
@@ -64,7 +64,7 @@ struct RoundSuperellipseParam {
     // The offset of the rounded superellipse's center from the origin.
     //
     // All other coordinates in this structure are relative to this point.
-    Point center;
+    Point offset;
 
     // The scaling factor used to transform a normalized rounded superellipse
     // back to its original, unnormalized shape.
@@ -87,12 +87,21 @@ struct RoundSuperellipseParam {
     Octant right;
   };
 
-  Quadrant top_left;
   Quadrant top_right;
-  Quadrant bottom_left;
   Quadrant bottom_right;
+  Quadrant bottom_left;
+  Quadrant top_left;
 
-  // Create a `RoundSuperellipseParam` from input parameters.
+  // Create a param of a rounded superellipse with equal radius size for all
+  // corners and centered at the origin.
+  //
+  // Only `top_right` of the 4 quadrant fields will be filled.
+  [[nodiscard]] static RoundSuperellipseParam MakeSizeRadiusForTopRight(
+      const Size& size,
+      const Size& radius);
+
+  // Create a param for a rounded superellipse with the specific bounds and
+  // radii.
   [[nodiscard]] static RoundSuperellipseParam MakeBoundsRadii(
       const Rect& bounds,
       const RoundingRadii& radii);

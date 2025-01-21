@@ -203,10 +203,10 @@ Scalar CalculateStep(Scalar minDimension, Scalar fullAngle) {
 // to `max_theta` radiance clockwise if `reverse` is false, or from `max_theta`
 // to 0 otherwise.
 //
-// The resulting points, after applying `transform`, are appended to `output`
-// and include the starting point but exclude the ending point.
+// The resulting points, transformed by `transform`, are appended to `output`.
+// The starting point is included, but the ending point is excluded.
 //
-// Returns the number of generated points.
+// Returns the number of points generated.
 size_t DrawSuperellipsoidArc(Point* output,
                              Scalar a,
                              Scalar n,
@@ -228,17 +228,17 @@ size_t DrawSuperellipsoidArc(Point* output,
   return next - output;
 }
 
-// Draw a circular arc from `start` to `end` with a radius of `r`.
+// Draws a circular arc centered at the origin with a radius of `r`, starting at
+// `start`, and spanning `max_angle` clockwise.
 //
-// It is assumed that `start` is north-west to `end`, and the center of the
-// circle is south-west to both points. If `reverse` is true, then the curve
-// goes from `end` to `start` instead.
+// If `reverse` is false, points are generated from `start` to `start +
+// max_angle`.  If `reverse` is true, points are generated from `start +
+// max_angle` back to `start`.
 //
-// The resulting points, after applying `transform`, are appended to `output`
-// and include the effective starting point but exclude the effective ending
-// point.
+// The generated points, transformed by `transform`, are appended to `output`.
+// The starting point is included, but the ending point is excluded.
 //
-// Returns the number of generated points.
+// Returns the number of points generated.
 size_t DrawCircularArc(Point* output,
                        Point start,
                        Scalar max_angle,
@@ -274,15 +274,14 @@ size_t DrawCircularArc(Point* output,
 // Draws an arc representing the top 1/8 segment of a square-like rounded
 // superellipse centered at the origin.
 //
-// The square-like rounded superellipse that this arc belongs to has a width and
-// height specified by `size` and features rounded corners determined by
-// `corner_radius`. The `corner_radius` corresponds to the `cornerRadius`
-// parameter in SwiftUI, rather than the literal radius of corner circles.
+// If `reverse_and_flip` is false, the resulting arc spans from 0 (inclusive) to
+// pi/4 (exclusive), moving clockwise starting from the positive Y-axis. If
+// `reverse` is true, the curve spans from pi/4 (inclusive) to 0 (inclusive)
+// counterclockwise instead, and all points have their x and y coordinates
+// flipped.
 //
-// If `reverse` is false, the resulting arc spans from 0 (inclusive) to pi/4
-// (exclusive), moving clockwise starting from the positive Y-axis. If `reverse`
-// is true, the curve spans from pi/4 (inclusive) to 0 (inclusive)
-// counterclockwise instead.
+// Either way, each point is then transformed by `external_transform` and
+// appended to `output`.
 //
 // Returns the number of points generated.
 size_t DrawOctantSquareLikeSquircle(Point* output,
@@ -302,7 +301,7 @@ size_t DrawOctantSquareLikeSquircle(Point* output,
    *          ↓     ↓
    *        A    B       J    circular arc
    *        ---------...._   ↙
-   *        |    |      /  `⟍ M
+   *        |    |      /  `⟍ M (where y=x)
    *        |    |     /    ⟋ ⟍
    *        |    |    /  ⟋     \
    *        |    |   / ⟋        |
@@ -350,41 +349,10 @@ size_t DrawOctantSquareLikeSquircle(Point* output,
 // Draw a quadrant curve, both ends included.
 //
 // Returns the number of points.
-//
-// The eact quadrant is specified by the direction of `outer` relative to
-// `center`. The curve goes from the X axis to the Y axis.
 static size_t DrawQuadrant(Point* output,
                            const RoundSuperellipseParam::Quadrant& param) {
-  // if (radii.width == 0 || radii.height == 0) {
-  //   // Degrade to rectangle. (A zero radius causes error below.)
-  //   output[0] = {center.x, outer.y};
-  //   output[1] = outer;
-  //   output[2] = {outer.x, center.y};
-  //   return 3;
-  // }
-  // // Normalize sizes and radii into symmetrical radius by scaling the longer
-  // of
-  // // `radii` to the shorter. For example, to draw a RSE with size (200, 300)
-  // // and radii (20, 10), this function draws one with size (100, 300) and
-  // radii
-  // // (10, 10) and then scales it by (2x, 1x).
-  // Scalar norm_radius = radii.MinDimension();
-  // Size radius_scale = radii / norm_radius;
-  // Point signed_size = (outer - center) * 2;
-  // Point norm_size = signed_size.Abs() / radius_scale;
-  // Point signed_scale = signed_size / norm_size;
-
-  // // Each quadrant curve is composed of two octant curves, each of which
-  // belongs
-  // // to a square-like rounded rectangle. When `norm_size`'s width != height,
-  // the
-  // // centers of such square-like rounded rectangles are offset from the
-  // origin
-  // // by a distance denoted as `c`.
-  // Scalar c = (norm_size.x - norm_size.y) / 2;
-
   Point* next = output;
-  auto transform = Matrix::MakeTranslateScale(param.signed_scale, param.center);
+  auto transform = Matrix::MakeTranslateScale(param.signed_scale, param.offset);
 
   next += DrawOctantSquareLikeSquircle(next, param.top,
                                        /*reverse_and_flip=*/false, transform);
@@ -427,8 +395,8 @@ GeometryResult RoundSuperellipseGeometry::GetPositionBuffer(
       rearranger_holder;
 
   if (radii_.AreAllCornersSame()) {
-    auto param = RoundSuperellipseParam::MakeBoundsRadii(
-        bounds_.Shift(-bounds_.GetCenter()), radii_);
+    auto param = RoundSuperellipseParam::MakeSizeRadiusForTopRight(
+        bounds_.GetSize(), radii_.top_right);
     rearranger_holder.emplace<MirroredQuadrantRearranger>(bounds_.GetCenter(),
                                                           cache);
     auto& t = std::get<MirroredQuadrantRearranger>(rearranger_holder);
