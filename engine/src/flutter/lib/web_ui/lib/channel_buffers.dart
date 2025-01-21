@@ -132,17 +132,11 @@ class ChannelBuffers {
   final Map<String, _Channel> _channels = <String, _Channel>{};
 
   @visibleForTesting
-  bool debugPrintOverflowWarning = true;
-
   void push(String name, ByteData? data, PlatformMessageResponseCallback callback) {
     final _Channel channel = _channels.putIfAbsent(name, () => _Channel());
     if (channel.push(_StoredMessage(data, callback))) {
       assert(() {
-        if (!debugPrintOverflowWarning) {
-          return true;
-        }
-
-        print(
+        engine.printWarning(
           'A message on the $name channel was discarded before it could be handled.\n'
           'This happens when a plugin sends messages to the framework side before the '
           'framework has had an opportunity to register a listener. See the ChannelBuffers '

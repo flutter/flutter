@@ -491,7 +491,6 @@ Future<void> testMain() async {
   });
 
   test('in full-page mode, Flutter window replaces viewport meta tags', () {
-    FullPageEmbeddingStrategy.debugPrintExistingMetaWarning = false;
     final DomHTMLMetaElement existingMeta =
         createDomHTMLMetaElement()
           ..name = 'viewport'
@@ -514,7 +513,6 @@ Future<void> testMain() async {
     expect(newMeta.content, contains('maximum-scale=1.0'));
     expect(newMeta.content, contains('user-scalable=no'));
     implicitView.dispose();
-    FullPageEmbeddingStrategy.debugPrintExistingMetaWarning = true;
   });
 
   test('auto-view-id', () {

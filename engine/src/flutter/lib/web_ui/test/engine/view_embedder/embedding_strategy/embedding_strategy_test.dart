@@ -19,8 +19,6 @@ void main() {
 }
 
 void doTests() {
-  ignoreUnhandledPlatformMessages();
-
   group('Factory', () {
     test('Creates a FullPage instance when hostElement is null', () async {
       final EmbeddingStrategy strategy = EmbeddingStrategy.create();

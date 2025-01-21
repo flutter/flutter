@@ -20,8 +20,6 @@ void doTests() {
   late CustomElementEmbeddingStrategy strategy;
   late DomElement target;
 
-  ignoreUnhandledPlatformMessages();
-
   group('initialize', () {
     setUp(() {
       target = createDomElement('this-is-the-target');

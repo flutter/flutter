@@ -22,8 +22,6 @@ void testMain() {
   int initCalled = 0;
   int runCalled = 0;
 
-  ignoreUnhandledPlatformMessages();
-
   setUp(() {
     callOrder = 1;
     initCalled = 0;

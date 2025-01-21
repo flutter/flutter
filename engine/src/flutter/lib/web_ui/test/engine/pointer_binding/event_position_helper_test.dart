@@ -31,8 +31,6 @@ void doTests() {
     return (await nextEvent) as DomPointerEvent;
   }
 
-  ignoreUnhandledPlatformMessages();
-
   group('computeEventOffsetToTarget', () {
     setUp(() {
       view = EngineFlutterView(EnginePlatformDispatcher.instance, domDocument.body!);
