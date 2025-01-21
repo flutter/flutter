@@ -30,6 +30,9 @@ import 'text_selection_toolbar_anchors.dart';
 /// and display this one. A system context menu that is hidden is informed via
 /// [onSystemHide].
 ///
+/// Pass [items] to specify the buttons that will appear in the menu. Any items
+/// without a title will be given a default title from [WidgetsLocalizations].
+///
 /// To check if the current device supports showing the system context menu,
 /// call [isSupported].
 ///
@@ -145,12 +148,6 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
   Widget build(BuildContext context) {
     assert(SystemContextMenu.isSupported(context));
     final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-    /*
-    final Iterable<IOSSystemContextMenuItem>? datas = widget.items?.map(
-      (IOSSystemContextMenuItem item) => _itemToData(item, localizations),
-    );
-    */
-    //_systemContextMenuController.show(widget.anchor, datas?.toList());
     _systemContextMenuController.show(widget.anchor, widget.items, localizations);
 
     return const SizedBox.shrink();
@@ -191,8 +188,8 @@ sealed class IOSSystemContextMenuItem {
 
   /// Returns json for use in method channel calls, specifically
   /// `ContextMenu.showSystemContextMenu`.
-  Map<String, dynamic> _toJson(WidgetsLocalizations localizations) {
-    final String? jsonTitle = title ?? _getJsonTitle(localizations);
+  Map<String, dynamic> _toJson(WidgetsLocalizations? localizations) {
+    final String? jsonTitle = title ?? _getJsonTitle(localizations!);
 
     return <String, dynamic>{
       'callbackId': hashCode,
@@ -330,7 +327,7 @@ class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
   String get _jsonType => 'lookUp';
 
   @override
-  String? _getJsonTitle(WidgetsLocalizations localizations) {
+  String _getJsonTitle(WidgetsLocalizations localizations) {
     return localizations.lookUpButtonLabel;
   }
 
@@ -368,7 +365,7 @@ class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
   String get _jsonType => 'searchWeb';
 
   @override
-  String? _getJsonTitle(WidgetsLocalizations localizations) {
+  String _getJsonTitle(WidgetsLocalizations localizations) {
     return localizations.searchWebButtonLabel;
   }
 
@@ -406,7 +403,7 @@ class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem {
   String get _jsonType => 'share';
 
   @override
-  String? _getJsonTitle(WidgetsLocalizations localizations) {
+  String _getJsonTitle(WidgetsLocalizations localizations) {
     return localizations.shareButtonLabel;
   }
 
@@ -562,6 +559,8 @@ class SystemContextMenuController with SystemContextMenuClient {
 
   // End SystemContextMenuClient.
 
+  // TODO(justinmc): The system shouldn't infer items, need to change this and
+  // update these docs.
   /// Shows the system context menu anchored on the given [Rect].
   ///
   /// Currently only supported on iOS 16.0 and later. Check
@@ -572,7 +571,9 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///
   /// Optionally, `items` can be provided to specify the menu items. If none are
   /// given, then the platform will infer which menu items should be visible
-  /// based on the state of the current [TextInputConnection].
+  /// based on the state of the current [TextInputConnection]. Any `items` that
+  /// have no title will be passed a default title from the given
+  /// [WidgetsLocalizations].
   ///
   /// Currently this system context menu is bound to text input. Using this
   /// without an active [TextInputConnection] will be a noop, even when
@@ -596,19 +597,10 @@ class SystemContextMenuController with SystemContextMenuClient {
   Future<void> show(
     Rect targetRect, [
     List<IOSSystemContextMenuItem>? items,
-    // TODO(justinmc): Or, I could take this in the constructor... Or take BuildContext.
     WidgetsLocalizations? localizations,
   ]) {
     assert(!_isDisposed);
-    /*
-    assert(
-      TextInput._instance._currentConnection != null,
-      'Currently, the system context menu can only be shown for an active text input connection',
-    );
-    */
     assert(items == null || !_containsDuplicates(items));
-
-    // TODO(justinmc): Assert that items aren't missing any titles.
 
     // Don't show the same thing that's already being shown.
     if (_lastShown != null &&
@@ -650,8 +642,7 @@ class SystemContextMenuController with SystemContextMenuClient {
         'items':
             items
                 .map<Map<String, dynamic>>(
-                  // (TODO(justinmc): Should this really be bang!?
-                  (IOSSystemContextMenuItem item) => item._toJson(localizations!),
+                  (IOSSystemContextMenuItem item) => item._toJson(localizations),
                 )
                 .toList(),
     });
