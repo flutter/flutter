@@ -705,9 +705,12 @@ static gboolean handle_key_event(FlView* self, GdkEventKey* key_event) {
         }
 
         if (redispatch_event != nullptr) {
-          g_ptr_array_add(self->redispatched_key_events,
-                          g_object_ref(redispatch_event));
-          gdk_event_put(fl_key_event_get_origin(redispatch_event));
+          if (!fl_text_input_handler_filter_keypress(self->text_input_handler,
+                                                     redispatch_event)) {
+            g_ptr_array_add(self->redispatched_key_events,
+                            g_object_ref(redispatch_event));
+            gdk_event_put(fl_key_event_get_origin(redispatch_event));
+          }
         }
       },
       self);
