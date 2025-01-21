@@ -3,11 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:js_interop';
 
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
-
-import 'util.dart';
 
 ui_web.BenchmarkValueCallback? engineBenchmarkValueCallback;
 

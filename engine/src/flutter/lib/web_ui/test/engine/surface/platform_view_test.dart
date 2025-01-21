@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
-import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 void main() {
@@ -28,7 +27,7 @@ Future<void> testMain() async {
     expect(warnings, isEmpty);
 
     // ignore: unnecessary_statements
-    ui.platformViewRegistry;
+    ui_web.platformViewRegistry;
     expect(warnings, hasLength(1));
     expect(warnings.single, contains('platformViewRegistry'));
     expect(warnings.single, contains('deprecated'));
