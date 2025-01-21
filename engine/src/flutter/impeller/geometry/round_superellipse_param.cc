@@ -8,11 +8,6 @@ namespace impeller {
 
 namespace {
 
-// Returns -1 if `i` is negative, and 1 if `i` is non-negative.
-inline constexpr Scalar Sign(Scalar i) {
-  return std::signbit(i) ? -1 : 1;
-}
-
 // Return the value that splits the range from `left` to `right` into two
 // portions whose ratio equals to `ratio_left` : `ratio_right`.
 Scalar Split(Scalar left, Scalar right, Scalar ratio_left, Scalar ratio_right) {
@@ -20,6 +15,11 @@ Scalar Split(Scalar left, Scalar right, Scalar ratio_left, Scalar ratio_right) {
     return (left + right) / 2;
   }
   return (left * ratio_right + right * ratio_left) / (ratio_left + ratio_right);
+}
+
+// Return the same Point, but each NaN coordinate is replaced by 1.
+inline Point ReplanceNanWithOne(Point in) {
+  return Point{std::isnan(in.x) ? 1 : in.x, std::isnan(in.y) ? 1 : in.y};
 }
 
 // A factor used to calculate the "gap", defined as the distance from the
@@ -116,7 +116,7 @@ Point FindCircleCenter(Point a, Point b, Scalar r) {
 // Compute parameters for a square-like rounded superellipse with a symmetrical
 // radius.
 RoundSuperellipseParam::Octant ComputeOctant(Point center,
-                                             Scalar size,
+                                             Scalar half_size,
                                              Scalar radius) {
   /* The following figure shows the first quadrant of a square-like rounded
    * superellipse. The target arc consists of the "stretch" (AB), a
@@ -137,13 +137,13 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
    *    ↓   +----+---------------| A'
    *       O
    *        ← s →
-   *        ←------ size/2 ------→
+   *        ←---- half_size -----→
    */
 
-
-  Scalar ratio = radius == 0 ? kMaxRatio : std::min(size / radius, kMaxRatio);
+  Scalar ratio =
+      radius == 0 ? kMaxRatio : std::min(half_size * 2 / radius, kMaxRatio);
   Scalar a = ratio * radius / 2;
-  Scalar s = size / 2 - a;
+  Scalar s = half_size - a;
   Scalar g = kGapFactor * radius;
 
   Scalar n = LerpPrecomputedVariable(1, ratio);
@@ -152,8 +152,8 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
 
   Scalar R = (a - d - g) * sqrt(2);
 
-  Point pointA{0, size / 2};
-  Point pointM{size / 2 - g, size / 2 - g};
+  Point pointA{0, half_size};
+  Point pointM{half_size - g, half_size - g};
   Point pointS{s, s};
   Point pointJ =
       Point{pow(abs(sinf(thetaJ)), 2 / n), pow(abs(cosf(thetaJ)), 2 / n)} * a +
@@ -188,34 +188,28 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
 // which quadrant the curve should be.
 RoundSuperellipseParam::Quadrant ComputeQuadrant(Point center,
                                                  Point corner,
-                                                 Size radii) {
+                                                 Size in_radii) {
   Point corner_vector = corner - center;
+  Size radii = in_radii.Abs();
 
+  // The prefix "norm" is short for "normalized".
   Scalar norm_radius = radii.MinDimension();
-  Point signed_scale;
-  Point norm_size;
-
-  if (radii.width == 0 || radii.height == 0) {
-    signed_scale = {Sign(corner_vector.x), Sign(corner_vector.y)};
-    norm_size = corner_vector.Abs() * 2;
-  } else {
-    Size radius_scale = radii / norm_radius;
-    Point signed_size = corner_vector * 2;
-    norm_size = signed_size.Abs() / radius_scale;
-    signed_scale = signed_size / norm_size;
-  }
+  Size forward_scale = norm_radius == 0 ? Size{1, 1} : radii / norm_radius;
+  Point norm_half_size = corner_vector.Abs() / forward_scale;
+  Point signed_scale = ReplanceNanWithOne(corner_vector / norm_half_size);
 
   // Each quadrant curve is composed of two octant curves, each of which belongs
-  // to a square-like rounded rectangle. The centers these two square-like
-  // rounded rectangle are offset from the quadrant center by the same distance
-  // in different directions. The distance is denoted as `c`.
-  Scalar c = (norm_size.x - norm_size.y) / 2;
+  // to a square-like rounded rectangle. For the two octants to connect at the
+  // circular arc, the centers these two square-like rounded rectangle must be
+  // offset from the quadrant center by a same distance in different directions.
+  // The distance is denoted as `c`.
+  Scalar c = norm_half_size.x - norm_half_size.y;
 
   return RoundSuperellipseParam::Quadrant{
       .center = center,
       .signed_scale = signed_scale,
-      .top = ComputeOctant(Point{0, -eccentric}, norm_size.x, norm_radius),
-      .right = ComputeOctant(Point{eccentric, 0}, norm_size.y, norm_radius),
+      .top = ComputeOctant(Point{0, -c}, norm_half_size.x, norm_radius),
+      .right = ComputeOctant(Point{c, 0}, norm_half_size.y, norm_radius),
   };
 }
 
