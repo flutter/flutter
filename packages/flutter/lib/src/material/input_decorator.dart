@@ -565,6 +565,7 @@ class _Decoration {
     required this.isDense,
     required this.isEmpty,
     required this.visualDensity,
+    required this.maintainHintSize,
     this.icon,
     this.input,
     this.label,
@@ -589,6 +590,7 @@ class _Decoration {
   final bool? isDense;
   final bool isEmpty;
   final VisualDensity visualDensity;
+  final bool maintainHintSize;
   final Widget? icon;
   final Widget? input;
   final Widget? label;
@@ -621,6 +623,7 @@ class _Decoration {
         other.isDense == isDense &&
         other.isEmpty == isEmpty &&
         other.visualDensity == visualDensity &&
+        other.maintainHintSize == maintainHintSize &&
         other.icon == icon &&
         other.input == input &&
         other.label == label &&
@@ -646,6 +649,7 @@ class _Decoration {
     isDense,
     isEmpty,
     visualDensity,
+    maintainHintSize,
     icon,
     input,
     label,
@@ -654,8 +658,7 @@ class _Decoration {
     suffix,
     prefixIcon,
     suffixIcon,
-    helperError,
-    Object.hash(counter, container),
+    Object.hash(helperError, counter, container),
   );
 }
 
@@ -1027,7 +1030,7 @@ class _RenderDecoration extends RenderBox
     // The field can be occupied by a hint or by the input itself.
     // If the hint is not visible do not use it to compute height.
     final double inputHeight = math.max(
-      decoration.isEmpty ? hintSize.height : 0.0,
+      decoration.isEmpty || decoration.maintainHintSize ? hintSize.height : 0.0,
       inputSize.height,
     );
     final double inputInternalBaseline = math.max(inputBaseline, hintBaseline);
@@ -1162,7 +1165,7 @@ class _RenderDecoration extends RenderBox
   @override
   double computeMinIntrinsicWidth(double height) {
     final double contentWidth =
-        decoration.isEmpty
+        decoration.isEmpty || decoration.maintainHintSize
             ? math.max(_minWidth(input, height), _minWidth(hint, height))
             : _minWidth(input, height);
     return _minWidth(icon, height) +
@@ -1178,7 +1181,7 @@ class _RenderDecoration extends RenderBox
   @override
   double computeMaxIntrinsicWidth(double height) {
     final double contentWidth =
-        decoration.isEmpty
+        decoration.isEmpty || decoration.maintainHintSize
             ? math.max(_maxWidth(input, height), _maxWidth(hint, height))
             : _maxWidth(input, height);
     return _maxWidth(icon, height) +
@@ -2267,7 +2270,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     final TextStyle hintStyle = _getInlineHintStyle(themeData, defaults);
     final String? hintText = decoration.hintText;
-    final bool maintainHintHeight = decoration.maintainHintHeight;
+    final bool maintainHintSize = decoration.maintainHintSize;
     Widget? hint;
     if (decoration.hint != null || hintText != null) {
       final Widget hintWidget =
@@ -2284,7 +2287,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           );
       final bool showHint = isEmpty && !_hasInlineLabel;
       hint =
-          maintainHintHeight
+          maintainHintSize
               ? AnimatedOpacity(
                 opacity: showHint ? 1.0 : 0.0,
                 duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
@@ -2595,6 +2598,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         isDense: decoration.isDense,
         isEmpty: isEmpty,
         visualDensity: themeData.visualDensity,
+        maintainHintSize: maintainHintSize,
         icon: icon,
         input: input,
         label: label,
@@ -2725,7 +2729,12 @@ class InputDecoration {
     this.hintTextDirection,
     this.hintMaxLines,
     this.hintFadeDuration,
+    @Deprecated(
+      'Use maintainHintSize instead. '
+      'This feature was deprecated after v3.28.0-2.0.pre.',
+    )
     this.maintainHintHeight = true,
+    this.maintainHintSize = true,
     this.error,
     this.errorText,
     this.errorStyle,
@@ -2815,7 +2824,12 @@ class InputDecoration {
     this.hintTextDirection,
     this.hintMaxLines,
     this.hintFadeDuration,
+    @Deprecated(
+      'Use maintainHintSize instead. '
+      'This feature was deprecated after v3.28.0-2.0.pre.',
+    )
     this.maintainHintHeight = true,
+    this.maintainHintSize = true,
     this.filled = false,
     this.fillColor,
     this.focusColor,
@@ -3097,7 +3111,20 @@ class InputDecoration {
   /// it's not visible, if this flag is set to false.
   ///
   /// Defaults to true.
+  @Deprecated(
+    'Use maintainHintSize instead. '
+    'This feature was deprecated after v3.28.0-2.0.pre.',
+  )
   final bool maintainHintHeight;
+
+  /// Whether the input field's size should always be greater than or equal to
+  /// the size of the [hintText], even if the [hintText] is not visible.
+  ///
+  /// The [InputDecorator] widget ignores [hintText] during layout when
+  /// it's not visible, if this flag is set to false.
+  ///
+  /// Defaults to true.
+  final bool maintainHintSize;
 
   /// Optional widget that appears below the [InputDecorator.child] and the border.
   ///
@@ -3785,6 +3812,7 @@ class InputDecoration {
     Duration? hintFadeDuration,
     int? hintMaxLines,
     bool? maintainHintHeight,
+    bool? maintainHintSize,
     Widget? error,
     String? errorText,
     TextStyle? errorStyle,
@@ -3842,6 +3870,7 @@ class InputDecoration {
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
       hintFadeDuration: hintFadeDuration ?? this.hintFadeDuration,
       maintainHintHeight: maintainHintHeight ?? this.maintainHintHeight,
+      maintainHintSize: maintainHintSize ?? this.maintainHintSize,
       error: error ?? this.error,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
@@ -3952,6 +3981,7 @@ class InputDecoration {
         other.hintMaxLines == hintMaxLines &&
         other.hintFadeDuration == hintFadeDuration &&
         other.maintainHintHeight == maintainHintHeight &&
+        other.maintainHintSize == maintainHintSize &&
         other.error == error &&
         other.errorText == errorText &&
         other.errorStyle == errorStyle &&
@@ -4012,6 +4042,7 @@ class InputDecoration {
       hintMaxLines,
       hintFadeDuration,
       maintainHintHeight,
+      maintainHintSize,
       error,
       errorText,
       errorStyle,
@@ -4070,6 +4101,7 @@ class InputDecoration {
       if (hintMaxLines != null) 'hintMaxLines: "$hintMaxLines"',
       if (hintFadeDuration != null) 'hintFadeDuration: "$hintFadeDuration"',
       if (!maintainHintHeight) 'maintainHintHeight: false',
+      if (!maintainHintSize) 'maintainHintSize: false',
       if (error != null) 'error: "$error"',
       if (errorText != null) 'errorText: "$errorText"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',

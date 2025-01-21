@@ -4717,14 +4717,14 @@ void main() {
       expect(hintTextWidget.style!.overflow, decoration.hintStyle!.overflow);
     });
 
-    testWidgets('Widget height collapses from hint height when maintainHintHeight is false', (
+    testWidgets('Widget height collapses from hint height when maintainHintSize is false', (
       WidgetTester tester,
     ) async {
       final String hintText = 'hint' * 20;
       final InputDecoration decoration = InputDecoration(
         hintText: hintText,
         hintMaxLines: 3,
-        maintainHintHeight: false,
+        maintainHintSize: false,
       );
 
       await tester.pumpWidget(buildInputDecorator(decoration: decoration));
@@ -4741,14 +4741,14 @@ void main() {
       expect(inputHeight, hintHeight + 16.0);
     });
 
-    testWidgets('hintFadeDuration applies to hint fade-in when maintainHintHeight is false', (
+    testWidgets('hintFadeDuration applies to hint fade-in when maintainHintSize is false', (
       WidgetTester tester,
     ) async {
       const InputDecoration decoration = InputDecoration(
         hintText: hintText,
         hintMaxLines: 3,
         hintFadeDuration: Duration(milliseconds: 120),
-        maintainHintHeight: false,
+        maintainHintSize: false,
       );
 
       // Build once with empty content.
@@ -4773,14 +4773,14 @@ void main() {
       expect(hintOpacity120ms, 1.0);
     });
 
-    testWidgets('hintFadeDuration applies to hint fade-out when maintainHintHeight is false', (
+    testWidgets('hintFadeDuration applies to hint fade-out when maintainHintSize is false', (
       WidgetTester tester,
     ) async {
       const InputDecoration decoration = InputDecoration(
         hintText: hintText,
         hintMaxLines: 3,
         hintFadeDuration: Duration(milliseconds: 120),
-        maintainHintHeight: false,
+        maintainHintSize: false,
       );
 
       // Build once with empty content.
@@ -8390,26 +8390,52 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/93337.
-    testWidgets('depends on content width when decorator is not empty', (
-      WidgetTester tester,
-    ) async {
-      const InputDecoration decorationWithHint = InputDecoration(
-        contentPadding: EdgeInsets.zero,
-        hintText: 'Hint',
-      );
-      const double contentWidth = 20.0;
+    testWidgets(
+      'depends on content width when decorator is not empty and maintainHintSize is false',
+      (WidgetTester tester) async {
+        const InputDecoration decorationWithHint = InputDecoration(
+          contentPadding: EdgeInsets.zero,
+          hintText: 'Hint',
+          maintainHintSize: false,
+        );
+        const double contentWidth = 20.0;
 
-      await tester.pumpWidget(
-        buildInputDecorator(
-          decoration: decorationWithHint,
-          useIntrinsicWidth: true,
-          child: const SizedBox(width: contentWidth),
-        ),
-      );
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: decorationWithHint,
+            useIntrinsicWidth: true,
+            child: const SizedBox(width: contentWidth),
+          ),
+        );
 
-      // The hint width is ignored even if larger than the content width.
-      expect(getDecoratorRect(tester).width, contentWidth);
-    });
+        // The hint width is ignored even if larger than the content width.
+        expect(getDecoratorRect(tester).width, contentWidth);
+      },
+    );
+
+    // Regression test for https://github.com/flutter/flutter/issues/93337.
+    testWidgets(
+      'depends on content width when decorator is not empty and maintainHintSize is true',
+      (WidgetTester tester) async {
+        const InputDecoration decorationWithHint = InputDecoration(
+          contentPadding: EdgeInsets.zero,
+          hintText: 'Hint',
+        );
+        const double contentWidth = 20.0;
+
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: decorationWithHint,
+            useIntrinsicWidth: true,
+            child: const SizedBox(width: contentWidth),
+          ),
+        );
+
+        // The hint width is ignored even if larger than the content width.
+        const double hintTextWidth = 66.0;
+        expect(getDecoratorRect(tester).width, hintTextWidth);
+      },
+    );
   });
 
   testWidgets('Ensure the height of labelStyle remains unchanged when TextField is focused', (
