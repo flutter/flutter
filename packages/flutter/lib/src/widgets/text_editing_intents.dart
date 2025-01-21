@@ -123,11 +123,9 @@ class HorizontalExtendSelectionByCharacterIntent extends ExtendSelectionByCharac
   const HorizontalExtendSelectionByCharacterIntent({
     required this.right,
     required super.collapseSelection,
-    TextDirection textDirection = TextDirection.ltr
-  }) : super(
-      forward: textDirection == TextDirection.rtl? !right : right,
-    );
-  
+    TextDirection textDirection = TextDirection.ltr,
+  }) : super(forward: textDirection == TextDirection.rtl ? !right : right);
+
   /// Whether the input field, if applicable, should perform the text editing
   /// operation from the current caret location towards the right direction.
   ///
@@ -141,11 +139,12 @@ class HorizontalExtendSelectionByCharacterIntent extends ExtendSelectionByCharac
   ///
   /// The new instance retains the current values of [right] and [collapseSelection],
   /// allowing dynamic adjustment of the intent based on the given text direction.
-  HorizontalExtendSelectionByCharacterIntent withTextDirection(TextDirection textDirection) => HorizontalExtendSelectionByCharacterIntent(
-    right: right,
-    textDirection: textDirection,
-    collapseSelection: collapseSelection,
-  );
+  HorizontalExtendSelectionByCharacterIntent withTextDirection(TextDirection textDirection) =>
+      HorizontalExtendSelectionByCharacterIntent(
+        right: right,
+        textDirection: textDirection,
+        collapseSelection: collapseSelection,
+      );
 }
 
 /// Extends, or moves the current selection from the current
