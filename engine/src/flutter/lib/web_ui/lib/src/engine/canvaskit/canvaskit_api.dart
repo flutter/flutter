@@ -2757,29 +2757,26 @@ extension SkTextStylePropertiesExtension on SkTextStyleProperties {
   @JS('shadows')
   external set _shadows(JSArray<JSAny?>? value);
   set shadows(List<SkTextShadow>? value) =>
-          // TODO(joshualitt): remove this cast when we reify JS types on JS
-          // backends.
-          // ignore: unnecessary_cast
-          _shadows =
-          (value as List<JSAny>?)?.toJS;
+      // TODO(joshualitt): remove this cast when we reify JS types on JS
+      // backends.
+      // ignore: unnecessary_cast
+      _shadows = (value as List<JSAny>?)?.toJS;
 
   @JS('fontFeatures')
   external set _fontFeatures(JSArray<JSAny?>? value);
   set fontFeatures(List<SkFontFeature>? value) =>
-          // TODO(joshualitt): remove this cast when we reify JS types on JS
-          // backends.
-          // ignore: unnecessary_cast
-          _fontFeatures =
-          (value as List<JSAny>?)?.toJS;
+      // TODO(joshualitt): remove this cast when we reify JS types on JS
+      // backends.
+      // ignore: unnecessary_cast
+      _fontFeatures = (value as List<JSAny>?)?.toJS;
 
   @JS('fontVariations')
   external set _fontVariations(JSArray<JSAny?>? value);
   set fontVariations(List<SkFontVariation>? value) =>
-          // TODO(joshualitt): remove this cast when we reify JS types on JS
-          // backends.
-          // ignore: unnecessary_cast
-          _fontVariations =
-          (value as List<JSAny>?)?.toJS;
+      // TODO(joshualitt): remove this cast when we reify JS types on JS
+      // backends.
+      // ignore: unnecessary_cast
+      _fontVariations = (value as List<JSAny>?)?.toJS;
 }
 
 @JS()

@@ -16,8 +16,8 @@ bool _isLetter(String char) {
     return false;
   }
   final int charCode = char.codeUnitAt(0);
-  return (charCode >= _kLowerA && charCode <= _kLowerZ)
-      || (charCode >= _kUpperA && charCode <= _kUpperZ);
+  return (charCode >= _kLowerA && charCode <= _kLowerZ) ||
+      (charCode >= _kUpperA && charCode <= _kUpperZ);
 }
 
 String _fromCharCode(int? logicalKey) {
@@ -27,7 +27,12 @@ String _fromCharCode(int? logicalKey) {
   return String.fromCharCode(logicalKey);
 }
 
-void verifyEntry(LocaleKeymap mapping, String eventCode, List<String> eventKeys, String mappedResult) {
+void verifyEntry(
+  LocaleKeymap mapping,
+  String eventCode,
+  List<String> eventKeys,
+  String mappedResult,
+) {
   // If the first two entry of KeyboardEvent.key are letter keys such as "a" and
   // "A", then KeyboardEvent.keyCode is the upper letter such as "A". Otherwise,
   // this field must not be used (in reality this field may or may not be

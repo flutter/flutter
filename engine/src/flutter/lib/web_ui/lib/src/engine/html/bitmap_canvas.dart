@@ -948,9 +948,8 @@ class BitmapCanvas extends EngineCanvas {
         // in the first place.
         paragraph.canDrawOnCanvas &&
         // Cannot composite if there's no bitmap canvas to composite into.
-            // Creating a new bitmap canvas just to draw text doesn't make sense.
-            _canvasPool
-            .hasCanvas &&
+        // Creating a new bitmap canvas just to draw text doesn't make sense.
+        _canvasPool.hasCanvas &&
         !_childOverdraw &&
         // Bitmap canvas introduces correctness issues in the presence of SVG
         // filters, so prefer plain HTML in this case.
