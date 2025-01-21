@@ -13,8 +13,6 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
-
 import 'src/engine.dart' as engine;
 import 'ui_web/src/ui_web.dart' as ui_web;
 

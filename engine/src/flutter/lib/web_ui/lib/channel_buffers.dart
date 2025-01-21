@@ -131,7 +131,6 @@ class ChannelBuffers {
 
   final Map<String, _Channel> _channels = <String, _Channel>{};
 
-  @visibleForTesting
   void push(String name, ByteData? data, PlatformMessageResponseCallback callback) {
     final _Channel channel = _channels.putIfAbsent(name, () => _Channel());
     if (channel.push(_StoredMessage(data, callback))) {

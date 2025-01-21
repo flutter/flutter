@@ -12,8 +12,6 @@ import 'package:ui/src/engine/view_embedder/embedding_strategy/custom_element_em
 import 'package:ui/src/engine/view_embedder/embedding_strategy/embedding_strategy.dart';
 import 'package:ui/src/engine/view_embedder/embedding_strategy/full_page_embedding_strategy.dart';
 
-import '../../../common/test_initialization.dart';
-
 void main() {
   internalBootstrapBrowserTest(() => doTests);
 }
