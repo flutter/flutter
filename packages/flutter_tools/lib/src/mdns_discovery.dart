@@ -219,6 +219,7 @@ class MDnsVmServiceDiscovery {
     // Since the mDNS client does not handle errors from the socket's stream,
     // socket exceptions are routed to the current zone. Create an error zone to
     // catch the socket exception.
+    // See: https://github.com/flutter/flutter/issues/150131
     final Completer<List<MDnsVmServiceDiscoveryResult>> completer =
         Completer<List<MDnsVmServiceDiscoveryResult>>();
     unawaited(

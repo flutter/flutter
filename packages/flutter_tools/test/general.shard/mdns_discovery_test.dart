@@ -612,6 +612,9 @@ void main() {
         );
       });
 
+      // On macOS, the mDNS client's socket stream creates a SocketException if
+      // the app running the tool does not have Local Network permissions.
+      // See: https://github.com/flutter/flutter/issues/150131
       test(
         'On macOS, tool exits with a helpful message when mDNS lookup throws a SocketException',
         () async {
@@ -647,6 +650,9 @@ void main() {
         skip: !globals.platform.isMacOS,
       );
 
+      // On macOS, the mDNS client's socket stream creates a SocketException if
+      // the app running the tool does not have Local Network permissions.
+      // See: https://github.com/flutter/flutter/issues/150131
       test(
         'On macOS, tool exits with a helpful message when mDNS lookup throws an uncaught SocketException',
         () async {
