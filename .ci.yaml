@@ -1528,7 +1528,7 @@ targets:
     bringup: true
     timeout: 60
     properties:
-      shard: flutter_driver_android
+      shard: android_engine_tests
       tags: >
          ["framework", "hostonly", "shard", "linux"]
       dependencies: >-
@@ -1541,7 +1541,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      shard: flutter_driver_android
+      shard: android_engine_tests
       tags: >
          ["framework", "hostonly", "shard", "linux"]
       dependencies: >-
@@ -2799,7 +2799,6 @@ targets:
       task_name: fast_scroll_large_images__memory
 
   - name: Linux_pixel_7pro flavors_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/156955
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4827,6 +4826,7 @@ targets:
 
   # mac mokey test
   - name: Mac_mokey run_debug_test_android
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/161655
     recipe: devicelab/devicelab_drone
     presubmit: false
     runIf:
