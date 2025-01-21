@@ -30,7 +30,7 @@ abstract class DatePickerDelegate {
   ///
   /// See also:
   ///  * [dateOnly], which does the same thing for a single date.
-  DateTimeRange<DateTime> datesOnly(covariant DateTimeRange<DateTime> range);
+  DateTimeRange datesOnly(covariant DateTimeRange range);
 
   /// Returns true if the two [DateTime] objects have the same day, month, and
   /// year, or are both null.InheritedWidget
@@ -40,7 +40,7 @@ abstract class DatePickerDelegate {
   /// year, or are both null.
   bool isSameMonth(covariant DateTime? dateA, covariant DateTime? dateB);
 
-  /// Determines the number of months between two [T] objects.
+  /// Determines the number of months between two [DateTime] objects.
   ///
   /// For example:
   ///
@@ -205,7 +205,7 @@ class GregorianDatePickerDelegate extends DatePickerDelegate {
   DateTime dateOnly(DateTime date) => DateUtils.dateOnly(date);
 
   @override
-  DateTimeRange<DateTime> datesOnly(DateTimeRange<DateTime> range) => DateUtils.datesOnly(range);
+  DateTimeRange datesOnly(DateTimeRange range) => DateUtils.datesOnly(range);
 
   @override
   bool isSameDay(DateTime? dateA, DateTime? dateB) => DateUtils.isSameDay(dateA, dateB);
@@ -297,8 +297,8 @@ abstract final class DateUtils {
   ///
   /// See also:
   ///  * [dateOnly], which does the same thing for a single date.
-  static DateTimeRange<DateTime> datesOnly(DateTimeRange<DateTime> range) {
-    return DateTimeRange<DateTime>(start: dateOnly(range.start), end: dateOnly(range.end));
+  static DateTimeRange datesOnly(DateTimeRange range) {
+    return DateTimeRange(start: dateOnly(range.start), end: dateOnly(range.end));
   }
 
   /// Returns true if the two [DateTime] objects have the same day, month, and
@@ -476,6 +476,7 @@ typedef SelectableDayPredicate = bool Function(DateTime day);
 ///  * [showDateRangePicker], which displays a dialog that allows the user to
 ///    select a date range.
 @immutable
+@optionalTypeArgs
 class DateTimeRange<T extends DateTime> {
   /// Creates a date range for the given start and end [T].
   DateTimeRange({required this.start, required this.end}) : assert(!start.isAfter(end));

@@ -1151,9 +1151,9 @@ typedef SelectableDayForRangePredicate =
 ///  * [DateTimeRange], which is used to describe a date range.
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
-Future<DateTimeRange<DateTime>?> showDateRangePicker({
+Future<DateTimeRange?> showDateRangePicker({
   required BuildContext context,
-  DateTimeRange<DateTime>? initialDateRange,
+  DateTimeRange? initialDateRange,
   required DateTime firstDate,
   required DateTime lastDate,
   DateTime? currentDate,
@@ -1257,7 +1257,7 @@ Future<DateTimeRange<DateTime>?> showDateRangePicker({
     dialog = Localizations.override(context: context, locale: locale, child: dialog);
   }
 
-  return showDialog<DateTimeRange<DateTime>>(
+  return showDialog<DateTimeRange>(
     context: context,
     barrierDismissible: barrierDismissible,
     barrierColor: barrierColor,
@@ -1358,7 +1358,7 @@ class DateRangePickerDialog extends StatefulWidget {
   /// If [initialDateRange] is non-null, then it will be used as the initially
   /// selected date range. If it is provided, `initialDateRange.start` must be
   /// before or on `initialDateRange.end`.
-  final DateTimeRange<DateTime>? initialDateRange;
+  final DateTimeRange? initialDateRange;
 
   /// The earliest allowable date on the date range.
   final DateTime firstDate;
@@ -1528,9 +1528,9 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
         return;
       }
     }
-    final DateTimeRange<DateTime>? selectedRange =
+    final DateTimeRange? selectedRange =
         _hasSelectedDateRange
-            ? DateTimeRange<DateTime>(start: _selectedStart.value!, end: _selectedEnd.value!)
+            ? DateTimeRange(start: _selectedStart.value!, end: _selectedEnd.value!)
             : null;
 
     Navigator.pop(context, selectedRange);
