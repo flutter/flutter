@@ -134,7 +134,7 @@ void WindowingHandler::HandleMethodCall(
   const std::string& method = method_call.method_name();
 
   if (method == kCreateWindowMethod) {
-    HandleCreateWindow(WindowArchetype::regular, method_call, *result);
+    HandleCreateWindow(WindowArchetype::kRegular, method_call, *result);
   } else if (method == kDestroyWindowMethod) {
     HandleDestroyWindow(method_call, *result);
   } else {
@@ -153,8 +153,8 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
   }
 
   // Helper lambda to check and report invalid window size
-  auto const hasValidWindowSize = [&result](Size size,
-                                            std::string_view key_name) -> bool {
+  auto const has_valid_window_size =
+      [&result](Size size, std::string_view key_name) -> bool {
     if (size.width() <= 0 || size.height() <= 0) {
       result.Error(kInvalidValueError,
                    "Values for the '" + std::string(key_name) + "' key (" +
@@ -176,16 +176,16 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
     return;
   }
   settings.size = {size_list->at(0), size_list->at(1)};
-  if (!hasValidWindowSize(settings.size, kSizeKey)) {
+  if (!has_valid_window_size(settings.size, kSizeKey)) {
     return;
   }
 
-  if (archetype == WindowArchetype::regular) {
+  if (archetype == WindowArchetype::kRegular) {
     // Get value for the 'minSize' key (nullable)
     if (auto const list = GetListOfValuesForKeyOrSendError<double, 2>(
             kMinSizeKey, map, result)) {
       settings.min_size = {list->at(0), list->at(1)};
-      if (!hasValidWindowSize(*settings.min_size, kMinSizeKey)) {
+      if (!has_valid_window_size(*settings.min_size, kMinSizeKey)) {
         return;
       }
     }
@@ -193,7 +193,7 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
     if (auto const list = GetListOfValuesForKeyOrSendError<double, 2>(
             kMaxSizeKey, map, result)) {
       settings.max_size = {list->at(0), list->at(1)};
-      if (!hasValidWindowSize(*settings.max_size, kMaxSizeKey)) {
+      if (!has_valid_window_size(*settings.max_size, kMaxSizeKey)) {
         return;
       }
     }
@@ -214,7 +214,7 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
     WindowMetadata const& data = data_opt.value();
     EncodableMap map;
 
-    if (archetype == WindowArchetype::regular) {
+    if (archetype == WindowArchetype::kRegular) {
       map.insert({EncodableValue(kViewIdKey), EncodableValue(data.view_id)});
       map.insert(
           {EncodableValue(kSizeKey),

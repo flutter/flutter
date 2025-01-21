@@ -79,7 +79,7 @@ class WindowingHandlerTest : public WindowsTest {
         .WillByDefault([](WindowCreationSettings const& settings) {
           return WindowMetadata{
               .size = settings.size,
-              .state = WindowState::restored,
+              .state = WindowState::kRestored,
           };
         });
     ON_CALL(*mock_controller_, DestroyHostWindow).WillByDefault(Return(true));
@@ -110,7 +110,7 @@ TEST_F(WindowingHandlerTest, HandleCreateRegularWindow) {
   WindowingHandler windowing_handler(&messenger, controller());
 
   WindowCreationSettings const settings = {
-      .archetype = WindowArchetype::regular,
+      .archetype = WindowArchetype::kRegular,
       .size = {800.0, 600.0},
       .title = "regular",
   };

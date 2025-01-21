@@ -64,7 +64,7 @@ class FlutterHostWindowControllerTest : public WindowsTest {
 TEST_F(FlutterHostWindowControllerTest, CreateRegularWindow) {
   // Define parameters for the window to be created.
   WindowCreationSettings const settings = {
-      .archetype = WindowArchetype::regular,
+      .archetype = WindowArchetype::kRegular,
       .size = {800.0, 600.0},
       .title = "window",
   };
@@ -130,7 +130,7 @@ TEST_F(FlutterHostWindowControllerTest, DestroyWindow) {
 
   // Define parameters for the window to be created.
   WindowCreationSettings const settings = {
-      .archetype = WindowArchetype::regular,
+      .archetype = WindowArchetype::kRegular,
       .size = {800.0, 600.0},
       .title = "window",
   };

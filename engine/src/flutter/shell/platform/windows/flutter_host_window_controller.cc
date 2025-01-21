@@ -112,10 +112,11 @@ LRESULT FlutterHostWindowController::HandleMessage(HWND hwnd,
           });
       if (it != windows_.end()) {
         auto& [view_id, window] = *it;
-        if (window->archetype_ == WindowArchetype::regular) {
-          window->state_ = (wparam == SIZE_MAXIMIZED)   ? WindowState::maximized
-                           : (wparam == SIZE_MINIMIZED) ? WindowState::minimized
-                                                        : WindowState::restored;
+        if (window->archetype_ == WindowArchetype::kRegular) {
+          window->state_ = (wparam == SIZE_MAXIMIZED) ? WindowState::kMaximized
+                           : (wparam == SIZE_MINIMIZED)
+                               ? WindowState::kMinimized
+                               : WindowState::kRestored;
         }
         SendOnWindowChanged(view_id, GetWindowSize(view_id), std::nullopt);
       }

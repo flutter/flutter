@@ -7,6 +7,7 @@
 
 #include <optional>
 
+#include "flutter/fml/mapping.h"
 #include "geometry.h"
 
 namespace flutter {
@@ -17,48 +18,51 @@ using FlutterViewId = int64_t;
 // Types of windows.
 enum class WindowArchetype {
   // Regular top-level window.
-  regular,
+  kRegular,
 };
 
 // Possible states a window can be in.
 enum class WindowState {
   // Normal state, neither maximized, nor minimized.
-  restored,
+  kRestored,
   // Maximized, occupying the full screen but still showing the system UI.
-  maximized,
+  kMaximized,
   // Minimized and not visible on the screen.
-  minimized,
+  kMinimized,
 };
 
-// Converts a |flutter::WindowState| to its corresponding string representation.
+// Converts a |flutter::WindowState| to the string representation of
+// |WindowState| as defined in the framework.
 inline std::string WindowStateToString(WindowState state) {
   switch (state) {
-    case WindowState::restored:
+    case WindowState::kRestored:
       return "WindowState.restored";
-    case WindowState::maximized:
+    case WindowState::kMaximized:
       return "WindowState.maximized";
-    case WindowState::minimized:
+    case WindowState::kMinimized:
       return "WindowState.minimized";
+    default:
+      FML_UNREACHABLE();
   }
-  return {};
 }
 
-// Converts a string to a |flutter::WindowState|. Returns std::nullopt if
+// Converts the string representation of |WindowState| defined in the framework
+// to a |flutter::WindowState|. Returns std::nullopt if the given string is
 // invalid.
 inline std::optional<WindowState> StringToWindowState(std::string_view str) {
   if (str == "WindowState.restored")
-    return WindowState::restored;
+    return WindowState::kRestored;
   if (str == "WindowState.maximized")
-    return WindowState::maximized;
+    return WindowState::kMaximized;
   if (str == "WindowState.minimized")
-    return WindowState::minimized;
+    return WindowState::kMinimized;
   return std::nullopt;
 }
 
 // Settings used for creating a Flutter window.
 struct WindowCreationSettings {
   // Type of the window.
-  WindowArchetype archetype = WindowArchetype::regular;
+  WindowArchetype archetype = WindowArchetype::kRegular;
   // Requested size of the window's client area, in logical coordinates.
   Size size;
   // Minimum size of the window's client area, in logical coordinates.
@@ -76,7 +80,7 @@ struct WindowMetadata {
   // The ID of the view used for this window, which is unique to each window.
   FlutterViewId view_id = 0;
   // The type of the window.
-  WindowArchetype archetype = WindowArchetype::regular;
+  WindowArchetype archetype = WindowArchetype::kRegular;
   // Size of the created window, in logical coordinates.
   Size size;
   // The ID of the view used by the parent window. If not set, the window is

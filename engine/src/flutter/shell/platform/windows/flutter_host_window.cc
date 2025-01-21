@@ -146,9 +146,9 @@ std::optional<flutter::Size> GetWindowSizeForClientSize(
   UINT const dpi = flutter::GetDpiForHWND(owner_hwnd);
   double const scale_factor =
       static_cast<double>(dpi) / USER_DEFAULT_SCREEN_DPI;
-  RECT rect = {};
-  rect.right = static_cast<LONG>(client_size.width() * scale_factor);
-  rect.bottom = static_cast<LONG>(client_size.height() * scale_factor);
+  RECT rect = {
+      .right = static_cast<LONG>(client_size.width() * scale_factor),
+      .bottom = static_cast<LONG>(client_size.height() * scale_factor)};
 
   HMODULE const user32_raw = LoadLibraryA("User32.dll");
   auto free_user32_module = [](HMODULE module) { FreeLibrary(module); };
@@ -211,7 +211,7 @@ bool IsClassRegistered(LPCWSTR class_name) {
 }
 
 // Convert std::string to std::wstring
-std::wstring StringToWstring(const std::string& str) {
+std::wstring StringToWstring(std::string const& str) {
   if (str.empty()) {
     return {};
   }
@@ -273,7 +273,7 @@ FlutterHostWindow::FlutterHostWindow(FlutterHostWindowController* controller,
   DWORD window_style = 0;
   DWORD extended_window_style = 0;
   switch (archetype_) {
-    case WindowArchetype::regular:
+    case WindowArchetype::kRegular:
       window_style |= WS_OVERLAPPEDWINDOW;
       break;
     default:
@@ -395,7 +395,7 @@ FlutterHostWindow::FlutterHostWindow(FlutterHostWindowController* controller,
 
   SetChildContent(view_controller_->view()->GetWindowHandle());
 
-  state_ = settings.state.value_or(WindowState::restored);
+  state_ = settings.state.value_or(WindowState::kRestored);
 
   // TODO(loicsharma): Hide the window until the first frame is rendered.
   // Single window apps use the engine's next frame callback to show the
@@ -403,15 +403,15 @@ FlutterHostWindow::FlutterHostWindow(FlutterHostWindowController* controller,
   // multiple next frame callbacks. If multiple windows are created, only the
   // last one will be shown.
   UINT const cmd_show = [&]() {
-    if (archetype_ == WindowArchetype::regular) {
+    if (archetype_ == WindowArchetype::kRegular) {
       switch (state_) {
-        case WindowState::restored:
+        case WindowState::kRestored:
           return SW_SHOWNORMAL;
           break;
-        case WindowState::maximized:
+        case WindowState::kMaximized:
           return SW_SHOWMAXIMIZED;
           break;
-        case WindowState::minimized:
+        case WindowState::kMinimized:
           return SW_SHOWMINIMIZED;
           break;
         default:

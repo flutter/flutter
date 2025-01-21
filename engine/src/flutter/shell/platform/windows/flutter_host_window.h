@@ -79,7 +79,7 @@ class FlutterHostWindow {
   std::unique_ptr<FlutterWindowsViewController> view_controller_;
 
   // The window archetype.
-  WindowArchetype archetype_ = WindowArchetype::regular;
+  WindowArchetype archetype_ = WindowArchetype::kRegular;
 
   // Indicates if closing this window will quit the application.
   bool quit_on_close_ = false;
@@ -97,7 +97,7 @@ class FlutterHostWindow {
   std::optional<Size> max_size_;
 
   // The window state.
-  WindowState state_ = WindowState::restored;
+  WindowState state_ = WindowState::kRestored;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterHostWindow);
 };
