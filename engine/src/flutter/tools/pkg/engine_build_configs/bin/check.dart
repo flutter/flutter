@@ -139,25 +139,38 @@ void main(List<String> args) {
       debugPrint('  Skipping ${target.name}: No configuration file found');
       continue;
     }
+
+    final configConventionErrors = <String>[];
     if (target.properties.isReleaseBuilder) {
+      // If there is a global generators step, assume it is doing something unscrupulous.
+      if (config.generators.isNotEmpty) {
+        debugPrint('  Skipping ${target.name}: Has "generators": [ ... ] which could do anything');
+        continue;
+      }
       // Check each build: it must have "archives: [ ... ]" and NOT "tests: [ ... ]"
-      if (config.archives.isEmpty) {
-        buildConventionErrors.add(
-          '${p.basename(config.path)}/${target.name}: Marked release_build: "true" but does not have "archives: [ ... ]"',
-        );
+      for (final build in config.builds) {
+        if (build.archives.isEmpty) {
+          configConventionErrors.add('${build.name}: Does not have "archives: [ ... ]"');
+        }
+        if (build.tests.isNotEmpty) {
+          configConventionErrors.add('${build.name}: Includes "tests: [ ... ]"');
+        }
       }
-      if (config.tests.isNotEmpty) {
-        buildConventionErrors.add(
-          '${p.basename(config.path)}/${target.name}: Marked release_build: "true" but includes "tests: [ ... ]"',
-        );
-      }
+      // FIXME: Check include_paths nonsense
     } else {
       // Check each build: it must NOT have "archives: [...]"
-      if (config.archives.isNotEmpty) {
-        buildConventionErrors.add(
-          '${p.basename(config.path)}/${target.name}: Not marked release_build: "true" but has "archives: [ ... ]"',
-        );
+      for (final build in config.builds) {
+        if (build.archives.isNotEmpty) {
+          debugPrint('  Skipping ${build.name}: Has "archives: [ ... ]"');
+        }
       }
+    }
+
+    if (configConventionErrors.isNotEmpty) {
+      buildConventionErrors.add(
+        '${p.basename(config.path)} (${target.name}, release_build = ${target.properties.isReleaseBuilder}):',
+      );
+      buildConventionErrors.addAll(configConventionErrors.map((e) => '  $e'));
     }
   }
   statusPrint(

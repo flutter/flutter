@@ -162,7 +162,7 @@ class CiTargetProperties {
     final y.YamlMap propertiesMap = yaml;
     return CiTargetProperties._(
       configName: propertiesMap.nodes[_configNameField].readStringOrNull(),
-      isReleaseBuilder: propertiesMap.nodes[_releaseBuildField].readBoolOrNull() ?? false,
+      isReleaseBuilder: propertiesMap.nodes[_releaseBuildField].readStringOrNull() == 'true',
     );
   }
 
@@ -206,7 +206,4 @@ extension on y.YamlNode? {
 
   /// Returns this node as a string if possible.
   String? readStringOrNull() => _readOrNull();
-
-  /// Returns this node as a boolean if possible.
-  bool? readBoolOrNull() => _readOrNull();
 }
