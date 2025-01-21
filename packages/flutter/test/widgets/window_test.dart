@@ -11,21 +11,9 @@ Future<Object?>? Function(MethodCall)? _createWindowMethodCallHandler(WidgetTest
     final Map<Object?, Object?> args = call.arguments as Map<Object?, Object?>;
     if (call.method == 'createWindow') {
       final List<Object?> size = args['size']! as List<Object?>;
+      final String state = args['state'] as String? ?? WindowState.restored.toString();
 
-      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
-        SystemChannels.windowing.name,
-        SystemChannels.windowing.codec.encodeMethodCall(
-          MethodCall('onWindowCreated',  <String, Object?>{'viewId': tester.view.viewId, 'parentViewId': null}),
-        ),
-        (ByteData? data) {},
-      );
-
-      return <String, Object?>{
-        'viewId': tester.view.viewId,
-        'archetype': WindowArchetype.regular.index,
-        'size': size,
-        'parentViewId': null,
-      };
+      return <String, Object?>{'viewId': tester.view.viewId, 'size': size, 'state': state};
     } else if (call.method == 'destroyWindow') {
       await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.windowing.name,
@@ -60,7 +48,7 @@ void main() {
         builder: (BuildContext context) {
           return WindowingApp(
             children: <Widget>[
-              RegularWindow(controller: controller, preferredSize: windowSize, child: Container()),
+              RegularWindow(controller: controller, size: windowSize, child: Container()),
             ],
           );
         },
@@ -102,7 +90,7 @@ void main() {
                   );
                   receivedError = true;
                 },
-                preferredSize: windowSize,
+                size: windowSize,
                 child: Container(),
               ),
             ],
@@ -136,7 +124,7 @@ void main() {
             children: <Widget>[
               RegularWindow(
                 controller: controller,
-                preferredSize: windowSize,
+                size: windowSize,
                 onDestroyed: () {
                   destroyed = true;
                 },
@@ -175,7 +163,7 @@ void main() {
               children: <Widget>[
                 RegularWindow(
                   controller: controller,
-                  preferredSize: initialSize,
+                  size: initialSize,
                   child: Container(),
                 ),
               ],
@@ -191,7 +179,7 @@ void main() {
         SystemChannels.windowing.codec.encodeMethodCall(
           MethodCall('onWindowChanged',  <String, Object?>{
             'viewId': tester.view.viewId,
-            'size': <int>[newSize.width.toInt(), newSize.height.toInt()],
+            'size': <double>[newSize.width, newSize.height],
           }),
         ),
         (ByteData? data) {},

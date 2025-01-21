@@ -29,17 +29,10 @@ class FlutterHostWindowController {
   // Flutter view that is displayed in the client area of the
   // |FlutterHostWindow|.
   //
-  // |title| is the window title string. |preferred_size| is the preferred size
-  // of the client rectangle, i.e., the size expected for the child view, in
-  // logical coordinates. The actual size may differ. The window style is
-  // determined by |archetype|.
-  //
   // Returns a |WindowMetadata| with the metadata of the window just created, or
   // std::nullopt if the window could not be created.
   virtual std::optional<WindowMetadata> CreateHostWindow(
-      std::wstring const& title,
-      WindowSize const& preferred_size,
-      WindowArchetype archetype);
+      WindowCreationSettings const& settings);
 
   // Destroys the window that hosts the view with ID |view_id|.
   //
@@ -69,17 +62,14 @@ class FlutterHostWindowController {
   // Destroys all windows managed by this controller.
   void DestroyAllWindows();
 
-  // Gets the size of the window hosting the view with ID |view_id|. This is the
-  // size the host window frame, in logical coordinates, and does not include
-  // the dimensions of the drop-shadow area.
-  WindowSize GetWindowSize(FlutterViewId view_id) const;
+  // Gets the size of the host window for the view with ID |view_id|. The size
+  // is in logical coordinates and excludes the drop-shadow area.
+  Size GetWindowSize(FlutterViewId view_id) const;
 
   // Sends the "onWindowChanged" message to the Flutter engine.
-  void SendOnWindowChanged(FlutterViewId view_id) const;
-
-  // Sends the "onWindowCreated" message to the Flutter engine.
-  void SendOnWindowCreated(FlutterViewId view_id,
-                           std::optional<FlutterViewId> parent_view_id) const;
+  void SendOnWindowChanged(FlutterViewId view_id,
+                           std::optional<Size> size,
+                           std::optional<Size> relative_position) const;
 
   // Sends the "onWindowDestroyed" message to the Flutter engine.
   void SendOnWindowDestroyed(FlutterViewId view_id) const;

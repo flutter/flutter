@@ -26,7 +26,8 @@ class WindowControllerRender extends StatelessWidget {
             key: key,
             onDestroyed: onDestroyed,
             onError: (String? reason) => onError(),
-            preferredSize: windowSettings.regularSize,
+            size: windowSettings.regularSize,
+            title: "Regular",
             controller: controller as RegularWindowController,
             child: RegularWindowContent(
                 window: controller as RegularWindowController,

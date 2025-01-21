@@ -6,6 +6,7 @@
 
 #include <dwmapi.h>
 
+#include "flutter/shell/platform/common/windowing.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 
 namespace flutter {
@@ -18,10 +19,10 @@ constexpr char kOnWindowCreatedMethod[] = "onWindowCreated";
 constexpr char kOnWindowDestroyedMethod[] = "onWindowDestroyed";
 
 // Keys used in the onWindow* messages sent through the channel.
-constexpr char kIsMovingKey[] = "isMoving";
 constexpr char kParentViewIdKey[] = "parentViewId";
 constexpr char kRelativePositionKey[] = "relativePosition";
 constexpr char kSizeKey[] = "size";
+constexpr char kStateKey[] = "state";
 constexpr char kViewIdKey[] = "viewId";
 
 }  // namespace
@@ -35,11 +36,8 @@ FlutterHostWindowController::~FlutterHostWindowController() {
 }
 
 std::optional<WindowMetadata> FlutterHostWindowController::CreateHostWindow(
-    std::wstring const& title,
-    WindowSize const& preferred_size,
-    WindowArchetype archetype) {
-  auto window = std::make_unique<FlutterHostWindow>(this, title, preferred_size,
-                                                    archetype);
+    WindowCreationSettings const& settings) {
+  auto window = std::make_unique<FlutterHostWindow>(this, settings);
   if (!window->GetWindowHandle()) {
     return std::nullopt;
   }
@@ -49,15 +47,15 @@ std::optional<WindowMetadata> FlutterHostWindowController::CreateHostWindow(
     window->SetQuitOnClose(true);
   }
 
-  FlutterViewId const view_id = window->GetFlutterViewId().value();
+  FlutterViewId const view_id = window->GetFlutterViewId();
+  WindowState const state = window->GetState();
   windows_[view_id] = std::move(window);
 
-  SendOnWindowCreated(view_id, std::nullopt);
-
   WindowMetadata result = {.view_id = view_id,
-                           .archetype = archetype,
+                           .archetype = settings.archetype,
                            .size = GetWindowSize(view_id),
-                           .parent_id = std::nullopt};
+                           .parent_id = std::nullopt,
+                           .state = state};
 
   return result;
 }
@@ -113,8 +111,13 @@ LRESULT FlutterHostWindowController::HandleMessage(HWND hwnd,
             return window.second->GetWindowHandle() == hwnd;
           });
       if (it != windows_.end()) {
-        FlutterViewId const view_id = it->first;
-        SendOnWindowChanged(view_id);
+        auto& [view_id, window] = *it;
+        if (window->archetype_ == WindowArchetype::regular) {
+          window->state_ = (wparam == SIZE_MAXIMIZED)   ? WindowState::maximized
+                           : (wparam == SIZE_MINIMIZED) ? WindowState::minimized
+                                                        : WindowState::restored;
+        }
+        SendOnWindowChanged(view_id, GetWindowSize(view_id), std::nullopt);
       }
     } break;
     default:
@@ -151,53 +154,40 @@ void FlutterHostWindowController::DestroyAllWindows() {
   }
 }
 
-WindowSize FlutterHostWindowController::GetWindowSize(
-    FlutterViewId view_id) const {
+Size FlutterHostWindowController::GetWindowSize(FlutterViewId view_id) const {
   HWND const hwnd = windows_.at(view_id)->GetWindowHandle();
   RECT frame_rect;
   DwmGetWindowAttribute(hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, &frame_rect,
                         sizeof(frame_rect));
 
   // Convert to logical coordinates.
-  auto const dpr = FlutterDesktopGetDpiForHWND(hwnd) /
-                   static_cast<double>(USER_DEFAULT_SCREEN_DPI);
-  frame_rect.left = static_cast<LONG>(frame_rect.left / dpr);
-  frame_rect.top = static_cast<LONG>(frame_rect.top / dpr);
-  frame_rect.right = static_cast<LONG>(frame_rect.right / dpr);
-  frame_rect.bottom = static_cast<LONG>(frame_rect.bottom / dpr);
-
-  auto const width = frame_rect.right - frame_rect.left;
-  auto const height = frame_rect.bottom - frame_rect.top;
-  return {static_cast<int>(width), static_cast<int>(height)};
+  double const dpr = FlutterDesktopGetDpiForHWND(hwnd) /
+                     static_cast<double>(USER_DEFAULT_SCREEN_DPI);
+  double const width = (frame_rect.right - frame_rect.left) / dpr;
+  double const height = (frame_rect.bottom - frame_rect.top) / dpr;
+  return {width, height};
 }
 
 void FlutterHostWindowController::SendOnWindowChanged(
-    FlutterViewId view_id) const {
-  if (channel_) {
-    WindowSize const size = GetWindowSize(view_id);
-    channel_->InvokeMethod(
-        kOnWindowChangedMethod,
-        std::make_unique<EncodableValue>(EncodableMap{
-            {EncodableValue(kViewIdKey), EncodableValue(view_id)},
-            {EncodableValue(kSizeKey),
-             EncodableValue(EncodableList{EncodableValue(size.width),
-                                          EncodableValue(size.height)})},
-            {EncodableValue(kRelativePositionKey), EncodableValue()},
-            {EncodableValue(kIsMovingKey), EncodableValue()}}));
-  }
-}
-
-void FlutterHostWindowController::SendOnWindowCreated(
     FlutterViewId view_id,
-    std::optional<FlutterViewId> parent_view_id) const {
+    std::optional<Size> size,
+    std::optional<Size> relative_position) const {
   if (channel_) {
-    channel_->InvokeMethod(
-        kOnWindowCreatedMethod,
-        std::make_unique<EncodableValue>(EncodableMap{
-            {EncodableValue(kViewIdKey), EncodableValue(view_id)},
-            {EncodableValue(kParentViewIdKey),
-             parent_view_id ? EncodableValue(parent_view_id.value())
-                            : EncodableValue()}}));
+    EncodableMap map{{EncodableValue(kViewIdKey), EncodableValue(view_id)}};
+    if (size) {
+      map.insert(
+          {EncodableValue(kSizeKey),
+           EncodableValue(EncodableList{EncodableValue(size->width()),
+                                        EncodableValue(size->height())})});
+    }
+    if (relative_position) {
+      map.insert({EncodableValue(kRelativePositionKey),
+                  EncodableValue(EncodableList{
+                      EncodableValue(relative_position->width()),
+                      EncodableValue(relative_position->height())})});
+    }
+    channel_->InvokeMethod(kOnWindowChangedMethod,
+                           std::make_unique<EncodableValue>(map));
   }
 }
 
