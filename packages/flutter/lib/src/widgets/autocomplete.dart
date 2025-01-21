@@ -322,6 +322,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     debugLabel: '_RawAutocompleteState',
   );
 
+  // The number of options to scroll by "page", such as when using the page
+  // up/down keys.
   static const int _pageSize = 4;
 
   TextEditingController? _internalTextEditingController;
