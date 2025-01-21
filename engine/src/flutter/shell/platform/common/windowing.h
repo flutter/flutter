@@ -7,7 +7,7 @@
 
 #include <optional>
 
-#include "flutter/fml/mapping.h"
+#include "flutter/fml/logging.h"
 #include "geometry.h"
 
 namespace flutter {
