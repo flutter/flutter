@@ -588,6 +588,26 @@ void main() {
       DeviceManager: () => fakeDeviceManager,
     },
   );
+
+  testUsingContext(
+    'flutter drive --help explains how to use the command',
+    () async {
+      final DriveCommand command = DriveCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        signals: signals,
+      );
+
+      await createTestCommandRunner(command).run(<String>['drive', '--help']);
+
+      expect(
+        logger.statusText,
+        stringContainsInOrder(<String>['flutter drive', '--target', '--driver']),
+      );
+    },
+    overrides: <Type, Generator>{Logger: () => logger},
+  );
 }
 
 class ThrowingScreenshotDevice extends ScreenshotDevice {
