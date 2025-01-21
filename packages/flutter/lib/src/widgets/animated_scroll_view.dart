@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'page_storage.dart';
+/// @docImport 'primary_scroll_controller.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';

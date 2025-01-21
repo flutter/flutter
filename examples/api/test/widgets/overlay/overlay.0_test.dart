@@ -38,4 +38,19 @@ void main() {
     expect(find.text(commutePage), findsNothing);
     expect(find.text(savedPage), findsNothing);
   });
+
+  testWidgets('Narrow layout does not overflow', (WidgetTester tester) async {
+    // Set a narrow screen size.
+    tester.view
+      ..physicalSize = const Size(320, 480)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      const example.OverlayApp(),
+    );
+
+    // Verify that no overflow errors occur.
+    expect(tester.takeException(), isNull);
+  });
 }

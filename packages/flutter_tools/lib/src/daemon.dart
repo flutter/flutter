@@ -349,10 +349,8 @@ class DaemonConnection {
       } else {
         _incomingCommands.add(message);
       }
-    } else if (data['event'] != null) {
-      // This is an event
-      _logger.printTrace('<- Event received: ${data['event']}');
-      final Object? eventName = data['event'];
+    } else if (data case {'event': final Object eventName}) {
+      _logger.printTrace('<- Event received: $eventName');
       if (eventName is String) {
         _events.add(DaemonEventData(
           eventName,

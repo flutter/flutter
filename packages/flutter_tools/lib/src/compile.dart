@@ -280,7 +280,6 @@ class KernelCompiler {
       }
       commandToStartFrontendServer = <String>[
         engineDartPath,
-        '--disable-dart-dev',
         frontendServerStarterPath,
       ];
     } else {
@@ -290,7 +289,6 @@ class KernelCompiler {
       }
       commandToStartFrontendServer = <String>[
         engineDartAotRuntimePath,
-        '--disable-dart-dev',
         _artifacts.getArtifactPath(
           Artifact.frontendServerSnapshotForEngineDartSdk,
           platform: platform,
@@ -795,13 +793,11 @@ class DefaultResidentCompiler implements ResidentCompiler {
     if (frontendServerStarterPath != null && frontendServerStarterPath!.isNotEmpty) {
       commandToStartFrontendServer = <String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
-        '--disable-dart-dev',
         frontendServerStarterPath!,
       ];
     } else {
       commandToStartFrontendServer = <String>[
         artifacts.getArtifactPath(Artifact.engineDartAotRuntime, platform: platform),
-        '--disable-dart-dev',
         artifacts.getArtifactPath(
           Artifact.frontendServerSnapshotForEngineDartSdk,
           platform: platform,

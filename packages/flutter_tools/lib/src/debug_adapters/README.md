@@ -1,6 +1,6 @@
 # Debug Adapter Protocol (DAP)
 
-This document is Flutter-specific. For information on the standard Dart DAP implementation, [see this document](https://github.com/dart-lang/sdk/blob/main/pkg/dds/tool/dap/README.md).
+This document is Flutter-specific. For information on the standard Dart DAP implementation, [see this document](https://github.com/dart-lang/sdk/blob/main/third_party/pkg/dap/tool/README.md).
 
 Flutter includes support for debugging using [the Debug Adapter Protocol](https://microsoft.github.io/debug-adapter-protocol/) as an alternative to using the [VM Service](https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md) directly, simplifying the integration for new editors.
 
@@ -11,7 +11,7 @@ Two adapters are available:
 - `flutter debug_adapter`
 - `flutter debug_adapter --test`
 
-The standard adapter will run applications using `flutter run` while the `--test` adapter will cause scripts to be run using `flutter test` and will emit custom `dart.testNotification` events (described in the [Dart DAP documentation](https://github.com/dart-lang/sdk/blob/main/pkg/dds/tool/dap/README.md#darttestnotification)).
+The standard adapter will run applications using `flutter run` while the `--test` adapter will cause scripts to be run using `flutter test` and will emit custom `dart.testNotification` events (described in the [Dart DAP documentation](https://github.com/dart-lang/sdk/blob/main/third_party/pkg/dap/tool/README.md#darttestnotification)).
 
 Because in the DAP protocol the client speaks first, running this command from the terminal will result in no output (nor will the process terminate). This is expected behaviour.
 
@@ -47,7 +47,7 @@ Arguments specific to `attachRequest` are:
 
 ## Custom Requests
 
-Some custom requests are available for clients to call. Below are the Flutter-specific custom requests, but the standard Dart DAP custom requests are also [documented here](https://github.com/dart-lang/sdk/blob/main/pkg/dds/tool/dap/README.md#custom-requests).
+Some custom requests are available for clients to call. Below are the Flutter-specific custom requests, but the standard Dart DAP custom requests are also [documented here](https://github.com/dart-lang/sdk/blob/main/third_party/pkg/dap/tool/README.md#custom-requests).
 
 ### `hotReload`
 
@@ -71,7 +71,7 @@ Some custom requests are available for clients to call. Below are the Flutter-sp
 
 ## Custom Events
 
-The debug adapter may emit several custom events that are useful to clients. Below are the Flutter-specific custom events, and the standard Dart DAP custom events are [documented here](https://github.com/dart-lang/sdk/blob/main/pkg/dds/tool/dap/README.md#custom-events).
+The debug adapter may emit several custom events that are useful to clients. Below are the Flutter-specific custom events, and the standard Dart DAP custom events are [documented here](https://github.com/dart-lang/sdk/blob/main/third_party/pkg/dap/tool/README.md#custom-events).
 
 ### `flutter.appStarted`
 

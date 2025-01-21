@@ -535,7 +535,7 @@ class RenderTable extends RenderBox {
   /// Row decorations fill the horizontal and vertical extent of each row in
   /// the table, unlike decorations for individual cells, which might not fill
   /// either.
-  List<Decoration> get rowDecorations => List<Decoration>.unmodifiable(_rowDecorations ?? const <Decoration>[]);
+  List<Decoration?> get rowDecorations => List<Decoration?>.unmodifiable(_rowDecorations ?? const <Decoration>[]);
   // _rowDecorations and _rowDecorationPainters need to be in sync. They have to
   // either both be null or have same length.
   List<Decoration?>? _rowDecorations;

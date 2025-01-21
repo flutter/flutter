@@ -94,10 +94,10 @@ class WebSteppingProject extends Project {
     Future<void> doAsyncStuff() async {
       print("test"); // BREAKPOINT
       await Future.value(true); // STEP 1
-      await Future.microtask(() => true); // STEP 2
-      await Future.delayed(const Duration(milliseconds: 1));  // STEP 3
-      print("done!"); // STEP 4
-    } // STEP 5
+      await Future.microtask(() => true);
+      await Future.delayed(const Duration(milliseconds: 1));
+      print("done!");
+    }
 
     @override
     Widget build(BuildContext context) {
@@ -113,5 +113,5 @@ class WebSteppingProject extends Project {
   int get breakpointLine => lineContaining(main, '// BREAKPOINT');
   int lineForStep(int i) => lineContaining(main, '// STEP $i');
 
-  final int numberOfSteps = 5;
+  final int numberOfSteps = 1;
 }

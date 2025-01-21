@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.historicalLigatures].
+/// Flutter code sample for [FontFeature.historicalLigatures].
 
 void main() => runApp(const ExampleApp());
 

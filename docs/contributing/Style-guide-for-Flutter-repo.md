@@ -477,7 +477,7 @@ Unfortunately, the reality is that everyone starts knowing nothing, and we do no
 
 For this reason, avoid using terms without first defining them, unless you are linking to more fundamental documentation that defines that term without reference to the API you are documenting.
 
-For example, a fancy widget in the Material library can refer to the `StatefulWidget` documentation and assume that the reader either knows about the `StatefulWidget` class, or can learn about it by following the link and then later returning to the documentation for the fancy widget. However, the documentation for the `StatefulWidget` class should avoid assuming that the reader knows what a `State` class is, and should avoid defering to it for its definition, because `State` could is likely to defer back to `StatefulWidget` and the reader would be stuck in a loop unable to grasp the basic principles. This is the documentation equivalent of a bootstrapping problem.
+For example, a fancy widget in the Material library can refer to the `StatefulWidget` documentation and assume that the reader either knows about the `StatefulWidget` class, or can learn about it by following the link and then later returning to the documentation for the fancy widget. However, the documentation for the `StatefulWidget` class should avoid assuming that the reader knows what a `State` class is, and should avoid deferring to it for its definition, because `State` could is likely to defer back to `StatefulWidget` and the reader would be stuck in a loop unable to grasp the basic principles. This is the documentation equivalent of a bootstrapping problem.
 
 Another way to express this is that API documentation should follow a similar layering philosophy as code. The goal of documentation is not just to act as a refresher for experts, but to act as a tutorial for new developers.
 
@@ -752,13 +752,13 @@ abstract class RenderBox extends RenderObject {
     // more complicated asserts:
     assert(() {
       final RenderObject parent = this.parent;
-      if (owner.debugDoingLayout)
-        return (RenderObject.debugActiveLayout == parent) &&
-            parent.debugDoingThisLayout;
-      if (owner.debugDoingPaint)
-        return ((RenderObject.debugActivePaint == parent) &&
-                parent.debugDoingThisPaint) ||
-            ((RenderObject.debugActivePaint == this) && debugDoingThisPaint);
+      if (owner.debugDoingLayout) {
+        return (RenderObject.debugActiveLayout == parent) && parent.debugDoingThisLayout;
+      }
+      if (owner.debugDoingPaint) {
+        return ((RenderObject.debugActivePaint == parent) && parent.debugDoingThisPaint)
+            || ((RenderObject.debugActivePaint == this)   && debugDoingThisPaint);
+      }
       assert(parent == this.parent);
       return false;
     });
@@ -834,7 +834,7 @@ than "lasagna" code (where each section of the code is cleanly layered and separ
 ### Avoid using `extension`.
 
 Extension methods are confusing to document and discover. To an end developer,
-they appear no different than the built in API of the class, and discovering
+they appear no different than the built-in API of the class, and discovering
 the documentation and implementation of an extension is more challenging than
 for class members.
 
@@ -928,8 +928,9 @@ TheType get theProperty => _theProperty;
 TheType _theProperty;
 void set theProperty(TheType value) {
   assert(value != null);
-  if (_theProperty == value)
+  if (_theProperty == value) {
     return;
+  }
   _theProperty = value;
   markNeedsWhatever(); // the method to mark the object dirty
 }
@@ -1073,7 +1074,7 @@ const double kParagraphSpacing = 1.5;
 const String kSaveButtonTitle = 'Save';
 ```
 
-However, where possible avoid global constants. Rather than `kDefaultButtonColor`, consider `Button.defaultColor`. If necessary, consider creating a class with a private constructor to hold relevant constants.
+However, where possible avoid global constants. Rather than `kDefaultButtonColor`, consider `Button.defaultColor`. If necessary, consider creating an `abstract final class` to hold relevant constants.
 
 
 ### Avoid abbreviations
@@ -1168,7 +1169,7 @@ documented top-level library intended to be imported by users.
 
 The definition of "New" changes as code grows and time passes. If the code
 needed a replacement version the odds of needing another replacement in the
-future is higher. Instead find a name that represents the idea being being used
+future is higher. Instead find a name that represents the idea being used
 or replaced.
 
 
@@ -1204,7 +1205,7 @@ Example:
 
 TODOs should include the string TODO in all caps, followed by the GitHub username of
 the person with the best _context_ about the problem referenced by the TODO in
-parenthesis. A TODO is not a commitment that the person referenced will fix the
+parentheses. A TODO is not a commitment that the person referenced will fix the
 problem, it is intended to be the person with enough context to explain the problem.
 Thus, when you create a TODO, it is almost always your username that is given.
 
@@ -1249,7 +1250,9 @@ include a link to that issue in the code.
 Generally the closure passed to `setState` should include all the code that changes the state. Sometimes this is not possible because the state changed elsewhere and the `setState` is called in response. In those cases, include a comment in the `setState` closure that explains what the state is that changed.
 
 ```dart
-  setState(() { /* The animation ticked. We use the animation's value in the build method. */ });
+  setState(() {
+    // The animation ticked. We use the animation's value in the build method.
+  });
 ```
 
 
@@ -1328,25 +1331,21 @@ to the superclass.
 
 ```dart
 // one-line constructor example
-abstract class Foo extends StatelessWidget {
-  Foo(this.bar, { Key key, this.child }) : super(key: key);
-  final int bar;
-  final Widget child;
+class ConstantTween<T> extends Tween<T> {
+  ConstantTween(T value) : super(begin: value, end: value);
+
   // ...
 }
 
 // fully expanded constructor example
-abstract class Foo extends StatelessWidget {
-  Foo(
-    this.bar, {
-    Key key,
-    Widget childWidget,
-  }) : child = childWidget,
-       super(
-         key: key,
-       );
-  final int bar;
-  final Widget child;
+class ConstantTween<T> extends Tween<T> {
+  ConstantTween(
+    T value,
+  ) : super(
+        begin: value,
+        end: value,
+      );
+
   // ...
 }
 ```
@@ -1432,8 +1431,6 @@ Example:
     bar,
     baz,
   );
-  foo(bar,
-    baz);
 ```
 
 ### Use a trailing comma for arguments, parameters, and list items, but only if they each have their own line.
@@ -1451,6 +1448,42 @@ foo1(
   baz,
 );
 foo2(bar, baz);
+```
+
+If one of the items is a multi-line callback, collection literal,
+or switch expression, it can be added without a trailing comma.
+
+```dart
+// GOOD:
+foo(
+  bar,
+  baz,
+  switch (value) {
+    true  => ScrollDirection.forward,
+    false => ScrollDirection.reverse,
+    null  => ScrollDirection.idle,
+  },
+);
+
+// also GOOD:
+foo(bar, baz, switch (value) {
+  true  => ScrollDirection.forward,
+  false => ScrollDirection.reverse,
+  null  => ScrollDirection.idle,
+});
+
+// The same applies to collection literals and callbacks:
+foo(<String>[
+  'list item 1',
+  'list item 2',
+  'list item 3',
+]);
+
+Future.delayed(Durations.short1, () {
+  if (mounted && _shouldOpenDrawer) {
+    _drawerController.forward();
+  }
+});
 ```
 
 Whether to put things all on one line or whether to have one line per item is an aesthetic choice. We prefer whatever ends up being most readable. Typically this means that when everything would fit on one line, put it all on one line, otherwise, split it one item to a line.
@@ -1488,17 +1521,6 @@ However, there are exceptions. For example, if there are six back-to-back lists 
   ];
 ```
 
-### Prefer single quotes for strings
-
-Use double quotes for nested strings or (optionally) for strings that contain single quotes.
-For all other strings, use single quotes.
-
-Example:
-
-```dart
-print('Hello ${name.split(" ")[0]}');
-```
-
 
 ### Consider using `=>` for short functions and methods
 
@@ -1520,14 +1542,49 @@ String capitalize(String s) {
 }
 ```
 
-### Use `=>` for inline callbacks that just return literals or switch expressions
+### Use `=>` for getters and callbacks that just return literals or switch expressions
 
-If your code is passing an inline closure that merely returns a list or
-map literal, or a switch expression, or is merely calling another function,
-then if the argument is on its own line, then rather than using braces and a
-`return` statement, you can instead use the `=>` form. When doing this, the
-closing `]`, `}`, or `)` bracket will line up with the argument name, for
-named arguments, or the `(` of the argument list, for positional arguments.
+```dart
+// GOOD:
+List<Color> get favorites => <Color>[
+  const Color(0xFF80FFFF),
+  const Color(0xFF00FFF0),
+  const Color(0xFF4000FF),
+  _mysteryColor(),
+];
+
+// GOOD:
+bool get isForwardOrCompleted => switch (status) {
+  AnimationStatus.forward || AnimationStatus.completed => true,
+  AnimationStatus.reverse || AnimationStatus.dismissed => false,
+};
+```
+
+It's important to use discretion, since there are cases where a function body
+is easier to visually parse:
+
+```dart
+// OKAY, but the code is more dense than it could be:
+String? get validated => switch(input[_inputIndex]?.trim()) {
+  final String value when value.isNotEmpty => value,
+  _ => null,
+}
+
+// BETTER (more verbose, but also more readable):
+String? get validated {
+  final String? value = input[_inputIndex]?.trim();
+
+  if (value != null && value.isNotEmpty) {
+    return value;
+  }
+  return null;
+}
+```
+
+If your code is passing an inline closure containing only a `return` statement,
+you can instead use the `=>` form.\
+When doing this, the closing `]`, `}`, or `)` bracket will have the same
+indentation as the line where the callback starts.
 
 For example:
 
@@ -1541,11 +1598,11 @@ For example:
           return <PopupMenuItem<String>>[
             PopupMenuItem<String>(
               value: 'Friends',
-              child: MenuItemWithIcon(Icons.people, 'Friends', '5 new')
+              child: MenuItemWithIcon(Icons.people, 'Friends', '5 new'),
             ),
             PopupMenuItem<String>(
               value: 'Events',
-              child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming')
+              child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming'),
             ),
           ];
         }
@@ -1560,11 +1617,11 @@ For example:
         itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
           PopupMenuItem<String>(
             value: 'Friends',
-            child: MenuItemWithIcon(Icons.people, 'Friends', '5 new')
+            child: MenuItemWithIcon(Icons.people, 'Friends', '5 new'),
           ),
           PopupMenuItem<String>(
             value: 'Events',
-            child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming')
+            child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming'),
           ),
         ]
       );
@@ -1665,60 +1722,6 @@ final List<String> args = <String>[
 
 Use a block (with braces) when a body would wrap onto more than one line (as opposed to using `=>`; the cases where you can use `=>` are discussed in the previous two guidelines).
 
-
-### Separate the 'if' expression from its statement
-
-(This is enforced by the `always_put_control_body_on_new_line` and `curly_braces_in_flow_control_structures` lints.)
-
-Don't put the statement part of an 'if' statement on the same line as
-the expression, even if it is short. (Doing so makes it unobvious that
-there is relevant code there. This is especially important for early
-returns.)
-
-Example:
-
-```dart
-// BAD:
-if (notReady) return;
-
-// GOOD:
-// Use this style for code that is expected to be publicly read by developers
-if (notReady) {
-  return;
-}
-```
-
-If the body is more than one line, or if there is an `else` clause, wrap the body in braces:
-
-```dart
-// BAD:
-if (foo)
-  bar(
-    'baz',
-  );
-
-// BAD:
-if (foo)
-  bar();
-else
-  baz();
-
-// GOOD:
-if (foo) {
-  bar(
-    'baz',
-  );
-}
-
-// GOOD:
-if (foo) {
-  bar();
-} else {
-  baz();
-}
-```
-
-We require bodies to make it very clear where the bodies belong.
 
 ### Align expressions
 

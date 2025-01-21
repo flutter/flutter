@@ -49,7 +49,7 @@ void main() {
       .toList();
 
     expect(description, <String>[
-      'color: Color(0xffffffff)',
+      'color: ${const Color(0xffffffff)}',
       'space: 5.0',
       'thickness: 4.0',
       'indent: 3.0',

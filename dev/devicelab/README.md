@@ -28,7 +28,7 @@ DeviceLab tests are run against physical devices in Flutter's lab (the
 
 Tasks specify the type of device they are to run on (`linux_android`, `mac_ios`,
 `mac_android`, `windows_android`, etc). When a device in the lab is free, it
-will pickup tasks that need to be completed.
+will pick up tasks that need to be completed.
 
 1. If the task succeeds, the test runner reports the success and uploads its
 performance metrics to Flutter's infrastructure. Not all tasks record

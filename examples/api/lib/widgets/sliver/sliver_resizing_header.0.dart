@@ -88,7 +88,7 @@ class ListHeader extends StatelessWidget {
     final ColorScheme colorScheme = theme.colorScheme;
 
     return Container(
-      color: colorScheme.background,
+      color: colorScheme.surface,
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Material(
         color: colorScheme.primaryContainer,

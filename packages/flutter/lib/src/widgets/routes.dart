@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+/// @docImport 'package:flutter/cupertino.dart';
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+/// @docImport 'form.dart';
+/// @docImport 'heroes.dart';
+/// @docImport 'pages.dart';
+/// @docImport 'pop_scope.dart';
+/// @docImport 'will_pop_scope.dart';
+library;
+
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
@@ -45,6 +57,7 @@ abstract class OverlayRoute<T> extends Route<T> {
   /// Creates a route that knows how to interact with an [Overlay].
   OverlayRoute({
     super.settings,
+    super.requestFocus,
   });
 
   /// Subclasses should override this getter to return the builders for the overlay.
@@ -103,6 +116,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   /// Creates a route that animates itself when it is pushed or popped.
   TransitionRoute({
     super.settings,
+    super.requestFocus,
   });
 
   /// This future completes only once the transition itself has finished, after
@@ -399,9 +413,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
     }
     // Finally, we dispose any previous train hopping animation because it
     // has been successfully updated at this point.
-    if (previousTrainHoppingListenerRemover != null) {
-      previousTrainHoppingListenerRemover();
-    }
+    previousTrainHoppingListenerRemover?.call();
   }
 
   void _setSecondaryAnimation(Animation<double>? animation, [Future<dynamic>? disposed]) {
@@ -1018,7 +1030,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   }
 
   bool get _shouldRequestFocus {
-    return widget.route.navigator!.widget.requestFocus;
+    return widget.route.requestFocus;
   }
 
   // This should be called to wrap any changes to route.isCurrent, route.canPop,
@@ -1066,7 +1078,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                         child: ListenableBuilder(
                           listenable: _listenable, // immutable
                           builder: (BuildContext context, Widget? child) {
-                            return widget.route.buildTransitions(
+                            return widget.route._buildFlexibleTransitions(
                               context,
                               widget.route.animation!,
                               widget.route.secondaryAnimation!,
@@ -1130,6 +1142,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Creates a route that blocks interaction with previous routes.
   ModalRoute({
     super.settings,
+    super.requestFocus,
     this.filter,
     this.traversalEdgeBehavior,
   });
@@ -1402,6 +1415,77 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     Widget child,
   ) {
     return child;
+  }
+
+  /// The [DelegatedTransitionBuilder] provided to the route below this one in the
+  /// navigation stack.
+  ///
+  /// {@template flutter.widgets.delegatedTransition}
+  /// Used for the purposes of coordinating transitions between two routes with
+  /// different route transitions. When a route is added to the stack, the original
+  /// topmost route will look for this transition, and if available, it will use
+  /// the `delegatedTransition` from the incoming transition to animate off the
+  /// screen.
+  ///
+  /// If the return of the [DelegatedTransitionBuilder] is null, then by default
+  /// the original transition of the routes will be used. This is useful if a
+  /// route can conditionally provide a transition based on the [BuildContext].
+  /// {@endtemplate}
+  ///
+  /// The [ModalRoute] receiving this transition will set it to their
+  /// [receivedTransition] property.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows an app that uses three different page transitions, a
+  /// Material Zoom transition, the standard Cupertino sliding transition, and a
+  /// custom vertical transition. All of the page routes are able to inform the
+  /// previous page how to transition off the screen to sync with the new page.
+  ///
+  /// ** See code in examples/api/lib/widgets/routes/flexible_route_transitions.0.dart **
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad}
+  /// This sample shows an app that uses the same transitions as the previous
+  /// sample, this time in a [MaterialApp.router].
+  ///
+  /// ** See code in examples/api/lib/widgets/routes/flexible_route_transitions.1.dart **
+  /// {@end-tool}
+  DelegatedTransitionBuilder? get delegatedTransition => null;
+
+  /// The [DelegatedTransitionBuilder] received from the route above this one in
+  /// the navigation stack.
+  ///
+  /// {@macro flutter.widgets.delegatedTransition}
+  ///
+  /// The `receivedTransition` will use the above route's [delegatedTransition] in
+  /// order to show the right route transition when the above route either enters
+  /// or leaves the navigation stack. If not null, the `receivedTransition` will
+  /// wrap the route content.
+  @visibleForTesting
+  DelegatedTransitionBuilder? receivedTransition;
+
+  // Wraps the transitions of this route with a DelegatedTransitionBuilder, when
+  // _receivedTransition is not null.
+  Widget _buildFlexibleTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (receivedTransition == null) {
+      return buildTransitions(context, animation, secondaryAnimation, child);
+    }
+
+    // Create a static proxy animation to supress the original secondary transition.
+    final ProxyAnimation proxyAnimation = ProxyAnimation();
+
+    final Widget proxiedOriginalTransitions = buildTransitions(context, animation, proxyAnimation, child);
+
+    // If recievedTransitions return null, then we want to return the original transitions,
+    // but with the secondary animation still proxied. This keeps a desynched
+    // animation from playing.
+    return receivedTransition!(context, animation, secondaryAnimation, allowSnapshotting, proxiedOriginalTransitions) ??
+      proxiedOriginalTransitions;
   }
 
   @override
@@ -1807,6 +1891,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void addScopedWillPopCallback(WillPopCallback callback) {
     assert(_scopeKey.currentState != null, 'Tried to add a willPop callback to a route that is not currently in the tree.');
     _willPopCallbacks.add(callback);
+    if (_willPopCallbacks.length == 1) {
+      _maybeDispatchNavigationNotification();
+    }
   }
 
   /// Remove one of the callbacks run by [willPop].
@@ -1823,6 +1910,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void removeScopedWillPopCallback(WillPopCallback callback) {
     assert(_scopeKey.currentState != null, 'Tried to remove a willPop callback from a route that is not currently in the tree.');
     _willPopCallbacks.remove(callback);
+    if (_willPopCallbacks.isEmpty) {
+      _maybeDispatchNavigationNotification();
+    }
   }
 
   /// Registers the existence of a [PopEntry] in the route.
@@ -1860,7 +1950,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       // canPop indicates that the originator of the Notification can handle a
       // pop. In the case of PopScope, it handles pops when canPop is
       // false. Hence the seemingly backward logic here.
-      canHandlePop: popDisposition == RoutePopDisposition.doNotPop,
+      canHandlePop: popDisposition == RoutePopDisposition.doNotPop
+          || _willPopCallbacks.isNotEmpty,
     );
     // Avoid dispatching a notification in the middle of a build.
     switch (SchedulerBinding.instance.schedulerPhase) {
@@ -1913,12 +2004,22 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   void didChangeNext(Route<dynamic>? nextRoute) {
+    if (nextRoute is ModalRoute<T> && canTransitionTo(nextRoute) && nextRoute.delegatedTransition != this.delegatedTransition) {
+      receivedTransition = nextRoute.delegatedTransition;
+    } else {
+      receivedTransition = null;
+    }
     super.didChangeNext(nextRoute);
     changedInternalState();
   }
 
   @override
   void didPopNext(Route<dynamic> nextRoute) {
+    if (nextRoute is ModalRoute<T> && canTransitionTo(nextRoute) && nextRoute.delegatedTransition != this.delegatedTransition) {
+      receivedTransition = nextRoute.delegatedTransition;
+    } else {
+      receivedTransition = null;
+    }
     super.didPopNext(nextRoute);
     changedInternalState();
     _maybeDispatchNavigationNotification();
@@ -2076,6 +2177,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
   /// Initializes the [PopupRoute].
   PopupRoute({
     super.settings,
+    super.requestFocus,
     super.filter,
     super.traversalEdgeBehavior,
   });
@@ -2277,6 +2379,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     Duration transitionDuration = const Duration(milliseconds: 200),
     RouteTransitionsBuilder? transitionBuilder,
     super.settings,
+    super.requestFocus,
     this.anchorPoint,
     super.traversalEdgeBehavior,
   }) : _pageBuilder = pageBuilder,

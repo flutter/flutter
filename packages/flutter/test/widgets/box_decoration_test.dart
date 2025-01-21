@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui show Image;
@@ -575,6 +578,66 @@ Future<void> main() async {
           ),
         ),
       ),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/13675
+  testWidgets('Border avoids clipping edges when possible', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    Widget buildWidget(Color color) {
+      final List<Widget> circles = <Widget>[];
+      for (int i = 100; i > 25; i--) {
+        final double radius = i * 2.5;
+        final double angle = i * 0.5;
+        final double x = radius * math.cos(angle);
+        final double y = radius * math.sin(angle);
+        final Widget circle = Positioned(
+          left: 275 - x,
+          top: 275 - y,
+          child: Container(
+            width: 250,
+            height: 250,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(75),
+              color: Colors.black,
+              border: Border.all(color: color, width: 50),
+            ),
+          ),
+        );
+        circles.add(circle);
+      }
+
+      return Center(
+        key: key,
+        child: Container(
+          width: 800,
+          height: 800,
+          decoration: const ShapeDecoration(
+            color: Colors.orangeAccent,
+            shape: CircleBorder(
+              side: BorderSide(strokeAlign: BorderSide.strokeAlignOutside),
+            ),
+          ),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: circles,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget(const Color(0xffffffff)));
+    await expectLater(
+      find.byKey(key),
+        matchesGoldenFile('painting.box_decoration.border.should_be_white.png'),
+    );
+
+    await tester.pumpWidget(buildWidget(const Color(0xfeffffff)));
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('painting.box_decoration.border.show_lines_due_to_opacity.png'),
     );
   });
 }

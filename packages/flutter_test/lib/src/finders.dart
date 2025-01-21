@@ -468,11 +468,77 @@ class CommonFinders {
     return _AncestorWidgetFinder(of, matching, matchLeaves: matchRoot);
   }
 
+  /// Finds a standard "back" button.
+  ///
+  /// A common element on many user interfaces is the "back" button. This is
+  /// the button which takes the user back to the previous page/screen/state.
+  ///
+  /// It is useful in tests to be able to find these buttons, both for tapping
+  /// them or verifying their existence, but because different platforms and
+  /// locales have different icons representing them with different labels and
+  /// tooltips, it's not desirable to have to look them up by these attributes.
+  ///
+  /// This finder uses the [StandardComponentType] enum to look for buttons that
+  /// have the key associated with [StandardComponentType.backButton]. If
+  /// another widget is assigned that key, then it too will be considered an
+  /// "official" back button in the widget tree, allowing this matcher to still
+  /// find it even though it might use a different icon or tooltip.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// expect(find.backButton(), findsOneWidget);
+  /// ```
+  ///
+  /// See also:
+  ///
+  /// * [StandardComponentType], the enum that enumerates components that are
+  ///   both common in user interfaces, but which also can vary slightly in
+  ///   presentation across different platforms, locales, and devices.
+  /// * [BackButton], the Flutter Material widget that represents the back
+  ///   button.
+  Finder backButton() {
+    return byKey(StandardComponentType.backButton.key);
+  }
+
+  /// Finds a standard "close" button.
+  ///
+  /// A common element on many user interfaces is the "close" button. This is
+  /// the button which closes or cancels whatever it is attached to.
+  ///
+  /// It is useful in tests to be able to find these buttons, both for tapping
+  /// them or verifying their existence, but because different platforms and
+  /// locales have different icons representing them with different labels and
+  /// tooltips, it's not desirable to have to look them up by these attributes.
+  ///
+  /// This finder uses the [StandardComponentType] enum to look for buttons that
+  /// have the key associated with [StandardComponentType.closeButton]. If
+  /// another widget is assigned that key, then it too will be considered an
+  /// "official" close button in the widget tree, allowing this matcher to still
+  /// find it even though it might use a different icon or tooltip.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// expect(find.closeButton(), findsOneWidget);
+  /// ```
+  ///
+  /// See also:
+  ///
+  /// * [StandardComponentType], the enum that enumerates components that are
+  ///   both common in user interfaces, but which also can vary slightly in
+  ///   presentation across different platforms, locales, and devices.
+  /// * [CloseButton], the Flutter Material widget that represents a close
+  ///   button.
+  Finder closeButton() {
+    return byKey(StandardComponentType.closeButton.key);
+  }
+
   /// Finds [Semantics] widgets matching the given `label`, either by
   /// [RegExp.hasMatch] or string equality.
   ///
   /// The framework may combine semantics labels in certain scenarios, such as
-  /// when multiple [Text] widgets are in a [MaterialButton] widget. In such a
+  /// when multiple [Text] widgets are in a [TextButton] widget. In such a
   /// case, it may be preferable to match by regular expression. Consumers of
   /// this API __must not__ introduce unsuitable content into the semantics tree
   /// for the purposes of testing; in particular, you should prefer matching by
@@ -489,11 +555,49 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder bySemanticsLabel(Pattern label, { bool skipOffstage = true }) {
+  Finder bySemanticsLabel(Pattern label, {bool skipOffstage = true}) {
+    return _bySemanticsProperty(
+      label,
+      (SemanticsNode? semantics) => semantics?.label,
+      skipOffstage: skipOffstage,
+    );
+  }
+
+  /// Finds [Semantics] widgets matching the given `identifier`, either by
+  /// [RegExp.hasMatch] or string equality.
+  ///
+  /// This allows matching against the identifier of a [Semantics] widget, which
+  /// is a unique identifier for the widget in the semantics tree. This is
+  /// exposed to offer a unified way widget tests and e2e tests can match
+  /// against a [Semantics] widget.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// expect(find.bySemanticsIdentifier('Back'), findsOneWidget);
+  /// ```
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder bySemanticsIdentifier(Pattern identifier, {bool skipOffstage = true}) {
+    return _bySemanticsProperty(
+      identifier,
+      (SemanticsNode? semantics) => semantics?.identifier,
+      skipOffstage: skipOffstage,
+    );
+  }
+
+  Finder _bySemanticsProperty(
+    Pattern pattern,
+    String? Function(SemanticsNode?) propertyGetter,
+    {bool skipOffstage = true}
+  ) {
     if (!SemanticsBinding.instance.semanticsEnabled) {
-      throw StateError('Semantics are not enabled. '
-                       'Make sure to call tester.ensureSemantics() before using '
-                       'this finder, and call dispose on its return value after.');
+      throw StateError(
+        'Semantics are not enabled. '
+        'Make sure to call tester.ensureSemantics() before using '
+        'this finder, and call dispose on its return value after.',
+      );
     }
     return byElementPredicate(
       (Element element) {
@@ -502,19 +606,18 @@ class CommonFinders {
         if (element is! RenderObjectElement) {
           return false;
         }
-        final String? semanticsLabel = element.renderObject.debugSemantics?.label;
-        if (semanticsLabel == null) {
+        final String? propertyValue = propertyGetter(element.renderObject.debugSemantics);
+        if (propertyValue == null) {
           return false;
         }
-        return label is RegExp
-            ? label.hasMatch(semanticsLabel)
-            : label == semanticsLabel;
+        return pattern is RegExp
+            ? pattern.hasMatch(propertyValue)
+            : pattern == propertyValue;
       },
       skipOffstage: skipOffstage,
     );
   }
 }
-
 
 /// Provides lightweight syntax for getting frequently used semantics finders.
 ///

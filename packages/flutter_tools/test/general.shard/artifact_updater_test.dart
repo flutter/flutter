@@ -83,6 +83,7 @@ void main() {
     File? desiredArtifact;
     File? entitlementsFile;
     File? nestedWithoutEntitlementsFile;
+    File? unsignedBinariesFile;
     operatingSystemUtils.unzipCallbacks[localZipPath] = (Directory outputDirectory) {
       desiredArtifact = outputDirectory.childFile('artifact.bin')..createSync();
       entitlementsFile = outputDirectory.childFile('entitlements.txt')..createSync();
@@ -90,6 +91,7 @@ void main() {
           .childDirectory('dir')
           .childFile('without_entitlements.txt')
           ..createSync(recursive: true);
+      unsignedBinariesFile = outputDirectory.childFile('unsigned_binaries.txt')..createSync();
     };
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
       fileSystem: fileSystem,
@@ -114,6 +116,7 @@ void main() {
     expect(desiredArtifact, exists);
     expect(entitlementsFile, isNot(exists));
     expect(nestedWithoutEntitlementsFile, isNot(exists));
+    expect(unsignedBinariesFile, isNot(exists));
     expect(staleEntitlementsFile, isNot(exists));
   });
 

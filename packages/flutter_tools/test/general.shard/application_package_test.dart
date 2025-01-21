@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/fuchsia/application_package.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
@@ -425,7 +424,6 @@ void main() {
 
     testUsingContext('returns null when there is no ios or .ios directory', () async {
       globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('.packages').createSync();
       final BuildableIOSApp? iosApp = await IOSApp.fromIosProject(
         FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp?;
 
@@ -434,7 +432,6 @@ void main() {
 
     testUsingContext('returns null when there is no Runner.xcodeproj', () async {
       globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('.packages').createSync();
       globals.fs.file('ios/FooBar.xcodeproj').createSync(recursive: true);
       final BuildableIOSApp? iosApp = await IOSApp.fromIosProject(
         FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp?;
@@ -444,7 +441,6 @@ void main() {
 
     testUsingContext('returns null when there is no Runner.xcodeproj/project.pbxproj', () async {
       globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('.packages').createSync();
       globals.fs.file('ios/Runner.xcodeproj').createSync(recursive: true);
       final BuildableIOSApp? iosApp = await IOSApp.fromIosProject(
         FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp?;
@@ -454,13 +450,25 @@ void main() {
 
     testUsingContext('returns null when there with no product identifier', () async {
       globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('.packages').createSync();
       final Directory project = globals.fs.directory('ios/Runner.xcodeproj')..createSync(recursive: true);
       project.childFile('project.pbxproj').createSync();
       final BuildableIOSApp? iosApp = await IOSApp.fromIosProject(
         FlutterProject.fromDirectory(globals.fs.currentDirectory).ios, null) as BuildableIOSApp?;
 
       expect(iosApp, null);
+    }, overrides: overrides);
+
+    testUsingContext('handles project paths with periods in app name', () async {
+      final BuildableIOSApp iosApp = BuildableIOSApp(
+        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        'com.foo.bar',
+        'Name.With.Dots',
+      );
+      expect(iosApp.name, 'Name.With.Dots');
+      expect(iosApp.archiveBundleOutputPath, 'build/ios/archive/Name.With.Dots.xcarchive');
+      expect(iosApp.deviceBundlePath, 'build/ios/iphoneos/Name.With.Dots.app');
+      expect(iosApp.simulatorBundlePath, 'build/ios/iphonesimulator/Name.With.Dots.app');
+      expect(iosApp.builtInfoPlistPathAfterArchive, 'build/ios/archive/Name.With.Dots.xcarchive/Products/Applications/Name.With.Dots.app/Info.plist');
     }, overrides: overrides);
 
     testUsingContext('returns project app icon dirname', () async {
@@ -633,51 +641,6 @@ void main() {
           launchImageDirSuffix,
         ),
       );
-    }, overrides: overrides);
-  });
-
-  group('FuchsiaApp', () {
-    final Map<Type, Generator> overrides = <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-      OperatingSystemUtils: () => FakeOperatingSystemUtils(),
-    };
-
-    testUsingContext('Error on non-existing file', () {
-      final PrebuiltFuchsiaApp? fuchsiaApp =
-          FuchsiaApp.fromPrebuiltApp(globals.fs.file('not_existing.far')) as PrebuiltFuchsiaApp?;
-      expect(fuchsiaApp, isNull);
-      expect(
-        testLogger.errorText,
-        'File "not_existing.far" does not exist or is not a .far file. Use far archive.\n',
-      );
-    }, overrides: overrides);
-
-    testUsingContext('Error on non-far file', () {
-      globals.fs.directory('regular_folder').createSync();
-      final PrebuiltFuchsiaApp? fuchsiaApp =
-          FuchsiaApp.fromPrebuiltApp(globals.fs.file('regular_folder')) as PrebuiltFuchsiaApp?;
-      expect(fuchsiaApp, isNull);
-      expect(
-        testLogger.errorText,
-        'File "regular_folder" does not exist or is not a .far file. Use far archive.\n',
-      );
-    }, overrides: overrides);
-
-    testUsingContext('Success with far file', () {
-      globals.fs.file('bundle.far').createSync();
-      final PrebuiltFuchsiaApp fuchsiaApp = FuchsiaApp.fromPrebuiltApp(globals.fs.file('bundle.far'))! as PrebuiltFuchsiaApp;
-      expect(testLogger.errorText, isEmpty);
-      expect(fuchsiaApp.id, 'bundle.far');
-      expect(fuchsiaApp.applicationPackage.path, globals.fs.file('bundle.far').path);
-    }, overrides: overrides);
-
-    testUsingContext('returns null when there is no fuchsia', () async {
-      globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('.packages').createSync();
-      final BuildableFuchsiaApp? fuchsiaApp = FuchsiaApp.fromFuchsiaProject(FlutterProject.fromDirectory(globals.fs.currentDirectory).fuchsia) as BuildableFuchsiaApp?;
-
-      expect(fuchsiaApp, null);
     }, overrides: overrides);
   });
 }

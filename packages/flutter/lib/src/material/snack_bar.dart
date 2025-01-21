@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'bottom_navigation_bar.dart';
+/// @docImport 'floating_action_button.dart';
+library;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -98,8 +102,8 @@ class SnackBarAction extends StatefulWidget {
   /// The button label color. If not provided, defaults to
   /// [SnackBarThemeData.actionTextColor].
   ///
-  /// If [textColor] is a [MaterialStateColor], then the text color will be
-  /// resolved against the set of [MaterialState]s that the action text
+  /// If [textColor] is a [WidgetStateColor], then the text color will be
+  /// resolved against the set of [WidgetState]s that the action text
   /// is in, thus allowing for different colors for states such as pressed,
   /// hovered and others.
   final Color? textColor;
@@ -107,8 +111,8 @@ class SnackBarAction extends StatefulWidget {
   /// The button background fill color. If not provided, defaults to
   /// [SnackBarThemeData.actionBackgroundColor].
   ///
-  /// If [backgroundColor] is a [MaterialStateColor], then the text color will
-  /// be resolved against the set of [MaterialState]s that the action text is
+  /// If [backgroundColor] is a [WidgetStateColor], then the text color will
+  /// be resolved against the set of [WidgetState]s that the action text is
   /// in, thus allowing for different colors for the states.
   final Color? backgroundColor;
 
@@ -432,15 +436,15 @@ class SnackBar extends StatefulWidget {
   /// Tapping the icon will close the snack bar.
   final bool? showCloseIcon;
 
-  /// (optional) An optional color for the close icon, if [showCloseIcon] is
+  /// An optional color for the close icon, if [showCloseIcon] is
   /// true.
   ///
   /// If this property is null, then [SnackBarThemeData.closeIconColor] of
   /// [ThemeData.snackBarTheme] is used. If that is null, then the default is
   /// inverse surface.
   ///
-  /// If [closeIconColor] is a [MaterialStateColor], then the icon color will be
-  /// resolved against the set of [MaterialState]s that the action text
+  /// If [closeIconColor] is a [WidgetStateColor], then the icon color will be
+  /// resolved against the set of [WidgetState]s that the action text
   /// is in, thus allowing for different colors for states such as pressed,
   /// hovered and others.
   final Color? closeIconColor;
@@ -638,9 +642,9 @@ class _SnackBarState extends State<SnackBar> {
     final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? defaults.contentTextStyle;
     final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? defaults.behavior!;
     final double? width = widget.width ?? snackBarTheme.width;
-    assert((){
+    assert(() {
       // Whether the behavior is set through the constructor or the theme,
-      // assert that our other properties are configured properly.
+      // assert that other properties are configured properly.
       if (snackBarBehavior != SnackBarBehavior.floating) {
         String message(String parameter) {
           final String prefix = '$parameter can only be used with floating behavior.';
@@ -674,6 +678,7 @@ class _SnackBarState extends State<SnackBar> {
 
     final IconButton? iconButton = showCloseIcon
         ? IconButton(
+            key: StandardComponentType.closeButton.key,
             icon: const Icon(Icons.close),
             iconSize: 24.0,
             color: widget.closeIconColor ?? snackBarTheme.closeIconColor ?? defaults.closeIconColor,
@@ -733,11 +738,10 @@ class _SnackBarState extends State<SnackBar> {
             Row(
               children: <Widget>[
                 Expanded(
-                  child: Container(
+                  child: Padding(
                     padding: widget.padding == null
-                        ? const EdgeInsets.symmetric(
-                            vertical: _singleLineVerticalPadding)
-                        : null,
+                        ? const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding)
+                        : EdgeInsets.zero,
                     child: DefaultTextStyle(
                       style: contentTextStyle!,
                       child: widget.content,
@@ -788,10 +792,9 @@ class _SnackBarState extends State<SnackBar> {
     if (isFloatingSnackBar) {
       // If width is provided, do not include horizontal margins.
       if (width != null) {
-        snackBar = Container(
-          margin: EdgeInsets.only(top: margin.top, bottom: margin.bottom),
-          width: width,
-          child: snackBar,
+        snackBar = Padding(
+          padding: EdgeInsets.only(top: margin.top, bottom: margin.bottom),
+          child: SizedBox(width: width, child: snackBar),
         );
       } else {
         snackBar = Padding(

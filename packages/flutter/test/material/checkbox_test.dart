@@ -322,7 +322,10 @@ void main() {
         SemanticsFlag.isFocusable,
         SemanticsFlag.isCheckStateMixed,
       ],
-      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+      actions: <SemanticsAction>[
+        SemanticsAction.tap,
+        SemanticsAction.focus,
+      ],
     ), hasLength(1));
 
     await tester.pumpWidget(
@@ -346,7 +349,10 @@ void main() {
         SemanticsFlag.isChecked,
         SemanticsFlag.isFocusable,
       ],
-      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+      actions: <SemanticsAction>[
+        SemanticsAction.tap,
+        SemanticsAction.focus,
+      ],
     ), hasLength(1));
 
     await tester.pumpWidget(
@@ -369,7 +375,10 @@ void main() {
         SemanticsFlag.isEnabled,
         SemanticsFlag.isFocusable,
       ],
-      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+      actions: <SemanticsAction>[
+        SemanticsAction.tap,
+        SemanticsAction.focus,
+      ],
     ), hasLength(1));
 
     semantics.dispose();
@@ -2225,6 +2234,39 @@ void main() {
       expect(find.byType(CupertinoCheckbox), findsNothing);
     }
   });
+
+  testWidgets('Checkbox.adaptive respects Checkbox.mouseCursor on iOS/macOS', (WidgetTester tester) async {
+    Widget buildApp({ MouseCursor? mouseCursor }) {
+      return MaterialApp(
+        home: Material(
+          child: Checkbox.adaptive(
+            value: true,
+            onChanged: (bool? newValue) { },
+            mouseCursor: mouseCursor,
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoCheckbox)));
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.byType(CupertinoCheckbox)));
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+
+    // Test mouse cursor can be configured.
+    await tester.pumpWidget(buildApp(mouseCursor: SystemMouseCursors.click));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test Checkbox.adaptive can resolve a WidgetStateMouseCursor.
+    await tester.pumpWidget(buildApp(mouseCursor: const _SelectedGrabMouseCursor()));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+
+    await gesture.removePointer();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   testWidgets('Material2 - Checkbox respects fillColor when it is unchecked', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: false);

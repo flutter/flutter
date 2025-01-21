@@ -34,13 +34,13 @@ class InputDecoratorExample extends StatelessWidget {
       decoration: InputDecoration(
         border: const OutlineInputBorder(),
         labelText: 'Name',
-        // The MaterialStateProperty's value is a text style that is orange
+        // The WidgetStateProperty's value is a text style that is orange
         // by default, but the theme's error color if the input decorator
         // is in its error state.
-        floatingLabelStyle: MaterialStateTextStyle.resolveWith(
-          (Set<MaterialState> states) {
+        floatingLabelStyle: WidgetStateTextStyle.resolveWith(
+          (Set<WidgetState> states) {
             final Color color =
-                states.contains(MaterialState.error) ? Theme.of(context).colorScheme.error : Colors.orange;
+                states.contains(WidgetState.error) ? Theme.of(context).colorScheme.error : Colors.orange;
             return TextStyle(color: color, letterSpacing: 1.3);
           },
         ),

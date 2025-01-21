@@ -72,7 +72,7 @@ or
 flutter test test_file_or_directory_path
 ```
 
-To run or debug the tests in IDE, make sure `FLUTTER_ROOT` directory is setup.
+To run or debug the tests in IDE, make sure `FLUTTER_ROOT` directory is set up.
 For example, in Android Studio, select the configuration for the test, click "Edit Configurations...",
 under "Environment Variables" section, enter `FLUTTER_ROOT=directory_to_your_flutter_framework_repo`.
 
