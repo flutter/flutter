@@ -17,59 +17,12 @@ static constexpr char kGetKeyboardStateMethod[] = "getKeyboardState";
 static constexpr uint64_t kMockPhysicalKey = 42;
 static constexpr uint64_t kMockLogicalKey = 42;
 
-G_BEGIN_DECLS
-
-G_DECLARE_FINAL_TYPE(FlMockKeyboardHandlerDelegate,
-                     fl_mock_keyboard_handler_delegate,
-                     FL,
-                     MOCK_KEYBOARD_HANDLER_DELEGATE,
-                     GObject);
-
-G_END_DECLS
-
-struct _FlMockKeyboardHandlerDelegate {
-  GObject parent_instance;
-};
-
-static void fl_mock_keyboard_handler_delegate_keyboard_view_delegate_iface_init(
-    FlKeyboardViewDelegateInterface* iface);
-
-G_DEFINE_TYPE_WITH_CODE(
-    FlMockKeyboardHandlerDelegate,
-    fl_mock_keyboard_handler_delegate,
-    G_TYPE_OBJECT,
-    G_IMPLEMENT_INTERFACE(
-        fl_keyboard_view_delegate_get_type(),
-        fl_mock_keyboard_handler_delegate_keyboard_view_delegate_iface_init))
-
-static void fl_mock_keyboard_handler_delegate_init(
-    FlMockKeyboardHandlerDelegate* self) {}
-
-static void fl_mock_keyboard_handler_delegate_class_init(
-    FlMockKeyboardHandlerDelegateClass* klass) {}
-
-static void fl_mock_keyboard_handler_delegate_keyboard_view_delegate_iface_init(
-    FlKeyboardViewDelegateInterface* iface) {}
-
-static FlMockKeyboardHandlerDelegate* fl_mock_keyboard_handler_delegate_new() {
-  FlMockKeyboardHandlerDelegate* self = FL_MOCK_KEYBOARD_HANDLER_DELEGATE(
-      g_object_new(fl_mock_keyboard_handler_delegate_get_type(), nullptr));
-
-  // Added to stop compiler complaining about an unused function.
-  FL_IS_MOCK_KEYBOARD_HANDLER_DELEGATE(self);
-
-  return self;
-}
-
 TEST(FlKeyboardHandlerTest, KeyboardChannelGetPressedState) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
       FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
                              FL_BINARY_MESSENGER(messenger), nullptr));
-  g_autoptr(FlMockKeyboardHandlerDelegate) view_delegate =
-      fl_mock_keyboard_handler_delegate_new();
-  g_autoptr(FlKeyboardManager) manager =
-      fl_keyboard_manager_new(engine, FL_KEYBOARD_VIEW_DELEGATE(view_delegate));
+  g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
   fl_keyboard_manager_set_get_pressed_state_handler(
       manager,
       [](gpointer user_data) {
