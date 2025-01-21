@@ -338,6 +338,7 @@ bool DriverInfoVK::IsKnownBadDriver() const {
   if (vendor_ == VendorVK::kHuawei) {
     return true;
   }
+
   if (vendor_ == VendorVK::kSamsung) {
     // The first version of the Xclipse series GPU has reported
     // bugs, unfortunately all versions of this GPU report the
@@ -348,6 +349,15 @@ bool DriverInfoVK::IsKnownBadDriver() const {
     // https://vulkan.gpuinfo.org/listreports.php?devicename=samsung+SM-S906B&platform=android
     // https://github.com/flutter/flutter/issues/161334
     return !api_version_.IsAtLeast(Version{1, 3, 0});
+  }
+
+  // https://github.com/flutter/flutter/issues/161122
+  // https://github.com/flutter/flutter/issues/160960
+  // https://github.com/flutter/flutter/issues/160866
+  // https://github.com/flutter/flutter/issues/160804
+  // https://github.com/flutter/flutter/issues/160406
+  if (vendor_ == VendorVK::kImgTec) {
+    return true;
   }
   return false;
 }

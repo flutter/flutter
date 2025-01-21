@@ -250,4 +250,14 @@ TEST(DriverInfoVKTest, DisableOldXclipseDriver) {
   EXPECT_FALSE(context->GetDriverInfo()->IsKnownBadDriver());
 }
 
+TEST(DriverInfoVKTest, AllPowerVRDisabled) {
+  auto const context =
+      MockVulkanContextBuilder()
+          .SetPhysicalPropertiesCallback(
+              [](VkPhysicalDevice device, VkPhysicalDeviceProperties* prop) {
+                prop->vendorID = 0x1010;
+                prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
+              })
+          .Build();
+
 }  // namespace impeller::testing
