@@ -108,11 +108,10 @@ TEST_P(AiksTest, CanRenderStrokePathThatEndsAtSharpTurn) {
   paint.setStrokeWidth(200);
   paint.setDrawStyle(DlDrawStyle::kStroke);
 
-  DlPathBuilder path_builder;
-  path_builder.AddArc(DlRect::MakeXYWH(100, 100, 200, 200),  //
-                      DlDegrees(0), DlDegrees(90), false);
+  DlPath path = DlPath::MakeArc(DlRect::MakeXYWH(100, 100, 200, 200),  //
+                                DlDegrees(0), DlDegrees(90), false);
 
-  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(path, paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -169,8 +168,10 @@ TEST_P(AiksTest, CanRenderDifferencePaths) {
   PathBuilder path_builder;
   DlRoundRect rrect =
       DlRoundRect::MakeRectRadii(DlRect::MakeXYWH(100, 100, 200, 200), radii);
-  path_builder.AddRoundRect(rrect);
-  path_builder.AddCircle(DlPoint(200, 200), 50);
+  // We use the factory method to convert the rrect and circle to a path so
+  // that they use the legacy conics for legacy golden output.
+  path_builder.AddPath(DlPath::MakeRoundRect(rrect).GetPath());
+  path_builder.AddPath(DlPath::MakeCircle(DlPoint(200, 200), 50).GetPath());
   DlPath path(path_builder, DlPathFillType::kOdd);
 
   builder.DrawImage(
@@ -412,7 +413,11 @@ TEST_P(AiksTest, CanDrawMultiContourConvexPath) {
   DlPathBuilder path_builder;
   for (auto i = 0; i < 10; i++) {
     if (i % 2 == 0) {
-      path_builder.AddCircle(DlPoint(100 + 50 * i, 100 + 50 * i), 100);
+      // We use the factory method to convert the circle to a path so that it
+      // uses the legacy conics for legacy golden output.
+      DlPath circle =
+          DlPath::MakeCircle(DlPoint(100 + 50 * i, 100 + 50 * i), 100);
+      path_builder.AddPath(circle.GetPath());
       path_builder.Close();
     } else {
       path_builder.MoveTo(DlPoint(100.f + 50.f * i - 100, 100.f + 50.f * i));
@@ -526,6 +531,9 @@ TEST_P(AiksTest, CanRenderOverlappingMultiContourPath) {
                        kTriangleHeight, kTriangleHeight),
       radii  //
   );
+  // We use the factory method to convert the rrect to a path so that it
+  // uses the legacy conics for legacy golden output.
+  DlPath rrect_path = DlPath::MakeRoundRect(rrect);
 
   builder.Translate(200, 200);
   // Form a path similar to the Material drop slider value indicator. Both
@@ -536,7 +544,7 @@ TEST_P(AiksTest, CanRenderOverlappingMultiContourPath) {
     path_builder.LineTo(DlPoint(-kTriangleHeight / 2.0f, 0));
     path_builder.LineTo(DlPoint(kTriangleHeight / 2.0f, 0));
     path_builder.Close();
-    path_builder.AddRoundRect(rrect);
+    path_builder.AddPath(rrect_path.GetPath());
 
     builder.DrawPath(DlPath(path_builder), paint);
   }
@@ -549,7 +557,7 @@ TEST_P(AiksTest, CanRenderOverlappingMultiContourPath) {
     path_builder.LineTo(DlPoint(0, -10));
     path_builder.LineTo(DlPoint(kTriangleHeight / 2.0f, 0));
     path_builder.Close();
-    path_builder.AddRoundRect(rrect);
+    path_builder.AddPath(rrect_path.GetPath());
 
     builder.DrawPath(DlPath(path_builder), paint);
   }

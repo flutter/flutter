@@ -62,16 +62,31 @@ DlPath DlPath::MakeRoundRectXY(const DlRect& rect,
       counter_clock_wise ? SkPathDirection::kCCW : SkPathDirection::kCW));
 }
 
-DlPath DlPath::MakeLine(DlPoint a, DlPoint b) {
+DlPath DlPath::MakeLine(const DlPoint& a, const DlPoint& b) {
   return DlPath(SkPath::Line(ToSkPoint(a), ToSkPoint(b)));
 }
 
-DlPath DlPath::MakePoly(DlPoint pts[],
+DlPath DlPath::MakePoly(const DlPoint pts[],
                         int count,
                         bool close,
                         DlPathFillType fill_type) {
   return DlPath(
       SkPath::Polygon(ToSkPoints(pts), count, close, ToSkFillType(fill_type)));
+}
+
+DlPath DlPath::MakeArc(const DlRect& bounds,
+                       DlDegrees start,
+                       DlDegrees end,
+                       bool use_center) {
+  SkPath path;
+  if (use_center) {
+    path.moveTo(ToSkPoint(bounds.GetCenter()));
+  }
+  path.arcTo(ToSkRect(bounds), start.degrees, end.degrees, !use_center);
+  if (use_center) {
+    path.close();
+  }
+  return DlPath(path);
 }
 
 const SkPath& DlPath::GetSkPath() const {

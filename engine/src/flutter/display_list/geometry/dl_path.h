@@ -43,11 +43,16 @@ class DlPath {
                                 DlScalar y_radius,
                                 bool counter_clock_wise = false);
 
-  static DlPath MakeLine(DlPoint a, DlPoint b);
-  static DlPath MakePoly(DlPoint pts[],
+  static DlPath MakeLine(const DlPoint& a, const DlPoint& b);
+  static DlPath MakePoly(const DlPoint pts[],
                          int count,
                          bool close,
                          DlPathFillType fill_type = DlPathFillType::kNonZero);
+
+  static DlPath MakeArc(const DlRect& bounds,
+                        DlDegrees start,
+                        DlDegrees end,
+                        bool use_center);
 
   DlPath() : data_(std::make_shared<Data>(SkPath())) {}
   explicit DlPath(const SkPath& path) : data_(std::make_shared<Data>(path)) {}

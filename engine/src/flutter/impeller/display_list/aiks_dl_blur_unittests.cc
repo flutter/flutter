@@ -550,13 +550,11 @@ static sk_sp<DisplayList> MaskBlurVariantTest(
   y += y_spacing;
   paint.setColor(DlColor::kMaroon().withAlpha(alpha));
   {
-    DlPathBuilder path_builder;
-    path_builder.AddArc(Rect::MakeXYWH(x + 5, y, 50, 50),  //
-                        Degrees(90), Degrees(180));
-    path_builder.AddArc(Rect::MakeXYWH(x + 25, y, 50, 50),  //
-                        Degrees(90), Degrees(180));
-    path_builder.Close();
-    builder.DrawPath(DlPath(path_builder), paint);
+    DlPath path = DlPath::MakeArc(Rect::MakeXYWH(x + 5, y, 50, 50),  //
+                                  Degrees(90), Degrees(180), false) +
+                  DlPath::MakeArc(Rect::MakeXYWH(x + 25, y, 50, 50),  //
+                                  Degrees(90), Degrees(180), false);
+    builder.DrawPath(path, paint);
   }
 
   return builder.Build();
