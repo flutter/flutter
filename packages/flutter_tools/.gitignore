@@ -4,3 +4,7 @@
 
 !ide_templates/intellij/.idea
 !templates/**/.idea
+
+# Gradle files related to the Flutter Gradle Plugin.
+gradle-wrapper.jar
+local.properties
