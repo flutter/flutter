@@ -216,26 +216,28 @@ class MDnsVmServiceDiscovery {
     bool quitOnFind = false,
   }) async {
     // macOS blocks mDNS unless the app has Local Network permissions.
-    // Since the mDNS client does not handle exceptions from the socket's
-    // stream, socket exceptions get routed to the current zone. Create an
-    // error zone to catch the exception.
+    // Since the mDNS client does not handle errors from the socket's stream,
+    // socket exceptions are routed to the current zone. Create an error zone to
+    // catch the socket exception.
     final Completer<List<MDnsVmServiceDiscoveryResult>> completer =
         Completer<List<MDnsVmServiceDiscoveryResult>>();
     unawaited(
       runZonedGuarded(
         () async {
-          completer.complete(
-            await _doPollingVmService(
-              client,
-              applicationId: applicationId,
-              deviceVmServicePort: deviceVmServicePort,
-              deviceName: deviceName,
-              ipv6: ipv6,
-              useDeviceIPAsHost: useDeviceIPAsHost,
-              timeout: timeout,
-              quitOnFind: quitOnFind,
-            ),
+          final List<MDnsVmServiceDiscoveryResult> results = await _doPollingVmService(
+            client,
+            applicationId: applicationId,
+            deviceVmServicePort: deviceVmServicePort,
+            deviceName: deviceName,
+            ipv6: ipv6,
+            useDeviceIPAsHost: useDeviceIPAsHost,
+            timeout: timeout,
+            quitOnFind: quitOnFind,
           );
+
+          if (!completer.isCompleted) {
+            completer.complete(results);
+          }
         },
         (Object error, StackTrace stackTrace) {
           if (!completer.isCompleted) {
@@ -264,7 +266,7 @@ class MDnsVmServiceDiscovery {
         'You can grant this permission in System Settings > Privacy & '
         'Security > Local Network.\n'
         '\n'
-        '$e'
+        '$e',
       );
     }
   }
