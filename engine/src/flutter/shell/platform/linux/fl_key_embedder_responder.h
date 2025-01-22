@@ -8,22 +8,6 @@
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_key_event.h"
 
-// The signature of a function that FlKeyEmbedderResponder calls on every key
-// event.
-//
-// The `user_data` is opaque data managed by the object that creates
-// FlKeyEmbedderResponder, and is registered along with this callback
-// via `fl_key_embedder_responder_new`.
-//
-// The `callback_user_data` is opaque data managed by FlKeyEmbedderResponder.
-// Instances of the EmbedderSendKeyEvent callback are required to invoke
-// `callback` with the `callback_user_data` parameter after the `event` has been
-// processed.
-typedef void (*EmbedderSendKeyEvent)(const FlutterKeyEvent* event,
-                                     FlutterKeyEventCallback callback,
-                                     void* callback_user_data,
-                                     void* send_key_event_user_data);
-
 /**
  * FlKeyEmbedderResponderAsyncCallback:
  * @event: whether the event has been handled.
@@ -59,16 +43,10 @@ G_DECLARE_FINAL_TYPE(FlKeyEmbedderResponder,
  * the event.
  *
  * Creates a new #FlKeyEmbedderResponder.
- * @send_key_event: a function that is called on every key event.
- * @send_key_event_user_data: an opaque pointer that will be sent back as the
- * last argument of send_key_event, created and managed by the object that holds
- * FlKeyEmbedderResponder.
  *
  * Returns: a new #FlKeyEmbedderResponder.
  */
-FlKeyEmbedderResponder* fl_key_embedder_responder_new(
-    EmbedderSendKeyEvent send_key_event,
-    void* send_key_event_user_data);
+FlKeyEmbedderResponder* fl_key_embedder_responder_new(FlEngine* engine);
 
 /**
  * fl_key_embedder_responder_handle_event:

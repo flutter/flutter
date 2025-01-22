@@ -356,44 +356,7 @@ FlKeyboardManager* fl_keyboard_manager_new(FlEngine* engine) {
 
   g_weak_ref_init(&self->engine, engine);
 
-  self->key_embedder_responder = fl_key_embedder_responder_new(
-      [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
-         void* callback_user_data, void* send_key_event_user_data) {
-        FlKeyboardManager* self = FL_KEYBOARD_MANAGER(send_key_event_user_data);
-        g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
-        if (engine != nullptr) {
-          typedef struct {
-            FlutterKeyEventCallback callback;
-            void* callback_user_data;
-          } SendKeyEventData;
-          SendKeyEventData* data = g_new0(SendKeyEventData, 1);
-          data->callback = callback;
-          data->callback_user_data = callback_user_data;
-          fl_engine_send_key_event(
-              engine, event, self->cancellable,
-              [](GObject* object, GAsyncResult* result, gpointer user_data) {
-                g_autofree SendKeyEventData* data =
-                    static_cast<SendKeyEventData*>(user_data);
-                gboolean handled = FALSE;
-                g_autoptr(GError) error = nullptr;
-                if (!fl_engine_send_key_event_finish(FL_ENGINE(object), result,
-                                                     &handled, &error)) {
-                  if (g_error_matches(error, G_IO_ERROR,
-                                      G_IO_ERROR_CANCELLED)) {
-                    return;
-                  }
-
-                  g_warning("Failed to send key event: %s", error->message);
-                }
-
-                if (data->callback != nullptr) {
-                  data->callback(handled, data->callback_user_data);
-                }
-              },
-              data);
-        }
-      },
-      self);
+  self->key_embedder_responder = fl_key_embedder_responder_new(engine);
   self->key_channel_responder =
       fl_key_channel_responder_new(fl_engine_get_binary_messenger(engine));
 
