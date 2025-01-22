@@ -1,24 +1,34 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const InfiniteScrollApp());
+  runApp(InfiniteScrollApp());
 }
 
-class InfiniteScrollApp extends StatefulWidget {
-  const InfiniteScrollApp({super.key});
-
+class InfiniteScrollApp extends StatelessWidget {
   @override
-  State<InfiniteScrollApp> createState() => _InfiniteScrollAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Infinite Scrolling Flutter',
+      home: InfiniteScrollList(),
+    );
+  }
 }
 
-class _InfiniteScrollAppState extends State<InfiniteScrollApp> {
-  List<String> items = List.generate(20, (index) => 'dash');
+class InfiniteScrollList extends StatefulWidget {
+  @override
+  _InfiniteScrollListState createState() => _InfiniteScrollListState();
+}
+
+class _InfiniteScrollListState extends State<InfiniteScrollList> {
+  List<String> items = List.generate(50, (index) => "Hello"); // Initial 50 rows
+  bool isLoadingMore = false;
   final ScrollController _scrollController = ScrollController();
+  final int _loadMoreThreshold = 5;
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
+    _scrollController.addListener(_scrollListener);
   }
 
   @override
@@ -27,38 +37,50 @@ class _InfiniteScrollAppState extends State<InfiniteScrollApp> {
     super.dispose();
   }
 
-  void _onScroll() {
-    if (_isBottom) {
-      _loadMore();
+  void _scrollListener() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent -
+            _loadMoreThreshold * 50 && // 50 is the approximate height of an row
+        !isLoadingMore) {
+      loadMoreItems();
     }
   }
 
-  bool get _isBottom {
-    if (!_scrollController.hasClients) return false;
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.offset;
-    return currentScroll >= (maxScroll * 0.9);
-  }
+  Future<void> loadMoreItems() async {
+    setState(() {
+      isLoadingMore = true;
+    });
 
-  void _loadMore() {
-    Future.delayed(const Duration(seconds: 1), () {
-      setState(() {
-        items.addAll(List.generate(20, (index) => 'dash'));
-      });
+    // Generate 20 new items
+    List<String> newItems = List.generate(20, (index) => "Hello");
+    setState(() {
+      items.addAll(newItems);
+      isLoadingMore = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: ListView.builder(
-          controller: _scrollController,
-          itemCount: items.length,
-          itemBuilder: (context, index) {
-            return Image.asset('assets/dash.jpg'); // Replace with your image path
-          },
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Infinite Scrolling List"),
+      ),
+      body: ListView.builder(
+        controller: _scrollController,
+        itemCount: items.length + (isLoadingMore ? 1 : 0), // +1 for loading indicator
+        itemBuilder: (context, index) {
+          if (index < items.length) {
+            return ListTile(
+              title: Text(items[index]),
+            );
+          } else {
+            // Display loading indicator at the bottom
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+        },
       ),
     );
   }
