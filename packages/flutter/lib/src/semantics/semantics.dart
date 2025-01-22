@@ -101,6 +101,30 @@ final int _kUnblockedUserActions =
     SemanticsAction.didGainAccessibilityFocus.index |
     SemanticsAction.didLoseAccessibilityFocus.index;
 
+typedef DebugSemanticsRoleCheck = bool Function(SemanticsData node);
+
+@visibleForTesting
+class DebugSemanticsRoleChecks {
+  DebugSemanticsRoleChecks._();
+
+  static const Map<SemanticsRole, DebugSemanticsRoleCheck> kChecks =
+      <SemanticsRole, DebugSemanticsRoleCheck>{SemanticsRole.tab: _semanticsTab};
+
+  static bool _semanticsTab(SemanticsData node) {
+    if (!node.hasFlag(SemanticsFlag.hasEnabledState) ||
+        !node.hasFlag(SemanticsFlag.hasSelectedState)) {
+      return false;
+    }
+
+    if (!node.hasFlag(SemanticsFlag.isEnabled)) {
+      // disabled tab is not interactable.
+      return true;
+    }
+
+    return node.hasFlag(SemanticsFlag.isSelected) || node.hasAction(SemanticsAction.tap);
+  }
+}
+
 /// A tag for a [SemanticsNode].
 ///
 /// Tags can be interpreted by the parent of a [SemanticsNode]
