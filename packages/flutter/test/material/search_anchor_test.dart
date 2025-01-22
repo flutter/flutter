@@ -3200,7 +3200,7 @@ void main() {
     expect(controller.value.text, initValue);
   });
 
-  testWidgets('Block entering text on disabled widget with named constructors', (
+  testWidgets('Block entering text on disabled widget with SearchAnchor.bar', (
     WidgetTester tester,
   ) async {
     const String initValue = 'init';
