@@ -184,12 +184,12 @@ sealed class IOSSystemContextMenuItem {
 
   String get _jsonType;
 
-  String? _getJsonTitle(WidgetsLocalizations localizations) => null;
+  String? _getJsonTitle(WidgetsLocalizations? localizations) => null;
 
   /// Returns json for use in method channel calls, specifically
   /// `ContextMenu.showSystemContextMenu`.
   Map<String, dynamic> _toJson(WidgetsLocalizations? localizations) {
-    final String? jsonTitle = title ?? _getJsonTitle(localizations!);
+    final String? jsonTitle = title ?? _getJsonTitle(localizations);
 
     return <String, dynamic>{
       'callbackId': hashCode,
@@ -327,8 +327,8 @@ class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
   String get _jsonType => 'lookUp';
 
   @override
-  String _getJsonTitle(WidgetsLocalizations localizations) {
-    return localizations.lookUpButtonLabel;
+  String _getJsonTitle(WidgetsLocalizations? localizations) {
+    return localizations!.lookUpButtonLabel;
   }
 
   @override
@@ -365,8 +365,8 @@ class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
   String get _jsonType => 'searchWeb';
 
   @override
-  String _getJsonTitle(WidgetsLocalizations localizations) {
-    return localizations.searchWebButtonLabel;
+  String _getJsonTitle(WidgetsLocalizations? localizations) {
+    return localizations!.searchWebButtonLabel;
   }
 
   @override
@@ -403,8 +403,8 @@ class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem {
   String get _jsonType => 'share';
 
   @override
-  String _getJsonTitle(WidgetsLocalizations localizations) {
-    return localizations.shareButtonLabel;
+  String _getJsonTitle(WidgetsLocalizations? localizations) {
+    return localizations!.shareButtonLabel;
   }
 
   @override
@@ -443,6 +443,7 @@ class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem {
   }
 }
 
+// TODO(justinmc): Could this be in its own file?
 /// Allows access to the system context menu.
 ///
 /// The context menu is the menu that appears, for example, when doing text
@@ -627,6 +628,12 @@ class SystemContextMenuController with SystemContextMenuClient {
 
     ServicesBinding.systemContextMenuClient = this;
 
+    final List<Map<String, dynamic>>? itemsJson =
+        items
+            ?.map<Map<String, dynamic>>(
+              (IOSSystemContextMenuItem item) => item._toJson(localizations),
+            )
+            .toList();
     _lastTargetRect = targetRect;
     _lastItems = items;
     _lastShown = this;
@@ -638,13 +645,7 @@ class SystemContextMenuController with SystemContextMenuClient {
         'width': targetRect.width,
         'height': targetRect.height,
       },
-      if (items != null)
-        'items':
-            items
-                .map<Map<String, dynamic>>(
-                  (IOSSystemContextMenuItem item) => item._toJson(localizations),
-                )
-                .toList(),
+      if (items != null) 'items': itemsJson,
     });
   }
 

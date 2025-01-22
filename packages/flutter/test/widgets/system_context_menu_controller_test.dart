@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../services/text_input_utils.dart';
 import '../system_context_menu_utils.dart';
-import './text_input_utils.dart';
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
@@ -320,8 +321,7 @@ void main() {
       connection.close();
     });
 
-    final List<List<IOSSystemContextMenuItemData>> itemsReceived =
-        <List<IOSSystemContextMenuItemData>>[];
+    final List<List<IOSSystemContextMenuItem>> itemsReceived = <List<IOSSystemContextMenuItem>>[];
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       (MethodCall methodCall) async {
@@ -329,7 +329,7 @@ void main() {
           case 'ContextMenu.showSystemContextMenu':
             final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
             final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-            final List<IOSSystemContextMenuItemData> lastItems =
+            final List<IOSSystemContextMenuItem> lastItems =
                 untypedItems.map((dynamic value) {
                   final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
                   return systemContextMenuItemDataFromJson(itemJson);
@@ -355,12 +355,12 @@ void main() {
 
     // Showing calls the platform.
     const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
-    final List<IOSSystemContextMenuItemData> items1 = <IOSSystemContextMenuItemData>[
-      const IOSSystemContextMenuItemDataCut(),
-      const IOSSystemContextMenuItemDataCopy(),
-      const IOSSystemContextMenuItemDataPaste(),
-      const IOSSystemContextMenuItemDataSelectAll(),
-      const IOSSystemContextMenuItemDataSearchWeb(title: 'Special Search'),
+    final List<IOSSystemContextMenuItem> items1 = <IOSSystemContextMenuItem>[
+      const IOSSystemContextMenuItemCut(),
+      const IOSSystemContextMenuItemCopy(),
+      const IOSSystemContextMenuItemPaste(),
+      const IOSSystemContextMenuItemSelectAll(),
+      const IOSSystemContextMenuItemSearchWeb(title: 'Special Search'),
       // TODO(justinmc): Support the "custom" item type.
       // https://github.com/flutter/flutter/issues/103163
     ];
@@ -377,14 +377,38 @@ void main() {
     expect(itemsReceived, hasLength(1));
 
     // Showing new items calls the platform.
-    final List<IOSSystemContextMenuItemData> items2 = <IOSSystemContextMenuItemData>[
-      const IOSSystemContextMenuItemDataCut(),
+    final List<IOSSystemContextMenuItem> items2 = <IOSSystemContextMenuItem>[
+      const IOSSystemContextMenuItemCut(),
     ];
     controller.show(rect, items2);
     expect(controller.isVisible, isTrue);
     expect(itemsReceived, hasLength(2));
     expect(itemsReceived.last, hasLength(items2.length));
     expect(itemsReceived.last, equals(items2));
+
+    // Calling show with a missing title throws an error if no localizations
+    // given and does call through to the platform.
+    final List<IOSSystemContextMenuItem> items3 = <IOSSystemContextMenuItem>[
+      const IOSSystemContextMenuItemSearchWeb(),
+    ];
+    expect(() {
+      controller.show(rect, items3);
+    }, throwsNullThrownError);
+    expect(controller.isVisible, isTrue);
+    expect(itemsReceived, hasLength(2));
+    expect(itemsReceived.last, hasLength(items2.length));
+    expect(itemsReceived.last, equals(items2));
+
+    // But if localizations are given, looks up the default title with no error.
+    const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+    controller.show(rect, items3, localizations);
+    expect(controller.isVisible, isTrue);
+    expect(itemsReceived, hasLength(3));
+    expect(itemsReceived.last, hasLength(items3.length));
+    // Not equal, because the title was changed to the default.
+    expect(itemsReceived.last, isNot(equals(items3)));
+    expect(itemsReceived.last.first.runtimeType, items3.first.runtimeType);
+    expect(itemsReceived.last.first.title, isNot(items3.first.title));
 
     controller.hide();
     expect(controller.isVisible, isFalse);
