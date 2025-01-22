@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -42,6 +43,8 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
 
   if (_isLeakTrackingEnabled()) {
     LeakTesting.enable();
+    deprecatedDoNotUseWillBeRemovedWithoutNoticeLeakTrackCodec = true;
+
     LeakTracking.warnForUnsupportedPlatforms = false;
     // Customized link to documentation on how to troubleshoot leaks,
     // to print in the error message.

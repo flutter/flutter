@@ -2311,7 +2311,9 @@ bool deprecatedDoNotUseWillBeRemovedWithoutNoticeLeakTrackCodec = false;
 /// [instantiateImageCodec].
 abstract class Codec {
   Codec() {
-    onCreate?.call(this);
+    if (deprecatedDoNotUseWillBeRemovedWithoutNoticeLeakTrackCodec) {}
+      onCreate?.call(this);
+    }
   }
 
   /// A callback that is invoked to report a codec creation.
@@ -2353,7 +2355,9 @@ abstract class Codec {
   /// This can't be a leaf call because the native function calls Dart API
   /// (Dart_SetNativeInstanceField).
   void dispose() {
-    onDispose?.call(this);
+    if (deprecatedDoNotUseWillBeRemovedWithoutNoticeLeakTrackCodec) {
+      onDispose?.call(this);
+    }
   }
 }
 
