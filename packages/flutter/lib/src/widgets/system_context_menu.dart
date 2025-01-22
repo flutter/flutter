@@ -56,8 +56,8 @@ import 'text_selection_toolbar_anchors.dart';
 class SystemContextMenu extends StatefulWidget {
   /// Creates an instance of [SystemContextMenu] that points to the given
   /// [anchor].
-  SystemContextMenu._({super.key, required this.anchor, this.items, this.onSystemHide})
-    : assert(items == null || !_containsDuplicates(items));
+  SystemContextMenu._({super.key, required this.anchor, required this.items, this.onSystemHide})
+    : assert(!_containsDuplicates(items));
 
   /// Creates an instance of [SystemContextMenu] for the field indicated by the
   /// given [EditableTextState].
@@ -84,6 +84,36 @@ class SystemContextMenu extends StatefulWidget {
     );
   }
 
+  /// The [Rect] that the context menu should point to.
+  final Rect anchor;
+
+  /// A list of the items to be displayed in the system context menu.
+  ///
+  /// When passed, items will be shown regardless of the state of text input.
+  /// For example, [IOSSystemContextMenuItemCopy] will produce a copy button
+  /// even when there is no selection to copy. Use [EditableTextState] and/or
+  /// the result of [getDefaultItems] to add and remove items based on the state
+  /// of the input.
+  ///
+  /// Defaults to the result of [getDefaultItems].
+  final List<IOSSystemContextMenuItem> items;
+
+  /// Called when the system hides this context menu.
+  ///
+  /// For example, tapping outside of the context menu typically causes the
+  /// system to hide the menu.
+  ///
+  /// This is not called when showing a new system context menu causes another
+  /// to be hidden.
+  final VoidCallback? onSystemHide;
+
+  /// Whether the current device supports showing the system context menu.
+  ///
+  /// Currently, this is only supported on newer versions of iOS.
+  static bool isSupported(BuildContext context) {
+    return MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false;
+  }
+
   /// The default [items] for the given [EditableTextState].
   ///
   /// For example, [IOSSystemContextMenuItemCopy] will only be included when the
@@ -102,37 +132,6 @@ class SystemContextMenu extends StatefulWidget {
       if (editableTextState.lookUpEnabled) const IOSSystemContextMenuItemLookUp(),
       if (editableTextState.searchWebEnabled) const IOSSystemContextMenuItemSearchWeb(),
     ];
-  }
-
-  /// The [Rect] that the context menu should point to.
-  final Rect anchor;
-
-  /// A list of the items to be displayed in the system context menu.
-  ///
-  /// If none are given, the items will be inferred by the platform based on the
-  /// current [TextInputConnection].
-  ///
-  /// Built-in items will only be shown when relevant. For example, if
-  /// [IOSSystemContextMenuItemCopy] is passed, the copy button will only be
-  /// shown when there is a non-empty selection and not when the selection is
-  /// collapsed. It's not necessary to manually add and remove these items based
-  /// on the state of the field.
-  final List<IOSSystemContextMenuItem>? items;
-
-  /// Called when the system hides this context menu.
-  ///
-  /// For example, tapping outside of the context menu typically causes the
-  /// system to hide the menu.
-  ///
-  /// This is not called when showing a new system context menu causes another
-  /// to be hidden.
-  final VoidCallback? onSystemHide;
-
-  /// Whether the current device supports showing the system context menu.
-  ///
-  /// Currently, this is only supported on newer versions of iOS.
-  static bool isSupported(BuildContext context) {
-    return MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false;
   }
 
   /// Returns true only if the given list contains at least one pair of
@@ -585,8 +584,6 @@ class SystemContextMenuController with SystemContextMenuClient {
 
   // End SystemContextMenuClient.
 
-  // TODO(justinmc): The system shouldn't infer items, need to change this and
-  // update these docs.
   /// Shows the system context menu anchored on the given [Rect].
   ///
   /// Currently only supported on iOS 16.0 and later. Check
@@ -595,21 +592,15 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// The [Rect] represents what the context menu is pointing to. For example,
   /// for some text selection, this would be the selection [Rect].
   ///
-  /// Optionally, `items` can be provided to specify the menu items. If none are
-  /// given, then the platform will infer which menu items should be visible
-  /// based on the state of the current [TextInputConnection]. Any `items` that
+  /// `items` specifies the buttons that appear in the menu. Any `items` that
   /// have no title will be passed a default title from the given
-  /// [WidgetsLocalizations].
+  /// [WidgetsLocalizations]. The buttons that appear in the menu will be
+  /// exactly as given and will not automatically udpate based on the state of
+  /// the input field. See [SystemContextMenu.getDefaultItems] for the default
+  /// items for a given [EditableTextState].
   ///
   /// Currently this system context menu is bound to text input. Using this
-  /// without an active [TextInputConnection] will be a noop, even when
-  /// specifying custom `items`.
-  ///
-  /// Built-in menu items will only be shown when relevant. For example, if
-  /// [IOSSystemContextMenuItemCopy] is passed, the copy button will only be
-  /// shown when there is something to copy (a non-empty selection). It's not
-  /// necessary to manually add and remove these items based on the state of the
-  /// field.
+  /// without an active [TextInputConnection] will be a noop.
   ///
   /// There can only be one system context menu visible at a time. Calling this
   /// while another system context menu is already visible will remove the old
@@ -621,12 +612,13 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates whether
   ///    this method is supported on the current platform.
   Future<void> show(
-    Rect targetRect, [
-    List<IOSSystemContextMenuItem>? items,
-    WidgetsLocalizations? localizations,
-  ]) {
+    Rect targetRect,
+    List<IOSSystemContextMenuItem> items,
+    WidgetsLocalizations localizations,
+  ) {
     assert(!_isDisposed);
-    assert(items == null || !_containsDuplicates(items));
+    assert(!_containsDuplicates(items));
+    assert(items.isNotEmpty);
 
     // Don't show the same thing that's already being shown.
     if (_lastShown != null &&
@@ -643,19 +635,17 @@ class SystemContextMenuController with SystemContextMenuClient {
 
     _buttonCallbacks.clear();
 
-    if (items != null) {
-      for (final IOSSystemContextMenuItem item in items) {
-        if (item is IOSSystemContextMenuItemCustom) {
-          _buttonCallbacks[item.hashCode] = item.onPressed;
-        }
+    for (final IOSSystemContextMenuItem item in items) {
+      if (item is IOSSystemContextMenuItemCustom) {
+        _buttonCallbacks[item.hashCode] = item.onPressed;
       }
     }
 
     ServicesBinding.systemContextMenuClient = this;
 
-    final List<Map<String, dynamic>>? itemsJson =
+    final List<Map<String, dynamic>> itemsJson =
         items
-            ?.map<Map<String, dynamic>>(
+            .map<Map<String, dynamic>>(
               (IOSSystemContextMenuItem item) => item._toJson(localizations),
             )
             .toList();
@@ -670,7 +660,7 @@ class SystemContextMenuController with SystemContextMenuClient {
         'width': targetRect.width,
         'height': targetRect.height,
       },
-      if (items != null) 'items': itemsJson,
+      'items': itemsJson,
     });
   }
 
