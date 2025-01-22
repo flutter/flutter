@@ -96,6 +96,7 @@ class _NextPageState extends State<NextPage> {
       child: CustomScrollView(
         slivers: <Widget>[
           CupertinoSliverNavigationBar.search(
+            stretch: true,
             backgroundColor: CupertinoColors.systemYellow,
             border: Border(
               bottom: BorderSide(
@@ -116,6 +117,7 @@ class _NextPageState extends State<NextPage> {
               },
             ),
             onSearchableBottomTap: (bool value) {
+              text = '';
               setState(() {
                 searchIsActive = value;
               });

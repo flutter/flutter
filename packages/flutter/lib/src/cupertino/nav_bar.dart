@@ -2229,11 +2229,7 @@ class _InactiveSearchableBottom extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: animation,
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: onSearchFieldTap,
-        child: searchField,
-      ),
+      child: GestureDetector(onTap: onSearchFieldTap, child: searchField),
       builder: (BuildContext context, Widget? child) {
         return LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
@@ -2312,13 +2308,16 @@ class _NavigationBarSearchField extends StatelessWidget implements PreferredSize
 
   @override
   Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: _kNavBarEdgePadding,
-          vertical: verticalPadding,
+    return AbsorbPointer(
+      child: FocusableActionDetector(
+        descendantsAreFocusable: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: _kNavBarEdgePadding,
+            vertical: verticalPadding,
+          ),
+          child: SizedBox(height: searchFieldHeight, child: searchField),
         ),
-        child: SizedBox(height: searchFieldHeight, child: searchField),
       ),
     );
   }

@@ -2373,7 +2373,9 @@ void main() {
 
     // Tap the search field.
     await tester.tap(searchFieldFinder, warnIfMissed: false);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    // Pump for the duration of the search field animation.
+    await tester.pump(const Duration(microseconds: 1) + const Duration(milliseconds: 300));
 
     // After tapping, the leading and trailing widgets are removed from the
     // widget tree, the large title is collapsed, and middle is hidden
@@ -2386,12 +2388,29 @@ void main() {
     // Search field and 'Cancel' button are visible.
     expect(searchFieldFinder, findsOneWidget);
     expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
+
+    // Tap the 'Cancel' button to exit the search view.
+    await tester.tap(find.widgetWithText(CupertinoButton, 'Cancel'));
+    await tester.pump();
+    // Pump for the duration of the search field animation.
+    await tester.pump(const Duration(microseconds: 1) + const Duration(milliseconds: 300));
+
+    // All widgets are visible again.
+    expect(find.byIcon(CupertinoIcons.person_2), findsOneWidget);
+    expect(find.byIcon(CupertinoIcons.add_circled), findsOneWidget);
+    expect(largeTitleFinder, findsOneWidget);
+    expect(middleFinder.hitTestable(), findsOneWidget);
+    expect(searchFieldFinder, findsOneWidget);
+    // A decoy 'Cancel' button used in the animation.
+    expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
   });
 
   testWidgets('onSearchableBottomTap callback', (WidgetTester tester) async {
     bool isSearchActive = false;
     const Color activeSearchColor = Color(0x0000000A);
     const Color inactiveSearchColor = Color(0x0000000B);
+    String text = '';
+
     await tester.pumpWidget(
       CupertinoApp(
         home: StatefulBuilder(
@@ -2399,6 +2418,13 @@ void main() {
             return CustomScrollView(
               slivers: <Widget>[
                 CupertinoSliverNavigationBar.search(
+                  searchField: CupertinoSearchTextField(
+                    onChanged: (String value) {
+                      setState(() {
+                        text = 'The text has changed to: $value';
+                      });
+                    },
+                  ),
                   onSearchableBottomTap: (bool value) {
                     setState(() {
                       isSearchActive = value;
@@ -2409,7 +2435,10 @@ void main() {
                   bottomMode: NavigationBarBottomMode.always,
                 ),
                 SliverFillRemaining(
-                  child: Container(color: isSearchActive ? activeSearchColor : inactiveSearchColor),
+                  child: ColoredBox(
+                    color: isSearchActive ? activeSearchColor : inactiveSearchColor,
+                    child: Text(text),
+                  ),
                 ),
               ],
             );
@@ -2424,7 +2453,7 @@ void main() {
     expect(find.widgetWithText(CupertinoSearchTextField, 'Search'), findsOneWidget);
     expect(
       find.byWidgetPredicate((Widget widget) {
-        return widget is Container && widget.color == inactiveSearchColor;
+        return widget is ColoredBox && widget.color == inactiveSearchColor;
       }),
       findsOneWidget,
     );
@@ -2439,10 +2468,17 @@ void main() {
     expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
     expect(
       find.byWidgetPredicate((Widget widget) {
-        return widget is Container && widget.color == activeSearchColor;
+        return widget is ColoredBox && widget.color == activeSearchColor;
       }),
       findsOneWidget,
     );
+
+    // Enter text into search field to search.
+    await tester.enterText(find.widgetWithText(CupertinoSearchTextField, 'Search'), 'aaa');
+    await tester.pumpAndSettle();
+
+    // The entered text is shown in the search view.
+    expect(find.text('The text has changed to: aaa'), findsOne);
   });
 
   testWidgets('CupertinoNavigationBar with bottom widget', (WidgetTester tester) async {
