@@ -23,15 +23,11 @@ class FlutterWindowsViewController;
 class FlutterHostWindow {
  public:
   // Creates a native Win32 window with a child view confined to its client
-  // area. |controller| manages the window. |title| is the window title.
-  // |preferred_client_size| is the preferred size of the client rectangle in
-  // logical coordinates. The window style is defined by |archetype|.
-  // On success, a valid window handle can be retrieved via
+  // area. |controller| is a pointer to the controller that manages the
+  // |FlutterHostWindow|. On success, a valid window handle can be retrieved via
   // |FlutterHostWindow::GetWindowHandle|.
   FlutterHostWindow(FlutterHostWindowController* controller,
-                    std::wstring const& title,
-                    WindowSize const& preferred_client_size,
-                    WindowArchetype archetype);
+                    WindowCreationSettings const& settings);
   virtual ~FlutterHostWindow();
 
   // Returns the instance pointer for |hwnd| or nulllptr if invalid.
@@ -40,8 +36,11 @@ class FlutterHostWindow {
   // Returns the window archetype.
   WindowArchetype GetArchetype() const;
 
-  // Returns the hosted Flutter view's ID or std::nullopt if not created.
-  std::optional<FlutterViewId> GetFlutterViewId() const;
+  // Returns the hosted Flutter view's ID.
+  FlutterViewId GetFlutterViewId() const;
+
+  // Returns the current window state.
+  WindowState GetState() const;
 
   // Returns the backing window handle, or nullptr if the native window is not
   // created or has already been destroyed.
@@ -80,7 +79,7 @@ class FlutterHostWindow {
   std::unique_ptr<FlutterWindowsViewController> view_controller_;
 
   // The window archetype.
-  WindowArchetype archetype_ = WindowArchetype::regular;
+  WindowArchetype archetype_ = WindowArchetype::kRegular;
 
   // Indicates if closing this window will quit the application.
   bool quit_on_close_ = false;
@@ -90,6 +89,15 @@ class FlutterHostWindow {
 
   // Backing handle for the hosted view window.
   HWND child_content_ = nullptr;
+
+  // The minimum size of the window's client area, if defined.
+  std::optional<Size> min_size_;
+
+  // The maximum size of the window's client area, if defined.
+  std::optional<Size> max_size_;
+
+  // The window state.
+  WindowState state_ = WindowState::kRestored;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterHostWindow);
 };

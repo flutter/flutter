@@ -6,7 +6,9 @@ void main() {
   runWidget(WindowingApp(children: <Widget>[
     RegularWindow(
         controller: controller,
-        preferredSize: const Size(800, 600),
+        size: const Size(800, 600),
+        sizeConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+        title: "Multi-Window Reference Application",
         child: MaterialApp(home: MainWindow(mainController: controller)))
   ]));
 }

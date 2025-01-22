@@ -148,6 +148,8 @@ source_set("common_cpp_core") {
   sources = [ "path_utils.cc" ]
 
   public_configs = [ "//flutter:config" ]
+
+  deps = [ "//flutter/fml:fml" ]
 }
 
 if (enable_unittests) {

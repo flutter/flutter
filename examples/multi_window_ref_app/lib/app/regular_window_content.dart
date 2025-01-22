@@ -95,9 +95,8 @@ class _RegularWindowContentState extends State<RegularWindowContent>
                   builder: (BuildContext context, Widget? _) {
                     return Text(
                       'View #${widget.window.view?.viewId ?? "Unknown"}\n'
-                      'Parent View: ${widget.window.parentViewId}\n'
                       'View Size: ${(widget.window.view!.physicalSize.width / dpr).toStringAsFixed(1)}\u00D7${(widget.window.view!.physicalSize.height / dpr).toStringAsFixed(1)}\n'
-                      'Window Size: ${widget.window.size?.width}\u00D7${widget.window.size?.height}\n'
+                      'Window Size: ${(widget.window.size!.width).toStringAsFixed(1)}\u00D7${(widget.window.size!.height).toStringAsFixed(1)}\n'
                       'Device Pixel Ratio: $dpr',
                       textAlign: TextAlign.center,
                     );
