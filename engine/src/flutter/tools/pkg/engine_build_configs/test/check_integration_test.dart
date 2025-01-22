@@ -74,29 +74,160 @@ void main() {
     expect(stderr.toString(), contains('❌ Loaded build configs under'));
   });
 
-  void addConfig(String name, {bool releaseBuild = false, bool malformed = false}) {
-    io.File(
-      p.join(tmpCiBuilders.path, '$name.json'),
-    ).writeAsStringSync(malformed ? 'bad{}' : jsonEncode({'builds': <Object?>[]}));
+  void addConfig(
+    String name,
+    List<Map<String, Object?>> builds, {
+    bool releaseBuild = false,
+    bool specifyConfig = true,
+    bool writeGenerators = false,
+  }) {
+    if (specifyConfig) {
+      io.File(p.join(tmpCiBuilders.path, '$name.json')).writeAsStringSync(
+        jsonEncode({
+          'builds': builds,
+          if (writeGenerators)
+            'generators': {
+              'tasks': <Object?>[{}],
+            },
+        }),
+      );
+    }
 
     ciYamlTargets.add({
       'name': name,
-      'properties': {'config_name': name, if (releaseBuild) 'release_build': 'true'},
+      'recipe': 'flutter/some_recipe',
+      'properties': {
+        if (specifyConfig) 'config_name': name,
+        if (releaseBuild) 'release_build': 'true',
+      },
     });
     tmpCiYaml.writeAsStringSync(jsonEncode({'targets': ciYamlTargets}));
   }
 
-  test('fails if .ci.yaml is not valid', () {
-    addConfig('linux_unopt');
+  test('fails if a configuration file had a deserialization error', () {
+    addConfig('linux_unopt', []);
+
+    // Malform the .ci.yaml file.
+    tmpCiYaml.writeAsStringSync('bad{}');
     run(['--engine-src-path=${tmpFlutterEngineSrc.path}'], allowFailure: true);
 
     expect(stderr.toString(), contains('❌ .ci.yaml at'));
   });
 
-  test('fails if a configuration file had a deserialization error', () {
-    addConfig('linux_unopt', malformed: true);
+  test('fails if an individual builder has a schema error', () {
+    addConfig('linux_unopt', [
+      {'ninja': 1234},
+    ]);
+
     run(['--engine-src-path=${tmpFlutterEngineSrc.path}'], allowFailure: true);
 
-    expect(stderr.toString(), contains('❌ .ci.yaml at'));
+    expect(stderr.toString(), contains('❌ All configuration files are valid'));
+  });
+
+  test('fails if all builds within a builder are not uniquely named', () {
+    addConfig('linux_unopt', [
+      {'name': 'foo'},
+      {'name': 'foo'},
+    ]);
+
+    run(['--engine-src-path=${tmpFlutterEngineSrc.path}'], allowFailure: true);
+
+    expect(stderr.toString(), contains('❌ All builds within a builder are uniquely named'));
+  });
+
+  test('fails if a build does not use a conforming OS prefix or "ci"', () {
+    addConfig('linux_unopt', [
+      {'name': 'not_an_os_or_ci/foo'},
+    ]);
+
+    run(['--engine-src-path=${tmpFlutterEngineSrc.path}'], allowFailure: true);
+
+    expect(stderr.toString(), contains('❌ All build names must have a conforming prefix'));
+  });
+
+  test('skips targets without a config_name', () {
+    addConfig('linux_unopt', []);
+    addConfig('linux_cache', [], specifyConfig: false);
+
+    run(['--engine-src-path=${tmpFlutterEngineSrc.path}', '--verbose']);
+
+    expect(stderr.toString(), contains('Skipping linux_cache'));
+  });
+
+  test('skips checking if a global "generators" field is present', () {
+    addConfig(
+      'linux_befuzzled',
+      [
+        {'name': 'ci/test'},
+      ],
+      releaseBuild: true,
+      writeGenerators: true,
+    );
+
+    run(['--engine-src-path=${tmpFlutterEngineSrc.path}', '--verbose']);
+
+    expect(stderr.toString(), contains('Skipping linux_befuzzled: Has "generators"'));
+  });
+
+  test('fails if a release builder omits archives', () {
+    addConfig('linux_engine', [
+      {
+        'name': 'ci/host_debug',
+        'archives': <Object?>[{}],
+      },
+    ], releaseBuild: true);
+
+    run(['--engine-src-path=${tmpFlutterEngineSrc.path}'], allowFailure: true);
+
+    expect(stderr.toString(), contains('❌ All builder files conform to release_build standards'));
+  });
+
+  test('fails if a release builder includes tests', () {
+    addConfig('linux_engine', [
+      {
+        'name': 'ci/host_debug',
+        'archives': <Object?>[
+          {
+            'include_paths': ['out/foo'],
+          },
+        ],
+        'tests': <Object?>[{}],
+      },
+    ], releaseBuild: true);
+
+    run(['--engine-src-path=${tmpFlutterEngineSrc.path}'], allowFailure: true);
+
+    expect(stderr.toString(), contains('❌ All builder files conform to release_build standards'));
+  });
+
+  test('allows a release builder if allow-listed', () {
+    addConfig('windows_host_engine', [
+      {
+        'name': r'ci\host_debug',
+        'archives': <Object?>[
+          {
+            'include_paths': ['out/foo'],
+          },
+        ],
+        'tests': <Object?>[{}],
+      },
+    ], releaseBuild: true);
+
+    run(['--engine-src-path=${tmpFlutterEngineSrc.path}']);
+  });
+
+  test('fails if archives.include_paths is empty', () {
+    addConfig('linux_engine', [
+      {
+        'name': 'ci/host_debug',
+        'archives': <Object?>[
+          {'include_paths': <Object?>[]},
+        ],
+      },
+    ], releaseBuild: true);
+
+    run(['--engine-src-path=${tmpFlutterEngineSrc.path}'], allowFailure: true);
+
+    expect(stderr.toString(), contains('❌ All builder files conform to release_build standards'));
   });
 }

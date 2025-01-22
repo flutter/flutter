@@ -115,6 +115,7 @@ void run(
 
     statusPrint('.ci.yaml at ${p.relative(ciYamlPath)} is valid', success: loadedConfig.valid);
     if (!loadedConfig.valid) {
+      indentedPrint([loadedConfig.error!]);
       ciConfig = null;
     } else {
       ciConfig = loadedConfig;
@@ -144,17 +145,18 @@ void run(
   // We require that targets that have `properties: release_build: "true"`:
   // (1) Each sub-build produces artifacts (`archives: [...]`)
   // (2) Each sub-build does not have `tests: [ ... ]`
-  //
-  // Targets that do *NOT* are not release_build: "true" should:
-  // (1) NOT have archives
-  // (2) Have tests
   final buildConventionErrors = <String>[];
   for (final MapEntry(key: _, value: target) in ciConfig.ciTargets.entries) {
     final config = loader.configs[target.properties.configName];
-    if (config == null) {
+    if (target.properties.configName == null) {
       // * builder_cache targets do not have configuration files.
       debugPrint('  Skipping ${target.name}: No configuration file found');
       continue;
+    }
+
+    // This would fail above during the general loading.
+    if (config == null) {
+      throw StateError('Unreachable');
     }
 
     final configConventionErrors = <String>[];
@@ -169,16 +171,19 @@ void run(
         if (build.archives.isEmpty) {
           configConventionErrors.add('${build.name}: Does not have "archives: [ ... ]"');
         }
-        if (build.tests.isNotEmpty) {
-          configConventionErrors.add('${build.name}: Includes "tests: [ ... ]"');
+        if (build.archives.any((e) => e.includePaths.isEmpty)) {
+          configConventionErrors.add(
+            '${build.name}: Has an archive with an empty "include_paths": []',
+          );
         }
-      }
-      // FIXME: Check include_paths nonsense
-    } else {
-      // Check each build: it must NOT have "archives: [...]"
-      for (final build in config.builds) {
-        if (build.archives.isNotEmpty) {
-          debugPrint('  Skipping ${build.name}: Has "archives: [ ... ]"');
+        if (build.tests.isNotEmpty) {
+          // TODO(matanlurey): https://github.com/flutter/flutter/issues/161990.
+          if (target.properties.configName == 'windows_host_engine' &&
+              build.name == r'ci\host_debug') {
+            debugPrint('  Skipping: ${build.name}: Allow-listed during migration');
+          } else {
+            configConventionErrors.add('${build.name}: Includes "tests: [ ... ]"');
+          }
         }
       }
     }
