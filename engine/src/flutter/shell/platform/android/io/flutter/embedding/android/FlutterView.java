@@ -1442,6 +1442,7 @@ public class FlutterView extends FrameLayout
         for (SpellCheckerInfo spellCheckerInfo : enabledSpellCheckerInfos) {
           if (spellCheckerInfo.getPackageName().equals(SPELL_CHECK_PACKAGE_NAME)) {
             gboardSpellCheckerEnabled = true;
+            break;
           }
         }
 
