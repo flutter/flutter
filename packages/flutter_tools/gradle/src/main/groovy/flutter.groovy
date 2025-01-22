@@ -598,7 +598,8 @@ class FlutterPlugin implements Plugin<Project> {
         // This prevents duplicated classes when using custom build types. That is, a custom build
         // type like profile is used, and the plugin and app projects have API dependencies on the
         // embedding.
-        if (!isFlutterAppProject() || getPluginListWithoutDevDependencies(project).size() == 0) {
+        List<Map<String, Object>> pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency = flutterBuildMode == "release" ? getPluginListWithoutDevDependencies(project) : getPluginList(project);
+        if (!isFlutterAppProject() || pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency.size() == 0) {
             addApiDependencies(project, buildType.name,
                     "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
         }
