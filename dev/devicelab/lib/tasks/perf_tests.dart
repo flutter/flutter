@@ -1719,13 +1719,12 @@ class CompileTest {
       '$testDirectory/hello_world_swiftui',
       'archive'
     ]).then((ProcessResult results) {
+      watch.stop();
       print(results.stdout);
       if (results.exitCode != 0) {
         print(results.stderr);
       }
     });
-
-    watch.stop();
 
     final String appPath = '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
 
