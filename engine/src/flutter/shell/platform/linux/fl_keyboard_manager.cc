@@ -95,6 +95,9 @@ struct _FlKeyboardManager {
   FlKeyboardManagerGetPressedStateHandler get_pressed_state_handler;
   gpointer get_pressed_state_handler_user_data;
 
+  // Key events that have been redispatched.
+  GPtrArray* redispatched_key_events;
+
   FlKeyEmbedderResponder* key_embedder_responder;
 
   FlKeyChannelResponder* key_channel_responder;
@@ -125,6 +128,25 @@ struct _FlKeyboardManager {
 };
 
 G_DEFINE_TYPE(FlKeyboardManager, fl_keyboard_manager, G_TYPE_OBJECT);
+
+static gboolean event_is_redispatched(FlKeyboardManager* self,
+                                      FlKeyEvent* event) {
+  guint32 time = fl_key_event_get_time(event);
+  gboolean is_press = !!fl_key_event_get_is_press(event);
+  guint16 keycode = fl_key_event_get_keycode(event);
+  for (guint i = 0; i < self->redispatched_key_events->len; i++) {
+    FlKeyEvent* e =
+        FL_KEY_EVENT(g_ptr_array_index(self->redispatched_key_events, i));
+    if (fl_key_event_get_time(e) == time &&
+        !!fl_key_event_get_is_press(e) == is_press &&
+        fl_key_event_get_keycode(e) == keycode) {
+      g_ptr_array_remove_index(self->redispatched_key_events, i);
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
 
 static void keymap_keys_changed_cb(FlKeyboardManager* self) {
   g_clear_object(&self->derived_layout);
@@ -292,6 +314,7 @@ static void fl_keyboard_manager_dispose(GObject* object) {
   self->keycode_to_goals.reset();
   self->logical_to_mandatory_goals.reset();
 
+  g_clear_pointer(&self->redispatched_key_events, g_ptr_array_unref);
   g_clear_object(&self->key_embedder_responder);
   g_clear_object(&self->key_channel_responder);
   g_clear_object(&self->derived_layout);
@@ -309,6 +332,8 @@ static void fl_keyboard_manager_class_init(FlKeyboardManagerClass* klass) {
 }
 
 static void fl_keyboard_manager_init(FlKeyboardManager* self) {
+  self->redispatched_key_events =
+      g_ptr_array_new_with_free_func(g_object_unref);
   self->derived_layout = fl_keyboard_layout_new();
 
   self->keycode_to_goals =
@@ -383,6 +408,13 @@ FlKeyboardManager* fl_keyboard_manager_new(FlEngine* engine) {
   return self;
 }
 
+void fl_keyboard_manager_add_redispatched_event(FlKeyboardManager* self,
+                                                FlKeyEvent* event) {
+  g_return_if_fail(FL_IS_KEYBOARD_MANAGER(self));
+
+  g_ptr_array_add(self->redispatched_key_events, g_object_ref(event));
+}
+
 void fl_keyboard_manager_handle_event(FlKeyboardManager* self,
                                       FlKeyEvent* event,
                                       GCancellable* cancellable,
@@ -398,6 +430,14 @@ void fl_keyboard_manager_handle_event(FlKeyboardManager* self,
   g_task_set_task_data(
       task, handle_event_data_new(event),
       reinterpret_cast<GDestroyNotify>(handle_event_data_free));
+
+  if (event_is_redispatched(self, event)) {
+    HandleEventData* data =
+        static_cast<HandleEventData*>(g_task_get_task_data(task));
+    data->handled = TRUE;
+    g_task_return_boolean(task, TRUE);
+    return;
+  }
 
   uint64_t specified_logical_key = fl_keyboard_layout_get_logical_key(
       self->derived_layout, fl_key_event_get_group(event),
