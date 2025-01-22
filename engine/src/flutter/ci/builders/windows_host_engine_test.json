@@ -23,22 +23,23 @@
                 "--no-goma",
                 "--rbe"
             ],
-            "name": "ci\\host_debug",
+            "name": "ci\\host_debug_test",
             "description": "Builds host-side unit tests for Windows.",
             "ninja": {
-                "config": "ci/host_debug",
+                "config": "ci/host_debug_test",
                 "targets": [
+                    "flutter/tools/font_subset",
                     "flutter:unittests"
                 ]
             },
             "tests": [
                 {
                     "language": "python3",
-                    "name": "Host Tests for host_debug",
+                    "name": "Host Tests for host_debug_test",
                     "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
-                        "ci/host_debug",
+                        "ci/host_debug_test",
                         "--type",
                         "engine"
                     ]
