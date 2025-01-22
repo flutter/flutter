@@ -281,11 +281,11 @@ TaskFunction createHelloWorldCompileTest() {
 }
 
 TaskFunction createImitationGameSwiftUITest() {
-  return CompileTest('${flutterDirectory.path}/examples/imitation_game_swiftui', reportPackageContentSizes: true).runSwiftUIApp;
+  return CompileTest('${flutterDirectory.path}/dev/benchmarks/imitation_game_swiftui', reportPackageContentSizes: true).runSwiftUIApp;
 }
 
 TaskFunction createImitationGameFlutterTest() {
-  return CompileTest('${flutterDirectory.path}/examples/imitation_game_flutter', reportPackageContentSizes: true).run;
+  return CompileTest('${flutterDirectory.path}/dev/benchmarks/imitation_game_flutter', reportPackageContentSizes: true).run;
 }
 
 TaskFunction createWebCompileTest() {
