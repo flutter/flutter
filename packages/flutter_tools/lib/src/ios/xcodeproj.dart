@@ -547,7 +547,9 @@ class XcodeProjectInfo {
       return null;
     }
     final String expectedConfiguration = expectedBuildConfigurationFor(buildInfo, scheme);
-    final String? buildConfigurationForBuildMode = _existingBuildConfigurationForBuildMode(expectedConfiguration);
+    final String? buildConfigurationForBuildMode = _existingBuildConfigurationForBuildMode(
+      expectedConfiguration,
+    );
     if (buildConfigurationForBuildMode != null) {
       return buildConfigurationForBuildMode;
     }
