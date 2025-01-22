@@ -103,7 +103,7 @@ std::optional<std::vector<T>> GetListOfValuesForKeyOrSendError(
     return decoded_values;
   }
 
-  // If the value exists but is not a list
+  // If the value exists but is not a list.
   result.Error(kInvalidValueError,
                "Value for key '" + key + "' key must be an array.");
   return std::nullopt;
@@ -152,7 +152,7 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
     return;
   }
 
-  // Helper lambda to check and report invalid window size
+  // Helper lambda to check and report invalid window size.
   auto const has_valid_window_size =
       [&result](Size size, std::string_view key_name) -> bool {
     if (size.width() <= 0 || size.height() <= 0) {
@@ -167,7 +167,7 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
 
   WindowCreationSettings settings;
 
-  // Get value for the 'size' key (non-nullable)
+  // Get value for the 'size' key (non-nullable).
   auto const size_list =
       GetListOfValuesForKeyOrSendError<double, 2>(kSizeKey, map, result);
   if (!size_list) {
@@ -181,7 +181,7 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
   }
 
   if (archetype == WindowArchetype::kRegular) {
-    // Get value for the 'minSize' key (nullable)
+    // Get value for the 'minSize' key (nullable).
     if (auto const list = GetListOfValuesForKeyOrSendError<double, 2>(
             kMinSizeKey, map, result)) {
       settings.min_size = {list->at(0), list->at(1)};
@@ -189,7 +189,7 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
         return;
       }
     }
-    // Get value for the 'maxSize' key (nullable)
+    // Get value for the 'maxSize' key (nullable).
     if (auto const list = GetListOfValuesForKeyOrSendError<double, 2>(
             kMaxSizeKey, map, result)) {
       settings.max_size = {list->at(0), list->at(1)};
@@ -197,11 +197,11 @@ void WindowingHandler::HandleCreateWindow(WindowArchetype archetype,
         return;
       }
     }
-    // Get value for the 'title' key (nullable)
+    // Get value for the 'title' key (nullable).
     settings.title =
         GetSingleValueForKeyOrSendError<std::string>(kTitleKey, map, result);
 
-    // Get value for the 'state' key (nullable)
+    // Get value for the 'state' key (nullable).
     if (std::optional<std::string> state_string =
             GetSingleValueForKeyOrSendError<std::string>(kStateKey, map,
                                                          result)) {

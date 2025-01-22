@@ -51,17 +51,17 @@ std::optional<WindowMetadata> FlutterHostWindowController::CreateHostWindow(
   WindowState const state = window->GetState();
   windows_[view_id] = std::move(window);
 
-  WindowMetadata result = {.view_id = view_id,
-                           .archetype = settings.archetype,
-                           .size = GetWindowSize(view_id),
-                           .parent_id = std::nullopt,
-                           .state = state};
+  WindowMetadata const result = {.view_id = view_id,
+                                 .archetype = settings.archetype,
+                                 .size = GetWindowSize(view_id),
+                                 .parent_id = std::nullopt,
+                                 .state = state};
 
   return result;
 }
 
 bool FlutterHostWindowController::DestroyHostWindow(FlutterViewId view_id) {
-  if (auto it = windows_.find(view_id); it != windows_.end()) {
+  if (auto const it = windows_.find(view_id); it != windows_.end()) {
     FlutterHostWindow* const window = it->second.get();
     HWND const window_handle = window->GetWindowHandle();
 
@@ -75,7 +75,7 @@ bool FlutterHostWindowController::DestroyHostWindow(FlutterViewId view_id) {
 
 FlutterHostWindow* FlutterHostWindowController::GetHostWindow(
     FlutterViewId view_id) const {
-  if (auto it = windows_.find(view_id); it != windows_.end()) {
+  if (auto const it = windows_.find(view_id); it != windows_.end()) {
     return it->second.get();
   }
   return nullptr;
@@ -146,7 +146,7 @@ void FlutterHostWindowController::DestroyAllWindows() {
     // Destroy windows in reverse order of creation.
     for (auto it = std::prev(windows_.end());
          it != std::prev(windows_.begin());) {
-      auto current = it--;
+      auto const current = it--;
       auto const& [view_id, window] = *current;
       if (window->GetWindowHandle()) {
         DestroyHostWindow(view_id);

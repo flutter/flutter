@@ -131,11 +131,13 @@ std::string GetLastErrorAsString() {
 }
 
 // Calculates the required window size, in physical coordinates, to
-// accommodate the given |client_size|, in logical coordinates, constrained to
-// |min_size| and |max_size|, for a window with the specified |window_style| and
-// |extended_window_style|. The result accounts for window borders, non-client
-// areas, and the drop-shadow area. On error, return std::nullopt and log the
-// error.
+// accommodate the given |client_size|, in logical coordinates, constrained by
+// optional |min_size| and |max_size|, for a window with the specified
+// |window_style| and |extended_window_style|. If |owner_hwnd| is not null, the
+// DPI of the display with the largest area of intersection with |owner_hwnd| is
+// used for the calculation; otherwise, the primary display's DPI is used. The
+// resulting size includes window borders, non-client areas, and drop shadows.
+// On error, returns std::nullopt and logs an error message.
 std::optional<flutter::Size> GetWindowSizeForClientSize(
     flutter::Size const& client_size,
     std::optional<flutter::Size> min_size,
@@ -210,7 +212,7 @@ bool IsClassRegistered(LPCWSTR class_name) {
          0;
 }
 
-// Convert std::string to std::wstring
+// Convert std::string to std::wstring.
 std::wstring StringToWstring(std::string const& str) {
   if (str.empty()) {
     return {};
@@ -280,7 +282,7 @@ FlutterHostWindow::FlutterHostWindow(FlutterHostWindowController* controller,
       FML_UNREACHABLE();
   }
 
-  // Validate size constraints
+  // Validate size constraints.
   min_size_ = settings.min_size;
   max_size_ = settings.max_size;
   if (min_size_ && max_size_) {
@@ -293,8 +295,8 @@ FlutterHostWindow::FlutterHostWindow(FlutterHostWindowController* controller,
 
   // Calculate the screen space window rectangle for the new window.
   // Default positioning values (CW_USEDEFAULT) are used
-  // if the window has no owner or positioner.
-  Rect initial_window_rect = [&]() -> Rect {
+  // if the window has no owner.
+  Rect const initial_window_rect = [&]() -> Rect {
     std::optional<Size> const window_size = GetWindowSizeForClientSize(
         settings.size, min_size_, max_size_, window_style,
         extended_window_style, nullptr);
@@ -556,7 +558,7 @@ LRESULT FlutterHostWindow::HandleMessage(HWND hwnd,
 
     case WM_SIZE: {
       if (child_content_ != nullptr) {
-        // Resize and reposition the child content window
+        // Resize and reposition the child content window.
         RECT client_rect;
         GetClientRect(hwnd, &client_rect);
         MoveWindow(child_content_, client_rect.left, client_rect.top,
