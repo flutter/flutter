@@ -15,7 +15,9 @@ Future<void> main() async {
   await task(() async {
     try {
       await runProjectTest((FlutterProject flutterProject) async {
-        utils.section('Configure plugins to be marked as dev dependencies in .flutter-plugins-dependencies file');
+        utils.section(
+          'Configure plugins to be marked as dev dependencies in .flutter-plugins-dependencies file',
+        );
 
         // Enable plugins being marked as dev dependncies in the .flutter-plugins-dependencies file.
         await utils.flutter('config', options: <String>['--explicit-package-dependencies']);
@@ -42,43 +44,59 @@ Future<void> main() async {
           options: <String>['--path', path.join(tempDir.path, 'dev_dependency_plugin')],
         );
 
-
-        utils.section('Verify the app includes dev dependency in non-release builds as expected');
+        utils.section(
+          'Verify the app includes/excludes dev_dependency_plugin as dependency in each build mode as expected',
+        );
         final List<String> buildModesToTest = <String>['debug', 'profile', 'release'];
         for (final String buildMode in buildModesToTest) {
           final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
           final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
-          final RegExp regExpToMatchDevDependencyPlugin = RegExp(r'\\--- project :dev_dependency_plugin');
-          final RegExp regExpToMatchDevDependencyPluginWithTransitiveDependencies = RegExp(r'\\--- project :dev_dependency_plugin\n(\s)*\+--- org.jetbrains.kotlin.*\s\(\*\)\n(\s)*\\---\sio.flutter:flutter_embedding_' + buildMode);
-          final String stringToMatchFlutterEmbedding = '+--- io.flutter:flutter_embedding_release:';
+          final RegExp regExpToMatchDevDependencyPlugin = RegExp(
+            r'--- project :dev_dependency_plugin',
+          );
+          final RegExp regExpToMatchDevDependencyPluginWithTransitiveDependencies = RegExp(
+            r'--- project :dev_dependency_plugin\n(\s)*\+--- org.jetbrains.kotlin.*\s\(\*\)\n(\s)*\\---\sio.flutter:flutter_embedding_' +
+                buildMode,
+          );
+          const String stringToMatchFlutterEmbedding = '+--- io.flutter:flutter_embedding_release:';
           final bool isTestingReleaseMode = buildMode == 'release';
 
-          utils.section('Query the dependency of the app built with $buildMode');
+          utils.section('Query the dependencies of the app built with $buildMode');
 
-          String appDependencies = await utils.eval(gradlewExecutable, <String>[
+          final String appDependencies = await utils.eval(gradlewExecutable, <String>[
             'app:dependencies',
             '--configuration',
             '${buildMode}RuntimeClasspath',
           ], workingDirectory: flutterProject.androidPath);
 
           if (isTestingReleaseMode) {
-            utils.section('Check that the release build includes Flutter embedding as a direct dependency');
+            utils.section(
+              'Check that the release build includes Flutter embedding as a direct dependency',
+            );
 
-            if(!appDependencies.contains(stringToMatchFlutterEmbedding)) {
-              // We expect dev dependency to not be included in the dev dependency, but the Flutter
+            if (!appDependencies.contains(stringToMatchFlutterEmbedding)) {
+              // We expect dev_dependency_plugin to not be included in the dev dependency, but the Flutter
               // embedding should still be a dependency of the app project (regardless of the fact
-              // that the app depends on no plugins that support Android and thus, would include the
-              // Flutter embedding as a transitive dependency).
-              throw TaskResult.failure('Expected to find the Flutter embedding as a dependency of the release app build, but did not.');
+              // that the app does not depend on any plugins that support Android, which would cause the
+              // Flutter embedding to be included as a transitive dependency).
+              throw TaskResult.failure(
+                'Expected to find the Flutter embedding as a dependency of the release app build, but did not.',
+              );
             }
           }
 
-          utils.section('Check that the $buildMode build includes/excludes the dev dependency plugin as expected');
+          utils.section(
+            'Check that the $buildMode build includes/excludes the dev dependency plugin as expected',
+          );
 
           // Ensure that release builds have no reference to the dev dependency plugin and make sure
-          // for that it is included with expected transitive dependencies for debug, profile builds.
+          // that it is included with expected transitive dependencies for debug, profile builds.
           final bool appIncludesDevDependencyAsExpected =
-              isTestingReleaseMode ? !appDependencies.contains(regExpToMatchDevDependencyPlugin) : appDependencies.contains(regExpToMatchDevDependencyPluginWithTransitiveDependencies);
+              isTestingReleaseMode
+                  ? !appDependencies.contains(regExpToMatchDevDependencyPlugin)
+                  : appDependencies.contains(
+                    regExpToMatchDevDependencyPluginWithTransitiveDependencies,
+                  );
           if (!appIncludesDevDependencyAsExpected) {
             throw TaskResult.failure(
               'Expected to${isTestingReleaseMode ? ' not' : ''} find dev_dependency_plugin as a dependency of the app built in $buildMode mode but did${isTestingReleaseMode ? '' : ' not'}.',

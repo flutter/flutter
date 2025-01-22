@@ -992,19 +992,17 @@ class FlutterPlugin implements Plugin<Project> {
         return pluginList
     }
 
-
     /**
      * Gets the list of plugins (as map) that support the Android platform and are dependencies of the
-     * Android project (excludes dev dependencies).
+     * Android project excluding dev dependencies.
      *
      * The map value contains either the plugins `name` (String),
      * its `path` (String), or its `dependencies` (List<String>).
      * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
      */
     private List<Map<String, Object>> getPluginListWithoutDevDependencies(Project project) {
-        List<Map<String, Object>> allPluginsList = getPluginList(project)
         List<Map<String, Object>> pluginListWithoutDevDependencies = []
-        for (Map<String, Object> plugin in allPluginsList) {
+        for (Map<String, Object> plugin in getPluginList(project)) {
             if (!plugin.dev_dependency) {
                 pluginListWithoutDevDependencies += plugin
             }
