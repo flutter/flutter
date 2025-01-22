@@ -329,24 +329,17 @@ bool DriverInfoVK::IsEmulator() const {
 }
 
 bool DriverInfoVK::IsKnownBadDriver() const {
-  if (adreno_gpu_.has_value()) {
-    AdrenoGPU adreno = adreno_gpu_.value();
-    // See:
-    // https://github.com/flutter/flutter/issues/154103
-    //
-    // Reports "VK_INCOMPLETE" when compiling certain entity shader with
-    // vkCreateGraphicsPipelines, which is not a valid return status.
-    // See https://github.com/flutter/flutter/issues/155185 .
-    //
-    // https://github.com/flutter/flutter/issues/155185
-    // Unknown crashes but device is not easily acquirable.
-    if (adreno <= AdrenoGPU::kAdreno630) {
-      return true;
-    }
-  }
   // Disable Maleoon series GPUs, see:
   // https://github.com/flutter/flutter/issues/156623
   if (vendor_ == VendorVK::kHuawei) {
+    return true;
+  }
+  // https://github.com/flutter/flutter/issues/161122
+  // https://github.com/flutter/flutter/issues/160960
+  // https://github.com/flutter/flutter/issues/160866
+  // https://github.com/flutter/flutter/issues/160804
+  // https://github.com/flutter/flutter/issues/160406
+  if (vendor_ == VendorVK::kImgTec) {
     return true;
   }
   return false;
