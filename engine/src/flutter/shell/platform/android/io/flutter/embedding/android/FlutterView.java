@@ -109,7 +109,7 @@ import java.util.Set;
 public class FlutterView extends FrameLayout
     implements MouseCursorPlugin.MouseCursorViewDelegate, KeyboardManager.ViewDelegate {
   private static final String TAG = "FlutterView";
-  private static final String SPELL_CHECK_PACKAGE_NAME = "com.google.android.inputmethod.latin";
+  private static final String GBOARD_PACKAGE_NAME = "com.google.android.inputmethod.latin";
 
   // Internal view hierarchy references.
   @Nullable private FlutterSurfaceView flutterSurfaceView;
@@ -1440,7 +1440,7 @@ public class FlutterView extends FrameLayout
         boolean gboardSpellCheckerEnabled = false;
 
         for (SpellCheckerInfo spellCheckerInfo : enabledSpellCheckerInfos) {
-          if (spellCheckerInfo.getPackageName().equals(SPELL_CHECK_PACKAGE_NAME)) {
+          if (spellCheckerInfo.getPackageName().equals(GBOARD_PACKAGE_NAME)) {
             gboardSpellCheckerEnabled = true;
             break;
           }
