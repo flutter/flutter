@@ -218,17 +218,15 @@ RoundSuperellipseParam::Quadrant ComputeQuadrant(Point center,
 
 }  // namespace
 
-RoundSuperellipseParam RoundSuperellipseParam::MakeSizeRadiusForTopRight(
-    const Size& size,
-    const Size& radius) {
-  return RoundSuperellipseParam{
-      .top_right = ComputeQuadrant(Point(), Point(size) / 2, radius),
-  };
-}
-
 RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
     const Rect& bounds_,
     const RoundingRadii& radii_) {
+  if (radii_.AreAllCornersSame()) {
+    return RoundSuperellipseParam{
+        .top_right = ComputeQuadrant(bounds_.GetCenter(), bounds_.GetRightTop(), radii_.top_right),
+        .all_corners_same = true,
+    };
+  }
   Scalar top_split = Split(bounds_.GetLeft(), bounds_.GetRight(),
                            radii_.top_left.width, radii_.top_right.width);
   Scalar right_split =
@@ -251,7 +249,7 @@ RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
                           bounds_.GetLeftBottom(), radii_.bottom_left),
       .top_left = ComputeQuadrant(Point{top_split, left_split},
                                   bounds_.GetLeftTop(), radii_.top_left),
-
+      .all_corners_same = false,
   };
 }
 

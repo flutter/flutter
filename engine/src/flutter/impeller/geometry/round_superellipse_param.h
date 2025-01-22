@@ -92,13 +92,8 @@ struct RoundSuperellipseParam {
   Quadrant bottom_left;
   Quadrant top_left;
 
-  // Create a param of a rounded superellipse with equal radius size for all
-  // corners and centered at the origin.
-  //
-  // Only `top_right` of the 4 quadrant fields will be filled.
-  [[nodiscard]] static RoundSuperellipseParam MakeSizeRadiusForTopRight(
-      const Size& size,
-      const Size& radius);
+  // If true, all corners are the same and only `top_right` is popularized.
+  bool all_corners_same;
 
   // Create a param for a rounded superellipse with the specific bounds and
   // radii.

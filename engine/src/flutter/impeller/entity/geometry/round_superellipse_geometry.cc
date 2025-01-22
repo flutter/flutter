@@ -394,19 +394,18 @@ GeometryResult RoundSuperellipseGeometry::GetPositionBuffer(
                UnevenQuadrantsRearranger>
       rearranger_holder;
 
-  if (radii_.AreAllCornersSame()) {
-    auto param = RoundSuperellipseParam::MakeSizeRadiusForTopRight(
-        bounds_.GetSize(), radii_.top_right);
+  auto param = RoundSuperellipseParam::MakeBoundsRadii(bounds_, radii_);
+
+  if (param.all_corners_same) {
     rearranger_holder.emplace<MirroredQuadrantRearranger>(bounds_.GetCenter(),
                                                           cache);
     auto& t = std::get<MirroredQuadrantRearranger>(rearranger_holder);
     rearranger = &t;
 
     // The quadrant must be drawn at the origin so that it can be rotated later.
+    param.top_right.offset = Point();
     t.QuadSize() = DrawQuadrant(cache, param.top_right);
   } else {
-    auto param = RoundSuperellipseParam::MakeBoundsRadii(bounds_, radii_);
-
     rearranger_holder.emplace<UnevenQuadrantsRearranger>(cache, kMaxQuadSize);
     auto& t = std::get<UnevenQuadrantsRearranger>(rearranger_holder);
     rearranger = &t;
