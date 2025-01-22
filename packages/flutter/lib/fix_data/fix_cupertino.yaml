@@ -431,10 +431,6 @@ transforms:
               requiredIf: "minSize != ''"
           - kind: 'removeParameter'
             name: 'minSize'
-      - if: "minSize == ''"
-        changes:
-          - kind: 'removeParameter'
-            name: 'minSize'
     variables:
       minSize:
         kind: fragment

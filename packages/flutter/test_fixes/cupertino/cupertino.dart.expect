@@ -304,4 +304,9 @@ void main() {
   CupertinoCheckbox(
     fillColor: WidgetStatePropertyAll(CupertinoColors.white),
   );
+
+  // https://github.com/flutter/flutter/pull/161295
+  final cupertinoButton = CupertinoButton(minWidth: 60, minHeight: 60);
+  double? minWidth = cupertinoButton.minWidth;
+  double? minHeight = cupertinoButton.minHeight;
 }
