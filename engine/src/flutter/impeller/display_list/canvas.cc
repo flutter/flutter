@@ -1024,7 +1024,7 @@ void Canvas::SaveLayer(const Paint& paint,
     did_round_out = true;
     subpass_size =
         static_cast<ISize>(IRect::RoundOut(subpass_coverage).GetSize());
-    // if rounding out, adjust the coverage to account for the subpixel shift.
+    // If rounding out, adjust the coverage to account for the subpixel shift.
     coverage_origin_adjustment =
         Point(subpass_coverage.GetLeftTop().x -
                   std::floor(subpass_coverage.GetLeftTop().x),
