@@ -289,7 +289,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// When setting [optionsLayerLink], [RawAutocomplete] must have a [CompositedTransformTarget]
   /// as a parent widget to link the options overlay to the correct position in the widget tree.
   ///
-  /// If a [LayerLink] is not provided, [RawAutocomplete] uses the default size.
+  /// If a [LayerLink] is not provided or null, [RawAutocomplete] uses the default size.
   /// {@endtemplate}
   final LayerLink? optionsLayerLink;
 
