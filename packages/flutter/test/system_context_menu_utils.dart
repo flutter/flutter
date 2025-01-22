@@ -9,7 +9,6 @@ import 'package:flutter/widgets.dart';
 IOSSystemContextMenuItem systemContextMenuItemDataFromJson(Map<String, dynamic> json) {
   final String? type = json['type'] as String?;
   final String? title = json['title'] as String?;
-  final VoidCallback? onPressed = json['onPressed'] as VoidCallback?;
   return switch (type) {
     'copy' => const IOSSystemContextMenuItemCopy(),
     'cut' => const IOSSystemContextMenuItemCut(),
@@ -18,7 +17,6 @@ IOSSystemContextMenuItem systemContextMenuItemDataFromJson(Map<String, dynamic> 
     'searchWeb' => IOSSystemContextMenuItemSearchWeb(title: title),
     'share' => IOSSystemContextMenuItemShare(title: title),
     'lookUp' => IOSSystemContextMenuItemLookUp(title: title),
-    'custom' => IOSSystemContextMenuItemCustom(title: title!, onPressed: onPressed!),
     _ => throw FlutterError('Invalid json for IOSSystemContextMenuItem.type $type.'),
   };
 }

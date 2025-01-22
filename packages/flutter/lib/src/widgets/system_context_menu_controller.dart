@@ -75,8 +75,6 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// After calling [dispose], this instance can no longer be used.
   bool _isDisposed = false;
 
-  final Map<int, VoidCallback> _buttonCallbacks = <int, VoidCallback>{};
-
   // Begin SystemContextMenuClient.
 
   @override
@@ -91,21 +89,6 @@ class SystemContextMenuController with SystemContextMenuClient {
     }
     _hiddenBySystem = true;
     onSystemHide?.call();
-  }
-
-  @override
-  void handleTapCustomActionItem(int callbackId) {
-    assert(!_isDisposed);
-    assert(isVisible);
-    if (_isDisposed || !isVisible) {
-      return;
-    }
-    final VoidCallback? callback = _buttonCallbacks[callbackId];
-    if (callback == null) {
-      assert(false, 'Tap received for non-existent item with id $callbackId.');
-      return;
-    }
-    callback();
   }
 
   // End SystemContextMenuClient.
@@ -158,14 +141,6 @@ class SystemContextMenuController with SystemContextMenuClient {
       'Attempted to show while another instance was still visible.',
     );
 
-    _buttonCallbacks.clear();
-
-    for (final IOSSystemContextMenuItem item in items) {
-      if (item is IOSSystemContextMenuItemCustom) {
-        _buttonCallbacks[item.hashCode] = item.onPressed;
-      }
-    }
-
     ServicesBinding.systemContextMenuClient = this;
 
     final List<Map<String, dynamic>> itemsJson =
@@ -209,7 +184,6 @@ class SystemContextMenuController with SystemContextMenuClient {
       return;
     }
     _lastShown = null;
-    _buttonCallbacks.clear();
     ServicesBinding.systemContextMenuClient = null;
     // This may be called unnecessarily in the case where the user has already
     // hidden the menu (for example by tapping the screen).
@@ -490,30 +464,3 @@ class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem {
 
 // TODO(justinmc): Support the "custom" type.
 // https://github.com/flutter/flutter/issues/103163
-/// Creates an instance of [IOSSystemContextMenuItem] for a custom menu item
-/// whose [title] and [onPressed] are as specified.
-///
-/// See also:
-///
-///  * [SystemContextMenu], a widget that can be used to display the system
-///    context menu.
-///  * [IOSSystemContextMenuItemCustom], which specifies the data to be sent
-///    to the platform for this same button.
-class IOSSystemContextMenuItemCustom extends IOSSystemContextMenuItem {
-  /// Creates an instance of [IOSSystemContextMenuItemCustom].
-  const IOSSystemContextMenuItemCustom({required String this.title, required this.onPressed});
-
-  @override
-  final String? title;
-
-  @override
-  final VoidCallback onPressed;
-
-  @override
-  String get _jsonType => 'custom';
-
-  @override
-  String toString() {
-    return 'IOSSystemContextMenuItemCustom(title: $title, onPressed: $onPressed)';
-  }
-}

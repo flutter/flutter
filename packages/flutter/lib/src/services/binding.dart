@@ -422,17 +422,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
         }
         _systemContextMenuClient!.handleSystemHide();
         _systemContextMenuClient = null;
-      case 'ContextMenu.onTapCustomActionItem':
-        if (_systemContextMenuClient == null) {
-          assert(
-            false,
-            'Platform sent onTapCustomActionItem when no SystemContextMenuClient was registered.',
-          );
-          return;
-        }
-        final List<dynamic> args = methodCall.arguments as List<dynamic>;
-        final int callbackId = args.first as int;
-        _systemContextMenuClient!.handleTapCustomActionItem(callbackId);
       case 'SystemChrome.systemUIChange':
         final List<dynamic> args = methodCall.arguments as List<dynamic>;
         if (_systemUiChangeCallback != null) {
@@ -700,10 +689,4 @@ mixin SystemContextMenuClient {
   /// Called only on the single active instance registered with
   /// [ServicesBinding.systemContextMenuClient].
   void handleSystemHide();
-
-  /// Called when a custom system context menu button receives a tap.
-  ///
-  /// Called only on the single active instance registered with
-  /// [ServicesBinding.systemContextMenuClient].
-  void handleTapCustomActionItem(int callbackId);
 }
