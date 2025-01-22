@@ -46,9 +46,7 @@ void main() {
       wrapWithView: false,
       Builder(
         builder: (BuildContext context) {
-          return WindowingApp(
-            children: <Widget>[RegularWindow(controller: controller, child: Container())],
-          );
+          return RegularWindow(controller: controller, child: Container());
         },
       ),
     );
@@ -57,7 +55,7 @@ void main() {
 
     expect(controller.type, WindowArchetype.regular);
     expect(controller.size, windowSize);
-    expect(controller.view!.viewId, tester.view.viewId);
+    expect(controller.view.viewId, tester.view.viewId);
   });
 
   testWidgets('RegularWindow.onError is called when creation throws an error', (
@@ -105,9 +103,7 @@ void main() {
       wrapWithView: false,
       Builder(
         builder: (BuildContext context) {
-          return WindowingApp(
-            children: <Widget>[RegularWindow(controller: controller, child: Container())],
-          );
+          return RegularWindow(controller: controller, child: Container());
         },
       ),
     );
@@ -135,9 +131,7 @@ void main() {
         wrapWithView: false,
         Builder(
           builder: (BuildContext context) {
-            return WindowingApp(
-              children: <Widget>[RegularWindow(controller: controller, child: Container())],
-            );
+            return RegularWindow(controller: controller, child: Container());
           },
         ),
       );
