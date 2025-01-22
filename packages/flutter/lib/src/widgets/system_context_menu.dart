@@ -33,6 +33,11 @@ import 'text_selection_toolbar_anchors.dart';
 /// Pass [items] to specify the buttons that will appear in the menu. Any items
 /// without a title will be given a default title from [WidgetsLocalizations].
 ///
+/// By default, [items] will be set to the result of [getDefaultItems]. This
+/// method considers the state of the [EditableTextState] so that, for example,
+/// it will only include [IOSSystemContextMenuItemCopy] if there is currently a
+/// selection to copy.
+///
 /// To check if the current device supports showing the system context menu,
 /// call [isSupported].
 ///
@@ -74,9 +79,29 @@ class SystemContextMenu extends StatefulWidget {
           editableTextState.textEditingValue.selection,
         ),
       ),
-      items: items,
+      items: items ?? getDefaultItems(editableTextState),
       onSystemHide: editableTextState.hideToolbar,
     );
+  }
+
+  /// The default [items] for the given [EditableTextState].
+  ///
+  /// For example, [IOSSystemContextMenuItemCopy] will only be included when the
+  /// field represented by the [EditableTextState] has a selection.
+  ///
+  /// See also:
+  ///
+  ///  * [EditableTextState.contextMenuButtonItems], which provides the default
+  ///    [ContextMenuButtonItem]s for the Flutter-rendered context menu.
+  static List<IOSSystemContextMenuItem> getDefaultItems(EditableTextState editableTextState) {
+    return <IOSSystemContextMenuItem>[
+      if (editableTextState.copyEnabled) const IOSSystemContextMenuItemCopy(),
+      if (editableTextState.cutEnabled) const IOSSystemContextMenuItemCut(),
+      if (editableTextState.pasteEnabled) const IOSSystemContextMenuItemPaste(),
+      if (editableTextState.selectAllEnabled) const IOSSystemContextMenuItemSelectAll(),
+      if (editableTextState.lookUpEnabled) const IOSSystemContextMenuItemLookUp(),
+      if (editableTextState.searchWebEnabled) const IOSSystemContextMenuItemSearchWeb(),
+    ];
   }
 
   /// The [Rect] that the context menu should point to.
