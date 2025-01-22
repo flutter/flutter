@@ -12,7 +12,7 @@ in an Android Studio window opened at the root of the entire Flutter repo.
 
 ### Contributing
 
-The Flutter Gradle Plugin is currently being re-written from Groovy to Kotlin 
+The Flutter Gradle Plugin is [currently being re-written](https://github.com/flutter/flutter/issues/121541) from Groovy to Kotlin 
 (Kotlin source specifically, i.e. not `.kts`). As such, outside of critical bug fixes, 
 new contributions will only be accepted in `src/main/kotlin` (and `src/test/kotlin`).
 
