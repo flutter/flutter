@@ -284,6 +284,15 @@ class DriveCommand extends RunCommandBase {
       throwToolExit(null);
     }
     if (await _fileSystem.type(testFile) != FileSystemEntityType.file) {
+      // A very common source of error is holding "flutter drive" wrong,
+      // and providing the "test_driver/foo_test.dart" as the target, when
+      // the intention was to provide "lib/foo.dart".
+      if (targetFile.endsWith('_test.dart')) {
+        _logger.printError(
+          'The file path passed to --target should be an app entrypoint that '
+          'contains a "main()". Did you mean "flutter drive --driver $targetFile"?',
+        );
+      }
       throwToolExit('Test file not found: $testFile');
     }
     final Device? device = await targetedDevice;
