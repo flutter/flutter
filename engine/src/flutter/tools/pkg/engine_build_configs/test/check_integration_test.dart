@@ -74,22 +74,10 @@ void main() {
     expect(stderr.toString(), contains('❌ Loaded build configs under'));
   });
 
-  void addValidConfig(String name, {bool releaseBuild = false}) {
+  void addConfig(String name, {bool releaseBuild = false, bool malformed = false}) {
     io.File(
       p.join(tmpCiBuilders.path, '$name.json'),
-    ).writeAsStringSync(jsonEncode({'builds': <Object?>[]}));
-
-    ciYamlTargets.add({
-      'name': name,
-      'properties': {'config_name': name, if (releaseBuild) 'release_build': 'true'},
-    });
-    tmpCiYaml.writeAsStringSync(jsonEncode({'targets': ciYamlTargets}));
-  }
-
-  void addInvalidConfig(String name, {bool releaseBuild = false}) {
-    io.File(
-      p.join(tmpCiBuilders.path, '$name.json'),
-    ).writeAsStringSync(jsonEncode({'builds': <Object?>[]}));
+    ).writeAsStringSync(malformed ? 'bad{}' : jsonEncode({'builds': <Object?>[]}));
 
     ciYamlTargets.add({
       'name': name,
@@ -99,11 +87,16 @@ void main() {
   }
 
   test('fails if .ci.yaml is not valid', () {
-    addValidConfig('linux_unopt');
+    addConfig('linux_unopt');
     run(['--engine-src-path=${tmpFlutterEngineSrc.path}'], allowFailure: true);
 
     expect(stderr.toString(), contains('❌ .ci.yaml at'));
   });
 
-  test('fails if a configuration file had a deserialization error', () {});
+  test('fails if a configuration file had a deserialization error', () {
+    addConfig('linux_unopt', malformed: true);
+    run(['--engine-src-path=${tmpFlutterEngineSrc.path}'], allowFailure: true);
+
+    expect(stderr.toString(), contains('❌ .ci.yaml at'));
+  });
 }
