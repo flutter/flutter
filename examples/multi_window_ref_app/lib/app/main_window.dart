@@ -7,8 +7,8 @@ import 'window_manager_model.dart';
 
 class MainWindow extends StatefulWidget {
   MainWindow({super.key, required WindowController mainController}) {
-    _windowManagerModel.add(
-        KeyedWindowController(isMainWindow: true, controller: mainController));
+    _windowManagerModel.add(KeyedWindowController(
+        isMainWindow: true, key: UniqueKey(), controller: mainController));
   }
 
   final WindowManagerModel _windowManagerModel = WindowManagerModel();
@@ -70,9 +70,9 @@ class _MainWindowState extends State<MainWindow> {
                     windowSettings: widget._settings,
                     windowManagerModel: widget._windowManagerModel,
                     onDestroyed: () =>
-                        widget._windowManagerModel.remove(controller),
+                        widget._windowManagerModel.remove(controller.key),
                     onError: () =>
-                        widget._windowManagerModel.remove(controller),
+                        widget._windowManagerModel.remove(controller.key),
                   ));
                 }
               }
@@ -134,10 +134,7 @@ class _ActiveWindowsTable extends StatelessWidget {
                 key: controller.key,
                 color: WidgetStateColor.resolveWith((states) {
                   if (states.contains(WidgetState.selected)) {
-                    return Theme.of(context)
-                        .colorScheme
-                        .primary
-                        .withAlpha(20);
+                    return Theme.of(context).colorScheme.primary.withAlpha(20);
                   }
                   return Colors.transparent;
                 }),
@@ -153,8 +150,8 @@ class _ActiveWindowsTable extends StatelessWidget {
                     ListenableBuilder(
                         listenable: controller.controller,
                         builder: (BuildContext context, Widget? _) => Text(
-                            controller.controller.view != null
-                                ? '${controller.controller.view?.viewId}'
+                            controller.controller.isReady
+                                ? '${controller.controller.view.viewId}'
                                 : 'Loading...')),
                   ),
                   DataCell(
@@ -218,8 +215,15 @@ class _WindowCreatorCard extends StatelessWidget {
               children: [
                 OutlinedButton(
                   onPressed: () async {
+                    final UniqueKey key = UniqueKey();
                     windowManagerModel.add(KeyedWindowController(
-                        controller: RegularWindowController()));
+                        key: key,
+                        controller: RegularWindowController(
+                            onDestroyed: () => windowManagerModel.remove(key),
+                            onError: (String error) =>
+                                windowManagerModel.remove(key),
+                            title: "Regular",
+                            size: windowSettings.regularSize)));
                   },
                   child: const Text('Regular'),
                 ),

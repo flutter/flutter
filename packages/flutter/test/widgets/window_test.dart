@@ -18,7 +18,7 @@ Future<Object?>? Function(MethodCall)? _createWindowMethodCallHandler(WidgetTest
       await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.windowing.name,
         SystemChannels.windowing.codec.encodeMethodCall(
-          MethodCall('onWindowDestroyed',  <String, Object?>{'viewId': tester.view.viewId}),
+          MethodCall('onWindowDestroyed', <String, Object?>{'viewId': tester.view.viewId}),
         ),
         (ByteData? data) {},
       );
@@ -41,15 +41,13 @@ void main() {
       _createWindowMethodCallHandler(tester),
     );
 
-    final RegularWindowController controller = RegularWindowController();
+    final RegularWindowController controller = RegularWindowController(size: windowSize);
     await tester.pumpWidget(
       wrapWithView: false,
       Builder(
         builder: (BuildContext context) {
           return WindowingApp(
-            children: <Widget>[
-              RegularWindow(controller: controller, size: windowSize, child: Container()),
-            ],
+            children: <Widget>[RegularWindow(controller: controller, child: Container())],
           );
         },
       ),
@@ -73,30 +71,12 @@ void main() {
       throw Exception('Failed to create the window');
     });
 
-    final RegularWindowController controller = RegularWindowController();
     bool receivedError = false;
-    await tester.pumpWidget(
-      wrapWithView: false,
-      Builder(
-        builder: (BuildContext context) {
-          return WindowingApp(
-            children: <Widget>[
-              RegularWindow(
-                controller: controller,
-                onError: (String? error) {
-                  expect(
-                    error,
-                    'PlatformException(error, Exception: Failed to create the window, null, null)',
-                  );
-                  receivedError = true;
-                },
-                size: windowSize,
-                child: Container(),
-              ),
-            ],
-          );
-        },
-      ),
+    final RegularWindowController controller = RegularWindowController(
+      onError: (String error) {
+        receivedError = true;
+      },
+      size: windowSize,
     );
 
     await tester.pump();
@@ -115,22 +95,18 @@ void main() {
     );
 
     bool destroyed = false;
-    final RegularWindowController controller = RegularWindowController();
+    final RegularWindowController controller = RegularWindowController(
+      size: windowSize,
+      onDestroyed: () {
+        destroyed = true;
+      },
+    );
     await tester.pumpWidget(
       wrapWithView: false,
       Builder(
         builder: (BuildContext context) {
           return WindowingApp(
-            children: <Widget>[
-              RegularWindow(
-                controller: controller,
-                size: windowSize,
-                onDestroyed: () {
-                  destroyed = true;
-                },
-                child: Container(),
-              ),
-            ],
+            children: <Widget>[RegularWindow(controller: controller, child: Container())],
           );
         },
       ),
@@ -154,19 +130,13 @@ void main() {
         _createWindowMethodCallHandler(tester),
       );
 
-      final RegularWindowController controller = RegularWindowController();
+      final RegularWindowController controller = RegularWindowController(size: initialSize);
       await tester.pumpWidget(
         wrapWithView: false,
         Builder(
           builder: (BuildContext context) {
             return WindowingApp(
-              children: <Widget>[
-                RegularWindow(
-                  controller: controller,
-                  size: initialSize,
-                  child: Container(),
-                ),
-              ],
+              children: <Widget>[RegularWindow(controller: controller, child: Container())],
             );
           },
         ),
@@ -177,7 +147,7 @@ void main() {
       await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.windowing.name,
         SystemChannels.windowing.codec.encodeMethodCall(
-          MethodCall('onWindowChanged',  <String, Object?>{
+          MethodCall('onWindowChanged', <String, Object?>{
             'viewId': tester.view.viewId,
             'size': <double>[newSize.width, newSize.height],
           }),

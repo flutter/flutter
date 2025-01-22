@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 /// Defines the type of the Window
 enum WindowArchetype {
   /// Defines a traditional window
-  regular
+  regular,
 }
 
 /// Defines the possible states a window can be in.
@@ -30,51 +30,109 @@ enum WindowState {
 /// provides access to modify and destroy the window, in addition to
 /// listening to changes on the window.
 abstract class WindowController with ChangeNotifier {
-  FlutterView? _view;
+  WindowController._({
+    VoidCallback? onDestroyed,
+    void Function(String)? onError,
+    required Future<WindowCreationResult> future,
+  }) : _future = future {
+    _future
+        .then((WindowCreationResult metadata) async {
+          _view = metadata.view;
+          _state = metadata.state;
+          _size = metadata.size;
+
+          SchedulerBinding.instance.addPostFrameCallback((_) async {
+            _listener = _WindowListener(
+              viewId: metadata.view.viewId,
+              onChanged: (_WindowChangeProperties properties) {
+                if (properties.size != null) {
+                  _size = properties.size!;
+                }
+              },
+              onDestroyed: () {
+                _view = null;
+                _isPendingDestroy = false;
+                onDestroyed?.call();
+              },
+            );
+            _WindowingAppGlobalData.instance._listen(_listener);
+          });
+        })
+        .catchError((Object? error) {
+          onError?.call(error.toString());
+        });
+  }
+
+  /// Returns true if the window associated with the controller has been
+  /// created and is ready to be used. Otherwise, returns false.
+  bool get isReady => _view != null;
+
+  final Future<WindowCreationResult> _future;
+
+  late _WindowListener _listener;
 
   /// The ID of the view used for this window, which is unique to each window.
-  FlutterView? get view => _view;
-  set view(FlutterView? value) {
-    _view = value;
-    notifyListeners();
-  }
-
-  Size? _size;
+  FlutterView get view => _view!;
+  FlutterView? _view;
 
   /// The current size of the window. This may differ from the requested size.
-  Size? get size => _size;
-  set size(Size? value) {
-    _size = value;
-    notifyListeners();
-  }
+  Size get size => _size;
+  Size _size = Size.zero;
+
+  /// The current state of the window.
+  WindowState? get state => _state;
+  WindowState? _state;
 
   /// The archetype of the window.
   WindowArchetype get type;
 
+  bool _isPendingDestroy = false;
+
   /// Destroys this window.
   Future<void> destroy() async {
-    if (view == null) {
+    if (!isReady || _isPendingDestroy) {
       return;
     }
 
-    return destroyWindow(view!.viewId);
+    _isPendingDestroy = true;
+    return destroyWindow(view.viewId);
   }
 }
 
-/// Provided to [RegularWindow]. Allows the user to listen on changes
-/// to a regular window and modify the window.
+/// Provided to [RegularWindow]. When this controller is initialized, a
+/// native window is created for the current platform. This controller
+/// can then be used to modify the window, listen to changes, or destroy
+/// the window.
 class RegularWindowController extends WindowController {
+  /// Creates a [RegularWindowController] with the provided properties.
+  /// Upon construction, the window is created for the platform.
+  ///
+  /// [title] the title of the window
+  /// [state] the initial state of the window
+  /// [sizeConstraints] the size constraints of the window
+  /// [onDestroyed] a callback that is called when the window is destroyed
+  /// [onError] a callback that is called when an error is encountered
+  /// [size] the size of the window
+  RegularWindowController({
+    String? title,
+    WindowState? state,
+    BoxConstraints? sizeConstraints,
+    VoidCallback? onDestroyed,
+    void Function(String)? onError,
+    required Size size,
+  }) : super._(
+         onDestroyed: onDestroyed,
+         onError: onError,
+         future: createRegular(
+           size: size,
+           sizeConstraints: sizeConstraints,
+           title: title,
+           state: state,
+         ),
+       );
+
   @override
   WindowArchetype get type => WindowArchetype.regular;
-
-  WindowState? _state;
-
-  /// The window state.
-  WindowState? get state => _state;
-  set state(WindowState? value) {
-    _state = value;
-    notifyListeners();
-  }
 
   /// Modify the properties of the window.
   Future<void> modify({Size? size}) {
@@ -87,37 +145,10 @@ class RegularWindowController extends WindowController {
 /// either a [ViewAnchor] or a [ViewCollection].
 class RegularWindow extends StatefulWidget {
   /// Creates a regular window widget
-  const RegularWindow(
-      {this.controller,
-      this.onDestroyed,
-      this.onError,
-      this.sizeConstraints,
-      this.title,
-      this.state,
-      super.key,
-      required this.size,
-      required this.child});
+  const RegularWindow({super.key, required this.controller, required this.child});
 
   /// Controller for this widget.
-  final RegularWindowController? controller;
-
-  /// Called when the window backing this widget is destroyed.
-  final void Function()? onDestroyed;
-
-  /// Called when an error is encountered during the creation of this widget.
-  final void Function(String?)? onError;
-
-  /// Preferred size of the window.
-  final Size size;
-
-  /// Size constraints.
-  final BoxConstraints? sizeConstraints;
-
-  /// Title of the window.
-  final String? title;
-
-  /// The state of the window.
-  final WindowState? state;
+  final RegularWindowController controller;
 
   /// The content rendered into this window.
   final Widget child;
@@ -127,96 +158,33 @@ class RegularWindow extends StatefulWidget {
 }
 
 class _RegularWindowState extends State<RegularWindow> {
-  _WindowListener? _listener;
-  Future<WindowCreationResult>? _future;
-  _WindowingAppState? _app;
-  int? _viewId;
-  bool _hasBeenDestroyed = false;
-
-  @override
-  void initState() {
-    super.initState();
-    final Future<WindowCreationResult> createRegularFuture = createRegular(
-      size: widget.size,
-      sizeConstraints: widget.sizeConstraints,
-      title: widget.title,
-      state: widget.state,
-    );
-    setState(() {
-      _future = createRegularFuture;
-    });
-
-    createRegularFuture.then((WindowCreationResult metadata) async {
-      _viewId = metadata.view.viewId;
-      if (widget.controller != null) {
-        widget.controller!.view = metadata.view;
-        widget.controller!.state = metadata.state;
-        widget.controller!.size = metadata.size;
-      }
-
-      SchedulerBinding.instance.addPostFrameCallback((_) async {
-        final _WindowingAppContext? windowingAppContext =
-            _WindowingAppContext.of(context);
-        assert(windowingAppContext != null);
-        _listener = _WindowListener(
-            viewId: metadata.view.viewId,
-            onChanged: (_WindowChangeProperties properties) {
-              if (widget.controller == null) {
-                return;
-              }
-
-              if (properties.size != null) {
-                widget.controller!.size = properties.size;
-              }
-            },
-            onDestroyed: () {
-              widget.onDestroyed?.call();
-              _hasBeenDestroyed = true;
-            });
-        _app = windowingAppContext!.windowingApp;
-        _app!._registerListener(_listener!);
-      });
-    }).catchError((Object? error) {
-      widget.onError?.call(error.toString());
-    });
-  }
-
   @override
   Future<void> dispose() async {
     super.dispose();
 
-    if (_listener != null) {
-      assert(_app != null);
-      _app!._unregisterListener(_listener!);
-    }
-
     // In the event that we're being disposed before we've been destroyed
     // we need to destroy the window on our way out.
-    if (!_hasBeenDestroyed && _viewId != null) {
-      // In the event of an argument error, we do nothing. We assume that
-      // the window has been successfully destroyed somehow else.
-      try {
-        await destroyWindow(_viewId!);
-      } on ArgumentError {}
+    if (widget.controller.isReady) {
+      await widget.controller.destroy();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<WindowCreationResult>(
-        key: widget.key,
-        future: _future,
-        builder: (BuildContext context,
-            AsyncSnapshot<WindowCreationResult> metadata) {
-          if (!metadata.hasData) {
-            return const ViewCollection(views: <Widget>[]);
-          }
+      key: widget.key,
+      future: widget.controller._future,
+      builder: (BuildContext context, AsyncSnapshot<WindowCreationResult> metadata) {
+        if (!metadata.hasData) {
+          return const ViewCollection(views: <Widget>[]);
+        }
 
-          return View(
-              view: metadata.data!.view,
-              child: WindowContext(
-                  viewId: metadata.data!.view.viewId, child: widget.child));
-        });
+        return View(
+          view: metadata.data!.view,
+          child: WindowContext(viewId: metadata.data!.view.viewId, child: widget.child),
+        );
+      },
+    );
   }
 }
 
@@ -242,12 +210,13 @@ class WindowContext extends InheritedWidget {
 /// The raw data returned as a result of creating a window.
 class WindowCreationResult {
   /// Creates a new window.
-  WindowCreationResult(
-      {required this.view,
-      required this.archetype,
-      required this.size,
-      this.state,
-      this.parent});
+  WindowCreationResult({
+    required this.view,
+    required this.archetype,
+    required this.size,
+    this.state,
+    this.parent,
+  });
 
   /// The view associated with the window.
   final FlutterView view;
@@ -285,8 +254,14 @@ Future<WindowCreationResult> createRegular({
     viewBuilder: (MethodChannel channel) async {
       return await channel.invokeMethod('createWindow', <String, dynamic>{
             'size': <double>[size.width, size.height],
-            'minSize': sizeConstraints != null ? <double>[sizeConstraints.minWidth, sizeConstraints.minHeight] : null,
-            'maxSize': sizeConstraints != null ? <double>[sizeConstraints.maxWidth, sizeConstraints.maxHeight] : null,
+            'minSize':
+                sizeConstraints != null
+                    ? <double>[sizeConstraints.minWidth, sizeConstraints.minHeight]
+                    : null,
+            'maxSize':
+                sizeConstraints != null
+                    ? <double>[sizeConstraints.maxWidth, sizeConstraints.maxHeight]
+                    : null,
             'title': title,
             'state': state?.toString(),
           })
@@ -298,11 +273,9 @@ Future<WindowCreationResult> createRegular({
 Future<WindowCreationResult> _createWindow({
   required WindowArchetype archetype,
   required Future<Map<Object?, Object?>> Function(MethodChannel channel) viewBuilder,
-  int? parentViewId,
 }) async {
   WidgetsFlutterBinding.ensureInitialized();
-  final Map<Object?, Object?> creationData =
-      await viewBuilder(SystemChannels.windowing);
+  final Map<Object?, Object?> creationData = await viewBuilder(SystemChannels.windowing);
   final int viewId = creationData['viewId']! as int;
   final List<Object?> size = creationData['size']! as List<Object?>;
 
@@ -315,8 +288,7 @@ Future<WindowCreationResult> _createWindow({
           )
           : null;
 
-  final FlutterView flView =
-      WidgetsBinding.instance.platformDispatcher.views.firstWhere(
+  final FlutterView flView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
     (FlutterView view) => view.viewId == viewId,
     orElse: () {
       throw Exception('No matching view found for viewId: $viewId');
@@ -324,10 +296,11 @@ Future<WindowCreationResult> _createWindow({
   );
 
   return WindowCreationResult(
-      view: flView,
-      archetype: archetype,
-      size: Size(size[0]! as double, size[1]! as double),
-      state: state);
+    view: flView,
+    archetype: archetype,
+    size: Size(size[0]! as double, size[1]! as double),
+    state: state,
+  );
 }
 
 /// Destroys the window associated with the provided view ID.
@@ -335,31 +308,78 @@ Future<WindowCreationResult> _createWindow({
 /// [viewId] the view id of the window that should be destroyed
 Future<void> destroyWindow(int viewId) async {
   try {
-    await SystemChannels.windowing
-        .invokeMethod('destroyWindow', <String, dynamic>{'viewId': viewId});
+    await SystemChannels.windowing.invokeMethod('destroyWindow', <String, dynamic>{
+      'viewId': viewId,
+    });
   } on PlatformException catch (e) {
     throw ArgumentError(
-        'Unable to delete window with view_id=$viewId. Does the window exist? Error: $e');
+      'Unable to delete window with view_id=$viewId. Does the window exist? Error: $e',
+    );
   }
 }
 
 class _WindowChangeProperties {
-  _WindowChangeProperties({this.size, this.relativePosition});
+  _WindowChangeProperties({this.size});
 
   Size? size;
   int? parentViewId;
-  Offset? relativePosition;
 }
 
 class _WindowListener {
-  _WindowListener(
-      {required this.viewId,
-      required this.onChanged,
-      required this.onDestroyed});
+  _WindowListener({required this.viewId, required this.onChanged, required this.onDestroyed});
 
   int viewId;
   void Function(_WindowChangeProperties) onChanged;
   void Function()? onDestroyed;
+}
+
+class _WindowingAppGlobalData {
+  _WindowingAppGlobalData() {
+    WidgetsFlutterBinding.ensureInitialized();
+    SystemChannels.windowing.setMethodCallHandler(_methodCallHandler);
+  }
+
+  static _WindowingAppGlobalData get instance {
+    _instance ??= _WindowingAppGlobalData();
+    return _instance!;
+  }
+
+  final List<_WindowListener> _listeners = <_WindowListener>[];
+  static _WindowingAppGlobalData? _instance;
+
+  Future<void> _methodCallHandler(MethodCall call) async {
+    final Map<Object?, Object?> arguments = call.arguments as Map<Object?, Object?>;
+
+    switch (call.method) {
+      case 'onWindowChanged':
+        final int viewId = arguments['viewId']! as int;
+        Size? size;
+        if (arguments['size'] != null) {
+          final List<Object?> sizeRaw = arguments['size']! as List<Object?>;
+          size = Size(sizeRaw[0]! as double, sizeRaw[1]! as double);
+        }
+
+        final _WindowChangeProperties properties = _WindowChangeProperties(size: size);
+        for (final _WindowListener listener in _listeners) {
+          if (listener.viewId == viewId) {
+            listener.onChanged(properties);
+          }
+        }
+      case 'onWindowDestroyed':
+        final int viewId = arguments['viewId']! as int;
+        for (final _WindowListener listener in _listeners) {
+          if (listener.viewId == viewId) {
+            listener.onDestroyed?.call();
+          }
+        }
+
+        _listeners.removeWhere((_WindowListener listener) => listener.viewId == viewId);
+    }
+  }
+
+  void _listen(_WindowListener listener) {
+    _listeners.add(listener);
+  }
 }
 
 /// Declares that an application will create multiple windows.
@@ -376,74 +396,14 @@ class WindowingApp extends StatefulWidget {
 }
 
 class _WindowingAppState extends State<WindowingApp> {
-  final List<_WindowListener> _listeners = <_WindowListener>[];
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsFlutterBinding.ensureInitialized();
-    SystemChannels.windowing.setMethodCallHandler(_methodCallHandler);
-  }
-
-  Future<void> _methodCallHandler(MethodCall call) async {
-    final Map<Object?, Object?> arguments =
-        call.arguments as Map<Object?, Object?>;
-
-    switch (call.method) {
-      case 'onWindowChanged':
-        final int viewId = arguments['viewId']! as int;
-        Size? size;
-        if (arguments['size'] != null) {
-          final List<Object?> sizeRaw = arguments['size']! as List<Object?>;
-          size = Size(sizeRaw[0]! as double, sizeRaw[1]! as double);
-        }
-
-        Offset? relativePosition;
-        if (arguments['relativePosition'] != null) {
-          final List<Object?> relativePositionRaw = arguments['relativePosition']! as List<Object?>;
-          relativePosition = Offset(
-            relativePositionRaw[0]! as double,
-            relativePositionRaw[1]! as double,
-          );
-        }
-
-        final _WindowChangeProperties properties = _WindowChangeProperties(
-          size: size,
-          relativePosition: relativePosition,
-        );
-        for (final _WindowListener listener in _listeners) {
-          if (listener.viewId == viewId) {
-            listener.onChanged(properties);
-          }
-        }
-      case 'onWindowDestroyed':
-        final int viewId = arguments['viewId']! as int;
-        for (final _WindowListener listener in _listeners) {
-          if (listener.viewId == viewId) {
-            listener.onDestroyed?.call();
-          }
-        }
-    }
-  }
-
-  void _registerListener(_WindowListener listener) {
-    _listeners.add(listener);
-  }
-
-  void _unregisterListener(_WindowListener listener) {
-    _listeners.remove(listener);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return _WindowingAppContext(
-        windowingApp: this, child: ViewCollection(views: widget.children));
+    return _WindowingAppContext(windowingApp: this, child: ViewCollection(views: widget.children));
   }
 }
 
 class _WindowingAppContext extends InheritedWidget {
-  const _WindowingAppContext(
-      {super.key, required super.child, required this.windowingApp});
+  const _WindowingAppContext({super.key, required super.child, required this.windowingApp});
 
   final _WindowingAppState windowingApp;
 

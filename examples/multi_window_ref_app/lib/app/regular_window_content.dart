@@ -84,8 +84,16 @@ class _RegularWindowContentState extends State<RegularWindowContent>
             children: [
               ElevatedButton(
                 onPressed: () {
+                  final UniqueKey key = UniqueKey();
                   widget.windowManagerModel.add(KeyedWindowController(
-                      controller: RegularWindowController()));
+                      key: key,
+                      controller: RegularWindowController(
+                          onDestroyed: () =>
+                              widget.windowManagerModel.remove(key),
+                          onError: (String error) =>
+                              widget.windowManagerModel.remove(key),
+                          title: "Regular",
+                          size: widget.windowSettings.regularSize)));
                 },
                 child: const Text('Create Regular Window'),
               ),
@@ -121,8 +129,9 @@ class _RegularWindowContentState extends State<RegularWindowContent>
                     windowSettings: widget.windowSettings,
                     windowManagerModel: widget.windowManagerModel,
                     onDestroyed: () =>
-                        widget.windowManagerModel.remove(controller),
-                    onError: () => widget.windowManagerModel.remove(controller),
+                        widget.windowManagerModel.remove(controller.key),
+                    onError: () =>
+                        widget.windowManagerModel.remove(controller.key),
                   ));
                 }
               }

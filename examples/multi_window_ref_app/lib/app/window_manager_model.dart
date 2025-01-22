@@ -2,12 +2,15 @@ import 'package:flutter/widgets.dart';
 
 class KeyedWindowController {
   KeyedWindowController(
-      {this.parent, this.isMainWindow = false, required this.controller});
+      {this.parent,
+      this.isMainWindow = false,
+      required this.key,
+      required this.controller});
 
   final WindowController? parent;
-  final WindowController controller;
   final bool isMainWindow;
-  final UniqueKey key = UniqueKey();
+  final UniqueKey key;
+  final WindowController controller;
 }
 
 /// Manages a flat list of all of the [WindowController]s that have been
@@ -23,7 +26,7 @@ class WindowManagerModel extends ChangeNotifier {
     }
 
     for (final KeyedWindowController controller in _windows) {
-      if (controller.controller.view?.viewId == _selectedViewId) {
+      if (controller.controller.view.viewId == _selectedViewId) {
         return controller.controller;
       }
     }
@@ -36,8 +39,8 @@ class WindowManagerModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void remove(KeyedWindowController window) {
-    _windows.remove(window);
+  void remove(UniqueKey key) {
+    _windows.removeWhere((KeyedWindowController window) => window.key == key);
     notifyListeners();
   }
 

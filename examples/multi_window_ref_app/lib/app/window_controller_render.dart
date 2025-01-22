@@ -24,10 +24,6 @@ class WindowControllerRender extends StatelessWidget {
       case WindowArchetype.regular:
         return RegularWindow(
             key: key,
-            onDestroyed: onDestroyed,
-            onError: (String? reason) => onError(),
-            size: windowSettings.regularSize,
-            title: "Regular",
             controller: controller as RegularWindowController,
             child: RegularWindowContent(
                 window: controller as RegularWindowController,
