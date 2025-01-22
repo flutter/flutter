@@ -55,8 +55,12 @@ import 'text_selection_toolbar_anchors.dart';
 class SystemContextMenu extends StatefulWidget {
   /// Creates an instance of [SystemContextMenu] that points to the given
   /// [anchor].
-  SystemContextMenu._({super.key, required this.anchor, required this.items, this.onSystemHide})
-    : assert(!_containsDuplicates(items));
+  const SystemContextMenu._({
+    super.key,
+    required this.anchor,
+    required this.items,
+    this.onSystemHide,
+  });
 
   /// Creates an instance of [SystemContextMenu] for the field indicated by the
   /// given [EditableTextState].
@@ -131,21 +135,6 @@ class SystemContextMenu extends StatefulWidget {
       if (editableTextState.lookUpEnabled) const IOSSystemContextMenuItemLookUp(),
       if (editableTextState.searchWebEnabled) const IOSSystemContextMenuItemSearchWeb(),
     ];
-  }
-
-  /// Returns true only if the given list contains at least one pair of
-  /// identical IOSSystemContextMenuItems.
-  static bool _containsDuplicates(List<IOSSystemContextMenuItem> items) {
-    final Set<IOSSystemContextMenuItem> uniqueItems = <IOSSystemContextMenuItem>{};
-
-    for (final IOSSystemContextMenuItem item in items) {
-      if (uniqueItems.contains(item)) {
-        return true;
-      }
-      uniqueItems.add(item);
-    }
-
-    return false;
   }
 
   @override

@@ -77,21 +77,6 @@ class SystemContextMenuController with SystemContextMenuClient {
 
   final Map<int, VoidCallback> _buttonCallbacks = <int, VoidCallback>{};
 
-  /// Returns true only if the given list contains at least one pair of
-  /// identical IOSSystemContextMenuItems.
-  static bool _containsDuplicates(List<IOSSystemContextMenuItem> items) {
-    final Set<IOSSystemContextMenuItem> uniqueItems = <IOSSystemContextMenuItem>{};
-
-    for (final IOSSystemContextMenuItem item in items) {
-      if (uniqueItems.contains(item)) {
-        return true;
-      }
-      uniqueItems.add(item);
-    }
-
-    return false;
-  }
-
   // Begin SystemContextMenuClient.
 
   @override
@@ -158,7 +143,6 @@ class SystemContextMenuController with SystemContextMenuClient {
     WidgetsLocalizations localizations,
   ) {
     assert(!_isDisposed);
-    assert(!_containsDuplicates(items));
     assert(items.isNotEmpty);
 
     // Don't show the same thing that's already being shown.
