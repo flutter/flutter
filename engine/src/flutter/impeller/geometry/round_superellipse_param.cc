@@ -223,7 +223,8 @@ RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
     const RoundingRadii& radii_) {
   if (radii_.AreAllCornersSame()) {
     return RoundSuperellipseParam{
-        .top_right = ComputeQuadrant(bounds_.GetCenter(), bounds_.GetRightTop(), radii_.top_right),
+        .top_right = ComputeQuadrant(bounds_.GetCenter(), bounds_.GetRightTop(),
+                                     radii_.top_right),
         .all_corners_same = true,
     };
   }
