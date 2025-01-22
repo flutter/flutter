@@ -145,8 +145,7 @@ void main() {
   testWidgets(
     'can customize the menu items',
     (WidgetTester tester) async {
-      final List<List<IOSSystemContextMenuItemData>> itemsReceived =
-          <List<IOSSystemContextMenuItemData>>[];
+      final List<List<IOSSystemContextMenuItem>> itemsReceived = <List<IOSSystemContextMenuItem>>[];
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
         (MethodCall methodCall) async {
@@ -154,7 +153,7 @@ void main() {
             case 'ContextMenu.showSystemContextMenu':
               final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
               final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-              final List<IOSSystemContextMenuItemData> lastItems =
+              final List<IOSSystemContextMenuItem> lastItems =
                   untypedItems.map((dynamic value) {
                     final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
                     return systemContextMenuItemDataFromJson(itemJson);
@@ -217,10 +216,10 @@ void main() {
 
       expect(itemsReceived, hasLength(1));
       expect(itemsReceived.last, hasLength(items1.length));
-      expect(itemsReceived.last[0], equals(const IOSSystemContextMenuItemDataCopy()));
+      expect(itemsReceived.last[0], equals(const IOSSystemContextMenuItemCopy()));
       expect(
         itemsReceived.last[1],
-        equals(const IOSSystemContextMenuItemDataShare(title: 'My Share Title')),
+        equals(const IOSSystemContextMenuItemShare(title: 'My Share Title')),
       );
 
       state.hideToolbar();
@@ -451,126 +450,6 @@ void main() {
       await tester.pump();
       expect(find.byKey(menu1Key), findsNothing);
       expect(find.byKey(menu2Key), findsOneWidget);
-    },
-    skip: kIsWeb, // [intended]
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
-
-  testWidgets(
-    'asserts when built with no text input connection',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
-    (WidgetTester tester) async {
-      SystemContextMenu? systemContextMenu;
-      late StateSetter setState;
-      await tester.pumpWidget(
-        Builder(
-          builder: (BuildContext context) {
-            final MediaQueryData mediaQueryData = MediaQuery.of(context);
-            return MediaQuery(
-              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
-              child: MaterialApp(
-                home: Scaffold(
-                  body: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter localSetState) {
-                      setState = localSetState;
-                      return Column(
-                        children: <Widget>[
-                          const TextField(),
-                          if (systemContextMenu != null) systemContextMenu!,
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      );
-
-      // No SystemContextMenu yet, so no assertion error.
-      expect(tester.takeException(), isNull);
-
-      // Add the SystemContextMenu and receive an assertion since there is no
-      // active text input connection.
-      setState(() {
-        final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-        systemContextMenu = SystemContextMenu.editableText(editableTextState: state);
-      });
-
-      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-      dynamic exception;
-      FlutterError.onError = (FlutterErrorDetails details) {
-        exception ??= details.exception;
-      };
-      addTearDown(() {
-        FlutterError.onError = oldHandler;
-      });
-
-      await tester.pump();
-      expect(exception, isAssertionError);
-      expect(exception.toString(), contains('only be shown for an active text input connection'));
-    },
-    skip: kIsWeb, // [intended]
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
-
-  testWidgets(
-    'does not assert when built with an active text input connection',
-    (WidgetTester tester) async {
-      SystemContextMenu? systemContextMenu;
-      late StateSetter setState;
-      await tester.pumpWidget(
-        Builder(
-          builder: (BuildContext context) {
-            final MediaQueryData mediaQueryData = MediaQuery.of(context);
-            return MediaQuery(
-              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
-              child: MaterialApp(
-                home: Scaffold(
-                  body: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter localSetState) {
-                      setState = localSetState;
-                      return Column(
-                        children: <Widget>[
-                          const TextField(),
-                          if (systemContextMenu != null) systemContextMenu!,
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      );
-
-      // No SystemContextMenu yet, so no assertion error.
-      expect(tester.takeException(), isNull);
-
-      // Tap the field to open a text input connection.
-      await tester.tap(find.byType(TextField));
-      await tester.pump();
-
-      // Add the SystemContextMenu and expect no error.
-      setState(() {
-        final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-        systemContextMenu = SystemContextMenu.editableText(editableTextState: state);
-      });
-
-      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-      dynamic exception;
-      FlutterError.onError = (FlutterErrorDetails details) {
-        exception ??= details.exception;
-      };
-      addTearDown(() {
-        FlutterError.onError = oldHandler;
-      });
-
-      await tester.pump();
-      expect(exception, isNull);
     },
     skip: kIsWeb, // [intended]
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
