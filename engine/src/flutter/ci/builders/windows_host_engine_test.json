@@ -28,7 +28,6 @@
             "ninja": {
                 "config": "ci/host_debug_test",
                 "targets": [
-                    "flutter/tools/font_subset",
                     "flutter:unittests"
                 ]
             },
