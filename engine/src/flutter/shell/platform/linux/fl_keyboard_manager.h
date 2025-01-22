@@ -7,7 +7,8 @@
 
 #include <gdk/gdk.h>
 
-#include "flutter/shell/platform/linux/fl_keyboard_view_delegate.h"
+#include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/linux/fl_key_event.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 
 G_BEGIN_DECLS
@@ -37,28 +38,22 @@ G_DECLARE_FINAL_TYPE(FlKeyboardManager,
 /**
  * fl_keyboard_manager_new:
  * @engine: an #FlEngine.
- * @view_delegate: An interface that the manager requires to communicate with
- * the platform. Usually implemented by FlView.
  *
  * Create a new #FlKeyboardManager.
  *
  * Returns: a new #FlKeyboardManager.
  */
-FlKeyboardManager* fl_keyboard_manager_new(
-    FlEngine* engine,
-    FlKeyboardViewDelegate* view_delegate);
+FlKeyboardManager* fl_keyboard_manager_new(FlEngine* engine);
 
-/**
- * fl_keyboard_manager_is_redispatched:
+/** fl_keyboard_manager_add_redispatched_event:
  * @manager: an #FlKeyboardManager.
- * @event: an event received from the system.
+ * @event: an event that will be handled by the manager in the future.
  *
- * Checks if an event was redispacthed from this manager.
- *
- * Returns: %TRUE if the event is redispatched.
+ * Add an event that will be redispatched and handled by the manager in the
+ * future. When that event is received it will be ignored.
  */
-gboolean fl_keyboard_manager_is_redispatched(FlKeyboardManager* manager,
-                                             FlKeyEvent* event);
+void fl_keyboard_manager_add_redispatched_event(FlKeyboardManager* manager,
+                                                FlKeyEvent* event);
 
 /**
  * fl_keyboard_manager_handle_event:
