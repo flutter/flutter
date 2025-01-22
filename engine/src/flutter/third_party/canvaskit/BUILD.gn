@@ -143,7 +143,7 @@ copy("skwasm_st_group") {
   ]
   if (is_debug) {
     if (!wasm_use_dwarf) {
-      sources += [ "$root_out_dir/skwasm_st/skwasm.wasm.map" ]
+      sources += [ "$root_out_dir/skwasm_st/skwasm_st.wasm.map" ]
     }
   }
   outputs = [ "$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}" ]

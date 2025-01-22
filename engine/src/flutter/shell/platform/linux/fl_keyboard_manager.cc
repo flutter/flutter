@@ -86,8 +86,6 @@ struct _FlKeyboardManager {
 
   GWeakRef engine;
 
-  GWeakRef view_delegate;
-
   FlKeyboardManagerSendKeyEventHandler send_key_event_handler;
   gpointer send_key_event_handler_user_data;
 
@@ -100,9 +98,6 @@ struct _FlKeyboardManager {
   FlKeyEmbedderResponder* key_embedder_responder;
 
   FlKeyChannelResponder* key_channel_responder;
-
-  // Events in the process of being redispatched.
-  GPtrArray* pending_redispatches;
 
   // Record the derived layout.
   //
@@ -145,21 +140,7 @@ static void complete_handle_event(FlKeyboardManager* self, GTask* task) {
     return;
   }
 
-  // Redispatch if needed.
-  if (!data->handled) {
-    gboolean filtered = FALSE;
-    g_autoptr(FlKeyboardViewDelegate) view_delegate =
-        FL_KEYBOARD_VIEW_DELEGATE(g_weak_ref_get(&self->view_delegate));
-    if (view_delegate != nullptr) {
-      filtered = fl_keyboard_view_delegate_text_filter_key_press(view_delegate,
-                                                                 data->event);
-    }
-    data->redispatch = !filtered;
-    if (data->redispatch) {
-      g_ptr_array_add(self->pending_redispatches, g_object_ref(data->event));
-    }
-  }
-
+  data->redispatch = !data->handled;
   g_task_return_boolean(task, TRUE);
 }
 
@@ -222,12 +203,6 @@ static uint16_t convert_key_to_char(FlKeyboardManager* self,
 // Make sure that Flutter has derived the layout for the group of the event,
 // if the event contains a goal keycode.
 static void guarantee_layout(FlKeyboardManager* self, FlKeyEvent* event) {
-  g_autoptr(FlKeyboardViewDelegate) view_delegate =
-      FL_KEYBOARD_VIEW_DELEGATE(g_weak_ref_get(&self->view_delegate));
-  if (view_delegate == nullptr) {
-    return;
-  }
-
   guint8 group = fl_key_event_get_group(event);
   if (fl_keyboard_layout_has_group(self->derived_layout, group)) {
     return;
@@ -313,14 +288,12 @@ static void fl_keyboard_manager_dispose(GObject* object) {
   g_cancellable_cancel(self->cancellable);
 
   g_weak_ref_clear(&self->engine);
-  g_weak_ref_clear(&self->view_delegate);
 
   self->keycode_to_goals.reset();
   self->logical_to_mandatory_goals.reset();
 
   g_clear_object(&self->key_embedder_responder);
   g_clear_object(&self->key_channel_responder);
-  g_ptr_array_free(self->pending_redispatches, TRUE);
   g_clear_object(&self->derived_layout);
   if (self->keymap_keys_changed_cb_id != 0) {
     g_signal_handler_disconnect(self->keymap, self->keymap_keys_changed_cb_id);
@@ -349,24 +322,17 @@ static void fl_keyboard_manager_init(FlKeyboardManager* self) {
     }
   }
 
-  self->pending_redispatches = g_ptr_array_new_with_free_func(g_object_unref);
-
   self->keymap = gdk_keymap_get_for_display(gdk_display_get_default());
   self->keymap_keys_changed_cb_id = g_signal_connect_swapped(
       self->keymap, "keys-changed", G_CALLBACK(keymap_keys_changed_cb), self);
   self->cancellable = g_cancellable_new();
 }
 
-FlKeyboardManager* fl_keyboard_manager_new(
-    FlEngine* engine,
-    FlKeyboardViewDelegate* view_delegate) {
-  g_return_val_if_fail(FL_IS_KEYBOARD_VIEW_DELEGATE(view_delegate), nullptr);
-
+FlKeyboardManager* fl_keyboard_manager_new(FlEngine* engine) {
   FlKeyboardManager* self = FL_KEYBOARD_MANAGER(
       g_object_new(fl_keyboard_manager_get_type(), nullptr));
 
   g_weak_ref_init(&self->engine, engine);
-  g_weak_ref_init(&self->view_delegate, view_delegate);
 
   self->key_embedder_responder = fl_key_embedder_responder_new(
       [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
@@ -415,27 +381,6 @@ FlKeyboardManager* fl_keyboard_manager_new(
       fl_key_channel_responder_new(fl_engine_get_binary_messenger(engine));
 
   return self;
-}
-
-gboolean fl_keyboard_manager_is_redispatched(FlKeyboardManager* self,
-                                             FlKeyEvent* event) {
-  g_return_val_if_fail(FL_IS_KEYBOARD_MANAGER(self), FALSE);
-
-  guint32 time = fl_key_event_get_time(event);
-  gboolean is_press = !!fl_key_event_get_is_press(event);
-  guint16 keycode = fl_key_event_get_keycode(event);
-  for (guint i = 0; i < self->pending_redispatches->len; i++) {
-    FlKeyEvent* e =
-        FL_KEY_EVENT(g_ptr_array_index(self->pending_redispatches, i));
-    if (fl_key_event_get_time(e) == time &&
-        !!fl_key_event_get_is_press(e) == is_press &&
-        fl_key_event_get_keycode(e) == keycode) {
-      g_ptr_array_remove_index(self->pending_redispatches, i);
-      return TRUE;
-    }
-  }
-
-  return FALSE;
 }
 
 void fl_keyboard_manager_handle_event(FlKeyboardManager* self,
