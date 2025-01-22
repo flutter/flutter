@@ -161,7 +161,7 @@ void run(
 
     final configConventionErrors = <String>[];
     if (target.properties.isReleaseBuilder) {
-      // If there is a global generators step, assume it is doing something unscrupulous.
+      // If there is a global generators step, assume artifacts are uploaded from the generators.
       if (config.generators.isNotEmpty) {
         debugPrint('  Skipping ${target.name}: Has "generators": [ ... ] which could do anything');
         continue;
