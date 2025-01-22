@@ -150,12 +150,6 @@ Future<void> installCodeAssets({
 /// It enables mocking `package:native_assets_builder` package.
 /// It also enables mocking native toolchain discovery via [cCompilerConfig].
 abstract interface class FlutterNativeAssetsBuildRunner {
-  /// Whether the project has a `.dart_tools/package_config.json`.
-  ///
-  /// If there is no package config, [packagesWithNativeAssets], [build] and
-  /// [link] must not be invoked.
-  Future<bool> hasPackageConfig();
-
   /// All packages in the transitive dependencies that have a `build.dart`.
   Future<List<Package>> packagesWithNativeAssets();
 
@@ -166,7 +160,6 @@ abstract interface class FlutterNativeAssetsBuildRunner {
     required BuildConfigCreator configCreator,
     required BuildValidator buildValidator,
     required ApplicationAssetValidator applicationAssetValidator,
-    required bool includeParentEnvironment,
     required Uri workingDirectory,
     required bool linkingEnabled,
   });
@@ -178,7 +171,6 @@ abstract interface class FlutterNativeAssetsBuildRunner {
     required LinkConfigCreator configCreator,
     required LinkValidator linkValidator,
     required ApplicationAssetValidator applicationAssetValidator,
-    required bool includeParentEnvironment,
     required Uri workingDirectory,
     required BuildResult buildResult,
   });
@@ -193,14 +185,12 @@ abstract interface class FlutterNativeAssetsBuildRunner {
 /// Uses `package:native_assets_builder` for its implementation.
 class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunner {
   FlutterNativeAssetsBuildRunnerImpl(
-    this.projectUri,
     this.packageConfigPath,
     this.packageConfig,
     this.fileSystem,
     this.logger,
   );
 
-  final Uri projectUri;
   final String packageConfigPath;
   final PackageConfig packageConfig;
   final FileSystem fileSystem;
@@ -221,21 +211,21 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
       }
     });
 
-  late final Uri _dartExecutable = fileSystem.directory(Cache.flutterRoot).uri.resolve('bin/dart');
+  // Flutter wraps the Dart executable to update it in place
+  // ($FLUTTER_ROOT/bin/dart). However, since this is a Dart process invocation
+  // in a Flutter process invocation, it should not try to update in place, so
+  // use the Dart standalone executable
+  // ($FLUTTER_ROOT/bin/cache/dart-sdk/bin/dart).
+  late final Uri _dartExecutable = fileSystem
+      .directory(Cache.flutterRoot)
+      .uri
+      .resolve('bin/cache/dart-sdk/bin/dart');
 
   late final NativeAssetsBuildRunner _buildRunner = NativeAssetsBuildRunner(
     logger: _logger,
     dartExecutable: _dartExecutable,
     fileSystem: fileSystem,
-    // TODO(dcharkes): Filter the environment with
-    // NativeAssetsBuildRunner.hookEnvironmentVariablesFilter.
-    hookEnvironment: const LocalPlatform().environment,
   );
-
-  @override
-  Future<bool> hasPackageConfig() {
-    return fileSystem.file(packageConfigPath).exists();
-  }
 
   @override
   Future<List<Package>> packagesWithNativeAssets() async {
@@ -257,7 +247,6 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     required BuildConfigCreator configCreator,
     required BuildValidator buildValidator,
     required ApplicationAssetValidator applicationAssetValidator,
-    required bool includeParentEnvironment,
     required Uri workingDirectory,
     required bool linkingEnabled,
   }) {
@@ -285,7 +274,6 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     required LinkConfigCreator configCreator,
     required LinkValidator linkValidator,
     required ApplicationAssetValidator applicationAssetValidator,
-    required bool includeParentEnvironment,
     required Uri workingDirectory,
     required BuildResult buildResult,
   }) {
@@ -384,24 +372,7 @@ bool _nativeAssetsLinkingEnabled(BuildMode buildMode) {
   }
 }
 
-/// Checks whether this project does not yet have a package config file.
-///
-/// A project has no package config when `pub get` has not yet been run.
-///
-/// Native asset builds cannot be run without a package config. If there is
-/// no package config, leave a logging trace about that.
-Future<bool> _hasNoPackageConfig(FlutterNativeAssetsBuildRunner buildRunner) async {
-  final bool packageConfigExists = await buildRunner.hasPackageConfig();
-  if (!packageConfigExists) {
-    globals.logger.printTrace('No package config found. Skipping native assets compilation.');
-  }
-  return !packageConfigExists;
-}
-
 Future<bool> _nativeBuildRequired(FlutterNativeAssetsBuildRunner buildRunner) async {
-  if (await _hasNoPackageConfig(buildRunner)) {
-    return false;
-  }
   final List<Package> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
   if (packagesWithNativeAssets.isEmpty) {
     globals.logger.printTrace(
@@ -430,9 +401,6 @@ Future<void> ensureNoNativeAssetsOrOsIsSupported(
   FileSystem fileSystem,
   FlutterNativeAssetsBuildRunner buildRunner,
 ) async {
-  if (await _hasNoPackageConfig(buildRunner)) {
-    return;
-  }
   final List<Package> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
   if (packagesWithNativeAssets.isEmpty) {
     globals.logger.printTrace(
@@ -666,7 +634,6 @@ Future<DartBuildResult> _runDartBuild({
             ...await validateCodeAssetInApplication(assets),
           ],
       workingDirectory: projectUri,
-      includeParentEnvironment: true,
       linkingEnabled: linkingEnabled,
     );
     if (buildResult == null) {
@@ -700,7 +667,6 @@ Future<DartBuildResult> _runDartBuild({
               ...await validateCodeAssetInApplication(assets),
             ],
         workingDirectory: projectUri,
-        includeParentEnvironment: true,
         buildResult: buildResult,
       );
       if (linkResult == null) {

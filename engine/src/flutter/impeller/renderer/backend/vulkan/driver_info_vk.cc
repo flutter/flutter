@@ -166,6 +166,8 @@ constexpr VendorVK IdentifyVendor(uint32_t vendor) {
       return VendorVK::kApple;
     case 0x19E5:
       return VendorVK::kHuawei;
+    case 0x144D:
+      return VendorVK::kSamsung;
   }
   // Check if the ID is a known Khronos vendor.
   switch (vendor) {
@@ -201,6 +203,8 @@ constexpr const char* VendorToString(VendorVK vendor) {
       return "Apple";
     case VendorVK::kHuawei:
       return "Huawei";
+    case VendorVK::kSamsung:
+      return "Samsung";
   }
   FML_UNREACHABLE();
 }
@@ -329,24 +333,30 @@ bool DriverInfoVK::IsEmulator() const {
 }
 
 bool DriverInfoVK::IsKnownBadDriver() const {
-  if (adreno_gpu_.has_value()) {
-    AdrenoGPU adreno = adreno_gpu_.value();
-    // See:
-    // https://github.com/flutter/flutter/issues/154103
-    //
-    // Reports "VK_INCOMPLETE" when compiling certain entity shader with
-    // vkCreateGraphicsPipelines, which is not a valid return status.
-    // See https://github.com/flutter/flutter/issues/155185 .
-    //
-    // https://github.com/flutter/flutter/issues/155185
-    // Unknown crashes but device is not easily acquirable.
-    if (adreno <= AdrenoGPU::kAdreno630) {
-      return true;
-    }
-  }
   // Disable Maleoon series GPUs, see:
   // https://github.com/flutter/flutter/issues/156623
   if (vendor_ == VendorVK::kHuawei) {
+    return true;
+  }
+
+  if (vendor_ == VendorVK::kSamsung) {
+    // The first version of the Xclipse series GPU has reported
+    // bugs, unfortunately all versions of this GPU report the
+    // same driver version. Instead we use the Vulkan version
+    // as a proxy, assuming that any newer devices would not
+    // lower the supported Vulkan API level.
+    // See
+    // https://vulkan.gpuinfo.org/listreports.php?devicename=samsung+SM-S906B&platform=android
+    // https://github.com/flutter/flutter/issues/161334
+    return !api_version_.IsAtLeast(Version{1, 3, 0});
+  }
+
+  // https://github.com/flutter/flutter/issues/161122
+  // https://github.com/flutter/flutter/issues/160960
+  // https://github.com/flutter/flutter/issues/160866
+  // https://github.com/flutter/flutter/issues/160804
+  // https://github.com/flutter/flutter/issues/160406
+  if (vendor_ == VendorVK::kImgTec) {
     return true;
   }
   return false;

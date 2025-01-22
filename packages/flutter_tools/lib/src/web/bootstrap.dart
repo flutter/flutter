@@ -4,20 +4,9 @@
 
 import 'package:package_config/package_config.dart';
 
-String generateDDCBootstrapScript({
-  required String entrypoint,
-  required String ddcModuleLoaderUrl,
-  required String mapperUrl,
-  required bool generateLoadingIndicator,
-  String appRootDirectory = '/',
-}) {
-  return '''
-${generateLoadingIndicator ? _generateLoadingIndicator() : ""}
-// TODO(markzipan): This is safe if Flutter app roots are always equal to the
-// host root '/'. Validate if this is true.
-var _currentDirectory = "$appRootDirectory";
-
-window.\$dartCreateScript = (function() {
+/// Used to load prerequisite scripts such as ddc_module_loader.js
+const String _simpleLoaderScript = r'''
+window.$dartCreateScript = (function() {
   // Find the nonce value. (Note, this is only computed once.)
   var scripts = Array.from(document.getElementsByTagName("script"));
   var nonce;
@@ -43,7 +32,7 @@ window.\$dartCreateScript = (function() {
 var forceLoadModule = function (relativeUrl, root) {
   var actualRoot = root ?? _currentDirectory;
   return new Promise(function(resolve, reject) {
-    var script = self.\$dartCreateScript();
+    var script = self.$dartCreateScript();
     let policy = {
       createScriptURL: function(src) {return src;}
     };
@@ -56,6 +45,23 @@ var forceLoadModule = function (relativeUrl, root) {
     document.head.appendChild(script);
   });
 };
+''';
+
+// TODO(srujzs): Delete this once it's no longer used internally.
+String generateDDCBootstrapScript({
+  required String entrypoint,
+  required String ddcModuleLoaderUrl,
+  required String mapperUrl,
+  required bool generateLoadingIndicator,
+  String appRootDirectory = '/',
+}) {
+  return '''
+${generateLoadingIndicator ? _generateLoadingIndicator() : ""}
+// TODO(markzipan): This is safe if Flutter app roots are always equal to the
+// host root '/'. Validate if this is true.
+var _currentDirectory = "$appRootDirectory";
+
+$_simpleLoaderScript
 
 // A map containing the URLs for the bootstrap scripts in debug.
 let _scriptUrls = {
@@ -128,6 +134,91 @@ let _scriptUrls = {
     // they can be arbitrarily overridden based on multi-app load order.
     window.\$dartLoader.loadConfig = loadConfig;
     window.\$dartLoader.loader = loader;
+    loader.nextAttempt();
+  }
+})();
+''';
+}
+
+String generateDDCLibraryBundleBootstrapScript({
+  required String entrypoint,
+  required String ddcModuleLoaderUrl,
+  required String mapperUrl,
+  required bool generateLoadingIndicator,
+  String appRootDirectory = '/',
+}) {
+  return '''
+${generateLoadingIndicator ? _generateLoadingIndicator() : ""}
+// TODO(markzipan): This is safe if Flutter app roots are always equal to the
+// host root '/'. Validate if this is true.
+var _currentDirectory = "$appRootDirectory";
+
+$_simpleLoaderScript
+
+// A map containing the URLs for the bootstrap scripts in debug.
+let _scriptUrls = {
+  "mapper": "$mapperUrl",
+  "moduleLoader": "$ddcModuleLoaderUrl"
+};
+
+(function() {
+  // Load pre-requisite DDC scripts. We intentionally use invalid names to avoid
+  // namespace clashes.
+  let prerequisiteScripts = [
+    {
+      "src": "$ddcModuleLoaderUrl",
+      "id": "ddc_module_loader \x00"
+    },
+    {
+      "src": "$mapperUrl",
+      "id": "dart_stack_trace_mapper \x00"
+    }
+  ];
+
+  // Load ddc_module_loader.js to access DDC's module loader API.
+  let prerequisiteLoads = [];
+  for (let i = 0; i < prerequisiteScripts.length; i++) {
+    prerequisiteLoads.push(forceLoadModule(prerequisiteScripts[i].src));
+  }
+  Promise.all(prerequisiteLoads).then((_) => afterPrerequisiteLogic());
+
+  var afterPrerequisiteLogic = function() {
+    window.\$dartLoader.rootDirectories.push(_currentDirectory);
+    let scripts = [
+      {
+        "src": "dart_sdk.js",
+        "id": "dart_sdk"
+      },
+      {
+        "src": "main_module.bootstrap.js",
+        "id": "data-main"
+      }
+    ];
+
+    let loadConfig = new window.\$dartLoader.LoadConfiguration();
+    loadConfig.bootstrapScript = scripts[scripts.length - 1];
+
+    loadConfig.loadScriptFn = function(loader) {
+      loader.addScriptsToQueue(scripts, null);
+      loader.loadEnqueuedModules();
+    }
+    loadConfig.ddcEventForLoadStart = /* LOAD_ALL_MODULES_START */ 1;
+    loadConfig.ddcEventForLoadedOk = /* LOAD_ALL_MODULES_END_OK */ 2;
+    loadConfig.ddcEventForLoadedError = /* LOAD_ALL_MODULES_END_ERROR */ 3;
+
+    let loader = new window.\$dartLoader.DDCLoader(loadConfig);
+
+    // Record prerequisite scripts' fully resolved URLs.
+    prerequisiteScripts.forEach(script => loader.registerScript(script));
+
+    // Note: these variables should only be used in non-multi-app scenarios
+    // since they can be arbitrarily overridden based on multi-app load order.
+    window.\$dartLoader.loadConfig = loadConfig;
+    window.\$dartLoader.loader = loader;
+
+    // TODO(srujzs): Support hot restart.
+
+    // Begin loading libraries
     loader.nextAttempt();
   }
 })();
@@ -287,6 +378,7 @@ document.addEventListener('dart-app-ready', function (e) {
 ''';
 }
 
+// TODO(srujzs): Delete this once it's no longer used internally.
 String generateDDCMainModule({
   required String entrypoint,
   required bool nullAssertions,
@@ -320,6 +412,35 @@ String generateDDCMainModule({
 ''';
 }
 
+String generateDDCLibraryBundleMainModule({
+  required String entrypoint,
+  required bool nullAssertions,
+  required bool nativeNullAssertions,
+}) {
+  // The typo below in "EXTENTION" is load-bearing, package:build depends on it.
+  return '''
+/* ENTRYPOINT_EXTENTION_MARKER */
+
+(function() {
+  let appName = "org-dartlang-app:/$entrypoint";
+
+  dartDevEmbedder.debugger.registerDevtoolsFormatter();
+
+  let child = {};
+  child.main = function() {
+    let sdkOptions = {
+      nonNullAsserts: $nullAssertions,
+      nativeNonNullAsserts: $nativeNullAssertions,
+    };
+    dartDevEmbedder.runMain(appName, sdkOptions);
+  }
+
+  /* MAIN_EXTENSION_MARKER */
+  child.main();
+})();
+''';
+}
+
 /// Generate a synthetic main module which captures the application's main
 /// method.
 ///
@@ -337,6 +458,7 @@ String generateMainModule({
   required bool nullAssertions,
   required bool nativeNullAssertions,
   String bootstrapModule = 'main_module.bootstrap',
+  String loaderRootDirectory = '',
 }) {
   // The typo below in "EXTENTION" is load-bearing, package:build depends on it.
   return '''
@@ -360,7 +482,7 @@ define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) 
   child.main();
 
   window.\$dartLoader = {};
-  window.\$dartLoader.rootDirectories = [];
+  window.\$dartLoader.rootDirectories = ["$loaderRootDirectory"];
   if (window.\$requireLoader) {
     window.\$requireLoader.getModuleLibraries = dart_sdk.dart.getModuleLibraries;
   }
