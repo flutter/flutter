@@ -3067,8 +3067,12 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     int targetIndex = event.isEnd ? currentSelectionEndIndex : currentSelectionStartIndex;
     SelectionResult result = dispatchSelectionEventToChild(selectables[targetIndex], event);
 
-    if (event is HorizontalGranularlyExtendSelectionEvent)
+    if (event is HorizontalGranularlyExtendSelectionEvent) {
+      // In HorizontalGranularlyExtendSelectionEvent, the "forward" property may not be valid
+      // until the TextDirection is determined. Therefore, we recreate the event with the
+      // proper TextDirection to ensure it reflects the correct directionality for the selection extension.
       event = event.withTextDirection(event.textDirection);
+    }
 
     if (event.forward) {
       assert(result != SelectionResult.previous);
