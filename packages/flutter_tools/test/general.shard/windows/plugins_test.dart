@@ -24,24 +24,29 @@ void main() {
       fileSystem.currentDirectory,
     );
 
-    await writeWindowsPluginFiles(flutterProject, <Plugin>[
-      Plugin(
-        name: 'test',
-        path: 'foo',
-        defaultPackagePlatforms: const <String, String>{},
-        pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
-        platforms: const <String, PluginPlatform>{
-          WindowsPlugin.kConfigKey: WindowsPlugin(
-            name: 'test',
-            pluginClass: 'Foo',
-            variants: <PluginPlatformVariant>{PluginPlatformVariant.win32},
-          ),
-        },
-        dependencies: <String>[],
-        isDirectDependency: true,
-        isDevDependency: false,
-      ),
-    ], renderer);
+    await writeWindowsPluginFiles(
+      flutterProject,
+      <Plugin>[
+        Plugin(
+          name: 'test',
+          path: 'foo',
+          defaultPackagePlatforms: const <String, String>{},
+          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
+          platforms: const <String, PluginPlatform>{
+            WindowsPlugin.kConfigKey: WindowsPlugin(
+              name: 'test',
+              pluginClass: 'Foo',
+              variants: <PluginPlatformVariant>{PluginPlatformVariant.win32},
+            ),
+          },
+          dependencies: <String>[],
+          isDirectDependency: true,
+          isDevDependency: false,
+        ),
+      ],
+      renderer,
+      releaseMode: false,
+    );
 
     final Directory managed = flutterProject.windows.managedDirectory;
     expect(flutterProject.windows.generatedPluginCmakeFile, exists);
