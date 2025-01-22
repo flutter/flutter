@@ -745,7 +745,6 @@ void main() {
     expect(width, entryLabelWidth + leadingWidth + trailingWidth + menuEntryPadding);
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/136678.
   testWidgets('The width is determined by the label when it is longer than menu entries', (
     WidgetTester tester,
   ) async {
