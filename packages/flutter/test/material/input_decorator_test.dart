@@ -4684,6 +4684,26 @@ void main() {
       });
     });
 
+    testWidgets('InputDecorator throws Assertion Error when hint and hintText are provided', (
+      WidgetTester tester,
+    ) async {
+      expect(() {
+        buildInputDecorator(
+          decoration: InputDecoration(
+            hintText: 'Enter text here',
+            hint: const Text('Enter text here', style: TextStyle(fontSize: 20.0)),
+          ),
+        );
+      }, throwsAssertionError);
+    });
+
+    testWidgets('InputDecorator shows hint widget', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(decoration: const InputDecoration(hint: Text('hint'))),
+      );
+      expect(find.text('hint'), findsOneWidget);
+    });
+
     testWidgets('hint style overflow works', (WidgetTester tester) async {
       final String hintText = 'hint text' * 20;
       const TextStyle hintStyle = TextStyle(fontSize: 14.0, overflow: TextOverflow.fade);
@@ -13704,28 +13724,6 @@ void main() {
         expect(getLabelStyle(tester).color, labelStyle.color);
       },
     );
-
-    group('test hint and hintText', () {
-      testWidgets('InputDecorator throws Assertion Error when hint and hintText are provided', (
-        WidgetTester tester,
-      ) async {
-        expect(() {
-          buildInputDecorator(
-            decoration: InputDecoration(
-              hintText: 'Enter text here',
-              hint: const Text('Enter text here', style: TextStyle(fontSize: 20.0)),
-            ),
-          );
-        }, throwsAssertionError);
-      });
-
-      testWidgets('InputDecorator shows hint widget', (WidgetTester tester) async {
-        await tester.pumpWidget(
-          buildInputDecorator(decoration: const InputDecoration(hint: Text('hint'))),
-        );
-        expect(find.text('hint'), findsOneWidget);
-      });
-    });
 
     testWidgets('hint style overflow works', (WidgetTester tester) async {
       final String hintText = 'hint text' * 20;
