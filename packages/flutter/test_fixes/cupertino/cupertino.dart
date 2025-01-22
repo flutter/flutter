@@ -288,7 +288,7 @@ void main() {
   );
 
   // https://github.com/flutter/flutter/pull/161295
- final cupertinoButton = CupertinoButton(minSize: 60.0);
+  final cupertinoButton = CupertinoButton(minSize: 60.0);
   double? minWidth = cupertinoButton.minWidth;
   double? minHeight = cupertinoButton.minHeight;
 }
