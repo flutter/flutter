@@ -840,14 +840,17 @@ TEST(FlKeyboardManagerTest, GetPressedState) {
   // Dispatch a key event.
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
+  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
   fl_keyboard_manager_handle_event(
       manager, event, nullptr,
       [](GObject* object, GAsyncResult* result, gpointer user_data) {
         g_autoptr(FlKeyEvent) redispatched_event = nullptr;
         EXPECT_TRUE(fl_keyboard_manager_handle_event_finish(
             FL_KEYBOARD_MANAGER(object), result, &redispatched_event, nullptr));
+        EXPECT_NE(redispatched_event, nullptr);
+        g_main_loop_quit(static_cast<GMainLoop*>(user_data));
       },
-      nullptr);
+      loop);
 
   GHashTable* pressedState = fl_keyboard_manager_get_pressed_state(manager);
   EXPECT_EQ(g_hash_table_size(pressedState), 1u);
@@ -855,6 +858,7 @@ TEST(FlKeyboardManagerTest, GetPressedState) {
   gpointer physical_key =
       g_hash_table_lookup(pressedState, uint64_to_gpointer(kPhysicalKeyA));
   EXPECT_EQ(gpointer_to_uint64(physical_key), kLogicalKeyA);
+  g_main_loop_run(loop);
 }
 
 // The following layout data is generated using DEBUG_PRINT_LAYOUT.

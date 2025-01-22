@@ -8,18 +8,6 @@
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_key_event.h"
 
-/**
- * FlKeyEmbedderResponderAsyncCallback:
- * @event: whether the event has been handled.
- * @user_data: the same value as user_data sent by
- * #fl_key_responder_handle_event.
- *
- * The signature for a callback with which a #FlKeyEmbedderResponder
- *asynchronously reports whether the responder handles the event.
- **/
-typedef void (*FlKeyEmbedderResponderAsyncCallback)(bool handled,
-                                                    gpointer user_data);
-
 G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE(FlKeyEmbedderResponder,
@@ -54,21 +42,38 @@ FlKeyEmbedderResponder* fl_key_embedder_responder_new(FlEngine* engine);
  * @event: the event to be handled. Must not be null. The object is managed by
  * callee and must not be assumed available after this function.
  * @specified_logical_key:
- * @callback: the callback to report the result. It should be called exactly
- * once. Must not be null.
- * @user_data: a value that will be sent back in the callback. Can be null.
+ * @cancellable: (allow-none): a #GCancellable or %NULL.
+ * @callback: (scope async): a #GAsyncReadyCallback to call when the view is
+ * added.
+ * @user_data: (closure): user data to pass to @callback.
  *
- * Let the responder handle an event, expecting the responder to report
- *  whether to handle the event. The result will be reported by invoking
- * `callback` exactly once, which might happen after
- * `fl_key_embedder_responder_handle_event` or during it.
+ * Let the responder handle an event, expecting the responder to report whether
+ * to handle the event.
  */
-void fl_key_embedder_responder_handle_event(
+void fl_key_embedder_responder_handle_event(FlKeyEmbedderResponder* responder,
+                                            FlKeyEvent* event,
+                                            uint64_t specified_logical_key,
+                                            GCancellable* cancellable,
+                                            GAsyncReadyCallback callback,
+                                            gpointer user_data);
+
+/**
+ * fl_key_embedder_responder_handle_event_finish:
+ * @responder: an #FlKeyEmbedderResponder.
+ * @result: a #GAsyncResult.
+ * @handled: location to write if this event was handled by the embedder.
+ * @error: (allow-none): #GError location to store the error occurring, or %NULL
+ * to ignore.
+ *
+ * Completes request started with fl_key_embedder_responder_handle_event().
+ *
+ * Returns %TRUE on success.
+ */
+gboolean fl_key_embedder_responder_handle_event_finish(
     FlKeyEmbedderResponder* responder,
-    FlKeyEvent* event,
-    uint64_t specified_logical_key,
-    FlKeyEmbedderResponderAsyncCallback callback,
-    gpointer user_data);
+    GAsyncResult* result,
+    gboolean* handled,
+    GError** error);
 
 /**
  * fl_key_embedder_responder_sync_modifiers_if_needed:
