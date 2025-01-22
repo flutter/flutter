@@ -737,7 +737,6 @@ Future<void> _writeIOSPluginRegistrant(
     methodChannelPlugins,
     IOSPlugin.kConfigKey,
   );
-
   final Map<String, Object> context = <String, Object>{
     'os': 'ios',
     'deploymentTarget': '12.0',
