@@ -3902,7 +3902,6 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  // Regression test for https://github.com/flutter/flutter/pull/161903
   testWidgets('DropdownMenu passes maxLines to TextField', (WidgetTester tester) async {
     // default
     await tester.pumpWidget(
