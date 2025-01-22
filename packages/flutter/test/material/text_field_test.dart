@@ -17556,6 +17556,8 @@ void main() {
 
       expect(controller.selection.base.offset, 3);
       expect(controller.selection.extent.offset, 3);
+
+      controller.dispose();
     },
   );
 }
