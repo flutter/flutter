@@ -5712,7 +5712,7 @@ final class _SemanticsGeometry {
     required _RenderObjectSemantics parent,
     required _RenderObjectSemantics child,
   }) {
-    final Matrix4 transform = geometry.transform.clone();
+    final Matrix4 transform = Matrix4.identity();
 
     Matrix4? parentToCommonAncestorTransform;
     RenderObject childRenderObject = child.renderObject;
