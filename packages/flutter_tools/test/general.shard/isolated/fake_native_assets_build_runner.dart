@@ -21,6 +21,7 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
     this.ndkCCompilerConfigResult,
   });
 
+  // TODO(dcharkes): Cleanup this fake https://github.com/flutter/flutter/issues/162061
   final BuildResult? Function(BuildInput)? onBuild;
   final LinkResult? Function(LinkInput)? onLink;
   final BuildResult? buildResult;
@@ -59,7 +60,6 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
             ..config.setupBuild(dryRun: false, linkingEnabled: linkingEnabled);
       final BuildInput buildConfig = BuildInput(configBuilder.json);
       if (onBuild != null) {
-        // This makes no sense, the result is simply overwritten!
         result = onBuild!(buildConfig);
       }
       buildInvocations++;
@@ -92,7 +92,6 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
             ..config.setupShared(buildAssetTypes: buildAssetTypes);
       final LinkInput buildConfig = LinkInput(configBuilder.json);
       if (onLink != null) {
-        // This makes no sense, the result is simply overwritten!
         result = onLink!(buildConfig);
       }
       linkInvocations++;
