@@ -47,8 +47,8 @@ const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivat
   SingleActivator(LogicalKeyboardKey.end): _FocusLastMenuItemIntent(),
 };
 
-/// Anchor and menu positioning information passed to
-/// [RawMenuAnchor.withOverlayBuilder].
+/// Anchor and menu information passed to
+/// [RawMenuAnchor.fromOverlayBuilder].
 @immutable
 class RawMenuOverlayInfo {
   /// Creates a [RawMenuOverlayInfo].
@@ -71,7 +71,8 @@ class RawMenuOverlayInfo {
   /// of the anchor that the menu should be positioned at.
   final Offset? position;
 
-  /// The group ID of the tap region that wraps widgets in this menu system.
+  /// The [TapRegion.groupId] of the [TapRegion] that wraps widgets in this menu
+  /// system.
   final Object tapRegionGroupId;
 
   @override
@@ -97,7 +98,7 @@ class RawMenuOverlayInfo {
   }
 }
 
-/// The type of builder function used by [RawMenuAnchor.withOverlayBuilder] to build
+/// The type of builder function used by [RawMenuAnchor.fromOverlayBuilder] to build
 /// the overlay attached to a [RawMenuAnchor].
 ///
 /// The `context` is the context that the overlay is being built in.
@@ -106,7 +107,7 @@ class RawMenuOverlayInfo {
 /// was passed to the [RawMenuAnchor].
 ///
 /// The `info` describes the info of the menu overlay for the
-/// [RawMenuAnchor.withOverlayBuilder] constructor.
+/// [RawMenuAnchor.fromOverlayBuilder] constructor.
 typedef RawMenuAnchorOverlayBuilder =
     Widget Function(BuildContext context, RawMenuOverlayInfo info);
 
@@ -169,12 +170,12 @@ class _RawMenuAnchorScope extends InheritedWidget {
 /// used for a conventional vertical layout with a customizable appearance.
 ///
 /// To customize how the menu [Overlay] is displayed, the
-/// [RawMenuAnchor.withOverlayBuilder] constructor delegates overlay
+/// [RawMenuAnchor.fromOverlayBuilder] constructor delegates overlay
 /// construction to a builder function. This constructor is useful for creating
 /// menu overlays with custom positioning or focus management, but requires
 /// users manage positioning, semantics, and focus themselves.
 ///
-/// The `overlayBuilder` passed to [RawMenuAnchor.withOverlayBuilder] is called
+/// The `overlayBuilder` passed to [RawMenuAnchor.fromOverlayBuilder] is called
 /// with an `info` argument that provides the anchor's [Rect], the
 /// [Size] of the overlay, the [TapRegion.groupId] used by members of the menu
 /// system, and the [position] argument passed to [MenuController.open].
@@ -292,13 +293,13 @@ class RawMenuAnchor extends _RawMenuAnchor {
   ///
   /// {@tool dartpad}
   ///
-  /// This example uses a [RawMenuAnchor.withOverlayBuilder] to build an
+  /// This example uses a [RawMenuAnchor.fromOverlayBuilder] to build an
   /// animated select menu with four items. The menu opens with the last
   /// selected item positioned above the anchor.
   ///
   /// ** See code in examples/api/lib/widgets/raw_menu_anchor/raw_menu_anchor.2.dart **
   /// {@end-tool}
-  const RawMenuAnchor.withOverlayBuilder({
+  const RawMenuAnchor.fromOverlayBuilder({
     super.key,
     super.controller,
     super.childFocusNode,

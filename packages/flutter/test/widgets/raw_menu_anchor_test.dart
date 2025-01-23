@@ -241,7 +241,7 @@ void main() {
   testWidgets('[Overlays] Can only have one open child anchor', (WidgetTester tester) async {
     await tester.pumpWidget(
       App(
-        RawMenuAnchor.withOverlayBuilder(
+        RawMenuAnchor.fromOverlayBuilder(
           overlayBuilder: (BuildContext context, RawMenuOverlayInfo position) {
             return Column(
               children: <Widget>[
@@ -914,7 +914,7 @@ void main() {
       App(
         Transform(
           transform: Matrix4.translationValues(-50, 50, 0)..scale(1.2),
-          child: RawMenuAnchor.withOverlayBuilder(
+          child: RawMenuAnchor.fromOverlayBuilder(
             controller: controller,
             overlayBuilder: (BuildContext context, RawMenuOverlayInfo position) {
               builderPosition = position;
@@ -1219,7 +1219,7 @@ void main() {
                   },
                 ),
               },
-              child: RawMenuAnchor.withOverlayBuilder(
+              child: RawMenuAnchor.fromOverlayBuilder(
                 controller: controller,
                 overlayBuilder: (BuildContext context, RawMenuOverlayInfo position) {
                   return Column(
@@ -1436,7 +1436,7 @@ void main() {
     RawMenuOverlayInfo? overlayPosition;
     await tester.pumpWidget(
       App(
-        RawMenuAnchor.withOverlayBuilder(
+        RawMenuAnchor.fromOverlayBuilder(
           overlayBuilder: (BuildContext context, RawMenuOverlayInfo position) {
             overlayPosition = position;
             return const SizedBox();
@@ -1455,7 +1455,7 @@ void main() {
   testWidgets('[OverlayBuilder] Overlay contents can be positioned', (WidgetTester tester) async {
     await tester.pumpWidget(
       App(
-        RawMenuAnchor.withOverlayBuilder(
+        RawMenuAnchor.fromOverlayBuilder(
           overlayBuilder: (BuildContext context, RawMenuOverlayInfo position) {
             return Positioned(
               top: position.anchorRect.top,
@@ -1489,7 +1489,7 @@ void main() {
 
     await tester.pumpWidget(
       App(
-        RawMenuAnchor.withOverlayBuilder(
+        RawMenuAnchor.fromOverlayBuilder(
           overlayBuilder: (BuildContext context, RawMenuOverlayInfo position) {
             return Positioned.fromRect(
               rect: position.anchorRect.translate(200, 200),

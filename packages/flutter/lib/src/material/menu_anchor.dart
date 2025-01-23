@@ -377,7 +377,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
   Widget build(BuildContext context) {
     final Widget child = _MenuAnchorScope(
       state: this,
-      child: RawMenuAnchor.withOverlayBuilder(
+      child: RawMenuAnchor.fromOverlayBuilder(
         useRootOverlay: widget.useRootOverlay,
         onOpen: widget.onOpen,
         onClose: widget.onClose,
