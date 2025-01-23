@@ -38,9 +38,7 @@ Future<void> testMain() async {
     expect(createdImage, image2);
 
     ui.Image.onCreate = null;
-    // TODO(polina-c): unskip the test when bug is fixed:
-    // https://github.com/flutter/flutter/issues/110599
-  }, skip: true);
+  });
 
   test('dispose() invokes onDispose once', () async {
     int onDisposeInvokedCount = 0;
@@ -65,9 +63,7 @@ Future<void> testMain() async {
     expect(disposedImage, image2);
 
     ui.Image.onDispose = null;
-    // TODO(polina-c): unskip the test when bug is fixed:
-    // https://github.com/flutter/flutter/issues/110599
-  }, skip: true);
+  });
 }
 
 Future<ui.Image> _createImage() => _createPicture().toImage(10, 10);
