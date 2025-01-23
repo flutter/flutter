@@ -2250,8 +2250,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final bool maintainHintHeight = decoration.maintainHintHeight;
     Widget? hint;
     if (decoration.hint != null || hintText != null) {
-      final Widget hintWidget;
-      hintWidget =
+      final Widget hintWidget =
           decoration.hint ??
           Text(
             hintText!,
