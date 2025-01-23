@@ -29,25 +29,7 @@ function script_location() {
 }
 
 # So that users can run this script from anywhere and it will work as expected.
-SCRIPT_LOCATION="$(script_location)"
-FLUTTER_ROOT="$(dirname "$(dirname "$SCRIPT_LOCATION")")"
+cd "$(script_location)"
 
-# Next we need to update the flutter/tests checkout.
-#
-# We use the SHA listed in the sibling file "tests.version" so that upstream
-# changes to flutter/tests do not turn the flutter/flutter tree red, and instead
-# require an atomic update (of the SHA listed in "tests.version").
-#
-# See https://github.com/flutter/flutter/issues/162041.
-
-# Read the SHA from the file "tests.version"
-tests_sha=$(cat $SCRIPT_LOCATION/tests.version)
-echo "Running tests @ flutter/tests $tests_sha"
-
-# Clone the flutter/tests repository and checkout the provided SHA
-git clone --depth 1 https://github.com/flutter/tests.git $FLUTTER_ROOT/bin/cache/pkg/tests
-git -C $FLUTTER_ROOT/bin/cache/pkg/tests checkout $tests_sha
-
-# Run the tests
-set -ex
-dart --enable-asserts $SCRIPT_LOCATION/run_tests.dart --skip-on-fetch-failure --skip-template $FLUTTER_ROOT/bin/cache/pkg/tests/registry/*.test
+# Run the cross-platform script.
+dart run ci.dart
