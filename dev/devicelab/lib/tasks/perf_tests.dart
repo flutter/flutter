@@ -281,11 +281,17 @@ TaskFunction createHelloWorldCompileTest() {
 }
 
 TaskFunction createImitationGameSwiftUITest() {
-  return CompileTest('${flutterDirectory.path}/dev/benchmarks/imitation_game_swiftui', reportPackageContentSizes: true).runSwiftUIApp;
+  return CompileTest(
+    '${flutterDirectory.path}/dev/benchmarks/imitation_game_swiftui',
+    reportPackageContentSizes: true,
+  ).runSwiftUIApp;
 }
 
 TaskFunction createImitationGameFlutterTest() {
-  return CompileTest('${flutterDirectory.path}/dev/benchmarks/imitation_game_flutter', reportPackageContentSizes: true).run;
+  return CompileTest(
+    '${flutterDirectory.path}/dev/benchmarks/imitation_game_flutter',
+    reportPackageContentSizes: true,
+  ).run;
 }
 
 TaskFunction createWebCompileTest() {
@@ -1697,47 +1703,45 @@ class CompileTest {
 
   Future<TaskResult> runSwiftUIApp() async {
     return inDirectory<TaskResult>(testDirectory, () async {
-    await Process.run('xcodebuild', <String>[
-      'clean',
-      '-allTargets'
-    ]);
+      await Process.run('xcodebuild', <String>['clean', '-allTargets']);
 
-    int releaseSizeInBytes = 0;
-    final Stopwatch watch = Stopwatch();
+      int releaseSizeInBytes = 0;
+      final Stopwatch watch = Stopwatch();
 
-    watch.start();
-    await Process.run(workingDirectory: testDirectory ,'xcodebuild', <String>[
-      '-scheme',
-      'hello_world_swiftui',
-      '-target',
-      'hello_world_swiftui',
-      '-sdk',
-      'iphoneos',
-      '-configuration',
-      'Release',
-      '-archivePath',
-      '$testDirectory/hello_world_swiftui',
-      'archive'
-    ]).then((ProcessResult results) {
-      watch.stop();
-      print(results.stdout);
-      if (results.exitCode != 0) {
-        print(results.stderr);
-      }
-    });
+      watch.start();
+      await Process.run(workingDirectory: testDirectory, 'xcodebuild', <String>[
+        '-scheme',
+        'hello_world_swiftui',
+        '-target',
+        'hello_world_swiftui',
+        '-sdk',
+        'iphoneos',
+        '-configuration',
+        'Release',
+        '-archivePath',
+        '$testDirectory/hello_world_swiftui',
+        'archive',
+      ]).then((ProcessResult results) {
+        watch.stop();
+        print(results.stdout);
+        if (results.exitCode != 0) {
+          print(results.stderr);
+        }
+      });
 
-    final String appPath = '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
+      final String appPath =
+          '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
 
-    // Zip up the .app file to get an approximation of the .ipa size.
-    await exec('tar', <String>['-zcf', 'app.tar.gz', appPath]);
-    releaseSizeInBytes = await file('$testDirectory/app.tar.gz').length();
+      // Zip up the .app file to get an approximation of the .ipa size.
+      await exec('tar', <String>['-zcf', 'app.tar.gz', appPath]);
+      releaseSizeInBytes = await file('$testDirectory/app.tar.gz').length();
 
-    final Map<String, dynamic> metrics = <String, dynamic>{};
-    metrics.addAll(<String, dynamic>{
-      'release_swiftui_compile_millis': watch.elapsedMilliseconds,
-      'release_swiftui_size_bytes': releaseSizeInBytes
-    });
-    return TaskResult.success(metrics);
+      final Map<String, dynamic> metrics = <String, dynamic>{};
+      metrics.addAll(<String, dynamic>{
+        'release_swiftui_compile_millis': watch.elapsedMilliseconds,
+        'release_swiftui_size_bytes': releaseSizeInBytes,
+      });
+      return TaskResult.success(metrics);
     });
   }
 
