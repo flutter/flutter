@@ -45,6 +45,16 @@ G_DECLARE_FINAL_TYPE(FlKeyboardManager,
  */
 FlKeyboardManager* fl_keyboard_manager_new(FlEngine* engine);
 
+/** fl_keyboard_manager_add_redispatched_event:
+ * @manager: an #FlKeyboardManager.
+ * @event: an event that will be handled by the manager in the future.
+ *
+ * Add an event that will be redispatched and handled by the manager in the
+ * future. When that event is received it will be ignored.
+ */
+void fl_keyboard_manager_add_redispatched_event(FlKeyboardManager* manager,
+                                                FlKeyEvent* event);
+
 /**
  * fl_keyboard_manager_handle_event:
  * @manager: an #FlKeyboardManager.
