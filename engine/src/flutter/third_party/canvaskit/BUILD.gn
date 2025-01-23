@@ -16,8 +16,7 @@ wasm_toolchain("canvaskit") {
     skia_use_libpng_decode = true
     skia_use_libwebp_decode = true
 
-    # Disable LTO.
-    enable_lto = false
+    wasm_prioritize_size = true
   }
 }
 
@@ -51,8 +50,7 @@ wasm_toolchain("canvaskit_chromium") {
     skia_use_libpng_decode = true
     skia_use_libwebp_decode = true
 
-    # Disable LTO.
-    enable_lto = false
+    wasm_prioritize_size = true
   }
 }
 

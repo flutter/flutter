@@ -58,6 +58,7 @@ template("skwasm_variant") {
     if (invoker.multi_threaded) {
       sources += [ "surface_mt.cpp" ]
       ldflags += [
+        "-sSHARED_MEMORY=1",
         "-sPTHREAD_POOL_SIZE=1",
         "-Wno-pthreads-mem-growth",
         "--js-library",
