@@ -191,9 +191,6 @@ TEST(FlKeyboardManagerTest, EngineHandledChannelNotHandledSync) {
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-  fl_keyboard_manager_set_lookup_key_handler(
-      manager, [](const GdkKeymapKey* key, gpointer user_data) { return 0u; },
-      nullptr);
 
   EXPECT_TRUE(fl_engine_start(engine, nullptr));
 
@@ -239,9 +236,6 @@ TEST(FlKeyboardManagerTest, EngineNotHandledChannelHandledSync) {
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-  fl_keyboard_manager_set_lookup_key_handler(
-      manager, [](const GdkKeymapKey* key, gpointer user_data) { return 0u; },
-      nullptr);
 
   EXPECT_TRUE(fl_engine_start(engine, nullptr));
 
@@ -287,9 +281,6 @@ TEST(FlKeyboardManagerTest, EngineHandledChannelHandledSync) {
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-  fl_keyboard_manager_set_lookup_key_handler(
-      manager, [](const GdkKeymapKey* key, gpointer user_data) { return 0u; },
-      nullptr);
 
   EXPECT_TRUE(fl_engine_start(engine, nullptr));
 
@@ -335,9 +326,6 @@ TEST(FlKeyboardManagerTest, EngineNotHandledChannelNotHandledSync) {
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-  fl_keyboard_manager_set_lookup_key_handler(
-      manager, [](const GdkKeymapKey* key, gpointer user_data) { return 0u; },
-      nullptr);
 
   EXPECT_TRUE(fl_engine_start(engine, nullptr));
 
@@ -391,9 +379,6 @@ TEST(FlKeyboardManagerTest, EngineHandledChannelNotHandledAsync) {
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-  fl_keyboard_manager_set_lookup_key_handler(
-      manager, [](const GdkKeymapKey* key, gpointer user_data) { return 0u; },
-      nullptr);
 
   EXPECT_TRUE(fl_engine_start(engine, nullptr));
 
@@ -455,9 +440,6 @@ TEST(FlKeyboardManagerTest, EngineNotHandledChannelHandledAsync) {
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-  fl_keyboard_manager_set_lookup_key_handler(
-      manager, [](const GdkKeymapKey* key, gpointer user_data) { return 0u; },
-      nullptr);
 
   EXPECT_TRUE(fl_engine_start(engine, nullptr));
 
@@ -519,9 +501,6 @@ TEST(FlKeyboardManagerTest, EngineHandledChannelHandledAsync) {
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-  fl_keyboard_manager_set_lookup_key_handler(
-      manager, [](const GdkKeymapKey* key, gpointer user_data) { return 0u; },
-      nullptr);
 
   EXPECT_TRUE(fl_engine_start(engine, nullptr));
 
@@ -583,9 +562,6 @@ TEST(FlKeyboardManagerTest, EngineNotHandledChannelNotHandledAsync) {
   g_autoptr(FlEngine) engine =
       fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-  fl_keyboard_manager_set_lookup_key_handler(
-      manager, [](const GdkKeymapKey* key, gpointer user_data) { return 0u; },
-      nullptr);
 
   EXPECT_TRUE(fl_engine_start(engine, nullptr));
 
@@ -658,9 +634,6 @@ TEST(FlKeyboardManagerTest, CorrectLogicalKeyForLayouts) {
                         call_record_new(event, callback, user_data));
         return kSuccess;
       }));
-  fl_keyboard_manager_set_lookup_key_handler(
-      manager, [](const GdkKeymapKey* key, gpointer user_data) { return 0u; },
-      nullptr);
 
   auto sendTap = [&](guint8 keycode, guint keyval, guint8 group) {
     g_autoptr(FlKeyEvent) event1 = fl_key_event_new(
