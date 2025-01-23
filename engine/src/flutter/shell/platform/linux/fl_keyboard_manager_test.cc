@@ -833,11 +833,29 @@ TEST(FlKeyboardManagerTest, SynthesizeModifiersIfNeeded) {
 TEST(FlKeyboardManagerTest, GetPressedState) {
   ::testing::NiceMock<flutter::testing::MockKeymap> mock_keymap;
 
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  g_autoptr(FlEngine) engine =
+      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
 
+  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+
   // Dispatch a key event.
+  fl_mock_binary_messenger_set_json_message_channel(
+      messenger, "flutter/keyevent",
+      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
+         gpointer user_data) {
+        FlValue* response = fl_value_new_map();
+        fl_value_set_string_take(response, "handled", fl_value_new_bool(FALSE));
+        return response;
+      },
+      nullptr);
+  fl_engine_get_embedder_api(engine)->SendKeyEvent = MOCK_ENGINE_PROC(
+      SendKeyEvent, ([](auto engine, const FlutterKeyEvent* event,
+                        FlutterKeyEventCallback callback, void* user_data) {
+        callback(false, user_data);
+        return kSuccess;
+      }));
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
   g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
@@ -851,14 +869,14 @@ TEST(FlKeyboardManagerTest, GetPressedState) {
         g_main_loop_quit(static_cast<GMainLoop*>(user_data));
       },
       loop);
+  g_main_loop_run(loop);
 
-  GHashTable* pressedState = fl_keyboard_manager_get_pressed_state(manager);
-  EXPECT_EQ(g_hash_table_size(pressedState), 1u);
+  GHashTable* pressed_state = fl_keyboard_manager_get_pressed_state(manager);
+  EXPECT_EQ(g_hash_table_size(pressed_state), 1u);
 
   gpointer physical_key =
-      g_hash_table_lookup(pressedState, uint64_to_gpointer(kPhysicalKeyA));
+      g_hash_table_lookup(pressed_state, uint64_to_gpointer(kPhysicalKeyA));
   EXPECT_EQ(gpointer_to_uint64(physical_key), kLogicalKeyA);
-  g_main_loop_run(loop);
 }
 
 // The following layout data is generated using DEBUG_PRINT_LAYOUT.

@@ -89,9 +89,6 @@ struct _FlKeyboardManager {
   FlKeyboardManagerLookupKeyHandler lookup_key_handler;
   gpointer lookup_key_handler_user_data;
 
-  FlKeyboardManagerGetPressedStateHandler get_pressed_state_handler;
-  gpointer get_pressed_state_handler_user_data;
-
   // Key events that have been redispatched.
   GPtrArray* redispatched_key_events;
 
@@ -444,13 +441,8 @@ void fl_keyboard_manager_sync_modifier_if_needed(FlKeyboardManager* self,
 
 GHashTable* fl_keyboard_manager_get_pressed_state(FlKeyboardManager* self) {
   g_return_val_if_fail(FL_IS_KEYBOARD_MANAGER(self), nullptr);
-  if (self->get_pressed_state_handler != nullptr) {
-    return self->get_pressed_state_handler(
-        self->get_pressed_state_handler_user_data);
-  } else {
-    return fl_key_embedder_responder_get_pressed_state(
-        self->key_embedder_responder);
-  }
+  return fl_key_embedder_responder_get_pressed_state(
+      self->key_embedder_responder);
 }
 
 void fl_keyboard_manager_set_lookup_key_handler(
@@ -460,13 +452,4 @@ void fl_keyboard_manager_set_lookup_key_handler(
   g_return_if_fail(FL_IS_KEYBOARD_MANAGER(self));
   self->lookup_key_handler = lookup_key_handler;
   self->lookup_key_handler_user_data = user_data;
-}
-
-void fl_keyboard_manager_set_get_pressed_state_handler(
-    FlKeyboardManager* self,
-    FlKeyboardManagerGetPressedStateHandler get_pressed_state_handler,
-    gpointer user_data) {
-  g_return_if_fail(FL_IS_KEYBOARD_MANAGER(self));
-  self->get_pressed_state_handler = get_pressed_state_handler;
-  self->get_pressed_state_handler_user_data = user_data;
 }
