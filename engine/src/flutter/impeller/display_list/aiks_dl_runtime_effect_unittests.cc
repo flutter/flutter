@@ -11,6 +11,9 @@
 #include "flutter/display_list/effects/dl_runtime_effect.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 
+#include "include/core/SkPath.h"
+#include "include/core/SkRRect.h"
+
 namespace impeller {
 namespace testing {
 
@@ -51,10 +54,10 @@ TEST_P(AiksTest, CanRenderClippedRuntimeEffects) {
 
   DisplayListBuilder builder;
   builder.Save();
-  builder.ClipRoundRect(
-      DlRoundRect::MakeRectXY(DlRect::MakeXYWH(0, 0, 400, 400), 10.0, 10.0),
+  builder.ClipRRect(
+      SkRRect::MakeRectXY(SkRect::MakeXYWH(0, 0, 400, 400), 10.0, 10.0),
       DlCanvas::ClipOp::kIntersect);
-  builder.DrawRect(DlRect::MakeXYWH(0, 0, 400, 400), paint);
+  builder.DrawRect(SkRect::MakeXYWH(0, 0, 400, 400), paint);
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -103,7 +106,7 @@ TEST_P(AiksTest, CanRenderRuntimeEffectFilter) {
       uniform_data));
 
   DisplayListBuilder builder;
-  builder.DrawRect(DlRect::MakeXYWH(0, 0, 400, 400), paint);
+  builder.DrawRect(SkRect::MakeXYWH(0, 0, 400, 400), paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
