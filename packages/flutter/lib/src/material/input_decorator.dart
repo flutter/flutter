@@ -2748,7 +2748,7 @@ class InputDecoration {
          'Declaring both label and labelText is not supported.',
        ),
        assert(
-         !(hintText != null && hint != null),
+         hint == null || hintText == null,
          'Declaring both hint and hintText is not supported.',
        ),
        assert(
@@ -3030,6 +3030,7 @@ class InputDecoration {
   final String? hintText;
 
   /// The widget to use in place of the [hintText].
+  ///
   /// Either [hintText] or [hint] can be specified, but not both.
   final Widget? hint;
 
