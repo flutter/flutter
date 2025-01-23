@@ -21,6 +21,7 @@ import '../widget_preview/preview_code_generator.dart';
 import '../widget_preview/preview_detector.dart';
 import 'create_base.dart';
 
+// TODO(bkonyi): use dependency injection instead of global accessors throughout this file.
 class WidgetPreviewCommand extends FlutterCommand {
   WidgetPreviewCommand() {
     addSubcommand(WidgetPreviewStartCommand());

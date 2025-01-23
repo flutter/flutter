@@ -15,6 +15,7 @@ import 'package:watcher/watcher.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/utils.dart';
 import '../globals.dart' as globals;
 import 'preview_code_generator.dart';
 
@@ -35,6 +36,7 @@ class PreviewDetector {
     _pathToPreviews = findPreviewFunctions(projectRoot);
 
     final Watcher watcher = Watcher(projectRoot.path);
+    // TODO(bkonyi): watch for changes to pubspec.yaml
     _fileWatcher = watcher.events.listen((WatchEvent event) async {
       final String eventPath = Uri.file(event.path).toString();
       // Only trigger a reload when changes to Dart sources are detected. We
@@ -43,8 +45,7 @@ class PreviewDetector {
           eventPath.endsWith(PreviewCodeGenerator.generatedPreviewFilePath)) {
         return;
       }
-      logger.printStatus('Detected change in $eventPath. Performing reload...');
-
+      logger.printStatus('Detected change in $eventPath.');
       final PreviewMapping filePreviewsMapping = findPreviewFunctions(
         globals.fs.file(Uri.file(event.path)),
       );
@@ -126,7 +127,7 @@ class PreviewDetector {
               }
             }
             if (previewEntries.isNotEmpty) {
-              previews[unit.uri.toString()] = previewEntries;
+              previews[Uri.file(unit.path).toString()] = previewEntries;
             }
           }
         } else {
@@ -134,6 +135,11 @@ class PreviewDetector {
         }
       }
     }
+    final int previewCount = previews.values.fold<int>(
+      0,
+      (int count, List<String> value) => count + value.length,
+    );
+    logger.printStatus('Found $previewCount ${pluralize('preview', previewCount)}.');
     return previews;
   }
 }

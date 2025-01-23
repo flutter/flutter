@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
@@ -35,14 +36,14 @@ void main() {
         final File generatedPreviewFile = project.directory.childFile(
           PreviewCodeGenerator.generatedPreviewFilePath,
         );
-        expect(generatedPreviewFile.existsSync(), false);
+        expect(generatedPreviewFile, isNot(exists));
 
         // Populate the generated preview file.
         codeGenerator.populatePreviewsInGeneratedPreviewScaffold(const <String, List<String>>{
           'foo.dart': <String>['preview'],
           'src/bar.dart': <String>['barPreview1', 'barPreview2'],
         });
-        expect(generatedPreviewFile.existsSync(), true);
+        expect(generatedPreviewFile, exists);
 
         // Check that the generated file contains:
         // - An import of the widget preview library
@@ -59,7 +60,7 @@ import 'foo.dart' as _i1;import 'src/bar.dart' as _i2;import 'package:widget_pre
 
         // Regenerate the generated file with no previews.
         codeGenerator.populatePreviewsInGeneratedPreviewScaffold(const <String, List<String>>{});
-        expect(generatedPreviewFile.existsSync(), true);
+        expect(generatedPreviewFile, exists);
 
         // The generated file should only contain:
         // - An import of the widget preview library
