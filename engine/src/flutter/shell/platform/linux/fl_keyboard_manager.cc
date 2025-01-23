@@ -9,7 +9,6 @@
 #include <memory>
 #include <string>
 
-#include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_key_channel_responder.h"
 #include "flutter/shell/platform/linux/fl_key_embedder_responder.h"
 #include "flutter/shell/platform/linux/fl_keyboard_layout.h"
@@ -83,8 +82,6 @@ static void handle_event_data_free(HandleEventData* data) {
 
 struct _FlKeyboardManager {
   GObject parent_instance;
-
-  GWeakRef engine;
 
   FlKeyboardManagerLookupKeyHandler lookup_key_handler;
   gpointer lookup_key_handler_user_data;
@@ -314,8 +311,6 @@ static void fl_keyboard_manager_dispose(GObject* object) {
 
   g_cancellable_cancel(self->cancellable);
 
-  g_weak_ref_clear(&self->engine);
-
   self->keycode_to_goals.reset();
   self->logical_to_mandatory_goals.reset();
 
@@ -361,8 +356,6 @@ static void fl_keyboard_manager_init(FlKeyboardManager* self) {
 FlKeyboardManager* fl_keyboard_manager_new(FlEngine* engine) {
   FlKeyboardManager* self = FL_KEYBOARD_MANAGER(
       g_object_new(fl_keyboard_manager_get_type(), nullptr));
-
-  g_weak_ref_init(&self->engine, engine);
 
   self->key_embedder_responder = fl_key_embedder_responder_new(engine);
   self->key_channel_responder =
