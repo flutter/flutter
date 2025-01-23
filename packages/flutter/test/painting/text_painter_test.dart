@@ -366,16 +366,13 @@ void main() {
       checkCaretOffsetsLtr('👩‍❤️‍👨');
     });
 
-    test(
-      'TextPainter caret emoji test: letters, then 1 emoji of 5 code units',
-      () {
-        // Regression test for https://github.com/flutter/flutter/issues/50563
-        checkCaretOffsetsLtr('a👩‍🚀');
-        checkCaretOffsetsLtr('ab👩‍🚀');
-        checkCaretOffsetsLtr('abc👩‍🚀');
-        checkCaretOffsetsLtr('abcd👩‍🚀');
-      },
-    );
+    test('TextPainter caret emoji test: letters, then 1 emoji of 5 code units', () {
+      // Regression test for https://github.com/flutter/flutter/issues/50563
+      checkCaretOffsetsLtr('a👩‍🚀');
+      checkCaretOffsetsLtr('ab👩‍🚀');
+      checkCaretOffsetsLtr('abc👩‍🚀');
+      checkCaretOffsetsLtr('abcd👩‍🚀');
+    });
 
     test('TextPainter caret zalgo test', () {
       // Regression test for https://github.com/flutter/flutter/issues/98516
@@ -403,73 +400,67 @@ void main() {
       checkCaretOffsetsLtr('प्राप्त वर्णन प्रव्रुति');
     }, skip: true); // https://github.com/flutter/flutter/issues/122478
 
-    test(
-      'TextPainter caret emoji test LTR: letters next to emoji, as separate TextBoxes',
-      () {
-        // Regression test for https://github.com/flutter/flutter/issues/122477
-        // The trigger for this bug was to have SkParagraph report separate
-        // TextBoxes for the emoji and for the characters next to it.
-        // In normal usage on a real device, this can happen by simply typing
-        // letters and then an emoji, presumably because they get different fonts.
-        // In these tests, our single test font covers both letters and emoji,
-        // so we provoke the same effect by adding styles.
-        expect(
-          caretOffsetsForTextSpan(
-            TextDirection.ltr,
-            const TextSpan(
-              children: <TextSpan>[
-                TextSpan(text: '👩‍🚀', style: TextStyle()),
-                TextSpan(text: ' words', style: TextStyle(fontWeight: FontWeight.bold)),
-              ],
-            ),
+    test('TextPainter caret emoji test LTR: letters next to emoji, as separate TextBoxes', () {
+      // Regression test for https://github.com/flutter/flutter/issues/122477
+      // The trigger for this bug was to have SkParagraph report separate
+      // TextBoxes for the emoji and for the characters next to it.
+      // In normal usage on a real device, this can happen by simply typing
+      // letters and then an emoji, presumably because they get different fonts.
+      // In these tests, our single test font covers both letters and emoji,
+      // so we provoke the same effect by adding styles.
+      expect(
+        caretOffsetsForTextSpan(
+          TextDirection.ltr,
+          const TextSpan(
+            children: <TextSpan>[
+              TextSpan(text: '👩‍🚀', style: TextStyle()),
+              TextSpan(text: ' words', style: TextStyle(fontWeight: FontWeight.bold)),
+            ],
           ),
-          <double>[0, 28, 28, 28, 28, 28, 42, 56, 70, 84, 98, 112],
-        );
-        expect(
-          caretOffsetsForTextSpan(
-            TextDirection.ltr,
-            const TextSpan(
-              children: <TextSpan>[
-                TextSpan(text: 'words ', style: TextStyle(fontWeight: FontWeight.bold)),
-                TextSpan(text: '👩‍🚀', style: TextStyle()),
-              ],
-            ),
+        ),
+        <double>[0, 28, 28, 28, 28, 28, 42, 56, 70, 84, 98, 112],
+      );
+      expect(
+        caretOffsetsForTextSpan(
+          TextDirection.ltr,
+          const TextSpan(
+            children: <TextSpan>[
+              TextSpan(text: 'words ', style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(text: '👩‍🚀', style: TextStyle()),
+            ],
           ),
-          <double>[0, 14, 28, 42, 56, 70, 84, 112, 112, 112, 112, 112],
-        );
-      },
-    );
+        ),
+        <double>[0, 14, 28, 42, 56, 70, 84, 112, 112, 112, 112, 112],
+      );
+    });
 
-    test(
-      'TextPainter caret emoji test RTL: letters next to emoji, as separate TextBoxes',
-      () {
-        // Regression test for https://github.com/flutter/flutter/issues/122477
-        expect(
-          caretOffsetsForTextSpan(
-            TextDirection.rtl,
-            const TextSpan(
-              children: <TextSpan>[
-                TextSpan(text: '👩‍🚀', style: TextStyle()),
-                TextSpan(text: ' מילים', style: TextStyle(fontWeight: FontWeight.bold)),
-              ],
-            ),
+    test('TextPainter caret emoji test RTL: letters next to emoji, as separate TextBoxes', () {
+      // Regression test for https://github.com/flutter/flutter/issues/122477
+      expect(
+        caretOffsetsForTextSpan(
+          TextDirection.rtl,
+          const TextSpan(
+            children: <TextSpan>[
+              TextSpan(text: '👩‍🚀', style: TextStyle()),
+              TextSpan(text: ' מילים', style: TextStyle(fontWeight: FontWeight.bold)),
+            ],
           ),
-          <double>[112, 84, 84, 84, 84, 84, 70, 56, 42, 28, 14, 0],
-        );
-        expect(
-          caretOffsetsForTextSpan(
-            TextDirection.rtl,
-            const TextSpan(
-              children: <TextSpan>[
-                TextSpan(text: 'מילים ', style: TextStyle(fontWeight: FontWeight.bold)),
-                TextSpan(text: '👩‍🚀', style: TextStyle()),
-              ],
-            ),
+        ),
+        <double>[112, 84, 84, 84, 84, 84, 70, 56, 42, 28, 14, 0],
+      );
+      expect(
+        caretOffsetsForTextSpan(
+          TextDirection.rtl,
+          const TextSpan(
+            children: <TextSpan>[
+              TextSpan(text: 'מילים ', style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(text: '👩‍🚀', style: TextStyle()),
+            ],
           ),
-          <double>[112, 98, 84, 70, 56, 42, 28, 0, 0, 0, 0, 0],
-        );
-      },
-    );
+        ),
+        <double>[112, 98, 84, 70, 56, 42, 28, 0, 0, 0, 0, 0],
+      );
+    });
 
     test('TextPainter caret center space test', () {
       final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
@@ -1543,36 +1534,75 @@ void main() {
     painter.dispose();
   });
 
-  test(
-    'TextPainter requires layout after providing different placeholder dimensions',
-    () {
-      final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+  test('TextPainter requires layout after providing different placeholder dimensions', () {
+    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
 
-      painter.text = const TextSpan(
-        children: <InlineSpan>[
-          TextSpan(text: 'before'),
-          WidgetSpan(child: Text('widget1')),
-          WidgetSpan(child: Text('widget2')),
-          WidgetSpan(child: Text('widget3')),
-          TextSpan(text: 'after'),
-        ],
-      );
+    painter.text = const TextSpan(
+      children: <InlineSpan>[
+        TextSpan(text: 'before'),
+        WidgetSpan(child: Text('widget1')),
+        WidgetSpan(child: Text('widget2')),
+        WidgetSpan(child: Text('widget3')),
+        TextSpan(text: 'after'),
+      ],
+    );
 
-      painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
-        PlaceholderDimensions(size: Size(30, 30), alignment: ui.PlaceholderAlignment.bottom),
-        PlaceholderDimensions(size: Size(40, 30), alignment: ui.PlaceholderAlignment.bottom),
-        PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
-      ]);
-      painter.layout();
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(30, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(40, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
+    ]);
+    painter.layout();
 
-      painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
-        PlaceholderDimensions(size: Size(30, 30), alignment: ui.PlaceholderAlignment.bottom),
-        PlaceholderDimensions(size: Size(40, 20), alignment: ui.PlaceholderAlignment.bottom),
-        PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
-      ]);
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(30, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(40, 20), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
+    ]);
 
-      expect(
-        () => painter.paint(MockCanvas(), Offset.zero),
+    expect(
+      () => painter.paint(MockCanvas(), Offset.zero),
+      throwsA(
+        isA<StateError>().having(
+          (StateError error) => error.message,
+          'message',
+          contains('TextPainter.paint called when text geometry was not yet calculated'),
+        ),
+      ),
+    );
+    painter.dispose();
+  });
+
+  test('TextPainter does not require layout after providing identical placeholder dimensions', () {
+    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+
+    painter.text = const TextSpan(
+      children: <InlineSpan>[
+        TextSpan(text: 'before'),
+        WidgetSpan(child: Text('widget1')),
+        WidgetSpan(child: Text('widget2')),
+        WidgetSpan(child: Text('widget3')),
+        TextSpan(text: 'after'),
+      ],
+    );
+
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(30, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(40, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
+    ]);
+    painter.layout();
+
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(30, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(40, 30), alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
+    ]);
+
+    // In tests, paint() will throw an UnimplementedError due to missing drawParagraph method.
+    expect(
+      () => painter.paint(MockCanvas(), Offset.zero),
+      isNot(
         throwsA(
           isA<StateError>().having(
             (StateError error) => error.message,
@@ -1580,55 +1610,10 @@ void main() {
             contains('TextPainter.paint called when text geometry was not yet calculated'),
           ),
         ),
-      );
-      painter.dispose();
-    },
-  );
-
-  test(
-    'TextPainter does not require layout after providing identical placeholder dimensions',
-    () {
-      final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
-
-      painter.text = const TextSpan(
-        children: <InlineSpan>[
-          TextSpan(text: 'before'),
-          WidgetSpan(child: Text('widget1')),
-          WidgetSpan(child: Text('widget2')),
-          WidgetSpan(child: Text('widget3')),
-          TextSpan(text: 'after'),
-        ],
-      );
-
-      painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
-        PlaceholderDimensions(size: Size(30, 30), alignment: ui.PlaceholderAlignment.bottom),
-        PlaceholderDimensions(size: Size(40, 30), alignment: ui.PlaceholderAlignment.bottom),
-        PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
-      ]);
-      painter.layout();
-
-      painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
-        PlaceholderDimensions(size: Size(30, 30), alignment: ui.PlaceholderAlignment.bottom),
-        PlaceholderDimensions(size: Size(40, 30), alignment: ui.PlaceholderAlignment.bottom),
-        PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
-      ]);
-
-      // In tests, paint() will throw an UnimplementedError due to missing drawParagraph method.
-      expect(
-        () => painter.paint(MockCanvas(), Offset.zero),
-        isNot(
-          throwsA(
-            isA<StateError>().having(
-              (StateError error) => error.message,
-              'message',
-              contains('TextPainter.paint called when text geometry was not yet calculated'),
-            ),
-          ),
-        ),
-      );
-      painter.dispose();
-    },
-  );
+      ),
+    );
+    painter.dispose();
+  });
 
   test('TextPainter - debugDisposed', () {
     final TextPainter painter = TextPainter();
@@ -1867,90 +1852,84 @@ void main() {
     }
   });
 
-  group(
-    'strut style',
-    () {
-      test('strut style applies when the span has no style', () {
-        const StrutStyle strut = StrutStyle(height: 10, fontSize: 10);
-        final TextPainter painter = TextPainter(
-          textDirection: TextDirection.ltr,
-          text: const TextSpan(),
-          strutStyle: strut,
-        )..layout();
-        expect(painter.height, 100);
-      });
+  group('strut style', () {
+    test('strut style applies when the span has no style', () {
+      const StrutStyle strut = StrutStyle(height: 10, fontSize: 10);
+      final TextPainter painter = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const TextSpan(),
+        strutStyle: strut,
+      )..layout();
+      expect(painter.height, 100);
+    });
 
-      test('strut style leading is a fontSize multiplier', () {
-        const StrutStyle strut = StrutStyle(height: 10, fontSize: 10, leading: 2);
-        final TextPainter painter = TextPainter(
-          textDirection: TextDirection.ltr,
-          text: const TextSpan(),
-          strutStyle: strut,
-        )..layout();
-        expect(painter.height, 100 + 20);
-        // Top leading + scaled ascent.
-        expect(painter.computeDistanceToActualBaseline(TextBaseline.alphabetic), 10 + 10 * 7.5);
-      });
+    test('strut style leading is a fontSize multiplier', () {
+      const StrutStyle strut = StrutStyle(height: 10, fontSize: 10, leading: 2);
+      final TextPainter painter = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const TextSpan(),
+        strutStyle: strut,
+      )..layout();
+      expect(painter.height, 100 + 20);
+      // Top leading + scaled ascent.
+      expect(painter.computeDistanceToActualBaseline(TextBaseline.alphabetic), 10 + 10 * 7.5);
+    });
 
-      test('strut no half leading + force strut height', () {
-        const StrutStyle strut = StrutStyle(height: 10, fontSize: 10, forceStrutHeight: true);
-        final TextPainter painter = TextPainter(
-          textDirection: TextDirection.ltr,
-          text: const TextSpan(text: 'A', style: TextStyle(fontSize: 20)),
-          strutStyle: strut,
-        )..layout();
-        expect(painter.height, 100);
-        const double baseline = 75;
-        expect(
-          painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1)),
-          const <ui.TextBox>[
-            TextBox.fromLTRBD(0, baseline - 15, 20, baseline + 5, TextDirection.ltr),
-          ],
-        );
-      });
+    test('strut no half leading + force strut height', () {
+      const StrutStyle strut = StrutStyle(height: 10, fontSize: 10, forceStrutHeight: true);
+      final TextPainter painter = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const TextSpan(text: 'A', style: TextStyle(fontSize: 20)),
+        strutStyle: strut,
+      )..layout();
+      expect(painter.height, 100);
+      const double baseline = 75;
+      expect(
+        painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1)),
+        const <ui.TextBox>[
+          TextBox.fromLTRBD(0, baseline - 15, 20, baseline + 5, TextDirection.ltr),
+        ],
+      );
+    });
 
-      test('strut half leading + force strut height', () {
-        const StrutStyle strut = StrutStyle(
-          height: 10,
-          fontSize: 10,
-          forceStrutHeight: true,
-          leadingDistribution: TextLeadingDistribution.even,
-        );
-        final TextPainter painter = TextPainter(
-          textDirection: TextDirection.ltr,
-          text: const TextSpan(text: 'A', style: TextStyle(fontSize: 20)),
-          strutStyle: strut,
-        )..layout();
-        expect(painter.height, 100);
-        const double baseline = 45 + 7.5;
-        expect(
-          painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1)),
-          const <ui.TextBox>[
-            TextBox.fromLTRBD(0, baseline - 15, 20, baseline + 5, TextDirection.ltr),
-          ],
-        );
-      });
+    test('strut half leading + force strut height', () {
+      const StrutStyle strut = StrutStyle(
+        height: 10,
+        fontSize: 10,
+        forceStrutHeight: true,
+        leadingDistribution: TextLeadingDistribution.even,
+      );
+      final TextPainter painter = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const TextSpan(text: 'A', style: TextStyle(fontSize: 20)),
+        strutStyle: strut,
+      )..layout();
+      expect(painter.height, 100);
+      const double baseline = 45 + 7.5;
+      expect(
+        painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1)),
+        const <ui.TextBox>[
+          TextBox.fromLTRBD(0, baseline - 15, 20, baseline + 5, TextDirection.ltr),
+        ],
+      );
+    });
 
-      test('force strut height applies to widget spans', () {
-        const Size placeholderSize = Size(1000, 1000);
-        const StrutStyle strut = StrutStyle(height: 10, fontSize: 10, forceStrutHeight: true);
-        final TextPainter painter =
-            TextPainter(
-                textDirection: TextDirection.ltr,
-                text: const WidgetSpan(child: SizedBox()),
-                strutStyle: strut,
-              )
-              ..setPlaceholderDimensions(const <PlaceholderDimensions>[
-                PlaceholderDimensions(
-                  size: placeholderSize,
-                  alignment: PlaceholderAlignment.bottom,
-                ),
-              ])
-              ..layout();
-        expect(painter.height, 100);
-      });
-    },
-  );
+    test('force strut height applies to widget spans', () {
+      const Size placeholderSize = Size(1000, 1000);
+      const StrutStyle strut = StrutStyle(height: 10, fontSize: 10, forceStrutHeight: true);
+      final TextPainter painter =
+          TextPainter(
+              textDirection: TextDirection.ltr,
+              text: const WidgetSpan(child: SizedBox()),
+              strutStyle: strut,
+            )
+            ..setPlaceholderDimensions(const <PlaceholderDimensions>[
+              PlaceholderDimensions(size: placeholderSize, alignment: PlaceholderAlignment.bottom),
+            ])
+            ..layout();
+      expect(painter.height, 100);
+    });
+  });
 
   test('getOffsetForCaret does not crash on decomposed characters', () {
     final TextPainter painter = TextPainter(

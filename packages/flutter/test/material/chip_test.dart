@@ -2576,36 +2576,35 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(80.0, 32.0));
   });
 
-  testWidgets(
-    'Material3 - Chip size is configurable by ThemeData.materialTapTargetSize',
-    (WidgetTester tester) async {
-      final Key key1 = UniqueKey();
-      await tester.pumpWidget(
-        wrapForChip(
-          child: Theme(
-            data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
-            child: Center(child: RawChip(key: key1, label: const Text('test'))),
-          ),
+  testWidgets('Material3 - Chip size is configurable by ThemeData.materialTapTargetSize', (
+    WidgetTester tester,
+  ) async {
+    final Key key1 = UniqueKey();
+    await tester.pumpWidget(
+      wrapForChip(
+        child: Theme(
+          data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+          child: Center(child: RawChip(key: key1, label: const Text('test'))),
         ),
-      );
+      ),
+    );
 
-      expect(tester.getSize(find.byKey(key1)).width, moreOrLessEquals(90.4, epsilon: 0.1));
-      expect(tester.getSize(find.byKey(key1)).height, equals(48.0));
+    expect(tester.getSize(find.byKey(key1)).width, moreOrLessEquals(90.4, epsilon: 0.1));
+    expect(tester.getSize(find.byKey(key1)).height, equals(48.0));
 
-      final Key key2 = UniqueKey();
-      await tester.pumpWidget(
-        wrapForChip(
-          child: Theme(
-            data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
-            child: Center(child: RawChip(key: key2, label: const Text('test'))),
-          ),
+    final Key key2 = UniqueKey();
+    await tester.pumpWidget(
+      wrapForChip(
+        child: Theme(
+          data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+          child: Center(child: RawChip(key: key2, label: const Text('test'))),
         ),
-      );
+      ),
+    );
 
-      expect(tester.getSize(find.byKey(key2)).width, moreOrLessEquals(90.4, epsilon: 0.1));
-      expect(tester.getSize(find.byKey(key2)).height, equals(38.0));
-    },
-  );
+    expect(tester.getSize(find.byKey(key2)).width, moreOrLessEquals(90.4, epsilon: 0.1));
+    expect(tester.getSize(find.byKey(key2)).height, equals(38.0));
+  });
 
   testWidgets('Chip uses the right theme colors for the right components', (
     WidgetTester tester,
@@ -5896,85 +5895,84 @@ void main() {
     expect(materialBox, paints..rrect(color: backgroundColor));
   });
 
-  testWidgets(
-    'ChipAnimationStyle.avatarDrawerAnimation overrides chip avatar animation duration',
-    (WidgetTester tester) async {
-      const Color checkmarkColor = Color(0xffff0000);
-      bool selected = false;
+  testWidgets('ChipAnimationStyle.avatarDrawerAnimation overrides chip avatar animation duration', (
+    WidgetTester tester,
+  ) async {
+    const Color checkmarkColor = Color(0xffff0000);
+    bool selected = false;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Center(
-              child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      RawChip(
-                        chipAnimationStyle: ChipAnimationStyle(
-                          avatarDrawerAnimation: AnimationStyle(
-                            duration: const Duration(milliseconds: 800),
-                            reverseDuration: const Duration(milliseconds: 400),
-                          ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    RawChip(
+                      chipAnimationStyle: ChipAnimationStyle(
+                        avatarDrawerAnimation: AnimationStyle(
+                          duration: const Duration(milliseconds: 800),
+                          reverseDuration: const Duration(milliseconds: 400),
                         ),
-                        checkmarkColor: checkmarkColor,
-                        selected: selected,
-                        onSelected: (bool value) {},
-                        label: const Text('RawChip'),
                       ),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            selected = !selected;
-                          });
-                        },
-                        child: Text('${selected ? 'Unselect' : 'Select'} Chip'),
-                      ),
-                    ],
-                  );
-                },
-              ),
+                      checkmarkColor: checkmarkColor,
+                      selected: selected,
+                      onSelected: (bool value) {},
+                      label: const Text('RawChip'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          selected = !selected;
+                        });
+                      },
+                      child: Text('${selected ? 'Unselect' : 'Select'} Chip'),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      final RenderBox materialBox = tester.firstRenderObject<RenderBox>(
-        find.descendant(of: find.byType(RawChip), matching: find.byType(CustomPaint)),
-      );
+    final RenderBox materialBox = tester.firstRenderObject<RenderBox>(
+      find.descendant(of: find.byType(RawChip), matching: find.byType(CustomPaint)),
+    );
 
-      // Test the checkmark is not visible yet.
-      expect(materialBox, isNot(paints..path(color: checkmarkColor)));
-      expect(tester.getSize(find.byType(RawChip)).width, closeTo(132.6, 0.1));
+    // Test the checkmark is not visible yet.
+    expect(materialBox, isNot(paints..path(color: checkmarkColor)));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(132.6, 0.1));
 
-      await tester.tap(find.widgetWithText(ElevatedButton, 'Select Chip'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Select Chip'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
 
-      expect(materialBox, paints..path(color: checkmarkColor));
-      expect(tester.getSize(find.byType(RawChip)).width, closeTo(148.2, 0.1));
+    expect(materialBox, paints..path(color: checkmarkColor));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(148.2, 0.1));
 
-      await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 400));
 
-      // Test the checkmark is fully visible.
-      expect(materialBox, paints..path(color: checkmarkColor));
-      expect(tester.getSize(find.byType(RawChip)).width, closeTo(152.6, 0.1));
+    // Test the checkmark is fully visible.
+    expect(materialBox, paints..path(color: checkmarkColor));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(152.6, 0.1));
 
-      await tester.tap(find.widgetWithText(ElevatedButton, 'Unselect Chip'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Unselect Chip'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
 
-      expect(materialBox, isNot(paints..path(color: checkmarkColor)));
-      expect(tester.getSize(find.byType(RawChip)).width, closeTo(148.2, 0.1));
+    expect(materialBox, isNot(paints..path(color: checkmarkColor)));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(148.2, 0.1));
 
-      await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 200));
 
-      // Test if checkmark is removed.
-      expect(materialBox, isNot(paints..path(color: checkmarkColor)));
-      expect(tester.getSize(find.byType(RawChip)).width, closeTo(132.6, 0.1));
-    },
-  );
+    // Test if checkmark is removed.
+    expect(materialBox, isNot(paints..path(color: checkmarkColor)));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(132.6, 0.1));
+  });
 
   testWidgets(
     'ChipAnimationStyle.deleteDrawerAnimation overrides chip delete icon animation duration',

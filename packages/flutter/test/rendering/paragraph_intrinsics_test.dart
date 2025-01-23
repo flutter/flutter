@@ -84,18 +84,15 @@ void main() {
     expect(paragraph.getMaxIntrinsicHeight(double.infinity), 10);
   });
 
-  test(
-    'strutStyle affects intrinsics',
-    () {
-      final RenderParagraph paragraph = RenderParagraph(
-        const TextSpan(style: TextStyle(fontSize: 10), text: 'Hello World'),
-        textDirection: TextDirection.ltr,
-      );
+  test('strutStyle affects intrinsics', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(style: TextStyle(fontSize: 10), text: 'Hello World'),
+      textDirection: TextDirection.ltr,
+    );
 
-      expect(paragraph.getMaxIntrinsicHeight(double.infinity), 10);
+    expect(paragraph.getMaxIntrinsicHeight(double.infinity), 10);
 
-      paragraph.strutStyle = const StrutStyle(fontSize: 100, forceStrutHeight: true);
-      expect(paragraph.getMaxIntrinsicHeight(double.infinity), 100);
-    },
-  );
+    paragraph.strutStyle = const StrutStyle(fontSize: 100, forceStrutHeight: true);
+    expect(paragraph.getMaxIntrinsicHeight(double.infinity), 100);
+  });
 }

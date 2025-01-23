@@ -897,7 +897,7 @@ void main() {
       final Offset subHeaderTextTopLeft = tester.getTopLeft(subHeaderText);
       final Offset dividerTopRight = tester.getTopRight(divider);
       expect(subHeaderTextTopLeft.dx, dividerTopRight.dx + 24.0);
-      expect(subHeaderTextTopLeft.dy,  dialogTopLeft.dy + 16.0);
+      expect(subHeaderTextTopLeft.dy, dialogTopLeft.dy + 16.0);
 
       // Test sub header icon position.
       final Finder subHeaderIcon = find.byIcon(Icons.arrow_drop_down);

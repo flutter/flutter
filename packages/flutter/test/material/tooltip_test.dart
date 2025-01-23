@@ -514,51 +514,51 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(324.0));
   });
 
-  testWidgets(
-    'Material3 - Does tooltip end up in the right place - way off to the right',
-    (WidgetTester tester) async {
-      final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
-      late final OverlayEntry entry;
-      addTearDown(
-        () =>
-            entry
-              ..remove()
-              ..dispose(),
-      );
+  testWidgets('Material3 - Does tooltip end up in the right place - way off to the right', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    late final OverlayEntry entry;
+    addTearDown(
+      () =>
+          entry
+            ..remove()
+            ..dispose(),
+    );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Overlay(
-            initialEntries: <OverlayEntry>[
-              entry = OverlayEntry(
-                builder: (BuildContext context) {
-                  return Stack(
-                    children: <Widget>[
-                      Positioned(
-                        left: 1600.0,
-                        top: 300.0,
-                        child: Tooltip(
-                          key: tooltipKey,
-                          message: tooltipText,
-                          height: 10.0,
-                          padding: EdgeInsets.zero,
-                          verticalOffset: 10.0,
-                          preferBelow: true,
-                          child: const SizedBox.shrink(),
-                        ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Overlay(
+          initialEntries: <OverlayEntry>[
+            entry = OverlayEntry(
+              builder: (BuildContext context) {
+                return Stack(
+                  children: <Widget>[
+                    Positioned(
+                      left: 1600.0,
+                      top: 300.0,
+                      child: Tooltip(
+                        key: tooltipKey,
+                        message: tooltipText,
+                        height: 10.0,
+                        padding: EdgeInsets.zero,
+                        verticalOffset: 10.0,
+                        preferBelow: true,
+                        child: const SizedBox.shrink(),
                       ),
-                    ],
-                  );
-                },
-              ),
-            ],
-          ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
         ),
-      );
-      tooltipKey.currentState?.ensureTooltipVisible();
-      await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+      ),
+    );
+    tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-      /********************* 800x600 screen
+    /********************* 800x600 screen
      *                   *
      *                   *
      *                   * y=300.0;   target -->   o
@@ -568,13 +568,12 @@ void main() {
      *                   * }-10.0 margin
      *********************/
 
-      final RenderBox tip = tester.renderObject(_findTooltipContainer(tooltipText));
-      expect(tip.size.height, equals(20.0));
-      expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(310.0));
-      expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
-      expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(330.0));
-    },
-  );
+    final RenderBox tip = tester.renderObject(_findTooltipContainer(tooltipText));
+    expect(tip.size.height, equals(20.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(310.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(330.0));
+  });
 
   testWidgets('Material2 - Does tooltip end up in the right place - near the edge', (
     WidgetTester tester,
