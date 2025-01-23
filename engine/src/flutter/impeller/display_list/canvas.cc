@@ -1662,8 +1662,6 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
   // applied.
   auto& replay_entities = clip_coverage_stack_.GetReplayEntities();
   for (const auto& replay : replay_entities) {
-    SetClipScissor(replay.clip_coverage, current_render_pass,
-                   global_pass_position);
     if (!replay.clip_contents.Render(renderer_, current_render_pass,
                                      replay.clip_depth)) {
       VALIDATION_LOG << "Failed to render entity for clip restore.";
