@@ -62,7 +62,7 @@ jobs:
               check_run_id: check[0].id,
               status: 'completed',
               conclusion: process.env.conclusion,
-              output: process.env.output
+              output,
             });
 
             return result;
