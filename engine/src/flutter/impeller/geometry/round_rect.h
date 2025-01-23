@@ -38,15 +38,6 @@ struct RoundRect {
     return MakeRectRadii(rect, RoundingRadii::MakeRadii(corner_radii));
   }
 
-  constexpr static RoundRect MakeNinePatch(const Rect& rect,
-                                           Scalar left,
-                                           Scalar top,
-                                           Scalar right,
-                                           Scalar bottom) {
-    return MakeRectRadii(
-        rect, RoundingRadii::MakeNinePatch(left, top, right, bottom));
-  }
-
   static RoundRect MakeRectRadii(const Rect& rect, const RoundingRadii& radii);
 
   constexpr const Rect& GetBounds() const { return bounds_; }
