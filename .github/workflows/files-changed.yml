@@ -30,9 +30,7 @@ jobs:
         run: |
           ./bin/dart run dev/tools/bin/get_files_changed.dart --since="${{ github.event.pull_request.base.sha }}" > metadata.json
 
-      - name: Read metadata.json
-        id: readmetadata
-        run: echo "::set-output name=metadata::$(cat metadata.json)"
+      - run: npm install fs
 
       # Update check run called "generate-json"
       - name: Upload metadata
@@ -40,9 +38,7 @@ jobs:
         env:
           number: ${{ github.event.pull_request.number }}
           job: ${{ github.job }}
-          # Conveniently, job.status maps to https://developer.github.com/v3/checks/runs/#update-a-check-run
           conclusion: ${{ job.status }}
-          metadata: ${{ steps.readmetadata.outputs.metadata }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -59,7 +55,7 @@ jobs:
             });
 
             const check = checks.check_runs.filter(c => c.name === process.env.job);
-            const output = fs.readFileSync('changed_files.json', 'utf8');
+            const output = fs.readFileSync('metadata.json', 'utf8');
 
             const { data: result } = await github.rest.checks.update({
               ...context.repo,
