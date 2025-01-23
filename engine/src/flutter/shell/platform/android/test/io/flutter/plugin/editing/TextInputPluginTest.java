@@ -1247,7 +1247,11 @@ public class TextInputPluginTest {
     ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
     TextInputPlugin textInputPlugin =
         new TextInputPlugin(
-            testView, textInputChannel, scribeChannel, mock(PlatformViewsController.class));
+            testView,
+            textInputChannel,
+            scribeChannel,
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
     textInputPlugin.setTextInputClient(
         0,
         new TextInputChannel.Configuration(
