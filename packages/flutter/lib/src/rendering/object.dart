@@ -5185,6 +5185,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   void ensureGeometry() {
     if (isRoot) {
+      if (geometry?.rect != renderObject.semanticBounds) {
+        markNeedsBuild();
+      }
       geometry = _SemanticsGeometry.root(renderObject.semanticBounds);
     }
     assert(geometry != null);
@@ -5195,7 +5198,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     assert(geometry != null);
     for (final _RenderObjectSemantics child in _childrenAndElevationAdjustments.keys) {
       final _SemanticsGeometry childGeometry = _SemanticsGeometry.computeChildGeometry(
-        geometry: geometry!,
+        parentPaintClipRect: geometry!.paintClipRect,
+        parentSemanticsClipRect: geometry!.semanticsClipRect,
+        parentTransform: null,
         parent: this,
         child: child,
       );
@@ -5441,7 +5446,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           continue;
         }
         final _SemanticsGeometry parentGeometry = _SemanticsGeometry.computeChildGeometry(
-          geometry: mainGeometry,
+          parentTransform: mainGeometry.transform,
+          parentSemanticsClipRect: mainGeometry.semanticsClipRect,
+          parentPaintClipRect: mainGeometry.paintClipRect,
           parent: this,
           child: fragment.owner,
         );
@@ -5708,12 +5715,13 @@ final class _SemanticsGeometry {
   final bool hidden;
 
   static _SemanticsGeometry computeChildGeometry({
-    required _SemanticsGeometry geometry,
+    required Matrix4? parentTransform,
+    required Rect? parentPaintClipRect,
+    required Rect? parentSemanticsClipRect,
     required _RenderObjectSemantics parent,
     required _RenderObjectSemantics child,
   }) {
-    final Matrix4 transform = Matrix4.identity();
-
+    final Matrix4 transform = parentTransform?.clone() ?? Matrix4.identity();
     Matrix4? parentToCommonAncestorTransform;
     RenderObject childRenderObject = child.renderObject;
     RenderObject parentRenderObject = parent.renderObject;
@@ -5766,8 +5774,8 @@ final class _SemanticsGeometry {
     Rect? semanticsClipRect;
     if (childToCommonAncestor.last == parent.renderObject) {
       // This is most common case, i.e. parent is the common ancestor.
-      paintClipRect = geometry.paintClipRect;
-      semanticsClipRect = geometry.semanticsClipRect;
+      paintClipRect = parentPaintClipRect;
+      semanticsClipRect = parentSemanticsClipRect;
       assert(parentToCommonAncestorTransform == null);
       for (int i = childToCommonAncestor.length - 1; i > 0; i -= 1) {
         (paintClipRect, semanticsClipRect) = _computeClipRect(
