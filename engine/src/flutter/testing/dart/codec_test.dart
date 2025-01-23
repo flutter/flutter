@@ -48,6 +48,8 @@ void main() {
       } else {
         expect(e.toString(), contains('Codec failed'));
       }
+    } finally {
+      codec.dispose();
     }
   });
 
@@ -62,6 +64,7 @@ void main() {
         frameInfo.image.height,
       ]);
     }
+    codec.dispose();
     expect(
       decodedFrameInfos,
       equals(<List<int>>[
@@ -86,6 +89,7 @@ void main() {
         frameInfo.image.height,
       ]);
     }
+    codec.dispose();
     expect(
       decodedFrameInfos,
       equals(<List<int>>[
@@ -113,6 +117,7 @@ void main() {
         frameInfo.image.height,
       ]);
     }
+    codec.dispose();
     expect(
       decodedFrameInfos,
       equals(<List<int>>[
@@ -134,6 +139,7 @@ void main() {
     } on Exception catch (e) {
       expect(e.toString(), contains('Decoded image has been disposed'));
     }
+    codec.dispose();
   });
 
   test('Animated gif can reuse across multiple frames', () async {
@@ -151,6 +157,7 @@ void main() {
     for (int i = 0; i < 4; i++) {
       frameInfo = await codec.getNextFrame();
     }
+    codec.dispose();
 
     final ui.Image image = frameInfo.image;
     final ByteData imageData = (await image.toByteData(format: ui.ImageByteFormat.png))!;
@@ -178,6 +185,7 @@ void main() {
     for (int i = 0; i < 69; i++) {
       frameInfo = await codec.getNextFrame();
     }
+    codec.dispose();
 
     final ui.Image image = frameInfo.image;
     final ByteData imageData = (await image.toByteData(format: ui.ImageByteFormat.png))!;
@@ -218,6 +226,7 @@ void main() {
         expect(imageData.buffer.asUint8List(), goldenData);
       }
     }
+    codec.dispose();
   });
 
   test('Animated apng alpha type handling', () async {
@@ -235,6 +244,7 @@ void main() {
     image = (await codec.getNextFrame()).image;
     imageData = (await image.toByteData())!;
     expect(imageData.getUint32(0), 0x99000099);
+    codec.dispose();
   });
 
   test('Animated apng background color restore', () async {
@@ -259,6 +269,7 @@ void main() {
     image = (await codec.getNextFrame()).image;
     imageData = (await image.toByteData())!;
     expect(imageData.getUint32(imageData.lengthInBytes - 4), 0x00000000);
+    codec.dispose();
   });
 
   test('Animated apng frame decode does not crash with invalid destination region', () async {
@@ -275,6 +286,8 @@ void main() {
       } else {
         expect(e.toString(), contains('Codec failed'));
       }
+    } finally {
+      codec.dispose();
     }
   });
 
@@ -296,6 +309,8 @@ void main() {
         } else {
           expect(e.toString(), contains('Codec failed'));
         }
+      } finally {
+        codec.dispose();
       }
     },
   );
