@@ -2731,6 +2731,7 @@ class InputDecoration {
     this.hintFadeDuration,
     @Deprecated(
       'Use maintainHintSize instead. '
+      'This will maintain both hint height and hint width. '
       'This feature was deprecated after v3.28.0-2.0.pre.',
     )
     this.maintainHintHeight = true,
@@ -2826,6 +2827,7 @@ class InputDecoration {
     this.hintFadeDuration,
     @Deprecated(
       'Use maintainHintSize instead. '
+      'This will maintain both hint height and hint width. '
       'This feature was deprecated after v3.28.0-2.0.pre.',
     )
     this.maintainHintHeight = true,
@@ -3113,6 +3115,7 @@ class InputDecoration {
   /// Defaults to true.
   @Deprecated(
     'Use maintainHintSize instead. '
+    'This will maintain both hint height and hint width. '
     'This feature was deprecated after v3.28.0-2.0.pre.',
   )
   final bool maintainHintHeight;
