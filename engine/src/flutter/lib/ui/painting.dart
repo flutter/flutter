@@ -2295,13 +2295,6 @@ class FrameInfo {
 /// Signature for [Codec] lifecycle events.
 typedef CodecEventCallback = void Function(Codec codec);
 
-/// If true, Codec is leak tracked.
-///
-/// For use in Flutter tests only.
-/// Do not take dependency. It will be deleted without notice.
-// TODO (https://github.com/flutter/flutter/issues/161132): remove after fixing the tests.
-bool deprecatedDoNotUseWillBeRemovedWithoutNoticeLeakTrackCodec = false;
-
 /// A handle to an image codec.
 ///
 /// This class is created by the engine, and should not be instantiated
@@ -2311,9 +2304,7 @@ bool deprecatedDoNotUseWillBeRemovedWithoutNoticeLeakTrackCodec = false;
 /// [instantiateImageCodec].
 abstract class Codec {
   Codec() {
-    if (deprecatedDoNotUseWillBeRemovedWithoutNoticeLeakTrackCodec) {
-      onCreate?.call(this);
-    }
+    onCreate?.call(this);
   }
 
   /// A callback that is invoked to report a codec creation.
@@ -2355,9 +2346,7 @@ abstract class Codec {
   /// This can't be a leaf call because the native function calls Dart API
   /// (Dart_SetNativeInstanceField).
   void dispose() {
-    if (deprecatedDoNotUseWillBeRemovedWithoutNoticeLeakTrackCodec) {
-      onDispose?.call(this);
-    }
+    onDispose?.call(this);
   }
 }
 
