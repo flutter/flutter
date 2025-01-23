@@ -363,7 +363,8 @@ List<Map<String, Object?>> _extractPlatformMaps(Iterable<Plugin> plugins, String
   ];
 }
 
-Future<void> _writeAndroidPluginRegistrant(
+@visibleForTesting
+Future<void> writeAndroidPluginRegistrant(
   FlutterProject project,
   List<Plugin> plugins, {
   required bool releaseMode,
@@ -719,7 +720,8 @@ $_dartPluginRegisterWith
 }
 ''';
 
-Future<void> _writeIOSPluginRegistrant(
+@visibleForTesting
+Future<void> writeIOSPluginRegistrant(
   FlutterProject project,
   List<Plugin> plugins, {
   required bool releaseMode,
@@ -783,7 +785,8 @@ String _cmakeRelativePluginSymlinkDirectoryPath(CmakeBasedProject project) {
   return cmakePathContext.joinAll(relativePathComponents);
 }
 
-Future<void> _writeLinuxPluginFiles(
+@visibleForTesting
+Future<void> writeLinuxPluginFiles(
   FlutterProject project,
   List<Plugin> plugins, {
   required bool releaseMode,
@@ -852,7 +855,8 @@ Future<void> _writePluginCmakefile(
   );
 }
 
-Future<void> _writeMacOSPluginRegistrant(
+@visibleForTesting
+Future<void> writeMacOSPluginRegistrant(
   FlutterProject project,
   List<Plugin> plugins, {
   required bool releaseMode,
@@ -1237,7 +1241,7 @@ Future<void> injectBuildTimePluginFilesForWebPlatform(
 
 /// Injects plugins found in `pubspec.yaml` into the platform-specific projects.
 ///
-/// The injected files are required by the flutter app as soon as possible, so
+/// The injected files are required by the Flutter app as soon as possible, so
 /// it can be built.
 ///
 /// Files written by this method end up in platform-specific locations that are
@@ -1265,28 +1269,28 @@ Future<void> injectPlugins(
   );
 
   if (androidPlatform) {
-    await _writeAndroidPluginRegistrant(
+    await writeAndroidPluginRegistrant(
       project,
       pluginsByPlatform[AndroidPlugin.kConfigKey]!,
       releaseMode: releaseMode ?? false,
     );
   }
   if (iosPlatform) {
-    await _writeIOSPluginRegistrant(
+    await writeIOSPluginRegistrant(
       project,
       pluginsByPlatform[IOSPlugin.kConfigKey]!,
       releaseMode: releaseMode ?? false,
     );
   }
   if (linuxPlatform) {
-    await _writeLinuxPluginFiles(
+    await writeLinuxPluginFiles(
       project,
       pluginsByPlatform[LinuxPlugin.kConfigKey]!,
       releaseMode: releaseMode ?? false,
     );
   }
   if (macOSPlatform) {
-    await _writeMacOSPluginRegistrant(
+    await writeMacOSPluginRegistrant(
       project,
       pluginsByPlatform[MacOSPlugin.kConfigKey]!,
       releaseMode: releaseMode ?? false,

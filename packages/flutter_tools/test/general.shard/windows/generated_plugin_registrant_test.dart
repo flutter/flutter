@@ -21,7 +21,6 @@ void main() {
 
   testWithoutContext('Win32 injects Win32 non-dev dependency plugins', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    setUpProject(fileSystem);
     final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
       fileSystem.currentDirectory,
     );
@@ -97,19 +96,15 @@ void main() {
         );
 
         final Directory managed = flutterProject.windows.managedDirectory;
+        final String testPluginDependencyImport = '#include <test/foo.h>';
         expect(flutterProject.windows.generatedPluginCmakeFile, exists);
         expect(managed.childFile('generated_plugin_registrant.h'), exists);
         expect(
           managed.childFile('generated_plugin_registrant.cc').readAsStringSync(),
           isTestingReleaseMode
-              ? isNot(contains('#include <test/foo.h>'))
-              : contains('#include <test/foo.h>'),
+              ? isNot(contains(testPluginDependencyImport)) : contains(testPluginDependencyImport)
         );
       }
     },
   );
-}
-
-void setUpProject(FileSystem fileSystem) {
-  fileSystem.file('pubspec.yaml').createSync();
 }

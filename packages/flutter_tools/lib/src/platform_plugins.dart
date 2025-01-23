@@ -244,7 +244,7 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
 /// The [name] of the plugin is required. Additionally, either:
 /// - [defaultPackage], or
 /// - an implementation consisting of:
-///   - the [pluginClass] (with optional [classPrefix]) that will be the entry
+///   - the [classPrefix] (with optional [pluginClass]) that will be the entry
 ///     point to the plugin's native code, and/or
 ///   - the [dartPluginClass] with optional [dartFileName] that will be
 ///     the entry point for the plugin's Dart code
@@ -430,7 +430,7 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
 ///
 /// The [name] of the plugin is required. Either [dartPluginClass] or [pluginClass] are required.
 /// [pluginClass] will be the entry point to the plugin's native code.
-/// [dartFileName] is not required and will be used only if [dartPluginClass]
+/// [dartFileName] is not required and will be used onlyWindowsPlugin if [dartPluginClass]
 /// provided.
 class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, VariantPlatformPlugin {
   const WindowsPlugin({
