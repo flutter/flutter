@@ -62,9 +62,10 @@ canvaskit_wasm_lib("canvaskit") {
   ldflags = []
   if (is_debug) {
     ldflags += [
-      "-O2",
+      "-O1",
       "-sASSERTIONS=1",
       "-sGL_ASSERTIONS=1",
+      "-g3",
       "--pre-js",
       rebase_path("$_skia_root/modules/canvaskit/debug.js"),
     ]
