@@ -3030,8 +3030,8 @@ class InputDecoration {
   /// or (b) the input has the focus.
   final String? hintText;
 
-  /// The widget to use inplace of the [hintText]. Either [hintText] or
-  /// [hint] can be specified, but not both.
+  /// The widget to use in place of the [hintText].
+  /// Either [hintText] or [hint] can be specified, but not both.
   final Widget? hint;
 
   /// The style to use for the [hintText].
