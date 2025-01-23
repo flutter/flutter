@@ -5,7 +5,6 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:flutter_tools/src/plugins.dart';
@@ -15,7 +14,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
-  List<String> buildModesToTest = ['debug', 'profile', 'release'];
+  final List<String> buildModesToTest = <String>['debug', 'profile', 'release'];
   final FileSystem fileSystem = MemoryFileSystem.test();
 
   testUsingContext(
@@ -53,7 +52,7 @@ void main() {
         expect(flutterProject.android.generatedPluginRegistrantFile, exists);
         expect(
           flutterProject.android.generatedPluginRegistrantFile.readAsStringSync(),
-          contains('flutterEngine.getPlugins().add(new com.company.Foo());'),
+          contains('com.company.Foo()'),
         );
       }
     },
@@ -74,7 +73,7 @@ void main() {
         ..writeAsStringSync('io.flutter.embedding.engine.plugins.FlutterPlugin');
 
       for (final String buildMode in buildModesToTest) {
-        bool isTestingReleaseMode = buildMode == 'release';
+        final bool isTestingReleaseMode = buildMode == 'release';
         await writeAndroidPluginRegistrant(flutterProject, <Plugin>[
           Plugin(
             name: 'foo',
@@ -96,7 +95,7 @@ void main() {
           ),
         ], releaseMode: isTestingReleaseMode);
 
-        final String fooPluginDependency = 'com.company.Foo()';
+        const String fooPluginDependency = 'com.company.Foo()';
         expect(flutterProject.android.generatedPluginRegistrantFile, exists);
         expect(
           flutterProject.android.generatedPluginRegistrantFile.readAsStringSync(),

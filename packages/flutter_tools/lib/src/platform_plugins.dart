@@ -430,7 +430,7 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
 ///
 /// The [name] of the plugin is required. Either [dartPluginClass] or [pluginClass] are required.
 /// [pluginClass] will be the entry point to the plugin's native code.
-/// [dartFileName] is not required and will be used onlyWindowsPlugin if [dartPluginClass]
+/// [dartFileName] is not required and will be used only if [dartPluginClass]
 /// provided.
 class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, VariantPlatformPlugin {
   const WindowsPlugin({

@@ -17,7 +17,7 @@ import '../../src/common.dart';
 const TemplateRenderer renderer = MustacheTemplateRenderer();
 
 void main() {
-  List<String> buildModesToTest = ['debug', 'profile', 'release'];
+  final List<String> buildModesToTest = <String>['debug', 'profile', 'release'];
 
   testWithoutContext('Win32 injects Win32 non-dev dependency plugins', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -64,13 +64,12 @@ void main() {
     'Win32 does not inject Win32 dev dependency plugins in release mode',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
-      setUpProject(fileSystem);
       final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
         fileSystem.currentDirectory,
       );
 
       for (final String buildMode in buildModesToTest) {
-        bool isTestingReleaseMode = buildMode == 'release';
+        final bool isTestingReleaseMode = buildMode == 'release';
         await writeWindowsPluginFiles(
           flutterProject,
           <Plugin>[
@@ -96,13 +95,14 @@ void main() {
         );
 
         final Directory managed = flutterProject.windows.managedDirectory;
-        final String testPluginDependencyImport = '#include <test/foo.h>';
+        const String testPluginDependencyImport = '#include <test/foo.h>';
         expect(flutterProject.windows.generatedPluginCmakeFile, exists);
         expect(managed.childFile('generated_plugin_registrant.h'), exists);
         expect(
           managed.childFile('generated_plugin_registrant.cc').readAsStringSync(),
           isTestingReleaseMode
-              ? isNot(contains(testPluginDependencyImport)) : contains(testPluginDependencyImport)
+              ? isNot(contains(testPluginDependencyImport))
+              : contains(testPluginDependencyImport),
         );
       }
     },

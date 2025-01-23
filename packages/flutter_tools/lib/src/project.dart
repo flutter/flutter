@@ -638,19 +638,15 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   File get generatedPluginRegistrantFile {
-    try {
     return hostAppGradleRoot
-          .childDirectory('app')
-          .childDirectory('src')
-          .childDirectory('main')
-          .childDirectory('java')
-          .childDirectory('io')
-          .childDirectory('flutter')
-          .childDirectory('plugins')
-          .childFile('GeneratedPluginRegistrant.java');
-    } catch (e) {
-        throwToolExit('Generated plugin registrant file not found. You may get this error if the project is not an app or does not depend on plugins.');
-    }
+        .childDirectory('app')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('java')
+        .childDirectory('io')
+        .childDirectory('flutter')
+        .childDirectory('plugins')
+        .childFile('GeneratedPluginRegistrant.java');
   }
 
   File get gradleAppOutV1File => gradleAppOutV1Directory.childFile('app-debug.apk');

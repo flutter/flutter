@@ -16,7 +16,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
-  List<String> buildModesToTest = ['debug', 'profile', 'release'];
+  final List<String> buildModesToTest = <String>['debug', 'profile', 'release'];
   final FileSystem fileSystem = MemoryFileSystem.test();
 
   testUsingContext(
@@ -33,12 +33,8 @@ void main() {
             path: 'foo',
             defaultPackagePlatforms: const <String, String>{},
             pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
-            platforms: <String, PluginPlatform>{
-              IOSPlugin.kConfigKey: IOSPlugin(
-                name: 'foo',
-                classPrefix: '',
-                pluginClass: 'Foo',
-              ),
+            platforms: const <String, PluginPlatform>{
+              IOSPlugin.kConfigKey: IOSPlugin(name: 'foo', classPrefix: '', pluginClass: 'Foo'),
             },
             dependencies: <String>[],
             isDirectDependency: true,
@@ -54,12 +50,10 @@ void main() {
         );
       }
     },
-    overrides: <Type, Generator>{
-        TemplateRenderer: () => const MustacheTemplateRenderer(),
-    }
+    overrides: <Type, Generator>{TemplateRenderer: () => const MustacheTemplateRenderer()},
   );
 
-   testUsingContext(
+  testUsingContext(
     'iOS does not iOS dev dependency plugins in realease mode',
     () async {
       final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
@@ -67,19 +61,15 @@ void main() {
       );
 
       for (final String buildMode in buildModesToTest) {
-        bool isTestingReleaseMode = buildMode == 'release';
+        final bool isTestingReleaseMode = buildMode == 'release';
         await writeIOSPluginRegistrant(flutterProject, <Plugin>[
           Plugin(
             name: 'foo',
             path: 'foo',
             defaultPackagePlatforms: const <String, String>{},
             pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
-            platforms: <String, PluginPlatform>{
-              IOSPlugin.kConfigKey: IOSPlugin(
-                name: 'foo',
-                classPrefix: '',
-                pluginClass: 'Foo',
-              ),
+            platforms: const <String, PluginPlatform>{
+              IOSPlugin.kConfigKey: IOSPlugin(name: 'foo', classPrefix: '', pluginClass: 'Foo'),
             },
             dependencies: <String>[],
             isDirectDependency: true,
@@ -87,17 +77,17 @@ void main() {
           ),
         ], releaseMode: isTestingReleaseMode);
 
-        final String fooPluginDependencyImport = '#import <foo/Foo.h>';
+        const String fooPluginDependencyImport = '#import <foo/Foo.h>';
         expect(flutterProject.ios.pluginRegistrantHeader, exists);
         expect(flutterProject.ios.pluginRegistrantImplementation, exists);
         expect(
           flutterProject.ios.pluginRegistrantImplementation.readAsStringSync(),
-          isTestingReleaseMode ? isNot(contains(fooPluginDependencyImport)) : contains(fooPluginDependencyImport),
+          isTestingReleaseMode
+              ? isNot(contains(fooPluginDependencyImport))
+              : contains(fooPluginDependencyImport),
         );
       }
     },
-    overrides: <Type, Generator>{
-        TemplateRenderer: () => const MustacheTemplateRenderer(),
-    }
+    overrides: <Type, Generator>{TemplateRenderer: () => const MustacheTemplateRenderer()},
   );
 }

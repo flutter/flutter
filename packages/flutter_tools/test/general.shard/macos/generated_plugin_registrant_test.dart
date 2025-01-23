@@ -15,10 +15,8 @@ import 'package:flutter_tools/src/project.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-const TemplateRenderer renderer = MustacheTemplateRenderer();
-
 void main() {
-  List<String> buildModesToTest = ['debug', 'profile', 'release'];
+  final List<String> buildModesToTest = <String>['debug', 'profile', 'release'];
 
   testUsingContext(
     'MacOS injects MacOS non-dev dependency plugins',
@@ -64,7 +62,7 @@ void main() {
       );
 
       for (final String buildMode in buildModesToTest) {
-        bool isTestingReleaseMode = buildMode == 'release';
+        final bool isTestingReleaseMode = buildMode == 'release';
         await writeMacOSPluginRegistrant(flutterProject, <Plugin>[
           Plugin(
             name: 'test',
@@ -81,11 +79,13 @@ void main() {
         ], releaseMode: isTestingReleaseMode);
 
         final Directory managed = flutterProject.macos.managedDirectory;
-        final String testPluginRegistration = 'Foo.register';
+        const String testPluginRegistration = 'Foo.register';
         expect(managed.childFile('GeneratedPluginRegistrant.swift'), exists);
         expect(
           managed.childFile('GeneratedPluginRegistrant.swift').readAsStringSync(),
-          isTestingReleaseMode ? isNot(contains(testPluginRegistration)) : contains(testPluginRegistration),
+          isTestingReleaseMode
+              ? isNot(contains(testPluginRegistration))
+              : contains(testPluginRegistration),
         );
       }
     },

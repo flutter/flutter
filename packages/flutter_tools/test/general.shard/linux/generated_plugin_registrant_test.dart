@@ -15,10 +15,8 @@ import 'package:flutter_tools/src/project.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-const TemplateRenderer renderer = MustacheTemplateRenderer();
-
 void main() {
-  List<String> buildModesToTest = ['debug', 'profile', 'release'];
+  final List<String> buildModesToTest = <String>['debug', 'profile', 'release'];
 
   testUsingContext(
     'Linux injects Linux non-dev dependency plugins',
@@ -65,7 +63,7 @@ void main() {
       );
 
       for (final String buildMode in buildModesToTest) {
-        bool isTestingReleaseMode = buildMode == 'release';
+        final bool isTestingReleaseMode = buildMode == 'release';
         await writeLinuxPluginFiles(flutterProject, <Plugin>[
           Plugin(
             name: 'test',
@@ -82,12 +80,14 @@ void main() {
         ], releaseMode: isTestingReleaseMode);
 
         final Directory managed = flutterProject.linux.managedDirectory;
-        final String testPluginDependencyImport = '#include <test/foo.h>';
+        const String testPluginDependencyImport = '#include <test/foo.h>';
         expect(flutterProject.linux.generatedPluginCmakeFile, exists);
         expect(managed.childFile('generated_plugin_registrant.h'), exists);
         expect(
           managed.childFile('generated_plugin_registrant.cc').readAsStringSync(),
-          isTestingReleaseMode ? isNot(contains(testPluginDependencyImport)) : contains(testPluginDependencyImport),
+          isTestingReleaseMode
+              ? isNot(contains(testPluginDependencyImport))
+              : contains(testPluginDependencyImport),
         );
       }
     },
