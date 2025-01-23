@@ -50,7 +50,11 @@ void main(List<String> args) async {
   final _Output output = _Output.values.byName(argResults.option('output')!);
   io.stdout.writeln(switch (output) {
     _Output.text => filesChanged.join('\n'),
-    _Output.json => jsonEncode(filesChanged),
+
+    // We only have a single field, but this makes it a tad more future proof
+    // in that we can add new fields in the future without it being a breaking
+    // change in cocoon.
+    _Output.json => jsonEncode(<String, Object?>{'changed': filesChanged}),
   });
 }
 
