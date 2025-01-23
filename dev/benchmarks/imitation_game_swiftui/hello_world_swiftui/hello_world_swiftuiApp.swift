@@ -1,9 +1,6 @@
-//
-//  hello_world_swiftuiApp.swift
-//  hello_world_swiftui
-//
-//  Created by Louise Hsu on 12/10/24.
-//
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 import SwiftUI
 
