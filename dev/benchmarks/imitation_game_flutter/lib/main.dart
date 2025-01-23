@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -5,6 +9,8 @@ void main() {
 }
 
 class InfiniteScrollApp extends StatelessWidget {
+  const InfiniteScrollApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -15,11 +21,13 @@ class InfiniteScrollApp extends StatelessWidget {
 }
 
 class InfiniteScrollList extends StatefulWidget {
+  const InfiniteScrollList({super.key});
+
   @override
-  _InfiniteScrollListState createState() => _InfiniteScrollListState();
+  InfiniteScrollListState createState() => InfiniteScrollListState();
 }
 
-class _InfiniteScrollListState extends State<InfiniteScrollList> {
+class InfiniteScrollListState extends State<InfiniteScrollList> {
   List<String> items = List.generate(50, (index) => "Hello"); // Initial 50 rows
   bool isLoadingMore = false;
   final ScrollController _scrollController = ScrollController();
@@ -39,8 +47,9 @@ class _InfiniteScrollListState extends State<InfiniteScrollList> {
 
   void _scrollListener() {
     if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent -
-            _loadMoreThreshold * 50 && // 50 is the approximate height of an row
+            _scrollController.position.maxScrollExtent -
+                _loadMoreThreshold *
+                    50 && // 50 is the approximate height of an row
         !isLoadingMore) {
       loadMoreItems();
     }
@@ -62,17 +71,14 @@ class _InfiniteScrollListState extends State<InfiniteScrollList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Infinite Scrolling List"),
-      ),
+      appBar: AppBar(title: Text("Infinite Scrolling List")),
       body: ListView.builder(
         controller: _scrollController,
-        itemCount: items.length + (isLoadingMore ? 1 : 0), // +1 for loading indicator
+        itemCount:
+            items.length + (isLoadingMore ? 1 : 0), // +1 for loading indicator
         itemBuilder: (context, index) {
           if (index < items.length) {
-            return ListTile(
-              title: Text(items[index]),
-            );
+            return ListTile(title: Text(items[index]));
           } else {
             // Display loading indicator at the bottom
             return Padding(
