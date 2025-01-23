@@ -10,13 +10,6 @@
 
 set -e
 
-# This script does not assume that "flutter update-packages" has been
-# run, to allow CIs to save time by skipping that steps since it's
-# largely not needed to run the flutter/tests tests.
-#
-# However, we do need to update this directory.
-dart pub get
-
 function script_location() {
   local script_location="${BASH_SOURCE[0]}"
   # Resolve symlinks
@@ -30,6 +23,13 @@ function script_location() {
 
 # So that users can run this script from anywhere and it will work as expected.
 cd "$(script_location)"
+
+# This script does not assume that "flutter update-packages" has been
+# run, to allow CIs to save time by skipping that steps since it's
+# largely not needed to run the flutter/tests tests.
+#
+# However, we do need to update this directory.
+dart pub get
 
 # Run the cross-platform script.
 ../../bin/dart run ci.dart
