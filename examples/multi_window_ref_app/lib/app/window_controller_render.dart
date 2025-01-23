@@ -28,9 +28,6 @@ class WindowControllerRender extends StatelessWidget {
       case WindowArchetype.regular:
         return RegularWindow(
             key: key,
-            onDestroyed: onDestroyed,
-            onError: (String? reason) => onError(),
-            preferredSize: windowSettings.regularSizeNotifier.value,
             controller: controller as RegularWindowController,
             child: RegularWindowContent(
                 controller: controller as RegularWindowController,
@@ -40,18 +37,6 @@ class WindowControllerRender extends StatelessWidget {
       case WindowArchetype.popup:
         return PopupWindow(
             key: key,
-            onDestroyed: onDestroyed,
-            onError: (String? reason) => onError(),
-            preferredSize: windowSettings.popupSizeNotifier.value,
-            anchorRect: windowSettings.anchorToWindowNotifier.value
-                ? null
-                : windowSettings.anchorRectNotifier.value,
-            positioner: WindowPositioner(
-                parentAnchor: positionerSettingsModifier.selected.parentAnchor,
-                childAnchor: positionerSettingsModifier.selected.childAnchor,
-                offset: positionerSettingsModifier.selected.offset,
-                constraintAdjustment:
-                    positionerSettingsModifier.selected.constraintAdjustments),
             controller: controller as PopupWindowController,
             child: PopupWindowContent(
                 controller: controller as PopupWindowController,

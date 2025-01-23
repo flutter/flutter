@@ -17,10 +17,15 @@ namespace testing {
 namespace {
 
 constexpr char kChannelName[] = "flutter/windowing";
+<<<<<<< HEAD
 constexpr char kOnWindowCreatedMethod[] = "onWindowCreated";
 constexpr char kOnWindowDestroyedMethod[] = "onWindowDestroyed";
 constexpr char kViewIdKey[] = "viewId";
 constexpr char kParentViewIdKey[] = "parentViewId";
+=======
+constexpr char kOnWindowDestroyedMethod[] = "onWindowDestroyed";
+constexpr char kViewIdKey[] = "viewId";
+>>>>>>> foundation
 
 // Process the next Win32 message if there is one. This can be used to
 // pump the Windows platform thread task runner.
@@ -64,6 +69,7 @@ class FlutterHostWindowControllerTest : public WindowsTest {
 }  // namespace
 
 TEST_F(FlutterHostWindowControllerTest, CreateRegularWindow) {
+<<<<<<< HEAD
   bool called_onWindowCreated = false;
 
   // Test messenger with a handler for onWindowCreated.
@@ -120,13 +126,31 @@ TEST_F(FlutterHostWindowControllerTest, CreateRegularWindow) {
 
   // Verify the onWindowCreated callback was invoked.
   EXPECT_TRUE(called_onWindowCreated);
+=======
+  // Define parameters for the window to be created.
+  WindowCreationSettings const settings = {
+      .archetype = WindowArchetype::kRegular,
+      .size = {800.0, 600.0},
+      .title = "window",
+  };
+
+  // Create the window.
+  std::optional<WindowMetadata> const result =
+      host_window_controller()->CreateHostWindow(settings);
+>>>>>>> foundation
 
   // Validate the returned metadata.
   ASSERT_TRUE(result.has_value());
   EXPECT_NE(engine()->view(result->view_id), nullptr);
+<<<<<<< HEAD
   EXPECT_EQ(result->archetype, archetype);
   EXPECT_GE(result->size.width, size.width);
   EXPECT_GE(result->size.height, size.height);
+=======
+  EXPECT_EQ(result->archetype, settings.archetype);
+  EXPECT_GE(result->size.width(), settings.size.width());
+  EXPECT_GE(result->size.height(), settings.size.height());
+>>>>>>> foundation
   EXPECT_FALSE(result->parent_id.has_value());
 
   // Verify the window exists and the view has the expected dimensions.
@@ -135,8 +159,13 @@ TEST_F(FlutterHostWindowControllerTest, CreateRegularWindow) {
   ASSERT_NE(window, nullptr);
   RECT client_rect;
   GetClientRect(window->GetWindowHandle(), &client_rect);
+<<<<<<< HEAD
   EXPECT_EQ(client_rect.right - client_rect.left, size.width);
   EXPECT_EQ(client_rect.bottom - client_rect.top, size.height);
+=======
+  EXPECT_EQ(client_rect.right - client_rect.left, settings.size.width());
+  EXPECT_EQ(client_rect.bottom - client_rect.top, settings.size.height());
+>>>>>>> foundation
 }
 
 TEST_F(FlutterHostWindowControllerTest, DestroyWindow) {
@@ -177,6 +206,7 @@ TEST_F(FlutterHostWindowControllerTest, DestroyWindow) {
   WindowingHandler windowing_handler(&messenger, host_window_controller());
 
   // Define parameters for the window to be created.
+<<<<<<< HEAD
   WindowSize const size = {800, 600};
   wchar_t const* const title = L"window";
   WindowArchetype const archetype = WindowArchetype::regular;
@@ -185,6 +215,17 @@ TEST_F(FlutterHostWindowControllerTest, DestroyWindow) {
   std::optional<WindowMetadata> const result =
       host_window_controller()->CreateHostWindow(title, size, archetype,
                                                  std::nullopt, std::nullopt);
+=======
+  WindowCreationSettings const settings = {
+      .archetype = WindowArchetype::kRegular,
+      .size = {800.0, 600.0},
+      .title = "window",
+  };
+
+  // Create the window.
+  std::optional<WindowMetadata> const result =
+      host_window_controller()->CreateHostWindow(settings);
+>>>>>>> foundation
   ASSERT_TRUE(result.has_value());
 
   // Destroy the window and ensure onWindowDestroyed was invoked.

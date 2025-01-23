@@ -6,11 +6,12 @@ import 'window_settings_dialog.dart';
 import 'window_manager_model.dart';
 import 'positioner_settings.dart';
 import 'custom_positioner_dialog.dart';
+import 'window_controller_render.dart';
 
 class MainWindow extends StatefulWidget {
   MainWindow({super.key, required WindowController mainController}) {
-    _windowManagerModel.add(
-        KeyedWindowController(isMainWindow: true, controller: mainController));
+    _windowManagerModel.add(KeyedWindowController(
+        isMainWindow: true, key: UniqueKey(), controller: mainController));
   }
 
   final WindowManagerModel _windowManagerModel = WindowManagerModel();
@@ -51,6 +52,8 @@ class _MainWindowState extends State<MainWindow> {
                       return _WindowCreatorCard(
                           selectedWindow: widget._windowManagerModel.selected,
                           windowManagerModel: widget._windowManagerModel,
+                          positionerSettings:
+                              widget._positionerSettingsModifier,
                           windowSettings: widget._settings);
                     }),
                 const SizedBox(height: 12),
@@ -65,12 +68,30 @@ class _MainWindowState extends State<MainWindow> {
     );
 
     return ViewAnchor(
-        view: ChildWindowRenderer(
-            windowManagerModel: widget._windowManagerModel,
-            windowSettings: widget._settings,
-            positionerSettingsModifier: widget._positionerSettingsModifier,
-            controller: widget._windowManagerModel.windows[0].controller,
-            renderParentlessWindows: true),
+        view: ListenableBuilder(
+            listenable: widget._windowManagerModel,
+            builder: (BuildContext context, Widget? _) {
+              final List<Widget> childViews = <Widget>[];
+              for (final KeyedWindowController controller
+                  in widget._windowManagerModel.windows) {
+                if (controller.parent == null && !controller.isMainWindow) {
+                  childViews.add(WindowControllerRender(
+                    controller: controller.controller,
+                    key: controller.key,
+                    windowSettings: widget._settings,
+                    windowManagerModel: widget._windowManagerModel,
+                    positionerSettingsModifier:
+                        widget._positionerSettingsModifier,
+                    onDestroyed: () =>
+                        widget._windowManagerModel.remove(controller.key),
+                    onError: () =>
+                        widget._windowManagerModel.remove(controller.key),
+                  ));
+                }
+              }
+
+              return ViewCollection(views: childViews);
+            }),
         child: child);
   }
 }
@@ -142,8 +163,8 @@ class _ActiveWindowsTable extends StatelessWidget {
                     ListenableBuilder(
                         listenable: controller.controller,
                         builder: (BuildContext context, Widget? _) => Text(
-                            controller.controller.view != null
-                                ? '${controller.controller.view?.viewId}'
+                            controller.controller.isReady
+                                ? '${controller.controller.view.viewId}'
                                 : 'Loading...')),
                   ),
                   DataCell(
@@ -177,10 +198,12 @@ class _WindowCreatorCard extends StatelessWidget {
   const _WindowCreatorCard(
       {required this.selectedWindow,
       required this.windowManagerModel,
+      required this.positionerSettings,
       required this.windowSettings});
 
   final WindowController? selectedWindow;
   final WindowManagerModel windowManagerModel;
+  final PositionerSettingsModifier positionerSettings;
   final WindowSettings windowSettings;
 
   @override
@@ -207,17 +230,45 @@ class _WindowCreatorCard extends StatelessWidget {
               children: [
                 OutlinedButton(
                   onPressed: () async {
+                    final UniqueKey key = UniqueKey();
                     windowManagerModel.add(KeyedWindowController(
-                        controller: RegularWindowController()));
+                        key: key,
+                        controller: RegularWindowController(
+                          onDestroyed: () => windowManagerModel.remove(key),
+                          onError: (String error) =>
+                              windowManagerModel.remove(key),
+                          title: "Regular",
+                          size: windowSettings.regularSizeNotifier.value,
+                        )));
                   },
                   child: const Text('Regular'),
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton(
                   onPressed: () {
+                    final UniqueKey key = UniqueKey();
                     windowManagerModel.add(KeyedWindowController(
+                        key: key,
                         parent: windowManagerModel.selected,
-                        controller: PopupWindowController()));
+                        controller: PopupWindowController(
+                          parent: windowManagerModel.selected!.view,
+                          onDestroyed: () => windowManagerModel.remove(key),
+                          onError: (String error) =>
+                              windowManagerModel.remove(key),
+                          size: windowSettings.popupSizeNotifier.value,
+                          anchorRect:
+                              windowSettings.anchorToWindowNotifier.value
+                                  ? null
+                                  : windowSettings.anchorRectNotifier.value,
+                          positioner: WindowPositioner(
+                              parentAnchor:
+                                  positionerSettings.selected.parentAnchor,
+                              childAnchor:
+                                  positionerSettings.selected.childAnchor,
+                              offset: positionerSettings.selected.offset,
+                              constraintAdjustment: positionerSettings
+                                  .selected.constraintAdjustments),
+                        )));
                   },
                   child: Text(windowManagerModel.selected?.view?.viewId != null
                       ? 'Popup of ID ${windowManagerModel.selected!.view?.viewId}'

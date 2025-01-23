@@ -23,6 +23,7 @@ class FlutterWindowsViewController;
 class FlutterHostWindow {
  public:
   // Creates a native Win32 window with a child view confined to its client
+<<<<<<< HEAD
   // area. |controller| manages the window. |title| is the window title.
   // |preferred_client_size| is the preferred size of the client rectangle in
   // logical coordinates. The window style is defined by |archetype|. For
@@ -37,6 +38,13 @@ class FlutterHostWindow {
                     WindowArchetype archetype,
                     std::optional<HWND> owner,
                     std::optional<WindowPositioner> positioner);
+=======
+  // area. |controller| is a pointer to the controller that manages the
+  // |FlutterHostWindow|. On success, a valid window handle can be retrieved via
+  // |FlutterHostWindow::GetWindowHandle|.
+  FlutterHostWindow(FlutterHostWindowController* controller,
+                    WindowCreationSettings const& settings);
+>>>>>>> foundation
   virtual ~FlutterHostWindow();
 
   // Returns the instance pointer for |hwnd| or nulllptr if invalid.
@@ -45,6 +53,7 @@ class FlutterHostWindow {
   // Returns the window archetype.
   WindowArchetype GetArchetype() const;
 
+<<<<<<< HEAD
   // Returns the owned windows.
   std::set<FlutterHostWindow*> const& GetOwnedWindows() const;
 
@@ -53,6 +62,13 @@ class FlutterHostWindow {
 
   // Returns the owner window, or nullptr if this is a top-level window.
   FlutterHostWindow* GetOwnerWindow() const;
+=======
+  // Returns the hosted Flutter view's ID.
+  FlutterViewId GetFlutterViewId() const;
+
+  // Returns the current window state.
+  WindowState GetState() const;
+>>>>>>> foundation
 
   // Returns the backing window handle, or nullptr if the native window is not
   // created or has already been destroyed.
@@ -76,6 +92,7 @@ class FlutterHostWindow {
   // responds to changes in DPI. Delegates other messages to the controller.
   static LRESULT WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 
+<<<<<<< HEAD
   // Closes this window's popups and returns the count of closed popups.
   std::size_t CloseOwnedPopups();
 
@@ -83,6 +100,8 @@ class FlutterHostWindow {
   // enabled, returns the current window.
   FlutterHostWindow* FindFirstEnabledDescendant() const;
 
+=======
+>>>>>>> foundation
   // Processes and routes salient window messages for mouse handling,
   // size change and DPI. Delegates handling of these to member overloads that
   // inheriting classes can handle.
@@ -98,6 +117,7 @@ class FlutterHostWindow {
   std::unique_ptr<FlutterWindowsViewController> view_controller_;
 
   // The window archetype.
+<<<<<<< HEAD
   WindowArchetype archetype_ = WindowArchetype::regular;
 
   // Windows that have this window as their owner window.
@@ -106,6 +126,9 @@ class FlutterHostWindow {
   // The number of popups in |owned_windows_| (for quick popup existence
   // checks).
   std::size_t num_owned_popups_ = 0;
+=======
+  WindowArchetype archetype_ = WindowArchetype::kRegular;
+>>>>>>> foundation
 
   // Indicates if closing this window will quit the application.
   bool quit_on_close_ = false;
@@ -116,9 +139,20 @@ class FlutterHostWindow {
   // Backing handle for the hosted view window.
   HWND child_content_ = nullptr;
 
+<<<<<<< HEAD
   // Whether the non-client area can be redrawn as inactive. Temporarily
   // disabled during owned popup destruction to prevent flickering.
   bool enable_redraw_non_client_as_inactive_ = true;
+=======
+  // The minimum size of the window's client area, if defined.
+  std::optional<Size> min_size_;
+
+  // The maximum size of the window's client area, if defined.
+  std::optional<Size> max_size_;
+
+  // The window state.
+  WindowState state_ = WindowState::kRestored;
+>>>>>>> foundation
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterHostWindow);
 };

@@ -24,7 +24,10 @@ using ::testing::Return;
 using ::testing::StrEq;
 
 static constexpr char kChannelName[] = "flutter/windowing";
+<<<<<<< HEAD
 
+=======
+>>>>>>> foundation
 static constexpr char kCreateWindowMethod[] = "createWindow";
 static constexpr char kDestroyWindowMethod[] = "destroyWindow";
 
@@ -52,11 +55,15 @@ class MockFlutterHostWindowController : public FlutterHostWindowController {
 
   MOCK_METHOD(std::optional<WindowMetadata>,
               CreateHostWindow,
+<<<<<<< HEAD
               (std::wstring const& title,
                WindowSize const& size,
                WindowArchetype archetype,
                std::optional<WindowPositioner> positioner,
                std::optional<FlutterViewId> parent_view_id),
+=======
+              (WindowCreationSettings const& settings),
+>>>>>>> foundation
               (override));
   MOCK_METHOD(bool, DestroyHostWindow, (FlutterViewId view_id), (override));
 
@@ -81,7 +88,16 @@ class WindowingHandlerTest : public WindowsTest {
             engine_.get());
 
     ON_CALL(*mock_controller_, CreateHostWindow)
+<<<<<<< HEAD
         .WillByDefault(Return(WindowMetadata{}));
+=======
+        .WillByDefault([](WindowCreationSettings const& settings) {
+          return WindowMetadata{
+              .size = settings.size,
+              .state = WindowState::kRestored,
+          };
+        });
+>>>>>>> foundation
     ON_CALL(*mock_controller_, DestroyHostWindow).WillByDefault(Return(true));
   }
 
@@ -96,15 +112,45 @@ class WindowingHandlerTest : public WindowsTest {
   FML_DISALLOW_COPY_AND_ASSIGN(WindowingHandlerTest);
 };
 
+<<<<<<< HEAD
+=======
+MATCHER_P(WindowCreationSettingsMatches,
+          expected,
+          "Matches WindowCreationSettings") {
+  return arg.archetype == expected.archetype && arg.size == expected.size &&
+         arg.min_size == expected.min_size &&
+         arg.max_size == expected.max_size && arg.title == expected.title &&
+         arg.state == expected.state;
+}
+
+>>>>>>> foundation
 TEST_F(WindowingHandlerTest, HandleCreateRegularWindow) {
   TestBinaryMessenger messenger;
   WindowingHandler windowing_handler(&messenger, controller());
 
+<<<<<<< HEAD
   WindowSize const size = {800, 600};
   EncodableMap const arguments = {
       {EncodableValue("size"),
        EncodableValue(EncodableList{EncodableValue(size.width),
                                     EncodableValue(size.height)})},
+=======
+  WindowCreationSettings const settings = {
+      .archetype = WindowArchetype::kRegular,
+      .size = {800.0, 600.0},
+      .title = "regular",
+  };
+
+  Size const size = {800.0, 600.0};
+  EncodableMap const arguments = {
+      {EncodableValue("size"),
+       EncodableValue(EncodableList{EncodableValue(settings.size.width()),
+                                    EncodableValue(settings.size.height())})},
+      {EncodableValue("minSize"), EncodableValue()},
+      {EncodableValue("maxSize"), EncodableValue()},
+      {EncodableValue("title"), EncodableValue(*settings.title)},
+      {EncodableValue("state"), EncodableValue()},
+>>>>>>> foundation
   };
 
   bool success = false;
@@ -112,10 +158,15 @@ TEST_F(WindowingHandlerTest, HandleCreateRegularWindow) {
       [&success](const EncodableValue* result) { success = true; }, nullptr,
       nullptr);
 
+<<<<<<< HEAD
   EXPECT_CALL(
       *controller(),
       CreateHostWindow(StrEq(L"regular"), size, WindowArchetype::regular,
                        Eq(std::nullopt), Eq(std::nullopt)))
+=======
+  EXPECT_CALL(*controller(),
+              CreateHostWindow(WindowCreationSettingsMatches(settings)))
+>>>>>>> foundation
       .Times(1);
 
   SimulateWindowingMessage(&messenger, kCreateWindowMethod,
