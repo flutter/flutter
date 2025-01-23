@@ -1121,11 +1121,6 @@ class FlutterPlugin implements Plugin<Project> {
         return false
     }
 
-    private static Task getAssembleTask(variant) {
-        // `assemble` became `assembleProvider` in AGP 3.3.0.
-        return variant.hasProperty("assembleProvider") ? variant.assembleProvider.get() : variant.assemble
-    }
-
     private boolean isFlutterAppProject() {
         return project.android.hasProperty("applicationVariants")
     }
@@ -1374,7 +1369,7 @@ class FlutterPlugin implements Plugin<Project> {
         } // end def addFlutterDeps
         if (isFlutterAppProject()) {
             project.android.applicationVariants.all { variant ->
-                Task assembleTask = getAssembleTask(variant)
+                Task assembleTask = variant.assembleProvider.get()
                 if (!shouldConfigureFlutterTask(assembleTask)) {
                     return
                 }
@@ -1394,14 +1389,8 @@ class FlutterPlugin implements Plugin<Project> {
                 //   * `build-mode` can be `release|debug|profile`.
                 variant.outputs.all { output ->
                     assembleTask.doLast {
-                        // `packageApplication` became `packageApplicationProvider` in AGP 3.3.0.
-                        def outputDirectory = variant.hasProperty("packageApplicationProvider")
-                            ? variant.packageApplicationProvider.get().outputDirectory
-                            : variant.packageApplication.outputDirectory
-                        //  `outputDirectory` is a `DirectoryProperty` in AGP 4.1.
-                        String outputDirectoryStr = outputDirectory.metaClass.respondsTo(outputDirectory, "get")
-                            ? outputDirectory.get()
-                            : outputDirectory
+                        def outputDirectory = variant.packageApplicationProvider.get().outputDirectory
+                        String outputDirectoryStr = outputDirectory.get()
                         String filename = "app"
                         String abi = output.getFilter(OutputFile.ABI)
                         if (abi != null && !abi.isEmpty()) {
@@ -1441,7 +1430,7 @@ class FlutterPlugin implements Plugin<Project> {
             project.android.libraryVariants.all { libraryVariant ->
                 Task copyFlutterAssetsTask
                 appProject.android.applicationVariants.all { appProjectVariant ->
-                    Task appAssembleTask = getAssembleTask(appProjectVariant)
+                    Task appAssembleTask = appProjectVariant.assembleProvider.get()
                     if (!shouldConfigureFlutterTask(appAssembleTask)) {
                         return
                     }
