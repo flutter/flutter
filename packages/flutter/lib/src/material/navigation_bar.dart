@@ -252,8 +252,8 @@ class NavigationBar extends StatelessWidget {
   ///
   /// When true, this will prevent the [NavigationBar] from shifting when opening a
   /// software keyboard due to the change in the padding value, especially when the
-  /// app uses [SystemUiMode.edgeToEdge], which renders the navigation elements over
-  /// the application instead of outside it.
+  /// app uses [SystemUiMode.edgeToEdge], which renders the system bars over the
+  /// application instead of outside it.
   ///
   /// Defaults to false.
   ///
