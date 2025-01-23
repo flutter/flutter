@@ -2311,7 +2311,7 @@ bool deprecatedDoNotUseWillBeRemovedWithoutNoticeLeakTrackCodec = false;
 /// [instantiateImageCodec].
 abstract class Codec {
   Codec() {
-    if (deprecatedDoNotUseWillBeRemovedWithoutNoticeLeakTrackCodec) {}
+    if (deprecatedDoNotUseWillBeRemovedWithoutNoticeLeakTrackCodec) {
       onCreate?.call(this);
     }
   }
