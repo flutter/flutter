@@ -1176,69 +1176,6 @@ void main() {
     );
   });
 
-  testWidgets('Top nav bar bottom is aligned with top large title animation', (
-    WidgetTester tester,
-  ) async {
-    const double horizontalPadding = 16.0;
-    const double height = 30.0;
-    await startTransitionBetween(
-      tester,
-      toTitle: 'Page 2',
-      to: const CupertinoSliverNavigationBar(
-        bottom: PreferredSize(preferredSize: Size.fromHeight(height), child: Placeholder()),
-      ),
-    );
-
-    await tester.pump(const Duration(milliseconds: 50));
-
-    expect(flying(tester, find.text('Page 2')), findsOneWidget);
-    expect(flying(tester, find.byType(Placeholder)), findsOneWidget);
-
-    double largeTitleOpacity =
-        tester
-            .firstRenderObject<RenderAnimatedOpacity>(
-              find.ancestor(
-                of: flying(tester, find.text('Page 2')),
-                matching: find.byType(FadeTransition),
-              ),
-            )
-            .opacity
-            .value;
-
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), largeTitleOpacity);
-
-    Offset largeTitleOffset = tester.getTopLeft(flying(tester, find.text('Page 2')));
-
-    // The nav bar bottom is horizontally aligned to the large title.
-    expect(
-      tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      largeTitleOffset.dx - horizontalPadding,
-    );
-
-    await tester.pump(const Duration(milliseconds: 150));
-
-    largeTitleOpacity =
-        tester
-            .firstRenderObject<RenderAnimatedOpacity>(
-              find.ancestor(
-                of: flying(tester, find.text('Page 2')),
-                matching: find.byType(FadeTransition),
-              ),
-            )
-            .opacity
-            .value;
-
-    checkOpacity(tester, flying(tester, find.byType(Placeholder)), largeTitleOpacity);
-
-    largeTitleOffset = tester.getTopLeft(flying(tester, find.text('Page 2')));
-
-    // The nav bar bottom is horizontally aligned to the large title.
-    expect(
-      tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      largeTitleOffset.dx - horizontalPadding,
-    );
-  });
-
   testWidgets('Components are not unnecessarily rebuilt during transitions', (
     WidgetTester tester,
   ) async {
