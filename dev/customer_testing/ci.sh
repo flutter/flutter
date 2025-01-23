@@ -32,4 +32,4 @@ function script_location() {
 cd "$(script_location)"
 
 # Run the cross-platform script.
-dart run ci.dart
+../../bin/dart run ci.dart

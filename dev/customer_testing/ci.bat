@@ -20,4 +20,4 @@ ECHO Updating pub packages...
 CALL dart pub get
 
 REM Run the cross-platform script.
-CALL dart ci.dart
+CALL ..\..\bin\dart.bat ci.dart
