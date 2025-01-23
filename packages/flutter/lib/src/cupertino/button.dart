@@ -129,7 +129,8 @@ class CupertinoButton extends StatefulWidget {
     this.autofocus = false,
     this.onLongPress,
     required this.onPressed,
-  }) : _style = _CupertinoButtonStyle.tinted,
+  }) : assert((minWidth == null && minHeight == null) || minSize == null),
+       _style = _CupertinoButtonStyle.tinted,
        minWidth = minWidth ?? minSize,
        minHeight = minHeight ?? minSize;
 
@@ -162,6 +163,7 @@ class CupertinoButton extends StatefulWidget {
     this.onLongPress,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
+       assert((minWidth == null && minHeight == null) || minSize == null),
        color = null,
        _style = _CupertinoButtonStyle.filled,
        minWidth = minWidth ?? minSize,
@@ -201,15 +203,15 @@ class CupertinoButton extends StatefulWidget {
   /// If [onPressed] and [onLongPress] callbacks are null, then the button will be disabled.
   final VoidCallback? onLongPress;
 
-  /// Minimum Width of the button.
+  /// Minimum width of the button.
   ///
-  /// Defaults to kMinInteractiveDimensionCupertino which the iOS Human
+  /// Defaults to [kMinInteractiveDimensionCupertino], which the iOS Human
   /// Interface Guidelines recommends as the minimum tappable area.
   final double? minWidth;
 
-  /// Minimum Height of the button.
+  /// Minimum height of the button.
   ///
-  /// Defaults to kMinInteractiveDimensionCupertino which the iOS Human
+  /// Defaults to [kMinInteractiveDimensionCupertino], which the iOS Human
   /// Interface Guidelines recommends as the minimum tappable area.
   final double? minHeight;
 
