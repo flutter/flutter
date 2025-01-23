@@ -16,16 +16,6 @@
 
 #include "gtest/gtest.h"
 
-// Define compound `expect` in macros. If they were defined in functions, the
-// stacktrace wouldn't print where the function is called in the unit tests.
-
-#define EXPECT_KEY_EVENT(RECORD, TYPE, PHYSICAL, LOGICAL, CHAR, SYNTHESIZED) \
-  EXPECT_EQ((RECORD)->event_type, (TYPE));                                   \
-  EXPECT_EQ((RECORD)->event_physical, (PHYSICAL));                           \
-  EXPECT_EQ((RECORD)->event_logical, (LOGICAL));                             \
-  EXPECT_STREQ((RECORD)->event_character, (CHAR));                           \
-  EXPECT_EQ((RECORD)->event_synthesized, (SYNTHESIZED));
-
 #define VERIFY_DOWN(OUT_LOGICAL, OUT_CHAR)                                  \
   EXPECT_EQ(static_cast<CallRecord*>(g_ptr_array_index(call_records, 0))    \
                 ->event_type,                                               \
@@ -774,16 +764,23 @@ TEST(FlKeyboardManagerTest, SynthesizeModifiersIfNeeded) {
     guint state = mask;
     fl_keyboard_manager_sync_modifier_if_needed(manager, state, 1000);
     EXPECT_EQ(call_records->len, 1u);
-    EXPECT_KEY_EVENT(
-        static_cast<CallRecord*>(g_ptr_array_index(call_records, 0)),
-        kFlutterKeyEventTypeDown, physical, logical, NULL, true);
+    CallRecord* record =
+        static_cast<CallRecord*>(g_ptr_array_index(call_records, 0));
+    EXPECT_EQ(record->event_type, kFlutterKeyEventTypeDown);
+    EXPECT_EQ(record->event_physical, physical);
+    EXPECT_EQ(record->event_logical, logical);
+    EXPECT_STREQ(record->event_character, NULL);
+    EXPECT_EQ(record->event_synthesized, true);
     // Modifier is released.
     state = state ^ mask;
     fl_keyboard_manager_sync_modifier_if_needed(manager, state, 1001);
     EXPECT_EQ(call_records->len, 2u);
-    EXPECT_KEY_EVENT(
-        static_cast<CallRecord*>(g_ptr_array_index(call_records, 1)),
-        kFlutterKeyEventTypeUp, physical, logical, NULL, true);
+    record = static_cast<CallRecord*>(g_ptr_array_index(call_records, 1));
+    EXPECT_EQ(record->event_type, kFlutterKeyEventTypeUp);
+    EXPECT_EQ(record->event_physical, physical);
+    EXPECT_EQ(record->event_logical, logical);
+    EXPECT_STREQ(record->event_character, NULL);
+    EXPECT_EQ(record->event_synthesized, true);
     g_ptr_array_set_size(call_records, 0);
   };
 
