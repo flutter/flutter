@@ -4722,12 +4722,14 @@ typedef _MergeUpAndSiblingMergeGroups =
 /// render objects according to these information. While doing that, the
 /// [updateChildren] also decide what _RenderObjectSemantics will have their own
 /// SemanticsNodes later on. After that, flushSemantics calls the
-/// [ensureSemanticsNode] compiling these _RenderObjectSemantics into the actual
-/// SemanticsNodes that form the semantics tree.
+/// [ensureGeometry] to calculate the geometries for these
+/// _RenderObjectSemantics. Finally, [ensureSemanticsNode] compiling these
+/// _RenderObjectSemantics into the actual SemanticsNodes that form the
+/// semantics tree.
 ///
 /// ## Steps Breakdown
 ///
-/// The _RenderObjectSemantics tree is compiled in three phases.
+/// The _RenderObjectSemantics tree is compiled in four phases.
 ///
 /// ### Phase 1
 ///
@@ -4752,15 +4754,20 @@ typedef _MergeUpAndSiblingMergeGroups =
 ///
 /// ### Phase 3
 ///
+/// Walks the [_childrenAndElevationAdjustments] and calculate their
+/// [_SemanticsGeometry] based on renderObject relationship.
+///
+/// ### Phase 4
+///
 /// Walks the [_childrenAndElevationAdjustments] and produce semantics node for
 /// each [_RenderObjectSemantics] plus the sibling nodes.
 ///
-/// Since phase 3 can only be done after the _childrenAndElevationAdjustments
-/// are created, it require another tree walk to produce the semantics node
-/// tree.
+/// Since phase 2, 3, 4 each depends on previous step to finished updating the
+/// the entire _RenderObjectSemantics tree. All three of them require separate
+/// tree walk.
 ///
-/// Phase 1 and 2 are done in [updateChildren]. Phase 3 is done in
-/// [ensureSemanticsNode].
+/// Phase 1 and 2 are done in [updateChildren], Phase 3 is done in
+/// [ensureGeometry], and phase 4 is done in [ensureSemanticsNode].
 class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeMixin {
   _RenderObjectSemantics(this.renderObject)
     : configProvider = _SemanticsConfigurationProvider(renderObject);
@@ -5183,6 +5190,12 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     _hasSiblingConflict = conflict;
   }
 
+  /// Updates the [geometry] for this [_RenderObjectSemantics]s and its subtree
+  /// in [_childrenAndElevationAdjustments].
+  ///
+  /// This method is short-circuited if the subtree geometry won't
+  /// be affect after the update. (e.g. the size doesn't change, or new clip
+  /// rect doesn't clip the content).
   void ensureGeometry() {
     if (isRoot) {
       if (geometry?.rect != renderObject.semanticBounds) {
