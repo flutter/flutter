@@ -62,6 +62,17 @@ typedef void (*FlEngineUpdateSemanticsHandler)(
     gpointer user_data);
 
 /**
+ * fl_engine_new_with_binary_messenger:
+ * @binary_messenger: an #FlBinaryMessenger.
+ *
+ * Creates a new engine with a custom binary messenger. Used for testing.
+ *
+ * Returns: a new #FlEngine.
+ */
+FlEngine* fl_engine_new_with_binary_messenger(
+    FlBinaryMessenger* binary_messenger);
+
+/**
  * fl_engine_new_with_renderer:
  * @project: an #FlDartProject.
  * @renderer: an #FlRenderer.

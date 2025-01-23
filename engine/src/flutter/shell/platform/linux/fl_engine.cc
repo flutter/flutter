@@ -545,6 +545,15 @@ G_MODULE_EXPORT FlEngine* fl_engine_new(FlDartProject* project) {
   return fl_engine_new_with_renderer(project, FL_RENDERER(renderer));
 }
 
+FlEngine* fl_engine_new_with_binary_messenger(
+    FlBinaryMessenger* binary_messenger) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  FlEngine* self = fl_engine_new(project);
+  g_object_unref(self->binary_messenger);
+  self->binary_messenger = FL_BINARY_MESSENGER(g_object_ref(binary_messenger));
+  return self;
+}
+
 G_MODULE_EXPORT FlEngine* fl_engine_new_headless(FlDartProject* project) {
   g_autoptr(FlRendererHeadless) renderer = fl_renderer_headless_new();
   return fl_engine_new_with_renderer(project, FL_RENDERER(renderer));

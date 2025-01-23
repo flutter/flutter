@@ -9,7 +9,6 @@
 #include <memory>
 #include <string>
 
-#include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_key_channel_responder.h"
 #include "flutter/shell/platform/linux/fl_key_embedder_responder.h"
 #include "flutter/shell/platform/linux/fl_keyboard_layout.h"
@@ -84,16 +83,8 @@ static void handle_event_data_free(HandleEventData* data) {
 struct _FlKeyboardManager {
   GObject parent_instance;
 
-  GWeakRef engine;
-
-  FlKeyboardManagerSendKeyEventHandler send_key_event_handler;
-  gpointer send_key_event_handler_user_data;
-
   FlKeyboardManagerLookupKeyHandler lookup_key_handler;
   gpointer lookup_key_handler_user_data;
-
-  FlKeyboardManagerGetPressedStateHandler get_pressed_state_handler;
-  gpointer get_pressed_state_handler_user_data;
 
   // Key events that have been redispatched.
   GPtrArray* redispatched_key_events;
@@ -166,14 +157,25 @@ static void complete_handle_event(FlKeyboardManager* self, GTask* task) {
   g_task_return_boolean(task, TRUE);
 }
 
-static void responder_handle_embedder_event_callback(bool handled,
-                                                     gpointer user_data) {
+static void responder_handle_embedder_event_cb(GObject* object,
+                                               GAsyncResult* result,
+                                               gpointer user_data) {
   g_autoptr(GTask) task = G_TASK(user_data);
   FlKeyboardManager* self = FL_KEYBOARD_MANAGER(g_task_get_source_object(task));
 
   HandleEventData* data =
       static_cast<HandleEventData*>(g_task_get_task_data(G_TASK(task)));
   data->embedder_responded = TRUE;
+
+  g_autoptr(GError) error = nullptr;
+  gboolean handled;
+  if (!fl_key_embedder_responder_handle_event_finish(
+          FL_KEY_EMBEDDER_RESPONDER(object), result, &handled, &error)) {
+    if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+      g_warning("Failed to handle key event in embedder: %s", error->message);
+    }
+    handled = FALSE;
+  }
   if (handled) {
     data->handled = TRUE;
   }
@@ -309,8 +311,6 @@ static void fl_keyboard_manager_dispose(GObject* object) {
 
   g_cancellable_cancel(self->cancellable);
 
-  g_weak_ref_clear(&self->engine);
-
   self->keycode_to_goals.reset();
   self->logical_to_mandatory_goals.reset();
 
@@ -357,51 +357,7 @@ FlKeyboardManager* fl_keyboard_manager_new(FlEngine* engine) {
   FlKeyboardManager* self = FL_KEYBOARD_MANAGER(
       g_object_new(fl_keyboard_manager_get_type(), nullptr));
 
-  g_weak_ref_init(&self->engine, engine);
-
-  self->key_embedder_responder = fl_key_embedder_responder_new(
-      [](const FlutterKeyEvent* event, FlutterKeyEventCallback callback,
-         void* callback_user_data, void* send_key_event_user_data) {
-        FlKeyboardManager* self = FL_KEYBOARD_MANAGER(send_key_event_user_data);
-        if (self->send_key_event_handler != nullptr) {
-          self->send_key_event_handler(event, callback, callback_user_data,
-                                       self->send_key_event_handler_user_data);
-        } else {
-          g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
-          if (engine != nullptr) {
-            typedef struct {
-              FlutterKeyEventCallback callback;
-              void* callback_user_data;
-            } SendKeyEventData;
-            SendKeyEventData* data = g_new0(SendKeyEventData, 1);
-            data->callback = callback;
-            data->callback_user_data = callback_user_data;
-            fl_engine_send_key_event(
-                engine, event, self->cancellable,
-                [](GObject* object, GAsyncResult* result, gpointer user_data) {
-                  g_autofree SendKeyEventData* data =
-                      static_cast<SendKeyEventData*>(user_data);
-                  gboolean handled = FALSE;
-                  g_autoptr(GError) error = nullptr;
-                  if (!fl_engine_send_key_event_finish(
-                          FL_ENGINE(object), result, &handled, &error)) {
-                    if (g_error_matches(error, G_IO_ERROR,
-                                        G_IO_ERROR_CANCELLED)) {
-                      return;
-                    }
-
-                    g_warning("Failed to send key event: %s", error->message);
-                  }
-
-                  if (data->callback != nullptr) {
-                    data->callback(handled, data->callback_user_data);
-                  }
-                },
-                data);
-          }
-        }
-      },
-      self);
+  self->key_embedder_responder = fl_key_embedder_responder_new(engine);
   self->key_channel_responder =
       fl_key_channel_responder_new(fl_engine_get_binary_messenger(engine));
 
@@ -444,7 +400,8 @@ void fl_keyboard_manager_handle_event(FlKeyboardManager* self,
       fl_key_event_get_keycode(event));
   fl_key_embedder_responder_handle_event(
       self->key_embedder_responder, event, specified_logical_key,
-      responder_handle_embedder_event_callback, g_object_ref(task));
+      self->cancellable, responder_handle_embedder_event_cb,
+      g_object_ref(task));
   fl_key_channel_responder_handle_event(
       self->key_channel_responder, event, specified_logical_key,
       self->cancellable, responder_handle_channel_event_cb, g_object_ref(task));
@@ -477,22 +434,8 @@ void fl_keyboard_manager_sync_modifier_if_needed(FlKeyboardManager* self,
 
 GHashTable* fl_keyboard_manager_get_pressed_state(FlKeyboardManager* self) {
   g_return_val_if_fail(FL_IS_KEYBOARD_MANAGER(self), nullptr);
-  if (self->get_pressed_state_handler != nullptr) {
-    return self->get_pressed_state_handler(
-        self->get_pressed_state_handler_user_data);
-  } else {
-    return fl_key_embedder_responder_get_pressed_state(
-        self->key_embedder_responder);
-  }
-}
-
-void fl_keyboard_manager_set_send_key_event_handler(
-    FlKeyboardManager* self,
-    FlKeyboardManagerSendKeyEventHandler send_key_event_handler,
-    gpointer user_data) {
-  g_return_if_fail(FL_IS_KEYBOARD_MANAGER(self));
-  self->send_key_event_handler = send_key_event_handler;
-  self->send_key_event_handler_user_data = user_data;
+  return fl_key_embedder_responder_get_pressed_state(
+      self->key_embedder_responder);
 }
 
 void fl_keyboard_manager_set_lookup_key_handler(
@@ -502,13 +445,4 @@ void fl_keyboard_manager_set_lookup_key_handler(
   g_return_if_fail(FL_IS_KEYBOARD_MANAGER(self));
   self->lookup_key_handler = lookup_key_handler;
   self->lookup_key_handler_user_data = user_data;
-}
-
-void fl_keyboard_manager_set_get_pressed_state_handler(
-    FlKeyboardManager* self,
-    FlKeyboardManagerGetPressedStateHandler get_pressed_state_handler,
-    gpointer user_data) {
-  g_return_if_fail(FL_IS_KEYBOARD_MANAGER(self));
-  self->get_pressed_state_handler = get_pressed_state_handler;
-  self->get_pressed_state_handler_user_data = user_data;
 }
