@@ -245,19 +245,19 @@ class _RawMenuAnchorScope extends InheritedWidget {
 ///
 /// {@end-tool}
 ///
-class RawMenuAnchor extends StatelessWidget {
+class RawMenuAnchor extends _RawMenuAnchor {
   /// Creates a [RawMenuAnchor] that displays a `menuPanel` widget when opened.
   const RawMenuAnchor({
     super.key,
-    this.controller,
-    this.childFocusNode,
+    super.controller,
+    super.childFocusNode,
+    super.consumeOutsideTaps = false,
     this.alignment,
     this.alignmentOffset = Offset.zero,
     this.menuAlignment,
-    this.consumeOutsideTaps = false,
     this.onOpen,
     this.onClose,
-    bool this.useRootOverlay = false,
+    this.useRootOverlay = false,
     String? semanticLabel,
     this.padding,
     required Widget menuPanel,
@@ -300,12 +300,12 @@ class RawMenuAnchor extends StatelessWidget {
   /// {@end-tool}
   const RawMenuAnchor.withOverlayBuilder({
     super.key,
-    this.controller,
-    this.childFocusNode,
-    this.consumeOutsideTaps = false,
+    super.controller,
+    super.childFocusNode,
+    super.consumeOutsideTaps = false,
     this.onOpen,
     this.onClose,
-    bool this.useRootOverlay = false,
+    this.useRootOverlay = false,
     required RawMenuAnchorOverlayBuilder overlayBuilder,
     this.builder,
     this.child,
@@ -317,30 +317,6 @@ class RawMenuAnchor extends StatelessWidget {
        _overlayBuilder = overlayBuilder,
        _semanticLabel = null,
        _hasExternalFocusScope = true;
-
-  /// An optional [MenuController] that allows opening and closing of the menu
-  /// from other widgets.
-  ///
-  /// If not supplied, [RawMenuAnchor] will create and manage a [MenuController].
-  final MenuController? controller;
-
-  /// The [FocusNode] attached to the widget that takes focus when the
-  /// menu is opened or closed.
-  ///
-  /// If not supplied, the anchor will not retain focus when the menu is opened.
-  final FocusNode? childFocusNode;
-
-  /// Whether or not a tap event that closes the menu will be permitted to
-  /// continue on to the gesture arena.
-  ///
-  /// If false, then tapping outside of a menu when the menu is open will both
-  /// close the menu, and allow the tap to participate in the gesture arena.
-  ///
-  /// If true, then it will only close the menu, and the tap event will be
-  /// consumed.
-  ///
-  /// Defaults to false.
-  final bool consumeOutsideTaps;
 
   /// A callback that is invoked when the menu is opened.
   final VoidCallback? onOpen;
@@ -437,7 +413,7 @@ class RawMenuAnchor extends StatelessWidget {
   /// {@endtemplate}
   ///
   /// Defaults to false on overlay menus.
-  final bool? useRootOverlay;
+  final bool useRootOverlay;
 
   // The menu panel that is displayed when the menu is opened.
   //
@@ -479,23 +455,7 @@ class RawMenuAnchor extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return _RawMenuAnchorOverlay(
-      useRootOverlay: useRootOverlay!,
-      controller: controller,
-      childFocusNode: childFocusNode,
-      consumeOutsideTaps: consumeOutsideTaps,
-      onOpen: onOpen,
-      onClose: onClose,
-      padding: padding,
-      overlayBuilder: _overlayBuilder ?? _defaultOverlayBuilder,
-      // If there's a custom overlay, then that overlay will manage its own
-      // focus scope.
-      hasExternalFocusScope: _hasExternalFocusScope,
-      builder: builder,
-      child: child,
-    );
-  }
+  State<RawMenuAnchor> createState() => _RawMenuAnchorOverlayState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -514,17 +474,37 @@ class RawMenuAnchor extends StatelessWidget {
 }
 
 // Base class that provides the common interface and state for both types of
-// RawMenuAnchors, [_RawMenuAnchorOverlay] and [_RawMenuAnchorNode].
+// RawMenuAnchors, [RawMenuAnchor] and [RawMenuAnchorGroup].
 sealed class _RawMenuAnchor extends StatefulWidget {
   const _RawMenuAnchor({
     super.key,
     this.childFocusNode,
-    required this.consumeOutsideTaps,
-    required this.controller,
+    this.consumeOutsideTaps = false,
+    this.controller,
   });
 
+  /// The [FocusNode] attached to the widget that takes focus when the
+  /// menu is opened or closed.
+  ///
+  /// If not supplied, the anchor will not retain focus when the menu is opened.
   final FocusNode? childFocusNode;
+
+  /// Whether or not a tap event that closes the menu will be permitted to
+  /// continue on to the gesture arena.
+  ///
+  /// If false, then tapping outside of a menu when the menu is open will both
+  /// close the menu, and allow the tap to participate in the gesture arena.
+  ///
+  /// If true, then it will only close the menu, and the tap event will be
+  /// consumed.
+  ///
+  /// Defaults to false.
   final bool consumeOutsideTaps;
+
+  /// An optional [MenuController] that allows opening and closing of the menu
+  /// from other widgets.
+  ///
+  /// If not supplied, [RawMenuAnchor] will create and manage a [MenuController].
   final MenuController? controller;
 
   @override
@@ -699,38 +679,7 @@ sealed class _RawMenuAnchorState<T extends _RawMenuAnchor> extends State<T> {
   String toString({DiagnosticLevel? minLevel}) => describeIdentity(this);
 }
 
-class _RawMenuAnchorOverlay extends _RawMenuAnchor {
-  const _RawMenuAnchorOverlay({
-    required this.onOpen,
-    required this.onClose,
-    required this.hasExternalFocusScope,
-    required this.useRootOverlay,
-    required this.overlayBuilder,
-    required this.builder,
-    required this.child,
-    required this.padding,
-    required super.controller,
-    required super.childFocusNode,
-    required super.consumeOutsideTaps,
-  });
-
-  final VoidCallback? onOpen;
-  final VoidCallback? onClose;
-  final bool useRootOverlay;
-  final Widget? child;
-  final EdgeInsetsGeometry? padding;
-  final RawMenuAnchorChildBuilder? builder;
-  final RawMenuAnchorOverlayBuilder overlayBuilder;
-
-  // Whether focus is handled by this class (default overlay) or externally
-  // (overlayBuilder).
-  final bool hasExternalFocusScope;
-
-  @override
-  State<_RawMenuAnchorOverlay> createState() => _RawMenuAnchorOverlayState();
-}
-
-class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverlay> {
+class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<RawMenuAnchor> {
   static final Map<Type, Action<Intent>> _rootOverlayAnchorActions = <Type, Action<Intent>>{
     DirectionalFocusIntent: _AnchorDirectionalFocusAction(),
   };
@@ -784,7 +733,7 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
   void initState() {
     super.initState();
     // If the overlay is custom, then focus is handled externally.
-    if (!widget.hasExternalFocusScope) {
+    if (!widget._hasExternalFocusScope) {
       _menuScopeNode = FocusScopeNode(
         debugLabel: kReleaseMode ? null : '${describeIdentity(this)} Sub Menu',
       );
@@ -821,7 +770,7 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
       ),
     );
 
-    if (!widget.hasExternalFocusScope && _isRootAnchor) {
+    if (!widget._hasExternalFocusScope && _isRootAnchor) {
       child = Actions(
         actions: _isOpen ? _rootOverlayAnchorActions : <Type, Action<Intent>>{},
         child: child,
@@ -841,7 +790,7 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
               child: child,
             );
 
-    if (widget.hasExternalFocusScope) {
+    if (widget._hasExternalFocusScope) {
       return child;
     }
 
@@ -867,15 +816,19 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<_RawMenuAnchorOverl
       anchorBox.size.bottomRight(Offset.zero),
       ancestor: overlay,
     );
-    return widget.overlayBuilder(
-      context,
-      RawMenuOverlayInfo(
-        anchorRect: Rect.fromPoints(upperLeft, bottomRight),
-        overlaySize: overlay.size,
-        position: _menuPosition,
-        tapRegionGroupId: _root._menuController,
-      ),
+
+    final RawMenuOverlayInfo info = RawMenuOverlayInfo(
+      anchorRect: Rect.fromPoints(upperLeft, bottomRight),
+      overlaySize: overlay.size,
+      position: _menuPosition,
+      tapRegionGroupId: _root._menuController,
     );
+
+    if (widget._overlayBuilder != null) {
+      return widget._overlayBuilder!(context, info);
+    }
+
+    return widget._defaultOverlayBuilder(context, info);
   }
 
   void _focusButton() {
@@ -1404,7 +1357,7 @@ class RawMenuPanel extends StatelessWidget {
   EdgeInsetsGeometry? _resolvePadding(BuildContext context) {
     return padding ??
         switch (MenuController.maybeOf(context)?._anchor?.widget) {
-          final _RawMenuAnchorOverlay anchor => anchor.padding,
+          final RawMenuAnchor anchor => anchor.padding,
           _ => null,
         };
   }
@@ -1474,8 +1427,8 @@ class _MenuOverlay extends StatelessWidget {
     required this.menuAlignment,
     required this.position,
     required this.padding,
-    required this.semanticLabel,
-    required this.consumeOutsideTaps,
+    this.semanticLabel,
+    this.consumeOutsideTaps = true,
     required this.child,
   });
 
