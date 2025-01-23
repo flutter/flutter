@@ -713,6 +713,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       userTrailing: widget.trailing,
       padding: widget.padding,
       userLargeTitle: widget.largeTitle,
+      userBottom: widget.bottom,
       large: widget.largeTitle != null,
       staticBar: true, // This one does not scroll
     );
@@ -1143,6 +1144,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       userMiddle: widget.middle,
       userTrailing: widget.trailing,
       userLargeTitle: widget.largeTitle,
+      userBottom: widget.bottom,
       padding: widget.padding,
       large: true,
       staticBar: false, // This one scrolls.
@@ -1327,14 +1329,14 @@ class _LargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDeleg
                       bottom: 0.0,
                       child: SizedBox(
                         height: bottomHeight * (1.0 - bottomShrinkFactor),
-                        child: ClipRect(child: bottom),
+                        child: ClipRect(child: components.navBarBottom),
                       ),
                     ),
                 ],
               ),
             ),
             if (bottomMode == NavigationBarBottomMode.always)
-              SizedBox(height: bottomHeight, child: bottom),
+              SizedBox(height: bottomHeight, child: components.navBarBottom),
           ],
         ),
       ),
@@ -1611,7 +1613,8 @@ class _NavigationBarStaticComponentsKeys {
       backLabelKey = GlobalKey(debugLabel: 'Back label'),
       middleKey = GlobalKey(debugLabel: 'Middle'),
       trailingKey = GlobalKey(debugLabel: 'Trailing'),
-      largeTitleKey = GlobalKey(debugLabel: 'Large title');
+      largeTitleKey = GlobalKey(debugLabel: 'Large title'),
+      navBarBottomKey = GlobalKey(debugLabel: 'Navigation bar bottom');
 
   final GlobalKey navBarBoxKey;
   final GlobalKey leadingKey;
@@ -1620,6 +1623,7 @@ class _NavigationBarStaticComponentsKeys {
   final GlobalKey middleKey;
   final GlobalKey trailingKey;
   final GlobalKey largeTitleKey;
+  final GlobalKey navBarBottomKey;
 }
 
 // Based on various user Widgets and other parameters, construct KeyedSubtree
@@ -1638,6 +1642,7 @@ class _NavigationBarStaticComponents {
     required Widget? userMiddle,
     required Widget? userTrailing,
     required Widget? userLargeTitle,
+    required Widget? userBottom,
     required EdgeInsetsDirectional? padding,
     required bool large,
     required bool staticBar,
@@ -1681,6 +1686,10 @@ class _NavigationBarStaticComponents {
          route: route,
          automaticImplyTitle: automaticallyImplyTitle,
          large: large,
+       ),
+       navBarBottom = createNavBarBottom(
+         navBarBottomKey: keys.navBarBottomKey,
+         userBottom: userBottom,
        );
 
   static Widget? _derivedTitle({
@@ -1856,6 +1865,14 @@ class _NavigationBarStaticComponents {
     );
 
     return KeyedSubtree(key: largeTitleKey, child: largeTitleContent!);
+  }
+
+  final KeyedSubtree? navBarBottom;
+  static KeyedSubtree? createNavBarBottom({
+    required GlobalKey navBarBottomKey,
+    required Widget? userBottom,
+  }) {
+    return KeyedSubtree(key: navBarBottomKey, child: userBottom ?? const SizedBox.shrink());
   }
 }
 
@@ -2201,6 +2218,7 @@ class _NavigationBarTransition extends StatelessWidget {
       if (componentsTransition.bottomMiddle != null) componentsTransition.bottomMiddle!,
       if (componentsTransition.bottomLargeTitle != null) componentsTransition.bottomLargeTitle!,
       if (componentsTransition.bottomTrailing != null) componentsTransition.bottomTrailing!,
+      if (componentsTransition.bottomNavBarBottom != null) componentsTransition.bottomNavBarBottom!,
       // Draw top components on top of the bottom components.
       if (componentsTransition.topLeading != null) componentsTransition.topLeading!,
       if (componentsTransition.topBackChevron != null) componentsTransition.topBackChevron!,
@@ -2208,6 +2226,7 @@ class _NavigationBarTransition extends StatelessWidget {
       if (componentsTransition.topMiddle != null) componentsTransition.topMiddle!,
       if (componentsTransition.topLargeTitle != null) componentsTransition.topLargeTitle!,
       if (componentsTransition.topTrailing != null) componentsTransition.topTrailing!,
+      if (componentsTransition.topNavBarBottom != null) componentsTransition.topNavBarBottom!,
     ];
 
     // The actual outer box is big enough to contain both the bottom and top
@@ -2581,6 +2600,24 @@ class _NavigationBarComponentsTransition {
     );
   }
 
+  Widget? get bottomNavBarBottom {
+    final KeyedSubtree? bottomNavBarBottom =
+        bottomComponents.navBarBottomKey.currentWidget as KeyedSubtree?;
+    final KeyedSubtree? topNavBarBottom =
+        topComponents.navBarBottomKey.currentWidget as KeyedSubtree?;
+
+    if (bottomNavBarBottom != null && topNavBarBottom != null) {
+      return slideFromLeadingEdge(
+        fromKey: bottomComponents.navBarBottomKey,
+        fromNavBarBox: bottomNavBarBox,
+        toKey: topComponents.navBarBottomKey,
+        toNavBarBox: topNavBarBox,
+        child: FadeTransition(opacity: fadeOutBy(0.6), child: bottomNavBarBottom.child),
+      );
+    }
+    return null;
+  }
+
   Widget? get topLeading {
     final KeyedSubtree? topLeading = topComponents.leadingKey.currentWidget as KeyedSubtree?;
 
@@ -2785,6 +2822,30 @@ class _NavigationBarComponentsTransition {
           child: topLargeTitle.child,
         ),
       ),
+    );
+  }
+
+  Widget? get topNavBarBottom {
+    final KeyedSubtree? topNavBarBottom =
+        topComponents.navBarBottomKey.currentWidget as KeyedSubtree?;
+
+    if (topNavBarBottom == null) {
+      return null;
+    }
+
+    final RelativeRect to = positionInTransitionBox(
+      topComponents.navBarBottomKey,
+      from: topNavBarBox,
+    );
+    // Shift in from the trailing edge of the screen.
+    final RelativeRectTween positionTween = RelativeRectTween(
+      begin: to.shift(Offset(forwardDirection * topNavBarBox.size.width, 0.0)),
+      end: to,
+    );
+
+    return PositionedTransition(
+      rect: animation.drive(positionTween),
+      child: FadeTransition(opacity: fadeInFrom(0.3), child: topNavBarBottom.child),
     );
   }
 }
