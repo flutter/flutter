@@ -23,7 +23,7 @@ $flutterRoot = (Get-Item $progName).parent.parent.FullName
 #
 # This is for systems, such as Github Actions, where we know ahead of time the
 # base-ref we want to use (to download the engine binaries and avoid trying
-# to compute one below), or for the Dart HHH bot, which wants to try the current
+# to compute one below), or for the Dart HH bot, which wants to try the current
 # Flutter framework/engine with a different Dart SDK.
 #
 # This environment variable is EXPERIMENTAL. If you are not on the Flutter infra
