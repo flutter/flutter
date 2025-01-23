@@ -465,17 +465,7 @@ targets:
     runIf:
       - DEPS
       - engine/src/flutter/.ci.yaml
-      - engine/src/flutter/tools/clang_tidy/**
-      - engine/src/flutter/ci/builders/**
-      - engine/src/flutter/ci/clang_tidy.sh
-      - "engine/src/flutter/**.h"
-      - "engine/src/flutter/**.c"
-      - "engine/src/flutter/**.cc"
-      - "engine/src/flutter/**.fbs"
-      - "engine/src/flutter/**.frag"
-      - "engine/src/flutter/**.vert"
-      - "engine/src/flutter/**.m"
-      - "engine/src/flutter/**.mm"
+      - "engine/src/flutter/**.(h|c|cc|fbs|frag|vert|m|mm)"
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
