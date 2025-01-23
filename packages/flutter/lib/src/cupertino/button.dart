@@ -93,6 +93,7 @@ class CupertinoButton extends StatefulWidget {
     this.onLongPress,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
+       assert((minWidth == null && minHeight == null) || minSize == null),
        _style = _CupertinoButtonStyle.plain,
        minWidth = minWidth ?? minSize,
        minHeight = minHeight ?? minSize;
