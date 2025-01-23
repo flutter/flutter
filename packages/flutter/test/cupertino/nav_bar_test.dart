@@ -2406,9 +2406,9 @@ void main() {
   });
 
   testWidgets('onSearchableBottomTap callback', (WidgetTester tester) async {
-    bool isSearchActive = false;
     const Color activeSearchColor = Color(0x0000000A);
     const Color inactiveSearchColor = Color(0x0000000B);
+    bool isSearchActive = false;
     String text = '';
 
     await tester.pumpWidget(
@@ -2480,6 +2480,85 @@ void main() {
     // The entered text is shown in the search view.
     expect(find.text('The text has changed to: aaa'), findsOne);
   });
+
+  testWidgets(
+    'CupertinoSliverNavigationBar.search large title and cancel buttons fade during search animation',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              CupertinoSliverNavigationBar.search(
+                largeTitle: Text('Large title'),
+                middle: Text('Middle'),
+              ),
+              SliverFillRemaining(child: SizedBox(height: 1000.0)),
+            ],
+          ),
+        ),
+      );
+
+      // Initially, all widgets are visible.
+      final RenderAnimatedOpacity largeTitleOpacity =
+          tester
+              .element(find.text('Large title'))
+              .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+      // The opacity of the decoy 'Cancel' button, which is always semi-transparent.
+      final RenderOpacity decoyCancelOpacity =
+          tester
+              .element(find.widgetWithText(CupertinoButton, 'Cancel'))
+              .findAncestorRenderObjectOfType<RenderOpacity>()!;
+
+      expect(largeTitleOpacity.opacity.value, 1.0);
+      expect(decoyCancelOpacity.opacity, 0.4);
+
+      // Tap the search field, and pump up until partway through the animation.
+      await tester.tap(
+        find.widgetWithText(CupertinoSearchTextField, 'Search'),
+        warnIfMissed: false,
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // During the inactive-to-active search animation, the large title fades
+      // out and the 'Cancel' button remains at a constant semi-transparent
+      // value.
+      expect(largeTitleOpacity.opacity.value, lessThan(1.0));
+      expect(largeTitleOpacity.opacity.value, greaterThan(0.0));
+      expect(decoyCancelOpacity.opacity, 0.4);
+
+      // At the end of the animation, the large title has completely faded out.
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(largeTitleOpacity.opacity.value, 0.0);
+      expect(decoyCancelOpacity.opacity, 0.4);
+
+      // The opacity of the tappable 'Cancel' button.
+      final RenderAnimatedOpacity cancelOpacity =
+          tester
+              .element(find.widgetWithText(CupertinoButton, 'Cancel'))
+              .findAncestorRenderObjectOfType<RenderAnimatedOpacity>()!;
+
+      expect(cancelOpacity.opacity.value, 1.0);
+
+      // Tap the 'Cancel' button, and pump up until partway through the animation.
+      await tester.tap(find.widgetWithText(CupertinoButton, 'Cancel'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // During the active-to-inactive search animation, the large title fades
+      // in and the 'Cancel' button fades out.
+      expect(largeTitleOpacity.opacity.value, lessThan(1.0));
+      expect(largeTitleOpacity.opacity.value, greaterThan(0.0));
+      expect(cancelOpacity.opacity.value, lessThan(1.0));
+      expect(cancelOpacity.opacity.value, greaterThan(0.0));
+
+      // At the end of the animation, the large title has completely faded in
+      // and the 'Cancel' button has completely faded out.
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(largeTitleOpacity.opacity.value, 1.0);
+      expect(cancelOpacity.opacity.value, 0.0);
+    },
+  );
 
   testWidgets('CupertinoNavigationBar with bottom widget', (WidgetTester tester) async {
     const double persistentHeight = 44.0;
