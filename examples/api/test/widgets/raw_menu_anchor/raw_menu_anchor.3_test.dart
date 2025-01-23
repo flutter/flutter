@@ -28,14 +28,13 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const example.MenuNodeApp());
-
-    expect(find.byType(RawMenuAnchor).evaluate().length, 5);
+    expect(find.bySubtype<RawMenuAnchorGroup>().evaluate().length, 1);
+    expect(find.bySubtype<RawMenuAnchor>().evaluate().length, 4);
     expect(
-      tester.getRect(find.byType(RawMenuAnchor).first),
+      tester.getRect(find.byType(RawMenuAnchorGroup).first),
       const Rect.fromLTRB(233.0, 278.0, 567.0, 322.0),
     );
   });
-
   testWidgets('Menu can be traversed', (WidgetTester tester) async {
     await tester.pumpWidget(const example.MenuNodeApp());
 
@@ -108,7 +107,6 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pump();
     await tester.pump();
-
     expect(find.text('Selected: Dictionary'), findsOneWidget);
   });
 
@@ -130,6 +128,7 @@ void main() {
       RawMenuPanel.lightSurfaceDecoration,
     );
   });
+
   testWidgets('Hover traversal opens submenus when the root menu is open', (
     WidgetTester tester,
   ) async {

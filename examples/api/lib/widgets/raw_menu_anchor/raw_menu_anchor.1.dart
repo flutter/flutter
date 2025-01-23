@@ -68,9 +68,9 @@ class _ContextMenuExampleState extends State<ContextMenuExample> {
       controller: controller,
       alignmentOffset: const Offset(0, 6),
       menuPanel: RawMenuPanel(
+        decoration: RawMenuPanel.lightSurfaceDecoration,
         constraints: const BoxConstraints(minWidth: 180),
         padding: const EdgeInsets.symmetric(vertical: 5),
-        decoration: RawMenuPanel.lightSurfaceDecoration,
         children: <Widget>[
           MenuItemButton(
             autofocus: true,
@@ -113,9 +113,9 @@ class _ContextMenuExampleState extends State<ContextMenuExample> {
           RawMenuAnchor(
             padding: const EdgeInsetsDirectional.symmetric(vertical: 5),
             menuPanel: RawMenuPanel(
+              decoration: RawMenuPanel.lightSurfaceDecoration,
               padding: const EdgeInsetsDirectional.symmetric(vertical: 5),
               constraints: const BoxConstraints(minWidth: 180),
-              decoration: RawMenuPanel.lightSurfaceDecoration,
               children: <Widget>[
                 MenuItemButton(
                   onPressed: () {
@@ -165,19 +165,14 @@ class _ContextMenuExampleState extends State<ContextMenuExample> {
           ),
         ],
       ),
-      child: NestedWidget(
-        child: Text(
-          _selected.isEmpty ? 'Right-click me!' : 'Selected: $_selected',
-          style: Theme.of(context).textTheme.displaySmall!.copyWith(color: Colors.white),
-        ),
-      ),
+      child: NestedWidget(message: _selected.isEmpty ? 'Right-click me!' : 'Selected: $_selected'),
     );
   }
 }
 
 class NestedWidget extends StatelessWidget {
-  const NestedWidget({super.key, this.child});
-  final Widget? child;
+  const NestedWidget({super.key, required this.message});
+  final String message;
 
   @override
   Widget build(BuildContext context) {
@@ -205,7 +200,24 @@ class NestedWidget extends StatelessWidget {
       onTapDown: (TapDownDetails details) {
         MenuController.maybeOf(context)?.close();
       },
-      child: ColoredBox(color: const Color(0xFF009DFF), child: Center(child: child)),
+      child: Stack(
+        children: <Widget>[
+          Positioned.fill(
+            child: ColoredBox(
+              color: Theme.of(context).colorScheme.secondaryContainer,
+              child: Center(
+                child: Text(
+                  message,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    fontSize: 24,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -216,9 +228,7 @@ class ContextMenuApp extends StatelessWidget {
   static const ButtonStyle menuButtonStyle = ButtonStyle(
     splashFactory: InkSparkle.splashFactory,
     iconSize: WidgetStatePropertyAll<double>(17),
-    overlayColor: WidgetStatePropertyAll<Color>(Color(0x12262627)),
     padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 12)),
-    textStyle: WidgetStatePropertyAll<TextStyle>(TextStyle(fontSize: 14)),
     visualDensity: VisualDensity(
       horizontal: VisualDensity.minimumDensity,
       vertical: VisualDensity.minimumDensity,
