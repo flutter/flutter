@@ -3,16 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:js_interop';
 
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
-
-import 'util.dart';
-
-// TODO(mdebbar): Deprecate this and remove it.
-// https://github.com/flutter/flutter/issues/127395
-@JS('window._flutter_internal_on_benchmark')
-external JSExportedDartFunction? get jsBenchmarkValueCallback;
 
 ui_web.BenchmarkValueCallback? engineBenchmarkValueCallback;
 
@@ -59,8 +51,8 @@ R timeAction<R>(String name, Action<R> action) {
 ///
 /// 1. Set the environment variable `FLUTTER_WEB_ENABLE_PROFILING` to true.
 ///
-/// 2. Using JS interop, assign a listener function to
-///    `window._flutter_internal_on_benchmark` in the browser.
+/// 2. Set the [engineBenchmarkValueCallback] to a function that will receive
+///   the benchmark data.
 ///
 /// The listener function will be called every time a new benchmark number is
 /// calculated. The signature is `Function(String name, num value)`.
@@ -69,9 +61,7 @@ class Profiler {
     _checkBenchmarkMode();
   }
 
-  static bool isBenchmarkMode = const bool.fromEnvironment(
-    'FLUTTER_WEB_ENABLE_PROFILING',
-  );
+  static bool isBenchmarkMode = const bool.fromEnvironment('FLUTTER_WEB_ENABLE_PROFILING');
 
   static Profiler ensureInitialized() {
     _checkBenchmarkMode();
@@ -107,17 +97,6 @@ class Profiler {
   void benchmark(String name, double value) {
     _checkBenchmarkMode();
 
-    final ui_web.BenchmarkValueCallback? callback =
-        jsBenchmarkValueCallback?.toDart as ui_web.BenchmarkValueCallback?;
-    if (callback != null) {
-      printWarning(
-        'The JavaScript benchmarking API (i.e. `window._flutter_internal_on_benchmark`) '
-        'is deprecated and will be removed in a future release. Please use '
-        '`benchmarkValueCallback` from `dart:ui_web` instead.',
-      );
-      callback(name, value);
-    }
-
     if (engineBenchmarkValueCallback != null) {
       engineBenchmarkValueCallback!(name, value);
     }
@@ -149,9 +128,8 @@ class Instrumentation {
 
     _enabled = value;
   }
-  static bool _enabled = const bool.fromEnvironment(
-    'FLUTTER_WEB_ENABLE_INSTRUMENTATION',
-  );
+
+  static bool _enabled = const bool.fromEnvironment('FLUTTER_WEB_ENABLE_INSTRUMENTATION');
 
   /// Returns the singleton that provides instrumentation API.
   static Instrumentation get instance {
@@ -184,24 +162,21 @@ class Instrumentation {
     _checkInstrumentationEnabled();
     final int currentCount = _counters[event] ?? 0;
     _counters[event] = currentCount + 1;
-    _printTimer ??= Timer(
-      const Duration(seconds: 2),
-      () {
-        if (_printTimer == null || !_enabled) {
-          return;
-        }
-        final StringBuffer message = StringBuffer('Engine counters:\n');
-        // Entries are sorted for readability and testability.
-        final List<MapEntry<String, int>> entries = _counters.entries.toList()
-          ..sort((MapEntry<String, int> a, MapEntry<String, int> b) {
+    _printTimer ??= Timer(const Duration(seconds: 2), () {
+      if (_printTimer == null || !_enabled) {
+        return;
+      }
+      final StringBuffer message = StringBuffer('Engine counters:\n');
+      // Entries are sorted for readability and testability.
+      final List<MapEntry<String, int>> entries =
+          _counters.entries.toList()..sort((MapEntry<String, int> a, MapEntry<String, int> b) {
             return a.key.compareTo(b.key);
           });
-        for (final MapEntry<String, int> entry in entries) {
-          message.writeln('  ${entry.key}: ${entry.value}');
-        }
-        print(message);
-        _printTimer = null;
-      },
-    );
+      for (final MapEntry<String, int> entry in entries) {
+        message.writeln('  ${entry.key}: ${entry.value}');
+      }
+      print(message);
+      _printTimer = null;
+    });
   }
 }

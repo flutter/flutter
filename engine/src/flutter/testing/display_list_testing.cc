@@ -189,10 +189,6 @@ std::ostream& operator<<(std::ostream& os, const SaveLayerOptions& options) {
             << ")";
 }
 
-static std::ostream& operator<<(std::ostream& os, const SkPoint& point) {
-  return os << "SkPoint(" << point.fX << ", " << point.fY << ")";
-}
-
 static std::ostream& operator<<(std::ostream& os, const SkRect& rect) {
   return os << "SkRect("
             << "left: " << rect.fLeft << ", "
@@ -207,14 +203,6 @@ extern std::ostream& operator<<(std::ostream& os, const DlPath& path) {
             << "bounds: " << path.GetSkBounds()
             // should iterate over verbs and coordinates...
             << ")";
-}
-
-static std::ostream& operator<<(std::ostream& os, const SkRSXform& xform) {
-  return os << "SkRSXform("
-            << "scos: " << xform.fSCos << ", "
-            << "ssin: " << xform.fSSin << ", "
-            << "tx: " << xform.fTx << ", "
-            << "ty: " << xform.fTy << ")";
 }
 
 std::ostream& operator<<(std::ostream& os, const DlCanvas::ClipOp& op) {
@@ -873,8 +861,8 @@ void DisplayListStreamDispatcher::drawVertices(const std::shared_ptr<DlVertices>
   startl() << "drawVertices("
                << "DlVertices("
                    << vertices->mode() << ", ";
-                   out_array("vertices", vertices->vertex_count(), vertices->vertices()) << ", ";
-                   out_array("texture_coords", vertices->vertex_count(), vertices->texture_coordinates()) << ", ";
+                   out_array("vertices", vertices->vertex_count(), vertices->vertex_data()) << ", ";
+                   out_array("texture_coords", vertices->vertex_count(), vertices->texture_coordinate_data()) << ", ";
                    out_array("colors", vertices->vertex_count(), vertices->colors()) << ", ";
                    out_array("indices", vertices->index_count(), vertices->indices())
                    << "), " << mode << ");" << std::endl;
@@ -916,7 +904,7 @@ void DisplayListStreamDispatcher::drawImageNine(const sk_sp<DlImage> image,
            << ");" << std::endl;
 }
 void DisplayListStreamDispatcher::drawAtlas(const sk_sp<DlImage> atlas,
-                                            const SkRSXform xform[],
+                                            const DlRSTransform xform[],
                                             const DlRect tex[],
                                             const DlColor colors[],
                                             int count,

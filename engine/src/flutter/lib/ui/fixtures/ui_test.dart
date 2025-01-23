@@ -90,7 +90,9 @@ external _validateEngineLayerDispose();
 
 @pragma('vm:entry-point')
 Future<void> createSingleFrameCodec() async {
-  final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(Uint8List.fromList(List<int>.filled(4, 100)));
+  final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(
+    Uint8List.fromList(List<int>.filled(4, 100)),
+  );
   final ImageDescriptor descriptor = ImageDescriptor.raw(
     buffer,
     width: 1,
@@ -147,30 +149,28 @@ void sendSemanticsUpdate() {
   final SemanticsUpdateBuilder builder = SemanticsUpdateBuilder();
   final String identifier = "identifier";
   final String label = "label";
-  final List<StringAttribute> labelAttributes = <StringAttribute> [
+  final List<StringAttribute> labelAttributes = <StringAttribute>[
     SpellOutStringAttribute(range: TextRange(start: 1, end: 2)),
   ];
 
   final String value = "value";
-  final List<StringAttribute> valueAttributes = <StringAttribute> [
+  final List<StringAttribute> valueAttributes = <StringAttribute>[
     SpellOutStringAttribute(range: TextRange(start: 2, end: 3)),
   ];
 
   final String increasedValue = "increasedValue";
-  final List<StringAttribute> increasedValueAttributes = <StringAttribute> [
+  final List<StringAttribute> increasedValueAttributes = <StringAttribute>[
     SpellOutStringAttribute(range: TextRange(start: 4, end: 5)),
   ];
 
   final String decreasedValue = "decreasedValue";
-  final List<StringAttribute> decreasedValueAttributes = <StringAttribute> [
+  final List<StringAttribute> decreasedValueAttributes = <StringAttribute>[
     SpellOutStringAttribute(range: TextRange(start: 5, end: 6)),
   ];
 
   final String hint = "hint";
-  final List<StringAttribute> hintAttributes = <StringAttribute> [
-    LocaleStringAttribute(
-      locale: Locale('en', 'MX'), range: TextRange(start: 0, end: 1),
-    ),
+  final List<StringAttribute> hintAttributes = <StringAttribute>[
+    LocaleStringAttribute(locale: Locale('en', 'MX'), range: TextRange(start: 0, end: 1)),
   ];
 
   String tooltip = "tooltip";
@@ -234,6 +234,59 @@ void sendSemanticsUpdate() {
     additionalActions: additionalActions,
     headingLevel: 0,
     linkUrl: '',
+  );
+  _semanticsUpdate(builder.build());
+}
+
+@pragma('vm:entry-point')
+void sendSemanticsUpdateWithRole() {
+  final SemanticsUpdateBuilder builder = SemanticsUpdateBuilder();
+
+  final Float64List transform = Float64List(16);
+  final Int32List childrenInTraversalOrder = Int32List(0);
+  final Int32List childrenInHitTestOrder = Int32List(0);
+  final Int32List additionalActions = Int32List(0);
+  // Identity matrix 4x4.
+  transform[0] = 1;
+  transform[5] = 1;
+  transform[10] = 1;
+  builder.updateNode(
+    id: 0,
+    flags: 0,
+    actions: 0,
+    maxValueLength: 0,
+    currentValueLength: 0,
+    textSelectionBase: -1,
+    textSelectionExtent: -1,
+    platformViewId: -1,
+    scrollChildren: 0,
+    scrollIndex: 0,
+    scrollPosition: 0,
+    scrollExtentMax: 0,
+    scrollExtentMin: 0,
+    rect: Rect.fromLTRB(0, 0, 10, 10),
+    elevation: 0,
+    thickness: 0,
+    identifier: "identifier",
+    label: "label",
+    labelAttributes: const <StringAttribute>[],
+    value: "value",
+    valueAttributes: const <StringAttribute>[],
+    increasedValue: "increasedValue",
+    increasedValueAttributes: const <StringAttribute>[],
+    decreasedValue: "decreasedValue",
+    decreasedValueAttributes: const <StringAttribute>[],
+    hint: "hint",
+    hintAttributes: const <StringAttribute>[],
+    tooltip: "tooltip",
+    textDirection: TextDirection.ltr,
+    transform: transform,
+    childrenInTraversalOrder: childrenInTraversalOrder,
+    childrenInHitTestOrder: childrenInHitTestOrder,
+    additionalActions: additionalActions,
+    headingLevel: 0,
+    linkUrl: '',
+    role: SemanticsRole.tab,
   );
   _semanticsUpdate(builder.build());
 }
@@ -318,9 +371,10 @@ external void validateConfiguration();
 Future<void> encodeImageProducesExternalUint8List() async {
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint = Paint()
-    ..color = Color.fromRGBO(255, 255, 255, 1.0)
-    ..style = PaintingStyle.fill;
+  final Paint paint =
+      Paint()
+        ..color = Color.fromRGBO(255, 255, 255, 1.0)
+        ..style = PaintingStyle.fill;
   final Offset c = Offset(50.0, 50.0);
   canvas.drawCircle(c, 25.0, paint);
   final Picture picture = pictureRecorder.endRecording();
@@ -350,9 +404,10 @@ external void _validateNotNull(Object? object);
 Future<void> toByteDataWithoutGPU() async {
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint = Paint()
-    ..color = Color.fromRGBO(255, 255, 255, 1.0)
-    ..style = PaintingStyle.fill;
+  final Paint paint =
+      Paint()
+        ..color = Color.fromRGBO(255, 255, 255, 1.0)
+        ..style = PaintingStyle.fill;
   final Offset c = Offset(50.0, 50.0);
   canvas.drawCircle(c, 25.0, paint);
   final Picture picture = pictureRecorder.endRecording();
@@ -375,9 +430,10 @@ Future<void> toByteDataWithoutGPU() async {
 Future<void> toByteDataRetries() async {
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint = Paint()
-    ..color = Color.fromRGBO(255, 255, 255, 1.0)
-    ..style = PaintingStyle.fill;
+  final Paint paint =
+      Paint()
+        ..color = Color.fromRGBO(255, 255, 255, 1.0)
+        ..style = PaintingStyle.fill;
   final Offset c = Offset(50.0, 50.0);
   canvas.drawCircle(c, 25.0, paint);
   final Picture picture = pictureRecorder.endRecording();
@@ -398,9 +454,10 @@ Future<void> toByteDataRetries() async {
 Future<void> toByteDataRetryOverflows() async {
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint = Paint()
-    ..color = Color.fromRGBO(255, 255, 255, 1.0)
-    ..style = PaintingStyle.fill;
+  final Paint paint =
+      Paint()
+        ..color = Color.fromRGBO(255, 255, 255, 1.0)
+        ..style = PaintingStyle.fill;
   final Offset c = Offset(50.0, 50.0);
   canvas.drawCircle(c, 25.0, paint);
   final Picture picture = pictureRecorder.endRecording();
@@ -437,9 +494,10 @@ Future<void> toByteDataRetryOverflows() async {
 Future<void> toImageRetries() async {
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint = Paint()
-    ..color = Color.fromRGBO(255, 255, 255, 1.0)
-    ..style = PaintingStyle.fill;
+  final Paint paint =
+      Paint()
+        ..color = Color.fromRGBO(255, 255, 255, 1.0)
+        ..style = PaintingStyle.fill;
   final Offset c = Offset(50.0, 50.0);
   canvas.drawCircle(c, 25.0, paint);
   final Picture picture = pictureRecorder.endRecording();
@@ -459,9 +517,10 @@ Future<void> toImageRetries() async {
 Future<void> toImageRetryOverflows() async {
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint = Paint()
-    ..color = Color.fromRGBO(255, 255, 255, 1.0)
-    ..style = PaintingStyle.fill;
+  final Paint paint =
+      Paint()
+        ..color = Color.fromRGBO(255, 255, 255, 1.0)
+        ..style = PaintingStyle.fill;
   final Offset c = Offset(50.0, 50.0);
   canvas.drawCircle(c, 25.0, paint);
   final Picture picture = pictureRecorder.endRecording();
@@ -562,7 +621,8 @@ void convertPaintToDlPaint() {
   paint.style = PaintingStyle.stroke;
   _convertPaintToDlPaint(paint);
 }
-@pragma('vm:external-name',  'ConvertPaintToDlPaint')
+
+@pragma('vm:external-name', 'ConvertPaintToDlPaint')
 external void _convertPaintToDlPaint(Paint paint);
 
 /// Hooks for platform_configuration_unittests.cc
@@ -623,24 +683,24 @@ void hooksTests() async {
       21,
       0, // window Id
       0.1234, // device pixel ratio
-      0.0,    // width
-      0.0,    // height
-      0.0,    // padding top
-      0.0,    // padding right
-      0.0,    // padding bottom
-      0.0,    // padding left
-      0.0,    // inset top
-      0.0,    // inset right
-      0.0,    // inset bottom
-      0.0,    // inset left
-      0.0,    // system gesture inset top
-      0.0,    // system gesture inset right
-      0.0,    // system gesture inset bottom
-      0.0,    // system gesture inset left
-      22.0,   // physicalTouchSlop
-      <double>[],  // display features bounds
-      <int>[],     // display features types
-      <int>[],     // display features states
+      0.0, // width
+      0.0, // height
+      0.0, // padding top
+      0.0, // padding right
+      0.0, // padding bottom
+      0.0, // padding left
+      0.0, // inset top
+      0.0, // inset right
+      0.0, // inset bottom
+      0.0, // inset left
+      0.0, // system gesture inset top
+      0.0, // system gesture inset right
+      0.0, // system gesture inset bottom
+      0.0, // system gesture inset left
+      22.0, // physicalTouchSlop
+      <double>[], // display features bounds
+      <int>[], // display features types
+      <int>[], // display features states
       0, // Display ID
     );
 
@@ -675,36 +735,48 @@ void hooksTests() async {
     _callHook('_updateUserSettingsData', 1, '{}');
   });
 
-  await test('PlatformDispatcher.locale returns unknown locale when locales is set to empty list', () {
-    late Locale locale;
-    int callCount = 0;
-    runZoned(() {
-      window.onLocaleChanged = () {
-        locale = PlatformDispatcher.instance.locale;
-        callCount += 1;
-      };
-    });
+  await test(
+    'PlatformDispatcher.locale returns unknown locale when locales is set to empty list',
+    () {
+      late Locale locale;
+      int callCount = 0;
+      runZoned(() {
+        window.onLocaleChanged = () {
+          locale = PlatformDispatcher.instance.locale;
+          callCount += 1;
+        };
+      });
 
-    const Locale fakeLocale = Locale.fromSubtags(languageCode: '1', countryCode: '2', scriptCode: '3');
-    _callHook('_updateLocales', 1, <String>[fakeLocale.languageCode, fakeLocale.countryCode!, fakeLocale.scriptCode!, '']);
-    if (callCount != 1) {
-      throw 'Expected 1 call, have $callCount';
-    }
-    if (locale != fakeLocale) {
-      throw 'Expected $locale to match $fakeLocale';
-    }
-    _callHook('_updateLocales', 1, <String>[]);
-    if (callCount != 2) {
-      throw 'Expected 2 calls, have $callCount';
-    }
+      const Locale fakeLocale = Locale.fromSubtags(
+        languageCode: '1',
+        countryCode: '2',
+        scriptCode: '3',
+      );
+      _callHook('_updateLocales', 1, <String>[
+        fakeLocale.languageCode,
+        fakeLocale.countryCode!,
+        fakeLocale.scriptCode!,
+        '',
+      ]);
+      if (callCount != 1) {
+        throw 'Expected 1 call, have $callCount';
+      }
+      if (locale != fakeLocale) {
+        throw 'Expected $locale to match $fakeLocale';
+      }
+      _callHook('_updateLocales', 1, <String>[]);
+      if (callCount != 2) {
+        throw 'Expected 2 calls, have $callCount';
+      }
 
-    if (locale != const Locale.fromSubtags()) {
-      throw '$locale did not equal ${Locale.fromSubtags()}';
-    }
-    if (locale.languageCode != 'und') {
-      throw '${locale.languageCode} did not equal "und"';
-    }
-  });
+      if (locale != const Locale.fromSubtags()) {
+        throw '$locale did not equal ${Locale.fromSubtags()}';
+      }
+      if (locale.languageCode != 'und') {
+        throw '${locale.languageCode} did not equal "und"';
+      }
+    },
+  );
 
   await test('deprecated region equals', () {
     // These are equal because ZR is deprecated and was mapped to CD.
@@ -740,9 +812,9 @@ void hooksTests() async {
       0.0, // systemGestureInsetBottom
       0.0, // systemGestureInsetLeft
       22.0, // physicalTouchSlop
-      <double>[],  // display features bounds
-      <int>[],     // display features types
-      <int>[],     // display features states
+      <double>[], // display features bounds
+      <int>[], // display features types
+      <int>[], // display features states
       0, // Display ID
     );
 
@@ -771,9 +843,9 @@ void hooksTests() async {
       44.0, // systemGestureInsetBottom
       0.0, // systemGestureInsetLeft
       22.0, // physicalTouchSlop
-      <double>[],  // display features bounds
-      <int>[],     // display features types
-      <int>[],     // display features states
+      <double>[], // display features bounds
+      <int>[], // display features types
+      <int>[], // display features states
       0, // Display ID
     );
 
@@ -804,14 +876,13 @@ void hooksTests() async {
       0.0, // systemGestureInsetBottom
       0.0, // systemGestureInsetLeft
       11.0, // physicalTouchSlop
-      <double>[],  // display features bounds
-      <int>[],     // display features types
-      <int>[],     // display features states
+      <double>[], // display features bounds
+      <int>[], // display features types
+      <int>[], // display features states
       0, // Display ID
     );
 
-    expectEquals(window.gestureSettings,
-      GestureSettings(physicalTouchSlop: 11.0));
+    expectEquals(window.gestureSettings, GestureSettings(physicalTouchSlop: 11.0));
 
     _callHook(
       '_updateWindowMetrics',
@@ -833,14 +904,13 @@ void hooksTests() async {
       44.0, // systemGestureInsetBottom
       0.0, // systemGestureInsetLeft
       -1.0, // physicalTouchSlop
-      <double>[],  // display features bounds
-      <int>[],     // display features types
-      <int>[],     // display features states
+      <double>[], // display features bounds
+      <int>[], // display features types
+      <int>[], // display features states
       0, // Display ID
     );
 
-    expectEquals(window.gestureSettings,
-      GestureSettings(physicalTouchSlop: null));
+    expectEquals(window.gestureSettings, GestureSettings(physicalTouchSlop: null));
 
     _callHook(
       '_updateWindowMetrics',
@@ -862,14 +932,13 @@ void hooksTests() async {
       44.0, // systemGestureInsetBottom
       0.0, // systemGestureInsetLeft
       22.0, // physicalTouchSlop
-      <double>[],  // display features bounds
-      <int>[],     // display features types
-      <int>[],     // display features states
+      <double>[], // display features bounds
+      <int>[], // display features types
+      <int>[], // display features states
       0, // Display ID
     );
 
-    expectEquals(window.gestureSettings,
-      GestureSettings(physicalTouchSlop: 22.0));
+    expectEquals(window.gestureSettings, GestureSettings(physicalTouchSlop: 22.0));
   });
 
   await test('onLocaleChanged preserves callback zone', () {
@@ -1034,7 +1103,11 @@ void hooksTests() async {
 
     window.onTextScaleFactorChanged!();
 
-    _callHook('_updateUserSettingsData', 1, '{"textScaleFactor": 0.5, "platformBrightness": "light", "alwaysUse24HourFormat": true}');
+    _callHook(
+      '_updateUserSettingsData',
+      1,
+      '{"textScaleFactor": 0.5, "platformBrightness": "light", "alwaysUse24HourFormat": true}',
+    );
     expectIdentical(runZoneTextScaleFactor, innerZone);
     expectEquals(textScaleFactor, 0.5);
 
@@ -1042,7 +1115,11 @@ void hooksTests() async {
     platformBrightness = null;
 
     window.onPlatformBrightnessChanged!();
-    _callHook('_updateUserSettingsData', 1, '{"textScaleFactor": 0.5, "platformBrightness": "dark", "alwaysUse24HourFormat": true}');
+    _callHook(
+      '_updateUserSettingsData',
+      1,
+      '{"textScaleFactor": 0.5, "platformBrightness": "dark", "alwaysUse24HourFormat": true}',
+    );
     expectIdentical(runZonePlatformBrightness, innerZone);
     expectEquals(platformBrightness, Brightness.dark);
   });
@@ -1079,7 +1156,9 @@ void hooksTests() async {
       };
     });
 
-    _callHook('_updateDisplays', 5, <int>[0], <double>[800], <double>[600], <double>[1.5], <double>[65]);
+    _callHook('_updateDisplays', 5, <int>[0], <double>[800], <double>[600], <double>[1.5], <double>[
+      65,
+    ]);
     expectNotEquals(runZone, null);
     expectIdentical(runZone, innerZone);
     expectEquals(display.id, 0);
@@ -1092,6 +1171,7 @@ void hooksTests() async {
     String? callbacker(void Function(Object? arg) cb) {
       return 'failure';
     }
+
     Object? error;
     try {
       await _futurize(callbacker);
@@ -1105,6 +1185,7 @@ void hooksTests() async {
     String? callbacker(void Function(Object? arg) cb) {
       cb(null); // indicates failure
     }
+
     Object? error;
     try {
       await _futurize(callbacker);
@@ -1120,6 +1201,7 @@ void hooksTests() async {
         cb(null); // indicates failure
       });
     }
+
     Object? error;
     try {
       await _futurize(callbacker);
@@ -1133,6 +1215,7 @@ void hooksTests() async {
     String? callbacker(void Function(Object? arg) cb) {
       cb(true);
     }
+
     final Object? result = await _futurize(callbacker);
 
     expectEquals(result, true);
@@ -1144,6 +1227,7 @@ void hooksTests() async {
         cb(true);
       });
     }
+
     final Object? result = await _futurize(callbacker);
 
     expectEquals(result, true);
@@ -1166,7 +1250,9 @@ void hooksTests() async {
     Isolate.spawn(_backgroundIsolateSendWithoutRegistering, receivePort.sendPort);
     bool didError = await receivePort.first as bool;
     if (!didError) {
-      throw Exception('Expected an error when not registering a root isolate and sending port messages.');
+      throw Exception(
+        'Expected an error when not registering a root isolate and sending port messages.',
+      );
     }
   });
 
@@ -1186,12 +1272,7 @@ void _backgroundIsolateSendWithoutRegistering(SendPort port) {
   bool didError = false;
   ReceivePort messagePort = ReceivePort();
   try {
-    PlatformDispatcher.instance.sendPortPlatformMessage(
-      'foo',
-      null,
-      1,
-      messagePort.sendPort,
-    );
+    PlatformDispatcher.instance.sendPortPlatformMessage('foo', null, 1, messagePort.sendPort);
   } catch (_) {
     didError = true;
   }
@@ -1221,8 +1302,7 @@ Future<T> _futurize<T>(_Callbacker<T> callbacker) {
     }
   });
   sync = false;
-  if (error != null)
-    throw Exception(error);
+  if (error != null) throw Exception(error);
   return completer.future;
 }
 

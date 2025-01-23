@@ -8,7 +8,6 @@
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
-#include "flutter/shell/platform/linux/testing/fl_test.h"
 #include "flutter/shell/platform/linux/testing/mock_settings.h"
 #include "flutter/testing/testing.h"
 
@@ -20,8 +19,7 @@ TEST(FlSettingsHandlerTest, AlwaysUse24HourFormat) {
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
-      FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
-                             FL_BINARY_MESSENGER(messenger), nullptr));
+      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlSettingsHandler) handler = fl_settings_handler_new(engine);
 
   EXPECT_CALL(settings, fl_settings_get_clock_format(
@@ -32,7 +30,7 @@ TEST(FlSettingsHandlerTest, AlwaysUse24HourFormat) {
   gboolean called = FALSE;
   fl_mock_binary_messenger_set_json_message_channel(
       messenger, "flutter/settings",
-      [](FlMockBinaryMessenger* messenger, FlValue* message,
+      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
          gpointer user_data) {
         gboolean* called = static_cast<gboolean*>(user_data);
         *called = TRUE;
@@ -53,7 +51,7 @@ TEST(FlSettingsHandlerTest, AlwaysUse24HourFormat) {
   called = FALSE;
   fl_mock_binary_messenger_set_json_message_channel(
       messenger, "flutter/settings",
-      [](FlMockBinaryMessenger* messenger, FlValue* message,
+      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
          gpointer user_data) {
         gboolean* called = static_cast<gboolean*>(user_data);
         *called = TRUE;
@@ -79,8 +77,7 @@ TEST(FlSettingsHandlerTest, PlatformBrightness) {
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
-      FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
-                             FL_BINARY_MESSENGER(messenger), nullptr));
+      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlSettingsHandler) handler = fl_settings_handler_new(engine);
 
   EXPECT_CALL(settings, fl_settings_get_color_scheme(
@@ -91,7 +88,7 @@ TEST(FlSettingsHandlerTest, PlatformBrightness) {
   gboolean called = FALSE;
   fl_mock_binary_messenger_set_json_message_channel(
       messenger, "flutter/settings",
-      [](FlMockBinaryMessenger* messenger, FlValue* message,
+      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
          gpointer user_data) {
         gboolean* called = static_cast<gboolean*>(user_data);
         *called = TRUE;
@@ -111,7 +108,7 @@ TEST(FlSettingsHandlerTest, PlatformBrightness) {
   called = FALSE;
   fl_mock_binary_messenger_set_json_message_channel(
       messenger, "flutter/settings",
-      [](FlMockBinaryMessenger* messenger, FlValue* message,
+      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
          gpointer user_data) {
         gboolean* called = static_cast<gboolean*>(user_data);
         *called = TRUE;
@@ -136,8 +133,7 @@ TEST(FlSettingsHandlerTest, TextScaleFactor) {
 
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlEngine) engine =
-      FL_ENGINE(g_object_new(fl_engine_get_type(), "binary-messenger",
-                             FL_BINARY_MESSENGER(messenger), nullptr));
+      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
   g_autoptr(FlSettingsHandler) handler = fl_settings_handler_new(engine);
 
   EXPECT_CALL(settings, fl_settings_get_text_scaling_factor(
@@ -148,7 +144,7 @@ TEST(FlSettingsHandlerTest, TextScaleFactor) {
   gboolean called = FALSE;
   fl_mock_binary_messenger_set_json_message_channel(
       messenger, "flutter/settings",
-      [](FlMockBinaryMessenger* messenger, FlValue* message,
+      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
          gpointer user_data) {
         gboolean* called = static_cast<gboolean*>(user_data);
         *called = TRUE;
@@ -168,7 +164,7 @@ TEST(FlSettingsHandlerTest, TextScaleFactor) {
   called = FALSE;
   fl_mock_binary_messenger_set_json_message_channel(
       messenger, "flutter/settings",
-      [](FlMockBinaryMessenger* messenger, FlValue* message,
+      [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
          gpointer user_data) {
         gboolean* called = static_cast<gboolean*>(user_data);
         *called = TRUE;
@@ -191,16 +187,21 @@ TEST(FlSettingsHandlerTest, TextScaleFactor) {
 // MOCK_ENGINE_PROC is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 TEST(FlSettingsHandlerTest, AccessibilityFeatures) {
-  g_autoptr(FlEngine) engine = make_mock_engine();
-  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
 
   std::vector<FlutterAccessibilityFeature> calls;
-  embedder_api->UpdateAccessibilityFeatures = MOCK_ENGINE_PROC(
-      UpdateAccessibilityFeatures,
-      ([&calls](auto engine, FlutterAccessibilityFeature features) {
-        calls.push_back(features);
-        return kSuccess;
-      }));
+  fl_engine_get_embedder_api(engine)->UpdateAccessibilityFeatures =
+      MOCK_ENGINE_PROC(
+          UpdateAccessibilityFeatures,
+          ([&calls](auto engine, FlutterAccessibilityFeature features) {
+            calls.push_back(features);
+            return kSuccess;
+          }));
 
   g_autoptr(FlSettingsHandler) handler = fl_settings_handler_new(engine);
 

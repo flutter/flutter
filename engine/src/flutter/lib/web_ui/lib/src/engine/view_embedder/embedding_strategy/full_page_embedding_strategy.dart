@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:ui/src/engine/dom.dart';
-import 'package:ui/src/engine/util.dart' show setElementStyle;
+import 'package:ui/src/engine/util.dart';
 
 import '../hot_restart_cache_handler.dart' show registerElementForCleanup;
 import 'embedding_strategy.dart';
@@ -62,17 +62,17 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
 
   // Sets a meta viewport tag appropriate for Flutter Web in full screen.
   void _applyViewportMeta() {
-    for (final DomElement viewportMeta
-        in domDocument.head!.querySelectorAll('meta[name="viewport"]')) {
+    for (final DomElement viewportMeta in domDocument.head!.querySelectorAll(
+      'meta[name="viewport"]',
+    )) {
       assert(() {
         // Filter out the meta tag that the engine placed on the page. This is
         // to avoid UI flicker during hot restart. Hot restart will clean up the
         // old meta tag synchronously with the first post-restart frame.
         if (!viewportMeta.hasAttribute('flt-viewport')) {
-          print(
-            'WARNING: found an existing <meta name="viewport"> tag. Flutter '
-            'Web uses its own viewport configuration for better compatibility '
-            'with Flutter. This tag will be replaced.',
+          printWarning(
+            'Found an existing <meta name="viewport"> tag. Flutter Web uses its own viewport '
+            'configuration for better compatibility with Flutter. This tag will be replaced.',
           );
         }
         return true;
@@ -82,11 +82,13 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
 
     // The meta viewport is always removed by the for method above, so we don't
     // need to do anything else here, other than create it again.
-    final DomHTMLMetaElement viewportMeta = createDomHTMLMetaElement()
-      ..setAttribute('flt-viewport', '')
-      ..name = 'viewport'
-      ..content = 'width=device-width, initial-scale=1.0, '
-          'maximum-scale=1.0, user-scalable=no';
+    final DomHTMLMetaElement viewportMeta =
+        createDomHTMLMetaElement()
+          ..setAttribute('flt-viewport', '')
+          ..name = 'viewport'
+          ..content =
+              'width=device-width, initial-scale=1.0, '
+              'maximum-scale=1.0, user-scalable=no';
 
     domDocument.head!.append(viewportMeta);
 

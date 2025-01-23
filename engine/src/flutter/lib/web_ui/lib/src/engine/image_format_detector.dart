@@ -61,14 +61,7 @@ ImageType? detectImageType(Uint8List data) {
 }
 
 /// The supported image file formats in Flutter Web.
-enum ImageFileType {
-  png,
-  gif,
-  jpeg,
-  webp,
-  bmp,
-  avif,
-}
+enum ImageFileType { png, gif, jpeg, webp, bmp, avif }
 
 /// The file format of the image, and whether or not it is animated.
 enum ImageType {
@@ -96,43 +89,25 @@ enum ImageType {
 
 /// The signature bytes in an image file that identify the format.
 enum ImageFileSignature {
-  png(
-    <int?>[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A],
-    ImageType.png,
-  ),
-  gif87a(
-    <int?>[0x47, 0x49, 0x46, 0x38, 0x37, 0x61],
-    ImageType.animatedGif,
-  ),
-  gif89a(
-    <int?>[0x47, 0x49, 0x46, 0x38, 0x39, 0x61],
-    ImageType.animatedGif,
-  ),
-  jpeg(
-    <int?>[0xFF, 0xD8, 0xFF],
-    ImageType.jpeg,
-  ),
-  webp(
-    <int?>[
-      0x52,
-      0x49,
-      0x46,
-      0x46,
-      null,
-      null,
-      null,
-      null,
-      0x57,
-      0x45,
-      0x42,
-      0x50
-    ],
-    ImageType.webp,
-  ),
-  bmp(
-    <int?>[0x42, 0x4D],
-    ImageType.bmp,
-  );
+  png(<int?>[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A], ImageType.png),
+  gif87a(<int?>[0x47, 0x49, 0x46, 0x38, 0x37, 0x61], ImageType.animatedGif),
+  gif89a(<int?>[0x47, 0x49, 0x46, 0x38, 0x39, 0x61], ImageType.animatedGif),
+  jpeg(<int?>[0xFF, 0xD8, 0xFF], ImageType.jpeg),
+  webp(<int?>[
+    0x52,
+    0x49,
+    0x46,
+    0x46,
+    null,
+    null,
+    null,
+    null,
+    0x57,
+    0x45,
+    0x42,
+    0x50,
+  ], ImageType.webp),
+  bmp(<int?>[0x42, 0x4D], ImageType.bmp);
 
   const ImageFileSignature(this.header, this.imageType);
 
@@ -290,8 +265,7 @@ class _GifHeaderReader {
 
     final int logicalScreenDescriptorFields = _readUint8();
     const int globalColorTableFlagMask = 1 << 7;
-    final bool hasGlobalColorTable =
-        logicalScreenDescriptorFields & globalColorTableFlagMask != 0;
+    final bool hasGlobalColorTable = logicalScreenDescriptorFields & globalColorTableFlagMask != 0;
 
     // Skip over the background color index and pixel aspect ratio.
     _position += 2;
@@ -299,17 +273,16 @@ class _GifHeaderReader {
     if (hasGlobalColorTable) {
       // Skip past the global color table.
       const int globalColorTableSizeMask = 1 << 2 | 1 << 1 | 1;
-      final int globalColorTableSize =
-          logicalScreenDescriptorFields & globalColorTableSizeMask;
+      final int globalColorTableSize = logicalScreenDescriptorFields & globalColorTableSizeMask;
       // This is 3 * 2^(Global Color Table Size + 1).
-      final int globalColorTableSizeInBytes =
-          3 * (1 << (globalColorTableSize + 1));
+      final int globalColorTableSizeInBytes = 3 * (1 << (globalColorTableSize + 1));
       _position += globalColorTableSizeInBytes;
     }
 
     int framesFound = 0;
     // Read the GIF until we either find 2 frames or reach the end of the GIF.
     while (true) {
+      _maybeSkipSpecialPurposeBlocks();
       final bool isTrailer = _checkForTrailer();
       if (isTrailer) {
         return framesFound > 1;
@@ -318,11 +291,7 @@ class _GifHeaderReader {
       // If we haven't reached the end, then the next block must either be a
       // graphic block or a special-purpose block (comment extension or
       // application extension).
-      final bool isSpecialPurposeBlock = _checkForSpecialPurposeBlock();
-      if (isSpecialPurposeBlock) {
-        _skipSpecialPurposeBlock();
-        continue;
-      }
+      _maybeSkipSpecialPurposeBlocks();
 
       // If the next block isn't a special-purpose block, it must be a graphic
       // block. Increase the frame count, skip the graphic block, and keep
@@ -350,8 +319,15 @@ class _GifHeaderReader {
     return nextByte == 0x3b;
   }
 
-  /// Returns [true] if the next block is a Special-Purpose Block (either a
-  /// Comment Extension or an Application Extension).
+  /// Skip Special Purpose Blocks (they do not effect decoding).
+  void _maybeSkipSpecialPurposeBlocks() {
+    while (_checkForSpecialPurposeBlock()) {
+      _skipSpecialPurposeBlock();
+    }
+  }
+
+  /// Returns [true] if the next block is a Special-Purpose Block (extension
+  /// label between 0xFA and 0xFF).
   bool _checkForSpecialPurposeBlock() {
     final int extensionIntroducer = bytes.getUint8(_position);
     if (extensionIntroducer != 0x21) {
@@ -360,9 +336,8 @@ class _GifHeaderReader {
 
     final int extensionLabel = bytes.getUint8(_position + 1);
 
-    // The Comment Extension label is 0xFE, the Application Extension Label is
-    // 0xFF.
-    return extensionLabel == 0xfe || extensionLabel == 0xff;
+    // A Special Purpose Block has a label between 0xFA and 0xFF.
+    return extensionLabel >= 0xfa && extensionLabel <= 0xff;
   }
 
   /// Skips past the current control block.
@@ -392,16 +367,20 @@ class _GifHeaderReader {
 
   /// Skip past the graphic block.
   void _skipGraphicBlock() {
+    _maybeSkipSpecialPurposeBlocks();
     // Check for the optional Graphic Control Extension.
     if (_checkForGraphicControlExtension()) {
       _skipGraphicControlExtension();
     }
 
+    _maybeSkipSpecialPurposeBlocks();
     // Check if the Graphic Block is a Plain Text Extension.
     if (_checkForPlainTextExtension()) {
       _skipPlainTextExtension();
       return;
     }
+
+    _maybeSkipSpecialPurposeBlocks();
 
     // This is a Table-Based Image block.
     assert(bytes.getUint8(_position) == 0x2c);
@@ -411,16 +390,13 @@ class _GifHeaderReader {
 
     final int packedImageDescriptorFields = _readUint8();
     const int localColorTableFlagMask = 1 << 7;
-    final bool hasLocalColorTable =
-        packedImageDescriptorFields & localColorTableFlagMask != 0;
+    final bool hasLocalColorTable = packedImageDescriptorFields & localColorTableFlagMask != 0;
     if (hasLocalColorTable) {
       // Skip past the local color table.
       const int localColorTableSizeMask = 1 << 2 | 1 << 1 | 1;
-      final int localColorTableSize =
-          packedImageDescriptorFields & localColorTableSizeMask;
+      final int localColorTableSize = packedImageDescriptorFields & localColorTableSizeMask;
       // This is 3 * 2^(Local Color Table Size + 1).
-      final int localColorTableSizeInBytes =
-          3 * (1 << (localColorTableSize + 1));
+      final int localColorTableSizeInBytes = 3 * (1 << (localColorTableSize + 1));
       _position += localColorTableSizeInBytes;
     }
     // Skip LZW minimum code size byte.

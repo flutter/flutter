@@ -165,12 +165,18 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
       texture->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
   auto buffer =
       impeller_context->GetResourceAllocator()->CreateBuffer(buffer_desc);
+  if (!buffer) {
+    encode_task(fml::Status(fml::StatusCode::kUnimplemented,
+                            "Failed to allocate destination buffer."));
+    return;
+  }
+
   auto command_buffer = impeller_context->CreateCommandBuffer();
   command_buffer->SetLabel("BlitTextureToBuffer Command Buffer");
   auto pass = command_buffer->CreateBlitPass();
   pass->SetLabel("BlitTextureToBuffer Blit Pass");
   pass->AddCopy(texture, buffer);
-  pass->EncodeCommands(impeller_context->GetResourceAllocator());
+  pass->EncodeCommands();
   auto completion = [buffer, color_type = color_type.value(), dimensions,
                      encode_task = std::move(encode_task)](
                         impeller::CommandBuffer::Status status) {

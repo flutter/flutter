@@ -15,7 +15,8 @@ import '../util.dart';
 ///   * [RouteName], which provides a description for this route in the absense
 ///     of an explicit route label set on the route itself.
 class SemanticRoute extends SemanticRole {
-  SemanticRoute(SemanticsObject semanticsObject) : super.blank(SemanticRoleKind.route, semanticsObject) {
+  SemanticRoute(SemanticsObject semanticsObject)
+    : super.blank(EngineSemanticsRole.route, semanticsObject) {
     // The following behaviors can coexist with the route. Generic `RouteName`
     // and `LabelAndValue` are not used by this role because when the route
     // names its own route an `aria-label` is used instead of
@@ -79,7 +80,7 @@ class SemanticRoute extends SemanticRole {
             'namesRoute set, indicating a self-labelled route, but it is '
             'missing the label. A route should be labelled either by setting '
             'namesRoute on itself and providing a label, or by containing a '
-            'child node with namesRoute that can describe it with its content.'
+            'child node with namesRoute that can describe it with its content.',
           );
         }
         return true;
@@ -97,10 +98,7 @@ class SemanticRoute extends SemanticRole {
       return;
     }
 
-    setAttribute(
-      'aria-describedby',
-      routeName.semanticsObject.element.id,
-    );
+    setAttribute('aria-describedby', routeName.semanticsObject.element.id);
   }
 
   @override
@@ -160,10 +158,10 @@ class RouteName extends SemanticBehavior {
 
   void _lookUpNearestAncestorRoute() {
     SemanticsObject? parent = semanticsObject.parent;
-    while (parent != null && parent.semanticRole?.kind != SemanticRoleKind.route) {
+    while (parent != null && parent.semanticRole?.kind != EngineSemanticsRole.route) {
       parent = parent.parent;
     }
-    if (parent != null && parent.semanticRole?.kind == SemanticRoleKind.route) {
+    if (parent != null && parent.semanticRole?.kind == EngineSemanticsRole.route) {
       _route = parent.semanticRole! as SemanticRoute;
     }
   }

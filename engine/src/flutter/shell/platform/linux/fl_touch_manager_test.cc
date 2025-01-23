@@ -5,18 +5,23 @@
 #include "flutter/shell/platform/linux/fl_touch_manager.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
-#include "flutter/shell/platform/linux/testing/fl_test.h"
 
+#include <gdk/gdkwayland.h>
 #include <cstring>
 #include <vector>
 
 #include "gtest/gtest.h"
 
-static void log_pointer_events(
-    FlEngine* engine,
-    std::vector<FlutterPointerEvent>& pointer_events) {
-  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
-  embedder_api->SendPointerEvent = MOCK_ENGINE_PROC(
+TEST(FlTouchManagerTest, TouchEvents) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+
+  std::vector<FlutterPointerEvent> pointer_events;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
       SendPointerEvent,
       ([&pointer_events](auto engine, const FlutterPointerEvent* events,
                          size_t events_count) {
@@ -26,32 +31,12 @@ static void log_pointer_events(
 
         return kSuccess;
       }));
-}
-
-struct _FakeGdkDevice {
-  GObject parent_instance;
-  gchar* name;
-  GdkInputSource source;
-};
-static GdkDevice* makeFakeDevice(GdkInputSource source) {
-  _FakeGdkDevice* device =
-      static_cast<_FakeGdkDevice*>(g_malloc0(sizeof(_FakeGdkDevice)));
-  device->source = source;
-  // Bully the type checker
-  (reinterpret_cast<GTypeInstance*>(device))->g_class =
-      static_cast<GTypeClass*>(g_malloc0(sizeof(GTypeClass)));
-  (reinterpret_cast<GTypeInstance*>(device))->g_class->g_type = GDK_TYPE_DEVICE;
-  return reinterpret_cast<GdkDevice*>(device);
-}
-
-TEST(FlTouchManagerTest, TouchEvents) {
-  g_autoptr(FlEngine) engine = make_mock_engine();
-  std::vector<FlutterPointerEvent> pointer_events;
-  log_pointer_events(engine, pointer_events);
 
   g_autoptr(FlTouchManager) manager = fl_touch_manager_new(engine, 0);
 
-  GdkDevice* touchscreen = makeFakeDevice(GDK_SOURCE_TOUCHSCREEN);
+  GdkDevice* touchscreen =
+      GDK_DEVICE(g_object_new(gdk_wayland_device_get_type(), "input-source",
+                              GDK_SOURCE_TOUCHSCREEN, nullptr));
   GdkEventTouch* event =
       reinterpret_cast<GdkEventTouch*>(gdk_event_new(GDK_TOUCH_BEGIN));
   event->time = 1;
