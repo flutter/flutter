@@ -33,10 +33,10 @@ abstract class WindowController with ChangeNotifier {
   WindowController._({
     VoidCallback? onDestroyed,
     void Function(String)? onError,
-    required Future<WindowCreationResult> future,
+    required Future<_WindowCreationResult> future,
   }) : _future = future {
     _future
-        .then((WindowCreationResult metadata) async {
+        .then((_WindowCreationResult metadata) async {
           _view = metadata.view;
           _state = metadata.state;
           _size = metadata.size;
@@ -70,7 +70,7 @@ abstract class WindowController with ChangeNotifier {
   /// created and is ready to be used. Otherwise, returns false.
   bool get isReady => _view != null;
 
-  final Future<WindowCreationResult> _future;
+  final Future<_WindowCreationResult> _future;
 
   late _WindowListener _listener;
 
@@ -98,7 +98,7 @@ abstract class WindowController with ChangeNotifier {
     }
 
     _isPendingDestroy = true;
-    return destroyWindow(view.viewId);
+    return _destroyWindow(view.viewId);
   }
 }
 
@@ -126,7 +126,7 @@ class RegularWindowController extends WindowController {
   }) : super._(
          onDestroyed: onDestroyed,
          onError: onError,
-         future: createRegular(
+         future: _createRegular(
            size: size,
            sizeConstraints: sizeConstraints,
            title: title,
@@ -165,55 +165,56 @@ class _RegularWindowState extends State<RegularWindow> {
   Future<void> dispose() async {
     super.dispose();
 
-    // In the event that we're being disposed before we've been destroyed
-    // we need to destroy the window on our way out.
-    if (widget.controller.isReady) {
+    if (widget.controller.isReady && !widget.controller._isPendingDestroy) {
       await widget.controller.destroy();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<WindowCreationResult>(
+    return FutureBuilder<_WindowCreationResult>(
       key: widget.key,
       future: widget.controller._future,
-      builder: (BuildContext context, AsyncSnapshot<WindowCreationResult> metadata) {
+      builder: (BuildContext context, AsyncSnapshot<_WindowCreationResult> metadata) {
         if (!metadata.hasData) {
           return const ViewCollection(views: <Widget>[]);
         }
 
         return View(
           view: metadata.data!.view,
-          child: WindowContext(viewId: metadata.data!.view.viewId, child: widget.child),
+          child: WindowControllerContext(controller: widget.controller, child: widget.child),
         );
       },
     );
   }
 }
 
-/// Provides descendents with access to the [Window] in which they are rendered
-class WindowContext extends InheritedWidget {
-  /// [window] the [Window]
-  const WindowContext({super.key, required this.viewId, required super.child});
+/// Provides descendents with access to the [WindowController] in which
+/// they are being rendered
+class WindowControllerContext extends InheritedWidget {
+  /// Creates a new [WindowControllerContext]
+  /// [controller] the controller associated with this window
+  /// [child] the child widget
+  const WindowControllerContext({super.key, required this.controller, required super.child});
 
-  /// The view ID in this context
-  final int viewId;
+  /// The controller associated with this window.
+  final WindowController controller;
 
   /// Returns the [WindowContext] if any
-  static WindowContext? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<WindowContext>();
+  static WindowControllerContext? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<WindowControllerContext>();
   }
 
   @override
-  bool updateShouldNotify(WindowContext oldWidget) {
-    return viewId != oldWidget.viewId;
+  bool updateShouldNotify(WindowControllerContext oldWidget) {
+    return controller != oldWidget.controller;
   }
 }
 
 /// The raw data returned as a result of creating a window.
-class WindowCreationResult {
+class _WindowCreationResult {
   /// Creates a new window.
-  WindowCreationResult({
+  _WindowCreationResult({
     required this.view,
     required this.archetype,
     required this.size,
@@ -238,15 +239,7 @@ class WindowCreationResult {
   final int? parent;
 }
 
-/// Creates a regular window for the platform and returns the metadata associated
-/// with the new window. Users should prefer using the [RegularWindow]
-/// widget instead of this method.
-///
-/// [size] the size of the new [Window] in pixels.
-/// [sizeConstraints] the size constraints of the new [Window].
-/// [title] the window title
-/// [state] the initial window state
-Future<WindowCreationResult> createRegular({
+Future<_WindowCreationResult> _createRegular({
   required Size size,
   BoxConstraints? sizeConstraints,
   String? title,
@@ -273,7 +266,7 @@ Future<WindowCreationResult> createRegular({
   );
 }
 
-Future<WindowCreationResult> _createWindow({
+Future<_WindowCreationResult> _createWindow({
   required WindowArchetype archetype,
   required Future<Map<Object?, Object?>> Function(MethodChannel channel) viewBuilder,
 }) async {
@@ -298,7 +291,7 @@ Future<WindowCreationResult> _createWindow({
     },
   );
 
-  return WindowCreationResult(
+  return _WindowCreationResult(
     view: flView,
     archetype: archetype,
     size: Size(size[0]! as double, size[1]! as double),
@@ -306,10 +299,7 @@ Future<WindowCreationResult> _createWindow({
   );
 }
 
-/// Destroys the window associated with the provided view ID.
-///
-/// [viewId] the view id of the window that should be destroyed
-Future<void> destroyWindow(int viewId) async {
+Future<void> _destroyWindow(int viewId) async {
   try {
     await SystemChannels.windowing.invokeMethod('destroyWindow', <String, dynamic>{
       'viewId': viewId,
