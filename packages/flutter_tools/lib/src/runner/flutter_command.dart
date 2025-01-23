@@ -1575,6 +1575,11 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  @override
+  void printUsage() {
+    globals.logger.printStatus(usage);
+  }
+
   @visibleForOverriding
   String get deprecationWarning {
     return '${globals.logger.terminal.warningMark} The "$name" command is '
@@ -1882,7 +1887,6 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         outputDir: globals.fs.directory(getBuildDirectory()),
         processManager: globals.processManager,
         platform: globals.platform,
-        usage: globals.flutterUsage,
         analytics: analytics,
         projectDir: project.directory,
         packageConfigPath: packageConfigPath(),
