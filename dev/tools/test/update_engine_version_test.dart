@@ -39,7 +39,7 @@ void main() {
   });
 
   tearDown(() {
-    // tmpDir.deleteSync(recursive: true);
+    tmpDir.deleteSync(recursive: true);
   });
 
   group('if FLUTTER_ENGINE_VERSION is set', () {
