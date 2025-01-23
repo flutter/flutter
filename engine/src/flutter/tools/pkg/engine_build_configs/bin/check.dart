@@ -177,13 +177,7 @@ void run(
           );
         }
         if (build.tests.isNotEmpty) {
-          // TODO(matanlurey): https://github.com/flutter/flutter/issues/161990.
-          if (target.properties.configName == 'windows_host_engine' &&
-              build.name == r'ci\host_debug') {
-            debugPrint('  Skipping: ${build.name}: Allow-listed during migration');
-          } else {
-            configConventionErrors.add('${build.name}: Includes "tests: [ ... ]"');
-          }
+          configConventionErrors.add('${build.name}: Includes "tests: [ ... ]"');
         }
       }
     }
