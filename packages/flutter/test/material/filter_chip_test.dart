@@ -1221,7 +1221,7 @@ void main() {
   testWidgets('FilterChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
     final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
       enableAnimation: AnimationStyle.noAnimation,
-      selectAnimation: AnimationStyle(duration: Durations.extralong4),
+      selectAnimation: const AnimationStyle(duration: Durations.extralong4),
     );
 
     await tester.pumpWidget(
@@ -1244,7 +1244,7 @@ void main() {
   ) async {
     final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
       enableAnimation: AnimationStyle.noAnimation,
-      selectAnimation: AnimationStyle(duration: Durations.extralong4),
+      selectAnimation: const AnimationStyle(duration: Durations.extralong4),
     );
 
     await tester.pumpWidget(
