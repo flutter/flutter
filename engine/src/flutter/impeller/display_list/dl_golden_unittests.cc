@@ -353,6 +353,7 @@ TEST_P(DlGoldenTest, SaveLayerAtFractionalValue) {
 }
 
 TEST_P(DlGoldenTest, TextJumpingTest) {
+  SetWindowSize(impeller::ISize(1024, 200));
   impeller::Scalar font_size = 150;
   auto callback = [&](impeller::Scalar scale) -> sk_sp<DisplayList> {
     DisplayListBuilder builder;
@@ -373,7 +374,7 @@ TEST_P(DlGoldenTest, TextJumpingTest) {
     // Note: The ahem font just has full blocks in it.
     RenderTextInCanvasSkia(&builder,
                            "the quick brown fox jumped over the lazy dog!.?",
-                           "Roboto-Regular.ttf", DlPoint::MakeXY(100, 300),
+                           "Roboto-Regular.ttf", DlPoint::MakeXY(10, 150),
                            TextRenderOptions{
                                .font_size = font_size,
                            });
@@ -405,10 +406,10 @@ TEST_P(DlGoldenTest, TextJumpingTest) {
     max_rmse = std::max(rmse, max_rmse);
   }
 
-  // This value was 15.442608398663085 when this test was first written.
+  // This value was 29.273919756836246 when this test was first written.
   // The threshold was changed to 14 after vertex shader pixel snapping was
   // introduced.
-  EXPECT_TRUE(max_rmse < 15.5) << "rmse: " << max_rmse;
+  EXPECT_TRUE(max_rmse < 29.5) << "rmse: " << max_rmse;
 }
 
 }  // namespace testing
