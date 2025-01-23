@@ -76,8 +76,8 @@ struct RoundSuperellipseParam {
     // draws a normalized RSE with size (100, 300) and radii (10, 10), then
     // scales it by (2x, 1x) to restore the original proportions.
     //
-    // Normalization also flips the curve to the first quadrant (top right) if
-    // it originally resides in another quadrant. This is reflected as the signs
+    // Normalization also flips the curve to the first quadrant (positive x and
+    // y) if it originally resides in another quadrant. This affects the signs
     // of `signed_scale`.
     Point signed_scale;
 
@@ -87,6 +87,9 @@ struct RoundSuperellipseParam {
     Octant right;
   };
 
+  // The parameters for the four quadrants that make up the full contour.
+  //
+  // If `all_corners_same` is true, then only `top_right` is popularized.
   Quadrant top_right;
   Quadrant bottom_right;
   Quadrant bottom_left;
@@ -100,6 +103,12 @@ struct RoundSuperellipseParam {
   [[nodiscard]] static RoundSuperellipseParam MakeBoundsRadii(
       const Rect& bounds,
       const RoundingRadii& radii);
+
+  // Returns whether this rounded superellipse contains the point.
+  //
+  // This method does not perform any prescreening such as comparing the point
+  // with the bounds, which is recommended for callers.
+  bool Contains(const Point& point) const;
 };
 
 }  // namespace impeller

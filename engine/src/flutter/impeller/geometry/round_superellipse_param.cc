@@ -22,6 +22,13 @@ inline Point ReplanceNaNWithOne(Point in) {
   return Point{std::isnan(in.x) ? 1 : in.x, std::isnan(in.y) ? 1 : in.y};
 }
 
+// Swap the x and y coordinate of a point.
+//
+// Effectively mirrors the point by the y=x line.
+inline Point Flip(Point a) {
+  return Point{a.y, a.x};
+}
+
 // A factor used to calculate the "gap", defined as the distance from the
 // midpoint of the curved corners to the nearest sides of the bounding box.
 //
@@ -216,6 +223,64 @@ RoundSuperellipseParam::Quadrant ComputeQuadrant(Point center,
   };
 }
 
+// Checks whether the given point is contained in the first octant of the given
+// square-like rounded superellipse.
+//
+// The first octant refers to the region that spans from 0 to pi/4 starting from
+// positive Y axis clockwise.
+//
+// If the point is not within this octant at all, then this function always
+// returns true.  Otherwise this function returns whether the point is contained
+// within the rounded superellipse.
+//
+// The `param.offset` is ignored. The input point should have been transformed
+// to the coordinate space where the rounded superellipse is centered at the
+// origin.
+bool OctantContains(const RoundSuperellipseParam::Octant& param,
+                    const Point& p) {
+  // Check whether the point is within the octant.
+  if (p.x < 0 || p.y < 0 || p.y < p.x) {
+    return true;
+  }
+  // Check if the point is within the stretch segment.
+  if (p.x <= param.se_center.x) {
+    return p.y <= param.edge_mid.y;
+  }
+  // Check if the point is within the superellipsoid segment.
+  if (p.x <= param.circle_start.x) {
+    Point p_se = (p - param.se_center) / param.se_a;
+    return powf(p_se.x, param.se_n) + powf(p_se.y, param.se_n) <= 1;
+  }
+  Scalar circle_radius =
+      param.circle_start.GetDistanceSquared(param.circle_center);
+  Point p_circle = p - param.circle_center;
+  return p_circle.GetDistanceSquared(Point()) < circle_radius;
+}
+
+// Checks whether the given quadrant contains the given point if the point is
+// under the quadrant's jurisdiction.
+//
+// If `check_quadrant` is true, then this function first checks if the point is
+// governed by the given quadrant, and returns true if not. Otherwise this
+// method returns whether the point is contained in the rounded superellipse.
+//
+// If `check_quadrant` is false, then the first step above is skipped, and the
+// function flips the point to the target quadrant and checks containment.
+bool QuadrantContains(const RoundSuperellipseParam::Quadrant& param,
+                      const Point& in_point,
+                      bool check_quadrant = true) {
+  Point norm_point = (in_point - param.offset) / param.signed_scale;
+  if (check_quadrant) {
+    if (norm_point.x < 0 || norm_point.y < 0) {
+      return false;
+    }
+  } else {
+    norm_point = norm_point.Abs();
+  }
+  return OctantContains(param.top, norm_point - param.top.offset) &&
+         OctantContains(param.right, Flip(norm_point - param.right.offset));
+}
+
 }  // namespace
 
 RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
@@ -252,6 +317,16 @@ RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
                                   bounds_.GetLeftTop(), radii_.top_left),
       .all_corners_same = false,
   };
+}
+
+bool RoundSuperellipseParam::Contains(const Point& point) const {
+  if (all_corners_same) {
+    return QuadrantContains(top_right, point, /*check_quadrant=*/false);
+  }
+  return QuadrantContains(top_right, point) &&
+         QuadrantContains(bottom_right, point) &&
+         QuadrantContains(bottom_left, point) &&
+         QuadrantContains(top_left, point);
 }
 
 }  // namespace impeller
