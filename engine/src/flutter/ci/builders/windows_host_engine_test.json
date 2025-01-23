@@ -16,7 +16,7 @@
             },
             "gn": [
                 "--target-dir",
-                "ci/host_debug",
+                "ci/host_debug_test",
                 "--runtime-mode",
                 "debug",
                 "--no-lto",
