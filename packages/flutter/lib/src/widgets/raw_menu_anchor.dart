@@ -103,9 +103,6 @@ class RawMenuOverlayInfo {
 ///
 /// The `context` is the context that the overlay is being built in.
 ///
-/// The `menuChildren` is the list of children containing the menu items that
-/// was passed to the [RawMenuAnchor].
-///
 /// The `info` describes the info of the menu overlay for the
 /// [RawMenuAnchor.fromOverlayBuilder] constructor.
 typedef RawMenuAnchorOverlayBuilder =
@@ -166,7 +163,7 @@ class _RawMenuAnchorScope extends InheritedWidget {
 /// [alignmentOffset], [padding], and [menuAlignment] properties of
 /// [RawMenuAnchor].
 ///
-/// While any widget can be used as a `panel`, the [RawMenuPanel] widget can be
+/// While any widget can be used as a `menuPanel`, the [RawMenuPanel] widget can be
 /// used for a conventional vertical layout with a customizable appearance.
 ///
 /// To customize how the menu [Overlay] is displayed, the
@@ -204,11 +201,11 @@ class _RawMenuAnchorScope extends InheritedWidget {
 ///       child: const Text('Edit'),
 ///     );
 ///   },
-///   panel: RawMenuPanel(
+///   menuPanel: RawMenuPanel(
 ///     padding: const EdgeInsets.symmetric(vertical: 4),
 ///     constraints: const BoxConstraints(minWidth: 200),
 ///     decoration: RawMenuPanel.lightSurfaceDecoration,
-///     menuChildren: <Widget>[
+///     children: <Widget>[
 ///       MenuItemButton(onPressed: () {}, child: const Text('Undo')),
 ///       MenuItemButton(onPressed: () {}, child: const Text('Redo')),
 ///       const Divider(),
@@ -229,8 +226,7 @@ class _RawMenuAnchorScope extends InheritedWidget {
 /// The "Edit" button opens and closes the menu when pressed. Selecting a menu
 /// item will close the menu and update the selected item text.
 ///
-/// ** See code in
-/// examples/api/lib/widgets/raw_menu_anchor/raw_menu_anchor.0.dart **
+/// ** See code in examples/api/lib/widgets/raw_menu_anchor/raw_menu_anchor.0.dart **
 ///
 /// {@end-tool}
 ///
@@ -241,8 +237,7 @@ class _RawMenuAnchorScope extends InheritedWidget {
 /// at the cursor. Selecting a menu item will close the menu and update the
 /// selected item text.
 ///
-/// ** See code in
-/// examples/api/lib/widgets/raw_menu_anchor/raw_menu_anchor.1.dart **
+/// ** See code in examples/api/lib/widgets/raw_menu_anchor/raw_menu_anchor.1.dart **
 ///
 /// {@end-tool}
 ///
@@ -378,19 +373,11 @@ class RawMenuAnchor extends _RawMenuAnchor {
   ///
   /// Menus commonly apply padding to the top and bottom of the menu surface,
   /// which can cause a submenu's items to be vertically misaligned with their
-  /// parent menu items. To ensure a submenu's items align with their parent's
-  /// items, the [padding] applied to the menu surface is ignored when
-  /// calculating the position of the menu.
+  /// parent menu items. To ensure a submenu's items align with its anchor, the
+  /// [padding] applied to the menu surface is ignored when calculating the
+  /// position of the menu.
   ///
-  /// When a [RawMenuPanel] is used with the [RawMenuAnchor] constructor, any
-  /// [padding] applied to the [RawMenuAnchor] is inherited by [RawMenuPanel].
-  /// This ensures that, by default, the top of a [RawMenuAnchor] will be
-  /// aligned with the top of the first item in that submenu.
-  ///
-  /// Supplying a custom [padding] to [RawMenuPanel] will prevent the inherited
-  /// value from being applied.
-  ///
-  /// Defaults to null.
+  /// Defaults to null, which applies no padding.
   final EdgeInsetsGeometry? padding;
 
   /// The point on the menu surface that attaches to the anchor.
@@ -945,7 +932,7 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<RawMenuAnchor> {
 ///  - [MenuController.isOpen] reflects whether any child [RawMenuAnchor] is
 ///    open.
 ///
-/// Either a [child] or a [builder] must be provided.
+/// A [child] must be provided.
 ///
 /// {@tool snippet}
 ///
@@ -983,9 +970,9 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<RawMenuAnchor> {
 ///                   child: Text('Submenu $i  ${controller.isOpen ? '▲' : '▼'}'),
 ///                 );
 ///               },
-///               panel: RawMenuPanel(
+///               menuPanel: RawMenuPanel(
 ///                 decoration: RawMenuPanel.lightSurfaceDecoration,
-///                 menuChildren: <Widget>[
+///                 children: <Widget>[
 ///                   for (int j = 0; j < 5; j++)
 ///                     MenuItemButton(
 ///                       onPressed: nodeController?.close,
@@ -1022,34 +1009,15 @@ class _RawMenuAnchorOverlayState extends _RawMenuAnchorState<RawMenuAnchor> {
 ///   submenu.
 class RawMenuAnchorGroup extends _RawMenuAnchor {
   /// Creates a [RawMenuAnchorGroup].
-  const RawMenuAnchorGroup({super.key, super.controller, this.child, this.builder})
-    : assert(
-        child != null || builder != null,
-        '$RawMenuAnchorGroup requires a child or a builder be provided.',
-      ),
-      super(consumeOutsideTaps: false);
+  ///
+  /// A [child] must be provided.
+  const RawMenuAnchorGroup({super.key, super.controller, required this.child})
+    : super(consumeOutsideTaps: false);
 
-  /// An optional child that is displayed by the [RawMenuAnchorGroup].
+  /// The child displayed by the [RawMenuAnchorGroup].
   ///
-  /// If a [builder] is provided, the pre-built [child] will be passed to
-  /// the [builder]. Doing so can improve performance by avoiding the need to
-  /// rebuild the [child] when the [RawMenuAnchorGroup] is rebuilt.
-  ///
-  /// Either [child] or [builder] must be provided.
-  ///
-  /// Defaults to null.
-  final Widget? child;
-
-  /// An optional builder that is used to build the contents of
-  /// [RawMenuAnchorGroup].
-  ///
-  /// If a [child] is defined, it should typically be part of the widget tree
-  /// returned by [builder].
-  ///
-  /// Either [child] or [builder] must be provided.
-  ///
-  /// Defaults to null.
-  final TransitionBuilder? builder;
+  /// To access the [MenuController] from the [child], use [MenuController.maybeOf].
+  final Widget child;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1101,7 +1069,7 @@ class _RawMenuAnchorGroupState extends _RawMenuAnchorState<RawMenuAnchorGroup> {
       groupId: _root._menuController,
       consumeOutsideTaps: _root._isOpen && widget.consumeOutsideTaps,
       onTapOutside: _handleOutsideTap,
-      child: widget.builder?.call(context, widget.child) ?? widget.child,
+      child: widget.child,
     );
   }
 }
@@ -1126,8 +1094,8 @@ class _RawMenuAnchorGroupState extends _RawMenuAnchorState<RawMenuAnchorGroup> {
 ///
 /// ```dart
 /// RawMenuAnchor(
-///   panel: RawMenuPanel(
-///     menuChildren: <Widget>[
+///   menuPanel: RawMenuPanel(
+///     children: <Widget>[
 ///       Builder(builder: (BuildContext context) {
 ///         return MenuItemButton(
 ///           onPressed: () {
@@ -1158,10 +1126,10 @@ class _RawMenuAnchorGroupState extends _RawMenuAnchorState<RawMenuAnchorGroup> {
 /// See also:
 ///
 /// * [MenuAnchor], a menu anchor that follows the Material Design guidelines.
-/// * [MenuBar], a widget that creates a menu bar, that can take an optional
+/// * [MenuBar], a widget that creates a menu bar that can take an optional
 ///   [MenuController].
-/// * [SubmenuButton], a widget that has a button that manages a submenu.
-/// * [RawMenuAnchor], a widget that defines a region that has submenu.
+/// * [SubmenuButton], a Material widget that has a button that manages a submenu.
+/// * [RawMenuAnchor], a generic widget that defines a region that has submenu.
 class MenuController {
   /// The anchor that this controller controls.
   ///
@@ -1305,14 +1273,6 @@ class RawMenuPanel extends StatelessWidget {
 
   /// The [EdgeInsetsGeometry] applied to the menu surface.
   ///
-  /// When a [RawMenuPanel] is used with the default [RawMenuAnchor]
-  /// constructor, [padding] applied to the [RawMenuAnchor] is inherited by
-  /// [RawMenuPanel]. This ensures that, by default, the top of a
-  /// [RawMenuAnchor] will be aligned with the top of the first item in that
-  /// submenu.
-  ///
-  /// Supplying a custom [padding] will override the inherited value.
-  ///
   /// Defaults to null, which applies no padding.
   final EdgeInsetsGeometry? padding;
 
@@ -1355,14 +1315,6 @@ class RawMenuPanel extends StatelessWidget {
         };
   }
 
-  EdgeInsetsGeometry? _resolvePadding(BuildContext context) {
-    return padding ??
-        switch (MenuController.maybeOf(context)?._anchor?.widget) {
-          final RawMenuAnchor anchor => anchor.padding,
-          _ => null,
-        };
-  }
-
   @override
   Widget build(BuildContext context) {
     final Widget body = SingleChildScrollView(
@@ -1375,7 +1327,7 @@ class RawMenuPanel extends StatelessWidget {
         builder: (BuildContext context) {
           return Container(
             clipBehavior: clipBehavior,
-            padding: _resolvePadding(context),
+            padding: padding,
             decoration: _resolveDecoration(context),
             child: body,
           );
