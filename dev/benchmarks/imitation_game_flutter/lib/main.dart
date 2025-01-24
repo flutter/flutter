@@ -28,65 +28,56 @@ class InfiniteScrollList extends StatefulWidget {
 }
 
 class InfiniteScrollListState extends State<InfiniteScrollList> {
-  List<String> items = List.generate(50, (index) => "Hello"); // Initial 50 rows
-  bool isLoadingMore = false;
-  final ScrollController _scrollController = ScrollController();
-  final int _loadMoreThreshold = 5;
+  final List<String> items = [];
+  final int itemsPerPage = 20;
+  final List<String> staticData = [
+    "Hello Flutter",
+    "Static Item B",
+    "Static Item C",
+    "Static Item D",
+    "Static Item E"
+  ];
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_scrollListener);
+    _loadMoreData(); // Load initial data
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _scrollListener() {
-    if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent -
-                _loadMoreThreshold *
-                    50 && // 50 is the approximate height of an row
-        !isLoadingMore) {
-      loadMoreItems();
-    }
-  }
-
-  Future<void> loadMoreItems() async {
+  void _loadMoreData() {
     setState(() {
-      isLoadingMore = true;
-    });
-
-    // Generate 20 new items
-    List<String> newItems = List.generate(20, (index) => "Hello");
-    setState(() {
+      final newItems = List.generate(itemsPerPage, (i) {
+        return staticData[i % staticData.length];
+      });
       items.addAll(newItems);
-      isLoadingMore = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Infinite Scrolling List")),
-      body: ListView.builder(
-        controller: _scrollController,
-        itemCount:
-            items.length + (isLoadingMore ? 1 : 0), // +1 for loading indicator
-        itemBuilder: (context, index) {
-          if (index < items.length) {
-            return ListTile(title: Text(items[index]));
-          } else {
-            // Display loading indicator at the bottom
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
-        },
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text("Infinite Scrolling ListView (Static Data)"),
+        ),
+        body: NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification scrollInfo) {
+            if (scrollInfo.metrics.pixels >=
+                scrollInfo.metrics.maxScrollExtent - 50) {
+              _loadMoreData();
+              return true;
+            }
+            return false;
+          },
+          child: ListView.builder(
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text(items[index]),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
