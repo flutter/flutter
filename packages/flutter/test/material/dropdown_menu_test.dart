@@ -3906,10 +3906,7 @@ void main() {
     Widget buildDropdownMenu({int? maxLines = 1}) {
       return MaterialApp(
         home: Scaffold(
-          body: DropdownMenu<TestMenu>(
-            dropdownMenuEntries: menuChildren,
-            maxLines: maxLines,
-          ),
+          body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren, maxLines: maxLines),
         ),
       );
     }
