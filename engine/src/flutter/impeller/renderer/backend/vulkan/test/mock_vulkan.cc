@@ -270,6 +270,12 @@ VkResult vkCreateCommandPool(VkDevice device,
 VkResult vkResetCommandPool(VkDevice device,
                             VkCommandPool commandPool,
                             VkCommandPoolResetFlags flags) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  if (flags & VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT) {
+    mock_device->AddCalledFunction("vkResetCommandPoolReleaseResources");
+  } else {
+    mock_device->AddCalledFunction("vkResetCommandPool");
+  }
   return VK_SUCCESS;
 }
 

@@ -12,6 +12,7 @@
 #include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
 
 #include "impeller/renderer/backend/vulkan/vk.h"  // IWYU pragma: keep.
+#include "vulkan/vulkan_enums.hpp"
 #include "vulkan/vulkan_handles.hpp"
 #include "vulkan/vulkan_structs.hpp"
 
@@ -260,9 +261,12 @@ void CommandPoolRecyclerVK::Reclaim(
     return;
   }
   auto device = strong_context->GetDevice();
-  device.resetCommandPool(pool.get());
   if (should_trim) {
-    device.trimCommandPool(pool.get(), {});
+    buffers.clear();
+    device.resetCommandPool(pool.get(),
+                            vk::CommandPoolResetFlagBits::eReleaseResources);
+  } else {
+    device.resetCommandPool(pool.get(), {});
   }
 
   // Move the pool to the recycled list.

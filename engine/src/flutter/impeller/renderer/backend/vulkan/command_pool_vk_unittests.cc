@@ -191,6 +191,11 @@ TEST(CommandPoolRecyclerVKTest, ExtraCommandBufferAllocationsTriggerTrim) {
     waiter.Wait();
   }
 
+  // Command pool is reset but does not release resources.
+  auto called = GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_EQ(std::count(called->begin(), called->end(), "vkResetCommandPool"),
+            1u);
+
   // Create the pool a second time, but dont use any command buffers.
   {
     // Fetch a pool (which will be created).
@@ -215,8 +220,9 @@ TEST(CommandPoolRecyclerVKTest, ExtraCommandBufferAllocationsTriggerTrim) {
   // Verify that the cmd pool was trimmed.
 
   // Now check that we only ever created one pool and one command buffer.
-  auto const called = GetMockVulkanFunctions(context->GetDevice());
-  EXPECT_EQ(std::count(called->begin(), called->end(), "vkTrimCommandPool"),
+  called = GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_EQ(std::count(called->begin(), called->end(),
+                       "vkResetCommandPoolReleaseResources"),
             1u);
 
   context->Shutdown();
