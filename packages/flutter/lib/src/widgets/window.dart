@@ -42,24 +42,22 @@ abstract class WindowController with ChangeNotifier {
           _size = metadata.size;
           notifyListeners();
 
-          SchedulerBinding.instance.addPostFrameCallback((_) async {
-            _listener = _WindowListener(
-              viewId: metadata.view.viewId,
-              onChanged: (_WindowChangeProperties properties) {
-                if (properties.size != null) {
-                  _size = properties.size!;
-                  notifyListeners();
-                }
-              },
-              onDestroyed: () {
-                _view = null;
-                _isPendingDestroy = false;
+          _listener = _WindowListener(
+            viewId: metadata.view.viewId,
+            onChanged: (_WindowChangeProperties properties) {
+              if (properties.size != null) {
+                _size = properties.size!;
                 notifyListeners();
-                onDestroyed?.call();
-              },
-            );
-            _WindowingAppGlobalData.instance._listen(_listener);
-          });
+              }
+            },
+            onDestroyed: () {
+              _view = null;
+              _isPendingDestroy = false;
+              notifyListeners();
+              onDestroyed?.call();
+            },
+          );
+          _WindowingAppGlobalData.instance._listen(_listener);
         })
         .catchError((Object? error) {
           onError?.call(error.toString());
@@ -138,8 +136,12 @@ class RegularWindowController extends WindowController {
   WindowArchetype get type => WindowArchetype.regular;
 
   /// Modify the properties of the window.
-  Future<void> modify({Size? size}) {
-    throw UnimplementedError();
+  /// [size] the new size of the window
+  /// [title] the new title of the window
+  /// [state] the new state of the window
+  Future<void> modify({Size? size, String? title, WindowState? state}) {
+    assert(isReady, 'Window is not ready');
+    return _modifyRegular(viewId: view.viewId, size: size, title: title, state: state);
   }
 }
 
@@ -264,6 +266,16 @@ Future<_WindowCreationResult> _createRegular({
           as Map<Object?, Object?>;
     },
   );
+}
+
+Future<void> _modifyRegular({required int viewId, Size? size, String? title, WindowState? state}) {
+  assert(size != null || title != null || state != null);
+  return SystemChannels.windowing.invokeMethod('modifyRegular', <String, dynamic>{
+    'viewId': viewId,
+    'size': size != null ? <double>[size.width, size.height] : null,
+    'title': title,
+    'state': state?.toString(),
+  });
 }
 
 Future<_WindowCreationResult> _createWindow({
