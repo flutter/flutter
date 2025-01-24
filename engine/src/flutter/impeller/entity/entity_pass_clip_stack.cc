@@ -83,6 +83,8 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::RecordRestore(
   if (subpass_state.clip_coverage.back().coverage.has_value()) {
     FML_DCHECK(next_replay_index_ <=
                subpass_state.rendered_clip_entities.size());
+    // This code is slightly wrong and should be popping more than one clip
+    // entry.
     if (!subpass_state.rendered_clip_entities.empty()) {
       subpass_state.rendered_clip_entities.pop_back();
 
