@@ -16,7 +16,8 @@ import 'package:path/path.dart' as p;
 /// Or:
 ///
 /// ```sh
-/// ./dev/customer_testing/ci.sh [sha]
+/// ./dev/customer_testing/ci.sh
+/// ./dev/customer_testing/ci.bat
 /// ```
 void main(List<String> args) async {
   final String sha;
