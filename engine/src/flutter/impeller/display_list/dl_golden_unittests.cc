@@ -370,8 +370,8 @@ int32_t CalculateMaxY(const impeller::testing::Screenshot* img) {
 
 // This test makes sure that given a tiny change in scale, a glyph will not do a
 // large jump in its drawn y position. This was noticed when performing
-// animations as a problematic artifact. We tried to come up with a more holistic
-// quantification of the problem but haven't yet been able to.
+// animations as a problematic artifact. We tried to come up with a more
+// holistic quantification of the problem but haven't yet been able to.
 TEST_P(DlGoldenTest, TextJumpingTest) {
   SetWindowSize(impeller::ISize(1024, 200));
   impeller::Scalar font_size = 150;
