@@ -4647,6 +4647,65 @@ void main() {
     await tester.pumpWidget(buildButton(enabled: false));
     expect(iconStyle(tester, Icons.add).color, disabledIconColor);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/161437.
+  testWidgets('Positioned correctly in nested overlays', (WidgetTester tester) async {
+    final MenuController menuController = MenuController();
+
+    final Widget nestedPage = Builder(builder:(BuildContext context) =>
+      Scaffold(
+        body: Center(
+          child: MenuAnchor(
+            controller: menuController,
+            menuChildren: List<Widget>.generate(5, (int i) =>
+              MenuItemButton(
+                child: Text('menu item $i'),
+                onPressed: () {},
+              ),
+            ),
+            child: ElevatedButton(
+              child: const Text('Open Anchor Menu'),
+              onPressed: () {
+                menuController.open();
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final GlobalKey containerKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Container(
+              key: containerKey,
+              width: 400,
+              height: 400,
+              decoration: BoxDecoration(border: Border.all(color: Colors.purpleAccent, width: 5)),
+              child: Navigator(
+                onGenerateInitialRoutes: (_, _) => <Route<dynamic>>[
+                  MaterialPageRoute<void>(
+                    builder: (BuildContext context) => nestedPage,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    // The menu and the button should match at their left edges.
+    expect(
+      tester.getTopLeft(find.byType(MenuItemButton).first).dx,
+      tester.getBottomLeft(find.byType(ElevatedButton).first).dx,
+    );
+  });
 }
 
 List<Widget> createTestMenus({
