@@ -4835,7 +4835,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: imitation_game_swiftui__compile
+      task_name: flutter_view_ios__start_up
 
   - name: Mac_arm64_ios hello_world_ios__compile
     recipe: devicelab/devicelab_drone
@@ -4844,7 +4844,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
-      task_name: imitation_game_flutter__compile
+      task_name: hello_world_ios__compile
 
   - name: Mac_arm64_ios imitation_game_flutter
     recipe: devicelab/devicelab_drone
