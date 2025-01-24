@@ -72,7 +72,7 @@ void main(List<String> args) async {
     'run_tests.dart',
     '--skip-on-fetch-failure',
     '--skip-template',
-    p.joinAll(<String>[...p.split(testsCacheDir.path), 'registry', '*.test']),
+    p.posix.joinAll(<String>[...p.split(testsCacheDir.path), 'registry', '*.test']),
   ], mode: io.ProcessStartMode.inheritStdio);
   if ((await test.exitCode) != 0) {
     io.exitCode = 1;
