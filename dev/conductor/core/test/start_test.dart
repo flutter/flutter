@@ -777,7 +777,25 @@ void main() {
 
         final File depsFile = engine.childFile('DEPS');
 
-        final List<FakeCommand> engineCommands = <FakeCommand>[
+        final List<FakeCommand> commands = <FakeCommand>[
+          // checkout and rev-parse framework
+          FakeCommand(
+            command: <String>[
+              'git',
+              'clone',
+              '--origin',
+              'upstream',
+              '--',
+              FrameworkRepository.defaultUpstream,
+              framework.path,
+            ],
+          ),
+          const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', frameworkMirror]),
+          const FakeCommand(command: <String>['git', 'fetch', 'mirror']),
+          const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
+          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
+
+          // engine
           FakeCommand(
             command: <String>[
               'git',
@@ -811,24 +829,8 @@ void main() {
           ),
           const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
           const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
-        ];
 
-        final List<FakeCommand> frameworkCommands = <FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              'git',
-              'clone',
-              '--origin',
-              'upstream',
-              '--',
-              FrameworkRepository.defaultUpstream,
-              framework.path,
-            ],
-          ),
-          const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', frameworkMirror]),
-          const FakeCommand(command: <String>['git', 'fetch', 'mirror']),
-          const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
-          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
+          // setup framework
           const FakeCommand(
             command: <String>['git', 'checkout', '-b', 'cherrypicks-$candidateBranch'],
           ),
@@ -862,6 +864,7 @@ void main() {
           const FakeCommand(
             command: <String>['git', 'push', FrameworkRepository.defaultUpstream, branchPointTag],
           ),
+
         ];
 
         final String operatingSystem = const LocalPlatform().operatingSystem;
@@ -877,10 +880,7 @@ void main() {
         );
         final File stateFile = fileSystem.file(stateFilePath);
 
-        processManager = FakeProcessManager.list(<FakeCommand>[
-          ...frameworkCommands,
-          ...engineCommands,
-        ]);
+        processManager = FakeProcessManager.list(<FakeCommand>[...commands]);
         checkouts = Checkouts(
           fileSystem: fileSystem,
           parentDirectory: fileSystem.directory(checkoutsParentDirectory),
