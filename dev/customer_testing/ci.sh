@@ -36,3 +36,4 @@ git -C ../../bin/cache/pkg/tests checkout FETCH_HEAD
 
 # Finally, run the tests.
 dart --enable-asserts run_tests.dart --skip-on-fetch-failure --skip-template ../../bin/cache/pkg/tests/registry/*.test
+
