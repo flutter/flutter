@@ -2754,7 +2754,7 @@ void main() {
     expect(accepted, isEmpty);
     expect(acceptedDetails, isEmpty);
     expect(find.text('Source'), findsNothing);
-    expect(find.text('Dragging'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
 
     final Offset secondLocation = tester.getCenter(find.text('Target'));
@@ -2764,7 +2764,7 @@ void main() {
     expect(accepted, isEmpty);
     expect(acceptedDetails, isEmpty);
     expect(find.text('Source'), findsNothing);
-    expect(find.text('Dragging'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
 
     await gesture.up();
@@ -3171,19 +3171,11 @@ void main() {
     await gesture.moveTo(secondLocation);
     await tester.pump();
 
-    // Expect that the feedback widget is a descendant of the root overlay,
-    // but not a descendant of the child overlay.
-    expect(
-      find.descendant(of: find.byType(Overlay).first, matching: find.text('Dragging')),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(of: find.byType(Overlay).last, matching: find.text('Dragging')),
-      findsNothing,
-    );
+    final OverlayPortal overlayPortal = tester.widget<OverlayPortal>(find.byType(OverlayPortal));
+    expect(OverlayPortal.overlayPortalTargetIsRootOverlay(overlayPortal), isTrue);
   });
 
-  testWidgets('Drag feedback is put on root overlay with [rootOverlay] flag', (
+  testWidgets('LongPressDraggable drag feedback is put on root overlay with [rootOverlay] flag', (
     WidgetTester tester,
   ) async {
     final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -3234,16 +3226,8 @@ void main() {
     await gesture.moveTo(secondLocation);
     await tester.pump();
 
-    // Expect that the feedback widget is a descendant of the root overlay,
-    // but not a descendant of the child overlay.
-    expect(
-      find.descendant(of: find.byType(Overlay).first, matching: find.text('Dragging')),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(of: find.byType(Overlay).last, matching: find.text('Dragging')),
-      findsNothing,
-    );
+    final OverlayPortal overlayPortal = tester.widget<OverlayPortal>(find.byType(OverlayPortal));
+    expect(OverlayPortal.overlayPortalTargetIsRootOverlay(overlayPortal), isTrue);
   });
 
   testWidgets('configurable DragTarget hit test behavior', (WidgetTester tester) async {
@@ -3969,6 +3953,71 @@ void main() {
       throwsAssertionError,
     );
   });
+
+  testWidgets('Feedback can access InheritedWidgets.', (WidgetTester tester) async {
+    Future<void> pumpWith(String text) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: _TestInheritedWidget(
+            data: text,
+            child: Center(
+              child: Draggable<int>(
+                feedback: Builder(
+                  builder: (BuildContext context) {
+                    final String? data =
+                        context.dependOnInheritedWidgetOfExactType<_TestInheritedWidget>()?.data;
+                    return Text(data ?? '');
+                  },
+                ),
+                child: const Text('Source'),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await pumpWith('Dragging1');
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+    expect(find.text('Dragging1'), findsOneWidget);
+    await pumpWith('Dragging2');
+    expect(find.text('Dragging1'), findsNothing);
+    expect(find.text('Dragging2'), findsOneWidget);
+    await gesture.up();
+  });
+
+  testWidgets('Feedback can be rebuilt when Draggable is rebuilt.', (WidgetTester tester) async {
+    String text = 'Dragging1';
+    StateSetter? draggableSetState;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              draggableSetState = setState;
+              return Draggable<int>(feedback: Text(text), child: const Text('Source'));
+            },
+          ),
+        ),
+      ),
+    );
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+    expect(find.text('Dragging1'), findsOneWidget);
+
+    draggableSetState!(() {
+      text = 'Dragging2';
+    });
+    await tester.pumpAndSettle();
+    expect(find.text('Dragging1'), findsNothing);
+    expect(find.text('Dragging2'), findsOneWidget);
+    await gesture.up();
+    draggableSetState = null;
+  });
 }
 
 Future<void> _testLongPressDraggableHapticFeedback({
@@ -4108,3 +4157,12 @@ Future<void> _testChildAnchorFeedbackPosition({
 class DragTargetData {}
 
 class ExtendedDragTargetData extends DragTargetData {}
+
+class _TestInheritedWidget extends InheritedWidget {
+  const _TestInheritedWidget({required super.child, this.data});
+  final String? data;
+  @override
+  bool updateShouldNotify(_TestInheritedWidget oldWidget) {
+    return data != oldWidget.data;
+  }
+}
