@@ -3917,6 +3917,10 @@ void main() {
     await tester.pumpWidget(buildDropdownMenu());
     TextField textField = tester.widget(find.byType(TextField));
     // Default behavior.
+    expect(textField.maxLines, 1);
+
+    await tester.pumpWidget(buildDropdownMenu(maxLines: null));
+    textField = tester.widget(find.byType(TextField));
     expect(textField.maxLines, null);
 
     await tester.pumpWidget(buildDropdownMenu(maxLines: 2));
