@@ -83,6 +83,7 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::RecordRestore(
   if (subpass_state.clip_coverage.back().coverage.has_value()) {
     FML_DCHECK(next_replay_index_ <=
                subpass_state.rendered_clip_entities.size());
+    // https://github.com/flutter/flutter/issues/162172
     // This code is slightly wrong and should be popping more than one clip
     // entry.
     if (!subpass_state.rendered_clip_entities.empty()) {
