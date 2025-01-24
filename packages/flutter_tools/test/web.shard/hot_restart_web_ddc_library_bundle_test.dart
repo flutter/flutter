@@ -10,10 +10,5 @@ import '../src/common.dart';
 import 'hot_restart_web_utils.dart';
 
 void main() async {
-  await testAll(
-    useDDCLibraryBundleFormat: true,
-    additionalCommandArgs: <String>[
-      '--extra-front-end-options=--dartdevc-canary,--dartdevc-module-format=ddc',
-    ],
-  );
+  await testAll(useDDCLibraryBundleFormat: true);
 }
