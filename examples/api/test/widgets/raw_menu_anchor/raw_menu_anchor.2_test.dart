@@ -36,19 +36,19 @@ void main() {
 
     Opacity opacity = tester.widget<Opacity>(opacityFinder);
 
-    expect(opacity.opacity, moreOrLessEquals(0.3778, epsilon: 0.001));
+     expect(opacity.opacity, moreOrLessEquals(0.2525, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
 
     opacity = tester.widget<Opacity>(opacityFinder);
 
-    expect(opacity.opacity, moreOrLessEquals(0.8336, epsilon: 0.001));
+    expect(opacity.opacity, moreOrLessEquals(0.5632, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
 
     opacity = tester.widget<Opacity>(opacityFinder);
 
-    expect(opacity.opacity, moreOrLessEquals(0.9710, epsilon: 0.001));
+    expect(opacity.opacity, moreOrLessEquals(0.8564, epsilon: 0.001));
 
     await tester.pumpAndSettle();
 
@@ -115,7 +115,7 @@ void main() {
 
     expect(
       tester.getRect(find.byType(example.ShiftingMenuOverlay)),
-      rectMoreOrLessEquals(const Rect.fromLTRB(443.2, 228.0, 672.2, 416.0), epsilon: 0.1),
+      rectMoreOrLessEquals(const Rect.fromLTRB(449.2, 228.0, 674.2, 416.0), epsilon: 0.1),
     );
 
     expect(iconByMenuItemLabel('Cat', tester), isNull);
