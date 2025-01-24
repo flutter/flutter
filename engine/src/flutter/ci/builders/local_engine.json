@@ -1023,6 +1023,11 @@
           "flutter/web_sdk:flutter_web_sdk_archive"
         ]
       },
+      "properties": {
+        "$flutter/osx_sdk": {
+          "skip_xcode_install": true
+        }
+      },
       "cas_archive": false
     },
     {
@@ -1048,6 +1053,11 @@
         "targets": [
           "flutter/web_sdk:flutter_web_sdk_archive"
         ]
+      },
+      "properties": {
+        "$flutter/osx_sdk": {
+          "skip_xcode_install": true
+        }
       },
       "cas_archive": false
     }
