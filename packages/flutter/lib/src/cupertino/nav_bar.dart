@@ -20,6 +20,7 @@ import 'icons.dart';
 import 'page_scaffold.dart';
 import 'route.dart';
 import 'search_field.dart';
+import 'sheet.dart';
 import 'theme.dart';
 
 /// Modes that determine how to display the navigation bar's bottom in relation to scroll events.
@@ -212,7 +213,9 @@ bool _isTransitionable(BuildContext context) {
   // Fullscreen dialogs never transitions their nav bar with other push-style
   // pages' nav bars or with other fullscreen dialog pages on the way in or on
   // the way out.
-  return route is PageRoute && !route.fullscreenDialog;
+  return route is PageRoute &&
+      !route.fullscreenDialog &&
+      !CupertinoSheetRoute.hasParentSheet(context);
 }
 
 /// An iOS-styled navigation bar.
@@ -699,7 +702,9 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 
     final double bottomHeight = widget.bottom?.preferredSize.height ?? 0.0;
     final double persistentHeight =
-        _kNavBarPersistentHeight + bottomHeight + MediaQuery.paddingOf(context).top;
+        _kNavBarPersistentHeight +
+        bottomHeight +
+        (CupertinoSheetRoute.hasParentSheet(context) ? 0.0 : MediaQuery.paddingOf(context).top);
     final double largeHeight = persistentHeight + _kNavBarLargeTitleHeightExtension;
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
@@ -1165,7 +1170,11 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           actionsForegroundColor: CupertinoTheme.of(context).primaryColor,
           transitionBetweenRoutes: widget.transitionBetweenRoutes,
           heroTag: widget.heroTag,
-          persistentHeight: _kNavBarPersistentHeight + MediaQuery.paddingOf(context).top,
+          persistentHeight:
+              _kNavBarPersistentHeight +
+              (CupertinoSheetRoute.hasParentSheet(context)
+                  ? 0.0
+                  : MediaQuery.paddingOf(context).top),
           alwaysShowMiddle: widget.alwaysShowMiddle && widget.middle != null,
           stretchConfiguration: widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
           enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
@@ -1571,7 +1580,10 @@ class _PersistentNavigationBar extends StatelessWidget {
     final Widget? backChevron = components.backChevron;
     final Widget? backLabel = components.backLabel;
 
-    if (leading == null && backChevron != null && backLabel != null) {
+    if (leading == null &&
+        backChevron != null &&
+        backLabel != null &&
+        !CupertinoSheetRoute.hasParentSheet(context)) {
       leading = CupertinoNavigationBarBackButton._assemble(backChevron, backLabel);
     }
 
@@ -1590,8 +1602,14 @@ class _PersistentNavigationBar extends StatelessWidget {
     }
 
     return SizedBox(
-      height: _kNavBarPersistentHeight + MediaQuery.paddingOf(context).top,
-      child: SafeArea(bottom: false, child: paddedToolbar),
+      height:
+          _kNavBarPersistentHeight +
+          (CupertinoSheetRoute.hasParentSheet(context) ? 0.0 : MediaQuery.paddingOf(context).top),
+      child: SafeArea(
+        top: !CupertinoSheetRoute.hasParentSheet(context),
+        bottom: false,
+        child: paddedToolbar,
+      ),
     );
   }
 }
