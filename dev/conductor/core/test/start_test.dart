@@ -753,6 +753,7 @@ void main() {
         expect(state.conductorVersion, conductorVersion);
         expect(state.releaseType, ReleaseType.STABLE_INITIAL);
       });
+
       test('StartContext gets engine and framework checkout directories after run', () async {
         stdio.stdin.add('y');
         const String revision2 = 'def789';
@@ -877,8 +878,8 @@ void main() {
         final File stateFile = fileSystem.file(stateFilePath);
 
         processManager = FakeProcessManager.list(<FakeCommand>[
-          ...engineCommands,
           ...frameworkCommands,
+          ...engineCommands,
         ]);
         checkouts = Checkouts(
           fileSystem: fileSystem,

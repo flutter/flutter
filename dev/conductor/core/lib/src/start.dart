@@ -272,9 +272,25 @@ class StartContext extends Context {
     // Create a new branch so that we don't accidentally push to upstream
     // candidateBranch.
     final String workingBranchName = 'cherrypicks-$candidateBranch';
-    await engine.newBranch(workingBranchName);
+
+    // Check if we are in a monorepo
+    if (await framework.isMonorepo) {
+      stdio.printTrace(
+        'Detected a monorepo at ${(await framework.checkoutDirectory).path}, '
+        'ignoring engine checkout.',
+      );
+      state.isMonorepo = true;
+    } else {
+      state.isMonorepo = false;
+
+      await engine.newBranch(workingBranchName);
+    }
+
 
     if (dartRevision != null && dartRevision!.isNotEmpty) {
+      if (state.isMonorepo) {
+        await framework.updateDartRevision(dartRevision!);
+      }
       await engine.updateDartRevision(dartRevision!);
       await engine.commit('Update Dart SDK to $dartRevision', addFirst: true);
     }

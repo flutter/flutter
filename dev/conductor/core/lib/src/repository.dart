@@ -711,6 +711,21 @@ class FrameworkRepository extends Repository {
     );
     return true;
   }
+
+  Future<bool> get isMonorepo async {
+    final Directory root = await checkoutDirectory;
+    return root.childDirectory('engine').existsSync();
+  }
+
+  /// Update the `dart_revision` entry in the DEPS file.
+  Future<void> updateDartRevision(String newRevision, {@visibleForTesting File? depsFile}) async {
+    if (!await isMonorepo) {
+      throw ConductorException(
+        'You cannot update the dart revision within a non-monorepo framework repo',
+      );
+    }
+    return _updateDartRevision(this, newRevision, depsFile: depsFile);
+  }
 }
 
 /// A wrapper around the host repository that is executing the conductor.
@@ -795,26 +810,8 @@ class EngineRepository extends Repository {
   static const String defaultBranch = 'main';
 
   /// Update the `dart_revision` entry in the DEPS file.
-  Future<void> updateDartRevision(String newRevision, {@visibleForTesting File? depsFile}) async {
-    assert(newRevision.length == 40);
-    depsFile ??= (await checkoutDirectory).childFile('DEPS');
-    final String fileContent = depsFile.readAsStringSync();
-    final RegExp dartPattern = RegExp("[ ]+'dart_revision': '([a-z0-9]{40})',");
-    final Iterable<RegExpMatch> allMatches = dartPattern.allMatches(fileContent);
-    if (allMatches.length != 1) {
-      throw ConductorException(
-        'Unexpected content in the DEPS file at ${depsFile.path}\n'
-        'Expected to find pattern ${dartPattern.pattern} 1 times, but got '
-        '${allMatches.length}.',
-      );
-    }
-    final String updatedFileContent = fileContent.replaceFirst(
-      dartPattern,
-      "  'dart_revision': '$newRevision',",
-    );
-
-    depsFile.writeAsStringSync(updatedFileContent, flush: true);
-  }
+  Future<void> updateDartRevision(String newRevision, {@visibleForTesting File? depsFile}) =>
+      _updateDartRevision(this, newRevision, depsFile: depsFile);
 
   @override
   Future<Repository> cloneRepository(String? cloneName) async {
@@ -850,4 +847,29 @@ class Checkouts {
   final Platform platform;
   final ProcessManager processManager;
   final Stdio stdio;
+}
+
+Future<void> _updateDartRevision(
+  Repository repo,
+  String newRevision, {
+  @visibleForTesting File? depsFile,
+}) async {
+  assert(newRevision.length == 40);
+  depsFile ??= (await repo.checkoutDirectory).childFile('DEPS');
+  final String fileContent = depsFile.readAsStringSync();
+  final RegExp dartPattern = RegExp("[ ]+'dart_revision': '([a-z0-9]{40})',");
+  final Iterable<RegExpMatch> allMatches = dartPattern.allMatches(fileContent);
+  if (allMatches.length != 1) {
+    throw ConductorException(
+      'Unexpected content in the DEPS file at ${depsFile.path}\n'
+      'Expected to find pattern ${dartPattern.pattern} 1 times, but got '
+      '${allMatches.length}.',
+    );
+  }
+  final String updatedFileContent = fileContent.replaceFirst(
+    dartPattern,
+    "  'dart_revision': '$newRevision',",
+  );
+
+  depsFile.writeAsStringSync(updatedFileContent, flush: true);
 }
