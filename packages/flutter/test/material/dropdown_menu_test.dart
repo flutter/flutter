@@ -3903,27 +3903,23 @@ void main() {
   );
 
   testWidgets('DropdownMenu passes maxLines to TextField', (WidgetTester tester) async {
-    // default
-    await tester.pumpWidget(
-      MaterialApp(
+    Widget buildDropdownMenu({int? maxLines}) {
+      return MaterialApp(
         home: Scaffold(
-          body: SafeArea(child: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren)),
-        ),
-      ),
-    );
-    TextField textField = tester.widget(find.byType(TextField));
-    expect(textField.maxLines, null);
-
-    // custom
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SafeArea(
-            child: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren, maxLines: 2),
+          body: DropdownMenu<TestMenu>(
+            dropdownMenuEntries: menuChildren,
+            maxLines: maxLines,
           ),
         ),
-      ),
-    );
+      );
+    }
+
+    await tester.pumpWidget(buildDropdownMenu());
+    TextField textField = tester.widget(find.byType(TextField));
+    // Default behavior.
+    expect(textField.maxLines, null);
+
+    await tester.pumpWidget(buildDropdownMenu(maxLines: 2));
     textField = tester.widget(find.byType(TextField));
     expect(textField.maxLines, 2);
   });
