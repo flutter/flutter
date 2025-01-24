@@ -751,6 +751,13 @@ void vkDestroyFramebuffer(VkDevice device,
   delete reinterpret_cast<MockFramebuffer*>(framebuffer);
 }
 
+void vkTrimCommandPool(VkDevice device,
+                       VkCommandPool commandPool,
+                       VkCommandPoolTrimFlags flags) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->AddCalledFunction("vkTrimCommandPool");
+}
+
 PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
                                             const char* pName) {
   if (strcmp("vkEnumerateInstanceExtensionProperties", pName) == 0) {
@@ -902,6 +909,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateFramebuffer);
   } else if (strcmp("vkDestroyFramebuffer", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyFramebuffer);
+  } else if (strcmp("vkTrimCommandPool", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkTrimCommandPool);
   }
   return noop;
 }

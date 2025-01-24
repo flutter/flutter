@@ -46,14 +46,11 @@ class BackgroundCommandPoolVK final {
     if (!recycler) {
       return;
     }
-    // If there are many unused command buffers, release some of them.
-    if (unused_count_ > kUnusedCommandBufferLimit) {
-      for (auto i = 0u; i < unused_count_; i++) {
-        buffers_.pop_back();
-      }
-    }
-
-    recycler->Reclaim(std::move(pool_), std::move(buffers_));
+    // If there are many unused command buffers, release some of them and
+    // trim the command pool.
+    bool should_trim = unused_count_ > kUnusedCommandBufferLimit;
+    recycler->Reclaim(std::move(pool_), std::move(buffers_),
+                      /*should_trim=*/should_trim);
   }
 
  private:
@@ -255,7 +252,8 @@ CommandPoolRecyclerVK::Reuse() {
 
 void CommandPoolRecyclerVK::Reclaim(
     vk::UniqueCommandPool&& pool,
-    std::vector<vk::UniqueCommandBuffer>&& buffers) {
+    std::vector<vk::UniqueCommandBuffer>&& buffers,
+    bool should_trim) {
   // Reset the pool on a background thread.
   auto strong_context = context_.lock();
   if (!strong_context) {
@@ -263,6 +261,9 @@ void CommandPoolRecyclerVK::Reclaim(
   }
   auto device = strong_context->GetDevice();
   device.resetCommandPool(pool.get());
+  if (should_trim) {
+    device.trimCommandPool(pool.get(), {});
+  }
 
   // Move the pool to the recycled list.
   Lock recycled_lock(recycled_mutex_);
