@@ -353,22 +353,18 @@ TEST_P(DlGoldenTest, SaveLayerAtFractionalValue) {
 }
 
 namespace {
-Point CalculateCentroid(const impeller::testing::Screenshot* img) {
+int32_t CalculateMaxY(const impeller::testing::Screenshot* img) {
   const uint32_t* ptr = reinterpret_cast<const uint32_t*>(img->GetBytes());
-  int32_t int_tally = 0;
-  double x_tally = 0;
-  double y_tally = 0;
+  int32_t max_y = 0;
   for (uint32_t i = 0; i < img->GetHeight(); ++i) {
     for (uint32_t j = 0; j < img->GetWidth(); ++j) {
       uint32_t pixel = *ptr++;
       if ((pixel & 0x00ffffff) != 0) {
-        int_tally += 1;
-        x_tally += j;
-        y_tally += i;
+        max_y = std::max(max_y, static_cast<int32_t>(i));
       }
     }
   }
-  return Point(x_tally / int_tally, y_tally / int_tally);
+  return max_y;
 }
 }  // namespace
 
@@ -396,7 +392,7 @@ TEST_P(DlGoldenTest, TextJumpingTest) {
     //                        .position = SkPoint::Make(100, 300),
     //                    });
     // Note: The ahem font just has full blocks in it.
-    RenderTextInCanvasSkia(&builder, "h", "Roboto-Regular.ttf",
+    RenderTextInCanvasSkia(&builder, "the", "Roboto-Regular.ttf",
                            DlPoint::MakeXY(10, 150),
                            TextRenderOptions{
                                .font_size = font_size,
@@ -421,10 +417,10 @@ TEST_P(DlGoldenTest, TextJumpingTest) {
   std::unique_ptr<impeller::testing::Screenshot> left =
       MakeScreenshot(callback(0.444));
 
-  Point left_centroid = CalculateCentroid(left.get());
-  Point right_centroid = CalculateCentroid(right.get());
-  Scalar y_diff = std::fabsf(left_centroid.y - right_centroid.y);
-  EXPECT_TRUE(y_diff < 2) << "y diff: " << y_diff;
+  int32_t left_max_y = CalculateMaxY(left.get());
+  int32_t right_max_y = CalculateMaxY(right.get());
+  int32_t y_diff = std::abs(left_max_y - right_max_y);
+  EXPECT_TRUE(y_diff <= 1) << "y diff: " << y_diff;
 }
 
 }  // namespace testing
