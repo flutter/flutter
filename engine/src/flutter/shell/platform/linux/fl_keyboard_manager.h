@@ -115,23 +115,6 @@ void fl_keyboard_manager_sync_modifier_if_needed(FlKeyboardManager* manager,
  */
 GHashTable* fl_keyboard_manager_get_pressed_state(FlKeyboardManager* manager);
 
-typedef void (*FlKeyboardManagerSendKeyEventHandler)(
-    const FlutterKeyEvent* event,
-    FlutterKeyEventCallback callback,
-    void* callback_user_data,
-    gpointer user_data);
-
-/**
- * fl_keyboard_manager_set_send_key_event_handler:
- * @manager: the #FlKeyboardManager self.
- *
- * Set the handler for sending events, for testing purposes only.
- */
-void fl_keyboard_manager_set_send_key_event_handler(
-    FlKeyboardManager* manager,
-    FlKeyboardManagerSendKeyEventHandler send_key_event_handler,
-    gpointer user_data);
-
 typedef guint (*FlKeyboardManagerLookupKeyHandler)(const GdkKeymapKey* key,
                                                    gpointer user_data);
 
@@ -144,20 +127,6 @@ typedef guint (*FlKeyboardManagerLookupKeyHandler)(const GdkKeymapKey* key,
 void fl_keyboard_manager_set_lookup_key_handler(
     FlKeyboardManager* manager,
     FlKeyboardManagerLookupKeyHandler lookup_key_handler,
-    gpointer user_data);
-
-typedef GHashTable* (*FlKeyboardManagerGetPressedStateHandler)(
-    gpointer user_data);
-
-/**
- * fl_keyboard_manager_set_get_pressed_state_handler:
- * @manager: the #FlKeyboardManager self.
- *
- * Set the handler for gettting the keyboard state, for testing purposes only.
- */
-void fl_keyboard_manager_set_get_pressed_state_handler(
-    FlKeyboardManager* manager,
-    FlKeyboardManagerGetPressedStateHandler get_pressed_state_handler,
     gpointer user_data);
 
 G_END_DECLS
