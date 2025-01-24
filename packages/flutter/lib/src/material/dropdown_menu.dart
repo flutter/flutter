@@ -503,7 +503,23 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Defaults to [DropdownMenuCloseBehavior.all].
   final DropdownMenuCloseBehavior closeBehavior;
 
-  /// {@macro flutter.widgets.editableText.maxLines}
+  /// Specifies the maximum number of lines the selected value can display
+  /// in the [DropdownMenu].
+  ///
+  /// If this is 1 (the default), the text will not wrap, but will scroll
+  /// horizontally instead.
+  ///
+  /// If this is null, there is no limit to the number of lines, and the text
+  /// container will start with enough vertical space for one line and
+  /// automatically grow to accommodate additional lines as they are entered, up
+  /// to the height of its constraints.
+  ///
+  /// If this is not null, the value must be greater than zero, and it will lock
+  /// the input to the given number of lines and take up enough horizontal space
+  /// to accommodate that number of lines.
+  ///
+  /// See also:
+  ///  * [TextField.maxLines]
   final int? maxLines;
 
   @override
