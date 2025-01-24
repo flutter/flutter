@@ -12,6 +12,12 @@ MockIMContext::MockIMContext() {
   mock = this;
 }
 
+MockIMContext::~MockIMContext() {
+  if (mock == this) {
+    mock = nullptr;
+  }
+}
+
 void gtk_im_context_set_client_window(GtkIMContext* context,
                                       GdkWindow* window) {
   if (mock != nullptr) {

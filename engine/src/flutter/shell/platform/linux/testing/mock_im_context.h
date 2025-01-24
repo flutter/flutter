@@ -15,6 +15,7 @@ namespace testing {
 class MockIMContext {
  public:
   MockIMContext();
+  ~MockIMContext();
 
   MOCK_METHOD(void,
               gtk_im_context_set_client_window,
