@@ -667,7 +667,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   bool isPointerAllowed(PointerDownEvent event) {
     switch (event.buttons) {
       case kPrimaryButton:
-        if (onTapDown == null && onTap == null && onTapUp == null && onTapCancel == null) {
+        if (onTapDown == null && onTap == null && onTapUp == null && onTapCancel == null && onTapMove == null) {
           return false;
         }
       case kSecondaryButton:

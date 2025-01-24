@@ -305,10 +305,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     }
     final RenderBox rb = context.findRenderObject()! as RenderBox;
     final Offset localPosition = rb.globalToLocal(event.globalPosition);
-    if (localPosition.dx >= 0.0 &&
-        localPosition.dy >= 0.0 &&
-        localPosition.dx <= rb.size.width &&
-        localPosition.dy <= rb.size.height) {
+    if ((Offset.zero & rb.size).contains(localPosition)) {
       _handleTap();
     }
   }
