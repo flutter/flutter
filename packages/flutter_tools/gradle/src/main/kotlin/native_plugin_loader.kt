@@ -3,6 +3,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
 
+/*
 object NativePluginLoader {
     private const val FLUTTER_PLUGINS_DEPENDENCIES_FILE_NAME = ".flutter-plugins-dependencies"
     private val json: Json = Json { ignoreUnknownKeys = true }
@@ -145,3 +146,5 @@ data class APlugin(
     @SerialName("native_build") val nativeBuild: Boolean? = null,
     @SerialName("dev_dependency") val devDependency: Boolean? = null,
 )
+
+*/

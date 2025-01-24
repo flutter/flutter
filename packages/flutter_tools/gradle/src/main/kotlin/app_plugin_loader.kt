@@ -16,12 +16,22 @@ class FlutterAppPluginLoaderPlugin : Plugin<Settings> {
             requireNotNull(settings.extra["flutterSdkPath"]) { "flutter.sdk not set in local.properties" }
         }
 
-        val nativePlugins: List<APlugin> = NativePluginLoader.getPlugins(flutterProjectRoot)
-        nativePlugins.forEach { androidPlugin ->
-            val pluginDirectory = File(androidPlugin.path, "android")
+        // val nativePlugins = NativePluginLoaderProxy.nativePluginLoader.getPlugins(flutterProjectRoot)
+        // check(nativePlugins != null) { "nativePlugins cannot be null" }
+
+        val nativePlugins = OldNativePluginLoader.getInstance().getPlugins(flutterProjectRoot)
+
+        // val nativePlugins: List<APlugin> = NativePluginLoader.getPlugins(flutterProjectRoot)
+        nativePlugins.forEach { androidPlugin: Map<String, Any> ->
+            val androidPluginPath = androidPlugin["path"] as? String
+            checkNotNull(androidPluginPath) { "androidPluginPath path cannot be null" }
+            val androidPluginName = androidPlugin["name"] as? String
+            checkNotNull(androidPluginName) { "androidPluginName cannot be null" }
+
+            val pluginDirectory = File(androidPluginPath, "android")
             check(pluginDirectory.exists())
-            settings.include(":${androidPlugin.name}")
-            settings.project(":${androidPlugin.name}").projectDir = pluginDirectory
+            settings.include(":${androidPluginName}")
+            settings.project(":${androidPluginName}").projectDir = pluginDirectory
         }
     }
 }

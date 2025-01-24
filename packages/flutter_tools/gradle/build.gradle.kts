@@ -20,15 +20,75 @@ tasks.validatePlugins {
     enableStricterValidation.set(true)
 }
 
-// We need to compile Kotlin first so we can call it from Groovy. See https://stackoverflow.com/q/36214437/7009800
-tasks.withType<GroovyCompile> {
-    dependsOn(tasks.compileKotlin)
-    classpath += files(tasks.compileKotlin.get().destinationDirectory)
+tasks.compileJava {
+    classpath = sourceSets.main.get().compileClasspath
+    source = sourceSets.main.get().java
+
+    doFirst {
+        println("Java source: ${sourceSets.main.get().java.sourceDirectories.files}")
+        classpath.forEach {
+            println("Java classpath entry: $it")
+        }
+    }
 }
 
-tasks.classes {
-    dependsOn(tasks.compileGroovy)
+tasks.compileGroovy {
+    dependsOn(tasks.compileJava)
+
+    classpath = sourceSets.main.get().compileClasspath // + sourceSets.main.get().java
+
+    doFirst {
+        println("Groovy source: ${sourceSets.main.get().groovy.sourceDirectories.files}")
+        classpath.forEach {
+            println("Groovy classpath entry: $it")
+        }
+    }
+    // println("classpath is ${classpath.files}")
 }
+
+//
+
+// Explicitly set the order of execution
+// tasks.compileGroovy { mustRunAfter(tasks.compileJava) }
+// tasks.compileKotlin { mustRunAfter(tasks.compileGroovy) }
+
+
+//
+// tasks.compileKotlin {
+//     // libraries.from(files(sourceSets.main.get().groovy.classesDirectory))
+// }
+
+tasks.compileKotlin {
+    mustRunAfter(tasks.compileGroovy)
+    // dependsOn(tasks.compileJava)
+    // dependsOn(tasks.compileGroovy)
+
+    // libraries.setFrom()
+
+    libraries.from(
+        files(
+            // sourceSets.main.get().groovy.classesDirectory,
+            // sourceSets.main.get().java.classesDirectory,
+        )
+    )
+
+    doFirst {
+        println("Kotlin source: ${sourceSets.main.get().kotlin.sourceDirectories.files}")
+        libraries.forEach {
+            println("Kotlin classpath entry: $it")
+        }
+    }
+}
+
+// // We need to compile Kotlin first so we can call it from Groovy. See https://stackoverflow.com/q/36214437/7009800
+// tasks.withType<GroovyCompile> {
+//     dependsOn(tasks.compileKotlin)
+//     classpath += files(tasks.compileKotlin.get().destinationDirectory)
+// }
+//
+// tasks.classes {
+//     dependsOn(tasks.compileGroovy)
+// }
 
 gradlePlugin {
     plugins {
