@@ -188,7 +188,7 @@ class DropdownMenu<T> extends StatefulWidget {
     required this.dropdownMenuEntries,
     this.inputFormatters,
     this.closeBehavior = DropdownMenuCloseBehavior.all,
-    this.maxLines,
+    this.maxLines = 1,
   }) : assert(filterCallback == null || enableFilter);
 
   /// Determine if the [DropdownMenu] is enabled.
