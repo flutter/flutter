@@ -21,14 +21,9 @@ void main() {
   late Map<String, String> environment;
   late ProcessRunner processRunner;
 
-  setUp(() {
+  setUp(() async {
     tmpDir = localFs.systemTempDirectory.createTempSync('update_engine_version_test.');
     testRoot = _FlutterRootUnderTest.fromPath(tmpDir.childDirectory('flutter').path);
-
-    // Copy the update_engine_version script and create a rough directory structure.
-    flutterRoot.binInternalUpdateEngineVersion.copySyncRecursive(
-      testRoot.binInternalUpdateEngineVersion.path,
-    );
 
     environment = <String, String>{};
     processRunner = ProcessRunner(
@@ -36,6 +31,20 @@ void main() {
       environment: environment,
       printOutputDefault: true,
     );
+
+    // Copy the update_engine_version script and create a rough directory structure.
+    flutterRoot.binInternalUpdateEngineVersion.copySyncRecursive(
+      testRoot.binInternalUpdateEngineVersion.path,
+    );
+
+    // On some systems, copying the file means losing the executable bit.
+    if (const LocalPlatform().isWindows) {
+      await processRunner.runProcess(<String>[
+        'attrib',
+        '+x',
+        testRoot.binInternalUpdateEngineVersion.path,
+      ]);
+    }
   });
 
   tearDown(() {
