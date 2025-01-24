@@ -2068,10 +2068,7 @@ void main() {
         RawMenuAnchor(
           controller: controller,
           childFocusNode: focusNode,
-          menuPanel: RawMenuPanel(children: <Widget>[
-            Button.tag(Tag.a),
-            Button.tag(Tag.b),
-          ]),
+          menuPanel: RawMenuPanel(children: <Widget>[Button.tag(Tag.a), Button.tag(Tag.b)]),
           child: AnchorButton(Tag.anchor, focusNode: focusNode),
         ),
       ),

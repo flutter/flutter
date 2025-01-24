@@ -70,7 +70,6 @@ class MenuNodeExample extends StatefulWidget {
 }
 
 class _MenuNodeExampleState extends State<MenuNodeExample> {
-
   final MenuController rootController = MenuController();
 
   MenuItem? _selected;
@@ -109,7 +108,9 @@ class _MenuNodeExampleState extends State<MenuNodeExample> {
             child: MenuItemButton(
               style:
                   controller.isOpen
-                      ? menuButtonStyle?.copyWith(backgroundColor: const WidgetStatePropertyAll<Color>(Color(0x0D1A1A1A)))
+                      ? menuButtonStyle?.copyWith(
+                        backgroundColor: const WidgetStatePropertyAll<Color>(Color(0x0D1A1A1A)),
+                      )
                       : menuButtonStyle,
               onHover: (bool value) {
                 if (rootController.isOpen) {
