@@ -127,7 +127,7 @@ class PreviewDetector {
               }
             }
             if (previewEntries.isNotEmpty) {
-              previews[Uri.file(unit.path).toString()] = previewEntries;
+              previews[unit.uri.toString()] = previewEntries;
             }
           }
         } else {
