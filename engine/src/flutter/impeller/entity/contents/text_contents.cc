@@ -196,7 +196,6 @@ void TextContents::ComputeVertexData(
           Rect::MakeOriginSize(uv_origin, Size(uv_size.x, uv_size.y)));
 
       for (const Point& point : unit_points) {
-        Point position;
         if (is_translation_scale) {
           vtx.position = (screen_glyph_position +
                           (basis_transform * point * scaled_bounds.GetSize()))
