@@ -408,7 +408,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       contents = CompositedTransformTarget(link: widget.layerLink!, child: contents);
     }
 
-    Widget child = OverlayPortal(
+    Widget child = OverlayPortal.targetsRootOverlay(
       controller: _overlayController,
       overlayChildBuilder: (BuildContext context) {
         return _Submenu(
@@ -3641,7 +3641,7 @@ class _Submenu extends StatelessWidget {
         .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
         .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
     final BuildContext anchorContext = anchor._anchorKey.currentContext!;
-    final RenderBox overlay = Overlay.of(anchorContext).context.findRenderObject()! as RenderBox;
+    final RenderBox overlay = Overlay.of(anchorContext, rootOverlay: true).context.findRenderObject()! as RenderBox;
 
     Offset upperLeft = Offset.zero;
     Offset bottomRight = Offset.zero;

@@ -4787,6 +4787,136 @@ void main() {
     await tester.pump();
     expect(find.byIcon(disabledIcon), findsOneWidget);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/155034.
+  testWidgets('Content is shown in the root overlay', (WidgetTester tester) async {
+    final MenuController controller = MenuController();
+    final UniqueKey overlayKey = UniqueKey();
+    final UniqueKey menuItemKey = UniqueKey();
+
+    List<RenderObject> ancestorRenderTheaters(RenderObject child) {
+      final List<RenderObject> results = <RenderObject>[];
+      RenderObject? node = child;
+      while (node != null) {
+        if (node.runtimeType.toString() == '_RenderTheater') {
+          results.add(node);
+        }
+        final RenderObject? parent = node.parent;
+        node = parent is RenderObject? parent : null;
+      }
+      return results;
+    }
+
+    Widget boilerplate() {
+      return MaterialApp(
+        home: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                return Scaffold(
+                  body: Center(
+                    child: MenuAnchor(
+                      controller: controller,
+                      menuChildren: <Widget>[
+                        MenuItemButton(
+                          key: menuItemKey,
+                          onPressed: () {},
+                          child: const Text('Item 1'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+            ),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(boilerplate());
+    expect(find.byKey(menuItemKey), findsNothing);
+
+    // Open the menu.
+    controller.open();
+    await tester.pump();
+    expect(find.byKey(menuItemKey), findsOne);
+
+    // Expect two overlays: the root overlay created by MaterialApp and the
+    // overlay created by the boilerplate code.
+    expect(find.byType(Overlay), findsNWidgets(2));
+
+    final Iterable<Overlay> overlays = tester.widgetList<Overlay>(find.byType(Overlay));
+    final Overlay nonRootOverlay = tester.widget(find.byKey(overlayKey));
+    final Overlay rootOverlay = overlays.firstWhere((Overlay overlay) => overlay != nonRootOverlay);
+
+    // Check that the ancestor _RenderTheater for the menu item is the one
+    // from the root overlay.
+    expect(
+      ancestorRenderTheaters(tester.renderObject(find.byKey(menuItemKey))).single,
+      tester.renderObject(find.byWidget(rootOverlay)),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/161437.
+  testWidgets('Positioned correctly in nested overlays', (WidgetTester tester) async {
+    final MenuController menuController = MenuController();
+
+    final Widget nestedPage = Builder(builder:(BuildContext context) =>
+      Scaffold(
+        body: Center(
+          child: MenuAnchor(
+            controller: menuController,
+            menuChildren: List<Widget>.generate(5, (int i) =>
+              MenuItemButton(
+                child: Text('menu item $i'),
+                onPressed: () {},
+              ),
+            ),
+            child: ElevatedButton(
+              child: const Text('Open Anchor Menu'),
+              onPressed: () {
+                menuController.open();
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final GlobalKey containerKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Container(
+              key: containerKey,
+              width: 400,
+              height: 400,
+              decoration: BoxDecoration(border: Border.all(color: Colors.purpleAccent, width: 5)),
+              child: Navigator(
+                onGenerateInitialRoutes: (_, _) => <Route<dynamic>>[
+                  MaterialPageRoute<void>(
+                    builder: (BuildContext context) => nestedPage,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    // The menu and the button should match at their left edges.
+    expect(
+      tester.getTopLeft(find.byType(MenuItemButton).first).dx,
+      tester.getBottomLeft(find.byType(ElevatedButton).first).dx,
+    );
+  });
 }
 
 List<Widget> createTestMenus({
