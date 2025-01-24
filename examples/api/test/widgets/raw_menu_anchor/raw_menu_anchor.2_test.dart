@@ -36,7 +36,7 @@ void main() {
 
     Opacity opacity = tester.widget<Opacity>(opacityFinder);
 
-     expect(opacity.opacity, moreOrLessEquals(0.2525, epsilon: 0.001));
+    expect(opacity.opacity, moreOrLessEquals(0.2525, epsilon: 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
 
