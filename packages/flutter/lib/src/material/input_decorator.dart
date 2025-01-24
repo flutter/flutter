@@ -1028,7 +1028,6 @@ class _RenderDecoration extends RenderBox
         hint == null ? 0.0 : getBaseline(hint, boxConstraints.tighten(width: inputWidth));
 
     // The field can be occupied by a hint or by the input itself.
-    // If the hint is not visible do not use it to compute height.
     final double inputHeight = math.max(
       decoration.isEmpty || decoration.maintainHintSize ? hintSize.height : 0.0,
       inputSize.height,
