@@ -51,9 +51,9 @@ void main() {
     tmpDir.deleteSync(recursive: true);
   });
 
-  group('if FLUTTER_ENGINE_VERSION is set', () {
+  group('if FLUTTER_PREBUILT_ENGINE_VERSION is set', () {
     setUp(() {
-      environment['FLUTTER_ENGINE_VERSION'] = '123abc';
+      environment['FLUTTER_PREBUILT_ENGINE_VERSION'] = '123abc';
     });
 
     test('writes it to engine.version with no git interaction', () async {

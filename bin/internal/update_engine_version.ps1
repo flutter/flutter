@@ -19,7 +19,7 @@ $ErrorActionPreference = "Stop"
 $progName = Split-Path -parent $MyInvocation.MyCommand.Definition
 $flutterRoot = (Get-Item $progName).parent.parent.FullName
 
-# Allow overriding the intended engine version via FLUTTER_ENGINE_VERSION.
+# Allow overriding the intended engine version via FLUTTER_PREBUILT_ENGINE_VERSION.
 #
 # This is for systems, such as Github Actions, where we know ahead of time the
 # base-ref we want to use (to download the engine binaries and avoid trying
@@ -29,8 +29,8 @@ $flutterRoot = (Get-Item $progName).parent.parent.FullName
 # This environment variable is EXPERIMENTAL. If you are not on the Flutter infra
 # or Dart infra teams, this code path might be removed at anytime and cease
 # functioning. Please file an issue if you have workflow needs.
-if (![string]::IsNullOrEmpty($env:FLUTTER_ENGINE_VERSION)) {
-  $engineVersion = $env:FLUTTER_ENGINE_VERSION
+if (![string]::IsNullOrEmpty($env:FLUTTER_PREBUILT_ENGINE_VERSION)) {
+  $engineVersion = $env:FLUTTER_PREBUILT_ENGINE_VERSION
   Write-Error "[Unstable] Override: Setting engine SHA to $engineVersion"
 }
 

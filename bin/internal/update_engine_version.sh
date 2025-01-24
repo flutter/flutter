@@ -17,7 +17,7 @@
 
 set -e
 
-# Allow overriding the intended engine version via FLUTTER_ENGINE_VERSION.
+# Allow overriding the intended engine version via FLUTTER_PREBUILT_ENGINE_VERSION.
 #
 # This is for systems, such as Github Actions, where we know ahead of time the
 # base-ref we want to use (to download the engine binaries and avoid trying
@@ -27,8 +27,8 @@ set -e
 # This environment variable is EXPERIMENTAL. If you are not on the Flutter infra
 # or Dart infra teams, this code path might be removed at anytime and cease
 # functioning. Please file an issue if you have workflow needs.
-if [ -n "${FLUTTER_ENGINE_VERSION}" ]; then
-  ENGINE_VERSION="${FLUTTER_ENGINE_VERSION}"
+if [ -n "${FLUTTER_PREBUILT_ENGINE_VERSION}" ]; then
+  ENGINE_VERSION="${FLUTTER_PREBUILT_ENGINE_VERSION}"
   echo "[Unstable] Override: Setting engine SHA to $ENGINE_VERSION" 1>&2
 fi
 
