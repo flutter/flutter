@@ -31,7 +31,8 @@ dart pub get
 # shard, it should still pass, even if we rolled one of the tests.)
 rm -rf ../../bin/cache/pkg/tests
 git clone https://github.com/flutter/tests.git ../../bin/cache/pkg/tests
-git -C ../../bin/cache/pkg/tests checkout f0d3df3d7ab322ed97dbc073231a3136e95e4d2b
+git -C ../../bin/cache/pkg/tests fetch origin refs/pull/446/head
+git -C ../../bin/cache/pkg/tests checkout FETCH_HEAD
 
 # Finally, run the tests.
 dart --enable-asserts run_tests.dart --skip-on-fetch-failure --skip-template ../../bin/cache/pkg/tests/registry/*.test
