@@ -363,20 +363,11 @@ List<Map<String, Object?>> _extractPlatformMaps(Iterable<Plugin> plugins, String
   ];
 }
 
-@visibleForTesting
-Future<void> writeAndroidPluginRegistrant(
-  FlutterProject project,
-  List<Plugin> plugins, {
-  required bool releaseMode,
-}) async {
-  Iterable<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
+Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+  final Iterable<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
     plugins,
     AndroidPlugin.kConfigKey,
   );
-
-  if (releaseMode) {
-    methodChannelPlugins = methodChannelPlugins.where((Plugin p) => !p.isDevDependency);
-  }
 
   final List<Map<String, Object?>> androidPlugins = _extractPlatformMaps(
     methodChannelPlugins,
@@ -720,20 +711,15 @@ $_dartPluginRegisterWith
 }
 ''';
 
-@visibleForTesting
-Future<void> writeIOSPluginRegistrant(
+Future<void> _writeIOSPluginRegistrant(
   FlutterProject project,
   List<Plugin> plugins, {
   required bool releaseMode,
 }) async {
-  Iterable<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
+  final Iterable<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
     plugins,
     IOSPlugin.kConfigKey,
   );
-
-  if (releaseMode) {
-    methodChannelPlugins = methodChannelPlugins.where((Plugin p) => !p.isDevDependency);
-  }
 
   final List<Map<String, Object?>> iosPlugins = _extractPlatformMaps(
     methodChannelPlugins,
@@ -785,20 +771,15 @@ String _cmakeRelativePluginSymlinkDirectoryPath(CmakeBasedProject project) {
   return cmakePathContext.joinAll(relativePathComponents);
 }
 
-@visibleForTesting
-Future<void> writeLinuxPluginFiles(
+Future<void> _writeLinuxPluginFiles(
   FlutterProject project,
   List<Plugin> plugins, {
   required bool releaseMode,
 }) async {
-  Iterable<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
+  final Iterable<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
     plugins,
     LinuxPlugin.kConfigKey,
   );
-
-  if (releaseMode) {
-    methodChannelPlugins = methodChannelPlugins.where((Plugin p) => !p.isDevDependency);
-  }
 
   final List<Map<String, Object?>> linuxMethodChannelPlugins = _extractPlatformMaps(
     methodChannelPlugins,
@@ -855,20 +836,15 @@ Future<void> _writePluginCmakefile(
   );
 }
 
-@visibleForTesting
-Future<void> writeMacOSPluginRegistrant(
+Future<void> _writeMacOSPluginRegistrant(
   FlutterProject project,
   List<Plugin> plugins, {
   required bool releaseMode,
 }) async {
-  Iterable<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
+  final Iterable<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
     plugins,
     MacOSPlugin.kConfigKey,
   );
-
-  if (releaseMode) {
-    methodChannelPlugins = methodChannelPlugins.where((Plugin p) => !p.isDevDependency);
-  }
 
   final List<Map<String, Object?>> macosMethodChannelPlugins = _extractPlatformMaps(
     methodChannelPlugins,
@@ -936,22 +912,16 @@ List<Plugin> _filterPluginsByVariant(
   }).toList();
 }
 
-@visibleForTesting
-Future<void> writeWindowsPluginFiles(
+Future<void> _writeWindowsPluginFiles(
   FlutterProject project,
   List<Plugin> plugins,
   TemplateRenderer templateRenderer, {
   Iterable<String>? allowedPlugins,
-  required bool releaseMode,
 }) async {
-  Iterable<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
+  final Iterable<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
     plugins,
     WindowsPlugin.kConfigKey,
   );
-
-  if (releaseMode) {
-    methodChannelPlugins = methodChannelPlugins.where((Plugin p) => !p.isDevDependency);
-  }
 
   if (allowedPlugins != null) {
     final List<Plugin> disallowedPlugins =
@@ -1262,47 +1232,47 @@ Future<void> injectPlugins(
   DarwinDependencyManagement? darwinDependencyManagement,
   bool? releaseMode,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  List<Plugin> plugins = await findPlugins(project);
+
+  if (releaseMode ?? false) {
+    plugins = plugins.where((Plugin p) => !p.isDevDependency).toList();
+  }
+
   final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(
     plugins,
     pluginResolutionType: _PluginResolutionType.nativeOrDart,
   );
 
   if (androidPlatform) {
-    await writeAndroidPluginRegistrant(
-      project,
-      pluginsByPlatform[AndroidPlugin.kConfigKey]!,
-      releaseMode: releaseMode ?? false,
-    );
+    await _writeAndroidPluginRegistrant(project, pluginsByPlatform[AndroidPlugin.kConfigKey]!);
   }
   if (iosPlatform) {
-    await writeIOSPluginRegistrant(
+    await _writeIOSPluginRegistrant(
       project,
       pluginsByPlatform[IOSPlugin.kConfigKey]!,
       releaseMode: releaseMode ?? false,
     );
   }
   if (linuxPlatform) {
-    await writeLinuxPluginFiles(
+    await _writeLinuxPluginFiles(
       project,
       pluginsByPlatform[LinuxPlugin.kConfigKey]!,
       releaseMode: releaseMode ?? false,
     );
   }
   if (macOSPlatform) {
-    await writeMacOSPluginRegistrant(
+    await _writeMacOSPluginRegistrant(
       project,
       pluginsByPlatform[MacOSPlugin.kConfigKey]!,
       releaseMode: releaseMode ?? false,
     );
   }
   if (windowsPlatform) {
-    await writeWindowsPluginFiles(
+    await _writeWindowsPluginFiles(
       project,
       pluginsByPlatform[WindowsPlugin.kConfigKey]!,
       globals.templateRenderer,
       allowedPlugins: allowedPlugins,
-      releaseMode: releaseMode ?? false,
     );
   }
   if (iosPlatform || macOSPlatform) {
