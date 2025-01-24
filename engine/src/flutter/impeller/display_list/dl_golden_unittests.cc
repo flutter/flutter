@@ -374,7 +374,7 @@ int32_t CalculateMaxY(const impeller::testing::Screenshot* img) {
 // holistic quantification of the problem but haven't yet been able to.
 TEST_P(DlGoldenTest, TextJumpingTest) {
   SetWindowSize(impeller::ISize(1024, 200));
-  impeller::Scalar font_size = 150;
+  impeller::Scalar font_size = 300;
   auto callback = [&](impeller::Scalar scale) -> sk_sp<DisplayList> {
     DisplayListBuilder builder;
     DlPaint paint;
@@ -392,20 +392,11 @@ TEST_P(DlGoldenTest, TextJumpingTest) {
     //                        .position = SkPoint::Make(100, 300),
     //                    });
     // Note: The ahem font just has full blocks in it.
-    RenderTextInCanvasSkia(&builder, "the", "Roboto-Regular.ttf",
-                           DlPoint::MakeXY(10, 150),
+    RenderTextInCanvasSkia(&builder, "h", "Roboto-Regular.ttf",
+                           DlPoint::MakeXY(10, 300),
                            TextRenderOptions{
                                .font_size = font_size,
                            });
-    std::shared_ptr<DlImageFilter> filter =
-        DlImageFilter::MakeMatrix(DlMatrix(                  //
-                                      1.0 / scale, 0, 0, 0,  //
-                                      0, 1.0 / scale, 0, 0,  //
-                                      0, 0, 1, 0,            //
-                                      0, 0, 0, 1),
-                                  DlImageSampling::kLinear);
-    builder.SaveLayer(std::nullopt, nullptr, filter.get());
-    builder.Restore();
     return builder.Build();
   };
 
