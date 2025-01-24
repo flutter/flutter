@@ -892,7 +892,7 @@ class _DragAvatar<T extends Object> extends Drag {
     _position += _restrictAxis(details.delta);
     updateDrag(_position);
     if (onDragUpdate != null && _position != oldPosition) {
-      onDragUpdate!(details, this);
+      onDragUpdate!(details);
     }
   }
 
