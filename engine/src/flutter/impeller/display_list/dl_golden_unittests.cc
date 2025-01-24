@@ -352,13 +352,37 @@ TEST_P(DlGoldenTest, SaveLayerAtFractionalValue) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+namespace {
+Point CalculateCentroid(const impeller::testing::Screenshot* img) {
+  const uint32_t* ptr = reinterpret_cast<const uint32_t*>(img->GetBytes());
+  int32_t int_tally = 0;
+  double x_tally = 0;
+  double y_tally = 0;
+  for (uint32_t i = 0; i < img->GetHeight(); ++i) {
+    for (uint32_t j = 0; j < img->GetWidth(); ++j) {
+      uint32_t pixel = *ptr++;
+      if ((pixel & 0x00ffffff) != 0) {
+        int_tally += 1;
+        x_tally += j;
+        y_tally += i;
+      }
+    }
+  }
+  return Point(x_tally / int_tally, y_tally / int_tally);
+}
+}  // namespace
+
+// This test makes sure that given a tiny change in scale, a glyph will not do a
+// large jump in its drawn y position. This was noticed when performing
+// animations as a problematic artifact. We tried to come up with a more holistic
+// quantification of the problem but haven't yet been able to.
 TEST_P(DlGoldenTest, TextJumpingTest) {
   SetWindowSize(impeller::ISize(1024, 200));
   impeller::Scalar font_size = 150;
   auto callback = [&](impeller::Scalar scale) -> sk_sp<DisplayList> {
     DisplayListBuilder builder;
     DlPaint paint;
-    paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+    paint.setColor(DlColor::ARGB(1, 0, 0, 0));
     builder.DrawPaint(paint);
     builder.Scale(scale, scale);
     // If you move this code to a playgrounds test the RenderTextInCanvasSkia
@@ -372,9 +396,8 @@ TEST_P(DlGoldenTest, TextJumpingTest) {
     //                        .position = SkPoint::Make(100, 300),
     //                    });
     // Note: The ahem font just has full blocks in it.
-    RenderTextInCanvasSkia(&builder,
-                           "the quick brown fox jumped over the lazy dog!.?",
-                           "Roboto-Regular.ttf", DlPoint::MakeXY(10, 150),
+    RenderTextInCanvasSkia(&builder, "h", "Roboto-Regular.ttf",
+                           DlPoint::MakeXY(10, 150),
                            TextRenderOptions{
                                .font_size = font_size,
                            });
@@ -390,26 +413,18 @@ TEST_P(DlGoldenTest, TextJumpingTest) {
     return builder.Build();
   };
 
-  double max_rmse = 0.0;
-  impeller::Scalar current_scalar = 0.440;
-  std::unique_ptr<impeller::testing::Screenshot> left;
   std::unique_ptr<impeller::testing::Screenshot> right =
-      MakeScreenshot(callback(current_scalar));
+      MakeScreenshot(callback(0.445));
   if (!right) {
     GTEST_SKIP() << "making screenshots not supported.";
   }
-  for (int i = 0; i < 10; ++i) {
-    current_scalar += 0.001;
-    left = std::move(right);
-    right = MakeScreenshot(callback(current_scalar));
-    double rmse = RMSE(left.get(), right.get());
-    max_rmse = std::max(rmse, max_rmse);
-  }
+  std::unique_ptr<impeller::testing::Screenshot> left =
+      MakeScreenshot(callback(0.444));
 
-  // This value was 29.273919756836246 when this test was first written.
-  // The threshold was changed to 14 after vertex shader pixel snapping was
-  // introduced.
-  EXPECT_TRUE(max_rmse < 29.5) << "rmse: " << max_rmse;
+  Point left_centroid = CalculateCentroid(left.get());
+  Point right_centroid = CalculateCentroid(right.get());
+  Scalar y_diff = std::fabsf(left_centroid.y - right_centroid.y);
+  EXPECT_TRUE(y_diff < 2) << "y diff: " << y_diff;
 }
 
 }  // namespace testing
