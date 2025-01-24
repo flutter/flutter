@@ -939,12 +939,7 @@ config("no_optimize") {
     # and Chrome will reject it.
     cflags = [
       "-O1",
-      "-fdata-sections",
-      "-ffunction-sections",
     ]
-    if (!using_sanitizer && !enable_profiling) {
-      cflags += [ "-fomit-frame-pointer" ]
-    }
     ldflags = common_optimize_on_ldflags
   } else {
     cflags = [ "-O0" ]
