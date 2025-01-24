@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:package_config/package_config.dart';
 
 /// Used to load prerequisite scripts such as ddc_module_loader.js
@@ -209,8 +207,9 @@ $_simpleLoaderScript
     ];
 
     let loadConfig = new window.\$dartLoader.LoadConfiguration();
-    // TODO(srujzs): Verify this is sufficient for Windows.
-    loadConfig.isWindows = ${Platform.isWindows};
+    // TODO(srujzs): Possibly set `loadConfig.isWindows` to
+    // `Platform.isWindows`. `dart:io` is disallowed and it isn't clear if this
+    // would be sufficient anyways to make Windows work.
     loadConfig.bootstrapScript = scripts[scripts.length - 1];
 
     loadConfig.loadScriptFn = function(loader) {
