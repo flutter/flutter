@@ -633,14 +633,14 @@ sealed class _RawMenuAnchorState<T extends _RawMenuAnchor> extends State<T> {
     }
   }
 
-  /// Open the menu, optionally at a position relative to the [RawMenuAnchor].
-  ///
-  /// Call this when the menu should be shown to the user.
-  ///
-  /// The optional `position` argument will specify the location of the menu in
-  /// the local coordinates of the [RawMenuAnchor], ignoring any
-  /// [MenuStyle.alignment] and/or [RawMenuAnchor.alignmentOffset] that were
-  /// specified.
+  // Open the menu, optionally at a position relative to the [RawMenuAnchor].
+  //
+  // Call this when the menu should be shown to the user.
+  //
+  // The optional `position` argument will specify the location of the menu in
+  // the local coordinates of the [RawMenuAnchor], ignoring any
+  // [MenuStyle.alignment] and/or [RawMenuAnchor.alignmentOffset] that were
+  // specified.
   void _open({Offset? position});
   void _close({bool inDispose = false});
   void _closeChildren({bool inDispose = false}) {

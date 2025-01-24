@@ -31,7 +31,7 @@ void main() {
     expect(find.byType(example.ShiftingMenuOverlay), findsOneWidget);
     expect(
       tester.getRect(find.byType(example.ShiftingMenuOverlay)),
-      rectMoreOrLessEquals(const Rect.fromLTRB(443.2, 272.0, 672.2, 460.0), epsilon: 0.1),
+      rectMoreOrLessEquals(const Rect.fromLTRB(449.2, 272.0, 674.2, 460.0), epsilon: 0.1),
     );
 
     Opacity opacity = tester.widget<Opacity>(opacityFinder);
@@ -102,7 +102,7 @@ void main() {
 
     expect(
       tester.getRect(find.byType(example.ShiftingMenuOverlay)),
-      rectMoreOrLessEquals(Rect.fromLTRB(443.2, 272.0, 672.2, 460.0), epsilon: 0.1),
+      rectMoreOrLessEquals(const Rect.fromLTRB(449.2, 272.0, 674.2, 460.0), epsilon: 0.1),
     );
 
     await tester.tap(find.text('Kitten'));
