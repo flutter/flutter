@@ -54,7 +54,8 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
     );
 
     // Stdout will produce: "Using the Impeller rendering backend (.*)"
-    final RegExp impellerStdoutPattern = RegExp('Using the Imepller rendering backend (.*)');
+    // TODO(matanlurey): Enable once `flutter drive` retains error logs.
+    // final RegExp impellerStdoutPattern = RegExp('Using the Imepller rendering backend (.*)');
 
     for (final FileSystemEntity file in mains) {
       final CommandResult result = await runCommand(
