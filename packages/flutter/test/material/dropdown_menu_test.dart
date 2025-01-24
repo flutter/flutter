@@ -3903,7 +3903,7 @@ void main() {
   );
 
   testWidgets('DropdownMenu passes maxLines to TextField', (WidgetTester tester) async {
-    Widget buildDropdownMenu({int? maxLines}) {
+    Widget buildDropdownMenu({int? maxLines = 1}) {
       return MaterialApp(
         home: Scaffold(
           body: DropdownMenu<TestMenu>(
