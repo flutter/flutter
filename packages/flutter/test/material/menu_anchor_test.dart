@@ -4686,7 +4686,7 @@ void main() {
               height: 400,
               decoration: BoxDecoration(border: Border.all(color: Colors.purpleAccent, width: 5)),
               child: Navigator(
-                onGenerateInitialRoutes: (_, _) => <Route<dynamic>>[
+                onGenerateInitialRoutes: (_, __) => <Route<dynamic>>[
                   MaterialPageRoute<void>(
                     builder: (BuildContext context) => nestedPage,
                   ),
