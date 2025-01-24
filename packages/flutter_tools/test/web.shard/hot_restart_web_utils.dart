@@ -19,53 +19,64 @@ import 'test_data/hot_reload_index_html_samples.dart';
 
 void main() async {
   await testAll(useDDCLibraryBundleFormat: false);
-  await testAll(useDDCLibraryBundleFormat: true);
 }
 
-Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
+Future<void> testAll({
+  required bool useDDCLibraryBundleFormat,
+  List<String> additionalCommandArgs = const <String>[],
+}) async {
   await _testProject(
     HotReloadProject(),
     useDDCLibraryBundleFormat: useDDCLibraryBundleFormat,
+    additionalCommandArgs: additionalCommandArgs,
   ); // default
   await _testProject(
     HotReloadProject(constApp: true),
     name: 'Default) (with `const MyApp()`)',
     useDDCLibraryBundleFormat: useDDCLibraryBundleFormat,
+    additionalCommandArgs: additionalCommandArgs,
   ); // runApp(const MyApp());
   await _testProject(
     HotReloadProject(indexHtml: indexHtmlFlutterJsCallback),
     name: 'flutter.js (callback)',
     useDDCLibraryBundleFormat: useDDCLibraryBundleFormat,
+    additionalCommandArgs: additionalCommandArgs,
   );
   await _testProject(
     HotReloadProject(indexHtml: indexHtmlFlutterJsPromisesFull),
     name: 'flutter.js (promises)',
     useDDCLibraryBundleFormat: useDDCLibraryBundleFormat,
+    additionalCommandArgs: additionalCommandArgs,
   );
   await _testProject(
     HotReloadProject(indexHtml: indexHtmlFlutterJsPromisesShort),
     name: 'flutter.js (promises, short)',
     useDDCLibraryBundleFormat: useDDCLibraryBundleFormat,
+    additionalCommandArgs: additionalCommandArgs,
   );
   await _testProject(
     HotReloadProject(indexHtml: indexHtmlFlutterJsLoad),
     name: 'flutter.js (load)',
     useDDCLibraryBundleFormat: useDDCLibraryBundleFormat,
+    additionalCommandArgs: additionalCommandArgs,
   );
   await _testProject(
     HotReloadProject(indexHtml: indexHtmlNoFlutterJs),
     name: 'No flutter.js',
     useDDCLibraryBundleFormat: useDDCLibraryBundleFormat,
+    additionalCommandArgs: additionalCommandArgs,
   );
   await _testProject(
     HotReloadProject(indexHtml: indexHtmlWithFlutterBootstrapScriptTag),
     name: 'Using flutter_bootstrap.js script tag',
     useDDCLibraryBundleFormat: useDDCLibraryBundleFormat,
+    additionalCommandArgs: additionalCommandArgs,
   );
   await _testProject(
     HotReloadProject(indexHtml: indexHtmlWithInlinedFlutterBootstrapScript),
     name: 'Using inlined flutter_bootstrap.js',
     useDDCLibraryBundleFormat: useDDCLibraryBundleFormat,
+    additionalCommandArgs: additionalCommandArgs,
   );
 }
 
@@ -73,15 +84,12 @@ Future<void> _testProject(
   HotReloadProject project, {
   String name = 'Default',
   required bool useDDCLibraryBundleFormat,
+  required List<String> additionalCommandArgs,
 }) async {
   late Directory tempDir;
   late FlutterRunTestDriver flutter;
 
   final String testName = 'Hot restart (index.html: $name)';
-  final List<String> additionalCommandArgs =
-      useDDCLibraryBundleFormat
-          ? <String>['--extra-front-end-options=--dartdevc-canary,--dartdevc-module-format=ddc']
-          : <String>[];
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('hot_restart_test.');

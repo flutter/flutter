@@ -198,10 +198,8 @@ void main() {
         generateLoadingIndicator: true,
       );
       // ddc module loader js source is interpolated correctly.
-      expect(result, contains('"moduleLoader": "ddc_module_loader.js"'));
       expect(result, contains('"src": "ddc_module_loader.js"'));
       // stack trace mapper source is interpolated correctly.
-      expect(result, contains('"mapper": "mapper.js"'));
       expect(result, contains('"src": "mapper.js"'));
       // data-main is set to correct bootstrap module.
       expect(result, contains('"src": "main_module.bootstrap.js"'));
