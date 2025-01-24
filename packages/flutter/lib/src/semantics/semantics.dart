@@ -5278,7 +5278,7 @@ class SemanticsConfiguration {
     if (other == null || !other.hasBeenAnnotated || !hasBeenAnnotated) {
       return true;
     }
-    if (_actionsAsBits & other._actionsAsBits != 0) {
+    if (_effectiveActionsAsBits & other._effectiveActionsAsBits != 0) {
       return false;
     }
     if ((_flags & other._flags) != 0) {

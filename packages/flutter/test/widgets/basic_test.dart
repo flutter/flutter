@@ -1007,6 +1007,63 @@ void main() {
       );
     });
 
+    testWidgets('can merge', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      Widget createWidget() {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            label: 'root',
+            container: true,
+            explicitChildNodes: true,
+            child: IgnorePointer(
+              child: Semantics(
+                onTap: () {},
+                label: '1',
+                child: Column(
+                  children: <Widget>[
+                    Semantics(
+                      label: '2',
+                      onTap: () {},
+                      child: const SizedBox(width: 10, height: 10),
+                    ),
+                    Semantics(
+                      label: '3',
+                      onTap: () {},
+                      child: const SizedBox(width: 10, height: 10),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(createWidget());
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                label: 'root',
+                textDirection: TextDirection.ltr,
+                children: <TestSemantics>[
+                  TestSemantics(id: 2, label: '1\n2\n3', textDirection: TextDirection.ltr),
+                ],
+              ),
+            ],
+          ),
+          ignoreId: true,
+          ignoreRect: true,
+          ignoreTransform: true,
+        ),
+      );
+      semantics.dispose();
+    });
+
     testWidgets('drops semantics when its ignoringSemantics is true', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final UniqueKey key = UniqueKey();
