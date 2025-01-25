@@ -157,7 +157,7 @@ void main() {
 
     test('rev-parse HEAD when running on LUCI', () async {
       environment['LUCI_CONTEXT'] = '_NON_NULL_AND_NON_EMPTY_STRING';
-      await processRunner.runProcess(<String>[testRoot.binInternalUpdateEngineVersion.path]);
+      await runUpdateEngineVersion();
 
       final ProcessRunnerResult revParseHead = await processRunner.runProcess(<String>[
         'git',

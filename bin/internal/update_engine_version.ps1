@@ -31,7 +31,7 @@ $flutterRoot = (Get-Item $progName).parent.parent.FullName
 # functioning. Please file an issue if you have workflow needs.
 if (![string]::IsNullOrEmpty($env:FLUTTER_PREBUILT_ENGINE_VERSION)) {
   $engineVersion = $env:FLUTTER_PREBUILT_ENGINE_VERSION
-  Write-Error "[Unstable] Override: Setting engine SHA to $engineVersion"
+  "[Unstable] Override: Setting engine SHA to $engineVersion" | Out-Stream -Stream Error
 }
 
 # Test for fusion repository
