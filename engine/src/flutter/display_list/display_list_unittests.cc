@@ -1793,7 +1793,7 @@ TEST_F(DisplayListTest, FlutterSvgIssue661BoundsWereEmpty) {
                              {32.3f, 14.615f},    //
                              {32.3f, 19.34f});
   path_builder1.Close();
-  DlPath dl_path1 = DlPath(path_builder1.TakePath(DlPathFillType::kNonZero));
+  DlPath dl_path1 = DlPath(path_builder1, DlPathFillType::kNonZero);
 
   DlPathBuilder path_builder2;
   path_builder2.MoveTo({37.5f, 19.33f});
@@ -1806,7 +1806,7 @@ TEST_F(DisplayListTest, FlutterSvgIssue661BoundsWereEmpty) {
                              {37.495f, 11.756f},  //
                              {37.5f, 19.33f});
   path_builder2.Close();
-  DlPath dl_path2 = DlPath(path_builder2.TakePath(DlPathFillType::kNonZero));
+  DlPath dl_path2 = DlPath(path_builder2, DlPathFillType::kNonZero);
 
   DisplayListBuilder builder;
   DlPaint paint = DlPaint(DlColor::kWhite()).setAntiAlias(true);
@@ -4878,7 +4878,7 @@ TEST_F(DisplayListTest, ClipPathNonCulling) {
   path_builder.LineTo({1000.0f, 0.0f});
   path_builder.LineTo({0.0f, 1000.0f});
   path_builder.Close();
-  DlPath path = DlPath(path_builder.TakePath());
+  DlPath path = DlPath(path_builder);
 
   // Double checking that the path does indeed contain the clip. But,
   // sadly, the Builder will not check paths for coverage to this level
