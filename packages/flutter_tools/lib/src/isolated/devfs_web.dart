@@ -809,6 +809,7 @@ class WebDevFS implements DevFS {
     required this.isWasm,
     required this.useLocalCanvasKit,
     required this.rootDirectory,
+    required this.isWindows,
     this.testMode = false,
   }) : _port = port {
     // TODO(srujzs): Remove this assertion when the library bundle format is
@@ -843,6 +844,7 @@ class WebDevFS implements DevFS {
   final WebRendererMode webRenderer;
   final bool isWasm;
   final bool useLocalCanvasKit;
+  final bool isWindows;
 
   late WebAssetServer webAssetServer;
 
@@ -1039,6 +1041,7 @@ class WebDevFS implements DevFS {
               ddcModuleLoaderUrl: 'ddc_module_loader.js',
               mapperUrl: 'stack_trace_mapper.js',
               generateLoadingIndicator: enableDwds,
+              isWindows: isWindows,
             )
             : generateBootstrapScript(
               requireUrl: 'require.js',

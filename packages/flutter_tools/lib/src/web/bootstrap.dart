@@ -145,6 +145,7 @@ String generateDDCLibraryBundleBootstrapScript({
   required String ddcModuleLoaderUrl,
   required String mapperUrl,
   required bool generateLoadingIndicator,
+  required bool isWindows,
 }) {
   return '''
 ${generateLoadingIndicator ? _generateLoadingIndicator() : ""}
@@ -207,9 +208,8 @@ $_simpleLoaderScript
     ];
 
     let loadConfig = new window.\$dartLoader.LoadConfiguration();
-    // TODO(srujzs): Possibly set `loadConfig.isWindows` to
-    // `Platform.isWindows`. `dart:io` is disallowed and it isn't clear if this
-    // would be sufficient anyways to make Windows work.
+    // TODO(srujzs): Verify this is sufficient for Windows.
+    loadConfig.isWindows = $isWindows;
     loadConfig.bootstrapScript = scripts[scripts.length - 1];
 
     loadConfig.loadScriptFn = function(loader) {
