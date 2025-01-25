@@ -989,17 +989,21 @@ class _NavigationBarDestinationSemantics extends StatelessWidget {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final _NavigationDestinationInfo destinationInfo = _NavigationDestinationInfo.of(context);
 
-    return Stack(
-      alignment: Alignment.center,
-      children: <Widget>[
-        child,
-        Semantics(
-          label: localizations.tabLabel(
-            tabIndex: destinationInfo.index + 1,
-            tabCount: destinationInfo.totalNumberOfDestinations,
+    return Semantics(
+      selected: destinationInfo.selectedAnimation.isForwardOrCompleted,
+      container: true,
+      child: Stack(
+        alignment: Alignment.center,
+        children: <Widget>[
+          child,
+          Semantics(
+            label: localizations.tabLabel(
+              tabIndex: destinationInfo.index + 1,
+              tabCount: destinationInfo.totalNumberOfDestinations,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
