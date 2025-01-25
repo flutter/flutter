@@ -54,7 +54,17 @@ void main(List<String> args) async {
     return;
   }
 
-  io.stderr.writeln('Checking out $sha');
+  io.stderr.writeln('Fetching/checking out $sha');
+  final io.Process fetch = await io.Process.start(
+    'git',
+    <String>['fetch', 'origin', sha],
+    mode: io.ProcessStartMode.inheritStdio,
+    workingDirectory: testsCacheDir.path,
+  );
+  if ((await fetch.exitCode) != 0) {
+    io.exitCode = 1;
+    return;
+  }
   final io.Process checkout = await io.Process.start(
     'git',
     <String>['checkout', sha],
