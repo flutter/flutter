@@ -438,31 +438,27 @@ class NavigationDestination extends StatelessWidget {
           child: icon,
         );
 
-        return Semantics(
-          focusable: true,
-          container: true,
-          child: Stack(
-            alignment: Alignment.center,
-            children: <Widget>[
-              NavigationIndicator(
-                animation: animation,
-                color:
-                    info.indicatorColor ??
-                    navigationBarTheme.indicatorColor ??
-                    defaults.indicatorColor!,
-                shape:
-                    info.indicatorShape ??
-                    navigationBarTheme.indicatorShape ??
-                    defaults.indicatorShape!,
-              ),
-              _StatusTransitionWidgetBuilder(
-                animation: animation,
-                builder: (BuildContext context, Widget? child) {
-                  return animation.isForwardOrCompleted ? selectedIconWidget : unselectedIconWidget;
-                },
-              ),
-            ],
-          ),
+        return Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            NavigationIndicator(
+              animation: animation,
+              color:
+                  info.indicatorColor ??
+                  navigationBarTheme.indicatorColor ??
+                  defaults.indicatorColor!,
+              shape:
+                  info.indicatorShape ??
+                  navigationBarTheme.indicatorShape ??
+                  defaults.indicatorShape!,
+            ),
+            _StatusTransitionWidgetBuilder(
+              animation: animation,
+              builder: (BuildContext context, Widget? child) {
+                return animation.isForwardOrCompleted ? selectedIconWidget : unselectedIconWidget;
+              },
+            ),
+          ],
         );
       },
       buildLabel: (BuildContext context) {
@@ -992,29 +988,18 @@ class _NavigationBarDestinationSemantics extends StatelessWidget {
   Widget build(BuildContext context) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final _NavigationDestinationInfo destinationInfo = _NavigationDestinationInfo.of(context);
-    // The AnimationStatusBuilder will make sure that the semantics update to
-    // "selected" when the animation status changes.
-    return _StatusTransitionWidgetBuilder(
-      animation: destinationInfo.selectedAnimation,
-      builder: (BuildContext context, Widget? child) {
-        return Semantics(
-          selected: destinationInfo.selectedAnimation.isForwardOrCompleted,
-          container: true,
-          child: child,
-        );
-      },
-      child: Stack(
-        alignment: Alignment.center,
-        children: <Widget>[
-          child,
-          Semantics(
-            label: localizations.tabLabel(
-              tabIndex: destinationInfo.index + 1,
-              tabCount: destinationInfo.totalNumberOfDestinations,
-            ),
+
+    return Stack(
+      alignment: Alignment.center,
+      children: <Widget>[
+        child,
+        Semantics(
+          label: localizations.tabLabel(
+            tabIndex: destinationInfo.index + 1,
+            tabCount: destinationInfo.totalNumberOfDestinations,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
