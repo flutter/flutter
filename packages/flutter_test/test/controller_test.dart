@@ -613,7 +613,9 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/143921.
-  testWidgets('WidgetTester.scrollUntilVisible should work together with onTap', (WidgetTester tester) async {
+  testWidgets('WidgetTester.scrollUntilVisible should work together with onTap', (
+    WidgetTester tester,
+  ) async {
     const int itemCount = 20;
 
     Widget buildFrame(bool hasOnTap) {
@@ -638,14 +640,14 @@ void main() {
     await tester.pumpWidget(buildFrame(false));
     await tester.pumpAndSettle();
     expect(target, findsNothing);
-    await tester.scrollUntilVisible(target, 20, scrollable: scrollable);
+    await tester.scrollUntilVisible(target, 20, scrollable: scrollable, continuous: true);
     expect(target, findsOneWidget);
 
     // Scroll with onTap.
     await tester.pumpWidget(buildFrame(true));
     await tester.pumpAndSettle();
     expect(target, findsNothing);
-    await tester.scrollUntilVisible(target, 20, scrollable: scrollable);
+    await tester.scrollUntilVisible(target, 20, scrollable: scrollable, continuous: true);
     expect(target, findsOneWidget);
   });
 
