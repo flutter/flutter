@@ -461,8 +461,6 @@ void main() {
   testWidgets('Media padding is applied to CupertinoSliverNavigationBar', (
     WidgetTester tester,
   ) async {
-    final ScrollController scrollController = ScrollController();
-    addTearDown(scrollController.dispose);
     final Key leadingKey = GlobalKey();
     final Key middleKey = GlobalKey();
     final Key trailingKey = GlobalKey();
@@ -475,7 +473,6 @@ void main() {
           ),
           child: CupertinoPageScaffold(
             child: CustomScrollView(
-              controller: scrollController,
               slivers: <Widget>[
                 CupertinoSliverNavigationBar(
                   leading: Placeholder(key: leadingKey),
@@ -499,6 +496,106 @@ void main() {
     // Top and left padding is applied to large title.
     expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(16.0 + 20.0, 54.0 + 10.0));
   });
+
+  testWidgets('CupertinoNavigationBar ignores MediaQuery top padding in a CupertinoSheetRoute', (
+    WidgetTester tester,
+  ) async {
+    final Key middleKey = GlobalKey();
+    double top = 10.0;
+    late StateSetter setState;
+
+    await tester.pumpWidget(const CupertinoApp(home: CupertinoNavigationBar()));
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(
+          CupertinoSheetRoute<void>(
+            builder: (BuildContext context) {
+              return StatefulBuilder(
+                builder: (BuildContext context, StateSetter setter) {
+                  setState = setter;
+                  return MediaQuery(
+                    data: MediaQueryData(padding: EdgeInsets.only(top: top)),
+                    child: CupertinoPageScaffold(
+                      navigationBar: CupertinoNavigationBar(middle: Placeholder(key: middleKey)),
+                      child: const Placeholder(),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    // Mediaquery padding applied to middle.
+    final double initialTop = tester.getTopLeft(find.byKey(middleKey)).dy;
+
+    // Change the top padding.
+    setState(() {
+      top = 20.0;
+    });
+    await tester.pump();
+
+    // The navigation bar ignores the top padding and remains at the same position.
+    expect(tester.getTopLeft(find.byKey(middleKey)).dy, initialTop);
+  });
+
+  testWidgets(
+    'CupertinoSliverNavigationBar ignores MediaQuery top padding in a CupertinoSheetRoute',
+    (WidgetTester tester) async {
+      final Key middleKey = GlobalKey();
+      double top = 10.0;
+      late StateSetter setState;
+
+      await tester.pumpWidget(const CupertinoApp(home: CupertinoNavigationBar()));
+
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .push(
+            CupertinoSheetRoute<void>(
+              builder: (BuildContext context) {
+                return StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setter) {
+                    setState = setter;
+                    return MediaQuery(
+                      data: MediaQueryData(padding: EdgeInsets.only(top: top)),
+                      child: CupertinoPageScaffold(
+                        child: CustomScrollView(
+                          slivers: <Widget>[
+                            CupertinoSliverNavigationBar(
+                              largeTitle: const Text('Large title'),
+                              middle: Placeholder(key: middleKey),
+                            ),
+                            SliverToBoxAdapter(child: Container(height: 1200.0)),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600));
+
+      // Mediaquery padding applied to middle.
+      final double initialTop = tester.getTopLeft(find.byKey(middleKey)).dy;
+
+      // Change the top padding.
+      setState(() {
+        top = 20.0;
+      });
+      await tester.pump();
+
+      // The navigation bar ignores the top padding and remains at the same position.
+      expect(tester.getTopLeft(find.byKey(middleKey)).dy, initialTop);
+    },
+  );
 
   testWidgets('Large title nav bar scrolls', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
@@ -795,6 +892,55 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.text('Home page'), findsOneWidget);
+  });
+
+  testWidgets('Navigation bars in a CupertinoSheetRoute have no back button', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(home: CupertinoNavigationBar(middle: Text('Home page'))),
+    );
+
+    expect(find.byType(CupertinoButton), findsNothing);
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(
+          CupertinoSheetRoute<void>(
+            builder: (BuildContext context) {
+              return const CupertinoPageScaffold(
+                navigationBar: CupertinoNavigationBar(middle: Text('Page 2')),
+                child: Placeholder(),
+              );
+            },
+          ),
+        );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    // No back button is found.
+    expect(find.byType(CupertinoButton), findsNothing);
+    expect(find.text(String.fromCharCode(CupertinoIcons.back.codePoint)), findsNothing);
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(
+          CupertinoSheetRoute<void>(
+            builder: (BuildContext context) {
+              return const CupertinoPageScaffold(
+                child: CustomScrollView(
+                  slivers: <Widget>[CupertinoSliverNavigationBar(largeTitle: Text('Page 3'))],
+                ),
+              );
+            },
+          ),
+        );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    // No back button is found.
+    expect(find.byType(CupertinoButton), findsNothing);
+    expect(find.text(String.fromCharCode(CupertinoIcons.back.codePoint)), findsNothing);
   });
 
   testWidgets('Long back label turns into "back"', (WidgetTester tester) async {
