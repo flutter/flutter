@@ -2312,7 +2312,7 @@ abstract class WidgetController {
   /// If `scrollable` is `null`, a [Finder] that looks for a [Scrollable] is
   /// used instead.
   ///
-  /// If [continuous] is `true`, the gesture will be reused to simulate the effect
+  /// If `continuous` is `true`, the gesture will be reused to simulate the effect
   /// of actual finger scrolling, which is useful when used alongside listeners
   /// like [GestureDetector.onTap]. The default is `false`.
   ///
