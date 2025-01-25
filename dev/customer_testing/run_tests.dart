@@ -89,7 +89,13 @@ Future<bool> run(List<String> arguments) async {
     .where((File file) => !skipTemplate || path.basename(file.path) != 'template.test')
     .toList();
 
-  if (help || repeat == null || files.isEmpty || numberShards == null || numberShards <= 0 || shardIndex == null || shardIndex < 0) {
+  if (help ||
+      repeat == null ||
+      files.isEmpty ||
+      numberShards == null ||
+      numberShards <= 0 ||
+      shardIndex == null ||
+      shardIndex < 0) {
     printHelp();
     if (verbose) {
       if (repeat == null) {
