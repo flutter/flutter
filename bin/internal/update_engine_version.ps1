@@ -14,8 +14,6 @@
 #
 # -------------------------------------------------------------------------- #
 
-$ErrorActionPreference = "Stop"
-
 $progName = Split-Path -parent $MyInvocation.MyCommand.Definition
 $flutterRoot = (Get-Item $progName).parent.parent.FullName
 
@@ -31,8 +29,10 @@ $flutterRoot = (Get-Item $progName).parent.parent.FullName
 # functioning. Please file an issue if you have workflow needs.
 if (![string]::IsNullOrEmpty($env:FLUTTER_PREBUILT_ENGINE_VERSION)) {
   $engineVersion = $env:FLUTTER_PREBUILT_ENGINE_VERSION
-  "[Unstable] Override: Setting engine SHA to $engineVersion" | Out-Stream -Stream Error
+  Write-Error "[Unstable] Override: Setting engine SHA to $engineVersion"
 }
+
+$ErrorActionPreference = "Stop"
 
 # Test for fusion repository
 if ([string]::IsNullOrEmpty($engineVersion) -and (Test-Path "$flutterRoot\DEPS" -PathType Leaf) -and (Test-Path "$flutterRoot\engine\src\.gn" -PathType Leaf)) {
