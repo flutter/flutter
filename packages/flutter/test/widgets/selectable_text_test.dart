@@ -423,6 +423,26 @@ void main() {
     expect(state.widget.cursorColor, cursorColor);
   });
 
+  testWidgets('uses given selectionColor for selection if provided', (
+    WidgetTester tester,
+  ) async {
+    const Color selectionColor = Colors.orange;
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: SelectableText(
+            'text',
+            selectionColor: selectionColor,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.widget.selectionColor, selectionColor);
+  });
+
   testWidgets('Selectable Text has adaptive size', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: const SelectableText('s')));
 

@@ -197,6 +197,7 @@ class SelectableText extends StatefulWidget {
     this.onSelectionChanged,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
+    this.selectionColor,
   }) : assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
        assert(
@@ -255,6 +256,7 @@ class SelectableText extends StatefulWidget {
     this.onSelectionChanged,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
+    this.selectionColor,
   }) : assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
        assert(
@@ -432,6 +434,9 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
   final EditableTextContextMenuBuilder? contextMenuBuilder;
 
+  /// {@macro flutter.widgets.EditableText.selectionColor}
+  final Color? selectionColor;
+
   static Widget _defaultContextMenuBuilder(
     BuildContext context,
     EditableTextState editableTextState,
@@ -499,6 +504,9 @@ class SelectableText extends StatefulWidget {
         textHeightBehavior,
         defaultValue: null,
       ),
+    );
+    properties.add(
+      DiagnosticsProperty<Color>('selectionColor', selectionColor, defaultValue: null),
     );
   }
 }
@@ -690,7 +698,7 @@ class _SelectableTextState extends State<SelectableText>
         cursorColor =
             widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor =
-            selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+            widget.selectionColor ?? selectionStyle.selectionColor ?? DefaultSelectionStyle.defaultColor;
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context), 0);
 
@@ -703,7 +711,7 @@ class _SelectableTextState extends State<SelectableText>
         cursorColor =
             widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor =
-            selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+            widget.selectionColor ?? selectionStyle.selectionColor ?? DefaultSelectionStyle.defaultColor;
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context), 0);
 
@@ -715,7 +723,7 @@ class _SelectableTextState extends State<SelectableText>
         cursorOpacityAnimates = false;
         cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor =
-            selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+            widget.selectionColor ?? selectionStyle.selectionColor ?? DefaultSelectionStyle.defaultColor;
 
       case TargetPlatform.linux:
       case TargetPlatform.windows:
@@ -725,7 +733,7 @@ class _SelectableTextState extends State<SelectableText>
         cursorOpacityAnimates = false;
         cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor =
-            selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+            widget.selectionColor ?? selectionStyle.selectionColor ?? DefaultSelectionStyle.defaultColor;
     }
 
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
