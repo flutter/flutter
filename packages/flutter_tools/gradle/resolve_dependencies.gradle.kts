@@ -4,7 +4,7 @@ import java.nio.file.Paths
 // used during the build. This script is invoked when `flutter precache` is run.
 //
 // Command:
-//  gradle -b <flutter-sdk>packages/flutter_tools/gradle/resolve_dependencies.gradle
+//  gradle -b <flutter-sdk>packages/flutter_tools/gradle/resolve_dependencies.gradle.kts
 //      resolveDependencies
 //
 // This way, Gradle can run with the `--offline` flag later on to eliminate any
