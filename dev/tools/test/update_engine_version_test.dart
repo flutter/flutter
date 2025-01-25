@@ -51,13 +51,24 @@ void main() {
     tmpDir.deleteSync(recursive: true);
   });
 
+  Future<void> runUpdateEngineVersion() async {
+    if (const LocalPlatform().isWindows) {
+      await processRunner.runProcess(<String>[
+        'powershell',
+        testRoot.binInternalUpdateEngineVersion.path,
+      ]);
+    } else {
+      await processRunner.runProcess(<String>[testRoot.binInternalUpdateEngineVersion.path]);
+    }
+  }
+
   group('if FLUTTER_PREBUILT_ENGINE_VERSION is set', () {
     setUp(() {
       environment['FLUTTER_PREBUILT_ENGINE_VERSION'] = '123abc';
     });
 
     test('writes it to engine.version with no git interaction', () async {
-      await processRunner.runProcess(<String>[testRoot.binInternalUpdateEngineVersion.path]);
+      await runUpdateEngineVersion();
 
       expect(testRoot.binInternalEngineVersion, exists);
       expect(
@@ -89,7 +100,7 @@ void main() {
     await setupRepo(branch: 'stable');
     await setupRemote(remote: 'upstream');
 
-    await processRunner.runProcess(<String>[testRoot.binInternalUpdateEngineVersion.path]);
+    await runUpdateEngineVersion();
 
     expect(testRoot.binInternalEngineVersion, isNot(exists));
   });
@@ -98,7 +109,7 @@ void main() {
     await setupRepo(branch: 'beta');
     await setupRemote(remote: 'upstream');
 
-    await processRunner.runProcess(<String>[testRoot.binInternalUpdateEngineVersion.path]);
+    await runUpdateEngineVersion();
 
     expect(testRoot.binInternalEngineVersion, isNot(exists));
   });
@@ -117,7 +128,7 @@ void main() {
         'HEAD',
         'upstream/master',
       ]);
-      await processRunner.runProcess(<String>[testRoot.binInternalUpdateEngineVersion.path]);
+      await runUpdateEngineVersion();
 
       expect(testRoot.binInternalEngineVersion, exists);
       expect(
@@ -135,7 +146,7 @@ void main() {
         'HEAD',
         'origin/master',
       ]);
-      await processRunner.runProcess(<String>[testRoot.binInternalUpdateEngineVersion.path]);
+      await runUpdateEngineVersion();
 
       expect(testRoot.binInternalEngineVersion, exists);
       expect(
@@ -171,7 +182,7 @@ void main() {
     test('[DEPS] engine.version is blank', () async {
       testRoot.deps.deleteSync();
 
-      await processRunner.runProcess(<String>[testRoot.binInternalUpdateEngineVersion.path]);
+      await runUpdateEngineVersion();
 
       expect(testRoot.binInternalEngineVersion, exists);
       expect(testRoot.binInternalEngineVersion.readAsStringSync(), equalsIgnoringWhitespace(''));
@@ -180,7 +191,7 @@ void main() {
     test('[engine/src/.gn] engine.version is blank', () async {
       testRoot.engineSrcGn.deleteSync();
 
-      await processRunner.runProcess(<String>[testRoot.binInternalUpdateEngineVersion.path]);
+      await runUpdateEngineVersion();
 
       expect(testRoot.binInternalEngineVersion, exists);
       expect(testRoot.binInternalEngineVersion.readAsStringSync(), equalsIgnoringWhitespace(''));
