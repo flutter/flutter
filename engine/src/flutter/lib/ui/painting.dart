@@ -2292,9 +2292,6 @@ class FrameInfo {
   final Image image;
 }
 
-/// Signature for [Codec] lifecycle events.
-typedef CodecEventCallback = void Function(Codec codec);
-
 /// A handle to an image codec.
 ///
 /// This class is created by the engine, and should not be instantiated
@@ -2303,24 +2300,6 @@ typedef CodecEventCallback = void Function(Codec codec);
 /// To obtain an instance of the [Codec] interface, see
 /// [instantiateImageCodec].
 abstract class Codec {
-  Codec() {
-    onCreate?.call(this);
-  }
-
-  /// A callback that is invoked to report a codec creation.
-  ///
-  /// It's preferred to use [MemoryAllocations] in flutter/foundation.dart
-  /// than to use [onCreate] directly because [MemoryAllocations]
-  /// allows multiple callbacks.
-  static CodecEventCallback? onCreate;
-
-  /// A callback that is invoked to report the codec disposal.
-  ///
-  /// It's preferred to use [MemoryAllocations] in flutter/foundation.dart
-  /// than to use [onDispose] directly because [MemoryAllocations]
-  /// allows multiple callbacks.
-  static CodecEventCallback? onDispose;
-
   /// Number of frames in this image.
   int get frameCount;
 
@@ -2345,9 +2324,7 @@ abstract class Codec {
   ///
   /// This can't be a leaf call because the native function calls Dart API
   /// (Dart_SetNativeInstanceField).
-  void dispose() {
-    onDispose?.call(this);
-  }
+  void dispose();
 }
 
 base class _NativeCodec extends NativeFieldWrapperClass1 implements Codec {

@@ -613,14 +613,8 @@ abstract class FrameInfo {
   Image get image;
 }
 
-typedef CodecEventCallback = void Function(Codec codec);
-
 class Codec {
-  Codec._() {
-    onCreate?.call(this);
-  }
-  static CodecEventCallback? onCreate;
-  static CodecEventCallback? onDispose;
+  Codec._();
   int get frameCount => 0;
   int get repetitionCount => 0;
   Future<FrameInfo> getNextFrame() {
@@ -628,9 +622,7 @@ class Codec {
   }
 
   String? _getNextFrame(engine.Callback<FrameInfo> callback) => null;
-  void dispose() {
-    onDispose?.call(this);
-  }
+  void dispose() {}
 }
 
 Future<Codec> instantiateImageCodec(
