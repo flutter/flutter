@@ -70,9 +70,11 @@ enum AnimationBehavior {
   /// [AccessibilityFeatures.disableAnimations] flag into account.
   preserve;
 
-  /// Whether animations should be enabled, based on the configured behavior
-  /// and the [AccessibilityFeatures.disableAnimations] flag.
-  bool get enableAnimations => switch (this) {
+  /// Whether animations should be enabled, based on the configured behavior and the
+  /// [AccessibilityFeatures.disableAnimations] flag.
+  //
+  // This field is private to allow changing its signature in the future without breakages.
+  bool get _enableAnimations => switch (this) {
     normal => !SemanticsBinding.instance.disableAnimations,
     preserve => true,
   };
@@ -262,7 +264,7 @@ class AnimationController extends Animation<double>
     required TickerProvider vsync,
   }) : assert(upperBound >= lowerBound) {
     if (kFlutterMemoryAllocationsEnabled) {
-      _dispatchObjectCreation();
+      _maybeDispatchObjectCreation();
     }
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value ?? lowerBound);
@@ -295,19 +297,21 @@ class AnimationController extends Animation<double>
   }) : lowerBound = double.negativeInfinity,
        upperBound = double.infinity {
     if (kFlutterMemoryAllocationsEnabled) {
-      _dispatchObjectCreation();
+      _maybeDispatchObjectCreation();
     }
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value);
   }
 
   /// Dispatches event of object creation to [FlutterMemoryAllocations.instance].
-  void _dispatchObjectCreation() {
-    FlutterMemoryAllocations.instance.dispatchObjectCreated(
-      library: _flutterAnimationLibrary,
-      className: '$AnimationController',
-      object: this,
-    );
+  void _maybeDispatchObjectCreation() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterAnimationLibrary,
+        className: '$AnimationController',
+        object: this,
+      );
+    }
   }
 
   /// The value at which this animation is deemed to be dismissed.
@@ -656,7 +660,7 @@ class AnimationController extends Animation<double>
     // pattern of an eternally repeating animation might cause an endless loop if it weren't delayed
     // for at least one frame.
     // Instead, we run it at 5% of the normal duration to limit most animations to a single frame.
-    final double scale = animationBehavior.enableAnimations ? 1.0 : 0.05;
+    final double scale = animationBehavior._enableAnimations ? 1.0 : 0.05;
     Duration? simulationDuration = duration;
     if (simulationDuration == null) {
       assert(!(this.duration == null && _direction == _AnimationDirection.forward));
@@ -791,7 +795,7 @@ class AnimationController extends Animation<double>
             : upperBound + _kFlingTolerance.distance;
     final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
     // The "200.0" value is arbitrary (it was chosen because it worked for the drawer widget).
-    final double scale = behavior.enableAnimations ? 1.0 : 200.0;
+    final double scale = behavior._enableAnimations ? 1.0 : 200.0;
     final SpringSimulation simulation = SpringSimulation(
       springDescription,
       value,
