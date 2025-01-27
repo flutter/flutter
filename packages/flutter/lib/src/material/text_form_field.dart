@@ -16,6 +16,14 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType;
 
+/// Signature for a callback that builds an error widget.
+///
+/// See also:
+///
+///  * [TextFormField.errorBuilder], which is of this type, and passes the result error
+/// given by [TextFormField.validator].
+typedef TextFormFieldErrorBuilder = Widget Function(String errorText);
+
 /// A [FormField] that contains a [TextField].
 ///
 /// This is a convenience widget that wraps a [TextField] widget in a
@@ -150,6 +158,7 @@ class TextFormField extends FormField<String> {
     ValueChanged<String>? onFieldSubmitted,
     super.onSaved,
     super.validator,
+    this.errorBuilder,
     List<TextInputFormatter>? inputFormatters,
     bool? enabled,
     bool? ignorePointers,
@@ -223,7 +232,12 @@ class TextFormField extends FormField<String> {
                restorationId: restorationId,
                controller: state._effectiveController,
                focusNode: focusNode,
-               decoration: effectiveDecoration.copyWith(errorText: field.errorText),
+               decoration:
+                   errorBuilder != null
+                       ? effectiveDecoration.copyWith(
+                         error: field.errorText != null ? errorBuilder(field.errorText!) : null,
+                       )
+                       : effectiveDecoration.copyWith(errorText: field.errorText),
                keyboardType: keyboardType,
                textInputAction: textInputAction,
                style: style,
@@ -311,6 +325,14 @@ class TextFormField extends FormField<String> {
   /// value: when they have inserted or deleted text or reset the form.
   /// {@endtemplate}
   final ValueChanged<String>? onChanged;
+
+  /// Function that returns the widget representing the error to display.
+  /// It is passed the form field validator error string as input.
+  /// The resulting widget is passed to [InputDecoration.error].
+  ///
+  /// If null, the validator error string is passed to
+  /// [InputDecoration.errorText].
+  final TextFormFieldErrorBuilder? errorBuilder;
 
   static Widget _defaultContextMenuBuilder(
     BuildContext context,
