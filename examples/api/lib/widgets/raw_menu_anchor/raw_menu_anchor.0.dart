@@ -2,77 +2,107 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'
+    show
+        ButtonStyle,
+        ColorScheme,
+        Colors,
+        DynamicSchemeVariant,
+        FilledButton,
+        Icons,
+        MaterialApp,
+        MenuButtonThemeData,
+        MenuItemButton,
+        Scaffold,
+        Theme,
+        ThemeData,
+        kElevationToShadow;
+import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for a [RawMenuAnchor] that shows a simple menu with
-/// three items.
-void main() => runApp(const SimpleMenuApp());
-
-class SimpleMenuExample extends StatefulWidget {
-  const SimpleMenuExample({super.key});
-
-  @override
-  State<SimpleMenuExample> createState() => _SimpleMenuExampleState();
+/// Flutter code sample for a [RawMenuAnchor] that demonstrates
+/// how to create a simple menu.
+void main() {
+  runApp(const RawMenuAnchorApp());
 }
 
-class _SimpleMenuExampleState extends State<SimpleMenuExample> {
-  final MenuController controller = MenuController();
-  String _selected = '';
+enum Animal {
+  cat('Cat', leading: Text('🦁')),
+  kitten('Kitten', leading: Text('🐱')),
+  felisCatus('Felis catus', leading: Text('🐈')),
+  dog('Dog', leading: Text('🐕'));
 
-  void _handlePressed(String value) {
-    setState(() {
-      _selected = value;
-    });
-    controller.close();
+  const Animal(this.label, {this.leading});
+  final String label;
+  final Widget? leading;
+}
+
+class RawMenuAnchorExample extends StatefulWidget {
+  const RawMenuAnchorExample({super.key});
+
+  @override
+  State<RawMenuAnchorExample> createState() => _RawMenuAnchorExampleState();
+}
+
+class _RawMenuAnchorExampleState extends State<RawMenuAnchorExample> {
+  final FocusNode focusNode = FocusNode();
+  final MenuController controller = MenuController();
+  Animal? _selectedAnimal;
+
+  @override
+  void dispose() {
+    focusNode.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
+    final ThemeData theme = Theme.of(context);
+    return UnconstrainedBox(
+      clipBehavior: Clip.hardEdge,
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Text('Selected: $_selected', style: Theme.of(context).textTheme.bodyMedium),
-          RawMenuAnchor(
+          Text('Favorite Animal:', style: theme.textTheme.titleMedium),
+          const SizedBox(width: 8),
+          CustomMenu(
             controller: controller,
-            padding: const EdgeInsets.symmetric(vertical: 5),
-            alignmentOffset: const Offset(0, 6),
-            menuPanel: RawMenuPanel(
-              decoration: RawMenuPanel.lightSurfaceDecoration,
-              constraints: const BoxConstraints(minWidth: 120),
-              children: <Widget>[
-                MenuItemButton(
-                  onPressed: () {
-                    _handlePressed('Cut');
-                  },
-                  child: const Text('Cut'),
-                ),
-                MenuItemButton(
-                  onPressed: () {
-                    _handlePressed('Copy');
-                  },
-                  child: const Text('Copy'),
-                ),
-                MenuItemButton(
-                  onPressed: () {
-                    _handlePressed('Paste');
-                  },
-                  child: const Text('Paste'),
-                ),
-              ],
+            focusNode: focusNode,
+            anchor: FilledButton(
+              focusNode: focusNode,
+              style: FilledButton.styleFrom(fixedSize: const Size(172, 36)),
+              onPressed: () {
+                if (controller.isOpen) {
+                  controller.close();
+                } else {
+                  controller.open();
+                }
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Expanded(flex: 3, child: Text(_selectedAnimal?.label ?? 'Select One')),
+                  const Flexible(child: Icon(Icons.arrow_drop_down, size: 16)),
+                ],
+              ),
             ),
-            builder: (BuildContext context, MenuController controller, Widget? child) {
-              return TextButton(
-                onPressed: () {
-                  if (controller.isOpen) {
+            children: <Widget>[
+              for (final Animal animal in Animal.values)
+                MenuItemButton(
+                  autofocus: _selectedAnimal == animal,
+                  onPressed: () {
+                    setState(() {
+                      _selectedAnimal = animal;
+                    });
                     controller.close();
-                  } else {
-                    controller.open();
-                  }
-                },
-                child: const Text('Edit'),
-              );
-            },
+                  },
+                  leadingIcon: SizedBox(width: 24, child: Center(child: animal.leading)),
+                  trailingIcon:
+                      _selectedAnimal == animal ? const Icon(Icons.check, size: 20) : null,
+                  child: Text(animal.label),
+                ),
+            ],
           ),
         ],
       ),
@@ -80,28 +110,90 @@ class _SimpleMenuExampleState extends State<SimpleMenuExample> {
   }
 }
 
-class SimpleMenuApp extends StatelessWidget {
-  const SimpleMenuApp({super.key});
+class CustomMenu extends StatelessWidget {
+  const CustomMenu({
+    super.key,
+    required this.children,
+    required this.anchor,
+    required this.controller,
+    required this.focusNode,
+  });
+
+  final List<Widget> children;
+  final Widget anchor;
+  final MenuController controller;
+  final FocusNode focusNode;
+
+  static const Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
+    SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
+    SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return RawMenuAnchor(
+      controller: controller,
+      childFocusNode: focusNode,
+      overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
+        return Positioned(
+          top: info.anchorRect.bottom + 4,
+          left: info.anchorRect.left,
+          // The overlay will treated as a dialog. SemanticsProperties.label can
+          // be set to a localized string to describe the dialog.
+          child: Semantics.fromProperties(
+            explicitChildNodes: true,
+            properties: const SemanticsProperties(scopesRoute: true),
+            child: TapRegion(
+              groupId: info.tapRegionGroupId,
+              onTapOutside: (PointerDownEvent event) {
+                MenuController.maybeOf(context)?.close();
+              },
+              child: FocusScope(
+                child: IntrinsicWidth(
+                  child: Container(
+                    clipBehavior: Clip.antiAlias,
+                    constraints: const BoxConstraints(minWidth: 168),
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(6),
+                      boxShadow: kElevationToShadow[4],
+                    ),
+                    child: Shortcuts(shortcuts: _shortcuts, child: Column(children: children)),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      child: anchor,
+    );
+  }
+}
+
+class RawMenuAnchorApp extends StatelessWidget {
+  const RawMenuAnchorApp({super.key});
 
   static const ButtonStyle menuButtonStyle = ButtonStyle(
-    splashFactory: InkSparkle.splashFactory,
+    overlayColor: WidgetStatePropertyAll<Color>(Color.fromARGB(55, 139, 195, 255)),
     iconSize: WidgetStatePropertyAll<double>(17),
-    overlayColor: WidgetStatePropertyAll<Color>(Color(0x0D1A1A1A)),
     padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 12)),
-    textStyle: WidgetStatePropertyAll<TextStyle>(TextStyle(fontSize: 14)),
-    visualDensity: VisualDensity(
-      horizontal: VisualDensity.minimumDensity,
-      vertical: VisualDensity.minimumDensity,
-    ),
   );
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.from(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          dynamicSchemeVariant: DynamicSchemeVariant.vibrant,
+        ),
       ).copyWith(menuButtonTheme: const MenuButtonThemeData(style: menuButtonStyle)),
-      home: const SimpleMenuExample(),
+      home: const Scaffold(body: Center(child: RawMenuAnchorExample())),
     );
   }
 }

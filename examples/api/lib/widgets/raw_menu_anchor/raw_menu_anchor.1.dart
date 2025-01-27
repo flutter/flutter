@@ -2,217 +2,171 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'
+    show
+        ButtonStyle,
+        ColorScheme,
+        Colors,
+        Icons,
+        InkSparkle,
+        MaterialApp,
+        MenuButtonThemeData,
+        MenuItemButton,
+        Scaffold,
+        Theme,
+        ThemeData,
+        VisualDensity,
+        kElevationToShadow;
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for a [RawMenuAnchor] that shows a context menu.
-/// The menu can be opened by right-clicking.
-void main() => runApp(const ContextMenuApp());
+/// Flutter code sample for a [RawMenuAnchor.node] that demonstrates
+/// how to create a menu bar for a document editor.
+// void main() => runApp(const MenuNodeApp());
 
-class ContextMenuExample extends StatefulWidget {
-  const ContextMenuExample({super.key});
-
-  @override
-  State<ContextMenuExample> createState() => _ContextMenuExampleState();
+class MenuItem {
+  const MenuItem(this.label, {this.leading, this.children});
+  final String label;
+  final Widget? leading;
+  final List<MenuItem>? children;
 }
 
-class _ContextMenuExampleState extends State<ContextMenuExample> {
-  final MenuController controller = MenuController();
-  bool _menuWasEnabled = false;
-  String _selected = '';
+const List<MenuItem> menuItems = <MenuItem>[
+  MenuItem(
+    'File',
+    children: <MenuItem>[
+      MenuItem('New', leading: Icon(Icons.edit_document)),
+      MenuItem('Open', leading: Icon(Icons.folder)),
+      MenuItem('Print', leading: Icon(Icons.print)),
+      MenuItem('Share', leading: Icon(Icons.share)),
+    ],
+  ),
+  MenuItem(
+    'Edit',
+    children: <MenuItem>[
+      MenuItem('Undo', leading: Icon(Icons.undo)),
+      MenuItem('Redo', leading: Icon(Icons.redo)),
+      MenuItem('Cut', leading: Icon(Icons.cut)),
+      MenuItem('Copy', leading: Icon(Icons.copy)),
+      MenuItem('Paste', leading: Icon(Icons.paste)),
+    ],
+  ),
+  MenuItem(
+    'View',
+    children: <MenuItem>[
+      MenuItem('Zoom In', leading: Icon(Icons.zoom_in)),
+      MenuItem('Zoom Out', leading: Icon(Icons.zoom_out)),
+      MenuItem('Fit', leading: Icon(Icons.fullscreen)),
+    ],
+  ),
+  MenuItem(
+    'Tools',
+    children: <MenuItem>[
+      MenuItem('Spelling', leading: Icon(Icons.spellcheck)),
+      MenuItem('Grammar', leading: Icon(Icons.text_format)),
+      MenuItem('Thesaurus', leading: Icon(Icons.book_outlined)),
+      MenuItem('Dictionary', leading: Icon(Icons.book)),
+    ],
+  ),
+];
+
+class RawMenuAnchorGroupExample extends StatefulWidget {
+  const RawMenuAnchorGroupExample({super.key});
 
   @override
-  void initState() {
-    super.initState();
-    _disablePlatformContextMenu();
-  }
+  State<RawMenuAnchorGroupExample> createState() => _RawMenuAnchorGroupExampleState();
+}
+
+class _RawMenuAnchorGroupExampleState extends State<RawMenuAnchorGroupExample> {
+  final MenuController controller = MenuController();
+  MenuItem? _selected;
+  List<FocusNode> focusNodes = List<FocusNode>.generate(
+    menuItems.length,
+    (int index) => FocusNode(),
+  );
 
   @override
   void dispose() {
-    _enablePlatformContextMenu();
+    for (final FocusNode focusNode in focusNodes) {
+      focusNode.dispose();
+    }
     super.dispose();
   }
 
-  void _enablePlatformContextMenu() {
-    if (!kIsWeb) {
-      // Does nothing on non-web platforms.
-      return;
-    }
-    if (_menuWasEnabled && !BrowserContextMenu.enabled) {
-      BrowserContextMenu.enableContextMenu();
-    }
-  }
-
-  Future<void> _disablePlatformContextMenu() async {
-    if (!kIsWeb) {
-      // Does nothing on non-web platforms.
-      return;
-    }
-    _menuWasEnabled = BrowserContextMenu.enabled;
-    if (_menuWasEnabled) {
-      await BrowserContextMenu.disableContextMenu();
-    }
-  }
-
-  void _handlePressed(String value) {
-    setState(() {
-      _selected = value;
-    });
-    controller.close();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return RawMenuAnchor(
-      controller: controller,
-      alignmentOffset: const Offset(0, 6),
-      menuPanel: RawMenuPanel(
-        decoration: RawMenuPanel.lightSurfaceDecoration,
-        constraints: const BoxConstraints(minWidth: 180),
-        padding: const EdgeInsets.symmetric(vertical: 5),
+    final ThemeData theme = Theme.of(context);
+    final TextStyle titleStyle = theme.textTheme.titleMedium!;
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          MenuItemButton(
-            autofocus: true,
-            onPressed: () {
-              _handlePressed('Undo');
-            },
-            leadingIcon: const Icon(Icons.undo),
-            child: const Text('Undo'),
-          ),
-          MenuItemButton(
-            onPressed: () {
-              _handlePressed('Redo');
-            },
-            leadingIcon: const Icon(Icons.redo),
-            child: const Text('Redo'),
-          ),
-          const Divider(thickness: 0.0, indent: 12, endIndent: 12),
-          MenuItemButton(
-            onPressed: () {
-              _handlePressed('Cut');
-            },
-            leadingIcon: const Icon(Icons.cut),
-            child: const Text('Cut'),
-          ),
-          MenuItemButton(
-            onPressed: () {
-              _handlePressed('Copy');
-            },
-            leadingIcon: const Icon(Icons.content_copy),
-            child: const Text('Copy'),
-          ),
-          MenuItemButton(
-            onPressed: () {
-              _handlePressed('Paste');
-            },
-            leadingIcon: const Icon(Icons.content_paste),
-            child: const Text('Paste'),
-          ),
-          const Divider(thickness: 0.0, indent: 12, endIndent: 12),
-          RawMenuAnchor(
-            padding: const EdgeInsetsDirectional.symmetric(vertical: 5),
-            menuPanel: RawMenuPanel(
-              decoration: RawMenuPanel.lightSurfaceDecoration,
-              padding: const EdgeInsetsDirectional.symmetric(vertical: 5),
-              constraints: const BoxConstraints(minWidth: 180),
-              children: <Widget>[
-                MenuItemButton(
-                  onPressed: () {
-                    _handlePressed('Bold');
-                  },
-                  leadingIcon: const Icon(Icons.format_bold),
-                  child: const Text('Bold'),
-                ),
-                MenuItemButton(
-                  onPressed: () {
-                    _handlePressed('Italic');
-                  },
-                  leadingIcon: const Icon(Icons.format_italic),
-                  child: const Text('Italic'),
-                ),
-                MenuItemButton(
-                  onPressed: () {
-                    _handlePressed('Underline');
-                  },
-                  leadingIcon: const Icon(Icons.format_underline),
-                  child: const Text('Underline'),
-                ),
-              ],
-            ),
-            builder: (BuildContext context, MenuController controller, Widget? child) {
-              return MergeSemantics(
-                child: Semantics(
-                  expanded: controller.isOpen,
-                  child: ColoredBox(
-                    color: controller.isOpen ? const Color(0x0D1A1A1A) : Colors.transparent,
-                    child: MenuItemButton(
-                      onPressed: () {
-                        if (controller.isOpen) {
-                          controller.close();
-                        } else {
-                          controller.open();
-                        }
-                      },
-                      leadingIcon: const Icon(Icons.text_format),
-                      trailingIcon: const Icon(Icons.keyboard_arrow_right),
-                      child: const Text('Format'),
+          if (_selected != null) Text('Selected: ${_selected!.label}', style: titleStyle),
+          UnconstrainedBox(
+            clipBehavior: Clip.hardEdge,
+            child: RawMenuAnchorGroup(
+              controller: controller,
+              child: Row(
+                children: <Widget>[
+                  for (int i = 0; i < menuItems.length; i++)
+                    CustomSubmenu(
+                      focusNode: focusNodes[i],
+                      anchor: Builder(
+                        builder: (BuildContext context) {
+                          final MenuController submenuController = MenuController.maybeOf(context)!;
+                          final MenuItem item = menuItems[i];
+                          final ButtonStyle openBackground = MenuItemButton.styleFrom(
+                            backgroundColor: const Color(0x0D1A1A1A),
+                          );
+                          return MergeSemantics(
+                            child: Semantics(
+                              expanded: controller.isOpen,
+                              child: MenuItemButton(
+                                style: submenuController.isOpen ? openBackground : null,
+                                onHover: (bool value) {
+                                  // If any submenu in the menu bar is already open, other
+                                  // submenus should open on hover. Otherwise, blur the menu item
+                                  // button if the menu button is no longer hovered.
+                                  if (controller.isOpen) {
+                                    if (value) {
+                                      submenuController.open();
+                                    }
+                                  } else if (!value) {
+                                    Focus.of(context).unfocus();
+                                  }
+                                },
+                                onPressed: () {
+                                  if (submenuController.isOpen) {
+                                    submenuController.close();
+                                  } else {
+                                    submenuController.open();
+                                  }
+                                },
+                                leadingIcon: item.leading,
+                                child: Text(item.label),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      children: <Widget>[
+                        for (final MenuItem child in menuItems[i].children ?? <MenuItem>[])
+                          MenuItemButton(
+                            onPressed: () {
+                              setState(() {
+                                _selected = child;
+                              });
+
+                              // Close the menu bar after a selection.
+                              controller.close();
+                            },
+                            leadingIcon: child.leading,
+                            child: Text(child.label),
+                          ),
+                      ],
                     ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      child: NestedWidget(message: _selected.isEmpty ? 'Right-click me!' : 'Selected: $_selected'),
-    );
-  }
-}
-
-class NestedWidget extends StatelessWidget {
-  const NestedWidget({super.key, required this.message});
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    // Long-press on mobile, secondary-click (right click) on desktop.
-    GestureLongPressStartCallback? onLongPressStart;
-    GestureTapDownCallback? onSecondaryTapDown;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        onLongPressStart = (LongPressStartDetails details) {
-          MenuController.maybeOf(context)?.open(position: details.localPosition);
-          HapticFeedback.heavyImpact();
-        };
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        onSecondaryTapDown = (TapDownDetails details) {
-          MenuController.maybeOf(context)?.open(position: details.localPosition);
-        };
-    }
-    return GestureDetector(
-      onSecondaryTapDown: onSecondaryTapDown,
-      onLongPressStart: onLongPressStart,
-      onTapDown: (TapDownDetails details) {
-        MenuController.maybeOf(context)?.close();
-      },
-      child: Stack(
-        children: <Widget>[
-          Positioned.fill(
-            child: ColoredBox(
-              color: Theme.of(context).colorScheme.secondaryContainer,
-              child: Center(
-                child: Text(
-                  message,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
-                    fontSize: 24,
-                  ),
-                ),
+                ],
               ),
             ),
           ),
@@ -222,13 +176,83 @@ class NestedWidget extends StatelessWidget {
   }
 }
 
-class ContextMenuApp extends StatelessWidget {
-  const ContextMenuApp({super.key});
+class CustomSubmenu extends StatelessWidget {
+  const CustomSubmenu({
+    super.key,
+    required this.children,
+    required this.anchor,
+    required this.focusNode,
+  });
+
+  final List<Widget> children;
+  final Widget anchor;
+  final FocusNode focusNode;
+
+  static const Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
+    SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
+    SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return RawMenuAnchor(
+      childFocusNode: focusNode,
+      overlayBuilder: (BuildContext context, RawMenuOverlayInfo info) {
+        return Positioned(
+          top: info.anchorRect.bottom + 4,
+          left: info.anchorRect.left,
+          // The overlay will treated as a dialog. SemanticsProperties.label can
+          // be set to a localized string to describe the dialog.
+          child: Semantics.fromProperties(
+            explicitChildNodes: true,
+            properties: const SemanticsProperties(scopesRoute: true),
+            child: TapRegion(
+              groupId: info.tapRegionGroupId,
+              onTapOutside: (PointerDownEvent event) {
+                MenuController.maybeOf(context)?.close();
+              },
+              child: FocusScope(
+                child: IntrinsicWidth(
+                  child: Container(
+                    clipBehavior: Clip.antiAlias,
+                    constraints: const BoxConstraints(minWidth: 160),
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(6),
+                      boxShadow: kElevationToShadow[4],
+                    ),
+                    child: Shortcuts(
+                      shortcuts: _shortcuts,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: children,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      child: anchor,
+    );
+  }
+}
+
+class RawMenuAnchorGroupApp extends StatelessWidget {
+  const RawMenuAnchorGroupApp({super.key});
 
   static const ButtonStyle menuButtonStyle = ButtonStyle(
     splashFactory: InkSparkle.splashFactory,
     iconSize: WidgetStatePropertyAll<double>(17),
+    overlayColor: WidgetStatePropertyAll<Color>(Color(0x0D1A1A1A)),
     padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 12)),
+    textStyle: WidgetStatePropertyAll<TextStyle>(TextStyle(fontSize: 14)),
     visualDensity: VisualDensity(
       horizontal: VisualDensity.minimumDensity,
       vertical: VisualDensity.minimumDensity,
@@ -241,7 +265,7 @@ class ContextMenuApp extends StatelessWidget {
       theme: ThemeData.from(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ).copyWith(menuButtonTheme: const MenuButtonThemeData(style: menuButtonStyle)),
-      home: const Scaffold(body: ContextMenuExample()),
+      home: const Scaffold(body: RawMenuAnchorGroupExample()),
     );
   }
 }
