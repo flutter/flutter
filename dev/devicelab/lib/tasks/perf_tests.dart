@@ -288,9 +288,14 @@ TaskFunction createImitationGameSwiftUITest() {
 }
 
 TaskFunction createImitationGameFlutterTest() {
-  flutter('create', options: <String>['--platforms=ios',
-    '${flutterDirectory.path}/dev/benchmarks/imitation_game_flutter',
-    '--no-overwrite']);
+  flutter(
+      'create',
+      options: <String>[
+        '--platforms=ios',
+        '${flutterDirectory.path}/dev/benchmarks/imitation_game_flutter',
+        '--no-overwrite'
+      ]
+  );
   return CompileTest(
     '${flutterDirectory.path}/dev/benchmarks/imitation_game_flutter',
     reportPackageContentSizes: true,

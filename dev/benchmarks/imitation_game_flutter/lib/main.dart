@@ -32,10 +32,10 @@ class InfiniteScrollListState extends State<InfiniteScrollList> {
   final int itemsPerPage = 20;
   final List<String> staticData = [
     "Hello Flutter",
-    "Static Item B",
-    "Static Item C",
-    "Static Item D",
-    "Static Item E"
+    "Hello Flutter",
+    "Hello Flutter",
+    "Hello Flutter",
+    "Hello Flutter",
   ];
 
   @override
@@ -72,9 +72,7 @@ class InfiniteScrollListState extends State<InfiniteScrollList> {
           child: ListView.builder(
             itemCount: items.length,
             itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(items[index]),
-              );
+              return ListTile(title: Text(items[index]));
             },
           ),
         ),
