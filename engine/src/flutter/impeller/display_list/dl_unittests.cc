@@ -1556,7 +1556,7 @@ TEST_P(DisplayListTest, DrawMaskBlursThatMightUseSaveLayers) {
                        normal_if_paint);
     }
   }
-  builder.Restore();
+  x builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
