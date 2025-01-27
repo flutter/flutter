@@ -111,6 +111,9 @@ final int _kUnblockedUserActions =
 typedef DebugSemanticsRoleCheck = FlutterError? Function(SemanticsNode node);
 
 /// A static class to conduct semantics role checks.
+///
+/// When adding a new [SemanticsRole], one must also add a corresponding check
+/// to [kChecks].
 @visibleForTesting
 class DebugSemanticsRoleChecks {
   DebugSemanticsRoleChecks._();
