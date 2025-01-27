@@ -58,7 +58,7 @@ class Divider extends StatelessWidget {
   ///
   /// The [height], [thickness], [indent], and [endIndent] must be null or
   /// non-negative.
-  const Divider({super.key, this.height, this.thickness, this.indent, this.endIndent, this.color})
+  const Divider({super.key, this.height, this.thickness, this.indent, this.endIndent, this.color, this.borderRadius})
     : assert(height == null || height >= 0.0),
       assert(thickness == null || thickness >= 0.0),
       assert(indent == null || indent >= 0.0),
@@ -108,6 +108,13 @@ class Divider extends StatelessWidget {
   /// ```
   /// {@end-tool}
   final Color? color;
+
+  /// The border radius of the divider.
+  ///
+  /// This rounds the corners of the divider's line. If null, no rounding
+  /// is applied.
+  final BorderRadius? borderRadius;
+
 
   /// Computes the [BorderSide] that represents a divider.
   ///
@@ -177,6 +184,7 @@ class Divider extends StatelessWidget {
           height: thickness,
           margin: EdgeInsetsDirectional.only(start: indent, end: endIndent),
           decoration: BoxDecoration(
+            borderRadius: borderRadius,
             border: Border(bottom: createBorderSide(context, color: color, width: thickness)),
           ),
         ),
@@ -227,6 +235,7 @@ class VerticalDivider extends StatelessWidget {
     this.indent,
     this.endIndent,
     this.color,
+    this.borderRadius
   }) : assert(width == null || width >= 0.0),
        assert(thickness == null || thickness >= 0.0),
        assert(indent == null || indent >= 0.0),
@@ -277,6 +286,13 @@ class VerticalDivider extends StatelessWidget {
   /// {@end-tool}
   final Color? color;
 
+  /// The border radius of the divider.
+  ///
+  /// This rounds the corners of the divider's line. If null, no rounding
+  /// is applied.
+  final BorderRadius? borderRadius;
+
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -295,6 +311,7 @@ class VerticalDivider extends StatelessWidget {
           width: thickness,
           margin: EdgeInsetsDirectional.only(top: indent, bottom: endIndent),
           decoration: BoxDecoration(
+            borderRadius: borderRadius,
             border: Border(left: Divider.createBorderSide(context, color: color, width: thickness)),
           ),
         ),
