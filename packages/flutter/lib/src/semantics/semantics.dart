@@ -101,27 +101,43 @@ final int _kUnblockedUserActions =
     SemanticsAction.didGainAccessibilityFocus.index |
     SemanticsAction.didLoseAccessibilityFocus.index;
 
-typedef DebugSemanticsRoleCheck = bool Function(SemanticsData node);
+/// Function signature for checks in [DebugSemanticsRoleChecks.kChecks].
+///
+/// The check is run against any `node` that is sent to the platform.
+typedef DebugSemanticsRoleCheck = FlutterError? Function(SemanticsData node);
 
+/// A static class to conduct semantics role checks.
 @visibleForTesting
 class DebugSemanticsRoleChecks {
   DebugSemanticsRoleChecks._();
 
+  /// A map to map each [SemanticsRole] to its check.
   static const Map<SemanticsRole, DebugSemanticsRoleCheck> kChecks =
-      <SemanticsRole, DebugSemanticsRoleCheck>{SemanticsRole.tab: _semanticsTab};
+      <SemanticsRole, DebugSemanticsRoleCheck>{
+        SemanticsRole.none: _semanticsNone,
+        SemanticsRole.tab: _semanticsTab,
+      };
 
-  static bool _semanticsTab(SemanticsData node) {
+  static FlutterError? _checkSemanticsData(SemanticsData node) => kChecks[node.role]!(node);
+
+  static FlutterError? _semanticsNone(SemanticsData node) => null;
+
+  static FlutterError? _semanticsTab(SemanticsData node) {
     if (!node.hasFlag(SemanticsFlag.hasEnabledState) ||
         !node.hasFlag(SemanticsFlag.hasSelectedState)) {
-      return false;
+      return FlutterError('A tab needs enabled and selected states');
     }
 
     if (!node.hasFlag(SemanticsFlag.isEnabled)) {
       // disabled tab is not interactable.
-      return true;
+      return null;
     }
 
-    return node.hasFlag(SemanticsFlag.isSelected) || node.hasAction(SemanticsAction.tap);
+    if (node.hasFlag(SemanticsFlag.isSelected) || node.hasAction(SemanticsAction.tap)) {
+      return null;
+    } else {
+      return FlutterError('A enabled tab must have a tap action');
+    }
   }
 }
 
@@ -3027,6 +3043,13 @@ class SemanticsNode with DiagnosticableTreeMixin {
   void _addToUpdate(SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
     assert(_dirty);
     final SemanticsData data = getSemanticsData();
+    assert(() {
+      final FlutterError? error = DebugSemanticsRoleChecks._checkSemanticsData(data);
+      if (error != null) {
+        throw error;
+      }
+      return true;
+    }());
     final Int32List childrenInTraversalOrder;
     final Int32List childrenInHitTestOrder;
     if (!hasChildren || mergeAllDescendantsIntoThisNode) {
