@@ -293,8 +293,8 @@ TaskFunction createImitationGameFlutterTest() {
     options: <String>[
       '--platforms=ios',
       '${flutterDirectory.path}/dev/benchmarks/imitation_game_flutter',
-      '--no-overwrite'
-    ]
+      '--no-overwrite',
+    ],
   );
   return CompileTest(
     '${flutterDirectory.path}/dev/benchmarks/imitation_game_flutter',
