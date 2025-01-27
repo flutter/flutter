@@ -76,6 +76,7 @@ void main() {
     final UniqueKey innerTable = UniqueKey();
     await tester.pumpWidget(
       Directionality(
+        textDirection: TextDirection.ltr,
         child: Table(
           key: outerTable,
           children: <TableRow>[
