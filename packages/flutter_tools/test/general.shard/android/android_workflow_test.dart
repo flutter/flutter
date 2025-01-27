@@ -520,8 +520,6 @@ Review licenses that have not been accepted (y/N)?
       userMessages: UserMessages(),
     );
 
-    final String errorMessage = UserMessages().androidMissingCmdTools;
-
     final ValidationResult validationResult = await androidValidator.validate();
     expect(validationResult.type, ValidationType.missing);
 
@@ -531,7 +529,7 @@ Review licenses that have not been accepted (y/N)?
 
     final ValidationMessage cmdlineMessage = validationResult.messages.last;
     expect(cmdlineMessage.type, ValidationMessageType.error);
-    expect(cmdlineMessage.message, errorMessage);
+    expect(cmdlineMessage.message, startsWith('cmdline-tools component is missing\n'));
   });
 
   testUsingContext('detects minimum required java version', () async {
