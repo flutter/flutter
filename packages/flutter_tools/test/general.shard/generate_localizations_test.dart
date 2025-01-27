@@ -12,8 +12,9 @@ import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 import 'package:flutter_tools/src/localizations/localizations_utils.dart';
 import 'package:yaml/yaml.dart';
 
-import '../src/common.dart';
 import '../src/fake_process_manager.dart';
+import '../src/common.dart';
+import '../src/context.dart';
 
 const String defaultTemplateArbFileName = 'app_en.arb';
 const String defaultOutputFileString = 'output-localization-file.dart';
@@ -834,7 +835,7 @@ class FooEn extends Foo {
 ''');
     });
 
-    testWithoutContext('throws exception on missing flutter: generate: true flag', () async {
+    testUsingContext('throws exception on missing flutter: generate: true flag', () async {
       _standardFlutterDirectoryL10nSetup(fs);
 
       // Missing flutter: generate: true should throw exception.
@@ -875,7 +876,7 @@ flutter:
       );
     });
 
-    testWithoutContext('uses the same line terminator as pubspec.yaml', () async {
+    testUsingContext('uses the same line terminator as pubspec.yaml', () async {
       _standardFlutterDirectoryL10nSetup(fs);
 
       fs.file('pubspec.yaml')
