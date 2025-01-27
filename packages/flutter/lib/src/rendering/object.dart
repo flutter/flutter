@@ -5016,20 +5016,20 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           siblingMergeGroups.addAll(childSemantics.siblingMergeGroups);
         }
       }
-    }
 
-    final Set<SemanticsTag>? tags = parentData?.tagsForChildren;
-    if (tags != null) {
-      assert(tags.isNotEmpty);
-      configProvider.updateConfig((SemanticsConfiguration config) {
-        tags.forEach(config.addTagForChildren);
-      });
-    }
+      final Set<SemanticsTag>? tags = parentData?.tagsForChildren;
+      if (tags != null) {
+        assert(tags.isNotEmpty);
+        configProvider.updateConfig((SemanticsConfiguration config) {
+          tags.forEach(config.addTagForChildren);
+        });
+      }
 
-    if (blocksUserAction != configProvider.effective.isBlockingUserActions) {
-      configProvider.updateConfig((SemanticsConfiguration config) {
-        config.isBlockingUserActions = blocksUserAction;
-      });
+      if (blocksUserAction != configProvider.effective.isBlockingUserActions) {
+        configProvider.updateConfig((SemanticsConfiguration config) {
+          config.isBlockingUserActions = blocksUserAction;
+        });
+      }
     }
   }
 
@@ -5178,6 +5178,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       return;
     }
     // Parent data changes may result in node formation changes.
+    geometry = null;
     markNeedsBuild();
     parentData = newParentData;
     updateChildren();
