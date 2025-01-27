@@ -104,6 +104,10 @@ final int _kUnblockedUserActions =
 /// Function signature for checks in [DebugSemanticsRoleChecks.kChecks].
 ///
 /// The check is run against any `node` that is sent to the platform.
+///
+/// To access the flags and properties, one should call the
+/// [SemanticsNode.getSemanticsData].
+@visibleForTesting
 typedef DebugSemanticsRoleCheck = FlutterError? Function(SemanticsNode node);
 
 /// A static class to conduct semantics role checks.
