@@ -507,7 +507,7 @@ class DropdownMenu<T> extends StatefulWidget {
   /// in the [DropdownMenu].
   ///
   /// If the provided value is 1, then the text will not wrap, but will scroll
-  /// horizontally instead. Defaults to 1. 
+  /// horizontally instead. Defaults to 1.
   ///
   /// If this is null, there is no limit to the number of lines, and the text
   /// container will start with enough vertical space for one line and
