@@ -72,39 +72,33 @@ void main() {
   });
 
   testWidgets('Table widget calculate depth', (WidgetTester tester) async {
-    Future<void> run(TextDirection textDirection) async {
-      final UniqueKey outerTable = UniqueKey();
-      final UniqueKey innerTable = UniqueKey();
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: textDirection,
-          child: Table(
-            key: outerTable,
-            children: <TableRow>[
-              TableRow(
-                children: <Widget>[
-                  Table(
-                    key: innerTable,
-                    children: const <TableRow>[
-                      TableRow(children: <Widget>[Text('AAAAAA'), Text('B'), Text('C')]),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
+    final UniqueKey outerTable = UniqueKey();
+    final UniqueKey innerTable = UniqueKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: textDirection,
+        child: Table(
+          key: outerTable,
+          children: <TableRow>[
+            TableRow(
+              children: <Widget>[
+                Table(
+                  key: innerTable,
+                  children: const <TableRow>[
+                    TableRow(children: <Widget>[Text('AAAAAA'), Text('B'), Text('C')]),
+                  ],
+                ),
+              ],
+            ),
+          ],
         ),
-      );
-      final RenderObject outerTableRenderObject = tester.renderObject(find.byKey(outerTable));
-      final RenderObject innerTableRenderObject = tester.renderObject(find.byKey(innerTable));
-      final RenderObject textRenderObject = tester.renderObject(find.text('AAAAAA'));
-      expect(outerTableRenderObject.depth + 1, innerTableRenderObject.depth);
-      expect(innerTableRenderObject.depth + 1, textRenderObject.depth);
-    }
-
-    await run(TextDirection.ltr);
-    await tester.pumpWidget(Container());
-    await run(TextDirection.rtl);
+      ),
+    );
+    final RenderObject outerTableRenderObject = tester.renderObject(find.byKey(outerTable));
+    final RenderObject innerTableRenderObject = tester.renderObject(find.byKey(innerTable));
+    final RenderObject textRenderObject = tester.renderObject(find.text('AAAAAA'));
+    expect(outerTableRenderObject.depth + 1, innerTableRenderObject.depth);
+    expect(innerTableRenderObject.depth + 1, textRenderObject.depth);
   });
 
   testWidgets('Table widget can be detached and re-attached', (WidgetTester tester) async {
