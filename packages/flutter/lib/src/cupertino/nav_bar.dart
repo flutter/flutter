@@ -1110,18 +1110,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   void initState() {
     super.initState();
     keys = _NavigationBarStaticComponentsKeys();
-    _animationController = AnimationController(vsync: this, duration: _kNavBarSearchDuration);
-    final Tween<double> persistentHeightTween = Tween<double>(
-      begin: _kNavBarPersistentHeight,
-      end: 0.0,
-    );
-    persistentHeightAnimation = persistentHeightTween.animate(_animationController)
-      ..addStatusListener(_handleSearchFieldStatusChanged);
-    final Tween<double> largeTitleHeightTween = Tween<double>(
-      begin: _kNavBarLargeTitleHeightExtension,
-      end: 0.0,
-    );
-    largeTitleHeightAnimation = largeTitleHeightTween.animate(_animationController);
+    _setupSearchableAnimation();
     if (widget._searchable) {
       assert(widget.searchField != null);
       preferredSizeSearchField = _NavigationBarSearchField(searchField: widget.searchField!);
@@ -1145,13 +1134,28 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     super.dispose();
   }
 
-  double _bottomHeight() {
+  double get _bottomHeight {
     if (widget._searchable) {
       return preferredSizeSearchField!.preferredSize.height;
     } else if (widget.bottom != null) {
       return widget.bottom!.preferredSize.height;
     }
     return 0.0;
+  }
+
+  void _setupSearchableAnimation() {
+    _animationController = AnimationController(vsync: this, duration: _kNavBarSearchDuration);
+    final Tween<double> persistentHeightTween = Tween<double>(
+      begin: _kNavBarPersistentHeight,
+      end: 0.0,
+    );
+    persistentHeightAnimation = persistentHeightTween.animate(_animationController)
+      ..addStatusListener(_handleSearchFieldStatusChanged);
+    final Tween<double> largeTitleHeightTween = Tween<double>(
+      begin: _kNavBarLargeTitleHeightExtension,
+      end: 0.0,
+    );
+    largeTitleHeightAnimation = largeTitleHeightTween.animate(_animationController);
   }
 
   void _handleScrollChange() {
@@ -1164,7 +1168,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     final bool canScrollBottom =
         (widget._searchable || widget.bottom != null) &&
         (widget.bottomMode == NavigationBarBottomMode.automatic || widget.bottomMode == null);
-    final double bottomScrollOffset = _bottomHeight();
+    final double bottomScrollOffset = _bottomHeight;
 
     // Snap the scroll view to a target determined by the navigation bar's
     // position.
@@ -1277,7 +1281,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                   searchIsActive
                       ? NavigationBarBottomMode.always
                       : widget.bottomMode ?? NavigationBarBottomMode.automatic,
-              bottomHeight: _bottomHeight(),
+              bottomHeight: _bottomHeight,
               controller: _animationController,
             ),
           );
