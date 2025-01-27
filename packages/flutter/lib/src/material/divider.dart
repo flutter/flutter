@@ -58,11 +58,18 @@ class Divider extends StatelessWidget {
   ///
   /// The [height], [thickness], [indent], and [endIndent] must be null or
   /// non-negative.
-  const Divider({super.key, this.height, this.thickness, this.indent, this.endIndent, this.color})
-    : assert(height == null || height >= 0.0),
-      assert(thickness == null || thickness >= 0.0),
-      assert(indent == null || indent >= 0.0),
-      assert(endIndent == null || endIndent >= 0.0);
+  const Divider({
+    super.key,
+    this.height,
+    this.thickness,
+    this.indent,
+    this.endIndent,
+    this.color,
+    this.radius,
+  }) : assert(height == null || height >= 0.0),
+       assert(thickness == null || thickness >= 0.0),
+       assert(indent == null || indent >= 0.0),
+       assert(endIndent == null || endIndent >= 0.0);
 
   /// The divider's height extent.
   ///
@@ -93,6 +100,11 @@ class Divider extends StatelessWidget {
   /// If this is null, then the [DividerThemeData.endIndent] is used. If that is
   /// also null, then this defaults to 0.0.
   final double? endIndent;
+
+  /// The amount of radius for the border of the divider
+  ///
+  /// if this is null, then the default radius of [BoxDecoration] will be used
+  final BorderRadiusGeometry? radius;
 
   /// The color to use when painting the line.
   ///
@@ -177,6 +189,7 @@ class Divider extends StatelessWidget {
           height: thickness,
           margin: EdgeInsetsDirectional.only(start: indent, end: endIndent),
           decoration: BoxDecoration(
+            borderRadius: radius,
             border: Border(bottom: createBorderSide(context, color: color, width: thickness)),
           ),
         ),
