@@ -257,19 +257,24 @@ bool OctantContains(const RoundSuperellipseParam::Octant& param,
   return p_circle.GetDistanceSquared(Point()) < circle_radius;
 }
 
-// Checks whether the given quadrant contains the given point if the point is
-// under the quadrant's jurisdiction.
+// Determine if p is inside the corner curve defined by the indicated corner
+// param.
+//
+// The coordinates of p should be within the same coordinate space with
+// `param.offset`.
 //
 // If `check_quadrant` is true, then this function first checks if the point is
-// governed by the given quadrant, and returns true if not. Otherwise this
-// method returns whether the point is contained in the rounded superellipse.
+// within the quadrant of given corner. If not, this function returns true,
+// otherwise this method continues to check whether the point is contained in
+// the rounded superellipse.
 //
 // If `check_quadrant` is false, then the first step above is skipped, and the
-// function flips the point to the target quadrant and checks containment.
-bool QuadrantContains(const RoundSuperellipseParam::Quadrant& param,
-                      const Point& in_point,
-                      bool check_quadrant = true) {
-  Point norm_point = (in_point - param.offset) / param.signed_scale;
+// function checks whether the absolute (relative to the center) coordinate of p
+// is contained in the rounded superellipse.
+bool CornerContains(const RoundSuperellipseParam::Quadrant& param,
+                    const Point& p,
+                    bool check_quadrant = true) {
+  Point norm_point = (p - param.offset) / param.signed_scale;
   if (check_quadrant) {
     if (norm_point.x < 0 || norm_point.y < 0) {
       return false;
@@ -321,12 +326,11 @@ RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
 
 bool RoundSuperellipseParam::Contains(const Point& point) const {
   if (all_corners_same) {
-    return QuadrantContains(top_right, point, /*check_quadrant=*/false);
+    return CornerContains(top_right, point, /*check_quadrant=*/false);
   }
-  return QuadrantContains(top_right, point) &&
-         QuadrantContains(bottom_right, point) &&
-         QuadrantContains(bottom_left, point) &&
-         QuadrantContains(top_left, point);
+  return CornerContains(top_right, point) &&
+         CornerContains(bottom_right, point) &&
+         CornerContains(bottom_left, point) && CornerContains(top_left, point);
 }
 
 }  // namespace impeller

@@ -870,6 +870,28 @@ TEST(RoundRectTest, NoCornerRoundRectContains) {
   EXPECT_FALSE(no_corners.Contains({50, 50.01}));
 }
 
+TEST(RoundRectTest, NoCornerContinuousRoundRectContains) {
+  Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
+  // RRect of bounds with no corners contains corners just barely
+  auto no_corners =
+      RoundRect::MakeRectXY(bounds, 0.0f, 0.0f, RoundRect::Style::kContinuous);
+
+  EXPECT_TRUE(no_corners.Contains({-50, -50}));
+  // Rectangles have half-in, half-out containment so we need
+  // to be careful about testing containment of right/bottom corners.
+  EXPECT_TRUE(no_corners.Contains({-50, 49.99}));
+  EXPECT_TRUE(no_corners.Contains({49.99, -50}));
+  EXPECT_TRUE(no_corners.Contains({49.99, 49.99}));
+  EXPECT_FALSE(no_corners.Contains({-50.01, -50}));
+  EXPECT_FALSE(no_corners.Contains({-50, -50.01}));
+  EXPECT_FALSE(no_corners.Contains({-50.01, 50}));
+  EXPECT_FALSE(no_corners.Contains({-50, 50.01}));
+  EXPECT_FALSE(no_corners.Contains({50.01, -50}));
+  EXPECT_FALSE(no_corners.Contains({50, -50.01}));
+  EXPECT_FALSE(no_corners.Contains({50.01, 50}));
+  EXPECT_FALSE(no_corners.Contains({50, 50.01}));
+}
+
 TEST(RoundRectTest, TinyCornerRoundRectContains) {
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
   // RRect of bounds with even the tiniest corners does not contain corners

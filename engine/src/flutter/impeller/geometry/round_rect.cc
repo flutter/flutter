@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 #include "flutter/impeller/geometry/round_rect.h"
+#include "flutter/impeller/geometry/round_superellipse_param.h"
 
 namespace impeller {
 
-RoundRect RoundRect::MakeRectRadii(const Rect& in_bounds,
-                                   const RoundingRadii& in_radii) {
+RoundRect RoundRect::MakeRectRadiiStyle(const Rect& in_bounds,
+                                        const RoundingRadii& in_radii,
+                                        Style style) {
   if (!in_bounds.IsFinite()) {
     return {};
   }
@@ -16,7 +18,7 @@ RoundRect RoundRect::MakeRectRadii(const Rect& in_bounds,
   // empty, which is expected. Pass along the bounds even if the radii is empty
   // as it would still have a valid location and/or 1-dimensional size which
   // might appear when stroked
-  return RoundRect(bounds, in_radii.Scaled(bounds));
+  return RoundRect(bounds, in_radii.Scaled(bounds), style);
 }
 
 // Determine if p is inside the elliptical corner curve defined by the
@@ -73,6 +75,10 @@ static constexpr Point kLowerRightDirection(1.0f, 1.0f);
 [[nodiscard]] bool RoundRect::Contains(const Point& p) const {
   if (!bounds_.Contains(p)) {
     return false;
+  }
+  if (style_ == Style::kContinuous) {
+    auto param = RoundSuperellipseParam::MakeBoundsRadii(bounds_, radii_);
+    return param.Contains(p);
   }
   if (!CornerContains(p, bounds_.GetLeftTop(), kUpperLeftDirection,
                       radii_.top_left) ||

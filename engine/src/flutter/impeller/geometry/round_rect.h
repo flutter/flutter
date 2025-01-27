@@ -13,44 +13,72 @@
 namespace impeller {
 
 struct RoundRect {
+  /// @brief An enum that specifies the shape of a rounded rectangle's corners.
+  enum class Style {
+    /// @brief Traditional quarter-circle rounded rectangle corners.
+    kCircular,
+
+    /// @brief Continuous curvature rounded rectangle corners.
+    ///
+    ///        This style has a smoother curvature transitions between the
+    ///        circular corner and the straight edges and is typically used in
+    ///        Apple design languages.
+    kContinuous,
+  };
+
   RoundRect() = default;
 
-  constexpr static RoundRect MakeRect(const Rect& rect) {
-    return MakeRectRadii(rect, RoundingRadii());
+  constexpr static RoundRect MakeRect(const Rect& rect,
+                                      Style style = Style::kCircular) {
+    return MakeRectRadiiStyle(rect, RoundingRadii(), style);
   }
 
-  constexpr static RoundRect MakeOval(const Rect& rect) {
-    return MakeRectRadii(rect, RoundingRadii::MakeRadii(rect.GetSize() * 0.5f));
+  constexpr static RoundRect MakeOval(const Rect& rect,
+                                      Style style = Style::kCircular) {
+    return MakeRectRadiiStyle(
+        rect, RoundingRadii::MakeRadii(rect.GetSize() * 0.5f), style);
   }
 
-  constexpr static RoundRect MakeRectRadius(const Rect& rect, Scalar radius) {
-    return MakeRectRadii(rect, RoundingRadii::MakeRadius(radius));
+  constexpr static RoundRect MakeRectRadius(const Rect& rect,
+                                            Scalar radius,
+                                            Style style = Style::kCircular) {
+    return MakeRectRadiiStyle(rect, RoundingRadii::MakeRadius(radius), style);
   }
 
   constexpr static RoundRect MakeRectXY(const Rect& rect,
                                         Scalar x_radius,
-                                        Scalar y_radius) {
-    return MakeRectRadii(rect,
-                         RoundingRadii::MakeRadii(Size(x_radius, y_radius)));
+                                        Scalar y_radius,
+                                        Style style = Style::kCircular) {
+    return MakeRectRadiiStyle(
+        rect, RoundingRadii::MakeRadii(Size(x_radius, y_radius)), style);
   }
 
-  constexpr static RoundRect MakeRectXY(const Rect& rect, Size corner_radii) {
-    return MakeRectRadii(rect, RoundingRadii::MakeRadii(corner_radii));
+  constexpr static RoundRect MakeRectXY(const Rect& rect,
+                                        Size corner_radii,
+                                        Style style = Style::kCircular) {
+    return MakeRectRadiiStyle(rect, RoundingRadii::MakeRadii(corner_radii),
+                              style);
   }
 
   constexpr static RoundRect MakeNinePatch(const Rect& rect,
                                            Scalar left,
                                            Scalar top,
                                            Scalar right,
-                                           Scalar bottom) {
-    return MakeRectRadii(
-        rect, RoundingRadii::MakeNinePatch(left, top, right, bottom));
+                                           Scalar bottom,
+                                           Style style = Style::kCircular) {
+    return MakeRectRadiiStyle(
+        rect, RoundingRadii::MakeNinePatch(left, top, right, bottom), style);
   }
 
-  static RoundRect MakeRectRadii(const Rect& rect, const RoundingRadii& radii);
+  constexpr static RoundRect MakeRectRadii(const Rect& rect,
+                                           const RoundingRadii& radii,
+                                           Style style = Style::kCircular) {
+    return MakeRectRadiiStyle(rect, radii, style);
+  }
 
   constexpr const Rect& GetBounds() const { return bounds_; }
   constexpr const RoundingRadii& GetRadii() const { return radii_; }
+  constexpr const Style& GetStyle() const { return style_; }
 
   [[nodiscard]] constexpr bool IsFinite() const {
     return bounds_.IsFinite() &&             //
@@ -88,7 +116,7 @@ struct RoundRect {
     // Just in case, use the factory rather than the internal constructor
     // as shifting the rectangle may increase/decrease its bit precision
     // so we should re-validate the radii to the newly located rectangle.
-    return MakeRectRadii(bounds_.Shift(dx, dy), radii_);
+    return MakeRectRadiiStyle(bounds_.Shift(dx, dy), radii_, style_);
   }
 
   /// @brief  Returns a round rectangle with expanded edges. Negative expansion
@@ -100,7 +128,8 @@ struct RoundRect {
     // Use the factory rather than the internal constructor as the changing
     // size of the rectangle requires that we re-validate the radii to the
     // newly sized rectangle.
-    return MakeRectRadii(bounds_.Expand(left, top, right, bottom), radii_);
+    return MakeRectRadiiStyle(bounds_.Expand(left, top, right, bottom), radii_,
+                              style_);
   }
 
   /// @brief  Returns a round rectangle with expanded edges. Negative expansion
@@ -110,7 +139,8 @@ struct RoundRect {
     // Use the factory rather than the internal constructor as the changing
     // size of the rectangle requires that we re-validate the radii to the
     // newly sized rectangle.
-    return MakeRectRadii(bounds_.Expand(horizontal, vertical), radii_);
+    return MakeRectRadiiStyle(bounds_.Expand(horizontal, vertical), radii_,
+                              style_);
   }
 
   /// @brief  Returns a round rectangle with expanded edges. Negative expansion
@@ -119,11 +149,11 @@ struct RoundRect {
     // Use the factory rather than the internal constructor as the changing
     // size of the rectangle requires that we re-validate the radii to the
     // newly sized rectangle.
-    return MakeRectRadii(bounds_.Expand(amount), radii_);
+    return MakeRectRadiiStyle(bounds_.Expand(amount), radii_, style_);
   }
 
   [[nodiscard]] constexpr bool operator==(const RoundRect& rr) const {
-    return bounds_ == rr.bounds_ && radii_ == rr.radii_;
+    return bounds_ == rr.bounds_ && radii_ == rr.radii_ && style_ == rr.style_;
   }
 
   [[nodiscard]] constexpr bool operator!=(const RoundRect& r) const {
@@ -131,11 +161,18 @@ struct RoundRect {
   }
 
  private:
-  constexpr RoundRect(const Rect& bounds, const RoundingRadii& radii)
-      : bounds_(bounds), radii_(radii) {}
+  static RoundRect MakeRectRadiiStyle(const Rect& rect,
+                                      const RoundingRadii& radii,
+                                      Style style);
+
+  constexpr RoundRect(const Rect& bounds,
+                      const RoundingRadii& radii,
+                      Style style)
+      : bounds_(bounds), radii_(radii), style_(style) {}
 
   Rect bounds_;
   RoundingRadii radii_;
+  Style style_;
 };
 
 }  // namespace impeller
@@ -143,11 +180,28 @@ struct RoundRect {
 namespace std {
 
 inline std::ostream& operator<<(std::ostream& out,
+                                const impeller::RoundRect::Style& style) {
+  switch (style) {
+    case impeller::RoundRect::Style::kCircular:
+      out << "Style::kCircular";
+      break;
+    case impeller::RoundRect::Style::kContinuous:
+      out << "Style::kContinuous";
+      break;
+  }
+  return out;
+}
+
+inline std::ostream& operator<<(std::ostream& out,
                                 const impeller::RoundRect& rr) {
   out << "("                                 //
       << "rect: " << rr.GetBounds() << ", "  //
-      << "radii: " << rr.GetRadii()          //
-      << ")";
+      << "radii: " << rr.GetRadii();
+  if (rr.GetStyle() != impeller::RoundRect::Style::kCircular) {
+    out << ", style: " << rr.GetStyle();
+  }
+
+  out << ")";
   return out;
 }
 
