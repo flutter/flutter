@@ -104,7 +104,7 @@ final int _kUnblockedUserActions =
 /// Function signature for checks in [DebugSemanticsRoleChecks.kChecks].
 ///
 /// The check is run against any `node` that is sent to the platform.
-typedef DebugSemanticsRoleCheck = FlutterError? Function(SemanticsData node);
+typedef DebugSemanticsRoleCheck = FlutterError? Function(SemanticsNode node);
 
 /// A static class to conduct semantics role checks.
 @visibleForTesting
@@ -114,30 +114,47 @@ class DebugSemanticsRoleChecks {
   /// A map to map each [SemanticsRole] to its check.
   static const Map<SemanticsRole, DebugSemanticsRoleCheck> kChecks =
       <SemanticsRole, DebugSemanticsRoleCheck>{
-        SemanticsRole.none: _semanticsNone,
+        SemanticsRole.none: _noCheckRequired,
         SemanticsRole.tab: _semanticsTab,
+        SemanticsRole.tabBar: _semanticsTabBar,
+        SemanticsRole.tabPanel: _noCheckRequired,
       };
 
-  static FlutterError? _checkSemanticsData(SemanticsData node) => kChecks[node.role]!(node);
+  static FlutterError? _checkSemanticsData(SemanticsNode node) => kChecks[node.role]!(node);
 
-  static FlutterError? _semanticsNone(SemanticsData node) => null;
+  static FlutterError? _noCheckRequired(SemanticsNode node) => null;
 
-  static FlutterError? _semanticsTab(SemanticsData node) {
-    if (!node.hasFlag(SemanticsFlag.hasEnabledState) ||
-        !node.hasFlag(SemanticsFlag.hasSelectedState)) {
+  static FlutterError? _semanticsTab(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    if (!data.hasFlag(SemanticsFlag.hasEnabledState) ||
+        !data.hasFlag(SemanticsFlag.hasSelectedState)) {
       return FlutterError('A tab needs enabled and selected states');
     }
 
-    if (!node.hasFlag(SemanticsFlag.isEnabled)) {
+    if (!data.hasFlag(SemanticsFlag.isEnabled)) {
       // disabled tab is not interactable.
       return null;
     }
 
-    if (node.hasFlag(SemanticsFlag.isSelected) || node.hasAction(SemanticsAction.tap)) {
+    if (data.hasFlag(SemanticsFlag.isSelected) || data.hasAction(SemanticsAction.tap)) {
       return null;
     } else {
       return FlutterError('A enabled tab must have a tap action');
     }
+  }
+
+  static FlutterError? _semanticsTabBar(SemanticsNode node) {
+    if (node.childrenCount < 1) {
+      return FlutterError('a TabBar cannot be empty');
+    }
+    FlutterError? error;
+    node.visitChildren((SemanticsNode child) {
+      if (child.getSemanticsData().role != SemanticsRole.tab) {
+        error = FlutterError('Children of TabBar must have the tab role');
+      }
+      return error == null;
+    });
+    return error;
   }
 }
 
@@ -3044,7 +3061,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     assert(_dirty);
     final SemanticsData data = getSemanticsData();
     assert(() {
-      final FlutterError? error = DebugSemanticsRoleChecks._checkSemanticsData(data);
+      final FlutterError? error = DebugSemanticsRoleChecks._checkSemanticsData(this);
       if (error != null) {
         throw error;
       }
