@@ -2349,6 +2349,7 @@ void main() {
               trailing: Icon(CupertinoIcons.add_circled),
               largeTitle: Text('Large title'),
               middle: Text('middle'),
+              searchField: CupertinoSearchTextField(),
             ),
             SliverFillRemaining(child: SizedBox(height: 1000.0)),
           ],
@@ -2491,6 +2492,7 @@ void main() {
               CupertinoSliverNavigationBar.search(
                 largeTitle: Text('Large title'),
                 middle: Text('Middle'),
+                searchField: CupertinoSearchTextField(),
               ),
               SliverFillRemaining(child: SizedBox(height: 1000.0)),
             ],

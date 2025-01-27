@@ -927,6 +927,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// required.
   const CupertinoSliverNavigationBar.search({
     super.key,
+    required this.searchField,
     this.largeTitle,
     this.leading,
     this.automaticallyImplyLeading = true,
@@ -946,7 +947,6 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.stretch = false,
     this.bottomMode = NavigationBarBottomMode.automatic,
     this.onSearchableBottomTap,
-    this.searchField = const CupertinoSearchTextField(),
   }) : assert(
          automaticallyImplyTitle || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
@@ -1083,7 +1083,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
 
   /// The search field used in [CupertinoSliverNavigationBar.search].
   ///
-  /// Defaults to a [CupertinoSearchTextField].
+  /// Typically a [CupertinoSearchTextField].
   final Widget? searchField;
 
   /// True if the [CupertinoSliverNavigationBar.search] constructor is used.
