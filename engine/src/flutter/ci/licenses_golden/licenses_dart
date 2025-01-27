@@ -1,4 +1,4 @@
-Signature: 24800956dcb396cd799a7adc3643c98c
+Signature: 5cf6e086c35c251eefabcec08e03f4d5
 
 ====================================================================================================
 LIBRARY: dart
@@ -4225,10 +4225,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: dart
 ORIGIN: ../../../flutter/third_party/dart/runtime/bin/dart_api_win.c + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/platform/lockers.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/tools/generate_dart_api_win_c.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/function_patch.dart + ../../../flutter/third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/dart/runtime/bin/dart_api_win.c
+FILE: ../../../flutter/third_party/dart/runtime/platform/lockers.h
 FILE: ../../../flutter/third_party/dart/runtime/tools/generate_dart_api_win_c.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/function_patch.dart
 ----------------------------------------------------------------------------------------------------
@@ -4839,7 +4841,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/3fc177bfd7016bcfa2781f43f1aa04d4cbc1351f
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/c36da19a8d90e9e9ac4c8434b7d50e9359b380e6
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
