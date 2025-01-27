@@ -1113,11 +1113,10 @@ void main() {
 
   testGesture('onTapMove works', (GestureTester tester) {
     TapMoveDetails? tapMoveDetails;
-    final TapGestureRecognizer tap =
-        TapGestureRecognizer(postAcceptSlopTolerance: null)
-          ..onTapMove = (TapMoveDetails detail) {
-            tapMoveDetails = detail;
-          };
+    final TapGestureRecognizer tap = TapGestureRecognizer(postAcceptSlopTolerance: null)
+      ..onTapMove = (TapMoveDetails detail) {
+        tapMoveDetails = detail;
+      };
     addTearDown(tap.dispose);
 
     final TestPointer pointer1 = TestPointer();
