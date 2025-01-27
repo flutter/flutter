@@ -21,7 +21,15 @@ void main() {
   late _FlutterRootUnderTest testRoot;
   late Map<String, String> environment;
 
-  io.ProcessResult run(executable, args) {
+  void printIfNotEmpty(String prefix, String string) {
+    if (string.isNotEmpty) {
+      string.split(io.Platform.lineTerminator).forEach((String s) {
+        print('$prefix:>$s<');
+      });
+    }
+  }
+
+  io.ProcessResult run(String executable, List<String> args) {
     print('Running "$executable ${args.join(" ")}"');
     final io.ProcessResult result = io.Process.runSync(
       executable,
@@ -33,16 +41,8 @@ void main() {
     if (result.exitCode != 0) {
       print('exitCode: ${result.exitCode}');
     }
-    if (result.stdout.trim().isNotEmpty) {
-      result.stdout.trim().split(io.Platform.lineTerminator).forEach((s) {
-        print('stdout:>$s<');
-      });
-    }
-    if (result.stderr.trim().isNotEmpty) {
-      result.stderr.trim().split(io.Platform.lineTerminator).forEach((s) {
-        print('stderr:>$s<');
-      });
-    }
+    printIfNotEmpty('stdout', (result.stdout as String).trim());
+    printIfNotEmpty('stderr', (result.stderr as String).trim());
     return result;
   }
 
@@ -65,7 +65,7 @@ void main() {
   });
 
   io.ProcessResult runUpdateEngineVersion() {
-    final (executable, args) =
+    final (String executable, List<String> args) =
         const LocalPlatform().isWindows
             ? ('powershell', <String>[testRoot.binInternalUpdateEngineVersion.path])
             : (testRoot.binInternalUpdateEngineVersion.path, <String>[]);
@@ -88,7 +88,7 @@ void main() {
     });
   });
 
-  void setupRepo({required String branch}) async {
+  void setupRepo({required String branch}) {
     for (final File f in <File>[testRoot.deps, testRoot.engineSrcGn]) {
       f.createSync(recursive: true);
     }
@@ -101,7 +101,7 @@ void main() {
     }
   }
 
-  void setupRemote({required String remote}) async {
+  void setupRemote({required String remote}) {
     run('git', <String>['remote', 'add', remote, testRoot.root.path]);
     run('git', <String>['fetch', remote]);
   }
@@ -142,7 +142,7 @@ void main() {
       expect(testRoot.binInternalEngineVersion, exists);
       expect(
         testRoot.binInternalEngineVersion.readAsStringSync(),
-        equalsIgnoringWhitespace(mergeBaseHeadUpstream.stdout),
+        equalsIgnoringWhitespace(mergeBaseHeadUpstream.stdout as String),
       );
     });
 
@@ -159,7 +159,7 @@ void main() {
       expect(testRoot.binInternalEngineVersion, exists);
       expect(
         testRoot.binInternalEngineVersion.readAsStringSync(),
-        equalsIgnoringWhitespace(mergeBaseHeadOrigin.stdout),
+        equalsIgnoringWhitespace(mergeBaseHeadOrigin.stdout as String),
       );
     });
 
@@ -171,7 +171,7 @@ void main() {
       expect(testRoot.binInternalEngineVersion, exists);
       expect(
         testRoot.binInternalEngineVersion.readAsStringSync(),
-        equalsIgnoringWhitespace(revParseHead.stdout),
+        equalsIgnoringWhitespace(revParseHead.stdout as String),
       );
     });
   });
