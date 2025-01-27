@@ -57,16 +57,12 @@ void main() {
           onPressed: null,
           minWidth: minWidth,
           minHeight: minHeight,
-          child: Text('X', style: testStyle),
+          child: SizedBox.shrink(),
         ),
       ),
     );
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
-    expect(
-      buttonBox.size,
-      // 1 10px character + 20px * 2 = 50.0 (is smaller than minSize: 60.0)
-      const Size(minWidth, minHeight),
-    );
+    expect(buttonBox.size, const Size(minWidth, minHeight));
   });
 
   testWidgets('Size grows with text', (WidgetTester tester) async {
