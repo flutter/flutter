@@ -1201,7 +1201,10 @@ TEST_F(DisplayListTest, SingleOpsMightSupportGroupOpacityBlendMode) {
       kTestImage2, DlIRect::MakeLTRB(20, 20, 30, 30),
       DlRect::MakeLTRB(0, 0, 20, 20), DlFilterMode::kLinear, nullptr);
              , true);
-  static SkRSXform xforms[] = {{1, 0, 0, 0}, {0, 1, 0, 0}};
+  static DlRSTransform xforms[] = {
+      DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(0)),
+      DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(90)),
+  };
   static DlRect texs[] = {
       DlRect::MakeLTRB(10, 10, 20, 20),
       DlRect::MakeLTRB(20, 20, 30, 30),
@@ -1790,7 +1793,7 @@ TEST_F(DisplayListTest, FlutterSvgIssue661BoundsWereEmpty) {
                              {32.3f, 14.615f},    //
                              {32.3f, 19.34f});
   path_builder1.Close();
-  DlPath dl_path1 = DlPath(path_builder1.TakePath(DlPathFillType::kNonZero));
+  DlPath dl_path1 = DlPath(path_builder1, DlPathFillType::kNonZero);
 
   DlPathBuilder path_builder2;
   path_builder2.MoveTo({37.5f, 19.33f});
@@ -1803,7 +1806,7 @@ TEST_F(DisplayListTest, FlutterSvgIssue661BoundsWereEmpty) {
                              {37.495f, 11.756f},  //
                              {37.5f, 19.33f});
   path_builder2.Close();
-  DlPath dl_path2 = DlPath(path_builder2.TakePath(DlPathFillType::kNonZero));
+  DlPath dl_path2 = DlPath(path_builder2, DlPathFillType::kNonZero);
 
   DisplayListBuilder builder;
   DlPaint paint = DlPaint(DlColor::kWhite()).setAntiAlias(true);
@@ -3502,7 +3505,10 @@ TEST_F(DisplayListTest, NopOperationsOmittedFromRecords) {
           builder.DrawImageNine(kTestImage1, DlIRect::MakeLTRB(10, 10, 20, 20),
                                 DlRect::MakeLTRB(10, 10, 100, 100),
                                 DlFilterMode::kLinear, &paint);
-          SkRSXform xforms[] = {{1, 0, 10, 10}, {0, 1, 10, 10}};
+          DlRSTransform xforms[] = {
+              DlRSTransform::Make({10.0f, 10.0f}, 1.0f, DlDegrees(0)),
+              DlRSTransform::Make({10.0f, 10.0f}, 1.0f, DlDegrees(90)),
+          };
           DlRect rects[] = {
               DlRect::MakeLTRB(10, 10, 20, 20),
               DlRect::MakeLTRB(10, 20, 30, 20),
@@ -4872,7 +4878,7 @@ TEST_F(DisplayListTest, ClipPathNonCulling) {
   path_builder.LineTo({1000.0f, 0.0f});
   path_builder.LineTo({0.0f, 1000.0f});
   path_builder.Close();
-  DlPath path = DlPath(path_builder.TakePath());
+  DlPath path = DlPath(path_builder);
 
   // Double checking that the path does indeed contain the clip. But,
   // sadly, the Builder will not check paths for coverage to this level
