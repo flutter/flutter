@@ -20,7 +20,6 @@ void main() {
   late Directory tmpDir;
   late _FlutterRootUnderTest testRoot;
   late Map<String, String> environment;
-  // late ProcessRunner processRunner;
 
   io.ProcessResult run(executable, args) {
     print('Running "$executable ${args.join(" ")}"');
