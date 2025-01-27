@@ -519,7 +519,8 @@ class DropdownMenu<T> extends StatefulWidget {
   /// to accommodate that number of lines.
   ///
   /// See also:
-  ///  * [TextField.maxLines]
+  ///  * [TextField.maxLines], which specifies the maximum number of lines
+  ///    the [TextField] can display.
   final int? maxLines;
 
   @override
