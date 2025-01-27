@@ -894,7 +894,9 @@ void main() {
     expect(find.text('Home page'), findsOneWidget);
   });
 
-  testWidgets('Navigation bars in a CupertinoSheetRoute have no back button', (WidgetTester tester) async {
+  testWidgets('Navigation bars in a CupertinoSheetRoute have no back button', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       const CupertinoApp(home: CupertinoNavigationBar(middle: Text('Home page'))),
     );
