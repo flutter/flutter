@@ -624,10 +624,12 @@ void main() {
           body: ListView.builder(
             key: ValueKey<bool>(hasOnTap), // Trigger a rebuild.
             itemCount: itemCount,
-            itemBuilder: (BuildContext context, int index) => ListTile(
-              onTap: hasOnTap ? () {} : null,
-              title: Text('$index'),
-            ),
+            itemBuilder: (BuildContext context, int index) {
+              return ListTile(
+                onTap: hasOnTap ? () {} : null,
+                title: Text('$index'),
+              );
+            },
           ),
         ),
       );
