@@ -1,3 +1,7 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
 name: Generate Changed Files JSON
 
 on:
@@ -18,7 +22,7 @@ jobs:
         run: |
           git fetch --no-tags --prune --depth=1 origin ${{ github.event.pull_request.base.sha }}
           git fetch --no-tags --prune --depth=1 origin master
-          echo "FLUTTER_ENGINE_VERSION=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_ENV"
+          echo "FLUTTER_PREBUILT_ENGINE_VERSION=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_ENV"
 
       - name: Initialize Dart SDK
         # This downloads the version of the Dart SDK for the current platform.
