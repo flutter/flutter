@@ -19,7 +19,6 @@ import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
-import '../macos/macos_ipad_device.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
@@ -684,15 +683,6 @@ class RunCommand extends RunCommandBase {
     if (devices == null) {
       throwToolExit(null);
     }
-
-    if (devices!.length == 1 && devices!.first is MacOSDesignedForIPadDevice) {
-      throwToolExit('Mac Designed for iPad is currently not supported for flutter run -d.');
-    }
-
-    if (globals.deviceManager!.hasSpecifiedAllDevices) {
-      devices?.removeWhere((Device device) => device is MacOSDesignedForIPadDevice);
-    }
-
     if (globals.deviceManager!.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit(
         'Using "-d all" with "--${FlutterOptions.kUseApplicationBinary}" is not supported',
@@ -856,12 +846,15 @@ class RunCommand extends RunCommandBase {
       if (!await device.supportsRuntimeMode(buildMode)) {
         throwToolExit(
           '${sentenceCase(getFriendlyModeName(buildMode))} '
-          'mode is not supported by ${device.name}.',
+          'mode is not supported by ${device.displayName}.',
         );
       }
       if (hotMode) {
         if (!device.supportsHotReload) {
-          throwToolExit('Hot reload is not supported by ${device.name}. Run with "--no-hot".');
+          throwToolExit(
+            'Hot reload is not supported by ${device.displayName}. '
+            'Run with "--no-hot".',
+          );
         }
       }
     }

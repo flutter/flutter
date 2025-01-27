@@ -3606,7 +3606,7 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
     final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
     final Pubspec pubspec = Pubspec.parse(rawPubspec);
-    final Map<String, VersionConstraint?> env = pubspec.environment!;
+    final Map<String, VersionConstraint?> env = pubspec.environment;
     expect(env['flutter']!.allows(Version(3, 3, 0)), true);
     expect(env['flutter']!.allows(Version(3, 2, 9)), false);
   });
@@ -4283,7 +4283,7 @@ void main() {
     final Pubspec pubspec = Pubspec.parse(rawPubspec);
 
     expect(
-      pubspec.environment!['sdk'].toString(),
+      pubspec.environment['sdk'].toString(),
       startsWith('^'),
       reason: 'The caret syntax is recommended over the traditional syntax.',
     );
@@ -4456,6 +4456,44 @@ void main() {
     },
     overrides: <Type, Generator>{Java: () => null, Logger: () => logger},
   );
+
+  testUsingContext('should return correct warning for incompatible Gradle versions', () async {
+    const String projectType = 'app';
+    final String gradleConflict = getIncompatibleJavaGradleAgpMessageHeader(
+      false,
+      templateDefaultGradleVersion,
+      templateAndroidGradlePluginVersion,
+      projectType,
+    );
+
+    expect(
+      gradleConflict,
+      contains('''
+The configured version of Java detected may conflict with the Gradle version in your new Flutter $projectType.
+
+To keep the default Gradle version $templateDefaultGradleVersion, download a compatible Java version
+'''),
+    );
+  });
+
+  testUsingContext('should return correct warning for incompatible AGP versions', () async {
+    const String projectType = 'app';
+    final String agpConflict = getIncompatibleJavaGradleAgpMessageHeader(
+      true,
+      templateDefaultGradleVersion,
+      templateAndroidGradlePluginVersion,
+      projectType,
+    );
+
+    expect(
+      agpConflict,
+      contains('''
+The configured version of Java detected may conflict with the Android Gradle Plugin (AGP) version in your new Flutter $projectType.
+
+To keep the default AGP version $templateAndroidGradlePluginVersion, download a compatible Java version
+'''),
+    );
+  });
 
   testUsingContext(
     'should not show warning for incompatible Java/template Gradle versions when created project type is irrelevant',

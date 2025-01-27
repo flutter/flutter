@@ -15,8 +15,8 @@ import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_cli/code_assets_builder.dart' hide BuildMode;
-import 'package:native_assets_cli/native_assets_cli_internal.dart' as native_assets_cli;
+import 'package:native_assets_cli/code_assets.dart' as native_assets_cli;
+import 'package:native_assets_cli/code_assets_builder.dart';
 import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
@@ -31,6 +31,7 @@ void main() {
   late FileSystem fileSystem;
   late BufferLogger logger;
   late Uri projectUri;
+  late String runPackageName;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -47,6 +48,7 @@ void main() {
     );
     environment.buildDir.createSync(recursive: true);
     projectUri = environment.projectDir.uri;
+    runPackageName = environment.projectDir.basename;
   });
 
   for (final bool flutterTester in <bool>[false, true]) {
@@ -96,7 +98,7 @@ void main() {
             ),
           ];
           final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
-            packagesWithNativeAssetsResult: <Package>[Package('bar', projectUri)],
+            packagesWithNativeAssetsResult: <String>['bar'],
             buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
             linkResult:
                 buildMode == BuildMode.debug
@@ -136,8 +138,8 @@ void main() {
           expect(
             (globals.logger as BufferLogger).traceText,
             stringContainsInOrder(<String>[
-              'Building native assets for $expectedOS $expectedArch $buildMode.',
-              'Building native assets for $expectedOS $expectedArch $buildMode done.',
+              'Building native assets for $expectedOS $expectedArch.',
+              'Building native assets for $expectedOS $expectedArch done.',
             ]),
           );
           expect(
@@ -264,18 +266,18 @@ void main() {
         logger: environment.logger,
       );
       final FlutterNativeAssetsBuildRunner runner = FlutterNativeAssetsBuildRunnerImpl(
-        projectUri,
         packageConfigFile.path,
         packageConfig,
         fileSystem,
         logger,
+        runPackageName,
       );
-      final CCompilerConfig result = await runner.cCompilerConfig;
-      expect(result.compiler?.toFilePath(), msvcBinDir.childFile('cl.exe').uri.toFilePath());
-      expect(result.archiver?.toFilePath(), msvcBinDir.childFile('lib.exe').uri.toFilePath());
-      expect(result.linker?.toFilePath(), msvcBinDir.childFile('link.exe').uri.toFilePath());
-      expect(result.envScript, isNotNull);
-      expect(result.envScriptArgs, isNotNull);
+      final CCompilerConfig result = (await runner.cCompilerConfig)!;
+      expect(result.compiler.toFilePath(), msvcBinDir.childFile('cl.exe').uri.toFilePath());
+      expect(result.archiver.toFilePath(), msvcBinDir.childFile('lib.exe').uri.toFilePath());
+      expect(result.linker.toFilePath(), msvcBinDir.childFile('link.exe').uri.toFilePath());
+      expect(result.windows.developerCommandPrompt?.script, isNotNull);
+      expect(result.windows.developerCommandPrompt?.arguments, isNotNull);
     },
   );
 }
