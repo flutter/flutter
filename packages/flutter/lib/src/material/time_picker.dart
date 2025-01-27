@@ -267,12 +267,11 @@ class _TimePickerHeader extends StatelessWidget {
               ),
             ),
             Row(
+              spacing: 12,
               children: <Widget>[
                 if (hourDialType == _HourDialType.twelveHour &&
-                    timeOfDayFormat == TimeOfDayFormat.a_space_h_colon_mm) ...<Widget>[
+                    timeOfDayFormat == TimeOfDayFormat.a_space_h_colon_mm)
                   const _DayPeriodControl(),
-                  const SizedBox(width: 12),
-                ],
                 Expanded(
                   child: Row(
                     // Hour/minutes should not change positions in RTL locales.
@@ -285,10 +284,8 @@ class _TimePickerHeader extends StatelessWidget {
                   ),
                 ),
                 if (hourDialType == _HourDialType.twelveHour &&
-                    timeOfDayFormat != TimeOfDayFormat.a_space_h_colon_mm) ...<Widget>[
-                  const SizedBox(width: 12),
+                    timeOfDayFormat != TimeOfDayFormat.a_space_h_colon_mm)
                   const _DayPeriodControl(),
-                ],
               ],
             ),
           ],
