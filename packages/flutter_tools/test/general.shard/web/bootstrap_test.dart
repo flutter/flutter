@@ -196,6 +196,7 @@ void main() {
         ddcModuleLoaderUrl: 'ddc_module_loader.js',
         mapperUrl: 'mapper.js',
         generateLoadingIndicator: true,
+        isWindows: false,
       );
       // ddc module loader js source is interpolated correctly.
       expect(result, contains('"src": "ddc_module_loader.js"'));
@@ -212,6 +213,7 @@ void main() {
         ddcModuleLoaderUrl: 'ddc_module_loader.js',
         mapperUrl: 'mapper.js',
         generateLoadingIndicator: true,
+        isWindows: false,
       );
       // LoadConfiguration and DDCLoader objects must be constructed.
       expect(result, contains(r'new window.$dartLoader.LoadConfiguration('));
@@ -232,6 +234,7 @@ void main() {
         ddcModuleLoaderUrl: 'ddc_module_loader.js',
         mapperUrl: 'mapper.js',
         generateLoadingIndicator: true,
+        isWindows: false,
       );
       expect(result, contains('"flutter-loader"'));
       expect(result, contains('"indeterminate"'));
@@ -243,6 +246,7 @@ void main() {
         ddcModuleLoaderUrl: 'ddc_module_loader.js',
         mapperUrl: 'mapper.js',
         generateLoadingIndicator: false,
+        isWindows: false,
       );
       expect(result, isNot(contains('"flutter-loader"')));
       expect(result, isNot(contains('"indeterminate"')));
@@ -255,6 +259,7 @@ void main() {
         ddcModuleLoaderUrl: 'ddc_module_loader.js',
         mapperUrl: 'mapper.js',
         generateLoadingIndicator: true,
+        isWindows: false,
       );
 
       // See: https://regexr.com/6q0ft
