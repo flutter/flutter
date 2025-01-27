@@ -265,7 +265,7 @@ void _createDevice({
   required String iosEngineVariant,
 }) {
   final scenarioPath = path.normalize(
-    path.join(engine.outDir.path, iosEngineVariant, 'scenario_app', 'Scenarios'),
+    path.join(engine.outDir.path, iosEngineVariant, 'ios_scenario_app', 'Scenarios'),
   );
 
   // Create a temporary directory to store the test results.

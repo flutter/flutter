@@ -38,8 +38,6 @@ Modify the following files as described:
 * `shell/platform/android/test_runner/build.gradle`: Bump `compileSdkVersion XX` to the latest version.
 * `shell/platform/android/AndroidManifest.xml`: Bump `android:targetSdkVersion=XX` to the latest version.
 * `testing/android/native_activity/native_activity.gni`: Bump the reference to `build-tools/XX` in `android_buildtools` to the latest **build-tools** version and the reference to `android-XX` in `android_jar` to the latest version.
-* `testing/scenario_app/android/app/build.gradle`: Upgrade `buildToolsVersion` to the latest **build-tools** version and the `compileSdkVersion` and `targetSdkVersion` to the latest version.
-* In all other android projects in `testing`: Upgrade the `compileSdkVersion` and `targetSdkVersion` in `android/app/build.gradle`.
 
 This list may become outdated, so be sure to change any references to the old SDK version to the latest version in `build.gradle` files across the repo.
 
