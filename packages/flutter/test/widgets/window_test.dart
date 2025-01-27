@@ -6,8 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/proxy_box_test.dart';
-
 Future<Object?>? Function(MethodCall)? _createWindowMethodCallHandler({
   required WidgetTester tester,
   void Function(MethodCall)? onMethodCall,
@@ -55,7 +53,7 @@ void main() {
 
     expect(controller.type, WindowArchetype.regular);
     expect(controller.size, windowSize);
-    expect(controller.view.viewId, tester.view.viewId);
+    expect(controller.rootView.viewId, tester.view.viewId);
   });
 
   testWidgets('RegularWindow.onError is called when creation throws an error', (

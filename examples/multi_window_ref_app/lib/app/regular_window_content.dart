@@ -101,10 +101,14 @@ class _RegularWindowContentState extends State<RegularWindowContent>
               ListenableBuilder(
                   listenable: widget.window,
                   builder: (BuildContext context, Widget? _) {
+                    if (!widget.window.isReady) {
+                      return const Text('View not ready');
+                    }
+
                     return Text(
-                      'View #${widget.window.view?.viewId ?? "Unknown"}\n'
-                      'View Size: ${(widget.window.view!.physicalSize.width / dpr).toStringAsFixed(1)}\u00D7${(widget.window.view!.physicalSize.height / dpr).toStringAsFixed(1)}\n'
-                      'Window Size: ${(widget.window.size!.width).toStringAsFixed(1)}\u00D7${(widget.window.size!.height).toStringAsFixed(1)}\n'
+                      'View #${widget.window.rootView.viewId}\n'
+                      'View Size: ${(widget.window.rootView.physicalSize.width / dpr).toStringAsFixed(1)}\u00D7${(widget.window.rootView.physicalSize.height / dpr).toStringAsFixed(1)}\n'
+                      'Window Size: ${(widget.window.size.width).toStringAsFixed(1)}\u00D7${(widget.window.size.height).toStringAsFixed(1)}\n'
                       'Device Pixel Ratio: $dpr',
                       textAlign: TextAlign.center,
                     );
