@@ -29,7 +29,8 @@ INTERNAL NOTE
 ### [3.27.3](https://github.com/flutter/flutter/releases/tag/3.27.3)
 - [flutter/159212](https://github.com/flutter/flutter/issues/159212) Track (via Google Analytics) if the Dart AOT Android "Deferred Components" feature is being meaningfully used.
 - [flutter/160631](https://github.com/flutter/flutter/issues/160631) Fixes an issue with Material 3 Tab Bar animations.
-- [flutter/159289](https://github.com/flutter/flutter/issues/159289) Fixse an issue with fullscreen route transitions.
+- [flutter/159289](https://github.com/flutter/flutter/issues/159289) Fixes an issue with fullscreen route transitions.
+- [flutter/162132](https://github.com/flutter/flutter/issues/162132) Fixes an issue that incorrectly positions `MenuAnchor`s in nested overlays.
 
 ### [3.27.2](https://github.com/flutter/flutter/releases/tag/3.27.2)
 
