@@ -514,9 +514,9 @@ class DropdownMenu<T> extends StatefulWidget {
   /// automatically grow to accommodate additional lines as they are entered, up
   /// to the height of its constraints.
   ///
-  /// If this is not null, the provided value must be greater than zero. The text field will restrict
-  /// the input to the given number of lines and take up enough horizontal space
-  /// to accommodate that number of lines.
+  /// If this is not null, the provided value must be greater than zero. The text
+  /// field will restrict the input to the given number of lines and take up enough
+  /// horizontal space to accommodate that number of lines.
   ///
   /// See also:
   ///  * [TextField.maxLines], which specifies the maximum number of lines
