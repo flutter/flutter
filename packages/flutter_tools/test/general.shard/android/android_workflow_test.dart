@@ -529,7 +529,7 @@ Review licenses that have not been accepted (y/N)?
 
     final ValidationMessage cmdlineMessage = validationResult.messages.last;
     expect(cmdlineMessage.type, ValidationMessageType.error);
-    expect(cmdlineMessage.message, startsWith('cmdline-tools component is missing\n'));
+    expect(cmdlineMessage.message, startsWith('cmdline-tools component is missing.\n'));
   });
 
   testUsingContext('detects minimum required java version', () async {
