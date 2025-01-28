@@ -736,6 +736,7 @@ void main() {
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
+              '-Pdart-defines=RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
