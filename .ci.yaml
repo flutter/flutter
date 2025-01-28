@@ -350,6 +350,13 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      # This is to instruct the queues to eagerly run Linux analze.
+      #
+      # We would like to see, both earlier in runs, and in the merge group,
+      # to validate the build.
+      #
+      # See https://github.com/flutter/flutter/issues/162329.
+      release_build: "true"
       shard: analyze
       dependencies: >-
         [
