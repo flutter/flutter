@@ -406,7 +406,7 @@ transforms:
         value: 'arguments[fillColor]'
 
   # Changes made in https://github.com/flutter/flutter/pull/161295
-  - title: "Migrate 'minSize' to 'minWidth' and 'minHeight'"
+  - title: "Migrate 'minSize' to 'minimumSize'"
     date: 2025-01-09
     element:
       uris: [ 'cupertino.dart' ]
@@ -417,17 +417,10 @@ transforms:
         changes:
           - kind: 'addParameter'
             index: 7
-            name: 'minWidth'
+            name: 'minimumSize'
             style: optional_named
             argumentValue:
-              expression: '{% minSize %}'
-              requiredIf: "minSize != ''"
-          - kind: 'addParameter'
-            index: 8
-            name: 'minHeight'
-            style: optional_named
-            argumentValue:
-              expression: '{% minSize %}'
+              expression: 'Size({% minSize %}, {% minSize %})'
               requiredIf: "minSize != ''"
           - kind: 'removeParameter'
             name: 'minSize'

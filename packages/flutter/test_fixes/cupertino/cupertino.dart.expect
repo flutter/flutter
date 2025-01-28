@@ -306,5 +306,5 @@ void main() {
   );
 
   // https://github.com/flutter/flutter/pull/161295
-  CupertinoButton(minWidth: 60.0, minHeight: 60.0);
+  CupertinoButton(minimumSize: Size(60.0, 60.0));
 }

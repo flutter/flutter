@@ -77,12 +77,11 @@ class CupertinoButton extends StatefulWidget {
     this.color,
     this.disabledColor = CupertinoColors.quaternarySystemFill,
     @Deprecated(
-      'Use minWidth and minHeight instead. '
+      'Use minimumSize instead. '
       'This feature was deprecated after v3.28.0-3.0.pre.',
     )
-    double? minSize,
-    double? minWidth,
-    double? minHeight,
+    this.minSize,
+    this.minimumSize,
     this.pressedOpacity = 0.4,
     this.borderRadius,
     this.alignment = Alignment.center,
@@ -93,10 +92,8 @@ class CupertinoButton extends StatefulWidget {
     this.onLongPress,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
-       assert((minWidth == null && minHeight == null) || minSize == null),
-       _style = _CupertinoButtonStyle.plain,
-       minWidth = minWidth ?? minSize,
-       minHeight = minHeight ?? minSize;
+       assert(minimumSize == null || minSize == null),
+       _style = _CupertinoButtonStyle.plain;
 
   /// Creates an iOS-style button with a tinted background.
   ///
@@ -115,12 +112,11 @@ class CupertinoButton extends StatefulWidget {
     this.color,
     this.disabledColor = CupertinoColors.tertiarySystemFill,
     @Deprecated(
-      'Use minWidth and minHeight instead. '
+      'Use minimumSize instead. '
       'This feature was deprecated after v3.28.0-3.0.pre.',
     )
-    double? minSize,
-    double? minWidth,
-    double? minHeight,
+    this.minSize,
+    this.minimumSize,
     this.pressedOpacity = 0.4,
     this.borderRadius,
     this.alignment = Alignment.center,
@@ -130,10 +126,8 @@ class CupertinoButton extends StatefulWidget {
     this.autofocus = false,
     this.onLongPress,
     required this.onPressed,
-  }) : assert((minWidth == null && minHeight == null) || minSize == null),
-       _style = _CupertinoButtonStyle.tinted,
-       minWidth = minWidth ?? minSize,
-       minHeight = minHeight ?? minSize;
+  }) : assert(minimumSize == null || minSize == null),
+       _style = _CupertinoButtonStyle.tinted;
 
   /// Creates an iOS-style button with a filled background.
   ///
@@ -148,12 +142,11 @@ class CupertinoButton extends StatefulWidget {
     this.padding,
     this.disabledColor = CupertinoColors.tertiarySystemFill,
     @Deprecated(
-      'Use minWidth and minHeight instead. '
+      'Use minimumSize instead. '
       'This feature was deprecated after v3.28.0-3.0.pre.',
     )
-    double? minSize,
-    double? minWidth,
-    double? minHeight,
+    this.minSize,
+    this.minimumSize,
     this.pressedOpacity = 0.4,
     this.borderRadius,
     this.alignment = Alignment.center,
@@ -164,11 +157,9 @@ class CupertinoButton extends StatefulWidget {
     this.onLongPress,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
-       assert((minWidth == null && minHeight == null) || minSize == null),
+       assert(minimumSize == null || minSize == null),
        color = null,
-       _style = _CupertinoButtonStyle.filled,
-       minWidth = minWidth ?? minSize,
-       minHeight = minHeight ?? minSize;
+       _style = _CupertinoButtonStyle.filled;
 
   /// The widget below this widget in the tree.
   ///
@@ -204,17 +195,21 @@ class CupertinoButton extends StatefulWidget {
   /// If [onPressed] and [onLongPress] callbacks are null, then the button will be disabled.
   final VoidCallback? onLongPress;
 
-  /// The minimum width of the button.
+  /// Minimum size of the button.
   ///
-  /// Defaults to [kMinInteractiveDimensionCupertino], which the iOS Human
+  /// Defaults to kMinInteractiveDimensionCupertino which the iOS Human
   /// Interface Guidelines recommends as the minimum tappable area.
-  final double? minWidth;
+  @Deprecated(
+    'Use minimumSize instead. '
+    'This feature was deprecated after v3.28.0-3.0.pre.',
+  )
+  final double? minSize;
 
-  /// The minimum height of the button.
+  /// The minimumSize of the button.
   ///
-  /// Defaults to [kMinInteractiveDimensionCupertino], which the iOS Human
+  /// Defaults to Size([kMinInteractiveDimensionCupertino], [kMinInteractiveDimensionCupertino]), which the iOS Human
   /// Interface Guidelines recommends as the minimum tappable area.
-  final double? minHeight;
+  final Size? minimumSize;
 
   /// The opacity that the button will fade to when it is pressed.
   /// The button will have an opacity of 1.0 when it is not pressed.
@@ -388,6 +383,12 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     final bool enabled = widget.enabled;
+    final Size? minimumSize =
+        widget.minimumSize == null
+            ? widget.minSize == null
+                ? null
+                : Size(widget.minSize!, widget.minSize!)
+            : widget.minimumSize!;
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
     final Color primaryColor = themeData.primaryColor;
     final Color? backgroundColor = (widget.color == null
@@ -451,11 +452,11 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 minWidth:
-                    widget.minWidth ??
+                    minimumSize?.width ??
                     kCupertinoButtonMinSize[widget.sizeStyle] ??
                     kMinInteractiveDimensionCupertino,
                 minHeight:
-                    widget.minHeight ??
+                    minimumSize?.height ??
                     kCupertinoButtonMinSize[widget.sizeStyle] ??
                     kMinInteractiveDimensionCupertino,
               ),
