@@ -28,7 +28,11 @@ void main() {
 
       // Focus the text field to show the keyboard.
       final SerializableFinder defaultTextField = find.byValueKey(keys.kDefaultTextField);
-      await driver.waitFor(defaultTextField);
+      // We use waitForTappable here instead of waitFor to avoid a race condition.
+      // In some cases, InputMethodManager will find the view not ready for keyboard, logging
+      // "InputMethodManager: Ignoring showSoftInput() as view=.. is not served"
+      // not opening the keyboard, and making the test fail.
+      await driver.waitForTappable(defaultTextField);
       await driver.tap(defaultTextField);
 
       bool heightTextDidShrink = false;
