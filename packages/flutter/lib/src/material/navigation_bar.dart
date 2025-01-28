@@ -989,9 +989,16 @@ class _NavigationBarDestinationSemantics extends StatelessWidget {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final _NavigationDestinationInfo destinationInfo = _NavigationDestinationInfo.of(context);
 
-    return Semantics(
-      selected: destinationInfo.selectedAnimation.isForwardOrCompleted,
-      container: true,
+    return _StatusTransitionWidgetBuilder(
+      animation: destinationInfo.selectedAnimation,
+      builder: (BuildContext context, Widget? child) {
+        return Semantics(
+          selected: destinationInfo.selectedAnimation.isForwardOrCompleted,
+          container: true,
+          button: true,
+          child: child,
+        );
+      },
       child: Stack(
         alignment: Alignment.center,
         children: <Widget>[
