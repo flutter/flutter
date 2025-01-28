@@ -414,5 +414,37 @@ TEST_P(DlGoldenTest, TextJumpingTest) {
   EXPECT_TRUE(y_diff <= 1) << "y diff: " << y_diff;
 }
 
+TEST_P(DlGoldenTest, BaselineHE) {
+  SetWindowSize(impeller::ISize(1024, 200));
+  impeller::Scalar font_size = 300;
+  auto callback = [&](const char* text,
+                      impeller::Scalar scale) -> sk_sp<DisplayList> {
+    DisplayListBuilder builder;
+    DlPaint paint;
+    paint.setColor(DlColor::ARGB(1, 0, 0, 0));
+    builder.DrawPaint(paint);
+    builder.Scale(scale, scale);
+    RenderTextInCanvasSkia(&builder, text, "Roboto-Regular.ttf",
+                           DlPoint::MakeXY(10, 300),
+                           TextRenderOptions{
+                               .font_size = font_size,
+                           });
+    return builder.Build();
+  };
+
+  std::unique_ptr<impeller::testing::Screenshot> right =
+      MakeScreenshot(callback("h", 0.444));
+  if (!right) {
+    GTEST_SKIP() << "making screenshots not supported.";
+  }
+  std::unique_ptr<impeller::testing::Screenshot> left =
+      MakeScreenshot(callback("e", 0.444));
+
+  int32_t left_max_y = CalculateMaxY(left.get());
+  int32_t right_max_y = CalculateMaxY(right.get());
+  int32_t y_diff = std::abs(left_max_y - right_max_y);
+  EXPECT_TRUE(y_diff <= 2) << "y diff: " << y_diff;
+}
+
 }  // namespace testing
 }  // namespace flutter

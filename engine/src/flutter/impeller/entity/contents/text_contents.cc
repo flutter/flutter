@@ -182,8 +182,8 @@ void TextContents::ComputeVertexData(
       Point uv_size = (atlas_glyph_bounds.GetSize() + Point(1, 1)) / atlas_size;
 
       Point unrounded_glyph_position =
-          basis_transform *
-          (glyph_position.position + scaled_bounds.GetLeftTop());
+          glyph_bounds.GetLeftTop() +
+          (basis_transform * glyph_position.position);
 
       Point screen_glyph_position =
           (screen_offset + unrounded_glyph_position + subpixel_adjustment)
