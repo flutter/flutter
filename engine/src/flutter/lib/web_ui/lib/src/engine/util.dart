@@ -883,15 +883,7 @@ class LruCache<K extends Object, V extends Object> {
 }
 
 /// Returns the VM-compatible string for the tile mode.
-String tileModeString(ui.TileMode? tileMode) {
-  return switch (tileMode) {
-    ui.TileMode.clamp => 'clamp',
-    ui.TileMode.mirror => 'mirror',
-    ui.TileMode.repeated => 'repeated',
-    ui.TileMode.decal => 'decal',
-    null => 'unspecified',
-  };
-}
+String tileModeString(ui.TileMode? tileMode) => tileMode?.name ?? 'unspecified';
 
 /// A size where both the width and height are integers.
 class BitmapSize {
