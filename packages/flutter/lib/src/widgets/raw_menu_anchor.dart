@@ -770,8 +770,8 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
   }
 }
 
-/// A controller used to manage a menu created by [MenuBar], [MenuAnchor], or
-/// [RawMenuAnchor].
+/// A controller used to manage a menu created by a [RawMenuAnchor], or
+/// [RawMenuAnchorGroup].
 ///
 /// A [MenuController] is used to control and interrogate a menu after it has
 /// been created, with methods such as [open] and [close], and state accessors
@@ -788,8 +788,10 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
 /// * [MenuAnchor], a menu anchor that follows the Material Design guidelines.
 /// * [MenuBar], a widget that creates a menu bar that can take an optional
 ///   [MenuController].
-/// * [SubmenuButton], a Material widget that has a button that manages a submenu.
-/// * [RawMenuAnchor], a generic widget that defines a region that build an overlay.
+/// * [SubmenuButton], a Material widget that has a button that manages a
+///   submenu.
+/// * [RawMenuAnchor], a generic widget that manages a submenu.
+/// * [RawMenuAnchorGroup], a generic widget that wraps a group of submenus.
 class MenuController {
   /// The anchor that this controller controls.
   ///
@@ -805,12 +807,8 @@ class MenuController {
   /// If `position` is given, then the menu will open at the position given, in
   /// the coordinate space of the root overlay.
   ///
-  /// If given, the `position` will override the [RawMenuAnchor.alignmentOffset]
-  /// given to the [RawMenuAnchor].
-  ///
-  /// If the menu's anchor point (either a [MenuBar], [MenuAnchor], or a
-  /// [RawMenuAnchor]) is scrolled by an ancestor, or the view changes size,
-  /// then any open menu will automatically close.
+  /// If the menu's anchor point is scrolled by an ancestor, or the view changes
+  /// size, then any open menus will automatically close.
   void open({Offset? position}) {
     assert(_anchor != null);
     _anchor!.open(position: position);
@@ -819,12 +817,11 @@ class MenuController {
   /// Close the menu that this [MenuController] is associated with.
   ///
   /// Associating with a menu is done by passing a [MenuController] to a
-  /// [RawMenuAnchor]. A [MenuController] is also be received by the
-  /// [RawMenuAnchor.builder] when invoked.
+  /// [RawMenuAnchor] or [MenuAnchor]. A [MenuController] is also be received by
+  /// [RawMenuAnchor.builder] or [MenuAnchor.builder] when invoked.
   ///
-  /// If the menu's anchor point (either a [MenuBar], [MenuAnchor], or a
-  /// [RawMenuAnchor]) is scrolled by an ancestor, or the view changes size,
-  /// then any open menu will automatically close.
+  /// If the menu's anchor point is scrolled by an ancestor, or the view changes
+  /// size, then any open menu will automatically close.
   void close() {
     _anchor?.close();
   }
