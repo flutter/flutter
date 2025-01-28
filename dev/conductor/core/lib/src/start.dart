@@ -286,13 +286,13 @@ class StartContext extends Context {
       await engine.newBranch(workingBranchName);
     }
 
-
     if (dartRevision != null && dartRevision!.isNotEmpty) {
       if (state.isMonorepo) {
         await framework.updateDartRevision(dartRevision!);
+      } else {
+        await engine.updateDartRevision(dartRevision!);
+        await engine.commit('Update Dart SDK to $dartRevision', addFirst: true);
       }
-      await engine.updateDartRevision(dartRevision!);
-      await engine.commit('Update Dart SDK to $dartRevision', addFirst: true);
     }
 
     final String engineHead = await engine.reverseParse('HEAD');
