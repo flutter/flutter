@@ -188,7 +188,7 @@ void main() {
     });
   });
 
-  test('parses flavor from standart configuration name', () {
+  test('parses flavor from standard configuration name', () {
     final Directory buildDir = fileSystem.directory('/path/to/builds')..createSync(recursive: true);
     final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
       ..createSync(recursive: true);
@@ -448,7 +448,7 @@ void main() {
       expect(context.stderr, isEmpty);
     });
 
-    test('parses flavor from standart configuration name', () {
+    test('parses flavor from standard configuration name', () {
       final Directory buildDir = fileSystem.directory('/path/to/builds')
         ..createSync(recursive: true);
       final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
