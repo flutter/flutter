@@ -16,7 +16,7 @@ import 'framework.dart';
 /// ```dart
 /// @Preview()
 /// WidgetPreview widgetPreview() {
-///   return WidgetPreview(name: 'Preview 1', child: const Text('Foo'));
+///   return const WidgetPreview(name: 'Preview 1', child: const Text('Foo'));
 /// }
 /// ```
 /// {@end-tool}
