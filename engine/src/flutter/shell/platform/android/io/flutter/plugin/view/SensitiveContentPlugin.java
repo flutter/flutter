@@ -7,15 +7,15 @@ package io.flutter.plugin.view;
 import static io.flutter.Build.API_LEVELS;
 
 import android.app.Activity;
-import android.view.View;
 import android.os.Build;
+import android.view.View;
 import androidx.annotation.NonNull;
 import io.flutter.embedding.engine.systemchannels.SensitiveContentChannel;
 import io.flutter.plugin.common.MethodChannel;
 
 /**
- * {@link SensitiveContentPlugin} is the implementation of all functionality needed to set
- * the content sensitivity level of a native Flutter Android {@code View}.
+ * {@link SensitiveContentPlugin} is the implementation of all functionality needed to set the
+ * content sensitivity level of a native Flutter Android {@code View}.
  *
  * <p>This plugin handles requests for setting content sensitivity sent by the {@link
  * io.flutter.embedding.engine.systemchannels.SensitiveContentChannel}.
@@ -50,7 +50,12 @@ public class SensitiveContentPlugin
 
     final View flutterView = mflutterActivity.findViewById(flutterViewId);
     if (flutterView == null) {
-      result.error("error", "Requested Flutter View with ID " + flutterViewId + " to set content sensitivty of was not found.", null);
+      result.error(
+          "error",
+          "Requested Flutter View with ID "
+              + flutterViewId
+              + " to set content sensitivty of was not found.",
+          null);
     }
 
     // Set requestedContentSensitivity on the requested View.
