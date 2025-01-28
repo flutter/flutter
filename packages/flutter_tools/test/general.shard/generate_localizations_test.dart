@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 import 'package:flutter_tools/src/localizations/localizations_utils.dart';
 import 'package:yaml/yaml.dart';
 
-import '../src/fake_process_manager.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
