@@ -188,10 +188,12 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
 
   final Codec testImageCodec = await instantiateImageCodec(Uint8List.fromList(test));
   final Image testImage = (await testImageCodec.getNextFrame()).image;
+  testImageCodec.dispose();
   final ByteData? testImageRgba = await testImage.toByteData();
 
   final Codec masterImageCodec = await instantiateImageCodec(Uint8List.fromList(master));
   final Image masterImage = (await masterImageCodec.getNextFrame()).image;
+  masterImageCodec.dispose();
   final ByteData? masterImageRgba = await masterImage.toByteData();
 
   final int width = testImage.width;
@@ -284,8 +286,16 @@ ByteData _invert(ByteData imageBytes) {
 }
 
 /// An unsupported [WebGoldenComparator] that exists for API compatibility.
+@Deprecated(
+  'Use GoldenFileComparator instead. '
+  'This feature was deprecated after v3.28.0-0.1.pre.',
+)
 class DefaultWebGoldenComparator extends WebGoldenComparator {
   /// This is provided to prevent warnings from the analyzer.
+  @Deprecated(
+    'Use a GoldenFileComparator implementation instead. '
+    'This feature was deprecated after v3.28.0-0.1.pre.',
+  )
   DefaultWebGoldenComparator(Uri _) {
     throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
   }

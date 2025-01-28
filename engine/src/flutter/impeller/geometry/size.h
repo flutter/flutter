@@ -101,6 +101,8 @@ struct TSize {
     };
   }
 
+  constexpr Type MinDimension() const { return std::min(width, height); }
+
   constexpr Type MaxDimension() const { return std::max(width, height); }
 
   constexpr TSize Abs() const { return {std::fabs(width), std::fabs(height)}; }
@@ -131,12 +133,25 @@ struct TSize {
                  static_cast<Type>(std::ceil(other.height))};
   }
 
+  /// Return the mip count of the texture.
+  ///
+  /// Note: does not count the final 1x1 mip level, both for practical reasons
+  /// and to workaround driver bugs.
   constexpr size_t MipCount() const {
     constexpr size_t minimum_mip = 1u;
     if (IsEmpty()) {
       return minimum_mip;
     }
     size_t result = std::max(ceil(log2(width)), ceil(log2(height)));
+    // This check avoids creating 1x1 mip levels, which are both pointless
+    // and cause rendering problems on some Adreno GPUs.
+    // See:
+    //      * https://github.com/flutter/flutter/issues/160441
+    //      * https://github.com/flutter/flutter/issues/159876
+    //      * https://github.com/flutter/flutter/issues/160587
+    if (result > 1) {
+      result -= 1;
+    }
     return std::max(result, minimum_mip);
   }
 };
