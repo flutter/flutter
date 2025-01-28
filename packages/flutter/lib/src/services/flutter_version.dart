@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @docImport 'dart:io'
+
 /// [FlutterVersion] contains various meta information about with which
 /// Flutter version this app was compiled.
 /// It tries to mimic the information that is seen when executing `flutter --version`.
@@ -10,7 +12,7 @@
 /// custom embedder, these values might be unreliable.
 ///
 /// See also:
-///  - [Platform.version](https://api.dart.dev/stable/dart-io/Platform/version.html)
+///  - [Platform.version]
 abstract final class FlutterVersion {
   const FlutterVersion._();
 
