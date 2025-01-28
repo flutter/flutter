@@ -2,24 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart'
-    show
-        ButtonStyle,
-        ColorScheme,
-        Colors,
-        DynamicSchemeVariant,
-        FilledButton,
-        Icons,
-        MaterialApp,
-        MenuButtonThemeData,
-        MenuItemButton,
-        Scaffold,
-        Theme,
-        ThemeData,
-        kElevationToShadow;
-import 'package:flutter/semantics.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 /// Flutter code sample for a [RawMenuAnchor] that demonstrates
 /// how to create a simple menu.
@@ -142,9 +126,8 @@ class CustomMenu extends StatelessWidget {
           left: info.anchorRect.left,
           // The overlay will be treated as a dialog. SemanticsProperties.label can
           // be set to a localized string to describe the dialog.
-          child: Semantics.fromProperties(
-            explicitChildNodes: true,
-            properties: const SemanticsProperties(scopesRoute: true),
+          child: Semantics(
+            scopesRoute: true,
             child: TapRegion(
               groupId: info.tapRegionGroupId,
               onTapOutside: (PointerDownEvent event) {
