@@ -1323,23 +1323,6 @@ SvgBlendMode? blendModeToSvgEnum(ui.BlendMode? blendMode) {
   }
 }
 
-String? stringForStrokeCap(ui.StrokeCap? strokeCap) {
-  return switch (strokeCap) {
-    null => null,
-    ui.StrokeCap.butt => 'butt',
-    ui.StrokeCap.round => 'round',
-    ui.StrokeCap.square => 'square',
-  };
-}
-
-String stringForStrokeJoin(ui.StrokeJoin strokeJoin) {
-  return switch (strokeJoin) {
-    ui.StrokeJoin.round => 'round',
-    ui.StrokeJoin.bevel => 'bevel',
-    ui.StrokeJoin.miter => 'miter',
-  };
-}
-
 /// Clips the content element against a stack of clip operations and returns
 /// root of a tree that contains content node.
 ///
