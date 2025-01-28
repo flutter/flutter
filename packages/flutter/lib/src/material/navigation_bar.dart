@@ -988,7 +988,8 @@ class _NavigationBarDestinationSemantics extends StatelessWidget {
   Widget build(BuildContext context) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final _NavigationDestinationInfo destinationInfo = _NavigationDestinationInfo.of(context);
-
+    // The AnimationStatusBuilder will make sure that the semantics update to
+    // "selected" when the animation status changes.
     return _StatusTransitionWidgetBuilder(
       animation: destinationInfo.selectedAnimation,
       builder: (BuildContext context, Widget? child) {
