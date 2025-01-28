@@ -191,6 +191,176 @@ void main() {
         );
       });
 
+      test('creates state file if provided correct inputs from monorepo', () async {
+        stdio.stdin.add('y'); // accept prompt from ensureBranchPointTagged()
+        const String revision2 = 'def789';
+        const String revision3 = '123abc';
+        const String previousDartRevision = '171876a4e6cf56ee6da1f97d203926bd7afda7ef';
+        const String nextDartRevision = 'f6c91128be6b77aef8351e1e3a9d07c85bc2e46e';
+        const String previousVersion = '1.2.0-1.0.pre';
+        // This is what this release will be
+        const String nextVersion = '1.2.0-1.1.pre';
+        const String candidateBranch = 'flutter-1.2-candidate.1';
+
+        final Directory engine = fileSystem
+            .directory(checkoutsParentDirectory)
+            .childDirectory('flutter_conductor_checkouts')
+            .childDirectory('engine');
+
+        final File depsFile = engine.childFile('DEPS');
+
+        final List<FakeCommand> commands = <FakeCommand>[
+          // clone and rev-parse engine
+          FakeCommand(
+            command: <String>[
+              'git',
+              'clone',
+              '--origin',
+              'upstream',
+              '--',
+              FrameworkRepository.defaultUpstream,
+              fileSystem.path.join(
+                checkoutsParentDirectory,
+                'flutter_conductor_checkouts',
+                'framework',
+              ),
+            ],
+            onRun: (_) {
+              // ensure this is a monorepo checkout
+              fileSystem
+                  .directory(
+                    fileSystem.path.join(
+                      checkoutsParentDirectory,
+                      'flutter_conductor_checkouts',
+                      'framework',
+                      'engine',
+                    ),
+                  )
+                  .createSync(recursive: true);
+
+              fileSystem
+                  .file(
+                    fileSystem.path.join(
+                      checkoutsParentDirectory,
+                      'flutter_conductor_checkouts',
+                      'framework',
+                      'DEPS',
+                    ),
+                  )
+                  .writeAsStringSync(generateMockDeps(previousDartRevision));
+            },
+          ),
+          const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', frameworkMirror]),
+          const FakeCommand(command: <String>['git', 'fetch', 'mirror']),
+          const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
+          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
+
+          FakeCommand(
+            command: <String>[
+              'git',
+              'clone',
+              '--origin',
+              'upstream',
+              '--',
+              EngineRepository.defaultUpstream,
+              engine.path,
+            ],
+            onRun: (_) {
+              // Create the DEPS file which the tool will update
+              engine.createSync(recursive: true);
+              depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
+            },
+          ),
+          const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', engineMirror]),
+          const FakeCommand(command: <String>['git', 'fetch', 'mirror']),
+          const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
+          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
+          const FakeCommand(
+            command: <String>['git', 'checkout', '-b', 'cherrypicks-$candidateBranch'],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'status', '--porcelain'],
+            stdout: 'MM path/to/DEPS',
+          ),
+          const FakeCommand(command: <String>['git', 'add', '--all']),
+          const FakeCommand(
+            command: <String>['git', 'commit', '--message', 'Update Dart SDK to $nextDartRevision'],
+          ),
+          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
+          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
+
+          // checkout framework
+          const FakeCommand(
+            command: <String>['git', 'checkout', '-b', 'cherrypicks-$candidateBranch'],
+          ),
+          const FakeCommand(
+            command: <String>[
+              'git',
+              'describe',
+              '--match',
+              '*.*.*',
+              '--tags',
+              'refs/remotes/upstream/$candidateBranch',
+            ],
+            stdout: '$previousVersion-42-gabc123',
+          ),
+          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
+          const FakeCommand(
+            command: <String>['git', 'merge-base', 'upstream/$candidateBranch', 'upstream/master'],
+            stdout: branchPointRevision,
+          ),
+          // check if commit is tagged, zero exit code means it is tagged
+          const FakeCommand(
+            command: <String>['git', 'describe', '--exact-match', '--tags', branchPointRevision],
+          ),
+        ];
+
+        final CommandRunner<void> runner = createRunner(commands: commands);
+
+        final String stateFilePath = fileSystem.path.join(
+          platform.environment['HOME']!,
+          kStateFileName,
+        );
+
+        await runner.run(<String>[
+          'start',
+          '--$kCandidateOption',
+          candidateBranch,
+          '--$kReleaseOption',
+          releaseChannel,
+          '--$kStateOption',
+          stateFilePath,
+          '--$kDartRevisionOption',
+          nextDartRevision,
+          '--$kGithubUsernameOption',
+          githubUsername,
+        ]);
+
+        final File stateFile = fileSystem.file(stateFilePath);
+
+        final pb.ConductorState state = pb.ConductorState();
+        state.mergeFromProto3Json(jsonDecode(stateFile.readAsStringSync()));
+
+        expect(state.releaseType, ReleaseType.BETA_HOTFIX);
+        expect(
+          stdio.error,
+          isNot(contains('Tried to tag the branch point, however the target version')),
+        );
+        expect(processManager, hasNoRemainingExpectations);
+        expect(state.isInitialized(), true);
+        expect(state.releaseChannel, releaseChannel);
+        expect(state.releaseVersion, nextVersion);
+        expect(state.engine.candidateBranch, candidateBranch);
+        expect(state.engine.startingGitHead, revision2);
+        expect(state.engine.dartRevision, nextDartRevision);
+        expect(state.engine.upstream.url, 'git@github.com:flutter/engine.git');
+        expect(state.framework.candidateBranch, candidateBranch);
+        expect(state.framework.startingGitHead, revision3);
+        expect(state.framework.upstream.url, 'git@github.com:flutter/flutter.git');
+        expect(state.currentPhase, ReleasePhase.APPLY_ENGINE_CHERRYPICKS);
+        expect(state.conductorVersion, conductorVersion);
+      });
+
       test('creates state file if provided correct inputs', () async {
         stdio.stdin.add('y'); // accept prompt from ensureBranchPointTagged()
         const String revision2 = 'def789';
