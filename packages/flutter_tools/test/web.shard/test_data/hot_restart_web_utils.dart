@@ -6,12 +6,12 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 
-import '../integration.shard/test_data/hot_reload_project.dart';
-import '../integration.shard/test_driver.dart';
-import '../integration.shard/test_utils.dart';
-import '../src/common.dart';
+import '../../integration.shard/test_data/hot_reload_project.dart';
+import '../../integration.shard/test_driver.dart';
+import '../../integration.shard/test_utils.dart';
+import '../../src/common.dart';
 
-import 'test_data/hot_reload_index_html_samples.dart';
+import 'hot_reload_index_html_samples.dart';
 
 void main() async {
   await testAll(useDDCLibraryBundleFormat: false);
