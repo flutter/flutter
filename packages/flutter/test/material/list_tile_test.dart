@@ -160,10 +160,7 @@ void main() {
     await tester.pumpWidget(buildFrame(isTwoLine: true, textScaler: const TextScaler.linear(4.0)));
     testChildren();
     testHorizontalGeometry();
-    if (!kIsWeb || isSkiaWeb) {
-      // https://github.com/flutter/flutter/issues/99933
-      testVerticalGeometry(192.0);
-    }
+    testVerticalGeometry(192.0);
 
     // Make sure that the height of a large subtitle is taken into account.
     await tester.pumpWidget(
@@ -175,20 +172,14 @@ void main() {
     );
     testChildren();
     testHorizontalGeometry();
-    if (!kIsWeb || isSkiaWeb) {
-      // https://github.com/flutter/flutter/issues/99933
-      testVerticalGeometry(108.0);
-    }
+    testVerticalGeometry(108.0);
 
     await tester.pumpWidget(
       buildFrame(isThreeLine: true, textScaler: const TextScaler.linear(4.0)),
     );
     testChildren();
     testHorizontalGeometry();
-    if (!kIsWeb || isSkiaWeb) {
-      // https://github.com/flutter/flutter/issues/99933
-      testVerticalGeometry(192.0);
-    }
+    testVerticalGeometry(192.0);
   });
 
   testWidgets('ListTile geometry (RTL)', (WidgetTester tester) async {
@@ -536,10 +527,6 @@ void main() {
       ),
     );
 
-    if (kIsWeb && !isSkiaWeb) {
-      // https://github.com/flutter/flutter/issues/99933
-      return;
-    }
     const double height = 300;
     const double avatarTop = 130.0;
     const double placeholderTop = 138.0;
@@ -2621,6 +2608,12 @@ void main() {
   testWidgets('Leading/Trailing exceeding list tile width throws exception', (
     WidgetTester tester,
   ) async {
+    List<dynamic> exceptions = <dynamic>[];
+    FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      exceptions.add(details.exception);
+    };
+
     Widget buildListTile({Widget? leading, Widget? trailing}) {
       return MaterialApp(
         home: Material(
@@ -2636,16 +2629,56 @@ void main() {
     // List tile width is 100 as a result, an exception should be thrown.
     await tester.pumpWidget(buildListTile(leading: const SizedBox(width: 61)));
 
-    // Error message cannot be tested as there too many errors thrown.
-    expect(tester.takeException(), isNotNull);
+    FlutterError.onError = oldHandler;
+    expect(exceptions.first.runtimeType, FlutterError);
+    FlutterError error = exceptions.first as FlutterError;
+    expect(error.diagnostics.length, 3);
+    expect(
+      error.diagnostics[0].toStringDeep(),
+      'Leading widget consumes the entire tile width (including\nListTile.contentPadding).\n',
+    );
+    expect(
+      error.diagnostics[1].toStringDeep(),
+      'Either resize the tile width so that the leading widget plus any\n'
+      'content padding do not exceed the tile width, or use a sized\n'
+      'widget, or consider replacing ListTile with a custom widget.\n',
+    );
+    expect(
+      error.diagnostics[2].toStringDeep(),
+      'See also:\n'
+      'https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4\n',
+    );
+
+    exceptions = <dynamic>[];
+    oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      exceptions.add(details.exception);
+    };
 
     // Test a trailing widget that exceeds the list tile width.
     // 16 (content padding) + 61 (trailing width) + 24 (content padding) = 101.
     // List tile width is 100 as a result, an exception should be thrown.
     await tester.pumpWidget(buildListTile(trailing: const SizedBox(width: 61)));
 
-    // Error message cannot tested be as there too many errors thrown.
-    expect(tester.takeException(), isNotNull);
+    FlutterError.onError = oldHandler;
+    expect(exceptions.first.runtimeType, FlutterError);
+    error = exceptions.first as FlutterError;
+    expect(error.diagnostics.length, 3);
+    expect(
+      error.diagnostics[0].toStringDeep(),
+      'Trailing widget consumes the entire tile width (including\nListTile.contentPadding).\n',
+    );
+    expect(
+      error.diagnostics[1].toStringDeep(),
+      'Either resize the tile width so that the trailing widget plus any\n'
+      'content padding do not exceed the tile width, or use a sized\n'
+      'widget, or consider replacing ListTile with a custom widget.\n',
+    );
+    expect(
+      error.diagnostics[2].toStringDeep(),
+      'See also:\n'
+      'https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4\n',
+    );
   });
 
   group('Material 2', () {

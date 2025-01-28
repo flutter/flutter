@@ -10,7 +10,6 @@ library;
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1687,7 +1686,6 @@ void main() {
       await tester.longPress(find.text(label));
       expect(tester.getSize(find.text(label).last).height, equals(80.0));
     },
-    skip: kIsWeb && !isSkiaWeb, // https://github.com/flutter/flutter/issues/99933
   );
 
   testWidgets('Different behaviour of tool tip in BottomNavigationBarItem', (
@@ -2838,7 +2836,7 @@ void main() {
       tester.getRect(find.byKey(icon1)),
       Rect.fromLTRB(500.0, iconTop, 700.0, iconTop + iconHeight),
     );
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+  });
 
   testWidgets('Material2 - BottomNavigationBar centered landscape layout', (
     WidgetTester tester,
@@ -2982,7 +2980,7 @@ void main() {
       tester.getRect(find.byKey(icon1)),
       Rect.fromLTRB(450.0, iconTop, 650.0, iconTop + iconHeight),
     );
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+  });
 
   testWidgets('Material2 - BottomNavigationBar linear landscape layout', (
     WidgetTester tester,
@@ -3122,7 +3120,7 @@ void main() {
       tester.getRect(find.byKey(icon1)),
       Rect.fromLTRB(secondItemLeft, iconTop, secondItemLeft + iconWidth, iconTop + iconHeight),
     );
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+  });
 
   testWidgets('BottomNavigationBar linear landscape layout label RenderFlex overflow', (
     WidgetTester tester,
