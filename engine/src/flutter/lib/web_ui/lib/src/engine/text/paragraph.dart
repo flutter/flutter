@@ -1108,19 +1108,9 @@ String? _textDecorationToCssString(
     }
   }
   if (decorationStyle != null) {
-    decorations.write(_decorationStyleToCssString(decorationStyle));
+    decorations.write(decorationStyle.name);
   }
   return decorations.isEmpty ? null : decorations.toString();
-}
-
-String? _decorationStyleToCssString(ui.TextDecorationStyle decorationStyle) {
-  return switch (decorationStyle) {
-    ui.TextDecorationStyle.dashed => 'dashed',
-    ui.TextDecorationStyle.dotted => 'dotted',
-    ui.TextDecorationStyle.double => 'double',
-    ui.TextDecorationStyle.solid => 'solid',
-    ui.TextDecorationStyle.wavy => 'wavy',
-  };
 }
 
 /// Converts [align] to its corresponding CSS value.

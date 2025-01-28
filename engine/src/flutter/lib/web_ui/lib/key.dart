@@ -133,23 +133,20 @@ class KeyData {
     // JavaScript only support 32-bit bitwise operations and needs to use
     // division instead.
     final int planeNum = (logical / 0x100000000).floor();
-    final String planeDescription =
-        (() {
-          return switch (planeNum) {
-            0x000 => ' (Unicode)',
-            0x001 => ' (Unprintable)',
-            0x002 => ' (Flutter)',
-            0x011 => ' (Android)',
-            0x012 => ' (Fuchsia)',
-            0x013 => ' (iOS)',
-            0x014 => ' (macOS)',
-            0x015 => ' (GTK)',
-            0x016 => ' (Windows)',
-            0x017 => ' (Web)',
-            0x018 => ' (GLFW)',
-            _ => '',
-          };
-        })();
+    final String planeDescription = switch (planeNum) {
+      0x000 => ' (Unicode)',
+      0x001 => ' (Unprintable)',
+      0x002 => ' (Flutter)',
+      0x011 => ' (Android)',
+      0x012 => ' (Fuchsia)',
+      0x013 => ' (iOS)',
+      0x014 => ' (macOS)',
+      0x015 => ' (GTK)',
+      0x016 => ' (Windows)',
+      0x017 => ' (Web)',
+      0x018 => ' (GLFW)',
+      _ => '',
+    };
     return '$result$planeDescription';
   }
 
