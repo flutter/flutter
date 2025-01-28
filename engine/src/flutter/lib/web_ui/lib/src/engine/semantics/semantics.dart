@@ -32,6 +32,7 @@ import 'platform_view.dart';
 import 'route.dart';
 import 'scrollable.dart';
 import 'semantics_helper.dart';
+import 'table.dart';
 import 'tabs.dart';
 import 'tappable.dart';
 import 'text_field.dart';
@@ -421,6 +422,18 @@ enum EngineSemanticsRole {
 
   /// An alert dialog.
   alertDialog,
+
+  /// A table structure containing data arranged in rows and columns.
+  table,
+
+  /// A cell in a [table] that does not contain column or row header information.
+  cell,
+
+  /// A row of [cell]s or or [columnHeader]s in a [table].
+  row,
+
+  /// A cell in a [table] contains header information for a column.
+  columnHeader,
 
   /// A role used when a more specific role cannot be assigend to
   /// a [SemanticsObject].
@@ -1755,6 +1768,14 @@ class SemanticsObject {
         return EngineSemanticsRole.dialog;
       case ui.SemanticsRole.alertDialog:
         return EngineSemanticsRole.alertDialog;
+      case ui.SemanticsRole.table:
+        return EngineSemanticsRole.table;
+      case ui.SemanticsRole.cell:
+        return EngineSemanticsRole.cell;
+      case ui.SemanticsRole.row:
+        return EngineSemanticsRole.row;
+      case ui.SemanticsRole.columnHeader:
+        return EngineSemanticsRole.columnHeader;
       case ui.SemanticsRole.none:
       // fallback to checking semantics properties.
     }
@@ -1806,6 +1827,10 @@ class SemanticsObject {
       EngineSemanticsRole.tabPanel => SemanticTabPanel(this),
       EngineSemanticsRole.dialog => SemanticDialog(this),
       EngineSemanticsRole.alertDialog => SemanticAlertDialog(this),
+      EngineSemanticsRole.table => SemanticTable(this),
+      EngineSemanticsRole.cell => SemanticCell(this),
+      EngineSemanticsRole.row => SemanticRow(this),
+      EngineSemanticsRole.columnHeader => SemanticColumnHeader(this),
       EngineSemanticsRole.generic => GenericRole(this),
     };
   }
