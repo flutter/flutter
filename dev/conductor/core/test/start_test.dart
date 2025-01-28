@@ -209,7 +209,28 @@ void main() {
 
         final File depsFile = engine.childFile('DEPS');
 
-        final List<FakeCommand> engineCommands = <FakeCommand>[
+        final List<FakeCommand> commands = <FakeCommand>[
+          // clone and rev-parse engine
+          FakeCommand(
+            command: <String>[
+              'git',
+              'clone',
+              '--origin',
+              'upstream',
+              '--',
+              FrameworkRepository.defaultUpstream,
+              fileSystem.path.join(
+                checkoutsParentDirectory,
+                'flutter_conductor_checkouts',
+                'framework',
+              ),
+            ],
+          ),
+          const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', frameworkMirror]),
+          const FakeCommand(command: <String>['git', 'fetch', 'mirror']),
+          const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
+          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
+
           FakeCommand(
             command: <String>[
               'git',
@@ -243,28 +264,8 @@ void main() {
           ),
           const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
           const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision2),
-        ];
 
-        final List<FakeCommand> frameworkCommands = <FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              'git',
-              'clone',
-              '--origin',
-              'upstream',
-              '--',
-              FrameworkRepository.defaultUpstream,
-              fileSystem.path.join(
-                checkoutsParentDirectory,
-                'flutter_conductor_checkouts',
-                'framework',
-              ),
-            ],
-          ),
-          const FakeCommand(command: <String>['git', 'remote', 'add', 'mirror', frameworkMirror]),
-          const FakeCommand(command: <String>['git', 'fetch', 'mirror']),
-          const FakeCommand(command: <String>['git', 'checkout', 'upstream/$candidateBranch']),
-          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision3),
+          // checkout framework
           const FakeCommand(
             command: <String>['git', 'checkout', '-b', 'cherrypicks-$candidateBranch'],
           ),
@@ -290,9 +291,7 @@ void main() {
           ),
         ];
 
-        final CommandRunner<void> runner = createRunner(
-          commands: <FakeCommand>[...engineCommands, ...frameworkCommands],
-        );
+        final CommandRunner<void> runner = createRunner(commands: commands);
 
         final String stateFilePath = fileSystem.path.join(
           platform.environment['HOME']!,
