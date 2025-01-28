@@ -546,7 +546,7 @@ abstract final class SystemChannels {
   ///  * `enableContextMenu`: enables the browser's context menu. When a Flutter
   ///    app starts, the browser's context menu is already enabled.
   ///  * `disableContextMenu`: disables the browser's context menu.
-  static const MethodChannel contextMenu = OptionalMethodChannel(
+static const MethodChannel contextMenu = OptionalMethodChannel(
     'flutter/contextmenu',
     JSONMethodCodec(),
   );
@@ -580,7 +580,11 @@ abstract final class SystemChannels {
   /// [OptionalMethodChannel.invokeMethod]):
   ///
   ///  * `setContentSensitivity`: Sets the content sensitivity level of the native backing
-  ///     backing for the Flutter view to one of the [ContentSensitivity] levels.
+  ///     backing for the Flutter view to one of the [ContentSensitivity] levels. The second
+  ///     argument is a JSON object with keys `flutterViewId` for the ID of the Flutter view
+  ///     that this method channel should set the content sensitivity for and
+  ///     `contentSensitivityLevel` for the ID of the `ContentSensitivity` level that the channel
+  ///     should set for the relevant Flutter view.
   static const MethodChannel sensitiveContent = OptionalMethodChannel(
     'flutter/sensitivecontent',
   );
