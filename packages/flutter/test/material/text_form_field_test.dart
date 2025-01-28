@@ -1665,19 +1665,15 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/135292.
-  testWidgets('TextFormField shows widget returned by errorBuilder', (WidgetTester tester) async {
+  testWidgets('Widget returned by errorBuilder is shown', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Center(
             child: TextFormField(
               autovalidateMode: AutovalidateMode.always,
-              validator: (String? value) {
-                return 'validation error';
-              },
-              errorBuilder: (String errorText) {
-                return Text('**$errorText**');
-              },
+              validator: (String? value) => 'validation error',
+              errorBuilder: (String errorText) => Text('**$errorText**'),
             ),
           ),
         ),
