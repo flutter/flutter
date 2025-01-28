@@ -1114,18 +1114,13 @@ String? _textDecorationToCssString(
 }
 
 String? _decorationStyleToCssString(ui.TextDecorationStyle decorationStyle) {
-  switch (decorationStyle) {
-    case ui.TextDecorationStyle.dashed:
-      return 'dashed';
-    case ui.TextDecorationStyle.dotted:
-      return 'dotted';
-    case ui.TextDecorationStyle.double:
-      return 'double';
-    case ui.TextDecorationStyle.solid:
-      return 'solid';
-    case ui.TextDecorationStyle.wavy:
-      return 'wavy';
-  }
+  return switch (decorationStyle) {
+    ui.TextDecorationStyle.dashed => 'dashed',
+    ui.TextDecorationStyle.dotted => 'dotted',
+    ui.TextDecorationStyle.double => 'double',
+    ui.TextDecorationStyle.solid => 'solid',
+    ui.TextDecorationStyle.wavy => 'wavy',
+  };
 }
 
 /// Converts [align] to its corresponding CSS value.

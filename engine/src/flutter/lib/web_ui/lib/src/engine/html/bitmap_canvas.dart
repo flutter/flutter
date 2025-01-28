@@ -1324,28 +1324,20 @@ SvgBlendMode? blendModeToSvgEnum(ui.BlendMode? blendMode) {
 }
 
 String? stringForStrokeCap(ui.StrokeCap? strokeCap) {
-  if (strokeCap == null) {
-    return null;
-  }
-  switch (strokeCap) {
-    case ui.StrokeCap.butt:
-      return 'butt';
-    case ui.StrokeCap.round:
-      return 'round';
-    case ui.StrokeCap.square:
-      return 'square';
-  }
+  return switch (strokeCap) {
+    null => null,
+    ui.StrokeCap.butt => 'butt',
+    ui.StrokeCap.round => 'round',
+    ui.StrokeCap.square => 'square',
+  };
 }
 
 String stringForStrokeJoin(ui.StrokeJoin strokeJoin) {
-  switch (strokeJoin) {
-    case ui.StrokeJoin.round:
-      return 'round';
-    case ui.StrokeJoin.bevel:
-      return 'bevel';
-    case ui.StrokeJoin.miter:
-      return 'miter';
-  }
+  return switch (strokeJoin) {
+    ui.StrokeJoin.round => 'round',
+    ui.StrokeJoin.bevel => 'bevel',
+    ui.StrokeJoin.miter => 'miter',
+  };
 }
 
 /// Clips the content element against a stack of clip operations and returns
