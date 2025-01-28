@@ -120,13 +120,22 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///  * [hide], which hides the menu shown by this method.
   ///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates whether
   ///    this method is supported on the current platform.
-  Future<void> show(
-    Rect targetRect,
-    List<IOSSystemContextMenuItem> items,
-    WidgetsLocalizations localizations,
-  ) {
+  Future<void> show(Rect targetRect, List<IOSSystemContextMenuItem> items) {
     assert(!_isDisposed);
     assert(items.isNotEmpty);
+    assert(
+      items.every((IOSSystemContextMenuItem item) {
+        return switch (item) {
+          IOSSystemContextMenuItemCopy() => true,
+          IOSSystemContextMenuItemCut() => true,
+          IOSSystemContextMenuItemPaste() => true,
+          IOSSystemContextMenuItemSelectAll() => true,
+          IOSSystemContextMenuItemLookUp() => item.title != null,
+          IOSSystemContextMenuItemSearchWeb() => item.title != null,
+          IOSSystemContextMenuItemShare() => item.title != null,
+        };
+      }),
+    );
 
     // Don't show the same thing that's already being shown.
     if (_lastShown != null &&
@@ -144,11 +153,7 @@ class SystemContextMenuController with SystemContextMenuClient {
     ServicesBinding.systemContextMenuClient = this;
 
     final List<Map<String, dynamic>> itemsJson =
-        items
-            .map<Map<String, dynamic>>(
-              (IOSSystemContextMenuItem item) => item._toJson(localizations),
-            )
-            .toList();
+        items.map<Map<String, dynamic>>((IOSSystemContextMenuItem item) => item._toJson()).toList();
     _lastTargetRect = targetRect;
     _lastItems = items;
     _lastShown = this;
@@ -231,18 +236,16 @@ sealed class IOSSystemContextMenuItem {
   /// pressed.
   VoidCallback? get onPressed => null;
 
+  /// The type used when serializing to json for passing over a method channel,
+  /// specifically `ContextMenu.showSystemContextMenu`.
   String get _jsonType;
-
-  String? _getJsonTitle(WidgetsLocalizations? localizations) => null;
 
   /// Returns json for use in method channel calls, specifically
   /// `ContextMenu.showSystemContextMenu`.
-  Map<String, dynamic> _toJson(WidgetsLocalizations? localizations) {
-    final String? jsonTitle = title ?? _getJsonTitle(localizations);
-
+  Map<String, dynamic> _toJson() {
     return <String, dynamic>{
       'callbackId': hashCode,
-      if (jsonTitle != null) 'title': jsonTitle,
+      if (title != null) 'title': title,
       'type': _jsonType,
     };
   }
@@ -376,11 +379,6 @@ class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
   String get _jsonType => 'lookUp';
 
   @override
-  String _getJsonTitle(WidgetsLocalizations? localizations) {
-    return localizations!.lookUpButtonLabel;
-  }
-
-  @override
   String toString() {
     return 'IOSSystemContextMenuItemLookUp(title: $title)';
   }
@@ -414,11 +412,6 @@ class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
   String get _jsonType => 'searchWeb';
 
   @override
-  String _getJsonTitle(WidgetsLocalizations? localizations) {
-    return localizations!.searchWebButtonLabel;
-  }
-
-  @override
   String toString() {
     return 'IOSSystemContextMenuItemSearchWeb(title: $title)';
   }
@@ -450,11 +443,6 @@ class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem {
 
   @override
   String get _jsonType => 'share';
-
-  @override
-  String _getJsonTitle(WidgetsLocalizations? localizations) {
-    return localizations!.shareButtonLabel;
-  }
 
   @override
   String toString() {

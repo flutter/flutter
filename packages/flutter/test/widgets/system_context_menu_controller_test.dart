@@ -64,8 +64,7 @@ void main() {
     final List<IOSSystemContextMenuItem> items = <IOSSystemContextMenuItem>[
       const IOSSystemContextMenuItemCopy(),
     ];
-    const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
-    controller.show(rect1, items, localizations);
+    controller.show(rect1, items);
     expect(targetRects, hasLength(1));
     expect(targetRects.last['x'], rect1.left);
     expect(targetRects.last['y'], rect1.top);
@@ -73,13 +72,13 @@ void main() {
     expect(targetRects.last['height'], rect1.height);
 
     // Showing the same thing again does nothing.
-    controller.show(rect1, items, localizations);
+    controller.show(rect1, items);
     expect(controller.isVisible, isTrue);
     expect(targetRects, hasLength(1));
 
     // Showing a new rect calls the platform.
     const Rect rect2 = Rect.fromLTWH(1.0, 1.0, 200.0, 200.0);
-    controller.show(rect2, items, localizations);
+    controller.show(rect2, items);
     expect(targetRects, hasLength(2));
     expect(targetRects.last['x'], rect2.left);
     expect(targetRects.last['y'], rect2.top);
@@ -97,7 +96,7 @@ void main() {
     expect(hideCount, 1);
 
     // Showing the last shown rect calls the platform.
-    controller.show(rect2, items, localizations);
+    controller.show(rect2, items);
     expect(controller.isVisible, isTrue);
     expect(targetRects, hasLength(3));
     expect(targetRects.last['x'], rect2.left);
@@ -168,8 +167,7 @@ void main() {
     final List<IOSSystemContextMenuItem> items = <IOSSystemContextMenuItem>[
       const IOSSystemContextMenuItemCopy(),
     ];
-    const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
-    controller.show(rect1, items, localizations);
+    controller.show(rect1, items);
     expect(controller.isVisible, isTrue);
     expect(targetRects, hasLength(1));
     expect(targetRects.last['x'], rect1.left);
@@ -213,9 +211,8 @@ void main() {
     final List<IOSSystemContextMenuItem> items = <IOSSystemContextMenuItem>[
       const IOSSystemContextMenuItemCopy(),
     ];
-    const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
     expect(() {
-      controller1.show(rect1, items, localizations);
+      controller1.show(rect1, items);
     }, isNot(throwsAssertionError));
     expect(controller1.isVisible, isTrue);
 
@@ -227,7 +224,7 @@ void main() {
     expect(controller2.isVisible, isFalse);
     const Rect rect2 = Rect.fromLTWH(1.0, 1.0, 200.0, 200.0);
     expect(() {
-      controller2.show(rect2, items, localizations);
+      controller2.show(rect2, items);
     }, throwsAssertionError);
     expect(controller1.isVisible, isTrue);
     expect(controller2.isVisible, isFalse);
@@ -289,8 +286,7 @@ void main() {
     final List<IOSSystemContextMenuItem> items = <IOSSystemContextMenuItem>[
       const IOSSystemContextMenuItemCopy(),
     ];
-    const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
-    controller1.show(rect1, items, localizations);
+    controller1.show(rect1, items);
     expect(controller1.isVisible, isTrue);
     expect(targetRects, hasLength(1));
     expect(targetRects.last['x'], rect1.left);
@@ -307,7 +303,7 @@ void main() {
     });
     expect(controller2.isVisible, isFalse);
     const Rect rect2 = Rect.fromLTWH(1.0, 1.0, 200.0, 200.0);
-    controller2.show(rect2, items, localizations);
+    controller2.show(rect2, items);
     expect(controller1.isVisible, isFalse);
     expect(controller2.isVisible, isTrue);
     expect(targetRects, hasLength(2));
@@ -381,15 +377,14 @@ void main() {
       // https://github.com/flutter/flutter/issues/103163
     ];
 
-    const WidgetsLocalizations localizations = DefaultWidgetsLocalizations();
-    controller.show(rect, items1, localizations);
+    controller.show(rect, items1);
     expect(controller.isVisible, isTrue);
     expect(itemsReceived, hasLength(1));
     expect(itemsReceived.last, hasLength(items1.length));
     expect(itemsReceived.last, equals(items1));
 
     // Showing the same thing again does nothing.
-    controller.show(rect, items1, localizations);
+    controller.show(rect, items1);
     expect(controller.isVisible, isTrue);
     expect(itemsReceived, hasLength(1));
 
@@ -397,25 +392,23 @@ void main() {
     final List<IOSSystemContextMenuItem> items2 = <IOSSystemContextMenuItem>[
       const IOSSystemContextMenuItemCut(),
     ];
-    controller.show(rect, items2, localizations);
+    controller.show(rect, items2);
     expect(controller.isVisible, isTrue);
     expect(itemsReceived, hasLength(2));
     expect(itemsReceived.last, hasLength(items2.length));
     expect(itemsReceived.last, equals(items2));
 
-    // Calling show with a missing title sets the title to the default from
-    // localizations.
+    // Calling show with a missing title throws an assertion error.
     final List<IOSSystemContextMenuItem> items3 = <IOSSystemContextMenuItem>[
       const IOSSystemContextMenuItemSearchWeb(),
     ];
-    controller.show(rect, items3, localizations);
+    expect(() {
+      controller.show(rect, items3);
+    }, throwsAssertionError);
     expect(controller.isVisible, isTrue);
-    expect(itemsReceived, hasLength(3));
-    expect(itemsReceived.last, hasLength(items3.length));
-    // Not equal, because the title was changed to the default.
-    expect(itemsReceived.last, isNot(equals(items3)));
-    expect(itemsReceived.last.first.runtimeType, items3.first.runtimeType);
-    expect(itemsReceived.last.first.title, isNot(items3.first.title));
+    expect(itemsReceived, hasLength(2));
+    expect(itemsReceived.last, hasLength(items2.length));
+    expect(itemsReceived.last, equals(items2));
 
     controller.hide();
     expect(controller.isVisible, isFalse);

@@ -144,6 +144,31 @@ class SystemContextMenu extends StatefulWidget {
 class _SystemContextMenuState extends State<SystemContextMenu> {
   late final SystemContextMenuController _systemContextMenuController;
 
+  /// Gets `widget.items` with any missing titles set to their default localized
+  /// values.
+  List<IOSSystemContextMenuItem> _getItems(WidgetsLocalizations localizations) {
+    return widget.items.map((IOSSystemContextMenuItem item) {
+      return switch (item) {
+        IOSSystemContextMenuItemCopy() => item,
+        IOSSystemContextMenuItemCut() => item,
+        IOSSystemContextMenuItemPaste() => item,
+        IOSSystemContextMenuItemSelectAll() => item,
+        IOSSystemContextMenuItemLookUp() =>
+          item.title != null
+              ? item
+              : IOSSystemContextMenuItemLookUp(title: localizations.lookUpButtonLabel),
+        IOSSystemContextMenuItemSearchWeb() =>
+          item.title != null
+              ? item
+              : IOSSystemContextMenuItemSearchWeb(title: localizations.searchWebButtonLabel),
+        IOSSystemContextMenuItemShare() =>
+          item.title != null
+              ? item
+              : IOSSystemContextMenuItemShare(title: localizations.shareButtonLabel),
+      };
+    }).toList();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -160,7 +185,7 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
   Widget build(BuildContext context) {
     assert(SystemContextMenu.isSupported(context));
     final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-    _systemContextMenuController.show(widget.anchor, widget.items, localizations);
+    _systemContextMenuController.show(widget.anchor, _getItems(localizations));
 
     return const SizedBox.shrink();
   }
