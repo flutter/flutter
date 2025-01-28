@@ -625,10 +625,7 @@ void main() {
             key: ValueKey<bool>(hasOnTap), // Trigger a rebuild.
             itemCount: itemCount,
             itemBuilder: (BuildContext context, int index) {
-              return ListTile(
-                onTap: hasOnTap ? () {} : null,
-                title: Text('$index'),
-              );
+              return ListTile(onTap: hasOnTap ? () {} : null, title: Text('$index'));
             },
           ),
         ),
