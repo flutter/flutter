@@ -17,16 +17,20 @@ Directory createBasicProjectStructure(FileSystem fs) {
   return fs.systemTempDirectory.createTempSync('root');
 }
 
-File addPreviewContainingFile(Directory projectRoot, String path) {
-  return projectRoot.childDirectory('lib').childFile(path)
-    ..createSync(recursive: true)
-    ..writeAsStringSync(previewContainingFileContents);
+PreviewPath addPreviewContainingFile(Directory projectRoot, String path) {
+  final File file =
+      projectRoot.childDirectory('lib').childFile(path)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(previewContainingFileContents);
+  return (path: file.path, uri: file.uri);
 }
 
-File addNonPreviewContainingFile(Directory projectRoot, String path) {
-  return projectRoot.childDirectory('lib').childFile(path)
-    ..createSync(recursive: true)
-    ..writeAsStringSync(nonPreviewContainingFileContents);
+PreviewPath addNonPreviewContainingFile(Directory projectRoot, String path) {
+  final File file =
+      projectRoot.childDirectory('lib').childFile(path)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(nonPreviewContainingFileContents);
+  return (path: file.path, uri: file.uri);
 }
 
 void main() {
@@ -58,29 +62,32 @@ void main() {
     });
 
     testUsingContext('can detect previews in existing files', () async {
-      final List<File> previewFiles = <File>[
+      final List<PreviewPath> previewFiles = <PreviewPath>[
         addPreviewContainingFile(projectRoot, 'foo.dart'),
         addPreviewContainingFile(projectRoot, 'src/bar.dart'),
       ];
       addNonPreviewContainingFile(projectRoot, 'baz.dart');
       final PreviewMapping mapping = previewDetector.findPreviewFunctions(projectRoot);
-      expect(mapping.keys.toSet(), previewFiles.map((File e) => e.uri.toString()).toSet());
+      expect(mapping.keys.toSet(), previewFiles.toSet());
     });
 
     testUsingContext('can detect previews in updated files', () async {
       // Create two files with existing previews and one without.
-      final PreviewMapping expectedInitialMapping = <String, List<String>>{
-        addPreviewContainingFile(projectRoot, 'foo.dart').uri.toString(): <String>['previews'],
-        addPreviewContainingFile(projectRoot, 'src/bar.dart').uri.toString(): <String>['previews'],
+      final PreviewMapping expectedInitialMapping = <PreviewPath, List<String>>{
+        addPreviewContainingFile(projectRoot, 'foo.dart'): <String>['previews'],
+        addPreviewContainingFile(projectRoot, 'src/bar.dart'): <String>['previews'],
       };
-      final File nonPreviewContainingFile = addNonPreviewContainingFile(projectRoot, 'baz.dart');
+      final PreviewPath nonPreviewContainingFile = addNonPreviewContainingFile(
+        projectRoot,
+        'baz.dart',
+      );
 
       Completer<void> completer = Completer<void>();
       onChangeDetected = (PreviewMapping updated) {
         // The new preview in baz.dart should be included in the preview mapping.
-        expect(updated, <String, List<String>>{
+        expect(updated, <PreviewPath, List<String>>{
           ...expectedInitialMapping,
-          nonPreviewContainingFile.uri.toString(): <String>['previews'],
+          nonPreviewContainingFile: <String>['previews'],
         });
         completer.complete();
       };

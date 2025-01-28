@@ -54,6 +54,7 @@ void main() {
     await runWidgetPreviewCommand(<String>[
       'start',
       ...?arguments,
+      '--no-launch-previewer',
       if (rootProject != null) rootProject.path,
     ]);
     final Directory widgetPreviewScaffoldDir = widgetPreviewScaffoldFromRootProject(

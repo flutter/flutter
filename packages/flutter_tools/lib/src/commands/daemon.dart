@@ -195,6 +195,21 @@ class Daemon {
     );
   }
 
+  factory Daemon.createMachineDaemon() {
+    final Daemon daemon = Daemon(
+      DaemonConnection(
+        daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
+        logger: globals.logger,
+      ),
+      notifyingLogger:
+          (globals.logger is NotifyingLogger)
+              ? globals.logger as NotifyingLogger
+              : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
+      logToStdout: true,
+    );
+    return daemon;
+  }
+
   final DaemonConnection connection;
 
   late DaemonDomain daemonDomain;
@@ -810,32 +825,31 @@ class AppDomain extends Domain {
       );
     }
     final Completer<void> appStartedCompleter = Completer<void>();
-    // We don't want to wait for this future to complete, and callbacks won't fail,
-    // as it just writes to stdout.
+
+    // This future won't complete until the application has shutdown.
     unawaited(
-      appStartedCompleter.future.then<void>((void value) {
-        _sendAppEvent(app, 'started');
+      app._runInZone<void>(this, () async {
+        try {
+          await runOrAttach(
+            connectionInfoCompleter: connectionInfoCompleter,
+            appStartedCompleter: appStartedCompleter,
+          );
+          _sendAppEvent(app, 'stop');
+        } on Exception catch (error, trace) {
+          _sendAppEvent(app, 'stop', <String, Object?>{
+            'error': _toJsonable(error),
+            'trace': '$trace',
+          });
+        } finally {
+          // If the full directory is used instead of the path then this causes
+          // a TypeError with the ErrorHandlingFileSystem.
+          globals.fs.currentDirectory = cwd.path;
+          _apps.remove(app);
+        }
       }),
     );
-
-    await app._runInZone<void>(this, () async {
-      try {
-        await runOrAttach(
-          connectionInfoCompleter: connectionInfoCompleter,
-          appStartedCompleter: appStartedCompleter,
-        );
-        _sendAppEvent(app, 'stop');
-      } on Exception catch (error, trace) {
-        _sendAppEvent(app, 'stop', <String, Object?>{
-          'error': _toJsonable(error),
-          'trace': '$trace',
-        });
-      } finally {
-        // If the full directory is used instead of the path then this causes
-        // a TypeError with the ErrorHandlingFileSystem.
-        globals.fs.currentDirectory = cwd.path;
-        _apps.remove(app);
-      }
+    await appStartedCompleter.future.then<void>((void value) {
+      _sendAppEvent(app, 'started');
     });
     return app;
   }
