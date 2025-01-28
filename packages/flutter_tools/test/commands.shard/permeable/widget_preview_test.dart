@@ -120,7 +120,6 @@ void main() {
               fileSystem: globals.fs,
               logger: globals.logger,
               processManager: globals.processManager,
-              usage: globals.flutterUsage,
               botDetector: globals.botDetector,
               platform: globals.platform,
               stdio: mockStdio,
@@ -143,7 +142,6 @@ void main() {
               fileSystem: globals.fs,
               logger: globals.logger,
               processManager: globals.processManager,
-              usage: globals.flutterUsage,
               botDetector: globals.botDetector,
               platform: globals.platform,
               stdio: mockStdio,
@@ -185,7 +183,6 @@ import 'package:flutter_project/foo.dart' as _i1;import 'package:widget_preview/
               fileSystem: globals.fs,
               logger: globals.logger,
               processManager: globals.processManager,
-              usage: globals.flutterUsage,
               botDetector: globals.botDetector,
               platform: globals.platform,
               stdio: mockStdio,
@@ -221,7 +218,6 @@ import 'package:flutter_project/foo.dart' as _i1;import 'package:widget_preview/
               fileSystem: globals.fs,
               logger: globals.logger,
               processManager: globals.processManager,
-              usage: globals.flutterUsage,
               botDetector: globals.botDetector,
               platform: globals.platform,
               stdio: mockStdio,
@@ -230,7 +226,7 @@ import 'package:flutter_project/foo.dart' as _i1;import 'package:widget_preview/
     );
 
     testUsingContext(
-      'clean deletes .dart_tool/widget_preview_scaffold',
+      'start finds existing previews in the CWD and injects them into ${PreviewCodeGenerator.generatedPreviewFilePath}',
       () async {
         final Directory rootProject = await createRootProject();
         await startWidgetPreview(rootProject: rootProject);
@@ -242,7 +238,6 @@ import 'package:flutter_project/foo.dart' as _i1;import 'package:widget_preview/
               fileSystem: globals.fs,
               logger: globals.logger,
               processManager: globals.processManager,
-              usage: globals.flutterUsage,
               botDetector: globals.botDetector,
               platform: globals.platform,
               stdio: mockStdio,
@@ -296,7 +291,6 @@ import 'package:flutter_project/foo.dart' as _i1;import 'package:widget_preview/
               fileSystem: globals.fs,
               logger: globals.logger,
               processManager: globals.processManager,
-              usage: globals.flutterUsage,
               botDetector: globals.botDetector,
               platform: globals.platform,
               stdio: mockStdio,
