@@ -210,11 +210,11 @@ vars = {
   # The version / instance id of the cipd:chromium/fuchsia/test-scripts which
   # will be used altogether with fuchsia-sdk to setup the build / test
   # environment.
-  'fuchsia_test_scripts_version': 'r9Dc5VRF6sE3pJH20k2d1Yko3xSlwljH_nuw7O8vcb4C',
+  'fuchsia_test_scripts_version': 'g6IlaYL1_wNmk3zNj_FUU1ymBGYcgwFxZyBIUfVd4r0C',
 
   # The version / instance id of the cipd:chromium/fuchsia/gn-sdk which will be
   # used altogether with fuchsia-sdk to generate gn based build rules.
-  'fuchsia_gn_sdk_version': 'tHRCseOuPnZ5H4a7kb4Zl6YQ2rhEDWIzcEX3G9NPFhkC',
+  'fuchsia_gn_sdk_version': 'T6ahk2PZvX-n2RabPqFNTu_AL3tTBGgQMnfAOavwCtsC',
 }
 
 gclient_gn_args_file = 'engine/src/flutter/third_party/dart/build/config/gclient_args.gni'
@@ -806,7 +806,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
-        'version': 'zvsXvTuk-Z1Mgtn34lhXHPbQAAPOVrHYuEZZJqa6N9oC'
+        'version': 's8vyu3kW9oxoTQoV7mRb00PnwPiJkOn36PVoOdjE8ncC'
        }
      ],
      'condition': 'download_fuchsia_deps and not download_fuchsia_sdk',
