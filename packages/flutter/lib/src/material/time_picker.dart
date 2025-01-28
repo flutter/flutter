@@ -3204,6 +3204,7 @@ Future<TimeOfDay?> showTimePicker({
   Orientation? orientation,
   Icon? switchToInputEntryModeIcon,
   Icon? switchToTimerEntryModeIcon,
+  bool? use24HourFormat,
 }) async {
   assert(debugCheckHasMaterialLocalizations(context));
 
@@ -3228,7 +3229,16 @@ Future<TimeOfDay?> showTimePicker({
     barrierLabel: barrierLabel,
     useRootNavigator: useRootNavigator,
     builder: (BuildContext context) {
-      return builder == null ? dialog : builder(context, dialog);
+      if (use24HourFormat == null) {
+        // No 24-hour format override - preserve existing MediaQuery settings
+        return builder == null ? dialog : builder(context, dialog);
+      }
+
+      // Override MediaQuery with specified 24-hour format
+      return MediaQuery(
+        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: use24HourFormat),
+        child: builder == null ? dialog : builder(context, dialog),
+      );
     },
     routeSettings: routeSettings,
     anchorPoint: anchorPoint,

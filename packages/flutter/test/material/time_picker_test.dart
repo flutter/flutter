@@ -123,6 +123,46 @@ void main() {
     );
   });
 
+  testWidgets('Material2 - show 24 Hour Format', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+
+    // When use24HourFormat: false, should show AM/PM indicators
+    await mediaQueryBoilerplate(tester, materialType: MaterialType.material2);
+    expect(find.text(amString), findsOneWidget);
+    expect(find.text(pmString), findsOneWidget);
+    await tester.tap(find.text(okString)); // Dismiss the dialog
+    await tester.pumpAndSettle();
+
+    // When use24HourFormat: true, should not show AM/PM indicators
+    await mediaQueryBoilerplate(
+      tester,
+      alwaysUse24HourFormat: true,
+      materialType: MaterialType.material2,
+    );
+    expect(find.text(amString), findsNothing);
+    expect(find.text(pmString), findsNothing);
+
+    // When use24HourFormat: true, hours should be displayed in 24 hour format
+    final List<String> labels00To22 = List<String>.generate(12, (int index) {
+      return (index * 2).toString().padLeft(2, '0');
+    });
+
+    final CustomPaint dialPaint = tester.widget(findDialPaint);
+    final dynamic dialPainter = dialPaint.painter;
+    // ignore: avoid_dynamic_calls
+    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
+    expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To22);
+
+    // ignore: avoid_dynamic_calls
+    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
+    expect(
+      // ignore: avoid_dynamic_calls
+      selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String),
+      labels00To22,
+    );
+  });
+
   testWidgets('Material3 - Dialog size - dial mode', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
 
