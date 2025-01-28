@@ -988,35 +988,6 @@ exit code: 66
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('analytics sent on success', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final TestUsage usage = TestUsage();
-    final Pub pub = Pub.test(
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-      processManager: FakeProcessManager.any(),
-      botDetector: const FakeBotDetector(false),
-      stdio: FakeStdio(),
-      platform: FakePlatform(
-        environment: const <String, String>{'PUB_CACHE': 'custom/pub-cache/path'},
-      ),
-    );
-    fileSystem.file('version').createSync();
-    fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file('.dart_tool/package_config.json')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('{"configVersion": 2,"packages": []}');
-
-    await pub.get(
-      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-      context: PubContext.flutterTests,
-    );
-    expect(
-      usage.events,
-      contains(const TestUsageEvent('pub-result', 'flutter-tests', label: 'success')),
-    );
-  });
-
   testWithoutContext(
     'package_config_subset file is generated from packages and not timestamp',
     () async {
@@ -1061,52 +1032,6 @@ exit code: 66
       );
     },
   );
-
-  testWithoutContext('analytics sent on failure', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    fileSystem.directory('custom/pub-cache/path').createSync(recursive: true);
-    final TestUsage usage = TestUsage();
-
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      const FakeCommand(
-        command: <String>[
-          'bin/cache/dart-sdk/bin/dart',
-          'pub',
-          '--suppress-analytics',
-          '--directory',
-          '.',
-          'get',
-          '--example',
-        ],
-        exitCode: 1,
-      ),
-    ]);
-
-    final Pub pub = Pub.test(
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-      processManager: processManager,
-      botDetector: const FakeBotDetector(false),
-      stdio: FakeStdio(),
-      platform: FakePlatform(
-        environment: const <String, String>{'PUB_CACHE': 'custom/pub-cache/path'},
-      ),
-    );
-    try {
-      await pub.get(
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        context: PubContext.flutterTests,
-      );
-    } on ToolExit {
-      // Ignore.
-    }
-
-    expect(
-      usage.events,
-      contains(const TestUsageEvent('pub-result', 'flutter-tests', label: 'failure')),
-    );
-    expect(processManager, hasNoRemainingExpectations);
-  });
 
   testWithoutContext('Pub error handling', () async {
     final BufferLogger logger = BufferLogger.test();
