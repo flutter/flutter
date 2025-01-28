@@ -8,6 +8,10 @@
 
 #include "flutter/impeller/geometry/geometry_asserts.h"
 
+#define CHECK_POINT_WITH_OFFSET(rr, p, outward_offset) \
+  EXPECT_TRUE(rr.Contains(p));                         \
+  EXPECT_FALSE(rr.Contains(p + outward_offset));
+
 namespace impeller {
 namespace testing {
 
@@ -903,6 +907,18 @@ TEST(RoundRectTest, TinyCornerRoundRectContains) {
   EXPECT_FALSE(tiny_corners.Contains({50, 50}));
 }
 
+TEST(RoundRectTest, TinyCornerContinuousRoundRectContains) {
+  Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
+  // RRect of bounds with even the tiniest corners does not contain corners
+  auto tiny_corners = RoundRect::MakeRectXY(bounds, 0.01f, 0.01f,
+                                            RoundRect::Style::kContinuous);
+
+  EXPECT_FALSE(tiny_corners.Contains({-50, -50}));
+  EXPECT_FALSE(tiny_corners.Contains({-50, 50}));
+  EXPECT_FALSE(tiny_corners.Contains({50, -50}));
+  EXPECT_FALSE(tiny_corners.Contains({50, 50}));
+}
+
 TEST(RoundRectTest, UniformCircularRoundRectContains) {
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
   auto expanded_2_r_2 = RoundRect::MakeRectXY(bounds.Expand(2.0), 2.0f, 2.0f);
@@ -936,6 +952,27 @@ TEST(RoundRectTest, UniformCircularRoundRectContains) {
   // Lower right corner
   EXPECT_TRUE(expanded_2_r_2.Contains({coord_in, coord_in}));
   EXPECT_FALSE(expanded_2_r_2.Contains({coord_out, coord_out}));
+}
+
+TEST(RoundRectTest, UniformContinuousRoundRectContains) {
+  Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
+  auto rr =
+      RoundRect::MakeRectXY(bounds, 5.0f, 5.0f, RoundRect::Style::kContinuous);
+
+#define CHECK_POINT_AND_MIRRORS(p)                                     \
+  CHECK_POINT_WITH_OFFSET(rr, (p), Point(0.02, 0.02));                 \
+  CHECK_POINT_WITH_OFFSET(rr, (p) * Point(1, -1), Point(0.02, -0.02)); \
+  CHECK_POINT_WITH_OFFSET(rr, (p) * Point(-1, 1), Point(-0.02, 0.02)); \
+  CHECK_POINT_WITH_OFFSET(rr, (p) * Point(-1, -1), Point(-0.02, -0.02));
+
+  CHECK_POINT_AND_MIRRORS(Point(0, 49.995));       // Top
+  CHECK_POINT_AND_MIRRORS(Point(44.245, 49.995));  // Top stretch end
+  CHECK_POINT_AND_MIRRORS(Point(45.72, 49.92));    // Top joint
+  CHECK_POINT_AND_MIRRORS(Point(48.53, 48.53));    // Circular arc mid
+  CHECK_POINT_AND_MIRRORS(Point(49.92, 45.72));    // Right joint
+  CHECK_POINT_AND_MIRRORS(Point(49.995, 44.245));  // Right stretch end
+  CHECK_POINT_AND_MIRRORS(Point(49.995, 0));       // Right
+#undef CHECK_POINT_AND_MIRRORS
 }
 
 TEST(RoundRectTest, UniformEllipticalRoundRectContains) {
@@ -975,6 +1012,57 @@ TEST(RoundRectTest, UniformEllipticalRoundRectContains) {
   // Lower right corner
   EXPECT_TRUE(expanded_2_r_2.Contains({x_coord_in, y_coord_in}));
   EXPECT_FALSE(expanded_2_r_2.Contains({x_coord_out, y_coord_out}));
+}
+
+TEST(RoundRectTest, UniformEllipticalContinuousRoundRectContains) {
+  Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
+  auto rr =
+      RoundRect::MakeRectXY(bounds, 5.0f, 10.0f, RoundRect::Style::kContinuous);
+
+#define CHECK_POINT_AND_MIRRORS(p)                                     \
+  CHECK_POINT_WITH_OFFSET(rr, (p), Point(0.02, 0.02));                 \
+  CHECK_POINT_WITH_OFFSET(rr, (p) * Point(1, -1), Point(0.02, -0.02)); \
+  CHECK_POINT_WITH_OFFSET(rr, (p) * Point(-1, 1), Point(-0.02, 0.02)); \
+  CHECK_POINT_WITH_OFFSET(rr, (p) * Point(-1, -1), Point(-0.02, -0.02));
+
+  CHECK_POINT_AND_MIRRORS(Point(0, 49.995));       // Top
+  CHECK_POINT_AND_MIRRORS(Point(44.245, 49.995));  // Top stretch end
+  CHECK_POINT_AND_MIRRORS(Point(45.72, 49.84));    // Top joint
+  CHECK_POINT_AND_MIRRORS(Point(48.53, 47.09));    // Circular arc mid
+  CHECK_POINT_AND_MIRRORS(Point(49.92, 41.44));    // Right joint
+  CHECK_POINT_AND_MIRRORS(Point(49.995, 38.49));   // Right stretch end
+  CHECK_POINT_AND_MIRRORS(Point(49.995, 0));       // Right
+#undef CHECK_POINT_AND_MIRRORS
+}
+
+TEST(RoundRectTest, UniformRectangularContinuousRoundRectContains) {
+  // The bounds is not centered at the origin and has unequal height and width.
+  Rect bounds = Rect::MakeLTRB(0.0f, 0.0f, 50.0f, 100.0f);
+  auto rr = RoundRect::MakeRectXY(bounds, 23.0f, 30.0f,
+                                  RoundRect::Style::kContinuous);
+
+  Point center = bounds.GetCenter();
+#define CHECK_POINT_AND_MIRRORS(p)                                   \
+  CHECK_POINT_WITH_OFFSET(rr, (p - center) * Point(1, 1) + center,   \
+                          Point(0.02, 0.02));                        \
+  CHECK_POINT_WITH_OFFSET(rr, (p - center) * Point(1, -1) + center,  \
+                          Point(0.02, -0.02));                       \
+  CHECK_POINT_WITH_OFFSET(rr, (p - center) * Point(-1, 1) + center,  \
+                          Point(-0.02, 0.02));                       \
+  CHECK_POINT_WITH_OFFSET(rr, (p - center) * Point(-1, -1) + center, \
+                          Point(-0.02, -0.02));
+
+  CHECK_POINT_AND_MIRRORS(Point(24.99, 99.99));  // Bottom mid edge
+  CHECK_POINT_AND_MIRRORS(Point(29.99, 99.64));
+  CHECK_POINT_AND_MIRRORS(Point(34.99, 98.09));
+  CHECK_POINT_AND_MIRRORS(Point(39.99, 94.76));
+  CHECK_POINT_AND_MIRRORS(Point(44.16, 89.99));
+  CHECK_POINT_AND_MIRRORS(Point(48.63, 79.99));
+  CHECK_POINT_AND_MIRRORS(Point(49.93, 69.99));
+  CHECK_POINT_AND_MIRRORS(Point(49.99, 59.99));
+  CHECK_POINT_AND_MIRRORS(Point(49.99, 49.99));  // Right mid edge
+
+#undef CHECK_POINT_AND_MIRRORS
 }
 
 TEST(RoundRectTest, DifferingCornersRoundRectContains) {
@@ -1018,6 +1106,44 @@ TEST(RoundRectTest, DifferingCornersRoundRectContains) {
   // Lower right corner (radii = {8.0, 9.0})
   EXPECT_TRUE(round_rect.Contains({coord_in(8.0), coord_in(9.0)}));
   EXPECT_FALSE(round_rect.Contains({coord_out(8.0), coord_out(9.0)}));
+}
+
+TEST(RoundRectTest, SlimDiagnalContinuousRoundRectContains) {
+  // This shape has large radii on one diagnal and tiny radii on the other,
+  // resulting in a almond-like shape placed diagnally (NE to SW).
+  Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
+  auto rr = RoundRect::MakeRectRadii(bounds,
+                                     {
+                                         .top_left = Size(1.0, 1.0),
+                                         .top_right = Size(99.0, 99.0),
+                                         .bottom_left = Size(99.0, 99.0),
+                                         .bottom_right = Size(1.0, 1.0),
+                                     },
+                                     RoundRect::Style::kContinuous);
+
+  EXPECT_TRUE(rr.Contains(Point{0, 0}));
+  EXPECT_FALSE(rr.Contains(Point{-49.999, -49.999}));
+  EXPECT_FALSE(rr.Contains(Point{-49.999, 49.999}));
+  EXPECT_FALSE(rr.Contains(Point{49.999, 49.999}));
+  EXPECT_FALSE(rr.Contains(Point{49.999, -49.999}));
+
+  // The pointy ends at the NE and SW corners
+  CHECK_POINT_WITH_OFFSET(rr, Point(-49.70, -49.70), Point(-0.02, -0.02));
+  CHECK_POINT_WITH_OFFSET(rr, Point(49.70, 49.70), Point(0.02, 0.02));
+
+// Checks two points symmetrical to the origin.
+#define CHECK_DIAGNAL_POINTS(p)                         \
+  CHECK_POINT_WITH_OFFSET(rr, (p), Point(0.02, -0.02)); \
+  CHECK_POINT_WITH_OFFSET(rr, (p) * Point(-1, -1), Point(-0.02, 0.02));
+
+  // A few other points along the edge
+  CHECK_DIAGNAL_POINTS(Point(-40.0, -49.59));
+  CHECK_DIAGNAL_POINTS(Point(-20.0, -45.66));
+  CHECK_DIAGNAL_POINTS(Point(0.0, -37.06));
+  CHECK_DIAGNAL_POINTS(Point(20.0, -22.08));
+  CHECK_DIAGNAL_POINTS(Point(21.05, -21.05));
+  CHECK_DIAGNAL_POINTS(Point(40.0, 5.60));
+#undef CHECK_POINT_AND_MIRRORS
 }
 
 }  // namespace testing

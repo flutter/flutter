@@ -277,7 +277,7 @@ bool CornerContains(const RoundSuperellipseParam::Quadrant& param,
   Point norm_point = (p - param.offset) / param.signed_scale;
   if (check_quadrant) {
     if (norm_point.x < 0 || norm_point.y < 0) {
-      return false;
+      return true;
     }
   } else {
     norm_point = norm_point.Abs();
