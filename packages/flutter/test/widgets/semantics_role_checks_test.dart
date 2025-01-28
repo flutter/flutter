@@ -24,49 +24,28 @@ void main() {
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
       final FlutterError error = exception! as FlutterError;
-      expect(error.message, 'A tab needs enabled and selected states');
+      expect(error.message, 'A tab needs selected states');
     });
 
     testWidgets('failure case, no tap', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: Semantics(
-            role: SemanticsRole.tab,
-            enabled: true,
-            selected: false,
-            child: const Text('a tab'),
-          ),
+          child: Semantics(role: SemanticsRole.tab, selected: false, child: const Text('a tab')),
         ),
       );
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
       final FlutterError error = exception! as FlutterError;
-      expect(error.message, 'A enabled tab must have a tap action');
+      expect(error.message, 'A tab must have a tap action');
     });
 
-    testWidgets('success case - disabled', (WidgetTester tester) async {
+    testWidgets('success case', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Semantics(
             role: SemanticsRole.tab,
-            enabled: false,
-            selected: false,
-            child: const Text('a tab'),
-          ),
-        ),
-      );
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('success case - enabled', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Semantics(
-            role: SemanticsRole.tab,
-            enabled: true,
             selected: false,
             onTap: () {},
             child: const Text('a tab'),
@@ -120,8 +99,8 @@ void main() {
             explicitChildNodes: true,
             child: Semantics(
               role: SemanticsRole.tab,
-              enabled: false,
               selected: false,
+              onTap: () {},
               child: const Text('some child'),
             ),
           ),
