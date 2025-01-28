@@ -2,28 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'framework.dart';
 
-/// Annotation used to mark functions that return widget previews.
+/// Annotation used to mark functions that return a widget preview.
+///
+/// NOTE: this interface is not stable and **will change**.
 ///
 /// {@tool snippet}
 ///
-/// Functions annotated with `@Preview()` should return a `List<WidgetPreview>`
+/// Functions annotated with `@Preview()` must return a `WidgetPreview`
 /// and be public, top-level functions.
 ///
 /// ```dart
 /// @Preview()
-/// List<WidgetPreview> myFirstPreview() {
-///   return <WidgetPreview>[
-///     WidgetPreview(
-///       name: 'Preview 1',
-///       child: const Text('Foo'),
-///     ),
-///     WidgetPreview(
-///       name: 'Preview 2',
-///       child: MyWidget(),
-///     ),
-///   ];
+/// WidgetPreview widgetPreview() {
+///   return WidgetPreview(name: 'Preview 1', child: const Text('Foo'));
 /// }
 /// ```
 /// {@end-tool}
@@ -59,17 +52,28 @@ class WidgetPreview {
   });
 
   /// A description to be displayed alongside the preview.
+  ///
+  /// If not provided, no name will be associated with the preview.
   final String? name;
 
   /// The [Widget] to be rendered in the preview.
   final Widget child;
 
   /// Artificial width constraint to be applied to the [child].
+  ///
+  /// If not provided, the previewed widget will attempt to set its own width
+  /// constraints and may result in an unbounded constraint error.
   final double? width;
 
   /// Artificial height constraint to be applied to the [child].
+  ///
+  /// If not provided, the previewed widget will attempt to set its own height
+  /// constraints and may result in an unbounded constraint error.
   final double? height;
 
   /// Applies font scaling to text within the [child].
+  ///
+  /// If not provided, the default text scaling factor provided by [MediaQuery]
+  /// will be used.
   final double? textScaleFactor;
 }
