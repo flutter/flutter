@@ -351,7 +351,7 @@ SVGSVGElement pathToSvgElement(SurfacePath path, SurfacePaintData paint) {
     svgPath.setAttribute('stroke', colorValueToCssString(paint.color));
     svgPath.setAttribute('stroke-width', '${paint.strokeWidth ?? 1.0}');
     if (paint.strokeCap case final value?) {
-      svgPath.setAttribute('stroke-linecap', value);
+      svgPath.setAttribute('stroke-linecap', value.name);
     }
     svgPath.setAttribute('fill', 'none');
   } else {
