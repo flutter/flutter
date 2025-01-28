@@ -997,6 +997,22 @@ class _MaterialAppState extends State<MaterialApp> {
     // Resolve which theme to use based on brightness and high contrast.
     final ThemeMode mode = widget.themeMode ?? ThemeMode.system;
     final Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
+
+
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarIconBrightness: switch (mode) {
+          ThemeMode.light => Brightness.dark,
+          ThemeMode.dark => Brightness.light,
+          ThemeMode.system =>
+          platformBrightness ==
+              Brightness.dark
+              ? Brightness.light
+              : Brightness.dark
+        },
+      ),
+    );
+
     final bool useDarkTheme =
         mode == ThemeMode.dark ||
         (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark);
