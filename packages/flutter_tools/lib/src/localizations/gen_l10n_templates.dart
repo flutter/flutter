@@ -123,9 +123,11 @@ const String numberFormatNamedTemplate = '''
 ''';
 
 const String dateFormatTemplate = '''
-    final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat.@(format)(localeName);
+    final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat.@(format)(localeName)@(addedFormats);
     final String @(placeholder)String = @(placeholder)DateFormat.format(@(placeholder));
 ''';
+
+const String dateFormatAddFormatTemplate = '''.add_@(format)()''';
 
 const String dateFormatCustomTemplate = '''
     final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat(@(format), localeName);
@@ -274,7 +276,8 @@ const String lookupBodyTemplate = '''
 
 const String switchClauseTemplate = '''case '@(case)': return @(localeClass)();''';
 
-const String switchClauseDeferredLoadingTemplate = '''case '@(case)': return @(library).loadLibrary().then((dynamic _) => @(library).@(localeClass)());''';
+const String switchClauseDeferredLoadingTemplate =
+    '''case '@(case)': return @(library).loadLibrary().then((dynamic _) => @(library).@(localeClass)());''';
 
 const String nestedSwitchTemplate = '''
 case '@(languageCode)': {

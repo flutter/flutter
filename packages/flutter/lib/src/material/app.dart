@@ -22,6 +22,7 @@ import 'package:flutter/services.dart';
 import 'arc.dart';
 import 'colors.dart';
 import 'floating_action_button.dart';
+import 'icon_button.dart';
 import 'icons.dart';
 import 'material_localizations.dart';
 import 'page.dart';
@@ -255,7 +256,7 @@ class MaterialApp extends StatefulWidget {
     @Deprecated(
       'Remove this parameter as it is now ignored. '
       'MaterialApp never introduces its own MediaQuery; the View widget takes care of that. '
-      'This feature was deprecated after v3.7.0-29.0.pre.'
+      'This feature was deprecated after v3.7.0-29.0.pre.',
     )
     this.useInheritedMediaQuery = false,
     this.themeAnimationStyle,
@@ -306,7 +307,7 @@ class MaterialApp extends StatefulWidget {
     @Deprecated(
       'Remove this parameter as it is now ignored. '
       'MaterialApp never introduces its own MediaQuery; the View widget takes care of that. '
-      'This feature was deprecated after v3.7.0-29.0.pre.'
+      'This feature was deprecated after v3.7.0-29.0.pre.',
     )
     this.useInheritedMediaQuery = false,
     this.themeAnimationStyle,
@@ -763,7 +764,7 @@ class MaterialApp extends StatefulWidget {
   @Deprecated(
     'This setting is now ignored. '
     'MaterialApp never introduces its own MediaQuery; the View widget takes care of that. '
-    'This feature was deprecated after v3.7.0-29.0.pre.'
+    'This feature was deprecated after v3.7.0-29.0.pre.',
   )
   final bool useInheritedMediaQuery;
 
@@ -856,10 +857,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
             assert(details.controller != null);
-            return Scrollbar(
-              controller: details.controller,
-              child: child,
-            );
+            return Scrollbar(controller: details.controller, child: child);
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.iOS:
@@ -872,9 +870,10 @@ class MaterialScrollBehavior extends ScrollBehavior {
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class ScrollBehavior as well.
-    final AndroidOverscrollIndicator indicator = Theme.of(context).useMaterial3
-        ? AndroidOverscrollIndicator.stretch
-        : AndroidOverscrollIndicator.glow;
+    final AndroidOverscrollIndicator indicator =
+        Theme.of(context).useMaterial3
+            ? AndroidOverscrollIndicator.stretch
+            : AndroidOverscrollIndicator.glow;
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
@@ -904,6 +903,9 @@ class MaterialScrollBehavior extends ScrollBehavior {
 }
 
 class _MaterialAppState extends State<MaterialApp> {
+  static const double _moveExitWidgetSelectionIconSize = 32;
+  static const double _moveExitWidgetSelectionTargetSize = 40;
+
   late HeroController _heroController;
 
   bool get _usesRouter => widget.routerDelegate != null || widget.routerConfig != null;
@@ -927,19 +929,67 @@ class _MaterialAppState extends State<MaterialApp> {
   // _MaterialLocalizationsDelegate.
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates {
     return <LocalizationsDelegate<dynamic>>[
-      if (widget.localizationsDelegates != null)
-        ...widget.localizationsDelegates!,
+      if (widget.localizationsDelegates != null) ...widget.localizationsDelegates!,
       DefaultMaterialLocalizations.delegate,
       DefaultCupertinoLocalizations.delegate,
     ];
   }
 
-  Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
+  Widget _exitWidgetSelectionButtonBuilder(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    required GlobalKey key,
+  }) {
     return FloatingActionButton(
+      key: key,
       onPressed: onPressed,
       mini: true,
-      child: const Icon(Icons.search),
+      backgroundColor: _widgetSelectionButtonsBackgroundColor(context),
+      foregroundColor: _widgetSelectionButtonsForegroundColor(context),
+      child: const Icon(Icons.close, semanticLabel: 'Exit Select Widget mode.'),
     );
+  }
+
+  Widget _moveExitWidgetSelectionButtonBuilder(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    bool isLeftAligned = true,
+  }) {
+    return IconButton(
+      color: _widgetSelectionButtonsBackgroundColor(context),
+      padding: EdgeInsets.zero,
+      iconSize: _moveExitWidgetSelectionIconSize,
+      onPressed: onPressed,
+      constraints: const BoxConstraints(
+        minWidth: _moveExitWidgetSelectionTargetSize,
+        minHeight: _moveExitWidgetSelectionTargetSize,
+      ),
+      icon: Icon(
+        isLeftAligned ? Icons.arrow_right : Icons.arrow_left,
+        semanticLabel:
+            'Move "Exit Select Widget mode" button to the ${isLeftAligned ? 'right' : 'left'}.',
+      ),
+    );
+  }
+
+  Color _widgetSelectionButtonsForegroundColor(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return _isDarkTheme(context)
+        ? theme.colorScheme.onPrimaryContainer
+        : theme.colorScheme.primaryContainer;
+  }
+
+  Color _widgetSelectionButtonsBackgroundColor(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return _isDarkTheme(context)
+        ? theme.colorScheme.primaryContainer
+        : theme.colorScheme.onPrimaryContainer;
+  }
+
+  bool _isDarkTheme(BuildContext context) {
+    return widget.themeMode == ThemeMode.dark ||
+        widget.themeMode == ThemeMode.system &&
+            MediaQuery.platformBrightnessOf(context) == Brightness.dark;
   }
 
   ThemeData _themeBuilder(BuildContext context) {
@@ -947,8 +997,9 @@ class _MaterialAppState extends State<MaterialApp> {
     // Resolve which theme to use based on brightness and high contrast.
     final ThemeMode mode = widget.themeMode ?? ThemeMode.system;
     final Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
-    final bool useDarkTheme = mode == ThemeMode.dark
-      || (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark);
+    final bool useDarkTheme =
+        mode == ThemeMode.dark ||
+        (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark);
     final bool highContrast = MediaQuery.highContrastOf(context);
     if (useDarkTheme && highContrast && widget.highContrastDarkTheme != null) {
       theme = widget.highContrastDarkTheme;
@@ -963,8 +1014,10 @@ class _MaterialAppState extends State<MaterialApp> {
 
   Widget _materialBuilder(BuildContext context, Widget? child) {
     final ThemeData theme = _themeBuilder(context);
-    final Color effectiveSelectionColor = theme.textSelectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
-    final Color effectiveCursorColor = theme.textSelectionTheme.cursorColor ?? theme.colorScheme.primary;
+    final Color effectiveSelectionColor =
+        theme.textSelectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+    final Color effectiveCursorColor =
+        theme.textSelectionTheme.cursorColor ?? theme.colorScheme.primary;
 
     Widget childWidget = child ?? const SizedBox.shrink();
 
@@ -1004,10 +1057,7 @@ class _MaterialAppState extends State<MaterialApp> {
         child: childWidget,
       );
     } else {
-      childWidget = Theme(
-        data: theme,
-        child: childWidget,
-      );
+      childWidget = Theme(data: theme, child: childWidget);
     }
 
     return childWidget;
@@ -1044,7 +1094,8 @@ class _MaterialAppState extends State<MaterialApp> {
         showPerformanceOverlay: widget.showPerformanceOverlay,
         showSemanticsDebugger: widget.showSemanticsDebugger,
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-        inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
+        exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
+        moveExitWidgetSelectionButtonBuilder: _moveExitWidgetSelectionButtonBuilder,
         shortcuts: widget.shortcuts,
         actions: widget.actions,
         restorationScopeId: widget.restorationScopeId,
@@ -1078,7 +1129,8 @@ class _MaterialAppState extends State<MaterialApp> {
       showPerformanceOverlay: widget.showPerformanceOverlay,
       showSemanticsDebugger: widget.showSemanticsDebugger,
       debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-      inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
+      exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
+      moveExitWidgetSelectionButtonBuilder: _moveExitWidgetSelectionButtonBuilder,
       shortcuts: widget.shortcuts,
       actions: widget.actions,
       restorationScopeId: widget.restorationScopeId,
@@ -1092,7 +1144,7 @@ class _MaterialAppState extends State<MaterialApp> {
       canRequestFocus: false,
       onKeyEvent: (FocusNode node, KeyEvent event) {
         if ((event is! KeyDownEvent && event is! KeyRepeatEvent) ||
-             event.logicalKey != LogicalKeyboardKey.escape) {
+            event.logicalKey != LogicalKeyboardKey.escape) {
           return KeyEventResult.ignored;
         }
         return Tooltip.dismissAllToolTips() ? KeyEventResult.handled : KeyEventResult.ignored;
@@ -1113,10 +1165,7 @@ class _MaterialAppState extends State<MaterialApp> {
 
     return ScrollConfiguration(
       behavior: widget.scrollBehavior ?? const MaterialScrollBehavior(),
-      child: HeroControllerScope(
-        controller: _heroController,
-        child: result,
-      ),
+      child: HeroControllerScope(controller: _heroController, child: result),
     );
   }
 }

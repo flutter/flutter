@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(matanlurey): Remove after debugging https://github.com/flutter/flutter/issues/159000.
-@Tags(<String>['flutter-build-apk'])
-library;
-
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
@@ -33,12 +29,12 @@ void main() {
     expect(result, const ProcessResultMatcher());
 
     final File api33File = tempDir
-       .childDirectory('android')
-       .childDirectory('app')
-       .childDirectory('src')
-       .childDirectory('main')
-       .childDirectory('java')
-       .childFile('Android33Api.java');
+        .childDirectory('android')
+        .childDirectory('app')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('java')
+        .childFile('Android33Api.java');
 
     api33File.createSync(recursive: true);
     // AccessibilityManager.isAudioDescriptionRequested() is an API 33 feature

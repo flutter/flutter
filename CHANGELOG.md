@@ -24,7 +24,41 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 INTERNAL NOTE
 -->
+
+## Flutter 3.27 Changes
+
+### [3.27.3](https://github.com/flutter/flutter/releases/tag/3.27.3)
+- [flutter/159212](https://github.com/flutter/flutter/issues/159212) Track (via Google Analytics) if the Dart AOT Android "Deferred Components" feature is being meaningfully used.
+- [flutter/160631](https://github.com/flutter/flutter/issues/160631) Fixes an issue with Material 3 Tab Bar animations.
+- [flutter/159289](https://github.com/flutter/flutter/issues/159289) Fixes an issue with fullscreen route transitions.
+
+### [3.27.2](https://github.com/flutter/flutter/releases/tag/3.27.2)
+
+- [flutter/159729](https://github.com/flutter/flutter/issues/159729) Flutter module template triggers a warning when built for Android.
+- [flutter/161176](https://github.com/flutter/flutter/issues/161176) Dropdown Menu can create an infinite loop.
+- [flutter/161330](https://github.com/flutter/flutter/issues/161330) Using ScrollViewKeyboardDismissBehavior.onDrag in a SingleChildScrollView causes text fields to immediately unfocus if the keyboard opening scrolls the text field to keep it visible.
+- [flutter/160127](https://github.com/flutter/flutter/issues/160127) Some Flutter web plugins do not add the `crossOrigin` property to <img> tags.
+- [flutter/160155](https://github.com/flutter/flutter/issues/160155) Failed assertion in web engine: "The targeted input element must be the active input element".
+- [flutter/160199](https://github.com/flutter/flutter/issues/160199) Some images on the web render blank.
+- [flutter/160459](https://github.com/flutter/flutter/issues/160459) Incorrect Z order rendering in drawPoints may cause lines to overlap when one should be drawn in front of the other.
+- [flutter/160409](https://github.com/flutter/flutter/issues/160409) App may crashes because of obsolete engine assertion.
+- [flutter/158192](https://github.com/flutter/flutter/issues/158192) Positions of display cutouts on Android may not update - as returned by MediaQuery and used by SafeArea - upon screen orientation change.
+
+### [3.27.1](https://github.com/flutter/flutter/releases/tag/3.27.1)
+
+- [flutter/160041](https://github.com/flutter/flutter/issues/160041) - [Impeller][Android] Disables Impeller on older Android devices.
+- [flutter/160206](https://github.com/flutter/flutter/issues/160206) - [Impeller][Android] Disables Android HardwareBuffer based swapchains on all devices.
+- [flutter/160208](https://github.com/flutter/flutter/issues/160208) - [iOS] Fixes an issue on iOS preventing the ability to tap web view links in some plugins.
+
+### [3.27.0](https://github.com/flutter/flutter/releases/tag/3.27.0)
+Initial stable release.
+
 ## Flutter 3.24 Changes
+
+### [3.24.5](https://github.com/flutter/flutter/releases/tag/3.24.5)
+- [flutter/158125](https://github.com/flutter/flutter/pull/158125) - [iOS] Fixed a tool issue causing failures when `flutter build ios-framework --xcframework` copies Flutter debug symbols.
+- [flutter/56301](https://github.com/flutter/engine/pull/56301) - [Android] Fixes a crash on Android devices when the surface is released unexpectedly when using PlatformView's.
+
 ### [3.24.4](https://github.com/flutter/flutter/releases/tag/3.24.4)
 - [dart 3.5.4 changelog](https://github.com/dart-lang/sdk/blob/stable/CHANGELOG.md#354---2024-10-17)
 - [flutter/154915](https://github.com/flutter/engine/pull/55366) - [macOS] Comply with the new Apple privacy manifest policy for the macOS Flutter engine framework and prevent the "Missing privacy manifest" warning when submitting a macOS app to the App Store.
